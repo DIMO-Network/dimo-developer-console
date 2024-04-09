@@ -1,17 +1,33 @@
-import { InputHTMLAttributes, FC } from "react";
+import { InputHTMLAttributes, forwardRef } from 'react';
 
-import classNames from "classnames";
+import classnames from 'classnames';
 
 interface IProps extends InputHTMLAttributes<HTMLInputElement> {
-  className: string;
+  className?: string;
 }
 
-export const TextField: FC<IProps> = ({ className, ...props }) => (
-  <input className={classNames(className)} {...props} />
+const defaultClassNames = [
+  'rounded-lg',
+  'py-2',
+  'px-4',
+  'outline-0',
+  'bg-gray-950',
+  'text-gray-50',
+];
+
+export type Ref = HTMLInputElement;
+
+export const TextField = forwardRef<Ref, IProps>(
+  ({ className: inputClassName, ...props }, ref) => {
+    const className = classnames(...defaultClassNames, inputClassName);
+    return <input className={className} {...props} ref={ref} />;
+  }
 );
 
+TextField.displayName = 'TextField';
+
 TextField.defaultProps = {
-  className: "",
+  className: '',
 };
 
 export default TextField;
