@@ -1,3 +1,3 @@
-export default function SignUp () {
-  return (<>Sign Up</>)
+export default function SignUp() {
+  return <>Sign Up</>;
 }
