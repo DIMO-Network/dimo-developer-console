@@ -1,9 +1,11 @@
-import type { FC, HTMLAttributes } from 'react';
+import type { FC, LabelHTMLAttributes } from 'react';
 
 import React, { ReactNode } from 'react';
 import classnames from 'classnames';
 
-interface LabelProps extends HTMLAttributes<HTMLLabelElement> {
+import './Label.css';
+
+interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   children: ReactNode;
 }
 
@@ -12,8 +14,7 @@ export const Label: FC<LabelProps> = ({
   className: inputClassName,
   ...props
 }) => {
-  const defaultClassNames = ['flex', 'flex-col', 'gap-2', 'font-medium'];
-  const className = classnames(...defaultClassNames, inputClassName);
+  const className = classnames('label', inputClassName);
   return (
     <label {...props} className={className}>
       {children}
