@@ -1,12 +1,14 @@
-import type { FC, AnchorHTMLAttributes } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 
 import React, { ReactNode } from 'react';
 import classnames from 'classnames';
+import Link, { LinkProps } from 'next/link';
 
 import './Anchor.css';
 
-interface AnchorProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+interface AnchorProps extends PropsWithChildren<LinkProps> {
   children: ReactNode;
+  className?: string;
 }
 
 export const Anchor: FC<AnchorProps> = ({
@@ -16,10 +18,14 @@ export const Anchor: FC<AnchorProps> = ({
 }) => {
   const className = classnames('anchor', inputClassName);
   return (
-    <a {...props} className={className}>
+    <Link {...props} className={className}>
       {children}
-    </a>
+    </Link>
   );
+};
+
+Anchor.defaultProps = {
+  className: '',
 };
 
 export default Anchor;
