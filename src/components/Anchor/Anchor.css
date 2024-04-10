@@ -1,0 +1,7 @@
+.anchor {
+  @apply text-white py-1;
+
+  &.primary {
+    @apply text-primary-200;
+  }
+}
