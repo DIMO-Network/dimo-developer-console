@@ -26,6 +26,16 @@ const euclid = localFont({
       style: 'italic',
     },
     {
+      path: './../assets/fonts/Euclid Circular A Medium.ttf',
+      weight: '500',
+      style: 'normal',
+    },
+    {
+      path: './../assets/fonts/Euclid Circular A Medium Italic.ttf',
+      weight: '500',
+      style: 'italic',
+    },
+    {
       path: './../assets/fonts/Euclid Circular A Bold.ttf',
       weight: '700',
       style: 'normal',
