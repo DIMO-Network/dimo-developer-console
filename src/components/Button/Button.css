@@ -1,0 +1,8 @@
+.button {
+  @apply rounded-full h-12 bg-white text-black font-medium; 
+
+  &.primary {
+    background-color: rgb(183 242 235 / 1);
+    background-image: radial-gradient(69.53% 323.91% at 69.53% 43.17%, rgba(110, 228, 218, .48) 26.04%, rgba(177, 227, 255, .6) 100%);
+  }
+}
