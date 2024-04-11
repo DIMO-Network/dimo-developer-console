@@ -10,24 +10,22 @@ import './page.css';
 export default function SignIn() {
   return (
     <main className="sign-in">
-      <div className="sign-in__form">
-        <div className="flex flex-col w-full max-w-sm gap-4 px-4 py-4">
-          <article className="flex flex-col w-full items-center gap-4 pt-4">
+      <div className="sign-in__content">
+        <article className="sign-in__form">
+          <section className="sign-in__header">
             <Image src={BuildOnDIMO} alt="DIMO Logo" className="w-44 h-6" />
-            <p className="text-3xl text-center px-10 leading-9">
-              Welcome back!
-            </p>
-          </article>
-          <div className="sign-in__buttons">
+            <p>Welcome back!</p>
+          </section>
+          <section className="sign-in__buttons">
             <SignInButton className="sm" isSignIn={true} Icon={GoogleIcon} />
             <SignInButton className="sm" isSignIn={true} Icon={GitHubIcon} />
-          </div>
-          <div className="flex justify-center">
+          </section>
+          <section className="sign-in__extra-links">
             <Anchor href="#" className="primary">
               Create an account
             </Anchor>
-          </div>
-        </div>
+          </section>
+        </article>
       </div>
     </main>
   );
