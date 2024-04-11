@@ -1,7 +1,8 @@
 import Image from 'next/image';
 
 import { Anchor } from '@/components/Anchor';
-import { SignInButtons } from '@/components/SignInButtons';
+import { SignInButton } from '@/components/SignInButton';
+import { GitHubIcon, GoogleIcon } from '@/components/Icons';
 import BuildOnDIMO from '@/assets/images/build-on-dimo.png';
 
 import './page.css';
@@ -17,7 +18,10 @@ export default function SignIn() {
               Welcome back!
             </p>
           </article>
-          <SignInButtons isSignIn={true} />
+          <div className="sign-in__buttons">
+            <SignInButton className="sm" isSignIn={true} Icon={GoogleIcon} />
+            <SignInButton className="sm" isSignIn={true} Icon={GitHubIcon} />
+          </div>
           <div className="flex justify-center">
             <Anchor href="#" className="primary">
               Create an account
