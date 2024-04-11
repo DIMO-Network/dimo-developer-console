@@ -1,21 +1,30 @@
 import Image from 'next/image';
 
-import { SignInForm } from '@/app/signin/components/SignInForm';
-import { Card } from '@/components/Card';
-import DimoLogo from '@/assets/logo.png';
+import { Anchor } from '@/components/Anchor';
+import { SignInButtons } from '@/components/SignInButtons';
+import BuildOnDIMO from '@/assets/images/build-on-dimo.png';
+
+import './page.css';
 
 export default function SignIn() {
   return (
-    <main className="flex flex-col items-center justify-center h-screen gap-4">
-      <Card className="flex flex-col max-w-sm gap-4">
-        <article className="flex flex-col w-full items-center gap-4 pt-4">
-          <Image src={DimoLogo} alt="DIMO Logo" className="w-24 h-4" />
-          <p className='text-2xl text-center font-medium px-10'>Sign in to your developer account</p>
-        </article>
-        <article className="flex flex-col w-full">
-          <SignInForm />
-        </article>
-      </Card>
+    <main className="sign-in">
+      <div className="sign-in__form">
+        <div className="flex flex-col w-full max-w-sm gap-4 px-4 py-4">
+          <article className="flex flex-col w-full items-center gap-4 pt-4">
+            <Image src={BuildOnDIMO} alt="DIMO Logo" className="w-44 h-6" />
+            <p className="text-3xl text-center px-10 leading-9">
+              Welcome back!
+            </p>
+          </article>
+          <SignInButtons isSignIn={true} />
+          <div className="flex justify-center">
+            <Anchor href="#" className="primary">
+              Create an account
+            </Anchor>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

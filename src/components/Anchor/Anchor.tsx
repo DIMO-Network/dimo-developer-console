@@ -13,7 +13,7 @@ interface AnchorProps extends PropsWithChildren<LinkProps> {
 
 export const Anchor: FC<AnchorProps> = ({
   children,
-  className: inputClassName,
+  className: inputClassName = '',
   ...props
 }) => {
   const className = classnames('anchor', inputClassName);
@@ -22,10 +22,6 @@ export const Anchor: FC<AnchorProps> = ({
       {children}
     </Link>
   );
-};
-
-Anchor.defaultProps = {
-  className: '',
 };
 
 export default Anchor;

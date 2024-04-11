@@ -1,0 +1,9 @@
+.sign-in {
+  @apply bg-[url('../../assets/images/login-background.png')] bg-cover 
+    flex flex-col justify-center 
+    h-screen gap-4;
+
+    .sign-in__form {
+    @apply flex flex-col w-1/2 items-center justify-center h-screen shadow-lg;
+  }
+}

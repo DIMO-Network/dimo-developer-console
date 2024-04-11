@@ -5,6 +5,7 @@ import { Anchor } from '@/components/Anchor';
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
+import { GoogleIcon } from '@/components/Icons';
 
 interface SignInFormInputs {
   email: string;
@@ -57,13 +58,16 @@ export const SignInForm = () => {
         </div>
       </div>
       <div className="flex flex-col gap-4">
-        <Button type="submit" className="primary">
-          Sign in
+        <Button type="submit" className="dark">
+          <GoogleIcon className='h-4 w-4' />
+          Sign In
         </Button>
-        <Button type="submit">Sign in with Google</Button>
+        <Button type="submit" className="dark">
+          Sign In
+        </Button>
         <div className="flex justify-center">
           <Anchor href="#" className="primary">
-            Sign Up
+            Create an account
           </Anchor>
         </div>
       </div>
