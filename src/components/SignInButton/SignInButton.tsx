@@ -11,18 +11,25 @@ interface SignInButtonProps {
   className: string;
   isSignIn: boolean;
   Icon: FC<IconProps>;
+  onClick: () => void;
 }
 
 export const SignInButton: FC<SignInButtonProps> = ({
   isSignIn,
   Icon,
   className: inputClassName = '',
+  onClick,
 }) => {
   const buttonText = isSignIn ? 'Sign In' : 'Sign Up';
   const className = classnames('icon', inputClassName);
 
   return (
-    <Button type="button" className="dark" role={'sign-in-button'}>
+    <Button
+      type="button"
+      className="dark"
+      role={'sign-in-button'}
+      onClick={onClick}
+    >
       <Icon className={className} />
       {buttonText}
     </Button>

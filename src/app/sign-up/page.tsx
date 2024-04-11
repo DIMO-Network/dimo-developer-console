@@ -1,3 +1,4 @@
+'use client';
 import Image from 'next/image';
 
 import { Anchor } from '@/components/Anchor';
@@ -8,6 +9,11 @@ import BuildOnDIMO from '@/assets/images/build-on-dimo.png';
 import './page.css';
 
 export const SignUp = () => {
+  const handlerGitHubLogin = () => {
+    window.location.href =
+      'http://localhost:3000/api/auth/authorize?app=github';
+  };
+
   return (
     <main className="sign-up">
       <div className="sign-up__content">
@@ -17,8 +23,18 @@ export const SignUp = () => {
             <p>Get started building</p>
           </section>
           <section className="sign-up__buttons">
-            <SignInButton className="sm" isSignIn={false} Icon={GoogleIcon} />
-            <SignInButton className="sm" isSignIn={false} Icon={GitHubIcon} />
+            <SignInButton
+              className="sm"
+              isSignIn={false}
+              Icon={GoogleIcon}
+              onClick={() => {}}
+            />
+            <SignInButton
+              className="sm"
+              isSignIn={false}
+              Icon={GitHubIcon}
+              onClick={handlerGitHubLogin}
+            />
           </section>
           <section className="sign-up__extra-links">
             <Anchor href="/sign-in" className="primary">
