@@ -21,7 +21,7 @@ export default function SignIn() {
             <SignInButton className="sm" isSignIn={true} Icon={GitHubIcon} />
           </section>
           <section className="sign-in__extra-links">
-            <Anchor href="#" className="primary">
+            <Anchor href="/sign-up" className="primary">
               Create an account
             </Anchor>
           </section>
