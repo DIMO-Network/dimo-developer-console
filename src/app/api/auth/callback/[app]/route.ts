@@ -7,18 +7,16 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code') ?? '';
 
-  if (app === 'github') {
-    const githubService = new GitHubAuthService();
-    await githubService.processCallback(code);
-    const user = await githubService.getUser();
-    console.log({ user });
-  }
+  const ProviderService = {
+    github: GitHubAuthService,
+    google: GoogleAuthService,
+  }[app];
 
-  if (app === 'google') {
-    const googleService = new GoogleAuthService();
-    await googleService.processCallback(code);
-    const user = await googleService.getUser();
-    console.log(user);
+  if (ProviderService) {
+    const providerService = new ProviderService();
+    const token = await providerService.processCallback(code);
+    const user = await providerService.getUser();
+    console.log({ token, user });
   }
 
   return Response.redirect('http://localhost:3000/sign-in');
