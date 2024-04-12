@@ -2,18 +2,12 @@
 import Image from 'next/image';
 
 import { Anchor } from '@/components/Anchor';
-import { SignInButton } from '@/components/SignInButton';
-import { GitHubIcon, GoogleIcon } from '@/components/Icons';
+import { SignInButtons } from '@/components/SignInButton';
 import BuildOnDIMO from '@/assets/images/build-on-dimo.png';
 
 import './page.css';
 
 export default function SignIn() {
-  const handlerGitHubLogin = () => {
-    console.log('test');
-    window.location.href =
-      'http://localhost:3000/api/auth/authorize?app=github';
-  };
 
   return (
     <main className="sign-in">
@@ -24,18 +18,7 @@ export default function SignIn() {
             <p>Welcome back!</p>
           </section>
           <section className="sign-in__buttons">
-            <SignInButton
-              className="sm"
-              isSignIn={true}
-              Icon={GoogleIcon}
-              onClick={() => {}}
-            />
-            <SignInButton
-              className="sm"
-              isSignIn={true}
-              Icon={GitHubIcon}
-              onClick={handlerGitHubLogin}
-            />
+            <SignInButtons isSignIn={true} />
           </section>
           <section className="sign-in__extra-links">
             <Anchor href="/sign-up" className="primary">
