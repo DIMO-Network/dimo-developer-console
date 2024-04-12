@@ -1,4 +1,14 @@
-import { people_v1 } from 'googleapis';
+export interface IUser {
+  name: string;
+  email: string;
+  avatarUrl: string;
+}
+
+export interface IToken {
+  accessToken: string;
+  refreshToken: string | null;
+  expiryDate: number;
+}
 
 /* eslint-disable no-unused-vars */
 export abstract class AuthService {
@@ -11,6 +21,6 @@ export abstract class AuthService {
   }
 
   abstract getOauthURL(): string;
-  abstract processCallback(c: string): Promise<void>;
-  abstract getUser(): Promise<people_v1.Schema$Person | Record<string, string>>;
+  abstract processCallback(c: string): Promise<IToken>;
+  abstract getUser(): Promise<IUser>;
 }

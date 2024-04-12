@@ -1,6 +1,9 @@
 import type { Auth } from 'googleapis';
 
-import { google } from 'googleapis';
+import type { IUser, IToken } from './base';
+
+import { google, people_v1 } from 'googleapis';
+import _ from 'lodash';
 
 import { AuthService } from './base';
 
@@ -43,17 +46,37 @@ export class GoogleAuthService extends AuthService {
     });
   }
 
-  async processCallback(code: string) {
-    const { tokens } = await this.client.getToken(code);
-    this.client.setCredentials(tokens);
+  static transformTokenData(token = {}): IToken {
+    const today = new Date();
+    return {
+      accessToken: _.get(token, 'access_token', ''),
+      refreshToken: _.get(token, 'refresh_token', null),
+      expiryDate: _.get(token, 'expiry_date', today.getTime()),
+    };
   }
+
+  async processCallback(code: string) {
+    const { tokens: token } = await this.client.getToken(code);
+    this.client.setCredentials(token);
+
+    return GoogleAuthService.transformTokenData(token);
+  }
+
+  static transformUserData(user: people_v1.Schema$Person): IUser {
+    return {
+      name: _.get(user, 'names.0.unstructuredName', ''),
+      email: _.get(user, 'emailAddresses.0.value', ''),
+      avatarUrl: _.get(user, 'photos.0.url', ''),
+    };
+  }
+
   async getUser() {
     const { data: user } = await this.people.get({
       resourceName: 'people/me',
       personFields: 'emailAddresses,names,photos',
     });
 
-    return user;
+    return GoogleAuthService.transformUserData(user);
   }
 }
 
