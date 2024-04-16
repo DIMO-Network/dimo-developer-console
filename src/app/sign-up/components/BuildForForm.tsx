@@ -7,27 +7,27 @@ import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { GoogleIcon } from '@/components/Icons';
 
-interface SignInFormInputs {
+interface BuildForFormInputs {
   email: string;
   password: string;
 }
 
-export const SignInForm = () => {
+export const BuildForForm = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInFormInputs>({
+  } = useForm<BuildForFormInputs>({
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
 
-  const onSubmit: SubmitHandler<SignInFormInputs> = (data) => {
+  const onSubmit: SubmitHandler<BuildForFormInputs> = (data) => {
     console.log({ data });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 w-full max-w-sm">
       <div className="flex flex-col gap-4">
         <Label htmlFor="email">
           Email
@@ -59,7 +59,7 @@ export const SignInForm = () => {
       </div>
       <div className="flex flex-col gap-4">
         <Button type="submit" className="dark">
-          <GoogleIcon className='h-4 w-4' />
+          <GoogleIcon className="h-4 w-4" />
           Sign In
         </Button>
         <Button type="submit" className="dark">
@@ -75,4 +75,4 @@ export const SignInForm = () => {
   );
 };
 
-export default SignInForm;
+export default BuildForForm;
