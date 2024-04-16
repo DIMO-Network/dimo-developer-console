@@ -11,7 +11,9 @@ interface SignInButtonProps {
 
 export const SignInButtons: FC<SignInButtonProps> = ({ isSignIn }) => {
   const handlerGitHubLogin = (app: string) => {
-    window.location.href = `http://localhost:3000/api/auth/authorize?app=${app}`;
+    window.location.replace(
+      `http://localhost:3000/api/auth/authorize?app=${app}`
+    );
   };
 
   return (
