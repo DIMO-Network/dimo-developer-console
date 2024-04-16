@@ -14,30 +14,32 @@ export async function middleware(request: NextRequest) {
       return result;
     }
     middlewareHeader.push(result.headers);
-
-    let redirectTo = null;
-
-    middlewareHeader.some((header) => {
-      const redirect = header.get('x-middleware-request-redirect');
-
-      if (redirect) {
-        redirectTo = redirect;
-        return true;
-      }
-      return false; // Continue the loop
-    });
-
-    if (redirectTo) {
-      return NextResponse.redirect(new URL(redirectTo, request.url), {
-        status: 307,
-      });
-    }
-
-    return nextResponse;
   }
+
+  let redirectTo = null;
+
+  middlewareHeader.some((header) => {
+    const redirect = header.get('x-middleware-request-redirect');
+
+    if (redirect) {
+      redirectTo = redirect;
+      return true;
+    }
+    return false; // Continue the loop
+  });
+
+  if (redirectTo) {
+    return NextResponse.redirect(new URL(redirectTo, request.url), {
+      status: 307,
+    });
+  }
+
+  return nextResponse;
 }
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: '/',
+  matcher: [
+    '/((?!api|_next/static|.*svg|.*png|.*jpg|.*jpeg|.*gif|.*webp|_next/image|favicon.ico).*)',
+  ],
 };
