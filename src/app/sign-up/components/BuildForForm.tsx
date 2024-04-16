@@ -1,16 +1,37 @@
 'use client';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
-import { Anchor } from '@/components/Anchor';
 import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
-import { GoogleIcon } from '@/components/Icons';
+import { CarRental, ComputerIcon, PhoneIcon } from '@/components/Icons';
 
 interface BuildForFormInputs {
   email: string;
   password: string;
 }
+
+const buildForList = [
+  {
+    text: 'Mobile app - IOS/Android',
+    Icon: PhoneIcon,
+    iconClassName: 'w-4 h-5',
+    value: 'mobile-app',
+  },
+  {
+    text: 'Web application with single account login',
+    Icon: ComputerIcon,
+    iconClassName: 'w-5 h-5',
+    value: 'web-app-single-login',
+  },
+  {
+    text: 'Web application with multi-account management',
+    Icon: CarRental,
+    iconClassName: 'w-4 h-5',
+    value: 'web-app-multi-account',
+  },
+];
 
 export const BuildForForm = () => {
   const {
@@ -27,49 +48,38 @@ export const BuildForForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 w-full max-w-sm">
-      <div className="flex flex-col gap-4">
-        <Label htmlFor="email">
-          Email
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-4 w-full max-w-sm pt-4"
+    >
+      {buildForList.map(({ text, value, Icon, iconClassName }) => {
+        return (
+          <Card
+            className="flex flex-row card-border justify-between"
+            key={value}
+          >
+            <p className="text-xs font-medium">{text}</p>
+            <Icon className={iconClassName} />
+          </Card>
+        );
+      })}
+      <Card className="flex flex-col gap-4 card-border">
+        <Label htmlFor="password" className="text-xs text-medium">
+          Something else
           <TextField
-            placeholder="johndoe@gmail.com"
-            type="email"
-            {...register('email', {
-              required: true,
-            })}
-          />
-        </Label>
-        {errors.email && <span>This field is required</span>}
-        <Label htmlFor="password">
-          Password
-          <TextField
-            type="password"
-            placeholder="******"
+            type="text"
+            placeholder="Enter text..."
             {...register('password', {
               required: true,
             })}
           />
         </Label>
         {errors.password && <span>This field is required</span>}
-        <div className="flex justify-center">
-          <Anchor href="#" className="text-xs opacity-50">
-            Forgot password?
-          </Anchor>
-        </div>
-      </div>
-      <div className="flex flex-col gap-4">
-        <Button type="submit" className="dark">
-          <GoogleIcon className="h-4 w-4" />
-          Sign In
+      </Card>
+      <div className="flex flex-col pt-4">
+        <Button type="submit" className="primary">
+          Continue
         </Button>
-        <Button type="submit" className="dark">
-          Sign In
-        </Button>
-        <div className="flex justify-center">
-          <Anchor href="#" className="primary">
-            Create an account
-          </Anchor>
-        </div>
       </div>
     </form>
   );

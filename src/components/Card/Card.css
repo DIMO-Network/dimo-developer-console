@@ -1,3 +1,11 @@
 .card {
-  @apply bg-dark-grey-950 px-4 py-8 rounded-lg;
+  @apply p-4 rounded-lg;
+
+  .dark {
+    @apply bg-dark-grey-950;
+  }
+
+  &.card-border {
+    @apply border border-gray-950;
+  }
 }
