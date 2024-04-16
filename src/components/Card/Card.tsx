@@ -12,12 +12,8 @@ interface CardProps {
 
 export const Card: FC<CardProps> = ({
   children,
-  className: inputClassName,
+  className: inputClassName = '',
 }) => {
   const className = classnames('card', inputClassName);
   return <div className={className}>{children}</div>;
-};
-
-Card.defaultProps = {
-  className: '',
 };
