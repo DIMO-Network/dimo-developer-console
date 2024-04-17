@@ -82,7 +82,8 @@ export const BuildForForm = () => {
         data: buildForData,
       })
       .catch(console.error);
-    window.location.replace('/');
+    console.log({ data });
+    window.location.replace('/sign-up');
   };
 
   return (
