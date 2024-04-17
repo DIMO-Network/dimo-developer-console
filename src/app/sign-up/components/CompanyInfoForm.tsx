@@ -6,12 +6,19 @@ import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
 import { SelectField } from '@/components/SelectField';
+import { regions } from '@/config/default';
+import { dimoDevClient } from '@/services/dimoDev';
 
 interface CompanyInfoInputs {
   name: string;
   website?: string;
   region?: string;
 }
+
+const regionOptions = regions.map((regionName) => ({
+  value: regionName,
+  text: regionName,
+}));
 
 export const CompanyInfoForm = () => {
   const {
@@ -24,7 +31,18 @@ export const CompanyInfoForm = () => {
   });
 
   const onSubmit: SubmitHandler<CompanyInfoInputs> = (data) => {
+    updateUser(data);
+  };
+
+  const updateUser = async (companyData: CompanyInfoInputs) => {
+    const data = await dimoDevClient
+      .put('/user', {
+        flow: 'company-info',
+        data: companyData,
+      })
+      .catch(console.error);
     console.log({ data });
+    window.location.replace('/sign-up');
   };
 
   return (
@@ -60,26 +78,7 @@ export const CompanyInfoForm = () => {
           {...register('region', {
             required: true,
           })}
-          options={[
-            { value: 'North America', text: 'North America' },
-            {
-              value: 'Latin America & Caribbean',
-              text: 'Latin America & Caribbean',
-            },
-            { value: 'Oceania', text: 'Oceania' },
-            {
-              value: 'Northern & Western Europe',
-              text: 'Northern & Western Europe',
-            },
-            { value: 'Africa', text: 'Africa' },
-            { value: 'East & Southeast Asia', text: 'East & Southeast Asia' },
-            {
-              value: 'Middle East & Central Asia ',
-              text: 'Middle East & Central Asia ',
-            },
-            { value: 'South Asia', text: 'South Asia' },
-            { value: 'Eastern Europe', text: 'Eastern Europe' },
-          ]}
+          options={regionOptions}
         />
       </Label>
       <div className="flex flex-col pt-4">
