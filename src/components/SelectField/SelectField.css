@@ -1,0 +1,15 @@
+.select-field {
+  @apply rounded-lg py-2 px-4 outline-0 bg-gray-950 text-gray-50 relative h-8 flex flex-row justify-between;
+
+  select {
+    @apply hidden;
+  }
+  .custom-menu {
+    @apply hidden absolute bg-gray-950 w-full left-0 rounded-lg p-4 mt-7 leading-5
+            flex flex-col gap-2;
+
+    &.show {
+      @apply flex;
+    }
+  }
+}
