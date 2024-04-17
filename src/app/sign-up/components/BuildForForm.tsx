@@ -1,15 +1,25 @@
 'use client';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import classnames from 'classnames';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
+import { TextError } from '@/components/TextError';
 import { CarRental, ComputerIcon, PhoneIcon } from '@/components/Icons';
+import { useState } from 'react';
 
 interface BuildForFormInputs {
-  email: string;
-  password: string;
+  buildFor: string;
+  buildForText?: string;
+}
+
+enum buildForValues {
+  'mobileApp' = 'mobile-app',
+  'webAppSingleLogin' = 'web-app-single-login',
+  'webAppMultiAccount' = 'web-app-multi-account',
+  'somethingElse' = 'something-else',
 }
 
 const buildForList = [
@@ -17,34 +27,50 @@ const buildForList = [
     text: 'Mobile app - IOS/Android',
     Icon: PhoneIcon,
     iconClassName: 'w-4 h-5',
-    value: 'mobile-app',
+    value: buildForValues.mobileApp,
   },
   {
     text: 'Web application with single account login',
     Icon: ComputerIcon,
     iconClassName: 'w-5 h-5',
-    value: 'web-app-single-login',
+    value: buildForValues.webAppSingleLogin,
   },
   {
     text: 'Web application with multi-account management',
     Icon: CarRental,
     iconClassName: 'w-4 h-5',
-    value: 'web-app-multi-account',
+    value: buildForValues.webAppMultiAccount,
   },
 ];
 
 export const BuildForForm = () => {
+  const [isDirty, setIsDirty] = useState<boolean>(false);
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
+    watch,
   } = useForm<BuildForFormInputs>({
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
+  const buildFor = watch('buildFor', '');
+  const buildForText = watch('buildForText', '');
 
   const onSubmit: SubmitHandler<BuildForFormInputs> = (data) => {
-    console.log({ data });
+    setIsDirty(true);
+    if (buildFor) {
+      console.log({ data });
+    }
+  };
+
+  const handleSelection = (selection: string) => {
+    setValue('buildFor', selection);
+    setIsDirty(true);
+    if (selection !== buildForValues.somethingElse) {
+      setValue('buildForText', '');
+    }
   };
 
   return (
@@ -55,7 +81,13 @@ export const BuildForForm = () => {
       {buildForList.map(({ text, value, Icon, iconClassName }) => {
         return (
           <Card
-            className="flex flex-row card-border justify-between"
+            className={classnames(
+              'flex flex-row card-border justify-between cursor-pointer',
+              {
+                '!border-white': buildFor === value,
+              }
+            )}
+            onClick={() => handleSelection(value)}
             key={value}
           >
             <p className="text-xs font-medium">{text}</p>
@@ -63,19 +95,29 @@ export const BuildForForm = () => {
           </Card>
         );
       })}
-      <Card className="flex flex-col gap-4 card-border">
+      <Card
+        className="flex flex-col gap-4 card-border"
+        onClick={() => handleSelection(buildForValues.somethingElse)}
+      >
         <Label htmlFor="password" className="text-xs text-medium">
           Something else
           <TextField
             type="text"
             placeholder="Enter text..."
-            {...register('password', {
-              required: true,
+            {...register('buildForText', {
+              required: buildFor === buildForValues.somethingElse,
             })}
           />
         </Label>
-        {errors.password && <span>This field is required</span>}
+        {errors.buildForText && (
+          <TextError errorMessage="This field is required" />
+        )}
       </Card>
+      <div className="flex flex-col items-center">
+        {isDirty && !buildFor && !buildForText && (
+          <TextError errorMessage="Select an option to continue" />
+        )}
+      </div>
       <div className="flex flex-col pt-4">
         <Button type="submit" className="primary">
           Continue
