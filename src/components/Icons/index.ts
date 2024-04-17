@@ -3,6 +3,7 @@ export interface IconProps {
 }
 
 export * from './CarRentalIcon';
+export * from './ChevronDownIcon';
 export * from './ComputerIcon';
 export * from './GitHubIcon';
 export * from './GoogleIcon';
