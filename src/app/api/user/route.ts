@@ -6,6 +6,9 @@ export async function PUT(request: Request) {
   if (data?.flow === 'build-for') {
     cookies().set('flow', 'company-information');
   }
+  if (data?.flow === 'company-info') {
+    cookies().set('compliant', 'true');
+  }
   return Response.json({
     status: 'OK',
     message: 'User updated',
