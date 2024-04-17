@@ -2,7 +2,11 @@
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
-import { SignUpWith, BuildForForm } from '@/app/sign-up/components';
+import {
+  SignUpWith,
+  BuildForForm,
+  CompanyInfoForm,
+} from '@/app/sign-up/components';
 import BuildOnDIMO from '@/assets/images/build-on-dimo.png';
 
 import './page.css';
@@ -15,6 +19,10 @@ const signUpFlows = {
   'build-for': {
     Component: BuildForForm,
     title: 'What are you building?',
+  },
+  'company-information': {
+    Component: CompanyInfoForm,
+    title: 'Our last question',
   },
 };
 
