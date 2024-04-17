@@ -5,10 +5,11 @@ export const UserCompliantMiddleware = async (request: NextRequest) => {
   const urlPath = request.nextUrl.pathname;
   const flow = request.nextUrl.searchParams.get('flow');
   const { value: isLogged } = cookies().get('logged') ?? {}; // TODO: IMPROVE VALIDATION
+  const { value: currentFlow = 'build-for' } = cookies().get('flow') ?? {}; // TODO: IMPROVE VALIDATION
   const header = new Headers();
 
   if (urlPath.startsWith('/sign-up') && Boolean(isLogged) && !flow) {
-    header.set('redirect', '/sign-up?flow=build-for');
+    header.set('redirect', `/sign-up?flow=${currentFlow}`);
     return NextResponse.next({
       request: { headers: header },
     });

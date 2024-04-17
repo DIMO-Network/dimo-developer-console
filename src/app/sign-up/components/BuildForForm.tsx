@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import classnames from 'classnames';
 
@@ -8,7 +9,7 @@ import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
 import { CarRental, ComputerIcon, PhoneIcon } from '@/components/Icons';
-import { useState } from 'react';
+import { dimoDevClient } from '@/services/dimoDev';
 
 interface BuildForFormInputs {
   buildFor: string;
@@ -51,6 +52,7 @@ export const BuildForForm = () => {
     setValue,
     formState: { errors },
     watch,
+    getValues,
   } = useForm<BuildForFormInputs>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -61,7 +63,7 @@ export const BuildForForm = () => {
   const onSubmit: SubmitHandler<BuildForFormInputs> = (data) => {
     setIsDirty(true);
     if (buildFor) {
-      console.log({ data });
+      updateUser(getValues());
     }
   };
 
@@ -71,6 +73,16 @@ export const BuildForForm = () => {
     if (selection !== buildForValues.somethingElse) {
       setValue('buildForText', '');
     }
+  };
+
+  const updateUser = async (buildForData: BuildForFormInputs) => {
+    const data = await dimoDevClient
+      .put('/user', {
+        flow: 'build-for',
+        data: buildForData,
+      })
+      .catch(console.error);
+    window.location.replace('/');
   };
 
   return (
@@ -99,7 +111,7 @@ export const BuildForForm = () => {
         className="flex flex-col gap-4 card-border"
         onClick={() => handleSelection(buildForValues.somethingElse)}
       >
-        <Label htmlFor="password" className="text-xs text-medium">
+        <Label htmlFor="buildForText" className="text-xs text-medium">
           Something else
           <TextField
             type="text"
