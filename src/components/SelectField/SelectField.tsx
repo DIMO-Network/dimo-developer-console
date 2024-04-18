@@ -18,32 +18,37 @@ interface IProps extends InputHTMLAttributes<HTMLSelectElement> {
 export type Ref = HTMLSelectElement;
 
 export const SelectField = forwardRef<Ref, IProps>(
-  ({ className: inputClassName = '', options, ...props }, ref) => {
+  ({ className: inputClassName = '', options, role, ...props }, ref) => {
     const [show, setShow] = useState<boolean>(false);
-    const [selected, setSelected] = useState<string>('');
+    const [selected, setSelected] = useState<IOption>({ value: '', text: '' });
     const className = classnames('select-field', inputClassName);
 
-    const handleSelection = (selection: string) => {
-      setSelected(selection);
+    const handleSelection = (value: string, text: string) => {
+      setSelected({ value, text });
     };
 
     return (
-      <div className={className} onClick={() => setShow(!show)}>
-        <select {...props} value={selected} ref={ref}>
+      <div className={className} onClick={() => setShow(!show)} role={role}>
+        <select
+          {...props}
+          value={selected.value}
+          role={`${role}-select`}
+          ref={ref}
+        >
           {options.map(({ value, text }) => (
             <option value={value} key={value}>
               {text}
             </option>
           ))}
         </select>
-        <p>{selected}</p>
+        <p role={`${role}-text`}>{selected.text}</p>
         <ChevronDownIcon className="w-4 h-4" />
         <div className={classnames('custom-menu', { show: show })}>
           {options.map(({ value, text }) => (
             <div
               className="custom-item"
               key={value}
-              onClick={() => handleSelection(value)}
+              onClick={() => handleSelection(value, text)}
             >
               {text}
             </div>

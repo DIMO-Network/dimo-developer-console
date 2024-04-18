@@ -8,7 +8,7 @@ import { Card } from '@/components/Card';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
-import { CarRental, ComputerIcon, PhoneIcon } from '@/components/Icons';
+import { CarRentalIcon, ComputerIcon, PhoneIcon } from '@/components/Icons';
 import { dimoDevClient } from '@/services/dimoDev';
 
 interface BuildForFormInputs {
@@ -38,7 +38,7 @@ const buildForList = [
   },
   {
     text: 'Web application with multi-account management',
-    Icon: CarRental,
+    Icon: CarRentalIcon,
     iconClassName: 'w-4 h-5',
     value: buildForValues.webAppMultiAccount,
   },
