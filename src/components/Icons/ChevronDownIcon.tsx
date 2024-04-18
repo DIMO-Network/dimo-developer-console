@@ -13,6 +13,7 @@ export const ChevronDownIcon: FC<IconProps> = ({ className }) => {
       strokeWidth={1.5}
       stroke="currentColor"
       className={className}
+      role="chevron-down-icon"
     >
       <path
         strokeLinecap="round"

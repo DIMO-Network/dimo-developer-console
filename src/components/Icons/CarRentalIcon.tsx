@@ -4,13 +4,14 @@ import React from 'react';
 
 import { IconProps } from './index';
 
-export const CarRental: FC<IconProps> = ({ className = '' }) => {
+export const CarRentalIcon: FC<IconProps> = ({ className = '' }) => {
   return (
     <svg
       className={className}
       viewBox="0 0 15 22"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      role="car-rental-icon"
     >
       <path
         d="M4.5 17.282C5.05228 17.282 5.5 16.8343 5.5 16.282C5.5 15.7297 5.05228 15.282 4.5 15.282C3.94772 15.282 3.5 15.7297 3.5 16.282C3.5 16.8343 3.94772 17.282 4.5 17.282Z"
@@ -98,4 +99,4 @@ export const CarRental: FC<IconProps> = ({ className = '' }) => {
   );
 };
 
-export default CarRental;
+export default CarRentalIcon;
