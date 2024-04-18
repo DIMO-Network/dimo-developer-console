@@ -1,5 +1,6 @@
 'use client';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { isURL } from 'validator';
 
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
@@ -68,10 +69,11 @@ export const CompanyInfoForm = () => {
           placeholder="www.dimo.zone"
           {...register('website', {
             required: false,
+            validate: { isURL: (str: string = '') => isURL(str) },
           })}
         />
       </Label>
-      {errors.website && <TextError errorMessage="This field is required" />}
+      {errors.website && <TextError errorMessage="This field must be a valid URL" />}
       <Label htmlFor="region" className="text-xs text-medium">
         Main Operating Region *
         <SelectField
