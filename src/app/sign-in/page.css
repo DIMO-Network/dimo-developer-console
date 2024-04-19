@@ -23,6 +23,6 @@
   }
 
   .sign-in__buttons {
-    @apply flex flex-col gap-4 pb-4 border-b border-gray-900;
+    @apply flex flex-col gap-4 pb-4 border-b border-grey-900;
   }
 }

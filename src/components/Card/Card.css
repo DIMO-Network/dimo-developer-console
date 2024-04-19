@@ -6,6 +6,6 @@
   }
 
   &.card-border {
-    @apply border border-gray-950;
+    @apply border border-grey-950;
   }
 }

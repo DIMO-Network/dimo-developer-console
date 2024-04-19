@@ -22,11 +22,11 @@
     @apply flex flex-col items-center gap-4;
 
     .terms-caption {
-      @apply text-gray-400 text-xs text-center leading-4;
+      @apply text-grey-400 text-xs text-center leading-4;
     }
   }
 
   .sign-up__buttons {
-    @apply flex flex-col gap-4 pb-4 border-b border-gray-900;
+    @apply flex flex-col gap-4 pb-4 border-b border-grey-900;
   }
 }
