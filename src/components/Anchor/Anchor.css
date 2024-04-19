@@ -6,6 +6,6 @@
   }
 
   &.grey {
-    @apply text-gray-400;
+    @apply text-grey-400;
   }
 }

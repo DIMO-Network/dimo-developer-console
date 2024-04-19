@@ -1,6 +1,9 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+
+import { Header } from '@/components/Header';
+
 import './globals.css';
 
 const euclid = localFont({
@@ -60,7 +63,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={euclid.className}>{children}</body>
+      <body className={euclid.className}>
+        <Header />
+        {children}
+      </body>
     </html>
   );
 }
