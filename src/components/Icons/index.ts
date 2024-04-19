@@ -8,3 +8,4 @@ export * from './ComputerIcon';
 export * from './GitHubIcon';
 export * from './GoogleIcon';
 export * from './PhoneIcon';
+export * from './PlusIcon';
