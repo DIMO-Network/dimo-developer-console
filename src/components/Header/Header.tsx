@@ -11,11 +11,11 @@ export const Header: FC<IProps> = () => {
   return (
     <header className="header">
       <Image src={BuildOnDIMO} alt="DIMO Logo" className="w-44 h-6" />
-      <div className="user-information">
+      <div className="user-information" role="user-information">
         <div className="user-avatar-default">
           <p className="default">SB</p>
         </div>
-        <div className="credits">
+        <div className="credits" role="credits-display">
           <div className="credits-info">
             <p className="credit-amount">0</p>
             <p className="credit-text">Credits</p>
