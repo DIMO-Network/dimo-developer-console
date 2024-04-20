@@ -21,6 +21,10 @@ body {
   @apply bg-dark-950;
 }
 
+.content {
+  @apply flex flex-row;
+}
+
 @layer base {
   body {
     @apply text-sm font-light;

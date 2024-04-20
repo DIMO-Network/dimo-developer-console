@@ -1,0 +1,5 @@
+.main-menu {
+  ul li {
+    @apply flex flex-row gap-3 items-center text-grey-200;
+  }
+}

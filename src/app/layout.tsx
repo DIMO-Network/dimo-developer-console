@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
 import { Header } from '@/components/Header';
+import { Menu } from '@/components/Menu';
 
 import './globals.css';
 
@@ -65,7 +66,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={euclid.className}>
         <Header />
-        {children}
+        <div className="content">
+          <Menu />
+          {children}
+        </div>
       </body>
     </html>
   );
