@@ -33,6 +33,7 @@ export const SelectField = forwardRef<Ref, IProps>(
           {...props}
           value={selected.value}
           role={`${role}-select`}
+          onChange={() => {}}
           ref={ref}
         >
           {options.map(({ value, text }) => (

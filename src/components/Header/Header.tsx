@@ -1,8 +1,6 @@
 import { type FC } from 'react';
-import Image from 'next/image';
-
 import { PlusIcon } from '@/components/Icons';
-import BuildOnDIMO from '@/assets/images/build-on-dimo.png';
+
 import './Header.css';
 
 interface IProps {}
@@ -10,7 +8,11 @@ interface IProps {}
 export const Header: FC<IProps> = () => {
   return (
     <header className="header">
-      <Image src={BuildOnDIMO} alt="DIMO Logo" className="w-44 h-6" />
+      <img
+        src={'/images/build-on-dimo.png'}
+        alt="DIMO Logo"
+        className="w-44 h-6"
+      />
       <div className="user-information" role="user-information">
         <div className="user-avatar-default">
           <p className="default">SB</p>

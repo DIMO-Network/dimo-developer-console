@@ -120,6 +120,7 @@ export const BuildForForm = () => {
             {...register('buildForText', {
               required: buildFor === buildForValues.somethingElse,
             })}
+            role="build-for-something-else-input"
           />
         </Label>
         {errors.buildForText && (
@@ -132,7 +133,7 @@ export const BuildForForm = () => {
         )}
       </div>
       <div className="flex flex-col pt-4">
-        <Button type="submit" className="primary">
+        <Button type="submit" className="primary" role="continue-button">
           Continue
         </Button>
       </div>
