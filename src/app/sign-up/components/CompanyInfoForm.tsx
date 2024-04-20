@@ -73,7 +73,9 @@ export const CompanyInfoForm = () => {
           })}
         />
       </Label>
-      {errors.website && <TextError errorMessage="This field must be a valid URL" />}
+      {errors.website && (
+        <TextError errorMessage="This field must be a valid URL" />
+      )}
       <Label htmlFor="region" className="text-xs text-medium">
         Main Operating Region *
         <SelectField
@@ -83,8 +85,9 @@ export const CompanyInfoForm = () => {
           options={regionOptions}
         />
       </Label>
+      {errors.region && <TextError errorMessage="This field is required" />}
       <div className="flex flex-col pt-4">
-        <Button type="submit" className="primary">
+        <Button type="submit" className="primary" role="finish-button">
           Finish sign up
         </Button>
       </div>

@@ -1,0 +1,196 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SignUpPage renders the sign in page at the company info form 1`] = `
+<div>
+  <main
+    class="sign-up"
+  >
+    <div
+      class="sign-up__content"
+    >
+      <article
+        class="sign-up__form"
+      >
+        <section
+          class="sign-up__header"
+        >
+          <img
+            alt="DIMO Logo"
+            class="w-44 h-6"
+            src="/images/build-on-dimo.png"
+          />
+          <p>
+            Our last question
+          </p>
+        </section>
+        <form
+          class="flex flex-col gap-4 w-full max-w-sm pt-4"
+        >
+          <label
+            class="label text-xs text-medium"
+            for="name"
+          >
+            Company name
+            <input
+              class="text-field"
+              name="name"
+              placeholder="DIMO"
+              type="text"
+            />
+          </label>
+          <label
+            class="label text-xs text-medium"
+            for="website"
+          >
+            Company website
+            <input
+              class="text-field"
+              name="website"
+              placeholder="www.dimo.zone"
+              type="text"
+            />
+          </label>
+          <label
+            class="label text-xs text-medium"
+            for="region"
+          >
+            Main Operating Region *
+            <div
+              class="select-field"
+            >
+              <select
+                name="region"
+                role="undefined-select"
+              >
+                <option
+                  value="North America"
+                >
+                  North America
+                </option>
+                <option
+                  value="Latin America & Caribbean"
+                >
+                  Latin America & Caribbean
+                </option>
+                <option
+                  value="Oceania"
+                >
+                  Oceania
+                </option>
+                <option
+                  value="Northern & Western Europe"
+                >
+                  Northern & Western Europe
+                </option>
+                <option
+                  value="Africa"
+                >
+                  Africa
+                </option>
+                <option
+                  value="East & Southeast Asia"
+                >
+                  East & Southeast Asia
+                </option>
+                <option
+                  value="Middle East & Central Asia "
+                >
+                  Middle East & Central Asia 
+                </option>
+                <option
+                  value="South Asia"
+                >
+                  South Asia
+                </option>
+                <option
+                  value="Eastern Europe"
+                >
+                  Eastern Europe
+                </option>
+              </select>
+              <p
+                role="undefined-text"
+              />
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                role="chevron-down-icon"
+                stroke="currentColor"
+                stroke-width="1.5"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <div
+                class="custom-menu"
+              >
+                <div
+                  class="custom-item"
+                >
+                  North America
+                </div>
+                <div
+                  class="custom-item"
+                >
+                  Latin America & Caribbean
+                </div>
+                <div
+                  class="custom-item"
+                >
+                  Oceania
+                </div>
+                <div
+                  class="custom-item"
+                >
+                  Northern & Western Europe
+                </div>
+                <div
+                  class="custom-item"
+                >
+                  Africa
+                </div>
+                <div
+                  class="custom-item"
+                >
+                  East & Southeast Asia
+                </div>
+                <div
+                  class="custom-item"
+                >
+                  Middle East & Central Asia 
+                </div>
+                <div
+                  class="custom-item"
+                >
+                  South Asia
+                </div>
+                <div
+                  class="custom-item"
+                >
+                  Eastern Europe
+                </div>
+              </div>
+            </div>
+          </label>
+          <div
+            class="flex flex-col pt-4"
+          >
+            <button
+              class="button primary"
+              role="finish-button"
+              type="submit"
+            >
+              Finish sign up
+            </button>
+          </div>
+        </form>
+      </article>
+    </div>
+  </main>
+</div>
+`;
