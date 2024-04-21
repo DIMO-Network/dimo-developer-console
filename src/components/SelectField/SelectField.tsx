@@ -1,9 +1,11 @@
 import { InputHTMLAttributes, forwardRef, useState } from 'react';
 
 import classnames from 'classnames';
+import { Control, Controller } from 'react-hook-form';
+
+import { ChevronDownIcon } from '@/components/Icons';
 
 import './SelectField.css';
-import { ChevronDownIcon } from '@/components/Icons';
 
 interface IOption {
   value: string;
@@ -13,12 +15,25 @@ interface IOption {
 interface IProps extends InputHTMLAttributes<HTMLSelectElement> {
   className?: string;
   options: IOption[];
+  control: Control<any, any>;
+  includeEmptyOption?: boolean;
 }
 
 export type Ref = HTMLSelectElement;
 
 export const SelectField = forwardRef<Ref, IProps>(
-  ({ className: inputClassName = '', options, role, ...props }, ref) => {
+  (
+    {
+      className: inputClassName = '',
+      options,
+      role,
+      includeEmptyOption = true,
+      control,
+      ...props
+    },
+    // eslint-disable-next-line no-unused-vars
+    _ref
+  ) => {
     const [show, setShow] = useState<boolean>(false);
     const [selected, setSelected] = useState<IOption>({ value: '', text: '' });
     const className = classnames('select-field', inputClassName);
@@ -28,34 +43,56 @@ export const SelectField = forwardRef<Ref, IProps>(
     };
 
     return (
-      <div className={className} onClick={() => setShow(!show)} role={role}>
-        <select
-          {...props}
-          value={selected.value}
-          role={`${role}-select`}
-          onChange={() => {}}
-          ref={ref}
-        >
-          {options.map(({ value, text }) => (
-            <option value={value} key={value}>
-              {text}
-            </option>
-          ))}
-        </select>
-        <p role={`${role}-text`}>{selected.text}</p>
-        <ChevronDownIcon className="w-4 h-4" />
-        <div className={classnames('custom-menu', { show: show })}>
-          {options.map(({ value, text }) => (
+      <Controller
+        control={control}
+        name={props.name || ''}
+        render={({ field: { onChange, value: selectedOption, ref } }) => {
+          return (
             <div
-              className="custom-item"
-              key={value}
-              onClick={() => handleSelection(value, text)}
+              className={className}
+              onClick={() => setShow(!show)}
+              role={role}
             >
-              {text}
+              <select
+                {...props}
+                value={selectedOption}
+                role={`${role}-select`}
+                ref={ref}
+              >
+                {includeEmptyOption && <option></option>}
+                {options.map(({ value, text }) => (
+                  <option value={value} key={value}>
+                    {text}
+                  </option>
+                ))}
+              </select>
+              <p
+                className={classnames({
+                  selected: Boolean(selected.value),
+                })}
+                role={`${role}-text`}
+              >
+                {selected.text || props.placeholder || ''}
+              </p>
+              <ChevronDownIcon className="w-4 h-4" />
+              <div className={classnames('custom-menu', { show: show })}>
+                {options.map(({ value, text }) => (
+                  <div
+                    className="custom-item"
+                    key={value}
+                    onClick={() => {
+                      handleSelection(value, text);
+                      onChange(value);
+                    }}
+                  >
+                    {text}
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          );
+        }}
+      />
     );
   }
 );

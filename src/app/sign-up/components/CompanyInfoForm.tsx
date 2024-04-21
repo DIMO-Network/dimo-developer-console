@@ -1,6 +1,6 @@
 'use client';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { isURL } from 'validator';
+import { isURL, isEmpty } from 'validator';
 
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
@@ -23,6 +23,7 @@ const regionOptions = regions.map((regionName) => ({
 
 export const CompanyInfoForm = () => {
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
@@ -42,7 +43,9 @@ export const CompanyInfoForm = () => {
         data: companyData,
       })
       .catch(console.error);
+
     console.log({ data });
+
     window.location.replace('/sign-up');
   };
 
@@ -59,6 +62,7 @@ export const CompanyInfoForm = () => {
           {...register('name', {
             required: false,
           })}
+          role="company-name-input"
         />
       </Label>
       {errors.name && <TextError errorMessage="This field is required" />}
@@ -69,8 +73,11 @@ export const CompanyInfoForm = () => {
           placeholder="www.dimo.zone"
           {...register('website', {
             required: false,
-            validate: { isURL: (str: string = '') => isURL(str) },
+            validate: {
+              isURL: (str: string = '') => isEmpty(str) || isURL(str),
+            },
           })}
+          role="company-website-input"
         />
       </Label>
       {errors.website && (
@@ -83,6 +90,9 @@ export const CompanyInfoForm = () => {
             required: true,
           })}
           options={regionOptions}
+          control={control}
+          placeholder="Select"
+          role="company-region"
         />
       </Label>
       {errors.region && <TextError errorMessage="This field is required" />}

@@ -161,6 +161,7 @@ exports[`SignUpPage renders the sign in page at the company info form 1`] = `
               class="text-field"
               name="name"
               placeholder="DIMO"
+              role="company-name-input"
               type="text"
             />
           </label>
@@ -173,6 +174,7 @@ exports[`SignUpPage renders the sign in page at the company info form 1`] = `
               class="text-field"
               name="website"
               placeholder="www.dimo.zone"
+              role="company-website-input"
               type="text"
             />
           </label>
@@ -183,11 +185,14 @@ exports[`SignUpPage renders the sign in page at the company info form 1`] = `
             Main Operating Region *
             <div
               class="select-field"
+              role="company-region"
             >
               <select
                 name="region"
-                role="undefined-select"
+                placeholder="Select"
+                role="company-region-select"
               >
+                <option />
                 <option
                   value="North America"
                 >
@@ -235,8 +240,11 @@ exports[`SignUpPage renders the sign in page at the company info form 1`] = `
                 </option>
               </select>
               <p
-                role="undefined-text"
-              />
+                class=""
+                role="company-region-text"
+              >
+                Select
+              </p>
               <svg
                 class="w-4 h-4"
                 fill="none"
