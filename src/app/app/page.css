@@ -1,0 +1,19 @@
+.home-page {
+  @apply flex flex-col gap-4;
+
+  .welcome-message {
+    @apply flex flex-col gap-2;
+
+    .title {
+      @apply text-3xl;
+    }
+
+    .sub-message {
+      @apply text-sm;
+    }
+  }
+
+  .onboarding-steps {
+    @apply flex flex-row gap-10;
+  }
+}
