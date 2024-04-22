@@ -1,5 +1,5 @@
-import { Card } from '@/components/Card';
-import { Button } from '@/components/Button';
+'use client';
+import { OnboardingCard } from '@/app/app/components';
 
 import './page.css';
 
@@ -13,24 +13,18 @@ export default function HomePage() {
         </p>
       </div>
       <div className="onboarding-steps">
-        <Card className="card-border w-72">
-          <div className="step-title">
-            <p>Connect wallet</p>
-            <p>Description</p>
-          </div>
-          <div className="step-action">
-            <Button className="primary px-4 w-full">Connect</Button>
-          </div>
-        </Card>
-        <Card className="card-border w-72">
-          <div className="step-title">
-            <p>Connect wallet</p>
-            <p>Description</p>
-          </div>
-          <div className="step-action">
-            <Button className="primary px-4 w-full">Connect</Button>
-          </div>
-        </Card>
+        <OnboardingCard
+          title="Connect a Wallet & Get Credits"
+          description="Click the button to connect a spender wallet and start building."
+          action="Connect Wallet"
+          onClick={() => {}}
+        />
+        <OnboardingCard
+          title="Create your first application"
+          description="Click the button to receive your credentials and access DIMO data in minutes."
+          action="Create app"
+          onClick={() => {}}
+        />
       </div>
     </div>
   );
