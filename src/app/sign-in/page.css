@@ -1,5 +1,5 @@
 .sign-in {
-  @apply bg-[url('../../assets/images/login-background.png')] bg-cover 
+  @apply bg-[url('/images/login-background.png')] bg-cover 
     flex flex-col justify-center 
     h-screen gap-4;
 

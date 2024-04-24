@@ -1,5 +1,11 @@
-import { GoogleAuthService, GitHubAuthService } from '@/services/auth';
+import { processOauth } from '@/services/auth';
 import { cookies } from 'next/headers';
+
+const hasToken = (token: string) => {
+  if (!token) {
+    throw new Error('Something went wrong');
+  }
+};
 
 export async function GET(
   request: Request,
@@ -8,21 +14,18 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const code = searchParams.get('code') ?? '';
 
-  const ProviderService = {
-    github: GitHubAuthService,
-    google: GoogleAuthService,
-  }[app];
+  try {
+    const { token } = await processOauth(code, app);
+    hasToken(token);
 
-  if (ProviderService) {
-    const providerService = new ProviderService();
-    const token = await providerService.processCallback(code);
-    const user = await providerService.getUser();
-
-    // TODO: DELETE WHEN JWT IS SET
-    cookies().set('logged', 'true', { httpOnly: true });
-    cookies().set('token', JSON.stringify(token), { httpOnly: true });
-    cookies().set('user', JSON.stringify(user), { httpOnly: true });
+    cookies().set('token', token);
+    return Response.redirect('http://localhost:3000/app');
+  } catch (error: any) {
+    console.error({
+      error,
+      step: 'OAuth process',
+      app,
+    });
+    return Response.redirect('http://localhost:3000/sign-in?error=true');
   }
-
-  return Response.redirect('http://localhost:3000/');
 }
