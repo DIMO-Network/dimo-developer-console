@@ -37,14 +37,12 @@ export const CompanyInfoForm = () => {
   };
 
   const updateUser = async (companyData: CompanyInfoInputs) => {
-    const data = await dimoDevClient
+    await dimoDevClient
       .put('/user', {
-        flow: 'company-info',
+        flow: 'company-information',
         data: companyData,
       })
       .catch(console.error);
-
-    console.log({ data });
 
     window.location.replace('/sign-up');
   };

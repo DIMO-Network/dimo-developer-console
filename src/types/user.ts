@@ -4,6 +4,8 @@ export interface IUser {
   email: string;
   auth: string;
   role?: string;
+  build_for?: string;
+  build_for_text?: string;
   company_name?: string;
   company_website?: string;
   company_region?: string;

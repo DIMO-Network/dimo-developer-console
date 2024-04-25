@@ -1,10 +1,10 @@
 import { IUser } from '@/types/user';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
-export const getUserByToken = async (token: string) => {
-  // Using fetch since middlewares do not use http adapter so, it blocks axios
-  dimoDevAPIClient.defaultHeaders = {
-    Authorization: `Bearer ${token}`,
-  };
-  return await dimoDevAPIClient.get<IUser>('/api/me', {});
+export const getUserByToken = async () => {
+  return await dimoDevAPIClient().get<IUser>('/api/me', {});
+};
+
+export const updateLoggedUser = async (data: Partial<IUser>) => {
+  return await dimoDevAPIClient().put<IUser>('api/me', data);
 };

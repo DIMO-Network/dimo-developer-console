@@ -4,11 +4,10 @@ import { middlewares } from '@/middlewares/config';
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
   const nextResponse = NextResponse.next();
-  const middlewareFunctions = middlewares.map((fn) => fn(request));
 
   const middlewareHeader = [];
-  for (const middleware of middlewareFunctions) {
-    const result = await middleware;
+  for (const middleware of middlewares) {
+    const result = await middleware(request);
 
     if (!result.ok) {
       return result;

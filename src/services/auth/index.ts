@@ -1,7 +1,7 @@
 import { dimoDevAPIClient } from '../dimoDevAPI';
 
 export const processOauth = async (code: string, app: string) => {
-  const { token } = await dimoDevAPIClient.post<{ token: string }>(
+  const { token } = await dimoDevAPIClient().post<{ token: string }>(
     '/api/auth',
     {
       code,

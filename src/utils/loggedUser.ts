@@ -20,13 +20,27 @@ class LoggedUSer {
     return this._user;
   }
 
-  get isCompliant() {
+  get hasBuildForData(): boolean {
+    return Boolean(this._user?.build_for);
+  }
+
+  get hasCompanyData(): boolean {
     return (
-      this._user &&
-      this._user.company_name &&
-      this._user.company_region &&
-      this._user.company_website
+      Boolean(this._user?.company_name) &&
+      Boolean(this._user?.company_region) &&
+      Boolean(this._user?.company_website)
     );
+  }
+
+  get isCompliant(): boolean {
+    return this.hasBuildForData && this.hasCompanyData;
+  }
+
+  get missingFlow(): string {
+    let missingFlow = 'sign-up-with';
+    if (!this.hasBuildForData) missingFlow = 'build-for';
+    else if (!this.hasCompanyData) missingFlow = 'company-information';
+    return missingFlow;
   }
 }
 
