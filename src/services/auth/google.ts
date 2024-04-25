@@ -1,22 +1,20 @@
-import type { Auth } from 'googleapis';
-
-import type { IUser, IToken } from './base';
-
-import { google, people_v1 } from 'googleapis';
+import { google, people_v1, type Auth } from 'googleapis';
 import _ from 'lodash';
 
-import { AuthService } from './base';
+import { AuthService, type IUser, type IToken } from './base';
+
+const {
+  env: {
+    GOOGLE_CLIENT_ID: clientId = '',
+    GOOGLE_CLIENT_SECRET: clientSecret = '',
+    FRONTEND_URL,
+  },
+} = process;
 
 export class GoogleAuthService extends AuthService {
   private client: Auth.OAuth2Client;
   private scopes: string[];
   constructor() {
-    const {
-      env: {
-        GOOGLE_CLIENT_ID: clientId = '',
-        GOOGLE_CLIENT_SECRET: clientSecret = '',
-      },
-    } = process;
     super(clientId, clientSecret);
 
     this.scopes = [
@@ -26,7 +24,7 @@ export class GoogleAuthService extends AuthService {
     this.client = new google.auth.OAuth2({
       clientId,
       clientSecret,
-      redirectUri: 'http://localhost:3000/api/auth/callback/google',
+      redirectUri: `${FRONTEND_URL}api/auth/callback/google`,
     });
   }
 

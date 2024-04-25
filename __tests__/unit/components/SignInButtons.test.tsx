@@ -4,6 +4,8 @@ import { SignInButtons } from '@/components/SignInButton';
 
 const replace = window.location.replace;
 
+const { FRONTEND_URL } = process.env;
+
 beforeEach(() => {
   Object.defineProperty(window, 'location', {
     value: { replace: jest.fn() },
@@ -25,7 +27,7 @@ describe('SignInButtons', () => {
     fireEvent.click(googleButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      'http://localhost:3000/api/auth/authorize?app=google'
+      `${FRONTEND_URL}api/auth/authorize?app=google`
     );
   });
 
@@ -39,7 +41,7 @@ describe('SignInButtons', () => {
     fireEvent.click(githubButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      'http://localhost:3000/api/auth/authorize?app=github'
+      `${FRONTEND_URL}api/auth/authorize?app=github`
     );
   });
 });

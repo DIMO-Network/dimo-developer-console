@@ -1,5 +1,4 @@
-import axios from 'axios';
+import { RestClient } from '@/utils/restClient';
+const { BACKEND_URL } = process.env;
 
-export const dimoDevAPIClient = axios.create({
-  baseURL: 'http://localhost:3001/api',
-});
+export const dimoDevAPIClient = new RestClient(`${BACKEND_URL}api`);

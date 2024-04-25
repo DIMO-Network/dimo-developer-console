@@ -6,15 +6,15 @@ import React from 'react';
 import { SignInButton } from '@/components/SignInButton';
 import { GitHubIcon, GoogleIcon } from '@/components/Icons';
 
+const { FRONTEND_URL } = process.env;
+
 interface SignInButtonProps {
   isSignIn: boolean;
 }
 
 export const SignInButtons: FC<SignInButtonProps> = ({ isSignIn }) => {
   const handlerGitHubLogin = (app: string) => {
-    window.location.replace(
-      `http://localhost:3000/api/auth/authorize?app=${app}`
-    );
+    window.location.replace(`${FRONTEND_URL}api/auth/authorize?app=${app}`);
   };
 
   return (

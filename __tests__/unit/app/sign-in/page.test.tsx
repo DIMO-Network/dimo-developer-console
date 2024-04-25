@@ -4,6 +4,8 @@ import SignInPage from '@/app/sign-in/page';
 
 const replace = window.location.replace;
 
+const { FRONTEND_URL } = process.env;
+
 beforeEach(() => {
   Object.defineProperty(window, 'location', {
     value: { replace: jest.fn() },
@@ -33,7 +35,7 @@ describe('SignInPage', () => {
     fireEvent.click(googleButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      'http://localhost:3000/api/auth/authorize?app=google'
+      `${FRONTEND_URL}api/auth/authorize?app=google`
     );
   });
 
@@ -47,7 +49,7 @@ describe('SignInPage', () => {
     fireEvent.click(githubButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      'http://localhost:3000/api/auth/authorize?app=github'
+      `${FRONTEND_URL}api/auth/authorize?app=github`
     );
   });
 });
