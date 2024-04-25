@@ -6,5 +6,5 @@ export const getUserByToken = async (token: string) => {
   dimoDevAPIClient.defaultHeaders = {
     Authorization: `Bearer ${token}`,
   };
-  return await dimoDevAPIClient.get<IUser>('api/me', {});
+  return await dimoDevAPIClient.get<IUser>('/api/me', {});
 };

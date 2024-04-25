@@ -1,7 +1,7 @@
-import { processOauth } from '@/services/auth';
 import { cookies } from 'next/headers';
 
-const { FRONTEND_URL } = process.env;
+import { processOauth } from '@/services/auth';
+import { frontendUrl } from '@/config/default';
 
 const hasToken = (token: string) => {
   if (!token) {
@@ -21,13 +21,13 @@ export async function GET(
     hasToken(token);
 
     cookies().set('token', token);
-    return Response.redirect(`${FRONTEND_URL}app`);
+    return Response.redirect(`${frontendUrl}app`);
   } catch (error: any) {
     console.error({
       error,
       step: 'OAuth process',
       app,
     });
-    return Response.redirect(`${FRONTEND_URL}sign-in?error=true`);
+    return Response.redirect(`${frontendUrl}sign-in?error=true`);
   }
 }

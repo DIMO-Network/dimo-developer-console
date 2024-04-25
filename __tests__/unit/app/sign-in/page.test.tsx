@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import SignInPage from '@/app/sign-in/page';
+import { frontendUrl } from '@/config/default';
 
 const replace = window.location.replace;
 
-const { FRONTEND_URL } = process.env;
 
 beforeEach(() => {
   Object.defineProperty(window, 'location', {
@@ -35,7 +35,7 @@ describe('SignInPage', () => {
     fireEvent.click(googleButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      `${FRONTEND_URL}api/auth/authorize?app=google`
+      `${frontendUrl}api/auth/authorize?app=google`
     );
   });
 
@@ -49,7 +49,7 @@ describe('SignInPage', () => {
     fireEvent.click(githubButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      `${FRONTEND_URL}api/auth/authorize?app=github`
+      `${frontendUrl}api/auth/authorize?app=github`
     );
   });
 });

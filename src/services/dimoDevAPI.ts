@@ -1,4 +1,4 @@
 import { RestClient } from '@/utils/restClient';
-const { BACKEND_URL } = process.env;
+import { backendUrl } from '@/config/default';
 
-export const dimoDevAPIClient = new RestClient(`${BACKEND_URL}api`);
+export const dimoDevAPIClient = new RestClient(backendUrl);

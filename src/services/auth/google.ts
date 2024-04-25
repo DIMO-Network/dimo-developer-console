@@ -1,13 +1,12 @@
 import { google, people_v1, type Auth } from 'googleapis';
 import _ from 'lodash';
 
+import { frontendUrl } from '@/config/default';
 import { AuthService, type IUser, type IToken } from './base';
-
 const {
   env: {
     GOOGLE_CLIENT_ID: clientId = '',
     GOOGLE_CLIENT_SECRET: clientSecret = '',
-    FRONTEND_URL,
   },
 } = process;
 
@@ -24,7 +23,7 @@ export class GoogleAuthService extends AuthService {
     this.client = new google.auth.OAuth2({
       clientId,
       clientSecret,
-      redirectUri: `${FRONTEND_URL}api/auth/callback/google`,
+      redirectUri: `${frontendUrl}api/auth/callback/google`,
     });
   }
 

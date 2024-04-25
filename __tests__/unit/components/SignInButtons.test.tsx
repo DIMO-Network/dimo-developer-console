@@ -1,10 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 
 import { SignInButtons } from '@/components/SignInButton';
+import { frontendUrl } from '@/config/default';
 
 const replace = window.location.replace;
-
-const { FRONTEND_URL } = process.env;
 
 beforeEach(() => {
   Object.defineProperty(window, 'location', {
@@ -27,7 +26,7 @@ describe('SignInButtons', () => {
     fireEvent.click(googleButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      `${FRONTEND_URL}api/auth/authorize?app=google`
+      `${frontendUrl}api/auth/authorize?app=google`
     );
   });
 
@@ -41,7 +40,7 @@ describe('SignInButtons', () => {
     fireEvent.click(githubButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      `${FRONTEND_URL}api/auth/authorize?app=github`
+      `${frontendUrl}api/auth/authorize?app=github`
     );
   });
 });

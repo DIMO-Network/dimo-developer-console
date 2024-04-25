@@ -9,3 +9,6 @@ export const regions = [
   'South Asia',
   'Eastern Europe',
 ];
+
+export const frontendUrl = 'http://localhost:3000/';
+export const backendUrl = 'http://localhost:3001/';

@@ -5,8 +5,7 @@ import React from 'react';
 
 import { SignInButton } from '@/components/SignInButton';
 import { GitHubIcon, GoogleIcon } from '@/components/Icons';
-
-const { FRONTEND_URL } = process.env;
+import { frontendUrl } from '@/config/default';
 
 interface SignInButtonProps {
   isSignIn: boolean;
@@ -14,7 +13,7 @@ interface SignInButtonProps {
 
 export const SignInButtons: FC<SignInButtonProps> = ({ isSignIn }) => {
   const handlerGitHubLogin = (app: string) => {
-    window.location.replace(`${FRONTEND_URL}api/auth/authorize?app=${app}`);
+    window.location.replace(`${frontendUrl}api/auth/authorize?app=${app}`);
   };
 
   return (

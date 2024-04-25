@@ -1,9 +1,10 @@
 import nock from 'nock';
 
 import { GoogleAuthService } from '@/services/auth';
+import { frontendUrl } from '@/config/default';
 
 const {
-  env: { GOOGLE_CLIENT_ID: clientId = '', FRONTEND_URL = '' },
+  env: { GOOGLE_CLIENT_ID: clientId = '' },
 } = process;
 
 describe('GoogleAuthService', () => {
@@ -12,7 +13,7 @@ describe('GoogleAuthService', () => {
 
     expect(googleService.getOauthURL()).toBe(
       `https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
-        FRONTEND_URL
+        frontendUrl
       )}api%2Fauth%2Fcallback%2Fgoogle`
     );
   });

@@ -4,14 +4,13 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 
 import SignUpPage from '@/app/sign-up/page';
+import { frontendUrl } from '@/config/default';
 
 jest.mock('next/navigation');
 
 const replace = window.location.replace;
 
 axios.defaults.adapter = 'http';
-
-const { FRONTEND_URL } = process.env;
 
 beforeEach(() => {
   Object.defineProperty(window, 'location', {
@@ -68,7 +67,7 @@ describe('SignUpPage', () => {
     fireEvent.click(googleButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      `${FRONTEND_URL}api/auth/authorize?app=google`
+      `${frontendUrl}api/auth/authorize?app=google`
     );
   });
 
@@ -86,7 +85,7 @@ describe('SignUpPage', () => {
     fireEvent.click(githubButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      `${FRONTEND_URL}api/auth/authorize?app=github`
+      `${frontendUrl}api/auth/authorize?app=github`
     );
   });
 
