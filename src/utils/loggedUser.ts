@@ -1,15 +1,11 @@
 import { IUser } from '@/types/user';
 
-class LoggedUSer {
-  public static instance: LoggedUSer | null = null;
+class LoggedUser {
+  public static instance: LoggedUser | null = null;
   private _user: IUser | null = null;
 
-  constructor() {
-    if (!LoggedUSer.instance) {
-      LoggedUSer.instance = this;
-      this.user = null;
-    }
-    return this;
+  constructor(user: IUser) {
+    this._user = user;
   }
 
   set user(user: IUser | null) {
@@ -25,11 +21,7 @@ class LoggedUSer {
   }
 
   get hasCompanyData(): boolean {
-    return (
-      Boolean(this._user?.company_name) &&
-      Boolean(this._user?.company_region) &&
-      Boolean(this._user?.company_website)
-    );
+    return Boolean(this._user?.company_region);
   }
 
   get isCompliant(): boolean {
@@ -44,6 +36,4 @@ class LoggedUSer {
   }
 }
 
-export const loggedUser = new LoggedUSer();
-
-export default loggedUser;
+export default LoggedUser;

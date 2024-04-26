@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-
 import { cookies } from 'next/headers';
 
-const excludedEndpoints = ['/sign-in', '/sign-up', '/api'];
+import { isIn } from '@/utils/middlewareUtils';
 
-const isIn = (url: string) => (path: string) => url.startsWith(path);
+enum EXCLUDED_PATHS {
+  SIGN_IN = '/sign-in',
+  SIGN_UP = '/sign-up',
+  API = '/api',
+}
+
+const excludedEndpoints = [
+  EXCLUDED_PATHS.SIGN_IN,
+  EXCLUDED_PATHS.SIGN_UP,
+  EXCLUDED_PATHS.API,
+];
 
 const mustSignIn = (request: NextRequest) => {
   const url = request.nextUrl.pathname;
@@ -18,7 +27,7 @@ export const AuthorizationMiddleware = async (request: NextRequest) => {
   const header = new Headers();
 
   if (mustSignIn(request)) {
-    header.set('redirect', '/sign-in');
+    header.set('redirect', EXCLUDED_PATHS.SIGN_IN);
     return NextResponse.next({
       request: { headers: header },
     });

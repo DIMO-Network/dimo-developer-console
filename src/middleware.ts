@@ -7,6 +7,7 @@ export async function middleware(request: NextRequest) {
 
   const middlewareHeader = [];
   for (const middleware of middlewares) {
+    console.count('middleware');
     const result = await middleware(request);
 
     if (!result.ok) {
@@ -39,6 +40,6 @@ export async function middleware(request: NextRequest) {
 // See "Matching Paths" below to learn more
 export const config = {
   matcher: [
-    '/((?!api|_next/static|.*svg|.*png|.*jpg|.*jpeg|.*gif|.*webp|_next/image|favicon.ico).*)',
+    '/((?!_next/static|.*svg|.*png|.*jpg|.*jpeg|.*gif|.*webp|_next/image|favicon.ico).*)',
   ],
 };
