@@ -42,8 +42,10 @@ export class RestClient {
     const response = await fetch(url.toString(), options);
 
     if (!response.ok) {
+      const error = await response.json();
       const errorMessage = `Failed to ${method} data: ${response.status} ${response.statusText}`;
-      throw new Error(errorMessage);
+      console.error(errorMessage);
+      throw new Error(error.message);
     }
 
     return (await response.json()) as T;
