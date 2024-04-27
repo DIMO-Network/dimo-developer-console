@@ -22,7 +22,7 @@ export async function GET(
 
     cookies().set('token', token);
     return Response.redirect(`${frontendUrl}app`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error({
       error,
       step: 'OAuth process',

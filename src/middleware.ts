@@ -7,7 +7,6 @@ export async function middleware(request: NextRequest) {
 
   const middlewareHeader = [];
   for (const middleware of middlewares) {
-    console.count('middleware');
     const result = await middleware(request);
 
     if (!result.ok) {

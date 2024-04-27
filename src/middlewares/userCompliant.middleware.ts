@@ -33,8 +33,6 @@ export const UserCompliantMiddleware = async (request: NextRequest) => {
 
   const header = new Headers();
 
-  console.log(request.user);
-
   if (!EXCLUDED_PATHS.some(isIn(urlPath)))
     if (mustCompleteData(request, isCompletingData)) {
       header.set('redirect', `${AUTH_PATHS.SIGN_UP}?flow=${missingFlow}`);

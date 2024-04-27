@@ -6,6 +6,7 @@ import {
   BuildForForm,
   CompanyInfoForm,
 } from '@/app/sign-up/components';
+import { withNotifications } from '@/hoc';
 
 import './page.css';
 
@@ -50,4 +51,4 @@ export const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default withNotifications(SignUp);

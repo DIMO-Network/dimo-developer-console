@@ -1,9 +1,11 @@
 'use client';
+
 import { OnboardingCard } from '@/app/app/components';
+import { withNotifications } from '@/hoc';
 
 import './page.css';
 
-export default function HomePage() {
+const HomePage = () => {
   return (
     <div className="home-page">
       <div className="welcome-message">
@@ -28,4 +30,6 @@ export default function HomePage() {
       </div>
     </div>
   );
-}
+};
+
+export default withNotifications(HomePage);

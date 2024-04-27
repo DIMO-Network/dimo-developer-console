@@ -1,10 +1,12 @@
 'use client';
+
 import { Anchor } from '@/components/Anchor';
 import { SignInButtons } from '@/components/SignInButton';
+import { withNotifications } from '@/hoc';
 
 import './page.css';
 
-export default function SignIn() {
+const SignIn = () => {
   return (
     <main className="sign-in">
       <div className="sign-in__content">
@@ -29,4 +31,6 @@ export default function SignIn() {
       </div>
     </main>
   );
-}
+};
+
+export default withNotifications(SignIn);

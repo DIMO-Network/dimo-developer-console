@@ -15,6 +15,7 @@ interface IOption {
 interface IProps extends InputHTMLAttributes<HTMLSelectElement> {
   className?: string;
   options: IOption[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any, any>;
   includeEmptyOption?: boolean;
 }
@@ -31,7 +32,7 @@ export const SelectField = forwardRef<Ref, IProps>(
       control,
       ...props
     },
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     _ref
   ) => {
     const [show, setShow] = useState<boolean>(false);

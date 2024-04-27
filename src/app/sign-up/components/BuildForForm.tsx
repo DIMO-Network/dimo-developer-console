@@ -60,7 +60,7 @@ export const BuildForForm = () => {
   const buildFor = watch('buildFor', '');
   const buildForText = watch('buildForText', '');
 
-  const onSubmit: SubmitHandler<BuildForFormInputs> = (data) => {
+  const onSubmit: SubmitHandler<BuildForFormInputs> = () => {
     setIsDirty(true);
     if (buildFor) {
       updateUser(getValues());
@@ -76,13 +76,12 @@ export const BuildForForm = () => {
   };
 
   const updateUser = async (buildForData: BuildForFormInputs) => {
-    const data = await dimoDevClient
+    await dimoDevClient
       .put('/user', {
         flow: 'build-for',
         data: buildForData,
       })
       .catch(console.error);
-    console.log({ data });
     window.location.replace('/sign-up');
   };
 

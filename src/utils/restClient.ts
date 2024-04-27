@@ -1,3 +1,6 @@
+type Primitive = string | number | boolean | null | undefined;
+type Data = Primitive | Record<string, Primitive> | Primitive[];
+
 export class RestClient {
   private baseUrl: string;
   private _defaultHeaders: Record<string, string>;
@@ -18,7 +21,7 @@ export class RestClient {
   private async execute<T>(
     method: string,
     resource: string,
-    data?: any,
+    data?: Data,
     customHeaders: Record<string, string> = {}
   ): Promise<T> {
     const url = new URL(resource, this.baseUrl);
@@ -65,7 +68,7 @@ export class RestClient {
 
   async post<T>(
     resource: string,
-    data: any,
+    data: Data,
     customHeaders: Record<string, string> = {}
   ): Promise<T> {
     return await this.execute<T>('POST', resource, data, customHeaders);
@@ -73,7 +76,7 @@ export class RestClient {
 
   async put<T>(
     resource: string,
-    data: any,
+    data: Data,
     customHeaders: Record<string, string> = {}
   ): Promise<T> {
     return await this.execute<T>('PUT', resource, data, customHeaders);
