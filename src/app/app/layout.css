@@ -4,5 +4,5 @@
 }
 
 .page-content {
-  @apply overflow-y-auto p-8;
+  @apply overflow-y-auto p-8 w-full;
 }

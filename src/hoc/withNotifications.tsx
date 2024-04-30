@@ -19,7 +19,7 @@ export const withNotifications = <P extends object>(
         <WrappedComponent {...props} />
         <NotificationPanel>
           {notifications?.map((item) => {
-            return <Toast key={item.id} />;
+            return <Toast key={item.id} {...item} />;
           })}
         </NotificationPanel>
       </NotificationContext.Provider>

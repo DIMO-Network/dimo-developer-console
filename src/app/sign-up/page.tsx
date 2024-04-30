@@ -6,6 +6,7 @@ import {
   BuildForForm,
   CompanyInfoForm,
 } from '@/app/sign-up/components';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { withNotifications } from '@/hoc';
 
 import './page.css';
@@ -26,6 +27,7 @@ const signUpFlows = {
 };
 
 export const SignUp = () => {
+  useErrorHandler();
   const searchParams = useSearchParams();
   const flow = searchParams.get('flow') ?? 'sign-up-with';
 

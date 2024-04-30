@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import SignInPage from '@/app/sign-in/page';
 import { frontendUrl } from '@/config/default';
 
 const replace = window.location.replace;
-
 
 beforeEach(() => {
   Object.defineProperty(window, 'location', {

@@ -1,11 +1,18 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { FC, Fragment, useState } from 'react';
 import { Transition } from '@headlessui/react';
-import { CheckCircleIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  XMarkIcon as XMarkIcon24,
+} from '@heroicons/react/24/outline';
 import { XMarkIcon } from '@heroicons/react/20/solid';
 
-export const Toast = () => {
+import { INotification } from '@/hooks';
+
+import './Toast.css';
+
+export const Toast: FC<INotification> = ({ title, message, type }) => {
   const [show, setShow] = useState(true);
 
   return (
@@ -20,35 +27,37 @@ export const Toast = () => {
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
       >
-        <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-          <div className="p-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
+        <div className="toast">
+          <div className="toast-content">
+            <div className="toast-icon-content">
+              {type === 'success' && (
                 <CheckCircleIcon
                   className="h-6 w-6 text-green-400"
                   aria-hidden="true"
                 />
-              </div>
-              <div className="ml-3 w-0 flex-1 pt-0.5">
-                <p className="text-sm font-medium text-gray-900">
-                  Successfully saved!
-                </p>
-                <p className="mt-1 text-sm text-gray-500">
-                  Anyone with a link can now view this file.
-                </p>
-              </div>
-              <div className="ml-4 flex flex-shrink-0">
-                <button
-                  type="button"
-                  className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  onClick={() => {
-                    setShow(false);
-                  }}
-                >
-                  <span className="sr-only">Close</span>
-                  <XMarkIcon className="h-5 w-5" aria-hidden="true" />
-                </button>
-              </div>
+              )}
+              {type === 'error' && (
+                <XMarkIcon24
+                  className="h-6 w-6 text-red-400"
+                  aria-hidden="true"
+                />
+              )}
+            </div>
+            <div className="toast-content-content">
+              <p className="toast-title">{title}</p>
+              <p className="toast-description">{message}</p>
+            </div>
+            <div className="toast-close-content">
+              <button
+                type="button"
+                className="toast-close-btn"
+                onClick={() => {
+                  setShow(false);
+                }}
+              >
+                <span className="sr-only">Close</span>
+                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+              </button>
             </div>
           </div>
         </div>

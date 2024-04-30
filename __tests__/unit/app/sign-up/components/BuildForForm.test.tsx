@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 

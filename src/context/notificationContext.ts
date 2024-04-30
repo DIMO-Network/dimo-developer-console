@@ -5,7 +5,7 @@ import { INotification } from '@/hooks/useNotification';
 
 interface IProps {
   notifications: INotification[] | undefined;
-  setNotification: (message: string, duration?: number) => void;
+  setNotification: (message: string, title: string, type:string, duration?: number) => void;
 }
 
 export const NotificationContext = createContext<IProps>({

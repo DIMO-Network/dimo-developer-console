@@ -2,11 +2,14 @@
 
 import { Anchor } from '@/components/Anchor';
 import { SignInButtons } from '@/components/SignInButton';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { withNotifications } from '@/hoc';
 
 import './page.css';
 
 const SignIn = () => {
+  useErrorHandler();
+
   return (
     <main className="sign-in">
       <div className="sign-in__content">

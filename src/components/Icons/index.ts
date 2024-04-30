@@ -3,9 +3,11 @@ export interface IconProps {
 }
 
 export * from './APIIcon';
+export * from './BeachAccessIcon';
 export * from './CarRentalIcon';
 export * from './ChevronDownIcon';
 export * from './ComputerIcon';
+export * from './DeveloperBoardIcon';
 export * from './GitHubIcon';
 export * from './GoogleIcon';
 export * from './HomeIcon';

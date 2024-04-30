@@ -28,6 +28,6 @@ export async function GET(
       step: 'OAuth process',
       app,
     });
-    return Response.redirect(`${frontendUrl}sign-in?error=true`);
+    return Response.redirect(`${frontendUrl}sign-in?error=unique_email`);
   }
 }

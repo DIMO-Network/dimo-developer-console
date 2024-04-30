@@ -1,0 +1,3 @@
+.option-card {
+  @apply flex flex-row justify-between cursor-pointer items-center;
+}
