@@ -1,0 +1,3 @@
+.back-button {
+  @apply py-4 cursor-pointer;
+}
