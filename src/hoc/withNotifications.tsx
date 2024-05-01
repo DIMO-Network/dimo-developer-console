@@ -1,5 +1,3 @@
-'use client';
-
 import React, { ComponentType } from 'react';
 
 import { NotificationContext } from '@/context/notificationContext';

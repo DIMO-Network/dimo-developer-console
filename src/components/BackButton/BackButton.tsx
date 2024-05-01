@@ -1,11 +1,14 @@
 'use client';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 
 import './BackButton.css';
 
 export const BackButton = () => {
+  const router = useRouter();
+
   const handleBack = () => {
-    history.back();
+    router.back();
   };
 
   return (

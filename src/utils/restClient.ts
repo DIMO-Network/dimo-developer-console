@@ -1,4 +1,4 @@
-type Primitive = string | number | boolean | null | undefined;
+type Primitive = string | number | boolean | Date | null | undefined;
 type Data = Primitive | Record<string, Primitive> | Primitive[];
 
 export class RestClient {

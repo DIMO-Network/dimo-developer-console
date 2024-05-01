@@ -1,4 +1,3 @@
-'use client';
 import { ComponentType } from 'react';
 
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
