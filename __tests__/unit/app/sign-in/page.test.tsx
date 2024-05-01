@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { fireEvent, render, screen } from '@testing-library/react';
+import { useSearchParams } from 'next/navigation';
 
 import SignInPage from '@/app/sign-in/page';
 import { frontendUrl } from '@/config/default';
 
 const replace = window.location.replace;
+
+jest.mock('next/navigation');
 
 beforeEach(() => {
   Object.defineProperty(window, 'location', {
@@ -19,6 +22,9 @@ afterEach(() => {
 describe('SignInPage', () => {
   it('renders the sign in page', () => {
     window.location.replace = jest.fn();
+    jest
+      .mocked<any>(useSearchParams)
+      .mockImplementation(() => ({ get: jest.fn(() => null) }));
 
     const { container } = render(<SignInPage />);
 
@@ -27,6 +33,10 @@ describe('SignInPage', () => {
 
   it('redirects to the sign with google endpoint', () => {
     window.location.replace = jest.fn();
+
+    jest
+      .mocked<any>(useSearchParams)
+      .mockImplementation(() => ({ get: jest.fn(() => null) }));
 
     render(<SignInPage />);
 
@@ -41,6 +51,10 @@ describe('SignInPage', () => {
 
   it('redirects to the sign with github endpoint', () => {
     window.location.replace = jest.fn();
+
+    jest
+      .mocked<any>(useSearchParams)
+      .mockImplementation(() => ({ get: jest.fn(() => null) }));
 
     render(<SignInPage />);
 

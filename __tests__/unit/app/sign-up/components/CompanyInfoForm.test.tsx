@@ -24,7 +24,7 @@ afterEach(() => {
 
 describe('SignUpPage', () => {
   it('renders the sign in page at the company info form', () => {
-    jest.mocked<any>(useSearchParams).mockImplementationOnce(() => ({
+    jest.mocked<any>(useSearchParams).mockImplementation(() => ({
       get: jest.fn(() => 'company-information'),
     }));
 
@@ -34,7 +34,7 @@ describe('SignUpPage', () => {
   });
 
   it('renders wrong url message at build for form', async () => {
-    jest.mocked<any>(useSearchParams).mockImplementationOnce(() => ({
+    jest.mocked<any>(useSearchParams).mockImplementation(() => ({
       get: jest.fn(() => 'company-information'),
     }));
 
@@ -55,7 +55,7 @@ describe('SignUpPage', () => {
   });
 
   it('submitting the build for form', async () => {
-    jest.mocked<any>(useSearchParams).mockImplementationOnce(() => ({
+    jest.mocked<any>(useSearchParams).mockImplementation(() => ({
       get: jest.fn(() => 'company-information'),
     }));
 

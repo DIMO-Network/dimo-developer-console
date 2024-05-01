@@ -27,7 +27,7 @@ describe('SignUpPage', () => {
   it('renders the sign in page at the build for form', () => {
     jest
       .mocked<any>(useSearchParams)
-      .mockImplementationOnce(() => ({ get: jest.fn(() => 'build-for') }));
+      .mockImplementation(() => ({ get: jest.fn(() => 'build-for') }));
 
     const { container } = render(<SignUpPage />);
 
@@ -37,7 +37,7 @@ describe('SignUpPage', () => {
   it('renders required action error at build for form', async () => {
     jest
       .mocked<any>(useSearchParams)
-      .mockImplementationOnce(() => ({ get: jest.fn(() => 'build-for') }));
+      .mockImplementation(() => ({ get: jest.fn(() => 'build-for') }));
 
     render(<SignUpPage />);
 
@@ -53,7 +53,7 @@ describe('SignUpPage', () => {
   it('renders required field error at build for form', async () => {
     jest
       .mocked<any>(useSearchParams)
-      .mockImplementationOnce(() => ({ get: jest.fn(() => 'build-for') }));
+      .mockImplementation(() => ({ get: jest.fn(() => 'build-for') }));
 
     render(<SignUpPage />);
 
@@ -69,7 +69,7 @@ describe('SignUpPage', () => {
   it('renders cleaning field at build for form', async () => {
     jest
       .mocked<any>(useSearchParams)
-      .mockImplementationOnce(() => ({ get: jest.fn(() => 'build-for') }));
+      .mockImplementation(() => ({ get: jest.fn(() => 'build-for') }));
 
     render(<SignUpPage />);
 
@@ -86,7 +86,7 @@ describe('SignUpPage', () => {
   it('submitting the build for form', async () => {
     jest
       .mocked<any>(useSearchParams)
-      .mockImplementationOnce(() => ({ get: jest.fn(() => 'build-for') }));
+      .mockImplementation(() => ({ get: jest.fn(() => 'build-for') }));
 
     nock('http://localhost:3000')
       .persist()

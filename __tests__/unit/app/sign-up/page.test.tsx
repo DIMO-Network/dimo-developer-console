@@ -27,7 +27,7 @@ describe('SignUpPage', () => {
   it('renders the sign in page', () => {
     jest
       .mocked<any>(useSearchParams)
-      .mockImplementationOnce(() => ({ get: jest.fn(() => null) }));
+      .mockImplementation(() => ({ get: jest.fn(() => null) }));
 
     const { container } = render(<SignUpPage />);
 
@@ -37,7 +37,7 @@ describe('SignUpPage', () => {
   it('renders the sign in page at the sign up with form', () => {
     jest
       .mocked<any>(useSearchParams)
-      .mockImplementationOnce(() => ({ get: jest.fn(() => 'sign-up-with') }));
+      .mockImplementation(() => ({ get: jest.fn(() => 'sign-up-with') }));
 
     const { container } = render(<SignUpPage />);
 
@@ -45,7 +45,7 @@ describe('SignUpPage', () => {
   });
 
   it('renders the sign in page with wrong flow', () => {
-    jest.mocked<any>(useSearchParams).mockImplementationOnce(() => ({
+    jest.mocked<any>(useSearchParams).mockImplementation(() => ({
       get: jest.fn(() => 'unexpected-flow'),
     }));
 
@@ -57,7 +57,7 @@ describe('SignUpPage', () => {
   it('redirects to the sign with google endpoint', () => {
     jest
       .mocked<any>(useSearchParams)
-      .mockImplementationOnce(() => ({ get: jest.fn(() => 'sign-up-with') }));
+      .mockImplementation(() => ({ get: jest.fn(() => 'sign-up-with') }));
 
     window.location.replace = jest.fn();
 
@@ -75,7 +75,7 @@ describe('SignUpPage', () => {
   it('redirects to the sign with github endpoint', () => {
     jest
       .mocked<any>(useSearchParams)
-      .mockImplementationOnce(() => ({ get: jest.fn(() => 'sign-up-with') }));
+      .mockImplementation(() => ({ get: jest.fn(() => 'sign-up-with') }));
 
     window.location.replace = jest.fn();
 
@@ -91,7 +91,7 @@ describe('SignUpPage', () => {
   });
 
   it('renders the sign in page at the company info form', () => {
-    jest.mocked<any>(useSearchParams).mockImplementationOnce(() => ({
+    jest.mocked<any>(useSearchParams).mockImplementation(() => ({
       get: jest.fn(() => 'company-information'),
     }));
 
