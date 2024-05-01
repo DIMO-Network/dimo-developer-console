@@ -66,4 +66,15 @@ describe('SignInPage', () => {
       `${frontendUrl}api/auth/authorize?app=github`
     );
   });
+
+  it('should render an error toast', async () => {
+    jest
+      .mocked<any>(useSearchParams)
+      .mockImplementation(() => ({ get: jest.fn(() => 'unique_email') }));
+
+    render(<SignInPage />);
+    const toastElm = await screen.findByText('The email is already registered');
+
+    expect(toastElm).toBeInTheDocument();
+  });
 });

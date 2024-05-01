@@ -51,6 +51,7 @@ export const Toast: FC<INotification> = ({ title, message, type }) => {
               <button
                 type="button"
                 className="toast-close-btn"
+                role="close-toast"
                 onClick={() => {
                   setShow(false);
                 }}

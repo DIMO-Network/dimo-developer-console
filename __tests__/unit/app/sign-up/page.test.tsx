@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { useSearchParams } from 'next/navigation';
 
@@ -98,5 +98,34 @@ describe('SignUpPage', () => {
     const { container } = render(<SignUpPage />);
 
     expect(container).toMatchSnapshot();
+  });
+
+  it('should render an error toast', async () => {
+    jest
+      .mocked<any>(useSearchParams)
+      .mockImplementation(() => ({ get: jest.fn(() => 'unique_email') }));
+
+    render(<SignUpPage />);
+    const toastElm = await screen.findByText('The email is already registered');
+
+    expect(toastElm).toBeInTheDocument();
+  });
+
+  it('should render an error toast and autoclose it', async () => {
+    jest
+      .mocked<any>(useSearchParams)
+      .mockImplementation(() => ({ get: jest.fn(() => 'unique_email') }));
+
+    jest.useFakeTimers();
+    jest.spyOn(global, 'setTimeout');
+
+    render(<SignUpPage />);
+
+    jest.runOnlyPendingTimers();
+    const toastElm = await screen.findByText('The email is already registered');
+
+    await waitFor(() => {
+      expect(toastElm).not.toBeInTheDocument();
+    });
   });
 });

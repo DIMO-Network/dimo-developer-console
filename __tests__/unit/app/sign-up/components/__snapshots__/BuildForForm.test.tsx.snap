@@ -346,6 +346,7 @@ exports[`SignUpPage renders the sign in page at the build for form 1`] = `
           >
             <button
               class="toast-close-btn"
+              role="close-toast"
               type="button"
             >
               <span

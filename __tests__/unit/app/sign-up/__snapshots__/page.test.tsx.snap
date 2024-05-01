@@ -386,6 +386,7 @@ exports[`SignUpPage renders the sign in page at the company info form 1`] = `
           >
             <button
               class="toast-close-btn"
+              role="close-toast"
               type="button"
             >
               <span
@@ -589,6 +590,7 @@ exports[`SignUpPage renders the sign in page at the sign up with form 1`] = `
           >
             <button
               class="toast-close-btn"
+              role="close-toast"
               type="button"
             >
               <span
@@ -963,6 +965,7 @@ exports[`SignUpPage renders the sign in page with wrong flow 1`] = `
           >
             <button
               class="toast-close-btn"
+              role="close-toast"
               type="button"
             >
               <span
