@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { useSearchParams } from 'next/navigation';
 
-import SignUpPage from '@/app/sign-up/page';
+import { SignUp } from '@/app/sign-up/page';
 import { frontendUrl } from '@/config/default';
 
 jest.mock('next/navigation');
@@ -23,13 +23,13 @@ afterEach(() => {
   window.location.replace = replace;
 });
 
-describe('SignUpPage', () => {
+describe('SignUp', () => {
   it('renders the sign in page', () => {
     jest
       .mocked<any>(useSearchParams)
       .mockImplementation(() => ({ get: jest.fn(() => null) }));
 
-    const { container } = render(<SignUpPage />);
+    const { container } = render(<SignUp />);
 
     expect(container).toMatchSnapshot();
   });
@@ -39,7 +39,7 @@ describe('SignUpPage', () => {
       .mocked<any>(useSearchParams)
       .mockImplementation(() => ({ get: jest.fn(() => 'sign-up-with') }));
 
-    const { container } = render(<SignUpPage />);
+    const { container } = render(<SignUp />);
 
     expect(container).toMatchSnapshot();
   });
@@ -49,7 +49,7 @@ describe('SignUpPage', () => {
       get: jest.fn(() => 'unexpected-flow'),
     }));
 
-    const { container } = render(<SignUpPage />);
+    const { container } = render(<SignUp />);
 
     expect(container).toMatchSnapshot();
   });
@@ -61,7 +61,7 @@ describe('SignUpPage', () => {
 
     window.location.replace = jest.fn();
 
-    render(<SignUpPage />);
+    render(<SignUp />);
 
     const [googleButton] = screen.getAllByText('Sign Up');
 
@@ -79,7 +79,7 @@ describe('SignUpPage', () => {
 
     window.location.replace = jest.fn();
 
-    render(<SignUpPage />);
+    render(<SignUp />);
 
     const [, githubButton] = screen.getAllByText('Sign Up');
 
@@ -95,7 +95,7 @@ describe('SignUpPage', () => {
       get: jest.fn(() => 'company-information'),
     }));
 
-    const { container } = render(<SignUpPage />);
+    const { container } = render(<SignUp />);
 
     expect(container).toMatchSnapshot();
   });
@@ -105,7 +105,7 @@ describe('SignUpPage', () => {
       .mocked<any>(useSearchParams)
       .mockImplementation(() => ({ get: jest.fn(() => 'unique_email') }));
 
-    render(<SignUpPage />);
+    render(<SignUp />);
     const toastElm = await screen.findByText('The email is already registered');
 
     expect(toastElm).toBeInTheDocument();
@@ -119,7 +119,7 @@ describe('SignUpPage', () => {
     jest.useFakeTimers();
     jest.spyOn(global, 'setTimeout');
 
-    render(<SignUpPage />);
+    render(<SignUp />);
 
     jest.runOnlyPendingTimers();
     const toastElm = await screen.findByText('The email is already registered');

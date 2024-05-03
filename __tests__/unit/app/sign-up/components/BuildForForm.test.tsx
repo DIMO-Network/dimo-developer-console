@@ -5,7 +5,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 import nock from 'nock';
 
-import SignUpPage from '@/app/sign-up/page';
+import { SignUp } from '@/app/sign-up/page';
 
 jest.mock('next/navigation');
 
@@ -23,13 +23,13 @@ afterEach(() => {
   window.location.replace = replace;
 });
 
-describe('SignUpPage', () => {
+describe('SignUp', () => {
   it('renders the sign in page at the build for form', () => {
     jest
       .mocked<any>(useSearchParams)
       .mockImplementation(() => ({ get: jest.fn(() => 'build-for') }));
 
-    const { container } = render(<SignUpPage />);
+    const { container } = render(<SignUp />);
 
     expect(container).toMatchSnapshot();
   });
@@ -39,7 +39,7 @@ describe('SignUpPage', () => {
       .mocked<any>(useSearchParams)
       .mockImplementation(() => ({ get: jest.fn(() => 'build-for') }));
 
-    render(<SignUpPage />);
+    render(<SignUp />);
 
     const continueBtn = screen.getByRole('continue-button');
     fireEvent.click(continueBtn);
@@ -55,7 +55,7 @@ describe('SignUpPage', () => {
       .mocked<any>(useSearchParams)
       .mockImplementation(() => ({ get: jest.fn(() => 'build-for') }));
 
-    render(<SignUpPage />);
+    render(<SignUp />);
 
     const inputBuildFor = screen.getByRole('build-for-something-else-input');
     fireEvent.click(inputBuildFor);
@@ -71,7 +71,7 @@ describe('SignUpPage', () => {
       .mocked<any>(useSearchParams)
       .mockImplementation(() => ({ get: jest.fn(() => 'build-for') }));
 
-    render(<SignUpPage />);
+    render(<SignUp />);
 
     const inputBuildFor = screen.getByRole(
       'build-for-something-else-input'
@@ -97,7 +97,7 @@ describe('SignUpPage', () => {
 
     window.location.replace = jest.fn();
 
-    render(<SignUpPage />);
+    render(<SignUp />);
 
     const mobileElm = screen.getByText('Mobile app - IOS/Android');
     fireEvent.click(mobileElm);

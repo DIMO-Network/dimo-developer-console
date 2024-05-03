@@ -1,15 +1,15 @@
 'use client';
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import classnames from 'classnames';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { Label } from '@/components/Label';
-import { TextField } from '@/components/TextField';
-import { TextError } from '@/components/TextError';
 import { CarRentalIcon, ComputerIcon, PhoneIcon } from '@/components/Icons';
-import { dimoDevClient } from '@/services/dimoDev';
+import { IUser } from '@/types/user';
+import { Label } from '@/components/Label';
+import { TextError } from '@/components/TextError';
+import { TextField } from '@/components/TextField';
 
 interface BuildForFormInputs {
   buildFor: string;
@@ -44,7 +44,11 @@ const buildForList = [
   },
 ];
 
-export const BuildForForm = () => {
+interface IProps {
+  onNext: (flow: string, user: Partial<IUser>) => void;
+}
+
+export const BuildForForm: FC<IProps> = ({ onNext }) => {
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const {
     register,
@@ -76,13 +80,10 @@ export const BuildForForm = () => {
   };
 
   const updateUser = async (buildForData: BuildForFormInputs) => {
-    await dimoDevClient
-      .put('/user', {
-        flow: 'build-for',
-        data: buildForData,
-      })
-      .catch(console.error);
-    window.location.replace('/sign-up');
+    onNext('build-for', {
+      build_for: buildForData.buildFor,
+      build_for_text: buildForData.buildForText,
+    });
   };
 
   return (

@@ -1,14 +1,15 @@
 'use client';
+import { FC } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { isURL, isEmpty } from 'validator';
 
 import { Button } from '@/components/Button';
+import { IUser } from '@/types/user';
 import { Label } from '@/components/Label';
-import { TextField } from '@/components/TextField';
-import { TextError } from '@/components/TextError';
-import { SelectField } from '@/components/SelectField';
 import { regions } from '@/config/default';
-import { dimoDevClient } from '@/services/dimoDev';
+import { SelectField } from '@/components/SelectField';
+import { TextError } from '@/components/TextError';
+import { TextField } from '@/components/TextField';
 
 interface CompanyInfoInputs {
   name: string;
@@ -21,7 +22,11 @@ const regionOptions = regions.map((regionName) => ({
   text: regionName,
 }));
 
-export const CompanyInfoForm = () => {
+interface IProps {
+  onNext: (flow: string, user: Partial<IUser>) => void;
+}
+
+export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
   const {
     control,
     register,
@@ -37,14 +42,11 @@ export const CompanyInfoForm = () => {
   };
 
   const updateUser = async (companyData: CompanyInfoInputs) => {
-    await dimoDevClient
-      .put('/user', {
-        flow: 'company-information',
-        data: companyData,
-      })
-      .catch(console.error);
-
-    window.location.replace('/sign-up');
+    onNext('company-information', {
+      company_name: companyData.name,
+      company_region: companyData.region,
+      company_website: companyData.website,
+    });
   };
 
   return (

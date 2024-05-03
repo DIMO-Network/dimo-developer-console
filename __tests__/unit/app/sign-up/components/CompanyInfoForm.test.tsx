@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useSearchParams } from 'next/navigation';
 
-import SignUpPage from '@/app/sign-up/page';
+import { SignUp } from '@/app/sign-up/page';
 import { regions } from '@/config/default';
 import nock from 'nock';
 
@@ -28,7 +29,7 @@ describe('SignUpPage', () => {
       get: jest.fn(() => 'company-information'),
     }));
 
-    const { container } = render(<SignUpPage />);
+    const { container } = render(<SignUp />);
 
     expect(container).toMatchSnapshot();
   });
@@ -38,7 +39,7 @@ describe('SignUpPage', () => {
       get: jest.fn(() => 'company-information'),
     }));
 
-    render(<SignUpPage />);
+    render(<SignUp />);
 
     const inputBuildFor = screen.getByRole(
       'company-website-input'
@@ -68,7 +69,7 @@ describe('SignUpPage', () => {
 
     window.location.replace = jest.fn();
 
-    render(<SignUpPage />);
+    render(<SignUp />);
 
     const regionContainer = screen.getByRole(
       'company-region'
