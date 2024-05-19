@@ -53,7 +53,7 @@ export const SignUp = () => {
         'Something went wrong while the completing user information',
         error
       );
-      setNotification('Something went wrong', 'Oops...', 'error', 10000);
+      setNotification('Something went wrong', 'Oops...', 'error');
     }
   };
 
