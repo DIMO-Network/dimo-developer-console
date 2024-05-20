@@ -19,7 +19,7 @@ describe('SignInButtons', () => {
   it('redirects to the sign with google endpoint', () => {
     window.location.replace = jest.fn();
 
-    render(<SignInButtons isSignIn={true} />);
+    render(<SignInButtons isSignIn={true} disabled={false} />);
 
     const [googleButton] = screen.getAllByText('Sign In');
 
@@ -33,7 +33,7 @@ describe('SignInButtons', () => {
   it('redirects to the sign with github endpoint', () => {
     window.location.replace = jest.fn();
 
-    render(<SignInButtons isSignIn={true} />);
+    render(<SignInButtons isSignIn={true} disabled={false} />);
 
     const [, githubButton] = screen.getAllByText('Sign In');
 
@@ -42,5 +42,17 @@ describe('SignInButtons', () => {
     expect(window.location.replace).toHaveBeenCalledWith(
       `${frontendUrl}api/auth/authorize?app=github`
     );
+  });
+
+  it('should not redirect to the sign with google endpoint', () => {
+    window.location.replace = jest.fn();
+
+    render(<SignInButtons isSignIn={true} disabled />);
+
+    const [googleButton] = screen.getAllByText('Sign In');
+
+    fireEvent.click(googleButton);
+
+    expect(window.location.replace).not.toHaveBeenCalled();
   });
 });
