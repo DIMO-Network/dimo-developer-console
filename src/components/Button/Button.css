@@ -9,4 +9,8 @@
   &.dark {
     @apply bg-dark-grey-950 text-white;
   }
+
+  &.with-icon {
+    @apply flex flex-row gap-2;
+  }
 }

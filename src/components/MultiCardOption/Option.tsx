@@ -1,12 +1,14 @@
 import { type FC } from 'react';
-import classNames from 'classnames';
-
-import { Card } from '@/components/Card';
 
 import './Option.css';
 
+export interface RenderParams {
+  value: string;
+  selected?: boolean;
+}
+
 export interface OptionItem {
-  render: FC;
+  render: FC<RenderParams>;
   value: string;
   selected?: boolean;
 }
@@ -22,15 +24,9 @@ export const Option: FC<OptionItem & Interaction> = ({
   selected,
 }) => {
   return (
-    <Card
-      className={classNames('card-border option-card', {
-        '!border-white': selected,
-      })}
-      onClick={() => onChange(value)}
-      key={value}
-    >
-      {render({ value })}
-    </Card>
+    <div onClick={() => onChange(value)} key={value}>
+      {render({ value, selected })}
+    </div>
   );
 };
 
