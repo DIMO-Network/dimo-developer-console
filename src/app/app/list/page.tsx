@@ -7,6 +7,7 @@ import { AppCard } from '@/components/AppCard';
 import { appListMock } from '@/mocks/appList';
 import { Button } from '@/components/Button';
 import { getUser } from '@/app/app/actions';
+import { IApp } from '@/types/app';
 import { IUser } from '@/types/user';
 
 import './page.css';
@@ -22,11 +23,7 @@ export const AppListPage = () => {
     router.push('/app/create');
   };
 
-  const renderItem = (app: {
-    name: string;
-    description: string;
-    environment: 'sandbox' | 'production';
-  }) => {
+  const renderItem = (app: IApp) => {
     return <AppCard className="hover:!border-white" {...app} />;
   };
 
