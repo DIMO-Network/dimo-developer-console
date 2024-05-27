@@ -1,36 +1,34 @@
-export const appListMock: {
-  name: string;
-  description: string;
-  environment: 'sandbox' | 'production';
-}[] = [
+import { IApp } from '@/types/app';
+
+export const appListMock: IApp[] = [
   {
     name: 'Test App',
-    description: 'Sandbox',
-    environment: 'sandbox',
+    scope: 'sandbox',
+    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
   },
   {
     name: 'Fleet Management App',
-    description: 'Production',
-    environment: 'production',
+    scope: 'production',
+    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
   },
   {
     name: 'Data Analytics',
-    description: 'Production',
-    environment: 'production',
+    scope: 'production',
+    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
   },
   {
     name: 'Hello World',
-    description: 'Production',
-    environment: 'production',
+    scope: 'production',
+    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
   },
   {
     name: 'Hello World',
-    description: 'Production',
-    environment: 'production',
+    scope: 'production',
+    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
   },
   {
     name: 'Hello World',
-    description: 'Production',
-    environment: 'production',
+    scope: 'production',
+    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
   },
 ];
