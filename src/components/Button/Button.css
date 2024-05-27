@@ -24,6 +24,15 @@
     color: rgb(183 242 235 / 1);
   }
 
+  &.white {
+    @apply bg-white;
+  }
+
+  &.white-outline {
+    @apply bg-transparent border border-white text-white;
+  }
+
+
   &.dark {
     @apply bg-dark-grey-950 text-white;
   }
