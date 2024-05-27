@@ -7,6 +7,7 @@ import { getAppByID } from '@/app/app/actions';
 import { IApp } from '@/types/app';
 import { RedirectUriForm } from './components/RedirectUriForm';
 import { SignerForm } from './components/SignerForm';
+import { SignerList } from './components/SignerList';
 import { Title } from '@/components/Title';
 import { withNotifications } from '@/hoc';
 
@@ -32,6 +33,7 @@ export const AppDetailPage = ({
         <Title component="h2">Signers</Title>
         <SignerForm />
       </div>
+      <div className="signers-table">{app && <SignerList app={app} />}</div>
       <div className="redirect-uri-content">
         <Title component="h2">Authorized Redirect URIs</Title>
         <RedirectUriForm />
