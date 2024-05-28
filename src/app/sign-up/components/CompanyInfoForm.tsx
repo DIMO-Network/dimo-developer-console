@@ -52,6 +52,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
       company_name: companyData.name,
       company_region: companyData.region,
       company_website: companyData.website,
+      company_type: companyData.type,
     });
   };
 
@@ -116,9 +117,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
           role="company-type"
         />
       </Label>
-      {errors.type && (
-        <TextError errorMessage={errors.type.message ?? ''} />
-      )}
+      {errors.type && <TextError errorMessage={errors.type.message ?? ''} />}
       <div className="flex flex-col pt-4">
         <Button type="submit" className="primary" role="finish-button">
           Finish sign up
