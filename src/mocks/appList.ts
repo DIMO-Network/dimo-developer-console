@@ -15,6 +15,16 @@ export const appListMock: IApp[] = [
         key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
       },
     ],
+    redirectUris: [
+      {
+        redirectUri: 'https://google.com/',
+        status: 'active',
+      },
+      {
+        redirectUri: 'https://google.com.co/',
+        status: 'inactive',
+      },
+    ],
   },
   {
     name: 'Fleet Management App',
@@ -24,6 +34,16 @@ export const appListMock: IApp[] = [
       {
         wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
         key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+      },
+    ],
+    redirectUris: [
+      {
+        redirectUri: 'https://google.com/',
+        status: 'active',
+      },
+      {
+        redirectUri: 'https://google.com.co/',
+        status: 'inactive',
       },
     ],
   },
@@ -37,15 +57,14 @@ export const appListMock: IApp[] = [
         key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
       },
     ],
-  },
-  {
-    name: 'Hello World',
-    scope: 'production',
-    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
-    signers: [
+    redirectUris: [
       {
-        wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
-        key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+        redirectUri: 'https://google.com/',
+        status: 'active',
+      },
+      {
+        redirectUri: 'https://google.com.co/',
+        status: 'inactive',
       },
     ],
   },
@@ -59,6 +78,16 @@ export const appListMock: IApp[] = [
         key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
       },
     ],
+    redirectUris: [
+      {
+        redirectUri: 'https://google.com/',
+        status: 'active',
+      },
+      {
+        redirectUri: 'https://google.com.co/',
+        status: 'inactive',
+      },
+    ],
   },
   {
     name: 'Hello World',
@@ -68,6 +97,37 @@ export const appListMock: IApp[] = [
       {
         wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
         key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+      },
+    ],
+    redirectUris: [
+      {
+        redirectUri: 'https://google.com/',
+        status: 'active',
+      },
+      {
+        redirectUri: 'https://google.com.co/',
+        status: 'inactive',
+      },
+    ],
+  },
+  {
+    name: 'Hello World',
+    scope: 'production',
+    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
+    signers: [
+      {
+        wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
+        key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+      },
+    ],
+    redirectUris: [
+      {
+        redirectUri: 'https://google.com/',
+        status: 'active',
+      },
+      {
+        redirectUri: 'https://google.com.co/',
+        status: 'inactive',
       },
     ],
   },
