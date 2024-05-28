@@ -1,4 +1,4 @@
-export const regions = [
+export const REGIONS = [
   'North America',
   'Latin America & Caribbean',
   'Oceania',
@@ -8,6 +8,20 @@ export const regions = [
   'Middle East & Central Asia ',
   'South Asia',
   'Eastern Europe',
+];
+
+export const DEVELOPER_TYPES = [
+  'OEM',
+  'Insurance',
+  'Maintenance',
+  'Fleet Management',
+  'Vehicle Sales',
+  'Utilities',
+  'Financing',
+  'EV',
+  'DePIN',
+  'Data',
+  'Others',
 ];
 
 export const frontendUrl = 'http://localhost:3000/';
