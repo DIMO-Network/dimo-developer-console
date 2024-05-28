@@ -9,6 +9,7 @@ export interface IUser {
   company_name?: string;
   company_website?: string;
   company_region?: string;
+  company_type?: string;
   team?: string;
   crm_id?: string;
   refresh_token?: string;
