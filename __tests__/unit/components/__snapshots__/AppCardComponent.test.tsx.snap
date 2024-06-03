@@ -16,7 +16,7 @@ exports[`AppCard renders an app card 1`] = `
       <p
         class="description"
       >
-        Sandbox
+        sandbox
       </p>
     </div>
     <svg

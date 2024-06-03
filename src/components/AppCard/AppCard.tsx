@@ -1,16 +1,13 @@
 import { type FC } from 'react';
-import { BeachAccessIcon, DeveloperBoardIcon } from '@/components/Icons';
-
-import './AppCard.css';
-import { Card } from '../Card';
 import classNames from 'classnames';
 
-type ENVIRONMENTS = 'production' | 'sandbox';
+import { BeachAccessIcon, DeveloperBoardIcon } from '@/components/Icons';
+import { Card } from '@/components/Card';
+import { IApp } from '@/types/app';
 
-interface IProps {
-  name: string;
-  description: string;
-  environment: ENVIRONMENTS;
+import './AppCard.css';
+
+interface IProps extends IApp {
   className?: string;
 }
 
@@ -21,17 +18,16 @@ const AppIcon = {
 
 export const AppCard: FC<IProps> = ({
   name,
-  description,
-  environment,
+  scope,
   className = '',
 }) => {
   return (
     <Card className={classNames('app-card card-border', className)}>
       <div className="content">
         <p className="title">{name}</p>
-        <p className="description">{description}</p>
+        <p className="description">{scope}</p>
       </div>
-      {AppIcon[environment]}
+      {AppIcon[scope]}
     </Card>
   );
 };

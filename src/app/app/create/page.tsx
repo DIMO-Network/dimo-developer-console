@@ -1,4 +1,4 @@
-import { Title } from '@/components/Title/Title';
+import { Title } from '@/components/Title';
 import { Form } from '@/app/app/create/components/Form';
 import { BackButton } from '@/components/BackButton';
 

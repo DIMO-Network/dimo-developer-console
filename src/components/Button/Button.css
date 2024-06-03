@@ -1,13 +1,50 @@
 .button {
-  @apply rounded-full h-12 bg-white text-black font-medium inline-flex justify-center items-center; 
+  @apply rounded-full h-12 bg-white text-black font-medium inline-flex justify-center items-center px-4;
 
   &.primary {
     background-color: rgb(183 242 235 / 1);
-    background-image: radial-gradient(69.53% 323.91% at 69.53% 43.17%, rgba(110, 228, 218, .48) 26.04%, rgba(177, 227, 255, .6) 100%);
+    background-image: radial-gradient(
+      69.53% 323.91% at 69.53% 43.17%,
+      rgba(110, 228, 218, 0.48) 26.04%,
+      rgba(177, 227, 255, 0.6) 100%
+    );
+  }
+
+  &.primary-outline {
+    @apply border bg-transparent;
+
+    border-color: rgb(183 242 235 / 1);
+    border-image: radial-gradient(
+        69.53% 323.91% at 69.53% 43.17%,
+        rgba(110, 228, 218, 0.48) 26.04%,
+        rgba(177, 227, 255, 0.6) 100%
+      )
+      border-box 1;
+    border-image-width: 1;
+    color: rgb(183 242 235 / 1);
+  }
+
+  &.white {
+    @apply bg-white;
+    &-outline {
+      @apply bg-transparent border border-white text-white;
+    }
   }
 
   &.dark {
     @apply bg-dark-grey-950 text-white;
+  }
+
+  &.error {
+    @apply bg-red-500;
+
+    &-outline {
+      @apply bg-transparent border border-red-500 text-red-500;
+    }
+
+    &-simple {
+      @apply bg-transparent text-red-500;
+    }
   }
 
   &.with-icon {
