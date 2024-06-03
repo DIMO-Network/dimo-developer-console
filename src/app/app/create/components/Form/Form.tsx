@@ -2,7 +2,6 @@
 import { useForm, Controller } from 'react-hook-form';
 
 import { Button } from '@/components/Button';
-import { BeachAccessIcon, DeveloperBoardIcon } from '@/components/Icons';
 import { IApp } from '@/types/app';
 import { Label } from '@/components/Label';
 import { MultiCardOption } from '@/components/MultiCardOption';
@@ -10,6 +9,8 @@ import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 
 import './Form.css';
+import { AppCard } from '@/components/AppCard';
+import classNames from 'classnames';
 
 export const Form = () => {
   const {
@@ -51,30 +52,28 @@ export const Form = () => {
               options={[
                 {
                   value: 'sanbox',
-                  render: () => (
-                    <>
-                      <div className="flex flex-col gap-1">
-                        <p className="text-base">Sanbox</p>
-                        <p className="text-xs">
-                          Test a limited set of API endpoints.
-                        </p>
-                      </div>
-                      <BeachAccessIcon className="w-5 h-5" />
-                    </>
+                  render: ({ selected }) => (
+                    <AppCard
+                      name="Sandbox"
+                      description="Test a limited set of API endpoints."
+                      environment="sandbox"
+                      className={classNames('w-full', {
+                        '!border-white': selected,
+                      })}
+                    />
                   ),
                 },
                 {
                   value: 'production',
-                  render: () => (
-                    <>
-                      <div className="flex flex-col">
-                        <p className="text-base">Production</p>
-                        <p className="text-xs">
-                          Access a full set of API endpoints.
-                        </p>
-                      </div>
-                      <DeveloperBoardIcon className="w-5 h-5" />
-                    </>
+                  render: ({ selected }) => (
+                    <AppCard
+                      name="Production"
+                      description="Access a full set of API endpoints."
+                      environment="production"
+                      className={classNames('w-full', {
+                        '!border-white': selected,
+                      })}
+                    />
                   ),
                 },
               ]}

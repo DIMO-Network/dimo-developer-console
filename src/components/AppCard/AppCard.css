@@ -1,0 +1,15 @@
+.app-card {
+  @apply flex flex-row justify-between cursor-pointer items-center;
+
+  .content {
+    @apply flex flex-col gap-1;
+
+    .title {
+      @apply text-base;
+    }
+
+    .description {
+      @apply text-xs text-white/50;
+    }
+  }
+}
