@@ -57,8 +57,16 @@ export const SignUp = () => {
     }
   };
 
-  const handleNext = (actualFlow: string, newUserData: Partial<IUser>) => {
-    setUserData({ ...userData, ...newUserData });
+  const handleNext = (actualFlow: string, inputUser: Partial<IUser>) => {
+    const newUserData = {
+      ...userData,
+      ...inputUser,
+      company: {
+        ...userData.company,
+        ...inputUser.company,
+      },
+    } as Partial<IUser>;
+    setUserData(newUserData);
     const currentProcess = signUpFlows[actualFlow as keyof typeof signUpFlows];
     const processes = Object.keys(signUpFlows).reduce(
       (acc, elm) => ({
@@ -71,7 +79,7 @@ export const SignUp = () => {
       processes[(currentProcess.order + 1) as keyof typeof processes] ??
       'complete';
     if (nextProcess !== 'complete') setFlow(nextProcess);
-    else handleCompleteUserData({ ...userData, ...newUserData });
+    else handleCompleteUserData(newUserData);
   };
 
   return (

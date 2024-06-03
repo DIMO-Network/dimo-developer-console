@@ -14,7 +14,7 @@ import { TextField } from '@/components/TextField';
 interface CompanyInfoInputs {
   name: string;
   website?: string;
-  region?: string;
+  region: string;
   type: string;
 }
 
@@ -49,11 +49,10 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
 
   const updateUser = async (companyData: CompanyInfoInputs) => {
     onNext('company-information', {
-      company_name: companyData.name,
-      company_region: companyData.region,
-      company_website: companyData.website,
-      company_type: companyData.type,
-    });
+      company: {
+        ...companyData,
+      },
+    } as Partial<IUser>);
   };
 
   return (
