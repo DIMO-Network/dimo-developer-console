@@ -12,7 +12,7 @@ import { IUser } from '@/types/user';
 
 import './page.css';
 
-export const AppListPage = () => {
+const AppListPage = () => {
   const router = useRouter();
   const [user, setUser] = useState<IUser>();
   useEffect(() => {

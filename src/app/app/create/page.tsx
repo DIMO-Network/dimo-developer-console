@@ -4,7 +4,7 @@ import { BackButton } from '@/components/BackButton';
 
 import './page.css';
 
-export const CreateAppPage = () => {
+const CreateAppPage = () => {
   return (
     <div className="page">
       <BackButton />
