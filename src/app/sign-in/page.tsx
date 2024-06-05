@@ -23,7 +23,7 @@ const SignIn = () => {
             <p>Welcome back!</p>
           </section>
           <section className="sign-in__buttons">
-            <SignInButtons isSignIn={true} />
+            <SignInButtons isSignIn={true} disabled={false} />
           </section>
           <section className="sign-in__extra-links">
             <Anchor href="/sign-up" className="primary">

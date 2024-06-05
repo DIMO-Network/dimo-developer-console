@@ -33,7 +33,7 @@ const signUpFlows = {
   },
 };
 
-export const SignUp = () => {
+const SignUp = () => {
   useErrorHandler();
   const { setNotification } = useNotification();
   const searchParams = useSearchParams();

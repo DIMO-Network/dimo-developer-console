@@ -56,7 +56,7 @@ export const Form = () => {
                     <AppCard
                       name="Sandbox"
                       description="Test a limited set of API endpoints."
-                      environment="sandbox"
+                      scope="sandbox"
                       className={classNames('w-full', {
                         '!border-white': selected,
                       })}
@@ -69,7 +69,7 @@ export const Form = () => {
                     <AppCard
                       name="Production"
                       description="Access a full set of API endpoints."
-                      environment="production"
+                      scope="production"
                       className={classNames('w-full', {
                         '!border-white': selected,
                       })}
