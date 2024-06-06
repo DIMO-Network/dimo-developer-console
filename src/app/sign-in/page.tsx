@@ -6,6 +6,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { withNotifications } from '@/hoc';
 
 import './page.css';
+import Siwe from '@/components/Siwe';
 
 const SignIn = () => {
   useErrorHandler();
@@ -24,6 +25,7 @@ const SignIn = () => {
           </section>
           <section className="sign-in__buttons">
             <SignInButtons isSignIn={true} />
+            <Siwe />
           </section>
           <section className="sign-in__extra-links">
             <Anchor href="/sign-up" className="primary">

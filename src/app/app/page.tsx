@@ -1,6 +1,6 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
-import { withNotifications, withRainbowKit } from '@/hoc';
+import { withNotifications } from '@/hoc';
 
 import './page.css';
 import { getUser } from './actions';
@@ -26,4 +26,4 @@ const HomePage: FC = () => {
   );
 };
 
-export default withRainbowKit(withNotifications(HomePage));
+export default withNotifications(HomePage);

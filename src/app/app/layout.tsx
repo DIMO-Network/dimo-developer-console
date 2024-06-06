@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
 
 import './layout.css';
+import RainbowSessionProvider from '@/hoc/RainbowSessionProvider';
 
 export default function AppLayout({
   children,
@@ -11,12 +12,14 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="main">
-      <Header />
-      <div className="app-content">
-        <Menu />
-        <main className="page-content">{children}</main>
+    <RainbowSessionProvider>
+      <div className="main">
+        <Header />
+        <div className="app-content">
+          <Menu />
+          <main className="page-content">{children}</main>
+        </div>
       </div>
-    </div>
+    </RainbowSessionProvider>
   );
 }
