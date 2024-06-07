@@ -9,11 +9,12 @@ const {
 
 describe('GoogleAuthService', () => {
   it('Should redirect to oauth page', () => {
-    const googleService = new GoogleAuthService();
+    const baseUrl = 'http://localhost:3000/';
+    const googleService = new GoogleAuthService(baseUrl);
 
     expect(googleService.getOauthURL()).toBe(
       `https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
-        frontendUrl
+        baseUrl
       )}api%2Fauth%2Fcallback%2Fgoogle`
     );
   });
