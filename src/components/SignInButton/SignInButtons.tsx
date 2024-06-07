@@ -5,7 +5,6 @@ import React, { useContext } from 'react';
 
 import { SignInButton } from '@/components/SignInButton';
 import { GitHubIcon, GoogleIcon } from '@/components/Icons';
-import { frontendUrl } from '@/config/default';
 import { NotificationContext } from '@/context/notificationContext';
 
 interface SignInButtonProps {
@@ -25,7 +24,7 @@ export const SignInButtons: FC<SignInButtonProps> = ({
         'Terms of service',
         'error'
       );
-    else window.location.replace(`${frontendUrl}api/auth/authorize?app=${app}`);
+    else window.location.replace(`/api/auth/authorize?app=${app}`);
   };
 
   return (

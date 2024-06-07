@@ -10,8 +10,6 @@ export const regions = [
   'Eastern Europe',
 ];
 
-export const frontendUrl =
-  'https://dimo-developer-console-gula1lhu3-dimo-aa6dc82a.vercel.app/';
 export const backendUrl =
   'https://dimo-developer-console-21io11fxt-dimo-aa6dc82a.vercel.app/';
 

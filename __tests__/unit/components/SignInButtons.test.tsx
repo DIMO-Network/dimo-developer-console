@@ -1,7 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 
 import { SignInButtons } from '@/components/SignInButton';
-import { frontendUrl } from '@/config/default';
 
 const replace = window.location.replace;
 
@@ -26,7 +25,7 @@ describe('SignInButtons', () => {
     fireEvent.click(googleButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      `${frontendUrl}api/auth/authorize?app=google`
+      '/api/auth/authorize?app=google'
     );
   });
 
@@ -40,7 +39,7 @@ describe('SignInButtons', () => {
     fireEvent.click(githubButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      `${frontendUrl}api/auth/authorize?app=github`
+      '/api/auth/authorize?app=github'
     );
   });
 
