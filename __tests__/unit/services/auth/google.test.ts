@@ -1,7 +1,6 @@
 import nock from 'nock';
 
 import { GoogleAuthService } from '@/services/auth';
-import { frontendUrl } from '@/config/default';
 
 const {
   env: { GOOGLE_CLIENT_ID: clientId = '' },
@@ -21,6 +20,7 @@ describe('GoogleAuthService', () => {
 
   it('should return expiry_date', async () => {
     const now = new Date().getTime();
+    const baseUrl = 'http://localhost:3000/';
     const scope = nock('https://oauth2.googleapis.com')
       .post('/token')
       .reply(200, {
@@ -28,7 +28,7 @@ describe('GoogleAuthService', () => {
         refresh_token: '1234',
         expires_in: 10,
       });
-    const googleService = new GoogleAuthService();
+    const googleService = new GoogleAuthService(baseUrl);
     const token = await googleService.processCallback('code here');
     expect(token).toHaveProperty('accessToken', '1234');
     expect(token).toHaveProperty('refreshToken', '1234');
@@ -38,7 +38,8 @@ describe('GoogleAuthService', () => {
   });
 
   it('should return the suer information', async () => {
-    const googleService = new GoogleAuthService();
+    const baseUrl = 'http://localhost:3000/';
+    const googleService = new GoogleAuthService(baseUrl);
     const scopeToken = nock('https://oauth2.googleapis.com')
       .post('/token')
       .times(2)
