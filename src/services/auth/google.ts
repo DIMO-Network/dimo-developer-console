@@ -1,7 +1,6 @@
 import { google, people_v1, type Auth } from 'googleapis';
 import _ from 'lodash';
 
-import { frontendUrl } from '@/config/default';
 import { AuthService, type IUser, type IToken } from './base';
 const {
   env: {
