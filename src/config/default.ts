@@ -11,7 +11,7 @@ export const regions = [
 ];
 
 export const backendUrl =
-  'https://dimo-developer-console-l0x407agp-dimo-aa6dc82a.vercel.app/';
+  'https://dimo-developer-console-qhnfhzbl2-dimo-aa6dc82a.vercel.app/';
 
 export const RAINBOW_PROJECT = {
   ID: '528803928611a7781fb6b23eaf232224',

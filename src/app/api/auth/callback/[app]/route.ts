@@ -16,7 +16,8 @@ export async function GET(
   const code = searchParams.get('code') ?? '';
 
   try {
-    const { token } = await processOauth(code, app);
+    console.log({ code, app });
+    const { token } = await processOauth(code, app, host);
     hasToken(token);
 
     cookies().set('token', token);
