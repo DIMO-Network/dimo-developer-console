@@ -10,7 +10,9 @@ export async function GET(request: Request) {
   }[app];
 
   if (ProviderService) {
-    const providerService = new ProviderService();
+    const url = new URL(request.url);
+    console.log({ url: url.host });
+    const providerService = new ProviderService(`https://${url.host}/`);
     return Response.redirect(providerService.getOauthURL());
   }
 

@@ -1,0 +1,15 @@
+.table {
+  @apply min-w-full;
+
+  .table-body {
+    @apply divide-y divide-dark-grey-950;
+  }
+
+  .table-action-column {
+    @apply relative py-3.5 pl-3 pr-4 sm:pr-0;
+  }
+
+  .table-action-cell {
+    @apply relative whitespace-nowrap p-3 text-right text-xs inline-flex gap-4 justify-center items-center;
+  }
+}

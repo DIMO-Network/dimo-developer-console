@@ -1,3 +1,6 @@
+import { type FC } from 'react';
+import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline';
+
 import {
   APIIcon,
   HomeIcon,
@@ -48,6 +51,12 @@ export const mainMenu = [
 ];
 
 export const bottomMenu = [
+  {
+    label: 'Logout',
+    icon: ArrowLeftStartOnRectangleIcon as FC,
+    iconClassName: 'h-5 w-5 fill-grey-200',
+    link: '/api/auth/logout',
+  },
   {
     label: 'Settings',
     icon: SettingsIcon,

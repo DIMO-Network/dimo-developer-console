@@ -14,10 +14,12 @@ export interface IToken {
 export abstract class AuthService {
   protected clientId: string;
   protected clientSecret: string;
+  protected baseUrl: string;
 
-  constructor(clientId: string, clientSecret: string) {
+  constructor(clientId: string, clientSecret: string, baseUrl: string) {
     this.clientId = clientId;
     this.clientSecret = clientSecret;
+    this.baseUrl = baseUrl;
   }
 
   abstract getOauthURL(): string;

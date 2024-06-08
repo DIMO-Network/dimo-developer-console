@@ -1,0 +1,11 @@
+.summary {
+  @apply flex flex-col gap-2;
+
+  .client-id-content {
+    @apply flex flex-row gap-6;
+  }
+
+  .client-id-description {
+    @apply text-base text-white/50;
+  }
+}

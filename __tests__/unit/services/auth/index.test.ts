@@ -34,7 +34,8 @@ describe('processOauth', () => {
 
     const code = 'authCode';
     const app = 'myApp';
-    const result = await processOauth(code, app);
+    const frontendUrl = 'http://localhosty';
+    const result = await processOauth(code, app, frontendUrl);
 
     expect(result).toEqual({ token: mockToken });
   });

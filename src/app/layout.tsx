@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   description: 'Developer Console for DIMO apps',
 };
 
-export const RootLayout = ({
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
