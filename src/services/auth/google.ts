@@ -1,7 +1,6 @@
 import { google, people_v1, type Auth } from 'googleapis';
 import _ from 'lodash';
 
-import { frontendUrl } from '@/config/default';
 import { AuthService, type IUser, type IToken } from './base';
 const {
   env: {
@@ -13,17 +12,22 @@ const {
 export class GoogleAuthService extends AuthService {
   private client: Auth.OAuth2Client;
   private scopes: string[];
-  constructor() {
-    super(clientId, clientSecret);
+  constructor(baseUrl: string) {
+    super(clientId, clientSecret, baseUrl);
 
     this.scopes = [
       'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/userinfo.profile',
     ];
+    console.log({
+      clientId,
+      clientSecret,
+      redirectUri: `${this.baseUrl}api/auth/callback/google`,
+    });
     this.client = new google.auth.OAuth2({
       clientId,
       clientSecret,
-      redirectUri: `${frontendUrl}api/auth/callback/google`,
+      redirectUri: `${this.baseUrl}api/auth/callback/google`,
     });
   }
 

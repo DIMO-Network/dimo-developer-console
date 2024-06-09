@@ -7,8 +7,9 @@ import { IApp } from '@/types/app';
 
 import './AppCard.css';
 
-interface IProps extends IApp {
+interface IProps extends Partial<IApp> {
   className?: string;
+  description?: string;
 }
 
 const AppIcon = {
@@ -19,15 +20,16 @@ const AppIcon = {
 export const AppCard: FC<IProps> = ({
   name,
   scope,
+  description = '',
   className = '',
 }) => {
   return (
     <Card className={classNames('app-card card-border', className)}>
       <div className="content">
         <p className="title">{name}</p>
-        <p className="description">{scope}</p>
+        <p className="description">{description || scope}</p>
       </div>
-      {AppIcon[scope]}
+      {AppIcon[scope || 'sandbox']}
     </Card>
   );
 };

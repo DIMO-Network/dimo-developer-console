@@ -16,22 +16,17 @@ class LoggedUser {
     return this._user;
   }
 
-  get hasBuildForData(): boolean {
-    return Boolean(this._user?.build_for);
-  }
-
-  get hasCompanyData(): boolean {
-    return Boolean(this._user?.company_region);
+  get hasTeam(): boolean {
+    return Boolean(this._user?.team);
   }
 
   get isCompliant(): boolean {
-    return this.hasBuildForData && this.hasCompanyData;
+    return this.hasTeam;
   }
 
   get missingFlow(): string {
     let missingFlow = 'sign-up-with';
-    if (!this.hasBuildForData) missingFlow = 'build-for';
-    else if (!this.hasCompanyData) missingFlow = 'company-information';
+    if (!this.hasTeam) missingFlow = 'build-for';
     return missingFlow;
   }
 }

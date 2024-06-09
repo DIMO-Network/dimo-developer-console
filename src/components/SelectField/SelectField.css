@@ -10,10 +10,14 @@
   }
   .custom-menu {
     @apply hidden absolute bg-grey-950 w-full left-0 rounded-lg p-4 mt-7 leading-5
-            flex flex-col gap-2 max-h-48 overflow-y-auto text-grey-50;
+            flex flex-col gap-2 max-h-48 overflow-y-auto text-grey-50 z-10;
 
     &.show {
       @apply flex;
+    }
+
+    .custom-item {
+      @apply cursor-pointer;
     }
   }
 }

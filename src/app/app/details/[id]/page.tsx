@@ -15,7 +15,7 @@ import { withNotifications } from '@/hoc';
 
 import './page.css';
 
-export const AppDetailPage = ({
+const AppDetailPage = ({
   params: { id },
 }: {
   params: { id: string };
