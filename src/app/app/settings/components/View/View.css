@@ -1,0 +1,11 @@
+.settings-page {
+  @apply flex flex-col gap-4;
+
+  .titles,
+  .user-information {
+    @apply flex flex-col gap-2;
+  }
+  .subtitle {
+    @apply text-sm;
+  }
+}

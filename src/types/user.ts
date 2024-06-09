@@ -3,6 +3,7 @@ export interface IUser {
   name: string;
   email: string;
   auth: string;
+  auth_login: string;
   role?: string;
   build_for?: string;
   build_for_text?: string;
