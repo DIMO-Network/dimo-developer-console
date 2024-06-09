@@ -12,6 +12,6 @@
   "plugins": ["@typescript-eslint"],
   "rules": {
     "semi": "error",
-    "no-console": "warn"
+    "no-console": "off"
   }
 }
