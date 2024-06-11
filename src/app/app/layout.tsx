@@ -1,7 +1,10 @@
+'use client';
 import React from 'react';
 
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
+import { UserContext } from '@/context/userContext';
+import { useUser } from '@/hooks';
 
 import './layout.css';
 
@@ -10,13 +13,16 @@ export default function AppLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { user, setUser } = useUser();
   return (
-    <div className="main">
-      <Header />
-      <div className="app-content">
-        <Menu />
-        <main className="page-content">{children}</main>
+    <UserContext.Provider value={{ user, setUser }}>
+      <div className="main">
+        <Header />
+        <div className="app-content">
+          <Menu />
+          <main className="page-content">{children}</main>
+        </div>
       </div>
-    </div>
+    </UserContext.Provider>
   );
 }

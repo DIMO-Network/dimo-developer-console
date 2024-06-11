@@ -1,11 +1,15 @@
 import { type FC } from 'react';
+
 import { PlusIcon } from '@/components/Icons';
+import { useUser } from '@/hooks';
 
 import './Header.css';
 
 interface IProps {}
 
 export const Header: FC<IProps> = () => {
+  const { user } = useUser();
+
   return (
     <header className="header">
       <img
