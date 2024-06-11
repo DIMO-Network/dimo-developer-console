@@ -17,7 +17,7 @@ export default function AppLayout({
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <div className="main">
-        <Header />
+        <Header user={user} />
         <div className="app-content">
           <Menu />
           <main className="page-content">{children}</main>

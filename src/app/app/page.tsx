@@ -1,17 +1,13 @@
 'use client';
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { withNotifications, withRainbowKit } from '@/hoc';
 
 import './page.css';
-import { getUser } from './actions';
-import { IUser } from '@/types/user';
 import Onboarding from './components/Onborading/Onboarding';
+import { useUser } from '@/hooks';
 
 const HomePage: FC = () => {
-  const [user, setUser] = useState<IUser>();
-  useEffect(() => {
-    getUser().then(setUser);
-  }, []);
+  const { user } = useUser();
 
   return (
     <div className="home-page">

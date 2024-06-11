@@ -1,16 +1,16 @@
 import { type FC } from 'react';
 
+import { IUser } from '@/types/user';
 import { PlusIcon } from '@/components/Icons';
-import { useUser } from '@/hooks';
 import { UserAvatar } from '@/components/UserAvatar';
 
 import './Header.css';
 
-interface IProps {}
+interface IProps {
+  user?: IUser;
+}
 
-export const Header: FC<IProps> = () => {
-  const { user } = useUser();
-
+export const Header: FC<IProps> = ({ user }) => {
   return (
     <header className="header">
       <img
