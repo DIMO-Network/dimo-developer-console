@@ -1,18 +1,16 @@
 'use client';
-import { useEffect, useState, type FC } from 'react';
+import { FC } from 'react';
 
-import { getUser } from '@/actions/user';
-import { IUser } from '@/types/user';
+import { TeamManagement } from '@/app/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
 import { UserForm } from '@/app/app/settings/components/UserForm';
+import { useUser, useTeamCollaborators } from '@/hooks';
 
 import './View.css';
 
 const View: FC = () => {
-  const [user, setUser] = useState<IUser>();
-  useEffect(() => {
-    getUser().then(setUser);
-  }, []);
+  const { user } = useUser();
+  const { teamCollaborators } = useTeamCollaborators();
 
   return (
     <div className="settings-page">
@@ -23,6 +21,10 @@ const View: FC = () => {
       <div className="user-information">
         <Title component="h2">User</Title>
         {user && <UserForm user={user} />}
+      </div>
+      <div className="team-information">
+        <Title component="h2">Team Management</Title>
+        <TeamManagement teamCollaborators={teamCollaborators.data} />
       </div>
     </div>
   );

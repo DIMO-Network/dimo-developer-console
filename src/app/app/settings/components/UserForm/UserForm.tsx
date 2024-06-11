@@ -31,6 +31,7 @@ export const UserForm: FC<IProps> = ({ user }) => {
           {...register('name', {
             required: 'The name is required',
           })}
+          disabled
           role="user-name-input"
         />
       </Label>
@@ -43,6 +44,7 @@ export const UserForm: FC<IProps> = ({ user }) => {
             required: 'The authentication login is required',
           })}
           role="user-login-input"
+          disabled
         />
       </Label>
       <Label htmlFor="email" className="text-xs text-medium">
@@ -54,6 +56,7 @@ export const UserForm: FC<IProps> = ({ user }) => {
             required: 'The email is required',
           })}
           role="user-email-input"
+          disabled
         />
       </Label>
     </form>
