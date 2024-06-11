@@ -2,6 +2,7 @@ import { type FC } from 'react';
 
 import { PlusIcon } from '@/components/Icons';
 import { useUser } from '@/hooks';
+import { UserAvatar } from '@/components/UserAvatar';
 
 import './Header.css';
 
@@ -18,9 +19,7 @@ export const Header: FC<IProps> = () => {
         className="w-44 h-6"
       />
       <div className="user-information" role="user-information">
-        <div className="user-avatar-default">
-          <p className="default">SB</p>
-        </div>
+        <UserAvatar user={user} />
         <div className="credits" role="credits-display">
           <div className="credits-info">
             <p className="credit-amount">0</p>
