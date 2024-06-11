@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { type FC } from 'react';
 
 import { type IColumn, Column } from './Column';
@@ -7,13 +8,13 @@ import './Table.css';
 
 interface IProps {
   columns: IColumn[];
-  data: Record<string, string | number | boolean>[];
+  data: Record<string, unknown>[];
   actions?: FC[];
 }
 
 export const Table: FC<IProps> = ({ columns, data, actions }) => {
-  const renderColumn = ({ name }: IColumn) => {
-    return <Column>{name}</Column>;
+  const renderColumn = ({ name, label }: IColumn) => {
+    return <Column>{label ?? name}</Column>;
   };
 
   return (
@@ -30,14 +31,14 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
       </thead>
       <tbody className="table-body">
         {data.map((item) => (
-          <tr key={item?.id as string}>
+          <tr key={`column-${item?.id as string}`}>
             {columns.map(({ name, render }) => {
-              const textNode = item[name] ?? '';
+              const textNode = _.get(item, name, '');
               const renderNode = render ? render(item) : null;
-              return <Cell key={name}>{renderNode || textNode}</Cell>;
+              return <Cell key={name}>{renderNode || String(textNode)}</Cell>;
             })}
             {actions && (
-              <td className="table-action-cell">
+              <td className="table-action-cell" key={`field-${item?.id as string}`}>
                 {actions?.map((action) => action(item))}
               </td>
             )}

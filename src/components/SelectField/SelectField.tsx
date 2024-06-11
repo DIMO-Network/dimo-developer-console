@@ -30,13 +30,19 @@ export const SelectField = forwardRef<Ref, IProps>(
       role,
       includeEmptyOption = true,
       control,
+      value: defaultValue,
       ...props
     },
     // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
     _ref
   ) => {
     const [show, setShow] = useState<boolean>(false);
-    const [selected, setSelected] = useState<IOption>({ value: '', text: '' });
+    const [selected, setSelected] = useState<IOption>(
+      options.find((item) => item.value === defaultValue) ?? {
+        value: '',
+        text: '',
+      }
+    );
     const className = classnames('select-field', inputClassName);
 
     const handleSelection = (value: string, text: string) => {
