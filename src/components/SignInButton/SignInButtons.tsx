@@ -6,6 +6,7 @@ import React from 'react';
 import { SignInButton } from '@/components/SignInButton';
 import { GitHubIcon, GoogleIcon } from '@/components/Icons';
 import { frontendUrl } from '@/config/default';
+import { Siwe } from '../Siwe';
 
 interface SignInButtonProps {
   isSignIn: boolean;
@@ -24,6 +25,7 @@ export const SignInButtons: FC<SignInButtonProps> = ({ isSignIn }) => {
         Icon={GoogleIcon}
         onClick={() => handlerGitHubLogin('google')}
       />
+      <Siwe isSignIn={isSignIn} />
       <SignInButton
         className="sm"
         isSignIn={isSignIn}

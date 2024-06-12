@@ -11,7 +11,7 @@ interface SignInButtonProps {
   className: string;
   isSignIn: boolean;
   Icon: FC<IconProps>;
-  onClick: () => void;
+  onClick: (e?: any) => void;
 }
 
 export const SignInButton: FC<SignInButtonProps> = ({

@@ -4,18 +4,34 @@ import { useAccount, useConnect, useSignMessage } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { useEffect, useState } from 'react';
 import { mainnet, polygon, polygonAmoy, arbitrum, base } from 'wagmi/chains';
+import { SignInButton } from '../SignInButton';
+import { SiweIcon } from '@/components/Icons';
+import type { FC } from 'react';
+import { frontendUrl } from '@/config/default';
+import { redirect } from 'next/navigation';
 
-function Siwe() {
+interface SiweButtonProps {
+  isSignIn: boolean;
+}
+
+export const Siwe: FC<SiweButtonProps> = ({ isSignIn }) => {
   const { signMessageAsync } = useSignMessage();
   // const { chain } = useNetwork();
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { data: session, status } = useSession();
+  // console.log({ session, status });
+
+  // useEffect(() => {
+  //   if (session && session.user && status === 'authenticated') {
+  //     redirect(`${frontendUrl}app`);
+  //   }
+  // }, [status]);
 
   const handleLogin = async () => {
     try {
       const callbackUrl = '/protected';
-      console.log(window.location.host, window.location.origin);
+
       const message = new SiweMessage({
         domain: window.location.host,
         address: address,
@@ -25,25 +41,28 @@ function Siwe() {
         chainId: mainnet?.id,
         nonce: await getCsrfToken(),
       });
+
       const signature = await signMessageAsync({
         message: message.prepareMessage(),
       });
-      console.log({ signature });
+
       signIn('credentials', {
-        authUrl: `${window.location.origin}/auth/`,
         message: JSON.stringify(message),
         redirect: false,
         signature,
-        callbackUrl: new URL(callbackUrl, window.location.href).href,
+        callbackUrl,
       });
     } catch (error) {
-      console.log('HEREHHEREHHERHEHERE', error);
+      console.log({ error });
       window.alert(error);
     }
   };
 
   return (
-    <button
+    <SignInButton
+      isSignIn={isSignIn}
+      Icon={SiweIcon}
+      className="sm"
       onClick={(e) => {
         e.preventDefault();
         if (!isConnected) {
@@ -52,11 +71,9 @@ function Siwe() {
           handleLogin();
         }
       }}
-    >
-      Sign-in
-    </button>
+    />
   );
-}
+};
 
 export async function getServerSideProps(context: any) {
   return {

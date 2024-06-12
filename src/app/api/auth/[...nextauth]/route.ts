@@ -2,6 +2,7 @@ import { AuthOptions } from 'next-auth';
 import NextAuth from 'next-auth/next';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { getCsrfToken } from 'next-auth/react';
+// import { cookies } from 'next/headers';
 import { SiweMessage } from 'siwe';
 
 export const authOptions: AuthOptions = {
@@ -50,7 +51,8 @@ export const authOptions: AuthOptions = {
           }
 
           await siwe.verify({ signature: credentials?.signature || '' });
-          console.log('test');
+          console.log({ id: siwe.address });
+
           return {
             id: siwe.address,
           };

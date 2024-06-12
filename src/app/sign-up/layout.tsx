@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
 import '../globals.css';
+import RainbowSessionProvider from '@/hoc/RainbowSessionProvider';
 
 const euclid = localFont({
   src: [
@@ -61,7 +62,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={euclid.className}>{children}</body>
+      <body className={euclid.className}>
+        <RainbowSessionProvider>{children}</RainbowSessionProvider>
+      </body>
     </html>
   );
 }

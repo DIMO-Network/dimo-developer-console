@@ -25,7 +25,6 @@ const SignIn = () => {
           </section>
           <section className="sign-in__buttons">
             <SignInButtons isSignIn={true} />
-            <Siwe />
           </section>
           <section className="sign-in__extra-links">
             <Anchor href="/sign-up" className="primary">
