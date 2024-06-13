@@ -2,7 +2,7 @@ import nock from 'nock';
 import { cookies } from 'next/headers';
 
 import { processOauth } from '@/services/auth';
-import { backendUrl } from '@/config/default';
+import config from '@/config';
 
 jest.mock('next/headers');
 
@@ -27,8 +27,7 @@ describe('processOauth', () => {
       })
     );
 
-    // Intercept the request to the backend URL
-    nock(backendUrl)
+    nock(config.backendUrl)
       .post('/api/auth', { code: 'authCode', app: 'myApp' })
       .reply(200, { token: mockToken });
 
