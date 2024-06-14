@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers';
 
 import { RestClient } from '@/utils/restClient';
-import { backendUrl } from '@/config/default';
+import config from '@/config';
 
 export const dimoDevAPIClient = () => {
-  const restClient = new RestClient(backendUrl);
+  const restClient = new RestClient(config.backendUrl);
 
   const { value: token = '' } = cookies().get('token') ?? {};
   if (token)
