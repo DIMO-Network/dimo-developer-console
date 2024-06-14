@@ -9,14 +9,14 @@ export class GitHubAuthService extends AuthService {
   private client: AxiosInstance;
   private apiClient: AxiosInstance;
 
-  constructor(baseUrl: string) {
+  constructor() {
     const {
       env: {
         GITHUB_CLIENT_ID: clientId = '',
         GITHUB_CLIENT_SECRET: clientSecret = '',
       },
     } = process;
-    super(clientId, clientSecret, baseUrl);
+    super(clientId, clientSecret);
 
     this.client = axios.create({
       baseURL: 'https://github.com',

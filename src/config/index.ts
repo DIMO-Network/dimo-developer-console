@@ -8,6 +8,7 @@ type Configuration = {
   REGIONS: string[];
   DEVELOPER_TYPES: string[];
   backendUrl: string;
+  frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
 };
 
