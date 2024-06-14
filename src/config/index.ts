@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
@@ -33,7 +31,10 @@ export const getConfig = () => {
   }
 
   // Use lodash to deeply merge the default configuration with the environment-specific configuration
-  return _.merge({}, defaultConfig, environmentConfig) as Configuration;
+  return {
+    ...defaultConfig,
+    ...environmentConfig,
+  } as Configuration;
 };
 
 export default getConfig();
