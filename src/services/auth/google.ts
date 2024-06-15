@@ -1,7 +1,8 @@
-import { google, people_v1, type Auth } from 'googleapis';
 import _ from 'lodash';
+import { google, people_v1, type Auth } from 'googleapis';
 
-import { frontendUrl } from '@/config/default';
+import config from '@/config';
+
 import { AuthService, type IUser, type IToken } from './base';
 const {
   env: {
@@ -20,10 +21,15 @@ export class GoogleAuthService extends AuthService {
       'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/userinfo.profile',
     ];
+    console.log({
+      clientId,
+      clientSecret,
+      redirectUri: `${config.frontendUrl}api/auth/cb/google`,
+    });
     this.client = new google.auth.OAuth2({
       clientId,
       clientSecret,
-      redirectUri: `${frontendUrl}api/auth/callback/google`,
+      redirectUri: `${config.frontendUrl}api/auth/cb/google`,
     });
   }
 

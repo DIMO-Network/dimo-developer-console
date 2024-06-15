@@ -1,4 +1,4 @@
-import { HTMLAttributes, type FC } from 'react';
+import { type FC } from 'react';
 import Link from 'next/link';
 
 import './MenuItem.css';
@@ -7,7 +7,8 @@ interface IProps {
   link: string;
   iconClassName: string;
   label: string;
-  icon: FC<HTMLAttributes<HTMLElement>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: FC<any>;
 }
 
 export const MenuItem: FC<IProps> = ({

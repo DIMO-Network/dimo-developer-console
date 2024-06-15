@@ -6,7 +6,7 @@ import { isURL, isEmpty } from 'validator';
 import { Button } from '@/components/Button';
 import { IUser } from '@/types/user';
 import { Label } from '@/components/Label';
-import { regions } from '@/config/default';
+import { DEVELOPER_TYPES, REGIONS } from '@/config/default';
 import { SelectField } from '@/components/SelectField';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
@@ -14,13 +14,19 @@ import { TextField } from '@/components/TextField';
 interface CompanyInfoInputs {
   name: string;
   website?: string;
-  region?: string;
+  region: string;
+  type: string;
 }
 
-const regionOptions = regions.map((regionName) => ({
+const regionOptions = REGIONS.map((regionName) => ({
   value: regionName,
   text: regionName,
-}));
+})) as { value: string; text: string }[];
+
+const typeOptions = DEVELOPER_TYPES.map((type) => ({
+  value: type,
+  text: type,
+})) as { value: string; text: string }[];
 
 interface IProps {
   onNext: (flow: string, user: Partial<IUser>) => void;
@@ -43,10 +49,10 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
 
   const updateUser = async (companyData: CompanyInfoInputs) => {
     onNext('company-information', {
-      company_name: companyData.name,
-      company_region: companyData.region,
-      company_website: companyData.website,
-    });
+      company: {
+        ...companyData,
+      },
+    } as Partial<IUser>);
   };
 
   return (
@@ -87,7 +93,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
         Main Operating Region *
         <SelectField
           {...register('region', {
-            required: true,
+            required: 'This field is required',
           })}
           options={regionOptions}
           control={control}
@@ -95,7 +101,22 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
           role="company-region"
         />
       </Label>
-      {errors.region && <TextError errorMessage="This field is required" />}
+      {errors.region && (
+        <TextError errorMessage={errors.region.message ?? ''} />
+      )}
+      <Label htmlFor="region" className="text-xs text-medium">
+        Business/Developer Type *
+        <SelectField
+          {...register('type', {
+            required: 'This field is required',
+          })}
+          options={typeOptions}
+          control={control}
+          placeholder="Select"
+          role="company-type"
+        />
+      </Label>
+      {errors.type && <TextError errorMessage={errors.type.message ?? ''} />}
       <div className="flex flex-col pt-4">
         <Button type="submit" className="primary" role="finish-button">
           Finish sign up

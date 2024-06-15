@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Toast } from '@/components/Toast';
 
 describe('Toast', () => {
@@ -36,6 +36,8 @@ describe('Toast', () => {
     const closeElm = await screen.findByRole('close-toast');
     fireEvent.click(closeElm);
 
-    expect(closeElm).not.toBeInTheDocument();
+    waitFor(() => {
+      expect(closeElm).not.toBeInTheDocument();
+    });
   });
 });

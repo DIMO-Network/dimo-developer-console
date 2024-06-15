@@ -1,5 +1,6 @@
 export interface IconProps {
   className?: string;
+  onClick?: () => void;
 }
 
 export * from './APIIcon';
@@ -7,6 +8,7 @@ export * from './BeachAccessIcon';
 export * from './CarRentalIcon';
 export * from './ChevronDownIcon';
 export * from './ComputerIcon';
+export * from './ContentCopyIcon';
 export * from './DeveloperBoardIcon';
 export * from './GitHubIcon';
 export * from './GoogleIcon';

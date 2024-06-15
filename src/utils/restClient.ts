@@ -1,5 +1,5 @@
-type Primitive = string | number | boolean | Date | null | undefined;
-type Data = Primitive | Record<string, Primitive> | Primitive[];
+export type Primitive = string | number | boolean | Date | null | undefined;
+export type Data = Primitive | Record<string, Primitive> | Primitive[];
 
 export class RestClient {
   private baseUrl: string;

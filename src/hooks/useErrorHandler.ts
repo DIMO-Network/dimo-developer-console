@@ -17,7 +17,7 @@ export const useErrorHandler = () => {
   useEffect(() => {
     const message =
       ERROR_CODES[error as keyof typeof ERROR_CODES] ?? 'Please try again';
-    error && setNotification(message, 'Something went wrong', 'error', 10000);
+    error && setNotification(message, 'Something went wrong', 'error');
   }, [error]);
 };
 

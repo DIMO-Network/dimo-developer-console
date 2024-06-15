@@ -1,0 +1,3 @@
+.table-cell {
+  @apply whitespace-nowrap p-3 text-xs text-white;
+}

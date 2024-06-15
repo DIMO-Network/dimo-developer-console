@@ -1,4 +1,4 @@
-export const regions = [
+export const REGIONS = [
   'North America',
   'Latin America & Caribbean',
   'Oceania',
@@ -10,8 +10,23 @@ export const regions = [
   'Eastern Europe',
 ];
 
-export const frontendUrl = 'http://localhost:3000/';
+export const DEVELOPER_TYPES = [
+  'OEM',
+  'Insurance',
+  'Maintenance',
+  'Fleet Management',
+  'Vehicle Sales',
+  'Utilities',
+  'Financing',
+  'EV',
+  'DePIN',
+  'Data',
+  'Others',
+];
+
 export const backendUrl = 'http://localhost:3001/';
+
+export const frontendUrl = 'http://localhost:3000/';
 
 export const RAINBOW_PROJECT = {
   ID: '528803928611a7781fb6b23eaf232224',

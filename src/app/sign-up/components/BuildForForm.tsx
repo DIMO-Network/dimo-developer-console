@@ -81,9 +81,11 @@ export const BuildForForm: FC<IProps> = ({ onNext }) => {
 
   const updateUser = async (buildForData: BuildForFormInputs) => {
     onNext('build-for', {
-      build_for: buildForData.buildFor,
-      build_for_text: buildForData.buildForText,
-    });
+      company: {
+        build_for: buildForData.buildFor,
+        build_for_text: buildForData.buildForText,
+      }
+    } as Partial<IUser>);
   };
 
   return (

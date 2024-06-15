@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Toggle renders a toggle component 1`] = `
+<div>
+  <button
+    aria-checked="false"
+    aria-label="toggle"
+    class="custom-toggle group"
+    data-headlessui-state=""
+    id="headlessui-switch-:r0:"
+    role="switch"
+    tabindex="0"
+    type="button"
+  >
+    <span
+      class="sr-only"
+    >
+      Use setting
+    </span>
+    <span
+      aria-hidden="true"
+      class="base"
+    />
+    <span
+      aria-hidden="true"
+      class="inactive bar"
+    />
+    <span
+      aria-hidden="true"
+      class="inactive dot"
+    />
+  </button>
+</div>
+`;
