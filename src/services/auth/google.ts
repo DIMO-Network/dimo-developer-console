@@ -24,12 +24,12 @@ export class GoogleAuthService extends AuthService {
     console.log({
       clientId,
       clientSecret,
-      redirectUri: `${config.frontendUrl}api/auth/callback/google`,
+      redirectUri: `${config.frontendUrl}api/auth/cb/google`,
     });
     this.client = new google.auth.OAuth2({
       clientId,
       clientSecret,
-      redirectUri: `${config.frontendUrl}api/auth/callback/google`,
+      redirectUri: `${config.frontendUrl}api/auth/cb/google`,
     });
   }
 
