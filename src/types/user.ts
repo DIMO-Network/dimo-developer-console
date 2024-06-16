@@ -6,6 +6,7 @@ export interface IUser {
   name: string;
   email: string;
   auth: string;
+  auth_login: string;
   role?: string;
   refresh_token?: string;
   refresh_token_expiration?: Date;

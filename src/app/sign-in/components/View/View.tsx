@@ -2,7 +2,7 @@
 
 import { Anchor } from '@/components/Anchor';
 import { SignInButtons } from '@/components/SignInButton';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';

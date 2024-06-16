@@ -4,7 +4,14 @@ import { Header } from '@/components/Header';
 describe('Header', () => {
   it('renders a card', () => {
     render(
-      <Header />
+      <Header
+        user={{
+          name: 'John Doe',
+          email: 'jhondoe@gmail.com',
+          auth: 'github',
+          auth_login: 'jhondoe@gmail.com',
+        }}
+      />
     );
 
     const userInformationElm = screen.getByRole('user-information');

@@ -1,10 +1,11 @@
+'use client';
 import React from 'react';
 
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
+import RainbowSessionProvider from '@/hoc/RainbowSessionProvider';
 
 import './layout.css';
-import RainbowSessionProvider from '@/hoc/RainbowSessionProvider';
 
 export default function AppLayout({
   children,
