@@ -1,18 +1,19 @@
 'use client';
 import { FC } from 'react';
-import { withNotifications } from '@/hoc';
+import { useSession } from 'next-auth/react';
 
 import './page.css';
-import Onboarding from './components/Onborading/Onboarding';
-import { useUser } from '@/hooks';
+import { Onboarding } from '@/app/app/components/Onboarding';
+import { withNotifications } from '@/hoc';
 
 const HomePage: FC = () => {
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const { user: { name = '' } = {} } = session ?? {};
 
   return (
     <div className="home-page">
       <div className="welcome-message">
-        <p className="title">Welcome {user?.name}</p>
+        <p className="title">Welcome {name}</p>
         <p className="sub-message">
           Learn how to get started with the DIMO API
         </p>

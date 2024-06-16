@@ -2,6 +2,7 @@
 import type { FC } from 'react';
 
 import React, { useContext } from 'react';
+import { signIn } from 'next-auth/react';
 
 import { SignInButton } from '@/components/SignInButton';
 import { GitHubIcon, GoogleIcon } from '@/components/Icons';
@@ -25,7 +26,7 @@ export const SignInButtons: FC<SignInButtonProps> = ({
         'Terms of service',
         'error'
       );
-    else window.location.replace(`/api/auth/authorize?app=${app}`);
+    else signIn(app);
   };
 
   return (

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getServerSession } from 'next-auth/next';
 
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { isIn } from '@/utils/middlewareUtils';
+import { Session } from 'next-auth';
 
 enum EXCLUDED_PATHS {
   SIGN_IN = '/sign-in',
@@ -15,18 +18,21 @@ const excludedEndpoints = [
   EXCLUDED_PATHS.API,
 ];
 
-const mustSignIn = (request: NextRequest) => {
+const mustSignIn = (request: NextRequest, session: Session | null) => {
   const url = request.nextUrl.pathname;
-  const { value: token = '' } = cookies().get('token') ?? {};
 
   const isPublicPath = excludedEndpoints.some(isIn(url));
-  return !isPublicPath && !token;
+  return !isPublicPath && !session;
 };
 
-export const AuthorizationMiddleware = async (request: NextRequest) => {
+export const AuthorizationMiddleware = async (
+  request: NextRequest,
+  response: NextResponse
+) => {
   const header = new Headers();
+  const session = await getServerSession(request, response, authOptions);
 
-  if (mustSignIn(request)) {
+  if (mustSignIn(request, session)) {
     header.set('redirect', EXCLUDED_PATHS.SIGN_IN);
     return NextResponse.next({
       request: { headers: header },

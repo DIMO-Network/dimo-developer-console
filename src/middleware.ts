@@ -1,44 +1,59 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { middlewares } from '@/middlewares/config';
+import { JWT, getToken } from 'next-auth/jwt';
+import { NextRequestWithAuth, withAuth } from 'next-auth/middleware';
+import { NextFetchEvent, NextResponse } from 'next/server';
 
-// This function can be marked `async` if using `await` inside
-export async function middleware(request: NextRequest) {
-  const nextResponse = NextResponse.next();
+import { isIn } from '@/utils/middlewareUtils';
+import configuration from '@/config';
 
-  const middlewareHeader = [];
-  for (const middleware of middlewares) {
-    const result = await middleware(request);
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
-    if (!result.ok) {
-      return result;
-    }
-    middlewareHeader.push(result.headers);
-  }
+const authMiddleware = withAuth({
+  callbacks: {
+    authorized: ({ token }) => !!token,
+  },
+  pages: {
+    signIn: 'sign-in',
+  },
+});
 
-  let redirectTo = null;
+const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
+  const url = request.nextUrl.pathname;
 
-  middlewareHeader.some((header) => {
-    const redirect = header.get('x-middleware-request-redirect');
+  const isAPI = url.startsWith(API_PATH);
+  const isPublicAPIPath = UNPROTECTED_PATHS.some(isIn(url));
+  return isAPI && !isPublicAPIPath && !token;
+};
 
-    if (redirect) {
-      redirectTo = redirect;
-      return true;
-    }
-    return false; // Continue the loop
-  });
+export const middleware = async (
+  request: NextRequestWithAuth,
+  event: NextFetchEvent
+) => {
+  const token = await getToken({ req: request });
+  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  const isAPIProtected = mustBeAuthorize(request, token);
 
-  if (redirectTo) {
-    return NextResponse.redirect(new URL(redirectTo, request.url), {
+  if (isLoginPage && token) {
+    return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });
   }
 
-  return nextResponse;
-}
+  if (isAPIProtected) {
+    return NextResponse.json(
+      {
+        message: 'Unauthorized Access',
+      },
+      { status: 401 }
+    );
+  }
 
-// See "Matching Paths" below to learn more
+  if (!isLoginPage) {
+    return authMiddleware(request, event);
+  }
+
+  return NextResponse.next();
+};
+
 export const config = {
-  matcher: [
-    '/((?!_next/static|.*svg|.*png|.*jpg|.*jpeg|.*gif|.*webp|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/auth).*)'],
 };

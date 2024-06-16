@@ -1,9 +1,19 @@
 import { AuthOptions } from 'next-auth';
-import NextAuth from 'next-auth/next';
-import CredentialsProvider from 'next-auth/providers/credentials';
 import { getCsrfToken } from 'next-auth/react';
-// import { cookies } from 'next/headers';
 import { SiweMessage } from 'siwe';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import GitHubProvider from 'next-auth/providers/github';
+import GoogleProvider from 'next-auth/providers/google';
+import NextAuth from 'next-auth/next';
+
+import { jwt, session } from '@/services/auth';
+
+const {
+  GITHUB_CLIENT_ID: githubClientId = '',
+  GITHUB_CLIENT_SECRET: githubClientSecret = '',
+  GOOGLE_CLIENT_ID: googleClientId = '',
+  GOOGLE_CLIENT_SECRET: googleClientSecret = '',
+} = process.env;
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -61,21 +71,21 @@ export const authOptions: AuthOptions = {
         }
       },
     }),
+    GitHubProvider({
+      clientId: githubClientId,
+      clientSecret: githubClientSecret,
+    }),
+    GoogleProvider({
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+    }),
   ],
   session: { strategy: 'jwt' },
-
   debug: process.env.NODE_ENV === 'development',
-
   secret: process.env.NEXAUTH_SECRET,
-
   callbacks: {
-    async session({ session, token }: { session: any; token: any }) {
-      session.address = token.sub;
-      session.user = {
-        name: token.sub,
-      };
-      return session;
-    },
+    jwt,
+    session,
   },
 };
 
