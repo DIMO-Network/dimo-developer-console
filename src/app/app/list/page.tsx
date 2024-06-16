@@ -1,30 +1,30 @@
 'use client';
-import { useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 import { AppCard } from '@/components/AppCard';
 import { appListMock } from '@/mocks/appList';
 import { Button } from '@/components/Button';
-import { getUser } from '@/app/app/actions';
 import { IApp } from '@/types/app';
-import { IUser } from '@/types/user';
 
 import './page.css';
+import { useUser } from '@/hooks';
+import { Anchor } from '@/components/Anchor';
 
 const AppListPage = () => {
   const router = useRouter();
-  const [user, setUser] = useState<IUser>();
-  useEffect(() => {
-    getUser().then(setUser);
-  }, []);
+  const { user } = useUser();
 
   const handleCreateApp = () => {
     router.push('/app/create');
   };
 
-  const renderItem = (app: IApp) => {
-    return <AppCard className="hover:!border-white" {...app} />;
+  const renderItem = (app: IApp, id: number) => {
+    return (
+      <Anchor href={`/app/details/${id}`} key={app.name}>
+        <AppCard className="hover:!border-white" {...app} />
+      </Anchor>
+    );
   };
 
   return (

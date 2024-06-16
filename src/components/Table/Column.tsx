@@ -3,8 +3,10 @@ import { type FC, type ReactNode } from 'react';
 import './Column.css';
 
 export interface IColumn {
+  label?: string;
   name: string;
-  render?: FC;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  render?: FC<any>;
 }
 
 interface IProps {

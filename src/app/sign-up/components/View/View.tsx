@@ -9,8 +9,7 @@ import {
 } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
 import { IUser } from '@/types/user';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
-import { useNotification } from '@/hooks';
+import { useErrorHandler, useNotification } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';

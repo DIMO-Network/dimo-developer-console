@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
 import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
-import { getAppByID } from '@/app/app/actions';
+import { getAppByID } from '@/actions/app';
 import { IApp } from '@/types/app';
 import { RedirectUriForm } from './components/RedirectUriForm';
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
@@ -15,11 +15,7 @@ import { withNotifications } from '@/hoc';
 
 import './page.css';
 
-const AppDetailPage = ({
-  params: { id },
-}: {
-  params: { id: string };
-}) => {
+const AppDetailPage = ({ params: { id } }: { params: { id: string } }) => {
   const [app, setApp] = useState<IApp>();
   useEffect(() => {
     getAppByID(id).then(setApp);
