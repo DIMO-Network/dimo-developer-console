@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import type { FC, MouseEvent } from 'react';
 
 import React from 'react';
 import classnames from 'classnames';
@@ -11,7 +11,7 @@ interface SignInButtonProps {
   className: string;
   isSignIn: boolean;
   Icon: FC<IconProps>;
-  onClick: (e?: any) => void;
+  onClick: (e: MouseEvent<HTMLElement>) => void;
 }
 
 export const SignInButton: FC<SignInButtonProps> = ({

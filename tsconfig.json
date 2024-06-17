@@ -8,7 +8,7 @@
     "esModuleInterop": true,
     "module": "esnext",
     // "moduleResolution": "bundler",
-    "moduleResolution":"node",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -22,7 +22,7 @@
       "@/*": ["./src/*"],
       "*": ["./src/types/*.d.ts"]
     },
-    "types": ["@types/jest"]
+    "types": ["@types/jest"],
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

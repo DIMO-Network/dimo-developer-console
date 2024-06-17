@@ -2,5 +2,6 @@ import { IUser } from '@/types/user';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
 export const getUserByToken = async () => {
-  return await dimoDevAPIClient().get<IUser>('/api/me');
+  const client = dimoDevAPIClient();
+  return await client.get<IUser>('/api/me');
 };

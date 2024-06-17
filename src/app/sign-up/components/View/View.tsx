@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import {
   SignUpWith,
@@ -35,6 +35,7 @@ const signUpFlows = {
 const View = () => {
   useErrorHandler();
   const { setNotification } = useNotification();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const currentFlow = searchParams.get('flow') ?? 'sign-up-with';
   const [flow, setFlow] = useState(currentFlow);
@@ -46,7 +47,7 @@ const View = () => {
   const handleCompleteUserData = async (user: Partial<IUser>) => {
     try {
       await completeUserData(user);
-      window.location.replace('/sign-up');
+      router.replace('/app');
     } catch (error) {
       console.error(
         'Something went wrong while the completing user information',

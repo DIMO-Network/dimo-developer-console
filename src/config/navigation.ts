@@ -1,5 +1,6 @@
 import { type FC } from 'react';
 import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline';
+import { signOut } from 'next-auth/react';
 
 import {
   APIIcon,
@@ -55,7 +56,7 @@ export const bottomMenu = [
     label: 'Logout',
     icon: ArrowLeftStartOnRectangleIcon as FC,
     iconClassName: 'h-5 w-5 fill-grey-200',
-    link: '/api/auth/logout',
+    link: () => signOut({ callbackUrl: '/sign-in' }),
   },
   {
     label: 'Settings',

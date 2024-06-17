@@ -1,8 +1,11 @@
+import _ from 'lodash';
 import { JWT, getToken } from 'next-auth/jwt';
-import { NextRequestWithAuth, withAuth } from 'next-auth/middleware';
+import { withAuth } from 'next-auth/middleware';
 import { NextFetchEvent, NextResponse } from 'next/server';
 
 import { isIn } from '@/utils/middlewareUtils';
+import { getUserByToken } from './services/user';
+import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
@@ -13,6 +16,7 @@ const authMiddleware = withAuth({
   },
   pages: {
     signIn: 'sign-in',
+    error: 'sign-in?error=true',
   },
 });
 
@@ -25,14 +29,30 @@ const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
 };
 
 export const middleware = async (
-  request: NextRequestWithAuth,
+  request: NextRequest,
   event: NextFetchEvent
 ) => {
   const token = await getToken({ req: request });
+
+  // Setting the user up
+  const { data: user } = await getUserByToken();
+  request.user = new LoggedUser(user);
+  const isCompliant = _.get(request.user, 'isCompliant', false);
+
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const isAPIProtected = mustBeAuthorize(request, token);
+  const flow = request.nextUrl.searchParams.get('flow');
 
-  if (isLoginPage && token) {
+  if (token && !isCompliant && !flow) {
+    return NextResponse.redirect(
+      new URL('/sign-up?flow=build-for', request.url),
+      {
+        status: 307,
+      }
+    );
+  }
+
+  if (isLoginPage && token && isCompliant) {
     return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });

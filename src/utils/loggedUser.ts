@@ -1,6 +1,6 @@
 import { IUser } from '@/types/user';
 
-class LoggedUser {
+export class LoggedUser {
   public static instance: LoggedUser | null = null;
   private _user: IUser | null = null;
 

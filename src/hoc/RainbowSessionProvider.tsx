@@ -1,16 +1,18 @@
 'use client';
+
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
 import { mainnet, polygon, polygonAmoy } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { RainbowKitSiweNextAuthProvider } from '@rainbow-me/rainbowkit-siwe-next-auth';
 import { SessionProvider } from 'next-auth/react';
-import type { Session } from 'next-auth';
-import { AppProps } from 'next/app';
 import { ReactNode } from 'react';
-import { RAINBOW_PROJECT } from '@/config/default';
+
+import configuration from '@/config';
 
 import '@rainbow-me/rainbowkit/styles.css';
+
+const { RAINBOW_PROJECT } = configuration;
 
 const config = getDefaultConfig({
   appName: RAINBOW_PROJECT.NAME,

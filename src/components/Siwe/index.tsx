@@ -1,14 +1,12 @@
-import { getCsrfToken, signIn, useSession } from 'next-auth/react';
+import type { FC } from 'react';
+import { getCsrfToken, signIn } from 'next-auth/react';
 import { SiweMessage } from 'siwe';
 import { useAccount, useConnect, useSignMessage } from 'wagmi';
 import { injected } from 'wagmi/connectors';
-import { useEffect, useState } from 'react';
-import { mainnet, polygon, polygonAmoy, arbitrum, base } from 'wagmi/chains';
-import { SignInButton } from '../SignInButton';
+import { mainnet } from 'wagmi/chains';
 import { SiweIcon } from '@/components/Icons';
-import type { FC } from 'react';
-import { frontendUrl } from '@/config/default';
-import { redirect } from 'next/navigation';
+
+import { SignInButton } from '@/components/SignInButton';
 
 interface SiweButtonProps {
   isSignIn: boolean;
@@ -16,17 +14,8 @@ interface SiweButtonProps {
 
 export const Siwe: FC<SiweButtonProps> = ({ isSignIn }) => {
   const { signMessageAsync } = useSignMessage();
-  // const { chain } = useNetwork();
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
-  const { data: session, status } = useSession();
-  // console.log({ session, status });
-
-  // useEffect(() => {
-  //   if (session && session.user && status === 'authenticated') {
-  //     redirect(`${frontendUrl}app`);
-  //   }
-  // }, [status]);
 
   const handleLogin = async () => {
     try {
@@ -75,6 +64,7 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn }) => {
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getServerSideProps(context: any) {
   return {
     props: {
