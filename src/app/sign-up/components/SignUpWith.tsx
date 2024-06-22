@@ -3,11 +3,12 @@ import { signIn } from 'next-auth/react';
 
 import { Anchor } from '@/components/Anchor';
 import { CheckboxField } from '@/components/CheckboxField';
+import { existUserAddress } from '@/actions/user';
 import { IAuth } from '@/types/auth';
 import { SignInButtons } from '@/components/SignInButton';
 
 interface IProps {
-  onNext: (flow: string, auth: Partial<IAuth>) => void;
+  onNext: (flow: string, auth?: Partial<IAuth>) => void;
 }
 
 export const SignUpWith: FC<IProps> = ({ onNext }) => {
@@ -17,12 +18,17 @@ export const SignUpWith: FC<IProps> = ({ onNext }) => {
     setAcceptTerms(!acceptTerms);
   };
 
-  const handleCTA = (app: string, auth?: Partial<IAuth>) => {
+  const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     if (app === 'credentials') {
-      onNext('sign-up-with', auth ?? {});
-    } else {
-      signIn(app);
+      const { exist } = await existUserAddress(auth?.address ?? null);
+
+      if (!exist) {
+        onNext('sign-up-with', auth ?? {});
+        return;
+      }
     }
+
+    signIn(app, auth);
   };
 
   return (

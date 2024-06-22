@@ -17,7 +17,7 @@ interface UserInfoInputs {
 
 interface IProps {
   auth?: Partial<IAuth>;
-  onNext: (flow: string, auth: Partial<IAuth>) => void;
+  onNext: (flow: string, auth?: Partial<IAuth>) => void;
 }
 
 export const UserInfoForm: FC<IProps> = ({ auth }) => {

@@ -6,7 +6,7 @@ import classnames from 'classnames';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { CarRentalIcon, ComputerIcon, PhoneIcon } from '@/components/Icons';
-import { IUser } from '@/types/user';
+import { IAuth } from '@/types/auth';
 import { Label } from '@/components/Label';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
@@ -45,7 +45,7 @@ const buildForList = [
 ];
 
 interface IProps {
-  onNext: (flow: string, user: Partial<IUser>) => void;
+  onNext: (flow: string, auth?: Partial<IAuth>) => void;
 }
 
 export const BuildForForm: FC<IProps> = ({ onNext }) => {
@@ -84,8 +84,8 @@ export const BuildForForm: FC<IProps> = ({ onNext }) => {
       company: {
         build_for: buildForData.buildFor,
         build_for_text: buildForData.buildForText,
-      }
-    } as Partial<IUser>);
+      },
+    } as Partial<IAuth>);
   };
 
   return (

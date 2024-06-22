@@ -64,13 +64,13 @@ const View = () => {
     }
   };
 
-  const handleNext = (actualFlow: string, inputAuth: Partial<IAuth>) => {
+  const handleNext = (actualFlow: string, inputAuth?: Partial<IAuth>) => {
     const newUserData = {
       ...authData,
       ...inputAuth,
       company: {
         ...authData.company,
-        ...inputAuth.company,
+        ...inputAuth?.company ?? {},
       },
     } as Partial<IAuth>;
     setAuthData(newUserData);

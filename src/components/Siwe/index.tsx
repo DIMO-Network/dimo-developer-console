@@ -37,9 +37,7 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
         message: message.prepareMessage(),
       });
 
-      console.log({ message, signature });
-
-      onCTA({ message: JSON.stringify(message), signature });
+      onCTA({ address, message: JSON.stringify(message), signature });
     } catch (error) {
       console.log({ error });
       window.alert(error);

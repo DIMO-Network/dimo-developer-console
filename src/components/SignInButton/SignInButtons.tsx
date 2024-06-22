@@ -21,6 +21,7 @@ export const SignInButtons: FC<SignInButtonProps> = ({
   onCTA,
 }) => {
   const { setNotification } = useContext(NotificationContext);
+  
   const handlerLogin = (app: string, auth?: Partial<IAuth>) => {
     if (disabled)
       setNotification(
