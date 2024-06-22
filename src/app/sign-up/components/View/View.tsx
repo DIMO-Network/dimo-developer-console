@@ -1,16 +1,18 @@
 'use client';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 
 import {
-  SignUpWith,
   BuildForForm,
   CompanyInfoForm,
+  SignUpWith,
+  UserInfoForm,
 } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
-import { IUser } from '@/types/user';
 import { useErrorHandler, useNotification } from '@/hooks';
 import { withNotifications } from '@/hoc';
+import { IAuth } from '@/types/auth';
 
 import './View.css';
 
@@ -20,15 +22,20 @@ const signUpFlows = {
     title: 'Get started building',
     order: 0,
   },
+  'personal-information': {
+    Component: UserInfoForm,
+    title: 'Personal information',
+    order: 1,
+  },
   'build-for': {
     Component: BuildForForm,
     title: 'What are you building?',
-    order: 1,
+    order: 2,
   },
   'company-information': {
     Component: CompanyInfoForm,
     title: 'Our last question',
-    order: 2,
+    order: 3,
   },
 };
 
@@ -39,14 +46,14 @@ const View = () => {
   const searchParams = useSearchParams();
   const currentFlow = searchParams.get('flow') ?? 'sign-up-with';
   const [flow, setFlow] = useState(currentFlow);
-  const [userData, setUserData] = useState<Partial<IUser>>({});
+  const [authData, setAuthData] = useState<Partial<IAuth>>({});
 
   const { Component: SignUpFlow, title } =
     signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['build-for'];
 
-  const handleCompleteUserData = async (user: Partial<IUser>) => {
+  const handleCompleteUserData = async (auth: Partial<IAuth>) => {
     try {
-      await completeUserData(user);
+      await completeUserData(auth);
       router.replace('/app');
     } catch (error) {
       console.error(
@@ -57,16 +64,16 @@ const View = () => {
     }
   };
 
-  const handleNext = (actualFlow: string, inputUser: Partial<IUser>) => {
+  const handleNext = (actualFlow: string, inputAuth: Partial<IAuth>) => {
     const newUserData = {
-      ...userData,
-      ...inputUser,
+      ...authData,
+      ...inputAuth,
       company: {
-        ...userData.company,
-        ...inputUser.company,
+        ...authData.company,
+        ...inputAuth.company,
       },
-    } as Partial<IUser>;
-    setUserData(newUserData);
+    } as Partial<IAuth>;
+    setAuthData(newUserData);
     const currentProcess = signUpFlows[actualFlow as keyof typeof signUpFlows];
     const processes = Object.keys(signUpFlows).reduce(
       (acc, elm) => ({
@@ -87,14 +94,15 @@ const View = () => {
       <div className="sign-up__content">
         <article className="sign-up__form">
           <section className="sign-up__header">
-            <img
+            <Image
               src={'/images/build-on-dimo.png'}
               alt="DIMO Logo"
-              className="w-44 h-6"
+              width={176}
+              height={24}
             />
             <p>{title}</p>
           </section>
-          {SignUpFlow && <SignUpFlow onNext={handleNext} />}
+          {SignUpFlow && <SignUpFlow onNext={handleNext} auth={authData} />}
         </article>
       </div>
     </main>

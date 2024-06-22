@@ -1,18 +1,38 @@
+import { useState, type FC } from 'react';
+import { signIn } from 'next-auth/react';
+
 import { Anchor } from '@/components/Anchor';
 import { CheckboxField } from '@/components/CheckboxField';
+import { IAuth } from '@/types/auth';
 import { SignInButtons } from '@/components/SignInButton';
-import { useState } from 'react';
 
-export const SignUpWith = () => {
+interface IProps {
+  onNext: (flow: string, auth: Partial<IAuth>) => void;
+}
+
+export const SignUpWith: FC<IProps> = ({ onNext }) => {
   const [acceptTerms, setAcceptTerms] = useState<boolean>(true);
 
   const handleAcceptTerms = () => {
     setAcceptTerms(!acceptTerms);
   };
+
+  const handleCTA = (app: string, auth?: Partial<IAuth>) => {
+    if (app === 'credentials') {
+      onNext('sign-up-with', auth ?? {});
+    } else {
+      signIn(app);
+    }
+  };
+
   return (
     <>
       <section className="sign-up__buttons">
-        <SignInButtons isSignIn={false} disabled={!acceptTerms} />
+        <SignInButtons
+          isSignIn={false}
+          disabled={!acceptTerms}
+          onCTA={handleCTA}
+        />
       </section>
       <section className="sign-up__extra-links">
         <Anchor href="/sign-in" className="primary">

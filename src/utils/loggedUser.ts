@@ -16,17 +16,22 @@ export class LoggedUser {
     return this._user;
   }
 
+  get hasPersonalData(): boolean {
+    return Boolean(this._user?.email && this._user?.name);
+  }
+
   get hasTeam(): boolean {
     return Boolean(this._user?.team);
   }
 
   get isCompliant(): boolean {
-    return this.hasTeam;
+    return this.hasTeam && this.hasPersonalData;
   }
 
   get missingFlow(): string {
     let missingFlow = 'sign-up-with';
-    if (!this.hasTeam) missingFlow = 'build-for';
+    if (!this.hasPersonalData) missingFlow = 'personal-information';
+    else if (!this.hasTeam) missingFlow = 'build-for';
     return missingFlow;
   }
 }

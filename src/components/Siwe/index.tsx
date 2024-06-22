@@ -1,25 +1,27 @@
 import type { FC } from 'react';
-import { getCsrfToken, signIn } from 'next-auth/react';
+import { getCsrfToken } from 'next-auth/react';
 import { SiweMessage } from 'siwe';
 import { useAccount, useConnect, useSignMessage } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { mainnet } from 'wagmi/chains';
-import { SiweIcon } from '@/components/Icons';
 
+import { SiweIcon } from '@/components/Icons';
 import { SignInButton } from '@/components/SignInButton';
+import { IAuth } from '@/types/auth';
 
 interface SiweButtonProps {
   isSignIn: boolean;
+  onCTA: (d: Partial<IAuth>) => void;
 }
 
-export const Siwe: FC<SiweButtonProps> = ({ isSignIn }) => {
+export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
   const { signMessageAsync } = useSignMessage();
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
 
   const handleLogin = async () => {
     try {
-      const callbackUrl = '/protected';
+      const csrfToken = await getCsrfToken();
 
       const message = new SiweMessage({
         domain: window.location.host,
@@ -28,19 +30,16 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn }) => {
         uri: window.location.origin,
         version: '1',
         chainId: mainnet?.id,
-        nonce: await getCsrfToken(),
+        nonce: csrfToken,
       });
 
       const signature = await signMessageAsync({
         message: message.prepareMessage(),
       });
 
-      signIn('credentials', {
-        message: JSON.stringify(message),
-        redirect: false,
-        signature,
-        callbackUrl,
-      });
+      console.log({ message, signature });
+
+      onCTA({ message: JSON.stringify(message), signature });
     } catch (error) {
       console.log({ error });
       window.alert(error);

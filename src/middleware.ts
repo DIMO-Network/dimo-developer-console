@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { JWT, getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextFetchEvent, NextResponse } from 'next/server';
@@ -35,9 +34,10 @@ export const middleware = async (
   const token = await getToken({ req: request });
 
   // Setting the user up
-  const { data: user } = await getUserByToken();
+  const user = await getUserByToken();
   request.user = new LoggedUser(user);
-  const isCompliant = _.get(request.user, 'isCompliant', false);
+  const isCompliant = request.user?.isCompliant ?? false;
+  const missingFlow = request.user?.missingFlow ?? null;
 
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const isAPIProtected = mustBeAuthorize(request, token);
@@ -45,7 +45,7 @@ export const middleware = async (
 
   if (token && !isCompliant && !flow) {
     return NextResponse.redirect(
-      new URL('/sign-up?flow=build-for', request.url),
+      new URL(`/sign-up?flow=${missingFlow}`, request.url),
       {
         status: 307,
       }
