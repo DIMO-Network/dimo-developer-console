@@ -1,18 +1,17 @@
 import { FC } from 'react';
 
 import { getInitials } from '@/utils/user';
-import { IUser } from '@/types/user';
 
 import './UserAvatar.css';
 
 type IProps = {
-  user?: IUser;
+  name: string;
 };
 
-export const UserAvatar: FC<IProps> = ({ user }) => {
+export const UserAvatar: FC<IProps> = ({ name }) => {
   return (
     <div className="user-avatar-default" role="user-avatar">
-      <p className="default">{getInitials(user ? user.name : '')}</p>
+      <p className="default">{getInitials(name)}</p>
     </div>
   );
 };
