@@ -3,7 +3,7 @@ import { signIn } from 'next-auth/react';
 
 import { Anchor } from '@/components/Anchor';
 import { CheckboxField } from '@/components/CheckboxField';
-import { existUserAddress } from '@/actions/user';
+import { existUserEmailOrAddress } from '@/actions/user';
 import { IAuth } from '@/types/auth';
 import { SignInButtons } from '@/components/SignInButton';
 
@@ -20,9 +20,12 @@ export const SignUpWith: FC<IProps> = ({ onNext }) => {
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     if (app === 'credentials') {
-      const { exist } = await existUserAddress(auth?.address ?? null);
+      const { existItem } = await existUserEmailOrAddress(
+        auth?.address ?? null,
+        app
+      );
 
-      if (!exist) {
+      if (!existItem) {
         onNext('sign-up-with', auth ?? {});
         return;
       }

@@ -6,9 +6,8 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 
-
 import config from '@/config';
-import { getUserByToken } from '@/services/user';
+import { existUserByEmailOrAddress, getUserByToken } from '@/services/user';
 
 const {
   GITHUB_CLIENT_ID: githubClientId = '',
@@ -24,19 +23,19 @@ export const jwt = async ({
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 any) => {
   const currentProvider = _.get(token, 'provider', null);
-  const provider = _.get(account, 'provider', currentProvider);
-  const address = _.get(token, 'sub', null);
+  token.provider = _.get(account, 'provider', currentProvider);
 
-  token.provider = provider;
-  token.address = address;
+  if (token.provider === 'credentials') {
+    token.address = _.get(token, 'sub', null);
+  }
 
   if (!token.userId) {
     const user = await getUserByToken();
-    const userId = _.get(user, 'id', null);
-    token.userId = userId;
+    token.userId = _.get(user, 'id', null);
+    token.name = _.get(user, 'name', token.name);
+    token.email = _.get(user, 'email', token.email);
   }
 
-  console.log({ token });
   return token;
 };
 
@@ -56,6 +55,10 @@ export const session = async ({
 };
 
 export const authOptions: AuthOptions = {
+  pages: {
+    signIn: '/sign-in',
+    error: '/sign-in',
+  },
   providers: [
     CredentialsProvider({
       name: 'Ethereum',
@@ -100,7 +103,6 @@ export const authOptions: AuthOptions = {
           }
 
           await siwe.verify({ signature: credentials?.signature || '' });
-          console.log({ id: siwe.address });
 
           return {
             id: siwe.address,
@@ -125,6 +127,19 @@ export const authOptions: AuthOptions = {
   debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXAUTH_SECRET,
   callbacks: {
+    signIn: async ({ user, account }) => {
+      const { email = null } = user ?? {};
+      const { provider = null, providerAccountId = null } = account ?? {};
+
+      const { existItem, existAssociation } = await existUserByEmailOrAddress(
+        email ?? providerAccountId,
+        provider
+      );
+
+      return existItem && !existAssociation
+        ? '/sign-in?error=unique_email'
+        : true;
+    },
     jwt,
     session,
   },

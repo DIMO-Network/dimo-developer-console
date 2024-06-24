@@ -7,11 +7,18 @@ export const getUserByToken = async () => {
   return data;
 };
 
-export const existUserByAddress = async (address: string | null) => {
+export const existUserByEmailOrAddress = async (
+  item: string | null,
+  provider: string | null
+) => {
   const client = dimoDevAPIClient();
-  const { data } = await client.get<{ exist: boolean }>('/api/auth/exist', {
+  const { data } = await client.get<{
+    existItem: boolean;
+    existAssociation: boolean;
+  }>('/api/auth/exist', {
     params: {
-      address,
+      item,
+      provider,
     },
   });
   return data;

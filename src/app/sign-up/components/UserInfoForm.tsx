@@ -35,7 +35,6 @@ export const UserInfoForm: FC<IProps> = ({ auth }) => {
   };
 
   const updateUser = async (userData: Partial<IAuth>) => {
-    console.log({ userData });
     signIn('credentials', userData);
   };
 

@@ -1,8 +1,9 @@
 'use client';
 import { signIn } from 'next-auth/react';
+import Image from 'next/image';
 
 import { Anchor } from '@/components/Anchor';
-import { existUserAddress } from '@/actions/user';
+import { existUserEmailOrAddress } from '@/actions/user';
 import { IAuth } from '@/types/auth';
 import { SignInButtons } from '@/components/SignInButton';
 import { useErrorHandler, useNotification } from '@/hooks';
@@ -20,9 +21,12 @@ export const View = () => {
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     if (app === 'credentials') {
-      const { exist } = await existUserAddress(auth?.address ?? null);
+      const { existItem } = await existUserEmailOrAddress(
+        auth?.address ?? null,
+        app
+      );
 
-      if (!exist) {
+      if (!existItem) {
         notifyUnregisterUser('address');
         return;
       }
@@ -35,10 +39,11 @@ export const View = () => {
       <div className="sign-in__content">
         <article className="sign-in__form">
           <section className="sign-in__header">
-            <img
+            <Image
               src={'/images/build-on-dimo.png'}
               alt="DIMO Logo"
-              className="w-44 h-6"
+              width={176}
+              height={24}
             />
             <p>Welcome back!</p>
           </section>

@@ -1,10 +1,13 @@
 'use server';
-import { existUserByAddress, getUserByToken } from '@/services/user';
+import { existUserByEmailOrAddress, getUserByToken } from '@/services/user';
 
 export const getUser = async () => {
   return getUserByToken();
 };
 
-export const existUserAddress = async (address: string | null) => {
-  return existUserByAddress(address);
+export const existUserEmailOrAddress = async (
+  address: string | null,
+  provider: string | null
+) => {
+  return existUserByEmailOrAddress(address, provider);
 };
