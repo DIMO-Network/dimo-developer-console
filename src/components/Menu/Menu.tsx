@@ -17,7 +17,7 @@ export const Menu: FC<IProps> = () => {
       </ul>
       <ul className="bottom-menu">
         {bottomMenu.map((item) => {
-          return <MenuItem key={item.link} {...item} />;
+          return <MenuItem key={item.label} {...item} />;
         })}
       </ul>
     </aside>
