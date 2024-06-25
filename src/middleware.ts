@@ -1,44 +1,79 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { middlewares } from '@/middlewares/config';
+import { JWT, getToken } from 'next-auth/jwt';
+import { withAuth } from 'next-auth/middleware';
+import { NextFetchEvent, NextResponse } from 'next/server';
 
-// This function can be marked `async` if using `await` inside
-export async function middleware(request: NextRequest) {
-  const nextResponse = NextResponse.next();
+import { isIn } from '@/utils/middlewareUtils';
+import { getUserByToken } from './services/user';
+import { LoggedUser } from '@/utils/loggedUser';
+import configuration from '@/config';
 
-  const middlewareHeader = [];
-  for (const middleware of middlewares) {
-    const result = await middleware(request);
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
-    if (!result.ok) {
-      return result;
-    }
-    middlewareHeader.push(result.headers);
+const authMiddleware = withAuth({
+  callbacks: {
+    authorized: ({ token }) => !!token,
+  },
+  pages: {
+    signIn: 'sign-in',
+    error: 'sign-in?error=true',
+  },
+});
+
+const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
+  const url = request.nextUrl.pathname;
+
+  const isAPI = url.startsWith(API_PATH);
+  const isPublicAPIPath = UNPROTECTED_PATHS.some(isIn(url));
+  return isAPI && !isPublicAPIPath && !token;
+};
+
+export const middleware = async (
+  request: NextRequest,
+  event: NextFetchEvent
+) => {
+  const token = await getToken({ req: request });
+
+  // Setting the user up
+  const user = await getUserByToken();
+  request.user = new LoggedUser(user);
+  const isCompliant = request.user?.isCompliant ?? false;
+  const missingFlow = request.user?.missingFlow ?? null;
+
+  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  const isAPIProtected = mustBeAuthorize(request, token);
+  const flow = request.nextUrl.searchParams.get('flow');
+
+  if (token && !isCompliant && !flow) {
+    return NextResponse.redirect(
+      new URL(`/sign-up?flow=${missingFlow}`, request.url),
+      {
+        status: 307,
+      }
+    );
   }
 
-  let redirectTo = null;
-
-  middlewareHeader.some((header) => {
-    const redirect = header.get('x-middleware-request-redirect');
-
-    if (redirect) {
-      redirectTo = redirect;
-      return true;
-    }
-    return false; // Continue the loop
-  });
-
-  if (redirectTo) {
-    return NextResponse.redirect(new URL(redirectTo, request.url), {
+  if (isLoginPage && token && isCompliant) {
+    return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });
   }
 
-  return nextResponse;
-}
+  if (isAPIProtected) {
+    return NextResponse.json(
+      {
+        message: 'Unauthorized Access',
+      },
+      { status: 401 }
+    );
+  }
 
-// See "Matching Paths" below to learn more
+  if (!isLoginPage) {
+    return authMiddleware(request, event);
+  }
+
+  return NextResponse.next();
+};
+
 export const config = {
-  matcher: [
-    '/((?!_next/static|.*svg|.*png|.*jpg|.*jpeg|.*gif|.*webp|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/auth).*)'],
 };

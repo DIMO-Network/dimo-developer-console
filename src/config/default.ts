@@ -1,3 +1,9 @@
+export const LOGIN_PAGES = ['/sign-in', '/sign-up'];
+
+export const API_PATH = '/api';
+
+export const UNPROTECTED_PATHS = ['/api/auth'];
+
 export const REGIONS = [
   'North America',
   'Latin America & Caribbean',

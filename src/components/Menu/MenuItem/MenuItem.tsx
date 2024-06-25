@@ -4,7 +4,7 @@ import Link from 'next/link';
 import './MenuItem.css';
 
 interface IProps {
-  link: string;
+  link: string | (() => void);
   iconClassName: string;
   label: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,7 +20,12 @@ export const MenuItem: FC<IProps> = ({
   return (
     <li>
       <Icon className={iconClassName} />
-      <Link href={link}>{label}</Link>
+      <Link
+        href={typeof link === 'string' ? link : '#'}
+        onClick={typeof link === 'function' ? link : () => {}}
+      >
+        {label}
+      </Link>
     </li>
   );
 };

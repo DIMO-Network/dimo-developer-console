@@ -1,2 +1,2 @@
 export * from './withNotifications';
-export * from './withRainbowKit';
+export * from './RainbowSessionProvider';

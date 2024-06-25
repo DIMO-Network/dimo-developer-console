@@ -1,16 +1,15 @@
 import { type FC } from 'react';
+import { useSession } from 'next-auth/react';
 
-import { IUser } from '@/types/user';
 import { PlusIcon } from '@/components/Icons';
 import { UserAvatar } from '@/components/UserAvatar';
 
 import './Header.css';
 
-interface IProps {
-  user?: IUser;
-}
+export const Header: FC = () => {
+  const { data: session } = useSession();
+  const { user: { name = '' } = {} } = session ?? {};
 
-export const Header: FC<IProps> = ({ user }) => {
   return (
     <header className="header">
       <img
@@ -19,7 +18,7 @@ export const Header: FC<IProps> = ({ user }) => {
         className="w-44 h-6"
       />
       <div className="user-information" role="user-information">
-        <UserAvatar user={user} />
+        <UserAvatar name={name ?? ''} />
         <div className="credits" role="credits-display">
           <div className="credits-info">
             <p className="credit-amount">0</p>

@@ -1,16 +1,18 @@
+import axios from 'axios';
 import { cookies } from 'next/headers';
 
-import { RestClient } from '@/utils/restClient';
 import config from '@/config';
 
-export const dimoDevAPIClient = () => {
-  const restClient = new RestClient(config.backendUrl);
+export const dimoDevAPIClient = (timeout: number = 5000) => {
+  const nextCookies = cookies();
+  const nextAuthSessionToken = nextCookies.get("next-auth.session-token");
 
-  const { value: token = '' } = cookies().get('token') ?? {};
-  if (token)
-    restClient.defaultHeaders = {
-      Authorization: `Bearer ${token}`,
-    };
-
-  return restClient;
+  return axios.create({
+    baseURL: config.backendUrl,
+    timeout,
+    withCredentials: true,
+    headers: {
+      Cookie: `next-auth.session-token=${nextAuthSessionToken?.value}`,
+    },
+  });
 };

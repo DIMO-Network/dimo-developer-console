@@ -20,3 +20,4 @@ export * from './PlusIcon';
 export * from './SettingsIcon';
 export * from './SummarizeIcon';
 export * from './SupportAgentIcon';
+export * from './SiweIcon';

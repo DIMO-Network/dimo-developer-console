@@ -1,19 +1,21 @@
 'use client';
+
+import { useSession } from 'next-auth/react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
+import { Anchor } from '@/components/Anchor';
 import { AppCard } from '@/components/AppCard';
 import { appListMock } from '@/mocks/appList';
 import { Button } from '@/components/Button';
 import { IApp } from '@/types/app';
 
 import './page.css';
-import { useUser } from '@/hooks';
-import { Anchor } from '@/components/Anchor';
 
 const AppListPage = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { data: session } = useSession();
+  const { user: { name = '' } = {} } = session ?? {};
 
   const handleCreateApp = () => {
     router.push('/app/create');
@@ -30,7 +32,7 @@ const AppListPage = () => {
   return (
     <div className="app-list-page">
       <div className="welcome-message">
-        <p className="title">Welcome {user?.name}</p>
+        <p className="title">Welcome {name}</p>
       </div>
       <div className="description">
         <p className="title">Your applications</p>
