@@ -1,12 +1,14 @@
 'use client';
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { isEmail } from 'validator';
 import { signIn } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
+import { existUserEmailOrAddress } from '@/actions/user';
 import { IAuth } from '@/types/auth';
 import { Label } from '@/components/Label';
+import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 
@@ -29,8 +31,14 @@ export const UserInfoForm: FC<IProps> = ({ auth }) => {
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
+  const { setNotification } = useContext(NotificationContext);
 
-  const onSubmit: SubmitHandler<UserInfoInputs> = (data) => {
+  const onSubmit: SubmitHandler<UserInfoInputs> = async (data) => {
+    const { existItem } = await existUserEmailOrAddress(data.email, 'email');
+    if (existItem) {
+      setNotification('The email already exists', 'Wrong email', 'error');
+      return;
+    }
     updateUser({ ...auth, ...data });
   };
 
