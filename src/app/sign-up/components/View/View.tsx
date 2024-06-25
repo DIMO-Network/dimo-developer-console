@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -10,9 +10,10 @@ import {
   UserInfoForm,
 } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
-import { useErrorHandler, useNotification } from '@/hooks';
-import { withNotifications } from '@/hoc';
 import { IAuth } from '@/types/auth';
+import { NotificationContext } from '@/context/notificationContext';
+import { useErrorHandler } from '@/hooks';
+import { withNotifications } from '@/hoc';
 
 import './View.css';
 
@@ -41,7 +42,7 @@ const signUpFlows = {
 
 const View = () => {
   useErrorHandler();
-  const { setNotification } = useNotification();
+  const { setNotification } = useContext(NotificationContext);
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentFlow = searchParams.get('flow') ?? 'sign-up-with';
@@ -70,7 +71,7 @@ const View = () => {
       ...inputAuth,
       company: {
         ...authData.company,
-        ...inputAuth?.company ?? {},
+        ...(inputAuth?.company ?? {}),
       },
     } as Partial<IAuth>;
     setAuthData(newUserData);

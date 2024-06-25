@@ -1,13 +1,14 @@
-import type { FC } from 'react';
+import { useContext, type FC } from 'react';
 import { getCsrfToken } from 'next-auth/react';
 import { SiweMessage } from 'siwe';
 import { useAccount, useConnect, useSignMessage } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { mainnet } from 'wagmi/chains';
 
-import { SiweIcon } from '@/components/Icons';
-import { SignInButton } from '@/components/SignInButton';
 import { IAuth } from '@/types/auth';
+import { NotificationContext } from '@/context/notificationContext';
+import { SignInButton } from '@/components/SignInButton';
+import { SiweIcon } from '@/components/Icons';
 
 interface SiweButtonProps {
   isSignIn: boolean;
@@ -16,6 +17,7 @@ interface SiweButtonProps {
 
 export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
   const { signMessageAsync } = useSignMessage();
+  const { setNotification } = useContext(NotificationContext);
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
 
@@ -39,7 +41,7 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
 
       onCTA({ address, message: JSON.stringify(message), signature });
     } catch (error) {
-      window.alert(error);
+      setNotification('Something went wrong please try again', 'Oops', 'error');
     }
   };
 

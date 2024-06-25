@@ -6,14 +6,16 @@ import { Anchor } from '@/components/Anchor';
 import { existUserEmailOrAddress } from '@/actions/user';
 import { IAuth } from '@/types/auth';
 import { SignInButtons } from '@/components/SignInButton';
-import { useErrorHandler, useNotification } from '@/hooks';
+import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
+import { NotificationContext } from '@/context/notificationContext';
+import { useContext } from 'react';
 
 export const View = () => {
   useErrorHandler();
-  const { setNotification } = useNotification();
+  const { setNotification } = useContext(NotificationContext);
 
   const notifyUnregisterUser = (type: string) => {
     setNotification(`The ${type} is not registered`, 'Not registered', 'error');
