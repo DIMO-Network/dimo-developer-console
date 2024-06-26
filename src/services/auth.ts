@@ -91,14 +91,14 @@ export const authOptions: AuthOptions = {
           );
 
           const { host: nextAuthHost } = new URL(config.frontendUrl);
+          console.log({ siweHost: siwe.domain, nextAuthHost });
           if (siwe.domain !== nextAuthHost) {
             return null;
           }
 
-          if (
-            siwe.nonce !==
-            (await getCsrfToken({ req: { headers: req.headers } }))
-          ) {
+          const csrf = await getCsrfToken({ req: { headers: req.headers } });
+          console.log({ siweNonce: siwe.nonce, csrf });
+          if (siwe.nonce !== csrf) {
             return null;
           }
 
