@@ -91,18 +91,16 @@ export const authOptions: AuthOptions = {
           );
 
           const { host: nextAuthHost } = new URL(config.frontendUrl);
-          console.log({ siweHost: siwe.domain, nextAuthHost });
           if (siwe.domain !== nextAuthHost) {
             return null;
           }
 
           const csrf = await getCsrfToken({ req: { headers: req.headers } });
-          console.log({ siweNonce: siwe.nonce, csrf });
           if (siwe.nonce !== csrf) {
             return null;
           }
 
-          console.log({ credentials });
+          console.log({ signature: credentials?.signature });
           await siwe.verify({ signature: credentials?.signature || '' });
 
           console.log('Verified');
@@ -112,6 +110,10 @@ export const authOptions: AuthOptions = {
             email: credentials?.email,
           };
         } catch (e) {
+          console.error(
+            'Error while authorizing the user with credentials method',
+            { error: e }
+          );
           return null;
         }
       },
