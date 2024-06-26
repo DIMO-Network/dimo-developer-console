@@ -61,6 +61,7 @@ export const authOptions: AuthOptions = {
   },
   providers: [
     CredentialsProvider({
+      id: 'credentials',
       name: 'Ethereum',
       credentials: {
         name: {
