@@ -102,8 +102,10 @@ export const authOptions: AuthOptions = {
             return null;
           }
 
+          console.log({ credentials });
           await siwe.verify({ signature: credentials?.signature || '' });
 
+          console.log('Verified');
           return {
             id: siwe.address,
             name: credentials?.name,
