@@ -61,7 +61,6 @@ export const authOptions: AuthOptions = {
   },
   providers: [
     CredentialsProvider({
-      id: 'credentials',
       name: 'Ethereum',
       credentials: {
         name: {
@@ -101,10 +100,8 @@ export const authOptions: AuthOptions = {
             return null;
           }
 
-          console.log({ signature: credentials?.signature });
           await siwe.verify({ signature: credentials?.signature || '' });
 
-          console.log('Verified');
           return {
             id: siwe.address,
             name: credentials?.name,
