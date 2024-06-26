@@ -125,7 +125,7 @@ export const authOptions: AuthOptions = {
   ],
   session: { strategy: 'jwt' },
   debug: process.env.VERCEL_ENV !== 'production',
-  secret: process.env.NEXAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     signIn: async ({ user, account }) => {
       const { email = null } = user ?? {};
