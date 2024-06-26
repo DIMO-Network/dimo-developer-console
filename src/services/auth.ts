@@ -124,7 +124,7 @@ export const authOptions: AuthOptions = {
     }),
   ],
   session: { strategy: 'jwt' },
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.VERCEL_ENV !== 'production',
   secret: process.env.NEXAUTH_SECRET,
   callbacks: {
     signIn: async ({ user, account }) => {
