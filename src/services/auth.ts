@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { AuthOptions } from 'next-auth';
 import { getCsrfToken } from 'next-auth/react';
 import { SiweMessage } from 'siwe';
@@ -23,18 +22,18 @@ export const jwt = async ({
   account,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 any) => {
-  const currentProvider = _.get(token, 'provider', null);
-  token.provider = _.get(account, 'provider', currentProvider);
+  const currentProvider = token?.provider ?? null;
+  token.provider = account?.provider ?? currentProvider;
 
   if (token.provider === 'credentials') {
-    token.address = _.get(token, 'sub', null);
+    token.address = token?.sub ?? null;
   }
 
   if (!token.userId) {
     const user = await getUserByToken();
-    token.userId = _.get(user, 'id', null);
-    token.name = _.get(user, 'name', token.name);
-    token.email = _.get(user, 'email', token.email);
+    token.userId = user?.id ?? null;
+    token.name = user?.name ?? token.name;
+    token.email = user?.email ?? token.email;
   }
 
   return token;
