@@ -141,17 +141,27 @@ export const authOptions: AuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: useSecureCookies,
-        domain: hostName == 'localhost' ? hostName : '.' + hostName, // add a . in front so that subdomains are included
+        domain: hostName == 'localhost' ? hostName : '.dimo.xyz',
       },
     },
-    csrfToken: {
-      name: `${cookiePrefix}next-auth.session-token`,
+    callbackUrl: {
+      name: `${cookiePrefix}next-auth.callback-url`,
       options: {
         httpOnly: true,
         sameSite: 'lax',
         path: '/',
         secure: useSecureCookies,
-        domain: hostName == 'localhost' ? hostName : '.' + hostName, // add a . in front so that subdomains are included
+        domain: hostName == 'localhost' ? hostName : '.dimo.xyz',
+      },
+    },
+    csrfToken: {
+      name: `__Host-next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: useSecureCookies,
+        domain: hostName == 'localhost' ? hostName : '.dimo.xyz',
       },
     },
   },
