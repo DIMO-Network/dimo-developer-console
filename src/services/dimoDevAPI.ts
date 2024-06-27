@@ -2,10 +2,13 @@ import axios from 'axios';
 import { cookies } from 'next/headers';
 
 import config from '@/config';
+import { cookiePrefix } from '@/services/auth';
 
 export const dimoDevAPIClient = (timeout: number = 5000) => {
   const nextCookies = cookies();
-  const nextAuthSessionToken = nextCookies.get("next-auth.session-token");
+  const nextAuthSessionToken = nextCookies.get(
+    `${cookiePrefix}next-auth.session-token`
+  );
 
   return axios.create({
     baseURL: config.backendUrl,
