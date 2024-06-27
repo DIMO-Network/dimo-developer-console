@@ -13,7 +13,6 @@ const {
   GITHUB_CLIENT_SECRET: githubClientSecret = '',
   GOOGLE_CLIENT_ID: googleClientId = '',
   GOOGLE_CLIENT_SECRET: googleClientSecret = '',
-  NEXTAUTH_URL: nextAuthUrl = '',
 } = process.env;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,10 +52,6 @@ export const session = async ({
 
   return session;
 };
-
-const useSecureCookies = nextAuthUrl.startsWith('https://');
-export const cookiePrefix = useSecureCookies ? '__Secure-' : '';
-const hostName = new URL(nextAuthUrl).hostname;
 
 export const authOptions: AuthOptions = {
   pages: {
@@ -132,38 +127,6 @@ export const authOptions: AuthOptions = {
   session: { strategy: 'jwt' },
   debug: process.env.VERCEL_ENV !== 'production',
   secret: process.env.NEXTAUTH_SECRET,
-  cookies: {
-    sessionToken: {
-      name: `${cookiePrefix}next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: useSecureCookies,
-        domain: hostName == 'localhost' ? hostName : '.dimo.xyz',
-      },
-    },
-    callbackUrl: {
-      name: `${cookiePrefix}next-auth.callback-url`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: useSecureCookies,
-        domain: hostName == 'localhost' ? hostName : '.dimo.xyz',
-      },
-    },
-    csrfToken: {
-      name: `__Host-next-auth.csrf-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: useSecureCookies,
-        domain: hostName == 'localhost' ? hostName : '.dimo.xyz',
-      },
-    },
-  },
   callbacks: {
     signIn: async ({ user, account }) => {
       const { email = null } = user ?? {};
