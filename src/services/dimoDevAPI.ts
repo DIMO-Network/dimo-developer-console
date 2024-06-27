@@ -10,16 +10,15 @@ export const cookiePrefix = useSecureCookies ? '__Secure-' : '';
 
 export const dimoDevAPIClient = (timeout: number = 5000) => {
   const nextCookies = cookies();
-  const nextAuthSessionToken = nextCookies.get(
-    `${cookiePrefix}next-auth.session-token`
-  );
+  const cookieName = `${cookiePrefix}next-auth.session-token`;
+  const nextAuthSessionToken = nextCookies.get(cookieName);
 
   return axios.create({
     baseURL: config.backendUrl,
     timeout,
     withCredentials: true,
     headers: {
-      Cookie: `next-auth.session-token=${nextAuthSessionToken?.value}`,
+      Cookie: `${cookieName}=${nextAuthSessionToken?.value}`,
     },
   });
 };
