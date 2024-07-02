@@ -7,6 +7,7 @@ import GoogleProvider from 'next-auth/providers/google';
 
 import config from '@/config';
 import { existUserByEmailOrAddress, getUserByToken } from '@/services/user';
+import { IUser } from '@/types/user';
 
 const {
   GITHUB_CLIENT_ID: githubClientId = '',
@@ -29,7 +30,7 @@ any) => {
   }
 
   if (!token.userId) {
-    const user = await getUserByToken();
+    const user = await getUserByToken().catch(() => ({})) as Partial<IUser>;
     token.userId = user?.id ?? null;
     token.name = user?.name ?? token.name;
     token.email = user?.email ?? token.email;
