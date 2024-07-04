@@ -4,16 +4,7 @@ import { UserAvatar } from '@/components/UserAvatar';
 
 describe('UserAvatar', () => {
   it('renders an avatar with the user initials', () => {
-    render(
-      <UserAvatar
-        user={{
-          name: 'John Doe',
-          email: 'jhondoe@gmail.com',
-          auth: 'github',
-          auth_login: 'jhondoe@gmail.com',
-        }}
-      />
-    );
+    render(<UserAvatar name="John Doe" />);
 
     const initialsText = screen.getByText('JD');
 
@@ -21,7 +12,7 @@ describe('UserAvatar', () => {
   });
 
   it('renders an avatar with empty value', () => {
-    render(<UserAvatar />);
+    render(<UserAvatar name="" />);
 
     const initialsElm = screen.getByRole('user-avatar');
 

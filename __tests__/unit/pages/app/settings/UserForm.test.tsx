@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { UserForm } from '@/app/app/settings/components/UserForm';
+import { UserForm } from '@/app/settings/components/UserForm';
 
 describe('UserForm', () => {
   it('renders user form on the settings page', () => {
