@@ -62,6 +62,6 @@ export const bottomMenu = [
     label: 'Settings',
     icon: SettingsIcon,
     iconClassName: 'h-5 w-5 fill-grey-200',
-    link: '/app/settings',
+    link: '/settings',
   },
 ];
