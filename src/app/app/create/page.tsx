@@ -1,21 +1,12 @@
-import { Title } from '@/components/Title';
-import { Form } from '@/app/app/create/components/Form';
-import { BackButton } from '@/components/BackButton';
+import { Metadata } from 'next';
 
-import './page.css';
+import { View } from '@/app/app/create/components/View';
+import configuration from '@/config';
 
-const CreateAppPage = () => {
-  return (
-    <div className="page">
-      <BackButton />
-      <div className="page-title">
-        <Title>Create a new app</Title>
-      </div>
-      <div className="form">
-        <Form />
-      </div>
-    </div>
-  );
+export const metadata: Metadata = {
+  title: `Create an Application | ${configuration.appName}`,
 };
+
+const CreateAppPage = View;
 
 export default CreateAppPage;
