@@ -23,4 +23,5 @@ export * from './SettingsIcon';
 export * from './SiweIcon';
 export * from './SummarizeIcon';
 export * from './SupportAgentIcon';
-export * from './WarningAmber';
+export * from './WalletIcon';
+export * from './WarningAmberIcon';
