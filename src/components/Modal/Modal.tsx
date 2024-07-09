@@ -1,6 +1,14 @@
-import { type FC, Fragment, useState, ReactNode } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+'use client';
+
+import { type FC, Fragment, ReactNode } from 'react';
+import {
+  Dialog,
+  Transition,
+  TransitionChild,
+  DialogPanel,
+} from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import classNames from 'classnames';
 
 import './Modal.css';
 
@@ -11,16 +19,22 @@ interface IAction {
 }
 
 interface IProps {
+  isOpen: boolean;
+  setIsOpen: (f: boolean) => void;
+  className: string;
   actions?: IAction[];
   children: ReactNode;
 }
-export const Modal: FC<IProps> = ({ actions = [], children }) => {
-  const [open, setOpen] = useState(true);
-
+export const Modal: FC<IProps> = ({
+  children,
+  isOpen,
+  setIsOpen,
+  className,
+}) => {
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={setOpen}>
-        <Transition.Child
+    <Transition show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={setIsOpen}>
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -29,11 +43,11 @@ export const Modal: FC<IProps> = ({ actions = [], children }) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" />
+        </TransitionChild>
 
-        <div className="modal-container">
-          <Transition.Child
+        <div className={classNames('modal-container', className)}>
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -42,41 +56,24 @@ export const Modal: FC<IProps> = ({ actions = [], children }) => {
             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <Dialog.Panel className="dialog-panel">
+            <DialogPanel className="dialog-panel">
               <div className="dialog-close-content">
                 <button
                   type="button"
                   className="close-btn"
-                  onClick={() => setOpen(false)}
+                  onClick={() => setIsOpen(false)}
+                  role="close-modal"
                 >
                   <span className="sr-only">Close</span>
-                  <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                  <XMarkIcon className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
               <div className="dialog-content">{children}</div>
-              {actions.length > 0 && (
-                <div className="dialog-action-content">
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => setOpen(false)}
-                  >
-                    Deactivate
-                  </button>
-                  <button
-                    type="button"
-                    className="danger"
-                    onClick={() => setOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
-            </Dialog.Panel>
-          </Transition.Child>
+            </DialogPanel>
+          </TransitionChild>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
 
