@@ -6,7 +6,7 @@ import { mainnet, polygon, polygonAmoy } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { RainbowKitSiweNextAuthProvider } from '@rainbow-me/rainbowkit-siwe-next-auth';
 import { SessionProvider } from 'next-auth/react';
-import { ReactNode } from 'react';
+import { ComponentType } from 'react';
 
 import configuration from '@/config';
 
@@ -23,20 +23,32 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-export default function RainbowSessionProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  return (
-    <WagmiProvider config={config}>
-      <SessionProvider>
-        <QueryClientProvider client={queryClient}>
-          <RainbowKitSiweNextAuthProvider>
-            <RainbowKitProvider>{children}</RainbowKitProvider>
-          </RainbowKitSiweNextAuthProvider>
-        </QueryClientProvider>
-      </SessionProvider>
-    </WagmiProvider>
-  );
-}
+export const withRainBow = <P extends object>(
+  WrappedComponent: ComponentType<P>
+) => {
+  const HOC: React.FC<P> = (props) => {
+    // Render the wrapped component with any additional props
+    return (
+      <WagmiProvider config={config}>
+        <SessionProvider>
+          <QueryClientProvider client={queryClient}>
+            <RainbowKitSiweNextAuthProvider>
+              <RainbowKitProvider>
+                <WrappedComponent {...props} />
+              </RainbowKitProvider>
+            </RainbowKitSiweNextAuthProvider>
+          </QueryClientProvider>
+        </SessionProvider>
+      </WagmiProvider>
+    );
+  };
+
+  // Set display name for the HOC component (optional but helpful for debugging)
+  HOC.displayName = `withRainBow(${
+    WrappedComponent.displayName || WrappedComponent.name
+  })`;
+
+  return HOC;
+};
+
+export default withRainBow;
