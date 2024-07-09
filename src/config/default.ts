@@ -40,3 +40,5 @@ export const RAINBOW_PROJECT = {
   ID: '528803928611a7781fb6b23eaf232224',
   NAME: 'Dimo Developer Console',
 };
+
+export const DLC_ADDRESS = '0x9A9D2E717bB005B240094ba761Ff074d392C7C85';

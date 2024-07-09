@@ -12,6 +12,7 @@ type Configuration = {
   backendUrl: string;
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
+  DLC_ADDRESS: string;
 };
 
 export const getConfig = (): Configuration => {
