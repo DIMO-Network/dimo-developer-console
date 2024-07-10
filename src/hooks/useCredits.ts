@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 export const useCredits = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return { isOpen, setIsOpen };
 };

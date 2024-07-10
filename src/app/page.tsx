@@ -1,5 +1,12 @@
-const Home = () => {
-  return <></>;
-};
+import { HomePage, metadata as homeMetadata } from '@/app/app/page';
+import { AuthorizedLayout } from '@/layouts/AuthorizedLayout';
 
-export default Home;
+export const metadata = homeMetadata;
+
+const MainPage = () => (
+  <AuthorizedLayout>
+    <HomePage />
+  </AuthorizedLayout>
+);
+
+export default MainPage;
