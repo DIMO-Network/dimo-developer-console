@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 
 import configuration from '@/config';
 
-import { View } from '@/app/app/View';
+import { View } from '@/app/app/components/View';
 
 export const metadata: Metadata = {
   title: `Home | ${configuration.appName}`,

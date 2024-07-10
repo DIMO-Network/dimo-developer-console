@@ -1,3 +1,4 @@
+import { type FC } from 'react';
 import { Metadata } from 'next';
 
 import { View } from '@/app/app/list/components/View';
@@ -7,6 +8,6 @@ export const metadata: Metadata = {
   title: `Applications | ${configuration.appName}`,
 };
 
-const AppListPage = () => <View />;
+export const AppListPage: FC = () => <View />;
 
 export default AppListPage;
