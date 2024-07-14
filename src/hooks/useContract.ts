@@ -1,24 +1,26 @@
 'use client';
-import Web3, { Contract, ContractAbi } from 'web3';
+import { useAccount } from 'wagmi';
 import { useEffect, useState } from 'react';
 
-import contractABI from '@/contracts/DeveloperLicenseContract.json';
-import configuration from '@/config';
+import {
+  initDimoSmartContract,
+  initDimoLicenseSmartContract,
+} from '@/utils/contract';
+import { ERC20 } from '@maticnetwork/maticjs/dist/ts/pos/erc20';
 
 export const useContract = () => {
-  const [contract, setContract] = useState<Contract<ContractAbi> | null>(null);
-  const [balance, setBalance] = useState<number>(0);
+  const [dimoContract, setDimoContract] = useState<ERC20>();
+  const [dimoLicenseContract, setDimoLicenseContract] = useState<ERC20>();
+  const { address, isConnected } = useAccount();
 
   useEffect(() => {
-    const web3 = new Web3(window.ethereum);
-    const contractAddress = configuration.DLC_ADDRESS;
-    const contract = new web3.eth.Contract(contractABI, contractAddress);
+    if (isConnected && address) {
+      initDimoSmartContract(address).then(setDimoContract);
+      initDimoLicenseSmartContract(address).then(setDimoLicenseContract);
+    }
+  }, [isConnected]);
 
-    setContract(contract);
-    contract.methods.totalStaked().call<number>().then(setBalance);
-  }, []);
-
-  return { contract, balance };
+  return { dimoContract, dimoLicenseContract, address, isConnected };
 };
 
 export default useContract;

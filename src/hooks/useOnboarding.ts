@@ -2,24 +2,24 @@
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 
-import { getLicense } from '@/actions/license';
-import { ILicense } from '@/types/license';
+import { getWorkspace } from '@/actions/workspace';
+import { IWorkspace } from '@/types/workspace';
 
 export const useOnboarding = () => {
   const { isConnected } = useAccount();
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>();
-  const [license, setLicense] = useState<ILicense>();
+  const [workspace, setWorkspace] = useState<IWorkspace>();
 
   useEffect(() => {
-    getLicense().then(setLicense);
+    getWorkspace().then(setWorkspace);
   }, []);
 
   useEffect(() => {
-    const hasLicense = Object.keys(license ?? {}).length > 0;
-    setIsOnboardingCompleted(isConnected && hasLicense);
-  }, [isConnected, license]);
+    const hasWorkspace = Object.keys(workspace ?? {}).length > 0;
+    setIsOnboardingCompleted(isConnected && hasWorkspace);
+  }, [isConnected, workspace]);
 
-  return { isOnboardingCompleted };
+  return { isOnboardingCompleted, workspace };
 };
 
 export default useOnboarding;
