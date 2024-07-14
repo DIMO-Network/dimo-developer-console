@@ -11,7 +11,6 @@ import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriLi
 import { SignerForm } from '@/app/app/details/[id]/components/SignerForm';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { Title } from '@/components/Title';
-import { withNotifications } from '@/hoc';
 
 import './View.css';
 
@@ -46,4 +45,4 @@ const View = ({ params: { id } }: { params: { id: string } }) => {
   );
 };
 
-export default withNotifications(View);
+export default View;
