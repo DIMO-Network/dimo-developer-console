@@ -1,3 +1,5 @@
+import { IWorkspace } from './workspace';
+
 type ENVIRONMENTS = 'production' | 'sandbox';
 
 export interface ISigner {
@@ -16,6 +18,11 @@ export interface IApp {
   name: string;
   scope: ENVIRONMENTS;
   client_id: string;
-  signers: ISigner[];
-  redirectUris: IRedirectUri[];
+  signers?: ISigner[];
+  redirectUris?: IRedirectUri[];
+}
+
+export interface IAppWithWorkspace {
+  app: IApp;
+  workspace: Partial<IWorkspace>;
 }

@@ -1,9 +1,10 @@
-export interface ILicense {
-  id: string;
+export interface IWorkspace {
+  id?: string;
+  name: string;
   token_id: number;
   client_id: string;
   owner: string;
-  company_id: string;
+  company_id?: string;
   created_at?: Date;
   updated_at?: Date;
   deleted?: boolean;
