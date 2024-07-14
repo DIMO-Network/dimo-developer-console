@@ -2,7 +2,7 @@ import React, { type ReactElement } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
-import { DCXInput } from '@/components/DCXInput';
+import { TokenInput } from '@/components/TokenInput';
 
 const renderWithForm = (
   ui: React.ReactElement,
@@ -21,16 +21,16 @@ const renderWithForm = (
   return render(ui, { wrapper: Wrapper as any });
 };
 
-describe('DCXInput', () => {
+describe('TokenInput', () => {
   it('renders the component', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    renderWithForm(<DCXInput name="dcx" control={null as any} />);
+    renderWithForm(<TokenInput name="dcx" control={null as any} />);
     expect(screen.getByRole('spinbutton')).toBeInTheDocument();
   });
 
   it('handles value changes', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    renderWithForm(<DCXInput name="dcx" control={null as any} />);
+    renderWithForm(<TokenInput name="dcx" control={null as any} />);
     const input = screen.getByRole('spinbutton');
 
     fireEvent.change(input, { target: { value: '100' } });
@@ -41,8 +41,19 @@ describe('DCXInput', () => {
   });
 
   it('handles suggestion button clicks', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    renderWithForm(<DCXInput name="dcx" control={null as any} />);
+    renderWithForm(
+      <TokenInput
+        name="dcx"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        control={null as any}
+        suggestions={[
+          { label: '10k', value: 10000 },
+          { label: '100k', value: 100000 },
+          { label: '500k', value: 500000 },
+          { label: '1M', value: 1000000 },
+        ]}
+      />
+    );
 
     fireEvent.click(screen.getByText('10k'));
     expect(screen.getByRole('spinbutton')).toHaveValue(10000);

@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/Button';
 import { CreditsContext } from '@/context/creditsContext';
-import { DCXInput } from '@/components/DCXInput';
+import { TokenInput } from '@/components/TokenInput';
 import { Modal } from '@/components/Modal';
 import { PaymentMethodSelector } from '@/components/PaymentMethodSelector';
 import { Title } from '@/components/Title';
@@ -47,7 +47,16 @@ export const BuyCreditsModal: FC<IProps> = () => {
             licenses on the Build DIMO platform
           </p>
         </div>
-        <DCXInput control={control} name="credits" />
+        <TokenInput
+          control={control}
+          name="credits"
+          suggestions={[
+            { label: '10k', value: 10000 },
+            { label: '100k', value: 100000 },
+            { label: '500k', value: 500000 },
+            { label: '1M', value: 1000000 },
+          ]}
+        />
         <div className="credit-total-content">
           <p className="total-descriptor">Your total</p>
           <p className="total-value">$ {credits}</p>
