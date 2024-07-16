@@ -1,44 +1,105 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { middlewares } from '@/middlewares/config';
+import { JWT, getToken } from 'next-auth/jwt';
+import { withAuth } from 'next-auth/middleware';
+import { NextFetchEvent, NextResponse } from 'next/server';
 
-// This function can be marked `async` if using `await` inside
-export async function middleware(request: NextRequest) {
-  const nextResponse = NextResponse.next();
+import { isIn } from '@/utils/middlewareUtils';
+import { getUserByToken } from './services/user';
+import { LoggedUser } from '@/utils/loggedUser';
+import configuration from '@/config';
+import axios, { isAxiosError } from 'axios';
 
-  const middlewareHeader = [];
-  for (const middleware of middlewares) {
-    const result = await middleware(request);
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
-    if (!result.ok) {
-      return result;
+const authMiddleware = withAuth({
+  callbacks: {
+    authorized: ({ token }) => !!token,
+  },
+  pages: {
+    signIn: 'sign-in',
+    error: 'sign-in?error=true',
+  },
+});
+
+const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
+  const url = request.nextUrl.pathname;
+
+  const isAPI = url.startsWith(API_PATH);
+  const isPublicAPIPath = UNPROTECTED_PATHS.some(isIn(url));
+  return isAPI && !isPublicAPIPath && !token;
+};
+
+const handleExpiredSession = (error: unknown) => {
+  if (isAxiosError(error)) {
+    const status = error.response?.status;
+    if (status === 401) {
+      const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
+      axios.post(signOutUrl);
+      return 'sign-in?error=expired';
     }
-    middlewareHeader.push(result.headers);
   }
+  return 'app?error=true';
+};
 
-  let redirectTo = null;
+export const middleware = async (
+  request: NextRequest,
+  event: NextFetchEvent
+) => {
+  const hasError = request.nextUrl.searchParams.get('error');
+  const token = await getToken({ req: request });
 
-  middlewareHeader.some((header) => {
-    const redirect = header.get('x-middleware-request-redirect');
+  // Setting the user up
+  try {
+    if (token) {
+      const user = await getUserByToken();
+      request.user = new LoggedUser(user);
 
-    if (redirect) {
-      redirectTo = redirect;
-      return true;
+      const isCompliant = request.user?.isCompliant ?? false;
+      const missingFlow = request.user?.missingFlow ?? null;
+
+      const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+      const isAPIProtected = mustBeAuthorize(request, token);
+      const flow = request.nextUrl.searchParams.get('flow');
+
+      if (token && !isCompliant && !flow) {
+        return NextResponse.redirect(
+          new URL(`/sign-up?flow=${missingFlow}`, request.url),
+          {
+            status: 307,
+          }
+        );
+      }
+
+      if (isLoginPage && token && isCompliant) {
+        return NextResponse.redirect(new URL('/app', request.url), {
+          status: 307,
+        });
+      }
+
+      if (isAPIProtected) {
+        return NextResponse.json(
+          {
+            message: 'Unauthorized Access',
+          },
+          { status: 401 }
+        );
+      }
+
+      if (!isLoginPage) {
+        return authMiddleware(request, event);
+      }
     }
-    return false; // Continue the loop
-  });
 
-  if (redirectTo) {
-    return NextResponse.redirect(new URL(redirectTo, request.url), {
-      status: 307,
-    });
+    return NextResponse.next();
+  } catch (error: unknown) {
+    const path = await handleExpiredSession(error);
+    const redirectUrl = `${configuration.frontendUrl}${path}`;
+    if (!hasError) {
+      return Response.redirect(redirectUrl);
+    }
+    return NextResponse.next();
   }
+};
 
-  return nextResponse;
-}
-
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: [
-    '/((?!_next/static|.*svg|.*png|.*jpg|.*jpeg|.*gif|.*webp|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/auth).*)'],
 };

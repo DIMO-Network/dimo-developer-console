@@ -4,9 +4,9 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { isURL, isEmpty } from 'validator';
 
 import { Button } from '@/components/Button';
-import { IUser } from '@/types/user';
-import { Label } from '@/components/Label';
 import { DEVELOPER_TYPES, REGIONS } from '@/config/default';
+import { IAuth } from '@/types/auth';
+import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
@@ -29,7 +29,7 @@ const typeOptions = DEVELOPER_TYPES.map((type) => ({
 })) as { value: string; text: string }[];
 
 interface IProps {
-  onNext: (flow: string, user: Partial<IUser>) => void;
+  onNext: (flow: string, auth?: Partial<IAuth>) => void;
 }
 
 export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
@@ -52,7 +52,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
       company: {
         ...companyData,
       },
-    } as Partial<IUser>);
+    } as Partial<IAuth>);
   };
 
   return (

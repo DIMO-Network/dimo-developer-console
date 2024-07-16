@@ -8,12 +8,13 @@ export interface IProps extends InputHTMLAttributes<HTMLInputElement> {}
 export type Ref = HTMLInputElement;
 
 export const CheckboxField: FC<IProps> = forwardRef<Ref, IProps>(
-  ({ className = '', ...props }) => {
+  ({ className = '', ...props }, ref) => {
     return (
       <input
         {...props}
         type="checkbox"
         className={classNames('checkbox', className)}
+        ref={ref}
       />
     );
   }

@@ -14,9 +14,10 @@ interface IProps {
 export const TeamManagement: FC<IProps> = ({ teamCollaborators }) => {
   const { control } = useForm();
   const renderUserName = ({ ...teamCollaborator }: ITeamCollaborator) => {
+    const { name = '' } = teamCollaborator.User ?? {};
     return (
       <div className="flex flex-row items-center gap-3">
-        <UserAvatar user={teamCollaborator.User} />
+        <UserAvatar name={name ?? ''} />
         <p>{teamCollaborator.User?.name ?? ''}</p>
       </div>
     );
@@ -36,7 +37,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators }) => {
               { text: TeamRoles.COLLABORATOR, value: TeamRoles.COLLABORATOR },
               { text: TeamRoles.OWNER, value: TeamRoles.OWNER },
             ]}
-            role='role-input'
+            role="role-input"
             ref={ref}
           />
         )}

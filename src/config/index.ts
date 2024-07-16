@@ -3,6 +3,9 @@ import * as productionConfig from './production';
 import * as previewConfig from './preview';
 
 type Configuration = {
+  LOGIN_PAGES: string[];
+  API_PATH: string;
+  UNPROTECTED_PATHS: string[];
   REGIONS: string[];
   DEVELOPER_TYPES: string[];
   backendUrl: string;
@@ -10,7 +13,7 @@ type Configuration = {
   RAINBOW_PROJECT: Record<string, string>;
 };
 
-export const getConfig = () => {
+export const getConfig = (): Configuration => {
   // Determine the current environment
   const env = process.env.VERCEL_ENV;
 

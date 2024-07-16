@@ -7,6 +7,7 @@ import { NotificationContext } from '@/context/notificationContext';
 
 const ERROR_CODES = {
   unique_email: 'The email is already registered',
+  expired: 'The session has expired please sign in again',
 };
 
 export const useErrorHandler = () => {
