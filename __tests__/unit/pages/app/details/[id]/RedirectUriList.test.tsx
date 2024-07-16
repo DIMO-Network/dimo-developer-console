@@ -7,10 +7,12 @@ const [app] = appListMock;
 
 describe('RedirectUriList', () => {
   it('renders the redirect uri list', () => {
-    const { container } = render(<RedirectUriList app={app} />);
+    const { container } = render(
+      <RedirectUriList list={app.RedirectUris} refreshData={() => {}} />
+    );
 
-    const [redirectUri] = app.redirectUris;
-    const [redirectUriElm] = screen.getAllByText(redirectUri.redirectUri);
+    const [redirectUri] = app.RedirectUris ?? [];
+    const [redirectUriElm] = screen.getAllByText(redirectUri.uri);
     const [toggleElm] = screen.getAllByLabelText('toggle');
 
     fireEvent.click(toggleElm);

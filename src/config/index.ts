@@ -3,6 +3,7 @@ import * as productionConfig from './production';
 import * as previewConfig from './preview';
 
 type Configuration = {
+  appName: string;
   LOGIN_PAGES: string[];
   API_PATH: string;
   UNPROTECTED_PATHS: string[];
@@ -11,6 +12,10 @@ type Configuration = {
   backendUrl: string;
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
+  DLC_ADDRESS: string;
+  DC_ADDRESS: string;
+  gasLimit: number;
+  gasPrice: number;
 };
 
 export const getConfig = (): Configuration => {

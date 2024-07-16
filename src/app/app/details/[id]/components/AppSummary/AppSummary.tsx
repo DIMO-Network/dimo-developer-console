@@ -13,9 +13,11 @@ interface IProps {
 }
 
 export const AppSummary: FC<IProps> = ({
-  app: { name, scope, client_id: clientId },
+  app: { name, scope, Workspace: workspace = {} },
 }) => {
   const { setNotification } = useContext(NotificationContext);
+  const { client_id: clientId = '' } = workspace;
+
   const handleCopy = () => {
     void navigator.clipboard.writeText(clientId);
     setNotification('Client ID copied!', 'Copying', 'info');

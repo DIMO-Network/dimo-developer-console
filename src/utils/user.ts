@@ -11,3 +11,19 @@ export const getInitials = (fullName: string): string => {
     return '';
   }
 };
+
+export const shortenAddress = (address: string): string => {
+  if (!address || typeof address !== 'string') {
+    throw new Error('Invalid address');
+  }
+
+  // Check if the address starts with 0x and is 42 characters long
+  if (address.length !== 42 || !address.startsWith('0x')) {
+    throw new Error('Invalid Ethereum address');
+  }
+
+  const start = address.substring(0, 6); // First 6 characters including '0x'
+  const end = address.substring(address.length - 4); // Last 4 characters
+
+  return `${start}...${end}`;
+};

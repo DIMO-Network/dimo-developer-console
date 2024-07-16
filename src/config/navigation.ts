@@ -17,7 +17,7 @@ export const mainMenu = [
     label: 'Home',
     icon: HomeIcon,
     iconClassName: 'h-5 w-5',
-    link: '/app/list',
+    link: '/app',
   },
   {
     label: 'Integrations',
@@ -62,6 +62,6 @@ export const bottomMenu = [
     label: 'Settings',
     icon: SettingsIcon,
     iconClassName: 'h-5 w-5 fill-grey-200',
-    link: '/app/settings',
+    link: '/settings',
   },
 ];

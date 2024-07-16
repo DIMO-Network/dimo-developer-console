@@ -1,9 +1,9 @@
 'use client';
 import { FC } from 'react';
 
-import { TeamManagement } from '@/app/app/settings/components/TeamManagement';
+import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
-import { UserForm } from '@/app/app/settings/components/UserForm';
+import { UserForm } from '@/app/settings/components/UserForm';
 import { useUser, useTeamCollaborators } from '@/hooks';
 
 import './View.css';

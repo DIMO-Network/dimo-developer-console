@@ -9,7 +9,8 @@ import './Table.css';
 interface IProps {
   columns: IColumn[];
   data: Record<string, unknown>[];
-  actions?: FC[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  actions?: FC<any>[];
 }
 
 export const Table: FC<IProps> = ({ columns, data, actions }) => {
@@ -38,7 +39,10 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
               return <Cell key={name}>{renderNode || String(textNode)}</Cell>;
             })}
             {actions && (
-              <td className="table-action-cell" key={`field-${item?.id as string}`}>
+              <td
+                className="table-action-cell"
+                key={`field-${item?.id as string}`}
+              >
                 {actions?.map((action) => action(item))}
               </td>
             )}

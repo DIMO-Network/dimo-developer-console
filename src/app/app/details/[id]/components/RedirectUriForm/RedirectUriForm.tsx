@@ -1,38 +1,63 @@
+import { useContext, useState, type FC } from 'react';
 import { isURL } from 'validator';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { type FC } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/Button';
+import { createMyRedirectUri } from '@/actions/app';
 import { Label } from '@/components/Label';
+import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 
 import './RedirectUriForm.css';
 
 interface IRedirectUri {
-  redirectUri: string;
+  uri: string;
 }
 
-export const RedirectUriForm: FC = () => {
+interface IProps {
+  appId: string;
+  refreshData: () => void;
+}
+
+export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { setNotification } = useContext(NotificationContext);
   const {
     formState: { errors },
     handleSubmit,
     register,
+    getValues,
   } = useForm<IRedirectUri>({
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
 
-  const addSigner = () => {};
+  const addSigner = async () => {
+    try {
+      setIsLoading(true);
+      const { uri } = getValues();
+      await createMyRedirectUri(uri, appId);
+      refreshData();
+    } catch (error: unknown) {
+      setNotification(
+        'Something went wrong while creating the redirect URI',
+        'Oops...',
+        'error'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="redirect-uri-form">
       <form onSubmit={handleSubmit(addSigner)}>
         <div className="field">
-          <Label htmlFor="redirectUri">
+          <Label htmlFor="uri">
             <TextField
-              {...register('redirectUri', {
+              {...register('uri', {
                 required: 'Please enter the redirect URI',
                 validate: {
                   url: (str = '') => isURL(str) || 'Invalid Redirect URI',
@@ -43,12 +68,14 @@ export const RedirectUriForm: FC = () => {
               role="redirect-url-input"
             />
           </Label>
-          {errors.redirectUri && (
-            <TextError errorMessage={errors.redirectUri?.message ?? ''} />
-          )}
+          {errors.uri && <TextError errorMessage={errors.uri?.message ?? ''} />}
         </div>
         <div className="cta">
-          <Button className="primary-outline px-4">
+          <Button
+            className="primary-outline px-4"
+            loading={isLoading}
+            loadingColor="primary"
+          >
             <PlusIcon className="w-5 h-5 mr-2" />
             Add URI
           </Button>

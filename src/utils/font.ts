@@ -1,10 +1,6 @@
-import React from 'react';
-import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 
-import './globals.css';
-
-const euclid = localFont({
+export const dimoFont = localFont({
   src: [
     {
       path: './../assets/fonts/Euclid Circular A Light.ttf',
@@ -48,22 +44,3 @@ const euclid = localFont({
     },
   ],
 });
-
-export const metadata: Metadata = {
-  title: 'DIMO Developer Console',
-  description: 'Developer Console for DIMO apps',
-};
-
-const RootLayout = ({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) => {
-  return (
-    <html lang="en">
-      <body className={euclid.className}>{children}</body>
-    </html>
-  );
-};
-
-export default RootLayout;
