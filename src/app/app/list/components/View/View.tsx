@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -13,7 +13,7 @@ import { IApp } from '@/types/app';
 
 import './View.css';
 
-const View = () => {
+export const View: FC = () => {
   const [apps, setApps] = useState<IApp[]>([]);
   const router = useRouter();
   const { data: session } = useSession();

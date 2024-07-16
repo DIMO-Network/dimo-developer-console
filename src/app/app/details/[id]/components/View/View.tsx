@@ -15,7 +15,7 @@ import { Title } from '@/components/Title';
 
 import './View.css';
 
-const View = ({ params: { id: appId } }: { params: { id: string } }) => {
+export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const [app, setApp] = useState<IApp>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);

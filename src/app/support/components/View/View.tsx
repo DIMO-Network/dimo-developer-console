@@ -3,7 +3,7 @@ import { FC } from 'react';
 
 import { ContactCard } from '@/app/support/components/ContactCard';
 import { Title } from '@/components/Title';
-import { LightBulb, MenuBook, WarningAmber } from '@/components/Icons';
+import { LightBulb, MenuBook, WarningAmberIcon } from '@/components/Icons';
 
 import './View.css';
 import { Anchor } from '@/components/Anchor';
@@ -24,7 +24,7 @@ const View: FC = () => {
           <ContactCard
             title="Report an issue"
             description="If you're experiencing unexpected issues with the DIMO API please contact us here."
-            Icon={WarningAmber}
+            Icon={WarningAmberIcon}
           />
           <p className="status-action">
             Known issues and outages can be found on our{' '}
