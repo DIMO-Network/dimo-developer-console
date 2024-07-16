@@ -24,6 +24,6 @@ describe('AppSummary', () => {
 
     expect(appNameElm).toBeInTheDocument();
     expect(scopeElm).toBeInTheDocument();
-    expect(writeTextTest).toHaveBeenCalledWith(app.client_id);
+    expect(writeTextTest).toHaveBeenCalledWith(app.Workspace.client_id);
   });
 });
