@@ -1,16 +1,21 @@
-import { type FC } from 'react';
+import { useContext, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
 import { ContentCopyIcon } from '@/components/Icons';
-import { IApp } from '@/types/app';
+import { ISigner } from '@/types/app';
+import { NotificationContext } from '@/context/notificationContext';
 import { Table } from '@/components/Table';
+import { deleteMySigner } from '@/actions/app';
 
 interface IProps {
-  app: IApp;
+  list: ISigner[] | undefined;
+  refreshData: () => void;
 }
 
-export const SignerList: FC<IProps> = ({ app }) => {
+export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
+  const { setNotification } = useContext(NotificationContext);
+
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
   };
@@ -41,18 +46,43 @@ export const SignerList: FC<IProps> = ({ app }) => {
     );
   };
 
-  const renderDeleteSignerAction = () => {
-    return <TrashIcon className="w-5 h-5" />;
+  const renderDeleteSignerAction = ({ id = '' }: ISigner) => {
+    return (
+      <button type="button" onClick={() => handleDelete(id)}>
+        <TrashIcon className="w-5 h-5" />
+      </button>
+    );
   };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMySigner(id);
+      refreshData();
+    } catch (error: unknown) {
+      setNotification(
+        'Something wen wrong while deleting the API key',
+        'Oops...',
+        'error'
+      );
+    }
+  };
+
   return (
-    <Table
-      columns={[
-        { name: 'wallet' },
-        { name: 'key', render: (item) => renderWithCopy('key', item) },
-      ]}
-      data={app.signers}
-      actions={[renderTestAuthenticationAction, renderDeleteSignerAction]}
-    />
+    <>
+      {list && list.length > 0 && (
+        <Table
+          columns={[
+            {
+              name: 'api_key',
+              label: 'API Key',
+              render: (item) => renderWithCopy('api_key', item),
+            },
+          ]}
+          data={list.filter(({ deleted }) => !deleted)}
+          actions={[renderTestAuthenticationAction, renderDeleteSignerAction]}
+        />
+      )}
+    </>
   );
 };
 

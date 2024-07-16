@@ -1,29 +1,35 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 import { Anchor } from '@/components/Anchor';
 import { AppCard } from '@/components/AppCard';
-import { appListMock } from '@/mocks/appList';
 import { Button } from '@/components/Button';
+import { getApps } from '@/actions/app';
 import { IApp } from '@/types/app';
 
 import './View.css';
 
 const View = () => {
+  const [apps, setApps] = useState<IApp[]>([]);
   const router = useRouter();
   const { data: session } = useSession();
   const { user: { name = '' } = {} } = session ?? {};
+
+  useEffect(() => {
+    getApps().then(({ data: createdApps }) => setApps(createdApps));
+  }, []);
 
   const handleCreateApp = () => {
     router.push('/app/create');
   };
 
-  const renderItem = (app: IApp, id: number) => {
+  const renderItem = (app: IApp) => {
     return (
-      <Anchor href={`/app/details/${id}`} key={app.name}>
+      <Anchor href={`/app/details/${app?.id}`} key={app?.id}>
         <AppCard className="hover:!border-white" {...app} />
       </Anchor>
     );
@@ -42,7 +48,7 @@ const View = () => {
         </Button>
       </div>
 
-      <div className="app-list">{appListMock.map(renderItem)}</div>
+      <div className="app-list">{apps.map(renderItem)}</div>
     </div>
   );
 };

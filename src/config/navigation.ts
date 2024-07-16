@@ -17,7 +17,7 @@ export const mainMenu = [
     label: 'Home',
     icon: HomeIcon,
     iconClassName: 'h-5 w-5',
-    link: '/app/list',
+    link: '/app',
   },
   {
     label: 'Integrations',

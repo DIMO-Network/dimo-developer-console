@@ -13,6 +13,9 @@ type Configuration = {
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
   DLC_ADDRESS: string;
+  DC_ADDRESS: string;
+  gasLimit: number;
+  gasPrice: number;
 };
 
 export const getConfig = (): Configuration => {

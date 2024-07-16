@@ -41,4 +41,8 @@ export const RAINBOW_PROJECT = {
   NAME: 'Dimo Developer Console',
 };
 
+export const DC_ADDRESS = '0x379e5770d36bf563c267097e3fa54ddccbefc00b';
 export const DLC_ADDRESS = '0x9A9D2E717bB005B240094ba761Ff074d392C7C85';
+
+export const gasLimit = 21000;
+export const gasPrice = 30000000000;

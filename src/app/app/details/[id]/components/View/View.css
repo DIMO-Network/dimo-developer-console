@@ -6,6 +6,14 @@
   }
 
   .signers-content {
-    @apply flex flex-col gap-4;
+    @apply grid grid-cols-12 gap-4 justify-between;
+
+    .title {
+      @apply col-span-10;
+    }
+
+    .generate-signer {
+      @apply col-span-2 w-full;
+    }
   }
 }
