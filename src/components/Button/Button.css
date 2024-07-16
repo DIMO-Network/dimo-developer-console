@@ -1,6 +1,10 @@
 .button {
   @apply rounded-full h-12 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex flex-row gap-2;
 
+  span.content {
+    @apply flex flex-row gap-2 items-center justify-center;
+  }
+
   &.primary {
     background-color: rgb(183 242 235 / 1);
     background-image: radial-gradient(

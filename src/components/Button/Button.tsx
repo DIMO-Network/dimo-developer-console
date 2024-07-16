@@ -13,12 +13,14 @@ import './Button.css';
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   loading?: boolean;
+  loadingColor?: string;
 }
 
 export const Button: FC<ButtonProps> = ({
   children,
   className: inputClassName,
   loading = false,
+  loadingColor = 'black',
   onClick = () => {},
   ...props
 }) => {
@@ -30,8 +32,8 @@ export const Button: FC<ButtonProps> = ({
 
   return (
     <button {...props} onClick={handleClick} className={className}>
-      {loading && <Loading className="!text-black" />}
-      {!loading && <span>{children}</span>}
+      {loading && <Loading className={`text-${loadingColor}`} />}
+      {!loading && <span className="content">{children}</span>}
     </button>
   );
 };
