@@ -22,6 +22,7 @@ interface IProps {
   isOpen: boolean;
   setIsOpen: (f: boolean) => void;
   className: string;
+  showClose?: boolean;
   actions?: IAction[];
   children: ReactNode;
 }
@@ -30,6 +31,7 @@ export const Modal: FC<IProps> = ({
   isOpen,
   setIsOpen,
   className,
+  showClose = true,
 }) => {
   return (
     <Transition show={isOpen} as={Fragment}>
@@ -57,17 +59,19 @@ export const Modal: FC<IProps> = ({
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel className="dialog-panel">
-              <div className="dialog-close-content">
-                <button
-                  type="button"
-                  className="close-btn"
-                  onClick={() => setIsOpen(false)}
-                  role="close-modal"
-                >
-                  <span className="sr-only">Close</span>
-                  <XMarkIcon className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </div>
+              {showClose && (
+                <div className="dialog-close-content">
+                  <button
+                    type="button"
+                    className="close-btn"
+                    onClick={() => setIsOpen(false)}
+                    role="close-modal"
+                  >
+                    <span className="sr-only">Close</span>
+                    <XMarkIcon className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+              )}
               <div className="dialog-content">{children}</div>
             </DialogPanel>
           </TransitionChild>
