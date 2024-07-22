@@ -20,9 +20,13 @@ import { NotificationContext } from '@/context/notificationContext';
 import { SpendingLimitModal } from '@/components/SpendingLimitModal';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useOnboarding } from '@/hooks';
+import { useContract, useOnboarding } from '@/hooks';
+
+import configuration from '@/config';
 
 import './Form.css';
+
+const ISSUE_IN_DIMO_GAS = 500000;
 
 export const Form = () => {
   const [isOpenedCreditsModal, setIsOpenedCreditsModal] =
@@ -30,6 +34,7 @@ export const Form = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { isOnboardingCompleted, workspace } = useOnboarding();
+  const { dimoLicenseContract } = useContract();
   const { address } = useAccount();
   const router = useRouter();
   const {
@@ -44,33 +49,53 @@ export const Form = () => {
   });
 
   const onSubmit = () => {
-    setIsOpenedCreditsModal(true);
+    if (isOnboardingCompleted && workspace) {
+      handleCreateApp();
+    } else {
+      setIsOpenedCreditsModal(true);
+    }
   };
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
     if (isOnboardingCompleted && workspace) return workspace;
+    if (!dimoLicenseContract) throw new Error('Web3 connection failed');
+
+    const workspaceName = String(
+      utils.fromAscii(workspaceData?.name ?? '')
+    ).padEnd(66, '0');
+
+    const {
+      events: {
+        Issued: {
+          returnValues: { clientId = '', owner = '', tokenId = 0 } = {},
+        } = {},
+      } = {},
+    } = await dimoLicenseContract.methods['0x77a5b102'](workspaceName).send({
+      from: address,
+      gas: String(ISSUE_IN_DIMO_GAS),
+      maxFeePerGas: String(configuration.masFeePerGas),
+      maxPriorityFeePerGas: String(configuration.gasPrice),
+    });
 
     return createWorkspace({
       name: workspaceData.name ?? '',
-      token_id: 1,
-      client_id: utils.randomHex(32),
-      owner: address as string,
+      token_id: Number(tokenId),
+      client_id: clientId as string,
+      owner: owner as string,
     });
   };
 
-  const handleSpendingLimit = async () => {
+  const handleCreateApp = async () => {
     try {
       setIsLoading(true);
       const { workspace, app } = getValues();
       const { id: workspaceId = '' } = await handleCreateWorkspace(workspace);
-      console.log({ workspaceId });
       await createApp(workspaceId, {
         name: app.name,
         scope: app.scope,
       });
       router.replace('/app');
     } catch (error: unknown) {
-      console.error(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
@@ -90,7 +115,7 @@ export const Form = () => {
       <SpendingLimitModal
         isOpen={isOpenedCreditsModal}
         setIsOpen={setIsOpenedCreditsModal}
-        onSubmit={handleSpendingLimit}
+        onSubmit={handleCreateApp}
       />
       <form onSubmit={handleSubmit(onSubmit)}>
         {!isOnboardingCompleted && (

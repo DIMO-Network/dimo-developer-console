@@ -6,11 +6,14 @@ import {
   initDimoSmartContract,
   initDimoLicenseSmartContract,
 } from '@/utils/contract';
-import { ERC20 } from '@maticnetwork/maticjs/dist/ts/pos/erc20';
+import { Contract } from 'web3';
 
 export const useContract = () => {
-  const [dimoContract, setDimoContract] = useState<ERC20>();
-  const [dimoLicenseContract, setDimoLicenseContract] = useState<ERC20>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [dimoContract, setDimoContract] = useState<Contract<any>>();
+  const [dimoLicenseContract, setDimoLicenseContract] =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    useState<Contract<any>>();
   const { address, isConnected } = useAccount();
 
   useEffect(() => {

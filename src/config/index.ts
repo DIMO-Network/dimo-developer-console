@@ -14,7 +14,7 @@ type Configuration = {
   RAINBOW_PROJECT: Record<string, string>;
   DLC_ADDRESS: string;
   DC_ADDRESS: string;
-  gasLimit: number;
+  masFeePerGas: number;
   gasPrice: number;
 };
 

@@ -31,7 +31,7 @@ export const SpendingLimitModal: FC<IProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { dimoContract } = useContract();
+  const { dimoContract, address } = useContract();
   const { control, handleSubmit, getValues } = useForm<IForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -46,11 +46,13 @@ export const SpendingLimitModal: FC<IProps> = ({
       if (dimoContract) {
         const { credits } = getValues();
         const dimoInWei = utils.toWei(credits, 'ether');
-        const result = await dimoContract.approve(dimoInWei, {
-          spenderAddress: configuration.DLC_ADDRESS,
-          maxPriorityFeePerGas: configuration.gasPrice,
-        });
-        await result.getReceipt();
+        await dimoContract.methods
+          .approve(configuration.DLC_ADDRESS, dimoInWei)
+          .send({
+            from: address,
+            maxFeePerGas: String(configuration.gasPrice),
+            maxPriorityFeePerGas: String(configuration.gasPrice),
+          });
         setIsOpen(false);
         onSubmit(credits);
       }

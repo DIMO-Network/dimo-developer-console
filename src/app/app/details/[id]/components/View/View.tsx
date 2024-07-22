@@ -1,4 +1,6 @@
 'use client';
+import _ from 'lodash';
+
 import { useEffect, useState, useContext } from 'react';
 import { utils } from 'web3';
 
@@ -12,13 +14,20 @@ import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriFo
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { Title } from '@/components/Title';
+import { useContract, useOnboarding } from '@/hooks';
+
+import configuration from '@/config';
 
 import './View.css';
+
+const ISSUE_IN_DIMO_GAS = 60000;
 
 export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const [app, setApp] = useState<IApp>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
+  const { isOnboardingCompleted, workspace } = useOnboarding();
+  const { address, dimoLicenseContract } = useContract();
 
   useEffect(() => refreshAppDetails(), []);
 
@@ -26,18 +35,38 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
     getAppByID(appId).then(setApp);
   };
 
+  const handleEnableSigner = async (signer: string) => {
+    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+      throw new Error('Web3 connection failed');
+    await dimoLicenseContract?.methods['0x3b1c393b'](
+      workspace?.token_id ?? 0,
+      signer
+    ).send({
+      from: address,
+      gas: String(ISSUE_IN_DIMO_GAS),
+      maxFeePerGas: String(configuration.masFeePerGas),
+      maxPriorityFeePerGas: String(configuration.gasPrice),
+    });
+  };
+
   const handleGenerateSigner = async () => {
     try {
       setIsLoading(true);
-      const signer = utils.randomHex(32) as string;
+      const signer = utils.randomHex(20);
+      await handleEnableSigner(signer);
       await createMySigner(signer, appId);
       refreshAppDetails();
     } catch (error: unknown) {
-      setNotification(
-        'Something went wrong while generating the API key',
-        'Oops...',
-        'error'
-      );
+      console.error({ error });
+      const code = _.get(error, 'code', null);
+      if (code === 4001)
+        setNotification('The transaction was denied', 'Oops...', 'error');
+      else
+        setNotification(
+          'Something went wrong while generating the API key',
+          'Oops...',
+          'error'
+        );
     } finally {
       setIsLoading(false);
     }
