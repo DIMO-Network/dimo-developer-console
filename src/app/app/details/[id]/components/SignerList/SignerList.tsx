@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
@@ -7,18 +9,39 @@ import { deleteMySigner } from '@/actions/app';
 import { ISigner } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
+import { useContract, useOnboarding } from '@/hooks';
+
+import configuration from '@/config';
 
 interface IProps {
   list: ISigner[] | undefined;
   refreshData: () => void;
 }
 
+const ISSUE_IN_DIMO_GAS = 60000;
+
 export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
+  const { isOnboardingCompleted, workspace } = useOnboarding();
+  const { address, dimoLicenseContract } = useContract();
 
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
+  };
+
+  const handleDisableSigner = async (signer: string) => {
+    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+      throw new Error('Web3 connection failed');
+    await dimoLicenseContract?.methods['0xde9cc84d'](
+      workspace?.token_id ?? 0,
+      signer
+    ).send({
+      from: address,
+      gas: String(ISSUE_IN_DIMO_GAS),
+      maxFeePerGas: String(configuration.masFeePerGas),
+      maxPriorityFeePerGas: String(configuration.gasPrice),
+    });
   };
 
   const renderWithCopy = (columnName: string, data: Record<string, string>) => {
@@ -47,17 +70,21 @@ export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
     );
   };
 
-  const renderDeleteSignerAction = ({ id = '' }: ISigner) => {
+  const renderDeleteSignerAction = ({
+    id = '',
+    api_key: signer = '',
+  }: ISigner) => {
     return (
-      <button type="button" onClick={() => handleDelete(id)}>
+      <button type="button" onClick={() => handleDelete(id, signer)}>
         <TrashIcon className="w-5 h-5" />
       </button>
     );
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, signer: string) => {
     try {
       setIsOpened(true);
+      await handleDisableSigner(signer);
       setLoadingStatus({
         label: 'Deleting the selected API key',
         status: 'loading',
@@ -66,7 +93,13 @@ export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
       setLoadingStatus({ label: 'API key deleted', status: 'success' });
       refreshData();
     } catch (error: unknown) {
-      setLoadingStatus({ label: 'Something went wrong', status: 'error' });
+      const code = _.get(error, 'code', null);
+      if (code === 4001)
+        setLoadingStatus({
+          label: 'The transaction was denied',
+          status: 'error',
+        });
+      else setLoadingStatus({ label: 'Something went wrong', status: 'error' });
     }
   };
 
