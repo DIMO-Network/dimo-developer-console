@@ -96,7 +96,6 @@ export const Form = () => {
       });
       router.replace('/app');
     } catch (error: unknown) {
-      console.error(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');

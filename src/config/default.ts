@@ -45,4 +45,4 @@ export const DC_ADDRESS = '0xE261D618a959aFfFd53168Cd07D12E37B26761db';
 export const DLC_ADDRESS = '0x9A9D2E717bB005B240094ba761Ff074d392C7C85';
 
 export const masFeePerGas = 60000000000;
-export const gasPrice = 30000000000;
+export const gasPrice = 43000000000;
