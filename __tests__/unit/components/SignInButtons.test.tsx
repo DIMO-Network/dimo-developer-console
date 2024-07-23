@@ -18,7 +18,7 @@ describe('SignInButtons', () => {
   it('redirects to the sign with google endpoint', () => {
     window.location.replace = jest.fn();
 
-    render(<SignInButtons isSignIn={true} disabled={false} />);
+    render(<SignInButtons isSignIn={true} disabled={false} onCTA={() => {}} />);
 
     const [googleButton] = screen.getAllByText('Sign In');
 
@@ -32,7 +32,7 @@ describe('SignInButtons', () => {
   it('redirects to the sign with github endpoint', () => {
     window.location.replace = jest.fn();
 
-    render(<SignInButtons isSignIn={true} disabled={false} />);
+    render(<SignInButtons isSignIn={true} disabled={false} onCTA={() => {}} />);
 
     const [, githubButton] = screen.getAllByText('Sign In');
 
@@ -46,7 +46,7 @@ describe('SignInButtons', () => {
   it('should not redirect to the sign with google endpoint', () => {
     window.location.replace = jest.fn();
 
-    render(<SignInButtons isSignIn={true} disabled />);
+    render(<SignInButtons isSignIn={true} disabled onCTA={() => {}} />);
 
     const [googleButton] = screen.getAllByText('Sign In');
 

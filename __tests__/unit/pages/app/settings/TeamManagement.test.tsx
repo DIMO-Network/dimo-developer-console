@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { TeamManagement } from '@/app/app/settings/components/TeamManagement';
+import { TeamManagement } from '@/app/settings/components/TeamManagement';
 
 describe('TeamManagement', () => {
   it('renders the team management table', () => {

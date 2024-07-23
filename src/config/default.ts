@@ -1,3 +1,5 @@
+export const appName = 'Developer Console';
+
 export const LOGIN_PAGES = ['/sign-in', '/sign-up'];
 
 export const API_PATH = '/api';

@@ -1,26 +1,14 @@
-'use client';
 import { FC } from 'react';
-import { useSession } from 'next-auth/react';
+import { Metadata } from 'next';
 
-import './page.css';
-import { Onboarding } from '@/app/app/components/Onboarding';
-import { withNotifications } from '@/hoc';
+import configuration from '@/config';
 
-const HomePage: FC = () => {
-  const { data: session } = useSession();
-  const { user: { name = '' } = {} } = session ?? {};
+import { View } from '@/app/app/View';
 
-  return (
-    <div className="home-page">
-      <div className="welcome-message">
-        <p className="title">Welcome {name}</p>
-        <p className="sub-message">
-          Learn how to get started with the DIMO API
-        </p>
-      </div>
-      <Onboarding />
-    </div>
-  );
+export const metadata: Metadata = {
+  title: `Home | ${configuration.appName}`,
 };
 
-export default withNotifications(HomePage);
+const HomePage: FC = () => <View />;
+
+export default HomePage;
