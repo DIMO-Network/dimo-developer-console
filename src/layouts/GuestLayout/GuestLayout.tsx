@@ -1,9 +1,14 @@
-import React from 'react';
+'use client';
+import React, { type ReactNode } from 'react';
 
 import { dimoFont } from '@/utils/font';
-import RainbowSessionProvider from '@/hoc/RainbowSessionProvider';
+import { withRainBow } from '@/hoc';
 
 import '@/app/globals.css';
+
+const View = withRainBow(({ children }: { children: ReactNode }) => (
+  <>{children}</>
+));
 
 export const GuestLayout = ({
   children,
@@ -12,7 +17,7 @@ export const GuestLayout = ({
 }>) => (
   <html lang="en">
     <body className={dimoFont.className}>
-      <RainbowSessionProvider>{children}</RainbowSessionProvider>
+      <View>{children}</View>
     </body>
   </html>
 );

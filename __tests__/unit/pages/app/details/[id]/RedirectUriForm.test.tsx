@@ -4,7 +4,7 @@ import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriFo
 
 describe('RedirectUriForm', () => {
   it('renders the redirect uri form on the app details page', () => {
-    render(<RedirectUriForm />);
+    render(<RedirectUriForm appId="" />);
 
     const signerAddressInputElm = screen.getByRole('redirect-url-input');
     const addUriBtn = screen.getByText('Add URI');
@@ -14,7 +14,7 @@ describe('RedirectUriForm', () => {
   });
 
   it('renders the redirect uri validation texts', () => {
-    render(<RedirectUriForm />);
+    render(<RedirectUriForm appId="" />);
 
     const signerAddressInputElm = screen.getByRole('redirect-url-input');
 

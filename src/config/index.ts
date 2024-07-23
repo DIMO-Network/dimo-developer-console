@@ -12,6 +12,10 @@ type Configuration = {
   backendUrl: string;
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
+  DLC_ADDRESS: string;
+  DC_ADDRESS: string;
+  masFeePerGas: number;
+  gasPrice: number;
 };
 
 export const getConfig = (): Configuration => {

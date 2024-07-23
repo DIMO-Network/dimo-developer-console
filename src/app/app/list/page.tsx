@@ -7,6 +7,6 @@ export const metadata: Metadata = {
   title: `Applications | ${configuration.appName}`,
 };
 
-const AppListPage = () => <View />;
+const ApplicationsPage = View;
 
-export default AppListPage;
+export default ApplicationsPage;

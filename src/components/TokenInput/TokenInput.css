@@ -1,0 +1,29 @@
+.dcx-input {
+  @apply flex flex-col items-center w-full gap-2;
+
+  .dcx-container {
+    @apply flex flex-row gap-2 w-3/4 justify-center items-center bg-dark-grey-950 relative rounded-lg h-14 px-2;
+
+    .action-icons {
+      @apply p-4 bg-dark-grey-800 h-10 w-10 rounded-lg flex items-center justify-center text-white fill-white stroke-white;
+    }
+
+    .dcx-value {
+      @apply bg-transparent focus:outline-none 
+        [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none 
+        w-full h-10 text-center text-3xl font-bold;
+    }
+  }
+
+  .suggest-values {
+    @apply grid grid-cols-4 w-3/4 gap-2 justify-center font-bold;
+
+    .suggestion {
+      @apply rounded bg-dark-grey-950 p-2;
+    }
+  }
+
+  .dcx-description {
+    @apply text-xs text-white/50;
+  }
+}
