@@ -3,7 +3,6 @@ import { FC } from 'react';
 import { useSession } from 'next-auth/react';
 
 import { Onboarding } from '@/app/app/components/Onboarding';
-import { withNotifications } from '@/hoc';
 
 import './View.css';
 
@@ -24,4 +23,4 @@ export const View: FC = () => {
   );
 };
 
-export default withNotifications(View);
+export default View;

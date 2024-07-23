@@ -1,0 +1,27 @@
+.support-page {
+  @apply flex flex-col gap-8;
+
+  .titles {
+    @apply flex flex-col gap-2;
+  }
+  .subtitle {
+    @apply text-sm;
+  }
+  .contact-cards {
+    @apply flex flex-col gap-4 max-w-md;
+  }
+
+  .report-issue {
+    @apply flex flex-col gap-2;
+  }
+
+  .status-action {
+    @apply text-xs;
+
+    @apply flex flex-row items-center gap-1;
+
+    a {
+      @apply flex flex-row items-center gap-1;
+    }
+  }
+}

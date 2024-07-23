@@ -3,12 +3,12 @@ import { Metadata } from 'next';
 
 import configuration from '@/config';
 
-import { View } from '@/app/app/View';
+import { SwitchPage } from '@/app/app/components/SwitchPage';
 
 export const metadata: Metadata = {
   title: `Home | ${configuration.appName}`,
 };
 
-const HomePage: FC = () => <View />;
+export const HomePage: FC = SwitchPage;
 
 export default HomePage;
