@@ -9,6 +9,6 @@ export const metadata: Metadata = {
   title: `Home | ${configuration.appName}`,
 };
 
-export const HomePage: FC = SwitchPage;
+const HomePage: FC = SwitchPage;
 
 export default HomePage;
