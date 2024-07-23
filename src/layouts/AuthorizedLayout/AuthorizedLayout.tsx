@@ -3,24 +3,28 @@ import React from 'react';
 
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
-import RainbowSessionProvider from '@/hoc/RainbowSessionProvider';
+import { withCredits, withNotifications, withRainBow } from '@/hoc';
 
 import './AuthorizedLayout.css';
 
-export const AuthorizedLayout = ({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) => (
-  <RainbowSessionProvider>
-    <div className="main">
-      <Header />
-      <div className="app-content">
-        <Menu />
-        <main className="page-content">{children}</main>
-      </div>
-    </div>
-  </RainbowSessionProvider>
+export const AuthorizedLayout = withRainBow(
+  withNotifications(
+    withCredits(
+      ({
+        children,
+      }: Readonly<{
+        children: React.ReactNode;
+      }>) => (
+        <div className="main">
+          <Header />
+          <div className="app-content">
+            <Menu />
+            <main className="page-content">{children}</main>
+          </div>
+        </div>
+      )
+    )
+  )
 );
 
 export default AuthorizedLayout;

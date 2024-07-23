@@ -4,130 +4,40 @@ export const appListMock: IApp[] = [
   {
     name: 'Test App',
     scope: 'sandbox',
-    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
-    signers: [
+    Workspace: {
+      id: '338c0066-f747-498d-9c42-3da8272d576f',
+      name: '0xlkajsdijoqwe90123kljsda',
+      company_id: '66a98327-3146-45ff-babb-9b08adf84b0f',
+      client_id: '66a98327-3146-45ff-babb-9b08adf84b0f',
+    },
+    Signers: [
       {
-        wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
-        key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+        id: '29dd90ce-157d-42bb-ad89-eb106141aff6',
+        api_key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+        company_id: '66a98327-3146-45ff-babb-9b08adf84b0f',
+        app_id: '9078a08c-5667-4af0-ba38-792097611bbb',
       },
       {
-        wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
-        key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
-      },
-    ],
-    redirectUris: [
-      {
-        redirectUri: 'https://google.com/',
-        status: 'active',
-      },
-      {
-        redirectUri: 'https://google.com.co/',
-        status: 'inactive',
-      },
-    ],
-  },
-  {
-    name: 'Fleet Management App',
-    scope: 'production',
-    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
-    signers: [
-      {
-        wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
-        key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+        id: 'd0ba855e-120d-44a7-8c74-18c9ef82f736',
+        api_key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+        company_id: '66a98327-3146-45ff-babb-9b08adf84b0f',
+        app_id: '9078a08c-5667-4af0-ba38-792097611bbb',
       },
     ],
-    redirectUris: [
+    RedirectUris: [
       {
-        redirectUri: 'https://google.com/',
-        status: 'active',
+        id: 'f3f67e8f-9d73-4d91-b79e-5df4f275db23',
+        uri: 'https://google.com/',
+        status: true,
+        company_id: '66a98327-3146-45ff-babb-9b08adf84b0f',
+        app_id: '9078a08c-5667-4af0-ba38-792097611bbb',
       },
       {
-        redirectUri: 'https://google.com.co/',
-        status: 'inactive',
-      },
-    ],
-  },
-  {
-    name: 'Data Analytics',
-    scope: 'production',
-    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
-    signers: [
-      {
-        wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
-        key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
-      },
-    ],
-    redirectUris: [
-      {
-        redirectUri: 'https://google.com/',
-        status: 'active',
-      },
-      {
-        redirectUri: 'https://google.com.co/',
-        status: 'inactive',
-      },
-    ],
-  },
-  {
-    name: 'Hello World',
-    scope: 'production',
-    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
-    signers: [
-      {
-        wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
-        key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
-      },
-    ],
-    redirectUris: [
-      {
-        redirectUri: 'https://google.com/',
-        status: 'active',
-      },
-      {
-        redirectUri: 'https://google.com.co/',
-        status: 'inactive',
-      },
-    ],
-  },
-  {
-    name: 'Hello World',
-    scope: 'production',
-    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
-    signers: [
-      {
-        wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
-        key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
-      },
-    ],
-    redirectUris: [
-      {
-        redirectUri: 'https://google.com/',
-        status: 'active',
-      },
-      {
-        redirectUri: 'https://google.com.co/',
-        status: 'inactive',
-      },
-    ],
-  },
-  {
-    name: 'Hello World',
-    scope: 'production',
-    client_id: '0x*HSD)BN*(SHJDM)S(IJD SIOPDJSN)abcded1EA',
-    signers: [
-      {
-        wallet: '0x1ABC7154748D1CE5144478CDEB574AE244B939B5',
-        key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
-      },
-    ],
-    redirectUris: [
-      {
-        redirectUri: 'https://google.com/',
-        status: 'active',
-      },
-      {
-        redirectUri: 'https://google.com.co/',
-        status: 'inactive',
+        id: 'b4555eb3-6095-4aff-9b57-1974eec3a7f7',
+        uri: 'https://google.com.co/',
+        status: false,
+        company_id: '66a98327-3146-45ff-babb-9b08adf84b0f',
+        app_id: '9078a08c-5667-4af0-ba38-792097611bbb',
       },
     ],
   },

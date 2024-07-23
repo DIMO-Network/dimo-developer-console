@@ -1,0 +1,15 @@
+.contact-card {
+  @apply flex flex-row gap-2 cursor-pointer;
+
+  .content {
+    @apply flex flex-col gap-2 leading-5;
+
+    .title {
+      @apply text-xs font-medium;
+    }
+
+    .description {
+      @apply text-xs;
+    }
+  }
+}

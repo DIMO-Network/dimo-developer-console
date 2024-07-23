@@ -14,19 +14,19 @@ Object.assign(navigator, {
 
 describe('SignerList', () => {
   it('renders the app summary', () => {
-    const { container } = render(<SignerList app={app} />);
+    const { container } = render(
+      <SignerList list={app.Signers} refreshData={() => {}} />
+    );
 
-    const [signer] = app.signers;
-    const [walletElm] = screen.getAllByText(signer.wallet);
-    const [keyElm] = screen.getAllByText(signer.key);
+    const [signer] = app.Signers ?? [];
+    const [keyElm] = screen.getAllByText(signer.api_key);
     const [contentCopyElm] = screen.getAllByRole('content-copy-icon');
 
     fireEvent.click(contentCopyElm);
 
-    expect(walletElm).toBeInTheDocument();
     expect(keyElm).toBeInTheDocument();
     expect(contentCopyElm).toBeInTheDocument();
-    expect(writeTextTest).toHaveBeenCalledWith(signer.key);
+    expect(writeTextTest).toHaveBeenCalledWith(signer.api_key);
     expect(container).toMatchSnapshot();
   });
 });
