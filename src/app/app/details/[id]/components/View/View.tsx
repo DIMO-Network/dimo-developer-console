@@ -9,6 +9,7 @@ import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
 import { createMySigner, getAppByID } from '@/actions/app';
 import { IApp } from '@/types/app';
+import { Loader } from '@/components/Loader';
 import { NotificationContext } from '@/context/notificationContext';
 import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriForm';
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
@@ -25,6 +26,7 @@ const ISSUE_IN_DIMO_GAS = 60000;
 export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const [app, setApp] = useState<IApp>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
   const { isOnboardingCompleted, workspace } = useOnboarding();
   const { address, dimoLicenseContract } = useContract();
@@ -32,7 +34,10 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   useEffect(() => refreshAppDetails(), []);
 
   const refreshAppDetails = () => {
-    getAppByID(appId).then(setApp);
+    setIsLoadingPage(true);
+    getAppByID(appId)
+      .then(setApp)
+      .finally(() => setIsLoadingPage(false));
   };
 
   const handleEnableSigner = async (signer: string) => {
@@ -78,39 +83,44 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
         <BackButton />
         {app && <AppSummary app={app} />}
       </div>
-      <div className="signers-content">
-        <Title component="h2">Signers</Title>
-        <div className="generate-signer">
-          <Button
-            className="primary-outline px-4 w-full"
-            loading={isLoading}
-            loadingColor="primary"
-            onClick={() => handleGenerateSigner()}
-          >
-            Generate Key
-          </Button>
-        </div>
-      </div>
-      <div className="signers-table">
-        {app && (
-          <SignerList list={app?.Signers} refreshData={refreshAppDetails} />
-        )}
-      </div>
-      <div className="redirect-uri-content">
-        <Title component="h2">Authorized Redirect URIs</Title>
-        <RedirectUriForm appId={appId} refreshData={refreshAppDetails} />
-      </div>
-      <div className="signers-table">
-        {app && (
-          <RedirectUriList
-            list={app?.RedirectUris}
-            refreshData={refreshAppDetails}
-          />
-        )}
-      </div>
-      <div className="extra-actions">
-        <Button className="error-simple">Delete application</Button>
-      </div>
+      {isLoadingPage && <Loader isLoading={true} />}
+      {!isLoadingPage && (
+        <>
+          <div className="signers-content">
+            <Title component="h2">Signers</Title>
+            <div className="generate-signer">
+              <Button
+                className="primary-outline px-4 w-full"
+                loading={isLoading}
+                loadingColor="primary"
+                onClick={() => handleGenerateSigner()}
+              >
+                Generate Key
+              </Button>
+            </div>
+          </div>
+          <div className="signers-table">
+            {app && (
+              <SignerList list={app?.Signers} refreshData={refreshAppDetails} />
+            )}
+          </div>
+          <div className="redirect-uri-content">
+            <Title component="h2">Authorized Redirect URIs</Title>
+            <RedirectUriForm appId={appId} refreshData={refreshAppDetails} />
+          </div>
+          <div className="signers-table">
+            {app && (
+              <RedirectUriList
+                list={app?.RedirectUris}
+                refreshData={refreshAppDetails}
+              />
+            )}
+          </div>
+          <div className="extra-actions">
+            <Button className="error-simple">Delete application</Button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

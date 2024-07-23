@@ -59,11 +59,12 @@ export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
 
   const handleTestAuthentication = () => {};
 
-  const renderTestAuthenticationAction = () => {
+  const renderTestAuthenticationAction = ({ id = '' }: ISigner) => {
     return (
       <Button
         className="white-outline px-4"
         onClick={() => handleTestAuthentication()}
+        key={id}
       >
         Test Authentication
       </Button>
@@ -75,7 +76,7 @@ export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
     api_key: signer = '',
   }: ISigner) => {
     return (
-      <button type="button" onClick={() => handleDelete(id, signer)}>
+      <button type="button" onClick={() => handleDelete(id, signer)} key={id}>
         <TrashIcon className="w-5 h-5" />
       </button>
     );
