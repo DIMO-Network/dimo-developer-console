@@ -27,7 +27,7 @@
     "axios": "^1.7.2",
     "classnames": "^2.5.1",
     "encoding": "^0.1.13",
-    "ethers": "^5.7.2",
+    "ethers": "^6.13.1",
     "googleapis": "^140.0.0",
     "lodash": "^4.17.21",
     "next": "^14.2.3",
@@ -39,8 +39,8 @@
     "siwe": "^2.3.2",
     "typescript-eslint": "^7.12.0",
     "validator": "^13.12.0",
-    "viem": "^2.13.7",
-    "wagmi": "^2.9.10",
+    "viem": "^2.17.10",
+    "wagmi": "^2.11.3",
     "web3": "^4.10.0"
   },
   "devDependencies": {

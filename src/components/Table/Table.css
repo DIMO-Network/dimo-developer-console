@@ -10,6 +10,6 @@
   }
 
   .table-action-cell {
-    @apply relative whitespace-nowrap p-3 text-right text-xs inline-flex gap-4 justify-center items-center;
+    @apply relative whitespace-nowrap px-3 py-1 text-right text-xs inline-flex gap-4 justify-center items-center;
   }
 }

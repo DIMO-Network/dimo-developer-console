@@ -5,7 +5,7 @@
     @apply grid grid-cols-12 gap-6 w-full items-center;
 
     .field {
-      @apply flex flex-col col-span-10 h-16 pt-3;
+      @apply flex flex-col col-span-10 h-16 justify-center;
     }
 
     .cta {
