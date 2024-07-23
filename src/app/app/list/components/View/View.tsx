@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 
 import { Anchor } from '@/components/Anchor';
 import { AppCard } from '@/components/AppCard';
+import { AppLoader } from '@/app/app/list/components/AppLoader';
 import { Button } from '@/components/Button';
 import { getApps } from '@/actions/app';
 import { IApp } from '@/types/app';
@@ -15,12 +16,16 @@ import './View.css';
 
 export const View: FC = () => {
   const [apps, setApps] = useState<IApp[]>([]);
+  const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const router = useRouter();
   const { data: session } = useSession();
   const { user: { name = '' } = {} } = session ?? {};
 
   useEffect(() => {
-    getApps().then(({ data: createdApps }) => setApps(createdApps));
+    setIsLoadingPage(true);
+    getApps()
+      .then(({ data: createdApps }) => setApps(createdApps))
+      .finally(() => setIsLoadingPage(false));
   }, []);
 
   const handleCreateApp = () => {
@@ -40,15 +45,23 @@ export const View: FC = () => {
       <div className="welcome-message">
         <p className="title">Welcome {name}</p>
       </div>
-      <div className="description">
-        <p className="title">Your applications</p>
-        <Button className="primary px-3 with-icon" onClick={handleCreateApp}>
-          <PlusIcon className="w-4 h-4" />
-          Create new
-        </Button>
-      </div>
+      {isLoadingPage && <AppLoader isLoading={true} />}
+      {!isLoadingPage && (
+        <>
+          <div className="description">
+            <p className="title">Your applications</p>
+            <Button
+              className="primary px-3 with-icon"
+              onClick={handleCreateApp}
+            >
+              <PlusIcon className="w-4 h-4" />
+              Create new
+            </Button>
+          </div>
 
-      <div className="app-list">{apps.map(renderItem)}</div>
+          <div className="app-list">{apps.map(renderItem)}</div>
+        </>
+      )}
     </div>
   );
 };
