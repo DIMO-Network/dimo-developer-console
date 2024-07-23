@@ -25,19 +25,19 @@ describe('TokenInput', () => {
   it('renders the component', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     renderWithForm(<TokenInput name="dcx" control={null as any} />);
-    expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+    expect(screen.getByRole('token-value-input')).toBeInTheDocument();
   });
 
   it('handles value changes', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     renderWithForm(<TokenInput name="dcx" control={null as any} />);
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByRole('token-value-input');
 
     fireEvent.change(input, { target: { value: '100' } });
-    expect(input).toHaveValue(100);
+    expect(input).toHaveValue('100');
 
     fireEvent.change(input, { target: { value: '-10' } });
-    expect(input).toHaveValue(0);
+    expect(input).toHaveValue('0');
   });
 
   it('handles suggestion button clicks', () => {
@@ -52,19 +52,20 @@ describe('TokenInput', () => {
           { label: '500k', value: 500000 },
           { label: '1M', value: 1000000 },
         ]}
+        showControls={true}
       />
     );
 
     fireEvent.click(screen.getByText('10k'));
-    expect(screen.getByRole('spinbutton')).toHaveValue(10000);
+    expect(screen.getByRole('token-value-input')).toHaveValue('10000');
 
     fireEvent.click(screen.getByText('100k'));
-    expect(screen.getByRole('spinbutton')).toHaveValue(100000);
+    expect(screen.getByRole('token-value-input')).toHaveValue('100000');
 
     fireEvent.click(screen.getByText('500k'));
-    expect(screen.getByRole('spinbutton')).toHaveValue(500000);
+    expect(screen.getByRole('token-value-input')).toHaveValue('500000');
 
     fireEvent.click(screen.getByText('1M'));
-    expect(screen.getByRole('spinbutton')).toHaveValue(1000000);
+    expect(screen.getByRole('token-value-input')).toHaveValue('1000000');
   });
 });

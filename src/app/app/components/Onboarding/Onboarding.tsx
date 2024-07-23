@@ -15,7 +15,7 @@ export const Onboarding = () => {
   return (
     <div className="onboarding-steps">
       <OnboardingCard
-        title="Connect a Wallet & Get Credits"
+        title="Connect a wallet"
         description="Click the button to connect a spender wallet and start building."
         action={<WalletConnectButton />}
       />

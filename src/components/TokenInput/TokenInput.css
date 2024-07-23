@@ -11,7 +11,15 @@
     .dcx-value {
       @apply bg-transparent focus:outline-none 
         [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none 
-        w-full h-10 text-center text-3xl font-bold;
+        w-full h-8 text-center text-3xl font-bold;
+    }
+
+    .amount-container {
+      @apply flex flex-col items-center;
+
+      .description {
+        @apply text-xs text-white/50;
+      }
     }
   }
 

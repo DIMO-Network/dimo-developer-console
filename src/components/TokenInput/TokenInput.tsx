@@ -14,13 +14,18 @@ interface IProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any, any>;
   suggestions?: ISuggestion[];
+  showControls?: boolean;
+  description?: string;
 }
 
 export type Ref = HTMLInputElement;
 
 export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  ({ name, control, suggestions = [] }, _ref) => {
+  (
+    { name, control, suggestions = [], showControls = false, description = '' },
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    _ref
+  ) => {
     const handleChange = (newValue: number) => {
       if (newValue < 0) return 0;
       return newValue;
@@ -33,30 +38,42 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
         render={({ field: { onChange, value: currentValue, ref } }) => (
           <div className="dcx-input">
             <div className="dcx-container">
-              <button
-                className="action-icons"
-                type="button"
-                onClick={() => onChange(handleChange(currentValue - 1))}
-              >
-                <MinusIcon className="h-3 w-3 text-white" color="white" />
-              </button>
-              <input
-                className="dcx-value"
-                type="number"
-                value={currentValue}
-                onChange={(e) => {
-                  const newValue = handleChange(Number(e.target.value));
-                  onChange(newValue);
-                }}
-                ref={ref}
-              />
-              <button
-                className="action-icons"
-                type="button"
-                onClick={() => onChange(handleChange(currentValue + 1))}
-              >
-                <PlusIcon className="h-3 w-3 text-white" color="white" />
-              </button>
+              {showControls && (
+                <button
+                  className="action-icons"
+                  type="button"
+                  onClick={() => onChange(handleChange(currentValue - 1))}
+                >
+                  <MinusIcon className="h-3 w-3 text-white" color="white" />
+                </button>
+              )}
+              <div className="amount-container">
+                <input
+                  className="dcx-value"
+                  type="text"
+                  value={Number(currentValue)}
+                  onChange={(e) => {
+                    const newValue = handleChange(
+                      parseInt(e.target.value || '0', 10)
+                    );
+                    onChange(newValue);
+                  }}
+                  role='token-value-input'
+                  ref={ref}
+                />
+                {description && (
+                  <span className="description">{description}</span>
+                )}
+              </div>
+              {showControls && (
+                <button
+                  className="action-icons"
+                  type="button"
+                  onClick={() => onChange(handleChange(currentValue + 1))}
+                >
+                  <PlusIcon className="h-3 w-3 text-white" color="white" />
+                </button>
+              )}
             </div>
             <div className="suggest-values">
               {suggestions.map(({ label, value }) => (
