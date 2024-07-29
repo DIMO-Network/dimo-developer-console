@@ -30,6 +30,7 @@
     "ethers": "^6.13.1",
     "googleapis": "^140.0.0",
     "lodash": "^4.17.21",
+    "maskdata": "^1.3.1",
     "next": "^14.2.3",
     "next-auth": "^4.24.7",
     "pino-pretty": "^11.1.0",
