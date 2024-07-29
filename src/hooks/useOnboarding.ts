@@ -8,10 +8,14 @@ import { IWorkspace } from '@/types/workspace';
 export const useOnboarding = () => {
   const { isConnected } = useAccount();
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [workspace, setWorkspace] = useState<IWorkspace>();
 
   useEffect(() => {
-    getWorkspace().then(setWorkspace);
+    getWorkspace().then((workspace) => {
+      setWorkspace(workspace);
+      setIsLoading(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -19,7 +23,7 @@ export const useOnboarding = () => {
     setIsOnboardingCompleted(isConnected && hasWorkspace);
   }, [isConnected, workspace]);
 
-  return { isOnboardingCompleted, workspace };
+  return { isOnboardingCompleted, isLoading, workspace };
 };
 
 export default useOnboarding;
