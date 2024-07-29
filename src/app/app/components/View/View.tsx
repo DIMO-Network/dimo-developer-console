@@ -15,7 +15,8 @@ export const View: FC = () => {
       <div className="welcome-message">
         <p className="title">Welcome {name}</p>
         <p className="sub-message">
-          Learn how to get started with the DIMO API
+          Learn how to get started with the{' '}
+          <span className="text-primary-200">DIMO API</span>
         </p>
       </div>
       <Onboarding />
