@@ -1,12 +1,16 @@
 .page {
-  @apply flex flex-col gap-10;
+  @apply flex flex-col;
 
   .subtitle {
     @apply text-white/50 capitalize;
   }
 
+  .summary {
+    @apply pb-4;
+  }
+
   .signers-content {
-    @apply grid grid-cols-12 gap-4 justify-between;
+    @apply grid grid-cols-12 gap-4 justify-between items-center;
 
     .title {
       @apply col-span-10;
@@ -15,5 +19,9 @@
     .generate-signer {
       @apply col-span-2 w-full;
     }
+  }
+
+  .signers-table {
+    @apply pb-6;
   }
 }
