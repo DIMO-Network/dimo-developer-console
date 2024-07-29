@@ -167,7 +167,7 @@ export const Form = () => {
                     render: ({ selected }) => (
                       <AppCard
                         name="Sandbox"
-                        description="Test a limited set of API endpoints."
+                        description="Connect to development vehicles"
                         scope="sandbox"
                         className={classNames('w-full', {
                           '!border-white': selected,
@@ -180,7 +180,7 @@ export const Form = () => {
                     render: ({ selected }) => (
                       <AppCard
                         name="Production"
-                        description="Access a full set of API endpoints."
+                        description="Connect to production vehicles"
                         scope="production"
                         className={classNames('w-full', {
                           '!border-white': selected,
