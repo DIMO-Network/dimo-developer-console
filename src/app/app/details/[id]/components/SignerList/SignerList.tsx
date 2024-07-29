@@ -1,7 +1,8 @@
 import _ from 'lodash';
 
-import { useState, type FC } from 'react';
+import { maskStringV2 } from 'maskdata';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { useState, type FC } from 'react';
 
 import { Button } from '@/components/Button';
 import { ContentCopyIcon } from '@/components/Icons';
@@ -48,7 +49,12 @@ export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
     const value = data[columnName];
     return (
       <p className="flex flex-row">
-        {value}
+        {maskStringV2(value, {
+          maskWith: '*',
+          unmaskedEndCharacters: 2,
+          unmaskedStartCharacters: 2,
+          maxMaskedCharacters: 20,
+        })}
         <ContentCopyIcon
           className="w-4 h-4 ml-2 fill-white/50 cursor-pointer"
           onClick={() => handleCopy(value)}
