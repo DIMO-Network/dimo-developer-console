@@ -1,5 +1,5 @@
 'use client';
-import { useContext, useState } from 'react';
+import { FC, useContext, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
@@ -20,7 +20,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { SpendingLimitModal } from '@/components/SpendingLimitModal';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContract } from '@/hooks';
 
 import configuration from '@/config';
 
@@ -28,12 +28,16 @@ import './Form.css';
 
 const ISSUE_IN_DIMO_GAS = 500000;
 
-export const Form = () => {
+interface IProps {
+  isOnboardingCompleted?: boolean;
+  workspace?: IWorkspace;
+}
+
+export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
   const [isOpenedCreditsModal, setIsOpenedCreditsModal] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { isOnboardingCompleted, workspace } = useOnboarding();
   const { dimoLicenseContract } = useContract();
   const { address } = useAccount();
   const router = useRouter();
@@ -49,7 +53,7 @@ export const Form = () => {
   });
 
   const onSubmit = () => {
-    if (isOnboardingCompleted && workspace) {
+    if (isOnboardingCompleted) {
       handleCreateApp();
     } else {
       setIsOpenedCreditsModal(true);
