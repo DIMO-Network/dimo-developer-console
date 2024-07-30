@@ -13,6 +13,11 @@ interface IProps {
 }
 
 export const UserForm: FC<IProps> = ({ user }) => {
+  const authProvider = {
+    google: 'Google',
+    github: 'Github',
+  }[user.auth];
+
   const { handleSubmit, register } = useForm<IUser>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -35,18 +40,20 @@ export const UserForm: FC<IProps> = ({ user }) => {
           role="user-name-input"
         />
       </Label>
-      <Label htmlFor="auth_login" className="text-xs text-medium">
-        Github handle
-        <TextField
-          type="text"
-          placeholder="@johndoe"
-          {...register('auth_login', {
-            required: 'The authentication login is required',
-          })}
-          role="user-login-input"
-          disabled
-        />
-      </Label>
+      {authProvider !== 'credentials' && (
+        <Label htmlFor="auth_login" className="text-xs text-medium">
+          {authProvider} handle
+          <TextField
+            type="text"
+            placeholder="@johndoe"
+            {...register('auth_login', {
+              required: 'The authentication login is required',
+            })}
+            role="user-login-input"
+            disabled
+          />
+        </Label>
+      )}
       <Label htmlFor="email" className="text-xs text-medium">
         Email
         <TextField
