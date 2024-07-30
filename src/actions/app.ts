@@ -1,4 +1,5 @@
 'use server';
+
 import {
   createMyApp,
   getMyApps,
@@ -9,7 +10,7 @@ import {
   createSigner,
   deleteSigner,
 } from '@/services/app';
-import { IApp, IRedirectUri } from '@/types/app';
+import { IApp, IRedirectUri, ISigner } from '@/types/app';
 
 export const getAppByID = async (id: string) => {
   return getMyApp(id);
@@ -31,12 +32,21 @@ export const deleteMyRedirectUri = (id: string) => {
   return deleteRedirectUri(id);
 };
 
-export const updateMyRedirectUri = (id: string, newData: Partial<IRedirectUri>) => {
+export const updateMyRedirectUri = (
+  id: string,
+  newData: Partial<IRedirectUri>
+) => {
   return updateRedirectUri(id, newData);
 };
 
-export const createMySigner = (apiKey: string, appId: string) => {
-  return createSigner(appId, { api_key: apiKey });
+export const createMySigner = (
+  newData: Partial<ISigner>,
+  appId: string
+) => {
+  return createSigner(appId, {
+    api_key: newData.api_key,
+    address: newData.address,
+  });
 };
 
 export const deleteMySigner = (id: string) => {
