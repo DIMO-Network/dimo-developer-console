@@ -2,6 +2,11 @@ import { IWorkspace } from './workspace';
 
 type ENVIRONMENTS = 'production' | 'sandbox';
 
+export enum ENVIRONMENTS_LABELS {
+  production = 'Production',
+  sandbox = 'Sandbox'
+}
+
 export interface ISigner {
   [k: string]: string | undefined;
   id?: string;
