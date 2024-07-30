@@ -1,17 +1,19 @@
 'use client';
 import { FC } from 'react';
 
+import { Loader } from '@/components/Loader';
 import { useOnboarding } from '@/hooks';
 import { View as AppListPage } from '@/app/app/list/components/View';
 import { View as OnboardingPage } from '@/app/app/components/View';
 
 export const SwitchPage: FC = () => {
-  const { isOnboardingCompleted } = useOnboarding();
+  const { isLoading, isOnboardingCompleted } = useOnboarding();
 
   return (
     <>
-      {!isOnboardingCompleted && <OnboardingPage />}
-      {isOnboardingCompleted && <AppListPage />}
+      {isLoading && <Loader isLoading={true} />}
+      {!isLoading && !isOnboardingCompleted && <OnboardingPage />}
+      {!isLoading && isOnboardingCompleted && <AppListPage />}
     </>
   );
 };

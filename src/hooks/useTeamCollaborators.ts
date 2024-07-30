@@ -9,12 +9,16 @@ export const useTeamCollaborators = () => {
   const [teamCollaborators, setTeamCollaborators] = useState<
     Paginated<ITeamCollaborator>
   >({ data: [], totalItems: 0, totalPages: 0 });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    getMyCollaborators().then(setTeamCollaborators);
+    setIsLoading(true);
+    getMyCollaborators()
+      .then(setTeamCollaborators)
+      .finally(() => setIsLoading(false));
   }, []);
 
-  return { teamCollaborators, setTeamCollaborators };
+  return { isLoading, teamCollaborators, setTeamCollaborators };
 };
 
 export default useTeamCollaborators;
