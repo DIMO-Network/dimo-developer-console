@@ -3,7 +3,7 @@ import classNames from 'classnames';
 
 import { BeachAccessIcon, DeveloperBoardIcon } from '@/components/Icons';
 import { Card } from '@/components/Card';
-import { IApp } from '@/types/app';
+import { ENVIRONMENTS_LABELS, IApp } from '@/types/app';
 
 import './AppCard.css';
 
@@ -19,7 +19,7 @@ const AppIcon = {
 
 export const AppCard: FC<IProps> = ({
   name,
-  scope,
+  scope = 'production',
   description = '',
   className = '',
 }) => {
@@ -27,7 +27,7 @@ export const AppCard: FC<IProps> = ({
     <Card className={classNames('app-card card-border', className)}>
       <div className="content">
         <p className="title">{name}</p>
-        <p className="description">{description || scope}</p>
+        <p className="description">{description || ENVIRONMENTS_LABELS[scope]}</p>
       </div>
       {AppIcon[scope || 'sandbox']}
     </Card>
