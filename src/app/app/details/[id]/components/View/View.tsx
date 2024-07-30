@@ -2,12 +2,12 @@
 import _ from 'lodash';
 
 import { useEffect, useState, useContext } from 'react';
-import { utils } from 'web3';
 
 import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
 import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
 import { createMySigner, getAppByID } from '@/actions/app';
+import { generateWallet } from '@/utils/wallet';
 import { IApp } from '@/types/app';
 import { Loader } from '@/components/Loader';
 import { NotificationContext } from '@/context/notificationContext';
@@ -57,9 +57,15 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const handleGenerateSigner = async () => {
     try {
       setIsLoading(true);
-      const signer = utils.randomHex(20);
-      await handleEnableSigner(signer);
-      await createMySigner(signer, appId);
+      const account = generateWallet();
+      await handleEnableSigner(account.address);
+      await createMySigner(
+        {
+          api_key: account.privateKey,
+          address: account.address,
+        },
+        appId
+      );
       refreshAppDetails();
     } catch (error: unknown) {
       console.error({ error });
