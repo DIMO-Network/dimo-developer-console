@@ -1,4 +1,4 @@
-import type { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren, HTMLAttributeAnchorTarget } from 'react';
 
 import React, { ReactNode } from 'react';
 import classnames from 'classnames';
@@ -9,16 +9,18 @@ import './Anchor.css';
 interface AnchorProps extends PropsWithChildren<LinkProps> {
   children: ReactNode;
   className?: string;
+  target?: HTMLAttributeAnchorTarget;
 }
 
 export const Anchor: FC<AnchorProps> = ({
   children,
   className: inputClassName = '',
+  target = '_self',
   ...props
 }) => {
   const className = classnames('anchor', inputClassName);
   return (
-    <Link {...props} className={className}>
+    <Link {...props} className={className} target={target}>
       {children}
     </Link>
   );
