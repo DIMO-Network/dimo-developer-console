@@ -107,7 +107,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
           </div>
           <div className="signers-table">
             {app && (
-              <SignerList list={app?.Signers} refreshData={refreshAppDetails} />
+              <SignerList app={app} refreshData={refreshAppDetails} />
             )}
           </div>
           <div className="redirect-uri-content">
