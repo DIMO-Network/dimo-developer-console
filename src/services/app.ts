@@ -67,7 +67,8 @@ export const deleteSigner = async (id: string) => {
 
 export const testMyApp = async (app: IApp, signer: ISigner) => {
   const clientId = app.Workspace.client_id ?? '';
-  const [{ uri: domain = '' } = {}] = app.RedirectUris || [];
+  const { uri: domain = '' } =
+    app.RedirectUris?.find(({ deleted }) => !deleted) || {};
   const { api_key: apiKey } = signer;
 
   const client = axios.create({
