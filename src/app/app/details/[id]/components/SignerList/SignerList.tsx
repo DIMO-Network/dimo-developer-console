@@ -46,7 +46,7 @@ export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
   };
 
   const renderWithCopy = (columnName: string, data: Record<string, string>) => {
-    const value = data[columnName];
+    const value = String(data[columnName]).replace('0x', '');
     return (
       <p className="flex flex-row">
         {maskStringV2(value, {

@@ -47,7 +47,7 @@ export const updateRedirectUri = async (id: string, newData: Partial<IRedirectUr
 
 export const createSigner = async (
   id: string,
-  newData: Partial<IRedirectUri>
+  newData: Partial<ISigner>
 ) => {
   const client = dimoDevAPIClient();
   const { data } = await client.post<ISigner>(

@@ -14,12 +14,14 @@ export const appListMock: IApp[] = [
       {
         id: '29dd90ce-157d-42bb-ad89-eb106141aff6',
         api_key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+        address: 'abcdef12345abcdef12345abcdef12345abcdef12345',
         company_id: '66a98327-3146-45ff-babb-9b08adf84b0f',
         app_id: '9078a08c-5667-4af0-ba38-792097611bbb',
       },
       {
         id: 'd0ba855e-120d-44a7-8c74-18c9ef82f736',
         api_key: 'abcdef12345abcdef12345abcdef12345abcdef12345',
+        address: 'abcdef12345abcdef12345abcdef12345abcdef12345',
         company_id: '66a98327-3146-45ff-babb-9b08adf84b0f',
         app_id: '9078a08c-5667-4af0-ba38-792097611bbb',
       },
