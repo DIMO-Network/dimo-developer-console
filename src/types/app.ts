@@ -11,6 +11,7 @@ export interface ISigner {
   [k: string]: string | undefined;
   id?: string;
   api_key: string;
+  address: string;
   app_id: string;
   company_id: string;
 }
