@@ -56,11 +56,19 @@ export const SignUpWith: FC<IProps> = ({ onNext }) => {
           />
           <p className="terms-caption">
             by signing up, you are agreeing to our{' '}
-            <Anchor href="#" className="grey underline">
+            <Anchor
+              href="https://docs.dimo.zone/dinc/developer-terms-of-service"
+              className="grey underline"
+              target="_blank"
+            >
               terms of service
             </Anchor>{' '}
             and{' '}
-            <Anchor href="#" className="grey underline">
+            <Anchor
+              href="https://dimo.zone/legal/privacy-policy"
+              className="grey underline"
+              target="_blank"
+            >
               privacy policy
             </Anchor>
           </p>
