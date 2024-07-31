@@ -70,6 +70,10 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
         label: 'Testing the application',
         status: 'loading',
       });
+      const [{ uri: domain = '' } = {}] = app.RedirectUris || [];
+      if (!domain) {
+        return setLoadingStatus({ label: 'You need to set at least one domain', status: 'error' });
+      }
       await testApp(app, signer);
       setLoadingStatus({
         label: 'Application tested successfully',
