@@ -64,7 +64,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
         Company name
         <TextField
           type="text"
-          placeholder="DIMO"
+          placeholder="ACME"
           {...register('name', {
             required: false,
           })}
@@ -76,7 +76,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
         Company website
         <TextField
           type="text"
-          placeholder="www.dimo.zone"
+          placeholder="www.acme.zone"
           {...register('website', {
             required: false,
             validate: {

@@ -6,8 +6,8 @@ import { useState, type FC } from 'react';
 
 import { Button } from '@/components/Button';
 import { ContentCopyIcon } from '@/components/Icons';
-import { deleteMySigner } from '@/actions/app';
-import { ISigner } from '@/types/app';
+import { deleteMySigner, testApp } from '@/actions/app';
+import { IApp, ISigner } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { useContract, useOnboarding } from '@/hooks';
@@ -15,13 +15,13 @@ import { useContract, useOnboarding } from '@/hooks';
 import configuration from '@/config';
 
 interface IProps {
-  list: ISigner[] | undefined;
+  app: IApp;
   refreshData: () => void;
 }
 
 const ISSUE_IN_DIMO_GAS = 60000;
 
-export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
+export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { isOnboardingCompleted, workspace } = useOnboarding();
@@ -63,14 +63,37 @@ export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
     );
   };
 
-  const handleTestAuthentication = () => {};
+  const handleTestAuthentication = async (signer: ISigner) => {
+    try {
+      setIsOpened(true);
+      setLoadingStatus({
+        label: 'Testing the application',
+        status: 'loading',
+      });
+      const { uri: domain = '' } =
+        app.RedirectUris?.find(({ deleted }) => !deleted) || {};
+      if (!domain) {
+        return setLoadingStatus({
+          label: 'You need to set at least one domain',
+          status: 'error',
+        });
+      }
+      await testApp(app, signer);
+      setLoadingStatus({
+        label: 'Application tested successfully',
+        status: 'success',
+      });
+    } catch (error: unknown) {
+      setLoadingStatus({ label: 'Something went wrong', status: 'error' });
+    }
+  };
 
-  const renderTestAuthenticationAction = ({ id = '' }: ISigner) => {
+  const renderTestAuthenticationAction = (signer: ISigner) => {
     return (
       <Button
         className="white-outline px-4"
-        onClick={() => handleTestAuthentication()}
-        key={id}
+        onClick={() => handleTestAuthentication(signer)}
+        key={signer.id}
       >
         Test Authentication
       </Button>
@@ -112,7 +135,7 @@ export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
 
   return (
     <>
-      {list && list.length > 0 && (
+      {app.Signers && app.Signers.length > 0 && (
         <>
           <Table
             columns={[
@@ -122,7 +145,7 @@ export const SignerList: FC<IProps> = ({ list = [], refreshData }) => {
                 render: (item) => renderWithCopy('api_key', item),
               },
             ]}
-            data={list.filter(({ deleted }) => !deleted)}
+            data={app.Signers.filter(({ deleted }) => !deleted)}
             actions={[renderTestAuthenticationAction, renderDeleteSignerAction]}
           />
           <LoadingModal

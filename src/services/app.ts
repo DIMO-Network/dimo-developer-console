@@ -1,3 +1,6 @@
+import axios from 'axios';
+import { eth } from 'web3';
+
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 import { IApp, IRedirectUri, ISigner } from '@/types/app';
 import { Paginated } from '@/types/pagination';
@@ -40,15 +43,15 @@ export const deleteRedirectUri = async (id: string) => {
   await client.delete<IRedirectUri>(`/api/my/redirect-uris/${id}`);
 };
 
-export const updateRedirectUri = async (id: string, newData: Partial<IRedirectUri>) => {
+export const updateRedirectUri = async (
+  id: string,
+  newData: Partial<IRedirectUri>
+) => {
   const client = dimoDevAPIClient();
   await client.put<IRedirectUri>(`/api/my/redirect-uris/${id}`, newData);
 };
 
-export const createSigner = async (
-  id: string,
-  newData: Partial<ISigner>
-) => {
+export const createSigner = async (id: string, newData: Partial<ISigner>) => {
   const client = dimoDevAPIClient();
   const { data } = await client.post<ISigner>(
     `/api/my/apps/${id}/signers`,
@@ -60,4 +63,53 @@ export const createSigner = async (
 export const deleteSigner = async (id: string) => {
   const client = dimoDevAPIClient();
   await client.delete<ISigner>(`/api/my/signers/${id}`);
+};
+
+export const testMyApp = async (app: IApp, signer: ISigner) => {
+  const clientId = app.Workspace.client_id ?? '';
+  const { uri: domain = '' } =
+    app.RedirectUris?.find(({ deleted }) => !deleted) || {};
+  const { api_key: apiKey } = signer;
+
+  const client = axios.create({
+    baseURL: 'https://auth.dimo.zone/auth/web3',
+  });
+
+  const {
+    data: { state, challenge },
+  } = await client.post<{
+    state: string;
+    challenge: string;
+  }>(
+    'generate_challenge',
+    {},
+    {
+      params: {
+        client_id: clientId,
+        domain,
+        scope: 'openid email',
+        response_type: 'code',
+        address: clientId,
+      },
+    }
+  );
+
+  const { signature } = await eth.accounts.sign(challenge, apiKey);
+
+  const { data: tokens } = await client.post(
+    'submit_challenge',
+    {
+      client_id: clientId,
+      state,
+      grant_type: 'authorization_code',
+      domain,
+      signature,
+    },
+    {
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+    }
+  );
+  return tokens;
 };
