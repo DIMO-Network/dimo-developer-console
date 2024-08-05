@@ -43,8 +43,8 @@ export const BuyCreditsModal: FC<IProps> = () => {
             Buy DCX
           </Title>
           <p className="description">
-            Development credits, or “DCX”, are used to purchase software
-            licenses on the Build DIMO platform
+            DIMO Credits (DCX), are used for developers with a predictable and
+            fair price
           </p>
         </div>
         <TokenInput
@@ -59,14 +59,14 @@ export const BuyCreditsModal: FC<IProps> = () => {
         />
         <div className="credit-total-content">
           <p className="total-descriptor">Your total</p>
-          <p className="total-value">$ {credits}</p>
+          <p className="total-value">$ {credits * 0.001}</p>
         </div>
         <div className="payment-method-container">
           <p className="payment-descriptor">Payment method</p>
           <PaymentMethodSelector name="paymentMethod" control={control} />
         </div>
         <div className="credit-action">
-          <Button className="primary !h-9">Purchase</Button>
+          <Button className="primary !h-9">Coming soon</Button>
         </div>
       </div>
     </Modal>
