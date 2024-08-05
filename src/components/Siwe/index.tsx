@@ -1,8 +1,7 @@
 import { useContext, type FC } from 'react';
 import { getCsrfToken } from 'next-auth/react';
 import { SiweMessage } from 'siwe';
-import { useAccount, useConnect, useSignMessage } from 'wagmi';
-import { injected } from 'wagmi/connectors';
+import { useAccount, useSignMessage } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 
