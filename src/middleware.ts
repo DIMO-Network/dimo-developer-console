@@ -46,6 +46,9 @@ export const middleware = async (
 ) => {
   const hasError = request.nextUrl.searchParams.get('error');
   const token = await getToken({ req: request });
+  const isAPIProtected = mustBeAuthorize(request, token);
+  const isAPI = request.nextUrl.pathname.startsWith(API_PATH);
+  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
 
   // Setting the user up
   try {
@@ -55,9 +58,6 @@ export const middleware = async (
 
       const isCompliant = request.user?.isCompliant ?? false;
       const missingFlow = request.user?.missingFlow ?? null;
-
-      const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
-      const isAPIProtected = mustBeAuthorize(request, token);
       const flow = request.nextUrl.searchParams.get('flow');
 
       if (token && !isCompliant && !flow) {
@@ -75,18 +75,26 @@ export const middleware = async (
         });
       }
 
-      if (isAPIProtected) {
-        return NextResponse.json(
-          {
-            message: 'Unauthorized Access',
-          },
-          { status: 401 }
-        );
-      }
-
       if (!isLoginPage) {
         return authMiddleware(request, event);
       }
+
+      return NextResponse.next();
+    }
+
+    if (isAPIProtected && isAPI) {
+      return NextResponse.json(
+        {
+          message: 'Unauthorized Access',
+        },
+        { status: 401 }
+      );
+    }
+
+    if (!isLoginPage) {
+      return NextResponse.redirect(new URL('/sign-in', request.url), {
+        status: 307,
+      });
     }
 
     return NextResponse.next();
