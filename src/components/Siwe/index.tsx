@@ -1,15 +1,14 @@
 import { useContext, type FC } from 'react';
 import { getCsrfToken } from 'next-auth/react';
 import { SiweMessage } from 'siwe';
-import { useAccount, useConnect, useSignMessage } from 'wagmi';
-import { injected } from 'wagmi/connectors';
+import { useAccount, useSignMessage } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
 import { SignInButton } from '@/components/SignInButton';
 import { SiweIcon } from '@/components/Icons';
-
 interface SiweButtonProps {
   isSignIn: boolean;
   onCTA: (d: Partial<IAuth>) => void;
@@ -19,7 +18,7 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
   const { signMessageAsync } = useSignMessage();
   const { setNotification } = useContext(NotificationContext);
   const { address, isConnected } = useAccount();
-  const { connect } = useConnect();
+  const { openConnectModal } = useConnectModal();
 
   const handleLogin = async () => {
     try {
@@ -52,8 +51,8 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
       className="sm"
       onClick={(e) => {
         e.preventDefault();
-        if (!isConnected) {
-          connect({ connector: injected() });
+        if (!isConnected && openConnectModal) {
+          openConnectModal();
         } else {
           handleLogin();
         }
