@@ -129,12 +129,18 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
               type="text"
               placeholder="Project Namespace"
               {...register('workspace.name', {
-                required: true,
+                required: 'This field is required',
+                maxLength: {
+                  value: 32,
+                  message: 'The name should has maximum 32 characters',
+                },
               })}
               role="namespace-input"
             />
             {errors?.workspace?.name && (
-              <TextError errorMessage="This field is required" />
+              <TextError
+                errorMessage={errors?.workspace?.name?.message ?? ''}
+              />
             )}
             <p className="text-sm text-grey-200">
               This is the namespace used across all your apps
@@ -147,12 +153,16 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
             type="text"
             placeholder="Application name"
             {...register('app.name', {
-              required: true,
+              required: 'This field is required',
+              maxLength: {
+                value: 32,
+                message: 'The name should has maximum 32 characters',
+              },
             })}
             role="name-input"
           />
           {errors?.app?.name && (
-            <TextError errorMessage="This field is required" />
+            <TextError errorMessage={errors?.app?.name?.message ?? ''} />
           )}
           <p className="text-sm text-grey-200">
             This name is for your reference only

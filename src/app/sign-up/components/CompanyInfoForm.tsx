@@ -66,12 +66,16 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
           type="text"
           placeholder="ACME"
           {...register('name', {
-            required: false,
+            required: 'This field is required',
+            maxLength: {
+              value: 120,
+              message: 'The name should has maximum 120 characters',
+            },
           })}
           role="company-name-input"
         />
       </Label>
-      {errors.name && <TextError errorMessage="This field is required" />}
+      {errors.name && <TextError errorMessage={errors?.name?.message ?? ''} />}
       <Label htmlFor="website" className="text-xs text-medium">
         Company website
         <TextField
@@ -79,6 +83,10 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
           placeholder="www.acme.zone"
           {...register('website', {
             required: false,
+            maxLength: {
+              value: 120,
+              message: 'The name should has maximum 120 characters',
+            },
             validate: {
               isURL: (str: string = '') => isEmpty(str) || isURL(str),
             },
@@ -87,7 +95,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
         />
       </Label>
       {errors.website && (
-        <TextError errorMessage="This field must be a valid URL" />
+        <TextError errorMessage="This field must be a valid URL with maximum 120 characters" />
       )}
       <Label htmlFor="region" className="text-xs text-medium">
         Main Operating Region *
