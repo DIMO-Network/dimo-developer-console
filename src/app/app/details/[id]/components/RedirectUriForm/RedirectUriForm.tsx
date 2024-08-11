@@ -88,6 +88,10 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
             <TextField
               {...register('uri', {
                 required: 'Please enter the redirect URI',
+                maxLength: {
+                  value: 150,
+                  message: 'The name should has maximum 150 characters',
+                },
                 validate: {
                   url: (str = '') => isURL(str) || 'Invalid Redirect URI',
                 },
