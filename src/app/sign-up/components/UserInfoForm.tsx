@@ -58,6 +58,10 @@ export const UserInfoForm: FC<IProps> = ({ auth }) => {
           placeholder="John Doe"
           {...register('name', {
             required: 'The name is required',
+            maxLength: {
+              value: 150,
+              message: 'The name should has maximum 150 characters',
+            },
           })}
           role="name-input"
         />
@@ -70,6 +74,10 @@ export const UserInfoForm: FC<IProps> = ({ auth }) => {
           placeholder="johndoe@dimo.zone"
           {...register('email', {
             required: 'The email is required',
+            maxLength: {
+              value: 150,
+              message: 'The name should has maximum 150 characters',
+            },
             validate: {
               isEmail: (str: string = '') => isEmail(str),
             },
