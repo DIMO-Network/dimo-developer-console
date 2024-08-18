@@ -45,9 +45,9 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators }) => {
     );
   };
 
-  const renderDeleteRemoveCollaborator = () => {
+  const renderDeleteRemoveCollaborator = ({ id }: ITeamCollaborator) => {
     return (
-      <div className="flex flex-row items-center w-full h-full">
+      <div className="flex flex-row items-center w-full h-full" key={id}>
         <TrashIcon className="w-5 h-5" />
       </div>
     );
