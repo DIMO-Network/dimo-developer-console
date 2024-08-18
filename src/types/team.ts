@@ -29,3 +29,8 @@ export interface ITeamCollaborator {
   deleted?: boolean;
   deleted_at?: Date;
 }
+
+export interface IInvitation {
+  email: string;
+  role: string;
+}
