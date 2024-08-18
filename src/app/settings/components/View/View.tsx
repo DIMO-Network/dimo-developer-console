@@ -2,6 +2,7 @@
 import { FC } from 'react';
 
 import { Loader } from '@/components/Loader';
+import { TeamForm } from '@/app/settings/components/TeamForm';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
 import { UserForm } from '@/app/settings/components/UserForm';
@@ -28,6 +29,7 @@ const View: FC = () => {
           </div>
           <div className="team-information">
             <Title component="h2">Team Management</Title>
+            <TeamForm />
             <TeamManagement teamCollaborators={teamCollaborators.data} />
           </div>
         </>

@@ -2,7 +2,8 @@
   @apply flex flex-col gap-8;
 
   .titles,
-  .user-information {
+  .user-information,
+  .team-information {
     @apply flex flex-col gap-2;
   }
   .subtitle {
