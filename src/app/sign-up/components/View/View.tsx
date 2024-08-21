@@ -12,7 +12,7 @@ import {
 import { completeUserData } from '@/app/sign-up/actions';
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
-import { useErrorHandler } from '@/hooks';
+import { useErrorHandler, useInvitation } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
@@ -48,6 +48,7 @@ const View = () => {
   const currentFlow = searchParams.get('flow') ?? 'sign-up-with';
   const [flow, setFlow] = useState(currentFlow);
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
+  const { invitationCode, isValid } = useInvitation();
 
   const { Component: SignUpFlow, title } =
     signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['build-for'];
