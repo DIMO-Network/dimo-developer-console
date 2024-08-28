@@ -1,12 +1,14 @@
+import axios, { isAxiosError } from 'axios';
+
 import { JWT, getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextFetchEvent, NextResponse } from 'next/server';
 
+import configuration from '@/config';
+
 import { isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
-import configuration from '@/config';
-import axios, { isAxiosError } from 'axios';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
@@ -60,7 +62,7 @@ export const middleware = async (
       const missingFlow = request.user?.missingFlow ?? null;
       const flow = request.nextUrl.searchParams.get('flow');
 
-      if (token && !isCompliant && !flow) {
+      if (!isCompliant && !flow) {
         return NextResponse.redirect(
           new URL(`/sign-up?flow=${missingFlow}`, request.url),
           {
@@ -69,7 +71,7 @@ export const middleware = async (
         );
       }
 
-      if (isLoginPage && token && isCompliant) {
+      if (isLoginPage && isCompliant) {
         return NextResponse.redirect(new URL('/app', request.url), {
           status: 307,
         });

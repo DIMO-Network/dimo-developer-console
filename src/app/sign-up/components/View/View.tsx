@@ -48,7 +48,7 @@ const View = () => {
   const currentFlow = searchParams.get('flow') ?? 'sign-up-with';
   const [flow, setFlow] = useState(currentFlow);
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
-  const { invitationCode, isValid } = useInvitation();
+  useInvitation();
 
   const { Component: SignUpFlow, title } =
     signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['build-for'];
