@@ -5,6 +5,11 @@ export enum TeamRoles {
   COLLABORATOR = 'COLLABORATOR',
 }
 
+export enum TeamRolesLabels {
+  OWNER = 'Owner',
+  COLLABORATOR = 'Collaborator',
+}
+
 export interface ITeam {
   id?: string;
   name: string;
