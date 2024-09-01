@@ -10,6 +10,18 @@ export enum TeamRolesLabels {
   COLLABORATOR = 'Collaborator',
 }
 
+export enum InvitationStatuses {
+  PENDING = 'PENDING',
+  SENT = 'SENT',
+  ACCEPTED = 'ACCEPTED',
+}
+
+export enum InvitationStatusLabels {
+  PENDING = 'Pending invitation',
+  SENT = 'Invitation sent',
+  ACCEPTED = 'Invitation accepted',
+}
+
 export interface ITeam {
   id?: string;
   name: string;
@@ -28,7 +40,9 @@ export interface ITeamCollaborator {
   Team?: ITeam | undefined;
   user_id: string;
   User?: IUser | undefined;
+  email?: string;
   role: string;
+  status: string;
   created_at?: Date;
   updated_at?: Date;
   deleted?: boolean;

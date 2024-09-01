@@ -1,7 +1,13 @@
 import { type FC } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
-import { ITeamCollaborator, TeamRoles, TeamRolesLabels } from '@/types/team';
+import {
+  InvitationStatuses,
+  InvitationStatusLabels,
+  ITeamCollaborator,
+  TeamRoles,
+  TeamRolesLabels,
+} from '@/types/team';
 import { SelectField } from '@/components/SelectField';
 import { Table } from '@/components/Table';
 import { TrashIcon } from '@heroicons/react/24/outline';
@@ -18,16 +24,26 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators }) => {
   const { user: { role = '' } = {} } = session ?? {};
 
   const renderUserName = ({ ...teamCollaborator }: ITeamCollaborator) => {
-    const { name = '' } = teamCollaborator.User ?? {};
+    const { User: currentUser, email = '' } = teamCollaborator ?? {};
+    const { name } = currentUser ?? {};
+
     return (
       <div className="flex flex-row items-center gap-3">
-        <UserAvatar name={name ?? ''} />
-        <p>{teamCollaborator.User?.name ?? ''}</p>
+        <UserAvatar name={name ?? email ?? ''} />
+        <p>{name ?? email ?? ''}</p>
       </div>
     );
   };
 
   const renderRole = ({ ...teamCollaborator }: ITeamCollaborator) => {
+    if (teamCollaborator.status === InvitationStatuses.PENDING) {
+      return (
+        <div className="rounded-lg py-2 px-4 outline-0 bg-grey-950 text-grey-50/50">
+          {InvitationStatusLabels.PENDING}
+        </div>
+      );
+    }
+
     return role === TeamRoles.OWNER ? (
       <Controller
         control={control}
