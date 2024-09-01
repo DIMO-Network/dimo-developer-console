@@ -1,16 +1,12 @@
-import _ from 'lodash';
-
 import { isEmail } from 'validator';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import { FC } from 'react';
 
 import config from '@/config';
 
 import { Button } from '@/components/Button';
 import { IInvitation } from '@/types/team';
-import { inviteCollaborator } from '@/actions/team';
 import { Label } from '@/components/Label';
-import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { PlusIcon } from '@/components/Icons';
 import { SelectField } from '@/components/SelectField';
 import { TextError } from '@/components/TextError';
@@ -23,10 +19,12 @@ const roleOptions = config.ROLES.map((roleName) => ({
   text: roleName,
 })) as { value: string; text: string }[];
 
-export const TeamForm = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isOpened, setIsOpened] = useState<boolean>(false);
-  const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
+interface IProps {
+  isLoading: boolean;
+  inviteToTeam: (a: IInvitation) => Promise<void>;
+}
+
+export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam }) => {
   const {
     control,
     handleSubmit,
@@ -40,29 +38,9 @@ export const TeamForm = () => {
   });
 
   const onSubmit = async () => {
-    setIsLoading(true);
-    setIsOpened(true);
-    try {
-      setLoadingStatus({
-        label: 'Sending the invitation',
-        status: 'loading',
-      });
-      const invitation = getValues();
-      invitation.role = invitation.role.toUpperCase();
-      await inviteCollaborator(invitation);
-      setLoadingStatus({
-        label: 'Invitation sent',
-        status: 'success',
-      });
-      reset();
-    } catch (error: unknown) {
-      setLoadingStatus({
-        label: _.get(error, 'message'),
-        status: 'error',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    const invitation = getValues();
+    await inviteToTeam(invitation);
+    reset();
   };
 
   return (
@@ -72,7 +50,7 @@ export const TeamForm = () => {
           Email
           <TextField
             type="text"
-            placeholder="Email"
+            placeholder="Enter email"
             {...register('email', {
               required: 'This field is required',
               maxLength: {
@@ -99,7 +77,7 @@ export const TeamForm = () => {
             })}
             options={roleOptions}
             control={control}
-            placeholder="Select"
+            placeholder="Select a role"
             role="company-region"
           />
           {errors.role && (
@@ -109,19 +87,14 @@ export const TeamForm = () => {
       </div>
       <div className="cta">
         <Button
-          className="primary-outline px-4 w-full"
+          className="primary px-4 w-full"
           loading={isLoading}
           loadingColor="primary"
         >
           <PlusIcon className="w-5 h-5 mr-2" />
-          Invite
+          Send email invitation
         </Button>
       </div>
-      <LoadingModal
-        isOpen={isOpened}
-        setIsOpen={setIsOpened}
-        {...loadingStatus}
-      />
     </form>
   );
 };

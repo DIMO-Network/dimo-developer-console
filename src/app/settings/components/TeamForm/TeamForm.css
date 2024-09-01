@@ -1,11 +1,11 @@
 .form-team-invitation {
-  @apply flex flex-row justify-between items-center w-full;
+  @apply flex flex-col w-full;
 
   .field {
     @apply w-full h-20;
   }
 
   .cta {
-    @apply flex w-96;
+    @apply flex w-full;
   }
 }
