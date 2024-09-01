@@ -6,6 +6,8 @@ export const API_PATH = '/api';
 
 export const UNPROTECTED_PATHS = ['/api/auth'];
 
+export const ROLES = ['Owner', 'Collaborator'];
+
 export const REGIONS = [
   'North America',
   'Latin America & Caribbean',

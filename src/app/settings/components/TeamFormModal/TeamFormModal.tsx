@@ -1,0 +1,60 @@
+'use client';
+
+import _ from 'lodash';
+
+import { useContext, useState, type FC } from 'react';
+
+import { IInvitation } from '@/types/team';
+import { inviteCollaborator } from '@/actions/team';
+import { Modal } from '@/components/Modal';
+import { NotificationContext } from '@/context/notificationContext';
+import { TeamForm } from '@/app/settings/components/TeamForm/TeamForm';
+import { Title } from '@/components/Title';
+
+import './TeamFormModal.css';
+
+interface IProps {
+  isOpen: boolean;
+  setIsOpen: (s: boolean) => void;
+}
+
+export const TeamFormModal: FC<IProps> = ({ isOpen, setIsOpen }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { setNotification } = useContext(NotificationContext);
+
+  const onSubmit = async (invitation: IInvitation) => {
+    setIsLoading(true);
+    setIsOpen(true);
+    try {
+      invitation.role = invitation.role.toUpperCase();
+      await inviteCollaborator(invitation);
+      setNotification('The invitation was sent', 'Success', 'info');
+    } catch (error: unknown) {
+      setNotification(
+        _.get(error, 'message', 'Something went wrong'),
+        'Oops...',
+        'error'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="team-form-modal">
+      <div className="team-form-content">
+        <div className="team-form-header">
+          <Title className="text-2xl" component="h3">
+            Invite your team members
+          </Title>
+          <p className="description">
+            Invite your team members to collaborate on the developer console
+          </p>
+        </div>
+        <TeamForm isLoading={isLoading} inviteToTeam={onSubmit} />
+      </div>
+    </Modal>
+  );
+};
+
+export default TeamFormModal;

@@ -7,8 +7,10 @@ import { deleteMyRedirectUri, updateMyRedirectUri } from '@/actions/app';
 import { IRedirectUri } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
+import { TeamRoles } from '@/types/team';
 import { Toggle } from '@/components/Toggle';
 import { useContract, useOnboarding } from '@/hooks';
+import { useSession } from 'next-auth/react';
 
 import configuration from '@/config';
 
@@ -24,6 +26,8 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { isOnboardingCompleted, workspace } = useOnboarding();
   const { address, dimoLicenseContract } = useContract();
+  const { data: session } = useSession();
+  const { user: { role = '' } = {} } = session ?? {};
 
   const recordsToShow = list.filter(({ deleted }) => !deleted);
 
@@ -44,11 +48,13 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
 
   const renderToggleStatus = ({ id, uri, status }: IRedirectUri) => {
     return (
-      <Toggle
-        checked={Boolean(status)}
-        onToggle={() => handleUpdateStatus(id as string, uri, !status)}
-        key={id}
-      />
+      role === TeamRoles.OWNER && (
+        <Toggle
+          checked={Boolean(status)}
+          onToggle={() => handleUpdateStatus(id as string, uri, !status)}
+          key={id}
+        />
+      )
     );
   };
 
@@ -102,13 +108,15 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
 
   const renderDeleteRedirectUriAction = ({ id, uri }: IRedirectUri) => {
     return (
-      <button
-        type="button"
-        onClick={() => handleDeleteUri(id as string, uri)}
-        key={id}
-      >
-        <TrashIcon className="w-5 h-5 cursor-pointer" />
-      </button>
+      role === TeamRoles.OWNER && (
+        <button
+          type="button"
+          onClick={() => handleDeleteUri(id as string, uri)}
+          key={id}
+        >
+          <TrashIcon className="w-5 h-5 cursor-pointer" />
+        </button>
+      )
     );
   };
 

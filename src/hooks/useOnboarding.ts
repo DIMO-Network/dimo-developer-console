@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 
 import { getWorkspace } from '@/actions/workspace';
 import { IWorkspace } from '@/types/workspace';
+import { TeamRoles } from '@/types/team';
 
 export const useOnboarding = () => {
   const { isConnected } = useAccount();
@@ -12,7 +13,7 @@ export const useOnboarding = () => {
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [workspace, setWorkspace] = useState<IWorkspace>();
-  const { user: { name = '' } = {} } = session ?? {};
+  const { user: { name = '', role = '' } = {} } = session ?? {};
 
   useEffect(() => {
     if (name) {
@@ -24,9 +25,13 @@ export const useOnboarding = () => {
   }, [name]);
 
   useEffect(() => {
-    const hasWorkspace = Object.keys(workspace ?? {}).length > 0;
-    setIsOnboardingCompleted(isConnected && hasWorkspace);
-  }, [isConnected, workspace]);
+    if (role === TeamRoles.COLLABORATOR) {
+      setIsOnboardingCompleted(true);
+    } else {
+      const hasWorkspace = Object.keys(workspace ?? {}).length > 0;
+      setIsOnboardingCompleted(isConnected && hasWorkspace);
+    }
+  }, [isConnected, workspace, role]);
 
   return { isOnboardingCompleted, isLoading, workspace };
 };

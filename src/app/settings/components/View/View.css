@@ -2,9 +2,15 @@
   @apply flex flex-col gap-8;
 
   .titles,
-  .user-information {
+  .user-information,
+  .team-information {
     @apply flex flex-col gap-2;
   }
+
+  .team-header {
+    @apply flex flex-row justify-between items-center;
+  }
+
   .subtitle {
     @apply text-sm;
   }

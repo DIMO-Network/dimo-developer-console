@@ -11,6 +11,7 @@ import { Button } from '@/components/Button';
 import { getApps } from '@/actions/app';
 import { IApp } from '@/types/app';
 import { Loader } from '@//components/Loader';
+import { TeamRoles } from '@/types/team';
 
 import './View.css';
 
@@ -19,7 +20,7 @@ export const View: FC = () => {
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const router = useRouter();
   const { data: session } = useSession();
-  const { user: { name = '' } = {} } = session ?? {};
+  const { user: { name = '', role = '' } = {} } = session ?? {};
 
   useEffect(() => {
     setIsLoadingPage(true);
@@ -52,15 +53,16 @@ export const View: FC = () => {
           <>
             <div className="description">
               <p className="title">Your applications</p>
-              <Button
-                className="primary px-3 with-icon"
-                onClick={handleCreateApp}
-              >
-                <PlusIcon className="w-4 h-4" />
-                Create new
-              </Button>
+              {role === TeamRoles.OWNER && (
+                <Button
+                  className="primary px-3 with-icon"
+                  onClick={handleCreateApp}
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  Create new
+                </Button>
+              )}
             </div>
-
             <div className="app-list">{apps.map(renderItem)}</div>
           </>
         </div>

@@ -10,7 +10,9 @@ import { deleteMySigner, testApp } from '@/actions/app';
 import { IApp, ISigner } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
+import { TeamRoles } from '@/types/team';
 import { useContract, useOnboarding } from '@/hooks';
+import { useSession } from 'next-auth/react';
 
 import configuration from '@/config';
 
@@ -26,6 +28,8 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { isOnboardingCompleted, workspace } = useOnboarding();
   const { address, dimoLicenseContract } = useContract();
+  const { data: session } = useSession();
+  const { user: { role = '' } = {} } = session ?? {};
 
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
@@ -105,9 +109,11 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     api_key: signer = '',
   }: ISigner) => {
     return (
-      <button type="button" onClick={() => handleDelete(id, signer)} key={id}>
-        <TrashIcon className="w-5 h-5" />
-      </button>
+      role === TeamRoles.OWNER && (
+        <button type="button" onClick={() => handleDelete(id, signer)} key={id}>
+          <TrashIcon className="w-5 h-5" />
+        </button>
+      )
     );
   };
 
