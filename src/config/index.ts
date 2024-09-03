@@ -12,6 +12,7 @@ type Configuration = {
   backendUrl: string;
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
+  CONTRACT_NETWORK: bigint;
   DLC_ADDRESS: string;
   DC_ADDRESS: string;
   masFeePerGas: number;

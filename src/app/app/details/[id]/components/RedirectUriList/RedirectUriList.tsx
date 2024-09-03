@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
+import { changeNetwork } from '@/utils/contract';
 import { deleteMyRedirectUri, updateMyRedirectUri } from '@/actions/app';
 import { IRedirectUri } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
@@ -30,6 +31,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const handleSetDomain = async (uri: string, enabled: boolean) => {
     if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
       throw new Error('Web3 connection failed');
+    await changeNetwork();
     await dimoLicenseContract?.methods['0xba1bedfc'](
       workspace?.token_id ?? 0,
       enabled,

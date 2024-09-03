@@ -6,6 +6,7 @@ import { useEffect, useState, useContext } from 'react';
 import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
 import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
+import { changeNetwork } from '@/utils/contract';
 import { createMySigner, getAppByID } from '@/actions/app';
 import { generateWallet } from '@/utils/wallet';
 import { IApp } from '@/types/app';
@@ -43,6 +44,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const handleEnableSigner = async (signer: string) => {
     if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
       throw new Error('Web3 connection failed');
+    await changeNetwork();
     await dimoLicenseContract?.methods['0x3b1c393b'](
       workspace?.token_id ?? 0,
       signer
