@@ -5,6 +5,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState, type FC } from 'react';
 
 import { Button } from '@/components/Button';
+import { changeNetwork } from '@/utils/contract';
 import { ContentCopyIcon } from '@/components/Icons';
 import { deleteMySigner, testApp } from '@/actions/app';
 import { IApp, ISigner } from '@/types/app';
@@ -38,6 +39,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const handleDisableSigner = async (signer: string) => {
     if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
       throw new Error('Web3 connection failed');
+    await changeNetwork();
     await dimoLicenseContract?.methods['0xde9cc84d'](
       workspace?.token_id ?? 0,
       signer
