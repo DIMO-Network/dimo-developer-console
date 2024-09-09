@@ -5,6 +5,7 @@ import * as previewConfig from './preview';
 type Configuration = {
   appName: string;
   LOGIN_PAGES: string[];
+  VALIDATION_PAGES: string[];
   API_PATH: string;
   UNPROTECTED_PATHS: string[];
   REGIONS: string[];

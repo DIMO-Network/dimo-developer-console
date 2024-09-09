@@ -7,4 +7,5 @@ export interface IAuth {
   company?: ICompany;
   message?: string;
   signature?: `0x${string}`;
+  isPasskey?: boolean;
 }

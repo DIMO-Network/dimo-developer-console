@@ -7,8 +7,9 @@ import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
 import axios, { isAxiosError } from 'axios';
+import { getUserSubOrganization } from '@/services/globalAccount';
 
-const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
 
 const authMiddleware = withAuth({
   callbacks: {
@@ -49,16 +50,29 @@ export const middleware = async (
   const isAPIProtected = mustBeAuthorize(request, token);
   const isAPI = request.nextUrl.pathname.startsWith(API_PATH);
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  const isValidationPage = VALIDATION_PAGES.includes(request.nextUrl.pathname);
 
   // Setting the user up
   try {
     if (token) {
       const user = await getUserByToken();
-      request.user = new LoggedUser(user);
+      const subOrganization = await getUserSubOrganization(user.email);
+      request.user = new LoggedUser(user, subOrganization);
 
       const isCompliant = request.user?.isCompliant ?? false;
       const missingFlow = request.user?.missingFlow ?? null;
       const flow = request.nextUrl.searchParams.get('flow');
+
+
+      console.info('user', user);
+      console.info('isLoginPage', isLoginPage);
+      console.info('isValidationPage', isValidationPage);
+      console.info('isCompliant', isCompliant);
+      console.info('missingFlow', missingFlow);
+      console.info('flow', flow);
+/*
+      if (isValidationPage) return NextResponse.next();
+
 
       if (token && !isCompliant && !flow) {
         return NextResponse.redirect(
@@ -78,7 +92,7 @@ export const middleware = async (
       if (!isLoginPage) {
         return authMiddleware(request, event);
       }
-
+*/
       return NextResponse.next();
     }
 
@@ -99,7 +113,7 @@ export const middleware = async (
 
     return NextResponse.next();
   } catch (error: unknown) {
-    const path = await handleExpiredSession(error);
+    const path = handleExpiredSession(error);
     const redirectUrl = `${configuration.frontendUrl}${path}`;
     if (!hasError) {
       return Response.redirect(redirectUrl);

@@ -45,10 +45,11 @@ const buildForList = [
 ];
 
 interface IProps {
+  auth?: Partial<IAuth>;
   onNext: (flow: string, auth?: Partial<IAuth>) => void;
 }
 
-export const BuildForForm: FC<IProps> = ({ onNext }) => {
+export const BuildForForm: FC<IProps> = ({ auth, onNext }) => {
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const {
     register,
@@ -81,6 +82,7 @@ export const BuildForForm: FC<IProps> = ({ onNext }) => {
 
   const updateUser = async (buildForData: BuildForFormInputs) => {
     onNext('build-for', {
+      ...auth,
       company: {
         build_for: buildForData.buildFor,
         build_for_text: buildForData.buildForText,

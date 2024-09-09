@@ -1,11 +1,14 @@
 import { IUser } from '@/types/user';
+import { ISubOrganization } from '@/types/wallet';
 
 export class LoggedUser {
   public static instance: LoggedUser | null = null;
   private _user: IUser | null = null;
+  private _subOrganization: ISubOrganization | null = null;
 
-  constructor(user: IUser) {
+  constructor(user: IUser, turnkeyData: ISubOrganization) {
     this._user = user;
+    this._subOrganization = turnkeyData;
   }
 
   set user(user: IUser | null) {
@@ -28,9 +31,17 @@ export class LoggedUser {
     return this.hasTeam && this.hasPersonalData;
   }
 
+  get isGlobalAccountUser(): boolean {
+    return this._subOrganization !== null;
+  }
+
+  get hasPasskey(): boolean {
+    return this._subOrganization?.hasPasskey ?? false;
+  }
+
   get missingFlow(): string {
     let missingFlow = 'sign-up-with';
-    if (!this.hasPersonalData) missingFlow = 'personal-information';
+    if (!this.isGlobalAccountUser) missingFlow = 'wallet-assignment';
     else if (!this.hasTeam) missingFlow = 'build-for';
     return missingFlow;
   }

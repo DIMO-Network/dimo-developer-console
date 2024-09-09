@@ -40,10 +40,6 @@ export const SignInButtons: FC<SignInButtonProps> = ({
         Icon={GoogleIcon}
         onClick={() => handlerLogin('google')}
       />
-      <Siwe
-        isSignIn={isSignIn}
-        onCTA={(auth) => handlerLogin('credentials', auth)}
-      />
       <SignInButton
         className="sm"
         isSignIn={isSignIn}

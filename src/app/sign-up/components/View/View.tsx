@@ -16,27 +16,29 @@ import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
+import WalletAssignment from '@/app/sign-up/components/WalletAssignment';
+import WalletCreation from '@/app/sign-up/components/WalletCreation';
 
 const signUpFlows = {
-  'sign-up-with': {
-    Component: SignUpWith,
-    title: 'Get started building',
-    order: 0,
-  },
-  'personal-information': {
-    Component: UserInfoForm,
-    title: 'Personal information',
+  'wallet-assignment': {
+    Component: WalletAssignment,
+    title: 'How would you like your wallet?',
     order: 1,
+  },
+  'wallet-creation': {
+    Component: WalletCreation,
+    title: 'Let\'s get you a wallet',
+    order: 2,
   },
   'build-for': {
     Component: BuildForForm,
     title: 'What are you building?',
-    order: 2,
+    order: 3,
   },
   'company-information': {
     Component: CompanyInfoForm,
     title: 'Our last question',
-    order: 3,
+    order: 4,
   },
 };
 

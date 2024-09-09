@@ -11,11 +11,15 @@ import { withNotifications } from '@/hoc';
 
 import './View.css';
 import { NotificationContext } from '@/context/notificationContext';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
+import { useGlobalAccount } from '@/hooks';
+import { useRouter } from 'next/navigation';
 
 export const View = () => {
   useErrorHandler();
   const { setNotification } = useContext(NotificationContext);
+  const router = useRouter();
+  const { organizationInfo, loginAndRedirect } = useGlobalAccount();
 
   const notifyUnregisterUser = (type: string) => {
     setNotification(`The ${type} is not registered`, 'Not registered', 'error');
@@ -33,8 +37,17 @@ export const View = () => {
         return;
       }
     }
-    signIn(app, auth);
+    await signIn(app, auth);
   };
+
+  useEffect(() => {
+    if (!organizationInfo) return;
+    if (!organizationInfo.subOrganizationId) {
+      router.push('/sign-up');
+      return;
+    }
+    void loginAndRedirect();
+  }, [organizationInfo]);
 
   return (
     <main className="sign-in">
