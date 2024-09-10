@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { get } from 'lodash';
 import Web3 from 'web3';
 
 import DimoABI from '@/contracts/DimoTokenContract.json';
@@ -45,19 +45,30 @@ export const changeNetwork = async () => {
         params: [{ chainId: web3.utils.toHex(configuration.CONTRACT_NETWORK) }],
       });
     } catch (err: unknown) {
-      if (_.get(err, 'code') === 4902) {
+      if (get(err, 'code') === 4902) {
+        const chainParams = getChainParams(web3);
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [
-            {
-              chainName: 'Polygon Mainnet',
-              chainId: web3.utils.toHex(configuration.CONTRACT_NETWORK),
-              nativeCurrency: { name: 'MATIC', decimals: 18, symbol: 'MATIC' },
-              rpcUrls: ['https://polygon-rpc.com/'],
-            },
+            chainParams,
           ],
         });
       }
     }
   }
+};
+
+const getChainParams = (web3: Web3) => {
+  const isAmoy = configuration.CONTRACT_NETWORK === BigInt(80_002);
+  const chainName = isAmoy ? 'Polygon Amoy' : 'Polygon';
+  const rpcUrl = isAmoy
+    ? 'https://rpc-amoy.polygon.technology'
+    : 'https://polygon-rpc.com';
+
+  return {
+    chainName,
+    chainId: web3.utils.toHex(configuration.CONTRACT_NETWORK),
+    nativeCurrency: { name: 'MATIC', decimals: 18, symbol: 'MATIC' },
+    rpcUrls: [rpcUrl]
+  };
 };
