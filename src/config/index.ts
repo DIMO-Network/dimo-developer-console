@@ -7,11 +7,13 @@ type Configuration = {
   LOGIN_PAGES: string[];
   API_PATH: string;
   UNPROTECTED_PATHS: string[];
+  ROLES: string[];
   REGIONS: string[];
   DEVELOPER_TYPES: string[];
   backendUrl: string;
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
+  CONTRACT_NETWORK: bigint;
   DLC_ADDRESS: string;
   DC_ADDRESS: string;
   masFeePerGas: number;

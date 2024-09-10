@@ -2,10 +2,12 @@
 import _ from 'lodash';
 
 import { useEffect, useState, useContext } from 'react';
+import { useSession } from 'next-auth/react';
 
 import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
 import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
+import { changeNetwork } from '@/utils/contract';
 import { createMySigner, getAppByID } from '@/actions/app';
 import { generateWallet } from '@/utils/wallet';
 import { IApp } from '@/types/app';
@@ -14,6 +16,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriForm';
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
+import { TeamRoles } from '@/types/team';
 import { Title } from '@/components/Title';
 import { useContract, useOnboarding } from '@/hooks';
 
@@ -25,11 +28,13 @@ const ISSUE_IN_DIMO_GAS = 60000;
 
 export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const [app, setApp] = useState<IApp>();
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
   const { isOnboardingCompleted, workspace } = useOnboarding();
   const { address, dimoLicenseContract } = useContract();
+  const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => refreshAppDetails(), []);
 
@@ -43,6 +48,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const handleEnableSigner = async (signer: string) => {
     if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
       throw new Error('Web3 connection failed');
+    await changeNetwork();
     await dimoLicenseContract?.methods['0x3b1c393b'](
       workspace?.token_id ?? 0,
       signer
@@ -94,25 +100,27 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
         <>
           <div className="signers-content">
             <Title component="h2">Signers</Title>
-            <div className="generate-signer">
-              <Button
-                className="primary-outline px-4 w-full"
-                loading={isLoading}
-                loadingColor="primary"
-                onClick={() => handleGenerateSigner()}
-              >
-                Generate Key
-              </Button>
-            </div>
+            {role === TeamRoles.OWNER && (
+              <div className="generate-signer">
+                <Button
+                  className="primary-outline px-4 w-full"
+                  loading={isLoading}
+                  loadingColor="primary"
+                  onClick={() => handleGenerateSigner()}
+                >
+                  Generate Key
+                </Button>
+              </div>
+            )}
           </div>
           <div className="signers-table">
-            {app && (
-              <SignerList app={app} refreshData={refreshAppDetails} />
-            )}
+            {app && <SignerList app={app} refreshData={refreshAppDetails} />}
           </div>
           <div className="redirect-uri-content">
             <Title component="h2">Authorized Redirect URIs</Title>
-            <RedirectUriForm appId={appId} refreshData={refreshAppDetails} />
+            {role === TeamRoles.OWNER && (
+              <RedirectUriForm appId={appId} refreshData={refreshAppDetails} />
+            )}
           </div>
           <div className="signers-table">
             {app && (
@@ -122,9 +130,11 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
               />
             )}
           </div>
-          <div className="extra-actions">
-            <Button className="error-simple">Delete application</Button>
-          </div>
+          {role === TeamRoles.OWNER && (
+            <div className="extra-actions">
+              <Button className="error-simple">Delete application</Button>
+            </div>
+          )}
         </>
       )}
     </div>

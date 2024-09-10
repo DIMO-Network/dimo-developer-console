@@ -6,6 +6,8 @@ export const API_PATH = '/api';
 
 export const UNPROTECTED_PATHS = ['/api/auth'];
 
+export const ROLES = ['Owner', 'Collaborator'];
+
 export const REGIONS = [
   'North America',
   'Latin America & Caribbean',
@@ -40,6 +42,9 @@ export const RAINBOW_PROJECT = {
   ID: '528803928611a7781fb6b23eaf232224',
   NAME: 'Dimo Developer Console',
 };
+
+// 80002 - AMOY
+export const CONTRACT_NETWORK = BigInt(80_002);
 
 // DIMO TOKEN AMOY
 export const DC_ADDRESS = '0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10';

@@ -2,6 +2,9 @@ export const backendUrl = 'https://console-api.dimo.xyz/';
 
 export const frontendUrl = 'https://console.dimo.xyz/';
 
+// 137 - MAINNET
+export const CONTRACT_NETWORK = BigInt(137);
+
 // DIMO TOKEN MAINNET
 export const DC_ADDRESS = '0xE261D618a959aFfFd53168Cd07D12E37B26761db';
 

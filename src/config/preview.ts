@@ -2,6 +2,9 @@ export const backendUrl = 'https://console-staging-api.dimo.xyz/';
 
 export const frontendUrl = 'https://console-staging.dimo.xyz/';
 
+// 80002 - AMOY
+export const CONTRACT_NETWORK = BigInt(80_002);
+
 // DIMO TOKEN AMOY
 export const DC_ADDRESS = '0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10';
 
