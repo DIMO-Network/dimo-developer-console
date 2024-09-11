@@ -2,7 +2,6 @@
 import { useContext, type FC } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { Button } from '@/components/Button';
 import { CreditsContext } from '@/context/creditsContext';
 import { TokenInput } from '@/components/TokenInput';
 import { Modal } from '@/components/Modal';
@@ -34,6 +33,7 @@ export const BuyCreditsModal: FC<IProps> = () => {
     },
   });
   const credits = watch('credits', 0);
+  const totalValue = credits * 0.001;
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="buy-credits-modal">
@@ -59,14 +59,20 @@ export const BuyCreditsModal: FC<IProps> = () => {
         />
         <div className="credit-total-content">
           <p className="total-descriptor">Your total</p>
-          <p className="total-value">$ {credits * 0.001}</p>
+          <p className="total-value">$ {totalValue.toFixed(2)}</p>
         </div>
         <div className="payment-method-container">
           <p className="payment-descriptor">Payment method</p>
           <PaymentMethodSelector name="paymentMethod" control={control} />
         </div>
         <div className="credit-action">
-          <Button className="primary !h-9">Coming soon</Button>
+          <iframe
+            title="AlchemyPay Onramp"
+            src={`https://ramptest.alchemypay.org/?apiKey=${process.env.NEXT_PUBLIC_API_KEY}&cryptoAddress=${process.env.NEXT_PUBLIC_CRYPTO_ADDRESS}&network=${process.env.NEXT_PUBLIC_NETWORK}&amount=${totalValue}`}
+            width="100%"
+            height="500px"
+            allow="payment"
+          />
         </div>
       </div>
     </Modal>
