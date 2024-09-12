@@ -1,18 +1,22 @@
 'use client';
+
+import _ from 'lodash';
+
 import { useState, useContext, type FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { utils } from 'web3';
 
 import { Button } from '@/components/Button';
-import { TokenInput } from '@/components/TokenInput';
+import { changeNetwork } from '@/utils/contract';
 import { Modal } from '@/components/Modal';
+import { NotificationContext } from '@/context/notificationContext';
 import { Title } from '@/components/Title';
+import { TokenInput } from '@/components/TokenInput';
 import { useContract } from '@/hooks';
+
 import configuration from '@/config';
 
 import './SpendingLimitModal.css';
-import { NotificationContext } from '@/context/notificationContext';
-import _ from 'lodash';
 
 interface IForm {
   credits: number;
@@ -46,6 +50,7 @@ export const SpendingLimitModal: FC<IProps> = ({
       if (dimoContract) {
         const { credits } = getValues();
         const dimoInWei = utils.toWei(credits, 'ether');
+        await changeNetwork();
         await dimoContract.methods
           .approve(configuration.DLC_ADDRESS, dimoInWei)
           .send({

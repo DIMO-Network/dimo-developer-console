@@ -6,6 +6,7 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/Button';
+import { changeNetwork } from '@/utils/contract';
 import { createMyRedirectUri } from '@/actions/app';
 import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
@@ -46,6 +47,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   const handleSetDomain = async (uri: string) => {
     if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
       throw new Error('Web3 connection failed');
+    await changeNetwork();
     await dimoLicenseContract?.methods['0xba1bedfc'](
       workspace?.token_id ?? 0,
       true,

@@ -1,6 +1,10 @@
+import axios, { isAxiosError } from 'axios';
+
 import { JWT, getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextFetchEvent, NextResponse } from 'next/server';
+
+import configuration from '@/config';
 
 import { isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
@@ -83,7 +87,7 @@ export const middleware = async (
         );
       }
 
-      if (isLoginPage && token && isCompliant) {
+      if (isLoginPage && isCompliant) {
         return NextResponse.redirect(new URL('/app', request.url), {
           status: 307,
         });

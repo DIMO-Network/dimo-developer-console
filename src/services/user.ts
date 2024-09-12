@@ -7,6 +7,14 @@ export const getUserByToken = async () => {
   return data;
 };
 
+export const acceptInvitation = async (invitationCode: string) => {
+  const client = dimoDevAPIClient();
+  const { data } = await client.put<IUser>('/api/my/team/invitation', {
+    invitation_code: invitationCode,
+  });
+  return data;
+};
+
 export const existUserByEmailOrAddress = async (
   item: string | null,
   provider: string | null
