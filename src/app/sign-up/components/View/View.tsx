@@ -16,29 +16,23 @@ import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
-import WalletAssignment from '@/app/sign-up/components/WalletAssignment';
 import WalletCreation from '@/app/sign-up/components/WalletCreation';
 
 const signUpFlows = {
-  'wallet-assignment': {
-    Component: WalletAssignment,
-    title: 'How would you like your wallet?',
-    order: 1,
-  },
   'wallet-creation': {
     Component: WalletCreation,
     title: 'Let\'s get you a wallet',
-    order: 2,
+    order: 1,
   },
   'build-for': {
     Component: BuildForForm,
     title: 'What are you building?',
-    order: 3,
+    order: 2,
   },
   'company-information': {
     Component: CompanyInfoForm,
     title: 'Our last question',
-    order: 4,
+    order: 3,
   },
 };
 
@@ -47,12 +41,12 @@ const View = () => {
   const { setNotification } = useContext(NotificationContext);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentFlow = searchParams.get('flow') ?? 'sign-up-with';
+  const currentFlow = searchParams.get('flow') ?? 'wallet-creation';
   const [flow, setFlow] = useState(currentFlow);
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
 
   const { Component: SignUpFlow, title } =
-    signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['build-for'];
+    signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['wallet-creation'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
     try {

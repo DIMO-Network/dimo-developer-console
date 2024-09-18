@@ -32,7 +32,7 @@ export class LoggedUser {
   }
 
   get isGlobalAccountUser(): boolean {
-    return this._subOrganization !== null;
+    return Boolean(this._subOrganization?.subOrganizationId);
   }
 
   get hasPasskey(): boolean {
@@ -40,8 +40,8 @@ export class LoggedUser {
   }
 
   get missingFlow(): string {
-    let missingFlow = 'sign-up-with';
-    if (!this.isGlobalAccountUser) missingFlow = 'wallet-assignment';
+    let missingFlow = '';
+    if (!this.isGlobalAccountUser) missingFlow = 'wallet-creation';
     else if (!this.hasTeam) missingFlow = 'build-for';
     return missingFlow;
   }

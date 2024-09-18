@@ -13,6 +13,7 @@ export interface IWalletSubOrganization {
       | 'AUTHENTICATOR_TRANSPORT_HYBRID'
       )[];
   };
+  deployAccount: boolean;
 }
 
 export interface IEmailAuth {
@@ -23,6 +24,9 @@ export interface IEmailAuth {
 
 export interface ISubOrganization {
   subOrganizationId: string;
+  emailVerified: boolean;
+  walletAddress: string;
+  smartContractAddress: string;
   hasPasskey: boolean;
 }
 

@@ -1,16 +1,11 @@
-import axios, { isAxiosError } from 'axios';
-
 import { JWT, getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextFetchEvent, NextResponse } from 'next/server';
-
-import configuration from '@/config';
-
 import { isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
-import axios, { isAxiosError } from 'axios';
+import axios, { AxiosError, isAxiosError } from 'axios';
 import { getUserSubOrganization } from '@/services/globalAccount';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
@@ -31,6 +26,16 @@ const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
   const isAPI = url.startsWith(API_PATH);
   const isPublicAPIPath = UNPROTECTED_PATHS.some(isIn(url));
   return isAPI && !isPublicAPIPath && !token;
+};
+
+const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
+  if (isAxiosError(error)) {
+    const code = error.code;
+    if (code === 'ERR_NETWORK') {
+      return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
+    }
+  }
+  return null;
 };
 
 const handleExpiredSession = (error: unknown) => {
@@ -67,18 +72,13 @@ export const middleware = async (
       const missingFlow = request.user?.missingFlow ?? null;
       const flow = request.nextUrl.searchParams.get('flow');
 
+      if (isValidationPage && isCompliant) {
+        return NextResponse.redirect(new URL('/app', request.url), {
+          status: 307,
+        });
+      }
 
-      console.info('user', user);
-      console.info('isLoginPage', isLoginPage);
-      console.info('isValidationPage', isValidationPage);
-      console.info('isCompliant', isCompliant);
-      console.info('missingFlow', missingFlow);
-      console.info('flow', flow);
-/*
-      if (isValidationPage) return NextResponse.next();
-
-
-      if (token && !isCompliant && !flow) {
+      if (!isCompliant && !flow) {
         return NextResponse.redirect(
           new URL(`/sign-up?flow=${missingFlow}`, request.url),
           {
@@ -87,16 +87,12 @@ export const middleware = async (
         );
       }
 
-      if (isLoginPage && isCompliant) {
-        return NextResponse.redirect(new URL('/app', request.url), {
-          status: 307,
-        });
-      }
-
       if (!isLoginPage) {
         return authMiddleware(request, event);
       }
-*/
+
+      console.info('got here');
+
       return NextResponse.next();
     }
 
@@ -117,7 +113,8 @@ export const middleware = async (
 
     return NextResponse.next();
   } catch (error: unknown) {
-    const path = handleExpiredSession(error);
+    let path = handleConnectionError(error, isLoginPage);
+    path = path ?? handleExpiredSession(error);
     const redirectUrl = `${configuration.frontendUrl}${path}`;
     if (!hasError) {
       return Response.redirect(redirectUrl);

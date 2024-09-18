@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
 import { TurnkeySDKApiTypes, WebauthnStamper } from '@turnkey/sdk-browser';
-import { createSubOrganization, createWallet, getUserSubOrganization, userEmailAuth } from '@/services/globalAccount';
+import { createSubOrganization, getUserSubOrganization, userEmailAuth } from '@/services/globalAccount';
 import { useSession } from 'next-auth/react';
 import { ISubOrganization, IWallet } from '@/types/wallet';
 import { useRouter } from 'next/navigation';
 import { getWebAuthnAttestation } from '@turnkey/http';
 import { isEmpty } from 'lodash';
-import useUser from '@/hooks/useUser';
+import configuration, { getConfig } from '@/config';
+
 
 
 const generateRandomBuffer = (): ArrayBuffer => {
@@ -38,129 +39,74 @@ const base64UrlEncode = (challenge: ArrayBuffer): string => {
 export const useGlobalAccount = () => {
   const { data: session } = useSession();
   const router = useRouter();
-  const { authIframeClient, passkeyClient, getActiveClient } = useTurnkey();
-  const [authBundle, setAuthBundle] = useState<string | null>(null);
-  const [validCredentials, setValidCredentials] = useState<boolean>(false);
+  const { passkeyClient } = useTurnkey();
   const [organizationInfo, setOrganizationInfo] = useState<ISubOrganization | null>(null);
+  const currentChain = useMemo(() => {
+    const isAmoy = configuration.CONTRACT_NETWORK === BigInt(80_002);
+    return isAmoy ? 'Polygon Amoy' : 'Polygon';
+  }, []);
 
-  const generateSessionCookie = async (readOnlySession: TurnkeySDKApiTypes.TCreateReadOnlySessionResponse) => {
-/**
- *
- *
- * */
-  };
-
-  const createSession = async () => {
-    if (!authIframeClient) return;
+  const walletLogin = async () : Promise<void> => {
+    const { subOrganizationId } = organizationInfo!;
     // a bit hacky but works for now
-    const { organizationId } = await authIframeClient.getWhoami();
-    const response = await authIframeClient.createReadOnlySession({
-      organizationId,
+    const signInResponse = await passkeyClient?.createReadOnlySession({
+      organizationId: subOrganizationId,
     });
+
+    if (isEmpty(signInResponse?.organizationId)) return;
+    router.push('/valid-tzd');
   };
 
-  const login = async () : Promise<boolean> => {
-    const { subOrganizationId, hasPasskey } = organizationInfo!;
-    const {email} = session!.user!;
-
-    if (hasPasskey) {
-      // a bit hacky but works for now
-      const signInResponse = await passkeyClient?.createReadOnlySession({
-        organizationId: subOrganizationId,
-      });
-
-      console.info(signInResponse);
-
-      return !isEmpty(signInResponse?.organizationId);
-    } else {
-      const signInResponse = await userEmailAuth({
-        email: email!,
-        targetPublicKey: authIframeClient!.iframePublicKey as string,
-        magicLink: `http://${window.location.host}/sign-up?flow=wallet-creation&continueWith=email&bundle=%s`,
-      });
-      return !isEmpty(signInResponse?.subOrganizationId);
-    }
-  };
-
-  const loginAndRedirect = async () : Promise<void> => {
-    const success = await login();
-    if (!success) return;
-    const { hasPasskey } = organizationInfo!;
-    if (hasPasskey) {
-      router.push('/valid-tzd');
-      return;
-    }
-
-    router.push('/verify-email');
-  };
-
-  const registerNewWallet  = async () : Promise<IWallet> => {
-    if (!session?.user?.email) return {} as IWallet;
-    const { subOrganizationId, hasPasskey } = organizationInfo!;
-    const client = hasPasskey ? new WebauthnStamper({ rpId: passkeyClient!.rpId }) : authIframeClient?.config.stamper;
-    return await createWallet(subOrganizationId, client!);
-  };
-
-  const registerSubOrganization = async (isPasskey?: boolean) : Promise<{ success: boolean; emailSent: boolean; } > => {
-    if (!session?.user?.email) return { success: false, emailSent: !isPasskey, };
+  const registerSubOrganization = async () : Promise<ISubOrganization> => {
+    if (!session?.user?.email) return {} as ISubOrganization;
     const { email } = session.user;
 
-    let encodedChallenge;
-    let attestation;
-
-    if (isPasskey) {
-      const challenge = generateRandomBuffer();
-      const authenticatorUserId = generateRandomBuffer();
-      encodedChallenge = base64UrlEncode(challenge);
-      attestation = await getWebAuthnAttestation({
-        publicKey: {
-          rp: {
-            id: passkeyClient?.rpId,
-            name: 'DIMO Developer Console',
+    const challenge = generateRandomBuffer();
+    const authenticatorUserId = generateRandomBuffer();
+    const encodedChallenge = base64UrlEncode(challenge);
+    const attestation = await getWebAuthnAttestation({
+      publicKey: {
+        rp: {
+          id: passkeyClient?.rpId,
+          name: 'DIMO Developer Console',
+        },
+        challenge,
+        pubKeyCredParams: [
+          {
+            type: publicKey,
+            alg: es256,
           },
-          challenge,
-          pubKeyCredParams: [
-            {
-              type: publicKey,
-              alg: es256,
-            },
-          ],
-          user: {
-            id: authenticatorUserId,
-            name: 'DIMO Developer Console',
-            displayName: 'DIMO Developer Console',
-          },
-          authenticatorSelection: {
-            requireResidentKey: true,
-            residentKey: 'required',
-            userVerification: 'preferred',
-          },
-        }
-      });
-    }
+        ],
+        user: {
+          id: authenticatorUserId,
+          name: 'DIMO Developer Console',
+          displayName: 'DIMO Developer Console',
+        },
+        authenticatorSelection: {
+          requireResidentKey: true,
+          residentKey: 'required',
+          userVerification: 'preferred',
+        },
+      }
+    });
 
     const response = await createSubOrganization({
       email,
       attestation,
       encodedChallenge,
+      deployAccount: true,
     });
 
     if (!response?.subOrganizationId) {
       console.error('Error creating sub organization');
-      return { success: false, emailSent: !isPasskey, };
+      return {} as ISubOrganization;
     }
 
     setOrganizationInfo({
-      subOrganizationId: response.subOrganizationId,
-      hasPasskey: isPasskey ?? false,
+      ...response
     });
 
-    const success = await login();
-
-    return {
-      success,
-      emailSent: !isPasskey,
-    };
+    return response;
   };
 
   useEffect(() => {
@@ -169,24 +115,15 @@ export const useGlobalAccount = () => {
       getUserSubOrganization(email).then((subOrganization) => {
         if (!subOrganization) return;
         setOrganizationInfo(subOrganization);
-      });
+      }).catch(console.error);
     }
   }, [session, organizationInfo]);
 
-  useEffect(() => {
-    if (!organizationInfo) return;
-    if (!authBundle) return;
-    if (!authIframeClient) return;
-    authIframeClient.injectCredentialBundle(authBundle).then(setValidCredentials);
-  }, [authBundle, authIframeClient, organizationInfo]);
-
   return {
-    setAuthBundle,
     organizationInfo,
-    loginAndRedirect,
+    walletLogin,
     registerSubOrganization,
-    registerNewWallet,
-    validCredentials,
+    currentChain,
   };
 };
 

@@ -1,66 +1,46 @@
 import { IAuth } from '@/types/auth';
-import { FC, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useGlobalAccount, useUser } from '@/hooks';
+import { FC, useContext, useEffect } from 'react';
+import { useGlobalAccount } from '@/hooks';
+import { Loader } from '@/components/Loader';
+import { Loading } from '@/components/Loading';
+import { BubbleLoader } from '@/components/BubbleLoader';
+import { useSession } from 'next-auth/react';
+import { NotificationContext } from '@/context/notificationContext';
 
 interface IProps {
   auth?: Partial<IAuth>;
   onNext: (flow: string, auth?: Partial<IAuth>) => void;
 }
 
-export const WalletCreation : FC<IProps> = ({ auth, onNext }) => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const {user} = useUser();
-  const [isSuccess, setIsSuccess] = useState<boolean>(false);
-  const [errorReason, setErrorReason] = useState<string>('');
-  const { setAuthBundle, registerNewWallet, validCredentials } = useGlobalAccount();
+export const WalletCreation : FC<IProps> = ({ onNext }) => {
+  const { setNotification } = useContext(NotificationContext);
+  const { registerSubOrganization } = useGlobalAccount();
+  const { data: session } = useSession();
 
   const handleWalletCreation = async () => {
-    const newWallet = await registerNewWallet();
-    if (!newWallet.success) {
-      setErrorReason(newWallet.reason ?? 'Unknown error');
-      return;
-    }
-    setIsSuccess(true);
+    try {
+      await registerSubOrganization();
 
-    onNext('wallet-creation', {
-      address: newWallet.address,
-    });
+      onNext('wallet-creation', {});
+    } catch (error) {
+    console.error(
+      'Something went wrong while the completing user information',
+      error
+    );
+    setNotification('Something went wrong', 'Oops...', 'error');
+  }
+
   };
 
   useEffect(() => {
-    const token = searchParams.get('bundle');
-    if (!token) return;
-    setAuthBundle(token);
-  }, [searchParams]);
-
-  useEffect(() => {
-    console.info('Valid credentials', validCredentials);
-    if (!validCredentials) return;
-    if(!user?.address){
-      handleWalletCreation().catch(console.error);
-    } else{
-      router.push('/valid-tzd');
-    }
-  }, [validCredentials]);
-
-  useEffect(() => {
-    if(!auth) return;
-    if(!user?.address){
-      handleWalletCreation().catch(console.error);
-    } else{
-      router.push('/valid-tzd');
-    }
-  }, [auth]);
+    if (!session) return;
+    handleWalletCreation().catch(console.error);
+  }, [session]);
 
   return (
     <div className={'text-center text-xl'}>
-      {
-        !user?.address && (
-          <h1>Hang tight! we're creating your wallet...</h1>
-        )
-      }
+      <h1>Hang tight! we're creating your wallet...</h1>
+      <BubbleLoader isLoading={true} />
     </div>
   );
 };
