@@ -11,37 +11,17 @@ import { NotificationContext } from '@/context/notificationContext';
 export const Onboarding = () => {
   const router = useRouter();
   const { organizationInfo, currentChain } = useGlobalAccount();
-  const { setNotification } = useContext(NotificationContext);
+
 
   const handleCreateApp = () => {
     router.push('/app/create');
   };
 
-  const handleCopy = (value: string) => {
-    void navigator.clipboard.writeText(value);
-    setNotification('Wallet address copied to clipboard', 'Success', 'success', 1000);
-  };
+
 
   return (
     <div className="onboarding-steps">
-      <OnboardingCard
-        title="Wallet"
-        description="Below you'll find your spender wallet, use it and start building."
-        action={
-        <div className="w-full inline-flex gap-2">
-          <p>{currentChain}</p>
-          { organizationInfo &&
-            <>
-              <p>{organizationInfo && shortenAddress(organizationInfo.smartContractAddress!)}</p>
-              <ContentCopyIcon
-                className="w5 h-5 fill-white/50 cursor-pointer"
-                onClick={() => handleCopy(organizationInfo.smartContractAddress!)}
-              />
-            </>
-          }
-        </div>
-      }
-      />
+
       <OnboardingCard
         title="Create your first application"
         description="Click the button to receive your credentials and access DIMO data in minutes."

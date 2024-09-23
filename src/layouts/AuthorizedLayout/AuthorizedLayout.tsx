@@ -6,9 +6,10 @@ import { Menu } from '@/components/Menu';
 import { withCredits, withNotifications, withRainBow } from '@/hoc';
 
 import './AuthorizedLayout.css';
+import withTurnKey from '@/hoc/TurnkeySessionProvider';
 
-export const AuthorizedLayout = withRainBow(
-  withNotifications(
+export const AuthorizedLayout = withRainBow(withNotifications(
+  withTurnKey(
     withCredits(
       ({
         children,
@@ -25,6 +26,7 @@ export const AuthorizedLayout = withRainBow(
       )
     )
   )
+)
 );
 
 export default AuthorizedLayout;

@@ -1,7 +1,6 @@
 'use client';
 import React, { type ReactNode } from 'react';
 
-import { dimoFont } from '@/utils/font';
 import { withRainBow } from '@/hoc';
 
 import '@/app/globals.css';

@@ -25,3 +25,4 @@ export * from './SummarizeIcon';
 export * from './SupportAgentIcon';
 export * from './WalletIcon';
 export * from './WarningAmberIcon';
+export * from './BuyDcxIcon';

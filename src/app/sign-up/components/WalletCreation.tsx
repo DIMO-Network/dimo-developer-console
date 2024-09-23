@@ -24,7 +24,7 @@ export const WalletCreation : FC<IProps> = ({ onNext }) => {
       onNext('wallet-creation', {});
     } catch (error) {
     console.error(
-      'Something went wrong while the completing user information',
+      'Something went wrong while creating the user wallet',
       error
     );
     setNotification('Something went wrong', 'Oops...', 'error');

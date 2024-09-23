@@ -4,6 +4,10 @@
   .user-information {
     @apply flex flex-row gap-4 items-center;
 
+    .account-information {
+        @apply items-center bg-[#243647] p-3 rounded-xl;
+    }
+
     .credits {
       @apply flex flex-row items-center gap-2 bg-dark-grey-950 pl-4 pr-2 py-1 rounded-full;
 
