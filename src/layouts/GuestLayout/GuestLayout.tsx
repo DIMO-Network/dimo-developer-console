@@ -6,8 +6,8 @@ import { withRainBow } from '@/hoc';
 import '@/app/globals.css';
 import withTurnKey from '@/hoc/TurnkeySessionProvider';
 
-const View = withTurnKey(
-  withRainBow(({ children }: { children: ReactNode }) => <>{children}</>),
+const View = withRainBow(
+  withTurnKey(({ children }: { children: ReactNode }) => <>{children}</>),
 );
 
 export const GuestLayout = ({
