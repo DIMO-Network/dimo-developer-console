@@ -17,7 +17,7 @@ export const acceptInvitation = async (invitationCode: string) => {
 
 export const existUserByEmailOrAddress = async (
   item: string | null,
-  provider: string | null
+  provider: string | null,
 ) => {
   const client = dimoDevAPIClient();
   const { data } = await client.get<{

@@ -27,10 +27,7 @@ export const Toggle: FC<IProps> = ({
       aria-label="toggle"
     >
       <span className="sr-only">Use setting</span>
-      <span
-        aria-hidden="true"
-        className="base"
-      />
+      <span aria-hidden="true" className="base" />
       <span
         aria-hidden="true"
         className={classNames({ active: enabled, inactive: !enabled }, 'bar')}

@@ -69,7 +69,7 @@ export const SpendingLimitModal: FC<IProps> = ({
         setNotification(
           'Something went wrong while confirming the transaction',
           'Oops...',
-          'error'
+          'error',
         );
     } finally {
       setIsLoading(false);

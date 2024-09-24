@@ -102,7 +102,7 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext }) => {
               'flex flex-row card-border justify-between cursor-pointer',
               {
                 '!border-white': buildFor === value,
-              }
+              },
             )}
             onClick={() => handleSelection(value)}
             key={value}

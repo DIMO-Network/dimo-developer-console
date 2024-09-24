@@ -31,7 +31,10 @@ export const Header: FC = () => {
       />
       <div className="user-information" role="user-information">
         <UserAvatar name={name ?? ''} />
-        <button className="account-information" onClick={handleOpenAccountInformationModal}>
+        <button
+          className="account-information"
+          onClick={handleOpenAccountInformationModal}
+        >
           <WalletIcon className="h-4 w-4" />
         </button>
         <div className="credits" role="credits-display">

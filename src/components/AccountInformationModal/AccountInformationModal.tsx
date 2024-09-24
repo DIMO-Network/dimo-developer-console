@@ -21,15 +21,26 @@ export const AccountInformationModal: FC<IProps> = () => {
   const { organizationInfo } = useGlobalAccount();
   const { data: session } = useSession();
   const { setNotification } = useContext(NotificationContext);
-  const { showAccountInformation, setShowAccountInformation } = useContext(AccountInformationContext);
+  const { showAccountInformation, setShowAccountInformation } = useContext(
+    AccountInformationContext,
+  );
 
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
-    setNotification('Wallet address copied to clipboard', 'Success', 'success', 1000);
+    setNotification(
+      'Wallet address copied to clipboard',
+      'Success',
+      'success',
+      1000,
+    );
   };
 
   return (
-    <Modal isOpen={showAccountInformation} setIsOpen={setShowAccountInformation} className="account-information-modal">
+    <Modal
+      isOpen={showAccountInformation}
+      setIsOpen={setShowAccountInformation}
+      className="account-information-modal"
+    >
       <div className="account-information-content">
         <div className="account-information-header">
           <Title className="text-2xl" component="h3">
@@ -40,7 +51,12 @@ export const AccountInformationModal: FC<IProps> = () => {
           <div className="account-information-row">
             <Label htmlFor="email" className="text-xs text-medium">
               Email
-              <TextField name="email" type="text" readOnly={true} value={get(session, 'user.email', '')} />
+              <TextField
+                name="email"
+                type="text"
+                readOnly={true}
+                value={get(session, 'user.email', '')}
+              />
             </Label>
           </div>
           <div className="account-information-row">
@@ -51,15 +67,32 @@ export const AccountInformationModal: FC<IProps> = () => {
                 type="text"
                 readOnly={true}
                 value={get(organizationInfo, 'smartContractAddress', '')}
-                action={<ContentCopyIcon
-                className="w5 h-5 fill-white/50 cursor-pointer"
-                onClick={() => handleCopy(get(organizationInfo, 'smartContractAddress', ''))}
-              />} />
+                action={
+                  <ContentCopyIcon
+                    className="w5 h-5 fill-white/50 cursor-pointer"
+                    onClick={() =>
+                      handleCopy(
+                        get(organizationInfo, 'smartContractAddress', ''),
+                      )
+                    }
+                  />
+                }
+              />
             </Label>
           </div>
           <div className="balances">
-              <TokenBalance token={'dimo'} balance={549.400282} exchangeRate={5.86} canBuy={false} />
-              <TokenBalance token={'dcx'} balance={0} exchangeRate={5.86} canBuy={true} />
+            <TokenBalance
+              token={'dimo'}
+              balance={549.400282}
+              exchangeRate={5.86}
+              canBuy={false}
+            />
+            <TokenBalance
+              token={'dcx'}
+              balance={0}
+              exchangeRate={5.86}
+              canBuy={true}
+            />
           </div>
         </div>
       </div>

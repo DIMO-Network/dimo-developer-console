@@ -1,4 +1,4 @@
-import {Turnkey} from '@turnkey/sdk-server';
+import { Turnkey } from '@turnkey/sdk-server';
 export const turnkeyConfig = {
   apiBaseUrl: process.env.NEXT_PUBLIC_TURNKEY_API_BASE_URL!,
   apiPrivateKey: process.env.NEXT_PUBLIC_TURNKEY_API_PRIVATE_KEY!,

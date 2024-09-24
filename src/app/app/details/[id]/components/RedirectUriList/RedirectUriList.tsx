@@ -39,7 +39,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
     await dimoLicenseContract?.methods['0xba1bedfc'](
       workspace?.token_id ?? 0,
       enabled,
-      uri
+      uri,
     ).send({
       from: address,
       gas: String(ISSUE_IN_DIMO_GAS),
@@ -63,7 +63,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const handleUpdateStatus = async (
     id: string,
     uri: string,
-    newStatus: boolean
+    newStatus: boolean,
   ) => {
     try {
       setIsOpened(true);

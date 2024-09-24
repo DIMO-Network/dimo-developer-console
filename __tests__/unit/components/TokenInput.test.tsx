@@ -6,7 +6,7 @@ import { TokenInput } from '@/components/TokenInput';
 
 const renderWithForm = (
   ui: React.ReactElement,
-  { defaultValues = {} } = {}
+  { defaultValues = {} } = {},
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Wrapper: React.FC<{ children: ReactElement<any, any> }> = ({
@@ -53,7 +53,7 @@ describe('TokenInput', () => {
           { label: '1M', value: 1000000 },
         ]}
         showControls={true}
-      />
+      />,
     );
 
     fireEvent.click(screen.getByText('10k'));

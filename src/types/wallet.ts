@@ -11,7 +11,7 @@ export interface IWalletSubOrganization {
       | 'AUTHENTICATOR_TRANSPORT_NFC'
       | 'AUTHENTICATOR_TRANSPORT_USB'
       | 'AUTHENTICATOR_TRANSPORT_HYBRID'
-      )[];
+    )[];
   };
   deployAccount: boolean;
 }

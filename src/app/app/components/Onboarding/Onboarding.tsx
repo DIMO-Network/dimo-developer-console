@@ -2,26 +2,16 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/Button';
 import { OnboardingCard } from '@/app/app/components/OnboardingCard';
-import { useGlobalAccount } from '@/hooks';
-import { shortenAddress } from '@/utils/user';
-import { ContentCopyIcon } from '@/components/Icons';
-import { useContext } from 'react';
-import { NotificationContext } from '@/context/notificationContext';
 
 export const Onboarding = () => {
   const router = useRouter();
-  const { organizationInfo, currentChain } = useGlobalAccount();
-
 
   const handleCreateApp = () => {
     router.push('/app/create');
   };
 
-
-
   return (
     <div className="onboarding-steps">
-
       <OnboardingCard
         title="Create your first application"
         description="Click the button to receive your credentials and access DIMO data in minutes."

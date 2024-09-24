@@ -4,7 +4,7 @@ type ENVIRONMENTS = 'production' | 'sandbox';
 
 export enum ENVIRONMENTS_LABELS {
   production = 'Production',
-  sandbox = 'Sandbox'
+  sandbox = 'Sandbox',
 }
 
 export interface ISigner {

@@ -16,10 +16,11 @@ export const TextField = forwardRef<Ref, IProps>(
     const className = classnames(inputClassName);
     return (
       <div className="text-field">
-      <input className={className} {...props} ref={ref} />
-      {action}
-    </div>);
-  }
+        <input className={className} {...props} ref={ref} />
+        {action}
+      </div>
+    );
+  },
 );
 
 TextField.displayName = 'TextField';

@@ -12,7 +12,7 @@ describe('Label', () => {
           name="email"
           role="email"
         />
-      </Label>
+      </Label>,
     );
 
     const field = screen.getByRole('email');

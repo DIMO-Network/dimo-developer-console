@@ -5,7 +5,7 @@
     @apply flex flex-row gap-4 items-center;
 
     .account-information {
-        @apply items-center bg-[#243647] p-3 rounded-xl;
+      @apply items-center bg-[#243647] p-3 rounded-xl;
     }
 
     .credits {

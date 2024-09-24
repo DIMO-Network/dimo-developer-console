@@ -1,14 +1,21 @@
 import { useState } from 'react';
 
-export const useLoading = (action) => {
+interface IParams {
+  [key: string]: unknown;
+}
+
+export const useLoading = (
+  action: (args: IParams | IParams[]) => Promise<void>,
+) => {
   const [loading, setLoading] = useState(false);
 
-  const handleAction = async (...args: any[]) => {
+  const handleAction = async (...args: IParams[]) => {
     setLoading(true);
     try {
       if (loading) return;
-      await action(...args);
-    }finally {
+      const actionParams = { ...args };
+      await action(actionParams);
+    } finally {
       setLoading(false);
     }
   };

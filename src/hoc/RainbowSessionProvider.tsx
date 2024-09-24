@@ -24,7 +24,7 @@ const config = getDefaultConfig({
 const queryClient = new QueryClient();
 
 export const withRainBow = <P extends object>(
-  WrappedComponent: ComponentType<P>
+  WrappedComponent: ComponentType<P>,
 ) => {
   const HOC: React.FC<P> = (props) => {
     // Render the wrapped component with any additional props

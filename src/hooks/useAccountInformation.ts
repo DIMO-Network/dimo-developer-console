@@ -2,7 +2,8 @@
 import { useState } from 'react';
 
 export const useAccountInformation = () => {
-  const [showAccountInformation, setShowAccountInformation] = useState<boolean>(false);
+  const [showAccountInformation, setShowAccountInformation] =
+    useState<boolean>(false);
 
   return { showAccountInformation, setShowAccountInformation };
 };

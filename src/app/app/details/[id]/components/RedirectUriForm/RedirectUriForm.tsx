@@ -51,7 +51,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
     await dimoLicenseContract?.methods['0xba1bedfc'](
       workspace?.token_id ?? 0,
       true,
-      uri
+      uri,
     ).send({
       from: address,
       gas: String(ISSUE_IN_DIMO_GAS),
@@ -75,7 +75,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
         setNotification(
           'Something went wrong while creating the redirect URI',
           'Oops...',
-          'error'
+          'error',
         );
     } finally {
       setIsLoading(false);

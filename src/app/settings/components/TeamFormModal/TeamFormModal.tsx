@@ -33,7 +33,7 @@ export const TeamFormModal: FC<IProps> = ({ isOpen, setIsOpen }) => {
       setNotification(
         _.get(error, 'message', 'Something went wrong'),
         'Oops...',
-        'error'
+        'error',
       );
     } finally {
       setIsLoading(false);

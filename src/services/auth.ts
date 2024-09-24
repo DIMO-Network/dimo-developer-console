@@ -91,7 +91,7 @@ export const authOptions: AuthOptions = {
       async authorize(credentials, req) {
         try {
           const siwe = new SiweMessage(
-            JSON.parse(credentials?.message || '{}')
+            JSON.parse(credentials?.message || '{}'),
           );
 
           const { host: nextAuthHost } = new URL(config.frontendUrl);
@@ -114,7 +114,7 @@ export const authOptions: AuthOptions = {
         } catch (e) {
           console.error(
             'Error while authorizing the user with credentials method',
-            { error: e }
+            { error: e },
           );
           return null;
         }
@@ -139,7 +139,7 @@ export const authOptions: AuthOptions = {
 
       const { existItem, existAssociation } = await existUserByEmailOrAddress(
         email ?? providerAccountId,
-        provider
+        provider,
       );
 
       return existItem && !existAssociation

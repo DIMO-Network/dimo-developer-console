@@ -7,7 +7,6 @@ import { GitHubIcon, GoogleIcon } from '@/components/Icons';
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
 import { SignInButton } from '@/components/SignInButton';
-import { Siwe } from '@/components/Siwe';
 
 interface SignInButtonProps {
   isSignIn: boolean;
@@ -21,13 +20,13 @@ export const SignInButtons: FC<SignInButtonProps> = ({
   onCTA,
 }) => {
   const { setNotification } = useContext(NotificationContext);
-  
+
   const handlerLogin = (app: string, auth?: Partial<IAuth>) => {
     if (disabled)
       setNotification(
         'You must accept terms of service and privacy policy',
         'Terms of service',
-        'error'
+        'error',
       );
     else onCTA(app, auth);
   };

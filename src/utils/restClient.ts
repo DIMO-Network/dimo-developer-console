@@ -22,7 +22,7 @@ export class RestClient {
     method: string,
     resource: string,
     data?: Data,
-    customHeaders: Record<string, string> = {}
+    customHeaders: Record<string, string> = {},
   ): Promise<T> {
     const url = new URL(resource, this.baseUrl);
     // eslint-disable-next-line no-undef
@@ -54,24 +54,24 @@ export class RestClient {
   async get<T>(
     resource: string,
     queryParams: Record<string, string> = {},
-    customHeaders: Record<string, string> = {}
+    customHeaders: Record<string, string> = {},
   ): Promise<T> {
     const url = new URL(resource, this.baseUrl);
     Object.keys(queryParams).forEach((key) =>
-      url.searchParams.append(key, queryParams[key])
+      url.searchParams.append(key, queryParams[key]),
     );
     return await this.execute<T>(
       'GET',
       url.toString(),
       undefined,
-      customHeaders
+      customHeaders,
     );
   }
 
   async post<T>(
     resource: string,
     data: Data,
-    customHeaders: Record<string, string> = {}
+    customHeaders: Record<string, string> = {},
   ): Promise<T> {
     return await this.execute<T>('POST', resource, data, customHeaders);
   }
@@ -79,14 +79,14 @@ export class RestClient {
   async put<T>(
     resource: string,
     data: Data,
-    customHeaders: Record<string, string> = {}
+    customHeaders: Record<string, string> = {},
   ): Promise<T> {
     return await this.execute<T>('PUT', resource, data, customHeaders);
   }
 
   async delete<T>(
     resource: string,
-    customHeaders: Record<string, string> = {}
+    customHeaders: Record<string, string> = {},
   ): Promise<T> {
     return await this.execute<T>('DELETE', resource, undefined, customHeaders);
   }

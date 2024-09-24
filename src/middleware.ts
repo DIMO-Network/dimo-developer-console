@@ -5,10 +5,11 @@ import { isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
-import axios, { AxiosError, isAxiosError } from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { getUserSubOrganization } from '@/services/globalAccount';
 
-const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
+  configuration;
 
 const authMiddleware = withAuth({
   callbacks: {
@@ -52,7 +53,7 @@ const handleExpiredSession = (error: unknown) => {
 
 export const middleware = async (
   request: NextRequest,
-  event: NextFetchEvent
+  event: NextFetchEvent,
 ) => {
   const hasError = request.nextUrl.searchParams.get('error');
   const token = await getToken({ req: request });
@@ -83,16 +84,13 @@ export const middleware = async (
           new URL(`/sign-up?flow=${missingFlow}`, request.url),
           {
             status: 307,
-          }
+          },
         );
       }
 
       if (!isLoginPage) {
         return authMiddleware(request, event);
       }
-
-      console.info('got here');
-
       return NextResponse.next();
     }
 
@@ -101,7 +99,7 @@ export const middleware = async (
         {
           message: 'Unauthorized Access',
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 

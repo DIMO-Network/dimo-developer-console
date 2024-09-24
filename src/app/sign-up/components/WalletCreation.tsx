@@ -1,8 +1,6 @@
 import { IAuth } from '@/types/auth';
 import { FC, useContext, useEffect } from 'react';
 import { useGlobalAccount } from '@/hooks';
-import { Loader } from '@/components/Loader';
-import { Loading } from '@/components/Loading';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { useSession } from 'next-auth/react';
 import { NotificationContext } from '@/context/notificationContext';
@@ -12,7 +10,7 @@ interface IProps {
   onNext: (flow: string, auth?: Partial<IAuth>) => void;
 }
 
-export const WalletCreation : FC<IProps> = ({ onNext }) => {
+export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
   const { registerSubOrganization } = useGlobalAccount();
   const { data: session } = useSession();
@@ -23,13 +21,12 @@ export const WalletCreation : FC<IProps> = ({ onNext }) => {
 
       onNext('wallet-creation', {});
     } catch (error) {
-    console.error(
-      'Something went wrong while creating the user wallet',
-      error
-    );
-    setNotification('Something went wrong', 'Oops...', 'error');
-  }
-
+      console.error(
+        'Something went wrong while creating the user wallet',
+        error,
+      );
+      setNotification('Something went wrong', 'Oops...', 'error');
+    }
   };
 
   useEffect(() => {
@@ -39,7 +36,7 @@ export const WalletCreation : FC<IProps> = ({ onNext }) => {
 
   return (
     <div className={'text-center text-xl'}>
-      <h1>Hang tight! we're creating your wallet...</h1>
+      <h1>Hang tight! we are creating your wallet...</h1>
       <BubbleLoader isLoading={true} />
     </div>
   );

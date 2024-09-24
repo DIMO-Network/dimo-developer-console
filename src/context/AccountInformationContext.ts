@@ -1,6 +1,5 @@
 'use client';
 
-import { ISubOrganization } from '@/types/wallet';
 import { createContext } from 'react';
 
 interface IProps {

@@ -51,7 +51,7 @@ export const PaymentMethodSelector: FC<IProps> = forwardRef<Ref, IProps>(
         }}
       />
     );
-  }
+  },
 );
 
 export default PaymentMethodSelector;

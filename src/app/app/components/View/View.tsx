@@ -1,13 +1,11 @@
 'use client';
 import { FC } from 'react';
-import { useSession } from 'next-auth/react';
 
 import { Onboarding } from '@/app/app/components/Onboarding';
 
 import './View.css';
 
 export const View: FC = () => {
-
   return (
     <div className="home-page">
       <div className="welcome-message">

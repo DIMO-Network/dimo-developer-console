@@ -8,7 +8,12 @@ interface IProps {
   canBuy: boolean;
 }
 
-export const TokenBalance = ({token, balance, exchangeRate, canBuy}: IProps) => {
+export const TokenBalance = ({
+  token,
+  balance,
+  exchangeRate,
+  canBuy,
+}: IProps) => {
   return (
     <div className="token-balance">
       <div className="token-balance__icon">
@@ -16,8 +21,10 @@ export const TokenBalance = ({token, balance, exchangeRate, canBuy}: IProps) => 
       </div>
       <div className="token-balance__balance">
         <div className="token-balance__balance-container">
-          <span className="text-sm font-bold">{(balance / exchangeRate).toFixed(2)} USD</span>
-          <span className="text-sm ">{ `${balance} ${token.toUpperCase()}` }</span>
+          <span className="text-sm font-bold">
+            {(balance / exchangeRate).toFixed(2)} USD
+          </span>
+          <span className="text-sm ">{`${balance} ${token.toUpperCase()}`}</span>
         </div>
       </div>
       {canBuy && (
@@ -25,7 +32,6 @@ export const TokenBalance = ({token, balance, exchangeRate, canBuy}: IProps) => 
           <BuyDcxIcon />
         </button>
       )}
-
     </div>
   );
 };

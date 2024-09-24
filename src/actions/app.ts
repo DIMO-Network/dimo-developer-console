@@ -39,7 +39,7 @@ export const deleteMyRedirectUri = (id: string) => {
 
 export const updateMyRedirectUri = (
   id: string,
-  newData: Partial<IRedirectUri>
+  newData: Partial<IRedirectUri>,
 ) => {
   return updateRedirectUri(id, newData);
 };

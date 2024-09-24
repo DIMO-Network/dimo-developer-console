@@ -2,16 +2,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
-import { TurnkeySDKApiTypes, WebauthnStamper } from '@turnkey/sdk-browser';
-import { createSubOrganization, getUserSubOrganization, userEmailAuth } from '@/services/globalAccount';
+import {
+  createSubOrganization,
+  getUserSubOrganization,
+} from '@/services/globalAccount';
 import { useSession } from 'next-auth/react';
-import { ISubOrganization, IWallet } from '@/types/wallet';
+import { ISubOrganization } from '@/types/wallet';
 import { useRouter } from 'next/navigation';
 import { getWebAuthnAttestation } from '@turnkey/http';
 import { isEmpty } from 'lodash';
-import configuration, { getConfig } from '@/config';
-
-
+import configuration from '@/config';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -40,13 +40,14 @@ export const useGlobalAccount = () => {
   const { data: session } = useSession();
   const router = useRouter();
   const { passkeyClient } = useTurnkey();
-  const [organizationInfo, setOrganizationInfo] = useState<ISubOrganization | null>(null);
+  const [organizationInfo, setOrganizationInfo] =
+    useState<ISubOrganization | null>(null);
   const currentChain = useMemo(() => {
     const isAmoy = configuration.CONTRACT_NETWORK === BigInt(80_002);
     return isAmoy ? 'Polygon Amoy' : 'Polygon';
   }, []);
 
-  const walletLogin = async () : Promise<void> => {
+  const walletLogin = async (): Promise<void> => {
     const { subOrganizationId } = organizationInfo!;
     // a bit hacky but works for now
     const signInResponse = await passkeyClient?.createReadOnlySession({
@@ -57,7 +58,7 @@ export const useGlobalAccount = () => {
     router.push('/valid-tzd');
   };
 
-  const registerSubOrganization = async () : Promise<ISubOrganization> => {
+  const registerSubOrganization = async (): Promise<ISubOrganization> => {
     if (!session?.user?.email) return {} as ISubOrganization;
     const { email } = session.user;
 
@@ -87,7 +88,7 @@ export const useGlobalAccount = () => {
           residentKey: 'required',
           userVerification: 'preferred',
         },
-      }
+      },
     });
 
     const response = await createSubOrganization({
@@ -103,7 +104,7 @@ export const useGlobalAccount = () => {
     }
 
     setOrganizationInfo({
-      ...response
+      ...response,
     });
 
     return response;
@@ -112,10 +113,12 @@ export const useGlobalAccount = () => {
   useEffect(() => {
     if (session?.user?.email && !organizationInfo) {
       const { email } = session.user;
-      getUserSubOrganization(email).then((subOrganization) => {
-        if (!subOrganization) return;
-        setOrganizationInfo(subOrganization);
-      }).catch(console.error);
+      getUserSubOrganization(email)
+        .then((subOrganization) => {
+          if (!subOrganization) return;
+          setOrganizationInfo(subOrganization);
+        })
+        .catch(console.error);
     }
   }, [session, organizationInfo]);
 
@@ -128,4 +131,3 @@ export const useGlobalAccount = () => {
 };
 
 export default useGlobalAccount;
-

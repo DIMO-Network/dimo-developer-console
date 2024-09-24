@@ -3,17 +3,14 @@ import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 
 import { Anchor } from '@/components/Anchor';
-import { existUserEmailOrAddress } from '@/actions/user';
 import { IAuth } from '@/types/auth';
 import { SignInButtons } from '@/components/SignInButton';
 import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
-import { NotificationContext } from '@/context/notificationContext';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGlobalAccount } from '@/hooks';
-import { useRouter } from 'next/navigation';
 import { CheckboxField } from '@/components/CheckboxField';
 
 export const View = () => {
@@ -48,7 +45,11 @@ export const View = () => {
             <p>Welcome back!</p>
           </section>
           <section className="sign-in__buttons">
-            <SignInButtons isSignIn={true} disabled={!acceptTerms} onCTA={handleCTA} />
+            <SignInButtons
+              isSignIn={true}
+              disabled={!acceptTerms}
+              onCTA={handleCTA}
+            />
           </section>
           <section className="sign-in__extra-links">
             <div className="flex flex-row">

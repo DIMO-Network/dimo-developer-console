@@ -8,17 +8,20 @@ import { useAccountInformation } from '@/hooks';
 import { AccountInformationModal } from '@/components/AccountInformationModal';
 
 export const withTurnKey = <P extends object>(
-  WrappedComponent: ComponentType<P>
+  WrappedComponent: ComponentType<P>,
 ) => {
   const HOC: React.FC<P> = (props) => {
-    const { showAccountInformation, setShowAccountInformation } = useAccountInformation();
+    const { showAccountInformation, setShowAccountInformation } =
+      useAccountInformation();
 
     // Render the wrapped component with any additional props
     return (
       <TurnkeyProvider config={turnkeyConfig}>
-        <AccountInformationContext.Provider value={{ showAccountInformation, setShowAccountInformation }}>
-            <WrappedComponent {...props} />
-            <AccountInformationModal />
+        <AccountInformationContext.Provider
+          value={{ showAccountInformation, setShowAccountInformation }}
+        >
+          <WrappedComponent {...props} />
+          <AccountInformationModal />
         </AccountInformationContext.Provider>
       </TurnkeyProvider>
     );

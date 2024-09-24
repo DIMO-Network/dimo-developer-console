@@ -3,12 +3,7 @@ import { useContext, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
-import {
-  BuildForForm,
-  CompanyInfoForm,
-  SignUpWith,
-  UserInfoForm,
-} from '@/app/sign-up/components';
+import { BuildForForm, CompanyInfoForm } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
@@ -21,7 +16,7 @@ import WalletCreation from '@/app/sign-up/components/WalletCreation';
 const signUpFlows = {
   'wallet-creation': {
     Component: WalletCreation,
-    title: 'Let\'s get you a wallet',
+    title: "Let's get you a wallet",
     order: 1,
   },
   'build-for': {
@@ -46,7 +41,8 @@ const View = () => {
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
 
   const { Component: SignUpFlow, title } =
-    signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['wallet-creation'];
+    signUpFlows[flow as keyof typeof signUpFlows] ??
+    signUpFlows['wallet-creation'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
     try {
@@ -55,7 +51,7 @@ const View = () => {
     } catch (error) {
       console.error(
         'Something went wrong while the completing user information',
-        error
+        error,
       );
       setNotification('Something went wrong', 'Oops...', 'error');
     }
@@ -77,7 +73,7 @@ const View = () => {
         ...acc,
         [signUpFlows[elm as keyof typeof signUpFlows].order]: elm,
       }),
-      {}
+      {},
     );
     const nextProcess =
       processes[(currentProcess.order + 1) as keyof typeof processes] ??
