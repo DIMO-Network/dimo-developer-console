@@ -14,7 +14,7 @@ describe('Table', () => {
           },
         ]}
         data={appListMock.map(({ name }) => ({ name }))}
-      />
+      />,
     );
 
     const titleElm = screen.getByText('name');
@@ -41,11 +41,11 @@ describe('Table', () => {
           { name: 'names' },
         ]}
         data={appListMock.map(({ name, scope }) => ({ name, scope }))}
-      />
+      />,
     );
 
     const appNameElm = screen.getByText(
-      `${appListMock[0].name} - ${appListMock[0].scope}`
+      `${appListMock[0].name} - ${appListMock[0].scope}`,
     );
 
     expect(appNameElm).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('Table', () => {
         ]}
         actions={[renderAction]}
         data={appListMock.map(({ name, scope }) => ({ name, scope }))}
-      />
+      />,
     );
 
     const actionElms = screen.getAllByRole('content-copy-icon');

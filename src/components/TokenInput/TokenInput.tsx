@@ -24,7 +24,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
   (
     { name, control, suggestions = [], showControls = false, description = '' },
     // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-    _ref
+    _ref,
   ) => {
     const handleChange = (newValue: number) => {
       if (newValue < 0) return 0;
@@ -54,11 +54,11 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
                   value={Number(currentValue)}
                   onChange={(e) => {
                     const newValue = handleChange(
-                      parseInt(e.target.value || '0', 10)
+                      parseInt(e.target.value || '0', 10),
                     );
                     onChange(newValue);
                   }}
-                  role='token-value-input'
+                  role="token-value-input"
                   ref={ref}
                 />
                 {description && (
@@ -90,7 +90,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
         )}
       />
     );
-  }
+  },
 );
 
 TokenInput.displayName = 'TokenInput';

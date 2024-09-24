@@ -65,7 +65,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     if (!dimoLicenseContract) throw new Error('Web3 connection failed');
 
     const workspaceName = String(
-      utils.fromAscii(workspaceData?.name ?? '')
+      utils.fromAscii(workspaceData?.name ?? ''),
     ).padEnd(66, '0');
 
     const {
@@ -107,7 +107,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
         setNotification(
           'Something went wrong while confirming the transaction',
           'Oops...',
-          'error'
+          'error',
         );
     } finally {
       setIsLoading(false);

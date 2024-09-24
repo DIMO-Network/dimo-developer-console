@@ -10,7 +10,7 @@ const initContract = async (
   fromAddress: `0x${string}`,
   contractAddress: `0x${string}`,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  contractABI: any
+  contractABI: any,
 ) => {
   const web3 = new Web3(window.ethereum);
   return new web3.eth.Contract(contractABI, contractAddress);
@@ -20,17 +20,17 @@ export const initDimoSmartContract = async (fromAddress: `0x${string}`) => {
   return initContract(
     fromAddress,
     configuration.DC_ADDRESS as `0x${string}`,
-    DimoABI
+    DimoABI,
   );
 };
 
 export const initDimoLicenseSmartContract = async (
-  fromAddress: `0x${string}`
+  fromAddress: `0x${string}`,
 ) => {
   return initContract(
     fromAddress,
     configuration.DLC_ADDRESS as `0x${string}`,
-    LicenseABI
+    LicenseABI,
   );
 };
 
@@ -49,9 +49,7 @@ export const changeNetwork = async () => {
         const chainParams = getChainParams(web3);
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
-          params: [
-            chainParams,
-          ],
+          params: [chainParams],
         });
       }
     }
@@ -69,6 +67,6 @@ const getChainParams = (web3: Web3) => {
     chainName,
     chainId: web3.utils.toHex(configuration.CONTRACT_NETWORK),
     nativeCurrency: { name: 'MATIC', decimals: 18, symbol: 'MATIC' },
-    rpcUrls: [rpcUrl]
+    rpcUrls: [rpcUrl],
   };
 };

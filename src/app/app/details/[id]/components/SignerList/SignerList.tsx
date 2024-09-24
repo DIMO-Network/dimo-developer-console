@@ -42,7 +42,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     await changeNetwork();
     await dimoLicenseContract?.methods['0xde9cc84d'](
       workspace?.token_id ?? 0,
-      signer
+      signer,
     ).send({
       from: address,
       gas: String(ISSUE_IN_DIMO_GAS),

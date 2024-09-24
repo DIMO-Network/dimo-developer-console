@@ -39,7 +39,7 @@ export const SignerForm: FC = () => {
               })}
               placeholder="0x address"
               className="address"
-              role='signer-address-input'
+              role="signer-address-input"
             />
           </Label>
           {errors.address && (

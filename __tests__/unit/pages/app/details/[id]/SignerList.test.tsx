@@ -15,7 +15,7 @@ Object.assign(navigator, {
 describe('SignerList', () => {
   it('renders the app summary', () => {
     const { container } = render(
-      <SignerList list={app.Signers} refreshData={() => {}} />
+      <SignerList list={app.Signers} refreshData={() => {}} />,
     );
 
     const [signer] = app.Signers ?? [];

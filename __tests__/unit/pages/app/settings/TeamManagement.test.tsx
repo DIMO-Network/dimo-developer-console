@@ -19,7 +19,7 @@ describe('TeamManagement', () => {
             role: 'OWNER',
           },
         ]}
-      />
+      />,
     );
 
     const nameElm = screen.getByText('John Doe');
@@ -42,7 +42,7 @@ describe('TeamManagement', () => {
             role: 'OWNER',
           },
         ]}
-      />
+      />,
     );
 
     const avatarElm = screen.getByRole('user-avatar');

@@ -51,7 +51,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
     await changeNetwork();
     await dimoLicenseContract?.methods['0x3b1c393b'](
       workspace?.token_id ?? 0,
-      signer
+      signer,
     ).send({
       from: address,
       gas: String(ISSUE_IN_DIMO_GAS),
@@ -70,7 +70,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
           api_key: account.privateKey,
           address: account.address,
         },
-        appId
+        appId,
       );
       refreshAppDetails();
     } catch (error: unknown) {
@@ -82,7 +82,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
         setNotification(
           'Something went wrong while generating the API key',
           'Oops...',
-          'error'
+          'error',
         );
     } finally {
       setIsLoading(false);

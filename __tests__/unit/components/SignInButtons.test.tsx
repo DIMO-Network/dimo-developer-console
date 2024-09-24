@@ -25,7 +25,7 @@ describe('SignInButtons', () => {
     fireEvent.click(googleButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      '/api/auth/authorize?app=google'
+      '/api/auth/authorize?app=google',
     );
   });
 
@@ -39,7 +39,7 @@ describe('SignInButtons', () => {
     fireEvent.click(githubButton);
 
     expect(window.location.replace).toHaveBeenCalledWith(
-      '/api/auth/authorize?app=github'
+      '/api/auth/authorize?app=github',
     );
   });
 

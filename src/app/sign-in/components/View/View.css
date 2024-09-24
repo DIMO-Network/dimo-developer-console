@@ -19,7 +19,11 @@
   }
 
   .sign-in__extra-links {
-    @apply flex flex-col items-center;
+    @apply flex flex-col items-center gap-4;
+
+    .terms-caption {
+      @apply text-grey-400 text-xs text-center leading-4;
+    }
   }
 
   .sign-in__buttons {

@@ -26,7 +26,6 @@ Before you begin, ensure you have the following installed on your machine:
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
 - A Google Developer Account and GitHub Account for OAuth integration.
 
-
 ### Set Up Google and GitHub OAuth Applications
 
 1. Create a Google OAuth App:
@@ -46,7 +45,7 @@ Before you begin, ensure you have the following installed on your machine:
 - Go to [GitHub Developer Settings](https://github.com/settings/developers).
 - Under OAuth Apps, click New OAuth App.
 - Set the Authorization callback URL to http://localhost:3000/api/auth/callback/github.
-Under OAuth scopes, ensure the app requests access to email addresses in read-only mode.
+  Under OAuth scopes, ensure the app requests access to email addresses in read-only mode.
 - Note down your Client ID and Client Secret. These will be used in your environment variables.
 
 ### Installation
@@ -127,7 +126,6 @@ A brief description of the main folders and files in the project:
 - `./src/types`: TypeScript type definitions and interfaces used throughout the application.
 - `./src/utils`: Utility functions and helper methods that are used across different parts of the application.
 - `./src/actions`: Server-side methods that interact with external APIs or perform specific tasks in response to client requests.
-
 
 ## Technologies Used
 

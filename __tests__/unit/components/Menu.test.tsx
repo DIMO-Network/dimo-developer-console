@@ -17,7 +17,7 @@ describe('MenuItem component', () => {
         iconClassName="test-icon-class"
         label="Test Label"
         icon={MockIcon}
-      />
+      />,
     );
 
     const linkElement = screen.getByRole('link');
@@ -36,7 +36,7 @@ describe('MenuItem component', () => {
         iconClassName="test-icon-class"
         label="Test Label"
         icon={MockIcon}
-      />
+      />,
     );
 
     const linkElement = screen.getByRole('link');
@@ -53,7 +53,7 @@ describe('MenuItem component', () => {
         iconClassName="test-icon-class"
         label="Test Label"
         icon={MockIcon}
-      />
+      />,
     );
 
     const linkElement = screen.getByRole('link');
@@ -75,7 +75,7 @@ describe('MenuItem component', () => {
         iconClassName="test-icon-class"
         label="Test Label"
         icon={MockIcon}
-      />
+      />,
     );
 
     const linkElement = screen.getByRole('link');
@@ -94,7 +94,7 @@ describe('MenuItem component', () => {
         iconClassName="test-icon-class"
         label="Test Label"
         icon={MockIcon}
-      />
+      />,
     );
 
     const linkElement = screen.getByRole('link');

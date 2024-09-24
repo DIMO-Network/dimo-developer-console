@@ -1,0 +1,24 @@
+.account-information-modal {
+  .dialog-panel {
+    @apply sm:max-w-5xl;
+  }
+
+  .account-information-content {
+    @apply flex flex-col justify-center  items-center gap-y-4 pb-8  ml-auto mr-auto;
+
+    .account-information-header {
+      @apply flex flex-col gap-2 text-center relative pt-8 pb-4 px-2 font-bold;
+    }
+
+    .account-information-body {
+      @apply w-full flex flex-col gap-y-4;
+      .account-information-row {
+        @apply w-full flex flex-col pr-10 gap-x-4;
+      }
+
+      .balances {
+        @apply w-full flex flex-col gap-y-4;
+      }
+    }
+  }
+}

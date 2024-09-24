@@ -1,0 +1,18 @@
+.token-balance {
+  @apply flex flex-row items-center gap-2;
+
+  .token-balance__icon {
+    @apply w-14 h-12 border-[#6EE4DACC] border-4 rounded-full flex items-center justify-center;
+  }
+
+  .token-balance__balance {
+    @apply flex flex-col h-full gap-1 w-full;
+    .token-balance__balance-container {
+      @apply rounded-lg py-2 px-4 outline-0 bg-grey-950 text-grey-50 flex flex-col items-end w-96;
+    }
+
+    .token-balance__buy-button {
+      @apply w-10 h-10 items-center;
+    }
+  }
+}
