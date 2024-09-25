@@ -19,15 +19,6 @@ const generateRandomBuffer = (): ArrayBuffer => {
   return arr.buffer;
 };
 
-// All algorithms can be found here: https://www.iana.org/assignments/cose/cose.xhtml#algorithms
-// We only support ES256, which is listed here
-//const es256 = -7;
-
-// This constant designates the type of credential we want to create.
-// The enum only supports one value, "public-key"
-// https://www.w3.org/TR/webauthn-2/#enumdef-publickeycredentialtype
-//const publicKey = 'public-key';
-
 const base64UrlEncode = (challenge: ArrayBuffer): string => {
   return Buffer.from(challenge)
     .toString('base64')
@@ -48,7 +39,7 @@ export const useGlobalAccount = () => {
   }, []);
 
   const checkIfAvailable = useMemo(async () => {
-    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(); // this only works on https
   }, []);
 
   const walletLogin = async (): Promise<void> => {
@@ -69,34 +60,6 @@ export const useGlobalAccount = () => {
     const challenge = generateRandomBuffer();
     const authenticatorUserId = generateRandomBuffer();
     const encodedChallenge = base64UrlEncode(challenge);
-
-    /*const attestation = await navigator.credentials.create({
-      publicKey: {
-        rp: {
-          id: passkeyClient?.rpId,
-          name: 'DIMO Global Accounts',
-        },
-        challenge,
-        pubKeyCredParams: [
-          {
-            alg: -7,
-            type: 'public-key',
-          },
-        ],
-        user: {
-          id: authenticatorUserId,
-          name: `${email} @ DIMO Developer Console`,
-          displayName: `${email} @ DIMO Developer Console`,
-        },
-        timeout: 300000,
-        authenticatorSelection: {
-          requireResidentKey: false,
-          residentKey: 'preferred',
-          userVerification: 'preferred',
-        },
-      },
-    });
-    */
 
     const attestation = await getWebAuthnAttestation({
       publicKey: {
@@ -125,19 +88,12 @@ export const useGlobalAccount = () => {
       },
     });
 
-    console.info(createSubOrganization);
-    console.info(email);
-    console.info(attestation);
-    console.info(encodedChallenge);
-
-    /*const response = await createSubOrganization({
+    const response = await createSubOrganization({
       email,
       attestation,
       encodedChallenge,
       deployAccount: true,
-    });*/
-
-    const response = {} as ISubOrganization;
+    });
 
     if (!response?.subOrganizationId) {
       console.error('Error creating sub organization');

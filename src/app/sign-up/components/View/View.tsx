@@ -7,11 +7,12 @@ import { BuildForForm, CompanyInfoForm } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
-import { useErrorHandler } from '@/hooks';
+import { useErrorHandler, useUser } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
 import WalletCreation from '@/app/sign-up/components/WalletCreation';
+import { getUser } from '@/actions/user';
 
 const signUpFlows = {
   'wallet-creation': {
@@ -57,7 +58,14 @@ const View = () => {
     }
   };
 
-  const handleNext = (actualFlow: string, inputAuth?: Partial<IAuth>) => {
+  const handleNext = async (actualFlow: string, inputAuth?: Partial<IAuth>) => {
+    // Check if user already has a team, if so, redirect to app cause is an old user
+    const user = await getUser();
+    if (user?.team) {
+      router.replace('/app');
+      return;
+    }
+
     const newUserData = {
       ...authData,
       ...inputAuth,
