@@ -48,7 +48,7 @@ export const useGlobalAccount = () => {
   }, []);
 
   const checkIfAvailable = useMemo(async () => {
-    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
   }, []);
 
   const walletLogin = async (): Promise<void> => {
@@ -65,9 +65,6 @@ export const useGlobalAccount = () => {
   const registerSubOrganization = async (): Promise<ISubOrganization> => {
     if (!session?.user?.email) return {} as ISubOrganization;
     const { email } = session.user;
-
-
-
 
     const challenge = generateRandomBuffer();
     const authenticatorUserId = generateRandomBuffer();
