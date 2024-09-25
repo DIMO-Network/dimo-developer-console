@@ -7,7 +7,7 @@ import { BuildForForm, CompanyInfoForm } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
-import { useErrorHandler, useUser } from '@/hooks';
+import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
