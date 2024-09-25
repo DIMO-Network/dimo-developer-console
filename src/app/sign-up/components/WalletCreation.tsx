@@ -12,11 +12,22 @@ interface IProps {
 
 export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
-  const { registerSubOrganization } = useGlobalAccount();
+  const { registerSubOrganization, checkIfAvailable } = useGlobalAccount();
   const { data: session } = useSession();
 
   const handleWalletCreation = async () => {
     try {
+      const isAvailable = await checkIfAvailable;
+
+      if (!isAvailable) {
+        setNotification(
+          'Your device does not support WebAuthn. Please use a different device to create your wallet.',
+          'WebAuthn not supported',
+          'error',
+        );
+        return;
+      }
+
       await registerSubOrganization();
 
       onNext('wallet-creation', {});

@@ -9,7 +9,7 @@ import {
 import { useSession } from 'next-auth/react';
 import { ISubOrganization } from '@/types/wallet';
 import { useRouter } from 'next/navigation';
-//import { getWebAuthnAttestation } from '@turnkey/http';
+import { getWebAuthnAttestation } from '@turnkey/http';
 import { isEmpty } from 'lodash';
 import configuration from '@/config';
 
@@ -47,6 +47,10 @@ export const useGlobalAccount = () => {
     return isAmoy ? 'Polygon Amoy' : 'Polygon';
   }, []);
 
+  const checkIfAvailable = useMemo(async () => {
+    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+  }, []);
+
   const walletLogin = async (): Promise<void> => {
     const { subOrganizationId } = organizationInfo!;
     // a bit hacky but works for now
@@ -62,22 +66,17 @@ export const useGlobalAccount = () => {
     if (!session?.user?.email) return {} as ISubOrganization;
     const { email } = session.user;
 
-    const available =
-      await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-//TODO: Just for testing
-    console.info(available);
+
+
 
     const challenge = generateRandomBuffer();
     const authenticatorUserId = generateRandomBuffer();
     const encodedChallenge = base64UrlEncode(challenge);
 
-    console.info(navigator);
-    console.info(navigator.credentials);
-
-    const attestation = await navigator.credentials.create({
+    /*const attestation = await navigator.credentials.create({
       publicKey: {
         rp: {
-          id: 'dimo-waas-webview-staging.vercel.app',//passkeyClient?.rpId,
+          id: passkeyClient?.rpId,
           name: 'DIMO Global Accounts',
         },
         challenge,
@@ -100,8 +99,8 @@ export const useGlobalAccount = () => {
         },
       },
     });
+    */
 
-/*
     const attestation = await getWebAuthnAttestation({
       publicKey: {
         rp: {
@@ -111,14 +110,14 @@ export const useGlobalAccount = () => {
         challenge,
         pubKeyCredParams: [
           {
-            type: publicKey,
-            alg: es256,
+            alg: -7,
+            type: 'public-key',
           },
         ],
         user: {
           id: authenticatorUserId,
           name: `${email} @ DIMO Developer Console`,
-          displayName: 'DIMO Developer Console',
+          displayName: `${email} @ DIMO Developer Console`,
         },
         timeout: 300000,
         authenticatorSelection: {
@@ -128,7 +127,7 @@ export const useGlobalAccount = () => {
         },
       },
     });
-*/
+
     console.info(createSubOrganization);
     console.info(email);
     console.info(attestation);
@@ -172,6 +171,7 @@ export const useGlobalAccount = () => {
     walletLogin,
     registerSubOrganization,
     currentChain,
+    checkIfAvailable,
   };
 };
 
