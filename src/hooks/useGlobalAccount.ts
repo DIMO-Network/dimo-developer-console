@@ -62,9 +62,46 @@ export const useGlobalAccount = () => {
     if (!session?.user?.email) return {} as ISubOrganization;
     const { email } = session.user;
 
+    const available =
+      await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+//TODO: Just for testing
+    console.info(available);
+
     const challenge = generateRandomBuffer();
     const authenticatorUserId = generateRandomBuffer();
     const encodedChallenge = base64UrlEncode(challenge);
+
+    console.info(navigator);
+    console.info(navigator.credentials);
+
+    const attestation = await navigator.credentials.create({
+      publicKey: {
+        rp: {
+          id: 'dimo-waas-webview-staging.vercel.app',//passkeyClient?.rpId,
+          name: 'DIMO Global Accounts',
+        },
+        challenge,
+        pubKeyCredParams: [
+          {
+            alg: -7,
+            type: 'public-key',
+          },
+        ],
+        user: {
+          id: authenticatorUserId,
+          name: `${email} @ DIMO Developer Console`,
+          displayName: `${email} @ DIMO Developer Console`,
+        },
+        timeout: 300000,
+        authenticatorSelection: {
+          requireResidentKey: false,
+          residentKey: 'preferred',
+          userVerification: 'preferred',
+        },
+      },
+    });
+
+/*
     const attestation = await getWebAuthnAttestation({
       publicKey: {
         rp: {
@@ -80,23 +117,31 @@ export const useGlobalAccount = () => {
         ],
         user: {
           id: authenticatorUserId,
-          name: 'DIMO Developer Console',
+          name: `${email} @ DIMO Developer Console`,
           displayName: 'DIMO Developer Console',
         },
+        timeout: 300000,
         authenticatorSelection: {
-          requireResidentKey: true,
-          residentKey: 'required',
+          requireResidentKey: false,
+          residentKey: 'preferred',
           userVerification: 'preferred',
         },
       },
     });
+*/
+    console.info(createSubOrganization);
+    console.info(email);
+    console.info(attestation);
+    console.info(encodedChallenge);
 
-    const response = await createSubOrganization({
+    /*const response = await createSubOrganization({
       email,
       attestation,
       encodedChallenge,
       deployAccount: true,
-    });
+    });*/
+
+    const response = {} as ISubOrganization;
 
     if (!response?.subOrganizationId) {
       console.error('Error creating sub organization');
