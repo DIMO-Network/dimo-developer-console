@@ -28,7 +28,7 @@ export class LoggedUser {
   }
 
   get isCompliant(): boolean {
-    return this.hasTeam && this.hasPersonalData;
+    return this.hasTeam && this.hasPersonalData && this.isGlobalAccountUser;
   }
 
   get isGlobalAccountUser(): boolean {
