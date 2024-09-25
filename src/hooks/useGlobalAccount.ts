@@ -9,7 +9,7 @@ import {
 import { useSession } from 'next-auth/react';
 import { ISubOrganization } from '@/types/wallet';
 import { useRouter } from 'next/navigation';
-import { getWebAuthnAttestation } from '@turnkey/http';
+//import { getWebAuthnAttestation } from '@turnkey/http';
 import { isEmpty } from 'lodash';
 import configuration from '@/config';
 
@@ -21,12 +21,12 @@ const generateRandomBuffer = (): ArrayBuffer => {
 
 // All algorithms can be found here: https://www.iana.org/assignments/cose/cose.xhtml#algorithms
 // We only support ES256, which is listed here
-const es256 = -7;
+//const es256 = -7;
 
 // This constant designates the type of credential we want to create.
 // The enum only supports one value, "public-key"
 // https://www.w3.org/TR/webauthn-2/#enumdef-publickeycredentialtype
-const publicKey = 'public-key';
+//const publicKey = 'public-key';
 
 const base64UrlEncode = (challenge: ArrayBuffer): string => {
   return Buffer.from(challenge)
