@@ -73,6 +73,10 @@ export const useGlobalAccount = () => {
             alg: -7,
             type: 'public-key',
           },
+          {
+            alg: -257,
+            type: 'public-key',
+          },
         ],
         user: {
           id: authenticatorUserId,
