@@ -34,7 +34,13 @@ export const BuyCreditsModal: FC<IProps> = () => {
   const [showIframe, setShowIframe] = useState(false);
   const credits = watch('credits', 0);
 
-  const iframeUrl = `https://ramptest.alchemypay.org/?apiKey=${process.env.NEXT_PUBLIC_API_KEY}&cryptoAddress=${process.env.NEXT_PUBLIC_CRYPTO_ADDRESS}&network=${process.env.NEXT_PUBLIC_NETWORK}`;
+  const {
+    NEXT_PUBLIC_API_KEY: nextPublicApiKey,
+    NEXT_PUBLIC_CRYPTO_ADDRESS: nextPublicCryptoAddress,
+    NEXT_PUBLIC_NETWORK: nextPublicNetwork,
+  } = process.env;
+
+  const iframeUrl = `https://ramptest.alchemypay.org/?apiKey=${nextPublicApiKey}&cryptoAddress=${nextPublicCryptoAddress}&network=${nextPublicNetwork}`;
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="buy-credits-modal">

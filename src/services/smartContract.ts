@@ -1,35 +1,12 @@
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
+import contractABI from '../config/dimoContract.json';
+import { DIMO_CONTRACT_ADDRESS } from '@/config/default';
 
 const web3 = new Web3('https://polygon-mumbai.infura.io/v3/YOUR_INFURA_PROJECT_ID'); // Replace with Infura ID
 
-const contractABI: AbiItem[] = [
-  {
-    "inputs": [
-      { "internalType": "address", "name": "to", "type": "address" },
-      { "internalType": "uint256", "name": "amountDimoTokens", "type": "uint256" }
-    ],
-    "name": "mintInDimo",
-    "outputs": [{ "internalType": "uint256", "name": "dimoCredits", "type": "uint256" }],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "from", "type": "address" },
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
-    ],
-    "name": "burn",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
-  // Include other ABI methods if needed
-];
-
-const contractAddress = '0x523d4a08cf149f1Ada8113B3b3400234236Bb5E8';
-
-const contract = new web3.eth.Contract(contractABI, contractAddress);
+// Load contract ABI
+const contract = new web3.eth.Contract(contractABI as AbiItem[], DIMO_CONTRACT_ADDRESS);
 
 // Function to mint DIMO Credits and burn DIMO tokens
 export async function mintDimoCredits(txHash: string) {
@@ -55,6 +32,7 @@ export async function mintDimoCredits(txHash: string) {
       throw new Error('Transaction failed or not confirmed.');
     }
   } catch (error) {
-    console.error('Error minting DIMO Credits:', error);
+    // Add the txHash to the error log to facilitate debugging
+    console.error(`Error minting DIMO Credits for txHash ${txHash}:`, error);
   }
 }
