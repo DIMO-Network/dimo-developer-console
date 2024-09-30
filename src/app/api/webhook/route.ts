@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mintDimoCredits } from '@/services/smartContract';
 
-// POST request handler
 export async function POST(req: NextRequest) {
   let txHash = '';
   try {
