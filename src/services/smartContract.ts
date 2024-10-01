@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
-import contractABI from '../config/dimoContract.json';
+import contractABI from '../contracts/DimoCreditABI.json';
 import { DIMO_CONTRACT_ADDRESS } from '@/config/default';
 
 const web3 = new Web3('https://polygon-mumbai.infura.io/v3/YOUR_INFURA_PROJECT_ID'); // Replace with Infura ID
