@@ -1,0 +1,16 @@
+.email-recovery{
+    @apply bg-[url('/images/login-background.png')] bg-cover
+    flex flex-col justify-center
+    h-screen gap-4;
+
+    .email-recovery__header {
+        @apply flex flex-col w-full items-center gap-4 pt-4;
+        p {
+            @apply text-3xl text-center leading-9;
+        }
+    }
+
+    .email-recovery__content{
+        @apply flex flex-col sm:w-1/2 items-center justify-center h-screen shadow-lg;
+    }
+}

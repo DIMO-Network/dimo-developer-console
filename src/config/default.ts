@@ -1,6 +1,6 @@
 export const appName = 'Developer Console';
 
-export const LOGIN_PAGES = ['/sign-in', '/sign-up'];
+export const LOGIN_PAGES = ['/sign-in', '/sign-up', '/email-recovery'];
 
 // Just a placeholder for redirection purposes
 export const VALIDATION_PAGES = ['/valid-tzd', '/verify-email'];

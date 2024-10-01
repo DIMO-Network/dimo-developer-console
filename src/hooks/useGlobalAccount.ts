@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
 import {
   createSubOrganization,
-  getUserSubOrganization,
+  getUserSubOrganization, startEmailRecovery
 } from '@/services/globalAccount';
 import { useSession } from 'next-auth/react';
 import { ISubOrganization } from '@/types/wallet';
@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { getWebAuthnAttestation } from '@turnkey/http';
 import { isEmpty } from 'lodash';
 import configuration from '@/config';
+import { signOut } from 'next-auth/react';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -30,7 +31,7 @@ const base64UrlEncode = (challenge: ArrayBuffer): string => {
 export const useGlobalAccount = () => {
   const { data: session } = useSession();
   const router = useRouter();
-  const { passkeyClient } = useTurnkey();
+  const { passkeyClient, authIframeClient } = useTurnkey();
   const [organizationInfo, setOrganizationInfo] =
     useState<ISubOrganization | null>(null);
   const currentChain = useMemo(() => {
@@ -38,19 +39,20 @@ export const useGlobalAccount = () => {
     return isAmoy ? 'Polygon Amoy' : 'Polygon';
   }, []);
 
-  const checkIfAvailable = useMemo(async () => {
-    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(); // this only works on https
-  }, []);
-
   const walletLogin = async (): Promise<void> => {
-    const { subOrganizationId } = organizationInfo!;
-    // a bit hacky but works for now
-    const signInResponse = await passkeyClient?.createReadOnlySession({
-      organizationId: subOrganizationId,
-    });
+   try {
+     const { subOrganizationId } = organizationInfo!;
+     // a bit hacky but works for now
+     const signInResponse = await passkeyClient?.createReadOnlySession({
+       organizationId: subOrganizationId,
+     });
 
-    if (isEmpty(signInResponse?.organizationId)) return;
-    router.push('/valid-tzd');
+     if (isEmpty(signInResponse?.organizationId)) return;
+     router.push('/valid-tzd');
+   } catch (e) {
+     console.error('Error logging in with wallet', e);
+     await signOut();
+   }
   };
 
   const registerSubOrganization = async (): Promise<ISubOrganization> => {
@@ -65,7 +67,7 @@ export const useGlobalAccount = () => {
       publicKey: {
         rp: {
           id: passkeyClient?.rpId,
-          name: 'DIMO Developer Console',
+          name: 'DIMO Global Accounts',
         },
         challenge,
         pubKeyCredParams: [
@@ -80,8 +82,8 @@ export const useGlobalAccount = () => {
         ],
         user: {
           id: authenticatorUserId,
-          name: `${email} @ DIMO Developer Console`,
-          displayName: `${email} @ DIMO Developer Console`,
+          name: `${email} @ DIMO`,
+          displayName: `${email} @ DIMO`,
         },
         timeout: 300000,
         authenticatorSelection: {
@@ -111,6 +113,17 @@ export const useGlobalAccount = () => {
     return response;
   };
 
+  const emailRecovery = async (email: string): Promise<boolean> => {
+    const user = await getUserSubOrganization(email);
+    if (!user) return false;
+    if (!authIframeClient) return false;
+    await startEmailRecovery({
+      email,
+      key: authIframeClient.iframePublicKey!,
+    });
+    return true;
+  };
+
   useEffect(() => {
     if (session?.user?.email && !organizationInfo) {
       const { email } = session.user;
@@ -128,7 +141,7 @@ export const useGlobalAccount = () => {
     walletLogin,
     registerSubOrganization,
     currentChain,
-    checkIfAvailable,
+    emailRecovery
   };
 };
 

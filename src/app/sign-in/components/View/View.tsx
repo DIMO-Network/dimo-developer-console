@@ -9,18 +9,12 @@ import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useGlobalAccount } from '@/hooks';
-import { CheckboxField } from '@/components/CheckboxField';
 
 export const View = () => {
   useErrorHandler();
-  const [acceptTerms, setAcceptTerms] = useState<boolean>(true);
   const { organizationInfo, walletLogin } = useGlobalAccount();
-
-  const handleAcceptTerms = () => {
-    setAcceptTerms(!acceptTerms);
-  };
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     await signIn(app, auth);
@@ -47,20 +41,22 @@ export const View = () => {
           <section className="sign-in__buttons">
             <SignInButtons
               isSignIn={true}
-              disabled={!acceptTerms}
+              disabled={false}
               onCTA={handleCTA}
             />
           </section>
           <section className="sign-in__extra-links">
-            <div className="flex flex-row">
-              <CheckboxField
-                name="terms"
-                checked={acceptTerms}
-                onChange={handleAcceptTerms}
-                className={acceptTerms ? '' : 'required'}
-              />
+            <div>
               <p className="terms-caption">
-                by signing in, you are agreeing to our{' '}
+                Lost your passkey?{' '}
+                <Anchor href="/email-recovery" target="_self" className="grey underline" >
+                  Recover with your email
+                </Anchor>
+              </p>
+            </div>
+            <div className="flex flex-row">
+              <p className="terms-caption">
+                By signing in, you are agreeing to our{' '}
                 <Anchor
                   href="https://docs.dimo.zone/dinc/developer-terms-of-service"
                   className="grey underline"

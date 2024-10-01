@@ -1,6 +1,7 @@
 'use client';
 import axios, { AxiosError } from 'axios';
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
+import config from '@/config';
 
 const globalAccountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
@@ -35,4 +36,20 @@ export const createSubOrganization = async (
   return data;
 };
 
+export const startEmailRecovery = async ({email, key} : {email: string;  key: string;}): Promise<void> => {
+  await globalAccountClient.post(`/api/account/recovery`, {
+    email,
+    key,
+    origin: "DIMO Developer Console",
+    redirectUrl: getRedirectUrl(),
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
+
 // private functions
+const getRedirectUrl = () => {
+  return `${config.frontendUrl}/email-recovery?flow=rewire-passkey`;
+};
