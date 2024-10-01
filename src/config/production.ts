@@ -1,6 +1,6 @@
-export const backendUrl = 'https://console-api.dimo.xyz/';
+export const backendUrl = 'https://console-api.dimo.org/';
 
-export const frontendUrl = 'https://console.dimo.xyz/';
+export const frontendUrl = 'https://console.dimo.org/';
 
 // 137 - MAINNET
 export const CONTRACT_NETWORK = BigInt(137);
