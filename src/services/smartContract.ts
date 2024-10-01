@@ -3,7 +3,7 @@ import { AbiItem } from 'web3-utils';
 import contractABI from '../contracts/DimoCreditABI.json';
 import { DIMO_CONTRACT_ADDRESS } from '@/config/default';
 
-const web3 = new Web3('https://polygon-mumbai.infura.io/v3/YOUR_INFURA_PROJECT_ID'); // Replace with Infura ID
+const web3 = new Web3('https://polygon-mumbai.infura.io/v3/YOUR_INFURA_PROJECT_ID'); // TODO: Replace with Infura ID and send to .env
 
 // Load contract ABI
 const contract = new web3.eth.Contract(contractABI as AbiItem[], DIMO_CONTRACT_ADDRESS);
@@ -20,7 +20,7 @@ export async function mintDimoCredits(txHash: string) {
 
       await contract.methods.mintInDimo(fromAddress, amountToMint).send({
         from: fromAddress,
-        gas: gasEstimate
+        gas: gasEstimate.toString(), // TODO: gas is a string, need to check this
       });
 
     } else {
