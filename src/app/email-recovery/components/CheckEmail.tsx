@@ -2,11 +2,9 @@
 import { FC, useState } from 'react';
 import { CheckIcon, ClickIcon } from '@/components/Icons';
 
-interface IProps {
+interface IProps {}
 
-}
-
-export const CheckEmail: FC<IProps> = ({ }) => {
+export const CheckEmail: FC<IProps> = ({}) => {
   return (
     <div className="text-left text-xl gap-8 mt-4">
       <h1>Not seeing an email? Check your spam folder or</h1>
@@ -30,4 +28,4 @@ export const CheckEmail: FC<IProps> = ({ }) => {
       </div>
     </div>
   );
-}
+};

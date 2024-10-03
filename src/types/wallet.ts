@@ -15,7 +15,7 @@ export interface IPasskeyAttestation {
     | 'AUTHENTICATOR_TRANSPORT_NFC'
     | 'AUTHENTICATOR_TRANSPORT_USB'
     | 'AUTHENTICATOR_TRANSPORT_HYBRID'
-    )[];
+  )[];
 }
 
 export interface IEmailAuth {

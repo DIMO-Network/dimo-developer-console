@@ -17,8 +17,8 @@ interface IProps {
 }
 
 export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
- const { emailRecovery } = useGlobalAccount();
- const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { emailRecovery } = useGlobalAccount();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
     register,
     handleSubmit,
@@ -38,7 +38,10 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-full max-w-sm pt-4">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-4 w-full max-w-sm pt-4"
+    >
       <div className="flex flex-col gap-4 ">
         <Label htmlFor="email" className="text-xs text-medium">
           <TextField
@@ -50,9 +53,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
             role="email-input"
           />
         </Label>
-        {errors.email && (
-          <TextError errorMessage="This field is required" />
-        )}
+        {errors.email && <TextError errorMessage="This field is required" />}
       </div>
       <div className="flex flex-col pt-4">
         <Button type="submit" className="primary" role="continue-button">

@@ -1,9 +1,13 @@
-"use client";
+'use client';
 import { withNotifications } from '@/hoc';
-import "./View.css";
+import './View.css';
 import { useErrorHandler } from '@/hooks';
 import Image from 'next/image';
-import { CheckEmail, EmailRecoveryForm, RewirePasskey } from '@/app/email-recovery/components';
+import {
+  CheckEmail,
+  EmailRecoveryForm,
+  RewirePasskey,
+} from '@/app/email-recovery/components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -31,10 +35,13 @@ export const View = () => {
   const router = useRouter();
   const currentFlow = searchParams.get('flow') ?? 'email-form';
   const [flow, setFlow] = useState(currentFlow);
-  const { Component: EmailRecoveryFlow, title } = emailRecoveryFlows[flow as keyof typeof emailRecoveryFlows] ?? emailRecoveryFlows['email-form'];
+  const { Component: EmailRecoveryFlow, title } =
+    emailRecoveryFlows[flow as keyof typeof emailRecoveryFlows] ??
+    emailRecoveryFlows['email-form'];
 
   const handleNext = (actualFlow: string) => {
-    const currentProcess = emailRecoveryFlows[actualFlow as keyof typeof emailRecoveryFlows];
+    const currentProcess =
+      emailRecoveryFlows[actualFlow as keyof typeof emailRecoveryFlows];
     const processes = Object.keys(emailRecoveryFlows).reduce(
       (acc, elm) => ({
         ...acc,
@@ -43,7 +50,9 @@ export const View = () => {
       {},
     );
 
-    const nextProcess = processes[(currentProcess.order + 1) as keyof typeof processes] ?? 'complete';
+    const nextProcess =
+      processes[(currentProcess.order + 1) as keyof typeof processes] ??
+      'complete';
     if (nextProcess !== 'complete') setFlow(nextProcess);
     else router.replace('/sign-in');
   };

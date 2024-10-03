@@ -4,7 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
 import {
   createSubOrganization,
-  getUserSubOrganization, rewirePasskey, startEmailRecovery
+  getUserSubOrganization,
+  rewirePasskey,
+  startEmailRecovery,
 } from '@/services/globalAccount';
 import { useSession } from 'next-auth/react';
 import { IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
@@ -41,13 +43,18 @@ export const useGlobalAccount = () => {
     return isAmoy ? 'Polygon Amoy' : 'Polygon';
   }, []);
 
-  const validCredentials = useCallback(async (authToken: string) => {
-    if (!authIframeClient) return null;
-    return await authIframeClient.injectCredentialBundle(authToken);
-  }, [authIframeClient]);
+  const validCredentials = useCallback(
+    async (authToken: string) => {
+      if (!authIframeClient) return null;
+      return await authIframeClient.injectCredentialBundle(authToken);
+    },
+    [authIframeClient],
+  );
 
-  const getPasskeyAttestation = async (email: string, challenge: ArrayBuffer): Promise<IPasskeyAttestation> => {
-
+  const getPasskeyAttestation = async (
+    email: string,
+    challenge: ArrayBuffer,
+  ): Promise<IPasskeyAttestation> => {
     const authenticatorUserId = generateRandomBuffer();
 
     const attestation = await getWebAuthnAttestation({
@@ -89,9 +96,12 @@ export const useGlobalAccount = () => {
     const challenge = generateRandomBuffer();
     const attestation = await getPasskeyAttestation(me!.username!, challenge);
 
-    const client = new TurnkeyClient({
-      baseUrl: turnkeyConfig.apiBaseUrl,
-    }, authIframeClient!.config.stamper!);
+    const client = new TurnkeyClient(
+      {
+        baseUrl: turnkeyConfig.apiBaseUrl,
+      },
+      authIframeClient!.config.stamper!,
+    );
 
     const { authenticators } = await client.getAuthenticators({
       organizationId: me!.organizationId,
@@ -99,47 +109,49 @@ export const useGlobalAccount = () => {
     });
 
     const signedRemoveAuthenticators = await client.stampDeleteAuthenticators({
-      type: "ACTIVITY_TYPE_DELETE_AUTHENTICATORS",
+      type: 'ACTIVITY_TYPE_DELETE_AUTHENTICATORS',
       timestampMs: Date.now().toString(),
       organizationId: me!.organizationId,
       parameters: {
         userId: me!.userId,
         authenticatorIds: authenticators!.map((auth) => auth.authenticatorId),
-      }
+      },
     });
 
     const signedRecoverUser = await client.stampRecoverUser({
-      type: "ACTIVITY_TYPE_RECOVER_USER",
+      type: 'ACTIVITY_TYPE_RECOVER_USER',
       timestampMs: Date.now().toString(),
       organizationId: me!.organizationId,
       parameters: {
         userId: me!.userId,
         authenticator: {
-          authenticatorName: "DIMO PASSKEY",
+          authenticatorName: 'DIMO PASSKEY',
           challenge: base64UrlEncode(challenge),
           attestation,
-        }
-      }
+        },
+      },
     });
 
-    await rewirePasskey({ signedRecoveryRequest: signedRecoverUser, signedAuthenticatorRemoval: signedRemoveAuthenticators });
-
+    await rewirePasskey({
+      signedRecoveryRequest: signedRecoverUser,
+      signedAuthenticatorRemoval: signedRemoveAuthenticators,
+    });
   };
 
   const walletLogin = async (): Promise<void> => {
-   try {
-     const { subOrganizationId } = organizationInfo!;
-     // a bit hacky but works for now
-     const signInResponse = await passkeyClient?.createReadOnlySession({
-       organizationId: subOrganizationId,
-     });
+    try {
+      const { subOrganizationId } = organizationInfo!;
+      // a bit hacky but works for now
+      const signInResponse = await passkeyClient?.createReadOnlySession({
+        organizationId: subOrganizationId,
+      });
 
-     if (isEmpty(signInResponse?.organizationId)) return;
-     router.push('/valid-tzd');
-   } catch (e) {
-     console.error('Error logging in with wallet', e);
-     await signOut();
-   }
+      if (isEmpty(signInResponse?.organizationId)) return;
+      router.push('/valid-tzd');
+    } catch (e) {
+      console.error('Error logging in with wallet', e);
+      await signOut();
+    }
   };
 
   const registerSubOrganization = async (): Promise<ISubOrganization> => {
@@ -199,7 +211,7 @@ export const useGlobalAccount = () => {
     currentChain,
     emailRecovery,
     validCredentials,
-    registerNewPasskey
+    registerNewPasskey,
   };
 };
 

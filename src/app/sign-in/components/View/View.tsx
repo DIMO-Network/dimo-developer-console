@@ -39,17 +39,17 @@ export const View = () => {
             <p>Welcome back!</p>
           </section>
           <section className="sign-in__buttons">
-            <SignInButtons
-              isSignIn={true}
-              disabled={false}
-              onCTA={handleCTA}
-            />
+            <SignInButtons isSignIn={true} disabled={false} onCTA={handleCTA} />
           </section>
           <section className="sign-in__extra-links">
             <div>
               <p className="terms-caption">
                 Lost your passkey?{' '}
-                <Anchor href="/email-recovery" target="_self" className="grey underline" >
+                <Anchor
+                  href="/email-recovery"
+                  target="_self"
+                  className="grey underline"
+                >
                   Recover with your email
                 </Anchor>
               </p>

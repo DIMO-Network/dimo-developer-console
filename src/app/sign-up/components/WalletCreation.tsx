@@ -17,7 +17,8 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
 
   const handleWalletCreation = async () => {
     try {
-      const isAvailable = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      const isAvailable =
+        await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
 
       if (!isAvailable) {
         setNotification(

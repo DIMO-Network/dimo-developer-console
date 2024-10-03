@@ -51,7 +51,9 @@ export const BuyCreditsModal: FC<IProps> = () => {
               Buy DCX
             </Title>
             <p className="description">
-              DCX, also known as DIMO Credits, is a stable token in the DIMO ecosystem for the builders. All DCX purchases uses the DIMO Token as medium.
+              DCX, also known as DIMO Credits, is a stable token in the DIMO
+              ecosystem for the builders. All DCX purchases uses the DIMO Token
+              as medium.
             </p>
           </div>
           <TokenInput

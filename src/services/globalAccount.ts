@@ -37,28 +37,48 @@ export const createSubOrganization = async (
   return data;
 };
 
-export const startEmailRecovery = async ({email, key} : {email: string;  key: string;}): Promise<void> => {
-  await globalAccountClient.post(`/api/account/recovery`, {
-    email,
-    key,
-    origin: "DIMO Developer Console",
-    redirectUrl: getRedirectUrl(),
-  }, {
-    headers: {
-      'Content-Type': 'application/json',
+export const startEmailRecovery = async ({
+  email,
+  key,
+}: {
+  email: string;
+  key: string;
+}): Promise<void> => {
+  await globalAccountClient.post(
+    `/api/account/recovery`,
+    {
+      email,
+      key,
+      origin: 'DIMO Developer Console',
+      redirectUrl: getRedirectUrl(),
     },
-  });
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
 };
 
-export const rewirePasskey = async ({signedRecoveryRequest, signedAuthenticatorRemoval} : { signedRecoveryRequest : TSignedRequest; signedAuthenticatorRemoval : TSignedRequest }) => {
-  await globalAccountClient.put(`/api/account/recovery`, {
-    signedRecoveryRequest,
-    signedAuthenticatorRemoval,
-  }, {
-    headers: {
-      'Content-Type': 'application/json',
+export const rewirePasskey = async ({
+  signedRecoveryRequest,
+  signedAuthenticatorRemoval,
+}: {
+  signedRecoveryRequest: TSignedRequest;
+  signedAuthenticatorRemoval: TSignedRequest;
+}) => {
+  await globalAccountClient.put(
+    `/api/account/recovery`,
+    {
+      signedRecoveryRequest,
+      signedAuthenticatorRemoval,
     },
-  });
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
 };
 
 // private functions
