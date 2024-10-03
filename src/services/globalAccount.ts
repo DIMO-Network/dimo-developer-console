@@ -2,6 +2,7 @@
 import axios, { AxiosError } from 'axios';
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import config from '@/config';
+import { TSignedRequest } from '@turnkey/http';
 
 const globalAccountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
@@ -42,6 +43,17 @@ export const startEmailRecovery = async ({email, key} : {email: string;  key: st
     key,
     origin: "DIMO Developer Console",
     redirectUrl: getRedirectUrl(),
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
+
+export const rewirePasskey = async ({signedRecoveryRequest, signedAuthenticatorRemoval} : { signedRecoveryRequest : TSignedRequest; signedAuthenticatorRemoval : TSignedRequest }) => {
+  await globalAccountClient.put(`/api/account/recovery`, {
+    signedRecoveryRequest,
+    signedAuthenticatorRemoval,
   }, {
     headers: {
       'Content-Type': 'application/json',

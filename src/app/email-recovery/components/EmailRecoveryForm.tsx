@@ -3,21 +3,22 @@ import { FC, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
-import { Form } from '@/app/app/create/components';
 import { Button } from '@/components/Button';
 import { TextError } from '@/components/TextError';
 import { useGlobalAccount } from '@/hooks';
+import { BubbleLoader } from '@/components/BubbleLoader';
 
 interface EmailRecoveryFormInputs {
   email: string;
 }
 
 interface IProps {
-
+  onNext: (flow: string) => void;
 }
 
-export const EmailRecoveryForm: FC<IProps> = ({ }) => {
+export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
  const { emailRecovery } = useGlobalAccount();
+ const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
     register,
     handleSubmit,
@@ -29,10 +30,10 @@ export const EmailRecoveryForm: FC<IProps> = ({ }) => {
 
   const onSubmit: SubmitHandler<EmailRecoveryFormInputs> = async () => {
     if (!email) return;
-    console.info(email);
+    setIsLoading(true);
     const success = await emailRecovery(email);
     if (success) {
-      // Redirect to check-email
+      onNext('email-form');
     }
   };
 
@@ -55,7 +56,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ }) => {
       </div>
       <div className="flex flex-col pt-4">
         <Button type="submit" className="primary" role="continue-button">
-          Continue
+          {isLoading ? <BubbleLoader isLoading={isLoading} /> : 'Continue'}
         </Button>
       </div>
     </form>

@@ -86,7 +86,7 @@ const View = () => {
       processes[(currentProcess.order + 1) as keyof typeof processes] ??
       'complete';
     if (nextProcess !== 'complete') setFlow(nextProcess);
-    else handleCompleteUserData(newUserData);
+    else await handleCompleteUserData(newUserData);
   };
 
   return (
