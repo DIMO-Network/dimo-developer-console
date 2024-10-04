@@ -1,7 +1,6 @@
 'use client';
 import axios, { AxiosError } from 'axios';
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
-import config from '@/config';
 import { TSignedRequest } from '@turnkey/http';
 
 const globalAccountClient = axios.create({
