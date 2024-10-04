@@ -3,7 +3,11 @@ import { useContext, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
-import { BuildForForm, CompanyInfoForm } from '@/app/sign-up/components';
+import {
+  BuildForForm,
+  CompanyInfoForm,
+  WalletCreation,
+} from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
@@ -11,7 +15,6 @@ import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
-import WalletCreation from '@/app/sign-up/components/WalletCreation';
 import { getUser } from '@/actions/user';
 
 const signUpFlows = {
@@ -87,7 +90,7 @@ const View = () => {
       processes[(currentProcess.order + 1) as keyof typeof processes] ??
       'complete';
     if (nextProcess !== 'complete') setFlow(nextProcess);
-    else handleCompleteUserData(newUserData);
+    else await handleCompleteUserData(newUserData);
   };
 
   return (

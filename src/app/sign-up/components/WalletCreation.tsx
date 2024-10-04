@@ -12,12 +12,13 @@ interface IProps {
 
 export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
-  const { registerSubOrganization, checkIfAvailable } = useGlobalAccount();
+  const { registerSubOrganization } = useGlobalAccount();
   const { data: session } = useSession();
 
   const handleWalletCreation = async () => {
     try {
-      const isAvailable = await checkIfAvailable;
+      const isAvailable =
+        await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
 
       if (!isAvailable) {
         setNotification(

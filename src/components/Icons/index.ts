@@ -26,3 +26,5 @@ export * from './SupportAgentIcon';
 export * from './WalletIcon';
 export * from './WarningAmberIcon';
 export * from './BuyDcxIcon';
+export * from './CheckIcon';
+export * from './ClickIcon';
