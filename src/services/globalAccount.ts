@@ -83,5 +83,5 @@ export const rewirePasskey = async ({
 
 // private functions
 const getRedirectUrl = () => {
-  return `${config.frontendUrl}/email-recovery?flow=rewire-passkey`;
+  return `${window.location.origin}/email-recovery?flow=rewire-passkey`;
 };
