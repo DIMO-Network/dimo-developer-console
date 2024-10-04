@@ -4,7 +4,7 @@ import { CheckIcon, ClickIcon } from '@/components/Icons';
 
 interface IProps {}
 
-export const CheckEmail: FC<IProps> = ({}) => {
+export const CheckEmail: FC<IProps> = () => {
   return (
     <div className="text-left text-xl gap-8 mt-4">
       <h1>Not seeing an email? Check your spam folder or</h1>
