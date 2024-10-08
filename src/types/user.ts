@@ -13,6 +13,7 @@ export interface IUser {
   refresh_token_expiration?: Date;
   team?: ITeam;
   company?: ICompany;
+  company_email_owner?: string;
   created_at?: Date;
   updated_at?: Date;
   deleted?: boolean;
