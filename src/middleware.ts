@@ -5,10 +5,11 @@ import { isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
-import axios, { AxiosError, isAxiosError } from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { getUserSubOrganization } from '@/services/globalAccount';
 
-const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
+  configuration;
 
 const authMiddleware = withAuth({
   callbacks: {
@@ -65,7 +66,9 @@ export const middleware = async (
   try {
     if (token) {
       const user = await getUserByToken();
-      const subOrganization = await getUserSubOrganization(user.email);
+      const subOrganization = await getUserSubOrganization(
+        user.company_email_owner ?? user.email
+      );
       request.user = new LoggedUser(user, subOrganization);
 
       const isCompliant = request.user?.isCompliant ?? false;
