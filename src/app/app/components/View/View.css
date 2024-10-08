@@ -1,19 +1,121 @@
 .home-page {
   @apply flex flex-col gap-4;
+  padding: 20px;
 
   .welcome-message {
     @apply flex flex-col gap-2;
 
     .title {
       @apply text-3xl;
+      font-weight: bold;
+      color: #ffffff;
     }
 
     .sub-message {
       @apply text-sm;
+      color: #b0b0b0;
     }
   }
 
   .onboarding-steps {
-    @apply flex flex-row gap-10;
+    @apply flex flex-col gap-10;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 16px;
+  }
+
+  .apps-section {
+    @apply flex flex-col;
+    margin-top: 20px;
+
+    h4 {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .apps-list {
+      @apply flex flex-col gap-2;
+    }
+
+    .app-item {
+      @apply flex flex-row justify-between items-center;
+      background-color: #3a3a3a;
+      padding: 12px 20px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    .app-item:hover {
+      background-color: #454545;
+    }
+
+    .app-name-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffffff;
+      cursor: pointer;
+      text-align: left;
+      padding: 0;
+      transition: color 0.2s ease;
+    }
+
+    .app-name-btn:hover {
+      color: #d0f0ff;
+    }
+
+    .app-status {
+      font-size: 14px;
+      color: #888888;
+    }
+
+    .create-new-app-btn {
+      background-color: #d0f0ff;
+      color: #000;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 20px;
+      align-self: flex-start;
+    }
+
+    .create-new-app-btn:hover {
+      background-color: #bdefff;
+    }
+  }
+
+  .attention-box {
+    padding: 15px;
+    background-color: #ff6666;
+    border-radius: 8px;
+    color: #ffffff;
+    margin-bottom: 20px;
+
+    .attention-title {
+      font-weight: bold;
+    }
+
+    .get-credits-btn {
+      background-color: #d0f0ff;
+      color: #000;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .get-credits-btn:hover {
+      background-color: #bdefff;
+    }
   }
 }
