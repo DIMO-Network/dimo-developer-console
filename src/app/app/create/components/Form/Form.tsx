@@ -38,7 +38,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { dimoLicenseContract } = useContract();
+  const { dimoLicenseContract, hasEnoughSpendingLimit } = useContract();
   const { address } = useAccount();
   const router = useRouter();
   const {
@@ -53,7 +53,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
   });
 
   const onSubmit = () => {
-    if (isOnboardingCompleted) {
+    if (hasEnoughSpendingLimit) {
       handleCreateApp();
     } else {
       setIsOpenedCreditsModal(true);

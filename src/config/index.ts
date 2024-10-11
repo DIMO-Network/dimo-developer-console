@@ -16,6 +16,7 @@ type Configuration = {
   DC_ADDRESS: string;
   masFeePerGas: number;
   gasPrice: number;
+  desiredAmountOfAllowance: number;
 };
 
 export const getConfig = (): Configuration => {

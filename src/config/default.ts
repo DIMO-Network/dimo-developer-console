@@ -46,3 +46,4 @@ export const DLC_ADDRESS = '0x9A9D2E717bB005B240094ba761Ff074d392C7C85';
 
 export const masFeePerGas = 60000000000;
 export const gasPrice = 43000000000;
+export const desiredAmountOfAllowance = 100;
