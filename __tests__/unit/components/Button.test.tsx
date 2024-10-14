@@ -12,7 +12,7 @@ describe('Button', () => {
         onClick={handleClick}
       >
         Sign in
-      </Button>
+      </Button>,
     );
 
     const button = screen.getByRole('button');
@@ -38,7 +38,7 @@ describe('Button', () => {
         loading={true}
       >
         Sign in
-      </Button>
+      </Button>,
     );
 
     const button = screen.getByRole('button');

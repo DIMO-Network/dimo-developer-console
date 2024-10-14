@@ -34,14 +34,14 @@ export const SelectField = forwardRef<Ref, IProps>(
       ...props
     },
     // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-    _ref
+    _ref,
   ) => {
     const [show, setShow] = useState<boolean>(false);
     const [selected, setSelected] = useState<IOption>(
       options.find((item) => item.value === defaultValue) ?? {
         value: '',
         text: '',
-      }
+      },
     );
     const className = classnames('select-field', inputClassName);
 
@@ -101,7 +101,7 @@ export const SelectField = forwardRef<Ref, IProps>(
         }}
       />
     );
-  }
+  },
 );
 
 SelectField.displayName = 'SelectField';

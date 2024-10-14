@@ -9,7 +9,7 @@ interface IProps {
     message: string,
     title: string,
     type: string,
-    duration?: number
+    duration?: number,
   ) => void;
 }
 

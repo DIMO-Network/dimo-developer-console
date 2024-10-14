@@ -6,7 +6,7 @@ describe('Card', () => {
     render(
       <Card>
         <p role="text-content">Another content</p>
-      </Card>
+      </Card>,
     );
 
     const textInsideCard = screen.getByRole('text-content');

@@ -1,4 +1,4 @@
-.loading-modal{
+.loading-modal {
   .container {
     @apply flex flex-col justify-center items-center w-full gap-2 h-32;
   }

@@ -3,38 +3,27 @@ import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 
 import { Anchor } from '@/components/Anchor';
-import { existUserEmailOrAddress } from '@/actions/user';
 import { IAuth } from '@/types/auth';
 import { SignInButtons } from '@/components/SignInButton';
 import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
-import { NotificationContext } from '@/context/notificationContext';
-import { useContext } from 'react';
+import { useEffect } from 'react';
+import { useGlobalAccount } from '@/hooks';
 
 export const View = () => {
   useErrorHandler();
-  const { setNotification } = useContext(NotificationContext);
-
-  const notifyUnregisterUser = (type: string) => {
-    setNotification(`The ${type} is not registered`, 'Not registered', 'error');
-  };
+  const { organizationInfo, walletLogin } = useGlobalAccount();
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
-    if (app === 'credentials') {
-      const { existItem } = await existUserEmailOrAddress(
-        auth?.address ?? null,
-        app
-      );
-
-      if (!existItem) {
-        notifyUnregisterUser('address');
-        return;
-      }
-    }
-    signIn(app, auth);
+    await signIn(app, auth);
   };
+
+  useEffect(() => {
+    if (!organizationInfo) return;
+    void walletLogin();
+  }, [organizationInfo]);
 
   return (
     <main className="sign-in">
@@ -53,9 +42,38 @@ export const View = () => {
             <SignInButtons isSignIn={true} disabled={false} onCTA={handleCTA} />
           </section>
           <section className="sign-in__extra-links">
-            <Anchor href="/sign-up" className="primary">
-              Create an account
-            </Anchor>
+            <div>
+              <p className="terms-caption">
+                Lost your passkey?{' '}
+                <Anchor
+                  href="/email-recovery"
+                  target="_self"
+                  className="grey underline"
+                >
+                  Recover with your email
+                </Anchor>
+              </p>
+            </div>
+            <div className="flex flex-row">
+              <p className="terms-caption">
+                By signing in, you are agreeing to our{' '}
+                <Anchor
+                  href="https://docs.dimo.zone/dinc/developer-terms-of-service"
+                  className="grey underline"
+                  target="_blank"
+                >
+                  terms of service
+                </Anchor>{' '}
+                and{' '}
+                <Anchor
+                  href="https://dimo.zone/legal/privacy-policy"
+                  className="grey underline"
+                  target="_blank"
+                >
+                  privacy policy
+                </Anchor>
+              </p>
+            </div>
           </section>
         </article>
       </div>

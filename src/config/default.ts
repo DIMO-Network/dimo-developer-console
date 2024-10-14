@@ -1,10 +1,15 @@
 export const appName = 'Developer Console';
 
-export const LOGIN_PAGES = ['/sign-in', '/sign-up'];
+export const LOGIN_PAGES = ['/sign-in', '/sign-up', '/email-recovery'];
+
+// Just a placeholder for redirection purposes
+export const VALIDATION_PAGES = ['/valid-tzd', '/verify-email'];
 
 export const API_PATH = '/api';
 
 export const UNPROTECTED_PATHS = ['/api/auth'];
+
+export const ROLES = ['Owner', 'Collaborator'];
 
 export const REGIONS = [
   'North America',
@@ -41,9 +46,19 @@ export const RAINBOW_PROJECT = {
   NAME: 'Dimo Developer Console',
 };
 
-export const DC_ADDRESS = '0xE261D618a959aFfFd53168Cd07D12E37B26761db';
-export const DLC_ADDRESS = '0x9A9D2E717bB005B240094ba761Ff074d392C7C85';
+// 80002 - AMOY
+export const CONTRACT_NETWORK = BigInt(80_002);
+
+// DIMO TOKEN AMOY
+export const DC_ADDRESS = '0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10';
+
+// DIMO LICENSE AMOY
+export const DLC_ADDRESS = '0xdb6c0dBbaf48b9D9Bcf5ca3C45cFF3811D70eD96';
 
 export const masFeePerGas = 60000000000;
 export const gasPrice = 43000000000;
 export const desiredAmountOfAllowance = 100;
+
+export const DIMO_CONTRACT_ADDRESS =
+  '0x523d4a08cf149f1Ada8113B3b3400234236Bb5E8';
+

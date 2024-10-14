@@ -1,9 +1,7 @@
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
-
 import { Button } from '@/components/Button';
 import { OnboardingCard } from '@/app/app/components/OnboardingCard';
-import { WalletConnectButton } from '@/components/WalletConnectButton';
 
 export const Onboarding = () => {
   const router = useRouter();
@@ -14,11 +12,6 @@ export const Onboarding = () => {
 
   return (
     <div className="onboarding-steps">
-      <OnboardingCard
-        title="Connect a wallet"
-        description="Click the button to connect a spender wallet and start building."
-        action={<WalletConnectButton />}
-      />
       <OnboardingCard
         title="Create your first application"
         description="Click the button to receive your credentials and access DIMO data in minutes."

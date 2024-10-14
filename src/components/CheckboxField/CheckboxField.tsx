@@ -17,7 +17,7 @@ export const CheckboxField: FC<IProps> = forwardRef<Ref, IProps>(
         ref={ref}
       />
     );
-  }
+  },
 );
 
 CheckboxField.displayName = 'TextField';

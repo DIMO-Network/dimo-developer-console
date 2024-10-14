@@ -1,0 +1,38 @@
+.email-recovery {
+  @apply bg-[url('/images/login-background.png')] bg-cover
+    flex flex-col justify-center
+    h-screen gap-4;
+
+  .email-recovery__header {
+    @apply flex flex-col w-full items-center gap-4 pt-4;
+    p {
+      @apply text-3xl text-center leading-9;
+    }
+  }
+
+  .email-recovery__content {
+    @apply flex flex-col sm:w-1/2 items-center justify-center h-screen shadow-lg gap-10;
+  }
+
+  .email-recovery__timeline {
+    @apply flex flex-col items-center w-full overflow-hidden mt-4;
+    .time-line {
+      @apply w-full h-0.5 bg-gray-300 mt-5 opacity-30 relative;
+    }
+    .steps {
+      @apply flex content-center gap-x-32 mt-3 z-50 absolute;
+      .step {
+        @apply flex flex-col items-center text-center text-white;
+        .step-icon {
+          @apply bg-dark-950 w-16 h-10 justify-center;
+          svg {
+            @apply mr-auto ml-auto;
+          }
+        }
+        p {
+          @apply text-lg opacity-30;
+        }
+      }
+    }
+  }
+}

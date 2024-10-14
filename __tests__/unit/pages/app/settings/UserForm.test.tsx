@@ -12,7 +12,7 @@ describe('UserForm', () => {
           auth: 'github',
           auth_login: 'jhondoe@gmail.com',
         }}
-      />
+      />,
     );
 
     const nameElm = screen.getByRole('user-name-input') as HTMLInputElement;

@@ -16,7 +16,7 @@ export const useNotification = () => {
     message: string,
     title: string,
     type: string,
-    duration = 10000
+    duration = 10000,
   ) => {
     const id = Math.floor(Math.random() * 10000); // Generate a unique ID for the notification
     const newNotification = { id, message, title, type };
