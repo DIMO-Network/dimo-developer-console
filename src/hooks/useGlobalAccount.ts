@@ -16,6 +16,16 @@ import { isEmpty } from 'lodash';
 import configuration from '@/config';
 import { signOut } from 'next-auth/react';
 import { turnkeyConfig } from '@/config/turnkey';
+import { createAccount } from '@turnkey/viem';
+import { Chain, createPublicClient, createWalletClient, http, parseUnits } from 'viem';
+import { ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner } from 'permissionless';
+import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
+import { createKernelAccount, createKernelAccountClient } from '@zerodev/sdk';
+import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
+import { polygon, polygonAmoy } from 'wagmi/chains';
+import { KernelEIP1193Provider } from '@zerodev/wallet';
+import { baseTokenAddresses, createKernelDefiClient } from '@zerodev/defi';
+import config from '@/config';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -192,6 +202,81 @@ export const useGlobalAccount = () => {
     return true;
   };
 
+  const connectWallet = async () => {
+    if (!organizationInfo) return;
+    console.info('Connecting wallet');
+    const { subOrganizationId, walletAddress } = organizationInfo;
+
+    const chain = getChain();
+
+    const stamperClient = new TurnkeyClient(
+      {
+        baseUrl: turnkeyConfig.apiBaseUrl,
+      },
+      passkeyClient!.config.stamper!,
+    );
+
+    const localAccount = await createAccount({
+      client: stamperClient,
+      organizationId: subOrganizationId,
+      signWith: walletAddress,
+      ethereumAddress: walletAddress,
+    });
+
+    const bundleRpc = process.env.NEXT_PUBLIC_BUNDLER_RPC!;
+
+    const smartAccountClient = createWalletClient({
+      account: localAccount,
+      chain: chain,
+      transport: http(bundleRpc)
+    });
+
+    const smartAccountSigner =
+      walletClientToSmartAccountSigner(smartAccountClient);
+
+    const publicClient = createPublicClient({
+      chain: chain,
+      transport: http(bundleRpc),
+    });
+
+    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+      signer: smartAccountSigner,
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+      kernelVersion: KERNEL_V3_1,
+    });
+
+    const zeroDevKernelAccount = await createKernelAccount(publicClient, {
+      plugins: {
+        sudo: ecdsaValidator,
+      },
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+      kernelVersion: KERNEL_V3_1,
+    });
+
+    const kernelClient = createKernelAccountClient({
+      account: zeroDevKernelAccount,
+      chain: chain,
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+      bundlerTransport: http(bundleRpc),
+
+    });
+
+
+    //return new KernelEIP1193Provider(kernelClient);
+
+    //await walletConnectKernelService.connect("wc:b31c3d6762c84ce15d3bf8b0c250d5a6a7ea5188ef09c6e8e25775b45ef6c3cd@2?expiryTimestamp=1728578837&relay-protocol=irn&symKey=65477b960e7430a6591fd3ea70d7f727624150145b2d063e1abcd1bcd28099ea");
+  };
+
+  const getChain = (): Chain => {
+    const { VERCEL_ENV: environment } = process.env;
+
+    if (environment === "production") {
+      return polygon;
+    }
+
+    return polygonAmoy;
+  };
+
   useEffect(() => {
     if (session?.user?.email && !organizationInfo) {
       const { email } = session.user;
@@ -212,6 +297,7 @@ export const useGlobalAccount = () => {
     emailRecovery,
     validCredentials,
     registerNewPasskey,
+    connectWallet
   };
 };
 
