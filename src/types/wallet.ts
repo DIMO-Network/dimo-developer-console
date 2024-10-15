@@ -27,8 +27,8 @@ export interface IEmailAuth {
 export interface ISubOrganization {
   subOrganizationId: string;
   emailVerified: boolean;
-  walletAddress: string;
-  smartContractAddress: string;
+  walletAddress: `0x${string}`;
+  smartContractAddress: `0x${string}`;
   hasPasskey: boolean;
 }
 
@@ -36,4 +36,13 @@ export interface IWallet {
   address: `0x${string}`;
   success: boolean;
   reason?: string;
+}
+
+export interface IDcxPurchaseTransaction {
+  destinationAddress: `0x${string}`;
+  usdAmount: number;
+  maticAmount: string;
+  dcxAmount: string;
+  currency: string;
+  transactionHash: string;
 }
