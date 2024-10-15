@@ -1,41 +1,27 @@
 .home-page {
-  @apply flex flex-col gap-4;
-  padding: 20px;
+  @apply flex flex-col gap-4 p-5;
 
   .welcome-message {
     @apply flex flex-col gap-2;
 
     .title {
-      @apply text-3xl;
-      font-weight: bold;
-      color: #ffffff;
+      @apply text-3xl font-bold text-white;
     }
 
     .sub-message {
-      @apply text-sm;
-      color: #b0b0b0;
+      @apply text-sm text-gray-400;
     }
   }
 
   .onboarding-steps {
-    @apply flex flex-col gap-10;
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #2a2a2a;
-    border-radius: 8px;
-    color: #ffffff;
-    font-size: 16px;
+    @apply flex flex-col gap-10 mt-5 p-5 bg-gray-800 rounded-lg text-white text-lg;
   }
 
   .apps-section {
-    @apply flex flex-col;
-    margin-top: 20px;
+    @apply flex flex-col mt-5;
 
     h4 {
-      font-size: 20px;
-      font-weight: bold;
-      color: #ffffff;
-      margin-bottom: 10px;
+      @apply text-xl font-bold text-white mb-2;
     }
 
     .apps-list {
@@ -43,79 +29,39 @@
     }
 
     .app-item {
-      @apply flex flex-row justify-between items-center;
-      background-color: #3a3a3a;
-      padding: 12px 20px;
-      border-radius: 8px;
-      transition: background-color 0.3s ease;
+      @apply flex flex-row justify-between items-center bg-gray-700 p-3 rounded-lg transition ease-in-out duration-300;
     }
 
     .app-item:hover {
-      background-color: #454545;
+      @apply bg-gray-600;
     }
 
     .app-name-btn {
-      background: none;
-      border: none;
-      font-size: 16px;
-      font-weight: bold;
-      color: #ffffff;
-      cursor: pointer;
-      text-align: left;
-      padding: 0;
-      transition: color 0.2s ease;
+      @apply bg-none border-none text-lg font-bold text-white cursor-pointer text-left p-0 transition ease-in-out duration-200;
     }
 
     .app-name-btn:hover {
-      color: #d0f0ff;
+      @apply text-blue-300;
     }
 
     .app-status {
-      font-size: 14px;
-      color: #888888;
+      @apply text-sm text-gray-400;
     }
 
     .create-new-app-btn {
-      background-color: #d0f0ff;
-      color: #000;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 14px;
-      margin-top: 20px;
-      align-self: flex-start;
-    }
-
-    .create-new-app-btn:hover {
-      background-color: #bdefff;
+      @apply bg-blue-400 text-black px-4 py-2 rounded-full mt-5 self-start cursor-pointer hover:bg-blue-300;
     }
   }
 
   .attention-box {
-    padding: 15px;
-    background-color: #ff6666;
-    border-radius: 8px;
-    color: #ffffff;
-    margin-bottom: 20px;
+    @apply p-4 bg-red-500 rounded-lg text-white mb-5;
 
     .attention-title {
-      font-weight: bold;
+      @apply font-bold;
     }
 
     .get-credits-btn {
-      background-color: #d0f0ff;
-      color: #000;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 14px;
-      margin-top: 10px;
-    }
-
-    .get-credits-btn:hover {
-      background-color: #bdefff;
+      @apply bg-blue-400 text-black px-4 py-2 rounded-full mt-3 cursor-pointer hover:bg-blue-300;
     }
   }
 }
