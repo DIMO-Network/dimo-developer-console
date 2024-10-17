@@ -76,9 +76,7 @@ export const View: FC = () => {
     return (
         <div className="home-page">
             {/* Loading State */}
-            {isLoading || loadingApps ? (
-                <div>Loading...</div>
-            ) : (
+            {(isLoading || loadingApps) && <div>Loading...</div>}
                 <>
                     <div className="erc20-tokens">
                         <h4>Your ERC20 Tokens</h4>
