@@ -2,27 +2,44 @@
 import { FC, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import { TokenBalance } from '@/components/TokenBalance/TokenBalance';
+import { createKernelDefiClient } from '@zerodev/defi';
 import { getMyApps, getMyApp } from '@/services/app';
 import './View.css';
 
 export const View: FC = () => {
-    const { isOnboardingCompleted, isLoading } = useOnboarding(); // Onboarding status
-    const [dcxBalance, setDcxBalance] = useState<number>(0); // Placeholder for DCX balance
+    const { isOnboardingCompleted, isLoading } = useOnboarding();
+    const [erc20Tokens, setErc20Tokens] = useState<Array<{ symbol: string; balance: number }>>([]);
     const [apps, setApps] = useState<Array<{ id: string; name: string; status: string }>>([]);
     const [loadingApps, setLoadingApps] = useState(true);
-    const exchangeRate = 0.001;
     const router = useRouter();
 
-    // Placeholder function for fetching DCX balance
-    const fetchDcxBalance = async () => {
+
+    const kernelClient = '<KERNEL_CLIENT>';
+    const projectId = '<PROJECT_ID>';
+    const defiClient = createKernelDefiClient(kernelClient, projectId);
+
+    const fetchERC20Tokens = async (accountAddress: string, chainId: number) => {
         try {
-            const fetchedBalance = 1000000; // Example hardcoded balance
-            setDcxBalance(fetchedBalance);
+            const accountBalances = await defiClient.listTokenBalances({
+                account: accountAddress,
+                chainId,
+            });
+
+            console.log("Token Balances:", accountBalances);
+
+            // Assuming i need to extract the symbol and balance
+            const tokenData = accountBalances.map(token => ({
+                symbol: token.token.symbol,
+                balance: token.balance,
+            }));
+
+            setErc20Tokens(tokenData);
         } catch (error) {
-            console.error('Error fetching DCX balance:', error);
+            console.error('Error fetching ERC20 token balances:', error);
         }
     };
+
+
 
     const handleAppClick = async (id: string) => {
         try {
@@ -35,24 +52,25 @@ export const View: FC = () => {
 
     useEffect(() => {
         if (isOnboardingCompleted) {
-            const fetchApps = async () => {
+            const fetchAppsAndTokens = async () => {
                 try {
-                    const response = await getMyApps(); // Fetch the user's apps
-                    setApps(response.results); // Use results from the API
+                    const response = await getMyApps();
+                    setApps(response.results);
+
+                    const accountAddress = '<USER_GLOBAL_ACCOUNT_ADDRESS>';
+                    const chainId = 1;
+                    await fetchERC20Tokens(accountAddress, chainId);
                 } catch (error) {
-                    console.error('Error fetching apps:', error);
+                    console.error('Error fetching apps or tokens:', error);
                 } finally {
                     setLoadingApps(false);
                 }
             };
 
-            fetchApps();
-            fetchDcxBalance();
+            fetchAppsAndTokens();
         }
     }, [isOnboardingCompleted]);
 
-    // Helper variables for conditional rendering
-    const hasDCXBalance = dcxBalance > 0;
     const hasApps = apps.length > 0;
 
     return (
@@ -62,6 +80,18 @@ export const View: FC = () => {
                 <div>Loading...</div>
             ) : (
                 <>
+                    <div className="erc20-tokens">
+                        <h4>Your ERC20 Tokens</h4>
+                        <ul>
+                            {erc20Tokens.map((token) => (
+                                <li key={token.symbol}>
+                                    <span>{token.symbol}</span>: <span>{token.balance}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+
                     {/* Scenario 1: No DCX balance, no apps, and onboarding not completed */}
                     {!hasDCXBalance && !hasApps && !isOnboardingCompleted && (
                         <div className="welcome-message">
