@@ -4,15 +4,21 @@ import { useRouter } from 'next/navigation';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { createKernelDefiClient } from '@zerodev/defi';
 import { getMyApps, getMyApp } from '@/services/app';
+import { ethers } from 'ethers';
+import ERC20TokensList from './ERC20TokensList';
+import OnboardingSection from './OnboardingSection';
+import GetStartedSection from './GetStartedSection';
+import AttentionBox from './AttentionBox';
+import AppsList from './AppsList';
+import TokenBalanceComponent from './TokenBalanceComponent';
 import './View.css';
 
 export const View: FC = () => {
     const { isOnboardingCompleted, isLoading } = useOnboarding();
-    const [erc20Tokens, setErc20Tokens] = useState<Array<{ symbol: string; balance: number }>>([]);
+    const [erc20Tokens, setErc20Tokens] = useState<Array<{ symbol: string; balance: string }>>([]);
     const [apps, setApps] = useState<Array<{ id: string; name: string; status: string }>>([]);
     const [loadingApps, setLoadingApps] = useState(true);
     const router = useRouter();
-
 
     const kernelClient = '<KERNEL_CLIENT>';
     const projectId = '<PROJECT_ID>';
@@ -25,12 +31,9 @@ export const View: FC = () => {
                 chainId,
             });
 
-            console.log("Token Balances:", accountBalances);
-
-            // Assuming i need to extract the symbol and balance
             const tokenData = accountBalances.map(token => ({
                 symbol: token.token.symbol,
-                balance: token.balance,
+                balance: ethers.utils.formatUnits(token.balance, token.token.decimals),
             }));
 
             setErc20Tokens(tokenData);
@@ -38,8 +41,6 @@ export const View: FC = () => {
             console.error('Error fetching ERC20 token balances:', error);
         }
     };
-
-
 
     const handleAppClick = async (id: string) => {
         try {
@@ -72,154 +73,60 @@ export const View: FC = () => {
     }, [isOnboardingCompleted]);
 
     const hasApps = apps.length > 0;
+    const hasDCXBalance = erc20Tokens.some(token => token.symbol === 'DCX' && token.balance > 0);
+    const exchangeRate = 0.001;
 
     return (
         <div className="home-page">
-            {/* Loading State */}
-            {(isLoading || loadingApps) && <div>Loading...</div>}
+            {isLoading || loadingApps ? (
+                <div>Loading...</div>
+            ) : (
                 <>
-                    <div className="erc20-tokens">
-                        <h4>Your ERC20 Tokens</h4>
-                        <ul>
-                            {erc20Tokens.map((token) => (
-                                <li key={token.symbol}>
-                                    <span>{token.symbol}</span>: <span>{token.balance}</span>
-                                </li>
-                            ))}
-                        </ul>
+                    {/* Display ERC20 Tokens */}
+                    <ERC20TokensList tokens={erc20Tokens} />
+
+                    {/* Welcome Message */}
+                    <div className="welcome-message">
+                        <p className="title">Welcome to DIMO Developer Console</p>
+                        <p className="sub-message">
+                            {hasDCXBalance && !hasApps
+                                ? "You have credits! Now it's time to create your first application."
+                                : "Learn how to get started with the DIMO API"}
+                        </p>
                     </div>
 
-
-                    {/* Scenario 1: No DCX balance, no apps, and onboarding not completed */}
-                    {!hasDCXBalance && !hasApps && !isOnboardingCompleted && (
-                        <div className="welcome-message">
-                            <p className="title">Welcome to DIMO Developer Console</p>
-                            <p className="sub-message">
-                                Learn how to get started with the{' '}
-                                <span className="text-primary-200">DIMO API</span>
-                            </p>
-
-                            <div className="onboarding-section">
-                                <h3>What are DIMO Credits (DCX)?</h3>
-                                <p>
-                                    DCX is a stablecoin that's pegged to one-tenth of a cent (0.001 USD),
-                                    and is essential for all developers building on DIMO. For DIMO protocol fees,
-                                    spending DCX or $DIMO is required.
-                                </p>
-                            </div>
-
-                            <div className="get-started-section">
-                                <h4>How to get started</h4>
-                                <div className="get-started-options">
-                                    <div className="option">
-                                        <p>Purchase DCX</p>
-                                        <button className="purchase-dcx-btn">Purchase DCX</button>
-                                    </div>
-                                    <div className="option">
-                                        <p>Create an application</p>
-                                        <button className="create-app-btn">Create an App</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    {/* Scenario 1: No DCX balance, no apps created */}
+                    {!hasDCXBalance && !hasApps && (
+                        <>
+                            <OnboardingSection />
+                            <GetStartedSection />
+                        </>
                     )}
 
                     {/* Scenario 2: DCX balance > 0, no apps created */}
                     {hasDCXBalance && !hasApps && (
-                        <div className="welcome-message">
-                            <p className="title">Welcome to DIMO Developer Console</p>
-                            <p className="sub-message">
-                                You have credits! Now it's time to{' '}
-                                <span className="text-primary-200">create your first application</span>.
-                            </p>
-
-                            <TokenBalance
-                                token="dcx"
-                                balance={dcxBalance}
-                                exchangeRate={exchangeRate}
-                                canBuy={true}
-                            />
-
-                            <div className="get-started-section">
-                                <h4>How to get started</h4>
-                                <div className="get-started-options">
-                                    <div className="option">
-                                        <p>Purchase DCX</p>
-                                        <span className="checkmark">✔</span>
-                                    </div>
-                                    <div className="option">
-                                        <p>Create an application</p>
-                                        <button className="create-app-btn">Create an App</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <>
+                            <GetStartedSection />
+                        </>
                     )}
 
                     {/* Scenario 3: Apps created, but DCX balance = 0 */}
                     {!hasDCXBalance && hasApps && (
-                        <div className="welcome-message">
-                            <p className="title">Welcome to DIMO Developer Console</p>
-
-                            <div className="attention-box">
-                                <p className="attention-text">
-                                    <span className="attention-title">Attention required:</span> Your developer
-                                    account needs DCX to function properly. Please purchase more DCX to avoid service
-                                    interruptions.
-                                </p>
-                                <button className="get-credits-btn">Get Credits</button>
-                            </div>
-
-                            <div className="apps-section">
-                                <h4>Your applications</h4>
-                                <div className="apps-list">
-                                    {apps.map((app) => (
-                                        <div key={app.id} className="app-item">
-                                            <button
-                                                className="app-name-btn"
-                                                onClick={() => handleAppClick(app.id)}
-                                            >
-                                                {app.name}
-                                            </button>
-                                            <span className="app-status">{app.status}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                <button className="create-new-app-btn">+ Create new</button>
-                            </div>
-                        </div>
+                        <>
+                            <AttentionBox />
+                            <AppsList apps={apps} onAppClick={handleAppClick} />
+                        </>
                     )}
 
                     {/* Scenario 4: Apps created, DCX balance > 0 */}
                     {hasDCXBalance && hasApps && (
-                        <div className="welcome-message">
-                            <p className="title">Welcome to DIMO Developer Console</p>
-
-                            <TokenBalance
-                                token="dcx"
-                                balance={dcxBalance}
+                        <>
+                            <AppsList apps={apps} onAppClick={handleAppClick} />
+                            <TokenBalanceComponent
+                                balance={erc20Tokens.find(token => token.symbol === 'DCX')?.balance ?? '0'}
                                 exchangeRate={exchangeRate}
-                                canBuy={true}
                             />
-
-                            <div className="apps-section">
-                                <h4>Your applications</h4>
-                                <div className="apps-list">
-                                    {apps.map((app) => (
-                                        <div key={app.id} className="app-item">
-                                            <button
-                                                className="app-name-btn"
-                                                onClick={() => handleAppClick(app.id)}
-                                            >
-                                                {app.name}
-                                            </button>
-                                            <span className="app-status">{app.status}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                <button className="create-new-app-btn">+ Create new</button>
-                            </div>
-                        </div>
+                        </>
                     )}
                 </>
             )}
