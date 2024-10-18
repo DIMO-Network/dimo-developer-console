@@ -2,20 +2,39 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
+import { useSession } from 'next-auth/react';
+import { IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
+import { useRouter } from 'next/navigation';
+import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
+import { isEmpty } from 'lodash';
+import { signOut } from 'next-auth/react';
+import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
+import { createKernelAccount, createKernelAccountClient } from '@zerodev/sdk';
+import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
+import {
+  walletClientToSmartAccountSigner,
+  ENTRYPOINT_ADDRESS_V07,
+} from 'permissionless';
+import { http } from 'wagmi';
+import { type Chain, polygon, polygonAmoy } from 'wagmi/chains';
+import { createAccount } from '@turnkey/viem';
+import {
+  createWalletClient,
+  createPublicClient,
+  type PublicClient,
+} from 'viem';
+
 import {
   createSubOrganization,
   getUserSubOrganization,
   rewirePasskey,
   startEmailRecovery,
 } from '@/services/globalAccount';
-import { useSession } from 'next-auth/react';
-import { IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
-import { useRouter } from 'next/navigation';
-import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
-import { isEmpty } from 'lodash';
-import configuration from '@/config';
-import { signOut } from 'next-auth/react';
 import { turnkeyConfig } from '@/config/turnkey';
+
+import configuration from '@/config';
+
+const BUNDLE_RPC = process.env.NEXT_PUBLIC_BUNDLER_RPC!;
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -192,6 +211,77 @@ export const useGlobalAccount = () => {
     return true;
   };
 
+  const getChain = (): Chain => {
+    const { VERCEL_ENV: environment } = process.env;
+
+    if (environment === 'production') {
+      return polygon;
+    }
+
+    return polygonAmoy;
+  };
+
+  const connectWallet = async () => {
+    if (!organizationInfo) return;
+
+    const { subOrganizationId, walletAddress } = organizationInfo;
+    const chain = getChain();
+
+    const stamperClient = new TurnkeyClient(
+      { baseUrl: turnkeyConfig.apiBaseUrl },
+      passkeyClient!.config.stamper!,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any;
+
+    const localAccount = await createAccount({
+      client: stamperClient,
+      organizationId: subOrganizationId,
+      signWith: walletAddress,
+      ethereumAddress: walletAddress,
+    });
+
+    const smartAccountClient = createWalletClient({
+      account: localAccount,
+      chain: chain,
+      transport: http(BUNDLE_RPC),
+    });
+
+    const smartAccountSigner =
+      walletClientToSmartAccountSigner(smartAccountClient);
+
+    const publicClient = createPublicClient({
+      chain: chain,
+      transport: http(BUNDLE_RPC),
+    }) as PublicClient;
+
+    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+      signer: smartAccountSigner,
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+      kernelVersion: KERNEL_V3_1,
+    });
+
+    const zeroDevKernelAccount = await createKernelAccount(publicClient, {
+      plugins: {
+        sudo: ecdsaValidator,
+      },
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+      kernelVersion: KERNEL_V3_1,
+    });
+
+    const kernelClient = createKernelAccountClient({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      account: zeroDevKernelAccount as any,
+      chain: chain,
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+      bundlerTransport: http(BUNDLE_RPC),
+    });
+
+    return {
+      kernelClient,
+      publicClient,
+    };
+  };
+
   useEffect(() => {
     if (session?.user?.email && !organizationInfo) {
       const { email } = session.user;
@@ -212,6 +302,7 @@ export const useGlobalAccount = () => {
     emailRecovery,
     validCredentials,
     registerNewPasskey,
+    connectWallet,
   };
 };
 

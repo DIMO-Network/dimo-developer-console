@@ -20,7 +20,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { SpendingLimitModal } from '@/components/SpendingLimitModal';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContract } from '@/hooks';
+import { useContractGA } from '@/hooks';
 
 import configuration from '@/config';
 
@@ -38,7 +38,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { dimoLicenseContract, hasEnoughSpendingLimit } = useContract();
+  const { licenseContract, hasEnoughSpendingLimit } = useContractGA();
   const { address } = useAccount();
   const router = useRouter();
   const {
@@ -62,7 +62,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
     if (isOnboardingCompleted && workspace) return workspace;
-    if (!dimoLicenseContract) throw new Error('Web3 connection failed');
+    if (!licenseContract) throw new Error('Web3 connection failed');
 
     const workspaceName = String(
       utils.fromAscii(workspaceData?.name ?? ''),
@@ -74,7 +74,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
           returnValues: { clientId = '', owner = '', tokenId = 0 } = {},
         } = {},
       } = {},
-    } = await dimoLicenseContract.methods['0x77a5b102'](workspaceName).send({
+    } = await licenseContract.methods['0x77a5b102'](workspaceName).send({
       from: address,
       gas: String(ISSUE_IN_DIMO_GAS),
       maxFeePerGas: String(configuration.masFeePerGas),
