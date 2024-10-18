@@ -12,7 +12,7 @@ import { IApp, ISigner } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { TeamRoles } from '@/types/team';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
 import { useSession } from 'next-auth/react';
 
 import configuration from '@/config';
@@ -28,7 +28,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, dimoLicenseContract } = useContract();
+  const { address, licenseContract } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
@@ -37,10 +37,10 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   };
 
   const handleDisableSigner = async (signer: string) => {
-    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+    if (!isOnboardingCompleted && !licenseContract && !workspace)
       throw new Error('Web3 connection failed');
     await changeNetwork();
-    await dimoLicenseContract?.methods['0xde9cc84d'](
+    await licenseContract?.methods['0xde9cc84d'](
       workspace?.token_id ?? 0,
       signer,
     ).send({

@@ -12,7 +12,7 @@ import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
 
 import configuration from '@/config';
 
@@ -33,7 +33,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, dimoLicenseContract } = useContract();
+  const { address, licenseContract } = useContractGA();
   const {
     formState: { errors },
     handleSubmit,
@@ -45,10 +45,10 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   });
 
   const handleSetDomain = async (uri: string) => {
-    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+    if (!isOnboardingCompleted && !licenseContract && !workspace)
       throw new Error('Web3 connection failed');
     await changeNetwork();
-    await dimoLicenseContract?.methods['0xba1bedfc'](
+    await licenseContract?.methods['0xba1bedfc'](
       workspace?.token_id ?? 0,
       true,
       uri,
