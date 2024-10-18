@@ -1,19 +1,21 @@
-import React from 'react';
-import TokenBalance from '@/components/TokenBalance/TokenBalance';
+import { FC } from 'react';
+import { Card } from '@/components/Card';
+import { Title } from '@/components/Title';
 
-interface TokenBalanceComponentProps {
+interface Props {
     balance: string;
     exchangeRate: number;
 }
 
-const TokenBalanceComponent: React.FC<TokenBalanceComponentProps> = ({ balance, exchangeRate }) => {
+const TokenBalanceComponent: FC<Props> = ({ balance, exchangeRate }) => {
     return (
-        <TokenBalance
-            token="dcx"
-            balance={balance}
-            exchangeRate={exchangeRate}
-            canBuy={true}
-        />
+        <Card className="token-balance-card">
+            <Title component="h3" className="text-lg">
+                Your Token Balance
+            </Title>
+            <p>{balance} DCX</p>
+            <p>USD Equivalent: {(parseFloat(balance) * exchangeRate).toFixed(2)} USD</p>
+        </Card>
     );
 };
 

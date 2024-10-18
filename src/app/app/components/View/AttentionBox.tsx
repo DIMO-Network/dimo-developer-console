@@ -1,15 +1,20 @@
-import React from 'react';
+import { FC } from 'react';
+import { Card } from '@/components/Card';
+import { Title } from '@/components/Title';
+import { Button } from '@/components/Button';
 
-const AttentionBox: React.FC = () => {
+const AttentionBox: FC = () => {
     return (
-        <div className="attention-box">
-            <p className="attention-text">
-                <span className="attention-title">Attention required:</span> Your
-                developer account needs DCX to function properly. Please purchase more DCX
-                to avoid service interruptions.
+        <Card className="attention-card">
+            <Title component="h3" className="text-lg text-red-500">
+                Attention Required
+            </Title>
+            <p>
+                Your developer account needs DCX to function properly. Please purchase
+                more DCX to avoid service interruptions.
             </p>
-            <button className="get-credits-btn">Get Credits</button>
-        </div>
+            <Button className="get-credits-button">Get Credits</Button>
+        </Card>
     );
 };
 

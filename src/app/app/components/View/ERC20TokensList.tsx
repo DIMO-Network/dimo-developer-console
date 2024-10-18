@@ -1,20 +1,33 @@
-import React from 'react';
+import { FC } from 'react';
+import { Card } from '@/components/Card';
+import { Title } from '@/components/Title';
 
-interface ERC20TokensListProps {
-    tokens: Array<{ symbol: string; balance: string }>;
+interface Token {
+    symbol: string;
+    balance: string;
 }
 
-const ERC20TokensList: React.FC<ERC20TokensListProps> = ({ tokens }) => {
+interface Props {
+    tokens: Token[];
+}
+
+const ERC20TokensList: FC<Props> = ({ tokens }) => {
     return (
-        <div className="erc20-tokens">
-            <h4>Your ERC20 Tokens</h4>
-            <ul>
-                {tokens.map((token) => (
-                    <li key={token.symbol}>
-                        <span>{token.symbol}</span>: <span>{token.balance}</span>
-                    </li>
-                ))}
-            </ul>
+        <div>
+            <Title component="h2" className="text-lg">
+                Your ERC20 Tokens
+            </Title>
+            {tokens.length > 0 ? (
+                <div className="token-list">
+                    {tokens.map((token) => (
+                        <Card key={token.symbol} className="token-card">
+                            <p>{token.symbol}: {token.balance}</p>
+                        </Card>
+                    ))}
+                </div>
+            ) : (
+                <p>No ERC20 tokens found.</p>
+            )}
         </div>
     );
 };
