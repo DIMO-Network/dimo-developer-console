@@ -19,7 +19,7 @@ export const PaymentMethod: FC<IProps> = ({
   className = '',
   Icon,
   selected = false,
-  onClick = () => {},
+  onClick = () => { },
 }) => {
   return (
     <Card

@@ -18,7 +18,7 @@ import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriLi
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { TeamRoles } from '@/types/team';
 import { Title } from '@/components/Title';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
 
 import configuration from '@/config';
 
@@ -33,7 +33,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
   const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, dimoLicenseContract } = useContract();
+  const { address, licenseContract } = useContractGA();
   const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => refreshAppDetails(), []);
@@ -46,10 +46,10 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   };
 
   const handleEnableSigner = async (signer: string) => {
-    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+    if (!isOnboardingCompleted && !licenseContract && !workspace)
       throw new Error('Web3 connection failed');
     await changeNetwork();
-    await dimoLicenseContract?.methods['0x3b1c393b'](
+    await licenseContract?.methods['0x3b1c393b'](
       workspace?.token_id ?? 0,
       signer,
     ).send({

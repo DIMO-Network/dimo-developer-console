@@ -12,7 +12,7 @@ import { Modal } from '@/components/Modal';
 import { NotificationContext } from '@/context/notificationContext';
 import { Title } from '@/components/Title';
 import { TokenInput } from '@/components/TokenInput';
-import { useContract } from '@/hooks';
+import { useContractGA } from '@/hooks';
 
 import configuration from '@/config';
 
@@ -31,11 +31,11 @@ interface IProps {
 export const SpendingLimitModal: FC<IProps> = ({
   isOpen,
   setIsOpen,
-  onSubmit = () => {},
+  onSubmit = () => { },
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { dimoContract, address } = useContract();
+  const { dimoContract, address } = useContractGA();
   const { control, handleSubmit, getValues } = useForm<IForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',

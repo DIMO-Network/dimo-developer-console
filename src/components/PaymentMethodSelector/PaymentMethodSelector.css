@@ -1,3 +1,11 @@
 .payment-method-selector {
   @apply flex flex-col gap-2;
+
+  .payment-method {
+    @apply border-dashed;
+  }
+
+  .selected {
+    @apply bg-dark-grey-950 border-solid border-primary-500;
+  }
 }

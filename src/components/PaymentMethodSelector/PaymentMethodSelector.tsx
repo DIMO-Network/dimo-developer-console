@@ -1,13 +1,12 @@
 import { forwardRef, type FC } from 'react';
-import { useAccount } from 'wagmi';
 import { Control, Controller } from 'react-hook-form';
 
 import { IconProps, WalletIcon } from '@/components/Icons';
 import { PaymentMethod } from '@/components/PaymentMethodSelector/PaymentMethod';
 import { PlusIcon } from '@heroicons/react/24/solid';
-import { shortenAddress } from '@/utils/user';
 
 import './PaymentMethodSelector.css';
+import classNames from 'classnames';
 
 interface IProps {
   name: string;
@@ -21,7 +20,6 @@ export type Ref = HTMLInputElement;
 export const PaymentMethodSelector: FC<IProps> = forwardRef<Ref, IProps>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ({ name, control }, _ref) => {
-    const { address, isConnected } = useAccount();
 
     return (
       <Controller
@@ -30,20 +28,22 @@ export const PaymentMethodSelector: FC<IProps> = forwardRef<Ref, IProps>(
         render={({ field: { onChange, value: currentValue } }) => {
           return (
             <div className="payment-method-selector">
-              {isConnected && (
-                <PaymentMethod
-                  className="bg-dark-grey-950"
-                  selected={currentValue?.type === 'wallet'}
-                  method={shortenAddress(address as string)}
-                  Icon={WalletIcon}
-                  onClick={() => {
-                    onChange({ type: 'wallet', id: address });
-                  }}
-                />
-              )}
               <PaymentMethod
-                className="border-dashed"
-                method="Add a card"
+                className={classNames('payment-method', { selected: currentValue?.type === 'wallet' })}
+                selected={currentValue?.type === 'wallet'}
+                method="Buy with DIMO"
+                Icon={WalletIcon}
+                onClick={() => {
+                  onChange({ type: 'wallet' });
+                }}
+              />
+              <PaymentMethod
+                className={classNames('payment-method', { selected: currentValue?.type === 'usd' })}
+                selected={currentValue?.type === 'usd'}
+                method="Buy with USD"
+                onClick={() => {
+                  onChange({ type: 'usd' });
+                }}
                 Icon={PlusIcon as FC<IconProps>}
               />
             </div>
