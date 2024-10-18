@@ -1,20 +1,19 @@
-import React from 'react';
+import { FC } from 'react';
+import { Card } from '@/components/Card';
+import { Title } from '@/components/Title';
+import { Button } from '@/components/Button';
 
-const GetStartedSection: React.FC = () => {
+const GetStartedSection: FC = () => {
     return (
-        <div className="get-started-section">
-            <h4>How to get started</h4>
+        <Card className="get-started-card">
+            <Title component="h3" className="text-lg">
+                How to Get Started
+            </Title>
             <div className="get-started-options">
-                <div className="option">
-                    <p>Purchase DCX</p>
-                    <button className="purchase-dcx-btn">Purchase DCX</button>
-                </div>
-                <div className="option">
-                    <p>Create an application</p>
-                    <button className="create-app-btn">Create an App</button>
-                </div>
+                <Button className="create-app-button">Create an App</Button>
+                <Button className="purchase-dcx-button">Purchase DCX</Button>
             </div>
-        </div>
+        </Card>
     );
 };
 

@@ -1,28 +1,38 @@
-import React from 'react';
+import { FC } from 'react';
+import { Card } from '@/components/Card';
+import { Title } from '@/components/Title';
+import { Button } from '@/components/Button';
 
-interface AppsListProps {
-    apps: Array<{ id: string; name: string; status: string }>;
+interface App {
+    id: string;
+    name: string;
+    status: string;
+}
+
+interface Props {
+    apps: App[];
     onAppClick: (id: string) => void;
 }
 
-const AppsList: React.FC<AppsListProps> = ({ apps, onAppClick }) => {
+const AppsList: FC<Props> = ({ apps, onAppClick }) => {
     return (
-        <div className="apps-section">
-            <h4>Your applications</h4>
-            <div className="apps-list">
-                {apps.map((app) => (
-                    <div key={app.id} className="app-item">
-                        <button
-                            className="app-name-btn"
-                            onClick={() => onAppClick(app.id)}
-                        >
-                            {app.name}
-                        </button>
-                        <span className="app-status">{app.status}</span>
-                    </div>
-                ))}
-            </div>
-            <button className="create-new-app-btn">+ Create new</button>
+        <div>
+            <Title component="h2" className="text-lg">
+                Your Applications
+            </Title>
+            {apps.length > 0 ? (
+                <div className="app-list">
+                    {apps.map((app) => (
+                        <Card key={app.id} className="app-card">
+                            <p>{app.name}</p>
+                            <p>{app.status}</p>
+                            <Button onClick={() => onAppClick(app.id)}>View App</Button>
+                        </Card>
+                    ))}
+                </div>
+            ) : (
+                <p>No applications found.</p>
+            )}
         </div>
     );
 };
