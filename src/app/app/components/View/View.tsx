@@ -11,6 +11,11 @@ import GetStartedSection from './GetStartedSection';
 import AttentionBox from './AttentionBox';
 import AppsList from './AppsList';
 import TokenBalanceComponent from './TokenBalanceComponent';
+import { createKernelAccountClient } from "@zerodev/sdk";
+import { http } from "viem";
+import { polygonAmoy } from 'viem/chains';
+import { ENTRYPOINT_ADDRESS_V07 } from "permissionless";
+import { createKernelAccount } from "@zerodev/sdk";
 import './View.css';
 
 export const View: FC = () => {
@@ -19,8 +24,23 @@ export const View: FC = () => {
     const [apps, setApps] = useState<Array<{ id: string; name: string; status: string }>>([]);
     const [loadingApps, setLoadingApps] = useState(true);
     const router = useRouter();
+    const entryPoint = ENTRYPOINT_ADDRESS_V07;
 
-    const kernelClient = '<KERNEL_CLIENT>';
+
+    const account = createKernelAccount(publicClient);
+
+    const kernelClient = createKernelAccountClient({
+        account,
+        entryPoint,
+
+        chain: polygonAmoy,
+
+        // Replace with your bundler RPC.
+        // For ZeroDev, you can find the RPC on your dashboard.
+        bundlerTransport: http('BUNDLER_RPC'),
+
+    });
+
     const projectId = '<PROJECT_ID>';
     const defiClient = createKernelDefiClient(kernelClient, projectId);
 
