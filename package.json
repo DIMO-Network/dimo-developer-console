@@ -15,6 +15,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@dimo-network/transactions": "^0.1.32",
     "@headlessui/react": "^2.1.8",
     "@heroicons/react": "^2.1.5",
     "@maticnetwork/maticjs": "^3.9.2",
