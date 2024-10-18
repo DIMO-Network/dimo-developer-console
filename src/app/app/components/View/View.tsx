@@ -1,59 +1,74 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createPublicClient } from 'viem';
+import { ContractType } from '@dimo-network/transactions';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import { createKernelDefiClient } from '@zerodev/defi';
 import { getMyApps, getMyApp } from '@/services/app';
-import { ethers } from 'ethers';
 import ERC20TokensList from './ERC20TokensList';
 import OnboardingSection from './OnboardingSection';
 import GetStartedSection from './GetStartedSection';
 import AttentionBox from './AttentionBox';
 import AppsList from './AppsList';
 import TokenBalanceComponent from './TokenBalanceComponent';
-import { createKernelAccountClient } from "@zerodev/sdk";
-import { http } from "viem";
-import { polygonAmoy } from 'viem/chains';
-import { ENTRYPOINT_ADDRESS_V07 } from "permissionless";
-import { createKernelAccount } from "@zerodev/sdk";
 import './View.css';
+import * as http from "http";
+import {polygonAmoy} from "viem/chains";
 
 export const View: FC = () => {
     const { isOnboardingCompleted, isLoading } = useOnboarding();
     const [erc20Tokens, setErc20Tokens] = useState<Array<{ symbol: string; balance: string }>>([]);
     const [apps, setApps] = useState<Array<{ id: string; name: string; status: string }>>([]);
     const [loadingApps, setLoadingApps] = useState(true);
+    const [dimoBalance, setDimoBalance] = useState<string>('0');
     const router = useRouter();
-    const entryPoint = ENTRYPOINT_ADDRESS_V07;
 
-
-    const account = createKernelAccount(publicClient);
-
-    const kernelClient = createKernelAccountClient({
-        account,
-        entryPoint,
-
+    // Create the public client (RPC)
+    const publicClient = createPublicClient({
+        transport: http('https://rpc.zerodev.app/api/v2/bundler/f4d1596a-edfd-4063-8f99-2d8835e07739'),
         chain: polygonAmoy,
-
-        // Replace with your bundler RPC.
-        // For ZeroDev, you can find the RPC on your dashboard.
-        bundlerTransport: http('BUNDLER_RPC'),
-
     });
 
-    const projectId = '<PROJECT_ID>';
-    const defiClient = createKernelDefiClient(kernelClient, projectId);
 
-    const fetchERC20Tokens = async (accountAddress: string, chainId: number) => {
+    // Contract mapping for DIMO token
+    const contractMapping = {
+        [ContractType.DIMO_TOKEN]: {
+            address: '0xDIMO_TOKEN_CONTRACT_ADDRESS',
+            abi: [],
+        },
+    };
+
+    // Function to fetch DIMO balance using `balanceOf`
+    const fetchDimoBalance = async (userAddress: string) => {
         try {
-            const accountBalances = await defiClient.listTokenBalances({
-                account: accountAddress,
-                chainId,
+            // Read directly from contract using publicClient
+            const balance = await publicClient.readContract({
+                address: contractMapping[ContractType.DIMO_TOKEN].address,
+                abi: contractMapping[ContractType.DIMO_TOKEN].abi,
+                functionName: 'balanceOf',
+                args: [userAddress],
+            });
+
+            setDimoBalance(balance);
+        } catch (error) {
+            console.error('Error fetching DIMO balance:', error);
+        }
+    };
+
+
+
+    const fetchERC20Tokens = async (accountAddress: string) => {
+        try {
+            const accountBalances = await publicClient.readContract({
+                address: contractMapping[ContractType.DIMO_TOKEN].address,
+                abi: contractMapping[ContractType.DIMO_TOKEN].abi,
+                functionName: 'balanceOf',
+                args: [accountAddress],
             });
 
             const tokenData = accountBalances.map(token => ({
                 symbol: token.token.symbol,
-                balance: ethers.utils.formatUnits(token.balance, token.token.decimals),
+                balance: token.balance,
             }));
 
             setErc20Tokens(tokenData);
@@ -79,8 +94,10 @@ export const View: FC = () => {
                     setApps(response.results);
 
                     const accountAddress = '<USER_GLOBAL_ACCOUNT_ADDRESS>';
-                    const chainId = 1;
-                    await fetchERC20Tokens(accountAddress, chainId);
+                    await fetchERC20Tokens(accountAddress);
+
+                    // Fetch DIMO balance for the same account
+                    await fetchDimoBalance(accountAddress);
                 } catch (error) {
                     console.error('Error fetching apps or tokens:', error);
                 } finally {
@@ -104,6 +121,12 @@ export const View: FC = () => {
                 <>
                     {/* Display ERC20 Tokens */}
                     <ERC20TokensList tokens={erc20Tokens} />
+
+                    {/* Display DIMO Balance */}
+                    <div className="dimo-balance">
+                        <h4>Your DIMO Token Balance</h4>
+                        <p>{dimoBalance} DIMO</p>
+                    </div>
 
                     {/* Welcome Message */}
                     <div className="welcome-message">
