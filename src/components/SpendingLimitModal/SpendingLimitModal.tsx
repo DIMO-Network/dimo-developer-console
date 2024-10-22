@@ -7,7 +7,6 @@ import { useForm } from 'react-hook-form';
 import { utils } from 'web3';
 
 import { Button } from '@/components/Button';
-import { changeNetwork } from '@/utils/contract';
 import { Modal } from '@/components/Modal';
 import { NotificationContext } from '@/context/notificationContext';
 import { Title } from '@/components/Title';

@@ -38,7 +38,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { licenseContract, hasEnoughSpendingLimit } = useContractGA();
+  const { licenseContract, hasEnoughAllowanceDLC } = useContractGA();
   const { address } = useAccount();
   const router = useRouter();
   const {
@@ -53,7 +53,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
   });
 
   const onSubmit = () => {
-    if (hasEnoughSpendingLimit) {
+    if (hasEnoughAllowanceDLC) {
       handleCreateApp();
     } else {
       setIsOpenedCreditsModal(true);
