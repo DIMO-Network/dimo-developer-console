@@ -53,12 +53,12 @@ export const CONTRACT_NETWORK = BigInt(80_002);
 export const DC_ADDRESS = '0xE261D618a959aFfFd53168Cd07D12E37B26761db'.toLowerCase();
 
 // DIMO LICENSE AMOY
-export const DLC_ADDRESS = '0xaa32a9e74486dd136ccedf17061fe4efc95a621e'.toLowerCase();
+export const DLC_ADDRESS = '0x9A9D2E717bB005B240094ba761Ff074d392C7C85'.toLowerCase();
 
 export const masFeePerGas = 60000000000;
 export const gasPrice = 43000000000;
 export const desiredAmountOfAllowance = 100;
 
-export const DIMO_CONTRACT_ADDRESS =
-  '0x523d4a08cf149f1Ada8113B3b3400234236Bb5E8'.toLowerCase();
+export const DIMO_CREDITS_CONTRACT_ADDRESS =
+  '0x7186F9aC35d24c9a4cf1E58a797c04DF1b334322'.toLowerCase();
 

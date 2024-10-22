@@ -17,6 +17,7 @@ import { PaymentMethodSelector } from '../PaymentMethodSelector';
 import configuration from '@/config';
 
 import './BuyCreditsModal.css';
+import { SpendingLimitModal } from '../SpendingLimitModal';
 
 const {
   NEXT_PUBLIC_API_KEY: nextPublicApiKey,
@@ -38,8 +39,9 @@ interface IProps { }
 
 export const BuyCreditsModal: FC<IProps> = () => {
   const { isOpen, setIsOpen } = useContext(CreditsContext);
-  const { dimoContract, address } = useContractGA();
+  const { dimoCreditsContract, hasEnoughAllowanceDCX, allowanceDCX } = useContractGA();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [allowedCredits, setAllowedCredits] = useState(allowanceDCX);
   const { setNotification } = useContext(NotificationContext);
   const { control, watch, getValues } = useForm<IForm>({
     mode: 'onChange',
@@ -62,16 +64,10 @@ export const BuyCreditsModal: FC<IProps> = () => {
   const burnDimo = async () => {
     try {
       setIsLoading(true);
-      if (dimoContract) {
+      if (dimoCreditsContract) {
         const { credits } = getValues();
         const dimoInWei = utils.toWei(credits, 'ether');
-        await dimoContract.methods
-          .mintInDimo(configuration.DLC_ADDRESS, dimoInWei)
-          .send({
-            from: address,
-            maxFeePerGas: String(configuration.gasPrice),
-            maxPriorityFeePerGas: String(configuration.gasPrice),
-          });
+        await dimoCreditsContract.write['0xec88fc37']([configuration.DLC_ADDRESS, dimoInWei]);
         setIsOpen(false);
       }
     } catch (error: unknown) {
@@ -99,61 +95,73 @@ export const BuyCreditsModal: FC<IProps> = () => {
     burnDimo();
   };
 
+  const handleChangeSpendingLimit = (credits: number) => {
+    setAllowedCredits(credits);
+  };
+
   return (
-    <Modal isOpen={isOpen} setIsOpen={handleClose} className="buy-credits-modal">
-      {!showIframe ? (
-        <div className="buy-credits-content">
-          <div className="buy-credits-header">
-            <Title className="text-2xl" component="h3">
-              Buy DCX
-            </Title>
-            <p className="description">
-              DCX, also known as DIMO Credits, is a stable token in the DIMO
-              ecosystem for the builders. All DCX purchases uses the DIMO Token
-              as medium.
-            </p>
+    <>
+      <SpendingLimitModal
+        isOpen={isOpen && !hasEnoughAllowanceDCX && allowanceDCX === 0}
+        setIsOpen={handleClose}
+        onSubmit={handleChangeSpendingLimit}
+        addressToAllow={configuration.DIMO_CREDITS_CONTRACT_ADDRESS}
+      />
+      <Modal isOpen={isOpen && (allowedCredits > 0 || hasEnoughAllowanceDCX)} setIsOpen={handleClose} className="buy-credits-modal">
+        {!showIframe ? (
+          <div className="buy-credits-content">
+            <div className="buy-credits-header">
+              <Title className="text-2xl" component="h3">
+                Buy DCX
+              </Title>
+              <p className="description">
+                DCX, also known as DIMO Credits, is a stable token in the DIMO
+                ecosystem for the builders. All DCX purchases uses the DIMO Token
+                as medium.
+              </p>
+            </div>
+            <TokenInput
+              control={control}
+              name="credits"
+              suggestions={[
+                { label: '10k', value: 10000 },
+                { label: '100k', value: 100000 },
+                { label: '500k', value: 500000 },
+                { label: '1M', value: 1000000 },
+              ]}
+            />
+            <div style={{ textAlign: 'center', margin: '10px 0' }}>
+              <p>1 DCX = $0.01 USD</p>
+              <p>1 DIMO = $0.20 USD</p>
+            </div>
+            <div className="credit-total-content">
+              <p className="total-descriptor">Your total</p>
+              <p className="total-value">$ {credits * 0.001}</p>
+            </div>
+            <div className="payment-method-container">
+              <p className="payment-descriptor">Payment method</p>
+              <PaymentMethodSelector name="paymentMethod" control={control} />
+            </div>
+            <div className="credit-action">
+              <Button
+                className="primary !h-9"
+                onClick={() => handleBuyDCX()}
+                loading={isLoading}
+              >
+                Buy DCX
+              </Button>
+            </div>
           </div>
-          <TokenInput
-            control={control}
-            name="credits"
-            suggestions={[
-              { label: '10k', value: 10000 },
-              { label: '100k', value: 100000 },
-              { label: '500k', value: 500000 },
-              { label: '1M', value: 1000000 },
-            ]}
+        ) : (
+          <iframe
+            src={ALCHEMY_IFRAME_URL}
+            title="AlchemyPay On/Off Ramp Widget"
+            style={{ width: '100%', height: '600px', border: 'none' }}
+            allow="payment"
           />
-          <div style={{ textAlign: 'center', margin: '10px 0' }}>
-            <p>1 DCX = $0.01 USD</p>
-            <p>1 DIMO = $0.20 USD</p>
-          </div>
-          <div className="credit-total-content">
-            <p className="total-descriptor">Your total</p>
-            <p className="total-value">$ {credits * 0.001}</p>
-          </div>
-          <div className="payment-method-container">
-            <p className="payment-descriptor">Payment method</p>
-            <PaymentMethodSelector name="paymentMethod" control={control} />
-          </div>
-          <div className="credit-action">
-            <Button
-              className="primary !h-9"
-              onClick={() => handleBuyDCX()}
-              loading={isLoading}
-            >
-              Buy DCX
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <iframe
-          src={ALCHEMY_IFRAME_URL}
-          title="AlchemyPay On/Off Ramp Widget"
-          style={{ width: '100%', height: '600px', border: 'none' }}
-          allow="payment"
-        />
-      )}
-    </Modal>
+        )}
+      </Modal>
+    </>
   );
 };
 

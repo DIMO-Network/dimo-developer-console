@@ -5,17 +5,21 @@ import { utils } from 'web3';
 import useGlobalAccount from '@/hooks/useGlobalAccount';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
+import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 
 import configuration from '@/config';
 
 export const useContractGA = () => {
   const { organizationInfo, connectWallet } = useGlobalAccount();
-  const [balance, setBalance] = useState<number>(0);
-  const [allowance, setAllowance] = useState<number>(0);
+  const [balanceDimo, setBalanceDimo] = useState<number>(0);
+  const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
+  const [allowanceDCX, setAllowanceDCX] = useState<number>(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [dimoContract, setDimoContract] = useState<any>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [licenseContract, setLicenseContract] = useState<any>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [dimoCreditsContract, setDimoCreditsContract] = useState<any>();
 
   useEffect(() => {
     if (!organizationInfo) return;
@@ -46,6 +50,17 @@ export const useContractGA = () => {
         }),
       );
 
+      setDimoCreditsContract(
+        getContract({
+          address: configuration.DIMO_CREDITS_CONTRACT_ADDRESS,
+          abi: DimoCreditsABI,
+          client: {
+            public: publicClient,
+            wallet: kernelClient,
+          }
+        }),
+      );
+
       return { dimoContract, licenseContract };
     });
   }, [organizationInfo]);
@@ -55,21 +70,30 @@ export const useContractGA = () => {
 
     dimoContract.read.balanceOf([organizationInfo!.walletAddress])
       .then((currentBalanceWei: unknown) => {
-        setBalance(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
+        setBalanceDimo(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });
 
 
     dimoContract.read.allowance([organizationInfo.walletAddress, configuration.DLC_ADDRESS])
       .then((currentBalanceWei: unknown) => {
-        setAllowance(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
+        setAllowanceDLC(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
+      });
+
+    dimoContract.read.allowance([organizationInfo.walletAddress, configuration.DIMO_CREDITS_CONTRACT_ADDRESS])
+      .then((currentBalanceWei: unknown) => {
+        setAllowanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });
   });
 
   return {
     dimoContract,
     licenseContract,
+    dimoCreditsContract,
     address: organizationInfo?.walletAddress,
-    balance,
-    hasEnoughSpendingLimit: allowance >= configuration.desiredAmountOfAllowance,
+    balanceDimo,
+    allowanceDLC,
+    allowanceDCX,
+    hasEnoughAllowanceDLC: allowanceDLC >= configuration.desiredAmountOfAllowance,
+    hasEnoughAllowanceDCX: allowanceDCX >= configuration.desiredAmountOfAllowance,
   };
 };

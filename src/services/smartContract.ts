@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import { AbiItem } from 'web3-utils';
 import contractABI from '../contracts/DimoCreditABI.json';
-import { DIMO_CONTRACT_ADDRESS } from '@/config/default';
+import { DC_ADDRESS } from '@/config/default';
 
 const web3 = new Web3(
   'https://polygon-mumbai.infura.io/v3/YOUR_INFURA_PROJECT_ID',
@@ -10,7 +10,7 @@ const web3 = new Web3(
 // Load contract ABI
 const contract = new web3.eth.Contract(
   contractABI as AbiItem[],
-  DIMO_CONTRACT_ADDRESS,
+  DC_ADDRESS,
 );
 
 export async function mintDimoCredits(txHash: string) {

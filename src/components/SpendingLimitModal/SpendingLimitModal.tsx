@@ -26,16 +26,18 @@ interface IProps {
   isOpen: boolean;
   setIsOpen: (f: boolean) => void;
   onSubmit?: (n: number) => void;
+  addressToAllow?: `0x${string}`,
 }
 
 export const SpendingLimitModal: FC<IProps> = ({
   isOpen,
   setIsOpen,
   onSubmit = () => { },
+  addressToAllow = configuration.DLC_ADDRESS,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { dimoContract, address } = useContractGA();
+  const { dimoContract } = useContractGA();
   const { control, handleSubmit, getValues } = useForm<IForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -50,14 +52,7 @@ export const SpendingLimitModal: FC<IProps> = ({
       if (dimoContract) {
         const { credits } = getValues();
         const dimoInWei = utils.toWei(credits, 'ether');
-        await changeNetwork();
-        await dimoContract.methods
-          .approve(configuration.DLC_ADDRESS, dimoInWei)
-          .send({
-            from: address,
-            maxFeePerGas: String(configuration.gasPrice),
-            maxPriorityFeePerGas: String(configuration.gasPrice),
-          });
+        await dimoContract.write.approve([addressToAllow, dimoInWei]);
         setIsOpen(false);
         onSubmit(credits);
       }
