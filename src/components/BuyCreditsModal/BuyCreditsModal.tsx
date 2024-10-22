@@ -39,9 +39,9 @@ interface IProps { }
 
 export const BuyCreditsModal: FC<IProps> = () => {
   const { isOpen, setIsOpen } = useContext(CreditsContext);
-  const { dimoCreditsContract, hasEnoughAllowanceDCX, allowanceDCX } = useContractGA();
+  const [isOpenSpending, setIsOpenSpending] = useState(false);
+  const { dimoCreditsContract, hasEnoughAllowanceDCX } = useContractGA();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [allowedCredits, setAllowedCredits] = useState(allowanceDCX);
   const { setNotification } = useContext(NotificationContext);
   const { control, watch, getValues } = useForm<IForm>({
     mode: 'onChange',
@@ -92,22 +92,29 @@ export const BuyCreditsModal: FC<IProps> = () => {
       return;
     }
 
-    burnDimo();
+    if (!hasEnoughAllowanceDCX) {
+      setIsOpen(false);
+      setIsOpenSpending(true);
+    } else {
+      burnDimo();
+    }
   };
 
-  const handleChangeSpendingLimit = (credits: number) => {
-    setAllowedCredits(credits);
+  const handleChangeSpendingLimit = () => {
+    setIsOpenSpending(false);
+    setIsOpen(true);
+    burnDimo();
   };
 
   return (
     <>
       <SpendingLimitModal
-        isOpen={isOpen && !hasEnoughAllowanceDCX && allowanceDCX === 0}
-        setIsOpen={handleClose}
+        isOpen={isOpenSpending}
+        setIsOpen={setIsOpenSpending}
         onSubmit={handleChangeSpendingLimit}
         addressToAllow={configuration.DIMO_CREDITS_CONTRACT_ADDRESS}
       />
-      <Modal isOpen={isOpen && (allowedCredits > 0 || hasEnoughAllowanceDCX)} setIsOpen={handleClose} className="buy-credits-modal">
+      <Modal isOpen={isOpen} setIsOpen={handleClose} className="buy-credits-modal">
         {!showIframe ? (
           <div className="buy-credits-content">
             <div className="buy-credits-header">
