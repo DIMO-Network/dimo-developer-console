@@ -15,10 +15,13 @@ type Configuration = {
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
   CONTRACT_NETWORK: bigint;
-  DLC_ADDRESS: string;
-  DC_ADDRESS: string;
+  DLC_ADDRESS: `0x${string}`;
+  DC_ADDRESS: `0x${string}`;
+  DIMO_CREDITS_CONTRACT_ADDRESS: `0x${string}`;
   masFeePerGas: number;
   gasPrice: number;
+  desiredAmountOfDCX: number;
+  desiredAmountOfDimo: number;
 };
 
 export const getConfig = (): Configuration => {

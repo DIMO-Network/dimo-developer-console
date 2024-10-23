@@ -1,6 +1,6 @@
 # Developer Console API
 
-This repository hosts the codebase for the DIMO Developer Console, powering the platform at `https://console.dimo.xyz`. The app facilitates seamless interactions and management of developer licenses within the DIMO ecosystem.
+This repository hosts the codebase for the DIMO Developer Console, powering the platform at `https://console.dimo.org`. The app facilitates seamless interactions and management of developer licenses within the DIMO ecosystem.
 
 ## Table of Contents
 
