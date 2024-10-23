@@ -1,3 +1,5 @@
+const { LICENSE_PRICE_USD = 100, DCX_IN_USD = 0.01, DIMO_IN_USD = 0.2 } = process.env;
+
 export const appName = 'Developer Console';
 
 export const LOGIN_PAGES = ['/sign-in', '/sign-up', '/email-recovery'];
@@ -57,7 +59,9 @@ export const DLC_ADDRESS = '0x9A9D2E717bB005B240094ba761Ff074d392C7C85'.toLowerC
 
 export const masFeePerGas = 60000000000;
 export const gasPrice = 43000000000;
-export const desiredAmountOfAllowance = 100;
+
+export const desiredAmountOfDimo = Number(LICENSE_PRICE_USD) / Number(DIMO_IN_USD);
+export const desiredAmountOfDCX = Number(LICENSE_PRICE_USD) / Number(DCX_IN_USD);
 
 export const DIMO_CREDITS_CONTRACT_ADDRESS =
   '0x7186F9aC35d24c9a4cf1E58a797c04DF1b334322'.toLowerCase();

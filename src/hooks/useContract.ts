@@ -42,7 +42,7 @@ export const useContract = () => {
     dimoContract,
     dimoLicenseContract,
     address,
-    hasEnoughSpendingLimit: allowance >= configuration.desiredAmountOfAllowance,
+    hasEnoughSpendingLimit: allowance >= configuration.desiredAmountOfDimo,
     isConnected,
   };
 };

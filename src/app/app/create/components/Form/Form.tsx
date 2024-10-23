@@ -1,32 +1,29 @@
 'use client';
-import { FC, useContext, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
+import { FC, useContext, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { utils } from 'web3';
 
-import _ from 'lodash';
 import classNames from 'classnames';
 
-import { AppCard } from '@/components/AppCard';
-import { Button } from '@/components/Button';
 import { createApp } from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
-import { IAppWithWorkspace } from '@/types/app';
-import { IWorkspace } from '@/types/workspace';
+import { AppCard } from '@/components/AppCard';
+import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { MultiCardOption } from '@/components/MultiCardOption';
-import { NotificationContext } from '@/context/notificationContext';
 import { SpendingLimitModal } from '@/components/SpendingLimitModal';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
+import { NotificationContext } from '@/context/notificationContext';
 import { useContractGA } from '@/hooks';
+import { IAppWithWorkspace } from '@/types/app';
+import { IWorkspace } from '@/types/workspace';
 
 import configuration from '@/config';
 
 import './Form.css';
 
-const ISSUE_IN_DIMO_GAS = 500000;
 
 interface IProps {
   isOnboardingCompleted?: boolean;
@@ -38,8 +35,16 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { licenseContract, hasEnoughAllowanceDLC } = useContractGA();
-  const { address } = useAccount();
+  const {
+    dimoCreditsContract,
+    licenseContract,
+    dimoContract,
+    hasEnoughAllowanceDLC,
+    hasEnoughAllowanceDCX,
+    hasEnoughBalanceDCX,
+    hasEnoughBalanceDimo,
+    address,
+  } = useContractGA();
   const router = useRouter();
   const {
     control,
@@ -52,17 +57,45 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     reValidateMode: 'onChange',
   });
 
-  const onSubmit = () => {
-    if (hasEnoughAllowanceDLC) {
-      handleCreateApp();
-    } else {
-      setIsOpenedCreditsModal(true);
+  const onSubmit = async () => {
+    try {
+      setIsLoading(true);
+      if (!hasEnoughBalanceDCX && !hasEnoughBalanceDimo) setNotification('Insufficient Dimo or DCX balance', 'Oops...', 'error');
+
+      if (!hasEnoughBalanceDCX) {
+        await mintDCX();
+      }
+
+      await prepareIssueInDC();
+      await handleCreateApp();
+    } catch (error: unknown) {
+      setNotification(
+        'Something went wrong while confirming the transaction',
+        'Oops...',
+        'error',
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const mintDCX = async () => {
+    if (!hasEnoughAllowanceDCX) {
+      await dimoContract.write.approve([configuration.DIMO_CREDITS_CONTRACT_ADDRESS, configuration.desiredAmountOfDimo]);
+    }
+
+    // Call mintInDimo 2 parameteres
+    await dimoCreditsContract.write['0xec88fc37']([address, configuration.desiredAmountOfDimo]);
+  };
+
+  const prepareIssueInDC = async () => {
+    if (hasEnoughAllowanceDLC) return;
+
+    await dimoContract.write.approve([configuration.DLC_ADDRESS, configuration.desiredAmountOfDCX]);
+  };
+
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
-    if (isOnboardingCompleted && workspace) return workspace;
-    if (!licenseContract) throw new Error('Web3 connection failed');
+    if (workspace) return workspace;
 
     const workspaceName = String(
       utils.fromAscii(workspaceData?.name ?? ''),
@@ -74,12 +107,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
           returnValues: { clientId = '', owner = '', tokenId = 0 } = {},
         } = {},
       } = {},
-    } = await licenseContract.methods['0x77a5b102'](workspaceName).send({
-      from: address,
-      gas: String(ISSUE_IN_DIMO_GAS),
-      maxFeePerGas: String(configuration.masFeePerGas),
-      maxPriorityFeePerGas: String(configuration.gasPrice),
-    });
+    } = await licenseContract.write['0xaf509d9f']([workspaceName]);
 
     return createWorkspace({
       name: workspaceData.name ?? '',
@@ -90,28 +118,13 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
   };
 
   const handleCreateApp = async () => {
-    try {
-      setIsLoading(true);
-      const { workspace, app } = getValues();
-      const { id: workspaceId = '' } = await handleCreateWorkspace(workspace);
-      await createApp(workspaceId, {
-        name: app.name,
-        scope: app.scope,
-      });
-      router.replace('/app');
-    } catch (error: unknown) {
-      const code = _.get(error, 'code', null);
-      if (code === 4001)
-        setNotification('The transaction was denied', 'Oops...', 'error');
-      else
-        setNotification(
-          'Something went wrong while confirming the transaction',
-          'Oops...',
-          'error',
-        );
-    } finally {
-      setIsLoading(false);
-    }
+    const { workspace, app } = getValues();
+    const { id: workspaceId = '' } = await handleCreateWorkspace(workspace);
+    await createApp(workspaceId, {
+      name: app.name,
+      scope: app.scope,
+    });
+    router.replace('/app');
   };
 
   return (

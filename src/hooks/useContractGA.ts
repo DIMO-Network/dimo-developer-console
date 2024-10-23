@@ -12,6 +12,7 @@ import configuration from '@/config';
 export const useContractGA = () => {
   const { organizationInfo, connectWallet } = useGlobalAccount();
   const [balanceDimo, setBalanceDimo] = useState<number>(0);
+  const [balanceDCX, setBalanceDCX] = useState<number>(0);
   const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
   const [allowanceDCX, setAllowanceDCX] = useState<number>(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,6 +74,10 @@ export const useContractGA = () => {
         setBalanceDimo(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });
 
+    dimoCreditsContract.read.balanceOf([organizationInfo!.walletAddress])
+      .then((currentBalanceWei: unknown) => {
+        setBalanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
+      });
 
     dimoContract.read.allowance([organizationInfo.walletAddress, configuration.DLC_ADDRESS])
       .then((currentBalanceWei: unknown) => {
@@ -91,9 +96,12 @@ export const useContractGA = () => {
     dimoCreditsContract,
     address: organizationInfo?.walletAddress,
     balanceDimo,
+    balanceDCX,
     allowanceDLC,
     allowanceDCX,
-    hasEnoughAllowanceDLC: allowanceDLC >= configuration.desiredAmountOfAllowance,
-    hasEnoughAllowanceDCX: allowanceDCX >= configuration.desiredAmountOfAllowance,
+    hasEnoughBalanceDCX: balanceDCX >= configuration.desiredAmountOfDCX,
+    hasEnoughBalanceDimo: balanceDCX >= configuration.desiredAmountOfDimo,
+    hasEnoughAllowanceDLC: allowanceDLC >= configuration.desiredAmountOfDCX,
+    hasEnoughAllowanceDCX: allowanceDCX >= configuration.desiredAmountOfDimo,
   };
 };

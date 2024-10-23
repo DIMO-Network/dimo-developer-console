@@ -20,7 +20,8 @@ type Configuration = {
   DIMO_CREDITS_CONTRACT_ADDRESS: `0x${string}`;
   masFeePerGas: number;
   gasPrice: number;
-  desiredAmountOfAllowance: number;
+  desiredAmountOfDCX: number;
+  desiredAmountOfDimo: number;
 };
 
 export const getConfig = (): Configuration => {
