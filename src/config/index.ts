@@ -1,6 +1,7 @@
 import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
+import { DCX_ADDRESS } from './default';
 
 type Configuration = {
   appName: string;
@@ -15,8 +16,11 @@ type Configuration = {
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
   CONTRACT_NETWORK: bigint;
-  DLC_ADDRESS: string;
-  DC_ADDRESS: string;
+  DLC_ADDRESS: `0x${string}`;
+  DC_ADDRESS: `0x${string}`;
+  DCX_ADDRESS: `0x${string}`;
+  WMATIC: `0x${string}`;
+  SwapRouterAddress: `0x${string}`;
   masFeePerGas: number;
   gasPrice: number;
 };
