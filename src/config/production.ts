@@ -18,4 +18,4 @@ export const DLC_ADDRESS: `0x${string}` = '0x9A9D2E717bB005B240094ba761Ff074d392
 export const WMATIC: `0x${string}` = '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270';
 
 // SwapRouter MAINNET
-export const SwapRouterAddress: `0x${string}` = '0xec7BE89e9d109e7e3Fec59c222CF297125FEFda2';
+export const SwapRouterAddress: `0x${string}` = '0xE592427A0AEce92De3Edee1F18E0157C05861564';
