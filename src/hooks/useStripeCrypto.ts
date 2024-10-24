@@ -5,10 +5,15 @@ export const useStripeCrypto = () => {
   const [stripeClientId, setStripeClientId] = useState<string | null>(null);
 
   const loadStripeOnRamp = async () => {
-    return await loadStripeOnramp(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+    return await loadStripeOnramp(
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+    );
   };
 
-  const createStripeCryptoSession = async (wallet: `0x${string}`, amount: number): Promise<{ client_secret: string; }> => {
+  const createStripeCryptoSession = async (
+    wallet: `0x${string}`,
+    amount: number,
+  ): Promise<{ client_secret: string }> => {
     const params = new URLSearchParams();
     params.append('wallet_addresses[polygon]', wallet);
     params.append('source_amount', amount.toString());
@@ -22,7 +27,7 @@ export const useStripeCrypto = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_STRIPE_API_KEY!}`
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_STRIPE_API_KEY!}`,
       },
       body: params,
     });
@@ -34,7 +39,7 @@ export const useStripeCrypto = () => {
     stripeClientId,
     setStripeClientId,
     createStripeCryptoSession,
-    loadStripeOnRamp
+    loadStripeOnRamp,
   };
 };
 

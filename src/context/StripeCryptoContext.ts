@@ -1,9 +1,9 @@
 'use client';
-import {createContext} from 'react';
+import { createContext } from 'react';
 
 interface IProps {
- stripeClientId: string | null;
- setStripeClientId: (f: string) => void;
+  stripeClientId: string | null;
+  setStripeClientId: (f: string) => void;
 }
 
 export const StripeCryptoContext = createContext<IProps>({

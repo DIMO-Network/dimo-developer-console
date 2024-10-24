@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { useGlobalAccount } from '@/hooks';
@@ -9,7 +9,10 @@ import { NotificationContext } from '@/context/notificationContext';
 import { ErrorIcon } from '@/components/Icons';
 
 interface IProps {
-  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
+  onNext: (
+    flow: string,
+    transaction?: Partial<IDcxPurchaseTransaction>,
+  ) => void;
   transactionData?: Partial<IDcxPurchaseTransaction>;
 }
 
@@ -20,8 +23,7 @@ enum LoadingStatus {
   Error = 'error',
 }
 
-
-const StatusIcon = ({status} : { status: LoadingStatus; }) => {
+const StatusIcon = ({ status }: { status: LoadingStatus }) => {
   switch (status) {
     case 'success':
       return <CheckIcon />;
@@ -34,8 +36,13 @@ const StatusIcon = ({status} : { status: LoadingStatus; }) => {
   }
 };
 
-
-const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus; }) => {
+const ProcessCard = ({
+  title,
+  status,
+}: {
+  title: string;
+  status: LoadingStatus;
+}) => {
   return (
     <div className="minting-card">
       <span>{title}</span>
@@ -44,20 +51,30 @@ const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus; 
   );
 };
 
-
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const { setNotification } = useContext(NotificationContext);
-  const { organizationInfo, depositWmatic, swapWmaticToDimo, mintDimoIntoDimoCredit } = useGlobalAccount();
+  const {
+    organizationInfo,
+    depositWmatic,
+    swapWmaticToDimo,
+    mintDimoIntoDimoCredit,
+  } = useGlobalAccount();
 
-  const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(LoadingStatus.None);
-  const [mintingDCX, setMintingDCX] = useState<LoadingStatus>(LoadingStatus.None);
+  const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
+    LoadingStatus.None,
+  );
+  const [mintingDCX, setMintingDCX] = useState<LoadingStatus>(
+    LoadingStatus.None,
+  );
 
   const handleMintingDcx = async () => {
     try {
       if (mintingDCX === LoadingStatus.Loading) return;
       setMintingDCX(LoadingStatus.Loading);
 
-      const mintResult = await mintDimoIntoDimoCredit(transactionData!.dcxAmount!);
+      const mintResult = await mintDimoIntoDimoCredit(
+        transactionData!.dcxAmount!,
+      );
       if (!mintResult.success) {
         setNotification(mintResult.reason!, 'Oops...', 'error');
         setMintingDCX(LoadingStatus.Error);
@@ -104,7 +121,10 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
 
   useEffect(() => {
     if (!organizationInfo?.subOrganizationId) return;
-    if (swappingIntoDimo === LoadingStatus.Success && mintingDCX === LoadingStatus.None) {
+    if (
+      swappingIntoDimo === LoadingStatus.Success &&
+      mintingDCX === LoadingStatus.None
+    ) {
       handleMintingDcx().catch(console.error);
     }
   }, [organizationInfo, swappingIntoDimo, mintingDCX]);

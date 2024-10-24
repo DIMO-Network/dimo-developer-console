@@ -16,13 +16,16 @@ interface IForm {
 }
 
 interface IProps {
-  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
+  onNext: (
+    flow: string,
+    transaction?: Partial<IDcxPurchaseTransaction>,
+  ) => void;
 }
 
-export const CreditsAmount = ({ onNext }:IProps) => {
+export const CreditsAmount = ({ onNext }: IProps) => {
   const { organizationInfo } = useGlobalAccount();
   const { setStripeClientId } = useContext(StripeCryptoContext);
-  const { createStripeCryptoSession, } = useStripeCrypto();
+  const { createStripeCryptoSession } = useStripeCrypto();
   const { control, watch } = useForm<IForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -39,7 +42,10 @@ export const CreditsAmount = ({ onNext }:IProps) => {
     const { smartContractAddress } = organizationInfo!;
     if (!smartContractAddress) return;
 
-    const { client_secret } = await createStripeCryptoSession(smartContractAddress, credits * 0.001);
+    const { client_secret } = await createStripeCryptoSession(
+      smartContractAddress,
+      credits * 0.001,
+    );
     setStripeClientId(client_secret);
     onNext('credits-amount', {
       destinationAddress: smartContractAddress,
@@ -57,7 +63,7 @@ export const CreditsAmount = ({ onNext }:IProps) => {
           { label: '10k', value: 10000 },
           { label: '100k', value: 100000 },
           { label: '500k', value: 500000 },
-          { label: '1M', value: 1000000 }
+          { label: '1M', value: 1000000 },
         ]}
       />
       <div style={{ textAlign: 'center', margin: '10px 0' }}>

@@ -16,7 +16,7 @@ export const withTurnKey = <P extends object>(
     const { showAccountInformation, setShowAccountInformation } =
       useAccountInformation();
 
-    const { stripeClientId ,setStripeClientId } = useStripeCrypto();
+    const { stripeClientId, setStripeClientId } = useStripeCrypto();
 
     // Render the wrapped component with any additional props
     return (
@@ -24,7 +24,9 @@ export const withTurnKey = <P extends object>(
         <AccountInformationContext.Provider
           value={{ showAccountInformation, setShowAccountInformation }}
         >
-          <StripeCryptoContext.Provider value={{ stripeClientId, setStripeClientId }}>
+          <StripeCryptoContext.Provider
+            value={{ stripeClientId, setStripeClientId }}
+          >
             <WrappedComponent {...props} />
             <AccountInformationModal />
           </StripeCryptoContext.Provider>

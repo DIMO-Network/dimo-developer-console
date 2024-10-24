@@ -46,8 +46,7 @@
     }
 
     .success-card {
-        @apply flex flex-col gap-4 w-full border-2 rounded-xl border-gray-600 p-2 items-center justify-between pl-4 pr-4;
-
+      @apply flex flex-col gap-4 w-full border-2 rounded-xl border-gray-600 p-2 items-center justify-between pl-4 pr-4;
     }
   }
 }

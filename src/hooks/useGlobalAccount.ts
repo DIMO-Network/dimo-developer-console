@@ -6,10 +6,14 @@ import {
   createSubOrganization,
   getUserSubOrganization,
   rewirePasskey,
-  startEmailRecovery
+  startEmailRecovery,
 } from '@/services/globalAccount';
 import { signOut, useSession } from 'next-auth/react';
-import { IKernelOperationStatus, IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
+import {
+  IKernelOperationStatus,
+  IPasskeyAttestation,
+  ISubOrganization,
+} from '@/types/wallet';
 import { useRouter } from 'next/navigation';
 import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
 import { isEmpty } from 'lodash';
@@ -30,13 +34,13 @@ import {
 import {
   bundlerActions,
   ENTRYPOINT_ADDRESS_V07,
-  walletClientToSmartAccountSigner
+  walletClientToSmartAccountSigner,
 } from 'permissionless';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
 import {
   createKernelAccount,
   createKernelAccountClient,
-  createZeroDevPaymasterClient
+  createZeroDevPaymasterClient,
 } from '@zerodev/sdk';
 import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
 import { polygon, polygonAmoy } from 'wagmi/chains';
@@ -78,12 +82,12 @@ export const useGlobalAccount = () => {
       if (!authIframeClient) return null;
       return await authIframeClient.injectCredentialBundle(authToken);
     },
-    [authIframeClient]
+    [authIframeClient],
   );
 
   const getPasskeyAttestation = async (
     email: string,
-    challenge: ArrayBuffer
+    challenge: ArrayBuffer,
   ): Promise<IPasskeyAttestation> => {
     const authenticatorUserId = generateRandomBuffer();
 
@@ -91,31 +95,31 @@ export const useGlobalAccount = () => {
       publicKey: {
         rp: {
           id: passkeyClient?.rpId,
-          name: 'DIMO Global Accounts'
+          name: 'DIMO Global Accounts',
         },
         challenge,
         pubKeyCredParams: [
           {
             alg: -7,
-            type: 'public-key'
+            type: 'public-key',
           },
           {
             alg: -257,
-            type: 'public-key'
-          }
+            type: 'public-key',
+          },
         ],
         user: {
           id: authenticatorUserId,
           name: `${email} @ DIMO`,
-          displayName: `${email} @ DIMO`
+          displayName: `${email} @ DIMO`,
         },
         timeout: 300000,
         authenticatorSelection: {
           requireResidentKey: false,
           residentKey: 'preferred',
-          userVerification: 'preferred'
-        }
-      }
+          userVerification: 'preferred',
+        },
+      },
     });
 
     return attestation;
@@ -128,14 +132,14 @@ export const useGlobalAccount = () => {
 
     const client = new TurnkeyClient(
       {
-        baseUrl: turnkeyConfig.apiBaseUrl
+        baseUrl: turnkeyConfig.apiBaseUrl,
       },
-      authIframeClient!.config.stamper!
+      authIframeClient!.config.stamper!,
     );
 
     const { authenticators } = await client.getAuthenticators({
       organizationId: me!.organizationId,
-      userId: me!.userId
+      userId: me!.userId,
     });
 
     const signedRemoveAuthenticators = await client.stampDeleteAuthenticators({
@@ -144,8 +148,8 @@ export const useGlobalAccount = () => {
       organizationId: me!.organizationId,
       parameters: {
         userId: me!.userId,
-        authenticatorIds: authenticators!.map((auth) => auth.authenticatorId)
-      }
+        authenticatorIds: authenticators!.map((auth) => auth.authenticatorId),
+      },
     });
 
     const signedRecoverUser = await client.stampRecoverUser({
@@ -157,14 +161,14 @@ export const useGlobalAccount = () => {
         authenticator: {
           authenticatorName: 'DIMO PASSKEY',
           challenge: base64UrlEncode(challenge),
-          attestation
-        }
-      }
+          attestation,
+        },
+      },
     });
 
     await rewirePasskey({
       signedRecoveryRequest: signedRecoverUser,
-      signedAuthenticatorRemoval: signedRemoveAuthenticators
+      signedAuthenticatorRemoval: signedRemoveAuthenticators,
     });
   };
 
@@ -173,7 +177,7 @@ export const useGlobalAccount = () => {
       const { subOrganizationId } = organizationInfo!;
       // a bit hacky but works for now
       const signInResponse = await passkeyClient?.createReadOnlySession({
-        organizationId: subOrganizationId
+        organizationId: subOrganizationId,
       });
 
       if (isEmpty(signInResponse?.organizationId)) return;
@@ -196,7 +200,7 @@ export const useGlobalAccount = () => {
       email,
       attestation,
       encodedChallenge,
-      deployAccount: true
+      deployAccount: true,
     });
 
     if (!response?.subOrganizationId) {
@@ -205,7 +209,7 @@ export const useGlobalAccount = () => {
     }
 
     setOrganizationInfo({
-      ...response
+      ...response,
     });
 
     return response;
@@ -217,14 +221,16 @@ export const useGlobalAccount = () => {
     if (!authIframeClient) return false;
     await startEmailRecovery({
       email,
-      key: authIframeClient.iframePublicKey!
+      key: authIframeClient.iframePublicKey!,
     });
     return true;
   };
 
-  const depositWmatic = async (amount: string) : Promise<IKernelOperationStatus> => {
-    try{
-      if (!organizationInfo) return { } as IKernelOperationStatus;
+  const depositWmatic = async (
+    amount: string,
+  ): Promise<IKernelOperationStatus> => {
+    try {
+      if (!organizationInfo) return {} as IKernelOperationStatus;
       const kernelClient = await getKernelClient(organizationInfo);
 
       const wmaticDepositOpHash = await kernelClient.sendUserOperation({
@@ -235,36 +241,39 @@ export const useGlobalAccount = () => {
             data: encodeFunctionData({
               abi: WMatic,
               functionName: 'deposit',
-              args: []
-            })
+              args: [],
+            }),
           }),
-        }
+        },
       });
 
       const bundlerClient = kernelClient.extend(
         bundlerActions(ENTRYPOINT_ADDRESS_V07),
       );
 
-      const { success, reason } = await bundlerClient.waitForUserOperationReceipt({
-        hash: wmaticDepositOpHash,
-      });
+      const { success, reason } =
+        await bundlerClient.waitForUserOperationReceipt({
+          hash: wmaticDepositOpHash,
+        });
 
       return {
         success,
-        reason
+        reason,
       };
-    }catch (e) {
+    } catch (e) {
       const errorReason = handleOnChainError(e as HttpRequestError);
       return {
         success: false,
-        reason: errorReason
+        reason: errorReason,
       };
     }
   };
 
-  const swapWmaticToDimo = async (amount: string) : Promise<IKernelOperationStatus> => {
+  const swapWmaticToDimo = async (
+    amount: string,
+  ): Promise<IKernelOperationStatus> => {
     try {
-      if (!organizationInfo) return { } as IKernelOperationStatus;
+      if (!organizationInfo) return {} as IKernelOperationStatus;
       const kernelClient = await getKernelClient(organizationInfo);
 
       const deadLine = Date.now() + 1000 * 60 * 10;
@@ -285,48 +294,9 @@ export const useGlobalAccount = () => {
                   amountIn: parseUnits(amount, 18),
                   deadline: BigInt(deadLine),
                   amountOutMinimum: BigInt(0),
-                  sqrtPriceLimitX96: BigInt(0)
-                }
-              ]
-            })
-          }),
-        }
-      });
-
-      const bundlerClient = kernelClient.extend(
-        bundlerActions(ENTRYPOINT_ADDRESS_V07),
-      );
-
-      const { success, reason } = await bundlerClient.waitForUserOperationReceipt({
-        hash: omidExchangeOpHash,
-      });
-      return {
-        success,
-        reason
-      };
-
-    } catch (e) {
-      const errorReason = handleOnChainError(e as HttpRequestError);
-      return {
-        success: false,
-        reason: errorReason
-      };
-    }
-  };
-
-  const mintDimoIntoDimoCredit = async (amount: string) : Promise<IKernelOperationStatus> => {
-    try{
-      if (!organizationInfo) return { } as IKernelOperationStatus;
-      const kernelClient = await getKernelClient(organizationInfo);
-      const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-        userOperation: {
-          callData: await kernelClient.account.encodeCallData({
-            to: config.DCX_ADDRESS,
-            value: parseUnits(amount, 18),
-            data: encodeFunctionData({
-              abi: DimoCredit,
-              functionName: 'mintInDimo',
-              args: [organizationInfo.smartContractAddress, parseUnits(amount, 18)]
+                  sqrtPriceLimitX96: BigInt(0),
+                },
+              ],
             }),
           }),
         },
@@ -336,25 +306,72 @@ export const useGlobalAccount = () => {
         bundlerActions(ENTRYPOINT_ADDRESS_V07),
       );
 
-      const { success, reason } = await bundlerClient.waitForUserOperationReceipt({
-        hash: dcxExchangeOpHash,
-      });
-
+      const { success, reason } =
+        await bundlerClient.waitForUserOperationReceipt({
+          hash: omidExchangeOpHash,
+        });
       return {
         success,
-        reason
+        reason,
       };
-
     } catch (e) {
       const errorReason = handleOnChainError(e as HttpRequestError);
       return {
         success: false,
-        reason: errorReason
+        reason: errorReason,
       };
     }
   };
 
-  const getKernelClient = async ({subOrganizationId, walletAddress}: ISubOrganization) => {
+  const mintDimoIntoDimoCredit = async (
+    amount: string,
+  ): Promise<IKernelOperationStatus> => {
+    try {
+      if (!organizationInfo) return {} as IKernelOperationStatus;
+      const kernelClient = await getKernelClient(organizationInfo);
+      const dcxExchangeOpHash = await kernelClient.sendUserOperation({
+        userOperation: {
+          callData: await kernelClient.account.encodeCallData({
+            to: config.DCX_ADDRESS,
+            value: parseUnits(amount, 18),
+            data: encodeFunctionData({
+              abi: DimoCredit,
+              functionName: 'mintInDimo',
+              args: [
+                organizationInfo.smartContractAddress,
+                parseUnits(amount, 18),
+              ],
+            }),
+          }),
+        },
+      });
+
+      const bundlerClient = kernelClient.extend(
+        bundlerActions(ENTRYPOINT_ADDRESS_V07),
+      );
+
+      const { success, reason } =
+        await bundlerClient.waitForUserOperationReceipt({
+          hash: dcxExchangeOpHash,
+        });
+
+      return {
+        success,
+        reason,
+      };
+    } catch (e) {
+      const errorReason = handleOnChainError(e as HttpRequestError);
+      return {
+        success: false,
+        reason: errorReason,
+      };
+    }
+  };
+
+  const getKernelClient = async ({
+    subOrganizationId,
+    walletAddress,
+  }: ISubOrganization) => {
     const chain = getChain();
     const stamperClient = new TurnkeyClient(
       {
@@ -373,7 +390,7 @@ export const useGlobalAccount = () => {
     const smartAccountClient = createWalletClient({
       account: localAccount,
       chain: chain,
-      transport: http(turnkeyConfig.bundleRpc)
+      transport: http(turnkeyConfig.bundleRpc),
     });
 
     const smartAccountSigner =
@@ -425,12 +442,14 @@ export const useGlobalAccount = () => {
     });
   };
 
-  const handleOnChainError = (error: HttpRequestError) : string => {
-    const errorData: `0x${string}` = error.details.replaceAll('"', '').split(': ')[1] as `0x${string}`;
+  const handleOnChainError = (error: HttpRequestError): string => {
+    const errorData: `0x${string}` = error.details
+      .replaceAll('"', '')
+      .split(': ')[1] as `0x${string}`;
 
     const value = decodeErrorResult({
       abi: wagmiAbi,
-      data: errorData
+      data: errorData,
     });
 
     const { args } = value;
@@ -441,7 +460,7 @@ export const useGlobalAccount = () => {
   const getChain = (): Chain => {
     const { VERCEL_ENV: environment } = process.env;
 
-    if (environment === "production") {
+    if (environment === 'production') {
       return polygon;
     }
 
@@ -470,7 +489,7 @@ export const useGlobalAccount = () => {
     registerNewPasskey,
     depositWmatic,
     swapWmaticToDimo,
-    mintDimoIntoDimoCredit
+    mintDimoIntoDimoCredit,
   };
 };
 

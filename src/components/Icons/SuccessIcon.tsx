@@ -16,7 +16,8 @@ export const SuccessIcon: FC<IconProps> = ({ className = '' }) => {
     >
       <path
         d="M13.3259 23.6508L7.24466 17.5696L5.17383 19.6258L13.3259 27.7779L30.8259 10.2779L28.7697 8.22168L13.3259 23.6508Z"
-        fill="#36DF71" />
+        fill="#36DF71"
+      />
     </svg>
   );
 };
