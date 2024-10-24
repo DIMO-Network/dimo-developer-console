@@ -1,39 +1,122 @@
 "use client";
-import { darkTheme, lightTheme, SupportedChainId, SwapWidget } from '@uniswap/widgets';
-import '@uniswap/widgets/fonts.css';
+
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { useTurnkey } from '@turnkey/sdk-react';
 import { useGlobalAccount } from '@/hooks';
-import { useEffect, useState } from 'react';
-import { Provider } from '@web3-react/types';
+import { useContext, useEffect, useState } from 'react';
+
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { Loader } from '@/components/Loader';
+import { Loading } from '@/components/Loading';
+import { CheckIcon } from '@/components/Icons';
+import { NotificationContext } from '@/context/notificationContext';
+import { ErrorIcon } from '@/components/Icons';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
   transactionData?: Partial<IDcxPurchaseTransaction>;
 }
-const TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org';
 
-interface WalletConnectConext {
-
+enum LoadingStatus {
+  None = 'none',
+  Loading = 'loading',
+  Success = 'success',
+  Error = 'error',
 }
 
 
+const StatusIcon = ({status} : { status: LoadingStatus; }) => {
+  switch (status) {
+    case 'success':
+      return <CheckIcon />;
+    case 'error':
+      return <ErrorIcon />;
+    case 'loading':
+      return <Loading />;
+    default:
+      return <></>;
+  }
+};
+
+
+const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus; }) => {
+  return (
+    <div className="minting-card">
+      <span>{title}</span>
+      <StatusIcon status={status} />
+    </div>
+  );
+};
+
+
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
-  const { connectWallet, organizationInfo } = useGlobalAccount();
-  const [provider, setProvider] = useState<Provider>();
+  const { setNotification } = useContext(NotificationContext);
+  const { organizationInfo, depositWmatic, swapWmaticToDimo, mintDimoIntoDimoCredit } = useGlobalAccount();
+
+  const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(LoadingStatus.None);
+  const [mintingDCX, setMintingDCX] = useState<LoadingStatus>(LoadingStatus.None);
+
+  const handleMintingDcx = async () => {
+    try {
+      if (mintingDCX === LoadingStatus.Loading) return;
+      setMintingDCX(LoadingStatus.Loading);
+
+      const mintResult = await mintDimoIntoDimoCredit(transactionData!.dcxAmount!);
+      if (!mintResult.success) {
+        setNotification(mintResult.reason!, 'Oops...', 'error');
+        setMintingDCX(LoadingStatus.Error);
+        return;
+      }
+      setMintingDCX(LoadingStatus.Success);
+    } catch (error) {
+      console.error('Error while minting DCX', error);
+      setMintingDCX(LoadingStatus.Error);
+    }
+  };
+
+  const handleSwappingIntoDimo = async () => {
+    try {
+      if (swappingIntoDimo === LoadingStatus.Loading) return;
+      setSwappingIntoDimo(LoadingStatus.Loading);
+
+      const depositResult = await depositWmatic(transactionData!.maticAmount!);
+      if (!depositResult.success) {
+        setNotification(depositResult.reason!, 'Oops...', 'error');
+        setSwappingIntoDimo(LoadingStatus.Error);
+        return;
+      }
+      const swapResult = await swapWmaticToDimo(transactionData!.maticAmount!);
+      if (!swapResult.success) {
+        setNotification(swapResult.reason!, 'Oops...', 'error');
+        setSwappingIntoDimo(LoadingStatus.Error);
+        return;
+      }
+      setSwappingIntoDimo(LoadingStatus.Success);
+    } catch (error) {
+      console.error('Error while swapping into DIMO', error);
+      setSwappingIntoDimo(LoadingStatus.Error);
+    }
+  };
 
   useEffect(() => {
     if (!organizationInfo?.subOrganizationId) return;
-    connectWallet().then(() => {
-      console.info('Wallet connected');
-    }).catch(console.error);
-  }, [organizationInfo]);
+    if (swappingIntoDimo === LoadingStatus.None) {
+      handleSwappingIntoDimo().catch(console.error);
+    }
+  }, [organizationInfo, swappingIntoDimo]);
+
+  useEffect(() => {
+    if (!organizationInfo?.subOrganizationId) return;
+    if (swappingIntoDimo === LoadingStatus.Success && mintingDCX === LoadingStatus.None) {
+      handleMintingDcx().catch(console.error);
+    }
+  }, [organizationInfo, swappingIntoDimo, mintingDCX]);
 
   return (
-    <>
-      <BubbleLoader isLoading={true} />
-    </>
+    <div className="minting-process">
+      <ProcessCard title="Swapping into DIMO" status={swappingIntoDimo} />
+      <ProcessCard title="Minting DCX" status={mintingDCX} />
+    </div>
   );
 };
 

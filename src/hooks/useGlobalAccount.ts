@@ -6,26 +6,51 @@ import {
   createSubOrganization,
   getUserSubOrganization,
   rewirePasskey,
-  startEmailRecovery,
+  startEmailRecovery
 } from '@/services/globalAccount';
-import { useSession } from 'next-auth/react';
-import { IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
+import { signOut, useSession } from 'next-auth/react';
+import { IKernelOperationStatus, IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
 import { useRouter } from 'next/navigation';
 import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
 import { isEmpty } from 'lodash';
 import configuration from '@/config';
-import { signOut } from 'next-auth/react';
+import config from '@/config';
 import { turnkeyConfig } from '@/config/turnkey';
 import { createAccount } from '@turnkey/viem';
-import { Chain, createPublicClient, createWalletClient, http, parseUnits } from 'viem';
-import { ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner } from 'permissionless';
+import {
+  Chain,
+  createPublicClient,
+  createWalletClient,
+  decodeErrorResult,
+  encodeFunctionData,
+  http, HttpRequestError,
+
+  parseUnits,
+
+} from 'viem';
+import {
+  bundlerActions,
+
+  ENTRYPOINT_ADDRESS_V07,
+  walletClientToSmartAccountSigner
+} from 'permissionless';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
-import { createKernelAccount, createKernelAccountClient } from '@zerodev/sdk';
+import {
+  createKernelAccount,
+  createKernelAccountClient,
+  createZeroDevPaymasterClient
+} from '@zerodev/sdk';
 import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
 import { polygon, polygonAmoy } from 'wagmi/chains';
-import { KernelEIP1193Provider } from '@zerodev/wallet';
-import { baseTokenAddresses, createKernelDefiClient } from '@zerodev/defi';
-import config from '@/config';
+
+import WMatic from '@/contracts/wmatic.json';
+import UniversalRouter from '@/contracts/uniswapRouter.json';
+import DimoCredit from '@/contracts/DimoCreditContract.json';
+
+import { wagmiAbi } from '@/contracts/wagmi';
+
+const WMATIC: `0x${string}` = '0x360ad4f9a9A8EFe9A8DCB5f461c4Cc1047E1Dcf9';
+const SwapRouterAddress: `0x${string}` = '0x52D03752872F30B6AcD26979FD5EB7213bA62DaF';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -58,12 +83,12 @@ export const useGlobalAccount = () => {
       if (!authIframeClient) return null;
       return await authIframeClient.injectCredentialBundle(authToken);
     },
-    [authIframeClient],
+    [authIframeClient]
   );
 
   const getPasskeyAttestation = async (
     email: string,
-    challenge: ArrayBuffer,
+    challenge: ArrayBuffer
   ): Promise<IPasskeyAttestation> => {
     const authenticatorUserId = generateRandomBuffer();
 
@@ -71,31 +96,31 @@ export const useGlobalAccount = () => {
       publicKey: {
         rp: {
           id: passkeyClient?.rpId,
-          name: 'DIMO Global Accounts',
+          name: 'DIMO Global Accounts'
         },
         challenge,
         pubKeyCredParams: [
           {
             alg: -7,
-            type: 'public-key',
+            type: 'public-key'
           },
           {
             alg: -257,
-            type: 'public-key',
-          },
+            type: 'public-key'
+          }
         ],
         user: {
           id: authenticatorUserId,
           name: `${email} @ DIMO`,
-          displayName: `${email} @ DIMO`,
+          displayName: `${email} @ DIMO`
         },
         timeout: 300000,
         authenticatorSelection: {
           requireResidentKey: false,
           residentKey: 'preferred',
-          userVerification: 'preferred',
-        },
-      },
+          userVerification: 'preferred'
+        }
+      }
     });
 
     return attestation;
@@ -108,14 +133,14 @@ export const useGlobalAccount = () => {
 
     const client = new TurnkeyClient(
       {
-        baseUrl: turnkeyConfig.apiBaseUrl,
+        baseUrl: turnkeyConfig.apiBaseUrl
       },
-      authIframeClient!.config.stamper!,
+      authIframeClient!.config.stamper!
     );
 
     const { authenticators } = await client.getAuthenticators({
       organizationId: me!.organizationId,
-      userId: me!.userId,
+      userId: me!.userId
     });
 
     const signedRemoveAuthenticators = await client.stampDeleteAuthenticators({
@@ -124,8 +149,8 @@ export const useGlobalAccount = () => {
       organizationId: me!.organizationId,
       parameters: {
         userId: me!.userId,
-        authenticatorIds: authenticators!.map((auth) => auth.authenticatorId),
-      },
+        authenticatorIds: authenticators!.map((auth) => auth.authenticatorId)
+      }
     });
 
     const signedRecoverUser = await client.stampRecoverUser({
@@ -137,14 +162,14 @@ export const useGlobalAccount = () => {
         authenticator: {
           authenticatorName: 'DIMO PASSKEY',
           challenge: base64UrlEncode(challenge),
-          attestation,
-        },
-      },
+          attestation
+        }
+      }
     });
 
     await rewirePasskey({
       signedRecoveryRequest: signedRecoverUser,
-      signedAuthenticatorRemoval: signedRemoveAuthenticators,
+      signedAuthenticatorRemoval: signedRemoveAuthenticators
     });
   };
 
@@ -153,7 +178,7 @@ export const useGlobalAccount = () => {
       const { subOrganizationId } = organizationInfo!;
       // a bit hacky but works for now
       const signInResponse = await passkeyClient?.createReadOnlySession({
-        organizationId: subOrganizationId,
+        organizationId: subOrganizationId
       });
 
       if (isEmpty(signInResponse?.organizationId)) return;
@@ -176,7 +201,7 @@ export const useGlobalAccount = () => {
       email,
       attestation,
       encodedChallenge,
-      deployAccount: true,
+      deployAccount: true
     });
 
     if (!response?.subOrganizationId) {
@@ -185,7 +210,7 @@ export const useGlobalAccount = () => {
     }
 
     setOrganizationInfo({
-      ...response,
+      ...response
     });
 
     return response;
@@ -197,18 +222,145 @@ export const useGlobalAccount = () => {
     if (!authIframeClient) return false;
     await startEmailRecovery({
       email,
-      key: authIframeClient.iframePublicKey!,
+      key: authIframeClient.iframePublicKey!
     });
     return true;
   };
 
-  const connectWallet = async () => {
-    if (!organizationInfo) return;
-    console.info('Connecting wallet');
-    const { subOrganizationId, walletAddress } = organizationInfo;
+  const depositWmatic = async (amount: string) : Promise<IKernelOperationStatus> => {
+    try{
+      if (!organizationInfo) return { } as IKernelOperationStatus;
+      const kernelClient = await getKernelClient(organizationInfo);
 
+      const wmaticDepositOpHash = await kernelClient.sendUserOperation({
+        userOperation: {
+          callData: await kernelClient.account.encodeCallData({
+            to: WMATIC,
+            value: parseUnits(amount, 18),
+            data: encodeFunctionData({
+              abi: WMatic,
+              functionName: 'deposit',
+              args: []
+            })
+          }),
+        }
+      });
+
+      const bundlerClient = kernelClient.extend(
+        bundlerActions(ENTRYPOINT_ADDRESS_V07),
+      );
+
+      const { success, reason } = await bundlerClient.waitForUserOperationReceipt({
+        hash: wmaticDepositOpHash,
+      });
+
+      return {
+        success,
+        reason
+      };
+    }catch (e) {
+      const errorReason = handleOnChainError(e as HttpRequestError);
+      return {
+        success: false,
+        reason: errorReason
+      };
+    }
+  };
+
+  const swapWmaticToDimo = async (amount: string) : Promise<IKernelOperationStatus> => {
+    try {
+      if (!organizationInfo) return { } as IKernelOperationStatus;
+      const kernelClient = await getKernelClient(organizationInfo);
+
+      const deadLine = Date.now() + 1000 * 60 * 10;
+      const omidExchangeOpHash = await kernelClient.sendUserOperation({
+        userOperation: {
+          callData: await kernelClient.account.encodeCallData({
+            to: SwapRouterAddress,
+            value: parseUnits(amount, 18),
+            data: encodeFunctionData({
+              abi: UniversalRouter,
+              functionName: 'exactInputSingle',
+              args: [
+                {
+                  tokenIn: WMATIC,
+                  tokenOut: config.DC_ADDRESS,
+                  fee: BigInt(10000),
+                  recipient: organizationInfo.smartContractAddress,
+                  amountIn: parseUnits(amount, 18),
+                  deadline: BigInt(deadLine),
+                  amountOutMinimum: BigInt(0),
+                  sqrtPriceLimitX96: BigInt(0)
+                }
+              ]
+            })
+          }),
+        }
+      });
+
+      const bundlerClient = kernelClient.extend(
+        bundlerActions(ENTRYPOINT_ADDRESS_V07),
+      );
+
+      const { success, reason } = await bundlerClient.waitForUserOperationReceipt({
+        hash: omidExchangeOpHash,
+      });
+      return {
+        success,
+        reason
+      };
+
+    } catch (e) {
+      const errorReason = handleOnChainError(e as HttpRequestError);
+      return {
+        success: false,
+        reason: errorReason
+      };
+    }
+  };
+
+  const mintDimoIntoDimoCredit = async (amount: string) : Promise<IKernelOperationStatus> => {
+    try{
+      if (!organizationInfo) return { } as IKernelOperationStatus;
+      const kernelClient = await getKernelClient(organizationInfo);
+      const dcxExchangeOpHash = await kernelClient.sendUserOperation({
+        userOperation: {
+          callData: await kernelClient.account.encodeCallData({
+            to: config.DCX_ADDRESS as `0x${string}`,
+            value: parseUnits(amount, 18),
+            data: encodeFunctionData({
+              abi: DimoCredit,
+              functionName: 'mintInDimo',
+              args: [organizationInfo.smartContractAddress, parseUnits(amount, 18)]
+            }),
+          }),
+        },
+      });
+
+      const bundlerClient = kernelClient.extend(
+        bundlerActions(ENTRYPOINT_ADDRESS_V07),
+      );
+
+      const { success, reason } = await bundlerClient.waitForUserOperationReceipt({
+        hash: dcxExchangeOpHash,
+      });
+
+      return {
+        success,
+        reason
+      };
+
+    } catch (e) {
+      const errorReason = handleOnChainError(e as HttpRequestError);
+      return {
+        success: false,
+        reason: errorReason
+      };
+    }
+  };
+
+  const getKernelClient = async ({subOrganizationId, walletAddress}: ISubOrganization) => {
     const chain = getChain();
-
     const stamperClient = new TurnkeyClient(
       {
         baseUrl: turnkeyConfig.apiBaseUrl,
@@ -223,12 +375,10 @@ export const useGlobalAccount = () => {
       ethereumAddress: walletAddress,
     });
 
-    const bundleRpc = process.env.NEXT_PUBLIC_BUNDLER_RPC!;
-
     const smartAccountClient = createWalletClient({
       account: localAccount,
       chain: chain,
-      transport: http(bundleRpc)
+      transport: http(turnkeyConfig.bundleRpc)
     });
 
     const smartAccountSigner =
@@ -236,7 +386,7 @@ export const useGlobalAccount = () => {
 
     const publicClient = createPublicClient({
       chain: chain,
-      transport: http(bundleRpc),
+      transport: http(turnkeyConfig.bundleRpc),
     });
 
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
@@ -257,14 +407,39 @@ export const useGlobalAccount = () => {
       account: zeroDevKernelAccount,
       chain: chain,
       entryPoint: ENTRYPOINT_ADDRESS_V07,
-      bundlerTransport: http(bundleRpc),
-
+      bundlerTransport: http(turnkeyConfig.bundleRpc),
+      middleware: {
+        sponsorUserOperation: sponsorUserOperation,
+      },
     });
 
+    return kernelClient;
+  };
 
-    //return new KernelEIP1193Provider(kernelClient);
+  const sponsorUserOperation = async ({ userOperation }) => {
+    const chain = getChain();
+    const zerodevPaymaster = createZeroDevPaymasterClient({
+      chain: chain,
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+      transport: http(turnkeyConfig.paymasterRpc),
+    });
+    return zerodevPaymaster.sponsorUserOperation({
+      userOperation,
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+    });
+  };
 
-    //await walletConnectKernelService.connect("wc:b31c3d6762c84ce15d3bf8b0c250d5a6a7ea5188ef09c6e8e25775b45ef6c3cd@2?expiryTimestamp=1728578837&relay-protocol=irn&symKey=65477b960e7430a6591fd3ea70d7f727624150145b2d063e1abcd1bcd28099ea");
+  const handleOnChainError = (error: HttpRequestError) : string => {
+    const errorData: `0x${string}` = error.details.replaceAll('"', '').split(': ')[1] as `0x${string}`;
+
+    const value = decodeErrorResult({
+      abi: wagmiAbi,
+      data: errorData
+    });
+
+    const { args } = value;
+
+    return args[0];
   };
 
   const getChain = (): Chain => {
@@ -297,7 +472,9 @@ export const useGlobalAccount = () => {
     emailRecovery,
     validCredentials,
     registerNewPasskey,
-    connectWallet
+    depositWmatic,
+    swapWmaticToDimo,
+    mintDimoIntoDimoCredit
   };
 };
 

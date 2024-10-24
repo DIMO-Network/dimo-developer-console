@@ -1,3 +1,5 @@
+import { OnrampSessionResult } from '@stripe/crypto';
+
 export interface IWalletSubOrganization {
   email: string;
   encodedChallenge?: string;
@@ -45,4 +47,20 @@ export interface IDcxPurchaseTransaction {
   dcxAmount: string;
   currency: string;
   transactionHash: string;
+}
+
+export interface IStripeCryptoEvent {
+  type: 'onramp_session_updated';
+  payload: {
+    session: StripeSession;
+  };
+}
+
+export interface StripeSession extends OnrampSessionResult {
+  destination_crypto_amount: string;
+}
+
+export interface IKernelOperationStatus {
+  success: boolean;
+  reason?: string;
 }

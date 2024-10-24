@@ -1,6 +1,7 @@
 import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
+import { DCX_ADDRESS } from './default';
 
 type Configuration = {
   appName: string;
@@ -17,6 +18,7 @@ type Configuration = {
   CONTRACT_NETWORK: bigint;
   DLC_ADDRESS: string;
   DC_ADDRESS: string;
+  DCX_ADDRESS: string;
   masFeePerGas: number;
   gasPrice: number;
 };

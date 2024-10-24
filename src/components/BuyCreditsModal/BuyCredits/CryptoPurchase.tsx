@@ -3,7 +3,7 @@ import useStripeCrypto from '@/hooks/useStripeCrypto';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { OnrampSession } from '@stripe/crypto';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { IDcxPurchaseTransaction, IStripeCryptoEvent } from '@/types/wallet';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
@@ -31,11 +31,12 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
   const handleOnReady = () => {
     setSessionReady(true);
   };
-  const handleOnChange = (event: { payload: { session: { status: string; destination_crypto_amount: string; } } }) => {
+
+  const handleOnChange = (event: IStripeCryptoEvent) => {
     if (event.payload.session.status === 'fulfillment_complete'){
       onNext('crypto-purchase',{
         ...transactionData,
-        maticAmount: event.payload.session.destination_crypto_amount,
+        maticAmount: event.payload.session.destination_crypto_amount//event.payload.session.destination_crypto_amount,
       });
     }
   };

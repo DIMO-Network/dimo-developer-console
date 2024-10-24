@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { loadStripeOnramp, StripeOnramp } from '@stripe/crypto/pure';
+import { loadStripeOnramp } from '@stripe/crypto/pure';
 
 export const useStripeCrypto = () => {
   const [stripeClientId, setStripeClientId] = useState<string | null>(null);
@@ -18,7 +18,7 @@ export const useStripeCrypto = () => {
     params.append('destination_network', 'polygon');
     params.append('destination_currency', 'matic');
 
-    const response = await fetch('https://api.stripe.com/v1/crypto/onramp_sessions', {
+    const response = await fetch(process.env.NEXT_PUBLIC_STRIPE_ONRAMP_API!, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

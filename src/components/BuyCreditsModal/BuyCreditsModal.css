@@ -33,5 +33,16 @@
     .credit-action {
       @apply flex flex-col w-full;
     }
+
+    .minting-process {
+      @apply flex flex-col w-full gap-2;
+      .minting-card {
+        @apply flex flex-row gap-2 border-2 rounded-xl border-gray-600 h-14 p-2 items-center justify-between pl-4 pr-4;
+
+        .spinner {
+          @apply mr-0;
+        }
+      }
+    }
   }
 }

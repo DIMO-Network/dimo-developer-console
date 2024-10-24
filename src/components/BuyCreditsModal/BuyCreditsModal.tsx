@@ -39,6 +39,11 @@ export const BuyCreditsModal: FC<IProps> = () => {
   const { Component: BuyCreditsFlow } = buyCreditsFlows[flow as keyof typeof buyCreditsFlows] ?? buyCreditsFlows['credits-amount'];
   const [transaction, setTransaction] = useState<Partial<IDcxPurchaseTransaction>>({});
 
+  const handleIsOpen = (open: boolean) => {
+    //setFlow('credits-amount');
+    setIsOpen(open);
+  };
+
   const handleNext = (actualFlow: string, transaction?: Partial<IDcxPurchaseTransaction>) => {
     setTransaction(transaction!);
     const currentStep = buyCreditsFlows[actualFlow as keyof typeof buyCreditsFlows];
@@ -55,7 +60,7 @@ export const BuyCreditsModal: FC<IProps> = () => {
   };
 
   return (
-    <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="buy-credits-modal">
+    <Modal isOpen={isOpen} setIsOpen={handleIsOpen} className="buy-credits-modal">
         <div className="buy-credits-content">
           <div className="buy-credits-header">
             <Title className="text-2xl" component="h3">
