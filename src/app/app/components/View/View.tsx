@@ -1,9 +1,9 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import { useContractGA } from '@/hooks/useContractGA';  //santi merge PR
+//import { useContractGA } from '@/hooks/useContractGA';  //santi merge PR
 import { getMyApps } from '@/services/app';
-import ERC20TokensList from './ERC20TokensList';
+import DimoAndDcxTokensList from './DimoAndDcxTokensList';
 import OnboardingSection from './OnboardingSection';
 import GetStartedSection from './GetStartedSection';
 import AttentionBox from './AttentionBox';
@@ -13,7 +13,9 @@ import './View.css';
 
 export const View: FC = () => {
     const { isOnboardingCompleted, isLoading } = useOnboarding();
-    const { balanceDimo, balanceDCX } = useContractGA();  // Get balances using the hook
+    //const { balanceDimo, balanceDCX } = useContractGA();  // Get balances using the hook
+    const balanceDimo = '1000';  // Hardcode for testing for now
+    const balanceDCX = '500';
     const [apps, setApps] = useState<Array<{ id: string; name: string; status: string }>>([]);
     const [loadingApps, setLoadingApps] = useState(true);
 
@@ -45,7 +47,7 @@ export const View: FC = () => {
             ) : (
                 <>
                     {/* Display ERC20 Tokens */}
-                    <ERC20TokensList tokens={[{ symbol: 'DIMO', balance: balanceDimo }, { symbol: 'DCX', balance: balanceDCX }]} />
+                    <DimoAndDcxTokensList tokens={[{ symbol: 'DIMO', balance: balanceDimo }, { symbol: 'DCX', balance: balanceDCX }]} />
 
                     {/* Display DIMO Balance */}
                     <div className="dimo-balance">
