@@ -8,8 +8,7 @@ import './BuyCreditsModal.css';
 import{ CryptoPurchase } from '@/components/BuyCreditsModal/BuyCredits/CryptoPurchase';
 import CreditsAmount from '@/components/BuyCreditsModal/BuyCredits/CreditsAmount';
 import CryptoExchange from '@/components/BuyCreditsModal/BuyCredits/CryptoExchange';
-import DcxConversion from '@/components/BuyCreditsModal/BuyCredits/DcxConversion';
-import { IAuth } from '@/types/auth';
+import ProcessComplete from '@/components/BuyCreditsModal/BuyCredits/ProcessComplete';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 
 interface IProps {}
@@ -27,8 +26,8 @@ const buyCreditsFlows = {
     Component: CryptoExchange,
     order: 3,
   },
-  'dcx-conversion': {
-    Component: DcxConversion,
+  'dcx-minted': {
+    Component: ProcessComplete,
     order: 4,
   }
 };
@@ -40,8 +39,8 @@ export const BuyCreditsModal: FC<IProps> = () => {
   const [transaction, setTransaction] = useState<Partial<IDcxPurchaseTransaction>>({});
 
   const handleIsOpen = (open: boolean) => {
-    //setFlow('credits-amount');
     setIsOpen(open);
+    setFlow('credits-amount');
   };
 
   const handleNext = (actualFlow: string, transaction?: Partial<IDcxPurchaseTransaction>) => {
@@ -57,6 +56,7 @@ export const BuyCreditsModal: FC<IProps> = () => {
     const nextStep =
       processes[(currentStep.order + 1) as keyof typeof processes] ?? 'complete';
     if (nextStep !== 'complete') setFlow(nextStep);
+    else handleIsOpen(false);
   };
 
   return (

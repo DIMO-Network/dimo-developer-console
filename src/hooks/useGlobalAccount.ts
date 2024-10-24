@@ -23,14 +23,12 @@ import {
   createWalletClient,
   decodeErrorResult,
   encodeFunctionData,
-  http, HttpRequestError,
-
+  http,
+  HttpRequestError,
   parseUnits,
-
 } from 'viem';
 import {
   bundlerActions,
-
   ENTRYPOINT_ADDRESS_V07,
   walletClientToSmartAccountSigner
 } from 'permissionless';
@@ -48,9 +46,6 @@ import UniversalRouter from '@/contracts/uniswapRouter.json';
 import DimoCredit from '@/contracts/DimoCreditContract.json';
 
 import { wagmiAbi } from '@/contracts/wagmi';
-
-const WMATIC: `0x${string}` = '0x360ad4f9a9A8EFe9A8DCB5f461c4Cc1047E1Dcf9';
-const SwapRouterAddress: `0x${string}` = '0x52D03752872F30B6AcD26979FD5EB7213bA62DaF';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -235,7 +230,7 @@ export const useGlobalAccount = () => {
       const wmaticDepositOpHash = await kernelClient.sendUserOperation({
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
-            to: WMATIC,
+            to: config.WMATIC,
             value: parseUnits(amount, 18),
             data: encodeFunctionData({
               abi: WMatic,
@@ -276,14 +271,14 @@ export const useGlobalAccount = () => {
       const omidExchangeOpHash = await kernelClient.sendUserOperation({
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
-            to: SwapRouterAddress,
+            to: config.SwapRouterAddress,
             value: parseUnits(amount, 18),
             data: encodeFunctionData({
               abi: UniversalRouter,
               functionName: 'exactInputSingle',
               args: [
                 {
-                  tokenIn: WMATIC,
+                  tokenIn: config.WMATIC,
                   tokenOut: config.DC_ADDRESS,
                   fee: BigInt(10000),
                   recipient: organizationInfo.smartContractAddress,
@@ -326,7 +321,7 @@ export const useGlobalAccount = () => {
       const dcxExchangeOpHash = await kernelClient.sendUserOperation({
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
-            to: config.DCX_ADDRESS as `0x${string}`,
+            to: config.DCX_ADDRESS,
             value: parseUnits(amount, 18),
             data: encodeFunctionData({
               abi: DimoCredit,
@@ -416,6 +411,7 @@ export const useGlobalAccount = () => {
     return kernelClient;
   };
 
+  // @ts-ignore
   const sponsorUserOperation = async ({ userOperation }) => {
     const chain = getChain();
     const zerodevPaymaster = createZeroDevPaymasterClient({

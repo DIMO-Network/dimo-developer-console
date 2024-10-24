@@ -1,12 +1,8 @@
 "use client";
 
 import { IDcxPurchaseTransaction } from '@/types/wallet';
-import { useTurnkey } from '@turnkey/sdk-react';
 import { useGlobalAccount } from '@/hooks';
 import { useContext, useEffect, useState } from 'react';
-
-import { BubbleLoader } from '@/components/BubbleLoader';
-import { Loader } from '@/components/Loader';
 import { Loading } from '@/components/Loading';
 import { CheckIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
@@ -92,6 +88,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
         return;
       }
       setSwappingIntoDimo(LoadingStatus.Success);
+      onNext('crypto-exchange', transactionData);
     } catch (error) {
       console.error('Error while swapping into DIMO', error);
       setSwappingIntoDimo(LoadingStatus.Error);

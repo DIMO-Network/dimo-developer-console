@@ -44,6 +44,7 @@ export const CreditsAmount = ({ onNext }:IProps) => {
     onNext('credits-amount', {
       destinationAddress: smartContractAddress,
       usdAmount: credits * 0.001,
+      dcxAmount: credits!.toFixed(2),
     });
   };
 

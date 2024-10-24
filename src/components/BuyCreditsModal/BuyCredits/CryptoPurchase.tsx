@@ -4,6 +4,7 @@ import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { OnrampSession } from '@stripe/crypto';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { IDcxPurchaseTransaction, IStripeCryptoEvent } from '@/types/wallet';
+import { OnrampUIEventMap } from '@stripe/crypto/types/crypto-js/onramp-session';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
@@ -33,6 +34,7 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
   };
 
   const handleOnChange = (event: IStripeCryptoEvent) => {
+    const f : OnrampUIEventMap["onramp_session_updated"] = event;
     if (event.payload.session.status === 'fulfillment_complete'){
       onNext('crypto-purchase',{
         ...transactionData,
