@@ -1,10 +1,10 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { createPublicClient } from 'viem';
 import { ContractType } from '@dimo-network/transactions';
 import { useOnboarding } from '@/hooks/useOnboarding';
-import { getMyApps, getMyApp } from '@/services/app';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
+import { getMyApps } from '@/services/app';
 import ERC20TokensList from './ERC20TokensList';
 import OnboardingSection from './OnboardingSection';
 import GetStartedSection from './GetStartedSection';
@@ -13,30 +13,32 @@ import AppsList from './AppsList';
 import TokenBalanceComponent from './TokenBalanceComponent';
 import './View.css';
 import * as http from "http";
-import {polygonAmoy} from "viem/chains";
+import { polygonAmoy } from "viem/chains";
+
+// Import contract mapping from transactions SDK
+import {
+    CHAIN_ABI_MAPPING,
+    ENVIRONMENT,
+    ENV_MAPPING,
+} from '@dimo-network/transactions';
+
+// Use environment mapping
+export const contractMapping =
+    CHAIN_ABI_MAPPING[ENV_MAPPING.get(process.env.NEXT_PUBLIC_ENV ?? "dev") ?? ENVIRONMENT.PROD].contracts;
 
 export const View: FC = () => {
     const { isOnboardingCompleted, isLoading } = useOnboarding();
+    const { organizationInfo } = useGlobalAccount();
     const [erc20Tokens, setErc20Tokens] = useState<Array<{ symbol: string; balance: string }>>([]);
     const [apps, setApps] = useState<Array<{ id: string; name: string; status: string }>>([]);
     const [loadingApps, setLoadingApps] = useState(true);
     const [dimoBalance, setDimoBalance] = useState<string>('0');
-    const router = useRouter();
 
     // Create the public client (RPC)
     const publicClient = createPublicClient({
         transport: http('https://rpc.zerodev.app/api/v2/bundler/f4d1596a-edfd-4063-8f99-2d8835e07739'),
         chain: polygonAmoy,
     });
-
-
-    // Contract mapping for DIMO token
-    const contractMapping = {
-        [ContractType.DIMO_TOKEN]: {
-            address: '0xDIMO_TOKEN_CONTRACT_ADDRESS',
-            abi: [],
-        },
-    };
 
     // Function to fetch DIMO balance using `balanceOf`
     const fetchDimoBalance = async (userAddress: string) => {
@@ -54,8 +56,6 @@ export const View: FC = () => {
             console.error('Error fetching DIMO balance:', error);
         }
     };
-
-
 
     const fetchERC20Tokens = async (accountAddress: string) => {
         try {
@@ -77,15 +77,6 @@ export const View: FC = () => {
         }
     };
 
-    const handleAppClick = async (id: string) => {
-        try {
-            const app = await getMyApp(id);
-            router.push(`/app/${app.id}`);
-        } catch (error) {
-            console.error('Error fetching app details:', error);
-        }
-    };
-
     useEffect(() => {
         if (isOnboardingCompleted) {
             const fetchAppsAndTokens = async () => {
@@ -93,7 +84,7 @@ export const View: FC = () => {
                     const response = await getMyApps();
                     setApps(response.results);
 
-                    const accountAddress = '<USER_GLOBAL_ACCOUNT_ADDRESS>';
+                    const accountAddress = organizationInfo.walletAddress;
                     await fetchERC20Tokens(accountAddress);
 
                     // Fetch DIMO balance for the same account
@@ -157,14 +148,14 @@ export const View: FC = () => {
                     {!hasDCXBalance && hasApps && (
                         <>
                             <AttentionBox />
-                            <AppsList apps={apps} onAppClick={handleAppClick} />
+                            <AppsList apps={apps} />
                         </>
                     )}
 
                     {/* Scenario 4: Apps created, DCX balance > 0 */}
                     {hasDCXBalance && hasApps && (
                         <>
-                            <AppsList apps={apps} onAppClick={handleAppClick} />
+                            <AppsList apps={apps} />
                             <TokenBalanceComponent
                                 balance={erc20Tokens.find(token => token.symbol === 'DCX')?.balance ?? '0'}
                                 exchangeRate={exchangeRate}

@@ -1,4 +1,6 @@
 import { FC } from 'react';
+import { useRouter } from 'next/navigation';
+import { getMyApp } from '@/services/app';
 import { Card } from '@/components/Card';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
@@ -11,10 +13,20 @@ interface App {
 
 interface Props {
     apps: App[];
-    onAppClick: (id: string) => void;
 }
 
-const AppsList: FC<Props> = ({ apps, onAppClick }) => {
+const AppsList: FC<Props> = ({ apps }) => {
+    const router = useRouter();
+
+    const handleAppClick = async (id: string) => {
+        try {
+            const app = await getMyApp(id);
+            router.push(`/app/${app.id}`);
+        } catch (error) {
+            console.error('Error fetching app details:', error);
+        }
+    };
+
     return (
         <div>
             <Title component="h2" className="text-lg">
@@ -26,7 +38,7 @@ const AppsList: FC<Props> = ({ apps, onAppClick }) => {
                         <Card key={app.id} className="app-card">
                             <p>{app.name}</p>
                             <p>{app.status}</p>
-                            <Button onClick={() => onAppClick(app.id)}>View App</Button>
+                            <Button onClick={() => handleAppClick(app.id)}>View App</Button>
                         </Card>
                     ))}
                 </div>
