@@ -1,6 +1,8 @@
 import { SuccessIcon } from '@/components/Icons';
 import { Button } from '@/components/Button';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { Title } from '@/components/Title';
+import { Card } from '@/components/Card';
 
 interface IProps {
   onNext: (
@@ -16,13 +18,13 @@ export const ProcessComplete = ({ onNext }: IProps) => {
   };
 
   return (
-    <div className="success-card">
+    <Card className="success-card">
       <SuccessIcon className="w-10 h-10" />
-      <h1>Successfully Minted DCX</h1>
+      <Title component="h1">Successfully Minted DCX</Title>
       <Button className="primary w-40 !h-9" onClick={handleFinish}>
         Finish
       </Button>
-    </div>
+    </Card>
   );
 };
 

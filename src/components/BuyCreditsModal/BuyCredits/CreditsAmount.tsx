@@ -6,6 +6,8 @@ import { useGlobalAccount } from '@/hooks';
 import { useContext } from 'react';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { TextError } from '@/components/TextError';
+import config from '@/config';
 
 interface IForm {
   credits: number;
@@ -30,7 +32,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      credits: 0,
+      credits: config.MINIMUM_CREDITS,
       paymentMethod: {
         type: 'wallet',
       },
@@ -66,6 +68,13 @@ export const CreditsAmount = ({ onNext }: IProps) => {
           { label: '1M', value: 1000000 },
         ]}
       />
+      <div className="flex flex-col items-center">
+        {credits < config.MINIMUM_CREDITS && (
+          <TextError
+            errorMessage={`Minimum allowed DCX purchase of ${config.MINIMUM_CREDITS}`}
+          />
+        )}
+      </div>
       <div style={{ textAlign: 'center', margin: '10px 0' }}>
         <p>1 DCX = $0.01 USD</p>
         <p>1 DIMO = $0.20 USD</p>
@@ -76,7 +85,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       </div>
       <div className="credit-action">
         <Button
-          disabled={credits === 0}
+          disabled={credits < config.MINIMUM_CREDITS}
           className="primary !h-9"
           onClick={handleShowIframe}
         >

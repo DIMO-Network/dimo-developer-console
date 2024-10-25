@@ -45,7 +45,7 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
     if (event.payload.session.status === 'fulfillment_complete') {
       onNext('crypto-purchase', {
         ...transactionData,
-        maticAmount: event.payload.session.destination_crypto_amount, //event.payload.session.destination_crypto_amount,
+        maticAmount: event.payload.session.destination_crypto_amount,
       });
     }
   };

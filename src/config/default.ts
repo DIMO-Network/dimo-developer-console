@@ -72,5 +72,7 @@ export const SwapRouterAddress: `0x${string}` =
 export const masFeePerGas = 60000000000;
 export const gasPrice = 43000000000;
 
+export const MINIMUM_CREDITS = 10000;
+
 export const DIMO_CONTRACT_ADDRESS =
   '0x523d4a08cf149f1Ada8113B3b3400234236Bb5E8';
