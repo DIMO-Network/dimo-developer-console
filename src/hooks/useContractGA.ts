@@ -6,11 +6,12 @@ import useGlobalAccount from '@/hooks/useGlobalAccount';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import { ISubOrganization } from '@/types/wallet';
 
 import configuration from '@/config';
 
 export const useContractGA = () => {
-  const { organizationInfo, connectWallet } = useGlobalAccount();
+  const { organizationInfo, getKernelClient, getPublicClient } = useGlobalAccount();
   const [balanceDimo, setBalanceDimo] = useState<number>(0);
   const [balanceDCX, setBalanceDCX] = useState<number>(0);
   const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
@@ -25,45 +26,41 @@ export const useContractGA = () => {
   useEffect(() => {
     if (!organizationInfo) return;
 
-    connectWallet().then((walletData) => {
-      const { kernelClient, publicClient } = walletData ?? {};
-      if (!kernelClient) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const kernelClient = getKernelClient(organizationInfo as ISubOrganization) as any;
+    const publicClient = getPublicClient();
+    setDimoContract(
+      getContract({
+        address: configuration.DC_ADDRESS,
+        abi: DimoABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        }
+      }),
+    );
 
-      setDimoContract(
-        getContract({
-          address: configuration.DC_ADDRESS,
-          abi: DimoABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          }
-        }),
-      );
+    setLicenseContract(
+      getContract({
+        address: configuration.DLC_ADDRESS,
+        abi: LicenseABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        }
+      }),
+    );
 
-      setLicenseContract(
-        getContract({
-          address: configuration.DLC_ADDRESS,
-          abi: LicenseABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          }
-        }),
-      );
-
-      setDimoCreditsContract(
-        getContract({
-          address: configuration.DIMO_CREDITS_CONTRACT_ADDRESS,
-          abi: DimoCreditsABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          }
-        }),
-      );
-
-      return { dimoContract, licenseContract };
-    });
+    setDimoCreditsContract(
+      getContract({
+        address: configuration.DCX_ADDRESS,
+        abi: DimoCreditsABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        }
+      }),
+    );
   }, [organizationInfo]);
 
   useEffect(() => {
@@ -84,7 +81,7 @@ export const useContractGA = () => {
         setAllowanceDLC(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });
 
-    dimoContract.read.allowance([organizationInfo.walletAddress, configuration.DIMO_CREDITS_CONTRACT_ADDRESS])
+    dimoContract.read.allowance([organizationInfo.walletAddress, configuration.DCX_ADDRESS])
       .then((currentBalanceWei: unknown) => {
         setAllowanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });

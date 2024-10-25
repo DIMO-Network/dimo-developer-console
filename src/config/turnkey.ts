@@ -5,6 +5,8 @@ export const turnkeyConfig = {
   apiPublicKey: process.env.NEXT_PUBLIC_TURNKEY_API_PUBLIC_KEY!,
   defaultOrganizationId: process.env.NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID!,
   rpId: process.env.NEXT_PUBLIC_RPID!,
+  bundleRpc: process.env.NEXT_PUBLIC_BUNDLER_RPC!,
+  paymasterRpc: process.env.NEXT_PUBLIC_PAYMASTER_RPC!,
 };
 
 const turnkeyClient = new Turnkey({
@@ -13,4 +15,5 @@ const turnkeyClient = new Turnkey({
   apiPublicKey: turnkeyConfig.apiPublicKey,
   defaultOrganizationId: turnkeyConfig.defaultOrganizationId,
 });
+
 export const turnkeyApiClient = turnkeyClient.apiClient();

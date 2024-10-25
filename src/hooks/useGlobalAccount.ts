@@ -2,39 +2,54 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
-import { useSession } from 'next-auth/react';
-import { IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
-import { useRouter } from 'next/navigation';
-import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
-import { isEmpty } from 'lodash';
-import { signOut } from 'next-auth/react';
-import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
-import { createKernelAccount, createKernelAccountClient } from '@zerodev/sdk';
-import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
-import {
-  walletClientToSmartAccountSigner,
-  ENTRYPOINT_ADDRESS_V07,
-} from 'permissionless';
-import { http } from 'wagmi';
-import { type Chain, polygon, polygonAmoy } from 'wagmi/chains';
-import { createAccount } from '@turnkey/viem';
-import {
-  createWalletClient,
-  createPublicClient,
-  type PublicClient,
-} from 'viem';
-
 import {
   createSubOrganization,
   getUserSubOrganization,
   rewirePasskey,
   startEmailRecovery,
 } from '@/services/globalAccount';
-import { turnkeyConfig } from '@/config/turnkey';
-
+import { signOut, useSession } from 'next-auth/react';
+import {
+  IKernelOperationStatus,
+  IPasskeyAttestation,
+  ISubOrganization,
+} from '@/types/wallet';
+import { useRouter } from 'next/navigation';
+import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
+import { isEmpty } from 'lodash';
 import configuration from '@/config';
+import config from '@/config';
+import { turnkeyConfig } from '@/config/turnkey';
+import { createAccount } from '@turnkey/viem';
+import {
+  Chain,
+  createPublicClient,
+  createWalletClient,
+  decodeErrorResult,
+  encodeFunctionData,
+  http,
+  HttpRequestError,
+  parseUnits,
+} from 'viem';
+import {
+  bundlerActions,
+  ENTRYPOINT_ADDRESS_V07,
+  walletClientToSmartAccountSigner,
+} from 'permissionless';
+import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
+import {
+  createKernelAccount,
+  createKernelAccountClient,
+  createZeroDevPaymasterClient,
+} from '@zerodev/sdk';
+import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
+import { polygon, polygonAmoy } from 'wagmi/chains';
 
-const BUNDLE_RPC = process.env.NEXT_PUBLIC_BUNDLER_RPC!;
+import WMatic from '@/contracts/wmatic.json';
+import UniversalRouter from '@/contracts/uniswapRouter.json';
+import DimoCredit from '@/contracts/DimoCreditContract.json';
+
+import { wagmiAbi } from '@/contracts/wagmi';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -211,27 +226,159 @@ export const useGlobalAccount = () => {
     return true;
   };
 
-  const getChain = (): Chain => {
-    const { VERCEL_ENV: environment } = process.env;
+  const depositWmatic = async (
+    amount: string,
+  ): Promise<IKernelOperationStatus> => {
+    try {
+      if (!organizationInfo) return {} as IKernelOperationStatus;
+      const kernelClient = await getKernelClient(organizationInfo);
 
-    if (environment === 'production') {
-      return polygon;
+      const wmaticDepositOpHash = await kernelClient.sendUserOperation({
+        userOperation: {
+          callData: await kernelClient.account.encodeCallData({
+            to: config.WMATIC,
+            value: parseUnits(amount, 18),
+            data: encodeFunctionData({
+              abi: WMatic,
+              functionName: 'deposit',
+              args: [],
+            }),
+          }),
+        },
+      });
+
+      const bundlerClient = kernelClient.extend(
+        bundlerActions(ENTRYPOINT_ADDRESS_V07),
+      );
+
+      const { success, reason } =
+        await bundlerClient.waitForUserOperationReceipt({
+          hash: wmaticDepositOpHash,
+        });
+
+      return {
+        success,
+        reason,
+      };
+    } catch (e) {
+      const errorReason = handleOnChainError(e as HttpRequestError);
+      return {
+        success: false,
+        reason: errorReason,
+      };
     }
-
-    return polygonAmoy;
   };
 
-  const connectWallet = async () => {
-    if (!organizationInfo) return;
+  const swapWmaticToDimo = async (
+    amount: string,
+  ): Promise<IKernelOperationStatus> => {
+    try {
+      if (!organizationInfo) return {} as IKernelOperationStatus;
+      const kernelClient = await getKernelClient(organizationInfo);
 
-    const { subOrganizationId, walletAddress } = organizationInfo;
+      const deadLine = Date.now() + 1000 * 60 * 10;
+      const omidExchangeOpHash = await kernelClient.sendUserOperation({
+        userOperation: {
+          callData: await kernelClient.account.encodeCallData({
+            to: config.SwapRouterAddress,
+            value: parseUnits(amount, 18),
+            data: encodeFunctionData({
+              abi: UniversalRouter,
+              functionName: 'exactInputSingle',
+              args: [
+                {
+                  tokenIn: config.WMATIC,
+                  tokenOut: config.DC_ADDRESS,
+                  fee: BigInt(10000),
+                  recipient: organizationInfo.smartContractAddress,
+                  amountIn: parseUnits(amount, 18),
+                  deadline: BigInt(deadLine),
+                  amountOutMinimum: BigInt(0),
+                  sqrtPriceLimitX96: BigInt(0),
+                },
+              ],
+            }),
+          }),
+        },
+      });
+
+      const bundlerClient = kernelClient.extend(
+        bundlerActions(ENTRYPOINT_ADDRESS_V07),
+      );
+
+      const { success, reason } =
+        await bundlerClient.waitForUserOperationReceipt({
+          hash: omidExchangeOpHash,
+        });
+      return {
+        success,
+        reason,
+      };
+    } catch (e) {
+      const errorReason = handleOnChainError(e as HttpRequestError);
+      return {
+        success: false,
+        reason: errorReason,
+      };
+    }
+  };
+
+  const mintDimoIntoDimoCredit = async (
+    amount: string,
+  ): Promise<IKernelOperationStatus> => {
+    try {
+      if (!organizationInfo) return {} as IKernelOperationStatus;
+      const kernelClient = await getKernelClient(organizationInfo);
+      const dcxExchangeOpHash = await kernelClient.sendUserOperation({
+        userOperation: {
+          callData: await kernelClient.account.encodeCallData({
+            to: config.DCX_ADDRESS,
+            value: parseUnits(amount, 18),
+            data: encodeFunctionData({
+              abi: DimoCredit,
+              functionName: 'mintInDimo',
+              args: [
+                organizationInfo.smartContractAddress,
+                parseUnits(amount, 18),
+              ],
+            }),
+          }),
+        },
+      });
+
+      const bundlerClient = kernelClient.extend(
+        bundlerActions(ENTRYPOINT_ADDRESS_V07),
+      );
+
+      const { success, reason } =
+        await bundlerClient.waitForUserOperationReceipt({
+          hash: dcxExchangeOpHash,
+        });
+
+      return {
+        success,
+        reason,
+      };
+    } catch (e) {
+      const errorReason = handleOnChainError(e as HttpRequestError);
+      return {
+        success: false,
+        reason: errorReason,
+      };
+    }
+  };
+
+  const getKernelClient = async ({
+    subOrganizationId,
+    walletAddress,
+  }: ISubOrganization) => {
     const chain = getChain();
-
     const stamperClient = new TurnkeyClient(
-      { baseUrl: turnkeyConfig.apiBaseUrl },
+      {
+        baseUrl: turnkeyConfig.apiBaseUrl,
+      },
       passkeyClient!.config.stamper!,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any;
+    );
 
     const localAccount = await createAccount({
       client: stamperClient,
@@ -243,17 +390,13 @@ export const useGlobalAccount = () => {
     const smartAccountClient = createWalletClient({
       account: localAccount,
       chain: chain,
-      transport: http(BUNDLE_RPC),
+      transport: http(turnkeyConfig.bundleRpc),
     });
 
     const smartAccountSigner =
       walletClientToSmartAccountSigner(smartAccountClient);
 
-    const publicClient = createPublicClient({
-      chain: chain,
-      transport: http(BUNDLE_RPC),
-    }) as PublicClient;
-
+    const publicClient = getPublicClient();
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer: smartAccountSigner,
       entryPoint: ENTRYPOINT_ADDRESS_V07,
@@ -269,17 +412,65 @@ export const useGlobalAccount = () => {
     });
 
     const kernelClient = createKernelAccountClient({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      account: zeroDevKernelAccount as any,
+      account: zeroDevKernelAccount,
       chain: chain,
       entryPoint: ENTRYPOINT_ADDRESS_V07,
-      bundlerTransport: http(BUNDLE_RPC),
+      bundlerTransport: http(turnkeyConfig.bundleRpc),
+      middleware: {
+        sponsorUserOperation: sponsorUserOperation,
+      },
     });
 
-    return {
-      kernelClient,
-      publicClient,
-    };
+    return kernelClient;
+  };
+
+  const getPublicClient = () => {
+    const chain = getChain();
+    const publicClient = createPublicClient({
+      chain: chain,
+      transport: http(turnkeyConfig.bundleRpc),
+    });
+
+    return publicClient;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sponsorUserOperation = async ({ userOperation }: { userOperation: any }) => {
+    const chain = getChain();
+    const zerodevPaymaster = createZeroDevPaymasterClient({
+      chain: chain,
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+      transport: http(turnkeyConfig.paymasterRpc),
+    });
+    return zerodevPaymaster.sponsorUserOperation({
+      userOperation,
+      entryPoint: ENTRYPOINT_ADDRESS_V07,
+    });
+  };
+
+  const handleOnChainError = (error: HttpRequestError): string => {
+    const errorData: `0x${string}` = error.details
+      .replaceAll('"', '')
+      .split(': ')[1] as `0x${string}`;
+
+    const value = decodeErrorResult({
+      abi: wagmiAbi,
+      data: errorData,
+    });
+
+    const { args } = value;
+
+    return args[0];
+  };
+
+  const getChain = (): Chain => {
+    const { VERCEL_ENV: environment } = process.env;
+
+    if (environment === 'production') {
+      return polygon;
+    }
+
+    return polygonAmoy;
   };
 
   useEffect(() => {
@@ -302,8 +493,13 @@ export const useGlobalAccount = () => {
     emailRecovery,
     validCredentials,
     registerNewPasskey,
-    connectWallet,
+    depositWmatic,
+    swapWmaticToDimo,
+    mintDimoIntoDimoCredit,
+    getPublicClient,
+    getKernelClient,
   };
 };
 
 export default useGlobalAccount;
+

@@ -6,6 +6,8 @@ import { turnkeyConfig } from '@/config/turnkey';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { useAccountInformation } from '@/hooks';
 import { AccountInformationModal } from '@/components/AccountInformationModal';
+import { StripeCryptoContext } from '@/context/StripeCryptoContext';
+import useStripeCrypto from '@/hooks/useStripeCrypto';
 
 export const withTurnKey = <P extends object>(
   WrappedComponent: ComponentType<P>,
@@ -14,14 +16,20 @@ export const withTurnKey = <P extends object>(
     const { showAccountInformation, setShowAccountInformation } =
       useAccountInformation();
 
+    const { stripeClientId, setStripeClientId } = useStripeCrypto();
+
     // Render the wrapped component with any additional props
     return (
       <TurnkeyProvider config={turnkeyConfig}>
         <AccountInformationContext.Provider
           value={{ showAccountInformation, setShowAccountInformation }}
         >
-          <WrappedComponent {...props} />
-          <AccountInformationModal />
+          <StripeCryptoContext.Provider
+            value={{ stripeClientId, setStripeClientId }}
+          >
+            <WrappedComponent {...props} />
+            <AccountInformationModal />
+          </StripeCryptoContext.Provider>
         </AccountInformationContext.Provider>
       </TurnkeyProvider>
     );

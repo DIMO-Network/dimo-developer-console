@@ -81,7 +81,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
 
   const mintDCX = async () => {
     if (!hasEnoughAllowanceDCX) {
-      await dimoContract.write.approve([configuration.DIMO_CREDITS_CONTRACT_ADDRESS, configuration.desiredAmountOfDimo]);
+      await dimoContract.write.approve([configuration.DCX_ADDRESS, configuration.desiredAmountOfDimo]);
     }
 
     // Call mintInDimo 2 parameteres

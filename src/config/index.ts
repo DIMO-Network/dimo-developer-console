@@ -17,7 +17,9 @@ type Configuration = {
   CONTRACT_NETWORK: bigint;
   DLC_ADDRESS: `0x${string}`;
   DC_ADDRESS: `0x${string}`;
-  DIMO_CREDITS_CONTRACT_ADDRESS: `0x${string}`;
+  DCX_ADDRESS: `0x${string}`;
+  WMATIC: `0x${string}`;
+  SwapRouterAddress: `0x${string}`;
   masFeePerGas: number;
   gasPrice: number;
   desiredAmountOfDCX: number;
