@@ -66,7 +66,9 @@ export const middleware = async (
   try {
     if (token) {
       const user = await getUserByToken();
-      const subOrganization = await getUserSubOrganization(user.email);
+      const subOrganization = await getUserSubOrganization(
+        user.company_email_owner ?? user.email
+      );
       request.user = new LoggedUser(user, subOrganization);
 
       const isCompliant = request.user?.isCompliant ?? false;
