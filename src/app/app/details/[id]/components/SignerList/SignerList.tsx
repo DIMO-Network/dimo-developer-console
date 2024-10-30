@@ -11,13 +11,11 @@ import { IApp, ISigner } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { TeamRoles } from '@/types/team';
-import { useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
 import { useSession } from 'next-auth/react';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
-import { IKernelOperationStatus } from '@/types/wallet';
-import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
 
 interface IProps {
   app: IApp;
@@ -28,7 +26,8 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { workspace } = useOnboarding();
-  const { organizationInfo, getKernelClient } = useGlobalAccount();
+  const { organizationInfo } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
@@ -52,28 +51,6 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
       }
     }];
     await processTransactions(transaction);
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const processTransactions = async (transactions: Array<any>) => {
-    if (!organizationInfo) return {} as IKernelOperationStatus;
-    const kernelClient = await getKernelClient(organizationInfo);
-    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-      userOperation: {
-        callData: await kernelClient.account.encodeCallData(transactions),
-      },
-    });
-
-    const bundlerClient = kernelClient.extend(
-      bundlerActions(ENTRYPOINT_ADDRESS_V07),
-    );
-
-    const { reason } =
-      await bundlerClient.waitForUserOperationReceipt({
-        hash: dcxExchangeOpHash,
-      });
-
-    if (reason) return Promise.reject(reason);
   };
 
   const renderWithCopy = (columnName: string, data: Record<string, string>) => {

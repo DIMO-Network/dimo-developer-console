@@ -6,9 +6,10 @@ import useGlobalAccount from '@/hooks/useGlobalAccount';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
-import { ISubOrganization } from '@/types/wallet';
+import { IKernelOperationStatus, ISubOrganization } from '@/types/wallet';
 
 import configuration from '@/config';
+import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
 
 export const useContractGA = () => {
   const { organizationInfo, getKernelClient, getPublicClient } = useGlobalAccount();
@@ -63,6 +64,31 @@ export const useContractGA = () => {
     );
   }, [organizationInfo]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const processTransactions = async (transactions: Array<any>) => {
+    if (!organizationInfo) return {} as IKernelOperationStatus;
+    const kernelClient = await getKernelClient(organizationInfo);
+    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
+      userOperation: {
+        callData: await kernelClient.account.encodeCallData(transactions),
+      },
+    });
+
+    console.log({ dcxExchangeOpHash });
+    const bundlerClient = kernelClient.extend(
+      bundlerActions(ENTRYPOINT_ADDRESS_V07),
+    );
+
+    const receipt =
+      await bundlerClient.waitForUserOperationReceipt({
+        hash: dcxExchangeOpHash,
+      });
+
+    console.log({ receipt });
+
+    if (receipt.reason) return Promise.reject(receipt.reason);
+  };
+
   useEffect(() => {
     if (!dimoContract || !organizationInfo) return;
 
@@ -98,6 +124,7 @@ export const useContractGA = () => {
     balanceDCX,
     allowanceDLC,
     allowanceDCX,
+    processTransactions,
     hasEnoughBalanceDCX: balanceDCX >= configuration.desiredAmountOfDCX,
     hasEnoughBalanceDimo: balanceDCX >= configuration.desiredAmountOfDimo,
     hasEnoughAllowanceDLC: allowanceDLC >= configuration.desiredAmountOfDCX,

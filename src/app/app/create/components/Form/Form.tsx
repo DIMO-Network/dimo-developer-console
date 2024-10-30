@@ -50,6 +50,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     hasEnoughBalanceDimo,
     balanceDCX,
     balanceDimo,
+    processTransactions,
   } = useContractGA();
   const { organizationInfo, getKernelClient } = useGlobalAccount();
   const router = useRouter();
@@ -84,7 +85,10 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
       }
 
       transactions.push(...(await prepareIssueInDC()));
-      await processTransactions(transactions);
+      if (transactions.length) {
+        await processTransactions(transactions);
+      }
+
       await handleCreateApp();
     } catch (error: unknown) {
       console.log(error);
@@ -97,30 +101,6 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
       setIsLoading(false);
       setIsOpened(false);
     }
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const processTransactions = async (transactions: Array<any>) => {
-    if (!organizationInfo) return {} as IKernelOperationStatus;
-    const kernelClient = await getKernelClient(organizationInfo);
-    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-      userOperation: {
-        callData: await kernelClient.account.encodeCallData(transactions),
-      },
-    });
-
-    const bundlerClient = kernelClient.extend(
-      bundlerActions(ENTRYPOINT_ADDRESS_V07),
-    );
-
-    const { success, reason } =
-      await bundlerClient.waitForUserOperationReceipt({
-        hash: dcxExchangeOpHash,
-      });
-
-    console.log({ reason, success });
-
-    if (reason) return Promise.reject(reason);
   };
 
   const mintDCX = async () => {

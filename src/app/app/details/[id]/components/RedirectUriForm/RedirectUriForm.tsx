@@ -11,14 +11,12 @@ import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
 
 import './RedirectUriForm.css';
-import { IKernelOperationStatus } from '@/types/wallet';
-import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
 
 interface IRedirectUri {
   uri: string;
@@ -34,7 +32,8 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { workspace } = useOnboarding();
-  const { organizationInfo, getKernelClient } = useGlobalAccount();
+  const { organizationInfo } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
   const {
     formState: { errors },
     handleSubmit,
@@ -62,28 +61,6 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
       }
     }];
     await processTransactions(transaction);
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const processTransactions = async (transactions: Array<any>) => {
-    if (!organizationInfo) return {} as IKernelOperationStatus;
-    const kernelClient = await getKernelClient(organizationInfo);
-    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-      userOperation: {
-        callData: await kernelClient.account.encodeCallData(transactions),
-      },
-    });
-
-    const bundlerClient = kernelClient.extend(
-      bundlerActions(ENTRYPOINT_ADDRESS_V07),
-    );
-
-    const { reason } =
-      await bundlerClient.waitForUserOperationReceipt({
-        hash: dcxExchangeOpHash,
-      });
-
-    if (reason) return Promise.reject(reason);
   };
 
   const addRedirectUri = async () => {

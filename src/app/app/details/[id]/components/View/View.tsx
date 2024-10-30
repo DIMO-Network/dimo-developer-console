@@ -17,14 +17,12 @@ import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriLi
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { TeamRoles } from '@/types/team';
 import { Title } from '@/components/Title';
-import { useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
 
 import './View.css';
-import { IKernelOperationStatus } from '@/types/wallet';
-import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
 
 export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const [app, setApp] = useState<IApp>();
@@ -33,7 +31,8 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
   const { workspace } = useOnboarding();
-  const { organizationInfo, getKernelClient } = useGlobalAccount();
+  const { organizationInfo } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
   const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => refreshAppDetails(), []);
@@ -61,28 +60,6 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
       }
     }];
     await processTransactions(transaction);
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const processTransactions = async (transactions: Array<any>) => {
-    if (!organizationInfo) return {} as IKernelOperationStatus;
-    const kernelClient = await getKernelClient(organizationInfo);
-    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-      userOperation: {
-        callData: await kernelClient.account.encodeCallData(transactions),
-      },
-    });
-
-    const bundlerClient = kernelClient.extend(
-      bundlerActions(ENTRYPOINT_ADDRESS_V07),
-    );
-
-    const { reason } =
-      await bundlerClient.waitForUserOperationReceipt({
-        hash: dcxExchangeOpHash,
-      });
-
-    if (reason) return Promise.reject(reason);
   };
 
   const handleGenerateSigner = async () => {
