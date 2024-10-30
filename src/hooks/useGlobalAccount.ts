@@ -43,7 +43,7 @@ import {
   createZeroDevPaymasterClient,
 } from '@zerodev/sdk';
 import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
-import { polygon, polygonAmoy } from 'wagmi/chains';
+import { polygon } from 'wagmi/chains';
 
 import WMatic from '@/contracts/wmatic.json';
 import UniversalRouter from '@/contracts/uniswapRouter.json';
@@ -372,6 +372,7 @@ export const useGlobalAccount = () => {
     subOrganizationId,
     walletAddress,
   }: ISubOrganization) => {
+    console.log({ subOrganizationId, walletAddress });
     const chain = getChain();
     const stamperClient = new TurnkeyClient(
       {
@@ -386,6 +387,7 @@ export const useGlobalAccount = () => {
       signWith: walletAddress,
       ethereumAddress: walletAddress,
     });
+    console.log({ localAccount });
 
     const smartAccountClient = createWalletClient({
       account: localAccount,
@@ -470,7 +472,8 @@ export const useGlobalAccount = () => {
       return polygon;
     }
 
-    return polygonAmoy;
+    return polygon;
+    // return polygonAmoy;
   };
 
   useEffect(() => {

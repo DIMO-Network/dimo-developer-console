@@ -78,11 +78,13 @@ export const useContractGA = () => {
 
     dimoContract.read.allowance([organizationInfo.walletAddress, configuration.DLC_ADDRESS])
       .then((currentBalanceWei: unknown) => {
+        console.log({ dlcAllowance: currentBalanceWei });
         setAllowanceDLC(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });
 
     dimoContract.read.allowance([organizationInfo.walletAddress, configuration.DCX_ADDRESS])
       .then((currentBalanceWei: unknown) => {
+        console.log({ dcxAllowance: currentBalanceWei });
         setAllowanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });
   });

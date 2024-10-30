@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { FC, useContext, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import _ from 'lodash';
 import { utils } from 'web3';
 
 import classNames from 'classnames';
@@ -16,13 +17,20 @@ import { SpendingLimitModal } from '@/components/SpendingLimitModal';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { NotificationContext } from '@/context/notificationContext';
-import { useContractGA } from '@/hooks';
+import { useContractGA, useGlobalAccount } from '@/hooks';
 import { IAppWithWorkspace } from '@/types/app';
 import { IWorkspace } from '@/types/workspace';
+import DimoABI from '@/contracts/DimoTokenContract.json';
+import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
 
 import './Form.css';
+import { IKernelOperationStatus } from '@/types/wallet';
+import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
+import { parseUnits, encodeFunctionData } from 'viem';
+import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
 
 
 interface IProps {
@@ -36,15 +44,14 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const {
-    dimoCreditsContract,
-    licenseContract,
-    dimoContract,
     hasEnoughAllowanceDLC,
     hasEnoughAllowanceDCX,
     hasEnoughBalanceDCX,
     hasEnoughBalanceDimo,
-    address,
+    balanceDCX,
+    balanceDimo,
   } = useContractGA();
+  const { organizationInfo, getKernelClient } = useGlobalAccount();
   const router = useRouter();
   const {
     control,
@@ -56,19 +63,31 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
+  const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
+  const [isOpened, setIsOpened] = useState<boolean>(false);
+  console.log({ balanceDimo, balanceDCX });
 
   const onSubmit = async () => {
     try {
       setIsLoading(true);
+      setIsOpened(true);
+      setLoadingStatus({
+        label: 'Preparing DCX to license the application...',
+        status: 'loading',
+      });
+      const transactions = [];
+
       if (!hasEnoughBalanceDCX && !hasEnoughBalanceDimo) setNotification('Insufficient Dimo or DCX balance', 'Oops...', 'error');
 
       if (!hasEnoughBalanceDCX) {
-        await mintDCX();
+        transactions.push(...(await mintDCX()));
       }
 
-      await prepareIssueInDC();
+      transactions.push(...(await prepareIssueInDC()));
+      await processTransactions(transactions);
       await handleCreateApp();
     } catch (error: unknown) {
+      console.log(error);
       setNotification(
         'Something went wrong while confirming the transaction',
         'Oops...',
@@ -76,30 +95,125 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
       );
     } finally {
       setIsLoading(false);
+      setIsOpened(false);
     }
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const processTransactions = async (transactions: Array<any>) => {
+    if (!organizationInfo) return {} as IKernelOperationStatus;
+    const kernelClient = await getKernelClient(organizationInfo);
+    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
+      userOperation: {
+        callData: await kernelClient.account.encodeCallData(transactions),
+      },
+    });
+
+    const bundlerClient = kernelClient.extend(
+      bundlerActions(ENTRYPOINT_ADDRESS_V07),
+    );
+
+    const { success, reason } =
+      await bundlerClient.waitForUserOperationReceipt({
+        hash: dcxExchangeOpHash,
+      });
+
+    console.log({ reason, success });
+
+    if (reason) return Promise.reject(reason);
   };
 
   const mintDCX = async () => {
+    const transactions = [];
     if (!hasEnoughAllowanceDCX) {
-      await dimoContract.write.approve([configuration.DCX_ADDRESS, configuration.desiredAmountOfDimo]);
+      transactions.push({
+        to: configuration.DC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoABI,
+          functionName: 'approve',
+          args: [
+            configuration.DCX_ADDRESS,
+            BigInt(utils.toWei(configuration.desiredAmountOfDimo, 'ether')),
+          ],
+        }),
+      });
     }
 
     // Call mintInDimo 2 parameteres
-    await dimoCreditsContract.write['0xec88fc37']([address, configuration.desiredAmountOfDimo]);
+    transactions.push({
+      to: configuration.DCX_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoCreditsABI,
+        functionName: 'mintInDimo',
+        args: [
+          organizationInfo!.walletAddress,
+          configuration.desiredAmountOfDimo,
+        ],
+      }),
+    });
+    return transactions;
   };
 
   const prepareIssueInDC = async () => {
-    if (hasEnoughAllowanceDLC) return;
+    if (hasEnoughAllowanceDLC) return [];
 
-    await dimoContract.write.approve([configuration.DLC_ADDRESS, configuration.desiredAmountOfDCX]);
+    return [{
+      to: configuration.DC_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoABI,
+        functionName: 'approve',
+        args: [
+          configuration.DLC_ADDRESS,
+          parseUnits(String(configuration.desiredAmountOfDimo), 18),
+        ],
+      }),
+    }];
   };
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
-    if (workspace) return workspace;
+    if (!_.isEmpty(workspace)) return workspace;
+    if (!organizationInfo) return {} as IKernelOperationStatus;
 
+    setLoadingStatus({
+      label: 'Licensing the application...',
+      status: 'loading',
+    });
     const workspaceName = String(
-      utils.fromAscii(workspaceData?.name ?? ''),
+      utils.fromAscii(workspaceData?.name ?? '')
     ).padEnd(66, '0');
+    setLoadingStatus({
+      label: 'Creating developer license...',
+      status: 'loading',
+    });
+    const kernelClient = await getKernelClient(organizationInfo);
+    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
+      userOperation: {
+        callData: await kernelClient.account.encodeCallData({
+          to: configuration.DLC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoLicenseABI,
+            functionName: '0xaf509d9f',
+            args: [
+              workspaceName,
+            ],
+          }),
+        }),
+      },
+    });
+    console.log({ dcxExchangeOpHash });
+
+    const bundlerClient = kernelClient.extend(
+      bundlerActions(ENTRYPOINT_ADDRESS_V07),
+    );
+
+    const event =
+      await bundlerClient.waitForUserOperationReceipt({
+        hash: dcxExchangeOpHash,
+      });
 
     const {
       events: {
@@ -107,7 +221,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
           returnValues: { clientId = '', owner = '', tokenId = 0 } = {},
         } = {},
       } = {},
-    } = await licenseContract.write['0xaf509d9f']([workspaceName]);
+    } = event.receipt;
 
     return createWorkspace({
       name: workspaceData.name ?? '',
@@ -133,6 +247,11 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
         isOpen={isOpenedCreditsModal}
         setIsOpen={setIsOpenedCreditsModal}
         onSubmit={handleCreateApp}
+      />
+      <LoadingModal
+        isOpen={isOpened}
+        setIsOpen={setIsOpened}
+        {...loadingStatus}
       />
       <form onSubmit={handleSubmit(onSubmit)}>
         {!isOnboardingCompleted && (
