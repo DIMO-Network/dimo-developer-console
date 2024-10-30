@@ -148,7 +148,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
         abi: DimoCreditsABI,
         functionName: 'mintInDimo',
         args: [
-          organizationInfo!.walletAddress,
+          organizationInfo!.smartContractAddress,
           configuration.desiredAmountOfDimo,
         ],
       }),

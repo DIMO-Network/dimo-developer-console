@@ -66,23 +66,23 @@ export const useContractGA = () => {
   useEffect(() => {
     if (!dimoContract || !organizationInfo) return;
 
-    dimoContract.read.balanceOf([organizationInfo!.walletAddress])
+    dimoContract.read.balanceOf([organizationInfo!.smartContractAddress])
       .then((currentBalanceWei: unknown) => {
         setBalanceDimo(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });
 
-    dimoCreditsContract.read.balanceOf([organizationInfo!.walletAddress])
+    dimoCreditsContract.read.balanceOf([organizationInfo!.smartContractAddress])
       .then((currentBalanceWei: unknown) => {
         setBalanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });
 
-    dimoContract.read.allowance([organizationInfo.walletAddress, configuration.DLC_ADDRESS])
+    dimoContract.read.allowance([organizationInfo.smartContractAddress, configuration.DLC_ADDRESS])
       .then((currentBalanceWei: unknown) => {
         console.log({ dlcAllowance: currentBalanceWei });
         setAllowanceDLC(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       });
 
-    dimoContract.read.allowance([organizationInfo.walletAddress, configuration.DCX_ADDRESS])
+    dimoContract.read.allowance([organizationInfo.smartContractAddress, configuration.DCX_ADDRESS])
       .then((currentBalanceWei: unknown) => {
         console.log({ dcxAllowance: currentBalanceWei });
         setAllowanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
@@ -93,7 +93,7 @@ export const useContractGA = () => {
     dimoContract,
     licenseContract,
     dimoCreditsContract,
-    address: organizationInfo?.walletAddress,
+    address: organizationInfo?.smartContractAddress,
     balanceDimo,
     balanceDCX,
     allowanceDLC,
