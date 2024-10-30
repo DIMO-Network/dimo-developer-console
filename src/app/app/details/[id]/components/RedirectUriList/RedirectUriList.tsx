@@ -3,49 +3,74 @@ import _ from 'lodash';
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
-import { changeNetwork } from '@/utils/contract';
 import { deleteMyRedirectUri, updateMyRedirectUri } from '@/actions/app';
 import { IRedirectUri } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { TeamRoles } from '@/types/team';
 import { Toggle } from '@/components/Toggle';
-import { useContractGA, useOnboarding } from '@/hooks';
+import { useGlobalAccount, useOnboarding } from '@/hooks';
 import { useSession } from 'next-auth/react';
 
 import configuration from '@/config';
+import { IKernelOperationStatus } from '@/types/wallet';
+import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 interface IProps {
   list: IRedirectUri[] | undefined;
   refreshData: () => void;
 }
 
-const ISSUE_IN_DIMO_GAS = 60000;
-
 export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, licenseContract } = useContractGA();
+  const { workspace } = useOnboarding();
+  const { organizationInfo, getKernelClient } = useGlobalAccount();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
   const recordsToShow = list.filter(({ deleted }) => !deleted);
 
   const handleSetDomain = async (uri: string, enabled: boolean) => {
-    if (!isOnboardingCompleted && !licenseContract && !workspace)
+    if (!organizationInfo)
       throw new Error('Web3 connection failed');
-    await changeNetwork();
-    await licenseContract?.methods['0xba1bedfc'](
-      workspace?.token_id ?? 0,
-      enabled,
-      uri,
-    ).send({
-      from: address,
-      gas: String(ISSUE_IN_DIMO_GAS),
-      maxFeePerGas: String(configuration.masFeePerGas),
-      maxPriorityFeePerGas: String(configuration.gasPrice),
+    const transaction = [{
+      to: configuration.DLC_ADDRESS,
+      value: BigInt(0),
+      data: {
+        abi: DimoLicenseABI,
+        functionName: '0xba1bedfc',
+        args: [
+          workspace?.token_id ?? 0,
+          enabled,
+          uri,
+        ]
+      }
+    }];
+    await processTransactions(transaction);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const processTransactions = async (transactions: Array<any>) => {
+    if (!organizationInfo) return {} as IKernelOperationStatus;
+    const kernelClient = await getKernelClient(organizationInfo);
+    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
+      userOperation: {
+        callData: await kernelClient.account.encodeCallData(transactions),
+      },
     });
+
+    const bundlerClient = kernelClient.extend(
+      bundlerActions(ENTRYPOINT_ADDRESS_V07),
+    );
+
+    const { reason } =
+      await bundlerClient.waitForUserOperationReceipt({
+        hash: dcxExchangeOpHash,
+      });
+
+    if (reason) return Promise.reject(reason);
   };
 
   const renderToggleStatus = ({ id, uri, status }: IRedirectUri) => {

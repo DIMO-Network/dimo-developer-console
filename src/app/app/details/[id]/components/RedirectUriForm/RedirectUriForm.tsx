@@ -6,17 +6,19 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/Button';
-import { changeNetwork } from '@/utils/contract';
 import { createMyRedirectUri } from '@/actions/app';
 import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA, useOnboarding } from '@/hooks';
+import { useGlobalAccount, useOnboarding } from '@/hooks';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
 
 import './RedirectUriForm.css';
+import { IKernelOperationStatus } from '@/types/wallet';
+import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
 
 interface IRedirectUri {
   uri: string;
@@ -27,13 +29,12 @@ interface IProps {
   refreshData: () => void;
 }
 
-const ISSUE_IN_DIMO_GAS = 60000;
 
 export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, licenseContract } = useContractGA();
+  const { workspace } = useOnboarding();
+  const { organizationInfo, getKernelClient } = useGlobalAccount();
   const {
     formState: { errors },
     handleSubmit,
@@ -45,19 +46,44 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   });
 
   const handleSetDomain = async (uri: string) => {
-    if (!isOnboardingCompleted && !licenseContract && !workspace)
+    if (!organizationInfo && !workspace)
       throw new Error('Web3 connection failed');
-    await changeNetwork();
-    await licenseContract?.methods['0xba1bedfc'](
-      workspace?.token_id ?? 0,
-      true,
-      uri,
-    ).send({
-      from: address,
-      gas: String(ISSUE_IN_DIMO_GAS),
-      maxFeePerGas: String(configuration.masFeePerGas),
-      maxPriorityFeePerGas: String(configuration.gasPrice),
+    const transaction = [{
+      to: configuration.DLC_ADDRESS,
+      value: BigInt(0),
+      data: {
+        abi: DimoLicenseABI,
+        functionName: '0xde9cc84',
+        args: [
+          workspace?.token_id ?? 0,
+          true,
+          uri,
+        ]
+      }
+    }];
+    await processTransactions(transaction);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const processTransactions = async (transactions: Array<any>) => {
+    if (!organizationInfo) return {} as IKernelOperationStatus;
+    const kernelClient = await getKernelClient(organizationInfo);
+    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
+      userOperation: {
+        callData: await kernelClient.account.encodeCallData(transactions),
+      },
     });
+
+    const bundlerClient = kernelClient.extend(
+      bundlerActions(ENTRYPOINT_ADDRESS_V07),
+    );
+
+    const { reason } =
+      await bundlerClient.waitForUserOperationReceipt({
+        hash: dcxExchangeOpHash,
+      });
+
+    if (reason) return Promise.reject(reason);
   };
 
   const addRedirectUri = async () => {
