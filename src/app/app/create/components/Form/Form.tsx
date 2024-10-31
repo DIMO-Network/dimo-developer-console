@@ -181,7 +181,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     const {
       topics: [, rawTokenId = '0x', rawOwner = '0x', rawClientId = '0x'] = []
     } = logs?.find(
-      ({ topics: [topic = '0x'] = [] }) => topic === '0x7533f62ec6601bf9c87f8d96bf756b4b495e2a0e26ec9284e4927926ed6b3afd'
+      ({ topics: [topic = '0x'] = [] }) => topic === configuration.ISSUED_TOPIC
     ) ?? {};
 
     return createWorkspace({
