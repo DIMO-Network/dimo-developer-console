@@ -13,7 +13,6 @@ import { AppCard } from '@/components/AppCard';
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { MultiCardOption } from '@/components/MultiCardOption';
-import { SpendingLimitModal } from '@/components/SpendingLimitModal';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { NotificationContext } from '@/context/notificationContext';
@@ -27,11 +26,11 @@ import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
 
 import './Form.css';
-import { IKernelOperationStatus } from '@/types/wallet';
-import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
-import { parseUnits, encodeFunctionData } from 'viem';
+import { encodeFunctionData } from 'viem';
 import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
+import { formatHexToNumber, formatHex } from '@/utils/formatHex';
 
+const { LICENSE_PRICE_USD = 5, DCX_IN_USD = 0.001, DIMO_IN_USD = 0.16 } = process.env;
 
 interface IProps {
   isOnboardingCompleted?: boolean;
@@ -39,8 +38,6 @@ interface IProps {
 }
 
 export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
-  const [isOpenedCreditsModal, setIsOpenedCreditsModal] =
-    useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const {
@@ -49,10 +46,9 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
     hasEnoughBalanceDCX,
     hasEnoughBalanceDimo,
     balanceDCX,
-    balanceDimo,
     processTransactions,
   } = useContractGA();
-  const { organizationInfo, getKernelClient } = useGlobalAccount();
+  const { organizationInfo } = useGlobalAccount();
   const router = useRouter();
   const {
     control,
@@ -66,7 +62,6 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
   });
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const [isOpened, setIsOpened] = useState<boolean>(false);
-  console.log({ balanceDimo, balanceDCX });
 
   const onSubmit = async () => {
     try {
@@ -78,7 +73,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
       });
       const transactions = [];
 
-      if (!hasEnoughBalanceDCX && !hasEnoughBalanceDimo) setNotification('Insufficient Dimo or DCX balance', 'Oops...', 'error');
+      if (!hasEnoughBalanceDCX && !hasEnoughBalanceDimo) return setNotification('Insufficient Dimo or DCX balance', 'Oops...', 'error');
 
       if (!hasEnoughBalanceDCX) {
         transactions.push(...(await mintDCX()));
@@ -91,7 +86,6 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
 
       await handleCreateApp();
     } catch (error: unknown) {
-      console.log(error);
       setNotification(
         'Something went wrong while confirming the transaction',
         'Oops...',
@@ -114,22 +108,24 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
           functionName: 'approve',
           args: [
             configuration.DCX_ADDRESS,
-            BigInt(utils.toWei(configuration.desiredAmountOfDimo, 'ether')),
+            BigInt(utils.toWei(Math.ceil(configuration.desiredAmountOfDimo), 'ether')),
           ],
         }),
       });
     }
 
     // Call mintInDimo 2 parameteres
+    const dcxAmountInUSD = balanceDCX * Number(DCX_IN_USD);
+    const missingAmount = Math.ceil(Number(LICENSE_PRICE_USD) - dcxAmountInUSD);
     transactions.push({
       to: configuration.DCX_ADDRESS,
       value: BigInt(0),
       data: encodeFunctionData({
         abi: DimoCreditsABI,
-        functionName: 'mintInDimo',
+        functionName: '0xec88fc37',
         args: [
           organizationInfo!.smartContractAddress,
-          configuration.desiredAmountOfDimo,
+          utils.toWei(Math.ceil(missingAmount / Number(DIMO_IN_USD)), 'ether'),
         ],
       }),
     });
@@ -147,7 +143,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
         functionName: 'approve',
         args: [
           configuration.DLC_ADDRESS,
-          parseUnits(String(configuration.desiredAmountOfDimo), 18),
+          BigInt(utils.toWei(Math.ceil(configuration.desiredAmountOfDimo), 'ether')),
         ],
       }),
     }];
@@ -155,7 +151,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
     if (!_.isEmpty(workspace)) return workspace;
-    if (!organizationInfo) return {} as IKernelOperationStatus;
+    if (!organizationInfo) throw new Error('There is not organization information');
 
     setLoadingStatus({
       label: 'Licensing the application...',
@@ -168,46 +164,31 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
       label: 'Creating developer license...',
       status: 'loading',
     });
-    const kernelClient = await getKernelClient(organizationInfo);
-    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-      userOperation: {
-        callData: await kernelClient.account.encodeCallData({
-          to: configuration.DLC_ADDRESS,
-          value: BigInt(0),
-          data: encodeFunctionData({
-            abi: DimoLicenseABI,
-            functionName: '0xaf509d9f',
-            args: [
-              workspaceName,
-            ],
-          }),
-        }),
-      },
-    });
-    console.log({ dcxExchangeOpHash });
 
-    const bundlerClient = kernelClient.extend(
-      bundlerActions(ENTRYPOINT_ADDRESS_V07),
-    );
+    const transaction = [{
+      to: configuration.DLC_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoLicenseABI,
+        functionName: 'issueInDc',
+        args: [
+          workspaceName,
+        ],
+      }),
+    }];
 
-    const event =
-      await bundlerClient.waitForUserOperationReceipt({
-        hash: dcxExchangeOpHash,
-      });
-
+    const { logs } = await processTransactions(transaction);
     const {
-      events: {
-        Issued: {
-          returnValues: { clientId = '', owner = '', tokenId = 0 } = {},
-        } = {},
-      } = {},
-    } = event.receipt;
+      topics: [, rawTokenId = '0x', rawOwner = '0x', rawClientId = '0x'] = []
+    } = logs?.find(
+      ({ topics: [topic = '0x'] = [] }) => topic === '0x7533f62ec6601bf9c87f8d96bf756b4b495e2a0e26ec9284e4927926ed6b3afd'
+    ) ?? {};
 
     return createWorkspace({
       name: workspaceData.name ?? '',
-      token_id: Number(tokenId),
-      client_id: clientId as string,
-      owner: owner as string,
+      token_id: Number(formatHexToNumber(rawTokenId as `0x${string}`)),
+      client_id: formatHex(rawClientId as `0x${string}`),
+      owner: formatHex(rawOwner as `0x${string}`),
     });
   };
 
@@ -223,11 +204,6 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
 
   return (
     <>
-      <SpendingLimitModal
-        isOpen={isOpenedCreditsModal}
-        setIsOpen={setIsOpenedCreditsModal}
-        onSubmit={handleCreateApp}
-      />
       <LoadingModal
         isOpen={isOpened}
         setIsOpen={setIsOpened}

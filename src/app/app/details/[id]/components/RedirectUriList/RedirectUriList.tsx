@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { encodeFunctionData } from 'viem';
 
 import { deleteMyRedirectUri, updateMyRedirectUri } from '@/actions/app';
 import { IRedirectUri } from '@/types/app';
@@ -37,15 +38,15 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
     const transaction = [{
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
-      data: {
+      data: encodeFunctionData({
         abi: DimoLicenseABI,
-        functionName: '0xba1bedfc',
+        functionName: 'setRedirectUri',
         args: [
           workspace?.token_id ?? 0,
           enabled,
           uri,
         ]
-      }
+      }),
     }];
     await processTransactions(transaction);
   };

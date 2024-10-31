@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { maskStringV2 } from 'maskdata';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState, type FC } from 'react';
+import { encodeFunctionData } from 'viem';
 
 import { Button } from '@/components/Button';
 import { ContentCopyIcon } from '@/components/Icons';
@@ -41,14 +42,14 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     const transaction = [{
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
-      data: {
+      data: encodeFunctionData({
         abi: DimoLicenseABI,
-        functionName: '0xde9cc84',
+        functionName: 'disableSigner',
         args: [
           workspace?.token_id ?? 0,
           signer,
         ]
-      }
+      }),
     }];
     await processTransactions(transaction);
   };

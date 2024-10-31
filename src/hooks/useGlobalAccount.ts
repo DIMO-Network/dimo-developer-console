@@ -372,7 +372,6 @@ export const useGlobalAccount = () => {
     subOrganizationId,
     walletAddress,
   }: ISubOrganization) => {
-    console.log({ subOrganizationId, walletAddress });
     const chain = getChain();
     const stamperClient = new TurnkeyClient(
       {
@@ -387,7 +386,6 @@ export const useGlobalAccount = () => {
       signWith: walletAddress,
       ethereumAddress: walletAddress,
     });
-    console.log({ localAccount });
 
     const smartAccountClient = createWalletClient({
       account: localAccount,
@@ -501,6 +499,7 @@ export const useGlobalAccount = () => {
     mintDimoIntoDimoCredit,
     getPublicClient,
     getKernelClient,
+    handleOnChainError,
   };
 };
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getContract } from 'viem';
+import { getContract, HttpRequestError } from 'viem';
 import { utils } from 'web3';
 
 import useGlobalAccount from '@/hooks/useGlobalAccount';
@@ -12,7 +12,7 @@ import configuration from '@/config';
 import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
 
 export const useContractGA = () => {
-  const { organizationInfo, getKernelClient, getPublicClient } = useGlobalAccount();
+  const { organizationInfo, getKernelClient, getPublicClient, handleOnChainError } = useGlobalAccount();
   const [balanceDimo, setBalanceDimo] = useState<number>(0);
   const [balanceDCX, setBalanceDCX] = useState<number>(0);
   const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
@@ -62,31 +62,37 @@ export const useContractGA = () => {
         }
       }),
     );
-  }, [organizationInfo]);
+  }, [organizationInfo?.smartContractAddress]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const processTransactions = async (transactions: Array<any>) => {
     if (!organizationInfo) return {} as IKernelOperationStatus;
-    const kernelClient = await getKernelClient(organizationInfo);
-    const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-      userOperation: {
-        callData: await kernelClient.account.encodeCallData(transactions),
-      },
-    });
-
-    console.log({ dcxExchangeOpHash });
-    const bundlerClient = kernelClient.extend(
-      bundlerActions(ENTRYPOINT_ADDRESS_V07),
-    );
-
-    const receipt =
-      await bundlerClient.waitForUserOperationReceipt({
-        hash: dcxExchangeOpHash,
+    try {
+      const kernelClient = await getKernelClient(organizationInfo);
+      const dcxExchangeOpHash = await kernelClient.sendUserOperation({
+        userOperation: {
+          callData: await kernelClient.account.encodeCallData(transactions),
+        },
       });
 
-    console.log({ receipt });
+      const bundlerClient = kernelClient.extend(
+        bundlerActions(ENTRYPOINT_ADDRESS_V07),
+      );
 
-    if (receipt.reason) return Promise.reject(receipt.reason);
+      const receipt =
+        await bundlerClient.waitForUserOperationReceipt({
+          hash: dcxExchangeOpHash,
+        });
+
+      if (receipt.reason) throw new Error(receipt.reason);
+
+      return receipt;
+    } catch (e: unknown) {
+      if (e instanceof HttpRequestError) {
+        throw new Error(handleOnChainError(e as HttpRequestError));
+      }
+      throw e;
+    }
   };
 
   useEffect(() => {
@@ -104,16 +110,14 @@ export const useContractGA = () => {
 
     dimoContract.read.allowance([organizationInfo.smartContractAddress, configuration.DLC_ADDRESS])
       .then((currentBalanceWei: unknown) => {
-        console.log({ dlcAllowance: currentBalanceWei });
-        setAllowanceDLC(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
+        setAllowanceDLC(Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))));
       });
 
     dimoContract.read.allowance([organizationInfo.smartContractAddress, configuration.DCX_ADDRESS])
       .then((currentBalanceWei: unknown) => {
-        console.log({ dcxAllowance: currentBalanceWei });
-        setAllowanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
+        setAllowanceDCX(Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))));
       });
-  });
+  }, [dimoContract, dimoCreditsContract]);
 
   return {
     dimoContract,

@@ -1,4 +1,4 @@
-const { LICENSE_PRICE_USD = 10, DCX_IN_USD = 0.001, DIMO_IN_USD = 0.2 } = process.env;
+const { LICENSE_PRICE_USD = 5, DCX_IN_USD = 0.001, DIMO_IN_USD = 0.16 } = process.env;
 
 export const appName = 'Developer Console';
 

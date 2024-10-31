@@ -4,6 +4,7 @@ import { useContext, useState, type FC } from 'react';
 import { isURL } from 'validator';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
+import { encodeFunctionData } from 'viem';
 
 import { Button } from '@/components/Button';
 import { createMyRedirectUri } from '@/actions/app';
@@ -27,7 +28,6 @@ interface IProps {
   refreshData: () => void;
 }
 
-
 export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
@@ -50,15 +50,15 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
     const transaction = [{
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
-      data: {
+      data: encodeFunctionData({
         abi: DimoLicenseABI,
-        functionName: '0xde9cc84',
+        functionName: 'setRedirectUri',
         args: [
           workspace?.token_id ?? 0,
           true,
           uri,
         ]
-      }
+      }),
     }];
     await processTransactions(transaction);
   };

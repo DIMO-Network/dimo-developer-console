@@ -3,6 +3,7 @@ import _ from 'lodash';
 
 import { useEffect, useState, useContext } from 'react';
 import { useSession } from 'next-auth/react';
+import { encodeFunctionData } from 'viem';
 
 import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
 import { BackButton } from '@/components/BackButton';
@@ -50,14 +51,14 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
     const transaction = [{
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
-      data: {
+      data: encodeFunctionData({
         abi: DimoLicenseABI,
-        functionName: '0x3b1c393b',
+        functionName: 'enableSigner',
         args: [
           workspace?.token_id ?? 0,
           signer,
         ]
-      }
+      }),
     }];
     await processTransactions(transaction);
   };
