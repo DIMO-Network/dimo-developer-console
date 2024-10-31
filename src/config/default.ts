@@ -77,6 +77,7 @@ export const gasPrice = 43000000000;
 export const desiredAmountOfDimo = Number(LICENSE_PRICE_USD) / Number(DIMO_IN_USD);
 export const desiredAmountOfDCX = Number(LICENSE_PRICE_USD) / Number(DCX_IN_USD);
 
-export const DIMO_CREDITS_CONTRACT_ADDRESS =
-  '0x7186F9aC35d24c9a4cf1E58a797c04DF1b334322'.toLowerCase();
+export const MINIMUM_CREDITS = 10000;
 
+export const DIMO_CONTRACT_ADDRESS =
+  '0x523d4a08cf149f1Ada8113B3b3400234236Bb5E8';

@@ -20,6 +20,7 @@ type Configuration = {
   DCX_ADDRESS: `0x${string}`;
   WMATIC: `0x${string}`;
   SwapRouterAddress: `0x${string}`;
+  MINIMUM_CREDITS: number;
   masFeePerGas: number;
   gasPrice: number;
   desiredAmountOfDCX: number;
