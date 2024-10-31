@@ -43,7 +43,7 @@ import {
   createZeroDevPaymasterClient,
 } from '@zerodev/sdk';
 import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
-import { polygon } from 'wagmi/chains';
+import { polygon, polygonAmoy } from 'wagmi/chains';
 
 import WMatic from '@/contracts/wmatic.json';
 import UniversalRouter from '@/contracts/uniswapRouter.json';
@@ -470,8 +470,7 @@ export const useGlobalAccount = () => {
       return polygon;
     }
 
-    return polygon;
-    // return polygonAmoy;
+    return polygonAmoy;
   };
 
   useEffect(() => {
