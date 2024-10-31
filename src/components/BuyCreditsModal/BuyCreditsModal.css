@@ -1,31 +1,52 @@
-.buy-credits-content {
-  @apply flex flex-col items-center gap-2;
+.buy-credits-modal {
+  .dialog-panel {
+    @apply w-auto h-auto;
+  }
 
-  .buy-credits-header {
-    @apply flex flex-col gap-2 text-center relative pt-8 pb-4 px-2 font-bold;
+  .buy-credits-content {
+    @apply flex flex-col items-center gap-2 mr-auto ml-auto;
 
-    .description {
-      @apply text-xs text-white/50 w-full h-full py-4;
+    .buy-credits-header {
+      @apply flex flex-col gap-2 text-center relative pt-8 pb-4 px-2 font-bold;
+
+      .description {
+        @apply text-xs text-white/50 w-full h-full py-4;
+      }
     }
-  }
 
-  .dcx-input {
-    @apply py-4;
-  }
-
-  .credit-total-content {
-    @apply w-full flex flex-row justify-between font-bold px-2 py-4;
-  }
-
-  .payment-method-container {
-    @apply flex flex-col w-full px-2 gap-2;
-
-    .payment-descriptor {
-      @apply font-bold;
+    .dcx-input {
+      @apply py-4;
     }
-  }
 
-  .credit-action {
-    @apply flex flex-col w-full;
+    .credit-total-content {
+      @apply w-full flex flex-row justify-between font-bold px-2 py-4;
+    }
+
+    .payment-method-container {
+      @apply flex flex-col w-full px-2 gap-2;
+
+      .payment-descriptor {
+        @apply font-bold;
+      }
+    }
+
+    .credit-action {
+      @apply flex flex-col w-full;
+    }
+
+    .minting-process {
+      @apply flex flex-col w-full gap-2;
+      .minting-card {
+        @apply flex flex-row gap-2 border-2 rounded-xl border-gray-600 h-14 p-2 items-center justify-between pl-4 pr-4;
+
+        .spinner {
+          @apply mr-0;
+        }
+      }
+    }
+
+    .success-card {
+      @apply flex flex-col gap-4 w-full border-2 rounded-xl border-gray-600 p-2 items-center justify-between pl-4 pr-4;
+    }
   }
 }

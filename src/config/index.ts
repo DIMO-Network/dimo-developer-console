@@ -15,8 +15,12 @@ type Configuration = {
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
   CONTRACT_NETWORK: bigint;
-  DLC_ADDRESS: string;
-  DC_ADDRESS: string;
+  DLC_ADDRESS: `0x${string}`;
+  DC_ADDRESS: `0x${string}`;
+  DCX_ADDRESS: `0x${string}`;
+  WMATIC: `0x${string}`;
+  SwapRouterAddress: `0x${string}`;
+  MINIMUM_CREDITS: number;
   masFeePerGas: number;
   gasPrice: number;
 };
