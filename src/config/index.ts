@@ -1,7 +1,6 @@
 import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
-import { DCX_ADDRESS, MINIMUM_CREDITS } from './default';
 
 type Configuration = {
   appName: string;
