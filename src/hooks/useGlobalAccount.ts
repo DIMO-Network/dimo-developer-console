@@ -281,7 +281,7 @@ export const useGlobalAccount = () => {
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
             to: config.SwapRouterAddress,
-            value: parseUnits(amount, 18),
+            value:BigInt(0),
             data: encodeFunctionData({
               abi: UniversalRouter,
               functionName: 'exactInputSingle',
@@ -333,7 +333,7 @@ export const useGlobalAccount = () => {
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
             to: config.DCX_ADDRESS,
-            value: parseUnits(amount, 18),
+            value: BigInt(0),
             data: encodeFunctionData({
               abi: DimoCredit,
               functionName: 'mintInDimo',
