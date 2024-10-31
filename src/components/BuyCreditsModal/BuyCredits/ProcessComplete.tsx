@@ -20,7 +20,7 @@ export const ProcessComplete = ({ onNext }: IProps) => {
   return (
     <Card className="success-card">
       <SuccessIcon className="w-10 h-10" />
-      <Title component="h1">Successfully Minted DCX</Title>
+      <Title component="h1">Successfully Purchased DCX</Title>
       <Button className="primary w-40 !h-9" onClick={handleFinish}>
         Finish
       </Button>
