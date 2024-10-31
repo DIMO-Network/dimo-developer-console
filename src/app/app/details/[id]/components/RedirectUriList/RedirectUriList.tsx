@@ -2,50 +2,53 @@ import _ from 'lodash';
 
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { encodeFunctionData } from 'viem';
 
-import { changeNetwork } from '@/utils/contract';
 import { deleteMyRedirectUri, updateMyRedirectUri } from '@/actions/app';
 import { IRedirectUri } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { TeamRoles } from '@/types/team';
 import { Toggle } from '@/components/Toggle';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
 import { useSession } from 'next-auth/react';
 
 import configuration from '@/config';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 interface IProps {
   list: IRedirectUri[] | undefined;
   refreshData: () => void;
 }
 
-const ISSUE_IN_DIMO_GAS = 60000;
-
 export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, dimoLicenseContract } = useContract();
+  const { workspace } = useOnboarding();
+  const { organizationInfo } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
   const recordsToShow = list.filter(({ deleted }) => !deleted);
 
   const handleSetDomain = async (uri: string, enabled: boolean) => {
-    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+    if (!organizationInfo)
       throw new Error('Web3 connection failed');
-    await changeNetwork();
-    await dimoLicenseContract?.methods['0xba1bedfc'](
-      workspace?.token_id ?? 0,
-      enabled,
-      uri,
-    ).send({
-      from: address,
-      gas: String(ISSUE_IN_DIMO_GAS),
-      maxFeePerGas: String(configuration.masFeePerGas),
-      maxPriorityFeePerGas: String(configuration.gasPrice),
-    });
+    const transaction = [{
+      to: configuration.DLC_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoLicenseABI,
+        functionName: 'setRedirectUri',
+        args: [
+          workspace?.token_id ?? 0,
+          enabled,
+          uri,
+        ]
+      }),
+    }];
+    await processTransactions(transaction);
   };
 
   const renderToggleStatus = ({ id, uri, status }: IRedirectUri) => {

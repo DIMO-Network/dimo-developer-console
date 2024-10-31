@@ -23,6 +23,9 @@ type Configuration = {
   MINIMUM_CREDITS: number;
   masFeePerGas: number;
   gasPrice: number;
+  desiredAmountOfDCX: number;
+  desiredAmountOfDimo: number;
+  ISSUED_TOPIC: `0x${string}`
 };
 
 export const getConfig = (): Configuration => {

@@ -60,7 +60,12 @@ export interface StripeSession extends OnrampSessionResult {
   destination_crypto_amount: string;
 }
 
+export interface Log {
+  topics?: `0x${string}`;
+}
+
 export interface IKernelOperationStatus {
   success: boolean;
   reason?: string;
+  logs?: Log[];
 }

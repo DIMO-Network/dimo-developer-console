@@ -1,17 +1,19 @@
 'use client';
+
 import { useContext, useState, type FC } from 'react';
 import { CreditsContext } from '@/context/creditsContext';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 
-import './BuyCreditsModal.css';
 import { CryptoPurchase } from '@/components/BuyCreditsModal/BuyCredits/CryptoPurchase';
 import CreditsAmount from '@/components/BuyCreditsModal/BuyCredits/CreditsAmount';
 import CryptoExchange from '@/components/BuyCreditsModal/BuyCredits/CryptoExchange';
 import ProcessComplete from '@/components/BuyCreditsModal/BuyCredits/ProcessComplete';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 
-interface IProps {}
+import './BuyCreditsModal.css';
+
+interface IProps { }
 
 const buyCreditsFlows = {
   'credits-amount': {
@@ -94,3 +96,4 @@ export const BuyCreditsModal: FC<IProps> = () => {
 };
 
 export default BuyCreditsModal;
+

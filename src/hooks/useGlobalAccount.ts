@@ -43,7 +43,7 @@ import {
   createZeroDevPaymasterClient,
 } from '@zerodev/sdk';
 import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
-import { polygon, polygonAmoy } from 'wagmi/chains';
+import { polygon } from 'wagmi/chains';
 
 import WMatic from '@/contracts/wmatic.json';
 import UniversalRouter from '@/contracts/uniswapRouter.json';
@@ -396,11 +396,7 @@ export const useGlobalAccount = () => {
     const smartAccountSigner =
       walletClientToSmartAccountSigner(smartAccountClient);
 
-    const publicClient = createPublicClient({
-      chain: chain,
-      transport: http(turnkeyConfig.bundleRpc),
-    });
-
+    const publicClient = getPublicClient();
     const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
       signer: smartAccountSigner,
       entryPoint: ENTRYPOINT_ADDRESS_V07,
@@ -428,8 +424,18 @@ export const useGlobalAccount = () => {
     return kernelClient;
   };
 
-  // @ts-ignore
-  const sponsorUserOperation = async ({ userOperation }) => {
+  const getPublicClient = () => {
+    const chain = getChain();
+    const publicClient = createPublicClient({
+      chain: chain,
+      transport: http(turnkeyConfig.bundleRpc),
+    });
+
+    return publicClient;
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sponsorUserOperation = async ({ userOperation }: { userOperation: any }) => {
     const chain = getChain();
     const zerodevPaymaster = createZeroDevPaymasterClient({
       chain: chain,
@@ -464,7 +470,8 @@ export const useGlobalAccount = () => {
       return polygon;
     }
 
-    return polygonAmoy;
+    return polygon;
+    // return polygonAmoy;
   };
 
   useEffect(() => {
@@ -490,7 +497,11 @@ export const useGlobalAccount = () => {
     depositWmatic,
     swapWmaticToDimo,
     mintDimoIntoDimoCredit,
+    getPublicClient,
+    getKernelClient,
+    handleOnChainError,
   };
 };
 
 export default useGlobalAccount;
+

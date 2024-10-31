@@ -1,10 +1,10 @@
 import { useContext, useEffect, useRef, useState } from 'react';
+
 import useStripeCrypto from '@/hooks/useStripeCrypto';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { OnrampSession } from '@stripe/crypto';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { IDcxPurchaseTransaction, IStripeCryptoEvent } from '@/types/wallet';
-import { OnrampUIEventMap } from '@stripe/crypto/types/crypto-js/onramp-session';
 
 interface IProps {
   onNext: (
@@ -63,16 +63,18 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
   useEffect(() => {
     if (cryptoSession) {
       cryptoSession.addEventListener('onramp_ui_loaded', handleOnReady);
-      cryptoSession.addEventListener('onramp_session_updated', handleOnChange);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      cryptoSession.addEventListener('onramp_session_updated', handleOnChange as any);
       return () => {
         cryptoSession.removeEventListener('onramp_ui_loaded', handleOnReady);
         cryptoSession.removeEventListener(
           'onramp_session_updated',
-          handleOnChange,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          handleOnChange as any,
         );
       };
     }
-    return () => {};
+    return () => { };
   }, [cryptoSession]);
 
   return (

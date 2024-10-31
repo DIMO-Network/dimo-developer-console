@@ -1,13 +1,18 @@
 import { useForm } from 'react-hook-form';
+import { useContext } from 'react';
+
 import { TokenInput } from '@/components/TokenInput';
 import { Button } from '@/components/Button';
 import useStripeCrypto from '@/hooks/useStripeCrypto';
 import { useGlobalAccount } from '@/hooks';
-import { useContext } from 'react';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { TextError } from '@/components/TextError';
 import config from '@/config';
+
+const { DCX_IN_USD = 0.1, DIMO_IN_USD = 0.2 } = process.env;
+const DCX_PRICE = Number(DCX_IN_USD);
+const DIMO_PRICE = Number(DIMO_IN_USD);
 
 interface IForm {
   credits: number;
@@ -46,12 +51,12 @@ export const CreditsAmount = ({ onNext }: IProps) => {
 
     const { client_secret } = await createStripeCryptoSession(
       smartContractAddress,
-      credits * 0.001,
+      credits * DCX_PRICE,
     );
     setStripeClientId(client_secret);
     onNext('credits-amount', {
       destinationAddress: smartContractAddress,
-      usdAmount: credits * 0.001,
+      usdAmount: credits * DCX_PRICE,
       dcxAmount: credits!.toFixed(2),
     });
   };
@@ -76,12 +81,12 @@ export const CreditsAmount = ({ onNext }: IProps) => {
         )}
       </div>
       <div style={{ textAlign: 'center', margin: '10px 0' }}>
-        <p>1 DCX = $0.01 USD</p>
-        <p>1 DIMO = $0.20 USD</p>
+        <p>1 DCX = ${DCX_PRICE} USD</p>
+        <p>1 DIMO = ${DIMO_PRICE} USD</p>
       </div>
       <div className="credit-total-content">
         <p className="total-descriptor">Your total</p>
-        <p className="total-value">$ {credits * 0.001}</p>
+        <p className="total-value">$ {credits * DCX_PRICE}</p>
       </div>
       <div className="credit-action">
         <Button

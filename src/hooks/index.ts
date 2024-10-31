@@ -1,4 +1,4 @@
-export * from './useContract';
+export * from './useContractGA';
 export * from './useCredits';
 export * from './useErrorHandler';
 export * from './useNotification';

@@ -3,11 +3,11 @@ import _ from 'lodash';
 
 import { useEffect, useState, useContext } from 'react';
 import { useSession } from 'next-auth/react';
+import { encodeFunctionData } from 'viem';
 
 import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
 import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
-import { changeNetwork } from '@/utils/contract';
 import { createMySigner, getAppByID } from '@/actions/app';
 import { generateWallet } from '@/utils/wallet';
 import { IApp } from '@/types/app';
@@ -18,13 +18,12 @@ import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriLi
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { TeamRoles } from '@/types/team';
 import { Title } from '@/components/Title';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
 
 import './View.css';
-
-const ISSUE_IN_DIMO_GAS = 60000;
 
 export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const [app, setApp] = useState<IApp>();
@@ -32,8 +31,9 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
-  const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, dimoLicenseContract } = useContract();
+  const { workspace } = useOnboarding();
+  const { organizationInfo } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
   const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => refreshAppDetails(), []);
@@ -46,18 +46,21 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   };
 
   const handleEnableSigner = async (signer: string) => {
-    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+    if (!organizationInfo && !workspace)
       throw new Error('Web3 connection failed');
-    await changeNetwork();
-    await dimoLicenseContract?.methods['0x3b1c393b'](
-      workspace?.token_id ?? 0,
-      signer,
-    ).send({
-      from: address,
-      gas: String(ISSUE_IN_DIMO_GAS),
-      maxFeePerGas: String(configuration.masFeePerGas),
-      maxPriorityFeePerGas: String(configuration.gasPrice),
-    });
+    const transaction = [{
+      to: configuration.DLC_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoLicenseABI,
+        functionName: 'enableSigner',
+        args: [
+          workspace?.token_id ?? 0,
+          signer,
+        ]
+      }),
+    }];
+    await processTransactions(transaction);
   };
 
   const handleGenerateSigner = async () => {

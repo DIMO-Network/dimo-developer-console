@@ -3,17 +3,18 @@ import _ from 'lodash';
 import { maskStringV2 } from 'maskdata';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState, type FC } from 'react';
+import { encodeFunctionData } from 'viem';
 
 import { Button } from '@/components/Button';
-import { changeNetwork } from '@/utils/contract';
 import { ContentCopyIcon } from '@/components/Icons';
 import { deleteMySigner, testApp } from '@/actions/app';
 import { IApp, ISigner } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { TeamRoles } from '@/types/team';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
 import { useSession } from 'next-auth/react';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
 
@@ -22,13 +23,12 @@ interface IProps {
   refreshData: () => void;
 }
 
-const ISSUE_IN_DIMO_GAS = 60000;
-
 export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, dimoLicenseContract } = useContract();
+  const { workspace } = useOnboarding();
+  const { organizationInfo } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
@@ -37,18 +37,21 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   };
 
   const handleDisableSigner = async (signer: string) => {
-    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+    if (!organizationInfo && !workspace)
       throw new Error('Web3 connection failed');
-    await changeNetwork();
-    await dimoLicenseContract?.methods['0xde9cc84d'](
-      workspace?.token_id ?? 0,
-      signer,
-    ).send({
-      from: address,
-      gas: String(ISSUE_IN_DIMO_GAS),
-      maxFeePerGas: String(configuration.masFeePerGas),
-      maxPriorityFeePerGas: String(configuration.gasPrice),
-    });
+    const transaction = [{
+      to: configuration.DLC_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoLicenseABI,
+        functionName: 'disableSigner',
+        args: [
+          workspace?.token_id ?? 0,
+          signer,
+        ]
+      }),
+    }];
+    await processTransactions(transaction);
   };
 
   const renderWithCopy = (columnName: string, data: Record<string, string>) => {
