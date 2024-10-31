@@ -281,7 +281,7 @@ export const useGlobalAccount = () => {
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
             to: config.SwapRouterAddress,
-            value:BigInt(0),
+            value: BigInt(0),
             data: encodeFunctionData({
               abi: UniversalRouter,
               functionName: 'exactInputSingle',

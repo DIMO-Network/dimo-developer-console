@@ -41,7 +41,6 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
   };
 
   const handleOnChange = (event: IStripeCryptoEvent) => {
-    const f: OnrampUIEventMap['onramp_session_updated'] = event;
     if (event.payload.session.status === 'fulfillment_complete') {
       onNext('crypto-purchase', {
         ...transactionData,
