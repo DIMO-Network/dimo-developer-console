@@ -36,7 +36,7 @@ const buyCreditsFlows = {
 
 export const BuyCreditsModal: FC<IProps> = () => {
   const { isOpen, setIsOpen } = useContext(CreditsContext);
-  const [flow, setFlow] = useState('crypto-exchange');
+  const [flow, setFlow] = useState('credits-amount');
   const { Component: BuyCreditsFlow } =
     buyCreditsFlows[flow as keyof typeof buyCreditsFlows] ??
     buyCreditsFlows['credits-amount'];
@@ -46,7 +46,7 @@ export const BuyCreditsModal: FC<IProps> = () => {
 
   const handleIsOpen = (open: boolean) => {
     setIsOpen(open);
-    //setFlow('credits-amount');
+    setFlow('credits-amount');
   };
 
   const handleNext = (
