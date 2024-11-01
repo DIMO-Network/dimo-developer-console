@@ -39,7 +39,7 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
   return null;
 };
 
-const handleExpiredSession = (error: unknown) => {
+const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
   if (isAxiosError(error)) {
     const status = error.response?.status;
     if (status === 401) {
@@ -48,7 +48,7 @@ const handleExpiredSession = (error: unknown) => {
       return 'sign-in?error=expired';
     }
   }
-  return 'app?error=true';
+  return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
 };
 
 export const middleware = async (
@@ -114,7 +114,7 @@ export const middleware = async (
     return NextResponse.next();
   } catch (error: unknown) {
     let path = handleConnectionError(error, isLoginPage);
-    path = path ?? handleExpiredSession(error);
+    path = path ?? handleExpiredSession(error, isLoginPage);
     const redirectUrl = `${configuration.frontendUrl}${path}`;
     if (!hasError) {
       return Response.redirect(redirectUrl);
