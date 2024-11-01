@@ -6,14 +6,10 @@ import {
   createSubOrganization,
   getUserSubOrganization,
   rewirePasskey,
-  startEmailRecovery,
+  startEmailRecovery
 } from '@/services/globalAccount';
 import { signOut, useSession } from 'next-auth/react';
-import {
-  IKernelOperationStatus,
-  IPasskeyAttestation,
-  ISubOrganization,
-} from '@/types/wallet';
+import { IKernelOperationStatus, IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
 import { useRouter } from 'next/navigation';
 import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
 import { isEmpty } from 'lodash';
@@ -29,19 +25,11 @@ import {
   encodeFunctionData,
   http,
   HttpRequestError,
-  parseUnits,
+  parseUnits
 } from 'viem';
-import {
-  bundlerActions,
-  ENTRYPOINT_ADDRESS_V07,
-  walletClientToSmartAccountSigner,
-} from 'permissionless';
+import { bundlerActions, ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner } from 'permissionless';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
-import {
-  createKernelAccount,
-  createKernelAccountClient,
-  createZeroDevPaymasterClient,
-} from '@zerodev/sdk';
+import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from '@zerodev/sdk';
 import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
 import { polygon, polygonAmoy } from 'wagmi/chains';
 
@@ -434,7 +422,7 @@ export const useGlobalAccount = () => {
         kernelVersion: KERNEL_V3_1,
       });
 
-      const kernelClient = createKernelAccountClient({
+      return createKernelAccountClient({
         account: zeroDevKernelAccount,
         chain: chain,
         entryPoint: ENTRYPOINT_ADDRESS_V07,
@@ -443,8 +431,6 @@ export const useGlobalAccount = () => {
           sponsorUserOperation: sponsorUserOperation,
         },
       });
-
-      return kernelClient;
     } catch (e) {
       console.error('Error creating kernel client', e);
       return null;
@@ -453,12 +439,10 @@ export const useGlobalAccount = () => {
 
   const getPublicClient = () => {
     const chain = getChain();
-    const publicClient = createPublicClient({
+    return createPublicClient({
       chain: chain,
       transport: http(turnkeyConfig.rpcUrl),
     });
-
-    return publicClient;
   };
 
   const sponsorUserOperation = async ({
@@ -480,6 +464,7 @@ export const useGlobalAccount = () => {
   };
 
   const handleOnChainError = (error: HttpRequestError): string => {
+    console.error('Error on chain', error);
     const errorData: `0x${string}` = error.details
       .replaceAll('"', '')
       .split(': ')[1] as `0x${string}`;
