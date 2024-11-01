@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { cookies } from 'next/headers';
+import xior from 'xior';
 
 import config from '@/config';
 
@@ -26,7 +26,7 @@ export const dimoDevAPIClient = async (timeout: number = 5000) => {
   addCookie(userCookies, tokenCookie, await getCookie(tokenCookie));
   addCookie(userCookies, invitationCookie, await getCookie(invitationCookie));
 
-  return axios.create({
+  return xior.create({
     baseURL: config.backendUrl,
     timeout,
     headers: {

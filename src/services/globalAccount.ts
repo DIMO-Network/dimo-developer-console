@@ -1,8 +1,8 @@
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
-import axios, { AxiosError } from 'axios';
+import xior, { XiorError } from 'xior';
 
-const globalAccountClient = axios.create({
+const globalAccountClient = xior.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
 });
 
@@ -15,7 +15,7 @@ export const getUserSubOrganization = async (
     const { data } = await globalAccountClient.get(`/api/account/${email}`);
     return data;
   } catch (error) {
-    if (error instanceof AxiosError) {
+    if (error instanceof XiorError) {
       if (error.response?.status === 404) {
         return {} as ISubOrganization;
       }
