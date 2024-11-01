@@ -1,6 +1,7 @@
-import axios, { AxiosError } from 'axios';
+import xior from 'xior';
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
+import axios, { AxiosError } from 'axios';
 
 const globalAccountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,

@@ -3,8 +3,6 @@ import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
 export const getUserByToken = async () => {
   const client = await dimoDevAPIClient();
-  console.info('Axios Instance', client);
-  console.info("self", self);
   const { data } = await client.get<IUser>('/api/me');
 
   return data;
