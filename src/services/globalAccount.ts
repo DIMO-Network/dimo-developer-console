@@ -1,4 +1,3 @@
-import xior from 'xior';
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import axios, { AxiosError } from 'axios';
