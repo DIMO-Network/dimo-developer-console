@@ -5,7 +5,6 @@ export const getUserByToken = async () => {
   const client = await dimoDevAPIClient();
   console.info('Axios Instance', client);
   console.info("self", self);
-  console.info("window", window);
   const { data } = await client.get<IUser>('/api/me');
 
   return data;
