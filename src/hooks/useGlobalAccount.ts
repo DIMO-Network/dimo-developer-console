@@ -413,7 +413,7 @@ export const useGlobalAccount = () => {
       const smartAccountClient = createWalletClient({
         account: localAccount,
         chain: chain,
-        transport: http(turnkeyConfig.bundleRpc),
+        transport: http(turnkeyConfig.rpcUrl),
       });
 
       const smartAccountSigner =
@@ -455,7 +455,7 @@ export const useGlobalAccount = () => {
     const chain = getChain();
     const publicClient = createPublicClient({
       chain: chain,
-      transport: http(turnkeyConfig.bundleRpc),
+      transport: http(turnkeyConfig.rpcUrl),
     });
 
     return publicClient;
