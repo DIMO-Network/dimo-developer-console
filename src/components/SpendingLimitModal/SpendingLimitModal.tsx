@@ -25,13 +25,13 @@ interface IProps {
   isOpen: boolean;
   setIsOpen: (f: boolean) => void;
   onSubmit?: (n: number) => void;
-  addressToAllow?: `0x${string}`,
+  addressToAllow?: `0x${string}`;
 }
 
 export const SpendingLimitModal: FC<IProps> = ({
   isOpen,
   setIsOpen,
-  onSubmit = () => { },
+  onSubmit = () => {},
   addressToAllow = configuration.DLC_ADDRESS,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);

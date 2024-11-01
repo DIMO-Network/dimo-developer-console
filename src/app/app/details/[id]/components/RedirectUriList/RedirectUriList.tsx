@@ -33,21 +33,18 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const recordsToShow = list.filter(({ deleted }) => !deleted);
 
   const handleSetDomain = async (uri: string, enabled: boolean) => {
-    if (!organizationInfo)
-      throw new Error('Web3 connection failed');
-    const transaction = [{
-      to: configuration.DLC_ADDRESS,
-      value: BigInt(0),
-      data: encodeFunctionData({
-        abi: DimoLicenseABI,
-        functionName: 'setRedirectUri',
-        args: [
-          workspace?.token_id ?? 0,
-          enabled,
-          uri,
-        ]
-      }),
-    }];
+    if (!organizationInfo) throw new Error('Web3 connection failed');
+    const transaction = [
+      {
+        to: configuration.DLC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoLicenseABI,
+          functionName: 'setRedirectUri',
+          args: [workspace?.token_id ?? 0, enabled, uri],
+        }),
+      },
+    ];
     await processTransactions(transaction);
   };
 

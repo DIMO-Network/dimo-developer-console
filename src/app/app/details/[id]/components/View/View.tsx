@@ -25,7 +25,7 @@ import configuration from '@/config';
 
 import './View.css';
 
-export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
+export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [app, setApp] = useState<IApp>();
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,10 +36,13 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const { processTransactions } = useContractGA();
   const { user: { role = '' } = {} } = session ?? {};
 
-  useEffect(() => refreshAppDetails(), []);
+  useEffect(() => {
+    refreshAppDetails().catch(console.error);
+  }, []);
 
-  const refreshAppDetails = () => {
+  const refreshAppDetails = async () => {
     setIsLoadingPage(true);
+    const { id: appId } = await params;
     getAppByID(appId)
       .then(setApp)
       .finally(() => setIsLoadingPage(false));
@@ -48,18 +51,17 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
   const handleEnableSigner = async (signer: string) => {
     if (!organizationInfo && !workspace)
       throw new Error('Web3 connection failed');
-    const transaction = [{
-      to: configuration.DLC_ADDRESS,
-      value: BigInt(0),
-      data: encodeFunctionData({
-        abi: DimoLicenseABI,
-        functionName: 'enableSigner',
-        args: [
-          workspace?.token_id ?? 0,
-          signer,
-        ]
-      }),
-    }];
+    const transaction = [
+      {
+        to: configuration.DLC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoLicenseABI,
+          functionName: 'enableSigner',
+          args: [workspace?.token_id ?? 0, signer],
+        }),
+      },
+    ];
     await processTransactions(transaction);
   };
 
@@ -68,6 +70,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
       setIsLoading(true);
       const account = generateWallet();
       await handleEnableSigner(account.address);
+      const { id: appId } = await params;
       await createMySigner(
         {
           api_key: account.privateKey,
@@ -75,7 +78,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
         },
         appId,
       );
-      refreshAppDetails();
+      await refreshAppDetails();
     } catch (error: unknown) {
       console.error({ error });
       const code = _.get(error, 'code', null);
@@ -121,8 +124,11 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
           </div>
           <div className="redirect-uri-content">
             <Title component="h2">Authorized Redirect URIs</Title>
-            {role === TeamRoles.OWNER && (
-              <RedirectUriForm appId={appId} refreshData={refreshAppDetails} />
+            {role === TeamRoles.OWNER && app && (
+              <RedirectUriForm
+                appId={app!.id!}
+                refreshData={refreshAppDetails}
+              />
             )}
           </div>
           <div className="signers-table">

@@ -24,4 +24,3 @@ export const WMATIC: `0x${string}` =
 // SwapRouter MAINNET
 export const SwapRouterAddress: `0x${string}` =
   '0xE592427A0AEce92De3Edee1F18E0157C05861564';
-

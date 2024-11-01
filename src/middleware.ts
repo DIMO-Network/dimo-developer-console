@@ -67,7 +67,7 @@ export const middleware = async (
     if (token) {
       const user = await getUserByToken();
       const subOrganization = await getUserSubOrganization(
-        user.company_email_owner ?? user.email
+        user.company_email_owner ?? user.email,
       );
       request.user = new LoggedUser(user, subOrganization);
 
@@ -113,6 +113,7 @@ export const middleware = async (
 
     return NextResponse.next();
   } catch (error: unknown) {
+    console.error('Middleware error:', error);
     let path = handleConnectionError(error, isLoginPage);
     path = path ?? handleExpiredSession(error, isLoginPage);
     const redirectUrl = `${configuration.frontendUrl}${path}`;

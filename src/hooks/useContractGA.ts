@@ -12,7 +12,12 @@ import configuration from '@/config';
 import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
 
 export const useContractGA = () => {
-  const { organizationInfo, getKernelClient, getPublicClient, handleOnChainError } = useGlobalAccount();
+  const {
+    organizationInfo,
+    getKernelClient,
+    getPublicClient,
+    handleOnChainError,
+  } = useGlobalAccount();
   const [balanceDimo, setBalanceDimo] = useState<number>(0);
   const [balanceDCX, setBalanceDCX] = useState<number>(0);
   const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
@@ -28,8 +33,10 @@ export const useContractGA = () => {
     const handleGetContracts = async () => {
       if (!organizationInfo) return;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const kernelClient = await getKernelClient(organizationInfo as ISubOrganization) as any;
+      const kernelClient = (await getKernelClient(
+        organizationInfo as ISubOrganization,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      )) as any;
       const publicClient = getPublicClient();
 
       if (!kernelClient) return;
@@ -41,7 +48,7 @@ export const useContractGA = () => {
           client: {
             public: publicClient,
             wallet: kernelClient,
-          }
+          },
         }),
       );
 
@@ -52,7 +59,7 @@ export const useContractGA = () => {
           client: {
             public: publicClient,
             wallet: kernelClient,
-          }
+          },
         }),
       );
 
@@ -63,7 +70,7 @@ export const useContractGA = () => {
           client: {
             public: publicClient,
             wallet: kernelClient,
-          }
+          },
         }),
       );
     };
@@ -89,10 +96,9 @@ export const useContractGA = () => {
         bundlerActions(ENTRYPOINT_ADDRESS_V07),
       );
 
-      const receipt =
-        await bundlerClient.waitForUserOperationReceipt({
-          hash: dcxExchangeOpHash,
-        });
+      const receipt = await bundlerClient.waitForUserOperationReceipt({
+        hash: dcxExchangeOpHash,
+      });
 
       if (receipt.reason) throw new Error(receipt.reason);
 
@@ -108,25 +114,51 @@ export const useContractGA = () => {
   useEffect(() => {
     if (!dimoContract || !organizationInfo) return;
 
-    dimoContract.read.balanceOf([organizationInfo!.smartContractAddress])
+    dimoContract.read
+      .balanceOf([organizationInfo!.smartContractAddress])
       .then((currentBalanceWei: unknown) => {
-        setBalanceDimo(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
-      }).catch(console.error);
+        setBalanceDimo(
+          Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
+        );
+      })
+      .catch(console.error);
 
-    dimoCreditsContract.read.balanceOf([organizationInfo!.smartContractAddress])
+    dimoCreditsContract.read
+      .balanceOf([organizationInfo!.smartContractAddress])
       .then((currentBalanceWei: unknown) => {
-        setBalanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
-      }).catch(console.error);
+        setBalanceDCX(
+          Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
+        );
+      })
+      .catch(console.error);
 
-    dimoContract.read.allowance([organizationInfo.smartContractAddress, configuration.DLC_ADDRESS])
+    dimoContract.read
+      .allowance([
+        organizationInfo.smartContractAddress,
+        configuration.DLC_ADDRESS,
+      ])
       .then((currentBalanceWei: unknown) => {
-        setAllowanceDLC(Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))));
-      }).catch(console.error);
+        setAllowanceDLC(
+          Math.ceil(
+            Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
+          ),
+        );
+      })
+      .catch(console.error);
 
-    dimoContract.read.allowance([organizationInfo.smartContractAddress, configuration.DCX_ADDRESS])
+    dimoContract.read
+      .allowance([
+        organizationInfo.smartContractAddress,
+        configuration.DCX_ADDRESS,
+      ])
       .then((currentBalanceWei: unknown) => {
-        setAllowanceDCX(Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))));
-      }).catch(console.error);
+        setAllowanceDCX(
+          Math.ceil(
+            Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
+          ),
+        );
+      })
+      .catch(console.error);
   }, [dimoContract, dimoCreditsContract]);
 
   return {

@@ -8,10 +8,7 @@ const web3 = new Web3(
 ); // TODO: Replace with Infura ID and send to .env
 
 // Load contract ABI
-const contract = new web3.eth.Contract(
-  contractABI as AbiItem[],
-  DC_ADDRESS,
-);
+const contract = new web3.eth.Contract(contractABI as AbiItem[], DC_ADDRESS);
 
 export async function mintDimoCredits(txHash: string) {
   try {

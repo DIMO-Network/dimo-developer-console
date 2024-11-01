@@ -13,7 +13,7 @@ import { IDcxPurchaseTransaction } from '@/types/wallet';
 
 import './BuyCreditsModal.css';
 
-interface IProps { }
+interface IProps {}
 
 const buyCreditsFlows = {
   'credits-amount': {
@@ -96,4 +96,3 @@ export const BuyCreditsModal: FC<IProps> = () => {
 };
 
 export default BuyCreditsModal;
-

@@ -1,4 +1,3 @@
-'use client';
 import axios, { AxiosError } from 'axios';
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';

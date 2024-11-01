@@ -445,7 +445,7 @@ export const useGlobalAccount = () => {
       });
 
       return kernelClient;
-    }catch (e) {
+    } catch (e) {
       console.error('Error creating kernel client', e);
       return null;
     }
@@ -461,8 +461,12 @@ export const useGlobalAccount = () => {
     return publicClient;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sponsorUserOperation = async ({ userOperation }: { userOperation: any }) => {
+  const sponsorUserOperation = async ({
+    userOperation,
+  }: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    userOperation: any;
+  }) => {
     const chain = getChain();
     const zerodevPaymaster = createZeroDevPaymasterClient({
       chain: chain,
@@ -530,4 +534,3 @@ export const useGlobalAccount = () => {
 };
 
 export default useGlobalAccount;
-

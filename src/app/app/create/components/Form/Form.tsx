@@ -30,7 +30,11 @@ import { encodeFunctionData } from 'viem';
 import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
 import { formatHexToNumber, formatHex } from '@/utils/formatHex';
 
-const { LICENSE_PRICE_USD = 5, DCX_IN_USD = 0.001, DIMO_IN_USD = 0.16 } = process.env;
+const {
+  LICENSE_PRICE_USD = 5,
+  DCX_IN_USD = 0.001,
+  DIMO_IN_USD = 0.16,
+} = process.env;
 
 interface IProps {
   isOnboardingCompleted?: boolean;
@@ -73,7 +77,12 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
       });
       const transactions = [];
 
-      if (!hasEnoughBalanceDCX && !hasEnoughBalanceDimo) return setNotification('Insufficient Dimo or DCX balance', 'Oops...', 'error');
+      if (!hasEnoughBalanceDCX && !hasEnoughBalanceDimo)
+        return setNotification(
+          'Insufficient Dimo or DCX balance',
+          'Oops...',
+          'error',
+        );
 
       if (!hasEnoughBalanceDCX) {
         transactions.push(...(await mintDCX()));
@@ -108,7 +117,12 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
           functionName: 'approve',
           args: [
             configuration.DCX_ADDRESS,
-            BigInt(utils.toWei(Math.ceil(configuration.desiredAmountOfDimo), 'ether')),
+            BigInt(
+              utils.toWei(
+                Math.ceil(configuration.desiredAmountOfDimo),
+                'ether',
+              ),
+            ),
           ],
         }),
       });
@@ -135,54 +149,64 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
   const prepareIssueInDC = async () => {
     if (hasEnoughAllowanceDLC) return [];
 
-    return [{
-      to: configuration.DC_ADDRESS,
-      value: BigInt(0),
-      data: encodeFunctionData({
-        abi: DimoABI,
-        functionName: 'approve',
-        args: [
-          configuration.DLC_ADDRESS,
-          BigInt(utils.toWei(Math.ceil(configuration.desiredAmountOfDimo), 'ether')),
-        ],
-      }),
-    }];
+    return [
+      {
+        to: configuration.DC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoABI,
+          functionName: 'approve',
+          args: [
+            configuration.DLC_ADDRESS,
+            BigInt(
+              utils.toWei(
+                Math.ceil(configuration.desiredAmountOfDimo),
+                'ether',
+              ),
+            ),
+          ],
+        }),
+      },
+    ];
   };
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
     if (!_.isEmpty(workspace)) return workspace;
-    if (!organizationInfo) throw new Error('There is not organization information');
+    if (!organizationInfo)
+      throw new Error('There is not organization information');
 
     setLoadingStatus({
       label: 'Licensing the application...',
       status: 'loading',
     });
     const workspaceName = String(
-      utils.fromAscii(workspaceData?.name ?? '')
+      utils.fromAscii(workspaceData?.name ?? ''),
     ).padEnd(66, '0');
     setLoadingStatus({
       label: 'Creating developer license...',
       status: 'loading',
     });
 
-    const transaction = [{
-      to: configuration.DLC_ADDRESS,
-      value: BigInt(0),
-      data: encodeFunctionData({
-        abi: DimoLicenseABI,
-        functionName: 'issueInDc',
-        args: [
-          workspaceName,
-        ],
-      }),
-    }];
+    const transaction = [
+      {
+        to: configuration.DLC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoLicenseABI,
+          functionName: 'issueInDc',
+          args: [workspaceName],
+        }),
+      },
+    ];
 
     const { logs } = await processTransactions(transaction);
     const {
-      topics: [, rawTokenId = '0x', rawOwner = '0x', rawClientId = '0x'] = []
-    } = logs?.find(
-      ({ topics: [topic = '0x'] = [] }) => topic === configuration.ISSUED_TOPIC
-    ) ?? {};
+      topics: [, rawTokenId = '0x', rawOwner = '0x', rawClientId = '0x'] = [],
+    } =
+      logs?.find(
+        ({ topics: [topic = '0x'] = [] }) =>
+          topic === configuration.ISSUED_TOPIC,
+      ) ?? {};
 
     return createWorkspace({
       name: workspaceData.name ?? '',

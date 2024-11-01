@@ -47,19 +47,17 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   const handleSetDomain = async (uri: string) => {
     if (!organizationInfo && !workspace)
       throw new Error('Web3 connection failed');
-    const transaction = [{
-      to: configuration.DLC_ADDRESS,
-      value: BigInt(0),
-      data: encodeFunctionData({
-        abi: DimoLicenseABI,
-        functionName: 'setRedirectUri',
-        args: [
-          workspace?.token_id ?? 0,
-          true,
-          uri,
-        ]
-      }),
-    }];
+    const transaction = [
+      {
+        to: configuration.DLC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoLicenseABI,
+          functionName: 'setRedirectUri',
+          args: [workspace?.token_id ?? 0, true, uri],
+        }),
+      },
+    ];
     await processTransactions(transaction);
   };
 

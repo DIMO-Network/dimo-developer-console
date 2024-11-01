@@ -39,18 +39,17 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const handleDisableSigner = async (signer: string) => {
     if (!organizationInfo && !workspace)
       throw new Error('Web3 connection failed');
-    const transaction = [{
-      to: configuration.DLC_ADDRESS,
-      value: BigInt(0),
-      data: encodeFunctionData({
-        abi: DimoLicenseABI,
-        functionName: 'disableSigner',
-        args: [
-          workspace?.token_id ?? 0,
-          signer,
-        ]
-      }),
-    }];
+    const transaction = [
+      {
+        to: configuration.DLC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoLicenseABI,
+          functionName: 'disableSigner',
+          args: [workspace?.token_id ?? 0, signer],
+        }),
+      },
+    ];
     await processTransactions(transaction);
   };
 

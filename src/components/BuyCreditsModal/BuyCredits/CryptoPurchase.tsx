@@ -63,8 +63,12 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
   useEffect(() => {
     if (cryptoSession) {
       cryptoSession.addEventListener('onramp_ui_loaded', handleOnReady);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      cryptoSession.addEventListener('onramp_session_updated', handleOnChange as any);
+
+      cryptoSession.addEventListener(
+        'onramp_session_updated',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        handleOnChange as any,
+      );
       return () => {
         cryptoSession.removeEventListener('onramp_ui_loaded', handleOnReady);
         cryptoSession.removeEventListener(
@@ -74,7 +78,7 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
         );
       };
     }
-    return () => { };
+    return () => {};
   }, [cryptoSession]);
 
   return (

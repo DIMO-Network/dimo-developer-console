@@ -2,13 +2,13 @@ import { IUser } from '@/types/user';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
 export const getUserByToken = async () => {
-  const client = dimoDevAPIClient();
+  const client = await dimoDevAPIClient();
   const { data } = await client.get<IUser>('/api/me');
   return data;
 };
 
 export const acceptInvitation = async (invitationCode: string) => {
-  const client = dimoDevAPIClient();
+  const client = await dimoDevAPIClient();
   const { data } = await client.put<IUser>('/api/my/team/invitation', {
     invitation_code: invitationCode,
   });
@@ -19,7 +19,7 @@ export const existUserByEmailOrAddress = async (
   item: string | null,
   provider: string | null,
 ) => {
-  const client = dimoDevAPIClient();
+  const client = await dimoDevAPIClient();
   const { data } = await client.get<{
     existItem: boolean;
     existAssociation: boolean;

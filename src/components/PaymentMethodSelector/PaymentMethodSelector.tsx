@@ -20,7 +20,6 @@ export type Ref = HTMLInputElement;
 export const PaymentMethodSelector: FC<IProps> = forwardRef<Ref, IProps>(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ({ name, control }, _ref) => {
-
     return (
       <Controller
         name={name}
@@ -29,7 +28,9 @@ export const PaymentMethodSelector: FC<IProps> = forwardRef<Ref, IProps>(
           return (
             <div className="payment-method-selector">
               <PaymentMethod
-                className={classNames('payment-method', { selected: currentValue?.type === 'wallet' })}
+                className={classNames('payment-method', {
+                  selected: currentValue?.type === 'wallet',
+                })}
                 selected={currentValue?.type === 'wallet'}
                 method="Buy with DIMO"
                 Icon={WalletIcon}
@@ -38,7 +39,9 @@ export const PaymentMethodSelector: FC<IProps> = forwardRef<Ref, IProps>(
                 }}
               />
               <PaymentMethod
-                className={classNames('payment-method', { selected: currentValue?.type === 'usd' })}
+                className={classNames('payment-method', {
+                  selected: currentValue?.type === 'usd',
+                })}
                 selected={currentValue?.type === 'usd'}
                 method="Buy with USD"
                 onClick={() => {
