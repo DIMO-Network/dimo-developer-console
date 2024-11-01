@@ -233,6 +233,13 @@ export const useGlobalAccount = () => {
       if (!organizationInfo) return {} as IKernelOperationStatus;
       const kernelClient = await getKernelClient(organizationInfo);
 
+      if (!kernelClient) {
+        return {
+          success: false,
+          reason: 'Error creating kernel client',
+        };
+      }
+
       const wmaticDepositOpHash = await kernelClient.sendUserOperation({
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
@@ -275,6 +282,13 @@ export const useGlobalAccount = () => {
     try {
       if (!organizationInfo) return {} as IKernelOperationStatus;
       const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) {
+        return {
+          success: false,
+          reason: 'Error creating kernel client',
+        };
+      }
 
       const deadLine = Date.now() + 1000 * 60 * 10;
       const omidExchangeOpHash = await kernelClient.sendUserOperation({
@@ -329,6 +343,14 @@ export const useGlobalAccount = () => {
     try {
       if (!organizationInfo) return {} as IKernelOperationStatus;
       const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) {
+        return {
+          success: false,
+          reason: 'Error creating kernel client',
+        };
+      }
+
       const dcxExchangeOpHash = await kernelClient.sendUserOperation({
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
@@ -372,56 +394,61 @@ export const useGlobalAccount = () => {
     subOrganizationId,
     walletAddress,
   }: ISubOrganization) => {
-    const chain = getChain();
-    const stamperClient = new TurnkeyClient(
-      {
-        baseUrl: turnkeyConfig.apiBaseUrl,
-      },
-      passkeyClient!.config.stamper!,
-    );
+    try {
+      const chain = getChain();
+      const stamperClient = new TurnkeyClient(
+        {
+          baseUrl: turnkeyConfig.apiBaseUrl,
+        },
+        passkeyClient!.config.stamper!,
+      );
 
-    const localAccount = await createAccount({
-      client: stamperClient,
-      organizationId: subOrganizationId,
-      signWith: walletAddress,
-      ethereumAddress: walletAddress,
-    });
+      const localAccount = await createAccount({
+        client: stamperClient,
+        organizationId: subOrganizationId,
+        signWith: walletAddress,
+        ethereumAddress: walletAddress,
+      });
 
-    const smartAccountClient = createWalletClient({
-      account: localAccount,
-      chain: chain,
-      transport: http(turnkeyConfig.bundleRpc),
-    });
+      const smartAccountClient = createWalletClient({
+        account: localAccount,
+        chain: chain,
+        transport: http(turnkeyConfig.bundleRpc),
+      });
 
-    const smartAccountSigner =
-      walletClientToSmartAccountSigner(smartAccountClient);
+      const smartAccountSigner =
+        walletClientToSmartAccountSigner(smartAccountClient);
 
-    const publicClient = getPublicClient();
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer: smartAccountSigner,
-      entryPoint: ENTRYPOINT_ADDRESS_V07,
-      kernelVersion: KERNEL_V3_1,
-    });
+      const publicClient = getPublicClient();
+      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+        signer: smartAccountSigner,
+        entryPoint: ENTRYPOINT_ADDRESS_V07,
+        kernelVersion: KERNEL_V3_1,
+      });
 
-    const zeroDevKernelAccount = await createKernelAccount(publicClient, {
-      plugins: {
-        sudo: ecdsaValidator,
-      },
-      entryPoint: ENTRYPOINT_ADDRESS_V07,
-      kernelVersion: KERNEL_V3_1,
-    });
+      const zeroDevKernelAccount = await createKernelAccount(publicClient, {
+        plugins: {
+          sudo: ecdsaValidator,
+        },
+        entryPoint: ENTRYPOINT_ADDRESS_V07,
+        kernelVersion: KERNEL_V3_1,
+      });
 
-    const kernelClient = createKernelAccountClient({
-      account: zeroDevKernelAccount,
-      chain: chain,
-      entryPoint: ENTRYPOINT_ADDRESS_V07,
-      bundlerTransport: http(turnkeyConfig.bundleRpc),
-      middleware: {
-        sponsorUserOperation: sponsorUserOperation,
-      },
-    });
+      const kernelClient = createKernelAccountClient({
+        account: zeroDevKernelAccount,
+        chain: chain,
+        entryPoint: ENTRYPOINT_ADDRESS_V07,
+        bundlerTransport: http(turnkeyConfig.bundleRpc),
+        middleware: {
+          sponsorUserOperation: sponsorUserOperation,
+        },
+      });
 
-    return kernelClient;
+      return kernelClient;
+    }catch (e) {
+      console.error('Error creating kernel client', e);
+      return null;
+    }
   };
 
   const getPublicClient = () => {

@@ -25,43 +25,50 @@ export const useContractGA = () => {
   const [dimoCreditsContract, setDimoCreditsContract] = useState<any>();
 
   useEffect(() => {
-    if (!organizationInfo) return;
+    const handleGetContracts = async () => {
+      if (!organizationInfo) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const kernelClient = getKernelClient(organizationInfo as ISubOrganization) as any;
-    const publicClient = getPublicClient();
-    setDimoContract(
-      getContract({
-        address: configuration.DC_ADDRESS,
-        abi: DimoABI,
-        client: {
-          public: publicClient,
-          wallet: kernelClient,
-        }
-      }),
-    );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const kernelClient = await getKernelClient(organizationInfo as ISubOrganization) as any;
+      const publicClient = getPublicClient();
 
-    setLicenseContract(
-      getContract({
-        address: configuration.DLC_ADDRESS,
-        abi: LicenseABI,
-        client: {
-          public: publicClient,
-          wallet: kernelClient,
-        }
-      }),
-    );
+      if (!kernelClient) return;
 
-    setDimoCreditsContract(
-      getContract({
-        address: configuration.DCX_ADDRESS,
-        abi: DimoCreditsABI,
-        client: {
-          public: publicClient,
-          wallet: kernelClient,
-        }
-      }),
-    );
+      setDimoContract(
+        getContract({
+          address: configuration.DC_ADDRESS,
+          abi: DimoABI,
+          client: {
+            public: publicClient,
+            wallet: kernelClient,
+          }
+        }),
+      );
+
+      setLicenseContract(
+        getContract({
+          address: configuration.DLC_ADDRESS,
+          abi: LicenseABI,
+          client: {
+            public: publicClient,
+            wallet: kernelClient,
+          }
+        }),
+      );
+
+      setDimoCreditsContract(
+        getContract({
+          address: configuration.DCX_ADDRESS,
+          abi: DimoCreditsABI,
+          client: {
+            public: publicClient,
+            wallet: kernelClient,
+          }
+        }),
+      );
+    };
+
+    handleGetContracts().catch(console.error);
   }, [organizationInfo?.smartContractAddress]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,6 +76,9 @@ export const useContractGA = () => {
     if (!organizationInfo) return {} as IKernelOperationStatus;
     try {
       const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) return {} as IKernelOperationStatus;
+
       const dcxExchangeOpHash = await kernelClient.sendUserOperation({
         userOperation: {
           callData: await kernelClient.account.encodeCallData(transactions),
@@ -101,22 +111,22 @@ export const useContractGA = () => {
     dimoContract.read.balanceOf([organizationInfo!.smartContractAddress])
       .then((currentBalanceWei: unknown) => {
         setBalanceDimo(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
-      });
+      }).catch(console.error);
 
     dimoCreditsContract.read.balanceOf([organizationInfo!.smartContractAddress])
       .then((currentBalanceWei: unknown) => {
         setBalanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
-      });
+      }).catch(console.error);
 
     dimoContract.read.allowance([organizationInfo.smartContractAddress, configuration.DLC_ADDRESS])
       .then((currentBalanceWei: unknown) => {
         setAllowanceDLC(Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))));
-      });
+      }).catch(console.error);
 
     dimoContract.read.allowance([organizationInfo.smartContractAddress, configuration.DCX_ADDRESS])
       .then((currentBalanceWei: unknown) => {
         setAllowanceDCX(Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))));
-      });
+      }).catch(console.error);
   }, [dimoContract, dimoCreditsContract]);
 
   return {

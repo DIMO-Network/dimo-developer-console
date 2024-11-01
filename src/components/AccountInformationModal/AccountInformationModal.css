@@ -1,6 +1,6 @@
 .account-information-modal {
   .dialog-panel {
-    @apply sm:max-w-5xl;
+    @apply !max-w-5xl;
   }
 
   .account-information-content {
