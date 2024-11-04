@@ -11,7 +11,6 @@ const GetStartedSection: FC = () => {
                 How to Get Started
             </Title>
             <div className="get-started-cards">
-                {/* Purchase DCX Card */}
                 <Card className="get-started-card">
                     <div>
                         <p className="get-started-card-title">Purchase DCX</p>
@@ -22,7 +21,6 @@ const GetStartedSection: FC = () => {
                     <Button className="get-started-card-button">+ Purchase DCX</Button>
                 </Card>
 
-                {/* Create an Application Card */}
                 <Card className="get-started-card">
                     <div>
                         <p className="get-started-card-title">Create an Application</p>
