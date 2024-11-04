@@ -1,6 +1,5 @@
 import { FC } from 'react';
 import { useRouter } from 'next/navigation';
-// import { getMyApp } from '@/services/app';  // Commenting out for now
 import { Card } from '@/components/Card';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
@@ -19,7 +18,6 @@ interface Props {
 const AppsList: FC<Props> = ({ apps }) => {
     const router = useRouter();
 
-    // Hardcoded handleAppClick for testing purposes
     const handleAppClick = (id: string) => {
         console.log(`Hardcoded App Click: App ID - ${id}`);
         router.push(`/app/${id}`);
@@ -27,24 +25,26 @@ const AppsList: FC<Props> = ({ apps }) => {
 
     return (
         <div className="apps-section">
-            <div className="apps-header">
-                <Title component="h2" className="text-lg">
+            <div className="apps-header flex justify-between items-center">
+                <Title component="h2" className="apps-title">
                     Your Applications
                 </Title>
                 <Button className="create-app-btn">+ Create New</Button>
             </div>
-
-            {apps.length > 0 ? (
-                <div className="apps-list">
-                    {apps.map((app) => (
-                        <Card key={app.id} className="app-card" onClick={() => handleAppClick(app.id)}>
-                            <p>{app.name}</p>
-                        </Card>
-                    ))}
-                </div>
-            ) : (
-                <p>No applications found.</p>
-            )}
+            <div className="apps-list">
+                {apps.map((app) => (
+                    <Card
+                        key={app.id}
+                        className="app-card"
+                        onClick={() => handleAppClick(app.id)}
+                    >
+                        <div>
+                            <p className="app-card-title">{app.name}</p>
+                            <p className="app-card-status">{app.status}</p>
+                        </div>
+                    </Card>
+                ))}
+            </div>
         </div>
     );
 };

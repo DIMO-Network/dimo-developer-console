@@ -7,16 +7,18 @@ import './View.css';
 const AttentionBox: FC = () => {
     return (
         <Card className="attention-card">
-            <div className="attention-header">
-                <Title component="h3" className="attention-title">
-                    Attention Required
-                </Title>
+            <div className="attention-header flex justify-between items-center">
+                <div>
+                    <Title component="h3" className="attention-title">
+                        Attention Required
+                    </Title>
+                    <p className="attention-description">
+                        Your developer account needs DCX to function properly. Please purchase
+                        more DCX to avoid service interruptions.
+                    </p>
+                </div>
                 <Button className="get-credits-btn">+ Get Credits</Button>
             </div>
-            <p>
-                Your developer account needs DCX to function properly. Please purchase
-                more DCX to avoid service interruptions.
-            </p>
         </Card>
     );
 };
