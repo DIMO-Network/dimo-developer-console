@@ -1,4 +1,5 @@
 import { FC, useContext } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/Card';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
@@ -6,10 +7,13 @@ import { CreditsContext } from '@/context/creditsContext';
 import './View.css';
 
 const GetStartedSection: FC = () => {
+    const router = useRouter();
     const { setIsOpen } = useContext(CreditsContext);
-
     const handleOpenBuyCreditsModal = () => setIsOpen(true);
-
+    const handleCreateAppClick = () => {
+        console.log("Create App button clicked");  // Debug log
+        router.push('/app/create');
+    };
     return (
         <div className="get-started-section">
             <Title component="h3" className="get-started-title">
@@ -35,7 +39,9 @@ const GetStartedSection: FC = () => {
                             Create an application as part of your Developer License
                         </p>
                     </div>
-                    <Button className="get-started-card-button">+ Create an App</Button>
+                    <Button className="get-started-card-button" onClick={handleCreateAppClick}>
+                        + Create an App
+                    </Button>
                 </Card>
             </div>
         </div>
