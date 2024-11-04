@@ -5,7 +5,7 @@
     @apply flex flex-col gap-2;
 
     .title {
-      @apply text-3xl font-bold text-white;
+      @apply text-5xl font-bold text-white;
     }
 
     .sub-message {
@@ -51,17 +51,41 @@
     .create-new-app-btn {
       @apply bg-blue-400 text-black px-4 py-2 rounded-full mt-5 self-start cursor-pointer hover:bg-blue-300;
     }
+
+    .purchase-dcx-btn {
+      @apply bg-blue-400 text-black px-4 py-2 rounded-full mt-5 self-start cursor-pointer hover:bg-blue-300;
+    }
   }
 
-  .attention-box {
-    @apply p-4 bg-red-500 rounded-lg text-white mb-5;
+  .attention-card {
+    @apply p-4 border border-red-500 rounded-lg mb-5;
 
     .attention-title {
-      @apply font-bold;
+      @apply font-bold text-red-500;
     }
 
     .get-credits-btn {
-      @apply bg-blue-400 text-black px-4 py-2 rounded-full mt-3 cursor-pointer hover:bg-blue-300;
+      @apply bg-blue-400 text-black px-4 py-2 rounded-full mt-0 ml-auto cursor-pointer hover:bg-blue-300;
+    }
+  }
+
+  .get-started-section {
+    @apply flex justify-between items-center p-5 bg-gray-800 rounded-lg;
+
+    .get-started-options {
+      @apply flex flex-row gap-4 justify-between items-center;
+    }
+
+    .create-app-btn {
+      @apply bg-blue-400 text-black px-4 py-2 rounded-full cursor-pointer hover:bg-blue-300;
+    }
+
+    .purchase-dcx-btn {
+      @apply bg-blue-400 text-black px-4 py-2 rounded-full cursor-pointer hover:bg-blue-300;
+    }
+
+    .option-description {
+      @apply text-sm text-gray-400;
     }
   }
 }

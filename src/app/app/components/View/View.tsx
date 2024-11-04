@@ -2,41 +2,47 @@
 import { FC, useEffect, useState } from 'react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 //import { useContractGA } from '@/hooks/useContractGA';  //santi merge PR
-import { getMyApps } from '@/services/app';
+//import { getMyApps } from '@/services/app';  // Commenting out for now
 import DimoAndDcxTokensList from './DimoAndDcxTokensList';
 import OnboardingSection from './OnboardingSection';
 import GetStartedSection from './GetStartedSection';
 import AttentionBox from './AttentionBox';
 import AppsList from './AppsList';
-import TokenBalanceComponent from './TokenBalanceComponent';
 import './View.css';
 
 export const View: FC = () => {
     const { isOnboardingCompleted, isLoading } = useOnboarding();
     //const { balanceDimo, balanceDCX } = useContractGA();  // Get balances using the hook
-    const balanceDimo = '1000';  // Hardcode for testing for now
-    const balanceDCX = '500';
-    const [apps, setApps] = useState<Array<{ id: string; name: string; status: string }>>([]);
-    const [loadingApps, setLoadingApps] = useState(true);
+    const balanceDimo = '0';  // Hardcode for testing for now
+    const balanceDCX = '0';
+
+    // Commenting out the getMyApps-related code and hardcoding apps for testing
+    // const [apps, setApps] = useState<Array<{ id: string; name: string; status: string }>>([]);
+    const [loadingApps, setLoadingApps] = useState(false); // No need to simulate loading for now
+    const hardcodedApps = [
+        { id: '1', name: 'Test App 1', status: 'active' },
+        //{ id: '2', name: 'Test App 2', status: 'inactive' },
+    ];
 
     useEffect(() => {
         if (isOnboardingCompleted) {
-            const fetchApps = async () => {
-                try {
-                    const response = await getMyApps();
-                    setApps(response.results);
-                } catch (error) {
-                    console.error('Error fetching apps:', error);
-                } finally {
-                    setLoadingApps(false);
-                }
-            };
+            // const fetchApps = async () => {
+            //     try {
+            //         const response = await getMyApps();
+            //         setApps(response.results);
+            //     } catch (error) {
+            //         console.error('Error fetching apps:', error);
+            //     } finally {
+            //         setLoadingApps(false);
+            //     }
+            // };
 
-            fetchApps();
+            // fetchApps();
         }
     }, [isOnboardingCompleted]);
 
-    const hasApps = apps.length > 0;
+    // Hardcode hasApps as true since we have hardcoded apps for testing
+    const hasApps = hardcodedApps.length > 0;
     const hasDCXBalance = parseFloat(balanceDCX) > 0;
     const exchangeRate = 0.001;
 
@@ -46,16 +52,15 @@ export const View: FC = () => {
                 <div>Loading...</div>
             ) : (
                 <>
-                    {/* Display ERC20 Tokens */}
-                    <DimoAndDcxTokensList tokens={[{ symbol: 'DIMO', balance: balanceDimo }, { symbol: 'DCX', balance: balanceDCX }]} />
+                    {/* Display Tokens */}
+                    <DimoAndDcxTokensList
+                        tokens={[
+                            { symbol: 'DIMO', balance: balanceDimo },
+                            { symbol: 'DCX', balance: balanceDCX }
+                        ]}
+                        exchangeRate={exchangeRate}
+                    />
 
-                    {/* Display DIMO Balance */}
-                    <div className="dimo-balance">
-                        <h4>Your DIMO Token Balance</h4>
-                        <p>{balanceDimo} DIMO</p>
-                    </div>
-
-                    {/* Welcome Message */}
                     <div className="welcome-message">
                         <p className="title">Welcome to DIMO Developer Console</p>
                         <p className="sub-message">
@@ -84,18 +89,14 @@ export const View: FC = () => {
                     {!hasDCXBalance && hasApps && (
                         <>
                             <AttentionBox />
-                            <AppsList apps={apps} />
+                            <AppsList apps={hardcodedApps} />
                         </>
                     )}
 
                     {/* Scenario 4: Apps created, DCX balance > 0 */}
                     {hasDCXBalance && hasApps && (
                         <>
-                            <AppsList apps={apps} />
-                            <TokenBalanceComponent
-                                balance={balanceDCX}
-                                exchangeRate={exchangeRate}
-                            />
+                            <AppsList apps={hardcodedApps} />
                         </>
                     )}
                 </>

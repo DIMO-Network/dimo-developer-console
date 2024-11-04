@@ -2,6 +2,8 @@ import { FC } from 'react';
 import { Card } from '@/components/Card';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
+import './View.css';
+
 
 const OnboardingSection: FC = () => {
     return (
