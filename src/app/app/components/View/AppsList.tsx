@@ -24,10 +24,12 @@ const AppsList: FC<Props> = ({ apps }) => {
 
     return (
         <div>
-            <Title component="h2" className="text-lg">
-                Your Applications
-            </Title>
-            <Button className="create-app-btn">+ Create New</Button>
+            <div className="apps-header">
+                <Title component="h2" className="title">
+                    Your Applications
+                </Title>
+                <Button className="create-app-btn">+ Create New</Button>
+            </div>
 
             {apps.length > 0 ? (
                 <div className="apps-list">

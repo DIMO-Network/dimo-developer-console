@@ -22,6 +22,7 @@
 
     .create-app-btn {
       @apply bg-[#b7f2eb] text-black px-4 py-2 rounded-full cursor-pointer hover:bg-opacity-80;
+      margin-top: 1.5rem;
     }
 
     .apps-list {
