@@ -12,13 +12,13 @@ import './View.css';
 export const View: FC = () => {
     const { isOnboardingCompleted, isLoading } = useOnboarding();
     //const { balanceDimo, balanceDCX } = useContractGA();  // Get balances using the hook
-    const balanceDCX = '0';
+    const balanceDCX = '10';
 
     // Commenting out the getMyApps-related code and hardcoding apps for testing
     // const [apps, setApps] = useState<Array<{ id: string; name: string; status: string }>>([]);
     const [loadingApps, setLoadingApps] = useState(false); // No need to simulate loading for now
     const hardcodedApps = [
-        //{ id: '1', name: 'Test App 1', status: 'active' },
+        { id: '1', name: 'Test App 1', status: 'active' },
     ];
 
     useEffect(() => {
@@ -82,10 +82,6 @@ export const View: FC = () => {
                     {hasDCXBalance && hasApps && (
                         <>
                             <div className="apps-section">
-                                <div className="apps-header">
-                                    <p className="title">Your Applications</p>
-                                    <button className="create-app-btn">Create New</button>
-                                </div>
                                 <AppsList apps={hardcodedApps} />
                             </div>
                         </>
