@@ -5,8 +5,8 @@ import { isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
-import axios, { isAxiosError } from 'axios';
 import { getUserSubOrganization } from '@/services/globalAccount';
+import xior, { XiorError } from 'xior';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
   configuration;
@@ -30,8 +30,8 @@ const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
 };
 
 const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
-  if (isAxiosError(error)) {
-    const code = error.code;
+  if (error instanceof XiorError) {
+    const code = error.cause;
     if (code === 'ERR_NETWORK') {
       return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
     }
@@ -40,11 +40,11 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
 };
 
 const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
-  if (isAxiosError(error)) {
+  if (error instanceof XiorError) {
     const status = error.response?.status;
     if (status === 401) {
       const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
-      axios.post(signOutUrl);
+      xior.post(signOutUrl);
       return 'sign-in?error=expired';
     }
   }
