@@ -35,6 +35,9 @@ export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam }) => {
   } = useForm<IInvitation>({
     mode: 'onChange',
     reValidateMode: 'onChange',
+    defaultValues: {
+      role: config.ROLES[0],
+    },
   });
 
   const onSubmit = async () => {
@@ -78,6 +81,7 @@ export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam }) => {
             options={roleOptions}
             control={control}
             placeholder="Select a role"
+            value={config.ROLES[0]}
             role="company-region"
           />
           {errors.role && (
