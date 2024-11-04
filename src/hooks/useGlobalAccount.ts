@@ -398,8 +398,6 @@ export const useGlobalAccount = () => {
         ethereumAddress: walletAddress,
       });
 
-      console.info('url', turnkeyConfig.rpcUrl);
-
       const smartAccountClient = createWalletClient({
         account: localAccount,
         chain: chain,

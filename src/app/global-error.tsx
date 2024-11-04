@@ -54,7 +54,7 @@ interface IProps {
 }
 
 const ErrorPage: FC<IProps> = ({ error, reset }) => {
-  console.log({ error });
+  console.error({ error });
 
   return (
     <html lang="en" className="h-full">
