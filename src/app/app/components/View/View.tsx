@@ -17,9 +17,9 @@ export const View: FC = () => {
     const { balanceDCX } = useContractGA();
     const [apps, setApps] = useState<AppItem[]>([]);
     const [loadingApps, setLoadingApps] = useState(true);
-
     const hasApps = apps.length > 0;
     const hasDCXBalance = balanceDCX > 0;
+
 
     useEffect(() => {
         const fetchApps = async () => {

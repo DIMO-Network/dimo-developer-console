@@ -1,24 +1,29 @@
-import { FC } from 'react';
+import {FC, useContext} from 'react';
 import { Card } from '@/components/Card';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
 import './View.css';
+import {CreditsContext} from "@/context/creditsContext";
+
 
 const AttentionBox: FC = () => {
+
+    const { setIsOpen } = useContext(CreditsContext);
+
+    const handleOpenBuyCreditsModal = () => setIsOpen(true);
+
     return (
         <Card className="attention-card">
-            <div className="attention-header flex justify-between items-center">
-                <div>
-                    <Title component="h3" className="attention-title">
-                        Attention Required
-                    </Title>
-                    <p className="attention-description">
-                        Your developer account needs DCX to function properly. Please purchase
-                        more DCX to avoid service interruptions.
-                    </p>
-                </div>
-                <Button className="get-credits-btn">+ Get Credits</Button>
-            </div>
+            <Title component="h3" className="attention-title">
+                Attention Required
+            </Title>
+            <p>
+                Your developer account needs DCX to function properly. Please purchase
+                more DCX to avoid service interruptions.
+            </p>
+            <Button className="get-credits-btn" onClick={handleOpenBuyCreditsModal}>
+                + Get Credits
+            </Button>
         </Card>
     );
 };

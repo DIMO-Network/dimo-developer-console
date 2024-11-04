@@ -1,10 +1,15 @@
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 import { Card } from '@/components/Card';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
+import { CreditsContext } from '@/context/creditsContext';
 import './View.css';
 
 const GetStartedSection: FC = () => {
+    const { setIsOpen } = useContext(CreditsContext);
+
+    const handleOpenBuyCreditsModal = () => setIsOpen(true);
+
     return (
         <div className="get-started-section">
             <Title component="h3" className="get-started-title">
@@ -18,7 +23,9 @@ const GetStartedSection: FC = () => {
                             Obtain DCX to get credits, unlocking the DIMO developer ecosystem
                         </p>
                     </div>
-                    <Button className="get-started-card-button">+ Purchase DCX</Button>
+                    <Button className="get-started-card-button" onClick={handleOpenBuyCreditsModal}>
+                        + Purchase DCX
+                    </Button>
                 </Card>
 
                 <Card className="get-started-card">
