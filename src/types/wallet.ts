@@ -44,6 +44,7 @@ export interface IDcxPurchaseTransaction {
   destinationAddress: `0x${string}`;
   usdAmount: number;
   maticAmount: string;
+  alreadyHasDimo: boolean;
   dcxAmount: string;
   currency: string;
   transactionHash: string;
@@ -52,12 +53,8 @@ export interface IDcxPurchaseTransaction {
 export interface IStripeCryptoEvent {
   type: 'onramp_session_updated';
   payload: {
-    session: StripeSession;
+    session: OnrampSessionResult;
   };
-}
-
-export interface StripeSession extends OnrampSessionResult {
-  destination_crypto_amount: string;
 }
 
 export interface Log {

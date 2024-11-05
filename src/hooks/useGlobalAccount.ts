@@ -22,7 +22,7 @@ import {
   createPublicClient,
   createWalletClient,
   decodeErrorResult,
-  encodeFunctionData,
+  encodeFunctionData, getContract,
   http,
   HttpRequestError,
   parseUnits
@@ -38,6 +38,8 @@ import UniversalRouter from '@/contracts/uniswapRouter.json';
 import DimoCredit from '@/contracts/DimoCreditContract.json';
 
 import { wagmiAbi } from '@/contracts/wagmi';
+import { utils } from 'web3';
+import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -378,6 +380,35 @@ export const useGlobalAccount = () => {
     }
   };
 
+  const getNeededDimoAmountForDcx = async (amount: number): Promise<number> => {
+    try {
+      if (!organizationInfo) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) {
+        return 0;
+      }
+
+      const contract = getContract({
+        address: configuration.DCX_ADDRESS,
+        abi: DimoCreditsABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const quote = await contract.read.getQuoteDc([amount]);
+
+      return Number(utils.fromWei(quote as bigint, 'ether'));
+    } catch (e) {
+      const errorReason = handleOnChainError(e as HttpRequestError);
+      console.error('Error getting needed dimo amount', errorReason);
+      return 0;
+    }
+  };
+
   const getKernelClient = async ({
     subOrganizationId,
     walletAddress,
@@ -479,6 +510,8 @@ export const useGlobalAccount = () => {
       data: errorData,
     });
 
+    console.error('Error value:', value);
+
     const { args } = value;
 
     return args[0];
@@ -520,6 +553,7 @@ export const useGlobalAccount = () => {
     getPublicClient,
     getKernelClient,
     handleOnChainError,
+    getNeededDimoAmountForDcx,
   };
 };
 

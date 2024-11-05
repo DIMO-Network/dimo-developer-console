@@ -42,9 +42,10 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
 
   const handleOnChange = (event: IStripeCryptoEvent) => {
     if (event.payload.session.status === 'fulfillment_complete') {
+      const processedAmount = process.env.VERCEL_ENV === 'production' ? event.payload.session.quote!.destination_amount! : '1';
       onNext('crypto-purchase', {
         ...transactionData,
-        maticAmount: event.payload.session.destination_crypto_amount,
+        maticAmount: processedAmount,
       });
     }
   };
@@ -73,8 +74,7 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
         cryptoSession.removeEventListener('onramp_ui_loaded', handleOnReady);
         cryptoSession.removeEventListener(
           'onramp_session_updated',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          handleOnChange as any,
+          handleOnChange,
         );
       };
     }

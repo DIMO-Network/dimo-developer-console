@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { TokenInput } from '@/components/TokenInput';
 import { Button } from '@/components/Button';
 import useStripeCrypto from '@/hooks/useStripeCrypto';
-import { useGlobalAccount } from '@/hooks';
+import { useContractGA, useGlobalAccount } from '@/hooks';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { TextError } from '@/components/TextError';
@@ -30,7 +30,8 @@ interface IProps {
 }
 
 export const CreditsAmount = ({ onNext }: IProps) => {
-  const { organizationInfo } = useGlobalAccount();
+  const { organizationInfo, getNeededDimoAmountForDcx } = useGlobalAccount();
+  const { balanceDimo } = useContractGA();
   const { setStripeClientId } = useContext(StripeCryptoContext);
   const { createStripeCryptoSession } = useStripeCrypto();
   const { control, watch } = useForm<IForm>({
@@ -45,11 +46,20 @@ export const CreditsAmount = ({ onNext }: IProps) => {
   });
   const credits = watch('credits', 0);
 
-  const handleShowIframe = async () => {
+  const handleStartPurchase = async () => {
     const { smartContractAddress } = organizationInfo!;
     if (!smartContractAddress) return;
-
-    const { client_secret } = await createStripeCryptoSession(
+    const neededDimo = await getNeededDimoAmountForDcx(credits);
+    if (balanceDimo > 0 && balanceDimo > neededDimo) {
+      // TODO: handle this better, right is a bit hacky
+      onNext('crypto-purchase', {
+        destinationAddress: smartContractAddress,
+        dcxAmount: credits!.toFixed(2),
+        alreadyHasDimo: true,
+      });
+      return;
+    }
+   const { client_secret } = await createStripeCryptoSession(
       smartContractAddress,
       credits * DCX_PRICE,
     );
@@ -58,6 +68,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       destinationAddress: smartContractAddress,
       usdAmount: credits * DCX_PRICE,
       dcxAmount: credits!.toFixed(2),
+      alreadyHasDimo: false,
     });
   };
 
@@ -92,7 +103,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
         <Button
           disabled={credits < config.MINIMUM_CREDITS}
           className="primary !h-9"
-          onClick={handleShowIframe}
+          onClick={handleStartPurchase}
         >
           Buy DCX
         </Button>

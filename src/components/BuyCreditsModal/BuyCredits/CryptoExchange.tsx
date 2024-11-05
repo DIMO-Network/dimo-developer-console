@@ -115,6 +115,10 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   useEffect(() => {
     if (!organizationInfo?.subOrganizationId) return;
     if (!transactionData) return;
+    if (transactionData.alreadyHasDimo) {
+      setSwappingIntoDimo(LoadingStatus.Success);
+      return;
+    }
     if (swappingIntoDimo === LoadingStatus.None) {
       handleSwappingIntoDimo().catch(console.error);
     }
@@ -132,7 +136,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
 
   return (
     <div className="minting-process">
-      <ProcessCard title="Swapping into DIMO" status={swappingIntoDimo} />
+      {!transactionData?.alreadyHasDimo && <ProcessCard title="Swapping into DIMO" status={swappingIntoDimo} /> }
       <ProcessCard title="Minting DCX" status={mintingDCX} />
     </div>
   );
