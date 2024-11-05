@@ -5,7 +5,6 @@ import {
   inviteCollaboratorToMyTeam,
 } from '@/services/team';
 import { IInvitation } from '@/types/team';
-import { isAxiosError } from 'axios';
 import { XiorError } from 'xior';
 
 export const getMyCollaborators = async () => {
