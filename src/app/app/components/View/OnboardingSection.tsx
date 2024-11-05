@@ -1,14 +1,9 @@
-import { FC, useContext } from 'react';
+import { FC } from 'react';
 import { Card } from '@/components/Card';
 import { Title } from '@/components/Title';
-import { Button } from '@/components/Button';
-import { CreditsContext } from '@/context/creditsContext';
 import './View.css';
 
 const OnboardingSection: FC = () => {
-    const { setIsOpen } = useContext(CreditsContext);
-
-    const handleOpenBuyCreditsModal = () => setIsOpen(true);
 
     return (
         <Card className="onboarding-card">
@@ -16,9 +11,6 @@ const OnboardingSection: FC = () => {
                 <Title component="h3" className="onboarding-title">
                     What are DIMO Credits (DCX)?
                 </Title>
-                <Button className="purchase-dcx-button" onClick={handleOpenBuyCreditsModal}>
-                    + Purchase DCX
-                </Button>
             </div>
             <p className="onboarding-content">
                 DCX is a stablecoin that’s pegged to one-tenth of a cent (0.001 USD), and is essential for all developers building on DIMO.

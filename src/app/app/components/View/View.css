@@ -9,6 +9,20 @@
     }
   }
 
+  .image-container {
+    @apply relative w-full;
+
+    .header-image {
+      @apply w-full;
+    }
+
+    .action-button {
+      @apply absolute top-4 right-4 text-black text-lg cursor-pointer hover:bg-opacity-90;
+      background-color: #4ed8e0;
+      padding: 0.8rem 2rem;
+      border-radius: 15px;
+    }
+  }
   .apps-section {
     @apply flex flex-col mt-5;
 
@@ -87,10 +101,6 @@
   }
 
 
-
-
-
-
   .get-started-section {
     @apply mt-5 text-white;
   }
@@ -116,8 +126,10 @@
   }
 
   .get-started-card-button {
-    @apply bg-[#b7f2eb] text-black px-4 py-2 rounded-full cursor-pointer hover:bg-opacity-80 whitespace-nowrap;
-    margin-left: auto;
+    @apply text-white cursor-pointer hover:bg-opacity-90;
+    background-color: #333;
+    padding: 0 2rem;
+    border-radius: 15px;
   }
 
 

@@ -28,7 +28,7 @@ const GetStartedSection: FC = () => {
                         </p>
                     </div>
                     <Button className="get-started-card-button" onClick={handleOpenBuyCreditsModal}>
-                        + Purchase DCX
+                        Purchase DCX
                     </Button>
                 </Card>
 
@@ -40,7 +40,7 @@ const GetStartedSection: FC = () => {
                         </p>
                     </div>
                     <Button className="get-started-card-button" onClick={handleCreateAppClick}>
-                        + Create an App
+                        Create an App
                     </Button>
                 </Card>
             </div>

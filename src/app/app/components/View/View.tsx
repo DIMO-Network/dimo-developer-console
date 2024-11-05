@@ -6,6 +6,10 @@ import OnboardingSection from './OnboardingSection';
 import GetStartedSection from './GetStartedSection';
 import AttentionBox from './AttentionBox';
 import AppsList from './AppsList';
+import { Button } from '@/components/Button';
+import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
+import { CreditsContext } from '@/context/creditsContext';
 import './View.css';
 
 interface AppItem {
@@ -17,9 +21,19 @@ export const View: FC = () => {
     const { balanceDCX } = useContractGA();
     const [apps, setApps] = useState<AppItem[]>([]);
     const [loadingApps, setLoadingApps] = useState(true);
+    const router = useRouter();
+    const { setIsOpen } = useContext(CreditsContext);
+
     const hasApps = apps.length > 0;
     const hasDCXBalance = balanceDCX > 0;
 
+    const handleActionButtonClick = () => {
+        if (hasDCXBalance && !hasApps) {
+            router.push('/app/create');
+        } else {
+            setIsOpen(true);
+        }
+    };
 
     useEffect(() => {
         const fetchApps = async () => {
@@ -48,6 +62,18 @@ export const View: FC = () => {
                 <>
                     <div className="welcome-message">
                         <p className="title">Welcome to DIMO Developer Console</p>
+                    </div>
+
+                    <div className="image-container">
+                        <img src="/images/LogoDIMO.png" alt="DIMO Logo" className="header-image" />
+                        {(!hasDCXBalance || (!hasApps && hasDCXBalance)) && (
+                            <Button
+                                className="action-button"
+                                onClick={handleActionButtonClick}
+                            >
+                                {hasDCXBalance ? 'Create an App' : 'Purchase DCX'}
+                            </Button>
+                        )}
                     </div>
 
                     {/* Scenario 1: No DCX balance, no apps created */}
