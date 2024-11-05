@@ -34,7 +34,7 @@ export const AppList: FC<IProps> = ({ apps }) => {
       <p className="title">Your applications</p>
       {role === TeamRoles.OWNER && (
         <Button
-          className="primary px-3 with-icon"
+          className="primary px-3 with-icon w-36 mr-4"
           onClick={handleCreateApp}
         >
           <PlusIcon className="w-4 h-4" />

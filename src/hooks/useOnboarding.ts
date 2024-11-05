@@ -54,7 +54,7 @@ export const useOnboarding = () => {
     setIsLoading,
     handleCreateApp,
     handleOpenBuyCreditsModal,
-    balanceDCX,
+    balance: balanceDCX,
   };
 };
 
