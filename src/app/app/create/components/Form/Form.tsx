@@ -37,11 +37,10 @@ const {
 } = process.env;
 
 interface IProps {
-  isOnboardingCompleted?: boolean;
   workspace?: IWorkspace;
 }
 
-export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
+export const Form: FC<IProps> = ({ workspace }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const {
@@ -234,7 +233,7 @@ export const Form: FC<IProps> = ({ isOnboardingCompleted, workspace }) => {
         {...loadingStatus}
       />
       <form onSubmit={handleSubmit(onSubmit)}>
-        {!isOnboardingCompleted && (
+        {!workspace && (
           <Label htmlFor="namespace" className="text-xs text-medium">
             Project Namespace
             <TextField
