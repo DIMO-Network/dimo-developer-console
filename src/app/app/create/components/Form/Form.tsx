@@ -233,7 +233,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
         {...loadingStatus}
       />
       <form onSubmit={handleSubmit(onSubmit)}>
-        {!workspace && (
+        {(!workspace || Object.keys(workspace).length > 0) && (
           <Label htmlFor="namespace" className="text-xs text-medium">
             Project Namespace
             <TextField
