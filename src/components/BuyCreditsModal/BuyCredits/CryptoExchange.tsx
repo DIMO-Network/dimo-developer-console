@@ -75,7 +75,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const mintDCX = async () => {
     const transactions = [];
     const expectedDcx = Number(transactionData!.dcxAmount!);
-    if (allowanceDCX >= expectedDcx) {
+    if (allowanceDCX <= expectedDcx) {
       transactions.push({
         to: configuration.DC_ADDRESS,
         value: BigInt(0),
@@ -86,7 +86,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
             configuration.DCX_ADDRESS,
             BigInt(
               utils.toWei(
-                Math.ceil(expectedDcx),
+                expectedDcx,
                 'ether',
               ),
             ),
@@ -104,7 +104,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
         functionName: '0xec88fc37',
         args: [
           organizationInfo!.smartContractAddress,
-          utils.toWei(Math.ceil(expectedDcx), 'ether'),
+          BigInt(utils.toWei(expectedDcx, 'ether')),
         ],
       }),
     });
