@@ -1,19 +1,136 @@
 .home-page {
-  @apply flex flex-col gap-4;
+  @apply flex flex-col gap-4 p-5;
 
   .welcome-message {
     @apply flex flex-col gap-2;
 
     .title {
-      @apply text-3xl;
-    }
-
-    .sub-message {
-      @apply text-sm;
+      @apply text-5xl text-white;
     }
   }
 
-  .onboarding-steps {
-    @apply flex flex-row gap-10;
+  .image-container {
+    @apply relative w-full;
+
+    .header-image {
+      @apply w-full;
+    }
+
+    .action-button {
+      @apply absolute top-4 right-4 text-black text-lg cursor-pointer hover:bg-opacity-90;
+      background-color: #4ed8e0;
+      padding: 0.8rem 2rem;
+      border-radius: 15px;
+    }
   }
+  .apps-section {
+    @apply flex flex-col mt-5;
+
+    .apps-header {
+      @apply flex justify-between items-center mb-4;
+    }
+
+    .title {
+      @apply text-xl text-white;
+    }
+
+    .create-app-btn {
+      @apply bg-[#b7f2eb] text-black px-4 py-2 rounded-full cursor-pointer hover:bg-opacity-80;
+      margin-top: 1.5rem;
+    }
+
+    .apps-list {
+      @apply mt-5 flex flex-col gap-3;
+    }
+
+    .app-card {
+      @apply flex justify-between items-center p-3 rounded-lg cursor-pointer transition ease-in-out duration-300;
+      @apply bg-transparent hover:bg-gray-700;
+      @apply border border-gray-500 hover:border-transparent;
+      @apply w-1/4;
+
+      .app-name {
+        @apply text-white font-semibold;
+      }
+
+      .app-status {
+        @apply text-gray-400 text-sm;
+      }
+    }
+  }
+
+
+  .attention-card {
+    @apply p-4 border border-red-500 rounded-lg mb-5 relative;
+
+    .attention-header {
+      @apply flex flex-wrap justify-between items-center gap-2;
+    }
+
+    .attention-title {
+      @apply font-bold text-red-500 text-lg;
+    }
+
+    p {
+      @apply text-sm text-white mt-2;
+    }
+
+    .get-credits-btn {
+      @apply bg-[#b7f2eb] text-black px-4 py-2 rounded-full cursor-pointer hover:bg-opacity-80 absolute right-4 top-1/2 transform -translate-y-1/2;
+    }
+  }
+
+  .onboarding-card {
+    @apply flex flex-col gap-3 w-full;
+
+    .onboarding-header {
+      @apply flex justify-between items-center w-full;
+    }
+
+    .onboarding-title {
+      @apply text-2xl text-white;
+    }
+
+    .purchase-dcx-button {
+      @apply bg-[#b7f2eb] text-black px-4 py-2 rounded-full cursor-pointer hover:bg-opacity-80 ml-auto;
+    }
+
+    .onboarding-content {
+      @apply text-sm text-gray-400 mt-2 leading-relaxed;
+    }
+  }
+
+
+  .get-started-section {
+    @apply mt-5 text-white;
+  }
+
+  .get-started-title {
+    @apply text-2xl mb-4 pl-4;
+  }
+
+  .get-started-cards {
+    @apply flex flex-col gap-3;
+  }
+
+  .get-started-card {
+    @apply flex justify-between items-center p-4 rounded-lg w-full;
+  }
+
+  .get-started-card-title {
+    @apply text-lg text-white;
+  }
+
+  .get-started-card-description {
+    @apply text-sm text-gray-400 mt-1;
+  }
+
+  .get-started-card-button {
+    @apply text-white cursor-pointer hover:bg-opacity-90;
+    background-color: #333;
+    padding: 0 2rem;
+    border-radius: 15px;
+  }
+
+
 }
