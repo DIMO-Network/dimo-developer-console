@@ -464,10 +464,12 @@ export const useGlobalAccount = () => {
   };
 
   const handleOnChainError = (error: HttpRequestError): string => {
-    console.error('Error on chain', error);
+    console.error('Error on chain:', error);
+
     if (!error.details) {
       return 'Unknown error';
     }
+
     const errorData: `0x${string}` = error.details
       .replaceAll('"', '')
       .split(': ')[1] as `0x${string}`;
