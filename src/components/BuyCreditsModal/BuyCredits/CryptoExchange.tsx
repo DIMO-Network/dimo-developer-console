@@ -63,7 +63,6 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
     organizationInfo,
     depositWmatic,
     swapWmaticToDimo,
-    mintDimoIntoDimoCredit,
   } = useGlobalAccount();
 
   const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
