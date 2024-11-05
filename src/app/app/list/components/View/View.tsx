@@ -20,7 +20,7 @@ export const View: FC = () => {
       {!isLoading && (
         <div className="app-list-page">
           <div className="welcome-message">
-            <p className="title">Welcome to DIMO Developer Consoleh</p>
+            <p className="title">Welcome to DIMO Developer Console</p>
           </div>
           <Banner cta={cta} />
           {balance === 0 && apps.length === 0 && <Explanation />}
