@@ -1,0 +1,29 @@
+.get-started-content {
+  .title {
+    @apply text-2xl py-4;
+  }
+
+  .actions-content {
+    @apply flex flex-col gap-2;
+  }
+
+  .action {
+    @apply flex flex-row justify-between gap-6;
+
+    &-icon {
+      @apply flex w-14 h-12 bg-dark-grey-900 items-center justify-center rounded-lg;
+    }
+    &-content {
+      @apply w-full;
+    }
+    &-title {
+      @apply text-base;
+    }
+    &-description {
+      @apply text-grey-400;
+    }
+    &-cta {
+      @apply w-40;
+    }
+  }
+}
