@@ -35,7 +35,7 @@
     border-image-width: 1;
     color: rgb(183 242 235 / 1);
   }
-:w
+
   &.white {
     @apply bg-white;
     &-outline {

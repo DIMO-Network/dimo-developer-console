@@ -37,7 +37,7 @@ export const useOnboarding = () => {
     } else {
       setCta(undefined);
     }
-  }, [apps]);
+  }, [apps, balanceDCX]);
 
   const handleCreateApp = () => {
     router.push('/app/create');
