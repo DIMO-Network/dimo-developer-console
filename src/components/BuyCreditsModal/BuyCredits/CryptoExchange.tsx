@@ -114,10 +114,11 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
 
   useEffect(() => {
     if (!organizationInfo?.subOrganizationId) return;
+    if (!transactionData) return;
     if (swappingIntoDimo === LoadingStatus.None) {
       handleSwappingIntoDimo().catch(console.error);
     }
-  }, [organizationInfo, swappingIntoDimo]);
+  }, [organizationInfo, swappingIntoDimo, transactionData]);
 
   useEffect(() => {
     if (!organizationInfo?.subOrganizationId) return;
