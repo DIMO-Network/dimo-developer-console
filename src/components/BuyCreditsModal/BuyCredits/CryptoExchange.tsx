@@ -127,6 +127,8 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       }
       setMintingDCX(LoadingStatus.Success);
     } catch (error) {
+      const e = error as Error;
+      setNotification(e.message, 'Oops...', 'error');
       console.error('Error while minting DCX', error);
       setMintingDCX(LoadingStatus.Error);
     }
