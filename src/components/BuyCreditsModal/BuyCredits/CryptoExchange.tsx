@@ -1,12 +1,17 @@
 'use client';
 
 import { IDcxPurchaseTransaction } from '@/types/wallet';
-import { useGlobalAccount } from '@/hooks';
+import { useContractGA, useGlobalAccount } from '@/hooks';
 import { useContext, useEffect, useState } from 'react';
 import { Loading } from '@/components/Loading';
 import { CheckIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
 import { ErrorIcon } from '@/components/Icons';
+import configuration from '@/config';
+import { encodeFunctionData } from 'viem';
+import DimoABI from '@/contracts/DimoTokenContract.json';
+import { utils } from 'web3';
+import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 
 interface IProps {
   onNext: (
@@ -53,11 +58,11 @@ const ProcessCard = ({
 
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const { setNotification } = useContext(NotificationContext);
+  const { allowanceDCX, processTransactions } = useContractGA();
   const {
     organizationInfo,
     depositWmatic,
     swapWmaticToDimo,
-    mintDimoIntoDimoCredit,
   } = useGlobalAccount();
 
   const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
@@ -67,14 +72,54 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
     LoadingStatus.None,
   );
 
+  const mintDCX = async () => {
+    const transactions = [];
+    const expectedDcx = Number(transactionData!.dcxAmount!);
+    if (allowanceDCX <= expectedDcx) {
+      transactions.push({
+        to: configuration.DC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoABI,
+          functionName: 'approve',
+          args: [
+            configuration.DCX_ADDRESS,
+            BigInt(
+              utils.toWei(
+                expectedDcx,
+                'ether',
+              ),
+            ),
+          ],
+        }),
+      });
+    }
+
+    // Call mintInDimo 2 parameteres
+    transactions.push({
+      to: configuration.DCX_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoCreditsABI,
+        functionName: '0xec88fc37',
+        args: [
+          organizationInfo!.smartContractAddress,
+          BigInt(utils.toWei(expectedDcx, 'ether')),
+        ],
+      }),
+    });
+    return transactions;
+  };
+
   const handleMintingDcx = async () => {
     try {
       if (mintingDCX === LoadingStatus.Loading) return;
       setMintingDCX(LoadingStatus.Loading);
 
-      const mintResult = await mintDimoIntoDimoCredit(
-        transactionData!.dcxAmount!,
-      );
+      const transactions = await mintDCX();
+
+      const mintResult = await processTransactions(transactions);
+
       if (!mintResult.success) {
         setNotification(mintResult.reason!, 'Oops...', 'error');
         setMintingDCX(LoadingStatus.Error);

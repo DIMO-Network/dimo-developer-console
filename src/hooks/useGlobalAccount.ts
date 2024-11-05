@@ -25,7 +25,6 @@ import {
   encodeFunctionData, getContract,
   http,
   HttpRequestError,
-  parseUnits
 } from 'viem';
 import { bundlerActions, ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner } from 'permissionless';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
@@ -35,7 +34,6 @@ import { polygon, polygonAmoy } from 'wagmi/chains';
 
 import WMatic from '@/contracts/wmatic.json';
 import UniversalRouter from '@/contracts/uniswapRouter.json';
-import DimoCredit from '@/contracts/DimoCreditContract.json';
 
 import { wagmiAbi } from '@/contracts/wagmi';
 import { utils } from 'web3';
@@ -234,7 +232,7 @@ export const useGlobalAccount = () => {
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
             to: config.WMATIC,
-            value: parseUnits(amount, 18),
+            value: BigInt(utils.toWei(amount, 'ether')),
             data: encodeFunctionData({
               abi: WMatic,
               functionName: 'deposit',
@@ -295,7 +293,7 @@ export const useGlobalAccount = () => {
                   tokenOut: config.DC_ADDRESS,
                   fee: BigInt(10000),
                   recipient: organizationInfo.smartContractAddress,
-                  amountIn: parseUnits(amount, 18),
+                  amountIn: BigInt(utils.toWei(amount, 'ether')),
                   deadline: BigInt(deadLine),
                   amountOutMinimum: BigInt(0),
                   sqrtPriceLimitX96: BigInt(0),
@@ -314,59 +312,6 @@ export const useGlobalAccount = () => {
         await bundlerClient.waitForUserOperationReceipt({
           hash: omidExchangeOpHash,
         });
-      return {
-        success,
-        reason,
-      };
-    } catch (e) {
-      const errorReason = handleOnChainError(e as HttpRequestError);
-      return {
-        success: false,
-        reason: errorReason,
-      };
-    }
-  };
-
-  const mintDimoIntoDimoCredit = async (
-    amount: string,
-  ): Promise<IKernelOperationStatus> => {
-    try {
-      if (!organizationInfo) return {} as IKernelOperationStatus;
-      const kernelClient = await getKernelClient(organizationInfo);
-
-      if (!kernelClient) {
-        return {
-          success: false,
-          reason: 'Error creating kernel client',
-        };
-      }
-
-      const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-        userOperation: {
-          callData: await kernelClient.account.encodeCallData({
-            to: config.DCX_ADDRESS,
-            value: BigInt(0),
-            data: encodeFunctionData({
-              abi: DimoCredit,
-              functionName: 'mintInDimo',
-              args: [
-                organizationInfo.smartContractAddress,
-                parseUnits(amount, 18),
-              ],
-            }),
-          }),
-        },
-      });
-
-      const bundlerClient = kernelClient.extend(
-        bundlerActions(ENTRYPOINT_ADDRESS_V07),
-      );
-
-      const { success, reason } =
-        await bundlerClient.waitForUserOperationReceipt({
-          hash: dcxExchangeOpHash,
-        });
-
       return {
         success,
         reason,
@@ -549,7 +494,6 @@ export const useGlobalAccount = () => {
     registerNewPasskey,
     depositWmatic,
     swapWmaticToDimo,
-    mintDimoIntoDimoCredit,
     getPublicClient,
     getKernelClient,
     handleOnChainError,
