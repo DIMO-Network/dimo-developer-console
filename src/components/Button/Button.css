@@ -1,5 +1,5 @@
 .button {
-  @apply rounded-full h-12 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex flex-row gap-2;
+  @apply rounded-full h-8 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex flex-row gap-2;
 
   span.content {
     @apply flex flex-row gap-2 items-center justify-center;
@@ -27,7 +27,7 @@
     border-image-width: 1;
     color: rgb(183 242 235 / 1);
   }
-
+:w
   &.white {
     @apply bg-white;
     &-outline {
