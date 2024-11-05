@@ -5,11 +5,13 @@ import { Loader } from '@//components/Loader';
 import { AppList } from '@/app/app/list/components/AppList';
 import { Banner } from '@/app/app/list/components/Banner';
 import { useOnboarding } from '@/hooks';
+import { Explanation } from '@/app/app/list/components/DCXExplanation';
+import { GetStarted } from '@/app/app/list/components/GetStarted';
 
 import './View.css';
 
 export const View: FC = () => {
-  const { isLoading, apps, cta } = useOnboarding();
+  const { isLoading, apps, balanceDCX, cta } = useOnboarding();
 
   return (
     <>
@@ -20,7 +22,9 @@ export const View: FC = () => {
             <p className="title">Welcome to DIMO Developer Consoleh</p>
           </div>
           <Banner cta={cta} />
-          {apps.length && <AppList apps={apps} />}
+          {balanceDCX === 0 && <Explanation />}
+          {apps.length === 0 && <GetStarted hasBalance={balanceDCX > 0} hasApps={apps.length > 0} />}
+          {apps.length > 0 && <AppList apps={apps} />}
         </div>
       )}
     </>
