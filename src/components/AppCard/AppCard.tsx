@@ -10,6 +10,7 @@ import './AppCard.css';
 interface IProps extends Partial<IApp> {
   className?: string;
   description?: string;
+  onClick?: () => void;
 }
 
 const AppIcon = {
