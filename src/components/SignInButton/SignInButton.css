@@ -3,3 +3,7 @@
     @apply h-6 w-6 mr-1;
   }
 }
+
+.sign-in-button {
+  @apply h-12;
+}
