@@ -1,4 +1,4 @@
-import { useContext, type FC } from 'react';
+import { useContext, type FC, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 
 import { CreditsContext } from '@/context/creditsContext';
@@ -24,11 +24,11 @@ export const Header: FC = () => {
     setShowAccountInformation(true);
   };
 
-  const getDcxBalance = () => {
+  const dcxBalance = useMemo(() => {
     if (!balanceDCX) return '0';
     if (balanceDCX <= 0) return '0';
     return balanceDCX.toFixed(2);
-  };
+  }, [balanceDCX]);
 
   return (
     <header className="header">
@@ -47,7 +47,7 @@ export const Header: FC = () => {
         </button>
         <div className="credits" role="credits-display">
           <div className="credits-info">
-            <p className="credit-amount">{getDcxBalance()}</p>
+            <p className="credit-amount">{dcxBalance}</p>
             <p className="credit-text">Credits</p>
           </div>
           <button
