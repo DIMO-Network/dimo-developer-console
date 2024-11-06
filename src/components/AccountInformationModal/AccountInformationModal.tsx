@@ -15,6 +15,7 @@ import { TokenBalance } from '@/components/TokenBalance';
 import { useContractGA } from '@/hooks';
 
 import './AccountInformationModal.css';
+import { CreditsContext } from '@/context/creditsContext';
 
 interface IProps {}
 
@@ -22,6 +23,7 @@ export const AccountInformationModal: FC<IProps> = () => {
   const { organizationInfo } = useGlobalAccount();
   const { data: session } = useSession();
   const { setNotification } = useContext(NotificationContext);
+  const { setIsOpen } = useContext(CreditsContext);
   const { showAccountInformation, setShowAccountInformation } = useContext(
       AccountInformationContext,
   );
@@ -36,6 +38,13 @@ export const AccountInformationModal: FC<IProps> = () => {
         'success',
         1000,
     );
+  };
+
+  const handleOpenBuyCreditsModal = () => {
+    setShowAccountInformation(false);
+    setTimeout(() =>
+      setIsOpen(true)
+    , 300);
   };
 
   return (
@@ -95,6 +104,7 @@ export const AccountInformationModal: FC<IProps> = () => {
                   balance={balanceDCX}
                   exchangeRate={5.86}
                   canBuy={true}
+                  openBuyModal={handleOpenBuyCreditsModal}
               />
             </div>
           </div>

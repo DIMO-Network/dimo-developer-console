@@ -31,6 +31,10 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
       return newValue;
     };
 
+    const formatValue = (value: number) => {
+      return value.toLocaleString('en-US');
+    };
+
     return (
       <Controller
         control={control}
@@ -51,10 +55,11 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
                 <input
                   className="dcx-value"
                   type="text"
-                  value={Number(currentValue)}
+                  value={formatValue(currentValue)}
                   onChange={(e) => {
+                    const textValue = (e.target.value || '0').replace(/,/g, '');
                     const newValue = handleChange(
-                      parseInt(e.target.value || '0', 10),
+                      parseInt(textValue, 10),
                     );
                     onChange(newValue);
                   }}

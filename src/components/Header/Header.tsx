@@ -7,9 +7,11 @@ import { UserAvatar } from '@/components/UserAvatar';
 
 import './Header.css';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
+import { useContractGA } from '@/hooks';
 
 export const Header: FC = () => {
   const { setIsOpen } = useContext(CreditsContext);
+  const { balanceDCX } = useContractGA();
   const { setShowAccountInformation } = useContext(AccountInformationContext);
   const { data: session } = useSession();
   const { user: { name = '' } = {} } = session ?? {};
@@ -20,6 +22,12 @@ export const Header: FC = () => {
 
   const handleOpenAccountInformationModal = () => {
     setShowAccountInformation(true);
+  };
+
+  const getDcxBalance = () => {
+    if (!balanceDCX) return '0';
+    if (balanceDCX <= 0) return '0';
+    return balanceDCX.toFixed(2);
   };
 
   return (
@@ -39,7 +47,7 @@ export const Header: FC = () => {
         </button>
         <div className="credits" role="credits-display">
           <div className="credits-info">
-            <p className="credit-amount">{0}</p>
+            <p className="credit-amount">{getDcxBalance()}</p>
             <p className="credit-text">Credits</p>
           </div>
           <button

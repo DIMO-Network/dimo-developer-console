@@ -45,7 +45,8 @@ export interface IDcxPurchaseTransaction {
   usdAmount: number;
   maticAmount: string;
   alreadyHasDimo: boolean;
-  dcxAmount: string;
+  dcxAmount: number;
+  requiredDimoAmount: number;
   currency: string;
   transactionHash: string;
 }

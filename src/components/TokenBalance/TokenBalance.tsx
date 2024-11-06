@@ -6,6 +6,7 @@ interface IProps {
   balance: number;
   exchangeRate: number;
   canBuy: boolean;
+  openBuyModal?: () => void;
 }
 
 export const TokenBalance = ({
@@ -13,6 +14,7 @@ export const TokenBalance = ({
   balance,
   exchangeRate,
   canBuy,
+  openBuyModal,
 }: IProps) => {
   return (
     <div className="token-balance">
@@ -28,7 +30,7 @@ export const TokenBalance = ({
         </div>
       </div>
       {canBuy && (
-        <button className="token-balance__buy-button">
+        <button className="token-balance__buy-button" onClick={openBuyModal}>
           <BuyDcxIcon />
         </button>
       )}
