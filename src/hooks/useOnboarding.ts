@@ -16,7 +16,7 @@ export const useOnboarding = () => {
   const [cta, setCta] = useState<CTA>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
-  const { balanceDCX } = useContractGA();
+  const { balanceDCX, balanceDimo } = useContractGA();
   const { setIsOpen } = useContext(CreditsContext);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export const useOnboarding = () => {
   }, []);
 
   useEffect(() => {
-    if (balanceDCX === 0) {
+    if (!(balanceDCX > 0 || balanceDimo > 0)) {
       setCta({
         label: 'Purchase DCX',
         onClick: handleOpenBuyCreditsModal,
