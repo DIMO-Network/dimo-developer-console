@@ -13,6 +13,7 @@ import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
 import { TokenBalance } from '@/components/TokenBalance';
 import { useContractGA } from '@/hooks';
+import config from '@/config';
 
 import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
@@ -103,7 +104,7 @@ export const AccountInformationModal: FC<IProps> = () => {
                   token={'dcx'}
                   balance={balanceDCX}
                   exchangeRate={5.86}
-                  canBuy={true}
+                  canBuy={balanceDCX < config.MINIMUM_CREDITS }
                   openBuyModal={handleOpenBuyCreditsModal}
               />
             </div>
