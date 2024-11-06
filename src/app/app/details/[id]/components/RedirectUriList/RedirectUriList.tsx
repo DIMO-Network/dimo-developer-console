@@ -54,7 +54,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
         <Toggle
           checked={Boolean(status)}
           onToggle={() => handleUpdateStatus(id as string, uri, !status)}
-          key={id}
+          key={`toggle-status-action-${id}`}
         />
       )
     );
@@ -114,7 +114,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
         <button
           type="button"
           onClick={() => handleDeleteUri(id as string, uri)}
-          key={id}
+          key={`delete-action-${id}`}
         >
           <TrashIcon className="w-5 h-5 cursor-pointer" />
         </button>
