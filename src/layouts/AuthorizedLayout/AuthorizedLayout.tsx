@@ -10,8 +10,8 @@ import withTurnKey from '@/hoc/TurnkeySessionProvider';
 
 export const AuthorizedLayout = withRainBow(
   withNotifications(
-    withTurnKey(
-      withCredits(
+    withCredits(
+      withTurnKey(
         ({
           children,
         }: Readonly<{

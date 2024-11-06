@@ -54,7 +54,8 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       // TODO: handle this better, right is a bit hacky
       onNext('crypto-purchase', {
         destinationAddress: smartContractAddress,
-        dcxAmount: credits!.toFixed(2),
+        dcxAmount: credits!,
+        requiredDimoAmount: neededDimo,
         alreadyHasDimo: true,
       });
       return;
@@ -67,7 +68,8 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     onNext('credits-amount', {
       destinationAddress: smartContractAddress,
       usdAmount: credits * DCX_PRICE,
-      dcxAmount: credits!.toFixed(2),
+      dcxAmount: credits!,
+      requiredDimoAmount: neededDimo,
       alreadyHasDimo: false,
     });
   };

@@ -78,7 +78,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
 
       if (!hasEnoughBalanceDCX && !hasEnoughBalanceDimo)
         return setNotification(
-          'Insufficient Dimo or DCX balance',
+          'Insufficient DMO or DCX balance',
           'Oops...',
           'error',
         );

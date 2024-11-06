@@ -101,7 +101,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
       <Button
         className="white-outline px-4"
         onClick={() => handleTestAuthentication(signer)}
-        key={signer.id}
+        key={`test-action-${signer.id}`}
       >
         Test Authentication
       </Button>
@@ -114,7 +114,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   }: ISigner) => {
     return (
       role === TeamRoles.OWNER && (
-        <button type="button" onClick={() => handleDelete(id, signer)} key={id}>
+        <button type="button" onClick={() => handleDelete(id, signer)} key={`delete-action-${id}`}>
           <TrashIcon className="w-5 h-5" />
         </button>
       )
