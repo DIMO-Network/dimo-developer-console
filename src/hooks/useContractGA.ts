@@ -159,7 +159,7 @@ export const useContractGA = () => {
         );
       })
       .catch(console.error);
-  }, [dimoContract, dimoCreditsContract]);
+  }, [organizationInfo?.smartContractAddress]);
 
   return {
     dimoContract,
