@@ -26,8 +26,8 @@ export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
     actionLabel,
     actionCta,
     completed,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Icon: ReactElement<any, string>;
     title: string;
     description: string;
