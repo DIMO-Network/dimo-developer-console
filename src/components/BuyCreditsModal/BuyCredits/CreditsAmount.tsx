@@ -51,7 +51,6 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     const { smartContractAddress } = organizationInfo!;
     if (!smartContractAddress) return;
     const neededDimo = await getNeededDimoAmountForDcx(credits);
-    console.info('neededDimo', neededDimo);
     const balanceDimo = await getDimoBalance();
     if (balanceDimo > 0 && balanceDimo > neededDimo) {
       // TODO: handle this better, right is a bit hacky

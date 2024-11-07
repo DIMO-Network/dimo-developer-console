@@ -11,7 +11,6 @@ const GetStartedSection: FC = () => {
     const { setIsOpen } = useContext(CreditsContext);
     const handleOpenBuyCreditsModal = () => setIsOpen(true);
     const handleCreateAppClick = () => {
-        console.log("Create App button clicked");  // Debug log
         router.push('/app/create');
     };
     return (
