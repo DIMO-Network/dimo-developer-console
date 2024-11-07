@@ -359,7 +359,15 @@ export const useGlobalAccount = () => {
 
       const quote = await contract.read.getQuoteDc([amount]);
 
-      return Number(utils.fromWei(quote as bigint, 'ether'));
+      const neededDimo = Number(utils.fromWei(quote as bigint, 'ether'));
+
+      const { VERCEL_ENV: environment } = process.env;
+
+      if (environment !== 'production') {
+        return neededDimo * amount;
+      }
+
+      return neededDimo;
     } catch (e) {
       const errorReason = handleOnChainError(e as HttpRequestError);
       console.error('Error getting needed dimo amount', errorReason);
