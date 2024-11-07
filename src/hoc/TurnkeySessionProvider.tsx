@@ -1,8 +1,6 @@
 'use client';
 
 import React, { ComponentType } from 'react';
-import { TurnkeyProvider } from '@turnkey/sdk-react';
-import { turnkeyConfig } from '@/config/turnkey';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { useAccountInformation } from '@/hooks';
 import { AccountInformationModal } from '@/components/AccountInformationModal';

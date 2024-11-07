@@ -1,17 +1,15 @@
 'use client';
 
-import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
 import { mainnet, polygon, polygonAmoy } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { RainbowKitSiweNextAuthProvider } from '@rainbow-me/rainbowkit-siwe-next-auth';
 import { SessionProvider } from 'next-auth/react';
 import { ComponentType } from 'react';
 
 import configuration from '@/config';
 
 import '@rainbow-me/rainbowkit/styles.css';
-import TurnkeySessionProvider from '@/hoc/TurnkeySessionProvider';
 import { TurnkeyProvider } from '@turnkey/sdk-react';
 import { turnkeyConfig } from '@/config/turnkey';
 

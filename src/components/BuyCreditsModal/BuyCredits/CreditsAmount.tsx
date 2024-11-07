@@ -10,9 +10,8 @@ import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { TextError } from '@/components/TextError';
 import config from '@/config';
 
-const { DCX_IN_USD = 0.001, DIMO_IN_USD = 0.16 } = process.env;
+const { DCX_IN_USD = 0.001 } = process.env;
 const DCX_PRICE = Number(DCX_IN_USD);
-const DIMO_PRICE = Number(DIMO_IN_USD);
 
 interface IForm {
   credits: number;
