@@ -11,6 +11,9 @@ import { ComponentType } from 'react';
 import configuration from '@/config';
 
 import '@rainbow-me/rainbowkit/styles.css';
+import TurnkeySessionProvider from '@/hoc/TurnkeySessionProvider';
+import { TurnkeyProvider } from '@turnkey/sdk-react';
+import { turnkeyConfig } from '@/config/turnkey';
 
 const { RAINBOW_PROJECT } = configuration;
 
@@ -32,11 +35,9 @@ export const withRainBow = <P extends object>(
       <WagmiProvider config={config}>
         <SessionProvider>
           <QueryClientProvider client={queryClient}>
-            <RainbowKitSiweNextAuthProvider>
-              <RainbowKitProvider>
-                <WrappedComponent {...props} />
-              </RainbowKitProvider>
-            </RainbowKitSiweNextAuthProvider>
+            <TurnkeyProvider config={turnkeyConfig}>
+              <WrappedComponent {...props} />
+            </TurnkeyProvider>
           </QueryClientProvider>
         </SessionProvider>
       </WagmiProvider>

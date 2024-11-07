@@ -4,7 +4,7 @@ import { BuyDcxIcon } from '@/components/Icons';
 interface IProps {
   token: string;
   balance: number;
-  exchangeRate: number;
+  basePrice: number;
   canBuy: boolean;
   openBuyModal?: () => void;
 }
@@ -12,7 +12,7 @@ interface IProps {
 export const TokenBalance = ({
   token,
   balance,
-  exchangeRate,
+  basePrice,
   canBuy,
   openBuyModal,
 }: IProps) => {
@@ -24,7 +24,7 @@ export const TokenBalance = ({
       <div className="token-balance__balance">
         <div className="token-balance__balance-container">
           <span className="text-sm font-bold">
-            {(balance / exchangeRate).toFixed(2)} USD
+            {(balance * basePrice).toFixed(2)} USD
           </span>
           <span className="text-sm ">{`${balance} ${token.toUpperCase()}`}</span>
         </div>

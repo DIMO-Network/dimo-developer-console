@@ -1,7 +1,7 @@
 'use client';
 
 import { get } from 'lodash';
-import { useContext, type FC } from 'react';
+import { useContext, type FC, useEffect, useState } from 'react';
 import { Modal } from '@/components/Modal';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { Title } from '@/components/Title';
@@ -28,8 +28,8 @@ export const AccountInformationModal: FC<IProps> = () => {
   const { showAccountInformation, setShowAccountInformation } = useContext(
       AccountInformationContext,
   );
-
-  const { balanceDimo, balanceDCX } = useContractGA();
+  const { getDimoBalance, getDcxBalance, getDimoPrice, dimoContract, dimoCreditsContract } = useContractGA();
+  const [balance, setBalance] = useState<{ dcxBalance: number, dimoBalance: number; dimoPrice: number; }>({ dcxBalance: 0, dimoBalance: 0, dimoPrice: 0 });
 
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
@@ -47,6 +47,18 @@ export const AccountInformationModal: FC<IProps> = () => {
       setIsOpen(true)
     , 300);
   };
+
+  const loadBalances = async () => {
+    const dimoBalance = await getDimoBalance();
+    const dcxBalance = await getDcxBalance();
+    const dimoPrice = await getDimoPrice();
+    setBalance({ dimoBalance, dcxBalance, dimoPrice });
+  };
+
+  useEffect(() => {
+    if(!(dimoContract && dimoCreditsContract)) return;
+    loadBalances().catch(console.error);
+  }, [dimoContract, dimoCreditsContract]);
 
   return (
       <Modal
@@ -96,15 +108,15 @@ export const AccountInformationModal: FC<IProps> = () => {
             <div className="balances">
               <TokenBalance
                   token={'dimo'}
-                  balance={balanceDimo}
-                  exchangeRate={5.86}
+                  balance={balance.dimoBalance}
+                  basePrice={balance.dimoPrice}
                   canBuy={false}
               />
               <TokenBalance
                   token={'dcx'}
-                  balance={balanceDCX}
-                  exchangeRate={5.86}
-                  canBuy={balanceDCX < config.MINIMUM_CREDITS }
+                  balance={balance.dcxBalance}
+                  basePrice={0.001}
+                  canBuy={balance.dcxBalance < config.MINIMUM_CREDITS }
                   openBuyModal={handleOpenBuyCreditsModal}
               />
             </div>

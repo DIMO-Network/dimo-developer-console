@@ -6,7 +6,7 @@ import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
-import xior, { XiorError } from 'xior';
+import xior, { isXiorError, XiorError } from 'xior';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
   configuration;
@@ -30,8 +30,9 @@ const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
 };
 
 const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
-  if (error instanceof XiorError) {
-    const code = error.cause;
+  if (isXiorError(error)) {
+    const xiorError = error as XiorError;
+    const code = xiorError.cause;
     if (code === 'ERR_NETWORK') {
       return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
     }
@@ -40,8 +41,9 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
 };
 
 const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
-  if (error instanceof XiorError) {
-    const status = error.response?.status;
+  if (isXiorError(error)) {
+    const xiorError = error as XiorError;
+    const status = xiorError.response?.status;
     if (status === 401) {
       const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
       xior.post(signOutUrl);
@@ -68,7 +70,8 @@ const validatePrivateSession = async (
   const missingFlow = request.user?.missingFlow ?? null;
   const flow = request.nextUrl.searchParams.get('flow');
 
-  if ((isValidationPage || isLoginPage) && isCompliant) {
+  //TODO: check how isLoginPage affects on safari
+  if ((isValidationPage) && isCompliant) {
     return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });
@@ -127,7 +130,6 @@ export const middleware = async (
   const token = await getToken({ req: request });
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
 
-  // Setting the user up
   try {
     if (token) {
       return validatePrivateSession(request, event);

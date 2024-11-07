@@ -10,6 +10,7 @@ import { IKernelOperationStatus, ISubOrganization } from '@/types/wallet';
 
 import configuration from '@/config';
 import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
+import { getCurrentDimoPrice } from '@/services/globalAccount';
 
 export const useContractGA = () => {
   const {
@@ -111,6 +112,21 @@ export const useContractGA = () => {
     }
   };
 
+  const getDcxBalance = async (): Promise<number> => {
+    if(!dimoCreditsContract) return 0;
+    const currentBalanceOnWei = await dimoCreditsContract.read.balanceOf([organizationInfo!.smartContractAddress]);
+    return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
+  };
+  const getDimoBalance = async (): Promise<number> => {
+    if(!dimoContract) return 0;
+    const currentBalanceOnWei = await dimoContract.read.balanceOf([organizationInfo!.smartContractAddress]);
+    return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
+  };
+
+  const getDimoPrice = (): Promise<number> => {
+    return getCurrentDimoPrice();
+  };
+
   useEffect(() => {
     if (!dimoContract || !organizationInfo) return;
 
@@ -171,6 +187,9 @@ export const useContractGA = () => {
     allowanceDLC,
     allowanceDCX,
     processTransactions,
+    getDcxBalance,
+    getDimoBalance,
+    getDimoPrice,
     hasEnoughBalanceDCX: balanceDCX >= configuration.desiredAmountOfDCX,
     hasEnoughBalanceDimo: balanceDCX >= configuration.desiredAmountOfDimo,
     hasEnoughAllowanceDLC: allowanceDLC >= configuration.desiredAmountOfDCX,

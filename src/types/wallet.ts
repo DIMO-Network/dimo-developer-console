@@ -67,3 +67,15 @@ export interface IKernelOperationStatus {
   reason?: string;
   logs?: Log[];
 }
+
+export interface ICoinMarketTokenResponse {
+  data: {
+    DIMO: {
+      quote: {
+        USD: {
+          price: number;
+        };
+      }
+    }[];
+  };
+}

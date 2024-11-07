@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { TokenInput } from '@/components/TokenInput';
 import { Button } from '@/components/Button';
@@ -31,7 +31,7 @@ interface IProps {
 
 export const CreditsAmount = ({ onNext }: IProps) => {
   const { organizationInfo, getNeededDimoAmountForDcx } = useGlobalAccount();
-  const { balanceDimo } = useContractGA();
+  const { getDimoBalance, getDimoPrice } = useContractGA();
   const { setStripeClientId } = useContext(StripeCryptoContext);
   const { createStripeCryptoSession } = useStripeCrypto();
   const { control, watch } = useForm<IForm>({
@@ -45,11 +45,13 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     },
   });
   const credits = watch('credits', 0);
+  const [dimoPrice, setDimoPrice] = useState<number>(0);
 
   const handleStartPurchase = async () => {
     const { smartContractAddress } = organizationInfo!;
     if (!smartContractAddress) return;
     const neededDimo = await getNeededDimoAmountForDcx(credits);
+    const balanceDimo = await getDimoBalance();
     if (balanceDimo > 0 && balanceDimo > neededDimo) {
       // TODO: handle this better, right is a bit hacky
       onNext('crypto-purchase', {
@@ -74,6 +76,14 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     });
   };
 
+  useEffect(() => {
+    const loadDimoPrice = async () => {
+      const dimoPrice = await getDimoPrice();
+      setDimoPrice(dimoPrice);
+    };
+    loadDimoPrice().catch(console.error);
+  }, []);
+
   return (
     <>
       <TokenInput
@@ -95,7 +105,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       </div>
       <div style={{ textAlign: 'center', margin: '10px 0' }}>
         <p>1 DCX = ${DCX_PRICE} USD</p>
-        <p>1 DIMO = ${DIMO_PRICE} USD</p>
+        <p>1 DIMO = ${dimoPrice.toFixed(3)} USD</p>
       </div>
       <div className="credit-total-content">
         <p className="total-descriptor">Your total</p>
