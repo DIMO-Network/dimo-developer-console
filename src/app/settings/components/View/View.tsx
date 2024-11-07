@@ -16,7 +16,7 @@ import { TeamFormModal } from '../TeamFormModal';
 
 const View: FC = () => {
   const { user } = useUser();
-  const { isLoading, teamCollaborators } = useTeamCollaborators();
+  const { isLoading, teamCollaborators, refreshData } = useTeamCollaborators();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
@@ -43,7 +43,10 @@ const View: FC = () => {
                 </Button>
               )}
             </div>
-            <TeamManagement teamCollaborators={teamCollaborators.data} />
+            <TeamManagement
+              teamCollaborators={teamCollaborators.filter(({ deleted }) => !deleted)}
+              refreshData={refreshData}
+            />
           </div>
         </>
       )}

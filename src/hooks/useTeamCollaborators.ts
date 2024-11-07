@@ -3,22 +3,30 @@ import { useEffect, useState } from 'react';
 
 import { getMyCollaborators } from '@/actions/team';
 import { ITeamCollaborator } from '@/types/team';
-import { Paginated } from '@/types/pagination';
 
 export const useTeamCollaborators = () => {
   const [teamCollaborators, setTeamCollaborators] = useState<
-    Paginated<ITeamCollaborator>
-  >({ data: [], totalItems: 0, totalPages: 0 });
+    ITeamCollaborator[]
+  >([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsLoading(true);
-    getMyCollaborators()
-      .then(setTeamCollaborators)
-      .finally(() => setIsLoading(false));
+    void refreshData();
   }, []);
 
-  return { isLoading, teamCollaborators, setTeamCollaborators };
+  const refreshData = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await getMyCollaborators();
+      setTeamCollaborators(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { isLoading, teamCollaborators, setTeamCollaborators, refreshData };
 };
 
 export default useTeamCollaborators;

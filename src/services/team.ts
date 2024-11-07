@@ -16,3 +16,8 @@ export const inviteCollaboratorToMyTeam = async (invitation: IInvitation) => {
     invitation,
   );
 };
+
+export const deleteMyTeamCollaborator = async (id: string) => {
+  const client = await dimoDevAPIClient();
+  return await client.delete(`/api/my/team/collaborator/${id}`);
+};

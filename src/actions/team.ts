@@ -1,6 +1,7 @@
 'use server';
 
 import {
+  deleteMyTeamCollaborator,
   getMyTeamCollaborators,
   inviteCollaboratorToMyTeam,
 } from '@/services/team';
@@ -15,6 +16,18 @@ export const getMyCollaborators = async () => {
 export const inviteCollaborator = async (invitation: IInvitation) => {
   try {
     const { data } = await inviteCollaboratorToMyTeam(invitation);
+    return data;
+  } catch (error: unknown) {
+    if (error instanceof XiorError) {
+      console.error({ error });
+      throw new Error(error?.response?.data?.message || error?.message);
+    }
+  }
+};
+
+export const deleteCollaborator = async (id: string) => {
+  try {
+    const { data } = await deleteMyTeamCollaborator(id);
     return data;
   } catch (error: unknown) {
     if (error instanceof XiorError) {
