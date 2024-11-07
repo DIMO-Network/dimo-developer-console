@@ -96,7 +96,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
                   message: 'The name should has maximum 150 characters',
                 },
                 validate: {
-                  url: (str = '') => isURL(str) || 'Invalid Redirect URI',
+                  url: (str = '') => isURL(str, { require_tld: false }) || 'Invalid Redirect URI',
                 },
               })}
               placeholder="www.google.com"
