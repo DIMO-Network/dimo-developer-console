@@ -17,6 +17,7 @@ import config from '@/config';
 
 import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
+import usePricing from '@/hooks/usePricing';
 
 interface IProps {}
 
@@ -28,7 +29,8 @@ export const AccountInformationModal: FC<IProps> = () => {
   const { showAccountInformation, setShowAccountInformation } = useContext(
       AccountInformationContext,
   );
-  const { getDimoBalance, getDcxBalance, getDimoPrice, dimoContract, dimoCreditsContract } = useContractGA();
+  const { getDimoBalance, getDcxBalance, dimoContract, dimoCreditsContract } = useContractGA();
+  const { getDimoPrice } = usePricing();
   const [balance, setBalance] = useState<{ dcxBalance: number, dimoBalance: number; dimoPrice: number; }>({ dcxBalance: 0, dimoBalance: 0, dimoPrice: 0 });
 
   const handleCopy = (value: string) => {

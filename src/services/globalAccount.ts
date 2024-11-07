@@ -1,17 +1,11 @@
 import { ICoinMarketTokenResponse, ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import xior, { XiorError } from 'xior';
-import cachePlugin from 'xior/plugins/cache';
+import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
 const globalAccountClient = xior.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
 });
-
-const coinMarketCapClient = xior.create({
-  baseURL: process.env.NEXT_PUBLIC_COINMARKET_API!,
-  cache: 'default',
-});
-coinMarketCapClient.plugins.use(cachePlugin());
 
 // public functions
 
@@ -84,15 +78,6 @@ export const rewirePasskey = async ({
       },
     },
   );
-};
-
-export const getCurrentDimoPrice = async (): Promise<number> => {
-  const { data } = await coinMarketCapClient.get<ICoinMarketTokenResponse>('v2/cryptocurrency/quotes/latest?symbol=DIMO', {
-    headers: {
-      'X-CMC_PRO_API_KEY': process.env.NEXT_PUBLIC_COINMARKET_API_KEY!,
-    }
-  });
-  return data.data.DIMO[0].quote.USD.price;
 };
 
 // private functions

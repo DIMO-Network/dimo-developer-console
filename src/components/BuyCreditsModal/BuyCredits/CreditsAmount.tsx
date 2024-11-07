@@ -9,6 +9,7 @@ import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { TextError } from '@/components/TextError';
 import config from '@/config';
+import usePricing from '@/hooks/usePricing';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 const DCX_PRICE = Number(DCX_IN_USD);
@@ -30,7 +31,8 @@ interface IProps {
 
 export const CreditsAmount = ({ onNext }: IProps) => {
   const { organizationInfo, getNeededDimoAmountForDcx } = useGlobalAccount();
-  const { getDimoBalance, getDimoPrice } = useContractGA();
+  const { getDimoBalance } = useContractGA();
+  const { getDimoPrice } = usePricing();
   const { setStripeClientId } = useContext(StripeCryptoContext);
   const { createStripeCryptoSession } = useStripeCrypto();
   const { control, watch } = useForm<IForm>({

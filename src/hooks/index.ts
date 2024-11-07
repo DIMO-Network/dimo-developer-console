@@ -8,3 +8,4 @@ export * from './useUser';
 export * from './useGlobalAccount';
 export * from './useLoading';
 export * from './useAccountInformation';
+export * from './usePricing';
