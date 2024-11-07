@@ -20,7 +20,6 @@ export const withTurnKey = <P extends object>(
 
     // Render the wrapped component with any additional props
     return (
-      <TurnkeyProvider config={turnkeyConfig}>
         <AccountInformationContext.Provider
           value={{ showAccountInformation, setShowAccountInformation }}
         >
@@ -31,7 +30,6 @@ export const withTurnKey = <P extends object>(
             <AccountInformationModal />
           </StripeCryptoContext.Provider>
         </AccountInformationContext.Provider>
-      </TurnkeyProvider>
     );
   };
 
