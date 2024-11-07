@@ -1,5 +1,7 @@
-import { type FC } from 'react';
+import { useState, type FC } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useSession } from 'next-auth/react';
+import { TrashIcon } from '@heroicons/react/24/outline';
 
 import {
   InvitationStatuses,
@@ -10,15 +12,18 @@ import {
 } from '@/types/team';
 import { SelectField } from '@/components/SelectField';
 import { Table } from '@/components/Table';
-import { TrashIcon } from '@heroicons/react/24/outline';
 import { UserAvatar } from '@/components/UserAvatar';
-import { useSession } from 'next-auth/react';
+import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
+import { deleteCollaborator } from '@/actions/team';
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
+  refreshData: () => void;
 }
 
-export const TeamManagement: FC<IProps> = ({ teamCollaborators }) => {
+export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) => {
+  const [isOpened, setIsOpened] = useState<boolean>(false);
+  const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { control } = useForm();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
@@ -67,32 +72,58 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators }) => {
     );
   };
 
-  const renderDeleteRemoveCollaborator = ({ id }: ITeamCollaborator) => {
+  const renderDeleteRemoveCollaborator = ({ id, role: invitationRole }: ITeamCollaborator) => {
     return (
-      role === TeamRoles.OWNER && (
-        <div className="flex flex-row items-center w-full h-full" key={id}>
+      role === TeamRoles.OWNER && invitationRole !== TeamRoles.OWNER && (
+        <div
+          className="flex flex-row items-center w-full h-full cursor-pointer"
+          onClick={() => handleDelete(id as string)}
+          key={`delete-collaborator-action-${id}`}>
           <TrashIcon className="w-5 h-5" />
         </div>
       )
     );
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      setIsOpened(true);
+      setLoadingStatus({
+        label: 'Deleting the selected collaborator',
+        status: 'loading',
+      });
+      await deleteCollaborator(id);
+      setLoadingStatus({ label: 'Collaborator removed', status: 'success' });
+      refreshData();
+    } catch (error: unknown) {
+      setLoadingStatus({ label: 'Something went wrong', status: 'error' });
+    }
+  };
+
   return (
-    <Table
-      columns={[
-        {
-          label: 'User',
-          name: 'User.name',
-          render: renderUserName,
-        },
-        {
-          name: 'role',
-          render: renderRole,
-        },
-      ]}
-      data={teamCollaborators}
-      actions={[renderDeleteRemoveCollaborator]}
-    />
+    <>
+      <LoadingModal
+        isOpen={isOpened}
+        setIsOpen={setIsOpened}
+        {...loadingStatus}
+      />
+
+      <Table
+        columns={[
+          {
+            label: 'User',
+            name: 'User.name',
+            render: renderUserName,
+          },
+          {
+            name: 'role',
+            render: renderRole,
+          },
+        ]}
+        data={teamCollaborators}
+        actions={[renderDeleteRemoveCollaborator]}
+      />
+    </>
   );
 };
 
