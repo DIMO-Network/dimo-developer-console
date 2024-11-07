@@ -32,4 +32,3 @@ export const initDimoLicenseSmartContract = async (
     LicenseABI,
   );
 };
-

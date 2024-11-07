@@ -1,8 +1,8 @@
-import { FC } from "react";
+import { FC } from 'react';
 
-import { Button } from "@/components/Button";
+import { Button } from '@/components/Button';
 
-import "./Banner.css";
+import './Banner.css';
 
 export interface CTA {
   label: string;
@@ -14,17 +14,24 @@ interface IProps {
 }
 
 export const Banner: FC<IProps> = ({ cta }) => {
-  return <div className="banner-content">
-    <div className="image-content">
-      <img alt="Onboarding banner" src="/images/dimo_banner.png" />
+  return (
+    <div className="banner-content">
+      <div className="image-content">
+        <img alt="Onboarding banner" src="/images/dimo_banner.png" />
+      </div>
+      {cta && (
+        <div>
+          <Button
+            className="cta primary-solid rounded-sm"
+            onClick={cta.onClick}
+            type="button"
+          >
+            {cta.label}
+          </Button>
+        </div>
+      )}
     </div>
-    {cta && <div>
-      <Button className="cta primary-solid rounded-sm" onClick={cta.onClick} type="button">
-        {cta.label}
-      </Button>
-    </div>
-    }
-  </div>;
+  );
 };
 
 export default Banner;

@@ -112,13 +112,17 @@ export const useContractGA = () => {
   };
 
   const getDcxBalance = async (): Promise<number> => {
-    if(!dimoCreditsContract) return 0;
-    const currentBalanceOnWei = await dimoCreditsContract.read.balanceOf([organizationInfo!.smartContractAddress]);
+    if (!dimoCreditsContract) return 0;
+    const currentBalanceOnWei = await dimoCreditsContract.read.balanceOf([
+      organizationInfo!.smartContractAddress,
+    ]);
     return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
   };
   const getDimoBalance = async (): Promise<number> => {
-    if(!dimoContract) return 0;
-    const currentBalanceOnWei = await dimoContract.read.balanceOf([organizationInfo!.smartContractAddress]);
+    if (!dimoContract) return 0;
+    const currentBalanceOnWei = await dimoContract.read.balanceOf([
+      organizationInfo!.smartContractAddress,
+    ]);
     return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
   };
 

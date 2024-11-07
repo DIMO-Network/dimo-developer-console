@@ -27,10 +27,9 @@ export const useOnboarding = () => {
   }, []);
 
   useEffect(() => {
-    getWorkspace()
-      .then((currentWorkspace) => {
-        setWorkspace(currentWorkspace);
-      });
+    getWorkspace().then((currentWorkspace) => {
+      setWorkspace(currentWorkspace);
+    });
   }, []);
 
   useEffect(() => {

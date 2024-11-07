@@ -58,9 +58,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
                   value={formatValue(currentValue)}
                   onChange={(e) => {
                     const textValue = (e.target.value || '0').replace(/,/g, '');
-                    const newValue = handleChange(
-                      parseInt(textValue, 10),
-                    );
+                    const newValue = handleChange(parseInt(textValue, 10));
                     onChange(newValue);
                   }}
                   role="token-value-input"

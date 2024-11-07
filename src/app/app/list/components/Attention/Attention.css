@@ -2,7 +2,7 @@
   .attention-card {
     @apply border-red-500 flex flex-row justify-between;
   }
-  
+
   .attention-title {
     @apply text-red-500;
   }

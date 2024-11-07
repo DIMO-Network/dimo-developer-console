@@ -44,7 +44,9 @@ const View: FC = () => {
               )}
             </div>
             <TeamManagement
-              teamCollaborators={teamCollaborators.filter(({ deleted }) => !deleted)}
+              teamCollaborators={teamCollaborators.filter(
+                ({ deleted }) => !deleted,
+              )}
               refreshData={refreshData}
             />
           </div>

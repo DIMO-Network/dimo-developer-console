@@ -71,7 +71,7 @@ const validatePrivateSession = async (
   const flow = request.nextUrl.searchParams.get('flow');
 
   //TODO: check how isLoginPage affects on safari
-  if ((isValidationPage) && isCompliant) {
+  if (isValidationPage && isCompliant) {
     return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });
@@ -90,13 +90,9 @@ const validatePrivateSession = async (
     return authMiddleware(request, event);
   }
   return NextResponse.next();
-
 };
 
-
-const validatePublicSession = async (
-  request: NextRequest,
-) => {
+const validatePublicSession = async (request: NextRequest) => {
   const token = await getToken({ req: request });
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const isAPIProtected = mustBeAuthorize(request, token);
@@ -118,9 +114,7 @@ const validatePublicSession = async (
   }
 
   return NextResponse.next();
-
 };
-
 
 export const middleware = async (
   request: NextRequest,
@@ -136,7 +130,6 @@ export const middleware = async (
     }
 
     return validatePublicSession(request);
-
   } catch (error: unknown) {
     console.error('Middleware error:', error);
     let path = handleConnectionError(error, isLoginPage);

@@ -21,7 +21,10 @@ interface IProps {
   refreshData: () => void;
 }
 
-export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) => {
+export const TeamManagement: FC<IProps> = ({
+  teamCollaborators,
+  refreshData,
+}) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { control } = useForm();
@@ -72,13 +75,18 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
     );
   };
 
-  const renderDeleteRemoveCollaborator = ({ id, role: invitationRole }: ITeamCollaborator) => {
+  const renderDeleteRemoveCollaborator = ({
+    id,
+    role: invitationRole,
+  }: ITeamCollaborator) => {
     return (
-      role === TeamRoles.OWNER && invitationRole !== TeamRoles.OWNER && (
+      role === TeamRoles.OWNER &&
+      invitationRole !== TeamRoles.OWNER && (
         <div
           className="flex flex-row items-center w-full h-full cursor-pointer"
           onClick={() => handleDelete(id as string)}
-          key={`delete-collaborator-action-${id}`}>
+          key={`delete-collaborator-action-${id}`}
+        >
           <TrashIcon className="w-5 h-5" />
         </div>
       )

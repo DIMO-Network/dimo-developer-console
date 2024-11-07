@@ -63,7 +63,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       });
       return;
     }
-   const { client_secret } = await createStripeCryptoSession(
+    const { client_secret } = await createStripeCryptoSession(
       smartContractAddress,
       credits * DCX_PRICE,
     );

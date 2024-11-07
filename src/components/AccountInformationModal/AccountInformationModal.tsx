@@ -27,27 +27,30 @@ export const AccountInformationModal: FC<IProps> = () => {
   const { setNotification } = useContext(NotificationContext);
   const { setIsOpen } = useContext(CreditsContext);
   const { showAccountInformation, setShowAccountInformation } = useContext(
-      AccountInformationContext,
+    AccountInformationContext,
   );
-  const { getDimoBalance, getDcxBalance, dimoContract, dimoCreditsContract } = useContractGA();
+  const { getDimoBalance, getDcxBalance, dimoContract, dimoCreditsContract } =
+    useContractGA();
   const { getDimoPrice } = usePricing();
-  const [balance, setBalance] = useState<{ dcxBalance: number, dimoBalance: number; dimoPrice: number; }>({ dcxBalance: 0, dimoBalance: 0, dimoPrice: 0 });
+  const [balance, setBalance] = useState<{
+    dcxBalance: number;
+    dimoBalance: number;
+    dimoPrice: number;
+  }>({ dcxBalance: 0, dimoBalance: 0, dimoPrice: 0 });
 
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
     setNotification(
-        'Wallet address copied to clipboard',
-        'Success',
-        'success',
-        1000,
+      'Wallet address copied to clipboard',
+      'Success',
+      'success',
+      1000,
     );
   };
 
   const handleOpenBuyCreditsModal = () => {
     setShowAccountInformation(false);
-    setTimeout(() =>
-      setIsOpen(true)
-    , 300);
+    setTimeout(() => setIsOpen(true), 300);
   };
 
   const loadBalances = async () => {
@@ -58,73 +61,73 @@ export const AccountInformationModal: FC<IProps> = () => {
   };
 
   useEffect(() => {
-    if(!(dimoContract && dimoCreditsContract)) return;
+    if (!(dimoContract && dimoCreditsContract)) return;
     loadBalances().catch(console.error);
   }, [dimoContract, dimoCreditsContract]);
 
   return (
-      <Modal
-          isOpen={showAccountInformation}
-          setIsOpen={setShowAccountInformation}
-          className="account-information-modal"
-      >
-        <div className="account-information-content">
-          <div className="account-information-header">
-            <Title className="text-2xl" component="h3">
-              Account Information
-            </Title>
+    <Modal
+      isOpen={showAccountInformation}
+      setIsOpen={setShowAccountInformation}
+      className="account-information-modal"
+    >
+      <div className="account-information-content">
+        <div className="account-information-header">
+          <Title className="text-2xl" component="h3">
+            Account Information
+          </Title>
+        </div>
+        <div className="account-information-body">
+          <div className="account-information-row">
+            <Label htmlFor="email" className="text-xs text-medium">
+              Email
+              <TextField
+                name="email"
+                type="text"
+                readOnly={true}
+                value={get(session, 'user.email', '')}
+              />
+            </Label>
           </div>
-          <div className="account-information-body">
-            <div className="account-information-row">
-              <Label htmlFor="email" className="text-xs text-medium">
-                Email
-                <TextField
-                    name="email"
-                    type="text"
-                    readOnly={true}
-                    value={get(session, 'user.email', '')}
-                />
-              </Label>
-            </div>
-            <div className="account-information-row">
-              <Label htmlFor="email" className="text-xs text-medium">
-                Wallet Address
-                <TextField
-                    name="wallet"
-                    type="text"
-                    readOnly={true}
-                    value={get(organizationInfo, 'smartContractAddress', '')}
-                    action={
-                      <ContentCopyIcon
-                          className="w5 h-5 fill-white/50 cursor-pointer"
-                          onClick={() =>
-                              handleCopy(
-                                  get(organizationInfo, 'smartContractAddress', ''),
-                              )
-                          }
-                      />
+          <div className="account-information-row">
+            <Label htmlFor="email" className="text-xs text-medium">
+              Wallet Address
+              <TextField
+                name="wallet"
+                type="text"
+                readOnly={true}
+                value={get(organizationInfo, 'smartContractAddress', '')}
+                action={
+                  <ContentCopyIcon
+                    className="w5 h-5 fill-white/50 cursor-pointer"
+                    onClick={() =>
+                      handleCopy(
+                        get(organizationInfo, 'smartContractAddress', ''),
+                      )
                     }
-                />
-              </Label>
-            </div>
-            <div className="balances">
-              <TokenBalance
-                  token={'dimo'}
-                  balance={balance.dimoBalance}
-                  basePrice={balance.dimoPrice}
-                  canBuy={false}
+                  />
+                }
               />
-              <TokenBalance
-                  token={'dcx'}
-                  balance={balance.dcxBalance}
-                  basePrice={0.001}
-                  canBuy={balance.dcxBalance < config.MINIMUM_CREDITS }
-                  openBuyModal={handleOpenBuyCreditsModal}
-              />
-            </div>
+            </Label>
+          </div>
+          <div className="balances">
+            <TokenBalance
+              token={'dimo'}
+              balance={balance.dimoBalance}
+              basePrice={balance.dimoPrice}
+              canBuy={false}
+            />
+            <TokenBalance
+              token={'dcx'}
+              balance={balance.dcxBalance}
+              basePrice={0.001}
+              canBuy={balance.dcxBalance < config.MINIMUM_CREDITS}
+              openBuyModal={handleOpenBuyCreditsModal}
+            />
           </div>
         </div>
-      </Modal>
+      </div>
+    </Modal>
   );
 };
 

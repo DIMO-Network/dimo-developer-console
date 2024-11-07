@@ -12,6 +12,8 @@ import configuration from '@/config';
 import '@rainbow-me/rainbowkit/styles.css';
 import { TurnkeyProvider } from '@turnkey/sdk-react';
 import { turnkeyConfig } from '@/config/turnkey';
+import { StripeCryptoContext } from '@/context/StripeCryptoContext';
+import useStripeCrypto from '@/hooks/useStripeCrypto';
 
 const { RAINBOW_PROJECT } = configuration;
 
@@ -28,13 +30,19 @@ export const withRainBow = <P extends object>(
   WrappedComponent: ComponentType<P>,
 ) => {
   const HOC: React.FC<P> = (props) => {
+    const { stripeClientId, setStripeClientId } = useStripeCrypto();
+
     // Render the wrapped component with any additional props
     return (
       <WagmiProvider config={config}>
         <SessionProvider>
           <QueryClientProvider client={queryClient}>
             <TurnkeyProvider config={turnkeyConfig}>
-              <WrappedComponent {...props} />
+              <StripeCryptoContext.Provider
+                value={{ stripeClientId, setStripeClientId }}
+              >
+                <WrappedComponent {...props} />
+              </StripeCryptoContext.Provider>
             </TurnkeyProvider>
           </QueryClientProvider>
         </SessionProvider>

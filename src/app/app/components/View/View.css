@@ -59,7 +59,6 @@
     }
   }
 
-
   .attention-card {
     @apply p-4 border border-red-500 rounded-lg mb-5 relative;
 
@@ -100,7 +99,6 @@
     }
   }
 
-
   .get-started-section {
     @apply mt-5 text-white;
   }
@@ -131,6 +129,4 @@
     padding: 0 2rem;
     border-radius: 15px;
   }
-
-
 }

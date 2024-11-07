@@ -2,7 +2,6 @@
 import { getCachedDimoPrice } from '@/services/wallet';
 
 const usePricing = () => {
-
   const getDimoPrice = getCachedDimoPrice;
 
   return {

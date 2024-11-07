@@ -6,10 +6,14 @@ import {
   createSubOrganization,
   getUserSubOrganization,
   rewirePasskey,
-  startEmailRecovery
+  startEmailRecovery,
 } from '@/services/globalAccount';
 import { signOut, useSession } from 'next-auth/react';
-import { IKernelOperationStatus, IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
+import {
+  IKernelOperationStatus,
+  IPasskeyAttestation,
+  ISubOrganization,
+} from '@/types/wallet';
 import { useRouter } from 'next/navigation';
 import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
 import { isEmpty } from 'lodash';
@@ -22,13 +26,22 @@ import {
   createPublicClient,
   createWalletClient,
   decodeErrorResult,
-  encodeFunctionData, getContract,
+  encodeFunctionData,
+  getContract,
   http,
   HttpRequestError,
 } from 'viem';
-import { bundlerActions, ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner } from 'permissionless';
+import {
+  bundlerActions,
+  ENTRYPOINT_ADDRESS_V07,
+  walletClientToSmartAccountSigner,
+} from 'permissionless';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
-import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from '@zerodev/sdk';
+import {
+  createKernelAccount,
+  createKernelAccountClient,
+  createZeroDevPaymasterClient,
+} from '@zerodev/sdk';
 import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
 import { polygon, polygonAmoy } from 'wagmi/chains';
 

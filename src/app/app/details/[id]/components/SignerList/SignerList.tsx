@@ -114,7 +114,11 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   }: ISigner) => {
     return (
       role === TeamRoles.OWNER && (
-        <button type="button" onClick={() => handleDelete(id, signer)} key={`delete-action-${id}`}>
+        <button
+          type="button"
+          onClick={() => handleDelete(id, signer)}
+          key={`delete-action-${id}`}
+        >
           <TrashIcon className="w-5 h-5" />
         </button>
       )

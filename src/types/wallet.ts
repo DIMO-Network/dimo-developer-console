@@ -75,7 +75,7 @@ export interface ICoinMarketTokenResponse {
         USD: {
           price: number;
         };
-      }
+      };
     }[];
   };
 }

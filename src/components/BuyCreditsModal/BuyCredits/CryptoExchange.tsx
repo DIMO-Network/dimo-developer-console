@@ -59,11 +59,8 @@ const ProcessCard = ({
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const { setNotification } = useContext(NotificationContext);
   const { allowanceDCX, processTransactions } = useContractGA();
-  const {
-    organizationInfo,
-    depositWmatic,
-    swapWmaticToDimo,
-  } = useGlobalAccount();
+  const { organizationInfo, depositWmatic, swapWmaticToDimo } =
+    useGlobalAccount();
 
   const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
     LoadingStatus.None,
@@ -84,12 +81,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
           functionName: 'approve',
           args: [
             configuration.DCX_ADDRESS,
-            BigInt(
-              utils.toWei(
-                expendableDimo,
-                'ether',
-              ),
-            ),
+            BigInt(utils.toWei(expendableDimo, 'ether')),
           ],
         }),
       });
@@ -183,7 +175,9 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
 
   return (
     <div className="minting-process">
-      {!transactionData?.alreadyHasDimo && <ProcessCard title="Swapping into DIMO" status={swappingIntoDimo} /> }
+      {!transactionData?.alreadyHasDimo && (
+        <ProcessCard title="Swapping into DIMO" status={swappingIntoDimo} />
+      )}
       <ProcessCard title="Minting DCX" status={mintingDCX} />
     </div>
   );

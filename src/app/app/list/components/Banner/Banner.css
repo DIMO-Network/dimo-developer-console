@@ -1,6 +1,6 @@
 .banner-content {
   @apply relative h-96 w-full;
-  
+
   .image-content {
     @apply absolute z-0 h-96 w-full inset-x-0 inset-y-0;
   }

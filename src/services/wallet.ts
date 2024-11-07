@@ -9,12 +9,15 @@ const dimoApiClient = xior.create({
 });
 
 const getCurrentDimoPrice = async (): Promise<number> => {
-  const { data } = await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto');
+  const { data } =
+    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto');
   return data.data.DIMO[0].quote.USD.price;
 };
 
-export const getCachedDimoPrice = unstable_cache(async () => {
+export const getCachedDimoPrice = unstable_cache(
+  async () => {
     return await getCurrentDimoPrice();
   },
   ['dimo-price'],
-  { revalidate: 60 * 60 * 24, tags: ['dimo-price'] });
+  { revalidate: 60 * 60 * 24, tags: ['dimo-price'] },
+);
