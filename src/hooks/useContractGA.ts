@@ -10,8 +10,6 @@ import { IKernelOperationStatus, ISubOrganization } from '@/types/wallet';
 
 import configuration from '@/config';
 import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
-import { getCurrentDimoPrice } from '@/services/wallet';
-import { unstable_cache } from 'next/cache';
 
 export const useContractGA = () => {
   const {

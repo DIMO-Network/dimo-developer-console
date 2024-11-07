@@ -1,7 +1,6 @@
-import { ICoinMarketTokenResponse, ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
+import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import xior, { XiorError } from 'xior';
-import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
 const globalAccountClient = xior.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
