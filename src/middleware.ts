@@ -63,6 +63,7 @@ const validatePrivateSession = async (
   );
   request.user = new LoggedUser(user, subOrganization);
 
+  const isCollaborator = request.user?.user?.role === 'COLLABORATOR';
   const isValidationPage = VALIDATION_PAGES.includes(request.nextUrl.pathname);
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
 
@@ -71,7 +72,7 @@ const validatePrivateSession = async (
   const flow = request.nextUrl.searchParams.get('flow');
 
   //TODO: check how isLoginPage affects on safari
-  if (isValidationPage && isCompliant) {
+  if ((isValidationPage || isCollaborator) && isCompliant) {
     return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });
