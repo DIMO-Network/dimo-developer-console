@@ -62,8 +62,9 @@ export const AccountInformationModal: FC<IProps> = () => {
 
   useEffect(() => {
     if (!(dimoContract && dimoCreditsContract)) return;
+    if (!showAccountInformation) return;
     loadBalances().catch(console.error);
-  }, [dimoContract, dimoCreditsContract]);
+  }, [dimoContract, dimoCreditsContract, showAccountInformation]);
 
   return (
     <Modal
