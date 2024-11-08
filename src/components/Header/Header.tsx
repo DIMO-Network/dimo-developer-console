@@ -28,7 +28,7 @@ export const Header: FC = () => {
   const dcxBalance = useMemo(() => {
     if (!balanceDCX) return '0';
     if (balanceDCX <= 0) return '0';
-    return balanceDCX.toFixed(2);
+    return formatToHumanReadable(balanceDCX);
   }, [balanceDCX]);
 
   return (
@@ -48,7 +48,7 @@ export const Header: FC = () => {
         </button>
         <div className="credits" role="credits-display">
           <div className="credits-info">
-            <p className="credit-amount">{formatToHumanReadable(balanceDCX)}</p>
+            <p className="credit-amount">{dcxBalance}</p>
             <p className="credit-text">Credits</p>
           </div>
           <button
