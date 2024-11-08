@@ -72,6 +72,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const mintDCX = async () => {
     const transactions = [];
     const expendableDimo = Number(transactionData!.requiredDimoAmount!);
+
     if (allowanceDCX <= expendableDimo) {
       transactions.push({
         to: configuration.DC_ADDRESS,

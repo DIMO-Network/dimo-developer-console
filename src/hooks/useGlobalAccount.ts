@@ -6,14 +6,10 @@ import {
   createSubOrganization,
   getUserSubOrganization,
   rewirePasskey,
-  startEmailRecovery,
+  startEmailRecovery
 } from '@/services/globalAccount';
 import { signOut, useSession } from 'next-auth/react';
-import {
-  IKernelOperationStatus,
-  IPasskeyAttestation,
-  ISubOrganization,
-} from '@/types/wallet';
+import { IKernelOperationStatus, IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
 import { useRouter } from 'next/navigation';
 import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
 import { isEmpty } from 'lodash';
@@ -29,19 +25,11 @@ import {
   encodeFunctionData,
   getContract,
   http,
-  HttpRequestError,
+  HttpRequestError
 } from 'viem';
-import {
-  bundlerActions,
-  ENTRYPOINT_ADDRESS_V07,
-  walletClientToSmartAccountSigner,
-} from 'permissionless';
+import { bundlerActions, ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner } from 'permissionless';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
-import {
-  createKernelAccount,
-  createKernelAccountClient,
-  createZeroDevPaymasterClient,
-} from '@zerodev/sdk';
+import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from '@zerodev/sdk';
 import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
 import { polygon, polygonAmoy } from 'wagmi/chains';
 
@@ -357,17 +345,9 @@ export const useGlobalAccount = () => {
         },
       });
 
-      const quote = await contract.read.getQuoteDc([amount]);
+      const quote = await contract.read.getQuoteDc([BigInt(utils.toWei(amount, 'ether'))]);
 
-      const neededDimo = Number(utils.fromWei(quote as bigint, 'ether'));
-
-      const { VERCEL_ENV: environment } = process.env;
-
-      if (environment !== 'production') {
-        return neededDimo * amount;
-      }
-
-      return neededDimo;
+      return Number(utils.fromWei(quote as bigint, 'ether'));
     } catch (e) {
       const errorReason = handleOnChainError(e as HttpRequestError);
       console.error('Error getting needed dimo amount', errorReason);
