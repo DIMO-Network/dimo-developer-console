@@ -3,6 +3,7 @@ import { MinusIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { Control, Controller } from 'react-hook-form';
 
 import './TokenInput.css';
+import { formatSimpleBalanceWithDigits } from '@/utils/formatBalance';
 
 interface ISuggestion {
   label: string | number;
@@ -32,7 +33,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
     };
 
     const formatValue = (value: number) => {
-      return value.toLocaleString('en-US');
+      return formatSimpleBalanceWithDigits(value, 0);
     };
 
     return (

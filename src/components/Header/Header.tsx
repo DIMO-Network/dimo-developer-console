@@ -8,6 +8,7 @@ import { UserAvatar } from '@/components/UserAvatar';
 import './Header.css';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { useContractGA } from '@/hooks';
+import { formatToHumanReadable } from '@/utils/formatBalance';
 
 export const Header: FC = () => {
   const { setIsOpen } = useContext(CreditsContext);
@@ -47,7 +48,7 @@ export const Header: FC = () => {
         </button>
         <div className="credits" role="credits-display">
           <div className="credits-info">
-            <p className="credit-amount">{dcxBalance}</p>
+            <p className="credit-amount">{formatToHumanReadable(balanceDCX)}</p>
             <p className="credit-text">Credits</p>
           </div>
           <button
