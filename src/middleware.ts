@@ -63,7 +63,6 @@ const validatePrivateSession = async (
   );
   request.user = new LoggedUser(user, subOrganization);
 
-  const isCollaborator = request.user?.user?.role === 'COLLABORATOR';
   const isValidationPage = VALIDATION_PAGES.includes(request.nextUrl.pathname);
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
 
