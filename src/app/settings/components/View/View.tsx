@@ -37,7 +37,7 @@ const View: FC = () => {
           <div className="team-information">
             <div className="team-header">
               <Title component="h2">Team Management</Title>
-              {role === TeamRoles.OWNER && (
+              {false && role === TeamRoles.OWNER && (
                 <Button className="primary" onClick={() => setIsOpen(!isOpen)}>
                   Invite team <PlusIcon className="h-5 w-5" />
                 </Button>
