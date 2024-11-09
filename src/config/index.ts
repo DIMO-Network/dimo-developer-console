@@ -1,7 +1,6 @@
 import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
-import { merge } from 'lodash';
 
 type Configuration = {
   appName: string;
