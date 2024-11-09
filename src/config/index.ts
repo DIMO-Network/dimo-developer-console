@@ -35,7 +35,6 @@ export const getConfig = (): Configuration => {
   const clientEnv = process.env.NEXT_PUBLIC_CE!;
 
   const environment = env ?? clientEnv;
-  console.info('environment', environment);
 
   // Select the appropriate configuration to merge with default based on the environment
   let environmentConfig = {};
@@ -52,11 +51,6 @@ export const getConfig = (): Configuration => {
       environmentConfig = {};
       break;
   }
-
-  console.info('currentConfig', {
-    ...defaultConfig,
-    ...environmentConfig,
-  } as Configuration);
 
   return {
     ...defaultConfig,
