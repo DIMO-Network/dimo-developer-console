@@ -50,6 +50,8 @@ export const getConfig = (): Configuration => {
       break;
   }
 
+  console.info('environmentConfig', environmentConfig);
+
   // Use lodash to deeply merge the default configuration with the environment-specific configuration
   return {
     ...defaultConfig,
@@ -58,7 +60,5 @@ export const getConfig = (): Configuration => {
 };
 
 const currentConfig = getConfig();
-
-console.info('currentConfig', currentConfig);
 
 export default currentConfig;
