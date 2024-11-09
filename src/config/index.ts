@@ -33,6 +33,7 @@ export const getConfig = (): Configuration => {
   // TODO: find a better way to determine the environment
   const { VERCEL_ENV: env, NEXT_PUBLIC_ENV: clientEnv } = process.env;
 
+  console.info('clientEnv', clientEnv);
   console.info('env', env ?? clientEnv);
 
   // Select the appropriate configuration to merge with default based on the environment
