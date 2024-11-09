@@ -31,7 +31,8 @@ type Configuration = {
 export const getConfig = (): Configuration => {
   // Determine the current environment
   // TODO: find a better way to determine the environment
-  const { VERCEL_ENV: env, NEXT_PUBLIC_CE: clientEnv } = process.env;
+  const env = process.env.VERCEL_ENV!;
+  const clientEnv = process.env.NEXT_PUBLIC_CE!;
 
   console.info('clientEnv', clientEnv);
   console.info('env', env ?? clientEnv);
