@@ -30,13 +30,14 @@ type Configuration = {
 
 export const getConfig = (): Configuration => {
   // Determine the current environment
-  const { VERCEL_ENV: env } = process.env;
+  // TODO: find a better way to determine the environment
+  const { VERCEL_ENV: env, NEXT_PUBLIC_ENV: clientEnv } = process.env;
 
-  console.info('env', env);
+  console.info('env', env ?? clientEnv);
 
   // Select the appropriate configuration to merge with default based on the environment
   let environmentConfig = {};
-  switch (env) {
+  switch (env ?? clientEnv) {
     case 'production':
       environmentConfig = productionConfig;
       break;
