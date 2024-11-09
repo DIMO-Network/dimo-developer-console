@@ -1,6 +1,7 @@
 import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
+import { merge } from 'lodash';
 
 type Configuration = {
   appName: string;
@@ -50,9 +51,11 @@ export const getConfig = (): Configuration => {
       break;
   }
 
-  console.info('environmentConfig', environmentConfig);
+  console.info('currentConfig', {
+    ...defaultConfig,
+    ...environmentConfig,
+  } as Configuration);
 
-  // Use lodash to deeply merge the default configuration with the environment-specific configuration
   return {
     ...defaultConfig,
     ...environmentConfig,
