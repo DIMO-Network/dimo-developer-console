@@ -6,7 +6,7 @@ import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
-import xior, { isXiorError, XiorError } from 'xior';
+import xior, { XiorError } from 'xior';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
   configuration;
