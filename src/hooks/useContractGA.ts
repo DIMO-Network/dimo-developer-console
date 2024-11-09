@@ -112,18 +112,28 @@ export const useContractGA = () => {
   };
 
   const getDcxBalance = async (): Promise<number> => {
-    if (!dimoCreditsContract) return 0;
-    const currentBalanceOnWei = await dimoCreditsContract.read.balanceOf([
-      organizationInfo!.smartContractAddress,
-    ]);
-    return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
+    try {
+      if (!dimoCreditsContract) return 0;
+      const currentBalanceOnWei = await dimoCreditsContract.read.balanceOf([
+        organizationInfo!.smartContractAddress,
+      ]);
+      return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
+    }catch (e: unknown) {
+      console.error(e);
+      return 0;
+    }
   };
   const getDimoBalance = async (): Promise<number> => {
-    if (!dimoContract) return 0;
-    const currentBalanceOnWei = await dimoContract.read.balanceOf([
-      organizationInfo!.smartContractAddress,
-    ]);
-    return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
+    try {
+      if (!dimoContract) return 0;
+      const currentBalanceOnWei = await dimoContract.read.balanceOf([
+        organizationInfo!.smartContractAddress,
+      ]);
+      return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
+    } catch (e: unknown) {
+      console.error(e);
+      return 0;
+    }
   };
 
   useEffect(() => {
