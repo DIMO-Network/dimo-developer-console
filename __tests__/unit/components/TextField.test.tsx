@@ -9,7 +9,7 @@ describe('TextField', () => {
         type="email"
         name="email"
         role="email"
-      />
+      />,
     );
 
     const field = screen.getByRole('email');

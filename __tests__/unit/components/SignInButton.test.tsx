@@ -13,7 +13,7 @@ describe('SignInButton', () => {
         isSignIn={true}
         Icon={GoogleIcon}
         onClick={() => handlerGitHubLogin('google')}
-      />
+      />,
     );
 
     const button = screen.getByText('Sign In');
@@ -34,7 +34,7 @@ describe('SignInButton', () => {
         isSignIn={false}
         Icon={GoogleIcon}
         onClick={() => handlerGitHubLogin('google')}
-      />
+      />,
     );
 
     const button = screen.getByText('Sign Up');

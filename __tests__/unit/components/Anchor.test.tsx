@@ -6,7 +6,7 @@ describe('Anchor', () => {
     render(
       <Anchor href="#" className="primary">
         Forgot password?
-      </Anchor>
+      </Anchor>,
     );
 
     const buttonText = screen.getByText('Forgot password?');

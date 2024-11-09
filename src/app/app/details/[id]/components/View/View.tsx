@@ -2,6 +2,8 @@
 import _ from 'lodash';
 
 import { useEffect, useState, useContext } from 'react';
+import { useSession } from 'next-auth/react';
+import { encodeFunctionData } from 'viem';
 
 import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
 import { BackButton } from '@/components/BackButton';
@@ -14,44 +16,53 @@ import { NotificationContext } from '@/context/notificationContext';
 import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriForm';
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
+import { TeamRoles } from '@/types/team';
 import { Title } from '@/components/Title';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
 
 import './View.css';
 
-const ISSUE_IN_DIMO_GAS = 60000;
-
-export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
+export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [app, setApp] = useState<IApp>();
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
-  const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, dimoLicenseContract } = useContract();
+  const { workspace } = useOnboarding();
+  const { organizationInfo } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
+  const { user: { role = '' } = {} } = session ?? {};
 
-  useEffect(() => refreshAppDetails(), []);
+  useEffect(() => {
+    refreshAppDetails().catch(console.error);
+  }, []);
 
-  const refreshAppDetails = () => {
+  const refreshAppDetails = async () => {
     setIsLoadingPage(true);
+    const { id: appId } = await params;
     getAppByID(appId)
       .then(setApp)
       .finally(() => setIsLoadingPage(false));
   };
 
   const handleEnableSigner = async (signer: string) => {
-    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+    if (!organizationInfo && !workspace)
       throw new Error('Web3 connection failed');
-    await dimoLicenseContract?.methods['0x3b1c393b'](
-      workspace?.token_id ?? 0,
-      signer
-    ).send({
-      from: address,
-      gas: String(ISSUE_IN_DIMO_GAS),
-      maxFeePerGas: String(configuration.masFeePerGas),
-      maxPriorityFeePerGas: String(configuration.gasPrice),
-    });
+    const transaction = [
+      {
+        to: configuration.DLC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoLicenseABI,
+          functionName: 'enableSigner',
+          args: [workspace?.token_id ?? 0, signer],
+        }),
+      },
+    ];
+    await processTransactions(transaction);
   };
 
   const handleGenerateSigner = async () => {
@@ -59,14 +70,15 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
       setIsLoading(true);
       const account = generateWallet();
       await handleEnableSigner(account.address);
+      const { id: appId } = await params;
       await createMySigner(
         {
           api_key: account.privateKey,
           address: account.address,
         },
-        appId
+        appId,
       );
-      refreshAppDetails();
+      await refreshAppDetails();
     } catch (error: unknown) {
       console.error({ error });
       const code = _.get(error, 'code', null);
@@ -76,7 +88,7 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
         setNotification(
           'Something went wrong while generating the API key',
           'Oops...',
-          'error'
+          'error',
         );
     } finally {
       setIsLoading(false);
@@ -94,25 +106,30 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
         <>
           <div className="signers-content">
             <Title component="h2">Signers</Title>
-            <div className="generate-signer">
-              <Button
-                className="primary-outline px-4 w-full"
-                loading={isLoading}
-                loadingColor="primary"
-                onClick={() => handleGenerateSigner()}
-              >
-                Generate Key
-              </Button>
-            </div>
+            {role === TeamRoles.OWNER && (
+              <div className="generate-signer">
+                <Button
+                  className="primary-outline px-4 w-full"
+                  loading={isLoading}
+                  loadingColor="primary"
+                  onClick={() => handleGenerateSigner()}
+                >
+                  Generate Key
+                </Button>
+              </div>
+            )}
           </div>
           <div className="signers-table">
-            {app && (
-              <SignerList app={app} refreshData={refreshAppDetails} />
-            )}
+            {app && <SignerList app={app} refreshData={refreshAppDetails} />}
           </div>
           <div className="redirect-uri-content">
             <Title component="h2">Authorized Redirect URIs</Title>
-            <RedirectUriForm appId={appId} refreshData={refreshAppDetails} />
+            {role === TeamRoles.OWNER && app && (
+              <RedirectUriForm
+                appId={app!.id!}
+                refreshData={refreshAppDetails}
+              />
+            )}
           </div>
           <div className="signers-table">
             {app && (
@@ -122,9 +139,11 @@ export const View = ({ params: { id: appId } }: { params: { id: string } }) => {
               />
             )}
           </div>
-          <div className="extra-actions">
-            <Button className="error-simple">Delete application</Button>
-          </div>
+          {role === TeamRoles.OWNER && (
+            <div className="extra-actions">
+              <Button className="error-simple">Delete application</Button>
+            </div>
+          )}
         </>
       )}
     </div>

@@ -15,7 +15,7 @@ interface IProps {
 
 export const Table: FC<IProps> = ({ columns, data, actions }) => {
   const renderColumn = ({ name, label }: IColumn) => {
-    return <Column key={label ?? name}>{label ?? name}</Column>;
+    return <Column key={`th-${label ?? name}`}>{label ?? name}</Column>;
   };
 
   return (

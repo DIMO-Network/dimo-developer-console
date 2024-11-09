@@ -1,68 +1,34 @@
 'use client';
+import { type FC } from 'react';
 
-import { FC, useEffect, useState } from 'react';
-import { PlusIcon } from '@heroicons/react/24/outline';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-
-import { Anchor } from '@/components/Anchor';
-import { AppCard } from '@/components/AppCard';
-import { Button } from '@/components/Button';
-import { getApps } from '@/actions/app';
-import { IApp } from '@/types/app';
 import { Loader } from '@//components/Loader';
+import { AppList } from '@/app/app/list/components/AppList';
+import { Banner } from '@/app/app/list/components/Banner';
+import { useOnboarding } from '@/hooks';
+import { Explanation } from '@/app/app/list/components/DCXExplanation';
+import { GetStarted } from '@/app/app/list/components/GetStarted';
+import { Attention } from '@/app/app/list/components/Attention';
 
 import './View.css';
 
 export const View: FC = () => {
-  const [apps, setApps] = useState<IApp[]>([]);
-  const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
-  const router = useRouter();
-  const { data: session } = useSession();
-  const { user: { name = '' } = {} } = session ?? {};
-
-  useEffect(() => {
-    setIsLoadingPage(true);
-    getApps()
-      .then(({ data: createdApps }) => setApps(createdApps))
-      .finally(() => setIsLoadingPage(false));
-  }, []);
-
-  const handleCreateApp = () => {
-    router.push('/app/create');
-  };
-
-  const renderItem = (app: IApp) => {
-    return (
-      <Anchor href={`/app/details/${app?.id}`} key={app?.id}>
-        <AppCard className="hover:!border-white" {...app} />
-      </Anchor>
-    );
-  };
+  const { isLoading, apps, balance, cta } = useOnboarding();
 
   return (
     <>
-      {isLoadingPage && <Loader isLoading={true} />}
-      {!isLoadingPage && (
+      {isLoading && <Loader isLoading={true} />}
+      {!isLoading && (
         <div className="app-list-page">
           <div className="welcome-message">
-            <p className="title">Welcome {name}</p>
+            <p className="title">Welcome to DIMO Developer Console</p>
           </div>
-
-          <>
-            <div className="description">
-              <p className="title">Your applications</p>
-              <Button
-                className="primary px-3 with-icon"
-                onClick={handleCreateApp}
-              >
-                <PlusIcon className="w-4 h-4" />
-                Create new
-              </Button>
-            </div>
-
-            <div className="app-list">{apps.map(renderItem)}</div>
-          </>
+          <Banner cta={cta} />
+          {balance === 0 && apps.length === 0 && <Explanation />}
+          {apps.length === 0 && (
+            <GetStarted hasBalance={balance > 0} hasApps={apps.length > 0} />
+          )}
+          {balance === 0 && apps.length > 0 && <Attention />}
+          {apps.length > 0 && <AppList apps={apps} />}
         </div>
       )}
     </>

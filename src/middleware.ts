@@ -1,14 +1,15 @@
 import { JWT, getToken } from 'next-auth/jwt';
 import { withAuth } from 'next-auth/middleware';
 import { NextFetchEvent, NextResponse } from 'next/server';
-
 import { isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
-import axios, { isAxiosError } from 'axios';
+import { getUserSubOrganization } from '@/services/globalAccount';
+import xior, { isXiorError, XiorError } from 'xior';
 
-const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
+  configuration;
 
 const authMiddleware = withAuth({
   callbacks: {
@@ -28,78 +29,111 @@ const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
   return isAPI && !isPublicAPIPath && !token;
 };
 
-const handleExpiredSession = (error: unknown) => {
-  if (isAxiosError(error)) {
-    const status = error.response?.status;
+const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
+  if (isXiorError(error)) {
+    const xiorError = error as XiorError;
+    const code = xiorError.cause;
+    if (code === 'ERR_NETWORK') {
+      return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
+    }
+  }
+  return null;
+};
+
+const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
+  if (isXiorError(error)) {
+    const xiorError = error as XiorError;
+    const status = xiorError.response?.status;
     if (status === 401) {
       const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
-      axios.post(signOutUrl);
+      xior.post(signOutUrl);
       return 'sign-in?error=expired';
     }
   }
-  return 'app?error=true';
+  return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
+};
+
+const validatePrivateSession = async (
+  request: NextRequest,
+  event: NextFetchEvent,
+) => {
+  const user = await getUserByToken();
+  const subOrganization = await getUserSubOrganization(
+    user.company_email_owner ?? user.email,
+  );
+  request.user = new LoggedUser(user, subOrganization);
+
+  const isValidationPage = VALIDATION_PAGES.includes(request.nextUrl.pathname);
+  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+
+  const isCompliant = request.user?.isCompliant ?? false;
+  const missingFlow = request.user?.missingFlow ?? null;
+  const flow = request.nextUrl.searchParams.get('flow');
+
+  //TODO: check how isLoginPage affects on safari
+  if ((isValidationPage) && isCompliant) {
+    return NextResponse.redirect(new URL('/app', request.url), {
+      status: 307,
+    });
+  }
+
+  if (!isCompliant && !flow) {
+    return NextResponse.redirect(
+      new URL(`/sign-up?flow=${missingFlow}`, request.url),
+      {
+        status: 307,
+      },
+    );
+  }
+
+  if (!isLoginPage) {
+    return authMiddleware(request, event);
+  }
+  return NextResponse.next();
+};
+
+const validatePublicSession = async (request: NextRequest) => {
+  const token = await getToken({ req: request });
+  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  const isAPIProtected = mustBeAuthorize(request, token);
+  const isAPI = request.nextUrl.pathname.startsWith(API_PATH);
+
+  if (isAPIProtected && isAPI) {
+    return NextResponse.json(
+      {
+        message: 'Unauthorized Access',
+      },
+      { status: 401 },
+    );
+  }
+
+  if (!isLoginPage) {
+    return NextResponse.redirect(new URL('/sign-in', request.url), {
+      status: 307,
+    });
+  }
+
+  return NextResponse.next();
 };
 
 export const middleware = async (
   request: NextRequest,
-  event: NextFetchEvent
+  event: NextFetchEvent,
 ) => {
   const hasError = request.nextUrl.searchParams.get('error');
   const token = await getToken({ req: request });
-  const isAPIProtected = mustBeAuthorize(request, token);
-  const isAPI = request.nextUrl.pathname.startsWith(API_PATH);
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
 
-  // Setting the user up
   try {
     if (token) {
-      const user = await getUserByToken();
-      request.user = new LoggedUser(user);
-
-      const isCompliant = request.user?.isCompliant ?? false;
-      const missingFlow = request.user?.missingFlow ?? null;
-      const flow = request.nextUrl.searchParams.get('flow');
-
-      if (token && !isCompliant && !flow) {
-        return NextResponse.redirect(
-          new URL(`/sign-up?flow=${missingFlow}`, request.url),
-          {
-            status: 307,
-          }
-        );
-      }
-
-      if (isLoginPage && token && isCompliant) {
-        return NextResponse.redirect(new URL('/app', request.url), {
-          status: 307,
-        });
-      }
-
-      if (!isLoginPage) {
-        return authMiddleware(request, event);
-      }
-
-      return NextResponse.next();
+      return validatePrivateSession(request, event);
     }
 
-    if (isAPIProtected && isAPI) {
-      return NextResponse.json(
-        {
-          message: 'Unauthorized Access',
-        },
-        { status: 401 }
-      );
-    }
-
-    if (!isLoginPage) {
-      return NextResponse.redirect(new URL('/sign-in', request.url), {
-        status: 307,
-      });
-    }
-
-    return NextResponse.next();
+    return validatePublicSession(request);
   } catch (error: unknown) {
-    const path = await handleExpiredSession(error);
+    console.error('Middleware error:', error);
+    let path = handleConnectionError(error, isLoginPage);
+    path = path ?? handleExpiredSession(error, isLoginPage);
     const redirectUrl = `${configuration.frontendUrl}${path}`;
     if (!hasError) {
       return Response.redirect(redirectUrl);

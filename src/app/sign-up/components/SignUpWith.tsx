@@ -22,7 +22,7 @@ export const SignUpWith: FC<IProps> = ({ onNext }) => {
     if (app === 'credentials') {
       const { existItem } = await existUserEmailOrAddress(
         auth?.address ?? null,
-        app
+        app,
       );
 
       if (!existItem) {

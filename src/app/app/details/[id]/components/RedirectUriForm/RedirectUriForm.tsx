@@ -4,6 +4,7 @@ import { useContext, useState, type FC } from 'react';
 import { isURL } from 'validator';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
+import { encodeFunctionData } from 'viem';
 
 import { Button } from '@/components/Button';
 import { createMyRedirectUri } from '@/actions/app';
@@ -11,7 +12,8 @@ import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
 
@@ -26,13 +28,12 @@ interface IProps {
   refreshData: () => void;
 }
 
-const ISSUE_IN_DIMO_GAS = 60000;
-
 export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, dimoLicenseContract } = useContract();
+  const { workspace } = useOnboarding();
+  const { organizationInfo } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
   const {
     formState: { errors },
     handleSubmit,
@@ -44,18 +45,20 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   });
 
   const handleSetDomain = async (uri: string) => {
-    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
+    if (!organizationInfo && !workspace)
       throw new Error('Web3 connection failed');
-    await dimoLicenseContract?.methods['0xba1bedfc'](
-      workspace?.token_id ?? 0,
-      true,
-      uri
-    ).send({
-      from: address,
-      gas: String(ISSUE_IN_DIMO_GAS),
-      maxFeePerGas: String(configuration.masFeePerGas),
-      maxPriorityFeePerGas: String(configuration.gasPrice),
-    });
+    const transaction = [
+      {
+        to: configuration.DLC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoLicenseABI,
+          functionName: 'setRedirectUri',
+          args: [workspace?.token_id ?? 0, true, uri],
+        }),
+      },
+    ];
+    await processTransactions(transaction);
   };
 
   const addRedirectUri = async () => {
@@ -73,7 +76,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
         setNotification(
           'Something went wrong while creating the redirect URI',
           'Oops...',
-          'error'
+          'error',
         );
     } finally {
       setIsLoading(false);
@@ -93,7 +96,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
                   message: 'The name should has maximum 150 characters',
                 },
                 validate: {
-                  url: (str = '') => isURL(str) || 'Invalid Redirect URI',
+                  url: (str = '') => isURL(str, { require_tld: false }) || 'Invalid Redirect URI',
                 },
               })}
               placeholder="www.google.com"

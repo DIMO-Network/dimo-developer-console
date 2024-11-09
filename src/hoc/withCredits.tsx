@@ -6,7 +6,7 @@ import { useCredits } from '@/hooks';
 import { BuyCreditsModal } from '@/components/BuyCreditsModal';
 
 export const withCredits = <P extends object>(
-  WrappedComponent: ComponentType<P>
+  WrappedComponent: ComponentType<P>,
 ) => {
   const HOC: React.FC<P> = (props) => {
     const { isOpen, setIsOpen } = useCredits();

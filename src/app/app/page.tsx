@@ -3,12 +3,12 @@ import { Metadata } from 'next';
 
 import configuration from '@/config';
 
-import { SwitchPage } from '@/app/app/components/SwitchPage';
+import { View as AppListPage } from '@/app/app/list/components/View';
 
 export const metadata: Metadata = {
   title: `Home | ${configuration.appName}`,
 };
 
-const HomePage: FC = SwitchPage;
+const HomePage: FC = AppListPage;
 
 export default HomePage;

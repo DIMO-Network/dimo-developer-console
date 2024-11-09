@@ -24,9 +24,11 @@ export const MenuItem: FC<IProps> = ({
   label,
 }) => {
   return (
-    <li className={classNames({
-      '!text-grey-200/50': disabled,
-    })}>
+    <li
+      className={classNames({
+        '!text-grey-200/50': disabled,
+      })}
+    >
       <Icon className={iconClassName} />
       <Link
         href={typeof link === 'string' && !disabled ? link : '#'}

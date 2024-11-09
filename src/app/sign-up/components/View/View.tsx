@@ -6,8 +6,7 @@ import Image from 'next/image';
 import {
   BuildForForm,
   CompanyInfoForm,
-  SignUpWith,
-  UserInfoForm,
+  WalletCreation,
 } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
 import { IAuth } from '@/types/auth';
@@ -16,16 +15,12 @@ import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
+import { getUser } from '@/actions/user';
 
 const signUpFlows = {
-  'sign-up-with': {
-    Component: SignUpWith,
-    title: 'Get started building',
-    order: 0,
-  },
-  'personal-information': {
-    Component: UserInfoForm,
-    title: 'Personal information',
+  'wallet-creation': {
+    Component: WalletCreation,
+    title: "Let's get you a wallet",
     order: 1,
   },
   'build-for': {
@@ -45,12 +40,13 @@ const View = () => {
   const { setNotification } = useContext(NotificationContext);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentFlow = searchParams.get('flow') ?? 'sign-up-with';
+  const currentFlow = searchParams.get('flow') ?? 'wallet-creation';
   const [flow, setFlow] = useState(currentFlow);
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
 
   const { Component: SignUpFlow, title } =
-    signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['build-for'];
+    signUpFlows[flow as keyof typeof signUpFlows] ??
+    signUpFlows['wallet-creation'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
     try {
@@ -59,13 +55,20 @@ const View = () => {
     } catch (error) {
       console.error(
         'Something went wrong while the completing user information',
-        error
+        error,
       );
       setNotification('Something went wrong', 'Oops...', 'error');
     }
   };
 
-  const handleNext = (actualFlow: string, inputAuth?: Partial<IAuth>) => {
+  const handleNext = async (actualFlow: string, inputAuth?: Partial<IAuth>) => {
+    // Check if user already has a team, if so, redirect to app cause is an old user
+    const user = await getUser();
+    if (user?.team) {
+      router.replace('/app');
+      return;
+    }
+
     const newUserData = {
       ...authData,
       ...inputAuth,
@@ -81,13 +84,13 @@ const View = () => {
         ...acc,
         [signUpFlows[elm as keyof typeof signUpFlows].order]: elm,
       }),
-      {}
+      {},
     );
     const nextProcess =
       processes[(currentProcess.order + 1) as keyof typeof processes] ??
       'complete';
     if (nextProcess !== 'complete') setFlow(nextProcess);
-    else handleCompleteUserData(newUserData);
+    else await handleCompleteUserData(newUserData);
   };
 
   return (

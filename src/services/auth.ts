@@ -5,9 +5,11 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 
-import config from '@/config';
 import { existUserByEmailOrAddress, getUserByToken } from '@/services/user';
 import { IUser } from '@/types/user';
+import { TeamRoles } from '@/types/team';
+
+import config from '@/config';
 
 const {
   GITHUB_CLIENT_ID: githubClientId = '',
@@ -30,10 +32,11 @@ any) => {
   }
 
   if (!token.userId) {
-    const user = await getUserByToken().catch(() => ({})) as Partial<IUser>;
+    const user = (await getUserByToken().catch(() => ({}))) as Partial<IUser>;
     token.userId = user?.id ?? null;
     token.name = user?.name ?? token.name;
     token.email = user?.email ?? token.email;
+    token.role = user?.role ?? TeamRoles.COLLABORATOR;
   }
 
   return token;
@@ -50,6 +53,7 @@ export const session = async ({
 }) => {
   session.user.provider = token.provider;
   session.user.id = token.userId;
+  session.user.role = token.role;
 
   return session;
 };
@@ -87,7 +91,7 @@ export const authOptions: AuthOptions = {
       async authorize(credentials, req) {
         try {
           const siwe = new SiweMessage(
-            JSON.parse(credentials?.message || '{}')
+            JSON.parse(credentials?.message || '{}'),
           );
 
           const { host: nextAuthHost } = new URL(config.frontendUrl);
@@ -110,7 +114,7 @@ export const authOptions: AuthOptions = {
         } catch (e) {
           console.error(
             'Error while authorizing the user with credentials method',
-            { error: e }
+            { error: e },
           );
           return null;
         }
@@ -135,7 +139,7 @@ export const authOptions: AuthOptions = {
 
       const { existItem, existAssociation } = await existUserByEmailOrAddress(
         email ?? providerAccountId,
-        provider
+        provider,
       );
 
       return existItem && !existAssociation

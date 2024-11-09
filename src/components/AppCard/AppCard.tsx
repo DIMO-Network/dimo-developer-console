@@ -10,6 +10,7 @@ import './AppCard.css';
 interface IProps extends Partial<IApp> {
   className?: string;
   description?: string;
+  onClick?: () => void;
 }
 
 const AppIcon = {
@@ -27,7 +28,9 @@ export const AppCard: FC<IProps> = ({
     <Card className={classNames('app-card card-border', className)}>
       <div className="content">
         <p className="title">{name}</p>
-        <p className="description">{description || ENVIRONMENTS_LABELS[scope]}</p>
+        <p className="description">
+          {description || ENVIRONMENTS_LABELS[scope]}
+        </p>
       </div>
       {AppIcon[scope || 'sandbox']}
     </Card>

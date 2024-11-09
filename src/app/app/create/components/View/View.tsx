@@ -9,7 +9,7 @@ import { useOnboarding } from '@/hooks';
 import './View.css';
 
 const CreateAppPage = () => {
-  const { isOnboardingCompleted, isLoading, workspace } = useOnboarding();
+  const { isLoading, workspace } = useOnboarding();
   return (
     <>
       {isLoading && <Loader isLoading={isLoading} />}
@@ -20,10 +20,7 @@ const CreateAppPage = () => {
             <Title>Create a new app</Title>
           </div>
           <div className="form">
-            <Form
-              isOnboardingCompleted={isOnboardingCompleted}
-              workspace={workspace}
-            />
+            <Form workspace={workspace} />
           </div>
         </div>
       )}

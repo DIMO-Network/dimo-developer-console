@@ -1,0 +1,17 @@
+.attention-content {
+  .attention-card {
+    @apply border-red-500 flex flex-row justify-between;
+  }
+
+  .attention-title {
+    @apply text-red-500;
+  }
+
+  .attention-content {
+    @apply flex flex-col leading-5;
+  }
+
+  .attention-cta {
+    @apply w-36;
+  }
+}

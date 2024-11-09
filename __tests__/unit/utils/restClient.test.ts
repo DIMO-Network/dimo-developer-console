@@ -112,7 +112,7 @@ describe('RestClient', () => {
       expect(error).toBeInstanceOf(Error);
       expect(error.message).toBe('Error message');
       expect(consoleErrorMock).toHaveBeenCalledWith(
-        `Failed to GET data: 404 Not Found`
+        `Failed to GET data: 404 Not Found`,
       );
     }
 

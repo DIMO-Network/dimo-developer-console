@@ -2,60 +2,68 @@ import _ from 'lodash';
 
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { encodeFunctionData } from 'viem';
 
 import { deleteMyRedirectUri, updateMyRedirectUri } from '@/actions/app';
 import { IRedirectUri } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
+import { TeamRoles } from '@/types/team';
 import { Toggle } from '@/components/Toggle';
-import { useContract, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import { useSession } from 'next-auth/react';
 
 import configuration from '@/config';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 interface IProps {
   list: IRedirectUri[] | undefined;
   refreshData: () => void;
 }
 
-const ISSUE_IN_DIMO_GAS = 60000;
-
 export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const { isOnboardingCompleted, workspace } = useOnboarding();
-  const { address, dimoLicenseContract } = useContract();
+  const { workspace } = useOnboarding();
+  const { organizationInfo } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
+  const { data: session } = useSession();
+  const { user: { role = '' } = {} } = session ?? {};
 
   const recordsToShow = list.filter(({ deleted }) => !deleted);
 
   const handleSetDomain = async (uri: string, enabled: boolean) => {
-    if (!isOnboardingCompleted && !dimoLicenseContract && !workspace)
-      throw new Error('Web3 connection failed');
-    await dimoLicenseContract?.methods['0xba1bedfc'](
-      workspace?.token_id ?? 0,
-      enabled,
-      uri
-    ).send({
-      from: address,
-      gas: String(ISSUE_IN_DIMO_GAS),
-      maxFeePerGas: String(configuration.masFeePerGas),
-      maxPriorityFeePerGas: String(configuration.gasPrice),
-    });
+    if (!organizationInfo) throw new Error('Web3 connection failed');
+    const transaction = [
+      {
+        to: configuration.DLC_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: DimoLicenseABI,
+          functionName: 'setRedirectUri',
+          args: [workspace?.token_id ?? 0, enabled, uri],
+        }),
+      },
+    ];
+    await processTransactions(transaction);
   };
 
   const renderToggleStatus = ({ id, uri, status }: IRedirectUri) => {
     return (
-      <Toggle
-        checked={Boolean(status)}
-        onToggle={() => handleUpdateStatus(id as string, uri, !status)}
-        key={id}
-      />
+      role === TeamRoles.OWNER && (
+        <Toggle
+          checked={Boolean(status)}
+          onToggle={() => handleUpdateStatus(id as string, uri, !status)}
+          key={`toggle-status-action-${id}`}
+        />
+      )
     );
   };
 
   const handleUpdateStatus = async (
     id: string,
     uri: string,
-    newStatus: boolean
+    newStatus: boolean,
   ) => {
     try {
       setIsOpened(true);
@@ -102,13 +110,15 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
 
   const renderDeleteRedirectUriAction = ({ id, uri }: IRedirectUri) => {
     return (
-      <button
-        type="button"
-        onClick={() => handleDeleteUri(id as string, uri)}
-        key={id}
-      >
-        <TrashIcon className="w-5 h-5 cursor-pointer" />
-      </button>
+      role === TeamRoles.OWNER && (
+        <button
+          type="button"
+          onClick={() => handleDeleteUri(id as string, uri)}
+          key={`delete-action-${id}`}
+        >
+          <TrashIcon className="w-5 h-5 cursor-pointer" />
+        </button>
+      )
     );
   };
 

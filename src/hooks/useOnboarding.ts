@@ -1,34 +1,71 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
-import { useSession } from 'next-auth/react';
+import { useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
+import { getApps } from '@/actions/app';
+import { type CTA } from '@/app/app/list/components/Banner';
+import { IApp } from '@/types/app';
+import { useContractGA } from '@/hooks';
+import { CreditsContext } from '@/context/creditsContext';
 import { getWorkspace } from '@/actions/workspace';
 import { IWorkspace } from '@/types/workspace';
 
 export const useOnboarding = () => {
-  const { isConnected } = useAccount();
-  const { data: session } = useSession();
-  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [apps, setApps] = useState<IApp[]>([]);
   const [workspace, setWorkspace] = useState<IWorkspace>();
-  const { user: { name = '' } = {} } = session ?? {};
+  const [cta, setCta] = useState<CTA>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const router = useRouter();
+  const { balanceDCX, balanceDimo } = useContractGA();
+  const { setIsOpen } = useContext(CreditsContext);
 
   useEffect(() => {
-    if (name) {
-      getWorkspace().then((workspace) => {
-        setWorkspace(workspace);
-        setIsLoading(false);
+    setIsLoading(true);
+    getApps()
+      .then(({ data: createdApps }) => setApps(createdApps))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    getWorkspace().then((currentWorkspace) => {
+      setWorkspace(currentWorkspace);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!(balanceDCX > 0 || balanceDimo > 0)) {
+      setCta({
+        label: 'Purchase DCX',
+        onClick: handleOpenBuyCreditsModal,
       });
+    } else if (apps.length === 0) {
+      setCta({
+        label: 'Create an app',
+        onClick: handleCreateApp,
+      });
+    } else {
+      setCta(undefined);
     }
-  }, [name]);
+  }, [apps, balanceDCX]);
 
-  useEffect(() => {
-    const hasWorkspace = Object.keys(workspace ?? {}).length > 0;
-    setIsOnboardingCompleted(isConnected && hasWorkspace);
-  }, [isConnected, workspace]);
+  const handleCreateApp = () => {
+    router.push('/app/create');
+  };
 
-  return { isOnboardingCompleted, isLoading, workspace };
+  const handleOpenBuyCreditsModal = () => {
+    setIsOpen(true);
+  };
+
+  return {
+    apps,
+    cta,
+    isLoading,
+    setIsLoading,
+    handleCreateApp,
+    handleOpenBuyCreditsModal,
+    balance: balanceDCX,
+    workspace,
+  };
 };
 
 export default useOnboarding;

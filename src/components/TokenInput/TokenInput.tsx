@@ -3,6 +3,7 @@ import { MinusIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { Control, Controller } from 'react-hook-form';
 
 import './TokenInput.css';
+import { formatSimpleBalanceWithDigits } from '@/utils/formatBalance';
 
 interface ISuggestion {
   label: string | number;
@@ -24,11 +25,15 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
   (
     { name, control, suggestions = [], showControls = false, description = '' },
     // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-    _ref
+    _ref,
   ) => {
     const handleChange = (newValue: number) => {
       if (newValue < 0) return 0;
       return newValue;
+    };
+
+    const formatValue = (value: number) => {
+      return formatSimpleBalanceWithDigits(value, 0);
     };
 
     return (
@@ -51,14 +56,13 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
                 <input
                   className="dcx-value"
                   type="text"
-                  value={Number(currentValue)}
+                  value={formatValue(currentValue)}
                   onChange={(e) => {
-                    const newValue = handleChange(
-                      parseInt(e.target.value || '0', 10)
-                    );
+                    const textValue = (e.target.value || '0').replace(/,/g, '');
+                    const newValue = handleChange(parseInt(textValue, 10));
                     onChange(newValue);
                   }}
-                  role='token-value-input'
+                  role="token-value-input"
                   ref={ref}
                 />
                 {description && (
@@ -90,7 +94,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
         )}
       />
     );
-  }
+  },
 );
 
 TokenInput.displayName = 'TokenInput';

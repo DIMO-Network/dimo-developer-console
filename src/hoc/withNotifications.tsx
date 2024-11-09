@@ -6,7 +6,7 @@ import { Toast } from '@/components/Toast';
 import { useNotification } from '@/hooks';
 
 export const withNotifications = <P extends object>(
-  WrappedComponent: ComponentType<P>
+  WrappedComponent: ComponentType<P>,
 ) => {
   const HOC: React.FC<P> = (props) => {
     const { notifications, setNotification } = useNotification();

@@ -3,12 +3,7 @@ import { CheckboxField } from '@/components/CheckboxField';
 
 describe('CheckboxField', () => {
   it('renders an input field', () => {
-    render(
-      <CheckboxField
-        name="terms"
-        role="terms"
-      />
-    );
+    render(<CheckboxField name="terms" role="terms" />);
 
     const field = screen.getByRole('terms');
 
