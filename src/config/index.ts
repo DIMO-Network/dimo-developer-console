@@ -30,7 +30,7 @@ type Configuration = {
 
 export const getConfig = (): Configuration => {
   // Determine the current environment
-  const env = process.env.VERCEL_ENV;
+  const { VERCEL_ENV: env } = process.env;
 
   // Select the appropriate configuration to merge with default based on the environment
   let environmentConfig = {};
