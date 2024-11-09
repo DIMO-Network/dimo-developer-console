@@ -30,7 +30,7 @@ const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
 };
 
 const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
-  if (isXiorError(error)) {
+  if (error instanceof XiorError) {
     const xiorError = error as XiorError;
     const code = xiorError.cause;
     if (code === 'ERR_NETWORK') {
@@ -41,7 +41,7 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
 };
 
 const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
-  if (isXiorError(error)) {
+  if (error instanceof XiorError) {
     const xiorError = error as XiorError;
     const status = xiorError.response?.status;
     if (status === 401) {
