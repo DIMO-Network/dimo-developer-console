@@ -57,4 +57,8 @@ export const getConfig = (): Configuration => {
   } as Configuration;
 };
 
-export default getConfig();
+const currentConfig = getConfig();
+
+console.info('currentConfig', currentConfig);
+
+export default currentConfig;
