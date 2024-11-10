@@ -186,13 +186,14 @@ export const Form: FC<IProps> = ({ workspace }) => {
       status: 'loading',
     });
 
+    // Call issueInDc 1 parameter
     const transaction = [
       {
         to: configuration.DLC_ADDRESS,
         value: BigInt(0),
         data: encodeFunctionData({
           abi: DimoLicenseABI,
-          functionName: 'issueInDc',
+          functionName: '0xaf509d9f',
           args: [workspaceName],
         }),
       },
