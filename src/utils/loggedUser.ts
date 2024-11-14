@@ -41,7 +41,7 @@ export class LoggedUser {
 
   get missingFlow(): string {
     let missingFlow = '';
-    if (!this.isGlobalAccountUser) missingFlow = 'wallet-creation';
+    if (!this.isGlobalAccountUser || !this.hasPasskey) missingFlow = 'wallet-creation';
     else if (!this.hasTeam) missingFlow = 'build-for';
     return missingFlow;
   }

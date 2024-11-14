@@ -14,6 +14,14 @@
       }
     }
 
+    .credits-costs {
+      @apply text-center pt-1 text-sm;
+    }
+
+    .buy-credits-payment-methods {
+      @apply flex flex-col gap-4 w-full max-w-sm pt-4 mb-4;
+    }
+
     .dcx-input {
       @apply py-4;
     }

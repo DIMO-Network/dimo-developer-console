@@ -10,8 +10,21 @@ const dimoApiClient = xior.create({
 
 const getCurrentDimoPrice = async (): Promise<number> => {
   const { data } =
-    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto');
+    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/DIMO');
   return data.data.DIMO[0].quote.USD.price;
+};
+
+const getCurrentPolPrice = async (): Promise<number> => {
+  const { data } =
+    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/POL');
+  return data.data.POL[0].quote.USD.price;
+};
+
+const getCurrentWMaticPrice = async (): Promise<number> => {
+  const { data } =
+    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/WMATIC');
+  console.info(data);
+  return data.data.WMATIC[0].quote.USD.price;
 };
 
 export const getCachedDimoPrice = unstable_cache(
@@ -20,4 +33,20 @@ export const getCachedDimoPrice = unstable_cache(
   },
   ['dimo-price'],
   { revalidate: 60 * 60 * 24, tags: ['dimo-price'] },
+);
+
+export const getCachedPolPrice = unstable_cache(
+  async () => {
+    return await getCurrentPolPrice();
+  },
+  ['pol-price'],
+  { revalidate: 60 * 60 * 24, tags: ['pol-price'] },
+);
+
+export const getCachedWmaticPrice = unstable_cache(
+  async () => {
+    return await getCurrentWMaticPrice();
+  },
+  ['wmatic-price'],
+  { revalidate: 60 * 60 * 24, tags: ['wmatic-price'] },
 );

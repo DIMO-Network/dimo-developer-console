@@ -92,6 +92,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
         status: 'success',
       });
     } catch (error: unknown) {
+      console.error(error);
       setLoadingStatus({ label: 'Something went wrong', status: 'error' });
     }
   };

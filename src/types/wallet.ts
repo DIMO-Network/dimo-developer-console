@@ -45,6 +45,7 @@ export interface IDcxPurchaseTransaction {
   usdAmount: number;
   maticAmount: string;
   alreadyHasDimo: boolean;
+  alreadyHasWmatic: boolean;
   dcxAmount: number;
   requiredDimoAmount: number;
   currency: string;
@@ -70,12 +71,16 @@ export interface IKernelOperationStatus {
 
 export interface ICoinMarketTokenResponse {
   data: {
-    DIMO: {
-      quote: {
-        USD: {
-          price: number;
-        };
-      };
-    }[];
+    DIMO: ICryptoQuote[];
+    POL: ICryptoQuote[];
+    WMATIC: ICryptoQuote[];
+  };
+}
+
+export interface ICryptoQuote {
+  quote: {
+    USD: {
+      price: number;
+    };
   };
 }

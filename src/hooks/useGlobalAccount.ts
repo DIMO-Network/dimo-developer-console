@@ -39,6 +39,7 @@ import UniversalRouter from '@/contracts/uniswapRouter.json';
 import { wagmiAbi } from '@/contracts/wagmi';
 import { utils } from 'web3';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import { bigint } from 'zod';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -53,6 +54,14 @@ const base64UrlEncode = (challenge: ArrayBuffer): string => {
     .replace(/\//g, '_')
     .replace(/=/g, '');
 };
+
+const MIN_SQRT_RATIO: bigint = BigInt(
+  '4295128739',
+);
+
+const MAX_SQRT_RATIO: bigint = BigInt(
+  '1461446703485210103287273052203988822378723970342',
+);
 
 export const useGlobalAccount = () => {
   const { data: session } = useSession();
@@ -105,6 +114,7 @@ export const useGlobalAccount = () => {
         timeout: 300000,
         authenticatorSelection: {
           requireResidentKey: false,
+          authenticatorAttachment: 'platform',
           residentKey: 'preferred',
           userVerification: 'preferred',
         },
@@ -229,6 +239,7 @@ export const useGlobalAccount = () => {
         };
       }
 
+      // value is payable amount required by contract
       const wmaticDepositOpHash = await kernelClient.sendUserOperation({
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
@@ -267,6 +278,7 @@ export const useGlobalAccount = () => {
 
   const swapWmaticToDimo = async (
     amount: string,
+    dimoAmount: number,
   ): Promise<IKernelOperationStatus> => {
     try {
       if (!organizationInfo) return {} as IKernelOperationStatus;
@@ -297,7 +309,7 @@ export const useGlobalAccount = () => {
                   amountIn: BigInt(utils.toWei(amount, 'ether')),
                   deadline: BigInt(deadLine),
                   amountOutMinimum: BigInt(0),
-                  sqrtPriceLimitX96: BigInt(0),
+                  sqrtPriceLimitX96: MIN_SQRT_RATIO + BigInt(10),
                 },
               ],
             }),

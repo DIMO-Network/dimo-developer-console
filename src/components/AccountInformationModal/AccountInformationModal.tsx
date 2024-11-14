@@ -17,7 +17,7 @@ import config from '@/config';
 
 import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
-import usePricing from '@/hooks/usePricing';
+import useCryptoPricing from '@/hooks/useCryptoPricing';
 
 interface IProps {}
 
@@ -31,7 +31,7 @@ export const AccountInformationModal: FC<IProps> = () => {
   );
   const { getDimoBalance, getDcxBalance, dimoContract, dimoCreditsContract } =
     useContractGA();
-  const { getDimoPrice } = usePricing();
+  const { getDimoPrice } = useCryptoPricing();
   const [balance, setBalance] = useState<{
     dcxBalance: number;
     dimoBalance: number;

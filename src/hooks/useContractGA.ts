@@ -6,6 +6,7 @@ import useGlobalAccount from '@/hooks/useGlobalAccount';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import WMatic from '@/contracts/wmatic.json';
 import { IKernelOperationStatus, ISubOrganization } from '@/types/wallet';
 
 import configuration from '@/config';
@@ -135,6 +136,53 @@ export const useContractGA = () => {
       return 0;
     }
   };
+  const getPolBalance = async (): Promise<number> => {
+    try {
+      if (!organizationInfo) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) {
+        return 0;
+      }
+
+      const polBalance = await publicClient.getBalance({
+        address: organizationInfo.smartContractAddress,
+      });
+
+      return Number(utils.fromWei(polBalance as bigint, 'ether'));
+    } catch (e: unknown) {
+      console.error(e);
+      return 0;
+    }
+  };
+  const getWmaticBalance = async (): Promise<number> => {
+    try {
+      if (!organizationInfo) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) {
+        return 0;
+      }
+
+      const contract = getContract({
+        address: configuration.WMATIC,
+        abi: WMatic,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const wmaticBalance = await contract.read.balanceOf([organizationInfo.smartContractAddress]);
+
+      return Number(utils.fromWei(wmaticBalance as bigint, 'ether'));
+    } catch (e: unknown) {
+      console.error(e);
+      return 0;
+    }
+  };
 
   useEffect(() => {
     if (!dimoContract || !organizationInfo) return;
@@ -198,6 +246,8 @@ export const useContractGA = () => {
     processTransactions,
     getDcxBalance,
     getDimoBalance,
+    getPolBalance,
+    getWmaticBalance,
     hasEnoughBalanceDCX: balanceDCX >= configuration.desiredAmountOfDCX,
     hasEnoughBalanceDimo: balanceDCX >= configuration.desiredAmountOfDimo,
     hasEnoughAllowanceDLC: allowanceDLC >= configuration.desiredAmountOfDCX,
