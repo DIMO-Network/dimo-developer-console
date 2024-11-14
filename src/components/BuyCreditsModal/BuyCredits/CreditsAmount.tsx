@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { TokenInput } from '@/components/TokenInput';
 import { Button } from '@/components/Button';
 import useStripeCrypto from '@/hooks/useStripeCrypto';
-import { useContractGA, useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { TextError } from '@/components/TextError';
@@ -49,12 +49,10 @@ interface IProps {
 
 export const CreditsAmount = ({ onNext }: IProps) => {
   const { organizationInfo, getNeededDimoAmountForDcx } = useGlobalAccount();
-  const { getDimoPrice, getWMaticPrice, getPolPrice } = useCryptoPricing();
+  const { getDimoPrice } = useCryptoPricing();
   const { setStripeClientId } = useContext(StripeCryptoContext);
   const { createStripeCryptoSession } = useStripeCrypto();
   const [paymentMethod, setPaymentMethod] = useState<string>('');
-  const [allowWalletPurchase, setAllowWalletPurchase] = useState<boolean>(false);
-  const { getDimoBalance, getPolBalance, getWmaticBalance } = useContractGA();
   const { control, watch } = useForm<IForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -113,25 +111,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       const dimoPrice = await getDimoPrice();
       setDimoPrice(dimoPrice);
     };
-    const loadBalances = async () => {
-      const [dimoBalance, polBalance, wmaticBalance, dimoPrice, polPrice, wmaticPrice] = await Promise.all([
-        getDimoBalance(),
-        getPolBalance(),
-        getWmaticBalance(),
-        getDimoPrice(),
-        getPolPrice(),
-        getWMaticPrice()
-      ]);
-      const pricing = config.MINIMUM_CREDITS * DCX_PRICE;
-
-      const enoughDimo = (dimoPrice * dimoBalance) >= pricing;
-      const enoughPol = (polBalance * polPrice) >= pricing;
-      const enoughWmatic = (wmaticBalance * wmaticPrice) >= pricing;
-
-      setAllowWalletPurchase(enoughDimo || enoughPol || enoughWmatic);
-    };
     loadDimoPrice().catch(console.error);
-    //loadBalances().catch(console.error);
   }, []);
 
   return (
@@ -167,7 +147,6 @@ export const CreditsAmount = ({ onNext }: IProps) => {
             <Card
               key={value}
               onClick={() => {
-                //if (!allowWalletPurchase && value === 'wallet') return;
                 handleSelection(value);
               }}
               className={classnames(
