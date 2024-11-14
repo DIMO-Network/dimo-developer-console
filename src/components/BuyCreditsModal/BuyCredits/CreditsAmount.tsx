@@ -131,7 +131,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       setAllowWalletPurchase(enoughDimo || enoughPol || enoughWmatic);
     };
     loadDimoPrice().catch(console.error);
-    loadBalances().catch(console.error);
+    //loadBalances().catch(console.error);
   }, []);
 
   return (
@@ -167,7 +167,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
             <Card
               key={value}
               onClick={() => {
-                if (!allowWalletPurchase && value === 'wallet') return;
+                //if (!allowWalletPurchase && value === 'wallet') return;
                 handleSelection(value);
               }}
               className={classnames(

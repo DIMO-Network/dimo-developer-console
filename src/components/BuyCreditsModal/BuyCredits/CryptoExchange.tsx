@@ -144,7 +144,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
 
       console.info(transactionData?.maticAmount);
 
-      const swapResult = await swapWmaticToDimo(transactionData!.maticAmount!, transactionData!.requiredDimoAmount!);
+      const swapResult = await swapWmaticToDimo(transactionData!.maticAmount!);
       if (!swapResult.success) {
         setNotification(swapResult.reason!, 'Oops...', 'error');
         setSwappingIntoDimo(LoadingStatus.Error);
