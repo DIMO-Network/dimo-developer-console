@@ -59,15 +59,18 @@ export const startEmailRecovery = async ({
 };
 
 export const rewirePasskey = async ({
+  email,
   signedRecoveryRequest,
   signedAuthenticatorRemoval,
 }: {
+  email: string;
   signedRecoveryRequest: TSignedRequest;
   signedAuthenticatorRemoval: TSignedRequest;
 }) => {
   await globalAccountClient.put(
     `/api/account/recovery`,
     {
+      email,
       signedRecoveryRequest,
       signedAuthenticatorRemoval,
     },

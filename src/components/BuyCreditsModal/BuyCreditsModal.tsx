@@ -14,7 +14,6 @@ import { IDcxPurchaseTransaction } from '@/types/wallet';
 
 import './BuyCreditsModal.css';
 
-
 interface IProps {}
 
 const buyCreditsFlows = {
@@ -28,7 +27,7 @@ const buyCreditsFlows = {
   },
   'balance-payment': {
     Component: BalancePayment,
-    order: 3
+    order: 3,
   },
   'crypto-exchange': {
     Component: CryptoExchange,

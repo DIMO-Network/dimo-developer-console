@@ -29,16 +29,27 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   const { organizationInfo } = useGlobalAccount();
 
   const [balances, setBalances] = useState<ICryptoBalance[]>([]);
-  const [selectedBalance, setSelectedBalance] = useState<ICryptoBalance>({ currency: '', balance: 0, price: 0 });
+  const [selectedBalance, setSelectedBalance] = useState<ICryptoBalance>({
+    currency: '',
+    balance: 0,
+    price: 0,
+  });
 
   const getBalances = async () => {
-    const [dimoBalance, polBalance, wmaticBalance, dimoPrice, polPrice, wmaticPrice] = await Promise.all([
+    const [
+      dimoBalance,
+      polBalance,
+      wmaticBalance,
+      dimoPrice,
+      polPrice,
+      wmaticPrice,
+    ] = await Promise.all([
       getDimoBalance(),
       getPolBalance(),
       getWmaticBalance(),
       getDimoPrice(),
       getPolPrice(),
-      getWMaticPrice()
+      getWMaticPrice(),
     ]);
     const balances = [
       {
@@ -55,7 +66,7 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
         currency: 'wmatic',
         balance: wmaticBalance,
         price: wmaticPrice,
-      }
+      },
     ];
     setBalances(balances);
   };
@@ -70,25 +81,23 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     const environment = env ?? clientEnv;
 
     const processedAmount =
-      environment === 'production'
-        ? selectedBalance.balance.toString()
-        : '1';
+      environment === 'production' ? selectedBalance.balance.toString() : '1';
 
     switch (selectedBalance.currency) {
       case 'dimo':
-        onNext('balance-payment',{
+        onNext('balance-payment', {
           ...transactionData,
           alreadyHasDimo: true,
         });
         return;
       case 'pol':
-        onNext('balance-payment',{
+        onNext('balance-payment', {
           ...transactionData,
           maticAmount: processedAmount,
         });
         return;
       case 'wmatic':
-        onNext('balance-payment',{
+        onNext('balance-payment', {
           ...transactionData,
           alreadyHasWmatic: true,
           maticAmount: processedAmount,
@@ -106,30 +115,32 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     <>
       <h1>Current Balances</h1>
       <div className="buy-credits-payment-methods">
-        {balances.length === 0 && <BubbleLoader isLoading={balances.length === 0}/>}
+        {balances.length === 0 && (
+          <BubbleLoader isLoading={balances.length === 0} />
+        )}
         {balances.map((currentBalance) => {
           const { currency, balance, price } = currentBalance;
           const usdEquivalent = balance * price;
           return (
             <Card
-            key={currency}
-            onClick={() => {
-              if (usdEquivalent < transactionData!.usdAmount!) return;
-              handleSelection(currentBalance);
-            }}
-            className={classnames(
-              'flex flex-row card-border justify-between cursor-pointer',
-              {
-                '!border-white': selectedBalance.currency === currency
-              }
-            )}
-          >
-            <p>{currency.toUpperCase()}</p>
-            <div className='text-right'>
-              <p>{balance.toFixed(3)}</p>
-              <p>${usdEquivalent.toFixed(2)} USD</p>
-            </div>
-          </Card>
+              key={currency}
+              onClick={() => {
+                if (usdEquivalent < transactionData!.usdAmount!) return;
+                handleSelection(currentBalance);
+              }}
+              className={classnames(
+                'flex flex-row card-border justify-between cursor-pointer',
+                {
+                  '!border-white': selectedBalance.currency === currency,
+                },
+              )}
+            >
+              <p>{currency.toUpperCase()}</p>
+              <div className="text-right">
+                <p>{balance.toFixed(3)}</p>
+                <p>${usdEquivalent.toFixed(2)} USD</p>
+              </div>
+            </Card>
           );
         })}
       </div>

@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { TokenInput } from '@/components/TokenInput';
 import { Button } from '@/components/Button';
 import useStripeCrypto from '@/hooks/useStripeCrypto';
-import { useGlobalAccount } from '@/hooks';
+import { useContractGA, useGlobalAccount } from '@/hooks';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { TextError } from '@/components/TextError';
@@ -49,10 +49,12 @@ interface IProps {
 
 export const CreditsAmount = ({ onNext }: IProps) => {
   const { organizationInfo, getNeededDimoAmountForDcx } = useGlobalAccount();
-  const { getDimoPrice } = useCryptoPricing();
+  const { getDimoPrice, getWMaticPrice, getPolPrice } = useCryptoPricing();
   const { setStripeClientId } = useContext(StripeCryptoContext);
   const { createStripeCryptoSession } = useStripeCrypto();
   const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [isWalletAllowed, setIsWalletAllowed] = useState<boolean>(false);
+  const { getDimoBalance, getPolBalance, getWmaticBalance } = useContractGA();
   const { control, watch } = useForm<IForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -67,6 +69,10 @@ export const CreditsAmount = ({ onNext }: IProps) => {
   const [dimoPrice, setDimoPrice] = useState<number>(0);
 
   const handleSelection = (value: string) => {
+    console.info(isWalletAllowed);
+    if (value === 'wallet' && !isWalletAllowed) {
+      return;
+    }
     setPaymentMethod(value);
   };
 
@@ -83,7 +89,10 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     await startWalletPurchase(smartContractAddress, neededDimo);
   };
 
-  const startOnrampPurchase = async (smartContractAddress: `0x${string}`, neededDimo: number) => {
+  const startOnrampPurchase = async (
+    smartContractAddress: `0x${string}`,
+    neededDimo: number,
+  ) => {
     const { client_secret } = await createStripeCryptoSession(
       smartContractAddress,
       credits * DCX_PRICE,
@@ -97,13 +106,51 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     });
   };
 
-  const startWalletPurchase = async (smartContractAddress: `0x${string}`, neededDimo: number) => {
+  const startWalletPurchase = async (
+    smartContractAddress: `0x${string}`,
+    neededDimo: number,
+  ) => {
     onNext('crypto-purchase', {
       destinationAddress: smartContractAddress,
       usdAmount: credits * DCX_PRICE,
       dcxAmount: credits!,
       requiredDimoAmount: neededDimo,
     });
+  };
+
+  const checkBalance = async (): Promise<void> => {
+    const [
+      dimoBalance,
+      polBalance,
+      wmaticBalance,
+      dimoPrice,
+      polPrice,
+      wmaticPrice,
+    ] = await Promise.all([
+      getDimoBalance(),
+      getPolBalance(),
+      getWmaticBalance(),
+      getDimoPrice(),
+      getPolPrice(),
+      getWMaticPrice(),
+    ]);
+    const pricing = config.MINIMUM_CREDITS * DCX_PRICE;
+
+    const enoughDimo = dimoPrice * dimoBalance >= pricing;
+    const enoughPol = polBalance * polPrice >= pricing;
+    const enoughWmatic = wmaticBalance * wmaticPrice >= pricing;
+
+    console.info('dimo balance', dimoBalance);
+    console.info('pol balance', polBalance);
+    console.info('wmatic balance', wmaticBalance);
+
+    console.info('dimo usd', dimoPrice * dimoBalance);
+    console.info('pol usd', polBalance * polPrice);
+    console.info('wmatic usd', wmaticBalance * wmaticPrice);
+    console.info(pricing);
+    console.info(enoughDimo, enoughPol, enoughWmatic);
+
+    setIsWalletAllowed(enoughDimo || enoughPol || enoughWmatic);
   };
 
   useEffect(() => {
@@ -113,6 +160,11 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     };
     loadDimoPrice().catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (!organizationInfo) return;
+    checkBalance().catch(console.error);
+  }, [organizationInfo?.smartContractAddress]);
 
   return (
     <>

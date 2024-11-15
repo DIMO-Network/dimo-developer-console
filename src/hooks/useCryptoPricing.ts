@@ -1,5 +1,9 @@
 'use client';
-import { getCachedDimoPrice, getCachedPolPrice, getCachedWmaticPrice } from '@/services/wallet';
+import {
+  getCachedDimoPrice,
+  getCachedPolPrice,
+  getCachedWmaticPrice,
+} from '@/services/wallet';
 
 const useCryptoPricing = () => {
   const getDimoPrice = getCachedDimoPrice;

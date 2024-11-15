@@ -132,9 +132,10 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       if (swappingIntoDimo === LoadingStatus.Loading) return;
       setSwappingIntoDimo(LoadingStatus.Loading);
 
-      if (!transactionData?.alreadyHasWmatic)
-      {
-        const depositResult = await depositWmatic(transactionData!.maticAmount!);
+      if (!transactionData?.alreadyHasWmatic) {
+        const depositResult = await depositWmatic(
+          transactionData!.maticAmount!,
+        );
         if (!depositResult.success) {
           setNotification(depositResult.reason!, 'Oops...', 'error');
           setSwappingIntoDimo(LoadingStatus.Error);

@@ -6,10 +6,14 @@ import {
   createSubOrganization,
   getUserSubOrganization,
   rewirePasskey,
-  startEmailRecovery
+  startEmailRecovery,
 } from '@/services/globalAccount';
 import { signOut, useSession } from 'next-auth/react';
-import { IKernelOperationStatus, IPasskeyAttestation, ISubOrganization } from '@/types/wallet';
+import {
+  IKernelOperationStatus,
+  IPasskeyAttestation,
+  ISubOrganization,
+} from '@/types/wallet';
 import { useRouter } from 'next/navigation';
 import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
 import { isEmpty } from 'lodash';
@@ -25,11 +29,19 @@ import {
   encodeFunctionData,
   getContract,
   http,
-  HttpRequestError
+  HttpRequestError,
 } from 'viem';
-import { bundlerActions, ENTRYPOINT_ADDRESS_V07, walletClientToSmartAccountSigner } from 'permissionless';
+import {
+  bundlerActions,
+  ENTRYPOINT_ADDRESS_V07,
+  walletClientToSmartAccountSigner,
+} from 'permissionless';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
-import { createKernelAccount, createKernelAccountClient, createZeroDevPaymasterClient } from '@zerodev/sdk';
+import {
+  createKernelAccount,
+  createKernelAccountClient,
+  createZeroDevPaymasterClient,
+} from '@zerodev/sdk';
 import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
 import { polygon, polygonAmoy } from 'wagmi/chains';
 
@@ -54,10 +66,7 @@ const base64UrlEncode = (challenge: ArrayBuffer): string => {
     .replace(/=/g, '');
 };
 
-const MIN_SQRT_RATIO: bigint = BigInt(
-  '4295128739',
-);
-
+const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 
 export const useGlobalAccount = () => {
   const { data: session } = useSession();
@@ -107,7 +116,7 @@ export const useGlobalAccount = () => {
           name: `${email} @ DIMO`,
           displayName: `${email} @ DIMO`,
         },
-        timeout: 300000,
+        timeout: 300_000,
         authenticatorSelection: {
           requireResidentKey: false,
           authenticatorAttachment: 'platform',
@@ -162,6 +171,7 @@ export const useGlobalAccount = () => {
     });
 
     await rewirePasskey({
+      email: me!.username!,
       signedRecoveryRequest: signedRecoverUser,
       signedAuthenticatorRemoval: signedRemoveAuthenticators,
     });
@@ -171,7 +181,7 @@ export const useGlobalAccount = () => {
     try {
       const { subOrganizationId } = organizationInfo!;
       // a bit hacky but works for now
-      const signInResponse = await passkeyClient?.createReadOnlySession({
+      const signInResponse = await passkeyClient?.login({
         organizationId: subOrganizationId,
       });
 
@@ -352,7 +362,9 @@ export const useGlobalAccount = () => {
         },
       });
 
-      const quote = await contract.read.getQuoteDc([BigInt(utils.toWei(amount, 'ether'))]);
+      const quote = await contract.read.getQuoteDc([
+        BigInt(utils.toWei(amount, 'ether')),
+      ]);
 
       return Number(utils.fromWei(quote as bigint, 'ether'));
     } catch (e) {

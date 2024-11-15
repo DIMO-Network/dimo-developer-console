@@ -119,7 +119,7 @@ export const useContractGA = () => {
         organizationInfo!.smartContractAddress,
       ]);
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
-    }catch (e: unknown) {
+    } catch (e: unknown) {
       console.error(e);
       return 0;
     }
@@ -175,7 +175,9 @@ export const useContractGA = () => {
         },
       });
 
-      const wmaticBalance = await contract.read.balanceOf([organizationInfo.smartContractAddress]);
+      const wmaticBalance = await contract.read.balanceOf([
+        organizationInfo.smartContractAddress,
+      ]);
 
       return Number(utils.fromWei(wmaticBalance as bigint, 'ether'));
     } catch (e: unknown) {
