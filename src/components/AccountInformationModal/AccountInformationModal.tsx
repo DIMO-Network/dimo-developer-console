@@ -62,11 +62,12 @@ export const AccountInformationModal: FC<IProps> = () => {
     setBalance({ dimoBalance, dcxBalance, dimoPrice });
   };
 
-  const [getBalances, isLoadingBalances] = useLoading(loadBalances);
+  const { handleAction: getBalances, loading: isLoadingBalances } = useLoading(loadBalances);
 
   useEffect(() => {
     if (!(dimoContract && dimoCreditsContract)) return;
     if (!showAccountInformation) return;
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     getBalances().catch(console.error);
   }, [dimoContract, dimoCreditsContract, showAccountInformation]);
 

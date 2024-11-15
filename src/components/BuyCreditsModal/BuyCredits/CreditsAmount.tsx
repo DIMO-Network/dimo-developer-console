@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from 'react';
 import { TokenInput } from '@/components/TokenInput';
 import { Button } from '@/components/Button';
 import useStripeCrypto from '@/hooks/useStripeCrypto';
-import { useContractGA, useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { TextError } from '@/components/TextError';
