@@ -5,11 +5,11 @@ interface IParams {
 }
 
 export const useLoading = (
-  action: (args: IParams | IParams[]) => Promise<void>,
+  action: (args?: IParams | IParams[]) => Promise<void>,
 ) => {
   const [loading, setLoading] = useState(false);
 
-  const handleAction = async (...args: IParams[]) => {
+  const handleAction = async (...args: IParams[]): Promise<void> => {
     setLoading(true);
     try {
       if (loading) return;
@@ -20,7 +20,7 @@ export const useLoading = (
     }
   };
 
-  return [handleAction, loading];
+  return {handleAction, loading};
 };
 
 export default useLoading;

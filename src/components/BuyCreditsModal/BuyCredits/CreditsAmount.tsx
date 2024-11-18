@@ -4,15 +4,33 @@ import { useContext, useEffect, useState } from 'react';
 import { TokenInput } from '@/components/TokenInput';
 import { Button } from '@/components/Button';
 import useStripeCrypto from '@/hooks/useStripeCrypto';
-import { useContractGA, useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { TextError } from '@/components/TextError';
 import config from '@/config';
-import usePricing from '@/hooks/usePricing';
+import useCryptoPricing from '@/hooks/useCryptoPricing';
+import { PlusIcon, WalletIcon } from '@/components/Icons';
+import classnames from 'classnames';
+import { Card } from '@/components/Card';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 const DCX_PRICE = Number(DCX_IN_USD);
+
+const paymentMethods = [
+  {
+    text: 'Wallet Balance',
+    icon: WalletIcon,
+    iconClassName: 'w-4 h-4',
+    value: 'wallet',
+  },
+  {
+    text: 'Buy with USD',
+    icon: PlusIcon,
+    iconClassName: 'w-4 h-4',
+    value: 'usd',
+  },
+];
 
 interface IForm {
   credits: number;
@@ -31,10 +49,10 @@ interface IProps {
 
 export const CreditsAmount = ({ onNext }: IProps) => {
   const { organizationInfo, getNeededDimoAmountForDcx } = useGlobalAccount();
-  const { getDimoBalance } = useContractGA();
-  const { getDimoPrice } = usePricing();
+  const { getDimoPrice } = useCryptoPricing();
   const { setStripeClientId } = useContext(StripeCryptoContext);
   const { createStripeCryptoSession } = useStripeCrypto();
+  const [paymentMethod, setPaymentMethod] = useState<string>('');
   const { control, watch } = useForm<IForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -48,21 +66,27 @@ export const CreditsAmount = ({ onNext }: IProps) => {
   const credits = watch('credits', 0);
   const [dimoPrice, setDimoPrice] = useState<number>(0);
 
+  const handleSelection = (value: string) => {
+    setPaymentMethod(value);
+  };
+
   const handleStartPurchase = async () => {
     const { smartContractAddress } = organizationInfo!;
     if (!smartContractAddress) return;
     const neededDimo = await getNeededDimoAmountForDcx(credits);
-    const balanceDimo = await getDimoBalance();
-    if (balanceDimo > 0 && balanceDimo > neededDimo) {
-      // TODO: handle this better, right is a bit hacky
-      onNext('crypto-purchase', {
-        destinationAddress: smartContractAddress,
-        dcxAmount: credits!,
-        requiredDimoAmount: neededDimo,
-        alreadyHasDimo: true,
-      });
+
+    if (paymentMethod === 'usd') {
+      await startOnrampPurchase(smartContractAddress, neededDimo);
       return;
     }
+
+    await startWalletPurchase(smartContractAddress, neededDimo);
+  };
+
+  const startOnrampPurchase = async (
+    smartContractAddress: `0x${string}`,
+    neededDimo: number,
+  ) => {
     const { client_secret } = await createStripeCryptoSession(
       smartContractAddress,
       credits * DCX_PRICE,
@@ -73,7 +97,18 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       usdAmount: credits * DCX_PRICE,
       dcxAmount: credits!,
       requiredDimoAmount: neededDimo,
-      alreadyHasDimo: false,
+    });
+  };
+
+  const startWalletPurchase = async (
+    smartContractAddress: `0x${string}`,
+    neededDimo: number,
+  ) => {
+    onNext('crypto-purchase', {
+      destinationAddress: smartContractAddress,
+      usdAmount: credits * DCX_PRICE,
+      dcxAmount: credits!,
+      requiredDimoAmount: neededDimo,
     });
   };
 
@@ -104,17 +139,38 @@ export const CreditsAmount = ({ onNext }: IProps) => {
           />
         )}
       </div>
-      <div style={{ textAlign: 'center', margin: '10px 0' }}>
+      <div className="credits-costs">
         <p>1 DCX = ${DCX_PRICE} USD</p>
         <p>1 DIMO = ${dimoPrice.toFixed(3)} USD</p>
       </div>
       <div className="credit-total-content">
-        <p className="total-descriptor">Your total</p>
+        <p className="total-descriptor">Your approximate total</p>
         <p className="total-value">$ {credits * DCX_PRICE}</p>
+      </div>
+      <div className="buy-credits-payment-methods">
+        {paymentMethods.map(({ text, icon: Icon, iconClassName, value }) => {
+          return (
+            <Card
+              key={value}
+              onClick={() => {
+                handleSelection(value);
+              }}
+              className={classnames(
+                'flex flex-row card-border gap-2 cursor-pointer',
+                {
+                  '!border-white': paymentMethod === value,
+                },
+              )}
+            >
+              <Icon className={iconClassName} />
+              <p>{text}</p>
+            </Card>
+          );
+        })}
       </div>
       <div className="credit-action">
         <Button
-          disabled={credits < config.MINIMUM_CREDITS}
+          disabled={credits < config.MINIMUM_CREDITS || paymentMethod === ''}
           className="primary !h-9"
           onClick={handleStartPurchase}
         >

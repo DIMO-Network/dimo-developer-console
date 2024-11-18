@@ -1,6 +1,9 @@
 import './TokenBalance.css';
 import { BuyDcxIcon } from '@/components/Icons';
-import { formatSimpleBalance, formatSimpleBalanceWithDigits } from '@/utils/formatBalance';
+import {
+  formatSimpleBalance,
+  formatSimpleBalanceWithDigits,
+} from '@/utils/formatBalance';
 
 interface IProps {
   token: string;

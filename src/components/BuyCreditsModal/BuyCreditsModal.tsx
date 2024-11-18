@@ -9,6 +9,7 @@ import { CryptoPurchase } from '@/components/BuyCreditsModal/BuyCredits/CryptoPu
 import CreditsAmount from '@/components/BuyCreditsModal/BuyCredits/CreditsAmount';
 import CryptoExchange from '@/components/BuyCreditsModal/BuyCredits/CryptoExchange';
 import ProcessComplete from '@/components/BuyCreditsModal/BuyCredits/ProcessComplete';
+import BalancePayment from '@/components/BuyCreditsModal/BuyCredits/BalancePayment';
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 
 import './BuyCreditsModal.css';
@@ -24,13 +25,17 @@ const buyCreditsFlows = {
     Component: CryptoPurchase,
     order: 2,
   },
+  'balance-payment': {
+    Component: BalancePayment,
+    order: 3,
+  },
   'crypto-exchange': {
     Component: CryptoExchange,
-    order: 3,
+    order: 4,
   },
   'dcx-minted': {
     Component: ProcessComplete,
-    order: 4,
+    order: 5,
   },
 };
 
