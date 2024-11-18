@@ -17,7 +17,7 @@
       }
 
       .balances {
-        @apply flex flex-col gap-y-4 min-w-96;
+        @apply flex flex-col gap-y-4 min-w-[27.5rem];
         .loading-text {
           @apply text-center;
         }
