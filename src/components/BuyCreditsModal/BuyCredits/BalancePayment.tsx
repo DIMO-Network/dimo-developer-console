@@ -75,14 +75,23 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     setSelectedBalance(value);
   };
 
-  const handleContinue = () => {
+  const getAmountToProcess = (balance: ICryptoBalance): number => {
     const env = process.env.VERCEL_ENV!;
     const clientEnv = process.env.NEXT_PUBLIC_CE!;
     const environment = env ?? clientEnv;
 
-    const processedAmount =
-      environment === 'production' ? selectedBalance.balance.toString() : '1';
+    if (environment === 'production') return 1;
 
+    const usdTarget = transactionData?.usdAmount!;
+    const usdEquivalent = balance.balance * balance.price;
+
+    const neededFromBalance = (balance.balance * usdTarget) / usdEquivalent;
+
+    return neededFromBalance;
+  };
+
+  const handleContinue = () => {    
+    const processedAmount = getAmountToProcess(selectedBalance);
     switch (selectedBalance.currency) {
       case 'dimo':
         onNext('balance-payment', {
@@ -93,14 +102,14 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
       case 'pol':
         onNext('balance-payment', {
           ...transactionData,
-          maticAmount: processedAmount,
+          maticAmount: processedAmount.toString(),
         });
         return;
       case 'wmatic':
         onNext('balance-payment', {
           ...transactionData,
           alreadyHasWmatic: true,
-          maticAmount: processedAmount,
+          maticAmount: processedAmount.toString(),
         });
         return;
     }
