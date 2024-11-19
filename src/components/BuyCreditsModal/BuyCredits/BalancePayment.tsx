@@ -80,7 +80,7 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     const clientEnv = process.env.NEXT_PUBLIC_CE!;
     const environment = env ?? clientEnv;
 
-    if (environment === 'production') return 1;
+    if (environment !== 'production') return 1;
 
     const usdTarget = transactionData?.usdAmount!;
     const usdEquivalent = balance.balance * balance.price;
