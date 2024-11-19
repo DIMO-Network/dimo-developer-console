@@ -114,28 +114,64 @@ export const useContractGA = () => {
 
   const getDcxBalance = async (): Promise<number> => {
     try {
-      if (!dimoCreditsContract) return 0;
-      const currentBalanceOnWei = await dimoCreditsContract.read.balanceOf([
+      if (!organizationInfo) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) {
+        return 0;
+      }
+
+      const creditsContract = getContract({
+        address: configuration.DCX_ADDRESS,
+        abi: DimoCreditsABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const currentBalanceOnWei = await creditsContract.read.balanceOf([
         organizationInfo!.smartContractAddress,
       ]);
+      
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
     } catch (e: unknown) {
       console.error(e);
       return 0;
     }
   };
+
   const getDimoBalance = async (): Promise<number> => {
     try {
-      if (!dimoContract) return 0;
-      const currentBalanceOnWei = await dimoContract.read.balanceOf([
+      if (!organizationInfo) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) {
+        return 0;
+      }
+
+      const dimoTokenContract = getContract({
+        address: configuration.DC_ADDRESS,
+        abi: DimoABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const currentBalanceOnWei = await dimoTokenContract.read.balanceOf([
         organizationInfo!.smartContractAddress,
       ]);
+
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
     } catch (e: unknown) {
       console.error(e);
       return 0;
     }
   };
+
   const getPolBalance = async (): Promise<number> => {
     try {
       if (!organizationInfo) return 0;
@@ -156,6 +192,7 @@ export const useContractGA = () => {
       return 0;
     }
   };
+
   const getWmaticBalance = async (): Promise<number> => {
     try {
       if (!organizationInfo) return 0;
