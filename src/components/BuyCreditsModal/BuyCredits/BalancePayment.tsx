@@ -82,7 +82,7 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
 
     if (environment !== 'production') return 1;
 
-    const usdTarget = transactionData?.usdAmount!;
+    const usdTarget = transactionData!.usdAmount!;
     const usdEquivalent = balance.balance * balance.price;
 
     const neededFromBalance = (balance.balance * usdTarget) / usdEquivalent;
