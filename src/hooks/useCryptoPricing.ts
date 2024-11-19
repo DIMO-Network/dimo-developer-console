@@ -1,14 +1,14 @@
 'use client';
 import {
-  getCachedDimoPrice,
-  getCachedPolPrice,
-  getCachedWmaticPrice,
+  getCurrentDimoPrice,
+  getCurrentPolPrice,
+  getCurrentWMaticPrice,
 } from '@/services/wallet';
 
 const useCryptoPricing = () => {
-  const getDimoPrice = getCachedDimoPrice;
-  const getPolPrice = getCachedPolPrice;
-  const getWMaticPrice = getCachedWmaticPrice;
+  const getDimoPrice = getCurrentDimoPrice;
+  const getPolPrice = getCurrentPolPrice;
+  const getWMaticPrice = getCurrentWMaticPrice;
 
   return {
     getDimoPrice,
