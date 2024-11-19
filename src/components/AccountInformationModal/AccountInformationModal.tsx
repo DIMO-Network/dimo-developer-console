@@ -62,7 +62,8 @@ export const AccountInformationModal: FC<IProps> = () => {
     setBalance({ dimoBalance, dcxBalance, dimoPrice });
   };
 
-  const { handleAction: getBalances, loading: isLoadingBalances } = useLoading(loadBalances);
+  const { handleAction: getBalances, loading: isLoadingBalances } =
+    useLoading(loadBalances);
 
   useEffect(() => {
     if (!(dimoContract && dimoCreditsContract)) return;
@@ -117,11 +118,13 @@ export const AccountInformationModal: FC<IProps> = () => {
             </Label>
           </div>
           <div className="balances">
-            {isLoadingBalances && <>
-              <BubbleLoader isLoading={isLoadingBalances} />
-              <p className='loading-text'>Loading your balances...</p>
-            </>}
-            { !isLoadingBalances &&
+            {isLoadingBalances && (
+              <>
+                <BubbleLoader isLoading={isLoadingBalances} />
+                <p className="loading-text">Loading your balances...</p>
+              </>
+            )}
+            {!isLoadingBalances && (
               <>
                 <TokenBalance
                   token={'dimo'}
@@ -136,8 +139,8 @@ export const AccountInformationModal: FC<IProps> = () => {
                   canBuy={balance.dcxBalance < config.MINIMUM_CREDITS}
                   openBuyModal={handleOpenBuyCreditsModal}
                 />
-            </>
-            }
+              </>
+            )}
           </div>
         </div>
       </div>

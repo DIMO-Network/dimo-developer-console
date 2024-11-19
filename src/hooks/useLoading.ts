@@ -20,7 +20,7 @@ export const useLoading = (
     }
   };
 
-  return {handleAction, loading};
+  return { handleAction, loading };
 };
 
 export default useLoading;

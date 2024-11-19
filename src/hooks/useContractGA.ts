@@ -134,7 +134,7 @@ export const useContractGA = () => {
       const currentBalanceOnWei = await creditsContract.read.balanceOf([
         organizationInfo!.smartContractAddress,
       ]);
-      
+
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
     } catch (e: unknown) {
       console.error(e);
