@@ -29,7 +29,6 @@ import configuration from '@/config';
 import './Form.css';
 import { encodeFunctionData } from 'viem';
 import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
-import { formatHexToNumber, formatHex } from '@/utils/formatHex';
 
 const {
   LICENSE_PRICE_USD = 5,
