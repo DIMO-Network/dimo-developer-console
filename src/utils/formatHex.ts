@@ -10,4 +10,4 @@ export const decodeHex = (str: `0x${string}`, type: string) => {
   const decoder = ethers.AbiCoder.defaultAbiCoder();
   const response = decoder.decode([type], str);
   return response[0];
-}
+};
