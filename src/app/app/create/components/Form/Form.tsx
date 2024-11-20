@@ -22,6 +22,7 @@ import { IWorkspace } from '@/types/workspace';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
+import { decodeHex } from '@/utils/formatHex';
 
 import configuration from '@/config';
 
@@ -210,9 +211,9 @@ export const Form: FC<IProps> = ({ workspace }) => {
 
     return createWorkspace({
       name: workspaceData.name ?? '',
-      token_id: Number(formatHexToNumber(rawTokenId as `0x${string}`)),
-      client_id: formatHex(rawClientId as `0x${string}`),
-      owner: formatHex(rawOwner as `0x${string}`),
+      token_id: Number(decodeHex(rawTokenId as `0x${string}`, 'uint256')),
+      client_id: decodeHex(rawClientId as `0x${string}`, 'address'),
+      owner: decodeHex(rawOwner as `0x${string}`, 'address'),
     });
   };
 
