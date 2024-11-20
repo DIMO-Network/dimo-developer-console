@@ -231,6 +231,37 @@ export const useGlobalAccount = () => {
     return true;
   };
 
+  const getWmaticAllowance = async (): Promise<number> => {
+    try {
+      if (!organizationInfo) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) {
+        return 0;
+      }
+
+      const wmaticContract = getContract({
+        address: config.WMATIC,
+        abi: WMatic,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const allowance = await wmaticContract.read.allowance([
+        organizationInfo.smartContractAddress,
+        config.SwapRouterAddress,
+      ]);
+
+      return Number(utils.fromWei(allowance as bigint, 'ether'));
+    } catch (e) {
+      console.error('Error getting wmatic allowance', e);
+      return 0;
+    };
+  };
+
   const depositWmatic = async (
     amount: string,
   ): Promise<IKernelOperationStatus> => {
@@ -296,29 +327,49 @@ export const useGlobalAccount = () => {
         };
       }
 
-      const deadLine = Date.now() + 1000 * 60 * 10;
+      const transactions = [];
+      const wmaticAllowance = await getWmaticAllowance();
+
+      if (wmaticAllowance < Number(amount)) {
+        transactions.push({
+          to: config.WMATIC,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: WMatic,
+            functionName: 'approve',
+            args: [
+              config.SwapRouterAddress,
+              BigInt(utils.toWei(amount, 'ether')),
+            ],
+          }),
+        });
+      }
+
+      const deadLine = Math.floor(Date.now() / 1000) + (60 * 10);
+      transactions.push({
+        to: config.SwapRouterAddress,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: UniversalRouter,
+          functionName: 'exactInputSingle',
+          args: [
+            {
+              tokenIn: config.WMATIC,
+              tokenOut: config.DC_ADDRESS,
+              fee: BigInt(10000),
+              recipient: organizationInfo.smartContractAddress,
+              amountIn: BigInt(utils.toWei(amount, 'ether')),
+              deadline: BigInt(deadLine),
+              amountOutMinimum: BigInt(0),
+              sqrtPriceLimitX96: MIN_SQRT_RATIO + BigInt(1),
+            },
+          ],
+        }),
+      });
+
       const omidExchangeOpHash = await kernelClient.sendUserOperation({
         userOperation: {
-          callData: await kernelClient.account.encodeCallData({
-            to: config.SwapRouterAddress,
-            value: BigInt(0),
-            data: encodeFunctionData({
-              abi: UniversalRouter,
-              functionName: 'exactInputSingle',
-              args: [
-                {
-                  tokenIn: config.WMATIC,
-                  tokenOut: config.DC_ADDRESS,
-                  fee: BigInt(10000),
-                  recipient: organizationInfo.smartContractAddress,
-                  amountIn: BigInt(utils.toWei(amount, 'ether')),
-                  deadline: BigInt(deadLine),
-                  amountOutMinimum: BigInt(0),
-                  sqrtPriceLimitX96: MIN_SQRT_RATIO + BigInt(1),
-                },
-              ],
-            }),
-          }),
+          callData: await kernelClient.account.encodeCallData(transactions),
         },
       });
 
