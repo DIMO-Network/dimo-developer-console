@@ -8,7 +8,7 @@ import { encodeFunctionData } from 'viem';
 import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
 import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
-import { createMySigner, getAppByID } from '@/actions/app';
+import { createMySigner, deleteApp, getAppByID } from '@/actions/app';
 import { generateWallet } from '@/utils/wallet';
 import { IApp } from '@/types/app';
 import { Loader } from '@/components/Loader';
@@ -51,25 +51,54 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const handleEnableSigner = async (signer: string) => {
     if (!organizationInfo && !workspace)
       throw new Error('Web3 connection failed');
-    const transaction = [
-      {
-        to: configuration.DLC_ADDRESS,
-        value: BigInt(0),
-        data: encodeFunctionData({
-          abi: DimoLicenseABI,
-          functionName: 'enableSigner',
-          args: [workspace?.token_id ?? 0, signer],
-        }),
-      },
-    ];
-    await processTransactions(transaction);
+    const transaction = {
+      to: configuration.DLC_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoLicenseABI,
+        functionName: 'enableSigner',
+        args: [workspace?.token_id ?? 0, signer],
+      }),
+    };
+    return transaction;
+  };
+
+  const handleDisableSigner = (signer: string) => {
+    if (!organizationInfo && !workspace)
+      throw new Error('Web3 connection failed');
+    const transaction = {
+      to: configuration.DLC_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoLicenseABI,
+        functionName: 'disableSigner',
+        args: [workspace?.token_id ?? 0, signer],
+      }),
+    };
+    return transaction;
+  };
+
+  const handleRemoveUri = (uri: string) => {
+    if (!organizationInfo && !workspace)
+      throw new Error('Web3 connection failed');
+    const transaction = {
+      to: configuration.DLC_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoLicenseABI,
+        functionName: 'setRedirectUri',
+        args: [workspace?.token_id ?? 0, false, uri],
+      }),
+    };
+    return transaction;
   };
 
   const handleGenerateSigner = async () => {
     try {
       setIsLoading(true);
       const account = generateWallet();
-      await handleEnableSigner(account.address);
+      const transaction = handleEnableSigner(account.address);
+      await processTransactions([transaction]);
       const { id: appId } = await params;
       await createMySigner(
         {
@@ -78,6 +107,41 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         },
         appId,
       );
+      await refreshAppDetails();
+    } catch (error: unknown) {
+      console.error({ error });
+      const code = _.get(error, 'code', null);
+      if (code === 4001)
+        setNotification('The transaction was denied', 'Oops...', 'error');
+      else
+        setNotification(
+          'Something went wrong while generating the API key',
+          'Oops...',
+          'error',
+        );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getAllDisableSignerTransactions = () => {
+    return app?.Signers?.map((signer) => handleDisableSigner(signer.address)) || [];
+  };
+
+  const getAllRemoveUriTransactions = () => {
+    return app?.RedirectUris?.map(({ uri }) => handleRemoveUri(uri)) || [];
+  };
+
+  const handleDeleteApplication = async () => {
+    try {
+      setIsLoading(true);
+      const transactions = [
+        ...getAllDisableSignerTransactions(),
+        ...getAllRemoveUriTransactions(),
+      ];
+      await processTransactions(transactions);
+      const { id: appId } = await params;
+      await deleteApp(appId);
       await refreshAppDetails();
     } catch (error: unknown) {
       console.error({ error });
@@ -141,7 +205,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
           {role === TeamRoles.OWNER && (
             <div className="extra-actions">
-              <Button className="error-simple">Delete application</Button>
+              <Button className="error-simple" onClick={handleDeleteApplication}>Delete application</Button>
             </div>
           )}
         </>
