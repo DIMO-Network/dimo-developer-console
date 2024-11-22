@@ -22,7 +22,9 @@ export const useOnboarding = () => {
   useEffect(() => {
     setIsLoading(true);
     getApps()
-      .then(({ data: createdApps }) => setApps(createdApps))
+      .then(({ data: createdApps }) =>
+        setApps(createdApps.filter(({ deleted }) => !deleted)),
+      )
       .finally(() => setIsLoading(false));
   }, []);
 

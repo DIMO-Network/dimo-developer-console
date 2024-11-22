@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { useEffect, useState, useContext } from 'react';
 import { useSession } from 'next-auth/react';
 import { encodeFunctionData } from 'viem';
+import { useRouter } from 'next/navigation';
 
 import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
 import { BackButton } from '@/components/BackButton';
@@ -34,6 +35,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const { workspace } = useOnboarding();
   const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
+  const router = useRouter();
   const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => {
@@ -125,7 +127,9 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const getAllDisableSignerTransactions = () => {
-    return app?.Signers?.map((signer) => handleDisableSigner(signer.address)) || [];
+    return (
+      app?.Signers?.map((signer) => handleDisableSigner(signer.address)) || []
+    );
   };
 
   const getAllRemoveUriTransactions = () => {
@@ -142,7 +146,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
       await processTransactions(transactions);
       const { id: appId } = await params;
       await deleteApp(appId);
-      await refreshAppDetails();
+      router.replace('/');
     } catch (error: unknown) {
       console.error({ error });
       const code = _.get(error, 'code', null);
@@ -205,7 +209,12 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
           {role === TeamRoles.OWNER && (
             <div className="extra-actions">
-              <Button className="error-simple" onClick={handleDeleteApplication}>Delete application</Button>
+              <Button
+                className="error-simple"
+                onClick={handleDeleteApplication}
+              >
+                Delete application
+              </Button>
             </div>
           )}
         </>
