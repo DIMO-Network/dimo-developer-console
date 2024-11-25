@@ -75,19 +75,19 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     setSelectedBalance(value);
   };
 
-  const getAmountToProcess = (balance: ICryptoBalance): number => {
+  const getAmountToProcess = (balance: ICryptoBalance): bigint => {
     const env = process.env.VERCEL_ENV!;
     const clientEnv = process.env.NEXT_PUBLIC_CE!;
     const environment = env ?? clientEnv;
 
-    if (environment !== 'production') return 1;
+    if (environment !== 'production') return BigInt(1);
 
     const usdTarget = transactionData!.usdAmount!;
     const usdEquivalent = balance.balance * balance.price;
 
     const neededFromBalance = (balance.balance * usdTarget) / usdEquivalent;
 
-    return neededFromBalance;
+    return BigInt(Math.ceil(neededFromBalance));
   };
 
   const handleContinue = () => {    
@@ -102,14 +102,14 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
       case 'pol':
         onNext('balance-payment', {
           ...transactionData,
-          maticAmount: processedAmount.toString(),
+          maticAmount: processedAmount,
         });
         return;
       case 'wmatic':
         onNext('balance-payment', {
           ...transactionData,
           alreadyHasWmatic: true,
-          maticAmount: processedAmount.toString(),
+          maticAmount: processedAmount,
         });
         return;
     }

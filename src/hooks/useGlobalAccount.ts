@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
 import {
   createSubOrganization,
@@ -74,11 +74,6 @@ export const useGlobalAccount = () => {
   const { passkeyClient, authIframeClient } = useTurnkey();
   const [organizationInfo, setOrganizationInfo] =
     useState<ISubOrganization | null>(null);
-
-  const currentChain = useMemo(() => {
-    const isAmoy = configuration.CONTRACT_NETWORK === BigInt(80_002);
-    return isAmoy ? 'Polygon Amoy' : 'Polygon';
-  }, []);
 
   const validCredentials = useCallback(
     async (authToken: string) => {
@@ -231,14 +226,14 @@ export const useGlobalAccount = () => {
     return true;
   };
 
-  const getWmaticAllowance = async (): Promise<number> => {
+  const getWmaticAllowance = async (): Promise<bigint> => {
     try {
-      if (!organizationInfo) return 0;
+      if (!organizationInfo) return BigInt(0);
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient(organizationInfo);
 
       if (!kernelClient) {
-        return 0;
+        return BigInt(0);
       }
 
       const wmaticContract = getContract({
@@ -255,15 +250,15 @@ export const useGlobalAccount = () => {
         config.SwapRouterAddress,
       ]);
 
-      return Number(utils.fromWei(allowance as bigint, 'ether'));
+      return BigInt(Math.ceil(Number(utils.fromWei(allowance as bigint, 'ether'))));
     } catch (e) {
       console.error('Error getting wmatic allowance', e);
-      return 0;
+      return BigInt(0);
     };
   };
 
   const depositWmatic = async (
-    amount: string,
+    amount: bigint,
   ): Promise<IKernelOperationStatus> => {
     try {
       if (!organizationInfo) return {} as IKernelOperationStatus;
@@ -314,7 +309,7 @@ export const useGlobalAccount = () => {
   };
 
   const swapWmaticToDimo = async (
-    amount: string,
+    amount: bigint,
   ): Promise<IKernelOperationStatus> => {
     try {
       if (!organizationInfo) return {} as IKernelOperationStatus;
@@ -330,7 +325,8 @@ export const useGlobalAccount = () => {
       const transactions = [];
       const wmaticAllowance = await getWmaticAllowance();
 
-      if (wmaticAllowance < Number(amount)) {
+      // Approve swap router to spend wmatic
+      if (wmaticAllowance < amount) {
         transactions.push({
           to: config.WMATIC,
           value: BigInt(0),
@@ -394,14 +390,14 @@ export const useGlobalAccount = () => {
     }
   };
 
-  const getNeededDimoAmountForDcx = async (amount: number): Promise<number> => {
+  const getNeededDimoAmountForDcx = async (amount: number): Promise<bigint> => {
     try {
-      if (!organizationInfo) return 0;
+      if (!organizationInfo) return BigInt(0);
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient(organizationInfo);
 
       if (!kernelClient) {
-        return 0;
+        return BigInt(0);
       }
 
       const contract = getContract({
@@ -417,11 +413,11 @@ export const useGlobalAccount = () => {
         BigInt(utils.toWei(amount, 'ether')),
       ]);
 
-      return Number(utils.fromWei(quote as bigint, 'ether'));
+      return BigInt(Math.ceil(Number(utils.fromWei(quote as bigint, 'ether'))));
     } catch (e) {
       const errorReason = handleOnChainError(e as HttpRequestError);
       console.error('Error getting needed dimo amount', errorReason);
-      return 0;
+      return BigInt(0);
     }
   };
 
@@ -562,7 +558,6 @@ export const useGlobalAccount = () => {
     organizationInfo,
     walletLogin,
     registerSubOrganization,
-    currentChain,
     emailRecovery,
     validCredentials,
     registerNewPasskey,

@@ -85,7 +85,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
 
   const startOnrampPurchase = async (
     smartContractAddress: `0x${string}`,
-    neededDimo: number,
+    neededDimo: bigint,
   ) => {
     const { client_secret } = await createStripeCryptoSession(
       smartContractAddress,
@@ -95,19 +95,19 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     onNext('credits-amount', {
       destinationAddress: smartContractAddress,
       usdAmount: credits * DCX_PRICE,
-      dcxAmount: credits!,
+      dcxAmount: BigInt(credits!),
       requiredDimoAmount: neededDimo,
     });
   };
 
   const startWalletPurchase = async (
     smartContractAddress: `0x${string}`,
-    neededDimo: number,
+    neededDimo: bigint,
   ) => {
     onNext('crypto-purchase', {
       destinationAddress: smartContractAddress,
       usdAmount: credits * DCX_PRICE,
-      dcxAmount: credits!,
+      dcxAmount: BigInt(credits!),
       requiredDimoAmount: neededDimo,
     });
   };

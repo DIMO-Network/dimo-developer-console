@@ -82,7 +82,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
           functionName: 'approve',
           args: [
             configuration.DCX_ADDRESS,
-            BigInt(utils.toWei(expendableDimo, 'ether')),
+            utils.toWei(expendableDimo, 'ether'),
           ],
         }),
       });
@@ -97,7 +97,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
         functionName: '0xec88fc37',
         args: [
           organizationInfo!.smartContractAddress,
-          BigInt(utils.toWei(expendableDimo, 'ether')),
+          utils.toWei(expendableDimo, 'ether'),
         ],
       }),
     });
@@ -142,8 +142,6 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
           return;
         }
       }
-
-      console.info(transactionData?.maticAmount);
 
       const swapResult = await swapWmaticToDimo(transactionData!.maticAmount!);
       if (!swapResult.success) {

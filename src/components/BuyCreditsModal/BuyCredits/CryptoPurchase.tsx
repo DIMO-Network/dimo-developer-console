@@ -53,7 +53,7 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
           : '1';
       onNext('crypto-purchase', {
         ...transactionData,
-        maticAmount: processedAmount,
+        maticAmount: BigInt(Math.floor(Number(processedAmount))),
       });
     }
   };
