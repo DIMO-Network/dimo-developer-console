@@ -71,18 +71,19 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
 
   const mintDCX = async () => {
     const transactions = [];
-    const expendableDimo = Number(transactionData!.requiredDimoAmount!);
+    const expendableDimo = transactionData!.requiredDimoAmount!;
 
     if (allowanceDCX <= expendableDimo) {
+      // Call approve
       transactions.push({
         to: configuration.DC_ADDRESS,
         value: BigInt(0),
         data: encodeFunctionData({
           abi: DimoABI,
-          functionName: 'approve',
+          functionName: '0x095ea7b3',
           args: [
             configuration.DCX_ADDRESS,
-            utils.toWei(expendableDimo, 'ether'),
+            BigInt(utils.toWei(expendableDimo, 'ether')),
           ],
         }),
       });
@@ -97,7 +98,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
         functionName: '0xec88fc37',
         args: [
           organizationInfo!.smartContractAddress,
-          utils.toWei(expendableDimo, 'ether'),
+          BigInt(utils.toWei(expendableDimo, 'ether')),
         ],
       }),
     });

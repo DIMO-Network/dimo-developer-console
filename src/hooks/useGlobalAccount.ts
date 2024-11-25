@@ -272,6 +272,7 @@ export const useGlobalAccount = () => {
       }
 
       // value is payable amount required by contract
+      // call deposit function
       const wmaticDepositOpHash = await kernelClient.sendUserOperation({
         userOperation: {
           callData: await kernelClient.account.encodeCallData({
@@ -279,7 +280,7 @@ export const useGlobalAccount = () => {
             value: BigInt(utils.toWei(amount, 'ether')),
             data: encodeFunctionData({
               abi: WMatic,
-              functionName: 'deposit',
+              functionName: '0xd0e30db0',
               args: [],
             }),
           }),
@@ -325,14 +326,14 @@ export const useGlobalAccount = () => {
       const transactions = [];
       const wmaticAllowance = await getWmaticAllowance();
 
-      // Approve swap router to spend wmatic
+      // Approve swap router to spend wmatic (call approve)
       if (wmaticAllowance < amount) {
         transactions.push({
           to: config.WMATIC,
           value: BigInt(0),
           data: encodeFunctionData({
             abi: WMatic,
-            functionName: 'approve',
+            functionName: '0x095ea7b3',
             args: [
               config.SwapRouterAddress,
               BigInt(utils.toWei(amount, 'ether')),
@@ -341,13 +342,14 @@ export const useGlobalAccount = () => {
         });
       }
 
+      // call exactInputSingle
       const deadLine = Math.floor(Date.now() / 1000) + (60 * 10);
       transactions.push({
         to: config.SwapRouterAddress,
         value: BigInt(0),
         data: encodeFunctionData({
           abi: UniversalRouter,
-          functionName: 'exactInputSingle',
+          functionName: '0x414bf389',
           args: [
             {
               tokenIn: config.WMATIC,
