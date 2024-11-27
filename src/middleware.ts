@@ -71,7 +71,7 @@ const validatePrivateSession = async (
   const flow = request.nextUrl.searchParams.get('flow');
 
   //TODO: check how isLoginPage affects on safari
-  if (isValidationPage && isCompliant) {
+  if ((isValidationPage || isLoginPage) && isCompliant) {
     return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });
