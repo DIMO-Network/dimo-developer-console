@@ -26,6 +26,11 @@ export const getMyApp = async (id: string) => {
   return data;
 };
 
+export const deleteMyApp = async (id: string) => {
+  const client = await dimoDevAPIClient();
+  await client.delete<IApp>(`/api/my/apps/${id}`);
+};
+
 export const createRedirectUri = async (
   id: string,
   newData: Partial<IRedirectUri>,

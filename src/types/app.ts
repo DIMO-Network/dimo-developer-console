@@ -32,6 +32,7 @@ export interface IApp {
   Workspace: Partial<IWorkspace>;
   RedirectUris?: IRedirectUri[];
   Signers?: ISigner[];
+  deleted: boolean;
 }
 
 export interface IAppWithWorkspace {
