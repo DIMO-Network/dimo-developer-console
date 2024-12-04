@@ -42,19 +42,12 @@ export const IntegrationsPage = () => {
 
     const handleUpdate = async () => {
         if (!currentWebhook?.id) return;
-
         try {
-            console.log("Updating webhook with currentWebhook:", currentWebhook);
-
             const parsedParameters = JSON.parse(parametersInput);
             const payload = {
                 ...currentWebhook,
                 parameters: parsedParameters,
             };
-
-            console.log("Payload being sent for update:", payload);
-
-
             await updateWebhook(currentWebhook.id, payload);
 
             await loadWebhooks();
@@ -65,8 +58,6 @@ export const IntegrationsPage = () => {
             alert('Invalid JSON in Parameters field.');
         }
     };
-
-
 
     const handleEdit = (webhook: Webhook) => {
         setCurrentWebhook(webhook);
@@ -117,11 +108,22 @@ export const IntegrationsPage = () => {
                 <div className="webhook-form-container">
                     <h2>{currentWebhook.id ? 'Edit Webhook' : 'Create New Webhook'}</h2>
                     <label>Service</label>
-                    <input
-                        type="text"
+                    <select
                         value={currentWebhook.service || ''}
                         onChange={(e) =>
                             setCurrentWebhook({ ...currentWebhook, service: e.target.value })
+                        }
+                    >
+                        <option value="">Select a service</option>
+                        <option value="Telemetry">Telemetry</option>
+                        <option value="SACD">SACD</option>
+                    </select>
+                    <label>Event Name</label>
+                    <input
+                        type="text"
+                        value={currentWebhook.data || ''}
+                        onChange={(e) =>
+                            setCurrentWebhook({ ...currentWebhook, data: e.target.value })
                         }
                     />
                     <label>Target URI</label>
@@ -176,6 +178,7 @@ export const IntegrationsPage = () => {
                 <table className="webhook-table">
                     <thead>
                     <tr>
+                        <th>Service</th>
                         <th>Event Name</th>
                         <th>Target URI</th>
                         <th>Status</th>
@@ -187,6 +190,7 @@ export const IntegrationsPage = () => {
                     {webhooks.map((webhook) => (
                         <tr key={webhook.id}>
                             <td>{webhook.service}</td>
+                            <td>{webhook.data}</td>
                             <td>{webhook.target_uri}</td>
                             <td>{webhook.status}</td>
                             <td>{webhook.setup}</td>
