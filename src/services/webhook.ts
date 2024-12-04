@@ -51,9 +51,24 @@ export const createWebhook = async (webhook: Partial<Webhook>): Promise<Webhook>
 
 // Update a webhook
 export const updateWebhook = async (id: string, webhook: Partial<Webhook>): Promise<Webhook> => {
-    const response = await axios.put(`${API_BASE_URL}/webhooks/${id}`, webhook);
-    return response.data;
+    try {
+        console.log("Updating webhook with ID:", id, "and payload:", webhook);
+
+        const response = await axios.put(`${API_BASE_URL}/webhooks/${id}`, webhook, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+        });
+
+        console.log("Update Webhook Response:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error updating webhook:", error);
+        throw error;
+    }
 };
+
 
 // Delete a webhook
 export const deleteWebhook = async (id: string): Promise<void> => {

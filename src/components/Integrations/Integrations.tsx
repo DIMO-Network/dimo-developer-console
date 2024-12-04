@@ -42,9 +42,19 @@ export const IntegrationsPage = () => {
 
     const handleUpdate = async () => {
         if (!currentWebhook?.id) return;
+
         try {
+            console.log("Updating webhook with currentWebhook:", currentWebhook);
+
             const parsedParameters = JSON.parse(parametersInput);
-            const payload = { ...currentWebhook, parameters: parsedParameters };
+            const payload = {
+                ...currentWebhook,
+                parameters: parsedParameters,
+            };
+
+            console.log("Payload being sent for update:", payload);
+
+
             await updateWebhook(currentWebhook.id, payload);
 
             await loadWebhooks();
@@ -55,6 +65,8 @@ export const IntegrationsPage = () => {
             alert('Invalid JSON in Parameters field.');
         }
     };
+
+
 
     const handleEdit = (webhook: Webhook) => {
         setCurrentWebhook(webhook);
