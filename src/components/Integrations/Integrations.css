@@ -1,0 +1,21 @@
+.integrations-page {
+    padding: 20px;
+}
+
+.integrations-page h1 {
+    font-size: 24px;
+}
+
+.integrations-page button {
+    margin: 10px 5px;
+    padding: 5px 10px;
+}
+
+.integrations-page ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.integrations-page li {
+    margin-bottom: 10px;
+}
