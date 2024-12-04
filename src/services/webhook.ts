@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Webhook } from '@/types/webhook';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://localhost:3003';
 
 export const fetchWebhooks = async (): Promise<Webhook[]> => {
     console.log('Fetching webhooks from:', `${API_BASE_URL}/webhooks`);
@@ -9,10 +9,9 @@ export const fetchWebhooks = async (): Promise<Webhook[]> => {
         const response = await axios.get(`${API_BASE_URL}/webhooks`, {
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
             },
         });
-
-
         console.log("Fetch Webhooks Response:", response);
         return response.data;
     } catch (error) {
