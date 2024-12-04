@@ -2,70 +2,164 @@
 
 import { useState, useEffect } from 'react';
 import { fetchWebhooks, createWebhook, updateWebhook, deleteWebhook } from '@/services/webhook';
-import { Button } from '@/components/Button';
-import { Webhook } from '@/types/webhook';
 import './Integrations.css';
+import { Webhook } from '@/types/webhook';
 
 export const IntegrationsPage = () => {
     const [webhooks, setWebhooks] = useState<Webhook[]>([]);
+    const [currentWebhook, setCurrentWebhook] = useState<Partial<Webhook> | null>(null);
+    const [parametersInput, setParametersInput] = useState<string>('{}');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [webhookToDelete, setWebhookToDelete] = useState<Webhook | null>(null);
+
+    const loadWebhooks = async () => {
+        try {
+            const data = await fetchWebhooks();
+            setWebhooks(data);
+        } catch (error) {
+            console.error('Error fetching webhooks:', error);
+        }
+    };
 
     useEffect(() => {
-        const loadWebhooks = async () => {
-            try {
-                const data = await fetchWebhooks();
-                setWebhooks(data);
-            } catch (error) {
-                console.error('Error fetching webhooks:', error);
-            }
-        };
         loadWebhooks();
     }, []);
 
     const handleCreate = async () => {
         try {
-            const newWebhook = await createWebhook();
-            setWebhooks((prev) => [...prev, newWebhook]);
+            const parsedParameters = JSON.parse(parametersInput);
+            const payload = { ...currentWebhook, parameters: parsedParameters };
+            await createWebhook(payload as Webhook);
+
+            await loadWebhooks();
+            setCurrentWebhook(null);
+            setParametersInput('{}');
         } catch (error) {
             console.error('Error creating webhook:', error);
+            alert('Invalid JSON in Parameters field.');
         }
     };
 
-    const handleUpdate = async (id: string) => {
+    const handleUpdate = async () => {
+        if (!currentWebhook?.id) return;
         try {
-            const updatedWebhook = await updateWebhook(id);
-            setWebhooks((prev) =>
-                prev.map((webhook) =>
-                    webhook.id === id ? { ...webhook, ...updatedWebhook } : webhook
-                )
-            );
+            const parsedParameters = JSON.parse(parametersInput);
+            const payload = { ...currentWebhook, parameters: parsedParameters };
+            await updateWebhook(currentWebhook.id, payload);
+
+            await loadWebhooks();
+            setCurrentWebhook(null);
+            setParametersInput('{}');
         } catch (error) {
             console.error('Error updating webhook:', error);
+            alert('Invalid JSON in Parameters field.');
         }
     };
 
-    const handleDelete = async (id: string) => {
-        try {
-            await deleteWebhook(id);
-            setWebhooks((prev) => prev.filter((webhook) => webhook.id !== id));
-        } catch (error) {
-            console.error('Error deleting webhook:', error);
+    const handleEdit = (webhook: Webhook) => {
+        setCurrentWebhook(webhook);
+        setParametersInput(JSON.stringify(webhook.parameters, null, 2));
+    };
+
+    const handleCancel = () => {
+        setCurrentWebhook(null);
+        setParametersInput('{}');
+    };
+
+    const handleDeleteClick = (webhook: Webhook) => {
+        setWebhookToDelete(webhook);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDelete = async () => {
+        if (webhookToDelete) {
+            await deleteWebhook(webhookToDelete.id);
+            await loadWebhooks();
+            setWebhookToDelete(null);
+            setShowDeleteConfirm(false);
         }
+    };
+
+    const cancelDelete = () => {
+        setWebhookToDelete(null);
+        setShowDeleteConfirm(false);
     };
 
     return (
         <div className="integrations-container">
-            <header className="integrations-header">
+            <div className="integrations-header">
                 <h1 className="integrations-title">Webhooks</h1>
-                <Button
-                    onClick={handleCreate}
+                <button
                     className="create-webhook-button"
+                    onClick={() => setCurrentWebhook({})}
                 >
                     + Create New
-                </Button>
-            </header>
+                </button>
+            </div>
+
             <p className="integrations-description">
-                Webhooks let you receive real-time event notifications when specific conditions are met for your vehicles.
+                Webhooks allow your application to receive real-time updates from events. You can create, edit, and delete webhooks to integrate seamlessly with external services.
             </p>
+
+            {currentWebhook && (
+                <div className="webhook-form-container">
+                    <h2>{currentWebhook.id ? 'Edit Webhook' : 'Create New Webhook'}</h2>
+                    <label>Service</label>
+                    <input
+                        type="text"
+                        value={currentWebhook.service || ''}
+                        onChange={(e) =>
+                            setCurrentWebhook({ ...currentWebhook, service: e.target.value })
+                        }
+                    />
+                    <label>Target URI</label>
+                    <input
+                        type="text"
+                        value={currentWebhook.target_uri || ''}
+                        onChange={(e) =>
+                            setCurrentWebhook({ ...currentWebhook, target_uri: e.target.value })
+                        }
+                    />
+                    <label>Setup</label>
+                    <select
+                        value={currentWebhook.setup || ''}
+                        onChange={(e) =>
+                            setCurrentWebhook({ ...currentWebhook, setup: e.target.value })
+                        }
+                    >
+                        <option value="Realtime">Realtime</option>
+                        <option value="Hourly">Hourly</option>
+                    </select>
+                    <label>Status</label>
+                    <select
+                        value={currentWebhook.status || ''}
+                        onChange={(e) =>
+                            setCurrentWebhook({ ...currentWebhook, status: e.target.value })
+                        }
+                    >
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                    <label>Parameters (JSON)</label>
+                    <textarea
+                        value={parametersInput}
+                        onChange={(e) => setParametersInput(e.target.value)}
+                        placeholder="Enter JSON parameters"
+                    />
+                    <div className="webhook-form-actions">
+                        <button
+                            className="save-button"
+                            onClick={currentWebhook.id ? handleUpdate : handleCreate}
+                        >
+                            Save
+                        </button>
+                        <button className="cancel-button" onClick={handleCancel}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="webhook-table-container">
                 <table className="webhook-table">
                     <thead>
@@ -74,58 +168,52 @@ export const IntegrationsPage = () => {
                         <th>Target URI</th>
                         <th>Status</th>
                         <th>Setup</th>
-                        <th>Last Triggered</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {webhooks.length > 0 ? (
-                        webhooks.map((webhook) => (
-                            <tr key={webhook.id}>
-                                <td>{webhook.service}</td>
-                                <td>{webhook.target_uri}</td>
-                                <td className="capitalize">{webhook.status}</td>
-                                <td>{webhook.setup}</td>
-                                <td>{webhook.updated_at || 'Never'}</td>
-                                <td className="webhook-actions">
-                                    <Button
-                                        onClick={() => handleUpdate(webhook.id)}
-                                        className="edit-webhook-button"
-                                    >
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleDelete(webhook.id)}
-                                        className="delete-webhook-button"
-                                    >
-                                        Delete
-                                    </Button>
-                                    <Button
-                                        className={`${
-                                            webhook.status === 'active'
-                                                ? 'deactivate-webhook-button'
-                                                : 'activate-webhook-button'
-                                        }`}
-                                    >
-                                        {webhook.status === 'active'
-                                            ? 'Deactivate'
-                                            : 'Activate'}
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan={6} className="no-webhooks-message">
-                                No webhooks found.
+                    {webhooks.map((webhook) => (
+                        <tr key={webhook.id}>
+                            <td>{webhook.service}</td>
+                            <td>{webhook.target_uri}</td>
+                            <td>{webhook.status}</td>
+                            <td>{webhook.setup}</td>
+                            <td className="webhook-actions">
+                                <button
+                                    className="edit-webhook-button"
+                                    onClick={() => handleEdit(webhook)}
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    className="delete-webhook-button"
+                                    onClick={() => handleDeleteClick(webhook)}
+                                >
+                                    Delete
+                                </button>
                             </td>
                         </tr>
-                    )}
+                    ))}
                     </tbody>
                 </table>
             </div>
+
+            {showDeleteConfirm && (
+                <div className="delete-confirm-overlay">
+                    <div className="delete-confirm-modal">
+                        <h2>Confirm Deletion</h2>
+                        <p>Are you sure you want to delete this webhook? This action cannot be undone.</p>
+                        <div className="delete-confirm-actions">
+                            <button className="delete-webhook-button" onClick={confirmDelete}>
+                                Delete
+                            </button>
+                            <button className="cancel-button" onClick={cancelDelete}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
-
-export default IntegrationsPage;

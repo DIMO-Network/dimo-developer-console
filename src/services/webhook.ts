@@ -20,23 +20,26 @@ export const fetchWebhooks = async (): Promise<Webhook[]> => {
     }
 };
 
-export const createWebhook = async (): Promise<Webhook> => {
-    console.log("Creating webhook...");
+export const createWebhook = async (webhook: Partial<Webhook>): Promise<Webhook> => {
+    console.log("Creating webhook with payload:", webhook);
     try {
         const payload = {
-            service: 'DemoService',
-            data: 'DemoData',
-            trigger: 'OnCreate',
-            setup: 'Realtime',
-            target_uri: 'https://example.com/webhook',
-            parameters: { key1: 'value1', key2: 123 },
-            developer_license_address: '1234567890abcdef',
-            status: 'Active',
+            service: webhook.service || 'DefaultService',
+            data: webhook.data || 'DefaultData',
+            trigger: webhook.trigger || 'OnCreate',
+            setup: webhook.setup || 'Realtime',
+            target_uri: webhook.target_uri || 'https://example.com/webhook',
+            parameters: webhook.parameters || { key1: 'value1', key2: 123 },
+            developer_license_address: webhook.developer_license_address || '1234567890abcdef',
+            status: webhook.status || 'Active',
         };
-        console.log("Payload for creating webhook:", payload);
 
-        const response = await axios.post(`${API_BASE_URL}/webhooks`, payload);
-        console.log("Create Webhook Response:", response);
+        const response = await axios.post(`${API_BASE_URL}/webhooks`, payload, {
+            headers: {
+                Accept: 'application/json',
+            },
+        });
+        console.log("Create Webhook Response:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error creating webhook:", error);
@@ -45,13 +48,10 @@ export const createWebhook = async (): Promise<Webhook> => {
 };
 
 
+
 // Update a webhook
-export const updateWebhook = async (id: string): Promise<Webhook> => {
-    const response = await axios.put(`${API_BASE_URL}/webhooks/${id}`, {
-        setup: 'Hourly',
-        target_uri: 'https://example.com/updated-webhook',
-        parameters: { key3: 'valueUpdated' },
-    });
+export const updateWebhook = async (id: string, webhook: Partial<Webhook>): Promise<Webhook> => {
+    const response = await axios.put(`${API_BASE_URL}/webhooks/${id}`, webhook);
     return response.data;
 };
 
