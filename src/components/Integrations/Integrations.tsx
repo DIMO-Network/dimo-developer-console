@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import React from 'react';
+
 import { fetchWebhooks, createWebhook, updateWebhook, deleteWebhook, fetchSignalNames } from '@/services/webhook';
 import './Integrations.css';
 import { Webhook, Condition } from '@/types/webhook';
@@ -17,6 +19,8 @@ export const IntegrationsPage = () => {
     const [conditions, setConditions] = useState<Condition[]>([]);
     const [logic, setLogic] = useState('AND');
     const [generatedCEL, setGeneratedCEL] = useState('');
+    const [expandedWebhook, setExpandedWebhook] = useState<string | null>(null);
+
 
 
     const loadWebhooks = async () => {
@@ -44,13 +48,19 @@ export const IntegrationsPage = () => {
     const handleCreate = async () => {
         try {
             const parsedParameters = JSON.parse(parametersInput);
-            const payload = { ...currentWebhook, parameters: parsedParameters };
+            const payload = {
+                ...currentWebhook,
+                trigger: generatedCEL, // Set the generated CEL to the trigger field
+                parameters: parsedParameters,
+            };
             console.log("Payload for creating webhook:", payload);
             await createWebhook(payload as Webhook);
 
             await loadWebhooks();
             setCurrentWebhook(null);
             setParametersInput('{}');
+            //setConditions([]); // Clear conditions after creating
+            //setGeneratedCEL(''); // Clear CEL after creating
         } catch (error) {
             console.error('Error creating webhook:', error);
             alert('Invalid JSON in Parameters field.');
@@ -63,18 +73,23 @@ export const IntegrationsPage = () => {
             const parsedParameters = JSON.parse(parametersInput);
             const payload = {
                 ...currentWebhook,
+                trigger: generatedCEL, // Set the generated CEL to the trigger field
                 parameters: parsedParameters,
             };
+            console.log("Payload for updating webhook:", payload);
             await updateWebhook(currentWebhook.id, payload);
 
             await loadWebhooks();
             setCurrentWebhook(null);
             setParametersInput('{}');
+            //setConditions([]); // Clear conditions after updating
+            //setGeneratedCEL(''); // Clear CEL after updating
         } catch (error) {
             console.error('Error updating webhook:', error);
             alert('Invalid JSON in Parameters field.');
         }
     };
+
 
     const handleEdit = (webhook: Webhook) => {
         setCurrentWebhook(webhook);
@@ -136,11 +151,9 @@ export const IntegrationsPage = () => {
         handleGenerateCEL();
     };
 
-
-
-
-
-
+    const toggleExpand = (webhookId: string) => {
+        setExpandedWebhook((prev) => (prev === webhookId ? null : webhookId));
+    };
 
     return (
         <div className="integrations-container">
@@ -308,7 +321,7 @@ export const IntegrationsPage = () => {
                     <thead>
                     <tr>
                         <th>Description</th>
-                        <th>Trigger</th>
+                        <th>Service</th>
                         <th>Target URI</th>
                         <th>Status</th>
                         <th>Setup</th>
@@ -317,27 +330,45 @@ export const IntegrationsPage = () => {
                     </thead>
                     <tbody>
                     {webhooks.map((webhook) => (
-                        <tr key={webhook.id}>
-                            <td>{webhook.description}</td>
-                            <td>{webhook.trigger}</td>
-                            <td>{webhook.target_uri}</td>
-                            <td>{webhook.status}</td>
-                            <td>{webhook.setup}</td>
-                            <td className="webhook-actions">
-                                <button
-                                    className="edit-webhook-button"
-                                    onClick={() => handleEdit(webhook)}
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    className="delete-webhook-button"
-                                    onClick={() => handleDeleteClick(webhook)}
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
+                        <React.Fragment key={webhook.id}>
+                            <tr onClick={() => toggleExpand(webhook.id)}>
+                                <td>{webhook.description}</td>
+                                <td>{webhook.service}</td>
+                                <td>{webhook.target_uri}</td>
+                                <td>{webhook.status}</td>
+                                <td>{webhook.setup}</td>
+                                <td className="webhook-actions">
+                                    <button
+                                        className="edit-webhook-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleEdit(webhook);
+                                        }}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        className="delete-webhook-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteClick(webhook);
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            {expandedWebhook === webhook.id && (
+                                <tr className="expanded-row">
+                                    <td colSpan={6}>
+                                        <div className="expanded-content">
+                                            <h4>CEL Expression</h4>
+                                            <p>{webhook.trigger}</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </React.Fragment>
                     ))}
                     </tbody>
                 </table>

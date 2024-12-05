@@ -338,3 +338,20 @@
 }
 
 
+/* Add hover effect for rows */
+.webhook-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.webhook-table tbody tr:hover {
+    background-color: #2d3748; /* Slightly darker background on hover */
+}
+
+/* Expanded row styles */
+.expanded-row {
+    background-color: #1a202c; /* Dark background for the expanded section */
+    color: #edf2f7; /* Light text */
+    padding: 1rem;
+    border-top: 1px solid #4a5568; /* Border between the original row and expanded info */
+}
