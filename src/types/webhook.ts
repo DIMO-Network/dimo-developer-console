@@ -10,4 +10,11 @@ export interface Webhook {
     status: string;
     created_at: string;
     updated_at: string;
+    description: string;
+}
+
+export interface Condition {
+    field: string;
+    operator: string;
+    value: string;
 }
