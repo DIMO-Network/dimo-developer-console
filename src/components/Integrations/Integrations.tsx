@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { fetchWebhooks, createWebhook, updateWebhook, deleteWebhook } from '@/services/webhook';
+import { fetchWebhooks, createWebhook, updateWebhook, deleteWebhook, fetchSignalNames } from '@/services/webhook';
 import './Integrations.css';
-import { Webhook } from '@/types/webhook';
+import { Webhook, Condition } from '@/types/webhook';
+import { generateCEL } from '@/services/webhook';
+
 
 export const IntegrationsPage = () => {
     const [webhooks, setWebhooks] = useState<Webhook[]>([]);
@@ -11,6 +13,11 @@ export const IntegrationsPage = () => {
     const [parametersInput, setParametersInput] = useState<string>('{}');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [webhookToDelete, setWebhookToDelete] = useState<Webhook | null>(null);
+    const [signalNames, setSignalNames] = useState<string[]>([]);
+    const [conditions, setConditions] = useState<Condition[]>([]);
+    const [logic, setLogic] = useState('AND');
+    const [generatedCEL, setGeneratedCEL] = useState('');
+
 
     const loadWebhooks = async () => {
         try {
@@ -21,14 +28,24 @@ export const IntegrationsPage = () => {
         }
     };
 
+    const loadSignalNames = async () => {
+        try {
+            const signals = await fetchSignalNames();
+            setSignalNames(signals);
+        } catch (error) {
+            console.error('Error fetching signal names:', error);
+        }
+    };
     useEffect(() => {
         loadWebhooks();
+        loadSignalNames();
     }, []);
 
     const handleCreate = async () => {
         try {
             const parsedParameters = JSON.parse(parametersInput);
             const payload = { ...currentWebhook, parameters: parsedParameters };
+            console.log("Payload for creating webhook:", payload);
             await createWebhook(payload as Webhook);
 
             await loadWebhooks();
@@ -87,6 +104,43 @@ export const IntegrationsPage = () => {
         setWebhookToDelete(null);
         setShowDeleteConfirm(false);
     };
+    const handleGenerateCEL = async () => {
+        try {
+            const celExpression = await generateCEL(conditions, logic);
+            setGeneratedCEL(celExpression);
+        } catch (error) {
+            console.error('Failed to generate CEL:', error);
+            alert('Error generating CEL. Check backend connectivity.');
+        }
+    };
+
+    const addCondition = () => {
+        setConditions([...conditions, { field: '', operator: '>', value: '' } as Condition]);
+        handleGenerateCEL();
+    };
+
+    const updateCondition = (index: number, key: keyof Condition, value: string) => {
+        const updatedConditions = [...conditions];
+        updatedConditions[index][key] = value;
+        setConditions(updatedConditions);
+        handleGenerateCEL();
+    };
+
+    const removeCondition = (index: number) => {
+        setConditions(conditions.filter((_, i) => i !== index));
+        handleGenerateCEL();
+    };
+
+    const handleLogicChange = (newLogic: string) => {
+        setLogic(newLogic);
+        handleGenerateCEL();
+    };
+
+
+
+
+
+
 
     return (
         <div className="integrations-container">
@@ -94,7 +148,12 @@ export const IntegrationsPage = () => {
                 <h1 className="integrations-title">Webhooks</h1>
                 <button
                     className="create-webhook-button"
-                    onClick={() => setCurrentWebhook({})}
+                    onClick={() => {
+                        setCurrentWebhook({});
+                        setConditions([]);
+                        setGeneratedCEL('');
+                        setLogic('AND');
+                    }}
                 >
                     + Create New
                 </button>
@@ -107,26 +166,18 @@ export const IntegrationsPage = () => {
             {currentWebhook && (
                 <div className="webhook-form-container">
                     <h2>{currentWebhook.id ? 'Edit Webhook' : 'Create New Webhook'}</h2>
-                    <label>Service</label>
-                    <select
-                        value={currentWebhook.service || ''}
+
+                    <label>Description</label>
+                    <p className="field-helper-text">Provide a short, human-readable description of the webhook.</p>
+                    <textarea
+                        value={currentWebhook.description || ''}
                         onChange={(e) =>
-                            setCurrentWebhook({ ...currentWebhook, service: e.target.value })
-                        }
-                    >
-                        <option value="">Select a service</option>
-                        <option value="Telemetry">Telemetry</option>
-                        <option value="SACD">SACD</option>
-                    </select>
-                    <label>Event Name</label>
-                    <input
-                        type="text"
-                        value={currentWebhook.data || ''}
-                        onChange={(e) =>
-                            setCurrentWebhook({ ...currentWebhook, data: e.target.value })
+                            setCurrentWebhook({ ...currentWebhook, description: e.target.value })
                         }
                     />
+
                     <label>Target URI</label>
+                    <p className="field-helper-text">Specify the endpoint where the webhook payload should be sent.</p>
                     <input
                         type="text"
                         value={currentWebhook.target_uri || ''}
@@ -134,7 +185,88 @@ export const IntegrationsPage = () => {
                             setCurrentWebhook({ ...currentWebhook, target_uri: e.target.value })
                         }
                     />
+
+                    <label>Service</label>
+                    <p className="field-helper-text">Choose the service that this webhook pertains to.</p>
+                    <select
+                        value={currentWebhook.service || ''}
+                        onChange={(e) =>
+                            setCurrentWebhook({ ...currentWebhook, service: e.target.value })
+                        }
+                    >
+                        <option value="Telemetry">Telemetry</option>
+                        <option value="SACD">SACD</option>
+                    </select>
+
+                    <label>Trigger</label>
+                    <p className="field-helper-text">Define conditions for triggering the webhook using dynamic criteria.</p>
+                    <div className="trigger-conditions">
+                        {conditions.map((condition, index) => (
+                            <div key={index} className="condition-row">
+                                <select
+                                    value={condition.field}
+                                    onChange={(e) =>
+                                        updateCondition(index, 'field', e.target.value)
+                                    }
+                                >
+                                    <option value="" disabled>Select Field (VSS Signal)</option>
+                                    {signalNames.map((signal) => (
+                                        <option key={signal} value={signal}>
+                                            {signal}
+                                        </option>
+                                    ))}
+                                </select>
+                                <select
+                                    value={condition.operator}
+                                    onChange={(e) =>
+                                        updateCondition(index, 'operator', e.target.value)
+                                    }
+                                >
+                                    <option value="&gt;">&gt;</option>
+                                    <option value="&lt;">&lt;</option>
+                                    <option value="==">==</option>
+                                </select>
+
+                                <input
+                                    type="text"
+                                    value={condition.value}
+                                    onChange={(e) =>
+                                        updateCondition(index, 'value', e.target.value)
+                                    }
+                                    placeholder="Value"
+                                />
+                                <button
+                                    className="remove-condition-button"
+                                    onClick={() => removeCondition(index)}
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        ))}
+                        <button className="add-condition-button" onClick={addCondition}>
+                            + Add Condition
+                        </button>
+                    </div>
+
+                    <label>Logic</label>
+                    <p className="field-helper-text">Choose how to combine conditions (AND/OR).</p>
+                    <select
+                        value={logic}
+                        onChange={(e) => handleLogicChange(e.target.value)}
+                    >
+                        <option value="AND">AND</option>
+                        <option value="OR">OR</option>
+                    </select>
+
+                    <label>Generated CEL</label>
+                    <p className="field-helper-text">The dynamically generated CEL expression.</p>
+                    <div className="generated-cel">
+                        <code>{generatedCEL || 'CEL expression will appear here...'}</code>
+                    </div>
+
+
                     <label>Setup</label>
+                    <p className="field-helper-text">Choose the frequency for sending webhook notifications.</p>
                     <select
                         value={currentWebhook.setup || ''}
                         onChange={(e) =>
@@ -144,7 +276,9 @@ export const IntegrationsPage = () => {
                         <option value="Realtime">Realtime</option>
                         <option value="Hourly">Hourly</option>
                     </select>
+
                     <label>Status</label>
+                    <p className="field-helper-text">Set the current status of the webhook (Active or Inactive).</p>
                     <select
                         value={currentWebhook.status || ''}
                         onChange={(e) =>
@@ -154,12 +288,7 @@ export const IntegrationsPage = () => {
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                     </select>
-                    <label>Parameters (JSON)</label>
-                    <textarea
-                        value={parametersInput}
-                        onChange={(e) => setParametersInput(e.target.value)}
-                        placeholder="Enter JSON parameters"
-                    />
+
                     <div className="webhook-form-actions">
                         <button
                             className="save-button"
@@ -178,8 +307,8 @@ export const IntegrationsPage = () => {
                 <table className="webhook-table">
                     <thead>
                     <tr>
-                        <th>Service</th>
-                        <th>Event Name</th>
+                        <th>Description</th>
+                        <th>Trigger</th>
                         <th>Target URI</th>
                         <th>Status</th>
                         <th>Setup</th>
@@ -189,8 +318,8 @@ export const IntegrationsPage = () => {
                     <tbody>
                     {webhooks.map((webhook) => (
                         <tr key={webhook.id}>
-                            <td>{webhook.service}</td>
-                            <td>{webhook.data}</td>
+                            <td>{webhook.description}</td>
+                            <td>{webhook.trigger}</td>
                             <td>{webhook.target_uri}</td>
                             <td>{webhook.status}</td>
                             <td>{webhook.setup}</td>
@@ -232,4 +361,6 @@ export const IntegrationsPage = () => {
             )}
         </div>
     );
+
+
 };
