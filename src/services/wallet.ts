@@ -27,14 +27,14 @@ const getCurrentWMaticPrice = async (): Promise<number> => {
   return data.data.WMATIC[0].quote.USD.price;
 };
 
-const oneDay = 60 * 60 * 24;
+const oneHour = 60 * 60 * 1;
 
 export const getCachedDimoPrice = cache(
   async () => {
     return await getCurrentDimoPrice();
   },
   ['dimo-price'],
-  { revalidate: oneDay, tags: ['dimo-price'] },
+  { revalidate: oneHour, tags: ['dimo-price'] },
 );
 
 export const getCachedPolPrice = cache(
@@ -42,7 +42,7 @@ export const getCachedPolPrice = cache(
     return await getCurrentPolPrice();
   },
   ['pol-price'],
-  { revalidate: oneDay, tags: ['pol-price'] },
+  { revalidate: oneHour, tags: ['pol-price'] },
 );
 
 export const getCachedWmaticPrice = cache(
@@ -50,5 +50,5 @@ export const getCachedWmaticPrice = cache(
     return await getCurrentWMaticPrice();
   },
   ['wmatic-price'],
-  { revalidate: oneDay, tags: ['wmatic-price'] },
+  { revalidate: oneHour, tags: ['wmatic-price'] },
 );
