@@ -21,6 +21,8 @@ const View: FC = () => {
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
+  console.log('role', role);
+
   return (
     <div className="settings-page">
       <div className="titles">
