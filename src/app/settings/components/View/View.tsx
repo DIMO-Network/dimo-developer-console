@@ -21,6 +21,8 @@ const View: FC = () => {
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
+  console.log('role', role);
+
   return (
     <div className="settings-page">
       <div className="titles">
@@ -37,7 +39,7 @@ const View: FC = () => {
           <div className="team-information">
             <div className="team-header">
               <Title component="h2">Team Management</Title>
-              {false && role === TeamRoles.OWNER && (
+              {role === TeamRoles.OWNER && (
                 <Button className="primary" onClick={() => setIsOpen(!isOpen)}>
                   Invite team <PlusIcon className="h-5 w-5" />
                 </Button>
