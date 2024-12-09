@@ -1,6 +1,8 @@
 'use client';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
+import { setCookie } from 'cookies-next/client';
 
 import { Anchor } from '@/components/Anchor';
 import { IAuth } from '@/types/auth';
@@ -15,6 +17,13 @@ import { useGlobalAccount } from '@/hooks';
 export const View = () => {
   useErrorHandler();
   const { organizationInfo, walletLogin } = useGlobalAccount();
+  const searchParams = useSearchParams();
+  const invitationCode = searchParams.get('code') ?? '';
+  if (invitationCode) {
+    setCookie('invitation_code', invitationCode, {
+      maxAge: 60 * 60,
+    });
+  }
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     await signIn(app, auth);
