@@ -1,7 +1,7 @@
 'use client';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { setCookie } from 'cookies-next/client';
 
 import { Anchor } from '@/components/Anchor';
@@ -13,11 +13,15 @@ import { withNotifications } from '@/hoc';
 import './View.css';
 import { useEffect } from 'react';
 import { useGlobalAccount } from '@/hooks';
+import { TeamRoles } from '@/types/team';
 
 export const View = () => {
   useErrorHandler();
   const { organizationInfo, walletLogin } = useGlobalAccount();
+  const { data: session } = useSession();
+  const { role } = session?.user ?? {};
   const searchParams = useSearchParams();
+  const router = useRouter();
   const invitationCode = searchParams.get('code') ?? '';
   if (invitationCode) {
     setCookie('invitation_code', invitationCode, {
@@ -30,9 +34,13 @@ export const View = () => {
   };
 
   useEffect(() => {
-    if (!organizationInfo) return;
-    void walletLogin();
-  }, [organizationInfo]);
+    if (role === TeamRoles.COLLABORATOR) {
+      router.push('/app');
+    } else {
+      if (!organizationInfo) return;
+      void walletLogin();
+    }
+  }, [organizationInfo, role]);
 
   return (
     <main className="sign-in">

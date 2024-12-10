@@ -1,5 +1,6 @@
 import { IUser } from '@/types/user';
 import { ISubOrganization } from '@/types/wallet';
+import { TeamRoles } from '@/types/team';
 
 export class LoggedUser {
   public static instance: LoggedUser | null = null;
@@ -32,6 +33,7 @@ export class LoggedUser {
   }
 
   get isGlobalAccountUser(): boolean {
+    if (this._user?.role === TeamRoles.COLLABORATOR) return true;
     return Boolean(this._subOrganization?.subOrganizationId);
   }
 
