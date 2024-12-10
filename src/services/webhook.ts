@@ -43,15 +43,15 @@ export const createWebhook = async (webhook: Partial<Webhook>): Promise<Webhook>
     console.log("Creating webhook with payload:", webhook);
     try {
         const payload = {
-            service: webhook.service || 'DefaultService',
-            data: webhook.data || 'DefaultData',
-            trigger: webhook.trigger || 'OnCreate',
+            service: webhook.service || 'Telemetry',
+            //data: webhook.data || 'DefaultData',
+            trigger: webhook.trigger || 'Conditions Empty',
             setup: webhook.setup || 'Realtime',
             target_uri: webhook.target_uri || 'https://example.com/webhook',
             parameters: webhook.parameters || { key1: 'value1', key2: 123 },
             developer_license_address: webhook.developer_license_address || '1234567890abcdef',
             status: webhook.status || 'Active',
-            description: webhook.description || 'Default Description', // Added description
+            description: webhook.description || 'Default Description',
         };
 
         const response = await axios.post(`${API_BASE_URL}/webhooks`, payload, {
