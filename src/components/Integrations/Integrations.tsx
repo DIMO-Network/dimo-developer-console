@@ -119,36 +119,46 @@ export const IntegrationsPage = () => {
         setWebhookToDelete(null);
         setShowDeleteConfirm(false);
     };
-    const handleGenerateCEL = async () => {
-        try {
-            const celExpression = await generateCEL(conditions, logic);
-            setGeneratedCEL(celExpression);
-        } catch (error) {
-            console.error('Failed to generate CEL:', error);
-            alert('Error generating CEL. Check backend connectivity.');
-        }
-    };
+
+    useEffect(() => {
+        const generateAndSetCEL = async () => {
+            try {
+                if (conditions.length > 0 && logic) {
+                    const celExpression = await generateCEL(conditions, logic); // Generate CEL dynamically
+                    setGeneratedCEL(celExpression); // Update CEL display
+                    if (currentWebhook) {
+                        setCurrentWebhook({
+                            ...currentWebhook,
+                            trigger: celExpression, // Update trigger field
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to generate CEL:', error);
+            }
+        };
+
+        generateAndSetCEL();
+    }, [logic, conditions]); // Trigger re-run whenever logic or conditions change
+
+
 
     const addCondition = () => {
         setConditions([...conditions, { field: '', operator: '>', value: '' } as Condition]);
-        handleGenerateCEL();
     };
 
     const updateCondition = (index: number, key: keyof Condition, value: string) => {
         const updatedConditions = [...conditions];
         updatedConditions[index][key] = value;
         setConditions(updatedConditions);
-        handleGenerateCEL();
     };
 
     const removeCondition = (index: number) => {
         setConditions(conditions.filter((_, i) => i !== index));
-        handleGenerateCEL();
     };
 
     const handleLogicChange = (newLogic: string) => {
         setLogic(newLogic);
-        handleGenerateCEL();
     };
 
     const toggleExpand = (webhookId: string) => {
@@ -162,7 +172,10 @@ export const IntegrationsPage = () => {
                 <button
                     className="create-webhook-button"
                     onClick={() => {
-                        setCurrentWebhook({});
+                        setCurrentWebhook({
+                            description: 'My Cool Webhook',
+                            target_uri: 'https://example.com/webhook',
+                        });
                         setConditions([]);
                         setGeneratedCEL('');
                         setLogic('AND');
