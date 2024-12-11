@@ -6,17 +6,6 @@ const globalAccountClient = xior.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
 });
 
-export const getOrganizationInfoForOwnerUser = async (
-  email: string,
-  companyEmail: string,
-): Promise<ISubOrganization> => {
-  if (email !== companyEmail) {
-    return {} as ISubOrganization;
-  }
-
-  return getUserSubOrganization(email);
-};
-
 export const getUserSubOrganization = async (
   email: string,
 ): Promise<ISubOrganization> => {

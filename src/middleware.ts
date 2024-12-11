@@ -5,7 +5,7 @@ import { isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
-import { getOrganizationInfoForOwnerUser } from '@/services/globalAccount';
+import { getUserSubOrganization } from '@/services/globalAccount';
 import xior, { XiorError } from 'xior';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
@@ -58,8 +58,7 @@ const validatePrivateSession = async (
   event: NextFetchEvent,
 ) => {
   const user = await getUserByToken();
-  const subOrganization = await getOrganizationInfoForOwnerUser(
-    user.email!,
+  const subOrganization = await getUserSubOrganization(
     user.company_email_owner!,
   );
   request.user = new LoggedUser(user, subOrganization);
