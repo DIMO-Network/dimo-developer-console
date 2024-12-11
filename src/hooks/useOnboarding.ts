@@ -1,6 +1,7 @@
 'use client';
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 import { getApps } from '@/actions/app';
 import { type CTA } from '@/app/app/list/components/Banner';
@@ -9,6 +10,7 @@ import { useContractGA } from '@/hooks';
 import { CreditsContext } from '@/context/creditsContext';
 import { getWorkspace } from '@/actions/workspace';
 import { IWorkspace } from '@/types/workspace';
+import { TeamRoles } from '@/types/team';
 
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
@@ -18,6 +20,8 @@ export const useOnboarding = () => {
   const router = useRouter();
   const { balanceDCX, balanceDimo } = useContractGA();
   const { setIsOpen } = useContext(CreditsContext);
+  const { data: session } = useSession();
+  const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => {
     setIsLoading(true);
@@ -35,19 +39,20 @@ export const useOnboarding = () => {
   }, []);
 
   useEffect(() => {
-    if (!(balanceDCX > 0 || balanceDimo > 0)) {
-      setCta({
-        label: 'Purchase DCX',
-        onClick: handleOpenBuyCreditsModal,
-      });
-    } else if (apps.length === 0) {
-      setCta({
-        label: 'Create an app',
-        onClick: handleCreateApp,
-      });
-    } else {
-      setCta(undefined);
+    if (role === TeamRoles.OWNER) {
+      if (!(balanceDCX > 0 || balanceDimo > 0)) {
+        setCta({
+          label: 'Purchase DCX',
+          onClick: handleOpenBuyCreditsModal,
+        });
+      } else if (apps.length === 0) {
+        setCta({
+          label: 'Create an app',
+          onClick: handleCreateApp,
+        });
+      }
     }
+    setCta(undefined);
   }, [apps, balanceDCX]);
 
   const handleCreateApp = () => {
