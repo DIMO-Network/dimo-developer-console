@@ -53,27 +53,7 @@ export const TeamManagement: FC<IProps> = ({
       );
     }
 
-    return isOwner(role) ? (
-      <Controller
-        control={control}
-        name="role"
-        render={({ field: { onChange, ref } }) => (
-          <SelectField
-            onChange={onChange}
-            control={control}
-            value={teamCollaborator.role}
-            options={[
-              { text: TeamRoles.COLLABORATOR, value: TeamRoles.COLLABORATOR },
-              { text: TeamRoles.OWNER, value: TeamRoles.OWNER },
-            ]}
-            role="role-input"
-            ref={ref}
-          />
-        )}
-      />
-    ) : (
-      <>{TeamRolesLabels[teamCollaborator.role as TeamRoles]}</>
-    );
+    return <>{TeamRolesLabels[teamCollaborator.role as TeamRoles]}</>;
   };
 
   const renderDeleteRemoveCollaborator = ({
