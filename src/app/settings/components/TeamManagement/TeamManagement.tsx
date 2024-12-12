@@ -1,5 +1,4 @@
 import { useState, type FC } from 'react';
-import { Controller, useForm } from 'react-hook-form';
 import { useSession } from 'next-auth/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
@@ -13,7 +12,6 @@ import {
 import { deleteCollaborator } from '@/actions/team';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
-import { SelectField } from '@/components/SelectField';
 import { Table } from '@/components/Table';
 import { UserAvatar } from '@/components/UserAvatar';
 
@@ -28,7 +26,6 @@ export const TeamManagement: FC<IProps> = ({
 }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const { control } = useForm();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
