@@ -1,16 +1,17 @@
 'use client';
+import { type CTA } from '@/app/app/list/components/Banner';
+
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
-import { getApps } from '@/actions/app';
-import { type CTA } from '@/app/app/list/components/Banner';
-import { IApp } from '@/types/app';
-import { useContractGA } from '@/hooks';
 import { CreditsContext } from '@/context/creditsContext';
+import { getApps } from '@/actions/app';
 import { getWorkspace } from '@/actions/workspace';
+import { IApp } from '@/types/app';
+import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
-import { TeamRoles } from '@/types/team';
+import { useContractGA } from '@/hooks';
 
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
@@ -39,7 +40,7 @@ export const useOnboarding = () => {
   }, []);
 
   useEffect(() => {
-    if (role === TeamRoles.OWNER) {
+    if (isOwner(role)) {
       if (!(balanceDCX > 0 || balanceDimo > 0)) {
         setCta({
           label: 'Purchase DCX',

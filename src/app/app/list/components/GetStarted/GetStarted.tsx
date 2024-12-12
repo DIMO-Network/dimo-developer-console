@@ -7,9 +7,9 @@ import {
 import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
+import { isOwner, isCollaborator } from '@/utils/user';
 import { Title } from '@/components/Title';
 import { useOnboarding } from '@/hooks';
-import { TeamRoles } from '@/types/team';
 
 import './GetStarted.css';
 
@@ -49,11 +49,11 @@ export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
         <div className="action-cta">
           <Button
             className="dark rounded-sm w-full"
-            onClick={role === TeamRoles.OWNER ? actionCta : undefined}
+            onClick={isOwner(role) ? actionCta : undefined}
             type="button"
           >
-            {role === TeamRoles.OWNER && !completed && actionLabel}
-            {role === TeamRoles.COLLABORATOR && !completed && 'Pending'}
+            {isOwner(role) && !completed && actionLabel}
+            {isCollaborator(role) && !completed && 'Pending'}
             {completed && <CheckIcon className="h5 w-5 stroke-green-700" />}
           </Button>
         </div>

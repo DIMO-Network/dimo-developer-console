@@ -7,9 +7,9 @@ import { EyeIcon } from '@heroicons/react/24/outline';
 import { UserAvatar } from '@/components/UserAvatar';
 
 import { AccountInformationContext } from '@/context/AccountInformationContext';
-import { useContractGA } from '@/hooks';
 import { formatToHumanReadable } from '@/utils/formatBalance';
-import { TeamRoles } from '@/types/team';
+import { isOwner } from '@/utils/user';
+import { useContractGA } from '@/hooks';
 
 import './Header.css';
 
@@ -58,14 +58,14 @@ export const Header: FC = () => {
           <button
             className="btn-add-credits"
             onClick={
-              role === TeamRoles.OWNER
+              isOwner(role)
                 ? handleOpenBuyCreditsModal
                 : handleOpenAccountInformationModal
             }
             role="add-credits"
           >
-            {role === TeamRoles.OWNER && <PlusIcon className="h-4 w-4" />}
-            {role !== TeamRoles.OWNER && <EyeIcon className="h-4 w-4" />}
+            {isOwner(role) && <PlusIcon className="h-4 w-4" />}
+            {!isOwner(role) && <EyeIcon className="h-4 w-4" />}
           </button>
         </div>
       </div>

@@ -12,16 +12,16 @@ import { Button } from '@/components/Button';
 import { createMySigner, deleteApp, getAppByID } from '@/actions/app';
 import { generateWallet } from '@/utils/wallet';
 import { IApp } from '@/types/app';
+import { isOwner } from '@/utils/user';
 import { Loader } from '@/components/Loader';
 import { NotificationContext } from '@/context/notificationContext';
 import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriForm';
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
-import { TeamRoles } from '@/types/team';
 import { Title } from '@/components/Title';
 import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
-import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
 
 import './View.css';
@@ -174,7 +174,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         <>
           <div className="signers-content">
             <Title component="h2">Signers</Title>
-            {role === TeamRoles.OWNER && (
+            {isOwner(role) && (
               <div className="generate-signer">
                 <Button
                   className="primary-outline px-4 w-full"
@@ -192,7 +192,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
           <div className="redirect-uri-content">
             <Title component="h2">Authorized Redirect URIs</Title>
-            {role === TeamRoles.OWNER && app && (
+            {isOwner(role) && app && (
               <RedirectUriForm
                 appId={app!.id!}
                 refreshData={refreshAppDetails}
@@ -207,7 +207,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               />
             )}
           </div>
-          {role === TeamRoles.OWNER && (
+          {isOwner(role) && (
             <div className="extra-actions">
               <Button
                 className="error-simple"

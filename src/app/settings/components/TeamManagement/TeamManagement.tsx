@@ -10,11 +10,12 @@ import {
   TeamRoles,
   TeamRolesLabels,
 } from '@/types/team';
+import { deleteCollaborator } from '@/actions/team';
+import { isOwner } from '@/utils/user';
+import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { SelectField } from '@/components/SelectField';
 import { Table } from '@/components/Table';
 import { UserAvatar } from '@/components/UserAvatar';
-import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
-import { deleteCollaborator } from '@/actions/team';
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
@@ -52,7 +53,7 @@ export const TeamManagement: FC<IProps> = ({
       );
     }
 
-    return role === TeamRoles.OWNER ? (
+    return isOwner(role) ? (
       <Controller
         control={control}
         name="role"
@@ -80,7 +81,7 @@ export const TeamManagement: FC<IProps> = ({
     role: invitationRole,
   }: ITeamCollaborator) => {
     return (
-      role === TeamRoles.OWNER &&
+      isOwner(role) &&
       invitationRole !== TeamRoles.OWNER && (
         <div
           className="flex flex-row items-center w-full h-full cursor-pointer"
