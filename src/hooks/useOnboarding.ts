@@ -52,9 +52,8 @@ export const useOnboarding = () => {
           onClick: handleCreateApp,
         });
       }
-    }
-    setCta(undefined);
-  }, [apps, balanceDCX]);
+    } else setCta(undefined);
+  }, [apps, balanceDCX, role]);
 
   const handleCreateApp = () => {
     router.push('/app/create');
