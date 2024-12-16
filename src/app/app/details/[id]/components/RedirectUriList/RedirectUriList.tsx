@@ -3,15 +3,15 @@ import _ from 'lodash';
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { encodeFunctionData } from 'viem';
+import { useSession } from 'next-auth/react';
 
 import { deleteMyRedirectUri, updateMyRedirectUri } from '@/actions/app';
 import { IRedirectUri } from '@/types/app';
+import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { TeamRoles } from '@/types/team';
 import { Toggle } from '@/components/Toggle';
 import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
-import { useSession } from 'next-auth/react';
 
 import configuration from '@/config';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
@@ -50,7 +50,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
 
   const renderToggleStatus = ({ id, uri, status }: IRedirectUri) => {
     return (
-      role === TeamRoles.OWNER && (
+      isOwner(role) && (
         <Toggle
           checked={Boolean(status)}
           onToggle={() => handleUpdateStatus(id as string, uri, !status)}
@@ -110,7 +110,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
 
   const renderDeleteRedirectUriAction = ({ id, uri }: IRedirectUri) => {
     return (
-      role === TeamRoles.OWNER && (
+      isOwner(role) && (
         <button
           type="button"
           onClick={() => handleDeleteUri(id as string, uri)}

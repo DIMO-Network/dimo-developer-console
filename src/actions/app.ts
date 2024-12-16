@@ -10,6 +10,7 @@ import {
   createSigner,
   deleteSigner,
   testMyApp,
+  deleteMyApp,
 } from '@/services/app';
 import { IApp, IRedirectUri, ISigner } from '@/types/app';
 
@@ -19,6 +20,10 @@ export const getAppByID = async (id: string) => {
 
 export const createApp = async (workspaceId: string, app: Partial<IApp>) => {
   return createMyApp(workspaceId, app);
+};
+
+export const deleteApp = async (id: string) => {
+  return deleteMyApp(id);
 };
 
 export const testApp = async (app: IApp, signer: ISigner) => {

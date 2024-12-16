@@ -3,19 +3,22 @@ import { useSession } from 'next-auth/react';
 
 import { CreditsContext } from '@/context/creditsContext';
 import { PlusIcon, WalletIcon } from '@/components/Icons';
+import { EyeIcon } from '@heroicons/react/24/outline';
 import { UserAvatar } from '@/components/UserAvatar';
 
-import './Header.css';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
-import { useContractGA } from '@/hooks';
 import { formatToHumanReadable } from '@/utils/formatBalance';
+import { isOwner } from '@/utils/user';
+import { useContractGA } from '@/hooks';
+
+import './Header.css';
 
 export const Header: FC = () => {
   const { setIsOpen } = useContext(CreditsContext);
   const { balanceDCX } = useContractGA();
   const { setShowAccountInformation } = useContext(AccountInformationContext);
   const { data: session } = useSession();
-  const { user: { name = '' } = {} } = session ?? {};
+  const { user: { name = '', role = '' } = {} } = session ?? {};
 
   const handleOpenBuyCreditsModal = () => {
     setIsOpen(true);
@@ -51,12 +54,18 @@ export const Header: FC = () => {
             <p className="credit-amount">{dcxBalance}</p>
             <p className="credit-text">Credits</p>
           </div>
+
           <button
             className="btn-add-credits"
-            onClick={handleOpenBuyCreditsModal}
+            onClick={
+              isOwner(role)
+                ? handleOpenBuyCreditsModal
+                : handleOpenAccountInformationModal
+            }
             role="add-credits"
           >
-            <PlusIcon className="h-4 w-4" />
+            {isOwner(role) && <PlusIcon className="h-4 w-4" />}
+            {!isOwner(role) && <EyeIcon className="h-4 w-4" />}
           </button>
         </div>
       </div>

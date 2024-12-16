@@ -4,18 +4,18 @@ import { maskStringV2 } from 'maskdata';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState, type FC } from 'react';
 import { encodeFunctionData } from 'viem';
+import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
 import { ContentCopyIcon } from '@/components/Icons';
 import { deleteMySigner, testApp } from '@/actions/app';
 import { IApp, ISigner } from '@/types/app';
+import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { TeamRoles } from '@/types/team';
 import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
-import { useSession } from 'next-auth/react';
-import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
 
 interface IProps {
@@ -114,7 +114,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     api_key: signer = '',
   }: ISigner) => {
     return (
-      role === TeamRoles.OWNER && (
+      isOwner(role) && (
         <button
           type="button"
           onClick={() => handleDelete(id, signer)}

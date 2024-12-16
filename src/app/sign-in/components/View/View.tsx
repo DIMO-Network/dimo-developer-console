@@ -1,29 +1,47 @@
 'use client';
-import { signIn } from 'next-auth/react';
+import { useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { setCookie } from 'cookies-next/client';
+
 import Image from 'next/image';
 
 import { Anchor } from '@/components/Anchor';
 import { IAuth } from '@/types/auth';
+import { isCollaborator } from '@/utils/user';
 import { SignInButtons } from '@/components/SignInButton';
 import { useErrorHandler } from '@/hooks';
+import { useGlobalAccount } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
-import { useEffect } from 'react';
-import { useGlobalAccount } from '@/hooks';
 
 export const View = () => {
   useErrorHandler();
   const { organizationInfo, walletLogin } = useGlobalAccount();
+  const { data: session } = useSession();
+  const { role = '' } = session?.user ?? {};
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const invitationCode = searchParams.get('code') ?? '';
+  if (invitationCode) {
+    setCookie('invitation_code', invitationCode, {
+      maxAge: 60 * 60,
+    });
+  }
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     await signIn(app, auth);
   };
 
   useEffect(() => {
-    if (!organizationInfo) return;
-    void walletLogin();
-  }, [organizationInfo]);
+    if (isCollaborator(role)) {
+      router.push('/app');
+    } else {
+      if (!organizationInfo) return;
+      void walletLogin();
+    }
+  }, [organizationInfo, role]);
 
   return (
     <main className="sign-in">

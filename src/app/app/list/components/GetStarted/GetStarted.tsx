@@ -4,12 +4,14 @@ import {
   CubeIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
+import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
+import { isOwner, isCollaborator } from '@/utils/user';
 import { Title } from '@/components/Title';
+import { useOnboarding } from '@/hooks';
 
 import './GetStarted.css';
-import { useOnboarding } from '@/hooks';
 
 interface IProps {
   hasBalance: boolean;
@@ -18,6 +20,8 @@ interface IProps {
 
 export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
   const { handleCreateApp, handleOpenBuyCreditsModal } = useOnboarding();
+  const { data: session } = useSession();
+  const { user: { role = '' } = {} } = session ?? {};
 
   const renderAction = ({
     Icon,
@@ -45,10 +49,11 @@ export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
         <div className="action-cta">
           <Button
             className="dark rounded-sm w-full"
-            onClick={actionCta}
+            onClick={isOwner(role) ? actionCta : undefined}
             type="button"
           >
-            {!completed && actionLabel}
+            {isOwner(role) && !completed && actionLabel}
+            {isCollaborator(role) && !completed && 'Pending'}
             {completed && <CheckIcon className="h5 w-5 stroke-green-700" />}
           </Button>
         </div>

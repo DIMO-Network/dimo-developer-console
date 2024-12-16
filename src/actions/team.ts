@@ -16,12 +16,20 @@ export const getMyCollaborators = async () => {
 export const inviteCollaborator = async (invitation: IInvitation) => {
   try {
     const { data } = await inviteCollaboratorToMyTeam(invitation);
-    return data;
+    return { success: true, message: data.message };
   } catch (error: unknown) {
     if (error instanceof XiorError) {
       console.error({ error });
-      throw new Error(error?.response?.data?.message || error?.message);
+      return {
+        success: false,
+        message: error?.response?.data?.message || error?.message,
+      };
     }
+
+    return {
+      success: false,
+      message: 'Something went wrong',
+    };
   }
 };
 

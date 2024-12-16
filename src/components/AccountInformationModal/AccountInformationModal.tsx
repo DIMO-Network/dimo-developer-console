@@ -87,7 +87,7 @@ export const AccountInformationModal: FC<IProps> = () => {
         <div className="account-information-body">
           <div className="account-information-row">
             <Label htmlFor="email" className="text-xs text-medium">
-              Email
+              Owner Email
               <TextField
                 name="email"
                 type="text"
@@ -98,7 +98,7 @@ export const AccountInformationModal: FC<IProps> = () => {
           </div>
           <div className="account-information-row">
             <Label htmlFor="email" className="text-xs text-medium">
-              Wallet Address
+              Organization Wallet Address
               <TextField
                 name="wallet"
                 type="text"
