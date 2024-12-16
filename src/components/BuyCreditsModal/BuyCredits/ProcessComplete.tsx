@@ -32,6 +32,10 @@ export const ProcessComplete = ({ onNext, transactionData }: IProps) => {
     <Card className="success-card">
       <SuccessIcon className="w-10 h-10" />
       <Title component="h1">Successfully Purchased DCX</Title>
+      <p>
+        Please check your inbox for the invoice. It should arrive within 24
+        hours.
+      </p>
       <Button className="primary w-40 !h-9" onClick={handleFinish}>
         Finish
       </Button>
