@@ -1,3 +1,10 @@
+import { TeamRoles } from '@/types/team';
+
+export const isOwner = (role: string): boolean => role === TeamRoles.OWNER;
+
+export const isCollaborator = (role: string): boolean =>
+  role === TeamRoles.COLLABORATOR;
+
 export const getInitials = (fullName: string): string => {
   const nameParts = fullName.split(' ');
   const filteredNameParts = nameParts.filter((part) => part.length > 0);

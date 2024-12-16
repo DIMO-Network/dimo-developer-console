@@ -27,7 +27,8 @@ export const TeamFormModal: FC<IProps> = ({ isOpen, setIsOpen }) => {
     setIsOpen(true);
     try {
       invitation.role = invitation.role.toUpperCase();
-      await inviteCollaborator(invitation);
+      const { success, message } = await inviteCollaborator(invitation);
+      if (!success) throw new Error(message);
       setNotification('The invitation was sent', 'Success', 'info');
     } catch (error: unknown) {
       setNotification(

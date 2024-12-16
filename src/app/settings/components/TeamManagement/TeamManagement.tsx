@@ -1,5 +1,4 @@
 import { useState, type FC } from 'react';
-import { Controller, useForm } from 'react-hook-form';
 import { useSession } from 'next-auth/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
@@ -10,11 +9,11 @@ import {
   TeamRoles,
   TeamRolesLabels,
 } from '@/types/team';
-import { SelectField } from '@/components/SelectField';
+import { deleteCollaborator } from '@/actions/team';
+import { isOwner } from '@/utils/user';
+import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { UserAvatar } from '@/components/UserAvatar';
-import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
-import { deleteCollaborator } from '@/actions/team';
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
@@ -27,7 +26,6 @@ export const TeamManagement: FC<IProps> = ({
 }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const { control } = useForm();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
@@ -52,27 +50,7 @@ export const TeamManagement: FC<IProps> = ({
       );
     }
 
-    return role === TeamRoles.OWNER ? (
-      <Controller
-        control={control}
-        name="role"
-        render={({ field: { onChange, ref } }) => (
-          <SelectField
-            onChange={onChange}
-            control={control}
-            value={teamCollaborator.role}
-            options={[
-              { text: TeamRoles.COLLABORATOR, value: TeamRoles.COLLABORATOR },
-              { text: TeamRoles.OWNER, value: TeamRoles.OWNER },
-            ]}
-            role="role-input"
-            ref={ref}
-          />
-        )}
-      />
-    ) : (
-      <>{TeamRolesLabels[teamCollaborator.role as TeamRoles]}</>
-    );
+    return <>{TeamRolesLabels[teamCollaborator.role as TeamRoles]}</>;
   };
 
   const renderDeleteRemoveCollaborator = ({
@@ -80,7 +58,7 @@ export const TeamManagement: FC<IProps> = ({
     role: invitationRole,
   }: ITeamCollaborator) => {
     return (
-      role === TeamRoles.OWNER &&
+      isOwner(role) &&
       invitationRole !== TeamRoles.OWNER && (
         <div
           className="flex flex-row items-center w-full h-full cursor-pointer"
