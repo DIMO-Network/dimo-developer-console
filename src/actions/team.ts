@@ -6,7 +6,7 @@ import {
   inviteCollaboratorToMyTeam,
 } from '@/services/team';
 import { IInvitation } from '@/types/team';
-import { XiorError } from 'xior';
+import {AxiosError} from 'axios';
 
 export const getMyCollaborators = async () => {
   const { data } = await getMyTeamCollaborators();
@@ -18,7 +18,7 @@ export const inviteCollaborator = async (invitation: IInvitation) => {
     const { data } = await inviteCollaboratorToMyTeam(invitation);
     return data;
   } catch (error: unknown) {
-    if (error instanceof XiorError) {
+    if (error instanceof AxiosError) {
       console.error({ error });
       throw new Error(error?.response?.data?.message || error?.message);
     }
@@ -30,7 +30,7 @@ export const deleteCollaborator = async (id: string) => {
     const { data } = await deleteMyTeamCollaborator(id);
     return data;
   } catch (error: unknown) {
-    if (error instanceof XiorError) {
+    if (error instanceof AxiosError) {
       console.error({ error });
       throw new Error(error?.response?.data?.message || error?.message);
     }

@@ -1,9 +1,10 @@
+'use server';
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
-import xior, { XiorError } from 'xior';
+import axios, {AxiosError} from 'axios';
 
-const globalAccountClient = xior.create({
-  baseURL: process.env.NEXT_PUBLIC_GA_API!,
+const globalAccountClient = axios.create({
+  baseURL: process.env.GA_API!,
 });
 
 // public functions
@@ -15,7 +16,7 @@ export const getUserSubOrganization = async (
     const { data } = await globalAccountClient.get(`/api/account/${email}`);
     return data;
   } catch (error) {
-    if (error instanceof XiorError) {
+    if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
         return {} as ISubOrganization;
       }
@@ -84,5 +85,6 @@ export const rewirePasskey = async ({
 
 // private functions
 const getRedirectUrl = () => {
-  return `${window.location.origin}/email-recovery?flow=rewire-passkey`;
+  const url = process.env.FRONTEND_URL;
+  return `${url}/email-recovery?flow=rewire-passkey`;
 };
