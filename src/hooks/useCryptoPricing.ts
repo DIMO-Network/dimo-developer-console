@@ -3,7 +3,7 @@ import {
   getCachedDimoPrice,
   getCachedPolPrice,
   getCachedWmaticPrice,
-} from '@/services/wallet';
+} from '@/services/pricing';
 
 const useCryptoPricing = () => {
   const getDimoPrice = getCachedDimoPrice;

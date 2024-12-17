@@ -36,14 +36,6 @@ import {
   ENTRYPOINT_ADDRESS_V07,
   walletClientToSmartAccountSigner,
 } from 'permissionless';
-import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
-import {
-  createKernelAccount,
-  createKernelAccountClient,
-  createZeroDevPaymasterClient,
-} from '@zerodev/sdk';
-import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
-import { polygon, polygonAmoy } from 'wagmi/chains';
 
 import WMatic from '@/contracts/wmatic.json';
 import UniversalRouter from '@/contracts/uniswapRouter.json';
@@ -51,19 +43,14 @@ import UniversalRouter from '@/contracts/uniswapRouter.json';
 import { wagmiAbi } from '@/contracts/wagmi';
 import { utils } from 'web3';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import { buildKernelClient, buildPublicClient, extractOnChainErrorMessage, generateRecoverySignedRequests } from '@/services/wallet';
+import { base64UrlEncode } from '@/utils/wallet';
+import { TStamper } from '@turnkey/http/dist/base';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
   crypto.getRandomValues(arr);
   return arr.buffer;
-};
-
-const base64UrlEncode = (challenge: ArrayBuffer): string => {
-  return Buffer.from(challenge)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
 };
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
@@ -129,40 +116,11 @@ export const useGlobalAccount = () => {
     const challenge = generateRandomBuffer();
     const attestation = await getPasskeyAttestation(me!.username!, challenge);
 
-    const client = new TurnkeyClient(
-      {
-        baseUrl: turnkeyConfig.apiBaseUrl,
-      },
-      authIframeClient!.config.stamper!,
-    );
-
-    const { authenticators } = await client.getAuthenticators({
-      organizationId: me!.organizationId,
-      userId: me!.userId,
-    });
-
-    const signedRemoveAuthenticators = await client.stampDeleteAuthenticators({
-      type: 'ACTIVITY_TYPE_DELETE_AUTHENTICATORS',
-      timestampMs: Date.now().toString(),
-      organizationId: me!.organizationId,
-      parameters: {
-        userId: me!.userId,
-        authenticatorIds: authenticators!.map((auth) => auth.authenticatorId),
-      },
-    });
-
-    const signedRecoverUser = await client.stampRecoverUser({
-      type: 'ACTIVITY_TYPE_RECOVER_USER',
-      timestampMs: Date.now().toString(),
-      organizationId: me!.organizationId,
-      parameters: {
-        userId: me!.userId,
-        authenticator: {
-          authenticatorName: 'DIMO PASSKEY',
-          challenge: base64UrlEncode(challenge),
-          attestation,
-        },
-      },
+    const { signedRecoverUser, signedRemoveAuthenticators } = await generateRecoverySignedRequests({
+      stamper: authIframeClient!.config.stamper!,
+      user: me!,
+      attestation,
+      challenge,
     });
 
     await rewirePasskey({
@@ -226,11 +184,21 @@ export const useGlobalAccount = () => {
     return true;
   };
 
+  const getPublicClient = async () => await buildPublicClient();
+  const getKernelClient = async (kernelParams: {
+    organizationInfo: ISubOrganization;
+    stamper: TStamper;
+}) => await buildKernelClient(kernelParams);
+  const handleOnChainError = async (e: HttpRequestError) => await extractOnChainErrorMessage(e);
+
   const getWmaticAllowance = async (): Promise<bigint> => {
     try {
       if (!organizationInfo) return BigInt(0);
-      const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const publicClient = await getPublicClient();
+      const kernelClient = await getKernelClient({
+        organizationInfo: organizationInfo,
+        stamper: passkeyClient?.config.stamper!,
+      });
 
       if (!kernelClient) {
         return BigInt(0);
@@ -264,7 +232,10 @@ export const useGlobalAccount = () => {
   ): Promise<IKernelOperationStatus> => {
     try {
       if (!organizationInfo) return {} as IKernelOperationStatus;
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo: organizationInfo,
+        stamper: passkeyClient?.config.stamper!,
+      });
 
       if (!kernelClient) {
         return {
@@ -303,7 +274,7 @@ export const useGlobalAccount = () => {
         reason,
       };
     } catch (e) {
-      const errorReason = handleOnChainError(e as HttpRequestError);
+      const errorReason = await handleOnChainError(e as HttpRequestError);
       return {
         success: false,
         reason: errorReason,
@@ -316,7 +287,10 @@ export const useGlobalAccount = () => {
   ): Promise<IKernelOperationStatus> => {
     try {
       if (!organizationInfo) return {} as IKernelOperationStatus;
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo: organizationInfo,
+        stamper: passkeyClient?.config.stamper!,
+      });
 
       if (!kernelClient) {
         return {
@@ -386,7 +360,7 @@ export const useGlobalAccount = () => {
         reason,
       };
     } catch (e) {
-      const errorReason = handleOnChainError(e as HttpRequestError);
+      const errorReason = await handleOnChainError(e as HttpRequestError);
       return {
         success: false,
         reason: errorReason,
@@ -397,8 +371,11 @@ export const useGlobalAccount = () => {
   const getNeededDimoAmountForDcx = async (amount: number): Promise<bigint> => {
     try {
       if (!organizationInfo) return BigInt(0);
-      const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const publicClient = await getPublicClient();
+      const kernelClient = await getKernelClient({
+        organizationInfo: organizationInfo,
+        stamper: passkeyClient?.config.stamper!,
+      });
 
       if (!kernelClient) {
         return BigInt(0);
@@ -419,131 +396,10 @@ export const useGlobalAccount = () => {
 
       return BigInt(Math.ceil(Number(utils.fromWei(quote as bigint, 'ether'))));
     } catch (e) {
-      const errorReason = handleOnChainError(e as HttpRequestError);
+      const errorReason = await handleOnChainError(e as HttpRequestError);
       console.error('Error getting needed dimo amount', errorReason);
       return BigInt(0);
     }
-  };
-
-  const getKernelClient = async ({
-    subOrganizationId,
-    walletAddress,
-  }: ISubOrganization) => {
-    try {
-      const chain = getChain();
-      const stamperClient = new TurnkeyClient(
-        {
-          baseUrl: turnkeyConfig.apiBaseUrl,
-        },
-        passkeyClient!.config.stamper!,
-      );
-
-      const localAccount = await createAccount({
-        client: stamperClient,
-        organizationId: subOrganizationId,
-        signWith: walletAddress,
-        ethereumAddress: walletAddress,
-      });
-
-      const smartAccountClient = createWalletClient({
-        account: localAccount,
-        chain: chain,
-        transport: http(turnkeyConfig.rpcUrl),
-      });
-
-      const smartAccountSigner =
-        walletClientToSmartAccountSigner(smartAccountClient);
-
-      const publicClient = getPublicClient();
-      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-        signer: smartAccountSigner,
-        entryPoint: ENTRYPOINT_ADDRESS_V07,
-        kernelVersion: KERNEL_V3_1,
-      });
-
-      const zeroDevKernelAccount = await createKernelAccount(publicClient, {
-        plugins: {
-          sudo: ecdsaValidator,
-        },
-        entryPoint: ENTRYPOINT_ADDRESS_V07,
-        kernelVersion: KERNEL_V3_1,
-      });
-
-      return createKernelAccountClient({
-        account: zeroDevKernelAccount,
-        chain: chain,
-        entryPoint: ENTRYPOINT_ADDRESS_V07,
-        bundlerTransport: http(turnkeyConfig.bundleRpc),
-        middleware: {
-          sponsorUserOperation: sponsorUserOperation,
-        },
-      });
-    } catch (e) {
-      console.error('Error creating kernel client', e);
-      return null;
-    }
-  };
-
-  const getPublicClient = () => {
-    const chain = getChain();
-    return createPublicClient({
-      chain: chain,
-      transport: http(turnkeyConfig.rpcUrl),
-    });
-  };
-
-  const sponsorUserOperation = async ({
-    userOperation,
-  }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    userOperation: any;
-  }) => {
-    const chain = getChain();
-    const zerodevPaymaster = createZeroDevPaymasterClient({
-      chain: chain,
-      entryPoint: ENTRYPOINT_ADDRESS_V07,
-      transport: http(turnkeyConfig.paymasterRpc),
-    });
-    return zerodevPaymaster.sponsorUserOperation({
-      userOperation,
-      entryPoint: ENTRYPOINT_ADDRESS_V07,
-    });
-  };
-
-  const handleOnChainError = (error: HttpRequestError): string => {
-    console.error('Error on chain:', error);
-
-    if (!error.details) {
-      return 'Unknown error';
-    }
-
-    const errorData: `0x${string}` = error.details
-      .replaceAll('"', '')
-      .split(': ')[1] as `0x${string}`;
-
-    const value = decodeErrorResult({
-      abi: wagmiAbi,
-      data: errorData,
-    });
-
-    console.error('Error value:', value);
-
-    const { args } = value;
-
-    return args[0];
-  };
-
-  const getChain = (): Chain => {
-    const env = process.env.VERCEL_ENV!;
-    const clientEnv = process.env.NEXT_PUBLIC_CE!;
-
-    const environment = env ?? clientEnv;
-
-    if (environment === 'production') {
-      return polygon;
-    }
-
-    return polygonAmoy;
   };
 
   useEffect(() => {
@@ -566,10 +422,10 @@ export const useGlobalAccount = () => {
     validCredentials,
     registerNewPasskey,
     depositWmatic,
-    swapWmaticToDimo,
     getPublicClient,
     getKernelClient,
     handleOnChainError,
+    swapWmaticToDimo,    
     getNeededDimoAmountForDcx,
   };
 };

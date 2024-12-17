@@ -56,6 +56,7 @@ export const AccountInformationModal: FC<IProps> = () => {
   };
 
   const loadBalances = async () => {
+    console.info('Loading balances');
     const dimoBalance = await getDimoBalance();
     const dcxBalance = await getDcxBalance();
     const dimoPrice = await getDimoPrice();
