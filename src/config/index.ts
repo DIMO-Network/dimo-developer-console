@@ -55,6 +55,13 @@ export const getConfig = (): Configuration => {
   return {
     ...defaultConfig,
     ...environmentConfig,
+    frontendUrl: process.env.NEXT_PUBLIC_FRONTEND_URL!,
+    backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL!,
+    WMATIC: process.env.NEXT_PUBLIC_WMATIC!,
+    DC_ADDRESS: process.env.NEXT_PUBLIC_DC_ADDRESS!,
+    DCX_ADDRESS: process.env.NEXT_PUBLIC_DCX_ADDRESS!,
+    DLC_ADDRESS: process.env.NEXT_PUBLIC_DLC_ADDRESS!,
+    SwapRouterAddress: process.env.NEXT_PUBLIC_SWAP_ROUTER_ADDRESS!,    
   } as Configuration;
 };
 
