@@ -1,4 +1,4 @@
 export interface TokenPurchaseTransaction {
-  amount: bigint;
+  amount: number;
   wallet: string;
 }

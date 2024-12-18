@@ -25,7 +25,7 @@ export const ProcessComplete = ({ onNext, transactionData }: IProps) => {
 
     setLoading(true);
     const transactionToSend = {
-      amount: transactionData!.dcxAmount ?? BigInt(0),
+      amount: Number(transactionData!.dcxAmount ?? BigInt(0)),
       wallet: organizationInfo!.smartContractAddress ?? '',
     };
     sendTokenBoughtEmail('DCX', transactionToSend).then(() => {
