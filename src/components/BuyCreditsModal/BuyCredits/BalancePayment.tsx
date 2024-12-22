@@ -90,7 +90,7 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     return BigInt(Math.ceil(neededFromBalance));
   };
 
-  const handleContinue = () => {    
+  const handleContinue = (): void => {
     const processedAmount = getAmountToProcess(selectedBalance);
     switch (selectedBalance.currency) {
       case 'dimo':

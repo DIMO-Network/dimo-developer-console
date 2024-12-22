@@ -250,11 +250,13 @@ export const useGlobalAccount = () => {
         config.SwapRouterAddress,
       ]);
 
-      return BigInt(Math.ceil(Number(utils.fromWei(allowance as bigint, 'ether'))));
+      return BigInt(
+        Math.ceil(Number(utils.fromWei(allowance as bigint, 'ether'))),
+      );
     } catch (e) {
       console.error('Error getting wmatic allowance', e);
       return BigInt(0);
-    };
+    }
   };
 
   const depositWmatic = async (
@@ -343,7 +345,7 @@ export const useGlobalAccount = () => {
       }
 
       // call exactInputSingle
-      const deadLine = Math.floor(Date.now() / 1000) + (60 * 10);
+      const deadLine = Math.floor(Date.now() / 1000) + 60 * 10;
       transactions.push({
         to: config.SwapRouterAddress,
         value: BigInt(0),

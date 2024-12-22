@@ -69,7 +69,13 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
     LoadingStatus.None,
   );
 
-  const mintDCX = async () => {
+  const mintDCX = async (): Promise<
+    {
+      to: `0x${string}`;
+      value: bigint;
+      data: `0x${string}`;
+    }[]
+  > => {
     const transactions = [];
     const expendableDimo = transactionData!.requiredDimoAmount!;
 
