@@ -1,5 +1,5 @@
 const {
-  LICENSE_PRICE_USD = 5,
+  LICENSE_PRICE_USD = 0,
   DCX_IN_USD = 0.001,
   DIMO_IN_USD = 0.16,
 } = process.env;
