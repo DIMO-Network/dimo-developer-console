@@ -1,16 +1,17 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { getContract, HttpRequestError } from 'viem';
 import { utils } from 'web3';
-
 import useGlobalAccount from '@/hooks/useGlobalAccount';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import WMatic from '@/contracts/wmatic.json';
 import { IKernelOperationStatus, ISubOrganization } from '@/types/wallet';
-
 import configuration from '@/config';
 import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
+import { useTurnkey } from '@turnkey/sdk-react';
 
 export const useContractGA = () => {
   const {
@@ -19,6 +20,7 @@ export const useContractGA = () => {
     getPublicClient,
     handleOnChainError,
   } = useGlobalAccount();
+  const { passkeyClient } = useTurnkey();
   const [balanceDimo, setBalanceDimo] = useState<number>(0);
   const [balanceDCX, setBalanceDCX] = useState<number>(0);
   const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
@@ -30,60 +32,73 @@ export const useContractGA = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [dimoCreditsContract, setDimoCreditsContract] = useState<any>();
 
-  useEffect(() => {
-    const handleGetContracts = async () => {
-      if (!organizationInfo) return;
+  const handleGetContracts = async () => {
+    if (!organizationInfo) return;
 
-      const kernelClient = (await getKernelClient(
-        organizationInfo as ISubOrganization,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      )) as any;
-      const publicClient = getPublicClient();
+    const kernelClient = await getKernelClient(
+      {
+        organizationInfo: organizationInfo as ISubOrganization,
+        stamper: passkeyClient!.config!.stamper!,
+      }
+      
+    );
+    const publicClient = await getPublicClient();
 
-      if (!kernelClient) return;
+    if (!kernelClient) return;
 
-      setDimoContract(
-        getContract({
-          address: configuration.DC_ADDRESS,
-          abi: DimoABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          },
-        }),
-      );
+    const dimoContract = getContract({
+      address: configuration.DC_ADDRESS,
+      abi: DimoABI,
+      client: {
+        public: publicClient,
+        wallet: kernelClient,
+      },
+    });
 
-      setLicenseContract(
-        getContract({
-          address: configuration.DLC_ADDRESS,
-          abi: LicenseABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          },
-        }),
-      );
+    const licenseContract = getContract({
+      address: configuration.DLC_ADDRESS,
+      abi: LicenseABI,
+      client: {
+        public: publicClient,
+        wallet: kernelClient,
+      },
+    });
 
-      setDimoCreditsContract(
-        getContract({
-          address: configuration.DCX_ADDRESS,
-          abi: DimoCreditsABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          },
-        }),
-      );
+    const creditsContract = getContract({
+      address: configuration.DCX_ADDRESS,
+      abi: DimoCreditsABI,
+      client: {
+        public: publicClient,
+        wallet: kernelClient,
+      },
+    });
+
+    return {
+      dimoContract,
+      licenseContract,
+      creditsContract
     };
+  };
 
-    handleGetContracts().catch(console.error);
-  }, [organizationInfo?.smartContractAddress]);
+  useEffect(() => {
+    if(!organizationInfo) return;
+    handleGetContracts()
+    .then((contracts) => {
+      console.info('Contracts:', contracts);
+    })
+    .catch(console.error);
+  }, [organizationInfo]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const processTransactions = async (transactions: Array<any>) => {
     if (!organizationInfo) return {} as IKernelOperationStatus;
     try {
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient(
+        {
+          organizationInfo: organizationInfo as ISubOrganization,
+          stamper: passkeyClient!.config!.stamper!,
+        }        
+      );
 
       if (!kernelClient) return {} as IKernelOperationStatus;
 
@@ -106,7 +121,7 @@ export const useContractGA = () => {
       return receipt;
     } catch (e: unknown) {
       if (e instanceof HttpRequestError) {
-        throw new Error(handleOnChainError(e as HttpRequestError));
+        throw new Error(await handleOnChainError(e as HttpRequestError));
       }
       throw e;
     }
@@ -115,8 +130,14 @@ export const useContractGA = () => {
   const getDcxBalance = async (): Promise<number> => {
     try {
       if (!organizationInfo) return 0;
-      const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient(
+        {
+          organizationInfo: organizationInfo as ISubOrganization,
+          stamper: passkeyClient!.config!.stamper!,
+        }
+        
+      );
+      const publicClient = await getPublicClient();
 
       if (!kernelClient) {
         return 0;
@@ -145,8 +166,14 @@ export const useContractGA = () => {
   const getDimoBalance = async (): Promise<number> => {
     try {
       if (!organizationInfo) return 0;
-      const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient(
+        {
+          organizationInfo: organizationInfo as ISubOrganization,
+          stamper: passkeyClient!.config!.stamper!,
+        }
+        
+      );
+      const publicClient = await getPublicClient();
 
       if (!kernelClient) {
         return 0;
@@ -175,8 +202,14 @@ export const useContractGA = () => {
   const getPolBalance = async (): Promise<number> => {
     try {
       if (!organizationInfo) return 0;
-      const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient(
+        {
+          organizationInfo: organizationInfo as ISubOrganization,
+          stamper: passkeyClient!.config!.stamper!,
+        }
+        
+      );
+      const publicClient = await getPublicClient();
 
       if (!kernelClient) {
         return 0;
@@ -196,8 +229,14 @@ export const useContractGA = () => {
   const getWmaticBalance = async (): Promise<number> => {
     try {
       if (!organizationInfo) return 0;
-      const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient(
+        {
+          organizationInfo: organizationInfo as ISubOrganization,
+          stamper: passkeyClient!.config!.stamper!,
+        }
+        
+      );
+      const publicClient = await getPublicClient();
 
       if (!kernelClient) {
         return 0;
