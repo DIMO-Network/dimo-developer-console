@@ -1,40 +1,37 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { FC, useContext, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import _ from 'lodash';
+import { encodeFunctionData } from 'viem';
+import { useRouter } from 'next/navigation';
 import { utils } from 'web3';
 
+import _ from 'lodash';
 import classNames from 'classnames';
 
-import { createApp } from '@/actions/app';
-import { createWorkspace } from '@/actions/workspace';
 import { AppCard } from '@/components/AppCard';
 import { Button } from '@/components/Button';
+import { createApp } from '@/actions/app';
+import { createWorkspace } from '@/actions/workspace';
+import { decodeHex } from '@/utils/formatHex';
+import { IAppWithWorkspace } from '@/types/app';
+import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
+import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
+import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
 import { MultiCardOption } from '@/components/MultiCardOption';
+import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { NotificationContext } from '@/context/notificationContext';
 import { useContractGA, useGlobalAccount } from '@/hooks';
-import { IAppWithWorkspace } from '@/types/app';
-import { IWorkspace } from '@/types/workspace';
+
+import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
-import { decodeHex } from '@/utils/formatHex';
-
-import configuration from '@/config';
 
 import './Form.css';
-import { encodeFunctionData } from 'viem';
-import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
 
-const {
-  LICENSE_PRICE_USD = 5,
-  DCX_IN_USD = 0.001,
-  DIMO_IN_USD = 0.16,
-} = process.env;
+const { DCX_IN_USD = 0.001 } = process.env;
 
 interface IProps {
   workspace?: IWorkspace;
@@ -44,10 +41,8 @@ export const Form: FC<IProps> = ({ workspace }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const {
-    hasEnoughAllowanceDLC,
-    hasEnoughAllowanceDCX,
-    hasEnoughBalanceDCX,
-    hasEnoughBalanceDimo,
+    checkEnoughBalance,
+    getDesiredTokenAmount,
     balanceDCX,
     processTransactions,
   } = useContractGA();
@@ -74,20 +69,27 @@ export const Form: FC<IProps> = ({ workspace }) => {
         label: 'Preparing DCX to license the application...',
         status: 'loading',
       });
+
+      const desiredTokenAmount = await getDesiredTokenAmount();
+      const enoughBalance = await checkEnoughBalance();
       const transactions = [];
 
-      if (!hasEnoughBalanceDCX && !hasEnoughBalanceDimo)
+      if (!enoughBalance.dcx && !enoughBalance.dimo)
         return setNotification(
           'Insufficient DIMO or DCX balance',
           'Oops...',
           'error',
         );
 
-      if (!hasEnoughBalanceDCX) {
-        transactions.push(...(await mintDCX()));
+      if (!enoughBalance.dcx) {
+        transactions.push(
+          ...(await mintDCX(desiredTokenAmount, enoughBalance)),
+        );
       }
 
-      transactions.push(...(await prepareIssueInDC()));
+      transactions.push(
+        ...(await prepareIssueInDC(desiredTokenAmount, enoughBalance)),
+      );
       if (transactions.length) {
         await processTransactions(transactions);
       }
@@ -105,9 +107,12 @@ export const Form: FC<IProps> = ({ workspace }) => {
     }
   };
 
-  const mintDCX = async () => {
+  const mintDCX = async (
+    desiredTokenAmount: IDesiredTokenAmount,
+    enoughBalance: ITokenBalance,
+  ) => {
     const transactions = [];
-    if (!hasEnoughAllowanceDCX) {
+    if (!enoughBalance.dcxAllowance) {
       transactions.push({
         to: configuration.DC_ADDRESS,
         value: BigInt(0),
@@ -117,10 +122,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
           args: [
             configuration.DCX_ADDRESS,
             BigInt(
-              utils.toWei(
-                Math.ceil(configuration.desiredAmountOfDimo),
-                'ether',
-              ),
+              utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether'),
             ),
           ],
         }),
@@ -129,7 +131,9 @@ export const Form: FC<IProps> = ({ workspace }) => {
 
     // Call mintInDimo 2 parameteres
     const dcxAmountInUSD = balanceDCX * Number(DCX_IN_USD);
-    const missingAmount = Math.ceil(Number(LICENSE_PRICE_USD) - dcxAmountInUSD);
+    const missingAmount = Math.ceil(
+      Number(desiredTokenAmount.licensePrice) - dcxAmountInUSD,
+    );
     transactions.push({
       to: configuration.DCX_ADDRESS,
       value: BigInt(0),
@@ -138,15 +142,21 @@ export const Form: FC<IProps> = ({ workspace }) => {
         functionName: '0xec88fc37',
         args: [
           organizationInfo!.smartContractAddress,
-          utils.toWei(Math.ceil(missingAmount / Number(DIMO_IN_USD)), 'ether'),
+          utils.toWei(
+            Math.ceil(missingAmount / Number(desiredTokenAmount.dimoCost)),
+            'ether',
+          ),
         ],
       }),
     });
     return transactions;
   };
 
-  const prepareIssueInDC = async () => {
-    if (hasEnoughAllowanceDLC) return [];
+  const prepareIssueInDC = async (
+    desiredTokenAmount: IDesiredTokenAmount,
+    enoughBalance: ITokenBalance,
+  ) => {
+    if (enoughBalance.dlcAllowance) return [];
 
     return [
       {
@@ -158,10 +168,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
           args: [
             configuration.DLC_ADDRESS,
             BigInt(
-              utils.toWei(
-                Math.ceil(configuration.desiredAmountOfDimo),
-                'ether',
-              ),
+              utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether'),
             ),
           ],
         }),
