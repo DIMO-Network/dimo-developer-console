@@ -61,7 +61,7 @@ export const getConfig = (): Configuration => {
     DC_ADDRESS: process.env.NEXT_PUBLIC_DC_ADDRESS!,
     DCX_ADDRESS: process.env.NEXT_PUBLIC_DCX_ADDRESS!,
     DLC_ADDRESS: process.env.NEXT_PUBLIC_DLC_ADDRESS!,
-    SwapRouterAddress: process.env.NEXT_PUBLIC_SWAP_ROUTER_ADDRESS!,    
+    SwapRouterAddress: process.env.NEXT_PUBLIC_SWAP_ROUTER_ADDRESS!,
   } as Configuration;
 };
 

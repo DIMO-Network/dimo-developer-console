@@ -23,26 +23,26 @@ import { turnkeyConfig } from '@/config/turnkey';
 import { createAccount } from '@turnkey/viem';
 import {
   Chain,
+  Client,
   createPublicClient,
-  createWalletClient,
   decodeErrorResult,
   encodeFunctionData,
   getContract,
   http,
   HttpRequestError,
+  RpcSchema,
+  Transport,
 } from 'viem';
-import {
-  bundlerActions,
-  ENTRYPOINT_ADDRESS_V07,
-  walletClientToSmartAccountSigner,
-} from 'permissionless';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
 import {
+  createFallbackKernelAccountClient,
   createKernelAccount,
   createKernelAccountClient,
   createZeroDevPaymasterClient,
+  getUserOperationGasPrice,
+  KernelAccountClient,
 } from '@zerodev/sdk';
-import { KERNEL_V3_1 } from '@zerodev/sdk/constants';
+import { getEntryPoint, KERNEL_V3_1 } from '@zerodev/sdk/constants';
 import { polygon, polygonAmoy } from 'wagmi/chains';
 
 import WMatic from '@/contracts/wmatic.json';
@@ -51,6 +51,10 @@ import UniversalRouter from '@/contracts/uniswapRouter.json';
 import { wagmiAbi } from '@/contracts/wagmi';
 import { utils } from 'web3';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import {
+  GetPaymasterDataParameters,
+  SmartAccount,
+} from 'viem/_types/account-abstraction';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -276,8 +280,8 @@ export const useGlobalAccount = () => {
       // value is payable amount required by contract
       // call deposit function
       const wmaticDepositOpHash = await kernelClient.sendUserOperation({
-        userOperation: {
-          callData: await kernelClient.account.encodeCallData({
+        callData: await kernelClient.account.encodeCalls([
+          {
             to: config.WMATIC,
             value: BigInt(utils.toWei(amount, 'ether')),
             data: encodeFunctionData({
@@ -285,16 +289,12 @@ export const useGlobalAccount = () => {
               functionName: '0xd0e30db0',
               args: [],
             }),
-          }),
-        },
+          },
+        ]),
       });
 
-      const bundlerClient = kernelClient.extend(
-        bundlerActions(ENTRYPOINT_ADDRESS_V07),
-      );
-
       const { success, reason } =
-        await bundlerClient.waitForUserOperationReceipt({
+        await kernelClient.waitForUserOperationReceipt({
           hash: wmaticDepositOpHash,
         });
 
@@ -367,19 +367,18 @@ export const useGlobalAccount = () => {
         }),
       });
 
-      const omidExchangeOpHash = await kernelClient.sendUserOperation({
-        userOperation: {
-          callData: await kernelClient.account.encodeCallData(transactions),
-        },
+      const dimoExchangeOpData =
+        await kernelClient.account.encodeCalls(transactions);
+
+      const dimoExchangeOpHash = await kernelClient.sendUserOperation({
+        callData: dimoExchangeOpData,
       });
 
-      const bundlerClient = kernelClient.extend(
-        bundlerActions(ENTRYPOINT_ADDRESS_V07),
-      );
-
       const { success, reason } =
-        await bundlerClient.waitForUserOperationReceipt({
-          hash: omidExchangeOpHash,
+        await kernelClient.waitForUserOperationReceipt({
+          hash: dimoExchangeOpHash,
+          timeout: 120_000,
+          pollingInterval: 10_000,
         });
       return {
         success,
@@ -425,63 +424,108 @@ export const useGlobalAccount = () => {
     }
   };
 
-  const getKernelClient = async ({
-    subOrganizationId,
-    walletAddress,
-  }: ISubOrganization) => {
+  const getKernelClient = async (organizationInfo: ISubOrganization) => {
     try {
-      const chain = getChain();
-      const stamperClient = new TurnkeyClient(
-        {
-          baseUrl: turnkeyConfig.apiBaseUrl,
-        },
-        passkeyClient!.config.stamper!,
-      );
-
-      const localAccount = await createAccount({
-        client: stamperClient,
-        organizationId: subOrganizationId,
-        signWith: walletAddress,
-        ethereumAddress: walletAddress,
+      const kernelClient = await buildFallbackKernelClients({
+        organizationInfo,
       });
-
-      const smartAccountClient = createWalletClient({
-        account: localAccount,
-        chain: chain,
-        transport: http(turnkeyConfig.rpcUrl),
-      });
-
-      const smartAccountSigner =
-        walletClientToSmartAccountSigner(smartAccountClient);
-
-      const publicClient = getPublicClient();
-      const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-        signer: smartAccountSigner,
-        entryPoint: ENTRYPOINT_ADDRESS_V07,
-        kernelVersion: KERNEL_V3_1,
-      });
-
-      const zeroDevKernelAccount = await createKernelAccount(publicClient, {
-        plugins: {
-          sudo: ecdsaValidator,
-        },
-        entryPoint: ENTRYPOINT_ADDRESS_V07,
-        kernelVersion: KERNEL_V3_1,
-      });
-
-      return createKernelAccountClient({
-        account: zeroDevKernelAccount,
-        chain: chain,
-        entryPoint: ENTRYPOINT_ADDRESS_V07,
-        bundlerTransport: http(turnkeyConfig.bundleRpc),
-        middleware: {
-          sponsorUserOperation: sponsorUserOperation,
-        },
-      });
+      return kernelClient;
     } catch (e) {
       console.error('Error creating kernel client', e);
       return null;
     }
+  };
+
+  const buildKernelClient = async ({
+    orgInfo,
+    provider,
+  }: {
+    orgInfo: ISubOrganization;
+    provider: string;
+  }) => {
+    const { subOrganizationId, walletAddress } = orgInfo;
+    const chain = getChain();
+    const entryPoint = getEntryPoint('0.7');
+    const publicClient = getPublicClient();
+
+    const stamperClient = new TurnkeyClient(
+      {
+        baseUrl: turnkeyConfig.apiBaseUrl,
+      },
+      passkeyClient!.config.stamper!,
+    );
+
+    const localAccount = await createAccount({
+      client: stamperClient,
+      organizationId: subOrganizationId,
+      signWith: walletAddress,
+      ethereumAddress: walletAddress,
+    });
+
+    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
+      signer: localAccount,
+      entryPoint: entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    });
+
+    const zeroDevKernelAccount = await createKernelAccount(publicClient, {
+      plugins: {
+        sudo: ecdsaValidator,
+      },
+      entryPoint: entryPoint,
+      kernelVersion: KERNEL_V3_1,
+    });
+
+    const kernelClient = createKernelAccountClient({
+      account: zeroDevKernelAccount,
+      chain: chain,
+      bundlerTransport: http(`${turnkeyConfig.rpcUrl}?provider=${provider}`),
+      client: publicClient,
+      paymaster: {
+        getPaymasterData: (userOperation) => {
+          return sponsorUserOperation({
+            userOperation,
+            provider,
+          });
+        },
+      },
+      userOperation: {
+        estimateFeesPerGas: async ({ bundlerClient }) => {
+          return getUserOperationGasPrice(bundlerClient);
+        },
+      },
+    });
+
+    return kernelClient;
+  };
+
+  const buildFallbackKernelClients = async ({
+    organizationInfo,
+  }: {
+    organizationInfo: ISubOrganization;
+  }) => {
+    const fallbackProviders: string[] = ['ALCHEMY', 'GELATO', 'PIMLICO'];
+    const fallbackKernelClients: KernelAccountClient<
+      Transport,
+      Chain,
+      SmartAccount,
+      Client,
+      RpcSchema
+    >[] = [];
+
+    for (const provider of fallbackProviders) {
+      try {
+        const kernelClient = await buildKernelClient({
+          orgInfo: organizationInfo!,
+          provider,
+        });
+        fallbackKernelClients.push(kernelClient);
+      } catch (e) {
+        console.error('Error creating fallback kernel client', e);
+      }
+    }
+
+    return createFallbackKernelAccountClient(fallbackKernelClients);
   };
 
   const getPublicClient = () => {
@@ -494,19 +538,18 @@ export const useGlobalAccount = () => {
 
   const sponsorUserOperation = async ({
     userOperation,
+    provider,
   }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    userOperation: any;
+    userOperation: GetPaymasterDataParameters;
+    provider: string;
   }) => {
     const chain = getChain();
     const zerodevPaymaster = createZeroDevPaymasterClient({
       chain: chain,
-      entryPoint: ENTRYPOINT_ADDRESS_V07,
-      transport: http(turnkeyConfig.paymasterRpc),
+      transport: http(`${turnkeyConfig.paymasterRpc}?provider=${provider}`),
     });
     return zerodevPaymaster.sponsorUserOperation({
       userOperation,
-      entryPoint: ENTRYPOINT_ADDRESS_V07,
     });
   };
 
