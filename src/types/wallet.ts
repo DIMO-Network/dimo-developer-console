@@ -84,3 +84,17 @@ export interface ICryptoQuote {
     };
   };
 }
+
+export interface ITokenBalance {
+  dimo: boolean;
+  dlcAllowance: boolean;
+  dcx: boolean;
+  dcxAllowance: boolean;
+}
+
+export interface IDesiredTokenAmount {
+  licensePrice: number;
+  dimoCost: number;
+  dimo: bigint;
+  dcx: bigint;
+}

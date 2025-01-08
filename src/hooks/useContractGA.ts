@@ -7,10 +7,18 @@ import DimoABI from '@/contracts/DimoTokenContract.json';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import WMatic from '@/contracts/wmatic.json';
-import { IKernelOperationStatus, ISubOrganization } from '@/types/wallet';
+import {
+  IDesiredTokenAmount,
+  IKernelOperationStatus,
+  ISubOrganization,
+  ITokenBalance,
+} from '@/types/wallet';
 
 import configuration from '@/config';
 import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
+import { getCachedDimoPrice } from '@/services/wallet';
+
+const { DCX_IN_USD = 0.001 } = process.env;
 
 export const useContractGA = () => {
   const {
@@ -172,6 +180,75 @@ export const useContractGA = () => {
     }
   };
 
+  const getDesiredTokenAmount = async (): Promise<IDesiredTokenAmount> => {
+    const DEFAULT_AMOUNTS = {
+      dimo: BigInt(0),
+      dcx: BigInt(0),
+      licensePrice: 0,
+      dimoCost: 0,
+    };
+
+    try {
+      if (!organizationInfo) return DEFAULT_AMOUNTS;
+
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient(organizationInfo);
+
+      if (!kernelClient) return DEFAULT_AMOUNTS;
+
+      const dimoPrice = await getCachedDimoPrice();
+
+      const contract = getContract({
+        address: configuration.DLC_ADDRESS,
+        abi: LicenseABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const currentLicenseCost = await contract.read.licenseCostInUsd1e18();
+      const desiredDimoAmount = Number(currentLicenseCost) / Number(dimoPrice);
+      const desiredDCXAmount = Number(currentLicenseCost) / Number(DCX_IN_USD);
+
+      return {
+        dimo: BigInt(desiredDimoAmount),
+        dcx: BigInt(desiredDCXAmount),
+        licensePrice: Number(currentLicenseCost),
+        dimoCost: Number(dimoPrice),
+      };
+    } catch (e: unknown) {
+      console.error(e);
+      return DEFAULT_AMOUNTS;
+    }
+  };
+
+  const checkEnoughBalance = async (): Promise<ITokenBalance> => {
+    const DEFAULT_TOKEN_BALANCE = {
+      dimo: false,
+      dcx: false,
+      dcxAllowance: false,
+      dlcAllowance: false,
+    };
+    try {
+      if (!organizationInfo) return DEFAULT_TOKEN_BALANCE;
+
+      const desiredTokenAmount = await getDesiredTokenAmount();
+      const dimoBalance = await getDimoBalance();
+      const dcxBalance = await getDcxBalance();
+
+      return {
+        dimo: dimoBalance >= Number(desiredTokenAmount.dimo),
+        dlcAllowance: allowanceDLC >= Number(desiredTokenAmount.dcx),
+        dcx: dcxBalance >= Number(desiredTokenAmount.dcx),
+        dcxAllowance: allowanceDCX >= Number(desiredTokenAmount.dimo),
+      };
+    } catch (e: unknown) {
+      console.error('Error while checking balance', e);
+      return DEFAULT_TOKEN_BALANCE;
+    }
+  };
+
   const getPolBalance = async (): Promise<number> => {
     try {
       if (!organizationInfo) return 0;
@@ -287,9 +364,7 @@ export const useContractGA = () => {
     getDimoBalance,
     getPolBalance,
     getWmaticBalance,
-    hasEnoughBalanceDCX: balanceDCX >= configuration.desiredAmountOfDCX,
-    hasEnoughBalanceDimo: balanceDCX >= configuration.desiredAmountOfDimo,
-    hasEnoughAllowanceDLC: allowanceDLC >= configuration.desiredAmountOfDCX,
-    hasEnoughAllowanceDCX: allowanceDCX >= configuration.desiredAmountOfDimo,
+    getDesiredTokenAmount,
+    checkEnoughBalance,
   };
 };
