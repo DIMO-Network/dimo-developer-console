@@ -1,9 +1,3 @@
-const {
-  LICENSE_PRICE_USD = 0,
-  DCX_IN_USD = 0.001,
-  DIMO_IN_USD = 0.16,
-} = process.env;
-
 export const appName = 'Developer Console';
 
 export const LOGIN_PAGES = ['/sign-in', '/sign-up', '/email-recovery'];
@@ -77,11 +71,6 @@ export const SwapRouterAddress: `0x${string}` =
 
 export const masFeePerGas = 60000000000;
 export const gasPrice = 43000000000;
-
-export const desiredAmountOfDimo =
-  Number(LICENSE_PRICE_USD) / Number(DIMO_IN_USD);
-export const desiredAmountOfDCX =
-  Number(LICENSE_PRICE_USD) / Number(DCX_IN_USD);
 
 export const MINIMUM_CREDITS = 10000;
 

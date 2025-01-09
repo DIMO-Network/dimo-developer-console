@@ -1,14 +1,17 @@
 'use client';
+import { type CTA } from '@/app/app/list/components/Banner';
+
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
-import { getApps } from '@/actions/app';
-import { type CTA } from '@/app/app/list/components/Banner';
-import { IApp } from '@/types/app';
-import { useContractGA } from '@/hooks';
 import { CreditsContext } from '@/context/creditsContext';
+import { getApps } from '@/actions/app';
 import { getWorkspace } from '@/actions/workspace';
+import { IApp } from '@/types/app';
+import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
+import { useContractGA } from '@/hooks';
 
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
@@ -18,11 +21,15 @@ export const useOnboarding = () => {
   const router = useRouter();
   const { balanceDCX, balanceDimo } = useContractGA();
   const { setIsOpen } = useContext(CreditsContext);
+  const { data: session } = useSession();
+  const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => {
     setIsLoading(true);
     getApps()
-      .then(({ data: createdApps }) => setApps(createdApps))
+      .then(({ data: createdApps }) =>
+        setApps(createdApps.filter(({ deleted }) => !deleted)),
+      )
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -33,20 +40,20 @@ export const useOnboarding = () => {
   }, []);
 
   useEffect(() => {
-    if (!(balanceDCX > 0 || balanceDimo > 0)) {
-      setCta({
-        label: 'Purchase DCX',
-        onClick: handleOpenBuyCreditsModal,
-      });
-    } else if (apps.length === 0) {
-      setCta({
-        label: 'Create an app',
-        onClick: handleCreateApp,
-      });
-    } else {
-      setCta(undefined);
-    }
-  }, [apps, balanceDCX]);
+    if (isOwner(role)) {
+      if (!(balanceDCX > 0 || balanceDimo > 0)) {
+        setCta({
+          label: 'Purchase DCX',
+          onClick: handleOpenBuyCreditsModal,
+        });
+      } else if (apps.length === 0) {
+        setCta({
+          label: 'Create an app',
+          onClick: handleCreateApp,
+        });
+      }
+    } else setCta(undefined);
+  }, [apps, balanceDCX, role]);
 
   const handleCreateApp = () => {
     router.push('/app/create');

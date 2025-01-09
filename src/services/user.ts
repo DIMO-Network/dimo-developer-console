@@ -1,9 +1,13 @@
 import { IUser } from '@/types/user';
-import { dimoDevAPIClient } from '@/services/dimoDevAPI';
+import { dimoDevAPIClient, getCookie } from '@/services/dimoDevAPI';
 
 export const getUserByToken = async () => {
   const client = await dimoDevAPIClient();
-  const { data } = await client.get<IUser>('/api/me');
+
+  const invitationCode = await getCookie('invitation_code');
+  const { data } = await client.get<IUser>(
+    `/api/me${invitationCode ? `?invitation_code=${invitationCode}` : ''}`,
+  );
 
   return data;
 };

@@ -42,5 +42,6 @@ export const appListMock: IApp[] = [
         app_id: '9078a08c-5667-4af0-ba38-792097611bbb',
       },
     ],
+    deleted: false,
   },
 ];

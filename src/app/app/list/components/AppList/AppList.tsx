@@ -3,11 +3,11 @@ import { useSession } from 'next-auth/react';
 import { type FC } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { TeamRoles } from '@/types/team';
-import { IApp } from '@/types/app';
 import { Anchor } from '@/components/Anchor';
 import { AppCard } from '@/components/AppCard';
 import { Button } from '@/components/Button';
+import { IApp } from '@/types/app';
+import { isOwner } from '@/utils/user';
 
 interface IProps {
   apps: IApp[];
@@ -33,7 +33,7 @@ export const AppList: FC<IProps> = ({ apps }) => {
     <div className="app-list-content">
       <div className="description">
         <p className="title">Your applications</p>
-        {role === TeamRoles.OWNER && (
+        {isOwner(role) && (
           <Button
             className="primary px-3 with-icon w-36 mr-4"
             onClick={handleCreateApp}
