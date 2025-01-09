@@ -207,17 +207,14 @@ export const useContractGA = () => {
         },
       });
 
-      const currentLicenseCostWei = await contract.read.licenseCostInUsd1e18();
-      const currentLicenseCost = Number(
-        utils.fromWei(currentLicenseCostWei as bigint, 'ether'),
-      );
-      const desiredDimoAmount = currentLicenseCost / Number(dimoPrice);
-      const desiredDCXAmount = currentLicenseCost / Number(DCX_IN_USD);
+      const currentLicenseCost = await contract.read.licenseCostInUsd1e18();
+      const desiredDimoAmount = Number(currentLicenseCost) / Number(dimoPrice);
+      const desiredDCXAmount = Number(currentLicenseCost) / Number(DCX_IN_USD);
 
       return {
         dimo: BigInt(desiredDimoAmount),
         dcx: BigInt(desiredDCXAmount),
-        licensePrice: currentLicenseCost,
+        licensePrice: Number(currentLicenseCost),
         dimoCost: Number(dimoPrice),
       };
     } catch (e: unknown) {
