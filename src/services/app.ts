@@ -1,9 +1,9 @@
-import axios from 'axios';
 import { eth } from 'web3';
 
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 import { IApp, IRedirectUri, ISigner } from '@/types/app';
 import { Paginated } from '@/types/pagination';
+import xior from 'xior';
 
 export const createMyApp = async (workspaceId: string, app: Partial<IApp>) => {
   const client = await dimoDevAPIClient();
@@ -76,7 +76,7 @@ export const testMyApp = async (app: IApp, signer: ISigner) => {
     app.RedirectUris?.find(({ deleted }) => !deleted) || {};
   const { api_key: apiKey } = signer;
 
-  const client = axios.create({
+  const client = xior.create({
     baseURL: 'https://auth.dimo.zone/auth/web3',
   });
 
