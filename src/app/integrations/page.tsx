@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const Page: FC = () => {
     return (
-        <Suspense>
+        <Suspense fallback={<div>Loading integrations...</div>}>
             <IntegrationsPage />
         </Suspense>
     );

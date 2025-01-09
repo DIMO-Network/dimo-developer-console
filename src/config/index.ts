@@ -32,6 +32,7 @@ export const getConfig = (): Configuration => {
   const env = process.env.VERCEL_ENV!;
   const clientEnv = process.env.NEXT_PUBLIC_CE!;
 
+
   const environment = env ?? clientEnv;
 
   // Select the appropriate configuration to merge with default based on the environment

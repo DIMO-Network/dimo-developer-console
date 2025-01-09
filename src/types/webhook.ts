@@ -11,10 +11,22 @@ export interface Webhook {
     created_at: string;
     updated_at: string;
     description: string;
+    conditions?: Condition[];
+
 }
 
 export interface Condition {
     field: string;
     operator: string;
     value: string;
+}
+
+export interface FormData {
+    description: string;
+    target_uri: string;
+    service: string;
+    logic: string;
+    setup: string;
+    status: string;
+    conditions?: Condition[];
 }

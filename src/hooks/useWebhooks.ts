@@ -110,6 +110,15 @@ export const useWebhooks = () => {
         setLogic('AND');
     };
 
+    const handleShowCreateForm = () => {
+        resetForm();
+        setCurrentWebhook({
+            description: 'My Cool Webhook',
+            target_uri: 'https://example.com/webhook',
+        });
+    };
+
+
     return {
         webhooks,
         currentWebhook,
@@ -132,5 +141,6 @@ export const useWebhooks = () => {
         handleUpdate,
         handleDelete,
         resetForm,
+        handleShowCreateForm,
     };
 };

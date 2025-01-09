@@ -6,14 +6,14 @@ import { useWebhooks } from '@/hooks/useWebhooks';
 import { WebhookForm } from './WebhookForm';
 import { WebhookTable } from './WebhookTable';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import Button from '@/components/Button/Button';
+import Title from '@/components/Title/Title';
 
 export const IntegrationsPage = () => {
     const {
         webhooks,
         currentWebhook,
         setCurrentWebhook,
-        parametersInput,
-        setParametersInput,
         conditions,
         setConditions,
         logic,
@@ -30,24 +30,23 @@ export const IntegrationsPage = () => {
         handleUpdate,
         handleDelete,
         resetForm,
+        handleShowCreateForm,
     } = useWebhooks();
 
     return (
         <div className="integrations-container">
             <div className="integrations-header">
-                <h1 className="integrations-title">Webhooks</h1>
-                <button
+                <Title component="h1" className="integrations-title">
+                    Webhooks
+                </Title>
+                <Button
                     className="create-webhook-button"
-                    onClick={() => {
-                        resetForm();
-                        setCurrentWebhook({
-                            description: 'My Cool Webhook',
-                            target_uri: 'https://example.com/webhook',
-                        });
-                    }}
+                    onClick={handleShowCreateForm}
                 >
                     + Create New
-                </button>
+                </Button>
+
+
             </div>
             <p className="integrations-description">
                 Webhooks allow your application to receive real-time updates from events.
@@ -57,8 +56,6 @@ export const IntegrationsPage = () => {
                 <WebhookForm
                     currentWebhook={currentWebhook}
                     setCurrentWebhook={setCurrentWebhook}
-                    parametersInput={parametersInput}
-                    setParametersInput={setParametersInput}
                     conditions={conditions}
                     setConditions={setConditions}
                     logic={logic}

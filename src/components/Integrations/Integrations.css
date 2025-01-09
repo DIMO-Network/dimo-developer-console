@@ -353,3 +353,6 @@
     padding: 1rem;
     border-top: 1px solid #4a5568;
 }
+.table-wrapper tr {
+    cursor: pointer;
+}

@@ -1,7 +1,6 @@
-import axios from 'axios';
+import axios from 'xior';
 import { Webhook, Condition } from '@/types/webhook';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+import { API_BASE_URL } from '@/config/default';
 
 interface GenerateCELResponse {
     cel_expression: string;

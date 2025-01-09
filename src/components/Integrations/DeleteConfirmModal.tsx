@@ -1,5 +1,7 @@
 import React from 'react';
 import { Webhook } from '@/types/webhook';
+import Button from '@/components/Button/Button';
+import Title from '@/components/Title/Title';
 
 interface DeleteConfirmModalProps {
     webhook: Webhook | null;
@@ -17,17 +19,23 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
     return (
         <div className="delete-confirm-overlay">
             <div className="delete-confirm-modal">
-                <h2>Confirm Deletion</h2>
+                <Title component="h2">Confirm Deletion</Title>
                 <p>
                     Are you sure you want to delete this webhook? This action cannot be undone.
                 </p>
                 <div className="delete-confirm-actions">
-                    <button className="delete-webhook-button" onClick={onDelete}>
+                    <Button
+                        className="delete-webhook-button"
+                        onClick={onDelete}
+                    >
                         Delete
-                    </button>
-                    <button className="cancel-button" onClick={onCancel}>
+                    </Button>
+                    <Button
+                        className="cancel-button"
+                        onClick={onCancel}
+                    >
                         Cancel
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

@@ -1,11 +1,10 @@
 import React from 'react';
 import { Webhook, Condition } from '@/types/webhook';
+import Button from '@/components/Button/Button';
 
 interface WebhookFormProps {
     currentWebhook: Partial<Webhook>;
     setCurrentWebhook: React.Dispatch<React.SetStateAction<Partial<Webhook> | null>>;
-    parametersInput: string;
-    setParametersInput: React.Dispatch<React.SetStateAction<string>>;
     conditions: Condition[];
     setConditions: React.Dispatch<React.SetStateAction<Condition[]>>;
     logic: string;
@@ -17,17 +16,17 @@ interface WebhookFormProps {
 }
 
 export const WebhookForm: React.FC<WebhookFormProps> = ({
-    currentWebhook,
-    setCurrentWebhook,
-    conditions,
-    setConditions,
-    logic,
-    setLogic,
-    signalNames,
-    generatedCEL,
-    onSave,
-    onCancel,
-    }) => {
+                                                            currentWebhook,
+                                                            setCurrentWebhook,
+                                                            conditions,
+                                                            setConditions,
+                                                            logic,
+                                                            setLogic,
+                                                            signalNames,
+                                                            generatedCEL,
+                                                            onSave,
+                                                            onCancel,
+                                                        }) => {
     const addCondition = () => {
         setConditions([...conditions, { field: '', operator: '>', value: '' }]);
     };
@@ -102,10 +101,22 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
                             value={condition.value}
                             onChange={(e) => updateCondition(index, 'value', e.target.value)}
                         />
-                        <button onClick={() => removeCondition(index)}>Remove</button>
+                        <Button
+                            type="button"
+                            onClick={() => removeCondition(index)}
+                            className="remove-condition-button"
+                        >
+                            Remove
+                        </Button>
                     </div>
                 ))}
-                <button onClick={addCondition}>+ Add Condition</button>
+                <Button
+                    type="button"
+                    onClick={addCondition}
+                    className="add-condition-button"
+                >
+                    + Add Condition
+                </Button>
             </div>
 
             <label>Logic</label>
@@ -145,8 +156,12 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
             </select>
 
             <div className="webhook-form-actions">
-                <button onClick={onSave}>Save</button>
-                <button onClick={onCancel}>Cancel</button>
+                <Button onClick={onSave} className="save-button">
+                    Save
+                </Button>
+                <Button onClick={onCancel} className="cancel-button">
+                    Cancel
+                </Button>
             </div>
         </div>
     );
