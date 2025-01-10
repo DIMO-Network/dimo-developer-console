@@ -26,7 +26,7 @@ export const mainMenu = [
     iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
     link: '/integrations',
     external: false,
-    disabled: true,
+    disabled: false,
   },
   {
     label: 'Support',
