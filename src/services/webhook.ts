@@ -1,4 +1,4 @@
-import axios from 'xior';
+import xior from 'xior';
 import { Webhook, Condition } from '@/types/webhook';
 import { API_BASE_URL } from '@/config/default';
 
@@ -7,7 +7,7 @@ interface GenerateCELResponse {
 }
 
 export const fetchSignalNames = async (): Promise<string[]> => {
-    const response = await axios.get<string[]>(`${API_BASE_URL}/webhooks/signals`, {
+    const response = await xior.get<string[]>(`${API_BASE_URL}/webhooks/signals`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -19,7 +19,7 @@ export const fetchSignalNames = async (): Promise<string[]> => {
 
 export const fetchWebhooks = async (): Promise<Webhook[]> => {
     console.log('Fetching webhooks from:', `${API_BASE_URL}/webhooks`);
-    const response = await axios.get<Webhook[]>(`${API_BASE_URL}/webhooks`, {
+    const response = await xior.get<Webhook[]>(`${API_BASE_URL}/webhooks`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -41,7 +41,7 @@ export const createWebhook = async (webhook: Partial<Webhook>): Promise<Webhook>
         description: webhook.description || 'Default Description',
     };
 
-    const response = await axios.post<Webhook>(`${API_BASE_URL}/webhooks`, payload, {
+    const response = await xior.post<Webhook>(`${API_BASE_URL}/webhooks`, payload, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -66,7 +66,7 @@ export const updateWebhook = async (id: string, webhook: Partial<Webhook>): Prom
         description: webhook.description,
     };
 
-    const response = await axios.put<Webhook>(`${API_BASE_URL}/webhooks/${id}`, payload, {
+    const response = await xior.put<Webhook>(`${API_BASE_URL}/webhooks/${id}`, payload, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -79,7 +79,7 @@ export const updateWebhook = async (id: string, webhook: Partial<Webhook>): Prom
 
 export const deleteWebhook = async (id: string): Promise<void> => {
     console.log("Deleting webhook with ID:", id);
-    await axios.delete<void>(`${API_BASE_URL}/webhooks/${id}`, {
+    await xior.delete<void>(`${API_BASE_URL}/webhooks/${id}`, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -89,7 +89,7 @@ export const deleteWebhook = async (id: string): Promise<void> => {
 };
 
 export const generateCEL = async (conditions: Condition[], logic: string): Promise<string> => {
-    const response = await axios.post<GenerateCELResponse>(`${API_BASE_URL}/build-cel`, { conditions, logic }, {
+    const response = await xior.post<GenerateCELResponse>(`${API_BASE_URL}/build-cel`, { conditions, logic }, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
