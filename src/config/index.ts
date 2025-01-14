@@ -13,7 +13,6 @@ type Configuration = {
   DEVELOPER_TYPES: string[];
   backendUrl: string;
   frontendUrl: string;
-  API_BASE_URL: string;
   RAINBOW_PROJECT: Record<string, string>;
   CONTRACT_NETWORK: bigint;
   DLC_ADDRESS: `0x${string}`;
@@ -32,7 +31,6 @@ export const getConfig = (): Configuration => {
   // TODO: find a better way to determine the environment
   const env = process.env.VERCEL_ENV!;
   const clientEnv = process.env.NEXT_PUBLIC_CE!;
-
 
   const environment = env ?? clientEnv;
 
@@ -57,7 +55,6 @@ export const getConfig = (): Configuration => {
     ...environmentConfig,
     frontendUrl: process.env.NEXT_PUBLIC_FRONTEND_URL!,
     backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL!,
-    API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL!,
     WMATIC: process.env.NEXT_PUBLIC_WMATIC!,
     DC_ADDRESS: process.env.NEXT_PUBLIC_DC_ADDRESS!,
     DCX_ADDRESS: process.env.NEXT_PUBLIC_DCX_ADDRESS!,
