@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getContract, HttpRequestError } from 'viem';
 import { utils } from 'web3';
+import * as Sentry from "@sentry/nextjs";
 
 import useGlobalAccount from '@/hooks/useGlobalAccount';
 import DimoABI from '@/contracts/DimoTokenContract.json';
@@ -106,6 +107,7 @@ export const useContractGA = () => {
 
       return receipt;
     } catch (e: unknown) {
+      Sentry.captureException(e);
       if (e instanceof HttpRequestError) {
         throw new Error(handleOnChainError(e as HttpRequestError));
       }
@@ -138,6 +140,7 @@ export const useContractGA = () => {
 
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
     } catch (e: unknown) {
+      Sentry.captureException(e);
       console.error(e);
       return 0;
     }
@@ -168,6 +171,7 @@ export const useContractGA = () => {
 
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
     } catch (e: unknown) {
+      Sentry.captureException(e);
       console.error(e);
       return 0;
     }
@@ -211,6 +215,7 @@ export const useContractGA = () => {
         dimoCost: Number(dimoPrice),
       };
     } catch (e: unknown) {
+      Sentry.captureException(e);
       console.error(e);
       return DEFAULT_AMOUNTS;
     }
@@ -237,6 +242,7 @@ export const useContractGA = () => {
         dcxAllowance: allowanceDCX >= Number(desiredTokenAmount.dimo),
       };
     } catch (e: unknown) {
+      Sentry.captureException(e);
       console.error('Error while checking balance', e);
       return DEFAULT_TOKEN_BALANCE;
     }
@@ -258,6 +264,7 @@ export const useContractGA = () => {
 
       return Number(utils.fromWei(polBalance as bigint, 'ether'));
     } catch (e: unknown) {
+      Sentry.captureException(e);
       console.error(e);
       return 0;
     }
@@ -288,6 +295,7 @@ export const useContractGA = () => {
 
       return Number(utils.fromWei(wmaticBalance as bigint, 'ether'));
     } catch (e: unknown) {
+      Sentry.captureException(e);
       console.error(e);
       return 0;
     }

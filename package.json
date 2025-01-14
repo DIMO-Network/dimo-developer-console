@@ -22,6 +22,7 @@
     "@maticnetwork/maticjs-web3": "^1.0.5",
     "@rainbow-me/rainbowkit": "^2.1.7",
     "@rainbow-me/rainbowkit-siwe-next-auth": "^0.4.1",
+    "@sentry/nextjs": "^8.48.0",
     "@stripe/crypto": "^0.0.4",
     "@stripe/stripe-js": "^4.10.0",
     "@tanstack/react-query": "^5.62.16",
