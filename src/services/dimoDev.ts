@@ -1,5 +1,5 @@
-import axios from 'axios';
+import xior from 'xior';
 
-export const dimoDevClient = axios.create({
+export const dimoDevClient = xior.create({
   baseURL: `/api`,
 });

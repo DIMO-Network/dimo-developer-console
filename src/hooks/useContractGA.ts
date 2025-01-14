@@ -15,7 +15,6 @@ import {
 } from '@/types/wallet';
 
 import configuration from '@/config';
-import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
 import { getCachedDimoPrice } from '@/services/wallet';
 
 const { DCX_IN_USD = 0.001 } = process.env;
@@ -96,16 +95,10 @@ export const useContractGA = () => {
       if (!kernelClient) return {} as IKernelOperationStatus;
 
       const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-        userOperation: {
-          callData: await kernelClient.account.encodeCallData(transactions),
-        },
+        callData: await kernelClient.account.encodeCalls(transactions),
       });
 
-      const bundlerClient = kernelClient.extend(
-        bundlerActions(ENTRYPOINT_ADDRESS_V07),
-      );
-
-      const receipt = await bundlerClient.waitForUserOperationReceipt({
+      const receipt = await kernelClient.waitForUserOperationReceipt({
         hash: dcxExchangeOpHash,
       });
 
