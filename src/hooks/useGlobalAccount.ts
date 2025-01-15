@@ -55,6 +55,7 @@ import {
   GetPaymasterDataParameters,
   SmartAccount,
 } from 'viem/_types/account-abstraction';
+import * as Sentry from "@sentry/nextjs";
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -187,6 +188,7 @@ export const useGlobalAccount = () => {
       if (isEmpty(signInResponse?.organizationId)) return;
       router.push('/valid-tzd');
     } catch (e) {
+      Sentry.captureException(e);
       console.error('Error logging in with wallet', e);
       await signOut();
     }
@@ -258,6 +260,7 @@ export const useGlobalAccount = () => {
         Math.ceil(Number(utils.fromWei(allowance as bigint, 'ether'))),
       );
     } catch (e) {
+      Sentry.captureException(e);
       console.error('Error getting wmatic allowance', e);
       return BigInt(0);
     }
@@ -303,6 +306,7 @@ export const useGlobalAccount = () => {
         reason,
       };
     } catch (e) {
+      Sentry.captureException(e);
       const errorReason = handleOnChainError(e as HttpRequestError);
       return {
         success: false,
@@ -385,6 +389,7 @@ export const useGlobalAccount = () => {
         reason,
       };
     } catch (e) {
+      Sentry.captureException(e);
       const errorReason = handleOnChainError(e as HttpRequestError);
       return {
         success: false,
@@ -418,6 +423,7 @@ export const useGlobalAccount = () => {
 
       return BigInt(Math.ceil(Number(utils.fromWei(quote as bigint, 'ether'))));
     } catch (e) {
+      Sentry.captureException(e);
       const errorReason = handleOnChainError(e as HttpRequestError);
       console.error('Error getting needed dimo amount', errorReason);
       return BigInt(0);
@@ -431,6 +437,7 @@ export const useGlobalAccount = () => {
       });
       return kernelClient;
     } catch (e) {
+      Sentry.captureException(e);
       console.error('Error creating kernel client', e);
       return null;
     }
@@ -521,6 +528,7 @@ export const useGlobalAccount = () => {
         });
         fallbackKernelClients.push(kernelClient);
       } catch (e) {
+        Sentry.captureException(e);
         console.error('Error creating fallback kernel client', e);
       }
     }

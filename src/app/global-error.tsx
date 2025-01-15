@@ -1,7 +1,8 @@
 'use client';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import localFont from 'next/font/local';
 import classNames from 'classnames';
+import * as Sentry from "@sentry/nextjs";
 
 const euclid = localFont({
   src: [
@@ -54,7 +55,10 @@ interface IProps {
 }
 
 const ErrorPage: FC<IProps> = ({ error, reset }) => {
-  console.error({ error });
+  useEffect(() => {
+    Sentry.captureException(error);
+    console.error({ error });
+  },[error]);
 
   return (
     <html lang="en" className="h-full">
