@@ -10,8 +10,7 @@ import { Anchor } from '@/components/Anchor';
 import { IAuth } from '@/types/auth';
 import { isCollaborator } from '@/utils/user';
 import { SignInButtons } from '@/components/SignInButton';
-import { useErrorHandler } from '@/hooks';
-import { useGlobalAccount } from '@/hooks';
+import { useErrorHandler, usePasskey, useGlobalAccount } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
@@ -19,8 +18,8 @@ import { NotificationContext } from '@/context/notificationContext';
 
 export const View = () => {
   useErrorHandler();
-  const { organizationInfo, walletLogin, validatePasskeyAvailability } =
-    useGlobalAccount();
+  const { isPasskeyAvailable } = usePasskey();
+  const { organizationInfo, walletLogin } = useGlobalAccount();
   const { setNotification } = useContext(NotificationContext);
   const { data: session } = useSession();
   const { role = '' } = session?.user ?? {};
@@ -33,9 +32,8 @@ export const View = () => {
     });
   }
 
-  const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
-    const isAvailable = await validatePasskeyAvailability();
-    if (!isAvailable) {
+  const handleCTA = async (app: string, auth?: Partial<IAuth>) => {    
+    if (!isPasskeyAvailable) {
       setNotification(
         "Passkey is not available in your browser. Please be sure that you're using a Passkey ready browser.",
         'Oops...',
@@ -54,17 +52,6 @@ export const View = () => {
       void walletLogin();
     }
   }, [organizationInfo, role]);
-
-  useEffect(() => {
-    validatePasskeyAvailability().then((isAvailable) => {
-      if (isAvailable) return;
-      setNotification(
-        "Passkey is not available in your browser. Please be sure that you're using a Passkey ready browser.",
-        'Oops...',
-        'error',
-      );
-    });
-  }, []);
 
   return (
     <main className="sign-in">
