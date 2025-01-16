@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getContract, HttpRequestError } from 'viem';
 import { utils } from 'web3';
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
 import useGlobalAccount from '@/hooks/useGlobalAccount';
 import DimoABI from '@/contracts/DimoTokenContract.json';

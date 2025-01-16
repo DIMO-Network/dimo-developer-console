@@ -12,6 +12,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { Title } from '@/components/Title';
 import { TokenInput } from '@/components/TokenInput';
 import { useContractGA } from '@/hooks';
+import * as Sentry from '@sentry/nextjs';
 
 import configuration from '@/config';
 
@@ -56,6 +57,7 @@ export const SpendingLimitModal: FC<IProps> = ({
         onSubmit(credits);
       }
     } catch (error: unknown) {
+      Sentry.captureException(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');

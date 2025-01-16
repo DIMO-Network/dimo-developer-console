@@ -2,7 +2,7 @@
 import { FC, useEffect } from 'react';
 import localFont from 'next/font/local';
 import classNames from 'classnames';
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
 const euclid = localFont({
   src: [
@@ -58,7 +58,7 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
   useEffect(() => {
     Sentry.captureException(error);
     console.error({ error });
-  },[error]);
+  }, [error]);
 
   return (
     <html lang="en" className="h-full">

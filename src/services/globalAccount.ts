@@ -1,7 +1,7 @@
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import xior, { XiorError } from 'xior';
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
 const globalAccountClient = xior.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,

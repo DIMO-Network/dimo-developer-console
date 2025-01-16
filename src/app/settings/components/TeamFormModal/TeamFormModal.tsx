@@ -1,6 +1,7 @@
 'use client';
 
 import _ from 'lodash';
+import * as Sentry from '@sentry/nextjs';
 
 import { useContext, useState, type FC } from 'react';
 
@@ -31,6 +32,7 @@ export const TeamFormModal: FC<IProps> = ({ isOpen, setIsOpen }) => {
       if (!success) throw new Error(message);
       setNotification('The invitation was sent', 'Success', 'info');
     } catch (error: unknown) {
+      Sentry.captureException(error);
       setNotification(
         _.get(error, 'message', 'Something went wrong'),
         'Oops...',

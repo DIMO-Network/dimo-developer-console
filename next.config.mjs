@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
@@ -15,8 +17,8 @@ const nextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  org: "dimo-hp",
-  project: "developer-console",
+  org: 'dimo-hp',
+  project: 'developer-console',
 
   // An auth token is required for uploading source maps.
   authToken: process.env.SENTRY_AUTH_TOKEN,

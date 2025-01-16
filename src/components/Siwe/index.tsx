@@ -9,6 +9,7 @@ import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
 import { SignInButton } from '@/components/SignInButton';
 import { SiweIcon } from '@/components/Icons';
+import * as Sentry from '@sentry/nextjs';
 interface SiweButtonProps {
   isSignIn: boolean;
   onCTA: (d: Partial<IAuth>) => void;
@@ -40,6 +41,7 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
 
       onCTA({ address, message: JSON.stringify(message), signature });
     } catch (error) {
+      Sentry.captureException(error);
       setNotification('Something went wrong please try again', 'Oops', 'error');
     }
   };

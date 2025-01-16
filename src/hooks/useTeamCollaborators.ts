@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { getMyCollaborators } from '@/actions/team';
 import { ITeamCollaborator } from '@/types/team';
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
 export const useTeamCollaborators = () => {
   const [teamCollaborators, setTeamCollaborators] = useState<
