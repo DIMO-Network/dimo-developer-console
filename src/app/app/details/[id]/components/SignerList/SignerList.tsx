@@ -129,7 +129,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   };
 
   const handleDelete = async (id: string, signer: string) => {
-  try {  
+    try {
       setIsOpened(true);
       await handleDisableSigner(signer);
       setLoadingStatus({

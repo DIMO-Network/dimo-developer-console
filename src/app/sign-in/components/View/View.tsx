@@ -19,7 +19,8 @@ import { NotificationContext } from '@/context/notificationContext';
 
 export const View = () => {
   useErrorHandler();
-  const { organizationInfo, walletLogin, validatePasskeyAvailability } = useGlobalAccount();
+  const { organizationInfo, walletLogin, validatePasskeyAvailability } =
+    useGlobalAccount();
   const { setNotification } = useContext(NotificationContext);
   const { data: session } = useSession();
   const { role = '' } = session?.user ?? {};
@@ -35,7 +36,11 @@ export const View = () => {
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     const isAvailable = await validatePasskeyAvailability();
     if (!isAvailable) {
-      setNotification('Passkey is not available in your browser.', 'Oops...', 'error');
+      setNotification(
+        'Passkey is not available in your browser.',
+        'Oops...',
+        'error',
+      );
       return;
     }
     await signIn(app, auth);
@@ -50,10 +55,14 @@ export const View = () => {
     }
   }, [organizationInfo, role]);
 
-  useEffect(()=>{
+  useEffect(() => {
     validatePasskeyAvailability().then((isAvailable) => {
       if (isAvailable) return;
-      setNotification("Passkey is not available in your browser. Please be sure that you're using a Passkey ready browser.", 'Oops...', 'error');
+      setNotification(
+        "Passkey is not available in your browser. Please be sure that you're using a Passkey ready browser.",
+        'Oops...',
+        'error',
+      );
     });
   }, []);
 
