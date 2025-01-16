@@ -37,7 +37,7 @@ export const View = () => {
     const isAvailable = await validatePasskeyAvailability();
     if (!isAvailable) {
       setNotification(
-        'Passkey is not available in your browser.',
+        "Passkey is not available in your browser. Please be sure that you're using a Passkey ready browser.",
         'Oops...',
         'error',
       );
