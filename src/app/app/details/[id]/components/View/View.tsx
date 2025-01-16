@@ -1,5 +1,6 @@
 'use client';
 import _ from 'lodash';
+import * as Sentry from '@sentry/nextjs';
 
 import { useEffect, useState, useContext } from 'react';
 import { useSession } from 'next-auth/react';
@@ -111,6 +112,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
       );
       await refreshAppDetails();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       console.error({ error });
       const code = _.get(error, 'code', null);
       if (code === 4001)
@@ -148,6 +150,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
       await deleteApp(appId);
       router.replace('/');
     } catch (error: unknown) {
+      Sentry.captureException(error);
       console.error({ error });
       const code = _.get(error, 'code', null);
       if (code === 4001)

@@ -8,6 +8,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import { existUserByEmailOrAddress, getUserByToken } from '@/services/user';
 import { IUser } from '@/types/user';
 import { TeamRoles } from '@/types/team';
+import * as Sentry from '@sentry/nextjs';
 
 import config from '@/config';
 
@@ -112,6 +113,7 @@ export const authOptions: AuthOptions = {
             email: credentials?.email,
           };
         } catch (e) {
+          Sentry.captureException(e);
           console.error(
             'Error while authorizing the user with credentials method',
             { error: e },

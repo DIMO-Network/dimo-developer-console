@@ -53,7 +53,7 @@ export const View = () => {
   useEffect(()=>{
     validatePasskeyAvailability().then((isAvailable) => {
       if (isAvailable) return;
-      setNotification('Passkey is not available in your browser.', 'Oops...', 'error');
+      setNotification("Passkey is not available in your browser. Please be sure that you're using a Passkey ready browser.", 'Oops...', 'error');
     });
   }, []);
 

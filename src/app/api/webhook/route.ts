@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mintDimoCredits } from '@/services/smartContract';
+import * as Sentry from '@sentry/nextjs';
 
 export async function POST(req: NextRequest) {
   let txHash = '';
@@ -19,6 +20,7 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
+    Sentry.captureException(error);
     console.error(`Error handling webhook for txHash ${txHash}:`, error);
     return NextResponse.json(
       { message: 'Error processing webhook.' },

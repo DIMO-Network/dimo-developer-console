@@ -1,5 +1,5 @@
 import _ from 'lodash';
-
+import * as Sentry from '@sentry/nextjs';
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { encodeFunctionData } from 'viem';
@@ -76,6 +76,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
       setLoadingStatus({ label: 'Redirect URI updated', status: 'success' });
       refreshData();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setLoadingStatus({
@@ -98,6 +99,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
       setLoadingStatus({ label: 'Redirect URI deleted', status: 'success' });
       refreshData();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setLoadingStatus({

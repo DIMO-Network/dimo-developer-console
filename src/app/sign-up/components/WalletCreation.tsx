@@ -4,6 +4,7 @@ import { useGlobalAccount } from '@/hooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { useSession } from 'next-auth/react';
 import { NotificationContext } from '@/context/notificationContext';
+import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
   auth?: Partial<IAuth>;
@@ -33,6 +34,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
 
       onNext('wallet-creation', {});
     } catch (error) {
+      Sentry.captureException(error);
       console.error(
         'Something went wrong while creating the user wallet',
         error,

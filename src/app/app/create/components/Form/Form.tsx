@@ -7,6 +7,7 @@ import { utils } from 'web3';
 
 import _ from 'lodash';
 import classNames from 'classnames';
+import * as Sentry from '@sentry/nextjs';
 
 import { AppCard } from '@/components/AppCard';
 import { Button } from '@/components/Button';
@@ -96,6 +97,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
 
       await handleCreateApp();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       setNotification(
         'Something went wrong while confirming the transaction',
         'Oops...',

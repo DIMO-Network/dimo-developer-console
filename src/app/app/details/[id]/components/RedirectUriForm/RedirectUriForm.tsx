@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import * as Sentry from '@sentry/nextjs';
 
 import { useContext, useState, type FC } from 'react';
 import { isURL } from 'validator';

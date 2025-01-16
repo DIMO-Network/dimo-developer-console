@@ -486,7 +486,7 @@ export const useGlobalAccount = () => {
     const kernelClient = createKernelAccountClient({
       account: zeroDevKernelAccount,
       chain: chain,
-      bundlerTransport: http(`${turnkeyConfig.rpcUrl}?provider=${provider}`),
+      bundlerTransport: http(`${turnkeyConfig.bundleRpc}?provider=${provider}`),
       client: publicClient,
       paymaster: {
         getPaymasterData: (userOperation) => {

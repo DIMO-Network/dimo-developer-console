@@ -1,6 +1,7 @@
 import { useState, type FC } from 'react';
 import { useSession } from 'next-auth/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import * as Sentry from '@sentry/nextjs';
 
 import {
   InvitationStatuses,
@@ -82,6 +83,7 @@ export const TeamManagement: FC<IProps> = ({
       setLoadingStatus({ label: 'Collaborator removed', status: 'success' });
       refreshData();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       setLoadingStatus({ label: 'Something went wrong', status: 'error' });
     }
   };

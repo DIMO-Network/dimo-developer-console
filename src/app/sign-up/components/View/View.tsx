@@ -2,6 +2,7 @@
 import { useContext, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import * as Sentry from '@sentry/nextjs';
 
 import {
   BuildForForm,
@@ -57,6 +58,7 @@ const View = () => {
         'Something went wrong while the completing user information',
         error,
       );
+      Sentry.captureException(error);
       setNotification('Something went wrong', 'Oops...', 'error');
     }
   };
