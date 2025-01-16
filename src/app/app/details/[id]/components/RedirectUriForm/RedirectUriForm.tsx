@@ -70,6 +70,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
       await createMyRedirectUri(uri, appId);
       refreshData();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
