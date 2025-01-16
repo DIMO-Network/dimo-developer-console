@@ -32,7 +32,7 @@ export const View = () => {
     });
   }
 
-  const handleCTA = async (app: string, auth?: Partial<IAuth>) => {    
+  const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     if (!isPasskeyAvailable) {
       setNotification(
         "Passkey is not available in your browser. Please be sure that you're using a Passkey ready browser. You can check your browser compatibility at https://www.passkeys.io/compatible-devices",
