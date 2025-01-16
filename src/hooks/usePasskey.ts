@@ -5,13 +5,14 @@ export const usePasskey = () => {
   const [isPasskeyAvailable, setIsPasskeyAvailable] = useState<boolean>(false);
 
   const validatePasskeyAvailability = async () => {
-    // Availability of `window.PublicKeyCredential` means WebAuthn is usable.
-    // `isUserVerifyingPlatformAuthenticatorAvailable` means the feature detection is usable.
-    // `​​isConditionalMediationAvailable` means the feature detection is usable.
-
+    // Availability of "window.PublicKeyCredential" means WebAuthn is usable.
     if (!window.PublicKeyCredential) return false;
+
+    // "isUserVerifyingPlatformAuthenticatorAvailable" means the feature detection is usable.
     if (!PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)
       return false;
+
+    // "isConditionalMediationAvailable" means the feature detection is usable.
     if (!PublicKeyCredential.isConditionalMediationAvailable) return false;
 
     // Check if user verifying platform authenticator is available.
