@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { setCookie } from 'cookies-next/client';
@@ -10,15 +10,17 @@ import { Anchor } from '@/components/Anchor';
 import { IAuth } from '@/types/auth';
 import { isCollaborator } from '@/utils/user';
 import { SignInButtons } from '@/components/SignInButton';
-import { useErrorHandler } from '@/hooks';
-import { useGlobalAccount } from '@/hooks';
+import { useErrorHandler, usePasskey, useGlobalAccount } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
+import { NotificationContext } from '@/context/notificationContext';
 
 export const View = () => {
   useErrorHandler();
+  const { isPasskeyAvailable } = usePasskey();
   const { organizationInfo, walletLogin } = useGlobalAccount();
+  const { setNotification } = useContext(NotificationContext);
   const { data: session } = useSession();
   const { role = '' } = session?.user ?? {};
   const searchParams = useSearchParams();
@@ -31,6 +33,14 @@ export const View = () => {
   }
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
+    if (!isPasskeyAvailable) {
+      setNotification(
+        "Passkey is not available in your browser. Please be sure that you're using a Passkey ready browser. You can check your browser compatibility at https://www.passkeys.io/compatible-devices",
+        'Oops...',
+        'error',
+      );
+      return;
+    }
     await signIn(app, auth);
   };
 

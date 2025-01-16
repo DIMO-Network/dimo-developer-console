@@ -7,6 +7,7 @@ import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import xior, { XiorError } from 'xior';
+import * as Sentry from '@sentry/nextjs';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
   configuration;
@@ -131,6 +132,7 @@ export const middleware = async (
 
     return validatePublicSession(request);
   } catch (error: unknown) {
+    Sentry.captureException(error);
     console.error('Middleware error:', error);
     let path = handleConnectionError(error, isLoginPage);
     path = path ?? handleExpiredSession(error, isLoginPage);

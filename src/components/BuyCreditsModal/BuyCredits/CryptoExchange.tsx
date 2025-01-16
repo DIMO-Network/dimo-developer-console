@@ -12,6 +12,7 @@ import { encodeFunctionData } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import { utils } from 'web3';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
   onNext: (
@@ -128,6 +129,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       setMintingDCX(LoadingStatus.Success);
     } catch (error) {
       const e = error as Error;
+      Sentry.captureException(e);
       setNotification(e.message, 'Oops...', 'error');
       console.error('Error while minting DCX', error);
       setMintingDCX(LoadingStatus.Error);
@@ -159,6 +161,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       setSwappingIntoDimo(LoadingStatus.Success);
       onNext('crypto-exchange', transactionData);
     } catch (error) {
+      Sentry.captureException(error);
       console.error('Error while swapping into DIMO', error);
       setSwappingIntoDimo(LoadingStatus.Error);
     }

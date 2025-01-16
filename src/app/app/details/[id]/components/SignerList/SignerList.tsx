@@ -17,6 +17,7 @@ import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
+import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
   app: IApp;
@@ -92,6 +93,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
         status: 'success',
       });
     } catch (error: unknown) {
+      Sentry.captureException(error);
       console.error(error);
       setLoadingStatus({ label: 'Something went wrong', status: 'error' });
     }
@@ -138,6 +140,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
       setLoadingStatus({ label: 'API key deleted', status: 'success' });
       refreshData();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setLoadingStatus({

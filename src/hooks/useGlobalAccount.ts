@@ -55,7 +55,7 @@ import {
   GetPaymasterDataParameters,
   SmartAccount,
 } from 'viem/_types/account-abstraction';
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs';
 
 const generateRandomBuffer = (): ArrayBuffer => {
   const arr = new Uint8Array(32);
@@ -486,7 +486,7 @@ export const useGlobalAccount = () => {
     const kernelClient = createKernelAccountClient({
       account: zeroDevKernelAccount,
       chain: chain,
-      bundlerTransport: http(`${turnkeyConfig.rpcUrl}?provider=${provider}`),
+      bundlerTransport: http(`${turnkeyConfig.bundleRpc}?provider=${provider}`),
       client: publicClient,
       paymaster: {
         getPaymasterData: (userOperation) => {

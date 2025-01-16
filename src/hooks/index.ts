@@ -9,3 +9,4 @@ export * from './useGlobalAccount';
 export * from './useLoading';
 export * from './useAccountInformation';
 export * from './useCryptoPricing';
+export * from './usePasskey';
