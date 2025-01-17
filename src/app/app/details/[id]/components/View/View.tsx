@@ -1,5 +1,5 @@
 'use client';
-import _ from 'lodash';
+import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
 import { useEffect, useState, useContext } from 'react';
@@ -114,7 +114,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     } catch (error: unknown) {
       Sentry.captureException(error);
       console.error({ error });
-      const code = _.get(error, 'code', null);
+      const code = get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
       else
@@ -152,7 +152,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     } catch (error: unknown) {
       Sentry.captureException(error);
       console.error({ error });
-      const code = _.get(error, 'code', null);
+      const code = get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
       else

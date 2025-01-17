@@ -11,15 +11,15 @@ export const getUserSubOrganization = async (
   email: string,
 ): Promise<ISubOrganization> => {
   try {
-    const { data } = await globalAccountClient.get(`/api/account/${email}`);
+    const { data } = await globalAccountClient.get<ISubOrganization>(`/api/account/${email}`);
     return data;
-  } catch (error) {
-    Sentry.captureException(error);
+  } catch (error) {    
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
         return {} as ISubOrganization;
       }
     }
+    Sentry.captureException(error);
     throw error;
   }
 };
@@ -27,7 +27,7 @@ export const getUserSubOrganization = async (
 export const createSubOrganization = async (
   walletInfo: Partial<IWalletSubOrganization>,
 ): Promise<ISubOrganization> => {
-  const { data } = await globalAccountClient.post('/api/account', walletInfo, {
+  const { data } = await globalAccountClient.post<ISubOrganization>('/api/account', walletInfo, {
     headers: {
       'Content-Type': 'application/json',
     },
