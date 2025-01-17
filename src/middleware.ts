@@ -57,7 +57,7 @@ const validatePrivateSession = async (
 ) => {
   const user = await getUserByToken();
   const subOrganization = await getUserSubOrganization(
-    user.company_email_owner!,
+    user.company_email_owner ?? user.email,
   );
   request.user = new LoggedUser(user, subOrganization);
 
