@@ -31,7 +31,7 @@ const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
 };
 
 const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
-  if (error instanceof AxiosError) {    
+  if (error instanceof AxiosError) {
     if (error.message === 'Network Error') {
       return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
     }
@@ -40,7 +40,7 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
 };
 
 const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
-  if (error instanceof AxiosError) {    
+  if (error instanceof AxiosError) {
     const status = error.response?.status;
     if (status === 401) {
       const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
