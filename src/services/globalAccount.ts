@@ -1,9 +1,9 @@
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
-import xior, { XiorError } from 'xior';
+import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 
-const globalAccountClient = xior.create({
+const globalAccountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
 });
 
@@ -15,7 +15,7 @@ export const getUserSubOrganization = async (
     return data;
   } catch (error) {
     Sentry.captureException(error);
-    if (error instanceof XiorError) {
+    if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
         return {} as ISubOrganization;
       }

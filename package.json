@@ -36,6 +36,7 @@
     "@zerodev/ecdsa-validator": "^5.4.1",
     "@zerodev/passkey-validator": "^5.5.0",
     "@zerodev/sdk": "^5.4.9",
+    "axios": "^1.7.9",
     "classnames": "^2.5.1",
     "cookies-next": "^5.0.2",
     "encoding": "^0.1.13",
@@ -52,8 +53,7 @@
     "typescript-eslint": "^7.18.0",
     "validator": "^13.12.0",
     "wagmi": "^2.14.6",
-    "web3": "^4.16.0",
-    "xior": "^0.6.1"
+    "web3": "^4.16.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",

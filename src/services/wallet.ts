@@ -1,10 +1,10 @@
 'use server';
 import { ICoinMarketTokenResponse } from '@/types/wallet';
 import { unstable_cache as cache } from 'next/cache';
-import xior from 'xior';
+import axios from 'axios';
 import config from '@/config';
 
-const dimoApiClient = xior.create({
+const dimoApiClient = axios.create({
   baseURL: config.backendUrl,
 });
 
