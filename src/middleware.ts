@@ -56,9 +56,18 @@ const validatePrivateSession = async (
   event: NextFetchEvent,
 ) => {
   const user = await getUserByToken();
+  //TODO: check if we need to use company_email_owner or email
   const subOrganization = await getUserSubOrganization(
     user.company_email_owner ?? user.email,
   );
+
+  if (!subOrganization) {
+    Sentry.captureMessage('Suborganization not found');
+    return NextResponse.redirect(new URL('/sign-in', request.url), {
+      status: 307,
+    });
+  }
+
   request.user = new LoggedUser(user, subOrganization);
 
   const isValidationPage = VALIDATION_PAGES.includes(request.nextUrl.pathname);

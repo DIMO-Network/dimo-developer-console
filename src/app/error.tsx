@@ -1,5 +1,6 @@
 'use client';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
   error: Error & { digest?: string };
@@ -7,7 +8,10 @@ interface IProps {
 }
 
 const ErrorPage: FC<IProps> = ({ error, reset }) => {
-  console.error({ error });
+  useEffect(() => {
+      Sentry.captureException(error);
+      console.error({ error });
+    }, [error]);
 
   return (
     <main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
