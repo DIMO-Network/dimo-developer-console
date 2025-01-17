@@ -600,6 +600,7 @@ export const useGlobalAccount = () => {
   useEffect(() => {
     if (session?.user?.email && !organizationInfo) {
       const { email } = session.user;
+      if (!email) return;
       getUserSubOrganization(email)
         .then((subOrganization) => {
           if (!subOrganization) return;
