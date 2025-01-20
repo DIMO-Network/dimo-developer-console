@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "npm install --prune",
     "build": "next build",
     "dev": "next dev",
     "sec": "next dev --experimental-https",
