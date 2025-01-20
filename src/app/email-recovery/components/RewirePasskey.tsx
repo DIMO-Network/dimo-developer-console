@@ -3,6 +3,7 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { useGlobalAccount } from '@/hooks';
 import { useSearchParams } from 'next/navigation';
 import { NotificationContext } from '@/context/notificationContext';
+import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
   onNext: (flow: string) => void;
@@ -13,24 +14,24 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
   const params = useSearchParams();
   const { validCredentials, registerNewPasskey } = useGlobalAccount();
 
+  const handleRewirePasskey = async (recoveryKey: string) => {
+    try {
+      const credentialsAreValid = validCredentials(recoveryKey);
+      if (credentialsAreValid === null) return;
+      if (!credentialsAreValid) return;
+      await registerNewPasskey();
+      setNotification('Passkey rewired successfully', 'Success', 'success');
+      onNext('rewire-passkey');
+    } catch (error) {
+      setNotification('Something went wrong', 'Oops...', 'error');
+      Sentry.captureException(error);
+    }
+  };
+
   useEffect(() => {
     const recoveryKey = params.get('token');
     if (recoveryKey) {
-      validCredentials(recoveryKey)
-        .then((success) => {
-          if (success === null) return;
-          if (!success) return;
-          registerNewPasskey()
-            .then(() => {
-              setNotification('Passkey rewired successfully', 'Success', 'success');
-              onNext('rewire-passkey');
-            })
-            .catch((error) => {
-              setNotification('Something went wrong', 'Oops...', 'error');
-              console.error(error);
-            });
-        })
-        .catch(console.error);
+      void handleRewirePasskey(recoveryKey);
     }
   }, [params, validCredentials]);
 

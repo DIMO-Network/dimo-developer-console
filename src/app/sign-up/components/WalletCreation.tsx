@@ -42,7 +42,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
 
   useEffect(() => {
     if (!session) return;
-    handleWalletCreation().catch(console.error);
+    void handleWalletCreation();
   }, [session]);
 
   return (

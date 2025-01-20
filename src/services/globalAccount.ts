@@ -21,7 +21,6 @@ export const getUserSubOrganization = async (
         return {} as ISubOrganization;
       }
     }
-    Sentry.captureException(error);
     throw error;
   }
 };
