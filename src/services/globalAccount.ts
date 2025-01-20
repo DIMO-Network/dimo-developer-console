@@ -1,7 +1,6 @@
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import axios, { AxiosError } from 'axios';
-import * as Sentry from '@sentry/nextjs';
 
 const globalAccountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
@@ -21,7 +20,6 @@ export const getUserSubOrganization = async (
         return {} as ISubOrganization;
       }
     }
-    Sentry.captureException(error);
     throw error;
   }
 };

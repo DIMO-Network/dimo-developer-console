@@ -194,30 +194,36 @@ export const useGlobalAccount = () => {
   };
 
   const registerSubOrganization = async (): Promise<ISubOrganization> => {
-    if (!session?.user?.email) return {} as ISubOrganization;
-    const { email } = session.user;
+    try {
+      if (!session?.user?.email) return {} as ISubOrganization;
+      const { email } = session.user;
 
-    const challenge = generateRandomBuffer();
-    const encodedChallenge = base64UrlEncode(challenge);
-    const attestation = await getPasskeyAttestation(email, challenge);
+      const challenge = generateRandomBuffer();
+      const encodedChallenge = base64UrlEncode(challenge);
+      const attestation = await getPasskeyAttestation(email, challenge);
 
-    const response = await createSubOrganization({
-      email,
-      attestation,
-      encodedChallenge,
-      deployAccount: true,
-    });
+      const response = await createSubOrganization({
+        email,
+        attestation,
+        encodedChallenge,
+        deployAccount: true,
+      });
 
-    if (!response?.subOrganizationId) {
-      console.error('Error creating sub organization');
+      if (!response?.subOrganizationId) {
+        console.error('Error creating sub organization');
+        return {} as ISubOrganization;
+      }
+
+      setOrganizationInfo({
+        ...response,
+      });
+
+      return response;
+    } catch (e) {
+      Sentry.captureException(e);
+      console.error('Error creating sub organization', e);
       return {} as ISubOrganization;
     }
-
-    setOrganizationInfo({
-      ...response,
-    });
-
-    return response;
   };
 
   const emailRecovery = async (email: string): Promise<boolean> => {
@@ -588,7 +594,10 @@ export const useGlobalAccount = () => {
           if (!subOrganization) return;
           setOrganizationInfo(subOrganization);
         })
-        .catch(console.error);
+        .catch((e) => {
+          Sentry.captureException(e);
+          console.error('Error getting sub organization', e);
+        });
     }
   }, [session, organizationInfo]);
 
