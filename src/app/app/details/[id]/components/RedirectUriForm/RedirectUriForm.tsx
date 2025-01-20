@@ -46,8 +46,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   });
 
   const handleSetDomain = async (uri: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = [
       {
         to: configuration.DLC_ADDRESS,
@@ -99,8 +98,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
                 },
                 validate: {
                   url: (str = '') =>
-                    isURL(str, { require_tld: false }) ||
-                    'Invalid Redirect URI',
+                    isURL(str, { require_tld: false }) || 'Invalid Redirect URI',
                 },
               })}
               placeholder="www.google.com"

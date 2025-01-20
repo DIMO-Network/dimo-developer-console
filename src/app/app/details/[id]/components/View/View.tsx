@@ -52,8 +52,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleEnableSigner = async (signer: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
@@ -67,8 +66,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleDisableSigner = (signer: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
@@ -82,8 +80,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleRemoveUri = (uri: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
@@ -129,9 +126,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const getAllDisableSignerTransactions = () => {
-    return (
-      app?.Signers?.map((signer) => handleDisableSigner(signer.address)) || []
-    );
+    return app?.Signers?.map((signer) => handleDisableSigner(signer.address)) || [];
   };
 
   const getAllRemoveUriTransactions = () => {
@@ -196,26 +191,17 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
           <div className="redirect-uri-content">
             <Title component="h2">Authorized Redirect URIs</Title>
             {isOwner(role) && app && (
-              <RedirectUriForm
-                appId={app!.id!}
-                refreshData={refreshAppDetails}
-              />
+              <RedirectUriForm appId={app!.id!} refreshData={refreshAppDetails} />
             )}
           </div>
           <div className="signers-table">
             {app && (
-              <RedirectUriList
-                list={app?.RedirectUris}
-                refreshData={refreshAppDetails}
-              />
+              <RedirectUriList list={app?.RedirectUris} refreshData={refreshAppDetails} />
             )}
           </div>
           {isOwner(role) && (
             <div className="extra-actions">
-              <Button
-                className="error-simple"
-                onClick={handleDeleteApplication}
-              >
+              <Button className="error-simple" onClick={handleDeleteApplication}>
                 Delete application
               </Button>
             </div>

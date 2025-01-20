@@ -1,9 +1,5 @@
 import { type ReactElement, type FC } from 'react';
-import {
-  PlusCircleIcon,
-  CubeIcon,
-  CheckIcon,
-} from '@heroicons/react/24/outline';
+import { PlusCircleIcon, CubeIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
@@ -79,8 +75,7 @@ export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
         {renderAction({
           Icon: <PlusCircleIcon className="h-5 w-5" />,
           title: 'Create an application',
-          description:
-            'Create an application as part of your Developer License',
+          description: 'Create an application as part of your Developer License',
           actionLabel: 'Create an app',
           actionCta: handleCreateApp,
           completed: hasApps,

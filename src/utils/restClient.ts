@@ -60,12 +60,7 @@ export class RestClient {
     Object.keys(queryParams).forEach((key) =>
       url.searchParams.append(key, queryParams[key]),
     );
-    return await this.execute<T>(
-      'GET',
-      url.toString(),
-      undefined,
-      customHeaders,
-    );
+    return await this.execute<T>('GET', url.toString(), undefined, customHeaders);
   }
 
   async post<T>(

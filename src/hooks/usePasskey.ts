@@ -9,8 +9,7 @@ export const usePasskey = () => {
     if (!window.PublicKeyCredential) return false;
 
     // "isUserVerifyingPlatformAuthenticatorAvailable" means the feature detection is usable.
-    if (!PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)
-      return false;
+    if (!PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) return false;
 
     // "isConditionalMediationAvailable" means the feature detection is usable.
     if (!PublicKeyCredential.isConditionalMediationAvailable) return false;

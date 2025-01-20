@@ -21,10 +21,7 @@ interface IProps {
   refreshData: () => void;
 }
 
-export const TeamManagement: FC<IProps> = ({
-  teamCollaborators,
-  refreshData,
-}) => {
+export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { data: session } = useSession();
@@ -90,11 +87,7 @@ export const TeamManagement: FC<IProps> = ({
 
   return (
     <>
-      <LoadingModal
-        isOpen={isOpened}
-        setIsOpen={setIsOpened}
-        {...loadingStatus}
-      />
+      <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
 
       <Table
         columns={[

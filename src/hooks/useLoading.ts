@@ -4,9 +4,7 @@ interface IParams {
   [key: string]: unknown;
 }
 
-export const useLoading = (
-  action: (args?: IParams | IParams[]) => Promise<void>,
-) => {
+export const useLoading = (action: (args?: IParams | IParams[]) => Promise<void>) => {
   const [loading, setLoading] = useState(false);
 
   const handleAction = async (...args: IParams[]): Promise<void> => {

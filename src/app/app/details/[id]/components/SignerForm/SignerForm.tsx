@@ -42,9 +42,7 @@ export const SignerForm: FC = () => {
               role="signer-address-input"
             />
           </Label>
-          {errors.address && (
-            <TextError errorMessage={errors.address?.message ?? ''} />
-          )}
+          {errors.address && <TextError errorMessage={errors.address?.message ?? ''} />}
         </div>
         <div className="cta">
           <Button className="primary-outline px-4">Generate Key</Button>

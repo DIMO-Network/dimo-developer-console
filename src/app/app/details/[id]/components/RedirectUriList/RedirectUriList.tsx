@@ -60,11 +60,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
     );
   };
 
-  const handleUpdateStatus = async (
-    id: string,
-    uri: string,
-    newStatus: boolean,
-  ) => {
+  const handleUpdateStatus = async (id: string, uri: string, newStatus: boolean) => {
     try {
       setIsOpened(true);
       await handleSetDomain(uri, newStatus);
@@ -133,11 +129,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
             data={recordsToShow}
             actions={[renderToggleStatus, renderDeleteRedirectUriAction]}
           />
-          <LoadingModal
-            isOpen={isOpened}
-            setIsOpen={setIsOpened}
-            {...loadingStatus}
-          />
+          <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
         </>
       )}
     </>

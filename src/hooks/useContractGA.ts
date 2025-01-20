@@ -21,12 +21,8 @@ import { getCachedDimoPrice } from '@/services/wallet';
 const { DCX_IN_USD = 0.001 } = process.env;
 
 export const useContractGA = () => {
-  const {
-    organizationInfo,
-    getKernelClient,
-    getPublicClient,
-    handleOnChainError,
-  } = useGlobalAccount();
+  const { organizationInfo, getKernelClient, getPublicClient, handleOnChainError } =
+    useGlobalAccount();
   const [balanceDimo, setBalanceDimo] = useState<number>(0);
   const [balanceDCX, setBalanceDCX] = useState<number>(0);
   const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
@@ -307,45 +303,31 @@ export const useContractGA = () => {
     dimoContract.read
       .balanceOf([organizationInfo!.smartContractAddress])
       .then((currentBalanceWei: unknown) => {
-        setBalanceDimo(
-          Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
-        );
+        setBalanceDimo(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       })
       .catch(console.error);
 
     dimoCreditsContract.read
       .balanceOf([organizationInfo!.smartContractAddress])
       .then((currentBalanceWei: unknown) => {
-        setBalanceDCX(
-          Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
-        );
+        setBalanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       })
       .catch(console.error);
 
     dimoContract.read
-      .allowance([
-        organizationInfo.smartContractAddress,
-        configuration.DLC_ADDRESS,
-      ])
+      .allowance([organizationInfo.smartContractAddress, configuration.DLC_ADDRESS])
       .then((currentBalanceWei: unknown) => {
         setAllowanceDLC(
-          Math.ceil(
-            Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
-          ),
+          Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))),
         );
       })
       .catch(console.error);
 
     dimoContract.read
-      .allowance([
-        organizationInfo.smartContractAddress,
-        configuration.DCX_ADDRESS,
-      ])
+      .allowance([organizationInfo.smartContractAddress, configuration.DCX_ADDRESS])
       .then((currentBalanceWei: unknown) => {
         setAllowanceDCX(
-          Math.ceil(
-            Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
-          ),
+          Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))),
         );
       })
       .catch(console.error);

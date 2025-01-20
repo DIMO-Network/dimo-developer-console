@@ -22,11 +22,7 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
           if (!success) return;
           registerNewPasskey()
             .then(() => {
-              setNotification(
-                'Passkey rewired successfully',
-                'Success',
-                'success',
-              );
+              setNotification('Passkey rewired successfully', 'Success', 'success');
               onNext('rewire-passkey');
             })
             .catch((error) => {
@@ -40,13 +36,9 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
 
   return (
     <div className="text-left text-xl mt-4">
-      <h1 className="opacity-30">
-        A passkey is the fastest and most secure way to sign
-      </h1>
+      <h1 className="opacity-30">A passkey is the fastest and most secure way to sign</h1>
       <h1 className="opacity-30">in to DIMO.</h1>
-      <h1 className="mt-4 text-center">
-        Hang tight! we are rewiring your passkey...
-      </h1>
+      <h1 className="mt-4 text-center">Hang tight! we are rewiring your passkey...</h1>
       <BubbleLoader isLoading={true} />
     </div>
   );

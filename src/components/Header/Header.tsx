@@ -36,11 +36,7 @@ export const Header: FC = () => {
 
   return (
     <header className="header">
-      <img
-        src={'/images/build-on-dimo.png'}
-        alt="DIMO Logo"
-        className="w-44 h-6"
-      />
+      <img src={'/images/build-on-dimo.png'} alt="DIMO Logo" className="w-44 h-6" />
       <div className="user-information" role="user-information">
         <UserAvatar name={name ?? ''} />
         <button

@@ -65,9 +65,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
                   role="token-value-input"
                   ref={ref}
                 />
-                {description && (
-                  <span className="description">{description}</span>
-                )}
+                {description && <span className="description">{description}</span>}
               </div>
               {showControls && (
                 <button

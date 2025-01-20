@@ -20,10 +20,7 @@ export const SignUpWith: FC<IProps> = ({ onNext }) => {
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     if (app === 'credentials') {
-      const { existItem } = await existUserEmailOrAddress(
-        auth?.address ?? null,
-        app,
-      );
+      const { existItem } = await existUserEmailOrAddress(auth?.address ?? null, app);
 
       if (!existItem) {
         onNext('sign-up-with', auth ?? {});
@@ -37,11 +34,7 @@ export const SignUpWith: FC<IProps> = ({ onNext }) => {
   return (
     <>
       <section className="sign-up__buttons">
-        <SignInButtons
-          isSignIn={false}
-          disabled={!acceptTerms}
-          onCTA={handleCTA}
-        />
+        <SignInButtons isSignIn={false} disabled={!acceptTerms} onCTA={handleCTA} />
       </section>
       <section className="sign-up__extra-links">
         <Anchor href="/sign-in" className="primary">

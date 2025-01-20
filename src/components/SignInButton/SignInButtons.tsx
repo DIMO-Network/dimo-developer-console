@@ -14,11 +14,7 @@ interface SignInButtonProps {
   onCTA: (a: string, d?: Partial<IAuth>) => void;
 }
 
-export const SignInButtons: FC<SignInButtonProps> = ({
-  isSignIn,
-  disabled,
-  onCTA,
-}) => {
+export const SignInButtons: FC<SignInButtonProps> = ({ isSignIn, disabled, onCTA }) => {
   const { setNotification } = useContext(NotificationContext);
 
   const handlerLogin = (app: string, auth?: Partial<IAuth>) => {

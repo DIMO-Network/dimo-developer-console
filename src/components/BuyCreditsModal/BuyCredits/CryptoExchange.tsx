@@ -15,10 +15,7 @@ import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
-  onNext: (
-    flow: string,
-    transaction?: Partial<IDcxPurchaseTransaction>,
-  ) => void;
+  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
   transactionData?: Partial<IDcxPurchaseTransaction>;
 }
 
@@ -42,13 +39,7 @@ const StatusIcon = ({ status }: { status: LoadingStatus }) => {
   }
 };
 
-const ProcessCard = ({
-  title,
-  status,
-}: {
-  title: string;
-  status: LoadingStatus;
-}) => {
+const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus }) => {
   return (
     <div className="minting-card">
       <span>{title}</span>
@@ -60,15 +51,12 @@ const ProcessCard = ({
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const { setNotification } = useContext(NotificationContext);
   const { allowanceDCX, processTransactions } = useContractGA();
-  const { organizationInfo, depositWmatic, swapWmaticToDimo } =
-    useGlobalAccount();
+  const { organizationInfo, depositWmatic, swapWmaticToDimo } = useGlobalAccount();
 
   const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
     LoadingStatus.None,
   );
-  const [mintingDCX, setMintingDCX] = useState<LoadingStatus>(
-    LoadingStatus.None,
-  );
+  const [mintingDCX, setMintingDCX] = useState<LoadingStatus>(LoadingStatus.None);
 
   const mintDCX = async (): Promise<
     {
@@ -88,10 +76,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
         data: encodeFunctionData({
           abi: DimoABI,
           functionName: '0x095ea7b3',
-          args: [
-            configuration.DCX_ADDRESS,
-            BigInt(utils.toWei(expendableDimo, 'ether')),
-          ],
+          args: [configuration.DCX_ADDRESS, BigInt(utils.toWei(expendableDimo, 'ether'))],
         }),
       });
     }
@@ -142,9 +127,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       setSwappingIntoDimo(LoadingStatus.Loading);
 
       if (!transactionData?.alreadyHasWmatic) {
-        const depositResult = await depositWmatic(
-          transactionData!.maticAmount!,
-        );
+        const depositResult = await depositWmatic(transactionData!.maticAmount!);
         if (!depositResult.success) {
           setNotification(depositResult.reason!, 'Oops...', 'error');
           setSwappingIntoDimo(LoadingStatus.Error);
@@ -181,10 +164,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
 
   useEffect(() => {
     if (!organizationInfo?.subOrganizationId) return;
-    if (
-      swappingIntoDimo === LoadingStatus.Success &&
-      mintingDCX === LoadingStatus.None
-    ) {
+    if (swappingIntoDimo === LoadingStatus.Success && mintingDCX === LoadingStatus.None) {
       handleMintingDcx().catch(console.error);
     }
   }, [organizationInfo, swappingIntoDimo, mintingDCX]);

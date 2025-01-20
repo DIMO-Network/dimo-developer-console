@@ -5,9 +5,7 @@ export const useStripeCrypto = () => {
   const [stripeClientId, setStripeClientId] = useState<string | null>(null);
 
   const loadStripeOnRamp = async () => {
-    return await loadStripeOnramp(
-      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-    );
+    return await loadStripeOnramp(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
   };
 
   const createStripeCryptoSession = async (
@@ -27,7 +25,7 @@ export const useStripeCrypto = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_STRIPE_API_KEY!}`,
+        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_STRIPE_API_KEY!}`,
       },
       body: params,
     });
