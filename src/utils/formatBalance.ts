@@ -31,9 +31,6 @@ export const formatSimpleBalance = (value: number): string => {
   return formatSimpleBalanceWithDigits(value, 2);
 };
 
-export const formatSimpleBalanceWithDigits = (
-  value: number,
-  digits: number,
-): string => {
+export const formatSimpleBalanceWithDigits = (value: number, digits: number): string => {
   return value.toLocaleString('en-US', { maximumFractionDigits: digits });
 };

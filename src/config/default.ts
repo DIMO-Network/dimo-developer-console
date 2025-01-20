@@ -50,20 +50,16 @@ export const RAINBOW_PROJECT = {
 export const CONTRACT_NETWORK = BigInt(80_002);
 
 // DIMO TOKEN AMOY
-export const DC_ADDRESS: `0x${string}` =
-  '0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10';
+export const DC_ADDRESS: `0x${string}` = '0x21cFE003997fB7c2B3cfe5cf71e7833B7B2eCe10';
 
 // DIMO CREDIT AMOY
-export const DCX_ADDRESS: `0x${string}` =
-  '0x49c120f4C3c6679Ebd357F2d749E4D1C03598d65';
+export const DCX_ADDRESS: `0x${string}` = '0x49c120f4C3c6679Ebd357F2d749E4D1C03598d65';
 
 // DIMO LICENSE AMOY
-export const DLC_ADDRESS: `0x${string}` =
-  '0xdb6c0dBbaf48b9D9Bcf5ca3C45cFF3811D70eD96';
+export const DLC_ADDRESS: `0x${string}` = '0xdb6c0dBbaf48b9D9Bcf5ca3C45cFF3811D70eD96';
 
 // WRAPPED MATIC AMOY
-export const WMATIC: `0x${string}` =
-  '0x360ad4f9a9A8EFe9A8DCB5f461c4Cc1047E1Dcf9';
+export const WMATIC: `0x${string}` = '0x360ad4f9a9A8EFe9A8DCB5f461c4Cc1047E1Dcf9';
 
 // SwapRouter AMOY
 export const SwapRouterAddress: `0x${string}` =
@@ -74,8 +70,7 @@ export const gasPrice = 43000000000;
 
 export const MINIMUM_CREDITS = 10000;
 
-export const DIMO_CONTRACT_ADDRESS =
-  '0x523d4a08cf149f1Ada8113B3b3400234236Bb5E8';
+export const DIMO_CONTRACT_ADDRESS = '0x523d4a08cf149f1Ada8113B3b3400234236Bb5E8';
 
 export const ISSUED_TOPIC: `0x${string}` =
   '0x7533f62ec6601bf9c87f8d96bf756b4b495e2a0e26ec9284e4927926ed6b3afd';

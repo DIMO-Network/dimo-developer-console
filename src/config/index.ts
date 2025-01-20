@@ -3,6 +3,7 @@ import * as productionConfig from './production';
 import * as previewConfig from './preview';
 
 type Configuration = {
+  environment: string;
   appName: string;
   LOGIN_PAGES: string[];
   VALIDATION_PAGES: string[];
@@ -26,14 +27,17 @@ type Configuration = {
   ISSUED_TOPIC: `0x${string}`;
 };
 
+const getCurrentEnvironment = (): string => {
+  let environment = process.env.VERCEL_ENV!;
+  if (!environment) {
+    environment = process.env.NEXT_PUBLIC_VERCEL_ENV!;
+  }
+  return environment;
+};
+
 export const getConfig = (): Configuration => {
   // Determine the current environment
-  // TODO: find a better way to determine the environment
-  const env = process.env.VERCEL_ENV!;
-  const clientEnv = process.env.NEXT_PUBLIC_CE!;
-
-  const environment = env ?? clientEnv;
-
+  const environment = getCurrentEnvironment();
   // Select the appropriate configuration to merge with default based on the environment
   let environmentConfig = {};
   switch (environment) {
@@ -50,17 +54,12 @@ export const getConfig = (): Configuration => {
       break;
   }
 
-  return {
+  const configuration = {
+    environment: environment,
     ...defaultConfig,
     ...environmentConfig,
-    frontendUrl: process.env.NEXT_PUBLIC_FRONTEND_URL!,
-    backendUrl: process.env.NEXT_PUBLIC_BACKEND_URL!,
-    WMATIC: process.env.NEXT_PUBLIC_WMATIC!,
-    DC_ADDRESS: process.env.NEXT_PUBLIC_DC_ADDRESS!,
-    DCX_ADDRESS: process.env.NEXT_PUBLIC_DCX_ADDRESS!,
-    DLC_ADDRESS: process.env.NEXT_PUBLIC_DLC_ADDRESS!,
-    SwapRouterAddress: process.env.NEXT_PUBLIC_SWAP_ROUTER_ADDRESS!,
   } as Configuration;
+  return configuration;
 };
 
 const currentConfig = getConfig();

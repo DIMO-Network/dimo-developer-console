@@ -1,9 +1,9 @@
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
-import xior, { XiorError } from 'xior';
+import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 
-const globalAccountClient = xior.create({
+const globalAccountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
 });
 
@@ -11,15 +11,17 @@ export const getUserSubOrganization = async (
   email: string,
 ): Promise<ISubOrganization> => {
   try {
-    const { data } = await globalAccountClient.get(`/api/account/${email}`);
+    const { data } = await globalAccountClient.get<ISubOrganization>(
+      `/api/account/${email}`,
+    );
     return data;
   } catch (error) {
-    Sentry.captureException(error);
-    if (error instanceof XiorError) {
+    if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
         return {} as ISubOrganization;
       }
     }
+    Sentry.captureException(error);
     throw error;
   }
 };
@@ -27,11 +29,15 @@ export const getUserSubOrganization = async (
 export const createSubOrganization = async (
   walletInfo: Partial<IWalletSubOrganization>,
 ): Promise<ISubOrganization> => {
-  const { data } = await globalAccountClient.post('/api/account', walletInfo, {
-    headers: {
-      'Content-Type': 'application/json',
+  const { data } = await globalAccountClient.post<ISubOrganization>(
+    '/api/account',
+    walletInfo,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
-  });
+  );
   return data;
 };
 

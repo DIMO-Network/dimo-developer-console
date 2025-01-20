@@ -5,12 +5,7 @@ describe('Button', () => {
   it('renders a button', () => {
     const handleClick = jest.fn();
     render(
-      <Button
-        type="submit"
-        className="primary"
-        role="button"
-        onClick={handleClick}
-      >
+      <Button type="submit" className="primary" role="button" onClick={handleClick}>
         Sign in
       </Button>,
     );

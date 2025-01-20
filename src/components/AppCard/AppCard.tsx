@@ -28,9 +28,7 @@ export const AppCard: FC<IProps> = ({
     <Card className={classNames('app-card card-border', className)}>
       <div className="content">
         <p className="title">{name}</p>
-        <p className="description">
-          {description || ENVIRONMENTS_LABELS[scope]}
-        </p>
+        <p className="description">{description || ENVIRONMENTS_LABELS[scope]}</p>
       </div>
       {AppIcon[scope || 'sandbox']}
     </Card>

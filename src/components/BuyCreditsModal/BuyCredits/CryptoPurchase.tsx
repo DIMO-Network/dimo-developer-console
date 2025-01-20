@@ -5,12 +5,10 @@ import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import { OnrampSession } from '@stripe/crypto';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { IDcxPurchaseTransaction, IStripeCryptoEvent } from '@/types/wallet';
+import configuration from '@/config';
 
 interface IProps {
-  onNext: (
-    flow: string,
-    transaction?: Partial<IDcxPurchaseTransaction>,
-  ) => void;
+  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
   transactionData?: Partial<IDcxPurchaseTransaction>;
 }
 
@@ -41,21 +39,16 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
   };
 
   const handleOnChange = (event: IStripeCryptoEvent) => {
-    if (event.payload.session.status === 'fulfillment_complete') {
-      const env = process.env.VERCEL_ENV!;
-      const clientEnv = process.env.NEXT_PUBLIC_CE!;
-
-      const environment = env ?? clientEnv;
-
-      const processedAmount =
-        environment === 'production'
-          ? event.payload.session.quote!.destination_amount!
-          : '1';
-      onNext('crypto-purchase', {
-        ...transactionData,
-        maticAmount: BigInt(Math.floor(Number(processedAmount))),
-      });
+    if (event.payload.session.status !== 'fulfillment_complete') return;
+    let processedAmount = '1';
+    if (configuration.environment === 'production') {
+      processedAmount = event.payload.session.quote!.destination_amount!;
     }
+
+    onNext('crypto-purchase', {
+      ...transactionData,
+      maticAmount: BigInt(Math.floor(Number(processedAmount))),
+    });
   };
 
   useEffect(() => {
@@ -75,10 +68,7 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
       cryptoSession.addEventListener('onramp_session_updated', handleOnChange);
       return () => {
         cryptoSession.removeEventListener('onramp_ui_loaded', handleOnReady);
-        cryptoSession.removeEventListener(
-          'onramp_session_updated',
-          handleOnChange,
-        );
+        cryptoSession.removeEventListener('onramp_session_updated', handleOnChange);
       };
     }
     return () => {};

@@ -91,9 +91,7 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials, req) {
         try {
-          const siwe = new SiweMessage(
-            JSON.parse(credentials?.message || '{}'),
-          );
+          const siwe = new SiweMessage(JSON.parse(credentials?.message || '{}'));
 
           const { host: nextAuthHost } = new URL(config.frontendUrl);
           if (siwe.domain !== nextAuthHost) {
@@ -114,10 +112,9 @@ export const authOptions: AuthOptions = {
           };
         } catch (e) {
           Sentry.captureException(e);
-          console.error(
-            'Error while authorizing the user with credentials method',
-            { error: e },
-          );
+          console.error('Error while authorizing the user with credentials method', {
+            error: e,
+          });
           return null;
         }
       },
@@ -144,9 +141,7 @@ export const authOptions: AuthOptions = {
         provider,
       );
 
-      return existItem && !existAssociation
-        ? '/sign-in?error=unique_email'
-        : true;
+      return existItem && !existAssociation ? '/sign-in?error=unique_email' : true;
     },
     jwt,
     session,

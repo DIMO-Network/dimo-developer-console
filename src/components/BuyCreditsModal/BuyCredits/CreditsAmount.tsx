@@ -41,10 +41,7 @@ interface IForm {
 }
 
 interface IProps {
-  onNext: (
-    flow: string,
-    transaction?: Partial<IDcxPurchaseTransaction>,
-  ) => void;
+  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
 }
 
 export const CreditsAmount = ({ onNext }: IProps) => {
@@ -155,12 +152,9 @@ export const CreditsAmount = ({ onNext }: IProps) => {
               onClick={() => {
                 handleSelection(value);
               }}
-              className={classnames(
-                'flex flex-row card-border gap-2 cursor-pointer',
-                {
-                  '!border-white': paymentMethod === value,
-                },
-              )}
+              className={classnames('flex flex-row card-border gap-2 cursor-pointer', {
+                '!border-white': paymentMethod === value,
+              })}
             >
               <Icon className={iconClassName} />
               <p>{text}</p>

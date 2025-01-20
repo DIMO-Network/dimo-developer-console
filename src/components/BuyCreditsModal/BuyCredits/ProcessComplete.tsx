@@ -9,10 +9,7 @@ import { Title } from '@/components/Title';
 import { useGlobalAccount } from '@/hooks';
 
 interface IProps {
-  onNext: (
-    flow: string,
-    transaction?: Partial<IDcxPurchaseTransaction>,
-  ) => void;
+  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
   transactionData?: Partial<IDcxPurchaseTransaction>;
 }
 
@@ -41,8 +38,7 @@ export const ProcessComplete = ({ onNext, transactionData }: IProps) => {
         Successfully Purchased DCX
       </Title>
       <p className="text-center">
-        Please check your inbox for the invoice. It should arrive within 24
-        hours.
+        Please check your inbox for the invoice. It should arrive within 24 hours.
       </p>
       <Button className="primary w-40 !h-9" onClick={handleFinish}>
         Finish

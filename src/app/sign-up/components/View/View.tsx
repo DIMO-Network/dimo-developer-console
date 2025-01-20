@@ -4,11 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import * as Sentry from '@sentry/nextjs';
 
-import {
-  BuildForForm,
-  CompanyInfoForm,
-  WalletCreation,
-} from '@/app/sign-up/components';
+import { BuildForForm, CompanyInfoForm, WalletCreation } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
@@ -46,18 +42,14 @@ const View = () => {
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
 
   const { Component: SignUpFlow, title } =
-    signUpFlows[flow as keyof typeof signUpFlows] ??
-    signUpFlows['wallet-creation'];
+    signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['wallet-creation'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
     try {
       await completeUserData(auth);
       router.replace('/app');
     } catch (error) {
-      console.error(
-        'Something went wrong while the completing user information',
-        error,
-      );
+      console.error('Something went wrong while the completing user information', error);
       Sentry.captureException(error);
       setNotification('Something went wrong', 'Oops...', 'error');
     }
@@ -89,8 +81,7 @@ const View = () => {
       {},
     );
     const nextProcess =
-      processes[(currentProcess.order + 1) as keyof typeof processes] ??
-      'complete';
+      processes[(currentProcess.order + 1) as keyof typeof processes] ?? 'complete';
     if (nextProcess !== 'complete') setFlow(nextProcess);
     else await handleCompleteUserData(newUserData);
   };
