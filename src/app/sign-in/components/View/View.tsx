@@ -46,7 +46,6 @@ export const View = () => {
   };
 
   useEffect(() => {
-    console.info(configuration.environment);
     if (isCollaborator(role)) {
       router.push('/app');
     } else {
