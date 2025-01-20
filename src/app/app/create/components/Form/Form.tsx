@@ -74,7 +74,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
       const desiredTokenAmount = await getDesiredTokenAmount();
       const enoughBalance = await checkEnoughBalance();
       const transactions = [];
-
+            
       if (!enoughBalance.dcx && !enoughBalance.dimo)
         return setNotification(
           'Insufficient DIMO or DCX balance',

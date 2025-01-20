@@ -94,9 +94,9 @@ export const useContractGA = () => {
       const kernelClient = await getKernelClient(organizationInfo);
 
       if (!kernelClient) return {} as IKernelOperationStatus;
-
+      const operation = await kernelClient.account.encodeCalls(transactions);
       const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-        callData: await kernelClient.account.encodeCalls(transactions),
+        callData: operation,
       });
 
       const receipt = await kernelClient.waitForUserOperationReceipt({

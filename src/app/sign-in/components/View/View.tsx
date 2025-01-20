@@ -15,6 +15,7 @@ import { withNotifications } from '@/hoc';
 
 import './View.css';
 import { NotificationContext } from '@/context/notificationContext';
+import configuration from '@/config';
 
 export const View = () => {
   useErrorHandler();
@@ -45,6 +46,7 @@ export const View = () => {
   };
 
   useEffect(() => {
+    console.info(configuration.environment);
     if (isCollaborator(role)) {
       router.push('/app');
     } else {

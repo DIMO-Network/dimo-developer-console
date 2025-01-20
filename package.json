@@ -34,7 +34,6 @@
     "@typescript-eslint/eslint-plugin": "^7.12.0",
     "@typescript-eslint/parser": "^7.12.0",
     "@zerodev/ecdsa-validator": "^5.4.2",
-    "@zerodev/passkey-validator": "^5.5.1",
     "@zerodev/sdk": "^5.4.12",
     "axios": "^1.7.9",
     "classnames": "^2.5.1",

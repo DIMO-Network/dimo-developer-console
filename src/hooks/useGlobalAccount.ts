@@ -584,13 +584,8 @@ export const useGlobalAccount = () => {
     return args[0];
   };
 
-  const getChain = (): Chain => {
-    const env = process.env.VERCEL_ENV!;
-    const clientEnv = process.env.NEXT_PUBLIC_CE!;
-
-    const environment = env ?? clientEnv;
-
-    if (environment === 'production') {
+  const getChain = (): Chain => {    
+    if (configuration.environment === 'production') {
       return polygon;
     }
 

@@ -9,6 +9,7 @@ import useGlobalAccount from '../../../hooks/useGlobalAccount';
 import { Button } from '@/components/Button';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import configuration from '@/config';
 
 interface IProps {
   onNext: (
@@ -75,18 +76,12 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     setSelectedBalance(value);
   };
 
-  const getAmountToProcess = (balance: ICryptoBalance): bigint => {
-    const env = process.env.VERCEL_ENV!;
-    const clientEnv = process.env.NEXT_PUBLIC_CE!;
-    const environment = env ?? clientEnv;
-
-    if (environment !== 'production') return BigInt(1);
+  const getAmountToProcess = (balance: ICryptoBalance): bigint => {    
+    if (configuration.environment !== 'production') return BigInt(1);
 
     const usdTarget = transactionData!.usdAmount!;
     const usdEquivalent = balance.balance * balance.price;
-
     const neededFromBalance = (balance.balance * usdTarget) / usdEquivalent;
-
     return BigInt(Math.ceil(neededFromBalance));
   };
 
