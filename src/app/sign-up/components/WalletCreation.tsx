@@ -35,10 +35,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
       onNext('wallet-creation', {});
     } catch (error) {
       Sentry.captureException(error);
-      console.error(
-        'Something went wrong while creating the user wallet',
-        error,
-      );
+      console.error('Something went wrong while creating the user wallet', error);
       setNotification('Something went wrong', 'Oops...', 'error');
     }
   };

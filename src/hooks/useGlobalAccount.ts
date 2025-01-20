@@ -77,8 +77,7 @@ export const useGlobalAccount = () => {
   const { data: session } = useSession();
   const router = useRouter();
   const { passkeyClient, authIframeClient } = useTurnkey();
-  const [organizationInfo, setOrganizationInfo] =
-    useState<ISubOrganization | null>(null);
+  const [organizationInfo, setOrganizationInfo] = useState<ISubOrganization | null>(null);
 
   const validCredentials = useCallback(
     async (authToken: string) => {
@@ -256,9 +255,7 @@ export const useGlobalAccount = () => {
         config.SwapRouterAddress,
       ]);
 
-      return BigInt(
-        Math.ceil(Number(utils.fromWei(allowance as bigint, 'ether'))),
-      );
+      return BigInt(Math.ceil(Number(utils.fromWei(allowance as bigint, 'ether'))));
     } catch (e) {
       Sentry.captureException(e);
       console.error('Error getting wmatic allowance', e);
@@ -266,9 +263,7 @@ export const useGlobalAccount = () => {
     }
   };
 
-  const depositWmatic = async (
-    amount: bigint,
-  ): Promise<IKernelOperationStatus> => {
+  const depositWmatic = async (amount: bigint): Promise<IKernelOperationStatus> => {
     try {
       if (!organizationInfo) return {} as IKernelOperationStatus;
       const kernelClient = await getKernelClient(organizationInfo);
@@ -296,10 +291,9 @@ export const useGlobalAccount = () => {
         ]),
       });
 
-      const { success, reason } =
-        await kernelClient.waitForUserOperationReceipt({
-          hash: wmaticDepositOpHash,
-        });
+      const { success, reason } = await kernelClient.waitForUserOperationReceipt({
+        hash: wmaticDepositOpHash,
+      });
 
       return {
         success,
@@ -315,9 +309,7 @@ export const useGlobalAccount = () => {
     }
   };
 
-  const swapWmaticToDimo = async (
-    amount: bigint,
-  ): Promise<IKernelOperationStatus> => {
+  const swapWmaticToDimo = async (amount: bigint): Promise<IKernelOperationStatus> => {
     try {
       if (!organizationInfo) return {} as IKernelOperationStatus;
       const kernelClient = await getKernelClient(organizationInfo);
@@ -340,10 +332,7 @@ export const useGlobalAccount = () => {
           data: encodeFunctionData({
             abi: WMatic,
             functionName: '0x095ea7b3',
-            args: [
-              config.SwapRouterAddress,
-              BigInt(utils.toWei(amount, 'ether')),
-            ],
+            args: [config.SwapRouterAddress, BigInt(utils.toWei(amount, 'ether'))],
           }),
         });
       }
@@ -371,19 +360,17 @@ export const useGlobalAccount = () => {
         }),
       });
 
-      const dimoExchangeOpData =
-        await kernelClient.account.encodeCalls(transactions);
+      const dimoExchangeOpData = await kernelClient.account.encodeCalls(transactions);
 
       const dimoExchangeOpHash = await kernelClient.sendUserOperation({
         callData: dimoExchangeOpData,
       });
 
-      const { success, reason } =
-        await kernelClient.waitForUserOperationReceipt({
-          hash: dimoExchangeOpHash,
-          timeout: 120_000,
-          pollingInterval: 10_000,
-        });
+      const { success, reason } = await kernelClient.waitForUserOperationReceipt({
+        hash: dimoExchangeOpHash,
+        timeout: 120_000,
+        pollingInterval: 10_000,
+      });
       return {
         success,
         reason,
@@ -584,7 +571,7 @@ export const useGlobalAccount = () => {
     return args[0];
   };
 
-  const getChain = (): Chain => {    
+  const getChain = (): Chain => {
     if (configuration.environment === 'production') {
       return polygon;
     }

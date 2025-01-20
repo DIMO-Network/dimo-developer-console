@@ -6,9 +6,7 @@ import { ITeamCollaborator } from '@/types/team';
 import * as Sentry from '@sentry/nextjs';
 
 export const useTeamCollaborators = () => {
-  const [teamCollaborators, setTeamCollaborators] = useState<
-    ITeamCollaborator[]
-  >([]);
+  const [teamCollaborators, setTeamCollaborators] = useState<ITeamCollaborator[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {

@@ -26,9 +26,7 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-export const withRainBow = <P extends object>(
-  WrappedComponent: ComponentType<P>,
-) => {
+export const withRainBow = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
     const { stripeClientId, setStripeClientId } = useStripeCrypto();
 
@@ -38,9 +36,7 @@ export const withRainBow = <P extends object>(
         <SessionProvider>
           <QueryClientProvider client={queryClient}>
             <TurnkeyProvider config={turnkeyConfig}>
-              <StripeCryptoContext.Provider
-                value={{ stripeClientId, setStripeClientId }}
-              >
+              <StripeCryptoContext.Provider value={{ stripeClientId, setStripeClientId }}>
                 <WrappedComponent {...props} />
               </StripeCryptoContext.Provider>
             </TurnkeyProvider>

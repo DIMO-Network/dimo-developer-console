@@ -9,14 +9,12 @@ const dimoApiClient = axios.create({
 });
 
 const getCurrentDimoPrice = async (): Promise<number> => {
-  const { data } =
-    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/DIMO');
+  const { data } = await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/DIMO');
   return data.data.DIMO[0].quote.USD.price;
 };
 
 const getCurrentPolPrice = async (): Promise<number> => {
-  const { data } =
-    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/POL');
+  const { data } = await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/POL');
   return data.data.POL[0].quote.USD.price;
 };
 

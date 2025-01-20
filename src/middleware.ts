@@ -9,8 +9,7 @@ import { getUserSubOrganization } from '@/services/globalAccount';
 import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 
-const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
-  configuration;
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
 
 const authMiddleware = withAuth({
   callbacks: {
@@ -51,10 +50,7 @@ const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
   return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
 };
 
-const validatePrivateSession = async (
-  request: NextRequest,
-  event: NextFetchEvent,
-) => {
+const validatePrivateSession = async (request: NextRequest, event: NextFetchEvent) => {
   const user = await getUserByToken();
   //TODO: check if we need to use company_email_owner or email
   const subOrganization = await getUserSubOrganization(
@@ -85,12 +81,9 @@ const validatePrivateSession = async (
   }
 
   if (!isCompliant && !flow) {
-    return NextResponse.redirect(
-      new URL(`/sign-up?flow=${missingFlow}`, request.url),
-      {
-        status: 307,
-      },
-    );
+    return NextResponse.redirect(new URL(`/sign-up?flow=${missingFlow}`, request.url), {
+      status: 307,
+    });
   }
 
   if (!isLoginPage) {
@@ -123,10 +116,7 @@ const validatePublicSession = async (request: NextRequest) => {
   return NextResponse.next();
 };
 
-export const middleware = async (
-  request: NextRequest,
-  event: NextFetchEvent,
-) => {
+export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
   const hasError = request.nextUrl.searchParams.get('error');
   const token = await getToken({ req: request });
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);

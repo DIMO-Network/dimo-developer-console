@@ -27,7 +27,7 @@ export const WalletConnectButton = () => {
           <div
             {...(!ready && {
               'aria-hidden': true,
-              style: {
+              'style': {
                 opacity: 0,
                 pointerEvents: 'none',
                 userSelect: 'none',
@@ -83,9 +83,7 @@ export const WalletConnectButton = () => {
 
                   <button onClick={openAccountModal} type="button">
                     {account.displayName}
-                    {account.displayBalance
-                      ? ` (${account.displayBalance})`
-                      : ''}
+                    {account.displayBalance ? ` (${account.displayBalance})` : ''}
                   </button>
                 </div>
               );

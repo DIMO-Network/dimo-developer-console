@@ -42,12 +42,7 @@ export const AccountInformationModal: FC<IProps> = () => {
 
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
-    setNotification(
-      'Wallet address copied to clipboard',
-      'Success',
-      'success',
-      1000,
-    );
+    setNotification('Wallet address copied to clipboard', 'Success', 'success', 1000);
   };
 
   const handleOpenBuyCreditsModal = () => {
@@ -108,9 +103,7 @@ export const AccountInformationModal: FC<IProps> = () => {
                   <ContentCopyIcon
                     className="w5 h-5 fill-white/50 cursor-pointer"
                     onClick={() =>
-                      handleCopy(
-                        get(organizationInfo, 'smartContractAddress', ''),
-                      )
+                      handleCopy(get(organizationInfo, 'smartContractAddress', ''))
                     }
                   />
                 }

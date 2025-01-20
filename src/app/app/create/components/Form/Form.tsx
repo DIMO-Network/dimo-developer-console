@@ -41,12 +41,8 @@ interface IProps {
 export const Form: FC<IProps> = ({ workspace }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const {
-    checkEnoughBalance,
-    getDesiredTokenAmount,
-    balanceDCX,
-    processTransactions,
-  } = useContractGA();
+  const { checkEnoughBalance, getDesiredTokenAmount, balanceDCX, processTransactions } =
+    useContractGA();
   const { organizationInfo } = useGlobalAccount();
   const router = useRouter();
   const {
@@ -74,23 +70,15 @@ export const Form: FC<IProps> = ({ workspace }) => {
       const desiredTokenAmount = await getDesiredTokenAmount();
       const enoughBalance = await checkEnoughBalance();
       const transactions = [];
-            
+
       if (!enoughBalance.dcx && !enoughBalance.dimo)
-        return setNotification(
-          'Insufficient DIMO or DCX balance',
-          'Oops...',
-          'error',
-        );
+        return setNotification('Insufficient DIMO or DCX balance', 'Oops...', 'error');
 
       if (!enoughBalance.dcx) {
-        transactions.push(
-          ...(await mintDCX(desiredTokenAmount, enoughBalance)),
-        );
+        transactions.push(...(await mintDCX(desiredTokenAmount, enoughBalance)));
       }
 
-      transactions.push(
-        ...(await prepareIssueInDC(desiredTokenAmount, enoughBalance)),
-      );
+      transactions.push(...(await prepareIssueInDC(desiredTokenAmount, enoughBalance)));
       if (transactions.length) {
         await processTransactions(transactions);
       }
@@ -123,9 +111,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
           functionName: 'approve',
           args: [
             configuration.DCX_ADDRESS,
-            BigInt(
-              utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether'),
-            ),
+            BigInt(utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether')),
           ],
         }),
       });
@@ -169,9 +155,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
           functionName: 'approve',
           args: [
             configuration.DLC_ADDRESS,
-            BigInt(
-              utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether'),
-            ),
+            BigInt(utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether')),
           ],
         }),
       },
@@ -180,16 +164,16 @@ export const Form: FC<IProps> = ({ workspace }) => {
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
     if (!_.isEmpty(workspace)) return workspace;
-    if (!organizationInfo)
-      throw new Error('There is not organization information');
+    if (!organizationInfo) throw new Error('There is not organization information');
 
     setLoadingStatus({
       label: 'Licensing the application...',
       status: 'loading',
     });
-    const workspaceName = String(
-      utils.fromAscii(workspaceData?.name ?? ''),
-    ).padEnd(66, '0');
+    const workspaceName = String(utils.fromAscii(workspaceData?.name ?? '')).padEnd(
+      66,
+      '0',
+    );
     setLoadingStatus({
       label: 'Creating developer license...',
       status: 'loading',
@@ -209,12 +193,9 @@ export const Form: FC<IProps> = ({ workspace }) => {
     ];
 
     const { logs } = await processTransactions(transaction);
-    const {
-      topics: [, rawTokenId = '0x', rawOwner = '0x', rawClientId = '0x'] = [],
-    } =
+    const { topics: [, rawTokenId = '0x', rawOwner = '0x', rawClientId = '0x'] = [] } =
       logs?.find(
-        ({ topics: [topic = '0x'] = [] }) =>
-          topic === configuration.ISSUED_TOPIC,
+        ({ topics: [topic = '0x'] = [] }) => topic === configuration.ISSUED_TOPIC,
       ) ?? {};
 
     return createWorkspace({
@@ -237,11 +218,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
 
   return (
     <>
-      <LoadingModal
-        isOpen={isOpened}
-        setIsOpen={setIsOpened}
-        {...loadingStatus}
-      />
+      <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
       <form onSubmit={handleSubmit(onSubmit)}>
         {(!workspace || Object.keys(workspace).length === 0) && (
           <Label htmlFor="namespace" className="text-xs text-medium">
@@ -259,9 +236,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
               role="namespace-input"
             />
             {errors?.workspace?.name && (
-              <TextError
-                errorMessage={errors?.workspace?.name?.message ?? ''}
-              />
+              <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
             )}
             <p className="text-sm text-grey-200">
               This is the namespace used across all your apps
@@ -285,9 +260,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
           {errors?.app?.name && (
             <TextError errorMessage={errors?.app?.name?.message ?? ''} />
           )}
-          <p className="text-sm text-grey-200">
-            This name is for your reference only
-          </p>
+          <p className="text-sm text-grey-200">This name is for your reference only</p>
         </Label>
         <div className="">
           <Controller
@@ -329,9 +302,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
               />
             )}
           />
-          {errors?.app?.scope && (
-            <TextError errorMessage="This field is required" />
-          )}
+          {errors?.app?.scope && <TextError errorMessage="This field is required" />}
         </div>
         <div className="flex flex-col pt-4">
           <Button

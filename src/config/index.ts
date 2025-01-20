@@ -33,7 +33,7 @@ const getCurrentEnvironment = (): string => {
     environment = process.env.NEXT_PUBLIC_VERCEL_ENV!;
   }
   return environment;
-}
+};
 
 export const getConfig = (): Configuration => {
   // Determine the current environment

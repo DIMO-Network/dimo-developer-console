@@ -16,8 +16,7 @@ export const useErrorHandler = () => {
   const error = searchParams.get('error') ?? '';
 
   useEffect(() => {
-    const message =
-      ERROR_CODES[error as keyof typeof ERROR_CODES] ?? 'Please try again';
+    const message = ERROR_CODES[error as keyof typeof ERROR_CODES] ?? 'Please try again';
     error && setNotification(message, 'Something went wrong', 'error');
   }, [error]);
 };

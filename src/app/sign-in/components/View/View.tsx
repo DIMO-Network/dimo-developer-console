@@ -75,11 +75,7 @@ export const View = () => {
             <div>
               <p className="terms-caption">
                 Lost your passkey?{' '}
-                <Anchor
-                  href="/email-recovery"
-                  target="_self"
-                  className="grey underline"
-                >
+                <Anchor href="/email-recovery" target="_self" className="grey underline">
                   Recover with your email
                 </Anchor>
               </p>

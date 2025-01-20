@@ -1,12 +1,7 @@
 'use client';
 
 import { type FC, Fragment, ReactNode } from 'react';
-import {
-  Dialog,
-  Transition,
-  TransitionChild,
-  DialogPanel,
-} from '@headlessui/react';
+import { Dialog, Transition, TransitionChild, DialogPanel } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 

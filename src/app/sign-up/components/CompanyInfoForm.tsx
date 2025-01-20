@@ -109,9 +109,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
           role="company-region"
         />
       </Label>
-      {errors.region && (
-        <TextError errorMessage={errors.region.message ?? ''} />
-      )}
+      {errors.region && <TextError errorMessage={errors.region.message ?? ''} />}
       <Label htmlFor="region" className="text-xs text-medium">
         Business/Developer Type *
         <SelectField

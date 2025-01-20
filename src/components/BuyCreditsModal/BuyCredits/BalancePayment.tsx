@@ -12,10 +12,7 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import configuration from '@/config';
 
 interface IProps {
-  onNext: (
-    flow: string,
-    transaction?: Partial<IDcxPurchaseTransaction>,
-  ) => void;
+  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
   transactionData?: Partial<IDcxPurchaseTransaction>;
 }
 interface ICryptoBalance {
@@ -37,21 +34,15 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   });
 
   const getBalances = async () => {
-    const [
-      dimoBalance,
-      polBalance,
-      wmaticBalance,
-      dimoPrice,
-      polPrice,
-      wmaticPrice,
-    ] = await Promise.all([
-      getDimoBalance(),
-      getPolBalance(),
-      getWmaticBalance(),
-      getDimoPrice(),
-      getPolPrice(),
-      getWMaticPrice(),
-    ]);
+    const [dimoBalance, polBalance, wmaticBalance, dimoPrice, polPrice, wmaticPrice] =
+      await Promise.all([
+        getDimoBalance(),
+        getPolBalance(),
+        getWmaticBalance(),
+        getDimoPrice(),
+        getPolPrice(),
+        getWMaticPrice(),
+      ]);
     const balances = [
       {
         currency: 'dimo',
@@ -76,7 +67,7 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     setSelectedBalance(value);
   };
 
-  const getAmountToProcess = (balance: ICryptoBalance): bigint => {    
+  const getAmountToProcess = (balance: ICryptoBalance): bigint => {
     if (configuration.environment !== 'production') return BigInt(1);
 
     const usdTarget = transactionData!.usdAmount!;
@@ -119,9 +110,7 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     <>
       <h1>Current Balances</h1>
       <div className="buy-credits-payment-methods">
-        {balances.length === 0 && (
-          <BubbleLoader isLoading={balances.length === 0} />
-        )}
+        {balances.length === 0 && <BubbleLoader isLoading={balances.length === 0} />}
         {balances.map((currentBalance) => {
           const { currency, balance, price } = currentBalance;
           const usdEquivalent = balance * price;

@@ -38,8 +38,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   };
 
   const handleDisableSigner = async (signer: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = [
       {
         to: configuration.DLC_ADDRESS,
@@ -111,10 +110,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     );
   };
 
-  const renderDeleteSignerAction = ({
-    id = '',
-    api_key: signer = '',
-  }: ISigner) => {
+  const renderDeleteSignerAction = ({ id = '', api_key: signer = '' }: ISigner) => {
     return (
       isOwner(role) && (
         <button
@@ -166,11 +162,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
             data={app.Signers.filter(({ deleted }) => !deleted)}
             actions={[renderTestAuthenticationAction, renderDeleteSignerAction]}
           />
-          <LoadingModal
-            isOpen={isOpened}
-            setIsOpen={setIsOpened}
-            {...loadingStatus}
-          />
+          <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
         </>
       )}
     </>

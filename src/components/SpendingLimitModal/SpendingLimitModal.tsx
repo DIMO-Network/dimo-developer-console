@@ -74,17 +74,14 @@ export const SpendingLimitModal: FC<IProps> = ({
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="buy-credits-modal">
-      <form
-        className="buy-credits-content"
-        onSubmit={handleSubmit(setSpendingLimit)}
-      >
+      <form className="buy-credits-content" onSubmit={handleSubmit(setSpendingLimit)}>
         <div className="buy-credits-header">
           <Title className="text-2xl" component="h3">
             Set spending limit
           </Title>
           <p className="description">
-            Approve the Developer License to spend $DIMO on your connected
-            wallet, we recommend approving more than $100 USD worth of $DIMO
+            Approve the Developer License to spend $DIMO on your connected wallet, we
+            recommend approving more than $100 USD worth of $DIMO
           </p>
         </div>
         <TokenInput control={control} name="credits" description="$DIMO" />
