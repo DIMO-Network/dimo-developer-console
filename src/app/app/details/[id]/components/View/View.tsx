@@ -51,7 +51,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
       .finally(() => setIsLoadingPage(false));
   };
 
-  const handleEnableSigner = async (signer: string) => {
+  const handleEnableSigner = (signer: string) => {
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
