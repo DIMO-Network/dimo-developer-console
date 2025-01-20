@@ -15,7 +15,6 @@ import { withNotifications } from '@/hoc';
 
 import './View.css';
 import { NotificationContext } from '@/context/notificationContext';
-import configuration from '@/config';
 
 export const View = () => {
   useErrorHandler();
