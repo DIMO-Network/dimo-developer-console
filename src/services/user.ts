@@ -22,16 +22,13 @@ export const acceptInvitation = async (invitationCode: string) => {
 
 export const existUserByEmailOrAddress = async (
   item: string | null,
-  provider: string | null,
 ) => {
   const client = await dimoDevAPIClient();
   const { data } = await client.get<{
     existItem: boolean;
-    existAssociation: boolean;
   }>('/api/auth/exist', {
     params: {
-      item,
-      provider,
+      item
     },
   });
   return data;
