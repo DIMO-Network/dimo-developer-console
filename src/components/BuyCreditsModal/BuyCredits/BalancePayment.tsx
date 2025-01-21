@@ -10,6 +10,7 @@ import { Button } from '@/components/Button';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import configuration from '@/config';
+import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
@@ -103,7 +104,10 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
 
   useEffect(() => {
     if (!organizationInfo) return;
-    getBalances().catch(console.error);
+    getBalances().catch((error) => {
+      console.error('Error while loading balances', error);
+      Sentry.captureException(error);
+    });
   }, [organizationInfo?.smartContractAddress]);
 
   return (

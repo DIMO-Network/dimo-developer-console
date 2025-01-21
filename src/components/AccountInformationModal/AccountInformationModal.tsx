@@ -14,6 +14,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { TokenBalance } from '@/components/TokenBalance';
 import { useContractGA } from '@/hooks';
 import config from '@/config';
+import * as Sentry from '@sentry/nextjs';
 
 import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
@@ -64,7 +65,11 @@ export const AccountInformationModal: FC<IProps> = () => {
     if (!(dimoContract && dimoCreditsContract)) return;
     if (!showAccountInformation) return;
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    getBalances().catch(console.error);
+    getBalances().catch((error) => {
+      Sentry.captureException(error);
+      console.error('Error while loading balances', error);
+      setNotification('Error while loading balances', 'Error', 'error');
+    });
   }, [dimoContract, dimoCreditsContract, showAccountInformation]);
 
   return (

@@ -40,7 +40,15 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => {
-    refreshAppDetails().catch(console.error);
+    refreshAppDetails().catch((error) => {
+      Sentry.captureException(error);
+      console.error({ error });
+      setNotification(
+        'Something went wrong while fetching the application details',
+        'Oops...',
+        'error',
+      );
+    });
   }, []);
 
   const refreshAppDetails = async () => {

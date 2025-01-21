@@ -80,7 +80,9 @@ export const useContractGA = () => {
       );
     };
 
-    handleGetContracts().catch(console.error);
+    handleGetContracts().catch((error) => {
+      Sentry.captureException(error);
+    });
   }, [organizationInfo?.smartContractAddress]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -305,14 +307,18 @@ export const useContractGA = () => {
       .then((currentBalanceWei: unknown) => {
         setBalanceDimo(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       })
-      .catch(console.error);
+      .catch((error: unknown) => {
+        Sentry.captureException(error);
+      });
 
     dimoCreditsContract.read
       .balanceOf([organizationInfo!.smartContractAddress])
       .then((currentBalanceWei: unknown) => {
         setBalanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
       })
-      .catch(console.error);
+      .catch((error: unknown) => {
+        Sentry.captureException(error);
+      });
 
     dimoContract.read
       .allowance([organizationInfo.smartContractAddress, configuration.DLC_ADDRESS])
@@ -321,7 +327,9 @@ export const useContractGA = () => {
           Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))),
         );
       })
-      .catch(console.error);
+      .catch((error: unknown) => {
+        Sentry.captureException(error);
+      });
 
     dimoContract.read
       .allowance([organizationInfo.smartContractAddress, configuration.DCX_ADDRESS])
@@ -330,7 +338,9 @@ export const useContractGA = () => {
           Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))),
         );
       })
-      .catch(console.error);
+      .catch((error: unknown) => {
+        Sentry.captureException(error);
+      });
   }, [dimoContract, organizationInfo?.smartContractAddress]);
 
   return {
