@@ -5,7 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 
-import { existUserByEmailOrAddress, getUserByToken } from '@/services/user';
+import { getUserByToken } from '@/services/user';
 import { IUser } from '@/types/user';
 import { TeamRoles } from '@/types/team';
 import * as Sentry from '@sentry/nextjs';

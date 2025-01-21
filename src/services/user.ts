@@ -20,15 +20,13 @@ export const acceptInvitation = async (invitationCode: string) => {
   return data;
 };
 
-export const existUserByEmailOrAddress = async (
-  item: string | null,
-) => {
+export const existUserByEmailOrAddress = async (item: string | null) => {
   const client = await dimoDevAPIClient();
   const { data } = await client.get<{
     existItem: boolean;
   }>('/api/auth/exist', {
     params: {
-      item
+      item,
     },
   });
   return data;
