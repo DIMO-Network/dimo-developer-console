@@ -20,7 +20,7 @@ export const SignUpWith: FC<IProps> = ({ onNext }) => {
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     if (app === 'credentials') {
-      const { existItem } = await existUserEmailOrAddress(auth?.address ?? null, app);
+      const { existItem } = await existUserEmailOrAddress(auth?.address ?? null);
 
       if (!existItem) {
         onNext('sign-up-with', auth ?? {});

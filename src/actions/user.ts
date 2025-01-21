@@ -7,7 +7,6 @@ export const getUser = async () => {
 
 export const existUserEmailOrAddress = async (
   address: string | null,
-  provider: string | null,
 ) => {
-  return existUserByEmailOrAddress(address, provider);
+  return existUserByEmailOrAddress(address);
 };
