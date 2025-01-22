@@ -1,6 +1,8 @@
 import React from 'react';
 import { Webhook, Condition } from '@/types/webhook';
 import Button from '@/components/Button/Button';
+import Title from '@/components/Title/Title';
+
 
 interface WebhookFormProps {
     currentWebhook: Partial<Webhook>;
@@ -43,7 +45,7 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
 
     return (
         <div className="webhook-form-container">
-            <h2>{currentWebhook.id ? 'Edit Webhook' : 'Create New Webhook'}</h2>
+            <Title>{currentWebhook.id ? 'Edit Webhook' : 'Create New Webhook'}</Title>
 
             <label>Description</label>
             <textarea
