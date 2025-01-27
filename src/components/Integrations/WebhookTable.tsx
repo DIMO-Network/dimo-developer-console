@@ -1,21 +1,24 @@
 import React from 'react';
 import { Webhook } from '@/types/webhook';
+import Button from '@/components/Button/Button';
 
 interface WebhookTableProps {
     webhooks: Webhook[];
     onEdit: (webhook: Webhook) => void;
     onDelete: (webhook: Webhook) => void;
+    onTest: (webhook: Webhook) => void;
     expandedWebhook: string | null;
     setExpandedWebhook: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const WebhookTable: React.FC<WebhookTableProps> = ({
-      webhooks,
-      onEdit,
-      onDelete,
-      expandedWebhook,
-      setExpandedWebhook,
-  }) => {
+                                                              webhooks,
+                                                              onEdit,
+                                                              onDelete,
+                                                              onTest,
+                                                              expandedWebhook,
+                                                              setExpandedWebhook,
+                                                          }) => {
     const toggleExpand = (webhookId: string) => {
         setExpandedWebhook((prev) => (prev === webhookId ? null : webhookId));
     };
@@ -43,7 +46,7 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({
                             <td>{webhook.status}</td>
                             <td>{webhook.setup}</td>
                             <td className="webhook-actions">
-                                <button
+                                <Button
                                     className="edit-webhook-button"
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -51,8 +54,8 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({
                                     }}
                                 >
                                     Edit
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     className="delete-webhook-button"
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -60,8 +63,18 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({
                                     }}
                                 >
                                     Delete
-                                </button>
+                                </Button>
+                                <Button
+                                    className="test-webhook-button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onTest(webhook);
+                                    }}
+                                >
+                                    Test
+                                </Button>
                             </td>
+
                         </tr>
                         {expandedWebhook === webhook.id && (
                             <tr className="expanded-row">

@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import './Integrations.css';
 import { useWebhooks } from '@/hooks/useWebhooks';
 import { WebhookForm } from './WebhookForm';
 import { WebhookTable } from './WebhookTable';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { TestWebhookModal } from './TestWebhookModal'; // Import the TestWebhookModal
 import Button from '@/components/Button/Button';
 import Title from '@/components/Title/Title';
 
@@ -33,6 +34,33 @@ export const IntegrationsPage = () => {
         handleShowCreateForm,
     } = useWebhooks();
 
+    const [showTestModal, setShowTestModal] = useState(false);
+    const [webhookToTest, setWebhookToTest] = useState(null);
+
+    const handleRunWebhookTest = async () => {
+        if (!webhookToTest) return;
+
+        try {
+            const fakeData = { event: 'test_event', data: 'This is test data' };
+            const response = await fetch(webhookToTest.target_uri, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fakeData),
+            });
+
+            if (response.ok) {
+                alert('Webhook triggered successfully.');
+            } else {
+                alert('Failed to trigger webhook. Please check the target URL.');
+            }
+        } catch (error) {
+            console.error('Error testing webhook:', error);
+            alert('An error occurred while testing the webhook.');
+        } finally {
+            setShowTestModal(false);
+        }
+    };
+
     return (
         <div className="integrations-container">
             <div className="integrations-header">
@@ -45,8 +73,6 @@ export const IntegrationsPage = () => {
                 >
                     + Create New
                 </Button>
-
-
             </div>
             <p className="integrations-description">
                 Webhooks allow your application to receive real-time updates from events.
@@ -74,6 +100,10 @@ export const IntegrationsPage = () => {
                     setWebhookToDelete(webhook);
                     setShowDeleteConfirm(true);
                 }}
+                onTest={(webhook) => {
+                    setWebhookToTest(webhook);
+                    setShowTestModal(true);
+                }}
                 expandedWebhook={expandedWebhook}
                 setExpandedWebhook={setExpandedWebhook}
             />
@@ -83,6 +113,14 @@ export const IntegrationsPage = () => {
                     webhook={webhookToDelete}
                     onDelete={handleDelete}
                     onCancel={() => setShowDeleteConfirm(false)}
+                />
+            )}
+
+            {showTestModal && webhookToTest && (
+                <TestWebhookModal
+                    webhook={webhookToTest}
+                    onRun={handleRunWebhookTest}
+                    onCancel={() => setShowTestModal(false)}
                 />
             )}
         </div>

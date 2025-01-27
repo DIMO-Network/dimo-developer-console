@@ -158,10 +158,10 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
             </select>
 
             <div className="webhook-form-actions">
-                <Button onClick={onSave} className="save-button">
+                <Button onClick={onSave} className="edit-webhook-button">
                     Save
                 </Button>
-                <Button onClick={onCancel} className="cancel-button">
+                <Button onClick={onCancel} className="delete-webhook-button">
                     Cancel
                 </Button>
             </div>
