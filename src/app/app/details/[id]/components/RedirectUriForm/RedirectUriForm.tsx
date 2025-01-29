@@ -98,7 +98,11 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
                 },
                 validate: {
                   url: (str = '') =>
-                    isURL(str, { require_tld: false }) || 'Invalid Redirect URI',
+                    isURL(str, {
+                      require_tld: false,
+                      protocols: ['http', 'https'],
+                      allow_protocol_relative_urls: false,
+                    }) || 'Invalid Redirect URI',
                 },
               })}
               placeholder="www.google.com"
