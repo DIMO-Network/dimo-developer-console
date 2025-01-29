@@ -158,14 +158,14 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       return;
     }
     if (swappingIntoDimo === LoadingStatus.None) {
-      handleSwappingIntoDimo().catch(console.error);
+      void handleSwappingIntoDimo();
     }
   }, [organizationInfo, swappingIntoDimo, transactionData]);
 
   useEffect(() => {
     if (!organizationInfo?.subOrganizationId) return;
     if (swappingIntoDimo === LoadingStatus.Success && mintingDCX === LoadingStatus.None) {
-      handleMintingDcx().catch(console.error);
+      void handleMintingDcx();
     }
   }, [organizationInfo, swappingIntoDimo, mintingDCX]);
 

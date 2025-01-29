@@ -6,6 +6,7 @@ import { OnrampSession } from '@stripe/crypto';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { IDcxPurchaseTransaction, IStripeCryptoEvent } from '@/types/wallet';
 import configuration from '@/config';
+import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
@@ -58,7 +59,10 @@ export const CryptoPurchase = ({ onNext, transactionData }: IProps) => {
           if (!session) return;
           setCryptoSession(session);
         })
-        .catch(console.error);
+        .catch((error) => {
+          Sentry.captureException(error);
+          console.error('Something went wrong while loading the onramp', error);
+        });
     }
   }, [stripeClientId]);
 

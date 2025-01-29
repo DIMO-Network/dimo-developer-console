@@ -114,6 +114,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     return (
       isOwner(role) && (
         <button
+          title="Delete API key"
           type="button"
           onClick={() => handleDelete(id, signer)}
           key={`delete-action-${id}`}

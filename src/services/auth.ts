@@ -5,7 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 
-import { existUserByEmailOrAddress, getUserByToken } from '@/services/user';
+import { getUserByToken } from '@/services/user';
 import { IUser } from '@/types/user';
 import { TeamRoles } from '@/types/team';
 import * as Sentry from '@sentry/nextjs';
@@ -132,18 +132,9 @@ export const authOptions: AuthOptions = {
   debug: process.env.VERCEL_ENV !== 'production',
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    signIn: async ({ user, account }) => {
-      const { email = null } = user ?? {};
-      const { provider = null, providerAccountId = null } = account ?? {};
-
-      const { existItem, existAssociation } = await existUserByEmailOrAddress(
-        email ?? providerAccountId,
-        provider,
-      );
-
-      return existItem && !existAssociation ? '/sign-in?error=unique_email' : true;
-    },
     jwt,
     session,
   },
 };
+
+//TODO: check if removing the signin callback will break the app

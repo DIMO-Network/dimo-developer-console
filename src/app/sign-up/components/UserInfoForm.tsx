@@ -34,7 +34,7 @@ export const UserInfoForm: FC<IProps> = ({ auth }) => {
   const { setNotification } = useContext(NotificationContext);
 
   const onSubmit: SubmitHandler<UserInfoInputs> = async (data) => {
-    const { existItem } = await existUserEmailOrAddress(data.email, 'email');
+    const { existItem } = await existUserEmailOrAddress(data.email);
     if (existItem) {
       setNotification('The email already exists', 'Wrong email', 'error');
       return;

@@ -13,6 +13,7 @@ import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { PlusIcon, WalletIcon } from '@/components/Icons';
 import classnames from 'classnames';
 import { Card } from '@/components/Card';
+import * as Sentry from '@sentry/nextjs';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 const DCX_PRICE = Number(DCX_IN_USD);
@@ -114,7 +115,9 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       const dimoPrice = await getDimoPrice();
       setDimoPrice(dimoPrice);
     };
-    loadDimoPrice().catch(console.error);
+    loadDimoPrice().catch((error) => {
+      Sentry.captureException(error);
+    });
   }, []);
 
   return (
