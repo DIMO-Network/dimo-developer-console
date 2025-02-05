@@ -37,10 +37,22 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const router = useRouter();
-  const { user: { role = '' } = {} } = session ?? {};
+  const [userRole, setUserRole] = useState<string>('');
 
   useEffect(() => {
-    refreshAppDetails().catch((error) => {
+    if (!session) return;
+    const { role } = session.user;
+    setUserRole(role);
+    refreshAppDetails();
+  }, [session]);
+
+  const refreshAppDetails = async () => {
+    try {
+      setIsLoadingPage(true);
+      const { id: appId } = await params;
+      const foundApp = await getAppByID(appId);
+      setApp(foundApp);
+    } catch (error: unknown) {
       Sentry.captureException(error);
       console.error({ error });
       setNotification(
@@ -48,15 +60,9 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         'Oops...',
         'error',
       );
-    });
-  }, []);
-
-  const refreshAppDetails = async () => {
-    setIsLoadingPage(true);
-    const { id: appId } = await params;
-    getAppByID(appId)
-      .then(setApp)
-      .finally(() => setIsLoadingPage(false));
+    } finally {
+      setIsLoadingPage(false);
+    }
   };
 
   const handleEnableSigner = (signer: string) => {
@@ -180,7 +186,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         <>
           <div className="signers-content">
             <Title component="h2">Signers</Title>
-            {isOwner(role) && (
+            {isOwner(userRole) && (
               <div className="generate-signer">
                 <Button
                   className="primary-outline px-4 w-full"
@@ -198,7 +204,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
           <div className="redirect-uri-content">
             <Title component="h2">Authorized Redirect URIs</Title>
-            {isOwner(role) && app && (
+            {isOwner(userRole) && app && (
               <RedirectUriForm appId={app!.id!} refreshData={refreshAppDetails} />
             )}
           </div>
@@ -207,7 +213,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               <RedirectUriList list={app?.RedirectUris} refreshData={refreshAppDetails} />
             )}
           </div>
-          {isOwner(role) && (
+          {isOwner(userRole) && (
             <div className="extra-actions">
               <Button className="error-simple" onClick={handleDeleteApplication}>
                 Delete application
