@@ -11,13 +11,9 @@ export const usePasskey = () => {
     // "isUserVerifyingPlatformAuthenticatorAvailable" means the feature detection is usable.
     if (!PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) return false;
 
-    // "isConditionalMediationAvailable" means the feature detection is usable.
-    if (!PublicKeyCredential.isConditionalMediationAvailable) return false;
-
     // Check if user verifying platform authenticator is available.
     const results = await Promise.all([
-      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
-      PublicKeyCredential.isConditionalMediationAvailable(),
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),     
     ]);
 
     return results.every((r) => r === true);
