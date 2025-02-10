@@ -13,7 +13,7 @@ export const usePasskey = () => {
 
     // Check if user verifying platform authenticator is available.
     const results = await Promise.all([
-      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),     
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
     ]);
 
     return results.every((r) => r === true);

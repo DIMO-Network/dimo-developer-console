@@ -18,18 +18,20 @@ export const withRainBow = <P extends object>(WrappedComponent: ComponentType<P>
     // Render the wrapped component with any additional props
     return (
       <SessionProvider>
-          <QueryClientProvider client={queryClient}>
-            <TurnkeyProvider config={{
+        <QueryClientProvider client={queryClient}>
+          <TurnkeyProvider
+            config={{
               rpId: turnkeyConfig.rpId,
               apiBaseUrl: turnkeyConfig.apiBaseUrl,
-              defaultOrganizationId: turnkeyConfig.defaultOrganizationId,              
-            }}>
-              <StripeCryptoContext.Provider value={{ stripeClientId, setStripeClientId }}>
-                <WrappedComponent {...props} />
-              </StripeCryptoContext.Provider>
-            </TurnkeyProvider>
-          </QueryClientProvider>
-        </SessionProvider>
+              defaultOrganizationId: turnkeyConfig.defaultOrganizationId,
+            }}
+          >
+            <StripeCryptoContext.Provider value={{ stripeClientId, setStripeClientId }}>
+              <WrappedComponent {...props} />
+            </StripeCryptoContext.Provider>
+          </TurnkeyProvider>
+        </QueryClientProvider>
+      </SessionProvider>
     );
   };
 

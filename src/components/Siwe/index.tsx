@@ -3,7 +3,6 @@ import { getCsrfToken } from 'next-auth/react';
 import { SiweMessage } from 'siwe';
 import { useAccount, useSignMessage } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
@@ -18,8 +17,7 @@ interface SiweButtonProps {
 export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
   const { signMessageAsync } = useSignMessage();
   const { setNotification } = useContext(NotificationContext);
-  const { address, isConnected } = useAccount();
-  const { openConnectModal } = useConnectModal();
+  const { address } = useAccount();
 
   const handleLogin = async () => {
     try {
@@ -53,11 +51,7 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
       className="sm"
       onClick={(e) => {
         e.preventDefault();
-        if (!isConnected && openConnectModal) {
-          openConnectModal();
-        } else {
-          handleLogin();
-        }
+        handleLogin();
       }}
     />
   );
