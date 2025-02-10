@@ -2,13 +2,13 @@ import { withSentryConfig } from '@sentry/nextjs';
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'report-sample' https://crypto-js.stripe.com https://js.stripe.com https://static.cloudflareinsights.com https://vercel.live;
-    style-src 'self' 'unsafe-hashes' 'report-sample';
+    script-src 'self' 'unsafe-inline' https://crypto-js.stripe.com https://js.stripe.com https://static.cloudflareinsights.com https://vercel.live;
+    style-src 'self' 'unsafe-inline';
     object-src 'none';
     base-uri 'self';
-    connect-src 'self' https://accounts.dimo.org https://api.stripe.com https://api.turnkey.com https://explorer-api.walletconnect.com https://*.sentry.io https://polygon-mainnet.g.alchemy.com https://polygon-amoy.g.alchemy.com https://pulse.walletconnect.org https://rpc.zerodev.app;
+    connect-src 'self' https://*.dimo.org https://api.stripe.com https://api.turnkey.com https://explorer-api.walletconnect.com https://*.sentry.io https://polygon-mainnet.g.alchemy.com https://polygon-amoy.g.alchemy.com https://pulse.walletconnect.org https://rpc.zerodev.app;
     font-src 'self';
-    frame-src 'self' https://auth.turnkey.com https://crypto-js.stripe.com https://js.stripe.com;
+    frame-src 'self' https://auth.turnkey.com https://crypto-js.stripe.com https://js.stripe.com https://vercel.live;
     img-src 'self' https://explorer-api.walletconnect.com;
     manifest-src 'self';
     media-src 'self';
