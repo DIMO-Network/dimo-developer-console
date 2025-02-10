@@ -1,7 +1,5 @@
 'use client';
 
-import { WagmiProvider } from 'wagmi';
-import { mainnet, polygon, polygonAmoy } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
 import { ComponentType } from 'react';
@@ -20,18 +18,20 @@ export const withRainBow = <P extends object>(WrappedComponent: ComponentType<P>
     // Render the wrapped component with any additional props
     return (
       <SessionProvider>
-          <QueryClientProvider client={queryClient}>
-            <TurnkeyProvider config={{
+        <QueryClientProvider client={queryClient}>
+          <TurnkeyProvider
+            config={{
               rpId: turnkeyConfig.rpId,
               apiBaseUrl: turnkeyConfig.apiBaseUrl,
-              defaultOrganizationId: turnkeyConfig.defaultOrganizationId,              
-            }}>
-              <StripeCryptoContext.Provider value={{ stripeClientId, setStripeClientId }}>
-                <WrappedComponent {...props} />
-              </StripeCryptoContext.Provider>
-            </TurnkeyProvider>
-          </QueryClientProvider>
-        </SessionProvider>
+              defaultOrganizationId: turnkeyConfig.defaultOrganizationId,
+            }}
+          >
+            <StripeCryptoContext.Provider value={{ stripeClientId, setStripeClientId }}>
+              <WrappedComponent {...props} />
+            </StripeCryptoContext.Provider>
+          </TurnkeyProvider>
+        </QueryClientProvider>
+      </SessionProvider>
     );
   };
 
