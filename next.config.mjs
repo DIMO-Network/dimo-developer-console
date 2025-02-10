@@ -2,15 +2,13 @@ import { withSentryConfig } from '@sentry/nextjs';
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline';
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data:;
-    font-src 'self';
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-    upgrade-insecure-requests;`;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' sentry.io cloudflareinsights.com vercel.live;
+    frame-src 'self' *.turnkey.com;
+    connect-src 'self' sentry.io cloudflareinsights.com;
+    img-src 'self' data:;
+    style-src 'self' 'unsafe-inline' cloudflareinsights.com;
+    font-src 'self' cloudflareinsights.com;
+    object-src 'none';`;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
