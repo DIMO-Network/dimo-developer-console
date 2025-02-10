@@ -1,7 +1,5 @@
 'use client';
 
-import { WagmiProvider } from 'wagmi';
-import { mainnet, polygon, polygonAmoy } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
 import { ComponentType } from 'react';
