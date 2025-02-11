@@ -16,4 +16,4 @@ const turnkeyClient = new Turnkey({
 });
 
 
-export const passkeyClient = turnkeyClient.passkeyClient();
+export const passkeyClient = turnkeyClient.passkeyClient(turnkeyConfig.rpId);
