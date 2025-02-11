@@ -19,7 +19,7 @@ import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
 import { isEmpty } from 'lodash';
 import configuration from '@/config';
 import config from '@/config';
-import { turnkeyConfig } from '@/config/turnkey';
+import { passkeyClient, turnkeyConfig } from '@/config/turnkey';
 import { createAccount } from '@turnkey/viem';
 import {
   Chain,
@@ -76,7 +76,7 @@ const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 export const useGlobalAccount = () => {
   const { data: session } = useSession();
   const router = useRouter();
-  const { passkeyClient, authIframeClient } = useTurnkey();
+  const { authIframeClient } = useTurnkey();
   const [organizationInfo, setOrganizationInfo] = useState<ISubOrganization | null>(null);
 
   const validCredentials = useCallback(
@@ -186,7 +186,7 @@ export const useGlobalAccount = () => {
     try {
       const { subOrganizationId } = organizationInfo!;
       // a bit hacky but works for now
-      const signInResponse = await passkeyClient?.login({
+      const signInResponse = await passkeyClient.login({
         organizationId: subOrganizationId,
       });
 
