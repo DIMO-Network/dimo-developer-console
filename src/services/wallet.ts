@@ -20,8 +20,7 @@ const getCurrentPolPrice = async (): Promise<number> => {
 
 const getCurrentWMaticPrice = async (): Promise<number> => {
   const { data } =
-    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/WMATIC');
-  console.info(data);
+    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/WMATIC');  
   return data.data.WMATIC[0].quote.USD.price;
 };
 
