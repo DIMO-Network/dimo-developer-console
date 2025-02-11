@@ -16,7 +16,7 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
 
   const handleRewirePasskey = async (recoveryKey: string) => {
     try {
-      const credentialsAreValid = validCredentials(recoveryKey);
+      const credentialsAreValid = await validCredentials(recoveryKey);
       if (credentialsAreValid === null) return;
       if (!credentialsAreValid) return;
       await registerNewPasskey();

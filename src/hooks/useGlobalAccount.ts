@@ -19,7 +19,7 @@ import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
 import { isEmpty } from 'lodash';
 import configuration from '@/config';
 import config from '@/config';
-import { turnkeyConfig } from '@/config/turnkey';
+import { passkeyClient, turnkeyConfig } from '@/config/turnkey';
 import { createAccount } from '@turnkey/viem';
 import {
   Chain,
@@ -76,7 +76,7 @@ const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 export const useGlobalAccount = () => {
   const { data: session } = useSession();
   const router = useRouter();
-  const { passkeyClient, authIframeClient } = useTurnkey();
+  const { authIframeClient } = useTurnkey();
   const [organizationInfo, setOrganizationInfo] = useState<ISubOrganization | null>(null);
 
   const validCredentials = useCallback(
@@ -92,6 +92,12 @@ export const useGlobalAccount = () => {
     challenge: ArrayBuffer,
   ): Promise<IPasskeyAttestation> => {
     const authenticatorUserId = generateRandomBuffer();
+
+    let authenticatorName = `${email} @ DIMO`;
+
+    if (config.environment !== 'production') {
+      authenticatorName += ` ${config.environment}`;
+    }
 
     const attestation = await getWebAuthnAttestation({
       publicKey: {
@@ -112,8 +118,8 @@ export const useGlobalAccount = () => {
         ],
         user: {
           id: authenticatorUserId,
-          name: `${email} @ DIMO`,
-          displayName: `${email} @ DIMO`,
+          name: authenticatorName,
+          displayName: authenticatorName,
         },
         timeout: 300_000,
         authenticatorSelection: {
@@ -180,7 +186,7 @@ export const useGlobalAccount = () => {
     try {
       const { subOrganizationId } = organizationInfo!;
       // a bit hacky but works for now
-      const signInResponse = await passkeyClient?.login({
+      const signInResponse = await passkeyClient.login({
         organizationId: subOrganizationId,
       });
 
@@ -448,15 +454,8 @@ export const useGlobalAccount = () => {
     const entryPoint = getEntryPoint('0.7');
     const publicClient = getPublicClient();
 
-    const stamperClient = new TurnkeyClient(
-      {
-        baseUrl: turnkeyConfig.apiBaseUrl,
-      },
-      passkeyClient!.config.stamper!,
-    );
-
     const localAccount = await createAccount({
-      client: stamperClient,
+      client: passkeyClient,
       organizationId: subOrganizationId,
       signWith: walletAddress,
       ethereumAddress: walletAddress,
