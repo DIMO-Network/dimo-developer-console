@@ -454,15 +454,8 @@ export const useGlobalAccount = () => {
     const entryPoint = getEntryPoint('0.7');
     const publicClient = getPublicClient();
 
-    const stamperClient = new TurnkeyClient(
-      {
-        baseUrl: turnkeyConfig.apiBaseUrl,
-      },
-      passkeyClient!.config.stamper!,
-    );
-
     const localAccount = await createAccount({
-      client: stamperClient,
+      client: passkeyClient,
       organizationId: subOrganizationId,
       signWith: walletAddress,
       ethereumAddress: walletAddress,
