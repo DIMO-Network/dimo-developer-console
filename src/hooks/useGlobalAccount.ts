@@ -93,6 +93,12 @@ export const useGlobalAccount = () => {
   ): Promise<IPasskeyAttestation> => {
     const authenticatorUserId = generateRandomBuffer();
 
+    let authenticatorName = `${email} @ DIMO`;
+
+    if (config.environment !== 'production') {
+      authenticatorName += ` ${config.environment}`;
+    }
+
     const attestation = await getWebAuthnAttestation({
       publicKey: {
         rp: {
@@ -112,8 +118,8 @@ export const useGlobalAccount = () => {
         ],
         user: {
           id: authenticatorUserId,
-          name: `${email} @ DIMO`,
-          displayName: `${email} @ DIMO`,
+          name: authenticatorName,
+          displayName: authenticatorName,
         },
         timeout: 300_000,
         authenticatorSelection: {
