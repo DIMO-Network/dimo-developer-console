@@ -1,6 +1,6 @@
 import { IAuth } from '@/types/auth';
 import { FC, useContext, useEffect } from 'react';
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount, usePasskey } from '@/hooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { useSession } from 'next-auth/react';
 import { NotificationContext } from '@/context/notificationContext';
@@ -15,23 +15,11 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
   const { registerSubOrganization } = useGlobalAccount();
   const { data: session } = useSession();
+  const { isPasskeyAvailable } = usePasskey();
 
-  const handleWalletCreation = async () => {
+  const handleWalletCreation = async (email: string) => {
     try {
-      const isAvailable =
-        await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-
-      if (!isAvailable) {
-        setNotification(
-          'Your device does not support WebAuthn. Please use a different device to create your wallet.',
-          'WebAuthn not supported',
-          'error',
-        );
-        return;
-      }
-
-      await registerSubOrganization();
-
+      await registerSubOrganization({ createWithoutPasskey: !isPasskeyAvailable, email });
       onNext('wallet-creation', {});
     } catch (error) {
       Sentry.captureException(error);
@@ -42,7 +30,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
 
   useEffect(() => {
     if (!session) return;
-    void handleWalletCreation();
+    void handleWalletCreation(session.user.email!);
   }, [session]);
 
   return (

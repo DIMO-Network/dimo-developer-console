@@ -10,19 +10,20 @@ import { Anchor } from '@/components/Anchor';
 import { IAuth } from '@/types/auth';
 import { isCollaborator } from '@/utils/user';
 import { SignInButtons } from '@/components/SignInButton';
-import { useErrorHandler, usePasskey, useGlobalAccount } from '@/hooks';
+import { useErrorHandler, useGlobalAccount } from '@/hooks';
 import { withNotifications } from '@/hoc';
 
 import './View.css';
 import { NotificationContext } from '@/context/notificationContext';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
+import * as Sentry from '@sentry/nextjs';
 
 export const View = () => {
   useErrorHandler();
-  const { isPasskeyAvailable } = usePasskey();
-  const { organizationInfo, walletLogin } = useGlobalAccount();
   const { setNotification } = useContext(NotificationContext);
+  const { loginWithPasskey, requestOtpLogin } = useContext(GlobalAccountAuthContext);
+  const { getUserGlobalAccountInfo } = useGlobalAccount();
   const { data: session } = useSession();
-  const { role = '' } = session?.user ?? {};
   const searchParams = useSearchParams();
   const router = useRouter();
   const invitationCode = searchParams.get('code') ?? '';
@@ -33,25 +34,31 @@ export const View = () => {
   }
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
-    if (!isPasskeyAvailable) {
-      setNotification(
-        "Passkey is not available in your browser. Please be sure that you're using a Passkey ready browser. You can check your browser compatibility at https://www.passkeys.io/compatible-devices",
-        'Oops...',
-        'error',
-      );
-      return;
-    }
     await signIn(app, auth);
   };
 
+  const handleLogin = async (email: string) => {
+    try {
+      const { hasPasskey } = await getUserGlobalAccountInfo(email);
+      if (hasPasskey) {
+        await loginWithPasskey(email);
+      } else {
+        await requestOtpLogin(email);
+      }
+    } catch (error) {
+      Sentry.captureException(error);
+      setNotification('Something went wrong please try again', 'Oops', 'error');
+    }
+  };
+
   useEffect(() => {
-    if (isCollaborator(role)) {
+    if (!session) return;
+    if (isCollaborator(session.user.role)) {
       router.push('/app');
     } else {
-      if (!organizationInfo) return;
-      void walletLogin();
+      void handleLogin(session.user.email!);
     }
-  }, [organizationInfo, role]);
+  }, [session]);
 
   return (
     <main className="sign-in">

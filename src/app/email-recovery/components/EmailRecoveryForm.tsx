@@ -42,8 +42,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
     } catch (error) {
       setNotification('Something went wrong while sending the email', 'Oops...', 'error');
       Sentry.captureException(error);
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   };

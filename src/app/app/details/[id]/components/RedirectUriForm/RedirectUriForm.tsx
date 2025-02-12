@@ -13,12 +13,14 @@ import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import configuration from '@/config';
 
 import './RedirectUriForm.css';
+import { IGlobalAccountSession } from '@/types/wallet';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IRedirectUri {
   uri: string;
@@ -33,7 +35,6 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { workspace } = useOnboarding();
-  const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const {
     formState: { errors },
@@ -46,6 +47,8 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   });
 
   const handleSetDomain = async (uri: string) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = [
       {

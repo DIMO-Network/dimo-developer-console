@@ -10,19 +10,19 @@ import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import WMatic from '@/contracts/wmatic.json';
 import {
   IDesiredTokenAmount,
-  IKernelOperationStatus,
-  ISubOrganization,
+  IGlobalAccountSession,
+  IKernelOperationStatus,  
   ITokenBalance,
 } from '@/types/wallet';
 
 import configuration from '@/config';
-import { getCachedDimoPrice } from '@/services/wallet';
+import { getCachedDimoPrice } from '@/services/pricing';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 
 export const useContractGA = () => {
-  const { organizationInfo, getKernelClient, getPublicClient, handleOnChainError } =
-    useGlobalAccount();
+  const { getKernelClient, getPublicClient, handleOnChainError } = useGlobalAccount();
   const [balanceDimo, setBalanceDimo] = useState<number>(0);
   const [balanceDCX, setBalanceDCX] = useState<number>(0);
   const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
@@ -36,12 +36,14 @@ export const useContractGA = () => {
 
   useEffect(() => {
     const handleGetContracts = async () => {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
       if (!organizationInfo) return;
 
-      const kernelClient = (await getKernelClient(
-        organizationInfo as ISubOrganization,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      )) as any;
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
       const publicClient = getPublicClient();
 
       if (!kernelClient) return;
@@ -83,13 +85,18 @@ export const useContractGA = () => {
     handleGetContracts().catch((error) => {
       Sentry.captureException(error);
     });
-  }, [organizationInfo?.smartContractAddress]);
+  }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const processTransactions = async (transactions: Array<any>) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo) return {} as IKernelOperationStatus;
     try {
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
 
       if (!kernelClient) return {} as IKernelOperationStatus;
       const operation = await kernelClient.account.encodeCalls(transactions);
@@ -115,9 +122,14 @@ export const useContractGA = () => {
 
   const getDcxBalance = async (): Promise<number> => {
     try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
 
       if (!kernelClient) {
         return 0;
@@ -146,9 +158,14 @@ export const useContractGA = () => {
 
   const getDimoBalance = async (): Promise<number> => {
     try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
 
       if (!kernelClient) {
         return 0;
@@ -184,10 +201,15 @@ export const useContractGA = () => {
     };
 
     try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
       if (!organizationInfo) return DEFAULT_AMOUNTS;
 
       const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
 
       if (!kernelClient) return DEFAULT_AMOUNTS;
 
@@ -227,6 +249,8 @@ export const useContractGA = () => {
       dlcAllowance: false,
     };
     try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
       if (!organizationInfo) return DEFAULT_TOKEN_BALANCE;
 
       const desiredTokenAmount = await getDesiredTokenAmount();
@@ -248,9 +272,14 @@ export const useContractGA = () => {
 
   const getPolBalance = async (): Promise<number> => {
     try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
 
       if (!kernelClient) {
         return 0;
@@ -270,9 +299,14 @@ export const useContractGA = () => {
 
   const getWmaticBalance = async (): Promise<number> => {
     try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
 
       if (!kernelClient) {
         return 0;
@@ -300,6 +334,8 @@ export const useContractGA = () => {
   };
 
   useEffect(() => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!dimoContract || !organizationInfo) return;
 
     dimoContract.read
@@ -341,13 +377,12 @@ export const useContractGA = () => {
       .catch((error: unknown) => {
         Sentry.captureException(error);
       });
-  }, [dimoContract, organizationInfo?.smartContractAddress]);
+  }, [dimoContract]);
 
   return {
     dimoContract,
     licenseContract,
     dimoCreditsContract,
-    address: organizationInfo?.smartContractAddress,
     balanceDimo,
     balanceDCX,
     allowanceDLC,

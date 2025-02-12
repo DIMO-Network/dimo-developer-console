@@ -7,7 +7,7 @@ import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
-import { useGlobalAccount, useLoading } from '@/hooks';
+import { useLoading } from '@/hooks';
 import { useSession } from 'next-auth/react';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
@@ -20,11 +20,12 @@ import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { IGlobalAccountSession } from '@/types/wallet';
 
 interface IProps {}
 
 export const AccountInformationModal: FC<IProps> = () => {
-  const { organizationInfo } = useGlobalAccount();
   const { data: session } = useSession();
   const { setNotification } = useContext(NotificationContext);
   const { setIsOpen } = useContext(CreditsContext);
@@ -71,6 +72,9 @@ export const AccountInformationModal: FC<IProps> = () => {
       setNotification('Error while loading balances', 'Error', 'error');
     });
   }, [dimoContract, dimoCreditsContract, showAccountInformation]);
+
+  const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+  const organizationInfo = gaSession?.organization;
 
   return (
     <Modal

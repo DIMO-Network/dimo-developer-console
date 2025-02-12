@@ -3,15 +3,14 @@ import React from 'react';
 
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
-import { withCredits, withNotifications, withRainBow } from '@/hoc';
+import { withCredits, withNotifications, withRainBow, withGlobalAccounts } from '@/hoc';
 
 import './AuthorizedLayout.css';
-import withTurnKey from '@/hoc/TurnkeySessionProvider';
 
 export const AuthorizedLayout = withRainBow(
   withNotifications(
     withCredits(
-      withTurnKey(
+      withGlobalAccounts(
         ({
           children,
         }: Readonly<{

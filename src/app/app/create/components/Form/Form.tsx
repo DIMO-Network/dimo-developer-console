@@ -15,7 +15,7 @@ import { createApp } from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
-import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
+import { IDesiredTokenAmount, IGlobalAccountSession, ITokenBalance } from '@/types/wallet';
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
 import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
@@ -23,7 +23,7 @@ import { MultiCardOption } from '@/components/MultiCardOption';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA, useGlobalAccount } from '@/hooks';
+import { useContractGA } from '@/hooks';
 
 import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
@@ -31,6 +31,7 @@ import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import './Form.css';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 
@@ -42,8 +43,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { checkEnoughBalance, getDesiredTokenAmount, balanceDCX, processTransactions } =
-    useContractGA();
-  const { organizationInfo } = useGlobalAccount();
+    useContractGA();  
   const router = useRouter();
   const {
     control,
@@ -101,6 +101,8 @@ export const Form: FC<IProps> = ({ workspace }) => {
     desiredTokenAmount: IDesiredTokenAmount,
     enoughBalance: ITokenBalance,
   ) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     const transactions = [];
     if (!enoughBalance.dcxAllowance) {
       transactions.push({
@@ -164,6 +166,8 @@ export const Form: FC<IProps> = ({ workspace }) => {
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
     if (!_.isEmpty(workspace)) return workspace;
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo) throw new Error('There is not organization information');
 
     setLoadingStatus({

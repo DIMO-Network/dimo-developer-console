@@ -10,7 +10,7 @@ interface IProps {
 const ErrorPage: FC<IProps> = ({ error, reset }) => {
   useEffect(() => {
     Sentry.captureException(error);
-    console.error({ error });
+    //console.error({ error });
   }, [error]);
 
   return (

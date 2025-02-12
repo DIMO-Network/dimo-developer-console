@@ -2,11 +2,11 @@ import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
 import { sendTokenBoughtEmail } from '@/actions/token';
 import { SuccessIcon } from '@/components/Icons';
 import { Title } from '@/components/Title';
-import { useGlobalAccount } from '@/hooks';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
@@ -15,10 +15,11 @@ interface IProps {
 
 export const ProcessComplete = ({ onNext, transactionData }: IProps) => {
   const [loading, setLoading] = useState(false);
-  const { organizationInfo } = useGlobalAccount();
 
   const handleFinish = () => {
     if (loading) return;
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+        const organizationInfo = gaSession?.organization;
 
     setLoading(true);
     const transactionToSend = {
