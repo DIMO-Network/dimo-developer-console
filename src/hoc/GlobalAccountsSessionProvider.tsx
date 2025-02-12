@@ -5,11 +5,7 @@ import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { useAccountInformation } from '@/hooks';
 import { AccountInformationModal } from '@/components/AccountInformationModal';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
-import {
-  otpLogin,
-  initOtpLogin,
-  getUserSubOrganization,
-} from '@/services/globalAccount';
+import { otpLogin, initOtpLogin, getUserSubOrganization } from '@/services/globalAccount';
 import { AuthClient } from '@turnkey/sdk-browser';
 import { useRouter } from 'next/navigation';
 import { passkeyClient, turnkeyClient } from '@/config/turnkey';

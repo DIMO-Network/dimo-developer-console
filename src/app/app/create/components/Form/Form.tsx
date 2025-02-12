@@ -15,7 +15,11 @@ import { createApp } from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
-import { IDesiredTokenAmount, IGlobalAccountSession, ITokenBalance } from '@/types/wallet';
+import {
+  IDesiredTokenAmount,
+  IGlobalAccountSession,
+  ITokenBalance,
+} from '@/types/wallet';
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
 import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
@@ -43,7 +47,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { checkEnoughBalance, getDesiredTokenAmount, balanceDCX, processTransactions } =
-    useContractGA();  
+    useContractGA();
   const router = useRouter();
   const {
     control,

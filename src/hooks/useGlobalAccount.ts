@@ -65,7 +65,7 @@ import {
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 
 export const useGlobalAccount = () => {
-  const { getNewUserPasskey } = usePasskey();  
+  const { getNewUserPasskey } = usePasskey();
   const { authIframeClient } = useTurnkey();
 
   const getUserGlobalAccountInfo = getUserSubOrganization;

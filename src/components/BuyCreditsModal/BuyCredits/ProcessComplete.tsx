@@ -19,7 +19,7 @@ export const ProcessComplete = ({ onNext, transactionData }: IProps) => {
   const handleFinish = () => {
     if (loading) return;
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        const organizationInfo = gaSession?.organization;
+    const organizationInfo = gaSession?.organization;
 
     setLoading(true);
     const transactionToSend = {

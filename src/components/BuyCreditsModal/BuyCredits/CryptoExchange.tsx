@@ -67,7 +67,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
     }[]
   > => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        const organizationInfo = gaSession?.organization;
+    const organizationInfo = gaSession?.organization;
     const transactions = [];
     const expendableDimo = transactionData!.requiredDimoAmount!;
 
@@ -155,7 +155,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
 
   useEffect(() => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        const organizationInfo = gaSession?.organization;
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo?.subOrganizationId) return;
     if (!transactionData) return;
     if (transactionData.alreadyHasDimo) {
@@ -169,7 +169,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
 
   useEffect(() => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        const organizationInfo = gaSession?.organization;
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo?.subOrganizationId) return;
     if (swappingIntoDimo === LoadingStatus.Success && mintingDCX === LoadingStatus.None) {
       void handleMintingDcx();

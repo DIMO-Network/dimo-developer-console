@@ -14,7 +14,7 @@ interface IProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export const OtpLoginModal: FC<IProps> = ({ isOpen, setIsOpen }: IProps) => {  
+export const OtpLoginModal: FC<IProps> = ({ isOpen, setIsOpen }: IProps) => {
   const { completeOtpLogin } = useContext(GlobalAccountAuthContext);
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);

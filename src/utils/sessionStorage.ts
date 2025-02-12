@@ -6,9 +6,9 @@ export const saveToSession = <T>(key: string, value: T): void => {
 };
 
 export const getFromSession = <T>(key: string): T | null => {
-    if (typeof window === 'undefined') {
-        return null;
-    }
+  if (typeof window === 'undefined') {
+    return null;
+  }
   const serializedValue = sessionStorage.getItem(key);
   if (!serializedValue) {
     return null;

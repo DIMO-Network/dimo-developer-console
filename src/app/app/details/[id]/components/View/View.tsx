@@ -68,7 +68,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
 
   const handleEnableSigner = (signer: string) => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        const organizationInfo = gaSession?.organization;
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
@@ -84,7 +84,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
 
   const handleDisableSigner = (signer: string) => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        const organizationInfo = gaSession?.organization;
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
@@ -100,7 +100,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
 
   const handleRemoveUri = (uri: string) => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        const organizationInfo = gaSession?.organization;
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,

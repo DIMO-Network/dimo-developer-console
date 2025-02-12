@@ -103,7 +103,7 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
 
   useEffect(() => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        const organizationInfo = gaSession?.organization;
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo) return;
     getBalances().catch((error) => {
       console.error('Error while loading balances', error);

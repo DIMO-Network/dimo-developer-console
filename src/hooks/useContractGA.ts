@@ -11,7 +11,7 @@ import WMatic from '@/contracts/wmatic.json';
 import {
   IDesiredTokenAmount,
   IGlobalAccountSession,
-  IKernelOperationStatus,  
+  IKernelOperationStatus,
   ITokenBalance,
 } from '@/types/wallet';
 
