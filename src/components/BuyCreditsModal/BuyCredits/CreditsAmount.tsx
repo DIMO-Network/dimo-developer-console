@@ -77,7 +77,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
       setNotification(
         'Buy with USD is paused until our new billing system is in place. DIMO Credits are not required to get started. Please reach out to developer-support@dimo.org for billing support.',
         'Important',
-        'error',
+        'info',
       );
       return;
     }

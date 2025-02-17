@@ -2,13 +2,11 @@
 
 import { FC, Fragment, useState } from 'react';
 import { Transition } from '@headlessui/react';
-import { XMarkIcon as XMarkIcon24 } from '@heroicons/react/24/outline';
 import {
-  CheckCircleIcon,
-  XMarkIcon,
+  XMarkIcon as XMarkIcon24,
   InformationCircleIcon,
-} from '@heroicons/react/20/solid';
-
+} from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { INotification } from '@/hooks';
 
 import './Toast.css';
@@ -33,7 +31,7 @@ export const Toast: FC<INotification> = ({ title, message, type }) => {
             <div className="toast-icon-content">
               {type === 'info' && (
                 <InformationCircleIcon
-                  className="h-6 w-6 text-black"
+                  className="h-6 w-6 stroke-black"
                   aria-hidden="true"
                 />
               )}
