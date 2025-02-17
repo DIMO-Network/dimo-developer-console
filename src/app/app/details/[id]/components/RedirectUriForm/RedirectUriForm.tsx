@@ -14,13 +14,13 @@ import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { useContractGA, useOnboarding } from '@/hooks';
-import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
-
-import configuration from '@/config';
-
-import './RedirectUriForm.css';
 import { IGlobalAccountSession } from '@/types/wallet';
 import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+
+import configuration from '@/config';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
+
+import './RedirectUriForm.css';
 
 interface IRedirectUri {
   uri: string;
