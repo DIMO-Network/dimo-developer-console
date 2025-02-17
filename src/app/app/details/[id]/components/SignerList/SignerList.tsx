@@ -14,12 +14,12 @@ import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { useContractGA, useOnboarding } from '@/hooks';
+import { IGlobalAccountSession } from '@/types/wallet';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
 import * as Sentry from '@sentry/nextjs';
-import { IGlobalAccountSession } from '@/types/wallet';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IProps {
   app: IApp;
