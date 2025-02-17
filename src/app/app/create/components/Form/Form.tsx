@@ -28,6 +28,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { useContractGA } from '@/hooks';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
@@ -35,7 +36,6 @@ import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import './Form.css';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 
