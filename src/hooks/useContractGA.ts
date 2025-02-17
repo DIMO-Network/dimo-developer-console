@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getContract, HttpRequestError } from 'viem';
 import { utils } from 'web3';
 import * as Sentry from '@sentry/nextjs';
@@ -18,11 +18,15 @@ import {
 import configuration from '@/config';
 import { getCachedDimoPrice } from '@/services/pricing';
 import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 
 export const useContractGA = () => {
   const { getKernelClient, getPublicClient, handleOnChainError } = useGlobalAccount();
+  const { checkAuthenticated, globalAccountSession } = useContext(
+    GlobalAccountAuthContext,
+  );
   const [balanceDimo, setBalanceDimo] = useState<number>(0);
   const [balanceDCX, setBalanceDCX] = useState<number>(0);
   const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
@@ -36,13 +40,12 @@ export const useContractGA = () => {
 
   useEffect(() => {
     const handleGetContracts = async () => {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const organizationInfo = globalAccountSession?.organization;
       if (!organizationInfo) return;
 
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: globalAccountSession.session.authenticator,
       });
       const publicClient = getPublicClient();
 
@@ -89,13 +92,14 @@ export const useContractGA = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const processTransactions = async (transactions: Array<any>) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo) return {} as IKernelOperationStatus;
     try {
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return {} as IKernelOperationStatus;
+      const { organization: organizationInfo, session } = currentSession;
+
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) return {} as IKernelOperationStatus;

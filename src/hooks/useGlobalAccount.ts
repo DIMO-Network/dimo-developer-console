@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
 import {
   createSubOrganization,
@@ -61,11 +61,13 @@ import {
   GlobalAccountSession,
   saveToSession,
 } from '@/utils/sessionStorage';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 
 export const useGlobalAccount = () => {
   const { getNewUserPasskey } = usePasskey();
+  const { checkAuthenticated } = useContext(GlobalAccountAuthContext);
   const { authIframeClient } = useTurnkey();
 
   const getUserGlobalAccountInfo = getUserSubOrganization;
@@ -159,7 +161,7 @@ export const useGlobalAccount = () => {
         organization: response,
         session: {
           token: '',
-          expiry: 0,
+          expiry: passkeyAttestation ? 30 : 0,
           authenticator: passkeyAttestation ? AuthClient.Passkey : AuthClient.Iframe,
         },
       });
@@ -222,12 +224,13 @@ export const useGlobalAccount = () => {
 
   const depositWmatic = async (amount: bigint): Promise<IKernelOperationStatus> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
-      if (!organizationInfo) return {} as IKernelOperationStatus;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return {} as IKernelOperationStatus;
+      const { organization: organizationInfo, session } = currentSession;
+
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {
@@ -273,12 +276,13 @@ export const useGlobalAccount = () => {
 
   const swapWmaticToDimo = async (amount: bigint): Promise<IKernelOperationStatus> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
-      if (!organizationInfo) return {} as IKernelOperationStatus;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return {} as IKernelOperationStatus;
+      const { organization: organizationInfo, session } = currentSession;
+
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {
@@ -354,13 +358,15 @@ export const useGlobalAccount = () => {
 
   const getNeededDimoAmountForDcx = async (amount: number): Promise<bigint> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return BigInt(0);
+      const { organization: organizationInfo, session } = currentSession;
+
       if (!organizationInfo) return BigInt(0);
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {
