@@ -12,11 +12,11 @@ import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { Toggle } from '@/components/Toggle';
 import { useContractGA, useOnboarding } from '@/hooks';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { IGlobalAccountSession } from '@/types/wallet';
 
 import configuration from '@/config';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
-import { IGlobalAccountSession } from '@/types/wallet';
 
 interface IProps {
   list: IRedirectUri[] | undefined;
