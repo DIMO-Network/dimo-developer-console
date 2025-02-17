@@ -19,7 +19,7 @@ import {
   GlobalAccountSession,
   getFromSession,
 } from '@/utils/sessionStorage';
-import { OtpLoginModal } from '@/components/OtpLoginModal/OtpLoginModal';
+import { OtpLoginModal } from '@/components/OtpLoginModal';
 import { useTurnkey } from '@turnkey/sdk-react';
 import { AxiosError } from 'axios';
 import { NotificationContext } from '@/context/notificationContext';
