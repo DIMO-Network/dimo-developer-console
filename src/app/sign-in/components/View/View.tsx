@@ -12,10 +12,10 @@ import { isCollaborator } from '@/utils/user';
 import { SignInButtons } from '@/components/SignInButton';
 import { useErrorHandler, useGlobalAccount } from '@/hooks';
 import { withNotifications } from '@/hoc';
-
-import './View.css';
 import { NotificationContext } from '@/context/notificationContext';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
+
+import './View.css';
 import * as Sentry from '@sentry/nextjs';
 
 export const View = () => {
