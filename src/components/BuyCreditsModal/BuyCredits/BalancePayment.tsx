@@ -1,16 +1,16 @@
 'use client';
 
-import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
 import { useContractGA } from '@/hooks';
 import { useEffect, useState } from 'react';
 import classnames from 'classnames';
 import { Card } from '@/components/Card';
-import useGlobalAccount from '../../../hooks/useGlobalAccount';
 import { Button } from '@/components/Button';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import configuration from '@/config';
 import * as Sentry from '@sentry/nextjs';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
@@ -25,7 +25,6 @@ interface ICryptoBalance {
 export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   const { getDimoBalance, getPolBalance, getWmaticBalance } = useContractGA();
   const { getDimoPrice, getPolPrice, getWMaticPrice } = useCryptoPricing();
-  const { organizationInfo } = useGlobalAccount();
 
   const [balances, setBalances] = useState<ICryptoBalance[]>([]);
   const [selectedBalance, setSelectedBalance] = useState<ICryptoBalance>({
@@ -103,12 +102,14 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   };
 
   useEffect(() => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo) return;
     getBalances().catch((error) => {
       console.error('Error while loading balances', error);
       Sentry.captureException(error);
     });
-  }, [organizationInfo?.smartContractAddress]);
+  }, []);
 
   return (
     <>

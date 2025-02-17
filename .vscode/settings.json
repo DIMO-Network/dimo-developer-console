@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["DIMO"]
+  "cSpell.words": ["DIMO"],
+  "css.customData": [".vscode/tailwind.json"]
 }

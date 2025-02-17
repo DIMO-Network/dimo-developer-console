@@ -13,7 +13,9 @@ import { IApp, ISigner } from '@/types/app';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
+import { IGlobalAccountSession } from '@/types/wallet';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
@@ -28,7 +30,6 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { workspace } = useOnboarding();
-  const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
@@ -38,6 +39,8 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   };
 
   const handleDisableSigner = async (signer: string) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = [
       {

@@ -1,13 +1,14 @@
 'use client';
 import React, { type ReactNode } from 'react';
 
-import { withRainBow } from '@/hoc';
+import { withRainBow, withGlobalAccounts, withNotifications } from '@/hoc';
 
 import '@/app/globals.css';
-import withTurnKey from '@/hoc/TurnkeySessionProvider';
 
-const View = withRainBow(
-  withTurnKey(({ children }: { children: ReactNode }) => <>{children}</>),
+const View = withNotifications(
+  withRainBow(
+    withGlobalAccounts(({ children }: { children: ReactNode }) => <>{children}</>),
+  ),
 );
 
 export const GuestLayout = ({

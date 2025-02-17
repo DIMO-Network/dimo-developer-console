@@ -10,10 +10,9 @@ export const turnkeyConfig = {
   paymasterRpc: process.env.NEXT_PUBLIC_PAYMASTER_RPC!,
 };
 
-const turnkeyClient = new Turnkey({
+export const turnkeyClient = new Turnkey({
   apiBaseUrl: turnkeyConfig.apiBaseUrl,
   defaultOrganizationId: turnkeyConfig.defaultOrganizationId,
 });
-
 
 export const passkeyClient = turnkeyClient.passkeyClient(turnkeyConfig.rpId);
