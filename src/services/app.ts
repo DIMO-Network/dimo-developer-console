@@ -64,7 +64,7 @@ export const testMyApp = async (app: IApp, signer: ISigner) => {
   const { api_key: apiKey } = signer;
 
   const client = axios.create({
-    baseURL: 'https://auth.dimo.zone/auth/web3',
+    baseURL: process.env.DIMO_AUTH_API,
   });
 
   const {
@@ -86,7 +86,7 @@ export const testMyApp = async (app: IApp, signer: ISigner) => {
     },
   );
 
-  const { signature } = await eth.accounts.sign(challenge, apiKey);
+  const { signature } = eth.accounts.sign(challenge, apiKey);
 
   const { data: tokens } = await client.post(
     'submit_challenge',
