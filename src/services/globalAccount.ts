@@ -14,7 +14,7 @@ export const getUserSubOrganization = async (
     const { data } = await globalAccountClient.get<ISubOrganization>(
       `/api/account/${email}`,
     );
-    return data;
+    return {...data, email: email};
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {

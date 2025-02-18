@@ -3,11 +3,11 @@ import React from 'react';
 
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
-import { withCredits, withNotifications, withRainBow, withGlobalAccounts } from '@/hoc';
+import { withCredits, withNotifications, withNextSession, withGlobalAccounts } from '@/hoc';
 
 import './AuthorizedLayout.css';
 
-export const AuthorizedLayout = withRainBow(
+export const AuthorizedLayout = withNextSession(
   withNotifications(
     withCredits(
       withGlobalAccounts(

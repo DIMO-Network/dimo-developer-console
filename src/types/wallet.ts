@@ -28,6 +28,7 @@ export interface IEmailAuth {
 }
 
 export interface ISubOrganization {
+  email: string;
   subOrganizationId: string;
   emailVerified: boolean;
   walletAddress: `0x${string}`;

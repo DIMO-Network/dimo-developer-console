@@ -11,7 +11,7 @@ import useStripeCrypto from '@/hooks/useStripeCrypto';
 
 const queryClient = new QueryClient();
 
-export const withRainBow = <P extends object>(WrappedComponent: ComponentType<P>) => {
+export const withNextSession = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
     const { stripeClientId, setStripeClientId } = useStripeCrypto();
 
@@ -36,11 +36,11 @@ export const withRainBow = <P extends object>(WrappedComponent: ComponentType<P>
   };
 
   // Set display name for the HOC component (optional but helpful for debugging)
-  HOC.displayName = `withRainBow(${
+  HOC.displayName = `withNextSession(${
     WrappedComponent.displayName || WrappedComponent.name
   })`;
 
   return HOC;
 };
 
-export default withRainBow;
+export default withNextSession;

@@ -50,8 +50,8 @@ const nextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  org: 'dimo-hp',
-  project: 'developer-console',
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
 
   // An auth token is required for uploading source maps.
   authToken: process.env.SENTRY_AUTH_TOKEN,

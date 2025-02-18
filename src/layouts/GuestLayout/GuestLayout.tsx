@@ -1,12 +1,12 @@
 'use client';
 import React, { type ReactNode } from 'react';
 
-import { withRainBow, withGlobalAccounts, withNotifications } from '@/hoc';
+import { withNextSession, withGlobalAccounts, withNotifications } from '@/hoc';
 
 import '@/app/globals.css';
 
 const View = withNotifications(
-  withRainBow(
+  withNextSession(
     withGlobalAccounts(({ children }: { children: ReactNode }) => <>{children}</>),
   ),
 );

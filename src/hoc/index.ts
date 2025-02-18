@@ -1,4 +1,4 @@
 export * from './withNotifications';
 export * from './withCredits';
-export * from './RainbowSessionProvider';
+export * from './NextSessionProvider';
 export * from './GlobalAccountsSessionProvider';

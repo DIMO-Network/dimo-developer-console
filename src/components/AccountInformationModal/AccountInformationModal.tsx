@@ -8,7 +8,6 @@ import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { useLoading } from '@/hooks';
-import { useSession } from 'next-auth/react';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
 import { TokenBalance } from '@/components/TokenBalance';
@@ -26,14 +25,13 @@ import { IGlobalAccountSession } from '@/types/wallet';
 interface IProps {}
 
 export const AccountInformationModal: FC<IProps> = () => {
-  const { data: session } = useSession();
   const { setNotification } = useContext(NotificationContext);
   const { setIsOpen } = useContext(CreditsContext);
   const { showAccountInformation, setShowAccountInformation } = useContext(
     AccountInformationContext,
   );
 
-  const { getDimoBalance, getDcxBalance, dimoContract, dimoCreditsContract } =
+  const { getDimoBalance, getDcxBalance } =
     useContractGA();
   const { getDimoPrice } = useCryptoPricing();
   const [balance, setBalance] = useState<{
@@ -63,15 +61,13 @@ export const AccountInformationModal: FC<IProps> = () => {
     useLoading(loadBalances);
 
   useEffect(() => {
-    if (!(dimoContract && dimoCreditsContract)) return;
     if (!showAccountInformation) return;
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     getBalances().catch((error) => {
       Sentry.captureException(error);
       console.error('Error while loading balances', error);
       setNotification('Error while loading balances', 'Error', 'error');
     });
-  }, [dimoContract, dimoCreditsContract, showAccountInformation]);
+  }, [showAccountInformation]);
 
   const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
   const organizationInfo = gaSession?.organization;
@@ -96,7 +92,7 @@ export const AccountInformationModal: FC<IProps> = () => {
                 name="email"
                 type="text"
                 readOnly={true}
-                value={get(session, 'user.email', '')}
+                value={get(organizationInfo, '', '')}
               />
             </Label>
           </div>
