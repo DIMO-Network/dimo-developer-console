@@ -92,7 +92,7 @@ export const AccountInformationModal: FC<IProps> = () => {
                 name="email"
                 type="text"
                 readOnly={true}
-                value={get(organizationInfo, '', '')}
+                value={get(organizationInfo, 'email', '')}
               />
             </Label>
           </div>

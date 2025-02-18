@@ -2,7 +2,11 @@
   @apply flex flex-row items-center gap-2;
 
   .token-balance__icon {
-    @apply w-14 h-12 border-[#6EE4DACC] border-4 rounded-full flex items-center justify-center;
+    @apply w-14 h-12 border-[#6EE4DACC] border-4 rounded-full flex items-center justify-center overflow-hidden;
+    
+    img {
+      @apply w-full h-full object-cover;
+    }
   }
 
   .token-balance__balance {
