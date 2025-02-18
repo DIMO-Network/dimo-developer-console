@@ -158,7 +158,7 @@ export const useGlobalAccount = () => {
       }
 
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
-        organization: response,
+        organization: { ...response, email },
         session: {
           token: '',
           expiry: passkeyAttestation ? 30 : 0,

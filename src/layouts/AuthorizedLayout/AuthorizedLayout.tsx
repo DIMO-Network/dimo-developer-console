@@ -3,7 +3,12 @@ import React from 'react';
 
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
-import { withCredits, withNotifications, withNextSession, withGlobalAccounts } from '@/hoc';
+import {
+  withCredits,
+  withNotifications,
+  withNextSession,
+  withGlobalAccounts,
+} from '@/hoc';
 
 import './AuthorizedLayout.css';
 

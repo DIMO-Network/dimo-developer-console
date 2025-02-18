@@ -113,6 +113,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
     return (
       isOwner(role) && (
         <button
+          title="Delete redirect URI"
           type="button"
           onClick={() => handleDeleteUri(id as string, uri)}
           key={`delete-action-${id}`}

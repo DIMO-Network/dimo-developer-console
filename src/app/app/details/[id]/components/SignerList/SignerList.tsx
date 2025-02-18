@@ -113,7 +113,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     );
   };
 
-  const renderDeleteSignerAction = ({ id = '', address: signer = '' }: ISigner) => {    
+  const renderDeleteSignerAction = ({ id = '', address: signer = '' }: ISigner) => {
     return (
       isOwner(role) && (
         <button

@@ -31,8 +31,7 @@ export const AccountInformationModal: FC<IProps> = () => {
     AccountInformationContext,
   );
 
-  const { getDimoBalance, getDcxBalance } =
-    useContractGA();
+  const { getDimoBalance, getDcxBalance } = useContractGA();
   const { getDimoPrice } = useCryptoPricing();
   const [balance, setBalance] = useState<{
     dcxBalance: number;

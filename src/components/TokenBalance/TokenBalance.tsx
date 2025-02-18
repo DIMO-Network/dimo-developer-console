@@ -34,7 +34,11 @@ export const TokenBalance = ({
         </div>
       </div>
       {canBuy && (
-        <button title="Buy DCX" className="token-balance__buy-button" onClick={openBuyModal}>
+        <button
+          title="Buy DCX"
+          className="token-balance__buy-button"
+          onClick={openBuyModal}
+        >
           <BuyDcxIcon />
         </button>
       )}

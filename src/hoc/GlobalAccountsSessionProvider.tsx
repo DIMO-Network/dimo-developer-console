@@ -164,14 +164,18 @@ export const withGlobalAccounts = <P extends object>(
 
     const checkSessionIsValid = (): boolean => {
       if (!currentSession) return false;
-      if (!currentSession.session.token) return false;
+      if (
+        !currentSession.session.token &&
+        currentSession.session.authenticator === AuthClient.Iframe
+      )
+        return false;
       return currentSession.session.expiry > Date.now() / 1000;
     };
 
     const checkValidateAuth =
       useCallback(async (): Promise<IGlobalAccountSession | null> => {
         if (checkSessionIsValid()) return currentSession;
-        setOtpModalOpen(true);
+        initOtpLogin(currentSession!.organization.email);
 
         return new Promise((resolve) => {
           setResolvers((prev) => [...prev, resolve]);
