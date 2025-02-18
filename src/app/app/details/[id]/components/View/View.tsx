@@ -20,7 +20,9 @@ import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriFo
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { Title } from '@/components/Title';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
+import { IGlobalAccountSession } from '@/types/wallet';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
@@ -34,7 +36,6 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
   const { workspace } = useOnboarding();
-  const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const router = useRouter();
   const [userRole, setUserRole] = useState<string>('');
@@ -66,6 +67,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleEnableSigner = (signer: string) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
@@ -80,6 +83,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleDisableSigner = (signer: string) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
@@ -94,6 +99,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleRemoveUri = (uri: string) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,

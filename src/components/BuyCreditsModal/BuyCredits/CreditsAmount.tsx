@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
 import { NotificationContext } from '@/context/notificationContext';
 import { PlusIcon, WalletIcon } from '@/components/Icons';
 import { TextError } from '@/components/TextError';
@@ -15,6 +15,7 @@ import { useGlobalAccount } from '@/hooks';
 
 import config from '@/config';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 const DCX_PRICE = Number(DCX_IN_USD);
@@ -47,7 +48,7 @@ interface IProps {
 }
 
 export const CreditsAmount = ({ onNext }: IProps) => {
-  const { organizationInfo, getNeededDimoAmountForDcx } = useGlobalAccount();
+  const { getNeededDimoAmountForDcx } = useGlobalAccount();
   const { getDimoPrice } = useCryptoPricing();
   const { setNotification } = useContext(NotificationContext);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
@@ -69,6 +70,8 @@ export const CreditsAmount = ({ onNext }: IProps) => {
   };
 
   const handleStartPurchase = async () => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     const { smartContractAddress } = organizationInfo!;
     if (!smartContractAddress) return;
     const neededDimo = await getNeededDimoAmountForDcx(credits);

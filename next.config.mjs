@@ -32,6 +32,9 @@ const nextConfig = {
     },
   },
   async headers() {
+    if (process.env.VERCEL_ENV === 'development') {
+      return [];
+    }
     return [
       {
         source: '/(.*)',

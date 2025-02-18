@@ -1,3 +1,4 @@
+import config from '@/config';
 import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import axios, { AxiosError } from 'axios';
@@ -86,7 +87,40 @@ export const rewirePasskey = async ({
   );
 };
 
+export const initOtpLogin = async (email: string): Promise<{ otpId: string }> => {
+  const { data } = await globalAccountClient.post<{ otpId: string }>(
+    '/api/auth/otp',
+    {
+      email,
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+  return data;
+};
+
+export const otpLogin = async (otpVars: {
+  email: string;
+  otpId: string;
+  otpCode: string;
+  key: string;
+}): Promise<{ credentialBundle: string }> => {
+  const { data } = await globalAccountClient.put<{ credentialBundle: string }>(
+    '/api/auth/otp',
+    otpVars,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+  return data;
+};
+
 // private functions
 const getRedirectUrl = () => {
-  return `${window.location.origin}/email-recovery?flow=rewire-passkey`;
+  return `${config.frontendUrl}/email-recovery?flow=rewire-passkey`;
 };
