@@ -113,7 +113,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     );
   };
 
-  const renderDeleteSignerAction = ({ id = '', address: signer }: ISigner) => {    
+  const renderDeleteSignerAction = ({ id = '', address: signer = '' }: ISigner) => {    
     return (
       isOwner(role) && (
         <button
@@ -128,7 +128,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     );
   };
 
-  const handleDelete = async (id: string, signer: `0x${string}`) => {
+  const handleDelete = async (id: string, signer: string) => {
     try {
       setIsOpened(true);
       await handleDisableSigner(signer);
