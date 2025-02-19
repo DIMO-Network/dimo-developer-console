@@ -31,6 +31,7 @@ import { AxiosError } from 'axios';
 import { NotificationContext } from '@/context/notificationContext';
 
 const halfHour = 30 * 60;
+const fifteenMinutes = 15 * 60;
 export const withGlobalAccounts = <P extends object>(
   WrappedComponent: ComponentType<P>,
 ) => {
@@ -84,15 +85,15 @@ export const withGlobalAccounts = <P extends object>(
 
           if (isEmpty(credentialBundle)) return;
 
-          const valid = await authIframeClient!.injectCredentialBundle(credentialBundle);
+          const injected = await authIframeClient!.injectCredentialBundle(credentialBundle);
 
-          if (!valid) return;
+          if (!injected) return;
 
           const currentSession = {
             organization: organization,
             session: {
               token: credentialBundle,
-              expiry: Date.now() / 1000 + halfHour,
+              expiry: Date.now() / 1000 + fifteenMinutes,
               authenticator: AuthClient.Iframe,
             },
           };
@@ -191,10 +192,10 @@ export const withGlobalAccounts = <P extends object>(
             return currentSession;
           }
 
-          const valid = await authIframeClient!.injectCredentialBundle(
+          const injected = await authIframeClient!.injectCredentialBundle(
             currentSession.session.token,
           );
-          if (valid) return currentSession;
+          if (injected && sessionValid) return currentSession;
           await logout();
           return null;
         }
