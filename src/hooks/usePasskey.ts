@@ -4,23 +4,36 @@ import { turnkeyConfig } from '@/config/turnkey';
 import { IPasskeyAttestation } from '@/types/wallet';
 import { getWebAuthnAttestation } from '@turnkey/http';
 import { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/nextjs';
 
 export const usePasskey = () => {
   const [isPasskeyAvailable, setIsPasskeyAvailable] = useState<boolean>(false);
 
-  const validatePasskeyAvailability = async () => {
+  const validatePasskeyAvailability = async (): Promise<boolean> => {
     // Availability of "window.PublicKeyCredential" means WebAuthn is usable.
-    if (!window.PublicKeyCredential) return false;
+    if (typeof window === 'undefined' || !window.PublicKeyCredential) return false;
+    try {
+      // "isUserVerifyingPlatformAuthenticatorAvailable" means the feature detection is usable.
+      if (!PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)
+        return false;
 
-    // "isUserVerifyingPlatformAuthenticatorAvailable" means the feature detection is usable.
-    if (!PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) return false;
+      // "isConditionalMediationAvailable" means the feature detection is usable.
+      if (!PublicKeyCredential.isConditionalMediationAvailable) return false;
 
-    // Check if user verifying platform authenticator is available.
-    const results = await Promise.all([
-      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
-    ]);
+      // Check if user verifying platform authenticator is available.
+      const results = await Promise.allSettled([
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable?.(),
+        PublicKeyCredential.isConditionalMediationAvailable?.(),
+      ]);
 
-    return results.every((r) => r === true);
+      return results.every(
+        (result: PromiseSettledResult<boolean>) =>
+          result.status === 'fulfilled' && result.value,
+      );
+    } catch (e: unknown) {
+      Sentry.captureException(e);
+      return false;
+    }
   };
 
   const generateRandomBuffer = (): ArrayBuffer => {

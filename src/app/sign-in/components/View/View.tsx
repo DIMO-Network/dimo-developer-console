@@ -10,7 +10,7 @@ import { Anchor } from '@/components/Anchor';
 import { IAuth } from '@/types/auth';
 import { isCollaborator } from '@/utils/user';
 import { SignInButtons } from '@/components/SignInButton';
-import { useErrorHandler, useGlobalAccount } from '@/hooks';
+import { useErrorHandler, useGlobalAccount, usePasskey } from '@/hooks';
 import { withNotifications } from '@/hoc';
 import { NotificationContext } from '@/context/notificationContext';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
@@ -23,6 +23,7 @@ export const View = () => {
   const { setNotification } = useContext(NotificationContext);
   const { loginWithPasskey, requestOtpLogin } = useContext(GlobalAccountAuthContext);
   const { getUserGlobalAccountInfo } = useGlobalAccount();
+  const { isPasskeyAvailable } = usePasskey();
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -40,7 +41,7 @@ export const View = () => {
   const handleLogin = async (email: string) => {
     try {
       const { hasPasskey } = await getUserGlobalAccountInfo(email);
-      if (hasPasskey) {
+      if (hasPasskey && isPasskeyAvailable) {
         await loginWithPasskey(email);
       } else {
         await requestOtpLogin(email);

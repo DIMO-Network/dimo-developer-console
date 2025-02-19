@@ -174,6 +174,10 @@ export const withGlobalAccounts = <P extends object>(
 
     const checkValidateAuth =
       useCallback(async (): Promise<IGlobalAccountSession | null> => {
+        if (!currentSession) {
+          logout();
+          return null;
+        }
         if (checkSessionIsValid()) return currentSession;
         initOtpLogin(currentSession!.organization.email);
 

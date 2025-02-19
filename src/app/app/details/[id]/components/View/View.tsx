@@ -38,14 +38,12 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const { workspace } = useOnboarding();
   const { processTransactions } = useContractGA();
   const router = useRouter();
-  const [userRole, setUserRole] = useState<string>('');
+  const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => {
-    if (!session) return;
-    const { role } = session.user;
-    setUserRole(role);
+    if (!role) return;
     refreshAppDetails();
-  }, [session]);
+  }, [role]);
 
   const refreshAppDetails = async () => {
     try {
@@ -193,7 +191,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         <>
           <div className="signers-content">
             <Title component="h2">Signers</Title>
-            {isOwner(userRole) && (
+            {isOwner(role) && (
               <div className="generate-signer">
                 <Button
                   className="primary-outline px-4 w-full"
@@ -211,7 +209,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
           <div className="redirect-uri-content">
             <Title component="h2">Authorized Redirect URIs</Title>
-            {isOwner(userRole) && app && (
+            {isOwner(role) && app && (
               <RedirectUriForm appId={app!.id!} refreshData={refreshAppDetails} />
             )}
           </div>
@@ -220,7 +218,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               <RedirectUriList list={app?.RedirectUris} refreshData={refreshAppDetails} />
             )}
           </div>
-          {isOwner(userRole) && (
+          {isOwner(role) && (
             <div className="extra-actions">
               <Button className="error-simple" onClick={handleDeleteApplication}>
                 Delete application
