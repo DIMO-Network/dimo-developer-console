@@ -561,9 +561,7 @@ export const useGlobalAccount = () => {
     return polygonAmoy;
   };
 
-  const getTurnkeyClient = (
-    authClient: AuthClient,
-  ): TurnkeyBrowserClient => {
+  const getTurnkeyClient = (authClient: AuthClient): TurnkeyBrowserClient => {
     if (authClient === AuthClient.Passkey) {
       return passkeyClient as TurnkeyBrowserClient;
     }

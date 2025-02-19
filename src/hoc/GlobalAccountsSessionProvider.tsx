@@ -92,7 +92,7 @@ export const withGlobalAccounts = <P extends object>(
             organization: organization,
             session: {
               token: credentialBundle,
-              expiry: (Date.now() / 1000) + halfHour,
+              expiry: Date.now() / 1000 + halfHour,
               authenticator: AuthClient.Iframe,
             },
           };
@@ -137,7 +137,7 @@ export const withGlobalAccounts = <P extends object>(
           organization: organization,
           session: {
             token: signInResponse.session,
-            expiry: (Date.now() / 1000) + halfHour,
+            expiry: Date.now() / 1000 + halfHour,
             authenticator: AuthClient.Passkey,
           },
         });
@@ -190,8 +190,10 @@ export const withGlobalAccounts = <P extends object>(
             await requestOtpLogin(currentSession.organization.email);
             return currentSession;
           }
-          
-          const valid = await authIframeClient!.injectCredentialBundle(currentSession.session.token);
+
+          const valid = await authIframeClient!.injectCredentialBundle(
+            currentSession.session.token,
+          );
           if (valid) return currentSession;
           await logout();
           return null;
@@ -204,13 +206,12 @@ export const withGlobalAccounts = <P extends object>(
 
     useEffect(() => {
       const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      if (stored && stored.session.expiry > Date.now() / 1000) {        
+      if (stored && stored.session.expiry > Date.now() / 1000) {
         setCurrentSession(stored);
       } else {
         setCurrentSession(null);
       }
     }, []);
-
 
     // Render the wrapped component with any additional props
     return (

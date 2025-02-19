@@ -269,7 +269,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
             <TextError errorMessage={errors?.app?.name?.message ?? ''} />
           )}
           <p className="text-sm text-grey-200">This name is for your reference only</p>
-        </Label>        
+        </Label>
         <div className="flex flex-col pt-4">
           <Button
             type="submit"
