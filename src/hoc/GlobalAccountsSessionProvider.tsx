@@ -177,22 +177,40 @@ export const withGlobalAccounts = <P extends object>(
           logout();
           return null;
         }
-        if (checkSessionIsValid()) return currentSession;
-        initOtpLogin(currentSession!.organization.email);
+
+        const sessionValid = checkSessionIsValid();
+        const currentAuthenticator = currentSession.session.authenticator;
+
+        if (currentAuthenticator === AuthClient.Passkey && !sessionValid) {
+          await logout();
+          return null;
+        }
+        if (currentAuthenticator === AuthClient.Iframe) {
+          if (isEmpty(currentSession.session.token)) {
+            await requestOtpLogin(currentSession.organization.email);
+            return currentSession;
+          }
+          
+          const valid = await authIframeClient!.injectCredentialBundle(currentSession.session.token);
+          if (valid) return currentSession;
+          await logout();
+          return null;
+        }
 
         return new Promise((resolve) => {
           setResolvers((prev) => [...prev, resolve]);
         });
-      }, [currentSession]);
+      }, [currentSession, authIframeClient]);
 
     useEffect(() => {
       const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      if (stored && stored.session.expiry > Date.now() / 1000) {
+      if (stored && stored.session.expiry > Date.now() / 1000) {        
         setCurrentSession(stored);
       } else {
         setCurrentSession(null);
       }
     }, []);
+
 
     // Render the wrapped component with any additional props
     return (
