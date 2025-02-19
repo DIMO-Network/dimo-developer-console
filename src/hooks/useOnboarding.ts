@@ -12,6 +12,7 @@ import { IApp } from '@/types/app';
 import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
 import { useContractGA } from '@/hooks';
+import * as Sentry from '@sentry/nextjs';
 
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
@@ -24,19 +25,23 @@ export const useOnboarding = () => {
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
 
-  useEffect(() => {
-    setIsLoading(true);
-    getApps()
-      .then(({ data: createdApps }) =>
-        setApps(createdApps.filter(({ deleted }) => !deleted)),
-      )
-      .finally(() => setIsLoading(false));
-  }, []);
+  const loadAppsAndWorkspace = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      const { data: createdApps } = await getApps();
+      setApps(createdApps.filter(({ deleted }) => !deleted));
+
+      const currentWorkspace = await getWorkspace();
+      setWorkspace(currentWorkspace);
+    } catch (error: unknown) {
+      Sentry.captureException(error);      
+    } finally {
+      setIsLoading(false)
+    }
+  };
 
   useEffect(() => {
-    getWorkspace().then((currentWorkspace) => {
-      setWorkspace(currentWorkspace);
-    });
+    void loadAppsAndWorkspace();
   }, []);
 
   useEffect(() => {
