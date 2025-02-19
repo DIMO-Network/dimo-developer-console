@@ -63,7 +63,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
       setIsLoading(true);
       setIsOpened(true);
       setLoadingStatus({
-        label: 'Preparing DCX to license the application...',
+        label: 'Preparing to license the application...',
         status: 'loading',
       });
 

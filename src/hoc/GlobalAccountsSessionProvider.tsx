@@ -85,7 +85,8 @@ export const withGlobalAccounts = <P extends object>(
 
           if (isEmpty(credentialBundle)) return;
 
-          const injected = await authIframeClient!.injectCredentialBundle(credentialBundle);
+          const injected =
+            await authIframeClient!.injectCredentialBundle(credentialBundle);
 
           if (!injected) return;
 
