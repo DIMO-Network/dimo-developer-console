@@ -5,7 +5,7 @@ import { encodeFunctionData } from 'viem';
 import { useRouter } from 'next/navigation';
 import { utils } from 'web3';
 
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import classNames from 'classnames';
 import * as Sentry from '@sentry/nextjs';
 
@@ -169,7 +169,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
   };
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
-    if (!_.isEmpty(workspace)) return workspace;
+    if (!isEmpty(workspace)) return workspace;
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
     const organizationInfo = gaSession?.organization;
     if (!organizationInfo) throw new Error('There is not organization information');
@@ -219,7 +219,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
     const { id: workspaceId = '' } = await handleCreateWorkspace(workspace);
     await createApp(workspaceId, {
       name: app.name,
-      scope: app.scope,
+      scope: 'production',
     });
     router.replace('/app');
   };
@@ -269,49 +269,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
             <TextError errorMessage={errors?.app?.name?.message ?? ''} />
           )}
           <p className="text-sm text-grey-200">This name is for your reference only</p>
-        </Label>
-        <div className="">
-          <Controller
-            control={control}
-            name="app.scope"
-            rules={{ required: true }}
-            render={({ field: { onChange, value: scope } }) => (
-              <MultiCardOption
-                options={[
-                  {
-                    value: 'sanbox',
-                    render: ({ selected }) => (
-                      <AppCard
-                        name="Sandbox"
-                        description="Connect to development vehicles"
-                        scope="sandbox"
-                        className={classNames('w-full', {
-                          '!border-white': selected,
-                        })}
-                      />
-                    ),
-                  },
-                  {
-                    value: 'production',
-                    render: ({ selected }) => (
-                      <AppCard
-                        name="Production"
-                        description="Connect to production vehicles"
-                        scope="production"
-                        className={classNames('w-full', {
-                          '!border-white': selected,
-                        })}
-                      />
-                    ),
-                  },
-                ]}
-                selected={scope}
-                onChange={onChange}
-              />
-            )}
-          />
-          {errors?.app?.scope && <TextError errorMessage="This field is required" />}
-        </div>
+        </Label>        
         <div className="flex flex-col pt-4">
           <Button
             type="submit"

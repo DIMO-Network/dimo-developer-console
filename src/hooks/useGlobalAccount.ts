@@ -563,18 +563,11 @@ export const useGlobalAccount = () => {
 
   const getTurnkeyClient = (
     authClient: AuthClient,
-  ): TurnkeyBrowserClient | TurnkeyClient => {
+  ): TurnkeyBrowserClient => {
     if (authClient === AuthClient.Passkey) {
       return passkeyClient as TurnkeyBrowserClient;
     }
-
-    // TODO: check why with iframe client it's not working
-    return new TurnkeyClient(
-      {
-        baseUrl: turnkeyConfig.apiBaseUrl,
-      },
-      authIframeClient!.config.stamper!,
-    );
+    return authIframeClient as unknown as TurnkeyBrowserClient;
   };
 
   return {
