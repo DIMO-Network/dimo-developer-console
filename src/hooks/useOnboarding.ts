@@ -36,7 +36,7 @@ export const useOnboarding = () => {
     } catch (error: unknown) {
       Sentry.captureException(error);      
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   };
 
