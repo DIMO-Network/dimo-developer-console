@@ -30,6 +30,7 @@ import { useTurnkey } from '@turnkey/sdk-react';
 import { AxiosError } from 'axios';
 import { NotificationContext } from '@/context/notificationContext';
 
+const halfHour = 30 * 60;
 export const withGlobalAccounts = <P extends object>(
   WrappedComponent: ComponentType<P>,
 ) => {
@@ -87,13 +88,11 @@ export const withGlobalAccounts = <P extends object>(
 
           if (!valid) return;
 
-          const signInResponse = await authIframeClient!.login();
-
           const currentSession = {
             organization: organization,
             session: {
-              token: signInResponse!.session!,
-              expiry: Number(signInResponse!.sessionExpiry!),
+              token: credentialBundle,
+              expiry: (Date.now() / 1000) + halfHour,
               authenticator: AuthClient.Iframe,
             },
           };
@@ -138,7 +137,7 @@ export const withGlobalAccounts = <P extends object>(
           organization: organization,
           session: {
             token: signInResponse.session,
-            expiry: Number(signInResponse.sessionExpiry),
+            expiry: (Date.now() / 1000) + halfHour,
             authenticator: AuthClient.Passkey,
           },
         });
