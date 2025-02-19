@@ -182,10 +182,12 @@ export const withGlobalAccounts = <P extends object>(
         const sessionValid = checkSessionIsValid();
         const currentAuthenticator = currentSession.session.authenticator;
 
-        if (currentAuthenticator === AuthClient.Passkey && !sessionValid) {
+        if (currentAuthenticator === AuthClient.Passkey) {
+          if (sessionValid) return currentSession;
           await logout();
           return null;
         }
+
         if (currentAuthenticator === AuthClient.Iframe) {
           if (isEmpty(currentSession.session.token)) {
             await requestOtpLogin(currentSession.organization.email);
