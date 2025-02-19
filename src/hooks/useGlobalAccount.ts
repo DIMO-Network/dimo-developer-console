@@ -18,7 +18,7 @@ import {
 import { TurnkeyClient } from '@turnkey/http';
 import configuration from '@/config';
 import config from '@/config';
-import { passkeyClient, turnkeyClient, turnkeyConfig } from '@/config/turnkey';
+import { passkeyClient, turnkeyConfig } from '@/config/turnkey';
 import { createAccount } from '@turnkey/viem';
 import {
   Chain,
@@ -567,7 +567,7 @@ export const useGlobalAccount = () => {
     if (authClient === AuthClient.Passkey) {
       return passkeyClient as TurnkeyBrowserClient;
     }
-    
+
     // TODO: check why with iframe client it's not working
     return new TurnkeyClient(
       {
