@@ -29,9 +29,10 @@ interface IRedirectUri {
 interface IProps {
   appId: string;
   refreshData: () => void;
+  list: IRedirectUri[] | undefined;
 }
 
-export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
+export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { workspace } = useOnboarding();
@@ -87,6 +88,21 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
     }
   };
 
+  const validateUrl = (str = '') => {
+    const isValidUrl = isURL(str, {
+      require_protocol: true,
+      require_tld: false,
+      protocols: ['http', 'https'],
+      allow_protocol_relative_urls: false,
+    });
+
+    const isUnique = !list?.find(({ uri }) => uri === str);
+
+    if (!isValidUrl) return 'Please enter a valid URL';
+    if (!isUnique) return 'The URL is already in the list';
+    return true;
+  };
+
   return (
     <div className="redirect-uri-form">
       <form onSubmit={handleSubmit(addRedirectUri)}>
@@ -100,13 +116,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
                   message: 'The name should has maximum 150 characters',
                 },
                 validate: {                  
-                  url: (str = '') =>
-                    isURL(str, {
-                      require_protocol: true,
-                      require_tld: false,
-                      protocols: ['http', 'https'],
-                      allow_protocol_relative_urls: false,
-                    }) || 'Invalid Redirect URI',
+                  url: validateUrl,
                 },
               })}
               placeholder="www.google.com"
