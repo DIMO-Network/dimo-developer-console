@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
 import { useContext, useState, type FC } from 'react';
@@ -73,7 +73,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
       refreshData();
     } catch (error: unknown) {
       Sentry.captureException(error);
-      const code = _.get(error, 'code', null);
+      const code = get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
       else
@@ -99,9 +99,10 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
                   value: 150,
                   message: 'The name should has maximum 150 characters',
                 },
-                validate: {
+                validate: {                  
                   url: (str = '') =>
                     isURL(str, {
+                      require_protocol: true,
                       require_tld: false,
                       protocols: ['http', 'https'],
                       allow_protocol_relative_urls: false,
