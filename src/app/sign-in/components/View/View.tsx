@@ -98,18 +98,6 @@ export const View = () => {
                   target="_blank"
                 >
                   terms of service
-                </Anchor>
-              </p>
-            </div>
-            <div className="flex flex-row">
-              <p className="terms-caption">
-                By signing in, you are agreeing to our{' '}
-                <Anchor
-                  href="https://docs.dimo.zone/dinc/developer-terms-of-service"
-                  className="grey underline"
-                  target="_blank"
-                >
-                  terms of service
                 </Anchor>{' '}
                 and{' '}
                 <Anchor

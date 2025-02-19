@@ -561,11 +561,19 @@ export const useGlobalAccount = () => {
     return polygonAmoy;
   };
 
-  const getTurnkeyClient = (authClient: AuthClient): TurnkeyBrowserClient => {
+  const getTurnkeyClient = (
+    authClient: AuthClient,
+  ): TurnkeyBrowserClient | TurnkeyClient => {
     if (authClient === AuthClient.Passkey) {
       return passkeyClient as TurnkeyBrowserClient;
     }
-    return authIframeClient as unknown as TurnkeyBrowserClient;
+    // TODO: check why is not working with auth iframe client
+    return new TurnkeyClient(
+      {
+        baseUrl: turnkeyConfig.apiBaseUrl,
+      },
+      authIframeClient!.config.stamper!,
+    );
   };
 
   return {
