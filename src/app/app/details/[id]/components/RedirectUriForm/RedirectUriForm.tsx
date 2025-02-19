@@ -98,7 +98,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
 
     const isUnique = !list?.find(({ uri }) => uri === str);
 
-    if (!isValidUrl) return 'Please enter a valid URL';
+    if (!isValidUrl) return 'Please enter a valid URL, must include http:// or https://';
     if (!isUnique) return 'The URL is already in the list';
     return true;
   };
@@ -119,7 +119,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
                   url: validateUrl,
                 },
               })}
-              placeholder="www.google.com"
+              placeholder="https://www.google.com"
               className="redirectUri"
               role="redirect-url-input"
             />
