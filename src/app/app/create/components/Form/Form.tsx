@@ -1,15 +1,13 @@
 'use client';
 import { FC, useContext, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { encodeFunctionData } from 'viem';
 import { useRouter } from 'next/navigation';
 import { utils } from 'web3';
 
 import { isEmpty } from 'lodash';
-import classNames from 'classnames';
 import * as Sentry from '@sentry/nextjs';
 
-import { AppCard } from '@/components/AppCard';
 import { Button } from '@/components/Button';
 import { createApp } from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
@@ -23,7 +21,6 @@ import {
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
 import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
-import { MultiCardOption } from '@/components/MultiCardOption';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
@@ -50,7 +47,6 @@ export const Form: FC<IProps> = ({ workspace }) => {
     useContractGA();
   const router = useRouter();
   const {
-    control,
     formState: { errors },
     handleSubmit,
     register,
