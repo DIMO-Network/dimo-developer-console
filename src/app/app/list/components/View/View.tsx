@@ -26,8 +26,7 @@ export const View: FC = () => {
           {balance === 0 && apps.length === 0 && <Explanation />}
           {apps.length === 0 && (
             <GetStarted hasBalance={balance > 0} hasApps={apps.length > 0} />
-          )}
-          {balance === 0 && apps.length > 0 && <Attention />}
+          )}          
           {apps.length > 0 && <AppList apps={apps} />}
         </div>
       )}
