@@ -10,6 +10,8 @@ import {
   SummarizeIcon,
   SupportAgentIcon,
 } from '@/components/Icons';
+import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage';
+import { turnkeyClient } from './turnkey';
 
 export const mainMenu = [
   {
@@ -59,7 +61,11 @@ export const bottomMenu = [
     label: 'Logout',
     icon: ArrowLeftStartOnRectangleIcon as FC,
     iconClassName: 'h-5 w-5 fill-grey-200',
-    link: () => signOut({ callbackUrl: '/sign-in' }),
+    link: () => {
+      turnkeyClient.logoutUser();
+      removeFromSession(GlobalAccountSession);
+      signOut({ callbackUrl: '/sign-in' });
+    },
     external: false,
     disabled: false,
   },

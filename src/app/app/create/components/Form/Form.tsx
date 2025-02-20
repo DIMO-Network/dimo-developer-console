@@ -1,29 +1,31 @@
 'use client';
 import { FC, useContext, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { encodeFunctionData } from 'viem';
 import { useRouter } from 'next/navigation';
 import { utils } from 'web3';
 
-import _ from 'lodash';
-import classNames from 'classnames';
+import { isEmpty } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
-import { AppCard } from '@/components/AppCard';
 import { Button } from '@/components/Button';
 import { createApp } from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
-import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
+import {
+  IDesiredTokenAmount,
+  IGlobalAccountSession,
+  ITokenBalance,
+} from '@/types/wallet';
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
 import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
-import { MultiCardOption } from '@/components/MultiCardOption';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA, useGlobalAccount } from '@/hooks';
+import { useContractGA } from '@/hooks';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
@@ -43,10 +45,8 @@ export const Form: FC<IProps> = ({ workspace }) => {
   const { setNotification } = useContext(NotificationContext);
   const { checkEnoughBalance, getDesiredTokenAmount, balanceDCX, processTransactions } =
     useContractGA();
-  const { organizationInfo } = useGlobalAccount();
   const router = useRouter();
   const {
-    control,
     formState: { errors },
     handleSubmit,
     register,
@@ -63,7 +63,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
       setIsLoading(true);
       setIsOpened(true);
       setLoadingStatus({
-        label: 'Preparing DCX to license the application...',
+        label: 'Preparing to license the application...',
         status: 'loading',
       });
 
@@ -101,6 +101,8 @@ export const Form: FC<IProps> = ({ workspace }) => {
     desiredTokenAmount: IDesiredTokenAmount,
     enoughBalance: ITokenBalance,
   ) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     const transactions = [];
     if (!enoughBalance.dcxAllowance) {
       transactions.push({
@@ -163,7 +165,9 @@ export const Form: FC<IProps> = ({ workspace }) => {
   };
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
-    if (!_.isEmpty(workspace)) return workspace;
+    if (!isEmpty(workspace)) return workspace;
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo) throw new Error('There is not organization information');
 
     setLoadingStatus({
@@ -211,7 +215,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
     const { id: workspaceId = '' } = await handleCreateWorkspace(workspace);
     await createApp(workspaceId, {
       name: app.name,
-      scope: app.scope,
+      scope: 'production',
     });
     router.replace('/app');
   };
@@ -262,48 +266,6 @@ export const Form: FC<IProps> = ({ workspace }) => {
           )}
           <p className="text-sm text-grey-200">This name is for your reference only</p>
         </Label>
-        <div className="">
-          <Controller
-            control={control}
-            name="app.scope"
-            rules={{ required: true }}
-            render={({ field: { onChange, value: scope } }) => (
-              <MultiCardOption
-                options={[
-                  {
-                    value: 'sanbox',
-                    render: ({ selected }) => (
-                      <AppCard
-                        name="Sandbox"
-                        description="Connect to development vehicles"
-                        scope="sandbox"
-                        className={classNames('w-full', {
-                          '!border-white': selected,
-                        })}
-                      />
-                    ),
-                  },
-                  {
-                    value: 'production',
-                    render: ({ selected }) => (
-                      <AppCard
-                        name="Production"
-                        description="Connect to production vehicles"
-                        scope="production"
-                        className={classNames('w-full', {
-                          '!border-white': selected,
-                        })}
-                      />
-                    ),
-                  },
-                ]}
-                selected={scope}
-                onChange={onChange}
-              />
-            )}
-          />
-          {errors?.app?.scope && <TextError errorMessage="This field is required" />}
-        </div>
         <div className="flex flex-col pt-4">
           <Button
             type="submit"

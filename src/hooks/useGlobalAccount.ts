@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext } from 'react';
 import { useTurnkey } from '@turnkey/sdk-react';
 import {
   createSubOrganization,
@@ -8,15 +8,14 @@ import {
   rewirePasskey,
   startEmailRecovery,
 } from '@/services/globalAccount';
-import { signOut, useSession } from 'next-auth/react';
+import { AuthClient, TurnkeyBrowserClient } from '@turnkey/sdk-browser';
 import {
+  IGlobalAccountSession,
   IKernelOperationStatus,
   IPasskeyAttestation,
   ISubOrganization,
 } from '@/types/wallet';
-import { useRouter } from 'next/navigation';
-import { getWebAuthnAttestation, TurnkeyClient } from '@turnkey/http';
-import { isEmpty } from 'lodash';
+import { TurnkeyClient } from '@turnkey/http';
 import configuration from '@/config';
 import config from '@/config';
 import { passkeyClient, turnkeyConfig } from '@/config/turnkey';
@@ -56,28 +55,22 @@ import {
   SmartAccount,
 } from 'viem/_types/account-abstraction';
 import * as Sentry from '@sentry/nextjs';
-
-const generateRandomBuffer = (): ArrayBuffer => {
-  const arr = new Uint8Array(32);
-  crypto.getRandomValues(arr);
-  return arr.buffer;
-};
-
-const base64UrlEncode = (challenge: ArrayBuffer): string => {
-  return Buffer.from(challenge)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-};
+import { usePasskey } from '@/hooks';
+import {
+  getFromSession,
+  GlobalAccountSession,
+  saveToSession,
+} from '@/utils/sessionStorage';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 
 export const useGlobalAccount = () => {
-  const { data: session } = useSession();
-  const router = useRouter();
+  const { getNewUserPasskey } = usePasskey();
+  const { checkAuthenticated } = useContext(GlobalAccountAuthContext);
   const { authIframeClient } = useTurnkey();
-  const [organizationInfo, setOrganizationInfo] = useState<ISubOrganization | null>(null);
+
+  const getUserGlobalAccountInfo = getUserSubOrganization;
 
   const validCredentials = useCallback(
     async (authToken: string) => {
@@ -87,57 +80,10 @@ export const useGlobalAccount = () => {
     [authIframeClient],
   );
 
-  const getPasskeyAttestation = async (
-    email: string,
-    challenge: ArrayBuffer,
-  ): Promise<IPasskeyAttestation> => {
-    const authenticatorUserId = generateRandomBuffer();
-
-    let authenticatorName = `${email} @ DIMO`;
-
-    if (config.environment !== 'production') {
-      authenticatorName += ` ${config.environment}`;
-    }
-
-    const attestation = await getWebAuthnAttestation({
-      publicKey: {
-        rp: {
-          id: passkeyClient?.rpId,
-          name: 'DIMO Global Accounts',
-        },
-        challenge,
-        pubKeyCredParams: [
-          {
-            alg: -7,
-            type: 'public-key',
-          },
-          {
-            alg: -257,
-            type: 'public-key',
-          },
-        ],
-        user: {
-          id: authenticatorUserId,
-          name: authenticatorName,
-          displayName: authenticatorName,
-        },
-        timeout: 300_000,
-        authenticatorSelection: {
-          requireResidentKey: false,
-          authenticatorAttachment: 'platform',
-          residentKey: 'preferred',
-          userVerification: 'preferred',
-        },
-      },
-    });
-
-    return attestation;
-  };
-
   const registerNewPasskey = async (): Promise<void> => {
     const me = await authIframeClient?.getWhoami();
-    const challenge = generateRandomBuffer();
-    const attestation = await getPasskeyAttestation(me!.username!, challenge);
+
+    const { attestation, encodedChallenge } = await getNewUserPasskey(me!.username!);
 
     const client = new TurnkeyClient(
       {
@@ -169,7 +115,7 @@ export const useGlobalAccount = () => {
         userId: me!.userId,
         authenticator: {
           authenticatorName: 'DIMO PASSKEY',
-          challenge: base64UrlEncode(challenge),
+          challenge: encodedChallenge,
           attestation,
         },
       },
@@ -182,36 +128,27 @@ export const useGlobalAccount = () => {
     });
   };
 
-  const walletLogin = async (): Promise<void> => {
+  const registerSubOrganization = async ({
+    createWithoutPasskey,
+    email,
+  }: {
+    createWithoutPasskey: boolean;
+    email: string;
+  }): Promise<ISubOrganization> => {
     try {
-      const { subOrganizationId } = organizationInfo!;
-      // a bit hacky but works for now
-      const signInResponse = await passkeyClient.login({
-        organizationId: subOrganizationId,
-      });
+      let challenge: string | undefined;
+      let passkeyAttestation: IPasskeyAttestation | undefined;
 
-      if (isEmpty(signInResponse?.organizationId)) return;
-      router.push('/valid-tzd');
-    } catch (e) {
-      Sentry.captureException(e);
-      console.error('Error logging in with wallet', e);
-      await signOut();
-    }
-  };
-
-  const registerSubOrganization = async (): Promise<ISubOrganization> => {
-    try {
-      if (!session?.user?.email) return {} as ISubOrganization;
-      const { email } = session.user;
-
-      const challenge = generateRandomBuffer();
-      const encodedChallenge = base64UrlEncode(challenge);
-      const attestation = await getPasskeyAttestation(email, challenge);
+      if (!createWithoutPasskey) {
+        const { attestation, encodedChallenge } = await getNewUserPasskey(email);
+        challenge = encodedChallenge;
+        passkeyAttestation = attestation;
+      }
 
       const response = await createSubOrganization({
         email,
-        attestation,
-        encodedChallenge,
+        attestation: passkeyAttestation,
+        encodedChallenge: challenge,
         deployAccount: true,
       });
 
@@ -220,8 +157,13 @@ export const useGlobalAccount = () => {
         return {} as ISubOrganization;
       }
 
-      setOrganizationInfo({
-        ...response,
+      saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
+        organization: { ...response, email },
+        session: {
+          token: '',
+          expiry: passkeyAttestation ? 30 : 0,
+          authenticator: passkeyAttestation ? AuthClient.Passkey : AuthClient.Iframe,
+        },
       });
 
       return response;
@@ -245,9 +187,14 @@ export const useGlobalAccount = () => {
 
   const getWmaticAllowance = async (): Promise<bigint> => {
     try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
       if (!organizationInfo) return BigInt(0);
       const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
 
       if (!kernelClient) {
         return BigInt(0);
@@ -277,8 +224,14 @@ export const useGlobalAccount = () => {
 
   const depositWmatic = async (amount: bigint): Promise<IKernelOperationStatus> => {
     try {
-      if (!organizationInfo) return {} as IKernelOperationStatus;
-      const kernelClient = await getKernelClient(organizationInfo);
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return {} as IKernelOperationStatus;
+      const { organization: organizationInfo, session } = currentSession;
+
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: session.authenticator,
+      });
 
       if (!kernelClient) {
         return {
@@ -323,8 +276,14 @@ export const useGlobalAccount = () => {
 
   const swapWmaticToDimo = async (amount: bigint): Promise<IKernelOperationStatus> => {
     try {
-      if (!organizationInfo) return {} as IKernelOperationStatus;
-      const kernelClient = await getKernelClient(organizationInfo);
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return {} as IKernelOperationStatus;
+      const { organization: organizationInfo, session } = currentSession;
+
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: session.authenticator,
+      });
 
       if (!kernelClient) {
         return {
@@ -399,9 +358,16 @@ export const useGlobalAccount = () => {
 
   const getNeededDimoAmountForDcx = async (amount: number): Promise<bigint> => {
     try {
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return BigInt(0);
+      const { organization: organizationInfo, session } = currentSession;
+
       if (!organizationInfo) return BigInt(0);
       const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient(organizationInfo);
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: session.authenticator,
+      });
 
       if (!kernelClient) {
         return BigInt(0);
@@ -429,10 +395,17 @@ export const useGlobalAccount = () => {
     }
   };
 
-  const getKernelClient = async (organizationInfo: ISubOrganization) => {
+  const getKernelClient = async ({
+    organizationInfo,
+    authClient,
+  }: {
+    organizationInfo: ISubOrganization;
+    authClient: AuthClient;
+  }) => {
     try {
       const kernelClient = await buildFallbackKernelClients({
         organizationInfo,
+        authClient,
       });
       return kernelClient;
     } catch (e) {
@@ -445,9 +418,11 @@ export const useGlobalAccount = () => {
   const buildKernelClient = async ({
     orgInfo,
     provider,
+    authClient,
   }: {
     orgInfo: ISubOrganization;
     provider: string;
+    authClient: AuthClient;
   }) => {
     const { subOrganizationId, walletAddress } = orgInfo;
     const chain = getChain();
@@ -455,7 +430,7 @@ export const useGlobalAccount = () => {
     const publicClient = getPublicClient();
 
     const localAccount = await createAccount({
-      client: passkeyClient,
+      client: getTurnkeyClient(authClient),
       organizationId: subOrganizationId,
       signWith: walletAddress,
       ethereumAddress: walletAddress,
@@ -500,8 +475,10 @@ export const useGlobalAccount = () => {
 
   const buildFallbackKernelClients = async ({
     organizationInfo,
+    authClient,
   }: {
     organizationInfo: ISubOrganization;
+    authClient: AuthClient;
   }) => {
     const fallbackProviders: string[] = ['ALCHEMY', 'GELATO', 'PIMLICO'];
     const fallbackKernelClients: KernelAccountClient<
@@ -517,6 +494,7 @@ export const useGlobalAccount = () => {
         const kernelClient = await buildKernelClient({
           orgInfo: organizationInfo!,
           provider,
+          authClient,
         });
         fallbackKernelClients.push(kernelClient);
       } catch (e) {
@@ -580,29 +558,26 @@ export const useGlobalAccount = () => {
     if (configuration.environment === 'production') {
       return polygon;
     }
-
     return polygonAmoy;
   };
 
-  useEffect(() => {
-    if (session?.user?.email && !organizationInfo) {
-      const { email } = session.user;
-      if (!email) return;
-      getUserSubOrganization(email)
-        .then((subOrganization) => {
-          if (!subOrganization) return;
-          setOrganizationInfo(subOrganization);
-        })
-        .catch((e) => {
-          Sentry.captureException(e);
-          console.error('Error getting sub organization', e);
-        });
+  const getTurnkeyClient = (
+    authClient: AuthClient,
+  ): TurnkeyBrowserClient | TurnkeyClient => {
+    if (authClient === AuthClient.Passkey) {
+      return passkeyClient as TurnkeyBrowserClient;
     }
-  }, [session, organizationInfo]);
+    // TODO: check why is not working with auth iframe client
+    return new TurnkeyClient(
+      {
+        baseUrl: turnkeyConfig.apiBaseUrl,
+      },
+      authIframeClient!.config.stamper!,
+    );
+  };
 
   return {
-    organizationInfo,
-    walletLogin,
+    getUserGlobalAccountInfo,
     registerSubOrganization,
     emailRecovery,
     validCredentials,

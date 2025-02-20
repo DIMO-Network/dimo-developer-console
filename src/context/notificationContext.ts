@@ -1,16 +1,11 @@
 'use client';
 
 import { createContext } from 'react';
-import { INotification } from '@/hooks';
+import { INotification, TSetMessageFn } from '@/hooks';
 
 interface IProps {
   notifications: INotification[] | undefined;
-  setNotification: (
-    message: string,
-    title: string,
-    type: string,
-    duration?: number,
-  ) => void;
+  setNotification: TSetMessageFn;
 }
 
 export const NotificationContext = createContext<IProps>({

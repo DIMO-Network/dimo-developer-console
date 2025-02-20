@@ -9,6 +9,8 @@ import { Button } from '@/components/Button';
 import { IApp } from '@/types/app';
 import { isOwner } from '@/utils/user';
 
+import './AppList.css';
+
 interface IProps {
   apps: IApp[];
 }

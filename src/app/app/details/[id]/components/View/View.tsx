@@ -20,7 +20,9 @@ import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriFo
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { Title } from '@/components/Title';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
+import { IGlobalAccountSession } from '@/types/wallet';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
@@ -34,17 +36,14 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
   const { workspace } = useOnboarding();
-  const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const router = useRouter();
-  const [userRole, setUserRole] = useState<string>('');
+  const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => {
-    if (!session) return;
-    const { role } = session.user;
-    setUserRole(role);
+    if (!role) return;
     refreshAppDetails();
-  }, [session]);
+  }, [role]);
 
   const refreshAppDetails = async () => {
     try {
@@ -66,6 +65,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleEnableSigner = (signer: string) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
@@ -80,6 +81,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleDisableSigner = (signer: string) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
@@ -94,6 +97,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleRemoveUri = (uri: string) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
@@ -186,7 +191,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         <>
           <div className="signers-content">
             <Title component="h2">Signers</Title>
-            {isOwner(userRole) && (
+            {isOwner(role) && (
               <div className="generate-signer">
                 <Button
                   className="primary-outline px-4 w-full"
@@ -204,8 +209,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
           </div>
           <div className="redirect-uri-content">
             <Title component="h2">Authorized Redirect URIs</Title>
-            {isOwner(userRole) && app && (
-              <RedirectUriForm appId={app!.id!} refreshData={refreshAppDetails} />
+            {isOwner(role) && app && (
+              <RedirectUriForm appId={app!.id!} refreshData={refreshAppDetails} list={app?.RedirectUris} />
             )}
           </div>
           <div className="signers-table">
@@ -213,7 +218,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               <RedirectUriList list={app?.RedirectUris} refreshData={refreshAppDetails} />
             )}
           </div>
-          {isOwner(userRole) && (
+          {isOwner(role) && (
             <div className="extra-actions">
               <Button className="error-simple" onClick={handleDeleteApplication}>
                 Delete application

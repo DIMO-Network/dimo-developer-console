@@ -1,19 +1,21 @@
 import { useForm } from 'react-hook-form';
 import { useContext, useEffect, useState } from 'react';
 
-import { TokenInput } from '@/components/TokenInput';
+import classnames from 'classnames';
+import * as Sentry from '@sentry/nextjs';
+
 import { Button } from '@/components/Button';
-import useStripeCrypto from '@/hooks/useStripeCrypto';
-import { useGlobalAccount } from '@/hooks';
-import { StripeCryptoContext } from '@/context/StripeCryptoContext';
-import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { Card } from '@/components/Card';
+import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
+import { NotificationContext } from '@/context/notificationContext';
+import { PlusIcon, WalletIcon } from '@/components/Icons';
 import { TextError } from '@/components/TextError';
+import { TokenInput } from '@/components/TokenInput';
+import { useGlobalAccount } from '@/hooks';
+
 import config from '@/config';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
-import { PlusIcon, WalletIcon } from '@/components/Icons';
-import classnames from 'classnames';
-import { Card } from '@/components/Card';
-import * as Sentry from '@sentry/nextjs';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 const DCX_PRICE = Number(DCX_IN_USD);
@@ -46,10 +48,9 @@ interface IProps {
 }
 
 export const CreditsAmount = ({ onNext }: IProps) => {
-  const { organizationInfo, getNeededDimoAmountForDcx } = useGlobalAccount();
+  const { getNeededDimoAmountForDcx } = useGlobalAccount();
   const { getDimoPrice } = useCryptoPricing();
-  const { setStripeClientId } = useContext(StripeCryptoContext);
-  const { createStripeCryptoSession } = useStripeCrypto();
+  const { setNotification } = useContext(NotificationContext);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
   const { control, watch } = useForm<IForm>({
     mode: 'onChange',
@@ -69,33 +70,22 @@ export const CreditsAmount = ({ onNext }: IProps) => {
   };
 
   const handleStartPurchase = async () => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     const { smartContractAddress } = organizationInfo!;
     if (!smartContractAddress) return;
     const neededDimo = await getNeededDimoAmountForDcx(credits);
 
     if (paymentMethod === 'usd') {
-      await startOnrampPurchase(smartContractAddress, neededDimo);
+      setNotification(
+        'Buy with USD is paused until our new billing system is in place. DIMO Credits are not required to get started. Please reach out to developer-support@dimo.org for billing support.',
+        'Important',
+        'info',
+      );
       return;
     }
 
     await startWalletPurchase(smartContractAddress, neededDimo);
-  };
-
-  const startOnrampPurchase = async (
-    smartContractAddress: `0x${string}`,
-    neededDimo: bigint,
-  ) => {
-    const { client_secret } = await createStripeCryptoSession(
-      smartContractAddress,
-      credits * DCX_PRICE,
-    );
-    setStripeClientId(client_secret);
-    onNext('credits-amount', {
-      destinationAddress: smartContractAddress,
-      usdAmount: credits * DCX_PRICE,
-      dcxAmount: BigInt(credits!),
-      requiredDimoAmount: neededDimo,
-    });
   };
 
   const startWalletPurchase = async (

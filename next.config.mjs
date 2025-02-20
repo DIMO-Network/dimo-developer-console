@@ -6,7 +6,7 @@ const cspHeader = `
     style-src 'self' 'unsafe-inline';
     object-src 'none';
     base-uri 'self';
-    connect-src 'self' https://*.dimo.org https://crypto-js.stripe.com https://js.stripe.com  https://r.stripe.com https://api.stripe.com https://api.turnkey.com https://explorer-api.walletconnect.com https://*.sentry.io https://polygon-mainnet.g.alchemy.com https://polygon-amoy.g.alchemy.com https://pulse.walletconnect.org https://rpc.zerodev.app https://*.vercel.app https://vercel.live;
+    connect-src 'self' https://*.dimo.org https://*.dimo.zone https://crypto-js.stripe.com https://js.stripe.com  https://r.stripe.com https://api.stripe.com https://api.turnkey.com https://explorer-api.walletconnect.com https://*.sentry.io https://polygon-mainnet.g.alchemy.com https://polygon-amoy.g.alchemy.com https://pulse.walletconnect.org https://rpc.zerodev.app https://*.vercel.app https://vercel.live;
     font-src 'self';
     frame-src 'self' https://auth.turnkey.com https://crypto-js.stripe.com https://js.stripe.com https://vercel.live https://r.stripe.com;
     img-src 'self' https://explorer-api.walletconnect.com;
@@ -32,6 +32,9 @@ const nextConfig = {
     },
   },
   async headers() {
+    if (process.env.VERCEL_ENV === 'development') {
+      return [];
+    }
     return [
       {
         source: '/(.*)',
@@ -47,8 +50,8 @@ const nextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  org: 'dimo-hp',
-  project: 'developer-console',
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
 
   // An auth token is required for uploading source maps.
   authToken: process.env.SENTRY_AUTH_TOKEN,

@@ -2,20 +2,29 @@
 
 import { useState } from 'react';
 
+export type TMessageType = 'success' | 'error' | 'info';
+
 export interface INotification {
   id: number;
   message: string;
   title: string;
-  type: string;
+  type: TMessageType;
 }
+
+export type TSetMessageFn = (
+  message: string,
+  title: string,
+  type: TMessageType,
+  duration?: number,
+) => void;
 
 export const useNotification = () => {
   const [notifications, setNotifications] = useState<INotification[]>([]);
 
-  const setNotification = (
+  const setNotification: TSetMessageFn = (
     message: string,
     title: string,
-    type: string,
+    type: TMessageType,
     duration = 10000,
   ) => {
     const id = Math.floor(Math.random() * 10000); // Generate a unique ID for the notification

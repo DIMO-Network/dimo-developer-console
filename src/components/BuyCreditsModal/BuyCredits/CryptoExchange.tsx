@@ -1,6 +1,6 @@
 'use client';
 
-import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import { useContext, useEffect, useState } from 'react';
 import { Loading } from '@/components/Loading';
@@ -13,6 +13,7 @@ import DimoABI from '@/contracts/DimoTokenContract.json';
 import { utils } from 'web3';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import * as Sentry from '@sentry/nextjs';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
@@ -51,7 +52,7 @@ const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus }
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const { setNotification } = useContext(NotificationContext);
   const { allowanceDCX, processTransactions } = useContractGA();
-  const { organizationInfo, depositWmatic, swapWmaticToDimo } = useGlobalAccount();
+  const { depositWmatic, swapWmaticToDimo } = useGlobalAccount();
 
   const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
     LoadingStatus.None,
@@ -65,6 +66,8 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       data: `0x${string}`;
     }[]
   > => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     const transactions = [];
     const expendableDimo = transactionData!.requiredDimoAmount!;
 
@@ -151,6 +154,8 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   };
 
   useEffect(() => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo?.subOrganizationId) return;
     if (!transactionData) return;
     if (transactionData.alreadyHasDimo) {
@@ -160,14 +165,16 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
     if (swappingIntoDimo === LoadingStatus.None) {
       void handleSwappingIntoDimo();
     }
-  }, [organizationInfo, swappingIntoDimo, transactionData]);
+  }, [swappingIntoDimo, transactionData]);
 
   useEffect(() => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo?.subOrganizationId) return;
     if (swappingIntoDimo === LoadingStatus.Success && mintingDCX === LoadingStatus.None) {
       void handleMintingDcx();
     }
-  }, [organizationInfo, swappingIntoDimo, mintingDCX]);
+  }, [swappingIntoDimo, mintingDCX]);
 
   return (
     <div className="minting-process">
