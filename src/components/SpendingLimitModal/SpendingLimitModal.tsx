@@ -1,10 +1,9 @@
 'use client';
 
-import _ from 'lodash';
+import { get } from 'lodash';
 
 import { useState, useContext, type FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { utils } from 'web3';
 
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
@@ -37,7 +36,7 @@ export const SpendingLimitModal: FC<IProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { dimoContract } = useContractGA();
+  const { approveNewSpendingLimit } = useContractGA();
   const { control, handleSubmit, getValues } = useForm<IForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -49,16 +48,13 @@ export const SpendingLimitModal: FC<IProps> = ({
   const setSpendingLimit = async () => {
     try {
       setIsLoading(true);
-      if (dimoContract) {
-        const { credits } = getValues();
-        const dimoInWei = utils.toWei(credits, 'ether');
-        await dimoContract.write.approve([addressToAllow, dimoInWei]);
-        setIsOpen(false);
-        onSubmit(credits);
-      }
+      const { credits } = getValues();
+      await approveNewSpendingLimit(credits, addressToAllow);
+      setIsOpen(false);
+      onSubmit(credits);
     } catch (error: unknown) {
       Sentry.captureException(error);
-      const code = _.get(error, 'code', null);
+      const code = get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
       else

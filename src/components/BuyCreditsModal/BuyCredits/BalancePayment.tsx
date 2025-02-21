@@ -33,34 +33,42 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     price: 0,
   });
 
-  const getBalances = async () => {
-    const [dimoBalance, polBalance, wmaticBalance, dimoPrice, polPrice, wmaticPrice] =
-      await Promise.all([
-        getDimoBalance(),
-        getPolBalance(),
-        getWmaticBalance(),
-        getDimoPrice(),
-        getPolPrice(),
-        getWMaticPrice(),
-      ]);
-    const balances = [
-      {
-        currency: 'dimo',
-        balance: dimoBalance,
-        price: dimoPrice,
-      },
-      {
-        currency: 'pol',
-        balance: polBalance,
-        price: polPrice,
-      },
-      {
-        currency: 'wmatic',
-        balance: wmaticBalance,
-        price: wmaticPrice,
-      },
-    ];
-    setBalances(balances);
+  const getBalances = async (): Promise<void> => {
+    try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
+      if (!organizationInfo) return;
+      const [dimoBalance, polBalance, wmaticBalance, dimoPrice, polPrice, wmaticPrice] =
+        await Promise.all([
+          getDimoBalance(),
+          getPolBalance(),
+          getWmaticBalance(),
+          getDimoPrice(),
+          getPolPrice(),
+          getWMaticPrice(),
+        ]);
+      const balances = [
+        {
+          currency: 'dimo',
+          balance: dimoBalance,
+          price: dimoPrice,
+        },
+        {
+          currency: 'pol',
+          balance: polBalance,
+          price: polPrice,
+        },
+        {
+          currency: 'wmatic',
+          balance: wmaticBalance,
+          price: wmaticPrice,
+        },
+      ];
+      setBalances(balances);
+    } catch (error: unknown) {
+      console.error('Error while loading balances', error);
+      Sentry.captureException(error);
+    }
   };
 
   const handleSelection = (value: ICryptoBalance) => {
@@ -102,13 +110,7 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   };
 
   useEffect(() => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo) return;
-    getBalances().catch((error) => {
-      console.error('Error while loading balances', error);
-      Sentry.captureException(error);
-    });
+    void getBalances();
   }, []);
 
   return (

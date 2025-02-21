@@ -19,8 +19,9 @@ export const useOnboarding = () => {
   const [workspace, setWorkspace] = useState<IWorkspace>();
   const [cta, setCta] = useState<CTA>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [balance, setBalance] = useState<number>(0);
   const router = useRouter();
-  const { balanceDCX, balanceDimo } = useContractGA();
+  const { getDcxBalance, getDimoBalance } = useContractGA();
   const { setIsOpen } = useContext(CreditsContext);
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
@@ -33,19 +34,22 @@ export const useOnboarding = () => {
 
       const currentWorkspace = await getWorkspace();
       setWorkspace(currentWorkspace);
+
+      const dcxBalance = await getDcxBalance();
+      setBalance(dcxBalance);
     } catch (error: unknown) {
-      Sentry.captureException(error);      
+      Sentry.captureException(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    void loadAppsAndWorkspace();
-  }, []);
-
-  useEffect(() => {
+  const setCtas = async () => {
     if (isOwner(role)) {
+      const [balanceDCX, balanceDimo] = await Promise.all([
+        getDcxBalance(),
+        getDimoBalance(),
+      ]);
       if (!(balanceDCX > 0 || balanceDimo > 0)) {
         setCta({
           label: 'Purchase DCX',
@@ -58,7 +62,15 @@ export const useOnboarding = () => {
         });
       }
     } else setCta(undefined);
-  }, [apps, balanceDCX, role]);
+  };
+
+  useEffect(() => {
+    void loadAppsAndWorkspace();
+  }, []);
+
+  useEffect(() => {
+    void setCtas();
+  }, [apps, role]);
 
   const handleCreateApp = () => {
     router.push('/app/create');
@@ -69,13 +81,13 @@ export const useOnboarding = () => {
   };
 
   return {
+    balance,
     apps,
     cta,
     isLoading,
     setIsLoading,
     handleCreateApp,
     handleOpenBuyCreditsModal,
-    balance: balanceDCX,
     workspace,
   };
 };

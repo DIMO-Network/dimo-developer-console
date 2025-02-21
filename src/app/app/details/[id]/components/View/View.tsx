@@ -210,7 +210,11 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
           <div className="redirect-uri-content">
             <Title component="h2">Authorized Redirect URIs</Title>
             {isOwner(role) && app && (
-              <RedirectUriForm appId={app!.id!} refreshData={refreshAppDetails} list={app?.RedirectUris} />
+              <RedirectUriForm
+                appId={app!.id!}
+                refreshData={refreshAppDetails}
+                list={app?.RedirectUris}
+              />
             )}
           </div>
           <div className="signers-table">

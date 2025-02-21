@@ -1,4 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+'use client';
+
+import { useContext } from 'react';
 import { getContract, HttpRequestError } from 'viem';
 import { utils } from 'web3';
 import * as Sentry from '@sentry/nextjs';
@@ -24,71 +26,7 @@ const { DCX_IN_USD = 0.001 } = process.env;
 
 export const useContractGA = () => {
   const { getKernelClient, getPublicClient, handleOnChainError } = useGlobalAccount();
-  const { checkAuthenticated, globalAccountSession } = useContext(
-    GlobalAccountAuthContext,
-  );
-  const [balanceDimo, setBalanceDimo] = useState<number>(0);
-  const [balanceDCX, setBalanceDCX] = useState<number>(0);
-  const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
-  const [allowanceDCX, setAllowanceDCX] = useState<number>(0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [dimoContract, setDimoContract] = useState<any>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [licenseContract, setLicenseContract] = useState<any>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [dimoCreditsContract, setDimoCreditsContract] = useState<any>();
-
-  useEffect(() => {
-    const handleGetContracts = async () => {
-      const organizationInfo = globalAccountSession?.organization;
-      if (!organizationInfo) return;
-
-      const kernelClient = await getKernelClient({
-        organizationInfo,
-        authClient: globalAccountSession.session.authenticator,
-      });
-      const publicClient = getPublicClient();
-
-      if (!kernelClient) return;
-
-      setDimoContract(
-        getContract({
-          address: configuration.DC_ADDRESS,
-          abi: DimoABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          },
-        }),
-      );
-
-      setLicenseContract(
-        getContract({
-          address: configuration.DLC_ADDRESS,
-          abi: LicenseABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          },
-        }),
-      );
-
-      setDimoCreditsContract(
-        getContract({
-          address: configuration.DCX_ADDRESS,
-          abi: DimoCreditsABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          },
-        }),
-      );
-    };
-
-    handleGetContracts().catch((error) => {
-      Sentry.captureException(error);
-    });
-  }, []);
+  const { checkAuthenticated } = useContext(GlobalAccountAuthContext);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const processTransactions = async (transactions: Array<any>) => {
@@ -260,12 +198,13 @@ export const useContractGA = () => {
       const desiredTokenAmount = await getDesiredTokenAmount();
       const dimoBalance = await getDimoBalance();
       const dcxBalance = await getDcxBalance();
+      const dcxAllowance = await getDcxAllowance();
 
       return {
         dimo: dimoBalance >= Number(desiredTokenAmount.dimo),
-        dlcAllowance: allowanceDLC >= Number(desiredTokenAmount.dcx),
+        dlcAllowance: dcxAllowance >= Number(desiredTokenAmount.dcx),
         dcx: dcxBalance >= Number(desiredTokenAmount.dcx),
-        dcxAllowance: allowanceDCX >= Number(desiredTokenAmount.dimo),
+        dcxAllowance: dcxAllowance >= Number(desiredTokenAmount.dimo),
       };
     } catch (e: unknown) {
       Sentry.captureException(e);
@@ -337,60 +276,114 @@ export const useContractGA = () => {
     }
   };
 
-  useEffect(() => {
+  const getDcxAllowance = async (): Promise<number> => {
+    try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
+      if (!organizationInfo) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
+
+      if (!kernelClient) {
+        return 0;
+      }
+
+      const dimoContract = getContract({
+        address: configuration.DC_ADDRESS,
+        abi: DimoCreditsABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const currentAllowanceOnWei = await dimoContract.read.allowance([
+        organizationInfo!.smartContractAddress,
+        configuration.DLC_ADDRESS,
+      ]);
+
+      return Number(utils.fromWei(currentAllowanceOnWei as bigint, 'ether'));
+    } catch (e: unknown) {
+      Sentry.captureException(e);
+      console.error(e);
+      return 0;
+    }
+  };
+
+  const getDimoAllowance = async (): Promise<number> => {
+    try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
+      if (!organizationInfo) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient({
+        organizationInfo,
+        authClient: gaSession.session.authenticator,
+      });
+
+      if (!kernelClient) {
+        return 0;
+      }
+
+      const dimoContract = getContract({
+        address: configuration.DC_ADDRESS,
+        abi: DimoCreditsABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const currentAllowanceOnWei = await dimoContract.read.allowance([
+        organizationInfo!.smartContractAddress,
+        configuration.DCX_ADDRESS,
+      ]);
+
+      return Number(utils.fromWei(currentAllowanceOnWei as bigint, 'ether'));
+    } catch (e: unknown) {
+      Sentry.captureException(e);
+      console.error(e);
+      return 0;
+    }
+  };
+
+  const approveNewSpendingLimit = async (
+    amount: number,
+    addressToAllow: `0x${string}`,
+  ): Promise<void> => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
     const organizationInfo = gaSession?.organization;
-    if (!dimoContract || !organizationInfo) return;
+    if (!organizationInfo) return;
+    const publicClient = getPublicClient();
+    const kernelClient = await getKernelClient({
+      organizationInfo,
+      authClient: gaSession.session.authenticator,
+    });
 
-    dimoContract.read
-      .balanceOf([organizationInfo!.smartContractAddress])
-      .then((currentBalanceWei: unknown) => {
-        setBalanceDimo(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
-      })
-      .catch((error: unknown) => {
-        Sentry.captureException(error);
-      });
+    if (!kernelClient) {
+      return;
+    }
 
-    dimoCreditsContract.read
-      .balanceOf([organizationInfo!.smartContractAddress])
-      .then((currentBalanceWei: unknown) => {
-        setBalanceDCX(Number(utils.fromWei(currentBalanceWei as bigint, 'ether')));
-      })
-      .catch((error: unknown) => {
-        Sentry.captureException(error);
-      });
+    const dimoContract = getContract({
+      address: configuration.DC_ADDRESS,
+      abi: DimoCreditsABI,
+      client: {
+        public: publicClient,
+        wallet: kernelClient,
+      },
+    });
 
-    dimoContract.read
-      .allowance([organizationInfo.smartContractAddress, configuration.DLC_ADDRESS])
-      .then((currentBalanceWei: unknown) => {
-        setAllowanceDLC(
-          Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))),
-        );
-      })
-      .catch((error: unknown) => {
-        Sentry.captureException(error);
-      });
-
-    dimoContract.read
-      .allowance([organizationInfo.smartContractAddress, configuration.DCX_ADDRESS])
-      .then((currentBalanceWei: unknown) => {
-        setAllowanceDCX(
-          Math.ceil(Number(utils.fromWei(currentBalanceWei as bigint, 'ether'))),
-        );
-      })
-      .catch((error: unknown) => {
-        Sentry.captureException(error);
-      });
-  }, [dimoContract]);
+    const dimoInWei = utils.toWei(amount, 'ether');
+    await dimoContract.write.approve([addressToAllow, dimoInWei]);
+  };
 
   return {
-    dimoContract,
-    licenseContract,
-    dimoCreditsContract,
-    balanceDimo,
-    balanceDCX,
-    allowanceDLC,
-    allowanceDCX,
+    approveNewSpendingLimit,
+    getDcxAllowance,
+    getDimoAllowance,
     processTransactions,
     getDcxBalance,
     getDimoBalance,

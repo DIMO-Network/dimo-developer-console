@@ -19,12 +19,27 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
 
   const handleWalletCreation = async (email: string) => {
     try {
-      await registerSubOrganization({ createWithoutPasskey: !isPasskeyAvailable, email });
+      const newOrg = await registerSubOrganization({
+        createWithoutPasskey: !isPasskeyAvailable,
+        email,
+      });
+      if (Object.keys(newOrg).length === 0) {
+        setNotification(
+          'Something went wrong while creating the user wallet',
+          'Oops...',
+          'error',
+        );
+        return;
+      }
       onNext('wallet-creation', {});
     } catch (error) {
       Sentry.captureException(error);
       console.error('Something went wrong while creating the user wallet', error);
-      setNotification('Something went wrong', 'Oops...', 'error');
+      setNotification(
+        'Something went wrong while creating the user wallet',
+        'Oops...',
+        'error',
+      );
     }
   };
 
