@@ -206,10 +206,6 @@ export const withGlobalAccounts = <P extends object>(
         });
       }, [authIframeClient]);
 
-    useEffect(() => {
-      void checkValidateAuth();
-    }, []);
-
     // Render the wrapped component with any additional props
     return (
       <GlobalAccountAuthContext.Provider
