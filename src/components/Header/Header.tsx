@@ -10,6 +10,7 @@ import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { formatToHumanReadable } from '@/utils/formatBalance';
 import { isOwner } from '@/utils/user';
 import { useContractGA } from '@/hooks';
+import * as Sentry from '@sentry/nextjs';
 
 import './Header.css';
 
@@ -29,10 +30,18 @@ export const Header: FC = () => {
     setShowAccountInformation(true);
   };
 
-  useEffect(() => {
-    void getDcxBalance().then((balance) => {
+  const loadAndFormatDcxBalance = async () => {
+    try {
+      const balance = await getDcxBalance();
       setDcxBalance(formatToHumanReadable(balance));
-    });
+    } catch (error: unknown) {
+      Sentry.captureException(error);
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+   void loadAndFormatDcxBalance();
   }, []);
 
   return (
