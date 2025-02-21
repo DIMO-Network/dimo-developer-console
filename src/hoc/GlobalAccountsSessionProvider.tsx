@@ -23,7 +23,11 @@ import { generateP256KeyPair } from '@turnkey/crypto';
 import { OtpLoginModal } from '@/components/OtpLoginModal';
 import { AxiosError } from 'axios';
 import { NotificationContext } from '@/context/notificationContext';
-import { EmbeddedKey, saveToLocalStorage } from '@/utils/localStorage';
+import {
+  EmbeddedKey,
+  removeFromLocalStorage,
+  saveToLocalStorage,
+} from '@/utils/localStorage';
 
 const halfHour = 30 * 60;
 const fifteenMinutes = 15 * 60;
@@ -139,6 +143,7 @@ export const withGlobalAccounts = <P extends object>(
     const logout = async () => {
       try {
         removeFromSession(GlobalAccountSession);
+        removeFromLocalStorage(EmbeddedKey);
         await turnkeyClient.logoutUser();
         await signOut({ callbackUrl: '/sign-in' });
       } catch (e) {
