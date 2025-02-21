@@ -13,9 +13,12 @@ import { useContractGA } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
 
 import './Header.css';
+import { useTurnkey } from '@turnkey/sdk-react';
 
 export const Header: FC = () => {
-  const [dcxBalance, setDcxBalance] = useState<string>('');
+  // just to be able to call balance 
+  const { authIframeClient } = useTurnkey();
+  const [dcxBalance, setDcxBalance] = useState<string>('0');
   const { setIsOpen } = useContext(CreditsContext);
   const { getDcxBalance } = useContractGA();
   const { setShowAccountInformation } = useContext(AccountInformationContext);
@@ -41,8 +44,9 @@ export const Header: FC = () => {
   };
 
   useEffect(() => {
+    if (!authIframeClient) return;
     void loadAndFormatDcxBalance();
-  }, []);
+  }, [authIframeClient]);
 
   return (
     <header className="header">
