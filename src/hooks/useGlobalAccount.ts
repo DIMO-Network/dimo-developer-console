@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useContext } from 'react';
-import { useTurnkey } from '@turnkey/sdk-react';
+import { useContext } from 'react';
 import {
   createSubOrganization,
   getUserSubOrganization,
@@ -69,7 +68,6 @@ import {
   getFromLocalStorage,
   saveToLocalStorage,
 } from '@/utils/localStorage';
-import { generateKey, subtle } from 'crypto';
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 

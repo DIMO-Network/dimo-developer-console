@@ -13,7 +13,6 @@ import { useContractGA } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
 
 import './Header.css';
-import { useTurnkey } from '@turnkey/sdk-react';
 
 export const Header: FC = () => {
   const [dcxBalance, setDcxBalance] = useState<string>('0');

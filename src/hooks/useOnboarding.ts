@@ -13,7 +13,6 @@ import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
 import { useContractGA } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
-import { useTurnkey } from '@turnkey/sdk-react';
 
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
