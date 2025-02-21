@@ -211,9 +211,11 @@ export const withGlobalAccounts = <P extends object>(
     useEffect(() => {
       const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
       if (!stored) return;
-      if (stored.session.expiry < Date.now() / 1000) {
+      if (stored.session.expiry > Date.now() / 1000) {
+        setCurrentSession(stored);
+      } else {
         void logout();
-      } 
+      }
     }, []);
 
     // Render the wrapped component with any additional props

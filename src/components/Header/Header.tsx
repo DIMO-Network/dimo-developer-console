@@ -41,7 +41,7 @@ export const Header: FC = () => {
   };
 
   useEffect(() => {
-   void loadAndFormatDcxBalance();
+    void loadAndFormatDcxBalance();
   }, []);
 
   return (

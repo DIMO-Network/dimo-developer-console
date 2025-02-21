@@ -187,13 +187,14 @@ export const useGlobalAccount = () => {
 
   const getWmaticAllowance = async (): Promise<bigint> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return BigInt(0);
+      const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return BigInt(0);
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {

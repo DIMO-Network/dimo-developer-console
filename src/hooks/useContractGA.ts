@@ -64,13 +64,14 @@ export const useContractGA = () => {
 
   const getDcxBalance = async (): Promise<number> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return 0;
+      const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {
@@ -100,13 +101,14 @@ export const useContractGA = () => {
 
   const getDimoBalance = async (): Promise<number> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return 0;
+      const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {
@@ -143,14 +145,15 @@ export const useContractGA = () => {
     };
 
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return DEFAULT_AMOUNTS;
+      const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return DEFAULT_AMOUNTS;
 
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) return DEFAULT_AMOUNTS;
@@ -191,8 +194,9 @@ export const useContractGA = () => {
       dlcAllowance: false,
     };
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return DEFAULT_TOKEN_BALANCE;
+      const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return DEFAULT_TOKEN_BALANCE;
 
       const desiredTokenAmount = await getDesiredTokenAmount();
@@ -215,13 +219,14 @@ export const useContractGA = () => {
 
   const getPolBalance = async (): Promise<number> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return 0;
+      const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {
@@ -242,13 +247,14 @@ export const useContractGA = () => {
 
   const getWmaticBalance = async (): Promise<number> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return 0;
+      const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {
@@ -278,13 +284,14 @@ export const useContractGA = () => {
 
   const getDcxAllowance = async (): Promise<number> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return 0;
+      const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {
@@ -315,13 +322,14 @@ export const useContractGA = () => {
 
   const getDimoAllowance = async (): Promise<number> => {
     try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
+      const currentSession = await checkAuthenticated();
+      if (!currentSession) return 0;
+      const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: gaSession.session.authenticator,
+        authClient: session.authenticator,
       });
 
       if (!kernelClient) {
@@ -354,13 +362,14 @@ export const useContractGA = () => {
     amount: number,
     addressToAllow: `0x${string}`,
   ): Promise<void> => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
+    const currentSession = await checkAuthenticated();
+    if (!currentSession) return;
+    const { organization: organizationInfo, session } = currentSession;
     if (!organizationInfo) return;
     const publicClient = getPublicClient();
     const kernelClient = await getKernelClient({
       organizationInfo,
-      authClient: gaSession.session.authenticator,
+      authClient: session.authenticator,
     });
 
     if (!kernelClient) {
