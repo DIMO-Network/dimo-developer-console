@@ -13,8 +13,10 @@ import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
 import { useContractGA } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
+import { useTurnkey } from '@turnkey/sdk-react';
 
 export const useOnboarding = () => {
+  const { authIframeClient } = useTurnkey();
   const [apps, setApps] = useState<IApp[]>([]);
   const [workspace, setWorkspace] = useState<IWorkspace>();
   const [cta, setCta] = useState<CTA>();
@@ -69,8 +71,9 @@ export const useOnboarding = () => {
   }, []);
 
   useEffect(() => {
+    if (!authIframeClient) return;
     void setCtas();
-  }, [apps, role]);
+  }, [apps, role, authIframeClient]);
 
   const handleCreateApp = () => {
     router.push('/app/create');
