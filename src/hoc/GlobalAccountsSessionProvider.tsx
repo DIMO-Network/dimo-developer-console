@@ -38,9 +38,6 @@ export const withGlobalAccounts = <P extends object>(
   const HOC: React.FC<P> = (props) => {
     const router = useRouter();
     const { authIframeClient } = useTurnkey();
-    const [currentSession, setCurrentSession] = useState<IGlobalAccountSession | null>(
-      null,
-    );
     const { setNotification } = useContext(NotificationContext);
     const [otpId, setOtpId] = useState<string>('');
     const [otpModalOpen, setOtpModalOpen] = useState<boolean>(false);
@@ -90,17 +87,17 @@ export const withGlobalAccounts = <P extends object>(
 
           if (!injected) return;
 
+          const nowInSeconds = Date.now() / 1000;
           const currentSession = {
             organization: organization,
             session: {
               token: credentialBundle,
-              expiry: Date.now() / 1000 + fifteenMinutes,
+              expiry: nowInSeconds + fifteenMinutes,
               authenticator: AuthClient.Iframe,
             },
           };
 
           saveToSession<IGlobalAccountSession>(GlobalAccountSession, currentSession);
-          setCurrentSession(currentSession);
           setOtpModalOpen(false);
           setResolvers((prev) => {
             prev.forEach((resolve) => resolve(currentSession));
@@ -122,11 +119,6 @@ export const withGlobalAccounts = <P extends object>(
 
     const loginWithPasskey = async (email: string) => {
       try {
-        const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        if (stored && stored.session.expiry > Date.now() / 1000) {
-          router.push('/valid-tzd');
-          return;
-        }
         const organization = await getUserSubOrganization(email);
         // a bit hacky but works for now
         const signInResponse = await passkeyClient.login({
@@ -135,11 +127,12 @@ export const withGlobalAccounts = <P extends object>(
 
         if (isEmpty(signInResponse.organizationId)) return;
 
+        const nowInSeconds = Date.now() / 1000;
         saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
           organization: organization,
           session: {
             token: signInResponse.session,
-            expiry: Date.now() / 1000 + halfHour,
+            expiry: nowInSeconds + halfHour,
             authenticator: AuthClient.Passkey,
           },
         });
@@ -164,17 +157,22 @@ export const withGlobalAccounts = <P extends object>(
     };
 
     const checkSessionIsValid = (): boolean => {
+      const currentSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
       if (!currentSession) return false;
       if (
         !currentSession.session.token &&
         currentSession.session.authenticator === AuthClient.Iframe
       )
         return false;
-      return currentSession.session.expiry > Date.now() / 1000;
+
+      const nowInSeconds = Date.now() / 1000;
+      return currentSession.session.expiry > nowInSeconds;
     };
 
     const checkValidateAuth =
       useCallback(async (): Promise<IGlobalAccountSession | null> => {
+        const currentSession =
+          getFromSession<IGlobalAccountSession>(GlobalAccountSession);
         if (!currentSession) {
           logout();
           return null;
@@ -206,23 +204,16 @@ export const withGlobalAccounts = <P extends object>(
         return new Promise((resolve) => {
           setResolvers((prev) => [...prev, resolve]);
         });
-      }, [currentSession, authIframeClient]);
+      }, [authIframeClient]);
 
     useEffect(() => {
-      const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      if (!stored) return;
-      if (stored.session.expiry > Date.now() / 1000) {
-        setCurrentSession(stored);
-      } else {
-        void logout();
-      }
+      void checkValidateAuth();
     }, []);
 
     // Render the wrapped component with any additional props
     return (
       <GlobalAccountAuthContext.Provider
         value={{
-          globalAccountSession: currentSession,
           checkAuthenticated: checkValidateAuth,
           requestOtpLogin,
           completeOtpLogin,
