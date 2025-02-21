@@ -4,7 +4,6 @@ import React, {
   ComponentType,
   useCallback,
   useContext,
-  useEffect,
   useState,
 } from 'react';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
