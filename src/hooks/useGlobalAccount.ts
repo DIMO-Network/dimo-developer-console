@@ -8,7 +8,13 @@ import {
   rewirePasskey,
   startEmailRecovery,
 } from '@/services/globalAccount';
-import { AuthClient, TurnkeyBrowserClient } from '@turnkey/sdk-browser';
+import { ApiKeyStamper, AuthClient, TurnkeyBrowserClient } from '@turnkey/sdk-browser';
+import {
+  generateP256KeyPair,
+  decryptCredentialBundle,
+  getPublicKey,
+} from '@turnkey/crypto';
+import { uint8ArrayToHexString, uint8ArrayFromHexString } from '@turnkey/encoding';
 import {
   IGlobalAccountSession,
   IKernelOperationStatus,
@@ -58,35 +64,48 @@ import * as Sentry from '@sentry/nextjs';
 import { usePasskey } from '@/hooks';
 import { GlobalAccountSession, saveToSession } from '@/utils/sessionStorage';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
+import {
+  EmbeddedKey,
+  getFromLocalStorage,
+  saveToLocalStorage,
+} from '@/utils/localStorage';
+import { generateKey, subtle } from 'crypto';
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 
 export const useGlobalAccount = () => {
   const { getNewUserPasskey } = usePasskey();
   const { checkAuthenticated } = useContext(GlobalAccountAuthContext);
-  const { authIframeClient } = useTurnkey();
 
   const getUserGlobalAccountInfo = getUserSubOrganization;
 
-  const validCredentials = useCallback(
-    async (authToken: string) => {
-      if (!authIframeClient) return null;
-      return await authIframeClient.injectCredentialBundle(authToken);
-    },
-    [authIframeClient],
-  );
-
-  const registerNewPasskey = async (): Promise<void> => {
-    const me = await authIframeClient?.getWhoami();
-
-    const { attestation, encodedChallenge } = await getNewUserPasskey(me!.username!);
+  const registerNewPasskey = async ({
+    recoveryKey,
+    email,
+  }: {
+    recoveryKey: string;
+    email: string;
+  }): Promise<void> => {
+    const { subOrganizationId } = await getUserSubOrganization(email);
+    const ekey = getFromLocalStorage<string>(EmbeddedKey);
+    const privateKey = decryptCredentialBundle(recoveryKey, ekey!);
+    const publicKey = uint8ArrayToHexString(
+      getPublicKey(uint8ArrayFromHexString(privateKey), true),
+    );
 
     const client = new TurnkeyClient(
       {
         baseUrl: turnkeyConfig.apiBaseUrl,
       },
-      authIframeClient!.config.stamper!,
+      new ApiKeyStamper({
+        apiPublicKey: publicKey,
+        apiPrivateKey: privateKey,
+      }),
     );
+
+    const me = await client.getWhoami({ organizationId: subOrganizationId });
+
+    const { attestation, encodedChallenge } = await getNewUserPasskey(me!.username!);
 
     const { authenticators } = await client.getAuthenticators({
       organizationId: me!.organizationId,
@@ -173,10 +192,12 @@ export const useGlobalAccount = () => {
   const emailRecovery = async (email: string): Promise<boolean> => {
     const user = await getUserSubOrganization(email);
     if (!user) return false;
-    if (!authIframeClient) return false;
+    const key = generateP256KeyPair();
+    const targetPublicKey = key.publicKeyUncompressed;
+    saveToLocalStorage(EmbeddedKey, key.privateKey);
     await startEmailRecovery({
       email,
-      key: authIframeClient.iframePublicKey!,
+      key: targetPublicKey,
     });
     return true;
   };
@@ -191,6 +212,7 @@ export const useGlobalAccount = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -228,6 +250,7 @@ export const useGlobalAccount = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -280,6 +303,7 @@ export const useGlobalAccount = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -364,6 +388,7 @@ export const useGlobalAccount = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -395,14 +420,17 @@ export const useGlobalAccount = () => {
   const getKernelClient = async ({
     organizationInfo,
     authClient,
+    authKey,
   }: {
     organizationInfo: ISubOrganization;
     authClient: AuthClient;
+    authKey: string;
   }) => {
     try {
       const kernelClient = await buildFallbackKernelClients({
         organizationInfo,
         authClient,
+        authKey,
       });
       return kernelClient;
     } catch (e) {
@@ -415,11 +443,11 @@ export const useGlobalAccount = () => {
   const buildKernelClient = async ({
     orgInfo,
     provider,
-    authClient,
+    client,
   }: {
     orgInfo: ISubOrganization;
     provider: string;
-    authClient: AuthClient;
+    client: TurnkeyBrowserClient | TurnkeyClient;
   }) => {
     const { subOrganizationId, walletAddress } = orgInfo;
     const chain = getChain();
@@ -427,7 +455,7 @@ export const useGlobalAccount = () => {
     const publicClient = getPublicClient();
 
     const localAccount = await createAccount({
-      client: getTurnkeyClient(authClient),
+      client: client,
       organizationId: subOrganizationId,
       signWith: walletAddress,
       ethereumAddress: walletAddress,
@@ -473,9 +501,11 @@ export const useGlobalAccount = () => {
   const buildFallbackKernelClients = async ({
     organizationInfo,
     authClient,
+    authKey,
   }: {
     organizationInfo: ISubOrganization;
     authClient: AuthClient;
+    authKey: string;
   }) => {
     const fallbackProviders: string[] = ['ALCHEMY', 'GELATO', 'PIMLICO'];
     const fallbackKernelClients: KernelAccountClient<
@@ -486,12 +516,14 @@ export const useGlobalAccount = () => {
       RpcSchema
     >[] = [];
 
+    const client = getTurnkeyClient(authClient, authKey);
+
     for (const provider of fallbackProviders) {
       try {
         const kernelClient = await buildKernelClient({
           orgInfo: organizationInfo!,
           provider,
-          authClient,
+          client: client,
         });
         fallbackKernelClients.push(kernelClient);
       } catch (e) {
@@ -560,16 +592,25 @@ export const useGlobalAccount = () => {
 
   const getTurnkeyClient = (
     authClient: AuthClient,
+    authKey: string,
   ): TurnkeyBrowserClient | TurnkeyClient => {
     if (authClient === AuthClient.Passkey) {
       return passkeyClient as TurnkeyBrowserClient;
     }
-    // TODO: check why is not working with auth iframe client
+    const ekey = getFromLocalStorage<string>(EmbeddedKey);
+    const privateKey = decryptCredentialBundle(authKey, ekey!);
+    const publicKey = uint8ArrayToHexString(
+      getPublicKey(uint8ArrayFromHexString(privateKey), true),
+    );
+
     return new TurnkeyClient(
       {
         baseUrl: turnkeyConfig.apiBaseUrl,
       },
-      authIframeClient!.config.stamper!,
+      new ApiKeyStamper({
+        apiPublicKey: publicKey,
+        apiPrivateKey: privateKey,
+      }),
     );
   };
 
@@ -577,7 +618,6 @@ export const useGlobalAccount = () => {
     getUserGlobalAccountInfo,
     registerSubOrganization,
     emailRecovery,
-    validCredentials,
     registerNewPasskey,
     depositWmatic,
     swapWmaticToDimo,

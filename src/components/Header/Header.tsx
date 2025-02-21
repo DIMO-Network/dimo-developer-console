@@ -16,8 +16,6 @@ import './Header.css';
 import { useTurnkey } from '@turnkey/sdk-react';
 
 export const Header: FC = () => {
-  // just to be able to call balance 
-  const { authIframeClient } = useTurnkey();
   const [dcxBalance, setDcxBalance] = useState<string>('0');
   const { setIsOpen } = useContext(CreditsContext);
   const { getDcxBalance } = useContractGA();
@@ -44,9 +42,8 @@ export const Header: FC = () => {
   };
 
   useEffect(() => {
-    if (!authIframeClient) return;
     void loadAndFormatDcxBalance();
-  }, [authIframeClient]);
+  }, []);
 
   return (
     <header className="header">

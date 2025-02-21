@@ -36,6 +36,7 @@ export const useContractGA = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) return {} as IKernelOperationStatus;
@@ -70,6 +71,7 @@ export const useContractGA = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -107,6 +109,7 @@ export const useContractGA = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -152,6 +155,7 @@ export const useContractGA = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) return DEFAULT_AMOUNTS;
@@ -225,6 +229,7 @@ export const useContractGA = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -253,6 +258,7 @@ export const useContractGA = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -290,6 +296,7 @@ export const useContractGA = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -328,6 +335,7 @@ export const useContractGA = () => {
       const kernelClient = await getKernelClient({
         organizationInfo,
         authClient: session.authenticator,
+        authKey: session.token,
       });
 
       if (!kernelClient) {
@@ -368,6 +376,7 @@ export const useContractGA = () => {
     const kernelClient = await getKernelClient({
       organizationInfo,
       authClient: session.authenticator,
+      authKey: session.token,
     });
 
     if (!kernelClient) {

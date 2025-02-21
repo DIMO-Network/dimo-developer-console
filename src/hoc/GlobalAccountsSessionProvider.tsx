@@ -1,11 +1,6 @@
 'use client';
 
-import React, {
-  ComponentType,
-  useCallback,
-  useContext,
-  useState,
-} from 'react';
+import React, { ComponentType, useCallback, useContext, useState } from 'react';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { useAccountInformation } from '@/hooks';
 import { AccountInformationModal } from '@/components/AccountInformationModal';
@@ -24,10 +19,11 @@ import {
   GlobalAccountSession,
   getFromSession,
 } from '@/utils/sessionStorage';
+import { generateP256KeyPair } from '@turnkey/crypto';
 import { OtpLoginModal } from '@/components/OtpLoginModal';
-import { useTurnkey } from '@turnkey/sdk-react';
 import { AxiosError } from 'axios';
 import { NotificationContext } from '@/context/notificationContext';
+import { EmbeddedKey, saveToLocalStorage } from '@/utils/localStorage';
 
 const halfHour = 30 * 60;
 const fifteenMinutes = 15 * 60;
@@ -36,7 +32,6 @@ export const withGlobalAccounts = <P extends object>(
 ) => {
   const HOC: React.FC<P> = (props) => {
     const router = useRouter();
-    const { authIframeClient } = useTurnkey();
     const { setNotification } = useContext(NotificationContext);
     const [otpId, setOtpId] = useState<string>('');
     const [otpModalOpen, setOtpModalOpen] = useState<boolean>(false);
@@ -72,19 +67,16 @@ export const withGlobalAccounts = <P extends object>(
         try {
           if (!otpId) return;
           const organization = await getUserSubOrganization(email);
+          const key = generateP256KeyPair();
+          const targetPublicKey = key.publicKeyUncompressed;
           const { credentialBundle } = await otpLogin({
             email: email,
             otpId: otpId,
             otpCode: otp,
-            key: authIframeClient!.iframePublicKey!,
+            key: targetPublicKey,
           });
 
           if (isEmpty(credentialBundle)) return;
-
-          const injected =
-            await authIframeClient!.injectCredentialBundle(credentialBundle);
-
-          if (!injected) return;
 
           const nowInSeconds = Date.now() / 1000;
           const currentSession = {
@@ -95,7 +87,7 @@ export const withGlobalAccounts = <P extends object>(
               authenticator: AuthClient.Iframe,
             },
           };
-
+          saveToLocalStorage(EmbeddedKey, key.privateKey);
           saveToSession<IGlobalAccountSession>(GlobalAccountSession, currentSession);
           setOtpModalOpen(false);
           setResolvers((prev) => {
@@ -113,7 +105,7 @@ export const withGlobalAccounts = <P extends object>(
           await signOut();
         }
       },
-      [authIframeClient, otpId],
+      [otpId],
     );
 
     const loginWithPasskey = async (email: string) => {
@@ -192,10 +184,7 @@ export const withGlobalAccounts = <P extends object>(
             return currentSession;
           }
 
-          const injected = await authIframeClient!.injectCredentialBundle(
-            currentSession.session.token,
-          );
-          if (injected && sessionValid) return currentSession;
+          if (sessionValid) return currentSession;
           await logout();
           return null;
         }
@@ -203,7 +192,7 @@ export const withGlobalAccounts = <P extends object>(
         return new Promise((resolve) => {
           setResolvers((prev) => [...prev, resolve]);
         });
-      }, [authIframeClient]);
+      }, []);
 
     // Render the wrapped component with any additional props
     return (

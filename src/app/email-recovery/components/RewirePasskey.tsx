@@ -12,17 +12,21 @@ interface IProps {
 export const RewirePasskey: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
   const params = useSearchParams();
-  const { validCredentials, registerNewPasskey } = useGlobalAccount();
+  const { registerNewPasskey } = useGlobalAccount();
 
-  const handleRewirePasskey = async (recoveryKey: string) => {
+  const handleRewirePasskey = async ({
+    recoveryKey,
+    email,
+  }: {
+    recoveryKey: string;
+    email: string;
+  }) => {
     try {
-      const credentialsAreValid = await validCredentials(recoveryKey);
-      if (credentialsAreValid === null) return;
-      if (!credentialsAreValid) return;
-      await registerNewPasskey();
+      await registerNewPasskey({ recoveryKey, email });
       setNotification('Passkey rewired successfully', 'Success', 'success');
       onNext('rewire-passkey');
     } catch (error) {
+      console.error('Error while rewiring passkey', error);
       setNotification('Something went wrong', 'Oops...', 'error');
       Sentry.captureException(error);
     }
@@ -30,10 +34,11 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
 
   useEffect(() => {
     const recoveryKey = params.get('token');
-    if (recoveryKey) {
-      void handleRewirePasskey(recoveryKey);
+    const email = params.get('email');
+    if (recoveryKey && email) {
+      void handleRewirePasskey({ recoveryKey, email });
     }
-  }, [params, validCredentials]);
+  }, [params]);
 
   return (
     <div className="text-left text-xl mt-4">
