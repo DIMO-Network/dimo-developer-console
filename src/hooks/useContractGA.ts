@@ -12,14 +12,12 @@ import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import WMatic from '@/contracts/wmatic.json';
 import {
   IDesiredTokenAmount,
-  IGlobalAccountSession,
   IKernelOperationStatus,
   ITokenBalance,
 } from '@/types/wallet';
 
 import configuration from '@/config';
 import { getCachedDimoPrice } from '@/services/pricing';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 const { DCX_IN_USD = 0.001 } = process.env;
@@ -196,7 +194,7 @@ export const useContractGA = () => {
     try {
       const currentSession = await checkAuthenticated();
       if (!currentSession) return DEFAULT_TOKEN_BALANCE;
-      const { organization: organizationInfo, session } = currentSession;
+      const { organization: organizationInfo } = currentSession;
       if (!organizationInfo) return DEFAULT_TOKEN_BALANCE;
 
       const desiredTokenAmount = await getDesiredTokenAmount();

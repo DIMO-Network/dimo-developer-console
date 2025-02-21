@@ -56,11 +56,7 @@ import {
 } from 'viem/_types/account-abstraction';
 import * as Sentry from '@sentry/nextjs';
 import { usePasskey } from '@/hooks';
-import {
-  getFromSession,
-  GlobalAccountSession,
-  saveToSession,
-} from '@/utils/sessionStorage';
+import { GlobalAccountSession, saveToSession } from '@/utils/sessionStorage';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
