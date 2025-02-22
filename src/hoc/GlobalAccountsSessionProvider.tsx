@@ -1,8 +1,8 @@
 'use client';
 
-import React, { ComponentType, useCallback, useContext, useState } from 'react';
+import React, { ComponentType, useCallback, useContext, useEffect, useState } from 'react';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
-import { useAccountInformation } from '@/hooks';
+import { useAccountInformation, useEventEmitter } from '@/hooks';
 import { AccountInformationModal } from '@/components/AccountInformationModal';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 import { otpLogin, initOtpLogin, getUserSubOrganization } from '@/services/globalAccount';
@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { passkeyClient, turnkeyClient } from '@/config/turnkey';
 import * as Sentry from '@sentry/nextjs';
 import { signOut } from 'next-auth/react';
-import { isEmpty } from 'lodash';
+import { isEmpty, set } from 'lodash';
 import { IGlobalAccountSession } from '@/types/wallet';
 import {
   saveToSession,
@@ -28,6 +28,7 @@ import {
   removeFromLocalStorage,
   saveToLocalStorage,
 } from '@/utils/localStorage';
+import { otpLoginProcessed } from '@/config/event';
 
 const halfHour = 30 * 60;
 const fifteenMinutes = 15 * 60;
@@ -38,23 +39,26 @@ export const withGlobalAccounts = <P extends object>(
     const router = useRouter();
     const { setNotification } = useContext(NotificationContext);
     const [otpId, setOtpId] = useState<string>('');
+    const [shouldRedirect, setShouldRedirect] = useState<boolean>(true);
+    const [hasSession, setHasSession] = useState<boolean>(false);
     const [otpModalOpen, setOtpModalOpen] = useState<boolean>(false);
     const { showAccountInformation, setShowAccountInformation } = useAccountInformation();
+    const { publishEvent } = useEventEmitter<{ loggedIn: boolean; }>(otpLoginProcessed);
     const [, setResolvers] = useState<
       Array<(value: IGlobalAccountSession | null) => void>
     >([]);
 
     const requestOtpLogin = async (email: string) => {
-      try {
+      try {        
         const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
         if (stored && stored.session.expiry > Date.now() / 1000) {
           router.push('/valid-tzd');
           return;
         }
-        if (otpId) return;
+        console.info('Requesting OTP login');
         const { otpId: currentOtpId } = await initOtpLogin(email);
         setOtpId(currentOtpId);
-        setOtpModalOpen(true);
+        setOtpModalOpen(true);        
       } catch (e: unknown) {
         Sentry.captureException(e);
         if (e instanceof AxiosError) {
@@ -67,12 +71,12 @@ export const withGlobalAccounts = <P extends object>(
     };
 
     const completeOtpLogin = useCallback(
-      async ({ otp, email }: { otp: string; email: string }) => {
+      async ({ otp, email }: { otp: string; email: string;  }) => {
         try {
           if (!otpId) return;
           const organization = await getUserSubOrganization(email);
           const key = generateP256KeyPair();
-          const targetPublicKey = key.publicKeyUncompressed;
+          const targetPublicKey = key.publicKeyUncompressed;         
           const { credentialBundle } = await otpLogin({
             email: email,
             otpId: otpId,
@@ -92,12 +96,13 @@ export const withGlobalAccounts = <P extends object>(
             },
           };
           saveToLocalStorage(EmbeddedKey, key.privateKey);
-          saveToSession<IGlobalAccountSession>(GlobalAccountSession, currentSession);
-          setOtpModalOpen(false);
+          saveToSession<IGlobalAccountSession>(GlobalAccountSession, currentSession);          
+          setHasSession(true);
           setResolvers((prev) => {
             prev.forEach((resolve) => resolve(currentSession));
             return [];
           });
+          if (!shouldRedirect) return;
           router.push('/valid-tzd');
         } catch (e: unknown) {
           Sentry.captureException(e);
@@ -105,11 +110,10 @@ export const withGlobalAccounts = <P extends object>(
             setNotification(e.response?.data.error, 'Error', 'error');
             return;
           }
-          console.error('Error logging in with otp', e);
           await signOut();
         }
       },
-      [otpId],
+      [otpId, shouldRedirect],
     );
 
     const loginWithPasskey = async (email: string) => {
@@ -185,8 +189,8 @@ export const withGlobalAccounts = <P extends object>(
 
         if (currentAuthenticator === AuthClient.Iframe) {
           if (isEmpty(currentSession.session.token)) {
-            await requestOtpLogin(currentSession.organization.email);
-            return currentSession;
+            await requestOtpLogin(currentSession.organization.email);            
+            return null;
           }
 
           if (sessionValid) return currentSession;
@@ -199,10 +203,23 @@ export const withGlobalAccounts = <P extends object>(
         });
       }, []);
 
+      useEffect(() => {
+        const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+        if (!stored) return;
+        const token = stored.session.token;
+        if (token) {
+          setHasSession(true);
+          return;
+        }        
+        setShouldRedirect(false);
+        void requestOtpLogin(stored.organization.email);
+      }, []);
+
     // Render the wrapped component with any additional props
     return (
       <GlobalAccountAuthContext.Provider
         value={{
+          hasSession,
           checkAuthenticated: checkValidateAuth,
           requestOtpLogin,
           completeOtpLogin,

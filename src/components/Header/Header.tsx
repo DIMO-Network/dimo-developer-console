@@ -13,8 +13,10 @@ import { useContractGA } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
 
 import './Header.css';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 export const Header: FC = () => {
+  const { hasSession } = useContext(GlobalAccountAuthContext);
   const [dcxBalance, setDcxBalance] = useState<string>('0');
   const { setIsOpen } = useContext(CreditsContext);
   const { getDcxBalance } = useContractGA();
@@ -41,8 +43,9 @@ export const Header: FC = () => {
   };
 
   useEffect(() => {
+    if (!hasSession) return;
     void loadAndFormatDcxBalance();
-  }, []);
+  }, [hasSession]);
 
   return (
     <header className="header">

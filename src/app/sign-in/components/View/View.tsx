@@ -56,7 +56,7 @@ export const View = () => {
     if (!session) return;
     if (isCollaborator(session.user.role)) {
       router.push('/app');
-    } else {
+    } else {      
       void handleLogin(session.user.email!);
     }
   }, [session]);

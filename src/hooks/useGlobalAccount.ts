@@ -159,7 +159,7 @@ export const useGlobalAccount = () => {
       }
 
       const response = await createSubOrganization({
-        email,
+        email: email,
         attestation: passkeyAttestation,
         encodedChallenge: challenge,
         deployAccount: true,

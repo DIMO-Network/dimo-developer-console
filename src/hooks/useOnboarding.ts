@@ -13,6 +13,7 @@ import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
 import { useContractGA } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
@@ -25,6 +26,7 @@ export const useOnboarding = () => {
   const { setIsOpen } = useContext(CreditsContext);
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
+  const { hasSession } = useContext(GlobalAccountAuthContext);
 
   const loadAppsAndWorkspace = async (): Promise<void> => {
     try {
@@ -65,12 +67,14 @@ export const useOnboarding = () => {
   };
 
   useEffect(() => {
+    if (!hasSession) return;
     void loadAppsAndWorkspace();
-  }, []);
+  }, [hasSession]);
 
   useEffect(() => {
+    if (!hasSession) return;
     void setCtas();
-  }, [apps, role]);
+  }, [apps, role, hasSession]);
 
   const handleCreateApp = () => {
     router.push('/app/create');

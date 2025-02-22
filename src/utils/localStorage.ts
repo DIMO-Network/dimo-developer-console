@@ -1,6 +1,7 @@
 'use client';
 
 export const EmbeddedKey = 'GlobalAccountEmbeddedKey';
+export const OtpRequested = 'requestedOtp';
 
 export const saveToLocalStorage = <T>(key: string, value: T): void => {
   const serializedValue = JSON.stringify(value);
