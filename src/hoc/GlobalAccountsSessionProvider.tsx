@@ -2,7 +2,7 @@
 
 import React, { ComponentType, useCallback, useContext, useEffect, useState } from 'react';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
-import { useAccountInformation, useEventEmitter } from '@/hooks';
+import { useAccountInformation } from '@/hooks';
 import { AccountInformationModal } from '@/components/AccountInformationModal';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 import { otpLogin, initOtpLogin, getUserSubOrganization } from '@/services/globalAccount';
@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { passkeyClient, turnkeyClient } from '@/config/turnkey';
 import * as Sentry from '@sentry/nextjs';
 import { signOut } from 'next-auth/react';
-import { isEmpty, set } from 'lodash';
+import { isEmpty } from 'lodash';
 import { IGlobalAccountSession } from '@/types/wallet';
 import {
   saveToSession,
@@ -28,7 +28,6 @@ import {
   removeFromLocalStorage,
   saveToLocalStorage,
 } from '@/utils/localStorage';
-import { otpLoginProcessed } from '@/config/event';
 
 const halfHour = 30 * 60;
 const fifteenMinutes = 15 * 60;
@@ -42,8 +41,7 @@ export const withGlobalAccounts = <P extends object>(
     const [shouldRedirect, setShouldRedirect] = useState<boolean>(true);
     const [hasSession, setHasSession] = useState<boolean>(false);
     const [otpModalOpen, setOtpModalOpen] = useState<boolean>(false);
-    const { showAccountInformation, setShowAccountInformation } = useAccountInformation();
-    const { publishEvent } = useEventEmitter<{ loggedIn: boolean; }>(otpLoginProcessed);
+    const { showAccountInformation, setShowAccountInformation } = useAccountInformation();    
     const [, setResolvers] = useState<
       Array<(value: IGlobalAccountSession | null) => void>
     >([]);
