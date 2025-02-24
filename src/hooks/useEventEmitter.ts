@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback, useRef } from "react";
-import globalEventEmitter from "../utils/event-emitter";
+import { useEffect, useState, useCallback, useRef } from 'react';
+import globalEventEmitter from '../utils/event-emitter';
 
 export const useEventEmitter = <T>(eventName: string) => {
   const [eventData, setEventData] = useState<T>();
@@ -11,7 +11,7 @@ export const useEventEmitter = <T>(eventName: string) => {
       const event = new CustomEvent(eventName, { detail: eventData });
       globalEventEmitter.dispatchEvent(event);
     },
-    [eventName]
+    [eventName],
   );
 
   useEffect(() => {

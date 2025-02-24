@@ -1,4 +1,4 @@
-import { type ReactElement, type FC } from 'react';
+import { type ReactElement, type FC, ReactNode } from 'react';
 import { PlusCircleIcon, CubeIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 
@@ -18,6 +18,24 @@ export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
   const { handleCreateApp, handleOpenBuyCreditsModal } = useOnboarding();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
+
+  const renderButtonContent = ({
+    actionLabel,
+    completed,
+  }: {
+    actionLabel: string;
+    completed: boolean;
+  }): ReactNode => {
+    if (!completed) {
+      if (isOwner(role)) {
+        return actionLabel;
+      }
+      if (isCollaborator(role)) {
+        return 'Pending';
+      }
+    }
+    return <CheckIcon className="h5 w-5 stroke-green-700" />;
+  };
 
   const renderAction = ({
     Icon,
@@ -48,9 +66,7 @@ export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
             onClick={isOwner(role) ? actionCta : undefined}
             type="button"
           >
-            {isOwner(role) && !completed && actionLabel}
-            {isCollaborator(role) && !completed && 'Pending'}
-            {completed && <CheckIcon className="h5 w-5 stroke-green-700" />}
+            {renderButtonContent({ actionLabel, completed })}
           </Button>
         </div>
       </div>

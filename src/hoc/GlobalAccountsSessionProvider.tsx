@@ -1,6 +1,12 @@
 'use client';
 
-import React, { ComponentType, useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  ComponentType,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { useAccountInformation } from '@/hooks';
 import { AccountInformationModal } from '@/components/AccountInformationModal';
@@ -41,13 +47,13 @@ export const withGlobalAccounts = <P extends object>(
     const [shouldRedirect, setShouldRedirect] = useState<boolean>(true);
     const [hasSession, setHasSession] = useState<boolean>(false);
     const [otpModalOpen, setOtpModalOpen] = useState<boolean>(false);
-    const { showAccountInformation, setShowAccountInformation } = useAccountInformation();    
+    const { showAccountInformation, setShowAccountInformation } = useAccountInformation();
     const [, setResolvers] = useState<
       Array<(value: IGlobalAccountSession | null) => void>
     >([]);
 
     const requestOtpLogin = async (email: string) => {
-      try {        
+      try {
         const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
         if (stored && stored.session.expiry > Date.now() / 1000) {
           router.push('/valid-tzd');
@@ -56,7 +62,7 @@ export const withGlobalAccounts = <P extends object>(
         console.info('Requesting OTP login');
         const { otpId: currentOtpId } = await initOtpLogin(email);
         setOtpId(currentOtpId);
-        setOtpModalOpen(true);        
+        setOtpModalOpen(true);
       } catch (e: unknown) {
         Sentry.captureException(e);
         if (e instanceof AxiosError) {
@@ -69,12 +75,12 @@ export const withGlobalAccounts = <P extends object>(
     };
 
     const completeOtpLogin = useCallback(
-      async ({ otp, email }: { otp: string; email: string;  }) => {
+      async ({ otp, email }: { otp: string; email: string }) => {
         try {
           if (!otpId) return;
           const organization = await getUserSubOrganization(email);
           const key = generateP256KeyPair();
-          const targetPublicKey = key.publicKeyUncompressed;         
+          const targetPublicKey = key.publicKeyUncompressed;
           const { credentialBundle } = await otpLogin({
             email: email,
             otpId: otpId,
@@ -94,13 +100,16 @@ export const withGlobalAccounts = <P extends object>(
             },
           };
           saveToLocalStorage(EmbeddedKey, key.privateKey);
-          saveToSession<IGlobalAccountSession>(GlobalAccountSession, currentSession);          
+          saveToSession<IGlobalAccountSession>(GlobalAccountSession, currentSession);
           setHasSession(true);
           setResolvers((prev) => {
             prev.forEach((resolve) => resolve(currentSession));
             return [];
           });
-          if (!shouldRedirect) return;
+          if (!shouldRedirect) {
+            setOtpModalOpen(false);
+            return;
+          }
           router.push('/valid-tzd');
         } catch (e: unknown) {
           Sentry.captureException(e);
@@ -187,7 +196,7 @@ export const withGlobalAccounts = <P extends object>(
 
         if (currentAuthenticator === AuthClient.Iframe) {
           if (isEmpty(currentSession.session.token)) {
-            await requestOtpLogin(currentSession.organization.email);            
+            await requestOtpLogin(currentSession.organization.email);
             return null;
           }
 
@@ -201,17 +210,17 @@ export const withGlobalAccounts = <P extends object>(
         });
       }, []);
 
-      useEffect(() => {
-        const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-        if (!stored) return;
-        const token = stored.session.token;
-        if (token) {
-          setHasSession(true);
-          return;
-        }        
-        setShouldRedirect(false);
-        void requestOtpLogin(stored.organization.email);
-      }, []);
+    useEffect(() => {
+      const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      if (!stored) return;
+      const token = stored.session.token;
+      if (token) {
+        setHasSession(true);
+        return;
+      }
+      setShouldRedirect(false);
+      void requestOtpLogin(stored.organization.email);
+    }, []);
 
     // Render the wrapped component with any additional props
     return (
