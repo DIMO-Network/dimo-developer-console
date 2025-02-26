@@ -1,4 +1,4 @@
-import { type ReactElement, type FC, ReactNode } from 'react';
+import { type ReactElement, type FC, ReactNode, useState, useEffect } from 'react';
 import { PlusCircleIcon, CubeIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 
@@ -17,7 +17,12 @@ interface IProps {
 export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
   const { handleCreateApp, handleOpenBuyCreditsModal } = useOnboarding();
   const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
+  const [role, setRole] = useState<string>('');
+
+  useEffect(() => {
+    if (!session) return;
+    setRole(session.user?.role);
+  }, [session]);
 
   const renderButtonContent = ({
     actionLabel,
