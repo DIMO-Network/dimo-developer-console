@@ -3,11 +3,13 @@
 import { type FC } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { Modal } from '@/components/Modal';
-import { Title } from '@/components/Title';
-import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
+import { IApp } from '@/types/app';
 import { Label } from '@/components/Label';
+import { Modal } from '@/components/Modal';
+import { TextField } from '@/components/TextField';
+import { Title } from '@/components/Title';
+import { updateApp } from '@/actions/app';
 
 import './WorkspaceNameModal.css';
 
@@ -15,7 +17,7 @@ interface IProps {
   isOpen: boolean;
   setIsOpen: (s: boolean) => void;
   workspaceName: string;
-  appName: string;
+  app: IApp;
 }
 
 interface IFormInputs {
@@ -27,8 +29,9 @@ export const WorkspaceNameModal: FC<IProps> = ({
   isOpen,
   setIsOpen,
   workspaceName,
-  appName,
+  app,
 }) => {
+  const { name: appName, id: appId } = app;
   const { register, handleSubmit, reset } = useForm<IFormInputs>({
     defaultValues: {
       workspaceName,
@@ -36,9 +39,18 @@ export const WorkspaceNameModal: FC<IProps> = ({
     },
   });
 
+  const updateAppName = async (data: IFormInputs) => {
+    try {
+      await updateApp(appId!, {
+        name: data.appName,
+      });
+    } catch (error) {
+      console.error('Failed to update app name', error);
+    }
+  };
+
   const onSubmit = (data: IFormInputs) => {
-    // Implement save logic here
-    console.log(data);
+    updateAppName(data);
     setIsOpen(false);
     reset();
   };
