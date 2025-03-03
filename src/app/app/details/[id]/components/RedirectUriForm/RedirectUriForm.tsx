@@ -115,7 +115,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
                   value: 150,
                   message: 'The name should has maximum 150 characters',
                 },
-                validate: {                  
+                validate: {
                   url: validateUrl,
                 },
               })}

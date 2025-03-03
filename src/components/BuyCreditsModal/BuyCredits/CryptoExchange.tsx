@@ -51,7 +51,7 @@ const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus }
 
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const { setNotification } = useContext(NotificationContext);
-  const { allowanceDCX, processTransactions } = useContractGA();
+  const { getDcxAllowance, processTransactions } = useContractGA();
   const { depositWmatic, swapWmaticToDimo } = useGlobalAccount();
 
   const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
@@ -70,6 +70,8 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
     const organizationInfo = gaSession?.organization;
     const transactions = [];
     const expendableDimo = transactionData!.requiredDimoAmount!;
+
+    const allowanceDCX = await getDcxAllowance();
 
     if (allowanceDCX <= expendableDimo) {
       // Call approve

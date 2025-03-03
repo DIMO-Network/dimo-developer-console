@@ -78,7 +78,15 @@ export const View = () => {
             <SignInButtons isSignIn={true} disabled={false} onCTA={handleCTA} />
           </section>
           <section className="sign-in__extra-links">
-            <div>
+            <div className="flex flex-row">
+              <p className="terms-caption">
+                Lost your passkey?{' '}
+                <Anchor href="/email-recovery" target="_self" className="grey underline">
+                  Recover with your email
+                </Anchor>
+              </p>
+            </div>
+            <div className="flex flex-row">
               <p className="terms-caption">
                 Having trouble logging in?{' '}
                 <Anchor

@@ -53,7 +53,7 @@ export const startEmailRecovery = async ({
       email,
       key,
       origin: 'DIMO Developer Console',
-      redirectUrl: getRedirectUrl(),
+      redirectUrl: getRedirectUrl(email),
     },
     {
       headers: {
@@ -121,6 +121,6 @@ export const otpLogin = async (otpVars: {
 };
 
 // private functions
-const getRedirectUrl = () => {
-  return `${config.frontendUrl}/email-recovery?flow=rewire-passkey`;
+const getRedirectUrl = (email: string) => {
+  return `${config.frontendUrl}/email-recovery?flow=rewire-passkey&email=${email}`;
 };

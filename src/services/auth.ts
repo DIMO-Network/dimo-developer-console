@@ -32,13 +32,11 @@ any) => {
     token.address = token?.sub ?? null;
   }
 
-  if (!token.userId) {
-    const user = (await getUserByToken().catch(() => ({}))) as Partial<IUser>;
-    token.userId = user?.id ?? null;
-    token.name = user?.name ?? token.name;
-    token.email = user?.email ?? token.email;
-    token.role = user?.role ?? TeamRoles.COLLABORATOR;
-  }
+  const user = (await getUserByToken().catch(() => ({}))) as Partial<IUser>;
+  token.userId = user?.id ?? null;
+  token.name = user?.name ?? token.name;
+  token.email = user?.email ?? token.email;
+  token.role = user?.role ?? TeamRoles.COLLABORATOR;
 
   return token;
 };

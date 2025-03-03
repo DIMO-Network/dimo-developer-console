@@ -1,4 +1,4 @@
-import { useContext, type FC, useMemo } from 'react';
+import { useContext, type FC, useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 
 import { CreditsContext } from '@/context/creditsContext';
@@ -10,12 +10,16 @@ import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { formatToHumanReadable } from '@/utils/formatBalance';
 import { isOwner } from '@/utils/user';
 import { useContractGA } from '@/hooks';
+import * as Sentry from '@sentry/nextjs';
 
 import './Header.css';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 export const Header: FC = () => {
+  const { hasSession } = useContext(GlobalAccountAuthContext);
+  const [dcxBalance, setDcxBalance] = useState<string>('0');
   const { setIsOpen } = useContext(CreditsContext);
-  const { balanceDCX } = useContractGA();
+  const { getDcxBalance } = useContractGA();
   const { setShowAccountInformation } = useContext(AccountInformationContext);
   const { data: session } = useSession();
   const { user: { name = '', role = '' } = {} } = session ?? {};
@@ -28,11 +32,20 @@ export const Header: FC = () => {
     setShowAccountInformation(true);
   };
 
-  const dcxBalance = useMemo(() => {
-    if (!balanceDCX) return '0';
-    if (balanceDCX <= 0) return '0';
-    return formatToHumanReadable(balanceDCX);
-  }, [balanceDCX]);
+  const loadAndFormatDcxBalance = async () => {
+    try {
+      const balance = await getDcxBalance();
+      setDcxBalance(formatToHumanReadable(balance));
+    } catch (error: unknown) {
+      Sentry.captureException(error);
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!hasSession) return;
+    void loadAndFormatDcxBalance();
+  }, [hasSession]);
 
   return (
     <header className="header">
@@ -40,6 +53,7 @@ export const Header: FC = () => {
       <div className="user-information" role="user-information">
         <UserAvatar name={name ?? ''} />
         <button
+          title="Account Information"
           className="account-information"
           onClick={handleOpenAccountInformationModal}
         >
@@ -52,6 +66,7 @@ export const Header: FC = () => {
           </div>
 
           <button
+            title="Add Credits"
             className="btn-add-credits"
             onClick={
               isOwner(role)

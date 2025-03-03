@@ -1,4 +1,5 @@
 'use client';
+export const GlobalAccountSession = 'globalAccount';
 
 export const saveToSession = <T>(key: string, value: T): void => {
   const serializedValue = JSON.stringify(value);
@@ -19,5 +20,3 @@ export const getFromSession = <T>(key: string): T | null => {
 export const removeFromSession = (key: string): void => {
   sessionStorage.removeItem(key);
 };
-
-export const GlobalAccountSession = 'globalAccount';

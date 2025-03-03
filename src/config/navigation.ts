@@ -12,6 +12,7 @@ import {
 } from '@/components/Icons';
 import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage';
 import { turnkeyClient } from './turnkey';
+import { removeFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 
 export const mainMenu = [
   {
@@ -64,6 +65,7 @@ export const bottomMenu = [
     link: () => {
       turnkeyClient.logoutUser();
       removeFromSession(GlobalAccountSession);
+      removeFromLocalStorage(EmbeddedKey);
       signOut({ callbackUrl: '/sign-in' });
     },
     external: false,

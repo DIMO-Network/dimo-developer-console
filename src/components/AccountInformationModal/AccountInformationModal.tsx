@@ -50,10 +50,18 @@ export const AccountInformationModal: FC<IProps> = () => {
   };
 
   const loadBalances = async () => {
-    const dimoBalance = await getDimoBalance();
-    const dcxBalance = await getDcxBalance();
-    const dimoPrice = await getDimoPrice();
-    setBalance({ dimoBalance, dcxBalance, dimoPrice });
+    try {
+      const [dimoBalance, dcxBalance, dimoPrice] = await Promise.all([
+        getDimoBalance(),
+        getDcxBalance(),
+        getDimoPrice(),
+      ]);
+      setBalance({ dimoBalance, dcxBalance, dimoPrice });
+    } catch (error: unknown) {
+      Sentry.captureException(error);
+      console.error('Error while loading balances', error);
+      setNotification('Error while loading balances', 'Error', 'error');
+    }
   };
 
   const { handleAction: getBalances, loading: isLoadingBalances } =
@@ -61,11 +69,7 @@ export const AccountInformationModal: FC<IProps> = () => {
 
   useEffect(() => {
     if (!showAccountInformation) return;
-    getBalances().catch((error) => {
-      Sentry.captureException(error);
-      console.error('Error while loading balances', error);
-      setNotification('Error while loading balances', 'Error', 'error');
-    });
+    void getBalances();
   }, [showAccountInformation]);
 
   const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);

@@ -43,8 +43,12 @@ interface IProps {
 export const Form: FC<IProps> = ({ workspace }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { checkEnoughBalance, getDesiredTokenAmount, balanceDCX, processTransactions } =
-    useContractGA();
+  const {
+    checkEnoughBalance,
+    getDesiredTokenAmount,
+    getDcxBalance,
+    processTransactions,
+  } = useContractGA();
   const router = useRouter();
   const {
     formState: { errors },
@@ -118,6 +122,8 @@ export const Form: FC<IProps> = ({ workspace }) => {
         }),
       });
     }
+
+    const balanceDCX = await getDcxBalance();
 
     // Call mintInDimo 2 parameteres
     const dcxAmountInUSD = balanceDCX * Number(DCX_IN_USD);
