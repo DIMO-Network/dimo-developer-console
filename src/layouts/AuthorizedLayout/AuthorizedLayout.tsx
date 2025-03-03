@@ -14,8 +14,8 @@ import './AuthorizedLayout.css';
 
 export const AuthorizedLayout = withNextSession(
   withNotifications(
-    withCredits(
-      withGlobalAccounts(
+    withGlobalAccounts(
+      withCredits(
         ({
           children,
         }: Readonly<{
