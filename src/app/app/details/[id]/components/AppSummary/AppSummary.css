@@ -1,6 +1,10 @@
 .summary {
   @apply flex flex-col gap-2;
 
+  .workspace-header {
+    @apply flex flex-row gap-2 items-center;
+  }
+
   .client-id-content {
     @apply flex flex-col md:flex-row md:items-center gap-2;
   }
