@@ -15,9 +15,8 @@ interface IProps {
   app: IApp;
 }
 
-export const AppSummary: FC<IProps> = ({
-  app: { name, scope, Workspace: workspace = {} },
-}) => {
+export const AppSummary: FC<IProps> = ({ app }) => {
+  const { name, scope, Workspace: workspace = {} } = app;
   const { setNotification } = useContext(NotificationContext);
   const { client_id: clientId = '', name: workspaceName = '' } = workspace;
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,7 +53,7 @@ export const AppSummary: FC<IProps> = ({
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
         workspaceName={workspaceName}
-        appName={name}
+        app={app}
       />
     </div>
   );
