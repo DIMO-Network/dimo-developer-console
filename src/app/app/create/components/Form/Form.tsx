@@ -178,10 +178,7 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
       label: 'Licensing the application...',
       status: 'loading',
     });
-    const workspaceName = String(utils.fromAscii(workspaceData?.name ?? '')).padEnd(
-      66,
-      '0',
-    );
+    const workspaceName = workspaceData?.name ?? '';
     setLoadingStatus({
       label: 'Creating developer license...',
       status: 'loading',
