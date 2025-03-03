@@ -49,12 +49,7 @@ export const AppSummary: FC<IProps> = ({ app }) => {
           onClick={handleCopy}
         />
       </div>
-      <WorkspaceNameModal
-        isOpen={isModalOpen}
-        setIsOpen={setIsModalOpen}
-        workspaceName={workspaceName}
-        app={app}
-      />
+      <WorkspaceNameModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} app={app} />
     </div>
   );
 };
