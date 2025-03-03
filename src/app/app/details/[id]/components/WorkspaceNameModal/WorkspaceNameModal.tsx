@@ -2,6 +2,7 @@
 
 import { type FC } from 'react';
 import { useForm } from 'react-hook-form';
+import { encodeFunctionData } from 'viem';
 
 import { Button } from '@/components/Button';
 import { IApp } from '@/types/app';
@@ -10,13 +11,16 @@ import { Modal } from '@/components/Modal';
 import { TextField } from '@/components/TextField';
 import { Title } from '@/components/Title';
 import { updateApp } from '@/actions/app';
+import { useContractGA } from '@/hooks';
+
+import configuration from '@/config';
+import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 
 import './WorkspaceNameModal.css';
 
 interface IProps {
   isOpen: boolean;
   setIsOpen: (s: boolean) => void;
-  workspaceName: string;
   app: IApp;
 }
 
@@ -25,13 +29,13 @@ interface IFormInputs {
   appName: string;
 }
 
-export const WorkspaceNameModal: FC<IProps> = ({
-  isOpen,
-  setIsOpen,
-  workspaceName,
-  app,
-}) => {
-  const { name: appName, id: appId } = app;
+export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
+  const { processTransactions } = useContractGA();
+  const {
+    name: appName,
+    id: appId,
+    Workspace: { name: workspaceName, token_id: tokenId },
+  } = app;
   const { register, handleSubmit, reset } = useForm<IFormInputs>({
     defaultValues: {
       workspaceName,
@@ -39,11 +43,27 @@ export const WorkspaceNameModal: FC<IProps> = ({
     },
   });
 
+  const setLicenseAlias = async (licenseAlias: string) => {
+    const transaction = {
+      to: configuration.DCX_ADDRESS,
+      value: BigInt(0),
+      data: encodeFunctionData({
+        abi: DimoCreditsABI,
+        functionName: 'setLicenseAlias',
+        args: [tokenId, licenseAlias],
+      }),
+    };
+
+    await processTransactions([transaction]);
+  };
+
   const updateAppName = async (data: IFormInputs) => {
+    const { appName, workspaceName } = data;
     try {
       await updateApp(appId!, {
-        name: data.appName,
+        name: appName,
       });
+      await setLicenseAlias(workspaceName);
     } catch (error) {
       console.error('Failed to update app name', error);
     }
