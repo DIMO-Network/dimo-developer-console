@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC } from 'react';
+import { type FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { encodeFunctionData } from 'viem';
 
@@ -8,6 +8,7 @@ import { Button } from '@/components/Button';
 import { IApp } from '@/types/app';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
+import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { Title } from '@/components/Title';
 import { updateApp } from '@/actions/app';
@@ -36,12 +37,25 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
     id: appId,
     Workspace: { name: workspaceName, token_id: tokenId },
   } = app;
-  const { register, handleSubmit, reset } = useForm<IFormInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<IFormInputs>({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       workspaceName,
       appName,
     },
   });
+
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
+    }
+  }, [isOpen, reset]);
 
   const setLicenseAlias = async (licenseAlias: string) => {
     if (licenseAlias === app.Workspace.name) return;
@@ -97,24 +111,40 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
             <Label htmlFor="workspaceName" className="text-xs text-medium">
               Workspace Name
               <TextField
-                {...register('workspaceName', { required: 'This field is required' })}
+                {...register('workspaceName', {
+                  required: 'Workspace name is required',
+                  maxLength: {
+                    value: 100,
+                    message: 'Workspace name cannot exceed 100 characters',
+                  },
+                })}
                 id="workspaceName"
                 placeholder="Enter Workspace Name"
                 defaultValue={workspaceName}
                 className="field"
               />
+              {errors?.workspaceName && (
+                <TextError errorMessage={errors.workspaceName.message!} />
+              )}
             </Label>
           </div>
           <div className="field">
             <Label htmlFor="appName" className="text-xs text-medium">
               App Name
               <TextField
-                {...register('appName')}
+                {...register('appName', {
+                  required: 'App name is required',
+                  maxLength: {
+                    value: 100,
+                    message: 'App name cannot exceed 100 characters',
+                  },
+                })}
                 id="appName"
                 placeholder="Enter App Name"
                 defaultValue={appName}
                 className="field"
               />
+              {errors?.appName && <TextError errorMessage={errors.appName.message!} />}
             </Label>
           </div>
         </div>
