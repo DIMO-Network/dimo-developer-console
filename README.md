@@ -26,10 +26,13 @@ Before you begin, ensure you have the following installed on your machine:
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
 - A Google Developer Account and GitHub Account for OAuth integration.
 
+### Set up the Turnkey config
+Set up the Turnkey config with the correct environment variables in `src/config/turnkey.ts`.
+
 ### Set Up Google and GitHub OAuth Applications
+Log in happens through one of two OAuth providers: Google or Github.
 
 1. Create a Google OAuth App:
-
 - Go to the [Google Developer Console](https://console.cloud.google.com/welcome).
 - Create a new project (if you don’t already have one).
 - Navigate to OAuth consent screen and configure it.
@@ -41,7 +44,6 @@ Before you begin, ensure you have the following installed on your machine:
 - Note down your Client ID and Client Secret. These will be used in your environment variables.
 
 2. Create a GitHub OAuth App:
-
 - Go to [GitHub Developer Settings](https://github.com/settings/developers).
 - Under OAuth Apps, click New OAuth App.
 - Set the Authorization callback URL to http://localhost:3000/api/auth/callback/github.
@@ -109,6 +111,8 @@ yarn start
 ```
 
 ## Project Structure
+This project is built with Next.js, which requires specific folder structures and file-naming conventions to structure the application. To understand this, read the docs at https://nextjs.org.
+
 
 A brief description of the main folders and files in the project:
 
