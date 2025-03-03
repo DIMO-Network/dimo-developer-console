@@ -44,6 +44,7 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
   });
 
   const setLicenseAlias = async (licenseAlias: string) => {
+    if (licenseAlias === app.Workspace.name) return;
     const transaction = {
       to: configuration.DCX_ADDRESS,
       value: BigInt(0),
@@ -55,22 +56,27 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
     };
 
     await processTransactions([transaction]);
+    app.Workspace.name = licenseAlias;
   };
 
   const updateAppName = async (data: IFormInputs) => {
-    const { appName, workspaceName } = data;
+    const { appName: newAppName } = data;
+    if (newAppName === app.name) return;
+
     try {
       await updateApp(appId!, {
-        name: appName,
+        name: newAppName,
       });
-      await setLicenseAlias(workspaceName);
+      app.name = newAppName;
     } catch (error) {
       console.error('Failed to update app name', error);
     }
   };
 
-  const onSubmit = (data: IFormInputs) => {
-    updateAppName(data);
+  const onSubmit = async (data: IFormInputs) => {
+    const { workspaceName: newWorkspaceName } = data;
+    await updateAppName(data);
+    await setLicenseAlias(newWorkspaceName);
     setIsOpen(false);
     reset();
   };
