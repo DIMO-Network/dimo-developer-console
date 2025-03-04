@@ -81,8 +81,10 @@ GITHUB_CLIENT_ID=<YOUR_SECRET>
 GITHUB_CLIENT_SECRET=<YOUR_SECRET>
 NEXTAUTH_SECRET=<YOUR_SECRET>
 NEXTAUTH_URL="http://localhost:3000/"
+# TODO - potentially delete JWT_PRIVATE_KEY, since it's not read
 JWT_PRIVATE_KEY=<YOUR_SECRET> # Should be the same as the NEXTAUTH_SECRET 
 VERCEL_ENV="development"
+STRIPE_API_KEY=<YOUR_SECRET>
 ```
 
 3. Install the dependencies:
