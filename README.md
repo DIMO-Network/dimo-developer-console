@@ -50,7 +50,7 @@ Log in happens through one of two OAuth providers: Google or Github.
 Follow the setup steps [here](https://github.com/DIMO-Network/dimo-developer-console-api/tree/master?tab=readme-ov-file#developer-console-api) to run the Dev Console API locally.
 
 ### Run the Accounts API locally
-Follow the setup steps [here](https://github.com/DIMO-Network/dimo-developer-console-api/tree/master?tab=readme-ov-file#developer-console-api) to run the Accounts API locally.
+Follow the setup steps [here](https://github.com/DIMO-Network/accounts?tab=readme-ov-file#dimo-waas) to run the Accounts API locally.
 
 ### Installation
 
