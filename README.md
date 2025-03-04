@@ -1,4 +1,4 @@
-# Developer Console API
+# Developer Console
 
 This repository hosts the codebase for the DIMO Developer Console, powering the platform at `https://console.dimo.org`. The app facilitates seamless interactions and management of developer licenses within the DIMO ecosystem.
 
@@ -47,10 +47,10 @@ Log in happens through one of two OAuth providers: Google or Github.
 - Note down your Client ID and Client Secret. These will be used in your environment variables.
 
 ### Run the Dev Console API locally
-Follow the setup steps [here](https://github.com/DIMO-Network/dimo-developer-console?tab=readme-ov-file#developer-console-api) to run the Dev Console API locally.
+Follow the setup steps [here](https://github.com/DIMO-Network/dimo-developer-console-api/tree/master?tab=readme-ov-file#developer-console-api) to run the Dev Console API locally.
 
 ### Run the Accounts API locally
-Follow the setup steps [here](https://github.com/DIMO-Network/dimo-developer-console?tab=readme-ov-file#developer-console-api) to run the Accounts API locally.
+Follow the setup steps [here](https://github.com/DIMO-Network/accounts?tab=readme-ov-file#dimo-waas) to run the Accounts API locally.
 
 ### Installation
 
