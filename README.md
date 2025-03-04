@@ -25,7 +25,7 @@ Before you begin, ensure you have the following installed on your machine:
 - [Node.js](https://nodejs.org/en/download/package-manager) (v20.x or later)
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
 
-### Set Up Google and/or GitHub OAuth Applications
+### Set Up Google and GitHub OAuth Applications
 Log in happens through one of two OAuth providers: Google or Github.
 
 1. Create a Google OAuth App:
