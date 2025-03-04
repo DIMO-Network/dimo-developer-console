@@ -1,13 +1,15 @@
 'use client';
 
-import { type FC, useEffect } from 'react';
+import { type FC, useEffect, useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { encodeFunctionData } from 'viem';
+import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
 import { IApp } from '@/types/app';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
+import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { Title } from '@/components/Title';
@@ -31,7 +33,9 @@ interface IFormInputs {
 }
 
 export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
+  const [isLoading, setIsLoading] = useState(false);
   const { processTransactions } = useContractGA();
+  const { setNotification } = useContext(NotificationContext);
   const {
     name: appName,
     id: appId,
@@ -57,7 +61,7 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
     }
   }, [isOpen, reset]);
 
-  const setLicenseAlias = async (licenseAlias: string) => {
+  const setLicenseAlias = async ({ workspaceName: licenseAlias }: IFormInputs) => {
     if (licenseAlias === app.Workspace.name) return;
     const transaction = {
       to: configuration.DCX_ADDRESS,
@@ -84,15 +88,28 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
       app.name = newAppName;
     } catch (error) {
       console.error('Failed to update app name', error);
+      Sentry.captureException(error);
     }
   };
 
   const onSubmit = async (data: IFormInputs) => {
-    const { workspaceName: newWorkspaceName } = data;
-    await updateAppName(data);
-    await setLicenseAlias(newWorkspaceName);
-    setIsOpen(false);
-    reset();
+    setIsLoading(true);
+    try {
+      await updateAppName(data);
+      await setLicenseAlias(data);
+      setNotification(
+        'Workspace and app names updated successfully',
+        'Success',
+        'success',
+      );
+    } catch (error) {
+      setNotification('Failed to update workspace or app name', 'Oops...', 'error');
+      Sentry.captureException(error);
+    } finally {
+      setIsOpen(false);
+      reset();
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -148,7 +165,7 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
             </Label>
           </div>
         </div>
-        <Button type="submit" className="primary save-button">
+        <Button type="submit" className="primary save-button" loading={isLoading}>
           Save Changes
         </Button>
       </form>
