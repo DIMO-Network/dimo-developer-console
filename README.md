@@ -24,12 +24,8 @@ Before you begin, ensure you have the following installed on your machine:
 
 - [Node.js](https://nodejs.org/en/download/package-manager) (v20.x or later)
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
-- A Google Developer Account and GitHub Account for OAuth integration.
 
-### Set up the Turnkey config
-Set up the Turnkey config with the correct environment variables in `src/config/turnkey.ts`.
-
-### Set Up Google and GitHub OAuth Applications
+### Set Up Google and/or GitHub OAuth Applications
 Log in happens through one of two OAuth providers: Google or Github.
 
 1. Create a Google OAuth App:
@@ -50,6 +46,12 @@ Log in happens through one of two OAuth providers: Google or Github.
   Under OAuth scopes, ensure the app requests access to email addresses in read-only mode.
 - Note down your Client ID and Client Secret. These will be used in your environment variables.
 
+### Run the Dev Console API locally
+Follow the setup steps to run the Dev Console API locally. (TODO - add setup instructions)
+
+### Run the Accounts API locally
+Follow the setup steps to run the Dev Console API locally. (TODO - add setup instructions)
+
 ### Installation
 
 1. Clone the repository:
@@ -61,17 +63,26 @@ cd dimo-developer-console
 
 2. Set up environment variables:
 
-- Create a .env.local file in the root directory of the project:
+- Create a `.env.local` file in the root directory of the project and add the follwing environment variables:
 
 ```bash
-GITHUB_CLIENT_ID=<YOUR_GITHUB_CLIENT_ID>
-GITHUB_CLIENT_SECRET=<YOUR_GITHUB_CLIENT_SECRET>
-
-GOOGLE_CLIENT_ID=<YOUR_GOOGLE_CLIENT_ID>
-GOOGLE_CLIENT_SECRET=<YOUR_GOOGLE_CLIENT_SECRET>
-
-NEXTAUTH_SECRET=<YOUR_NEXTAUTH_SECRET>
-NEXTAUTH_URL=http://localhost:3000/
+NEXT_PUBLIC_TURNKEY_API_BASE_URL=<YOUR_SECRET>
+NEXT_PUBLIC_TURNKEY_API_PRIVATE_KEY=<YOUR_SECRET>
+NEXT_PUBLIC_TURNKEY_API_PUBLIC_KEY=<YOUR_SECRET>
+NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID=<YOUR_SECRET>
+NEXT_PUBLIC_RPID="localhost" # Only for local. In production, use your top level domain where the app credentials are hosted
+NEXT_PUBLIC_RPC_URL=<YOUR_SECRET>
+NEXT_PUBLIC_BUNDLER_RPC=<YOUR_SECRET>
+NEXT_PUBLIC_PAYMASTER_RPC=<YOUR_SECRET>
+NEXT_PUBLIC_GA_API="http://localhost:3002" # Or wherever your Accounts API is running
+GOOGLE_CLIENT_ID=<YOUR_SECRET>
+GOOGLE_CLIENT_SECRET=<YOUR_SECRET>
+GITHUB_CLIENT_ID=<YOUR_SECRET>
+GITHUB_CLIENT_SECRET=<YOUR_SECRET>
+NEXTAUTH_SECRET=<YOUR_SECRET>
+NEXTAUTH_URL="http://localhost:3000/"
+JWT_PRIVATE_KEY=<YOUR_SECRET> # Should be the same as the NEXTAUTH_SECRET 
+VERCEL_ENV="development"
 ```
 
 3. Install the dependencies:
