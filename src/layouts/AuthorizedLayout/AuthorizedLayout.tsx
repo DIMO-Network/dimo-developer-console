@@ -16,19 +16,23 @@ export const AuthorizedLayout = withNextSession(
   withNotifications(
     withGlobalAccounts(
       withCredits(
-        ({
+         ({
           children,
         }: Readonly<{
           children: React.ReactNode;
-        }>) => (
-          <div className="main">
-            <Header />
-            <div className="app-content">
-              <Menu />
-              <main className="page-content">{children}</main>
+        }>) => {
+          return (
+            <div className="main">
+              <div className="flex">
+                <Menu />
+              </div>
+              <div className="app-content">
+                <Header />
+                <main className="page-content">{children}</main>
+              </div>
             </div>
-          </div>
-        ),
+          );
+        },
       ),
     ),
   ),

@@ -13,6 +13,7 @@ interface IProps {
   label: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: FC<any>;
+  isHighlighted?: boolean;
 }
 
 export const MenuItem: FC<IProps> = ({
@@ -22,11 +23,13 @@ export const MenuItem: FC<IProps> = ({
   icon: Icon,
   iconClassName,
   label,
+  isHighlighted,
 }) => {
   return (
     <li
       className={classNames({
         '!text-grey-200/50': disabled,
+        'bg-red-900': isHighlighted,
       })}
     >
       <Icon className={iconClassName} />
