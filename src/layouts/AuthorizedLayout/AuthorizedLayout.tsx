@@ -11,7 +11,7 @@ import {
 } from '@/hoc';
 
 import './AuthorizedLayout.css';
-import MenuButton from "@/components/Menu/MenuButton";
+import FullScreenMenu from "../../components/Menu/FullScreenMenu";
 
 export const AuthorizedLayout = withNextSession(
   withNotifications(
@@ -22,7 +22,6 @@ export const AuthorizedLayout = withNextSession(
         }: Readonly<{
           children: React.ReactNode;
         }>) => {
-          const [isSidebarOpen, setIsSidebarOpen] = useState(false);
           return (
             <div className="main">
               <div className="sidebar-container">
@@ -30,7 +29,7 @@ export const AuthorizedLayout = withNextSession(
               </div>
               <div className="app-content">
                 <div className="flex flex-row items-center justify-items-stretch">
-                  <MenuButton />
+                  <FullScreenMenu />
                   <Header />
                 </div>
                 <main className="page-content">{children}</main>

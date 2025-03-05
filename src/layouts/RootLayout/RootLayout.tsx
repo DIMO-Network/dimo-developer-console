@@ -19,7 +19,7 @@ export const RootLayout = ({
 }>) => {
   return (
     <html lang="en">
-    <body className={dimoFont.className}>{children}</body>
+      <body className={dimoFont.className}>{children}</body>
     </html>
   );
 };

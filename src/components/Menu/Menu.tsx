@@ -7,12 +7,14 @@ import './Menu.css';
 import Image from "next/image";
 import {usePathname} from "next/navigation";
 
-interface IProps {}
+interface Props {
+  isFullScreen?: boolean;
+}
 
-export const Menu: FC<IProps> = () => {
+export const Menu: FC<Props> = ({ isFullScreen }) => {
   const pathname = usePathname();
   return (
-    <aside className="main-menu">
+    <aside className={isFullScreen ? "main-menu-full-screen" : "main-menu"}>
       <ul className="top-menu">
         <Image
           src={'/images/dimo_dev_logo.svg'}
