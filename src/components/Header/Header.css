@@ -1,6 +1,8 @@
 .header {
-  @apply flex h-20 items-center justify-between px-6 border-b border-dark-900;
-
+  @apply flex h-20 items-center justify-between px-6 bg-surface-default rounded-2xl;
+  .page-title {
+    @apply text-2xl font-extrabold
+  }
   .user-information {
     @apply flex flex-row gap-4 items-center;
 

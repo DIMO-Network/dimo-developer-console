@@ -15,7 +15,8 @@ const config: Config = {
       },
       colors: {
         'surface': {
-          'default': '#141012'
+          'default': '#141012',
+          'sunken': '#0A0508'
         },
         'grey': {
           '50': '#f5f6f6',

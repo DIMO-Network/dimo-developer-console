@@ -14,6 +14,8 @@ import * as Sentry from '@sentry/nextjs';
 
 import './Header.css';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
+import {usePathname} from "next/navigation";
+import {pageTitles} from "@/config/navigation";
 
 export const Header: FC = () => {
   const { hasSession } = useContext(GlobalAccountAuthContext);
@@ -23,6 +25,7 @@ export const Header: FC = () => {
   const { setShowAccountInformation } = useContext(AccountInformationContext);
   const { data: session } = useSession();
   const { user: { name = '', role = '' } = {} } = session ?? {};
+  const pathname = usePathname();
 
   const handleOpenBuyCreditsModal = () => {
     setIsOpen(true);
@@ -49,9 +52,8 @@ export const Header: FC = () => {
 
   return (
     <header className="header">
-      <img src={'/images/build-on-dimo.png'} alt="DIMO Logo" className="w-44 h-6" />
+      <p className="page-title">{pageTitles[pathname]}</p>
       <div className="user-information" role="user-information">
-        <UserAvatar name={name ?? ''} />
         <button
           title="Account Information"
           className="account-information"
@@ -79,6 +81,8 @@ export const Header: FC = () => {
             {!isOwner(role) && <EyeIcon className="h-4 w-4" />}
           </button>
         </div>
+        <UserAvatar name={name ?? ''} />
+
       </div>
     </header>
   );
