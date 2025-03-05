@@ -17,13 +17,7 @@ const FullScreenMenu: FC = () => {
           isSidebarOpen ? "" : "hidden"
         )}
       >
-        {/* Close Button */}
-        <button className="self-end text-white" onClick={() => setIsSidebarOpen(false)}>
-          <p>Close button</p>
-        </button>
-
-        {/* Menu Items */}
-        <Menu isFullScreen/>
+        <Menu onClose={() => setIsSidebarOpen(false)} />
       </nav>
     </>
 
