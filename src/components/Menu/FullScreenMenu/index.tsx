@@ -12,7 +12,7 @@ const FullScreenMenu: FC = () => {
       </button>
       <nav
         className={clsx(
-          "fixed inset-y-0 left-0 w-screen bg-gray-900 text-white p-6 z-50 flex flex-col gap-6 transition-transform",
+          "fixed inset-y-0 left-0 w-screen bg-gray-900 text-white z-50 flex transition-transform",
           "md:hidden",
           isSidebarOpen ? "" : "hidden"
         )}

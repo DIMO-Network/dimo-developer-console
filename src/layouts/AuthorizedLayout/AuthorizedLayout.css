@@ -1,5 +1,5 @@
 .main {
-  @apply flex flex-row p-6 bg-surface-sunken
+  @apply flex flex-row p-6 bg-surface-sunken min-h-screen;
 }
 
 .sidebar-container {
