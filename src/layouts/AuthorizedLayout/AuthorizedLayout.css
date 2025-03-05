@@ -2,9 +2,13 @@
   @apply flex flex-row p-6 bg-surface-sunken
 }
 
+.sidebar-container {
+  @apply hidden md:flex md:mr-6
+}
+
 .app-content {
   height: calc(100vh - 80px);
-  @apply flex flex-col pl-6;
+  @apply flex flex-col;
 }
 
 .page-content {

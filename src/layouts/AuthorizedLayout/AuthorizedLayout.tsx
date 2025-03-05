@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, {useState} from 'react';
 
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
@@ -11,6 +11,7 @@ import {
 } from '@/hoc';
 
 import './AuthorizedLayout.css';
+import MenuButton from "@/components/Menu/MenuButton";
 
 export const AuthorizedLayout = withNextSession(
   withNotifications(
@@ -21,13 +22,17 @@ export const AuthorizedLayout = withNextSession(
         }: Readonly<{
           children: React.ReactNode;
         }>) => {
+          const [isSidebarOpen, setIsSidebarOpen] = useState(false);
           return (
             <div className="main">
-              <div className="flex">
+              <div className="sidebar-container">
                 <Menu />
               </div>
               <div className="app-content">
-                <Header />
+                <div className="flex flex-row items-center justify-items-stretch">
+                  <MenuButton />
+                  <Header />
+                </div>
                 <main className="page-content">{children}</main>
               </div>
             </div>
