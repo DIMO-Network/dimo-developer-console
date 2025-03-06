@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, {useState} from 'react';
 
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
@@ -11,24 +11,40 @@ import {
 } from '@/hoc';
 
 import './AuthorizedLayout.css';
+import {MenuButton} from "@/components/Menu/MenuButton";
+import clsx from "classnames";
+import {XMarkIcon} from "@heroicons/react/24/solid";
 
 export const AuthorizedLayout = withNextSession(
   withNotifications(
     withGlobalAccounts(
       withCredits(
-        ({
+         ({
           children,
         }: Readonly<{
           children: React.ReactNode;
-        }>) => (
-          <div className="main">
-            <Header />
-            <div className="app-content">
-              <Menu />
-              <main className="page-content">{children}</main>
+        }>) => {
+           const [isFullMenuOpen, setIsFullMenuOpen] = useState(false);
+           return (
+            <div className="main">
+              <div className="sidebar-container">
+                <Menu />
+              </div>
+              <div className="app-content">
+                <div className="header-container">
+                  <div className="menu-header-button">
+                    <MenuButton onClick={() => setIsFullMenuOpen(true)} />
+                  </div>
+                  <Header/>
+                </div>
+                <div className={clsx('full-screen-menu-container', isFullMenuOpen ? 'flex' : 'hidden')}>
+                  <Menu onClose={() => setIsFullMenuOpen(false)}/>
+                </div>
+                <main className="page-content">{children}</main>
+              </div>
             </div>
-          </div>
-        ),
+           );
+         },
       ),
     ),
   ),

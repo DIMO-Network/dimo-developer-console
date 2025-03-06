@@ -14,6 +14,14 @@ import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage'
 import { turnkeyClient } from './turnkey';
 import { removeFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 
+// TODO - how to handle dynamic pages like app-details?
+export const pageTitles: Record<string, string> = {
+  '/app': 'Home',
+  '/integrations': 'Integrations',
+  '/api-status': 'API Status',
+  '/settings': 'Settings'
+};
+
 export const mainMenu = [
   {
     label: 'Home',
