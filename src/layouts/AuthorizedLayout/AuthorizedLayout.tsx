@@ -13,6 +13,7 @@ import {
 import './AuthorizedLayout.css';
 import {MenuButton} from "@/components/Menu/MenuButton";
 import clsx from "classnames";
+import {XMarkIcon} from "@heroicons/react/24/solid";
 
 export const AuthorizedLayout = withNextSession(
   withNotifications(
@@ -37,7 +38,7 @@ export const AuthorizedLayout = withNextSession(
                   <Header/>
                 </div>
                 <div className={clsx('full-screen-menu-container', isFullMenuOpen ? 'flex' : 'hidden')}>
-                  <Menu onClose={() => setIsFullMenuOpen(false)} />
+                  <Menu onClose={() => setIsFullMenuOpen(false)}/>
                 </div>
                 <main className="page-content">{children}</main>
               </div>

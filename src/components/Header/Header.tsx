@@ -52,7 +52,7 @@ export const Header: FC = () => {
 
   return (
     <header className="header">
-      <p className="page-title">{pageTitles[pathname]}</p>
+      <p className="page-title">{pageTitles[pathname] ?? ''}</p>
       <div className="user-information" role="user-information">
         <button
           title="Account Information"
