@@ -33,7 +33,7 @@ export const AppList: FC<IProps> = ({ apps }) => {
       <div className="description">
         <p className="title">Your Apps</p>
         {isOwner(role) && (
-          <Button className="dark with-icon py-3 px-4" onClick={handleCreateApp}>
+          <Button className="dark with-icon !h-10" onClick={handleCreateApp}>
             <PlusIcon className="w-4 h-4" />
             Create an app
           </Button>
