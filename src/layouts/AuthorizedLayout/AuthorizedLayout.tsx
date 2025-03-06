@@ -24,7 +24,7 @@ export const AuthorizedLayout = withNextSession(
         }>) => {
            const [isFullMenuOpen, setIsFullMenuOpen] = useState(false);
            return (
-            <div className={"main"}>
+            <div className="main">
               <div className="sidebar-container">
                 <Menu />
               </div>
