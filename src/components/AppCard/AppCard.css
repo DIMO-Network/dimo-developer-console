@@ -8,8 +8,9 @@
       @apply text-base font-black;
     }
 
-    .description {
-      @apply text-sm text-white/50;
-    }
   }
+}
+
+.app-card-description {
+  @apply text-sm text-white/50;
 }

@@ -34,7 +34,7 @@ export const AppCard: FC<IProps> = ({
           <p className="title">{name}</p>
           {AppIcon[scope || 'sandbox']}
         </div>
-        <p className="description">{description || ENVIRONMENTS_LABELS[scope]}</p>
+        <p className="app-card-description">{description || ENVIRONMENTS_LABELS[scope]}</p>
         <Anchor href={`/app/details/${id}`}>
           <Button className={'dark w-full !h-10'}>
             App Details
