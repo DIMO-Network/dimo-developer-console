@@ -44,7 +44,7 @@
   }
 
   &.dark {
-    @apply bg-cta-default text-white;
+    @apply bg-cta-default text-white hover:border-white border-transparent border-2;
   }
 
   &.error {
