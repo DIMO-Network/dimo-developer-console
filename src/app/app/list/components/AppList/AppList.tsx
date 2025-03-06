@@ -31,11 +31,11 @@ export const AppList: FC<IProps> = ({ apps }) => {
   return (
     <div className="app-list-content">
       <div className="description">
-        <p className="title">Your applications</p>
+        <p className="title">Your Apps</p>
         {isOwner(role) && (
-          <Button className="primary px-3 with-icon w-36 mr-4" onClick={handleCreateApp}>
+          <Button className="dark with-icon py-3 px-4" onClick={handleCreateApp}>
             <PlusIcon className="w-4 h-4" />
-            Create new
+            Create an app
           </Button>
         )}
       </div>

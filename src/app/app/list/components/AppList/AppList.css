@@ -3,7 +3,7 @@
     @apply flex flex-row gap-2 w-full justify-between items-center mb-5;
 
     .title {
-      @apply text-base leading-5;
+      @apply !text-xl !font-black;
     }
   }
 
