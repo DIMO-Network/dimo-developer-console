@@ -9,7 +9,7 @@
     }
 
     .description {
-      @apply text-xs text-white/50;
+      @apply text-sm text-white/50;
     }
   }
 }
