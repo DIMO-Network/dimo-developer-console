@@ -13,7 +13,6 @@ import {
 import './AuthorizedLayout.css';
 import {MenuButton} from "@/components/Menu/MenuButton";
 import clsx from "classnames";
-import {XMarkIcon} from "@heroicons/react/24/solid";
 
 export const AuthorizedLayout = withNextSession(
   withNotifications(
@@ -26,7 +25,7 @@ export const AuthorizedLayout = withNextSession(
         }>) => {
            const [isFullMenuOpen, setIsFullMenuOpen] = useState(false);
            return (
-            <div className="main">
+            <div className={"main"}>
               <div className="sidebar-container">
                 <Menu />
               </div>

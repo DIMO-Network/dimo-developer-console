@@ -32,6 +32,7 @@ export const useOnboarding = () => {
     try {
       setIsLoading(true);
       const { data: createdApps } = await getApps();
+      console.log('CREATED APPS', createdApps);
       setApps(createdApps.filter(({ deleted }) => !deleted));
 
       const currentWorkspace = await getWorkspace();
