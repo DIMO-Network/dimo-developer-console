@@ -1,11 +1,11 @@
 .app-card {
-  @apply flex flex-row justify-between cursor-pointer items-center bg-surface-default;
+  @apply flex flex-row justify-between items-center bg-surface-raised rounded-2xl;
 
   .content {
-    @apply flex flex-col gap-1;
+    @apply flex flex-col gap-2.5 flex-1;
 
     .title {
-      @apply text-base;
+      @apply text-base font-black;
     }
 
     .description {

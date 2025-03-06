@@ -3,7 +3,6 @@ import { useSession } from 'next-auth/react';
 import { type FC } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { Anchor } from '@/components/Anchor';
 import { AppCard } from '@/components/AppCard';
 import { Button } from '@/components/Button';
 import { IApp } from '@/types/app';
@@ -23,11 +22,9 @@ export const AppList: FC<IProps> = ({ apps }) => {
     router.push('/app/create');
   };
 
-  const renderItem = (app: IApp) => {
+  const renderItem = (app: IApp, idx: number) => {
     return (
-      <Anchor href={`/app/details/${app?.id}`} key={app?.id}>
-        <AppCard className="hover:!border-white" {...app} />
-      </Anchor>
+      <AppCard key={app.id ?? idx} className="hover:!border-white" {...app} />
     );
   };
 

@@ -16,7 +16,11 @@ const config: Config = {
       colors: {
         'surface': {
           'default': '#141012',
-          'sunken': '#0A0508'
+          'sunken': '#0A0508',
+          'raised': '#201C1E'
+        },
+        'cta': {
+          'default': '#322D2F'
         },
         'grey': {
           '50': '#f5f6f6',
