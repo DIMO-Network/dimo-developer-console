@@ -11,7 +11,8 @@ import {
 } from '@/hoc';
 
 import './AuthorizedLayout.css';
-import FullScreenMenu from "../../components/Menu/FullScreenMenu";
+import {MenuButton} from "@/components/Menu/MenuButton";
+import clsx from "classnames";
 
 export const AuthorizedLayout = withNextSession(
   withNotifications(
@@ -22,21 +23,27 @@ export const AuthorizedLayout = withNextSession(
         }: Readonly<{
           children: React.ReactNode;
         }>) => {
-          return (
+           const [isFullMenuOpen, setIsFullMenuOpen] = useState(false);
+           return (
             <div className="main">
               <div className="sidebar-container">
                 <Menu />
               </div>
               <div className="app-content">
-                <div className="flex flex-row items-center justify-items-stretch">
-                  <FullScreenMenu />
-                  <Header />
+                <div className="header-container">
+                  <div className="menu-header-button">
+                    <MenuButton onClick={() => setIsFullMenuOpen(true)} />
+                  </div>
+                  <Header/>
+                </div>
+                <div className={clsx('full-screen-menu-container', isFullMenuOpen ? 'flex' : 'hidden')}>
+                  <Menu onClose={() => setIsFullMenuOpen(false)} />
                 </div>
                 <main className="page-content">{children}</main>
               </div>
             </div>
-          );
-        },
+           );
+         },
       ),
     ),
   ),

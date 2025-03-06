@@ -18,7 +18,7 @@ export const Menu: FC<Props> = ({ onClose }) => {
     typeof onClose === 'function' ? onClose() : undefined;
   };
   return (
-    <aside className={"main-menu"}>
+    <div className={"main-menu"}>
       <ul className="top-menu">
         <div className={"flex flex-row justify-between"}>
           <Image
@@ -44,6 +44,6 @@ export const Menu: FC<Props> = ({ onClose }) => {
           return <MenuItem key={item.label} {...item} isHighlighted={pathname === item.link} onClick={handleClick} />;
         })}
       </ul>
-    </aside>
+    </div>
   );
 };

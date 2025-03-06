@@ -1,9 +1,21 @@
 .main {
-  @apply flex flex-row p-6 bg-surface-sunken min-h-screen;
+  @apply flex flex-row p-6 bg-surface-sunken min-h-screen items-stretch;
 }
 
 .sidebar-container {
-  @apply hidden md:flex md:mr-6
+  @apply hidden md:flex md:mr-6 md:w-52 md:flex-shrink-0 md:rounded-xl md:bg-surface-default
+}
+
+.header-container {
+  @apply flex flex-row items-center justify-items-stretch
+}
+
+.menu-header-button {
+  @apply md:hidden
+}
+
+.full-screen-menu-container {
+  @apply fixed inset-y-0 left-0 w-screen bg-surface-default text-white z-50 transition-transform md:hidden
 }
 
 .app-content {
