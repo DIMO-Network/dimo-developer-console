@@ -8,12 +8,4 @@
       @apply text-3xl;
     }
   }
-
-  .description {
-    @apply flex flex-row gap-2 w-full justify-between items-center;
-
-    .title {
-      @apply text-base leading-5;
-    }
-  }
 }
