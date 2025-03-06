@@ -3,7 +3,6 @@ import { useSession } from 'next-auth/react';
 import { type FC } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { Anchor } from '@/components/Anchor';
 import { AppCard } from '@/components/AppCard';
 import { Button } from '@/components/Button';
 import { IApp } from '@/types/app';
@@ -23,22 +22,20 @@ export const AppList: FC<IProps> = ({ apps }) => {
     router.push('/app/create');
   };
 
-  const renderItem = (app: IApp) => {
+  const renderItem = (app: IApp, idx: number) => {
     return (
-      <Anchor href={`/app/details/${app?.id}`} key={app?.id}>
-        <AppCard className="hover:!border-white" {...app} />
-      </Anchor>
+      <AppCard key={app.id ?? idx} className="hover:!border-white" {...app} />
     );
   };
 
   return (
     <div className="app-list-content">
       <div className="description">
-        <p className="title">Your applications</p>
+        <p className="title">Your Apps</p>
         {isOwner(role) && (
-          <Button className="primary px-3 with-icon w-36 mr-4" onClick={handleCreateApp}>
+          <Button className="dark with-icon !h-10" onClick={handleCreateApp}>
             <PlusIcon className="w-4 h-4" />
-            Create new
+            Create an app
           </Button>
         )}
       </div>

@@ -15,14 +15,14 @@
 }
 
 .full-screen-menu-container {
-  @apply fixed inset-y-0 left-0 w-screen bg-surface-default text-white z-50 transition-transform md:hidden
+  @apply fixed flex inset-y-0 left-0 w-screen bg-surface-default text-white z-50 transition-transform md:hidden
 }
 
 .app-content {
   height: calc(100vh - 80px);
-  @apply flex flex-col;
+  @apply flex flex-col flex-1;
 }
 
 .page-content {
-  @apply overflow-y-auto p-8 w-full;
+  @apply overflow-y-auto py-6 w-full;
 }
