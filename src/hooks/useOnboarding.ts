@@ -37,8 +37,10 @@ export const useOnboarding = () => {
       const currentWorkspace = await getWorkspace();
       setWorkspace(currentWorkspace);
 
-      const dcxBalance = await getDcxBalance();
-      setBalance(dcxBalance);
+      if(isOwner(role)){
+        const dcxBalance = await getDcxBalance();
+        setBalance(dcxBalance);
+      }      
     } catch (error: unknown) {
       Sentry.captureException(error);
     } finally {
@@ -69,7 +71,7 @@ export const useOnboarding = () => {
   useEffect(() => {
     if (!hasSession) return;
     void loadAppsAndWorkspace();
-  }, [hasSession]);
+  }, [hasSession, role]);
 
   useEffect(() => {
     if (!hasSession) return;
