@@ -22,6 +22,9 @@ const config: Config = {
         'cta': {
           'default': '#322D2F'
         },
+        'text': {
+          'secondary': '#BABABA'
+        },
         'grey': {
           '50': '#f5f6f6',
           '100': '#e4e8e9',

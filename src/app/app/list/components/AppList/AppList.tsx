@@ -1,26 +1,20 @@
-import { PlusIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 import { type FC } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { AppCard } from '@/components/AppCard';
-import { Button } from '@/components/Button';
 import { IApp } from '@/types/app';
 import { isOwner } from '@/utils/user';
 
 import './AppList.css';
+import EmptyList from '@/app/app/list/components/EmptyList';
+import CreateAppButton from '@/app/app/list/components/CreateAppButton';
 
 interface IProps {
   apps: IApp[];
 }
 export const AppList: FC<IProps> = ({ apps }) => {
-  const router = useRouter();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
-
-  const handleCreateApp = () => {
-    router.push('/app/create');
-  };
 
   const renderItem = (app: IApp, idx: number) => {
     return (
@@ -32,14 +26,11 @@ export const AppList: FC<IProps> = ({ apps }) => {
     <div className="app-list-content">
       <div className="description">
         <p className="title">Your Apps</p>
-        {isOwner(role) && (
-          <Button className="dark with-icon !h-10" onClick={handleCreateApp}>
-            <PlusIcon className="w-4 h-4" />
-            Create an app
-          </Button>
+        {isOwner(role) && !!apps.length && (
+          <CreateAppButton />
         )}
       </div>
-      <div className="app-list">{apps.map(renderItem)}</div>
+      {apps.length ? <div className="app-list">{apps.map(renderItem)}</div> : <div className={"empty-list"}><EmptyList /></div>}
     </div>
   );
 };

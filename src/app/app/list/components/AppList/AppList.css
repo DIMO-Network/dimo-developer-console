@@ -10,4 +10,8 @@
   .app-list {
     @apply w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6;
   }
+
+  .empty-list {
+    @apply mt-10 md:mt-20
+  }
 }
