@@ -1,0 +1,23 @@
+.workspace-name-content {
+  @apply flex flex-col items-center gap-2;
+}
+
+.workspace-name-header {
+  @apply flex flex-col gap-2 text-center relative pt-8 pb-4 px-2 font-bold;
+}
+
+.workspace-name-description {
+  @apply text-xs text-white/50 w-full h-full py-4;
+}
+
+.field {
+  @apply w-full;
+}
+
+.save-button {
+  @apply self-end w-full;
+}
+
+.fields-container {
+  @apply flex flex-col gap-4 w-full mb-4;
+}

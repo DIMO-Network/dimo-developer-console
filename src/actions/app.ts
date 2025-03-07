@@ -11,6 +11,7 @@ import {
   deleteSigner,
   testMyApp,
   deleteMyApp,
+  updateMyApp,
 } from '@/services/app';
 import { IApp, IRedirectUri, ISigner } from '@/types/app';
 
@@ -55,4 +56,8 @@ export const createMySigner = async (newData: Partial<ISigner>, appId: string) =
 
 export const deleteMySigner = async (id: string) => {
   return deleteSigner(id);
+};
+
+export const updateApp = async (id: string, app: Partial<IApp>) => {
+  return updateMyApp(id, app);
 };
