@@ -120,7 +120,8 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
             Edit Workspace and App Names
           </Title>
           <p className="workspace-name-description">
-            Please update the workspace and app names below.
+            Please update the workspace and app names below. Note that changing the
+            workspace name will impact all apps using this workspace.
           </p>
         </div>
         <div className="fields-container">
