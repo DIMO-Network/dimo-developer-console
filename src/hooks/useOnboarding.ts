@@ -29,8 +29,10 @@ export const useOnboarding = () => {
       const currentWorkspace = await getWorkspace();
       setWorkspace(currentWorkspace);
 
-      const dcxBalance = await getDcxBalance();
-      setBalance(dcxBalance);
+      if(isOwner(role)){
+        const dcxBalance = await getDcxBalance();
+        setBalance(dcxBalance);
+      }      
     } catch (error: unknown) {
       Sentry.captureException(error);
     } finally {
