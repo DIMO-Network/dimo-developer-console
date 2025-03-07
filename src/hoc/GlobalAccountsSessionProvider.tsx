@@ -215,7 +215,10 @@ export const withGlobalAccounts = <P extends object>(
 
     useEffect(() => {
       if(!role) return;
-      if (isCollaborator(role)) return;
+      if (isCollaborator(role)) {
+        setHasSession(true);
+        return;
+      }
       const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
       if (!stored) return;
       const token = stored.session.token;

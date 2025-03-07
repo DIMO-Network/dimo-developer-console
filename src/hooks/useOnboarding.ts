@@ -71,7 +71,7 @@ export const useOnboarding = () => {
   useEffect(() => {
     if (!hasSession) return;
     void loadAppsAndWorkspace();
-  }, [hasSession]);
+  }, [hasSession, role]);
 
   useEffect(() => {
     if (!hasSession) return;
