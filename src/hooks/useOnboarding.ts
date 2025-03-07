@@ -54,7 +54,7 @@ export const useOnboarding = () => {
       ]);
       if (!(balanceDCX > 0 || balanceDimo > 0)) {
         setCta({
-          label: 'Purchase DCX',
+          label: 'Add credits',
           onClick: handleOpenBuyCreditsModal,
         });
       } else if (apps.length === 0) {
