@@ -8,7 +8,7 @@ import { UserAvatar } from '@/components/UserAvatar';
 
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { formatToHumanReadable } from '@/utils/formatBalance';
-import { isOwner } from '@/utils/user';
+import { isCollaborator, isOwner } from '@/utils/user';
 import { useContractGA } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
 
@@ -37,6 +37,7 @@ export const Header: FC = () => {
 
   const loadAndFormatDcxBalance = async () => {
     try {
+      if (isCollaborator(role)) return;
       const balance = await getDcxBalance();
       setDcxBalance(formatToHumanReadable(balance));
     } catch (error: unknown) {
@@ -73,7 +74,7 @@ export const Header: FC = () => {
             onClick={
               isOwner(role)
                 ? handleOpenBuyCreditsModal
-                : handleOpenAccountInformationModal
+                : undefined
             }
             role="add-credits"
           >
