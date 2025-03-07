@@ -16,7 +16,7 @@ import { AuthClient } from '@turnkey/sdk-browser';
 import { useRouter } from 'next/navigation';
 import { passkeyClient, turnkeyClient } from '@/config/turnkey';
 import * as Sentry from '@sentry/nextjs';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { isEmpty } from 'lodash';
 import { IGlobalAccountSession } from '@/types/wallet';
 import {
@@ -34,6 +34,7 @@ import {
   removeFromLocalStorage,
   saveToLocalStorage,
 } from '@/utils/localStorage';
+import { isCollaborator } from '@/utils/user';
 
 const halfHour = 30 * 60;
 const fifteenMinutes = 15 * 60;
@@ -42,6 +43,8 @@ export const withGlobalAccounts = <P extends object>(
 ) => {
   const HOC: React.FC<P> = (props) => {
     const router = useRouter();
+    const { data: session } = useSession();
+    const { user: { role = '' } = {} } = session ?? {};
     const { setNotification } = useContext(NotificationContext);
     const [otpId, setOtpId] = useState<string>('');
     const [shouldRedirect, setShouldRedirect] = useState<boolean>(true);
@@ -211,6 +214,8 @@ export const withGlobalAccounts = <P extends object>(
       }, []);
 
     useEffect(() => {
+      if(!role) return;
+      if (isCollaborator(role)) return;
       const stored = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
       if (!stored) return;
       const token = stored.session.token;
@@ -220,7 +225,7 @@ export const withGlobalAccounts = <P extends object>(
       }
       setShouldRedirect(false);
       void requestOtpLogin(stored.organization.email);
-    }, []);
+    }, [role]);
 
     // Render the wrapped component with any additional props
     return (
