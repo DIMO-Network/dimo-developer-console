@@ -94,6 +94,8 @@ export const withGlobalAccounts = <P extends object>(
 
           if (isEmpty(credentialBundle)) return;
 
+          saveToLocalStorage(EmbeddedKey, key.privateKey);
+
           const { walletAddress, smartContractAddress } = await getWalletAddress({
             subOrganizationId: organization.subOrganizationId,
             authKey: credentialBundle,
@@ -111,8 +113,7 @@ export const withGlobalAccounts = <P extends object>(
               expiry: nowInSeconds + fifteenMinutes,
               authenticator: AuthClient.Iframe,
             },
-          };
-          saveToLocalStorage(EmbeddedKey, key.privateKey);
+          };          
           saveToSession<IGlobalAccountSession>(GlobalAccountSession, currentSession);
           setHasSession(true);
           setResolvers((prev) => {
@@ -152,12 +153,13 @@ export const withGlobalAccounts = <P extends object>(
 
         if (isEmpty(credentialBundle)) return;
 
+        saveToLocalStorage(EmbeddedKey, key.privateKey);
+
         const { walletAddress, smartContractAddress } = await getWalletAddress({
           subOrganizationId: organization.subOrganizationId,
           authKey: credentialBundle,
         });
-
-        saveToLocalStorage(EmbeddedKey, key.privateKey);
+        
         saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
           organization: {
             ...organization,
