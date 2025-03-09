@@ -1,9 +1,6 @@
 import { FC } from 'react';
 
-import {
-  DevSupportForm,
-  type IDevSupportForm,
-} from '@/app/settings/components/DevSupportForm';
+import { DevSupportForm, type IDevSupportForm } from '@/components/DevSupportForm';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 
