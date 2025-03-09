@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
+import { inquiryOptions, IDevSupportForm } from '@/types/support';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
 import { TextArea } from '@/components/TextArea';
@@ -11,20 +12,9 @@ import { TextField } from '@/components/TextField';
 
 import './DevSupportForm.css';
 
-export const inquiryOptions = [
-  { value: 'general', text: 'General Inquiry' },
-  { value: 'technical', text: 'Technical Questions' },
-  { value: 'payments', text: 'Payments and Subscriptions' },
-];
-
 interface IProps {
   onSubmit: (data: IDevSupportForm) => Promise<void>;
   onCancel: () => void;
-}
-
-export interface IDevSupportForm {
-  inquiryType: string;
-  message: string;
 }
 
 export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
@@ -52,6 +42,11 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
     await onSubmit(formData);
     reset();
     setIsLoading(false);
+  };
+
+  const handleCancel = () => {
+    reset();
+    onCancel();
   };
 
   return (
@@ -102,7 +97,7 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
         <Button className="primary w-full" loading={isLoading} loadingColor="primary">
           Submit
         </Button>
-        <Button className="dark w-full" onClick={onCancel}>
+        <Button className="dark w-full" onClick={handleCancel}>
           Cancel
         </Button>
       </div>
