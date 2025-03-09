@@ -7,7 +7,7 @@ import { Button } from '@/components/Button';
 import { isOwner } from '@/utils/user';
 import { Loader } from '@/components/Loader';
 import { SupportAgentIcon } from '@/components/Icons';
-import { SupportFormModal } from '@/app/settings/components/SupportFormModal';
+import { SupportFormModal } from '@/components/SupportFormModal';
 import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
