@@ -94,9 +94,18 @@ export const withGlobalAccounts = <P extends object>(
 
           if (isEmpty(credentialBundle)) return;
 
+          const { walletAddress, smartContractAddress } = await getWalletAddress({
+            subOrganizationId: organization.subOrganizationId,
+            authKey: credentialBundle,
+          });
+
           const nowInSeconds = Date.now() / 1000;
           const currentSession = {
-            organization: organization,
+            organization: {
+              ...organization,
+              walletAddress,
+              smartContractAddress,
+            },
             session: {
               token: credentialBundle,
               expiry: nowInSeconds + fifteenMinutes,
