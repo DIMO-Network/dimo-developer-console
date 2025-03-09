@@ -1,6 +1,10 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
+
+import {
+  DevSupportForm,
+  type IDevSupportForm,
+} from '@/app/settings/components/DevSupportForm';
 import { Modal } from '@/components/Modal';
-import { Button } from '@/components/Button';
 import { Title } from '@/components/Title';
 
 import './SupportFormModal.css';
@@ -11,15 +15,16 @@ interface SupportFormModalProps {
 }
 
 export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen }) => {
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = () => {
-    setLoading(true);
+  const handleSubmit = async (data: IDevSupportForm) => {
+    console.log(data);
     // Simulate an async operation
     setTimeout(() => {
-      setLoading(false);
       setIsOpen(false);
     }, 2000);
+  };
+
+  const onCancel = () => {
+    setIsOpen(false);
   };
 
   return (
@@ -33,9 +38,7 @@ export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen 
             Get in touch with our team to answer your questions.
           </p>
         </div>
-        <Button className="primary" onClick={handleSubmit} loading={loading}>
-          Submit
-        </Button>
+        <DevSupportForm onSubmit={handleSubmit} onCancel={onCancel} />
       </div>
     </Modal>
   );
