@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { type FC, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useSession } from 'next-auth/react';
 
@@ -11,7 +11,7 @@ import { TextField } from '@/components/TextField';
 
 import './DevSupportForm.css';
 
-const inquiryOptions = [
+export const inquiryOptions = [
   { value: 'general', text: 'General Inquiry' },
   { value: 'technical', text: 'Technical Questions' },
   { value: 'payments', text: 'Payments and Subscriptions' },
@@ -31,6 +31,8 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
   const { data: session } = useSession();
   const { user: { name: userName = '' } = {} } = session ?? {};
   const [isLoading, setIsLoading] = useState(false);
+  const memoizedInquiryOptions = useMemo(() => inquiryOptions, []);
+
   const {
     control,
     handleSubmit,
@@ -41,9 +43,7 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
   } = useForm<IDevSupportForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',
-    defaultValues: {
-      inquiryType: inquiryOptions[0].value,
-    },
+    defaultValues: {},
   });
 
   const handleFormSubmit = async () => {
@@ -69,7 +69,7 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
             {...register('inquiryType', {
               required: 'This field is required',
             })}
-            options={inquiryOptions}
+            options={memoizedInquiryOptions}
             control={control}
             placeholder="Select inquiry"
             role="inquiry-type-select"
