@@ -541,6 +541,36 @@ export const useGlobalAccount = () => {
     });
   };
 
+  const getWalletAddress = async ({
+    subOrganizationId,
+    authKey,
+  }: {
+    subOrganizationId: string;
+    authKey: string;
+  }) => {
+    const client = getTurnkeyClient(AuthClient.Iframe, authKey);
+    const { wallets } = await client.getWallets({
+      organizationId: subOrganizationId,
+    });
+    const { account } = await client.getWalletAccount({
+      organizationId: subOrganizationId,
+      walletId: wallets[0].walletId,
+    });
+
+    const kernelClient = await getKernelClient({
+      organizationInfo: {
+        subOrganizationId,
+        walletAddress: account.address as `0x${string}`,
+      } as ISubOrganization,
+      authClient: AuthClient.Iframe,
+      authKey,
+    });
+    return {
+      walletAddress: account.address as `0x${string}`,
+      smartContractAddress: kernelClient!.account.address as `0x${string}`,
+    };
+  };
+
   const sponsorUserOperation = async ({
     userOperation,
     provider,
@@ -623,6 +653,7 @@ export const useGlobalAccount = () => {
     getKernelClient,
     handleOnChainError,
     getNeededDimoAmountForDcx,
+    getWalletAddress,
   };
 };
 
