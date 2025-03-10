@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
-import { createApp } from '@/actions/app';
+import {createApp} from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
@@ -20,7 +20,7 @@ import {
 } from '@/types/wallet';
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
-import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
+import { LoadingProps } from '@/components/LoadingModal';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
@@ -31,16 +31,17 @@ import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
-
+import {Loading} from "@/components/Loading";
 import './Form.css';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 
 interface IProps {
   workspace?: IWorkspace;
+  onSuccess: () => void;
 }
 
-export const Form: FC<IProps> = ({ workspace }) => {
+export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const {
@@ -60,12 +61,10 @@ export const Form: FC<IProps> = ({ workspace }) => {
     reValidateMode: 'onChange',
   });
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const [isOpened, setIsOpened] = useState<boolean>(false);
 
   const onSubmit = async () => {
     try {
       setIsLoading(true);
-      setIsOpened(true);
       setLoadingStatus({
         label: 'Preparing to license the application...',
         status: 'loading',
@@ -97,7 +96,6 @@ export const Form: FC<IProps> = ({ workspace }) => {
       );
     } finally {
       setIsLoading(false);
-      setIsOpened(false);
     }
   };
 
@@ -219,19 +217,28 @@ export const Form: FC<IProps> = ({ workspace }) => {
   const handleCreateApp = async () => {
     const { workspace, app } = getValues();
     const { id: workspaceId = '' } = await handleCreateWorkspace(workspace);
-    await createApp(workspaceId, {
+    const newApp = await createApp(workspaceId, {
       name: app.name,
       scope: 'production',
     });
-    router.replace('/app');
+    router.push(`/app/details/${newApp.id}`);
+    setNotification('New app created!', 'Success', 'success');
+    onSuccess();
   };
 
+  if (isLoading) {
+    return (
+      <div className={"flex flex-col flex-1 items-center"}>
+        <Loading className={"!h-9 !w-9 text-primary-200"} />
+        <p className={"text-xl text-center mt-3"}>{loadingStatus?.label ?? 'Loading'}</p>
+      </div>
+    );
+  }
   return (
     <>
-      <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
       <form onSubmit={handleSubmit(onSubmit)}>
         {(!workspace || Object.keys(workspace).length === 0) && (
-          <Label htmlFor="namespace" className="text-xs text-medium">
+          <Label htmlFor="namespace" className="text-sm font-medium">
             Project Namespace
             <TextField
               type="text"
@@ -248,13 +255,13 @@ export const Form: FC<IProps> = ({ workspace }) => {
             {errors?.workspace?.name && (
               <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
             )}
-            <p className="text-sm text-grey-200">
-              This is the namespace used across all your apps
+            <p className="text-sm text-text-secondary font-normal">
+              This is the namespace used across all your apps. It is a public name visible to other developers and users in the ecosystem.
             </p>
           </Label>
         )}
-        <Label htmlFor="name" className="text-xs text-medium">
-          Name
+        <Label htmlFor="name" className="text-sm font-medium">
+          Application Name
           <TextField
             type="text"
             placeholder="Application name"
@@ -270,16 +277,25 @@ export const Form: FC<IProps> = ({ workspace }) => {
           {errors?.app?.name && (
             <TextError errorMessage={errors?.app?.name?.message ?? ''} />
           )}
-          <p className="text-sm text-grey-200">This name is for your reference only</p>
+          <p className="text-sm text-text-secondary font-normal">This name is for your reference only</p>
         </Label>
-        <div className="flex flex-col pt-4">
+        <div className="flex flex-col pt-4 gap-4">
           <Button
             type="submit"
-            className="primary"
+            className="white"
             role="continue-button"
             loading={isLoading}
           >
             Create application
+          </Button>
+          <Button
+            type="reset"
+            className="dark"
+            role="cancel-button"
+            loading={isLoading}
+            onClick={() => {}}
+          >
+            Cancel
           </Button>
         </div>
       </form>

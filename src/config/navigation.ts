@@ -14,8 +14,15 @@ import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage'
 import { turnkeyClient } from './turnkey';
 import { removeFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 
-// TODO - how to handle dynamic pages like app-details?
-export const pageTitles: Record<string, string> = {
+const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
+
+export const getPageTitle = (path: string) => {
+  const staticPageTitle = pageTitles[path];
+  if (staticPageTitle) return staticPageTitle;
+  if (APP_DETAILS_REGEX.test(path)) return 'App Details';
+};
+
+const pageTitles: Record<string, string> = {
   '/app': 'Home',
   '/integrations': 'Integrations',
   '/api-status': 'API Status',

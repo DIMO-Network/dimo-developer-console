@@ -1,18 +1,22 @@
 import React, {FC} from 'react';
 import './Banner.css';
 import CreateAppButton from "@/app/app/list/components/CreateAppButton";
-import useOnboarding from "@/hooks/useOnboarding";
 import AddCreditsButton from "@/app/app/list/components/AddCreditsButton";
 import {ActionCompletedRow} from "@/app/app/list/components/Banner/components/ActionCompletedRow";
 import {CTARow} from "@/app/app/list/components/Banner/components/CTARow";
+import {IApp} from "@/types/app";
 
 export interface CTA {
   label: string;
   onClick: () => void;
 }
 
-export const Banner: FC = () => {
-  const {balance, apps} = useOnboarding();
+interface Props {
+  balance: number;
+  apps: IApp[];
+}
+
+export const Banner: FC<Props> = ({ balance, apps }) => {
   return (
     <div className="banner-content">
       <div>
