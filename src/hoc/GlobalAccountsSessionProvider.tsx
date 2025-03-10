@@ -101,7 +101,7 @@ export const withGlobalAccounts = <P extends object>(
             authKey: credentialBundle,
           });
 
-          const nowInSeconds = Date.now() / 1000;
+          const nowInSeconds = Math.ceil(Date.now() / 1000);
           const currentSession = {
             organization: {
               ...organization,
@@ -113,7 +113,7 @@ export const withGlobalAccounts = <P extends object>(
               expiry: nowInSeconds + fifteenMinutes,
               authenticator: AuthClient.Iframe,
             },
-          };          
+          };
           saveToSession<IGlobalAccountSession>(GlobalAccountSession, currentSession);
           setHasSession(true);
           setResolvers((prev) => {
@@ -143,7 +143,7 @@ export const withGlobalAccounts = <P extends object>(
 
         const key = generateP256KeyPair();
         const targetPubHex = key.publicKeyUncompressed;
-        const nowInSeconds = Date.now() / 1000;
+        const nowInSeconds = Math.ceil(Date.now() / 1000);
 
         const { credentialBundle } = await passkeyClient.createReadWriteSession({
           organizationId: organization.subOrganizationId,
@@ -159,7 +159,7 @@ export const withGlobalAccounts = <P extends object>(
           subOrganizationId: organization.subOrganizationId,
           authKey: credentialBundle,
         });
-        
+
         saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
           organization: {
             ...organization,
@@ -202,7 +202,7 @@ export const withGlobalAccounts = <P extends object>(
       )
         return false;
 
-      const nowInSeconds = Date.now() / 1000;
+      const nowInSeconds = Math.ceil(Date.now() / 1000);
       return currentSession.session.expiry > nowInSeconds;
     };
 
