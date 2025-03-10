@@ -14,7 +14,7 @@ const CreateAppButton: React.FC<Props> = ({ className = 'dark with-icon' }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   return (
     <>
-      <CreateAppModal isOpen={isModalOpen} handleIsOpen={() => {setIsModalOpen(false);}} />
+      <CreateAppModal isOpen={isModalOpen} handleIsOpen={setIsModalOpen} />
       <Button className={clsx(className, "!h-10")} onClick={() => setIsModalOpen(true)}>
         <PlusIcon className="w-4 h-4" />
         Create an app

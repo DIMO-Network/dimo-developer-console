@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
-import { createApp } from '@/actions/app';
+import {createApp, getApps} from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
@@ -20,7 +20,7 @@ import {
 } from '@/types/wallet';
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
-import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
+import { LoadingProps } from '@/components/LoadingModal';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
@@ -31,16 +31,17 @@ import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
-
+import {Loading} from "@/components/Loading";
 import './Form.css';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 
 interface IProps {
   workspace?: IWorkspace;
+  onSuccess: () => void;
 }
 
-export const Form: FC<IProps> = ({ workspace }) => {
+export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const {
@@ -49,7 +50,6 @@ export const Form: FC<IProps> = ({ workspace }) => {
     getDcxBalance,
     processTransactions,
   } = useContractGA();
-  const router = useRouter();
   const {
     formState: { errors },
     handleSubmit,
@@ -60,12 +60,10 @@ export const Form: FC<IProps> = ({ workspace }) => {
     reValidateMode: 'onChange',
   });
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const [isOpened, setIsOpened] = useState<boolean>(false);
 
   const onSubmit = async () => {
     try {
       setIsLoading(true);
-      setIsOpened(true);
       setLoadingStatus({
         label: 'Preparing to license the application...',
         status: 'loading',
@@ -97,7 +95,6 @@ export const Form: FC<IProps> = ({ workspace }) => {
       );
     } finally {
       setIsLoading(false);
-      setIsOpened(false);
     }
   };
 
@@ -223,14 +220,23 @@ export const Form: FC<IProps> = ({ workspace }) => {
       name: app.name,
       scope: 'production',
     });
-    router.replace('/app');
+    setNotification('New app created!', 'Success', 'success');
+    await getApps();
+    onSuccess();
   };
 
+  if (isLoading) {
+    return (
+      <div className={"flex flex-col flex-1 items-center"}>
+        <Loading className={"!h-9 !w-9 text-primary-200"} />
+        <p className={"text-xl text-center mt-3"}>{loadingStatus?.label ?? 'Loading'}</p>
+      </div>
+    );
+  }
   return (
     <>
-      <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
       <form onSubmit={handleSubmit(onSubmit)}>
-        {(!workspace || Object.keys(workspace).length === 0 || true) && (
+        {(!workspace || Object.keys(workspace).length === 0) && (
           <Label htmlFor="namespace" className="text-sm font-medium">
             Project Namespace
             <TextField

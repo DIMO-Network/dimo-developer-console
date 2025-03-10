@@ -8,7 +8,7 @@ import './CreateAppModal.css';
 
 interface Props {
   isOpen: boolean;
-  handleIsOpen: () => void;
+  handleIsOpen: (e: boolean) => void;
 }
 export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
   const { isLoading, workspace } = useOnboarding();
@@ -22,7 +22,7 @@ export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
           </Title>
         </div>
         <div className={"flex flex-1 w-full py-6"}>
-          <Form workspace={workspace}/>
+          <Form workspace={workspace} onSuccess={() => handleIsOpen(false)}/>
         </div>
       </div>
     </Modal>
