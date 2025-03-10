@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
-import {createApp, getApps} from '@/actions/app';
+import {createApp} from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
@@ -50,6 +50,7 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
     getDcxBalance,
     processTransactions,
   } = useContractGA();
+  const router = useRouter();
   const {
     formState: { errors },
     handleSubmit,
@@ -216,10 +217,11 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
   const handleCreateApp = async () => {
     const { workspace, app } = getValues();
     const { id: workspaceId = '' } = await handleCreateWorkspace(workspace);
-    await createApp(workspaceId, {
+    const newApp = await createApp(workspaceId, {
       name: app.name,
       scope: 'production',
     });
+    router.push(`/app/details/${newApp.id}`);
     setNotification('New app created!', 'Success', 'success');
     onSuccess();
   };

@@ -11,9 +11,8 @@ interface Props {
   handleIsOpen: (e: boolean) => void;
 }
 export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
-  const { workspace, loadAppsAndWorkspace } = useOnboarding();
+  const { workspace } = useOnboarding();
   const handleSuccess = async () => {
-    await loadAppsAndWorkspace();
     handleIsOpen(false);
   };
 

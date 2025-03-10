@@ -12,6 +12,7 @@ import './View.css';
 export const View: FC = () => {
   const { isLoading, apps, balance } = useOnboarding();
   const {user} = useUser();
+
   if (isLoading) {
     return <Loader isLoading={true} />;
   }
