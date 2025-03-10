@@ -8,13 +8,13 @@ interface Props {
   className?: string;
 }
 
-const CreateAppButton: React.FC<Props> = ({ className = 'dark with-icon' }) => {
-  const {handleCreateApp} = useOnboarding();
+const AddCreditsButton: React.FC<Props> = ({ className = 'dark with-icon' }) => {
+  const {handleOpenBuyCreditsModal} = useOnboarding();
   return (
-    <Button className={clsx(className, "!h-10")} onClick={handleCreateApp}>
+    <Button className={clsx(className, "!h-10")} onClick={handleOpenBuyCreditsModal}>
       <PlusIcon className="w-4 h-4" />
-      Create an app
+      Add credits
     </Button>
   );
 };
-export default CreateAppButton;
+export default AddCreditsButton;

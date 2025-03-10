@@ -25,6 +25,9 @@ const config: Config = {
         'text': {
           'secondary': '#BABABA'
         },
+        'feedback': {
+          'success': "#0D7038"
+        },
         'grey': {
           '50': '#f5f6f6',
           '100': '#e4e8e9',

@@ -1,15 +1,3 @@
 .banner-content {
-  @apply relative h-96 w-full;
-
-  .image-content {
-    @apply absolute z-0 h-96 w-full inset-x-0 inset-y-0;
-  }
-
-  img {
-    @apply object-cover h-full w-full;
-  }
-
-  .cta {
-    @apply absolute z-10 top-6 right-6;
-  }
+  @apply w-full rounded-2xl bg-surface-raised p-4 flex flex-col items-start gap-4;
 }
