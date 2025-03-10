@@ -16,7 +16,6 @@ import { removeFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 
-// TODO - how to handle dynamic pages like app-details?
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;

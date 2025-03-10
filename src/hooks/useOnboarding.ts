@@ -23,7 +23,6 @@ export const useOnboarding = () => {
   const loadAppsAndWorkspace = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 3000));
       const { data: createdApps } = await getApps();
       setApps(createdApps.filter(({ deleted }) => !deleted));
 
@@ -55,7 +54,6 @@ export const useOnboarding = () => {
     setIsLoading,
     handleOpenBuyCreditsModal,
     workspace,
-    loadAppsAndWorkspace,
   };
 };
 
