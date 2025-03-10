@@ -23,7 +23,7 @@ export const View: FC = () => {
         <Image src={"/images/waving_hand.svg"} width={16} height={16} alt={"waving-hand"}/>
         <p className="title">Welcome {user?.name.slice(0, user.name?.indexOf(' '))}</p>
       </div>
-      {!(balance && apps.length) && <Banner />}
+      {!(balance && apps.length) && <Banner balance={balance} apps={apps} />}
       <AppList apps={apps}/>
     </div>
   );
