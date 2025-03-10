@@ -21,7 +21,6 @@ export const useOnboarding = () => {
   const [cta, setCta] = useState<CTA>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState<number>(0);
-  const router = useRouter();
   const { getDcxBalance, getDimoBalance } = useContractGA();
   const { setIsOpen } = useContext(CreditsContext);
   const { data: session } = useSession();
@@ -78,10 +77,6 @@ export const useOnboarding = () => {
     void setCtas();
   }, [apps, role, hasSession]);
 
-  const handleCreateApp = () => {
-    router.push('/app/create');
-  };
-
   const handleOpenBuyCreditsModal = () => {
     setIsOpen(true);
   };
@@ -92,7 +87,6 @@ export const useOnboarding = () => {
     cta,
     isLoading,
     setIsLoading,
-    handleCreateApp,
     handleOpenBuyCreditsModal,
     workspace,
     loadAppsAndWorkspace,
