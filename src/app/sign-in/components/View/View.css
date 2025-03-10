@@ -1,32 +1,50 @@
 .sign-in {
-  @apply bg-[url('/images/login-background.png')] bg-cover 
-    flex flex-col justify-center 
-    h-screen gap-4;
+  @apply flex flex-row justify-center h-screen gap-4;
 
   .sign-in__content {
-    @apply flex flex-col sm:w-1/2 items-center justify-center h-screen shadow-lg;
-  }
+    @apply flex flex-col w-1/2 items-center justify-center h-screen;
 
-  .sign-in__form {
-    @apply flex flex-col w-full max-w-sm gap-4 px-4 py-4;
-  }
+    .sign-in__form {
+      @apply flex flex-col w-full max-w-sm gap-4 px-4 py-4 bg-charcoal rounded-3xl;
+    }
+    .sign-in__input {
+      @apply flex flex-col w-full gap-4 pb-4;
+    }
 
-  .sign-in__header {
-    @apply flex flex-col w-full items-center gap-4 pt-4;
-    p {
-      @apply text-3xl text-center leading-9;
+    .sign-in__divider {
+      @apply flex flex-row items-center gap-4;
+      .divider {
+        @apply w-1/2 h-0.5 bg-grey-400 opacity-30;
+      }
+      .divider-caption {
+        @apply text-grey-400 text-xs;
+      }
+    }
+
+    .sign-in__header {
+      @apply flex flex-col w-full items-center gap-4 pt-4;
+      p {
+        @apply text-3xl text-center leading-9;
+      }
+    }
+
+    .sign-in__extra-links {
+      @apply flex flex-col items-center gap-4;
+
+      .terms-caption {
+        @apply text-grey-400 text-xs text-center leading-4;
+      }
+    }
+
+    .sign-in__buttons {
+      @apply flex flex-row gap-4 pb-4 align-middle justify-center;
     }
   }
 
-  .sign-in__extra-links {
-    @apply flex flex-col items-center gap-4;
-
-    .terms-caption {
-      @apply text-grey-400 text-xs text-center leading-4;
+  .sign-in__background {
+    @apply hidden lg:flex w-1/2 h-screen;
+    img {
+      @apply object-cover w-full h-full;
     }
-  }
-
-  .sign-in__buttons {
-    @apply flex flex-col gap-4 pb-4 border-b border-grey-900;
   }
 }

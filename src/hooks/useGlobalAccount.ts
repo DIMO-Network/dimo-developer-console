@@ -175,7 +175,7 @@ export const useGlobalAccount = () => {
         session: {
           token: '',
           expiry: passkeyAttestation ? 30 : 0,
-          authenticator: passkeyAttestation ? AuthClient.Passkey : AuthClient.Iframe,
+          authenticator: AuthClient.Iframe,
         },
       });
 

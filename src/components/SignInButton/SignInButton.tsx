@@ -20,7 +20,6 @@ export const SignInButton: FC<SignInButtonProps> = ({
   className: inputClassName = '',
   onClick,
 }) => {
-  const buttonText = isSignIn ? 'Sign In' : 'Sign Up';
   const className = classnames('icon', inputClassName);
 
   return (
@@ -30,8 +29,7 @@ export const SignInButton: FC<SignInButtonProps> = ({
       role={'sign-in-button'}
       onClick={onClick}
     >
-      <Icon className={className} />
-      {buttonText}
+      <Icon className={className} />      
     </Button>
   );
 };

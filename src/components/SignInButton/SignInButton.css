@@ -1,9 +1,9 @@
 .icon {
   &.sm {
-    @apply h-6 w-6 mr-1;
+    @apply h-6 w-6;
   }
 }
 
 .sign-in-button {
-  @apply h-12;
+  @apply h-12 w-12 rounded-full items-center justify-center; 
 }

@@ -17,6 +17,8 @@ import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 import './View.css';
 import * as Sentry from '@sentry/nextjs';
+import { TextField } from '@/components/TextField';
+import { Button } from '@/components/Button';
 
 export const View = () => {
   useErrorHandler();
@@ -64,15 +66,26 @@ export const View = () => {
   return (
     <main className="sign-in">
       <div className="sign-in__content">
+        <Image
+          src={'/images/build-on-dimo.png'}
+          alt="DIMO Logo"
+          width={176}
+          height={24}
+        />
         <article className="sign-in__form">
-          <section className="sign-in__header">
-            <Image
-              src={'/images/build-on-dimo.png'}
-              alt="DIMO Logo"
-              width={176}
-              height={24}
-            />
-            <p>Welcome back!</p>
+          <section className="sign-in__header">            
+            <p>Build with car data</p>
+          </section>
+          <section className="sign-in__input">
+            <TextField />
+            <Button disabled={true} onClick={() => {}}>
+              Continue
+            </Button>
+          </section>
+          <section className="sign-in__divider">
+            <div className="divider"></div>
+            <p className='divider-caption' >or</p>          
+            <div className="divider"></div>
           </section>
           <section className="sign-in__buttons">
             <SignInButtons isSignIn={true} disabled={false} onCTA={handleCTA} />
@@ -88,37 +101,40 @@ export const View = () => {
             </div>
             <div className="flex flex-row">
               <p className="terms-caption">
-                Having trouble logging in?{' '}
+                Trouble logging in?{' '}
                 <Anchor
                   href="mailto:developer-support@dimo.org"
                   className="grey underline"
                 >
-                  Contact our support team
-                </Anchor>
-              </p>
-            </div>
-            <div className="flex flex-row">
-              <p className="terms-caption">
-                By signing in, you are agreeing to our{' '}
-                <Anchor
-                  href="https://docs.dimo.zone/dinc/developer-terms-of-service"
-                  className="grey underline"
-                  target="_blank"
-                >
-                  terms of service
-                </Anchor>{' '}
-                and{' '}
-                <Anchor
-                  href="https://dimo.zone/legal/privacy-policy"
-                  className="grey underline"
-                  target="_blank"
-                >
-                  privacy policy
+                  Get support
                 </Anchor>
               </p>
             </div>
           </section>
         </article>
+        <div className="flex flex-row">
+          <p className="terms-caption">
+            By signing in, you are agreeing to our{' '}
+            <Anchor
+              href="https://docs.dimo.zone/dinc/developer-terms-of-service"
+              className="grey underline"
+              target="_blank"
+            >
+              terms of service
+            </Anchor>{' '}
+            and{' '}
+            <Anchor
+              href="https://dimo.zone/legal/privacy-policy"
+              className="grey underline"
+              target="_blank"
+            >
+              privacy policy
+            </Anchor>
+          </p>
+        </div>
+      </div>
+      <div className="sign-in__background">
+        <img src={'/images/car_segment.svg'} alt="DIMO Background" />
       </div>
     </main>
   );
