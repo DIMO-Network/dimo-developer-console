@@ -68,8 +68,10 @@ import {
   getFromLocalStorage,
   saveToLocalStorage,
 } from '@/utils/localStorage';
+import { isEmpty } from 'lodash';
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
+const halfHour = 30 * 60;
 
 export const useGlobalAccount = () => {
   const { getNewUserPasskey } = usePasskey();
@@ -158,28 +160,64 @@ export const useGlobalAccount = () => {
         passkeyAttestation = attestation;
       }
 
-      const response = await createSubOrganization({
+      const organization = await createSubOrganization({
         email: email,
         attestation: passkeyAttestation,
         encodedChallenge: challenge,
         deployAccount: true,
       });
 
-      if (!response?.subOrganizationId) {
+      if (!organization?.subOrganizationId) {
         console.error('Error creating sub organization');
         return {} as ISubOrganization;
       }
 
+      let turnkeyWalletAddress: `0x${string}` = `0x${'0'.repeat(40)}`;
+      let kernelAccountAddress: `0x${string}` = `0x${'0'.repeat(40)}`;
+      const key = generateP256KeyPair();
+      const nowInSeconds = Math.ceil(Date.now() / 1000);
+      let authToken = '';
+      if (passkeyAttestation) {
+        const targetPubHex = key.publicKeyUncompressed;
+
+        const { credentialBundle } = await passkeyClient.createReadWriteSession({
+          organizationId: organization.subOrganizationId,
+          targetPublicKey: targetPubHex,
+          expirationSeconds: (nowInSeconds + halfHour).toString(),
+        });
+
+        if (isEmpty(credentialBundle)) {
+          console.error('Error creating sub organization');
+          return {} as ISubOrganization;
+        }
+
+        saveToLocalStorage(EmbeddedKey, key.privateKey);
+
+        const { walletAddress, smartContractAddress } = await getWalletAddress({
+          subOrganizationId: organization.subOrganizationId,
+          authKey: credentialBundle,
+        });
+
+        turnkeyWalletAddress = walletAddress as `0x${string}`;
+        kernelAccountAddress = smartContractAddress as `0x${string}`;
+        authToken = credentialBundle;
+      }
+
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
-        organization: { ...response, email },
+        organization: {
+          ...organization,
+          email,
+          walletAddress: turnkeyWalletAddress,
+          smartContractAddress: kernelAccountAddress,
+        },
         session: {
-          token: '',
-          expiry: passkeyAttestation ? 30 : 0,
-          authenticator: passkeyAttestation ? AuthClient.Passkey : AuthClient.Iframe,
+          token: authToken,
+          expiry: nowInSeconds + halfHour,
+          authenticator: AuthClient.Iframe,
         },
       });
 
-      return response;
+      return organization;
     } catch (e) {
       Sentry.captureException(e);
       console.error('Error creating sub organization', e);
@@ -541,6 +579,36 @@ export const useGlobalAccount = () => {
     });
   };
 
+  const getWalletAddress = async ({
+    subOrganizationId,
+    authKey,
+  }: {
+    subOrganizationId: string;
+    authKey: string;
+  }) => {
+    const client = getTurnkeyClient(AuthClient.Iframe, authKey);
+    const { wallets } = await client.getWallets({
+      organizationId: subOrganizationId,
+    });
+    const { account } = await client.getWalletAccount({
+      organizationId: subOrganizationId,
+      walletId: wallets[0].walletId,
+    });
+
+    const kernelClient = await getKernelClient({
+      organizationInfo: {
+        subOrganizationId,
+        walletAddress: account.address as `0x${string}`,
+      } as ISubOrganization,
+      authClient: AuthClient.Iframe,
+      authKey,
+    });
+    return {
+      walletAddress: account.address as `0x${string}`,
+      smartContractAddress: kernelClient!.account.address as `0x${string}`,
+    };
+  };
+
   const sponsorUserOperation = async ({
     userOperation,
     provider,
@@ -623,6 +691,7 @@ export const useGlobalAccount = () => {
     getKernelClient,
     handleOnChainError,
     getNeededDimoAmountForDcx,
+    getWalletAddress,
   };
 };
 

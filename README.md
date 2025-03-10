@@ -26,9 +26,11 @@ Before you begin, ensure you have the following installed on your machine:
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
 
 ### Set Up Google and GitHub OAuth Applications
+
 Log in happens through one of two OAuth providers: Google or Github.
 
 1. Create a Google OAuth App:
+
 - Go to the [Google Developer Console](https://console.cloud.google.com/welcome).
 - Create a new project (if you don’t already have one).
 - Navigate to OAuth consent screen and configure it.
@@ -40,6 +42,7 @@ Log in happens through one of two OAuth providers: Google or Github.
 - Note down your Client ID and Client Secret. These will be used in your environment variables.
 
 2. Create a GitHub OAuth App:
+
 - Go to [GitHub Developer Settings](https://github.com/settings/developers).
 - Under OAuth Apps, click New OAuth App.
 - Set the Authorization callback URL to http://localhost:3000/api/auth/callback/github.
@@ -47,9 +50,11 @@ Log in happens through one of two OAuth providers: Google or Github.
 - Note down your Client ID and Client Secret. These will be used in your environment variables.
 
 ### Run the Dev Console API locally
+
 Follow the setup steps [here](https://github.com/DIMO-Network/dimo-developer-console-api/tree/master?tab=readme-ov-file#developer-console-api) to run the Dev Console API locally.
 
 ### Run the Accounts API locally
+
 Follow the setup steps [here](https://github.com/DIMO-Network/accounts?tab=readme-ov-file#dimo-waas) to run the Accounts API locally.
 
 ### Installation
@@ -82,7 +87,7 @@ GITHUB_CLIENT_SECRET=<YOUR_SECRET>
 NEXTAUTH_SECRET=<YOUR_SECRET>
 NEXTAUTH_URL="http://localhost:3000/"
 # TODO - potentially delete JWT_PRIVATE_KEY, since it's not read
-JWT_PRIVATE_KEY=<YOUR_SECRET> # Should be the same as the NEXTAUTH_SECRET 
+JWT_PRIVATE_KEY=<YOUR_SECRET> # Should be the same as the NEXTAUTH_SECRET
 VERCEL_ENV="development"
 STRIPE_API_KEY=<YOUR_SECRET>
 ```
@@ -124,8 +129,8 @@ yarn start
 ```
 
 ## Project Structure
-This project is built with Next.js, which requires specific folder structures and file-naming conventions to structure the application. To understand this, read the docs at https://nextjs.org.
 
+This project is built with Next.js, which requires specific folder structures and file-naming conventions to structure the application. To understand this, read the docs at https://nextjs.org.
 
 A brief description of the main folders and files in the project:
 
