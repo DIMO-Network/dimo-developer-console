@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
-import { useAccountInformation } from '@/hooks';
+import { useAccountInformation, useGlobalAccount } from '@/hooks';
 import { AccountInformationModal } from '@/components/AccountInformationModal';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 import { otpLogin, initOtpLogin, getUserSubOrganization } from '@/services/globalAccount';
@@ -44,6 +44,7 @@ export const withGlobalAccounts = <P extends object>(
   const HOC: React.FC<P> = (props) => {
     const router = useRouter();
     const { data: session } = useSession();
+    const { getWalletAddress } = useGlobalAccount();
     const { user: { role = '' } = {} } = session ?? {};
     const { setNotification } = useContext(NotificationContext);
     const [otpId, setOtpId] = useState<string>('');
@@ -93,16 +94,26 @@ export const withGlobalAccounts = <P extends object>(
 
           if (isEmpty(credentialBundle)) return;
 
-          const nowInSeconds = Date.now() / 1000;
+          saveToLocalStorage(EmbeddedKey, key.privateKey);
+
+          const { walletAddress, smartContractAddress } = await getWalletAddress({
+            subOrganizationId: organization.subOrganizationId,
+            authKey: credentialBundle,
+          });
+
+          const nowInSeconds = Math.ceil(Date.now() / 1000);
           const currentSession = {
-            organization: organization,
+            organization: {
+              ...organization,
+              walletAddress,
+              smartContractAddress,
+            },
             session: {
               token: credentialBundle,
               expiry: nowInSeconds + fifteenMinutes,
               authenticator: AuthClient.Iframe,
             },
           };
-          saveToLocalStorage(EmbeddedKey, key.privateKey);
           saveToSession<IGlobalAccountSession>(GlobalAccountSession, currentSession);
           setHasSession(true);
           setResolvers((prev) => {
@@ -129,20 +140,36 @@ export const withGlobalAccounts = <P extends object>(
     const loginWithPasskey = async (email: string) => {
       try {
         const organization = await getUserSubOrganization(email);
-        // a bit hacky but works for now
-        const signInResponse = await passkeyClient.login({
+
+        const key = generateP256KeyPair();
+        const targetPubHex = key.publicKeyUncompressed;
+        const nowInSeconds = Math.ceil(Date.now() / 1000);
+
+        const { credentialBundle } = await passkeyClient.createReadWriteSession({
           organizationId: organization.subOrganizationId,
+          targetPublicKey: targetPubHex,
+          expirationSeconds: (nowInSeconds + halfHour).toString(),
         });
 
-        if (isEmpty(signInResponse.organizationId)) return;
+        if (isEmpty(credentialBundle)) return;
 
-        const nowInSeconds = Date.now() / 1000;
+        saveToLocalStorage(EmbeddedKey, key.privateKey);
+
+        const { walletAddress, smartContractAddress } = await getWalletAddress({
+          subOrganizationId: organization.subOrganizationId,
+          authKey: credentialBundle,
+        });
+
         saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
-          organization: organization,
+          organization: {
+            ...organization,
+            walletAddress,
+            smartContractAddress,
+          },
           session: {
-            token: signInResponse.session,
+            token: credentialBundle,
             expiry: nowInSeconds + halfHour,
-            authenticator: AuthClient.Passkey,
+            authenticator: AuthClient.Iframe,
           },
         });
 
@@ -175,7 +202,7 @@ export const withGlobalAccounts = <P extends object>(
       )
         return false;
 
-      const nowInSeconds = Date.now() / 1000;
+      const nowInSeconds = Math.ceil(Date.now() / 1000);
       return currentSession.session.expiry > nowInSeconds;
     };
 
@@ -214,7 +241,7 @@ export const withGlobalAccounts = <P extends object>(
       }, []);
 
     useEffect(() => {
-      if(!role) return;
+      if (!role) return;
       if (isCollaborator(role)) {
         setHasSession(true);
         return;
