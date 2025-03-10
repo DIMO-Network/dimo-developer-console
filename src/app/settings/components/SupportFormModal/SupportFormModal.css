@@ -1,0 +1,15 @@
+.support-form-content {
+  @apply flex flex-col items-center gap-2 w-full;
+
+  .support-form-header {
+    @apply flex flex-col gap-2 text-center relative pt-8 pb-4 px-2 font-bold;
+
+    .description {
+      @apply text-xs text-white/50 w-full h-full py-4;
+    }
+  }
+
+  .support-form-action {
+    @apply flex flex-col w-full;
+  }
+}
