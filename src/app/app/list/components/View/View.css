@@ -2,10 +2,10 @@
   @apply flex flex-col gap-4;
 
   .welcome-message {
-    @apply flex flex-col gap-2;
+    @apply flex flex-row gap-1 pb-2 border-b-cta-default border-b;
 
     .title {
-      @apply text-3xl;
+      @apply text-base text-text-secondary font-medium;
     }
   }
 }

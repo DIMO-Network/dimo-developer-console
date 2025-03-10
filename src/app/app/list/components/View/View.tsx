@@ -4,13 +4,14 @@ import { type FC } from 'react';
 import { Loader } from '@//components/Loader';
 import { AppList } from '@/app/app/list/components/AppList';
 import { Banner } from '@/app/app/list/components/Banner';
-import { useOnboarding } from '@/hooks';
+import {useOnboarding, useUser} from '@/hooks';
+import Image from "next/image";
 
 import './View.css';
 
 export const View: FC = () => {
   const { isLoading, apps, balance } = useOnboarding();
-
+  const {user} = useUser();
   if (isLoading) {
     return <Loader isLoading={true} />;
   }
@@ -18,7 +19,9 @@ export const View: FC = () => {
   return (
     <div className="app-list-page">
       <div className="welcome-message">
-        <p className="title">Welcome to DIMO Developer Console</p>
+        <Image src={"/images/waving_hand.svg"} width={16} height={16} alt={"waving-hand"}/>
+        {/*<Image src={'/images/waving_hand.svg'} alt={'hand-wave'} />*/}
+        <p className="title">Welcome {user?.name.slice(0, user.name?.indexOf(' '))}</p>
       </div>
       {!(balance && apps.length) && <Banner />}
       <AppList apps={apps}/>
