@@ -1,7 +1,10 @@
 import {CheckCircleIcon} from "@heroicons/react/16/solid";
-import React from "react";
+import React, {FC} from "react";
 
-export const ActionCompletedRow = ({ text }: {text: string; }) => {
+interface Props {
+  text: string;
+}
+export const ActionCompletedRow: FC<Props> = ({ text }) => {
   return (
     <div className={"flex flex-row items-center gap-2"}>
       <CheckCircleIcon
