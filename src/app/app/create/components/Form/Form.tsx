@@ -221,7 +221,6 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
       scope: 'production',
     });
     setNotification('New app created!', 'Success', 'success');
-    await getApps();
     onSuccess();
   };
 

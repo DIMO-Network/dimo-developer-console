@@ -93,6 +93,7 @@ export const useOnboarding = () => {
     handleCreateApp,
     handleOpenBuyCreditsModal,
     workspace,
+    loadAppsAndWorkspace,
   };
 };
 

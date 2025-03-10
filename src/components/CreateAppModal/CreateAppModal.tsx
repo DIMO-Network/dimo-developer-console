@@ -11,7 +11,11 @@ interface Props {
   handleIsOpen: (e: boolean) => void;
 }
 export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
-  const { isLoading, workspace } = useOnboarding();
+  const { workspace, loadAppsAndWorkspace } = useOnboarding();
+  const handleSuccess = async () => {
+    await loadAppsAndWorkspace();
+    handleIsOpen(false);
+  };
 
   return (
     <Modal isOpen={isOpen} setIsOpen={handleIsOpen} className="create-app-modal">
@@ -22,7 +26,7 @@ export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
           </Title>
         </div>
         <div className={"flex flex-1 w-full py-6"}>
-          <Form workspace={workspace} onSuccess={() => handleIsOpen(false)}/>
+          <Form workspace={workspace} onSuccess={handleSuccess}/>
         </div>
       </div>
     </Modal>
