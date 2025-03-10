@@ -29,7 +29,7 @@ export const SignInButton: FC<SignInButtonProps> = ({
       role={'sign-in-button'}
       onClick={onClick}
     >
-      <Icon className={className} />      
+      <Icon className={className} />
     </Button>
   );
 };
