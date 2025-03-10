@@ -230,8 +230,8 @@ export const Form: FC<IProps> = ({ workspace }) => {
     <>
       <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
       <form onSubmit={handleSubmit(onSubmit)}>
-        {(!workspace || Object.keys(workspace).length === 0) && (
-          <Label htmlFor="namespace" className="text-xs text-medium">
+        {(!workspace || Object.keys(workspace).length === 0 || true) && (
+          <Label htmlFor="namespace" className="text-sm font-medium">
             Project Namespace
             <TextField
               type="text"
@@ -248,13 +248,13 @@ export const Form: FC<IProps> = ({ workspace }) => {
             {errors?.workspace?.name && (
               <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
             )}
-            <p className="text-sm text-grey-200">
-              This is the namespace used across all your apps
+            <p className="text-sm text-text-secondary font-normal">
+              This is the namespace used across all your apps. It is a public name visible to other developers and users in the ecosystem.
             </p>
           </Label>
         )}
-        <Label htmlFor="name" className="text-xs text-medium">
-          Name
+        <Label htmlFor="name" className="text-sm font-medium">
+          Application Name
           <TextField
             type="text"
             placeholder="Application name"
@@ -270,16 +270,25 @@ export const Form: FC<IProps> = ({ workspace }) => {
           {errors?.app?.name && (
             <TextError errorMessage={errors?.app?.name?.message ?? ''} />
           )}
-          <p className="text-sm text-grey-200">This name is for your reference only</p>
+          <p className="text-sm text-text-secondary font-normal">This name is for your reference only</p>
         </Label>
-        <div className="flex flex-col pt-4">
+        <div className="flex flex-col pt-4 gap-4">
           <Button
             type="submit"
-            className="primary"
+            className="white"
             role="continue-button"
             loading={isLoading}
           >
             Create application
+          </Button>
+          <Button
+            type="reset"
+            className="dark"
+            role="cancel-button"
+            loading={isLoading}
+            onClick={() => {}}
+          >
+            Cancel
           </Button>
         </div>
       </form>
