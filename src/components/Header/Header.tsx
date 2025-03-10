@@ -15,7 +15,7 @@ import * as Sentry from '@sentry/nextjs';
 import './Header.css';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 import {usePathname} from "next/navigation";
-import {pageTitles} from "@/config/navigation";
+import {getPageTitle} from "@/config/navigation";
 
 export const Header: FC = () => {
   const { hasSession } = useContext(GlobalAccountAuthContext);
@@ -52,7 +52,7 @@ export const Header: FC = () => {
 
   return (
     <header className="header">
-      <p className="page-title">{pageTitles[pathname] ?? ''}</p>
+      <p className="page-title">{getPageTitle(pathname) ?? ''}</p>
       <div className="user-information" role="user-information">
         <button
           title="Account Information"
@@ -82,7 +82,6 @@ export const Header: FC = () => {
           </button>
         </div>
         <UserAvatar name={name ?? ''} />
-
       </div>
     </header>
   );
