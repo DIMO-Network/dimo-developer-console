@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import * as Sentry from '@sentry/nextjs';
-import { useState, type FC } from 'react';
+import {useState, type FC, useContext} from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { encodeFunctionData } from 'viem';
 import { useSession } from 'next-auth/react';
@@ -14,9 +14,12 @@ import { Toggle } from '@/components/Toggle';
 import { useContractGA, useOnboarding } from '@/hooks';
 import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 import { IGlobalAccountSession } from '@/types/wallet';
+import {Button} from "@/components/Button";
 
 import configuration from '@/config';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
+import {ContentCopyIcon} from "@/components/Icons";
+import {NotificationContext} from "@/context/notificationContext";
 
 interface IProps {
   list: IRedirectUri[] | undefined;
@@ -30,6 +33,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const { processTransactions } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
+  const { setNotification } = useContext(NotificationContext);
 
   const recordsToShow = list.filter(({ deleted }) => !deleted);
 
@@ -109,17 +113,39 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
     }
   };
 
+  const handleCopy = (value: string) => {
+    void navigator.clipboard.writeText(value);
+    setNotification('Redirect URI copied!', 'Success', 'info');
+  };
+
+  const renderCopyRedirectUriAction = ({ id, uri }: IRedirectUri) => {
+    return (
+      <Button
+        className={"table-action-button"}
+        title="Copy Redirect URI"
+        key={`copy-redirect-uri-action-${id}`}
+        type={"button"}
+        onClick={() => handleCopy(uri)}
+        >
+        <ContentCopyIcon
+          className="w-4 h-4 fill-text-secondary cursor-pointer"
+        />
+      </Button>
+    );
+  };
+
   const renderDeleteRedirectUriAction = ({ id, uri }: IRedirectUri) => {
     return (
       isOwner(role) && (
-        <button
+        <Button
+          className={"table-action-button"}
           title="Delete redirect URI"
           type="button"
           onClick={() => handleDeleteUri(id as string, uri)}
           key={`delete-action-${id}`}
         >
           <TrashIcon className="w-5 h-5 cursor-pointer" />
-        </button>
+        </Button>
       )
     );
   };
@@ -129,9 +155,9 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
       {recordsToShow.length > 0 && (
         <>
           <Table
-            columns={[{ name: 'uri' }]}
+            columns={[{ name: 'uri', label: 'Authorized URIs' }, {name: 'status', label: 'Status', render: renderToggleStatus}]}
             data={recordsToShow}
-            actions={[renderToggleStatus, renderDeleteRedirectUriAction]}
+            actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
           />
           <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
         </>

@@ -1,11 +1,11 @@
 .redirect-uri-form {
-  @apply flex flex-col gap-4;
+  @apply flex flex-col;
 
   form {
-    @apply grid grid-cols-12 gap-6 w-full items-center;
+    @apply flex flex-col md:flex-row flex-1 w-full gap-2.5 md:items-center;
 
     .field {
-      @apply flex flex-col col-span-10 h-16 justify-center;
+      @apply flex flex-col flex-[0.9] justify-center;
     }
 
     .cta {
