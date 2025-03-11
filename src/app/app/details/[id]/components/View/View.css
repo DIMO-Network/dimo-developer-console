@@ -16,8 +16,4 @@
       @apply col-span-10;
     }
   }
-
-  .signers-table {
-    @apply pb-6;
-  }
 }

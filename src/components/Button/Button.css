@@ -47,6 +47,10 @@
     @apply bg-cta-default text-white hover:border-white border-transparent border-2;
   }
 
+  &.table-action-button {
+    @apply bg-transparent text-white border border-surface-raised hover:border-white
+  }
+
   &.error {
     @apply bg-red-500;
 

@@ -56,21 +56,24 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     await processTransactions(transaction);
   };
 
-  const renderWithCopy = (columnName: string, data: Record<string, string>) => {
+  const renderColumn = (columnName: string, data: ISigner) => {
     const value = String(data[columnName]).replace('0x', '');
     return (
-      <p className="flex flex-row">
-        {maskStringV2(value, {
-          maskWith: '*',
-          unmaskedEndCharacters: 2,
-          unmaskedStartCharacters: 2,
-          maxMaskedCharacters: 20,
-        })}
-        <ContentCopyIcon
-          className="w-4 h-4 ml-2 fill-white/50 cursor-pointer"
-          onClick={() => handleCopy(value)}
-        />
-      </p>
+      <div className={"bg-surface-raised rounded-xl px-3 py-2 inline-flex flex-row items-center gap-2.5"}>
+          <p className="text-base text-text-secondary">
+            {maskStringV2(value, {
+              maskWith: '*',
+              unmaskedEndCharacters: 2,
+              unmaskedStartCharacters: 2,
+              maxMaskedCharacters: 20,
+            })}
+          </p>
+          <ContentCopyIcon
+            className="w-4 h-4 fill-text-secondary cursor-pointer"
+            onClick={() => handleCopy(value)}
+          />
+      </div>
+
     );
   };
 
@@ -81,8 +84,8 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
         label: 'Testing the application',
         status: 'loading',
       });
-      const { uri: domain = '' } =
-        app.RedirectUris?.find(({ deleted }) => !deleted) || {};
+      const {uri: domain = ''} =
+      app.RedirectUris?.find(({deleted}) => !deleted) || {};
       if (!domain) {
         return setLoadingStatus({
           label: 'You need to set at least one domain',
@@ -104,7 +107,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const renderTestAuthenticationAction = (signer: ISigner) => {
     return (
       <Button
-        className="white-outline px-4"
+        className="table-action-button"
         onClick={() => handleTestAuthentication(signer)}
         key={`test-action-${signer.id}`}
       >
@@ -116,14 +119,15 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const renderDeleteSignerAction = ({ id = '', address: signer = '' }: ISigner) => {
     return (
       isOwner(role) && (
-        <button
+        <Button
+          className={"table-action-button"}
           title="Delete API key"
           type="button"
           onClick={() => handleDelete(id, signer)}
           key={`delete-action-${id}`}
         >
           <TrashIcon className="w-5 h-5" />
-        </button>
+        </Button>
       )
     );
   };
@@ -160,7 +164,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
               {
                 name: 'api_key',
                 label: 'API Key',
-                render: (item) => renderWithCopy('api_key', item),
+                render: (item: ISigner) => renderColumn('api_key', item),
               },
             ]}
             data={app.Signers.filter(({ deleted }) => !deleted)}

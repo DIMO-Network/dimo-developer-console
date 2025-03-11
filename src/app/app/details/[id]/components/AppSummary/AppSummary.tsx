@@ -20,7 +20,7 @@ export const AppSummary: FC<IProps> = ({
 
   const handleCopy = () => {
     void navigator.clipboard.writeText(clientId);
-    setNotification('Client ID copied!', 'Copying', 'info');
+    setNotification('Client ID copied!', 'Success', 'info');
   };
 
   return (
