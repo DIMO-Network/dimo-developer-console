@@ -2,10 +2,10 @@
   @apply flex flex-col gap-2;
 
   .client-id-content {
-    @apply flex flex-row gap-6;
+    @apply flex flex-col md:flex-row md:items-center gap-2;
   }
 
   .client-id-description {
-    @apply text-base text-white/50;
+    @apply text-base text-text-secondary font-medium
   }
 }

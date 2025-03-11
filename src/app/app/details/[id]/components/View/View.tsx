@@ -1,33 +1,34 @@
 'use client';
-import { get } from 'lodash';
+import {get} from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
-import { useEffect, useState, useContext } from 'react';
-import { useSession } from 'next-auth/react';
-import { encodeFunctionData } from 'viem';
-import { useRouter } from 'next/navigation';
+import React, {useContext, useEffect, useState} from 'react';
+import {useSession} from 'next-auth/react';
+import {encodeFunctionData} from 'viem';
+import {useRouter} from 'next/navigation';
 
-import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
-import { BackButton } from '@/components/BackButton';
-import { Button } from '@/components/Button';
-import { createMySigner, deleteApp, getAppByID } from '@/actions/app';
-import { generateWallet } from '@/utils/wallet';
-import { IApp } from '@/types/app';
-import { isOwner } from '@/utils/user';
-import { Loader } from '@/components/Loader';
-import { NotificationContext } from '@/context/notificationContext';
-import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriForm';
-import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
-import { SignerList } from '@/app/app/details/[id]/components/SignerList';
-import { Title } from '@/components/Title';
-import { useContractGA, useOnboarding } from '@/hooks';
-import { IGlobalAccountSession } from '@/types/wallet';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import {AppSummary} from '@/app/app/details/[id]/components/AppSummary';
+import {BackButton} from '@/components/BackButton';
+import {Button} from '@/components/Button';
+import {createMySigner, deleteApp, getAppByID} from '@/actions/app';
+import {generateWallet} from '@/utils/wallet';
+import {IApp} from '@/types/app';
+import {isOwner} from '@/utils/user';
+import {Loader} from '@/components/Loader';
+import {NotificationContext} from '@/context/notificationContext';
+import {RedirectUriForm} from '@/app/app/details/[id]/components/RedirectUriForm';
+import {RedirectUriList} from '@/app/app/details/[id]/components/RedirectUriList';
+import {SignerList} from '@/app/app/details/[id]/components/SignerList';
+import {Title} from '@/components/Title';
+import {useContractGA, useOnboarding} from '@/hooks';
+import {IGlobalAccountSession} from '@/types/wallet';
+import {getFromSession, GlobalAccountSession} from '@/utils/sessionStorage';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
 
 import './View.css';
+import {KeyIcon} from "@heroicons/react/20/solid";
 
 export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [app, setApp] = useState<IApp>();
@@ -84,7 +85,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
     const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
-    const transaction = {
+    return {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
       data: encodeFunctionData({
@@ -93,14 +94,13 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         args: [workspace?.token_id ?? 0, signer],
       }),
     };
-    return transaction;
   };
 
   const handleRemoveUri = (uri: string) => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
     const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
-    const transaction = {
+    return {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
       data: encodeFunctionData({
@@ -109,7 +109,6 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         args: [workspace?.token_id ?? 0, false, uri],
       }),
     };
-    return transaction;
   };
 
   const handleGenerateSigner = async () => {
@@ -190,25 +189,29 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
       {!isLoadingPage && (
         <>
           <div className="signers-content">
-            <Title component="h2">Signers</Title>
-            {isOwner(role) && (
-              <div className="generate-signer">
-                <Button
-                  className="primary-outline px-4 w-full"
-                  loading={isLoading}
-                  loadingColor="primary"
-                  onClick={() => handleGenerateSigner()}
-                >
-                  Generate Key
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="signers-table">
-            {app && <SignerList app={app} refreshData={refreshAppDetails} />}
+            <div className={"flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center"}>
+              <Title component="h2" className={"text-xl"}>API Keys</Title>
+              {isOwner(role) && (
+                <div className="generate-signer">
+                  <Button
+                    className="dark with-icon px-4"
+                    loading={isLoading}
+                    loadingColor="primary"
+                    onClick={() => handleGenerateSigner()}
+                  >
+                    <KeyIcon className="w-4 h-4" />
+                    Generate Key
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="signers-table">
+              {app && <SignerList app={app} refreshData={refreshAppDetails}/>}
+            </div>
           </div>
           <div className="redirect-uri-content">
-            <Title component="h2">Authorized Redirect URIs</Title>
+            <Title component="h2" className={"text-xl"}>Authorized Redirect URIs</Title>
             {isOwner(role) && app && (
               <RedirectUriForm
                 appId={app!.id!}

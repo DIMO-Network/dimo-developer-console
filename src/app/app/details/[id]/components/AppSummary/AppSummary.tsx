@@ -25,17 +25,18 @@ export const AppSummary: FC<IProps> = ({
 
   return (
     <div className="summary">
-      <Title className="text-3xl">{name}</Title>
+      <Title className="text-xl font-black !leading-7">{name}</Title>
       <p className="subtitle">{scope}</p>
+
       <div className="client-id-content">
-        <p className="client-id-description">
-          <strong>Client ID: </strong>
-          {clientId}
-        </p>
-        <ContentCopyIcon
-          className="w5 h-5 fill-white/50 cursor-pointer"
-          onClick={handleCopy}
-        />
+        <p className="client-id-description">Client ID</p>
+        <div className={"py-2 px-3 bg-surface-raised flex flex-row items-center gap-2.5 rounded-2xl flex-wrap text-wrap"}>
+          <p className={"text-text-secondary text-base"}> {clientId}</p>
+          <ContentCopyIcon
+            className="w5 h-5 fill-white/50 cursor-pointer"
+            onClick={handleCopy}
+          />
+        </div>
       </div>
     </div>
   );
