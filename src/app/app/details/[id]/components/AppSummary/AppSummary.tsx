@@ -1,5 +1,5 @@
 'use client';
-import React, { useContext, type FC } from 'react';
+import React, {useContext, type FC} from 'react';
 
 import { IApp } from '@/types/app';
 import { Title } from '@/components/Title';
@@ -12,10 +12,13 @@ import {TrashIcon} from "@heroicons/react/24/outline";
 interface IProps {
   app: IApp;
   isOwner: boolean;
+  handleDelete: () => void;
 }
 
 export const AppSummary: FC<IProps> = ({
   app: { name, scope, Workspace: workspace = {} },
+  isOwner,
+  handleDelete
 }) => {
   const { setNotification } = useContext(NotificationContext);
   const { client_id: clientId = '' } = workspace;
@@ -24,7 +27,6 @@ export const AppSummary: FC<IProps> = ({
     void navigator.clipboard.writeText(clientId);
     setNotification('Client ID copied!', 'Success', 'info');
   };
-
   return (
     <div className={"flex lg:flex-row flex-col justify-between"}>
       <div className="summary">
@@ -42,12 +44,14 @@ export const AppSummary: FC<IProps> = ({
           </div>
         </div>
       </div>
-      <div className="extra-actions">
-        <Button className="error-outline" onClick={() => {}}>
-          <TrashIcon className="w-4 h-4"/>
-          Delete application
-        </Button>
-      </div>
+      {isOwner && (
+        <div className="extra-actions">
+          <Button className="error-outline" onClick={handleDelete}>
+            <TrashIcon className="w-4 h-4"/>
+            Delete application
+          </Button>
+        </div>
+      )}
     </div>
 
   );

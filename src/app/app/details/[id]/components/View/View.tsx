@@ -29,7 +29,6 @@ import configuration from '@/config';
 
 import './View.css';
 import {KeyIcon} from "@heroicons/react/20/solid";
-import {TrashIcon} from "@heroicons/react/24/outline";
 
 export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [app, setApp] = useState<IApp>();
@@ -70,7 +69,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
     const organizationInfo = gaSession?.organization;
     if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
-    const transaction = {
+    return {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
       data: encodeFunctionData({
@@ -79,7 +78,6 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         args: [workspace?.token_id ?? 0, signer],
       }),
     };
-    return transaction;
   };
 
   const handleDisableSigner = (signer: string) => {
@@ -184,7 +182,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     <div className="page">
       <div className="summary">
         <BackButton />
-        {app && <AppSummary app={app} isOwner={isOwner(role)} />}
+        {app && <AppSummary app={app} isOwner={isOwner(role)} handleDelete={handleDeleteApplication} />}
       </div>
       {isLoadingPage && <Loader isLoading={true} />}
       {!isLoadingPage && (
@@ -230,15 +228,6 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               )}
             </div>
           </div>
-
-          {isOwner(role) && (
-            <div className="extra-actions">
-              <Button className="error-outline" onClick={handleDeleteApplication}>
-                <TrashIcon className="w-4 h-4" />
-                Delete application
-              </Button>
-            </div>
-          )}
         </div>
       )}
     </div>
