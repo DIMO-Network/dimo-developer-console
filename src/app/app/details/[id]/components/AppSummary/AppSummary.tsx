@@ -1,15 +1,17 @@
 'use client';
-import { useContext, type FC } from 'react';
+import React, { useContext, type FC } from 'react';
 
 import { IApp } from '@/types/app';
 import { Title } from '@/components/Title';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
-
 import './AppSummary.css';
+import {Button} from "@/components/Button";
+import {TrashIcon} from "@heroicons/react/24/outline";
 
 interface IProps {
   app: IApp;
+  isOwner: boolean;
 }
 
 export const AppSummary: FC<IProps> = ({
@@ -24,7 +26,7 @@ export const AppSummary: FC<IProps> = ({
   };
 
   return (
-    <div className={"flex flex-row justify-between"}>
+    <div className={"flex lg:flex-row flex-col justify-between"}>
       <div className="summary">
         <Title className="text-xl font-black !leading-7">{name}</Title>
         <p className="subtitle">{scope}</p>
@@ -39,6 +41,12 @@ export const AppSummary: FC<IProps> = ({
             />
           </div>
         </div>
+      </div>
+      <div className="extra-actions">
+        <Button className="error-outline" onClick={() => {}}>
+          <TrashIcon className="w-4 h-4"/>
+          Delete application
+        </Button>
       </div>
     </div>
 

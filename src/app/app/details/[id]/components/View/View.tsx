@@ -29,6 +29,7 @@ import configuration from '@/config';
 
 import './View.css';
 import {KeyIcon} from "@heroicons/react/20/solid";
+import {TrashIcon} from "@heroicons/react/24/outline";
 
 export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [app, setApp] = useState<IApp>();
@@ -170,7 +171,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         setNotification('The transaction was denied', 'Oops...', 'error');
       else
         setNotification(
-          'Something went wrong while generating the API key',
+          'Something went wrong while deleting the app',
           'Oops...',
           'error',
         );
@@ -183,7 +184,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     <div className="page">
       <div className="summary">
         <BackButton />
-        {app && <AppSummary app={app} />}
+        {app && <AppSummary app={app} isOwner={isOwner(role)} />}
       </div>
       {isLoadingPage && <Loader isLoading={true} />}
       {!isLoadingPage && (
@@ -232,7 +233,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
 
           {isOwner(role) && (
             <div className="extra-actions">
-              <Button className="error-simple" onClick={handleDeleteApplication}>
+              <Button className="error-outline" onClick={handleDeleteApplication}>
+                <TrashIcon className="w-4 h-4" />
                 Delete application
               </Button>
             </div>
