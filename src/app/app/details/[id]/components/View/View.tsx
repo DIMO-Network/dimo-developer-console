@@ -187,7 +187,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
       </div>
       {isLoadingPage && <Loader isLoading={true} />}
       {!isLoadingPage && (
-        <>
+        <div className={"flex flex-col gap-6"}>
           <div className="signers-content">
             <div className={"flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center"}>
               <Title component="h2" className={"text-xl"}>API Keys</Title>
@@ -210,21 +210,26 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               {app && <SignerList app={app} refreshData={refreshAppDetails}/>}
             </div>
           </div>
-          <div className="redirect-uri-content">
-            <Title component="h2" className={"text-xl"}>Authorized Redirect URIs</Title>
-            {isOwner(role) && app && (
-              <RedirectUriForm
-                appId={app!.id!}
-                refreshData={refreshAppDetails}
-                list={app?.RedirectUris}
-              />
-            )}
+          <div className={"signers-content"}>
+            <div className="redirect-uri-content">
+              <Title component="h2" className={"text-xl"}>Authorized Redirect URIs</Title>
+              {isOwner(role) && app && (
+                <div className={"mt-4"}>
+                  <RedirectUriForm
+                    appId={app!.id!}
+                    refreshData={refreshAppDetails}
+                    list={app?.RedirectUris}
+                  />
+                </div>
+              )}
+            </div>
+            <div className="signers-table">
+              {app && (
+                <RedirectUriList list={app?.RedirectUris} refreshData={refreshAppDetails}/>
+              )}
+            </div>
           </div>
-          <div className="signers-table">
-            {app && (
-              <RedirectUriList list={app?.RedirectUris} refreshData={refreshAppDetails} />
-            )}
-          </div>
+
           {isOwner(role) && (
             <div className="extra-actions">
               <Button className="error-simple" onClick={handleDeleteApplication}>
@@ -232,7 +237,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               </Button>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

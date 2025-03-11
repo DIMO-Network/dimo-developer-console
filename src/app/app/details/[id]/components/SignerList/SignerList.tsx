@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import { maskStringV2 } from 'maskdata';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { useState, type FC } from 'react';
+import {useState, type FC, useContext} from 'react';
 import { encodeFunctionData } from 'viem';
 import { useSession } from 'next-auth/react';
 
@@ -20,6 +20,7 @@ import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
 import * as Sentry from '@sentry/nextjs';
+import {NotificationContext} from "@/context/notificationContext";
 
 interface IProps {
   app: IApp;
@@ -33,9 +34,11 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const { processTransactions } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
+  const { setNotification } = useContext(NotificationContext);
 
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
+    setNotification('API Key copied', 'Success!', 'info');
   };
 
   const handleDisableSigner = async (signer: string) => {
