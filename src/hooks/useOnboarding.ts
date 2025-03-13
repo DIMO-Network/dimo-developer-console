@@ -3,7 +3,6 @@ import { type CTA } from '@/app/app/list/components/Banner';
 
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 
 import { CreditsContext } from '@/context/creditsContext';
 import { getApps } from '@/actions/app';
@@ -24,8 +23,8 @@ export const useOnboarding = () => {
   const router = useRouter();
   const { getDcxBalance, getDimoBalance } = useContractGA();
   const { setIsOpen } = useContext(CreditsContext);
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
+  // const { data: session } = useSession();
+  // const { user: { role = '' } = {} } = session ?? {};
   const { hasSession } = useContext(GlobalAccountAuthContext);
 
   const loadAppsAndWorkspace = async (): Promise<void> => {
@@ -37,10 +36,10 @@ export const useOnboarding = () => {
       const currentWorkspace = await getWorkspace();
       setWorkspace(currentWorkspace);
 
-      if (isOwner(role)) {
-        const dcxBalance = await getDcxBalance();
-        setBalance(dcxBalance);
-      }
+      // if (isOwner(role)) {
+      //   const dcxBalance = await getDcxBalance();
+      //   setBalance(dcxBalance);
+      // }
     } catch (error: unknown) {
       Sentry.captureException(error);
     } finally {
@@ -49,34 +48,34 @@ export const useOnboarding = () => {
   };
 
   const setCtas = async () => {
-    if (isOwner(role)) {
-      const [balanceDCX, balanceDimo] = await Promise.all([
-        getDcxBalance(),
-        getDimoBalance(),
-      ]);
-      if (!(balanceDCX > 0 || balanceDimo > 0)) {
-        setCta({
-          label: 'Purchase DCX',
-          onClick: handleOpenBuyCreditsModal,
-        });
-      } else if (apps.length === 0) {
-        setCta({
-          label: 'Create an app',
-          onClick: handleCreateApp,
-        });
-      }
-    } else setCta(undefined);
+    // if (isOwner(role)) {
+    //   const [balanceDCX, balanceDimo] = await Promise.all([
+    //     getDcxBalance(),
+    //     getDimoBalance(),
+    //   ]);
+    //   if (!(balanceDCX > 0 || balanceDimo > 0)) {
+    //     setCta({
+    //       label: 'Purchase DCX',
+    //       onClick: handleOpenBuyCreditsModal,
+    //     });
+    //   } else if (apps.length === 0) {
+    //     setCta({
+    //       label: 'Create an app',
+    //       onClick: handleCreateApp,
+    //     });
+    //   }
+    // } else setCta(undefined);
   };
 
   useEffect(() => {
     if (!hasSession) return;
     void loadAppsAndWorkspace();
-  }, [hasSession, role]);
+  }, [hasSession]);
 
   useEffect(() => {
     if (!hasSession) return;
     void setCtas();
-  }, [apps, role, hasSession]);
+  }, [apps, hasSession]);
 
   const handleCreateApp = () => {
     router.push('/app/create');

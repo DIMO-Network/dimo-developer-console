@@ -13,6 +13,7 @@ import { withNotifications } from '@/hoc';
 
 import './View.css';
 import { getUser } from '@/actions/user';
+import { Anchor } from '@/components/Anchor';
 
 const signUpFlows = {
   'wallet-creation': {
@@ -89,18 +90,33 @@ const View = () => {
   return (
     <main className="sign-up">
       <div className="sign-up__content">
-        <article className="sign-up__form">
-          <section className="sign-up__header">
-            <Image
-              src={'/images/build-on-dimo.png'}
-              alt="DIMO Logo"
-              width={176}
-              height={24}
-            />
-            <p>{title}</p>
-          </section>
-          {SignUpFlow && <SignUpFlow onNext={handleNext} auth={authData} />}
-        </article>
+        <img src={'/images/dimo-dev.svg'} alt="DIMO Logo" />
+        {SignUpFlow && <SignUpFlow onNext={handleNext} auth={authData} />}
+        <div className="sign-up__extra-links mt-6">
+          <div className="flex flex-row">
+            <p className="terms-caption">
+              By signing in, you are agreeing to our{' '}
+              <Anchor
+                href="https://docs.dimo.zone/dinc/developer-terms-of-service"
+                className="grey underline"
+                target="_blank"
+              >
+                terms of service
+              </Anchor>{' '}
+              and{' '}
+              <Anchor
+                href="https://dimo.zone/legal/privacy-policy"
+                className="grey underline"
+                target="_blank"
+              >
+                privacy policy
+              </Anchor>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="sign-up__background">
+        <img src={'/images/car_segment.svg'} alt="DIMO Background" />
       </div>
     </main>
   );

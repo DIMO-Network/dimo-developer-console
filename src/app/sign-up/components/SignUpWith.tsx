@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import { signIn } from 'next-auth/react';
+// import { signIn } from 'next-auth/react';
 
 import { Anchor } from '@/components/Anchor';
 import { CheckboxField } from '@/components/CheckboxField';
@@ -28,7 +28,7 @@ export const SignUpWith: FC<IProps> = ({ onNext }) => {
       }
     }
 
-    signIn(app, auth);
+    //signIn(app, auth);
   };
 
   return (

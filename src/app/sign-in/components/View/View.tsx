@@ -1,6 +1,5 @@
 'use client';
-import { useContext, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';
+import { ReactNode, useContext, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { setCookie } from 'cookies-next/client';
 
@@ -8,26 +7,50 @@ import Image from 'next/image';
 
 import { Anchor } from '@/components/Anchor';
 import { IAuth } from '@/types/auth';
-import { isCollaborator } from '@/utils/user';
-import { SignInButtons } from '@/components/SignInButton';
-import { useErrorHandler, useGlobalAccount, usePasskey } from '@/hooks';
+import { useAuth, useErrorHandler, usePasskey } from '@/hooks';
 import { withNotifications } from '@/hoc';
 import { NotificationContext } from '@/context/notificationContext';
-import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 import './View.css';
 import * as Sentry from '@sentry/nextjs';
-import { TextField } from '@/components/TextField';
-import { Button } from '@/components/Button';
-import { gtSuper } from '@/utils/font';
+import SignInMethodForm from '../SignInMethodForm';
+import PasskeyLogin from '../PasskeyLogin';
+import OtpInputForm from '../OtpInputForm';
+import { getUserInformation } from '@/actions/user';
+import { isCollaborator } from '@/utils/user';
+
+enum SignInType {
+  NONE = 'none',
+  OTP = 'otp',
+  PASSKEY = 'passkey',
+}
+
+const SignInForm = ({
+  type,
+  handleLogin,
+  handleCTA,
+  handlePasskeyRejected,
+}: {
+  type: SignInType;
+  handleLogin: (email: string) => Promise<void>;
+  handleCTA: (app: string, auth?: Partial<IAuth>) => Promise<void>;
+  handlePasskeyRejected: () => void;
+}): ReactNode => {
+  switch (type) {
+    case SignInType.OTP:
+      return <OtpInputForm />;
+    case SignInType.PASSKEY:
+      return <PasskeyLogin handlePasskeyRejected={handlePasskeyRejected} />;
+    default:
+      return <SignInMethodForm handleCTA={handleCTA} handleLogin={handleLogin} />;
+  }
+};
 
 export const View = () => {
   useErrorHandler();
   const { setNotification } = useContext(NotificationContext);
-  const { loginWithPasskey, requestOtpLogin } = useContext(GlobalAccountAuthContext);
-  const { getUserGlobalAccountInfo } = useGlobalAccount();
+  const { setUser, handleExternalAuth } = useAuth();
   const { isPasskeyAvailable } = usePasskey();
-  const { data: session } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
   const invitationCode = searchParams.get('code') ?? '';
@@ -37,17 +60,42 @@ export const View = () => {
     });
   }
 
+  const [signInType, setSignInType] = useState<SignInType>(SignInType.NONE);
+
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
-    await signIn(app, auth);
+    //await signIn(app, auth);
+    await handleExternalAuth(app);
   };
 
   const handleLogin = async (email: string) => {
     try {
-      const { hasPasskey } = await getUserGlobalAccountInfo(email);
+      const userInformation = await getUserInformation(email);
+
+      if (!userInformation) {
+        router.push('/sign-up');
+        return;
+      }
+
+      const { role, subOrganizationId, hasPasskey } = userInformation;
+
+      if (isCollaborator(role)) {
+        router.push('/app');
+        return;
+      }
+
+      setUser({
+        organization: {
+          email: email,
+          subOrganizationId: subOrganizationId,
+          hasPasskey: hasPasskey,
+        },
+        role,
+      });
+
       if (hasPasskey && isPasskeyAvailable) {
-        await loginWithPasskey(email);
+        setSignInType(SignInType.PASSKEY);
       } else {
-        await requestOtpLogin(email);
+        setSignInType(SignInType.OTP);
       }
     } catch (error) {
       Sentry.captureException(error);
@@ -55,59 +103,29 @@ export const View = () => {
     }
   };
 
-  useEffect(() => {
-    if (!session) return;
-    if (isCollaborator(session.user.role)) {
-      router.push('/app');
-    } else {
-      void handleLogin(session.user.email!);
-    }
-  }, [session]);
+  const handlePasskeyRejected = () => {
+    setSignInType(SignInType.OTP);
+  };
+
+  // useEffect(() => {
+  //   if (!session) return;
+  //   if (isCollaborator(session.user.role)) {
+  //     router.push('/app');
+  //   } else {
+  //     void handleLogin(session.user.email!);
+  //   }
+  // }, [session]);
 
   return (
     <main className="sign-in">
       <div className="sign-in__content">
         <img src={'/images/dimo-dev.svg'} alt="DIMO Logo" />
-        <article className="sign-in__form">
-          <section className="sign-in__header">
-            <p className={gtSuper.className}>Build with car data</p>
-          </section>
-          <section className="sign-in__input">
-            <TextField name="email" type="text" placeholder="email@address.com" />
-            <Button disabled={true} onClick={() => {}}>
-              Continue
-            </Button>
-          </section>
-          <section className="sign-in__divider">
-            <div className="divider"></div>
-            <p className="divider-caption">or</p>
-            <div className="divider"></div>
-          </section>
-          <section className="sign-in__buttons">
-            <SignInButtons isSignIn={true} disabled={false} onCTA={handleCTA} />
-          </section>
-          <section className="sign-in__extra-links">
-            <div className="flex flex-row">
-              <p className="terms-caption">
-                Lost your passkey?{' '}
-                <Anchor href="/email-recovery" target="_self" className="grey underline">
-                  Recover with your email
-                </Anchor>
-              </p>
-            </div>
-            <div className="flex flex-row">
-              <p className="terms-caption">
-                Trouble logging in?{' '}
-                <Anchor
-                  href="mailto:developer-support@dimo.org"
-                  className="grey underline"
-                >
-                  Get support
-                </Anchor>
-              </p>
-            </div>
-          </section>
-        </article>
+        <SignInForm
+          type={signInType}
+          handleCTA={handleCTA}
+          handleLogin={handleLogin}
+          handlePasskeyRejected={handlePasskeyRejected}
+        />
         <div className="sign-in__extra-links mt-6">
           <div className="flex flex-row">
             <p className="terms-caption">

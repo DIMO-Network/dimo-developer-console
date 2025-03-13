@@ -2,7 +2,6 @@
 import { FC, useContext } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { isEmail } from 'validator';
-import { signIn } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
 import { existUserEmailOrAddress } from '@/actions/user';
@@ -43,7 +42,7 @@ export const UserInfoForm: FC<IProps> = ({ auth }) => {
   };
 
   const updateUser = async (userData: Partial<IAuth>) => {
-    signIn('credentials', userData);
+    //signIn('credentials', userData);
   };
 
   return (

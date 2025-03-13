@@ -2,9 +2,10 @@ import { IAuth } from '@/types/auth';
 import { FC, useContext, useEffect } from 'react';
 import { useGlobalAccount, usePasskey } from '@/hooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { useSession } from 'next-auth/react';
 import { NotificationContext } from '@/context/notificationContext';
 import * as Sentry from '@sentry/nextjs';
+import { gtSuper } from '@/utils/font';
+import { Anchor } from '@/components/Anchor';
 
 interface IProps {
   auth?: Partial<IAuth>;
@@ -14,7 +15,6 @@ interface IProps {
 export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
   const { registerSubOrganization } = useGlobalAccount();
-  const { data: session } = useSession();
   const { isPasskeyAvailable } = usePasskey();
 
   const handleWalletCreation = async (email: string) => {
@@ -43,16 +43,38 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     }
   };
 
-  useEffect(() => {
-    if (!session) return;
-    void handleWalletCreation(session.user.email!);
-  }, [session]);
+  // useEffect(() => {
+  //   if (!session) return;
+  //   void handleWalletCreation(session.user.email!);
+  // }, [session]);
 
   return (
-    <div className={'text-center text-xl'}>
-      <h1>Hang tight! we are creating your wallet...</h1>
-      <BubbleLoader isLoading={true} />
-    </div>
+    <>
+      <div className="sign-up__form">
+        <div className="sign-up__header">
+          <p className={gtSuper.className}>Continue with passkey</p>
+        </div>
+        <BubbleLoader isLoading={true} />
+        <div className="sign-up__extra-links">
+          <div className="flex flex-row">
+            <p className="terms-caption">
+              Lost your passkey?{' '}
+              <Anchor href="/email-recovery" target="_self" className="grey underline">
+                Recover with your email
+              </Anchor>
+            </p>
+          </div>
+          <div className="flex flex-row">
+            <p className="terms-caption">
+              Trouble logging in?{' '}
+              <Anchor href="mailto:developer-support@dimo.org" className="grey underline">
+                Get support
+              </Anchor>
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

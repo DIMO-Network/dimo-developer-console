@@ -7,7 +7,7 @@ import {
   rewirePasskey,
   startEmailRecovery,
 } from '@/services/globalAccount';
-import { ApiKeyStamper, AuthClient, TurnkeyBrowserClient } from '@turnkey/sdk-browser';
+import { ApiKeyStamper, AuthClient } from '@turnkey/sdk-browser';
 import {
   generateP256KeyPair,
   decryptCredentialBundle,
@@ -23,31 +23,13 @@ import {
 import { TurnkeyClient } from '@turnkey/http';
 import configuration from '@/config';
 import config from '@/config';
-import { passkeyClient, turnkeyConfig } from '@/config/turnkey';
-import { createAccount } from '@turnkey/viem';
+import { turnkeyConfig } from '@/config/turnkey';
 import {
-  Chain,
-  Client,
-  createPublicClient,
   decodeErrorResult,
   encodeFunctionData,
   getContract,
-  http,
   HttpRequestError,
-  RpcSchema,
-  Transport,
 } from 'viem';
-import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
-import {
-  createFallbackKernelAccountClient,
-  createKernelAccount,
-  createKernelAccountClient,
-  createZeroDevPaymasterClient,
-  getUserOperationGasPrice,
-  KernelAccountClient,
-} from '@zerodev/sdk';
-import { getEntryPoint, KERNEL_V3_1 } from '@zerodev/sdk/constants';
-import { polygon, polygonAmoy } from 'wagmi/chains';
 
 import WMatic from '@/contracts/wmatic.json';
 import UniversalRouter from '@/contracts/uniswapRouter.json';
@@ -55,10 +37,7 @@ import UniversalRouter from '@/contracts/uniswapRouter.json';
 import { wagmiAbi } from '@/contracts/wagmi';
 import { utils } from 'web3';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
-import {
-  GetPaymasterDataParameters,
-  SmartAccount,
-} from 'viem/_types/account-abstraction';
+
 import * as Sentry from '@sentry/nextjs';
 import { usePasskey } from '@/hooks';
 import { GlobalAccountSession, saveToSession } from '@/utils/sessionStorage';
@@ -68,6 +47,8 @@ import {
   getFromLocalStorage,
   saveToLocalStorage,
 } from '@/utils/localStorage';
+import { getTurnkeyWallet } from '@/services/turnkey';
+import { getKernelClient } from '@/services/zerodev';
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 
@@ -209,7 +190,6 @@ export const useGlobalAccount = () => {
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: session.authenticator,
         authKey: session.token,
       });
 
@@ -247,7 +227,6 @@ export const useGlobalAccount = () => {
 
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: session.authenticator,
         authKey: session.token,
       });
 
@@ -300,8 +279,7 @@ export const useGlobalAccount = () => {
 
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: session.authenticator,
-        authKey: session.token,
+        authKey: session!.token,
       });
 
       if (!kernelClient) {
@@ -385,7 +363,6 @@ export const useGlobalAccount = () => {
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
         organizationInfo,
-        authClient: session.authenticator,
         authKey: session.token,
       });
 
@@ -415,132 +392,6 @@ export const useGlobalAccount = () => {
     }
   };
 
-  const getKernelClient = async ({
-    organizationInfo,
-    authClient,
-    authKey,
-  }: {
-    organizationInfo: ISubOrganization;
-    authClient: AuthClient;
-    authKey: string;
-  }) => {
-    try {
-      const kernelClient = await buildFallbackKernelClients({
-        organizationInfo,
-        authClient,
-        authKey,
-      });
-      return kernelClient;
-    } catch (e) {
-      Sentry.captureException(e);
-      console.error('Error creating kernel client', e);
-      return null;
-    }
-  };
-
-  const buildKernelClient = async ({
-    orgInfo,
-    provider,
-    client,
-  }: {
-    orgInfo: ISubOrganization;
-    provider: string;
-    client: TurnkeyBrowserClient | TurnkeyClient;
-  }) => {
-    const { subOrganizationId, walletAddress } = orgInfo;
-    const chain = getChain();
-    const entryPoint = getEntryPoint('0.7');
-    const publicClient = getPublicClient();
-
-    const localAccount = await createAccount({
-      client: client,
-      organizationId: subOrganizationId,
-      signWith: walletAddress,
-      ethereumAddress: walletAddress,
-    });
-
-    const ecdsaValidator = await signerToEcdsaValidator(publicClient, {
-      signer: localAccount,
-      entryPoint: entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    });
-
-    const zeroDevKernelAccount = await createKernelAccount(publicClient, {
-      plugins: {
-        sudo: ecdsaValidator,
-      },
-      entryPoint: entryPoint,
-      kernelVersion: KERNEL_V3_1,
-    });
-
-    const kernelClient = createKernelAccountClient({
-      account: zeroDevKernelAccount,
-      chain: chain,
-      bundlerTransport: http(`${turnkeyConfig.bundleRpc}?provider=${provider}`),
-      client: publicClient,
-      paymaster: {
-        getPaymasterData: (userOperation) => {
-          return sponsorUserOperation({
-            userOperation,
-            provider,
-          });
-        },
-      },
-      userOperation: {
-        estimateFeesPerGas: async ({ bundlerClient }) => {
-          return getUserOperationGasPrice(bundlerClient);
-        },
-      },
-    });
-
-    return kernelClient;
-  };
-
-  const buildFallbackKernelClients = async ({
-    organizationInfo,
-    authClient,
-    authKey,
-  }: {
-    organizationInfo: ISubOrganization;
-    authClient: AuthClient;
-    authKey: string;
-  }) => {
-    const fallbackProviders: string[] = ['ALCHEMY', 'GELATO', 'PIMLICO'];
-    const fallbackKernelClients: KernelAccountClient<
-      Transport,
-      Chain,
-      SmartAccount,
-      Client,
-      RpcSchema
-    >[] = [];
-
-    const client = getTurnkeyClient(authClient, authKey);
-
-    for (const provider of fallbackProviders) {
-      try {
-        const kernelClient = await buildKernelClient({
-          orgInfo: organizationInfo!,
-          provider,
-          client: client,
-        });
-        fallbackKernelClients.push(kernelClient);
-      } catch (e) {
-        Sentry.captureException(e);
-        console.error('Error creating fallback kernel client', e);
-      }
-    }
-
-    return createFallbackKernelAccountClient(fallbackKernelClients);
-  };
-
-  const getPublicClient = () => {
-    const chain = getChain();
-    return createPublicClient({
-      chain: chain,
-      transport: http(turnkeyConfig.rpcUrl),
-    });
-  };
-
   const getWalletAddress = async ({
     subOrganizationId,
     authKey,
@@ -548,44 +399,49 @@ export const useGlobalAccount = () => {
     subOrganizationId: string;
     authKey: string;
   }) => {
-    const client = getTurnkeyClient(AuthClient.Iframe, authKey);
-    const { wallets } = await client.getWallets({
-      organizationId: subOrganizationId,
-    });
-    const { account } = await client.getWalletAccount({
-      organizationId: subOrganizationId,
-      walletId: wallets[0].walletId,
+    const turnkeyAddress = await getTurnkeyWallet({
+      authKey,
+      subOrganizationId,
     });
 
     const kernelClient = await getKernelClient({
       organizationInfo: {
         subOrganizationId,
-        walletAddress: account.address as `0x${string}`,
+        walletAddress: turnkeyAddress as `0x${string}`,
       } as ISubOrganization,
-      authClient: AuthClient.Iframe,
       authKey,
     });
+
     return {
-      walletAddress: account.address as `0x${string}`,
+      walletAddress: turnkeyAddress as `0x${string}`,
       smartContractAddress: kernelClient!.account.address as `0x${string}`,
     };
   };
 
-  const sponsorUserOperation = async ({
-    userOperation,
-    provider,
+  const signMessage = async ({
+    subOrganizationId,
+    authKey,
+    message,
+    walletAddress,
   }: {
-    userOperation: GetPaymasterDataParameters;
-    provider: string;
-  }) => {
-    const chain = getChain();
-    const zerodevPaymaster = createZeroDevPaymasterClient({
-      chain: chain,
-      transport: http(`${turnkeyConfig.paymasterRpc}?provider=${provider}`),
+    subOrganizationId: string;
+    walletAddress: string;
+    authKey: string;
+    message: string;
+  }): Promise<string> => {
+    const kernelClient = await getKernelClient({
+      organizationInfo: {
+        subOrganizationId,
+        walletAddress: walletAddress as `0x${string}`,
+      } as ISubOrganization,
+      authKey,
     });
-    return zerodevPaymaster.sponsorUserOperation({
-      userOperation,
+
+    const signed = await kernelClient!.signMessage({
+      message: message,
     });
+
+    return signed;
   };
 
   const handleOnChainError = (error: HttpRequestError): string => {
@@ -611,37 +467,6 @@ export const useGlobalAccount = () => {
     return args[0];
   };
 
-  const getChain = (): Chain => {
-    if (configuration.environment === 'production') {
-      return polygon;
-    }
-    return polygonAmoy;
-  };
-
-  const getTurnkeyClient = (
-    authClient: AuthClient,
-    authKey: string,
-  ): TurnkeyBrowserClient | TurnkeyClient => {
-    if (authClient === AuthClient.Passkey) {
-      return passkeyClient as TurnkeyBrowserClient;
-    }
-    const ekey = getFromLocalStorage<string>(EmbeddedKey);
-    const privateKey = decryptCredentialBundle(authKey, ekey!);
-    const publicKey = uint8ArrayToHexString(
-      getPublicKey(uint8ArrayFromHexString(privateKey), true),
-    );
-
-    return new TurnkeyClient(
-      {
-        baseUrl: turnkeyConfig.apiBaseUrl,
-      },
-      new ApiKeyStamper({
-        apiPublicKey: publicKey,
-        apiPrivateKey: privateKey,
-      }),
-    );
-  };
-
   return {
     getUserGlobalAccountInfo,
     registerSubOrganization,
@@ -649,11 +474,11 @@ export const useGlobalAccount = () => {
     registerNewPasskey,
     depositWmatic,
     swapWmaticToDimo,
-    getPublicClient,
     getKernelClient,
     handleOnChainError,
     getNeededDimoAmountForDcx,
     getWalletAddress,
+    signMessage,
   };
 };
 

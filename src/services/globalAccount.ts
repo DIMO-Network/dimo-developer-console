@@ -9,7 +9,7 @@ const globalAccountClient = axios.create({
 
 export const getUserSubOrganization = async (
   email: string,
-): Promise<ISubOrganization> => {
+): Promise<ISubOrganization | null> => {
   try {
     const { data } = await globalAccountClient.get<ISubOrganization>(
       `/api/account/${email}`,
@@ -18,7 +18,7 @@ export const getUserSubOrganization = async (
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
-        return {} as ISubOrganization;
+        return null;
       }
     }
     throw error;
