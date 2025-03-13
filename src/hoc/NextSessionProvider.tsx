@@ -4,8 +4,6 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
 import { ComponentType } from 'react';
 
-import { TurnkeyProvider } from '@turnkey/sdk-react';
-import { turnkeyConfig } from '@/config/turnkey';
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import useStripeCrypto from '@/hooks/useStripeCrypto';
 
@@ -19,17 +17,9 @@ export const withNextSession = <P extends object>(WrappedComponent: ComponentTyp
     return (
       <SessionProvider>
         <QueryClientProvider client={queryClient}>
-          <TurnkeyProvider
-            config={{
-              rpId: turnkeyConfig.rpId,
-              apiBaseUrl: turnkeyConfig.apiBaseUrl,
-              defaultOrganizationId: turnkeyConfig.defaultOrganizationId,
-            }}
-          >
-            <StripeCryptoContext.Provider value={{ stripeClientId, setStripeClientId }}>
+          <StripeCryptoContext.Provider value={{ stripeClientId, setStripeClientId }}>
               <WrappedComponent {...props} />
             </StripeCryptoContext.Provider>
-          </TurnkeyProvider>
         </QueryClientProvider>
       </SessionProvider>
     );
