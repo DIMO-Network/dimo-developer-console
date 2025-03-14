@@ -39,12 +39,17 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "string",
         "name": "licenseAlias",
-        "type": "bytes32"
+        "type": "string"
       }
     ],
     "name": "AliasAlreadyInUse",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AliasExceedsMaxLength",
     "type": "error"
   },
   {
@@ -268,9 +273,9 @@
       },
       {
         "indexed": false,
-        "internalType": "bytes32",
+        "internalType": "string",
         "name": "licenseAlias",
-        "type": "bytes32"
+        "type": "string"
       }
     ],
     "name": "LicenseAliasSet",
@@ -924,9 +929,9 @@
     "name": "getLicenseAliasByTokenId",
     "outputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "string",
         "name": "licenseAlias",
-        "type": "bytes32"
+        "type": "string"
       }
     ],
     "stateMutability": "view",
@@ -946,6 +951,25 @@
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "licenseAlias",
+        "type": "string"
+      }
+    ],
+    "name": "getTokenIdByLicenseAlias",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1087,9 +1111,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "string",
         "name": "licenseAlias",
-        "type": "bytes32"
+        "type": "string"
       }
     ],
     "name": "issueInDc",
@@ -1116,9 +1140,9 @@
         "type": "address"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "string",
         "name": "licenseAlias",
-        "type": "bytes32"
+        "type": "string"
       }
     ],
     "name": "issueInDc",
@@ -1140,9 +1164,9 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "string",
         "name": "licenseAlias",
-        "type": "bytes32"
+        "type": "string"
       }
     ],
     "name": "issueInDimo",
@@ -1169,9 +1193,9 @@
         "type": "address"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "string",
         "name": "licenseAlias",
-        "type": "bytes32"
+        "type": "string"
       }
     ],
     "name": "issueInDimo",
@@ -1539,9 +1563,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "bytes32",
+        "internalType": "string",
         "name": "licenseAlias",
-        "type": "bytes32"
+        "type": "string"
       }
     ],
     "name": "setLicenseAlias",
