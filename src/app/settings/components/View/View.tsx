@@ -10,12 +10,12 @@ import { Loader } from '@/components/Loader';
 import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
-import { useUser, useTeamCollaborators } from '@/hooks';
+import { useTeamCollaborators } from '@/hooks';
+import { UserDetails } from '@/app/settings/components/UserDetails';
 
 import './View.css';
 
 const View: FC = () => {
-  const { user } = useUser();
   const { isLoading, teamCollaborators, refreshData } = useTeamCollaborators();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { data: session } = useSession();
@@ -26,23 +26,7 @@ const View: FC = () => {
       {isLoading && <Loader isLoading={true} />}
       {!isLoading && (
         <>
-          {user && (
-            <Card className="primary user-detail">
-              <Title component="h4" className="settings-card-title">
-                User Details
-              </Title>
-              <Card className="secondary user-detail-content">
-                <Title component="h4" className="user-title">
-                  Name
-                </Title>
-                <p className="user-description">{user.name}</p>
-                <Title component="h4" className="user-title">
-                  Email
-                </Title>
-                <p className="user-description">{user.email}</p>
-              </Card>
-            </Card>
-          )}
+          <UserDetails />
           <Card className="primary team-information">
             <div className="team-header">
               <Title component="h4" className="settings-card-title">
