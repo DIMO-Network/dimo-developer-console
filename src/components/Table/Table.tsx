@@ -20,7 +20,7 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
 
   return (
     <table className="table">
-      <thead>
+      <thead className="table-header">
         <tr>
           {columns.map(renderColumn)}
           {actions && (

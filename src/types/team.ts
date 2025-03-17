@@ -7,7 +7,7 @@ export enum TeamRoles {
 
 export enum TeamRolesLabels {
   OWNER = 'Owner',
-  COLLABORATOR = 'Collaborator',
+  COLLABORATOR = 'Read Only',
 }
 
 export enum InvitationStatuses {
@@ -17,7 +17,7 @@ export enum InvitationStatuses {
 }
 
 export enum InvitationStatusLabels {
-  PENDING = 'Pending invitation',
+  PENDING = 'Pending',
   SENT = 'Invitation sent',
   ACCEPTED = 'Invitation accepted',
 }
