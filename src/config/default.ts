@@ -76,6 +76,6 @@ export const ISSUED_TOPIC: `0x${string}` =
   '0x7533f62ec6601bf9c87f8d96bf756b4b495e2a0e26ec9284e4927926ed6b3afd';
 
 export const CONTRACT_METHODS = {
-  ISSUE_IN_DC: '0xaf509d9f',
-  MINT_IN_DC: '0xec88fc37',
+  ISSUE_IN_DC: '0x69054339',
+  MINT_IN_DIMO: '0xec88fc37',
 };
