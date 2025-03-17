@@ -55,5 +55,3 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected }) => {
     </>
   );
 };
-
-export default PasskeyLogin;

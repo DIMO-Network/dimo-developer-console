@@ -1,4 +1,4 @@
-import { ApiKeyStamper } from '@turnkey/sdk-browser';
+import { ApiKeyStamper } from '@turnkey/sdk-server';
 import { turnkeyConfig } from '@/config/turnkey';
 import { getFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 import { TurnkeyClient } from '@turnkey/http';
@@ -9,10 +9,14 @@ import {
 } from '@turnkey/crypto';
 import { uint8ArrayToHexString, uint8ArrayFromHexString } from '@turnkey/encoding';
 
-export const getTurnkeyClient = (authKey: string): TurnkeyClient => {
-  const ekey = getFromLocalStorage<string>(EmbeddedKey);
-  console.info('ekey', ekey);
-  const privateKey = decryptCredentialBundle(authKey, ekey!);
+export const getTurnkeyClient = ({
+  authKey,
+  eKey,
+}: {
+  authKey: string;
+  eKey: string;
+}): TurnkeyClient => {
+  const privateKey = decryptCredentialBundle(authKey, eKey);
   const publicKey = uint8ArrayToHexString(
     getPublicKey(uint8ArrayFromHexString(privateKey), true),
   );
@@ -28,14 +32,13 @@ export const getTurnkeyClient = (authKey: string): TurnkeyClient => {
   );
 };
 
-export const getTurnkeyWallet = async ({
-  authKey,
+export const getTurnkeyWalletAddress = async ({
   subOrganizationId,
+  client,
 }: {
-  authKey: string;
   subOrganizationId: string;
-}) => {
-  const client = getTurnkeyClient(authKey);
+  client: TurnkeyClient;
+}): Promise<`0x${string}`> => {
   const { wallets } = await client.getWallets({
     organizationId: subOrganizationId,
   });
@@ -44,5 +47,5 @@ export const getTurnkeyWallet = async ({
     walletId: wallets[0].walletId,
   });
 
-  return account.address;
+  return account.address as `0x${string}`;
 };

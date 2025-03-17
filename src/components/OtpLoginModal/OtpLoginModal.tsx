@@ -6,7 +6,7 @@ import { Button } from '@/components/Button';
 import { Title } from '@/components/Title';
 
 import './OtpLoginModal.css';
-import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountContext';
 import { useSession } from 'next-auth/react';
 
 interface IProps {

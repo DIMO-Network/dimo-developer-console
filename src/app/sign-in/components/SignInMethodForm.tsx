@@ -90,5 +90,3 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin, handleCTA }) => {
     </>
   );
 };
-
-export default SignInMethodForm;

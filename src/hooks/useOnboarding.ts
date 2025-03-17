@@ -10,9 +10,8 @@ import { getWorkspace } from '@/actions/workspace';
 import { IApp } from '@/types/app';
 import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
-import { useContractGA } from '@/hooks';
+import { useContractGA, useGlobalAccount } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
-import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
@@ -21,11 +20,8 @@ export const useOnboarding = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState<number>(0);
   const router = useRouter();
-  const { getDcxBalance, getDimoBalance } = useContractGA();
   const { setIsOpen } = useContext(CreditsContext);
-  // const { data: session } = useSession();
-  // const { user: { role = '' } = {} } = session ?? {};
-  const { hasSession } = useContext(GlobalAccountAuthContext);
+  const { currentUser } = useGlobalAccount();
 
   const loadAppsAndWorkspace = async (): Promise<void> => {
     try {
@@ -36,10 +32,8 @@ export const useOnboarding = () => {
       const currentWorkspace = await getWorkspace();
       setWorkspace(currentWorkspace);
 
-      // if (isOwner(role)) {
-      //   const dcxBalance = await getDcxBalance();
-      //   setBalance(dcxBalance);
-      // }
+      const dcxBalance = await getDcxBalance();
+      setBalance(dcxBalance);
     } catch (error: unknown) {
       Sentry.captureException(error);
     } finally {
@@ -68,14 +62,14 @@ export const useOnboarding = () => {
   };
 
   useEffect(() => {
-    if (!hasSession) return;
+    if (!currentUser) return;
     void loadAppsAndWorkspace();
-  }, [hasSession]);
+  }, [currentUser]);
 
   useEffect(() => {
-    if (!hasSession) return;
+    if (!currentUser) return;
     void setCtas();
-  }, [apps, hasSession]);
+  }, [apps, currentUser]);
 
   const handleCreateApp = () => {
     router.push('/app/create');

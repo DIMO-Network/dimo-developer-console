@@ -157,5 +157,3 @@ export const OtpInputForm: FC<IProps> = ({}) => {
     </>
   );
 };
-
-export default OtpInputForm;

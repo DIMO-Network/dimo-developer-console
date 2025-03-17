@@ -1,7 +1,5 @@
 import { turnkeyConfig } from '@/config/turnkey';
-import { ISubOrganization } from '@/types/wallet';
 import { TurnkeyClient } from '@turnkey/http';
-import { TurnkeyBrowserClient } from '@turnkey/sdk-browser';
 import { createAccount } from '@turnkey/viem';
 import { signerToEcdsaValidator } from '@zerodev/ecdsa-validator';
 import {
@@ -20,23 +18,8 @@ import {
 } from 'viem/_types/account-abstraction';
 import { http, Transport } from 'wagmi';
 import { Chain } from 'wagmi/chains';
-import { getTurnkeyClient } from './turnkey';
 import { polygon, polygonAmoy } from 'wagmi/chains';
 import configuration from '@/config';
-
-export const getKernelClient = async ({
-  organizationInfo,
-  authKey,
-}: {
-  organizationInfo: ISubOrganization;
-  authKey: string;
-}) => {
-  const kernelClient = await buildFallbackKernelClients({
-    organizationInfo,
-    authKey,
-  });
-  return kernelClient;
-};
 
 const getChain = (): Chain => {
   if (configuration.environment === 'production') {
@@ -45,7 +28,7 @@ const getChain = (): Chain => {
   return polygonAmoy;
 };
 
-const getPublicClient = () => {
+export const getPublicClient = () => {
   const chain = getChain();
   return createPublicClient({
     chain: chain,
@@ -70,17 +53,67 @@ const sponsorUserOperation = async ({
   });
 };
 
-const buildKernelClient = async ({
-  orgInfo,
-  provider,
+const buildFallbackKernelClients = async ({
+  subOrganizationId,
+  walletAddress,
   client,
 }: {
-  orgInfo: ISubOrganization;
-  provider: string;
-  client: TurnkeyBrowserClient | TurnkeyClient;
+  subOrganizationId: string;
+  walletAddress: `0x${string}`;
+  client: TurnkeyClient;
 }) => {
-  const { subOrganizationId, walletAddress } = orgInfo;
+  const fallbackProviders: string[] = ['ALCHEMY', 'GELATO', 'PIMLICO'];
+  const fallbackKernelClients: KernelAccountClient<
+    Transport,
+    Chain,
+    SmartAccount,
+    Client,
+    RpcSchema
+  >[] = [];
+
   const chain = getChain();
+  const kernelAccount = await getKernelAccount({
+    subOrganizationId,
+    walletAddress,
+    client,
+  });
+
+  for (const provider of fallbackProviders) {
+    const kernelClient = createKernelAccountClient({
+      account: kernelAccount,
+      chain: chain,
+      bundlerTransport: http(`${turnkeyConfig.bundleRpc}?provider=${provider}`),
+      client: kernelAccount.client,
+      paymaster: {
+        getPaymasterData: (userOperation) => {
+          return sponsorUserOperation({
+            userOperation,
+            provider,
+          });
+        },
+      },
+      userOperation: {
+        estimateFeesPerGas: async ({ bundlerClient }) => {
+          return getUserOperationGasPrice(bundlerClient);
+        },
+      },
+    });
+
+    fallbackKernelClients.push(kernelClient);
+  }
+
+  return createFallbackKernelAccountClient(fallbackKernelClients);
+};
+
+export const getKernelAccount = async ({
+  subOrganizationId,
+  walletAddress,
+  client,
+}: {
+  subOrganizationId: string;
+  walletAddress: `0x${string}`;
+  client: TurnkeyClient;
+}) => {
   const entryPoint = getEntryPoint('0.7');
   const publicClient = getPublicClient();
 
@@ -105,55 +138,22 @@ const buildKernelClient = async ({
     kernelVersion: KERNEL_V3_1,
   });
 
-  const kernelClient = createKernelAccountClient({
-    account: zeroDevKernelAccount,
-    chain: chain,
-    bundlerTransport: http(`${turnkeyConfig.bundleRpc}?provider=${provider}`),
-    client: publicClient,
-    paymaster: {
-      getPaymasterData: (userOperation) => {
-        return sponsorUserOperation({
-          userOperation,
-          provider,
-        });
-      },
-    },
-    userOperation: {
-      estimateFeesPerGas: async ({ bundlerClient }) => {
-        return getUserOperationGasPrice(bundlerClient);
-      },
-    },
-  });
-
-  return kernelClient;
+  return zeroDevKernelAccount;
 };
 
-const buildFallbackKernelClients = async ({
-  organizationInfo,
-  authKey,
+export const getKernelClient = async ({
+  subOrganizationId,
+  walletAddress,
+  client,
 }: {
-  organizationInfo: ISubOrganization;
-  authKey: string;
+  subOrganizationId: string;
+  walletAddress: `0x${string}`;
+  client: TurnkeyClient;
 }) => {
-  const fallbackProviders: string[] = ['ALCHEMY', 'GELATO', 'PIMLICO'];
-  const fallbackKernelClients: KernelAccountClient<
-    Transport,
-    Chain,
-    SmartAccount,
-    Client,
-    RpcSchema
-  >[] = [];
-
-  const client = getTurnkeyClient(authKey);
-
-  for (const provider of fallbackProviders) {
-    const kernelClient = await buildKernelClient({
-      orgInfo: organizationInfo!,
-      provider,
-      client: client,
-    });
-    fallbackKernelClients.push(kernelClient);
-  }
-
-  return createFallbackKernelAccountClient(fallbackKernelClients);
+  const kernelClient = await buildFallbackKernelClients({
+    subOrganizationId,
+    walletAddress,
+    client,
+  });
+  return kernelClient;
 };

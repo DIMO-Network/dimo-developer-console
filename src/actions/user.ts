@@ -11,23 +11,23 @@ export const existUserEmailOrAddress = async (address: string | null) => {
 };
 
 export const getUserInformation = async (email: string) => {
-  return null;
-  // const { existItem, role } = await existUserByEmailOrAddress(email);
-  // if (!existItem) {
-  //   return null;
-  // }
+  //return null;
+  const { existItem, role } = await existUserByEmailOrAddress(email);
+  if (!existItem) {
+    return null;
+  }
 
-  // const organization = await getUserSubOrganization(email);
-  // if (!organization) {
-  //   return null;
-  // }
+  const organization = await getUserSubOrganization(email);
+  if (!organization) {
+    return null;
+  }
 
-  // const { hasPasskey, subOrganizationId } = organization;
+  const { hasPasskey, subOrganizationId } = organization;
 
-  // return {
-  //   existsOnDevConsole: existItem,
-  //   role,
-  //   hasPasskey,
-  //   subOrganizationId,
-  // };
+  return {
+    existsOnDevConsole: existItem,
+    role,
+    hasPasskey,
+    subOrganizationId,
+  };
 };

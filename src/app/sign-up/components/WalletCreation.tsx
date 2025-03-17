@@ -15,7 +15,7 @@ interface IProps {
 export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
   const { registerSubOrganization } = useGlobalAccount();
-  const { isPasskeyAvailable } = usePasskey();
+  const { isPasskeyAvailable, getNewUserPasskey } = usePasskey();
 
   const handleWalletCreation = async (email: string) => {
     try {

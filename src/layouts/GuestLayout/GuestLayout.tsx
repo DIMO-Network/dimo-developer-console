@@ -1,13 +1,13 @@
 'use client';
 import React, { type ReactNode } from 'react';
 
-import { withNotifications } from '@/hoc';
+import { withAuth, withNotifications } from '@/hoc';
 
 import '@/app/globals.css';
 
-const View = withNotifications(({ children }: { children: ReactNode }) => (
-  <>{children}</>
-));
+const View = withNotifications(
+  withAuth(({ children }: { children: React.ReactNode }) => <>{children}</>),
+);
 
 export const GuestLayout = ({
   children,

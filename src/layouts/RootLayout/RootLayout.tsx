@@ -15,8 +15,6 @@ export const metadata: Metadata = {
     "Welcome to DIMO Developer Console - Your Ultimate Development Hub! Access powerful tools, and manage applications seamlessly. Whether you're a beginner or an expert, DIMO Developer Console provides a secure and intuitive environment to enhance your coding experience. Start exploring our advanced features and take your development to the next level today!",
 };
 
-const View = withAuth(({ children }: { children: React.ReactNode }) => <>{children}</>);
-
 export const RootLayout = ({
   children,
 }: Readonly<{
@@ -24,9 +22,7 @@ export const RootLayout = ({
 }>) => {
   return (
     <html lang="en">
-      <body className={dimoFont.className}>
-        <View>{children}</View>
-      </body>
+      <body className={dimoFont.className}>{children}</body>
     </html>
   );
 };

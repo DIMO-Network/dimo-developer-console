@@ -13,7 +13,7 @@ import { useContractGA } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
 
 import './Header.css';
-import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountContext';
 
 export const Header: FC = () => {
   const { hasSession } = useContext(GlobalAccountAuthContext);

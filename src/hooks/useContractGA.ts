@@ -18,18 +18,17 @@ import {
 
 import configuration from '@/config';
 import { getCachedDimoPrice } from '@/services/pricing';
-import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
+import { handleOnChainError } from '@/utils/wallet';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 
 export const useContractGA = () => {
-  const { getKernelClient, getPublicClient, handleOnChainError } = useGlobalAccount();
-  const { checkAuthenticated } = useContext(GlobalAccountAuthContext);
+  const { validateCurrentSession } = useGlobalAccount();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const processTransactions = async (transactions: Array<any>) => {
     try {
-      const currentSession = await checkAuthenticated();
+      const currentSession = await validateCurrentSession();
       if (!currentSession) return {} as IKernelOperationStatus;
       const { organization: organizationInfo, session } = currentSession;
 
@@ -61,82 +60,6 @@ export const useContractGA = () => {
     }
   };
 
-  const getDcxBalance = async (): Promise<number> => {
-    try {
-      const currentSession = await checkAuthenticated();
-      if (!currentSession) return 0;
-      const { organization: organizationInfo, session } = currentSession;
-      if (!organizationInfo) return 0;
-      const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient({
-        organizationInfo,
-        authClient: session.authenticator,
-        authKey: session.token,
-      });
-
-      if (!kernelClient) {
-        return 0;
-      }
-
-      const creditsContract = getContract({
-        address: configuration.DCX_ADDRESS,
-        abi: DimoCreditsABI,
-        client: {
-          public: publicClient,
-          wallet: kernelClient,
-        },
-      });
-
-      const currentBalanceOnWei = await creditsContract.read.balanceOf([
-        organizationInfo!.smartContractAddress,
-      ]);
-
-      return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
-    } catch (e: unknown) {
-      Sentry.captureException(e);
-      console.error(e);
-      return 0;
-    }
-  };
-
-  const getDimoBalance = async (): Promise<number> => {
-    try {
-      const currentSession = await checkAuthenticated();
-      if (!currentSession) return 0;
-      const { organization: organizationInfo, session } = currentSession;
-      if (!organizationInfo) return 0;
-      const publicClient = getPublicClient();
-      const kernelClient = await getKernelClient({
-        organizationInfo,
-        authClient: session.authenticator,
-        authKey: session.token,
-      });
-
-      if (!kernelClient) {
-        return 0;
-      }
-
-      const dimoTokenContract = getContract({
-        address: configuration.DC_ADDRESS,
-        abi: DimoABI,
-        client: {
-          public: publicClient,
-          wallet: kernelClient,
-        },
-      });
-
-      const currentBalanceOnWei = await dimoTokenContract.read.balanceOf([
-        organizationInfo!.smartContractAddress,
-      ]);
-
-      return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
-    } catch (e: unknown) {
-      Sentry.captureException(e);
-      console.error(e);
-      return 0;
-    }
-  };
-
   const getDesiredTokenAmount = async (): Promise<IDesiredTokenAmount> => {
     const DEFAULT_AMOUNTS = {
       dimo: BigInt(0),
@@ -146,10 +69,10 @@ export const useContractGA = () => {
     };
 
     try {
-      const currentSession = await checkAuthenticated();
+      const currentSession = await validateCurrentSession();
       if (!currentSession) return DEFAULT_AMOUNTS;
-      const { organization: organizationInfo, session } = currentSession;
-      if (!organizationInfo) return DEFAULT_AMOUNTS;
+      const { subOrganizationId } = currentSession;
+      if (!subOrganizationId) return DEFAULT_AMOUNTS;
 
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
@@ -196,7 +119,7 @@ export const useContractGA = () => {
       dlcAllowance: false,
     };
     try {
-      const currentSession = await checkAuthenticated();
+      const currentSession = await validateCurrentSession();
       if (!currentSession) return DEFAULT_TOKEN_BALANCE;
       const { organization: organizationInfo } = currentSession;
       if (!organizationInfo) return DEFAULT_TOKEN_BALANCE;
@@ -221,7 +144,7 @@ export const useContractGA = () => {
 
   const getPolBalance = async (): Promise<number> => {
     try {
-      const currentSession = await checkAuthenticated();
+      const currentSession = await validateCurrentSession();
       if (!currentSession) return 0;
       const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
@@ -250,7 +173,7 @@ export const useContractGA = () => {
 
   const getWmaticBalance = async (): Promise<number> => {
     try {
-      const currentSession = await checkAuthenticated();
+      const currentSession = await validateCurrentSession();
       if (!currentSession) return 0;
       const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
@@ -288,7 +211,7 @@ export const useContractGA = () => {
 
   const getDcxAllowance = async (): Promise<number> => {
     try {
-      const currentSession = await checkAuthenticated();
+      const currentSession = await validateCurrentSession();
       if (!currentSession) return 0;
       const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
@@ -327,7 +250,7 @@ export const useContractGA = () => {
 
   const getDimoAllowance = async (): Promise<number> => {
     try {
-      const currentSession = await checkAuthenticated();
+      const currentSession = await validateCurrentSession();
       if (!currentSession) return 0;
       const { organization: organizationInfo, session } = currentSession;
       if (!organizationInfo) return 0;
@@ -368,7 +291,7 @@ export const useContractGA = () => {
     amount: number,
     addressToAllow: `0x${string}`,
   ): Promise<void> => {
-    const currentSession = await checkAuthenticated();
+    const currentSession = await validateCurrentSession();
     if (!currentSession) return;
     const { organization: organizationInfo, session } = currentSession;
     if (!organizationInfo) return;
@@ -401,8 +324,6 @@ export const useContractGA = () => {
     getDcxAllowance,
     getDimoAllowance,
     processTransactions,
-    getDcxBalance,
-    getDimoBalance,
     getPolBalance,
     getWmaticBalance,
     getDesiredTokenAmount,

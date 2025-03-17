@@ -13,9 +13,7 @@ import { NotificationContext } from '@/context/notificationContext';
 
 import './View.css';
 import * as Sentry from '@sentry/nextjs';
-import SignInMethodForm from '../SignInMethodForm';
-import PasskeyLogin from '../PasskeyLogin';
-import OtpInputForm from '../OtpInputForm';
+import { OtpInputForm, PasskeyLogin, SignInMethodForm } from '@/app/sign-in/components';
 import { getUserInformation } from '@/actions/user';
 import { isCollaborator } from '@/utils/user';
 
@@ -84,12 +82,8 @@ export const View = () => {
       }
 
       setUser({
-        organization: {
-          email: email,
-          subOrganizationId: subOrganizationId,
-          hasPasskey: hasPasskey,
-        },
-        role,
+        subOrganizationId: subOrganizationId,
+        email: email,
       });
 
       if (hasPasskey && isPasskeyAvailable) {

@@ -6,23 +6,18 @@ import { Menu } from '@/components/Menu';
 import { withCredits, withNotifications } from '@/hoc';
 
 import './AuthorizedLayout.css';
+import withGlobalAccounts from '@/hoc/GlobalAccountProvider';
 
-export const AuthorizedLayout = withNotifications(
-  withCredits(
-    ({
-      children,
-    }: Readonly<{
-      children: React.ReactNode;
-    }>) => (
-      <div className="main">
-        <Header />
-        <div className="app-content">
-          <Menu />
-          <main className="page-content">{children}</main>
-        </div>
-      </div>
-    ),
+const View = withNotifications(
+  withGlobalAccounts(
+    withCredits(({ children }: { children: React.ReactNode }) => <>{children}</>),
   ),
 );
+
+export const AuthorizedLayout = ({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) => <View>{children}</View>;
 
 export default AuthorizedLayout;

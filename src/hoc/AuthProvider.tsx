@@ -1,8 +1,9 @@
 import { getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
-import { passkeyClient, turnkeyClient } from '@/config/turnkey';
+import { passkeyClient } from '@/config/turnkey';
 import { AuthContext } from '@/context/AuthContext';
-import { useGlobalAccount } from '@/hooks';
-import { getUserSubOrganization, initOtpLogin, otpLogin } from '@/services/globalAccount';
+import { initOtpLogin, otpLogin } from '@/services/globalAccount';
+import { getTurnkeyWalletAddress, getTurnkeyClient } from '@/services/turnkey';
+import { getKernelAccount } from '@/services/zerodev';
 import { IGlobalAccountSession } from '@/types/wallet';
 import {
   removeFromLocalStorage,
@@ -12,11 +13,11 @@ import {
 import {
   saveToSession,
   GlobalAccountSession,
-  getFromSession,
   removeFromSession,
 } from '@/utils/sessionStorage';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty } from 'lodash';
+//import { cookies } from 'next/headers';
 import { useRouter } from 'next/navigation';
 import { ComponentType, useState } from 'react';
 const halfHour = 30 * 60;
@@ -24,100 +25,114 @@ const fifteenMinutes = 15 * 60;
 
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
-    const { getWalletAddress, signMessage } = useGlobalAccount();
     const router = useRouter();
-    const [user, setUser] = useState<Partial<IGlobalAccountSession> | null>(null);
+    const [user, setUser] = useState<{ email: string; subOrganizationId: string } | null>(
+      null,
+    );
 
-    const getWalletsAndSmartContract = async (credentials: string) => {};
+    const createSession = async ({
+      accessToken,
+      sessionExpiration,
+      credentialBundle,
+      privateKey,
+    }: {
+      credentialBundle: string;
+      privateKey: string;
+      accessToken: string;
+      sessionExpiration: number;
+    }) => {
+      // const userCookies = await cookies();
+      // userCookies.set('session-token', accessToken, { maxAge: sessionExpiration });
 
-    const getUserDetails = async (email: string) => {
-      const information = await getUserSubOrganization(email);
-      if (!information) {
-        return null;
-      }
+      saveToLocalStorage(EmbeddedKey, privateKey);
 
-      const consolodatedInformation = {
-        organization: information,
+      saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
+        email: user!.email,
         role: 'owner',
-        token: '',
-      };
-
-      saveToSession<IGlobalAccountSession>(GlobalAccountSession, consolodatedInformation);
-      return consolodatedInformation;
+        subOrganizationId: user!.subOrganizationId,
+        token: credentialBundle,
+        expiry: sessionExpiration,
+      });
     };
 
-    const loginWithPasskey = async () => {
-      const { organization } = user!;
-
-      if (!organization) {
-        throw new Error('No organization found');
-      }
-
-      const { subOrganizationId, email } = organization;
-
-      const key = generateP256KeyPair();
-      const targetPubHex = key.publicKeyUncompressed;
-      const nowInSeconds = Math.ceil(Date.now() / 1000);
-
-      const { credentialBundle } = await passkeyClient.createReadWriteSession({
-        organizationId: subOrganizationId,
-        targetPublicKey: targetPubHex,
-        expirationSeconds: (nowInSeconds + halfHour).toString(),
+    const signIntoDimo = async ({
+      credentialBundle,
+      privateKey,
+    }: {
+      credentialBundle: string;
+      privateKey: string;
+    }) => {
+      const { subOrganizationId } = user!;
+      const client = getTurnkeyClient({ authKey: credentialBundle, eKey: privateKey });
+      const walletAddress = await getTurnkeyWalletAddress({
+        subOrganizationId: subOrganizationId,
+        client: client,
       });
 
-      if (isEmpty(credentialBundle)) return;
-
-      saveToLocalStorage(EmbeddedKey, key.privateKey);
-
-      const { walletAddress, smartContractAddress } = await getWalletAddress({
-        subOrganizationId: subOrganizationId!,
-        authKey: credentialBundle,
-      });
-
-      const { challenge, state } = await getDimoChallenge(smartContractAddress);
-
-      const signedChallenge = await signMessage({
-        subOrganizationId: subOrganizationId!,
+      const kernelAccount = await getKernelAccount({
+        subOrganizationId: subOrganizationId,
         walletAddress: walletAddress,
-        authKey: credentialBundle,
+        client: client,
+      });
+
+      const { challenge, state } = await getDimoChallenge(kernelAccount.address);
+
+      const signedChallenge = await kernelAccount.signMessage({
         message: challenge,
       });
 
       const token = await getDimoToken(state, signedChallenge);
 
-      setUser({
-        organization: {
-          subOrganizationId: subOrganizationId,
-          email: email,
-          walletAddress: walletAddress,
-          smartContractAddress: smartContractAddress,
-        },
-        role: 'owner',
-        session: {
-          token: credentialBundle,
-          expiry: Math.ceil(Date.now() / 1000) + fifteenMinutes,
-        },
-        token: token.access_token,
+      return token;
+    };
+
+    const loginWithPasskey = async () => {
+      const { subOrganizationId, email } = user!;
+
+      if (!subOrganizationId) {
+        throw new Error('No organization found');
+      }
+
+      const key = generateP256KeyPair();
+      const targetPubHex = key.publicKeyUncompressed;
+      const nowInSeconds = Math.ceil(Date.now() / 1000);
+
+      const sessionExpiration = nowInSeconds + halfHour;
+
+      const { credentialBundle } = await passkeyClient.createReadWriteSession({
+        organizationId: subOrganizationId,
+        targetPublicKey: targetPubHex,
+        expirationSeconds: sessionExpiration.toString(),
       });
+
+      if (isEmpty(credentialBundle)) return;
+
+      const token = await signIntoDimo({ credentialBundle, privateKey: key.privateKey });
+
+      await createSession({
+        accessToken: token.access_token,
+        sessionExpiration,
+        credentialBundle,
+        privateKey: key.privateKey,
+      });
+
       router.push('/app');
     };
 
     const beginOtpLogin = async () => {
-      const { organization } = user!;
-      if (!organization) {
+      const { email } = user!;
+      if (!email) {
         throw new Error('No organization found');
       }
-      const { email } = organization;
       const { otpId } = await initOtpLogin(email!);
       return otpId;
     };
 
     const completeOtpLogin = async ({ otp, otpId }: { otp: string; otpId: string }) => {
-      const { organization } = user!;
-      if (!organization) {
+      const { email } = user!;
+      if (!email) {
         return;
       }
-      const { email, subOrganizationId } = organization;
       const key = generateP256KeyPair();
       const targetPublicKey = key.publicKeyUncompressed;
       const { credentialBundle } = await otpLogin({
@@ -129,37 +144,16 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
       if (isEmpty(credentialBundle)) return;
 
-      saveToLocalStorage(EmbeddedKey, key.privateKey);
+      const nowInSeconds = Math.ceil(Date.now() / 1000);
+      const sessionExpiration = nowInSeconds + halfHour;
 
-      const { walletAddress, smartContractAddress } = await getWalletAddress({
-        subOrganizationId: subOrganizationId!,
-        authKey: credentialBundle,
-      });
+      const token = await signIntoDimo({ credentialBundle, privateKey: key.privateKey });
 
-      const { challenge, state } = await getDimoChallenge(smartContractAddress);
-
-      const signedChallenge = await signMessage({
-        subOrganizationId: subOrganizationId!,
-        walletAddress: walletAddress,
-        authKey: credentialBundle,
-        message: challenge,
-      });
-
-      const token = await getDimoToken(state, signedChallenge);
-
-      setUser({
-        organization: {
-          subOrganizationId: subOrganizationId,
-          email: email,
-          walletAddress: walletAddress,
-          smartContractAddress: smartContractAddress,
-        },
-        role: 'owner',
-        session: {
-          token: credentialBundle,
-          expiry: Math.ceil(Date.now() / 1000) + fifteenMinutes,
-        },
-        token: token.access_token,
+      await createSession({
+        accessToken: token.access_token,
+        sessionExpiration,
+        credentialBundle,
+        privateKey: key.privateKey,
       });
 
       router.push('/app');
@@ -168,7 +162,6 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     const logout = async () => {
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
-      await turnkeyClient.logoutUser();
     };
 
     const handleExternalAuth = (provider: string) => {
@@ -180,7 +173,6 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       <AuthContext.Provider
         value={{
           setUser,
-          getUserDetails,
           loginWithPasskey,
           beginOtpLogin,
           completeOtpLogin,

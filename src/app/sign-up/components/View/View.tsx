@@ -10,15 +10,15 @@ import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
 import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
-
-import './View.css';
 import { getUser } from '@/actions/user';
 import { Anchor } from '@/components/Anchor';
+
+import './View.css';
 
 const signUpFlows = {
   'wallet-creation': {
     Component: WalletCreation,
-    title: "Let's get you a wallet",
+    title: 'Continue with passkey',
     order: 1,
   },
   'build-for': {
@@ -28,7 +28,7 @@ const signUpFlows = {
   },
   'company-information': {
     Component: CompanyInfoForm,
-    title: 'Our last question',
+    title: 'Final strecht',
     order: 3,
   },
 };

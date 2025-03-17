@@ -55,13 +55,11 @@ export interface IDcxPurchaseTransaction {
 }
 
 export interface IGlobalAccountSession {
-  organization: Partial<ISubOrganization>;
-  role?: string;
-  session?: {
-    token: string;
-    expiry: number;
-  };
+  email: string;
+  role: string;
+  subOrganizationId: string;
   token: string;
+  expiry: number;
 }
 
 export interface IStripeCryptoEvent {
