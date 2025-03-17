@@ -15,22 +15,6 @@
     @apply text-sm;
   }
 
-  .user-detail {
-    @apply flex flex-col gap-4 font-medium text-white;
-
-    .user-detail-content {
-      @apply grid grid-cols-[80px_1fr] auto-cols-min gap-4;
-    }
-
-    .user-title {
-      @apply font-medium;
-    }
-
-    .user-description {
-      @apply font-normal text-white/50;
-    }
-  }
-
   .settings-card-title {
     @apply text-2xl font-black text-white;
   }
