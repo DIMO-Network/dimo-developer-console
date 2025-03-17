@@ -2,16 +2,11 @@
   @apply rounded-full h-8 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex flex-row gap-2;
 
   span.content {
-    @apply flex flex-row gap-2 items-center justify-center;
+    @apply flex flex-row gap-1 items-center justify-center;
   }
 
   &.primary {
-    background-color: rgb(183 242 235 / 1);
-    background-image: radial-gradient(
-      69.53% 323.91% at 69.53% 43.17%,
-      rgba(110, 228, 218, 0.48) 26.04%,
-      rgba(177, 227, 255, 0.6) 100%
-    );
+    @apply bg-white;
   }
 
   &.primary-solid {

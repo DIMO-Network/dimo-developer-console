@@ -34,7 +34,7 @@ const View: FC = () => {
               </Title>
               {isOwner(role) && (
                 <Button className="primary" onClick={() => setIsOpen(!isOpen)}>
-                  Invite team <PlusIcon className="h-5 w-5" />
+                  <PlusIcon className="h-5 w-5" /> Invite Team Member
                 </Button>
               )}
             </div>
