@@ -137,7 +137,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
       value: BigInt(0),
       data: encodeFunctionData({
         abi: DimoCreditsABI,
-        functionName: CONTRACT_METHODS.ISSUE_IN_DC,
+        functionName: CONTRACT_METHODS.MINT_IN_DIMO,
         args: [
           organizationInfo!.smartContractAddress,
           utils.toWei(

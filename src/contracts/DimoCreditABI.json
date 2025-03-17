@@ -39,17 +39,6 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
-        "name": "licenseAlias",
-        "type": "bytes32"
-      }
-    ],
-    "name": "AliasAlreadyInUse",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "implementation",
         "type": "address"
@@ -71,19 +60,13 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "FrozenToken",
-    "type": "error"
-  },
-  {
-    "inputs": [
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
       {
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "fromBalance",
         "type": "uint256"
       },
       {
@@ -92,18 +75,7 @@
         "type": "uint256"
       }
     ],
-    "name": "InsufficientStakedFunds",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "InvalidAmount",
+    "name": "InsufficientBalance",
     "type": "error"
   },
   {
@@ -117,46 +89,8 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      }
-    ],
-    "name": "InvalidSender",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "NonexistentToken",
-    "type": "error"
-  },
-  {
     "inputs": [],
     "name": "NotInitializing",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ReentrancyGuardReentrantCall",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "StakedFunds",
     "type": "error"
   },
   {
@@ -176,48 +110,20 @@
     "type": "error"
   },
   {
-    "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
       }
     ],
-    "name": "AssetForfeit",
-    "type": "event"
+    "name": "Unauthorized",
+    "type": "error"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "frozen",
-        "type": "bool"
-      }
-    ],
-    "name": "AssetFreezeUpdate",
-    "type": "event"
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
   },
   {
     "anonymous": false,
@@ -230,101 +136,6 @@
       }
     ],
     "name": "Initialized",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "clientId",
-        "type": "address"
-      }
-    ],
-    "name": "Issued",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes32",
-        "name": "licenseAlias",
-        "type": "bytes32"
-      }
-    ],
-    "name": "LicenseAliasSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "Locked",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "uri",
-        "type": "string"
-      }
-    ],
-    "name": "RedirectUriDisabled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "uri",
-        "type": "string"
-      }
-    ],
-    "name": "RedirectUriEnabled",
     "type": "event"
   },
   {
@@ -407,94 +218,6 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "signer",
-        "type": "address"
-      }
-    ],
-    "name": "SignerDisabled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "signer",
-        "type": "address"
-      }
-    ],
-    "name": "SignerEnabled",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "StakeDeposit",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "StakeWithdraw",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
         "internalType": "address",
         "name": "from",
         "type": "address"
@@ -506,9 +229,9 @@
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "amount",
         "type": "uint256"
       }
     ],
@@ -520,51 +243,25 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "dimoCredit_",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "rate",
+        "type": "uint256"
       }
     ],
-    "name": "UpdateDimoCreditAddress",
+    "name": "UpdateDimoCreditRate",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
-        "name": "dimoToken_",
+        "name": "dimo_",
         "type": "address"
       }
     ],
     "name": "UpdateDimoTokenAddress",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "licenseAccountFactory_",
-        "type": "address"
-      }
-    ],
-    "name": "UpdateLicenseAccountFactoryAddress",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "licenseCost",
-        "type": "uint256"
-      }
-    ],
-    "name": "UpdateLicenseCost",
     "type": "event"
   },
   {
@@ -584,7 +281,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "provider",
         "type": "address"
@@ -597,7 +294,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "receiver_",
         "type": "address"
@@ -621,6 +318,32 @@
   },
   {
     "inputs": [],
+    "name": "BURNER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DC_ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "DEFAULT_ADMIN_ROLE",
     "outputs": [
       {
@@ -634,20 +357,7 @@
   },
   {
     "inputs": [],
-    "name": "LICENSE_ADMIN_ROLE",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "REVOKER_ROLE",
+    "name": "TRANSFERER_ROLE",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -687,73 +397,25 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "adminBurnLockedFunds",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "frozen_",
-        "type": "bool"
-      }
-    ],
-    "name": "adminFreeze",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       },
       {
         "internalType": "address",
-        "name": "to",
+        "name": "",
         "type": "address"
       }
     ],
-    "name": "adminReallocate",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+    "name": "allowance",
+    "outputs": [
       {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
-    "name": "adminWithdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -770,23 +432,29 @@
       }
     ],
     "name": "approve",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
     "inputs": [
       {
         "internalType": "address",
-        "name": "clientId",
+        "name": "account",
         "type": "address"
       }
     ],
-    "name": "clientIdToTokenId",
+    "name": "balanceOf",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -794,52 +462,44 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "contractDescription",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "contractDescription_",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "contractImage",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "contractImage_",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "contractURI",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "contractURI_",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "dimoCredit",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "address",
-        "name": "dimoCredit_",
+        "name": "from",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "burn",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "decimals",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "dimoCreditRate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -851,8 +511,21 @@
     "outputs": [
       {
         "internalType": "address",
-        "name": "dimoToken_",
+        "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getQuote",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "quote",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -862,52 +535,16 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "signer",
-        "type": "address"
-      }
-    ],
-    "name": "disableSigner",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "signer",
-        "type": "address"
-      }
-    ],
-    "name": "enableSigner",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
+        "name": "amountDimoTokens",
         "type": "uint256"
       }
     ],
-    "name": "frozen",
+    "name": "getQuote",
     "outputs": [
       {
-        "internalType": "bool",
-        "name": "frozen_",
-        "type": "bool"
+        "internalType": "uint256",
+        "name": "quote",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -917,16 +554,29 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "amountDcxTokens",
         "type": "uint256"
       }
     ],
-    "name": "getLicenseAliasByTokenId",
+    "name": "getQuoteDc",
     "outputs": [
       {
-        "internalType": "bytes32",
-        "name": "licenseAlias",
-        "type": "bytes32"
+        "internalType": "uint256",
+        "name": "quote",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getQuoteDc",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "quote",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -946,25 +596,6 @@
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "licenseAlias",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getTokenIdByLicenseAlias",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1015,13 +646,23 @@
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "name_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol_",
+        "type": "string"
+      },
+      {
         "internalType": "address",
-        "name": "receiver_",
+        "name": "dimoToken_",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "licenseAccountFactory_",
+        "name": "receiver_",
         "type": "address"
       },
       {
@@ -1030,29 +671,14 @@
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "dimoTokenAddress_",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "dimoCreditAddress_",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "licenseCostInUsd_",
+        "name": "periodValidity_",
         "type": "uint256"
       },
       {
-        "internalType": "string",
-        "name": "image_",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "description_",
-        "type": "string"
+        "internalType": "uint256",
+        "name": "dimoCreditRateInWei_",
+        "type": "uint256"
       }
     ],
     "name": "initialize",
@@ -1063,173 +689,17 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "signer",
-        "type": "address"
-      }
-    ],
-    "name": "isSigner",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "isSigner_",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "licenseAlias",
-        "type": "bytes32"
-      }
-    ],
-    "name": "issueInDc",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "clientId",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "to",
         "type": "address"
       },
       {
-        "internalType": "bytes32",
-        "name": "licenseAlias",
-        "type": "bytes32"
-      }
-    ],
-    "name": "issueInDc",
-    "outputs": [
-      {
         "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "clientId",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "licenseAlias",
-        "type": "bytes32"
-      }
-    ],
-    "name": "issueInDimo",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "clientId",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "licenseAlias",
-        "type": "bytes32"
-      }
-    ],
-    "name": "issueInDimo",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "clientId",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "licenseAccountFactory",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "licenseAccountFactory_",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "licenseCostInUsd1e18",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "licenseCostInUsd1e18_",
+        "name": "amountDimoCredits",
         "type": "uint256"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "lock",
+    "name": "mint",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1237,20 +707,77 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "amountDimoCredits",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "mint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountDimoTokens",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "mintInDimo",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "dimoCredits",
         "type": "uint256"
       }
     ],
-    "name": "locked",
-    "outputs": [
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
       {
-        "internalType": "bool",
-        "name": "locked_",
-        "type": "bool"
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amountDimoTokens",
+        "type": "uint256"
       }
     ],
-    "stateMutability": "view",
+    "name": "mintInDimo",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "dimoCredits",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1259,27 +786,8 @@
     "outputs": [
       {
         "internalType": "string",
-        "name": "name_",
+        "name": "",
         "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "ownerOf",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1291,7 +799,7 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "periodValidity_",
+        "name": "",
         "type": "uint256"
       }
     ],
@@ -1304,7 +812,7 @@
     "outputs": [
       {
         "internalType": "address",
-        "name": "provider_",
+        "name": "",
         "type": "address"
       }
     ],
@@ -1330,32 +838,8 @@
     "outputs": [
       {
         "internalType": "address",
-        "name": "receiver_",
+        "name": "",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "uri",
-        "type": "string"
-      }
-    ],
-    "name": "redirectUriStatus",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "enabled",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -1382,19 +866,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "revoke",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes32",
         "name": "role",
         "type": "bytes32"
@@ -1413,107 +884,12 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "",
+        "name": "dimoCreditRateInWei_",
         "type": "uint256"
       }
     ],
-    "name": "safeTransferFrom",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
-      }
-    ],
-    "name": "safeTransferFrom",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "name": "setApprovalForAll",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "description_",
-        "type": "string"
-      }
-    ],
-    "name": "setContractDescription",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "image_",
-        "type": "string"
-      }
-    ],
-    "name": "setContractImage",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "dimoCreditAddress_",
-        "type": "address"
-      }
-    ],
-    "name": "setDimoCreditAddress",
+    "name": "setDimoCreditRate",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1527,50 +903,6 @@
       }
     ],
     "name": "setDimoTokenAddress",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "licenseAlias",
-        "type": "bytes32"
-      }
-    ],
-    "name": "setLicenseAlias",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "licenseCostInUsd1e18_",
-        "type": "uint256"
-      }
-    ],
-    "name": "setLicenseCost",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "licenseAccountFactory_",
-        "type": "address"
-      }
-    ],
-    "name": "setLicenseFactoryAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1617,111 +949,6 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "enabled",
-        "type": "bool"
-      },
-      {
-        "internalType": "string",
-        "name": "uri",
-        "type": "string"
-      }
-    ],
-    "name": "setRedirectUri",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "description_",
-        "type": "string"
-      }
-    ],
-    "name": "setTokenDescription",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "image_",
-        "type": "string"
-      }
-    ],
-    "name": "setTokenImage",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "signer",
-        "type": "address"
-      }
-    ],
-    "name": "signers",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "stakeTotal",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "stakeTotal_",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "stakedBalance",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "stakedBalance_",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes4",
         "name": "interfaceId",
         "type": "bytes4"
@@ -1744,7 +971,7 @@
     "outputs": [
       {
         "internalType": "string",
-        "name": "symbol_",
+        "name": "",
         "type": "string"
       }
     ],
@@ -1753,12 +980,12 @@
   },
   {
     "inputs": [],
-    "name": "tokenDescription",
+    "name": "totalSupply",
     "outputs": [
       {
-        "internalType": "string",
-        "name": "tokenDescription_",
-        "type": "string"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1766,66 +993,26 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "tokenIdToClientId",
-    "outputs": [
       {
         "internalType": "address",
-        "name": "clientId",
+        "name": "to",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "tokenImage",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "tokenImage_",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
+      },
       {
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "amount",
         "type": "uint256"
       }
     ],
-    "name": "tokenURI",
+    "name": "transfer",
     "outputs": [
       {
-        "internalType": "string",
-        "name": "tokenURI_",
-        "type": "string"
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalStaked",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "totalStaked_",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1847,6 +1034,25 @@
       }
     ],
     "name": "transferFrom",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
+      }
+    ],
+    "name": "updatePrice",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1867,24 +1073,6 @@
     "name": "upgradeToAndCall",
     "outputs": [],
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "withdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]
