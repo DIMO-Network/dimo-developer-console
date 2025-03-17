@@ -4,12 +4,12 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
 import { isOwner } from '@/utils/user';
 import { Loader } from '@/components/Loader';
 import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
-import { UserForm } from '@/app/settings/components/UserForm';
 import { useUser, useTeamCollaborators } from '@/hooks';
 
 import './View.css';
@@ -23,20 +23,31 @@ const View: FC = () => {
 
   return (
     <div className="settings-page">
-      <div className="titles">
-        <Title>Settings</Title>
-        <p className="subtitle">General Settings for the Developer Console</p>
-      </div>
       {isLoading && <Loader isLoading={true} />}
       {!isLoading && (
         <>
-          <div className="user-information">
-            <Title component="h2">User</Title>
-            {user && <UserForm user={user} />}
-          </div>
-          <div className="team-information">
+          {user && (
+            <Card className="primary user-detail">
+              <Title component="h4" className="settings-card-title">
+                User Details
+              </Title>
+              <Card className="secondary user-detail-content">
+                <Title component="h4" className="user-title">
+                  Name
+                </Title>
+                <p className="user-description">{user.name}</p>
+                <Title component="h4" className="user-title">
+                  Email
+                </Title>
+                <p className="user-description">{user.email}</p>
+              </Card>
+            </Card>
+          )}
+          <Card className="primary team-information">
             <div className="team-header">
-              <Title component="h2">Team Management</Title>
+              <Title component="h4" className="settings-card-title">
+                Team Management
+              </Title>
               {isOwner(role) && (
                 <Button className="primary" onClick={() => setIsOpen(!isOpen)}>
                   Invite team <PlusIcon className="h-5 w-5" />
@@ -47,7 +58,7 @@ const View: FC = () => {
               teamCollaborators={teamCollaborators.filter(({ deleted }) => !deleted)}
               refreshData={refreshData}
             />
-          </div>
+          </Card>
         </>
       )}
       <TeamFormModal isOpen={isOpen} setIsOpen={setIsOpen} />
