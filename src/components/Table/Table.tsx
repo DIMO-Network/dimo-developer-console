@@ -19,8 +19,9 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
   };
 
   return (
-    <table className="table">
-      <thead>
+    <div className={"min-w-full bg-surface-default rounded-xl p-4"}>
+      <table className="table">
+        <thead>
         <tr>
           {columns.map(renderColumn)}
           {actions && (
@@ -29,11 +30,11 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
             </th>
           )}
         </tr>
-      </thead>
-      <tbody className="table-body">
+        </thead>
+        <tbody className="table-body">
         {data.map((item) => (
-          <tr key={`column-${item?.id as string}`}>
-            {columns.map(({ name, render }) => {
+          <tr key={`column-${item?.id as string}`} className={"border-t border-t-cta-default"}>
+            {columns.map(({name, render}) => {
               const textNode = _.get(item, name, '');
               const renderNode = render ? render(item) : null;
               return <Cell key={name}>{renderNode || String(textNode)}</Cell>;
@@ -45,8 +46,10 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
             )}
           </tr>
         ))}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
+
   );
 };
 

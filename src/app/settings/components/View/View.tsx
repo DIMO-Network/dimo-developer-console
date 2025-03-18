@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react';
 import { Button } from '@/components/Button';
 import { isOwner } from '@/utils/user';
 import { Loader } from '@/components/Loader';
+import { SupportAgentIcon } from '@/components/Icons';
+import { SupportFormModal } from '@/app/settings/components/SupportFormModal';
 import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
@@ -20,6 +22,7 @@ const View: FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
 
   return (
     <div className="settings-page">
@@ -48,8 +51,18 @@ const View: FC = () => {
               refreshData={refreshData}
             />
           </div>
+          <div className="flex">
+            <Button
+              className="primary-outline"
+              onClick={() => setIsSupportModalOpen(true)}
+            >
+              <SupportAgentIcon className="fill-primary h-5 w-5" color="currentColor" />
+              Developer support
+            </Button>
+          </div>
         </>
       )}
+      <SupportFormModal isOpen={isSupportModalOpen} setIsOpen={setIsSupportModalOpen} />
       <TeamFormModal isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );

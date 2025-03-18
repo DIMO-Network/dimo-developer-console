@@ -4,6 +4,7 @@ import { useContext } from 'react';
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
+const halfHour = 30 * 60;
 
 // export const useGlobalAccount = () => {
 //   const { getNewUserPasskey } = usePasskey();

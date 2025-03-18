@@ -1,35 +1,40 @@
-import { FC } from 'react';
-
-import { Button } from '@/components/Button';
-
+import React, {FC} from 'react';
 import './Banner.css';
+import CreateAppButton from "@/app/app/list/components/CreateAppButton";
+import AddCreditsButton from "@/app/app/list/components/AddCreditsButton";
+import {ActionCompletedRow} from "@/app/app/list/components/Banner/components/ActionCompletedRow";
+import {CTARow} from "@/app/app/list/components/Banner/components/CTARow";
+import {IApp} from "@/types/app";
 
 export interface CTA {
   label: string;
   onClick: () => void;
 }
 
-interface IProps {
-  cta?: CTA;
+interface Props {
+  balance: number;
+  apps: IApp[];
 }
 
-export const Banner: FC<IProps> = ({ cta }) => {
+export const Banner: FC<Props> = ({ balance, apps }) => {
   return (
     <div className="banner-content">
-      <div className="image-content">
-        <img alt="Onboarding banner" src="/images/dimo_banner.png" />
+      <div>
+        <p className="font-black text-xl">Getting Started</p>
+        <p className="text-text-secondary text-sm mt-1">You’re on the way to building with DIMO!</p>
       </div>
-      {cta && (
-        <div>
-          <Button
-            className="cta primary-solid rounded-sm"
-            onClick={cta.onClick}
-            type="button"
-          >
-            {cta.label}
-          </Button>
-        </div>
-      )}
+      <div className={"flex flex-col flex-1 gap-4 w-full"}>
+        <ActionCompletedRow text={'Create account'} />
+        <ActionCompletedRow text={'Confirm your details'} />
+        {apps.length ? (<ActionCompletedRow text={'Create your first app'} />) : (
+          <CTARow
+            text={'Create your first app'}
+            subtitle={"Now that your account is set up, it’s time to create your first application."}
+            CTA={<CreateAppButton className={"white-with-icon"} />}
+          />
+        )}
+        {apps.length ? (balance ? <ActionCompletedRow text={'Add credits'} /> : <CTARow text={'Add credits'} subtitle={'Your developer account needs DCX to function properly, purchase credits now'} CTA={<AddCreditsButton className={'white-with-icon'} />}/>) : null}
+      </div>
     </div>
   );
 };

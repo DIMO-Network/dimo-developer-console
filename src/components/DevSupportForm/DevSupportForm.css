@@ -1,0 +1,11 @@
+.form-dev-support {
+  @apply flex flex-col w-full;
+
+  .field {
+    @apply w-full;
+  }
+
+  .cta {
+    @apply flex w-full;
+  }
+}

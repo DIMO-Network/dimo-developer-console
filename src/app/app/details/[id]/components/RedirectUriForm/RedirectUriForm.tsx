@@ -124,19 +124,20 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
               role="redirect-url-input"
             />
           </Label>
-          {errors.uri && <TextError errorMessage={errors.uri?.message ?? ''} />}
         </div>
-        <div className="cta">
+        <div className="cta flex-[0.2]">
           <Button
-            className="primary-outline px-4"
+            className="white with-icon px-4"
             loading={isLoading}
             loadingColor="primary"
+            disabled={!!errors.uri}
           >
-            <PlusIcon className="w-5 h-5 mr-2" />
+            <PlusIcon className="w-5 h-5" />
             Add URI
           </Button>
         </div>
       </form>
+      {errors.uri && <div className={"mt-4"}><TextError errorMessage={errors.uri?.message ?? ''} /></div>}
     </div>
   );
 };
