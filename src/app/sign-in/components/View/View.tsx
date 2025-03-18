@@ -1,5 +1,5 @@
 'use client';
-import { ReactNode, useContext, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { setCookie } from 'cookies-next/client';
 
@@ -16,6 +16,7 @@ import * as Sentry from '@sentry/nextjs';
 import { OtpInputForm, PasskeyLogin, SignInMethodForm } from '@/app/sign-in/components';
 import { getUserInformation } from '@/actions/user';
 import { isCollaborator } from '@/utils/user';
+import { isNull } from 'lodash';
 
 enum SignInType {
   NONE = 'none',
@@ -86,7 +87,7 @@ export const View = () => {
         email: email,
       });
 
-      if (hasPasskey && isPasskeyAvailable) {
+      if (hasPasskey && !isNull(isPasskeyAvailable) && isPasskeyAvailable) {
         setSignInType(SignInType.PASSKEY);
       } else {
         setSignInType(SignInType.OTP);

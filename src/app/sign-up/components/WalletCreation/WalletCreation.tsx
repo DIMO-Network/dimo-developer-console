@@ -11,6 +11,7 @@ import { PasskeySignup } from '@/app/sign-up/components/WalletCreation/PasskeySi
 import { useSearchParams } from 'next/navigation';
 import { IPasskeyAttestation } from '@/types/wallet';
 import { OtpSignup } from './OtpSignup';
+import { isNull } from 'lodash';
 
 interface IProps {
   auth?: Partial<IAuth>;
@@ -80,16 +81,18 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     onNext('wallet-creation', {});
   };
 
-  const handleWalletCreation = useCallback(async (email: string) => {
+  const handleWalletCreation = async (email: string) => {
     try {
       const { success, encodedChallenge, attestation } = await tryCreatePasskey(email);
 
-      const { subOrganizationId } = await createUserGlobalAccount({
-        email,
-        encodedChallenge,
-        attestation,
-        deployAccount: true,
-      });
+      // const { subOrganizationId } = await createUserGlobalAccount({
+      //   email,
+      //   encodedChallenge,
+      //   attestation,
+      //   deployAccount: true,
+      // });
+
+      const subOrganizationId = '1234';
 
       setUser({
         email,
@@ -121,14 +124,15 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         'error',
       );
     }
-  }, []);
+  };
 
   useEffect(() => {
+    if (isNull(isPasskeyAvailable)) return;
     const email = searchParams.get('email');
     if (!email) return;
     setEmail(email);
     void handleWalletCreation(email);
-  }, [searchParams]);
+  }, [searchParams, isPasskeyAvailable]);
 
   return (
     <WalletCreationForm

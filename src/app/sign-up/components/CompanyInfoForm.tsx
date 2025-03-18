@@ -207,7 +207,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
             />
           </Label>
           {errors.type && <TextError errorMessage={errors.type.message ?? ''} />}
-          {!isEmpty(type) && type != 'Personal Developer'&& (
+          {!isEmpty(type) && type != 'Personal Developer' && (
             <CompanyForm control={control} register={register} errors={errors} />
           )}
           {!isEmpty(type) && type === 'Personal Developer' && (
