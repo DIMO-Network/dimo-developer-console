@@ -14,8 +14,8 @@ import * as Sentry from '@sentry/nextjs';
 
 import './Header.css';
 import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
-import {usePathname} from "next/navigation";
-import {getPageTitle} from "@/config/navigation";
+import { usePathname } from 'next/navigation';
+import { getPageTitle } from '@/config/navigation';
 
 export const Header: FC = () => {
   const { hasSession } = useContext(GlobalAccountAuthContext);

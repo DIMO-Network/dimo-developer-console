@@ -17,20 +17,22 @@ export const AppList: FC<IProps> = ({ apps }) => {
   const { user: { role = '' } = {} } = session ?? {};
 
   const renderItem = (app: IApp, idx: number) => {
-    return (
-      <AppCard key={app.id ?? idx} className="hover:!border-white" {...app} />
-    );
+    return <AppCard key={app.id ?? idx} className="hover:!border-white" {...app} />;
   };
 
   return (
     <div className="app-list-content">
       <div className="description">
         <p className="title">Your Apps</p>
-        {isOwner(role) && !!apps.length && (
-          <CreateAppButton />
-        )}
+        {isOwner(role) && !!apps.length && <CreateAppButton />}
       </div>
-      {apps.length ? <div className="app-list">{apps.map(renderItem)}</div> : <div className={"empty-list"}><EmptyList /></div>}
+      {apps.length ? (
+        <div className="app-list">{apps.map(renderItem)}</div>
+      ) : (
+        <div className={'empty-list'}>
+          <EmptyList />
+        </div>
+      )}
     </div>
   );
 };

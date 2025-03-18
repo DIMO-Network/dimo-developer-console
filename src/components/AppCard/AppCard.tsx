@@ -6,8 +6,8 @@ import { Card } from '@/components/Card';
 import { ENVIRONMENTS_LABELS, IApp } from '@/types/app';
 
 import './AppCard.css';
-import {Anchor} from "@/components/Anchor";
-import {Button} from "@/components/Button";
+import { Anchor } from '@/components/Anchor';
+import { Button } from '@/components/Button';
 
 interface IProps extends Partial<IApp> {
   className?: string;
@@ -30,15 +30,15 @@ export const AppCard: FC<IProps> = ({
   return (
     <Card className={classNames('app-card', className)}>
       <div className="content">
-        <div className={"flex w-full flex-row justify-between items-center"}>
+        <div className={'flex w-full flex-row justify-between items-center'}>
           <p className="title">{name}</p>
           {AppIcon[scope || 'sandbox']}
         </div>
-        <p className="app-card-description">{description || ENVIRONMENTS_LABELS[scope]}</p>
+        <p className="app-card-description">
+          {description || ENVIRONMENTS_LABELS[scope]}
+        </p>
         <Anchor href={`/app/details/${id}`}>
-          <Button className={'dark w-full !h-10'}>
-            App Details
-          </Button>
+          <Button className={'dark w-full !h-10'}>App Details</Button>
         </Anchor>
       </div>
     </Card>

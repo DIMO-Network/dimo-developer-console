@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
-import {createApp} from '@/actions/app';
+import { createApp } from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
@@ -31,7 +31,7 @@ import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
-import {Loading} from "@/components/Loading";
+import { Loading } from '@/components/Loading';
 import './Form.css';
 
 const { CONTRACT_METHODS } = configuration;
@@ -227,9 +227,9 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
 
   if (isLoading) {
     return (
-      <div className={"flex flex-col flex-1 items-center"}>
-        <Loading className={"!h-9 !w-9 text-primary-200"} />
-        <p className={"text-xl text-center mt-3"}>{loadingStatus?.label ?? 'Loading'}</p>
+      <div className={'flex flex-col flex-1 items-center'}>
+        <Loading className={'!h-9 !w-9 text-primary-200'} />
+        <p className={'text-xl text-center mt-3'}>{loadingStatus?.label ?? 'Loading'}</p>
       </div>
     );
   }
@@ -255,7 +255,8 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
               <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
             )}
             <p className="text-sm text-text-secondary font-normal">
-              This is the namespace used across all your apps. It is a public name visible to other developers and users in the ecosystem.
+              This is the namespace used across all your apps. It is a public name visible
+              to other developers and users in the ecosystem.
             </p>
           </Label>
         )}
@@ -276,7 +277,9 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
           {errors?.app?.name && (
             <TextError errorMessage={errors?.app?.name?.message ?? ''} />
           )}
-          <p className="text-sm text-text-secondary font-normal">This name is for your reference only</p>
+          <p className="text-sm text-text-secondary font-normal">
+            This name is for your reference only
+          </p>
         </Label>
         <div className="flex flex-col pt-4 gap-4">
           <Button

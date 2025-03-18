@@ -14,7 +14,7 @@ interface IProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: FC<any>;
   isHighlighted?: boolean;
-  onClick?: () => void
+  onClick?: () => void;
 }
 
 export const MenuItem: FC<IProps> = ({
@@ -25,7 +25,7 @@ export const MenuItem: FC<IProps> = ({
   iconClassName,
   label,
   isHighlighted,
-  onClick
+  onClick,
 }) => {
   return (
     <li

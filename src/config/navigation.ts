@@ -26,7 +26,7 @@ const pageTitles: Record<string, string> = {
   '/app': 'Home',
   '/integrations': 'Integrations',
   '/api-status': 'API Status',
-  '/settings': 'Settings'
+  '/settings': 'Settings',
 };
 
 export const mainMenu = [

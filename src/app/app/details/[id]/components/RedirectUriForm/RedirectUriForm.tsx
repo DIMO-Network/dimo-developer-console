@@ -137,7 +137,11 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
           </Button>
         </div>
       </form>
-      {errors.uri && <div className={"mt-4"}><TextError errorMessage={errors.uri?.message ?? ''} /></div>}
+      {errors.uri && (
+        <div className={'mt-4'}>
+          <TextError errorMessage={errors.uri?.message ?? ''} />
+        </div>
+      )}
     </div>
   );
 };

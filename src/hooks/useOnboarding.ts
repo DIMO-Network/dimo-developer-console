@@ -1,10 +1,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-<<<<<<< HEAD
 import { useRouter } from 'next/navigation';
-=======
->>>>>>> redesign
 
 import { CreditsContext } from '@/context/creditsContext';
 import { getApps } from '@/actions/app';
@@ -48,10 +45,10 @@ export const useOnboarding = () => {
       getCurrentDimoBalance(),
     ]);
     if (!(balanceDCX > 0 || balanceDimo > 0)) {
-      setCta({
-        label: 'Purchase DCX',
-        onClick: handleOpenBuyCreditsModal,
-      });
+      // setCta({
+      //   label: 'Purchase DCX',
+      //   onClick: handleOpenBuyCreditsModal,
+      // });
     }
     //   } else if (apps.length === 0) {
     //     setCta({

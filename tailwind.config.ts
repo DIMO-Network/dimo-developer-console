@@ -16,18 +16,18 @@ const config: Config = {
       colors: {
         'charcoal': '#141012',
         'surface': {
-          'default': '#141012',
-          'sunken': '#0A0508',
-          'raised': '#201C1E'
+          default: '#141012',
+          sunken: '#0A0508',
+          raised: '#201C1E',
         },
         'cta': {
-          'default': '#322D2F'
+          default: '#322D2F',
         },
         'text': {
-          'secondary': '#BABABA'
+          secondary: '#BABABA',
         },
         'feedback': {
-          'success': "#0D7038"
+          success: '#0D7038',
         },
         'grey': {
           '50': '#f5f6f6',

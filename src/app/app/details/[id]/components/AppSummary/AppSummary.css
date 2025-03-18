@@ -10,6 +10,6 @@
   }
 
   .client-id-description {
-    @apply text-base text-text-secondary font-medium
+    @apply text-base text-text-secondary font-medium;
   }
 }
