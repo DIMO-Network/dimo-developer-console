@@ -34,6 +34,8 @@ import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import './Form.css';
 
+const { CONTRACT_METHODS } = configuration;
+
 const { DCX_IN_USD = 0.001 } = process.env;
 
 interface IProps {
@@ -135,7 +137,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
       value: BigInt(0),
       data: encodeFunctionData({
         abi: DimoCreditsABI,
-        functionName: '0xec88fc37',
+        functionName: CONTRACT_METHODS.MINT_IN_DIMO,
         args: [
           organizationInfo!.smartContractAddress,
           utils.toWei(
@@ -193,7 +195,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
         value: BigInt(0),
         data: encodeFunctionData({
           abi: DimoLicenseABI,
-          functionName: '0xaf509d9f',
+          functionName: CONTRACT_METHODS.ISSUE_IN_DC,
           args: [workspaceName],
         }),
       },

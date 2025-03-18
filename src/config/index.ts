@@ -2,6 +2,8 @@ import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
 
+const { CONTRACT_METHODS } = defaultConfig;
+
 type Configuration = {
   environment: string;
   appName: string;
@@ -25,6 +27,7 @@ type Configuration = {
   masFeePerGas: number;
   gasPrice: number;
   ISSUED_TOPIC: `0x${string}`;
+  CONTRACT_METHODS: Record<keyof typeof CONTRACT_METHODS, string>;
 };
 
 const getCurrentEnvironment = (): string => {
