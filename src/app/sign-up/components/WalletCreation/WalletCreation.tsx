@@ -1,5 +1,5 @@
 import { IAuth } from '@/types/auth';
-import { FC, ReactNode, useContext, useEffect, useState } from 'react';
+import { FC, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { useAuth, useGlobalAccount, usePasskey } from '@/hooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { NotificationContext } from '@/context/notificationContext';
@@ -23,15 +23,17 @@ enum WalletCreationType {
 }
 
 const WalletCreationForm = ({
+  email,
   type,
   singupComplete,
 }: {
+  email: string;
   type: WalletCreationType;
   singupComplete: () => void;
 }): ReactNode => {
   switch (type) {
     case WalletCreationType.OTP:
-      return <OtpSignup handleSignupComplete={singupComplete} />;
+      return <OtpSignup handleSignupComplete={singupComplete} email={email} />;
     case WalletCreationType.PASSKEY:
       return <PasskeySignup />;
   }
@@ -40,6 +42,7 @@ const WalletCreationForm = ({
 export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
   const searchParams = useSearchParams();
+  const [email, setEmail] = useState<string>('');
   const [walletCreationType, setWalletCreationType] = useState<WalletCreationType>(
     WalletCreationType.PASSKEY,
   );
@@ -77,7 +80,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     onNext('wallet-creation', {});
   };
 
-  const handleWalletCreation = async (email: string) => {
+  const handleWalletCreation = useCallback(async (email: string) => {
     try {
       const { success, encodedChallenge, attestation } = await tryCreatePasskey(email);
 
@@ -118,16 +121,18 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         'error',
       );
     }
-  };
+  }, []);
 
   useEffect(() => {
     const email = searchParams.get('email');
     if (!email) return;
+    setEmail(email);
     void handleWalletCreation(email);
   }, [searchParams]);
 
   return (
     <WalletCreationForm
+      email={email}
       type={walletCreationType}
       singupComplete={globalAccountSignupComplete}
     />

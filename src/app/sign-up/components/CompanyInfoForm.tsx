@@ -1,6 +1,12 @@
 'use client';
-import { FC } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { FC, ReactNode } from 'react';
+import {
+  useForm,
+  SubmitHandler,
+  FieldErrors,
+  Control,
+  UseFormRegister,
+} from 'react-hook-form';
 import { isURL, isEmpty } from 'validator';
 
 import { Button } from '@/components/Button';
@@ -33,16 +39,138 @@ interface IProps {
   onNext: (flow: string, auth?: Partial<IAuth>) => void;
 }
 
+interface IFormProps {
+  register: UseFormRegister<CompanyInfoInputs>;
+  control: Control<CompanyInfoInputs, any>;
+  errors: FieldErrors<CompanyInfoInputs>;
+}
+
+const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
+  return (
+    <>
+      <Label htmlFor="name" className="text-xs text-medium">
+        Company name
+        <TextField
+          type="text"
+          placeholder="ACME"
+          {...register('name', {
+            required: 'This field is required',
+            maxLength: {
+              value: 120,
+              message: 'The name should has maximum 120 characters',
+            },
+          })}
+          role="company-name-input"
+        />
+      </Label>
+      {errors.name && <TextError errorMessage={errors?.name?.message ?? ''} />}
+      <Label htmlFor="website" className="text-xs text-medium">
+        Company website
+        <TextField
+          type="text"
+          placeholder="www.acme.zone"
+          {...register('website', {
+            required: false,
+            maxLength: {
+              value: 120,
+              message: 'The name should has maximum 120 characters',
+            },
+            validate: {
+              isURL: (str: string = '') => isEmpty(str) || isURL(str),
+            },
+          })}
+          role="company-website-input"
+        />
+      </Label>
+      {errors.website && (
+        <TextError errorMessage="This field must be a valid URL with maximum 120 characters" />
+      )}
+      <Label htmlFor="region" className="text-xs text-medium">
+        Main Operating Region *
+        <SelectField
+          {...register('region', {
+            required: 'This field is required',
+          })}
+          options={regionOptions}
+          control={control}
+          placeholder="Select"
+          role="company-region"
+        />
+      </Label>
+      {errors.region && <TextError errorMessage={errors.region.message ?? ''} />}
+    </>
+  );
+};
+const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNode => {
+  return (
+    <>
+      <Label htmlFor="name" className="text-xs text-medium">
+        Name
+        <TextField
+          type="text"
+          placeholder="Bruce Wayne"
+          {...register('name', {
+            required: 'This field is required',
+            maxLength: {
+              value: 120,
+              message: 'The name should has maximum 120 characters',
+            },
+          })}
+          role="company-name-input"
+        />
+      </Label>
+      {errors.name && <TextError errorMessage={errors?.name?.message ?? ''} />}
+      <Label htmlFor="website" className="text-xs text-medium">
+        Social URL
+        <TextField
+          type="text"
+          placeholder="https://instagram.com/batman"
+          {...register('website', {
+            required: false,
+            maxLength: {
+              value: 120,
+              message: 'The name should has maximum 120 characters',
+            },
+            validate: {
+              isURL: (str: string = '') => isEmpty(str) || isURL(str),
+            },
+          })}
+          role="company-website-input"
+        />
+      </Label>
+      {errors.website && (
+        <TextError errorMessage="This field must be a valid URL with maximum 120 characters" />
+      )}
+      <Label htmlFor="region" className="text-xs text-medium">
+        Region *
+        <SelectField
+          {...register('region', {
+            required: 'This field is required',
+          })}
+          options={regionOptions}
+          control={control}
+          placeholder="Select"
+          role="company-region"
+        />
+      </Label>
+      {errors.region && <TextError errorMessage={errors.region.message ?? ''} />}
+    </>
+  );
+};
+
 export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
   const {
     control,
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<CompanyInfoInputs>({
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
+
+  const type = watch('type', '');
 
   const onSubmit: SubmitHandler<CompanyInfoInputs> = (data) => {
     updateUser(data);
@@ -79,57 +207,13 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
             />
           </Label>
           {errors.type && <TextError errorMessage={errors.type.message ?? ''} />}
-          <Label htmlFor="name" className="text-xs text-medium">
-            Company name
-            <TextField
-              type="text"
-              placeholder="ACME"
-              {...register('name', {
-                required: 'This field is required',
-                maxLength: {
-                  value: 120,
-                  message: 'The name should has maximum 120 characters',
-                },
-              })}
-              role="company-name-input"
-            />
-          </Label>
-          {errors.name && <TextError errorMessage={errors?.name?.message ?? ''} />}
-          <Label htmlFor="website" className="text-xs text-medium">
-            Company website
-            <TextField
-              type="text"
-              placeholder="www.acme.zone"
-              {...register('website', {
-                required: false,
-                maxLength: {
-                  value: 120,
-                  message: 'The name should has maximum 120 characters',
-                },
-                validate: {
-                  isURL: (str: string = '') => isEmpty(str) || isURL(str),
-                },
-              })}
-              role="company-website-input"
-            />
-          </Label>
-          {errors.website && (
-            <TextError errorMessage="This field must be a valid URL with maximum 120 characters" />
+          {!isEmpty(type) && type != 'Personal Developer'&& (
+            <CompanyForm control={control} register={register} errors={errors} />
           )}
-          <Label htmlFor="region" className="text-xs text-medium">
-            Main Operating Region *
-            <SelectField
-              {...register('region', {
-                required: 'This field is required',
-              })}
-              options={regionOptions}
-              control={control}
-              placeholder="Select"
-              role="company-region"
-            />
-          </Label>
-          {errors.region && <TextError errorMessage={errors.region.message ?? ''} />}
-          
+          {!isEmpty(type) && type === 'Personal Developer' && (
+            <SingleDeveloperForm control={control} register={register} errors={errors} />
+          )}
+
           <div className="flex flex-col pt-4">
             <Button type="submit" className="primary" role="finish-button">
               Finish sign up
