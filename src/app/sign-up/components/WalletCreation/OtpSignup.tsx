@@ -1,13 +1,16 @@
 import { Anchor } from '@/components/Anchor';
-import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
-import { FC, useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/Button';
+import { useState, useRef, useEffect, FC } from 'react';
 
-interface IProps {}
+interface IProps {
+  email: string;
+  handleSignupComplete: () => void;
+}
 
-export const OtpInputForm: FC<IProps> = ({}) => {
+export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const inputRefs = useRef<HTMLInputElement[]>([]);
@@ -75,7 +78,9 @@ export const OtpInputForm: FC<IProps> = ({}) => {
     try {
       setIsLoading(true);
       await completeOtpLogin({ otp: otpString, otpId });
-    } catch (error) {
+      handleSignupComplete();
+    } catch (error: unknown) {
+      console.error(error);
       //Sentry.captureException(error);
     } finally {
       setIsLoading(false);
@@ -96,13 +101,13 @@ export const OtpInputForm: FC<IProps> = ({}) => {
   };
   return (
     <>
-      <div className="sign-in__form">
-        <div className="sign-in__header">
+      <div className="sign-up__form">
+        <div className="sign-up__header">
           <p className={gtSuper.className}>Welcome back!</p>
         </div>
         <div className="otp-login-text">
           <p>
-            Enter the code sent to <strong>{'bruce.w@batman.com'}</strong>
+            Enter the code sent to <strong>{email}</strong>
           </p>
         </div>
         <div className="otp-inputs">
@@ -143,7 +148,7 @@ export const OtpInputForm: FC<IProps> = ({}) => {
             Resend Code
           </Button>
         </div>
-        <div className="sign-in__extra-links">
+        <div className="sign-up__extra-links">
           <div className="flex flex-row">
             <p className="terms-caption">
               Trouble logging in?{' '}

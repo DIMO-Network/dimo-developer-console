@@ -1,10 +1,10 @@
 import { OnrampSessionResult } from '@stripe/crypto';
 import { AuthClient } from '@turnkey/sdk-browser';
 
-export interface IWalletSubOrganization {
+export interface ICreateGlobalAccountRequest {
   email: string;
-  encodedChallenge?: string;
-  attestation?: IPasskeyAttestation;
+  encodedChallenge: string;
+  attestation: IPasskeyAttestation;
   deployAccount: boolean;
 }
 

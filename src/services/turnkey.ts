@@ -8,6 +8,8 @@ import {
   getPublicKey,
 } from '@turnkey/crypto';
 import { uint8ArrayToHexString, uint8ArrayFromHexString } from '@turnkey/encoding';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { IGlobalAccountSession } from '@/types/wallet';
 
 export const getTurnkeyClient = ({
   authKey,
@@ -30,6 +32,19 @@ export const getTurnkeyClient = ({
       apiPrivateKey: privateKey,
     }),
   );
+};
+
+export const getSessionTurnkeyClient = (): TurnkeyClient | null => {
+  const eKey = getFromLocalStorage<string>(EmbeddedKey);
+  const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+
+  if (!eKey || !session) {
+    return null;
+  }
+
+  const { token } = session;
+
+  return getTurnkeyClient({ authKey: token, eKey });
 };
 
 export const getTurnkeyWalletAddress = async ({

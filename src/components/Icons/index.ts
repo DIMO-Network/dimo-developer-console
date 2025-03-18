@@ -30,3 +30,4 @@ export * from './CheckIcon';
 export * from './ClickIcon';
 export * from './ErrorIcon';
 export * from './SuccessIcon';
+export * from './UserIcon';

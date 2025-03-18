@@ -19,26 +19,34 @@ import {
 import configuration from '@/config';
 import { getCachedDimoPrice } from '@/services/pricing';
 import { handleOnChainError } from '@/utils/wallet';
+import { getKernelClient, getPublicClient } from '@/services/zerodev';
+import { getSessionTurnkeyClient } from '@/services/turnkey';
 
 const { DCX_IN_USD = 0.001 } = process.env;
 
 export const useContractGA = () => {
-  const { validateCurrentSession } = useGlobalAccount();
+  const { validateCurrentSession, getCurrentDcxBalance, getCurrentDimoBalance } =
+    useGlobalAccount();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const processTransactions = async (transactions: Array<any>) => {
     try {
       const currentSession = await validateCurrentSession();
       if (!currentSession) return {} as IKernelOperationStatus;
-      const { organization: organizationInfo, session } = currentSession;
+      const { subOrganizationId, walletAddress } = currentSession;
+
+      const turnkeyClient = getSessionTurnkeyClient();
+
+      if (!turnkeyClient) return {} as IKernelOperationStatus;
 
       const kernelClient = await getKernelClient({
-        organizationInfo,
-        authClient: session.authenticator,
-        authKey: session.token,
+        subOrganizationId,
+        walletAddress: walletAddress,
+        client: turnkeyClient,
       });
 
       if (!kernelClient) return {} as IKernelOperationStatus;
+
       const operation = await kernelClient.account.encodeCalls(transactions);
       const dcxExchangeOpHash = await kernelClient.sendUserOperation({
         callData: operation,
@@ -71,14 +79,15 @@ export const useContractGA = () => {
     try {
       const currentSession = await validateCurrentSession();
       if (!currentSession) return DEFAULT_AMOUNTS;
-      const { subOrganizationId } = currentSession;
-      if (!subOrganizationId) return DEFAULT_AMOUNTS;
+      const { subOrganizationId, walletAddress } = currentSession;
+      const turnkeyClient = getSessionTurnkeyClient();
+      if (!turnkeyClient) return DEFAULT_AMOUNTS;
 
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
-        organizationInfo,
-        authClient: session.authenticator,
-        authKey: session.token,
+        subOrganizationId: subOrganizationId,
+        walletAddress: walletAddress,
+        client: turnkeyClient,
       });
 
       if (!kernelClient) return DEFAULT_AMOUNTS;
@@ -121,12 +130,9 @@ export const useContractGA = () => {
     try {
       const currentSession = await validateCurrentSession();
       if (!currentSession) return DEFAULT_TOKEN_BALANCE;
-      const { organization: organizationInfo } = currentSession;
-      if (!organizationInfo) return DEFAULT_TOKEN_BALANCE;
-
       const desiredTokenAmount = await getDesiredTokenAmount();
-      const dimoBalance = await getDimoBalance();
-      const dcxBalance = await getDcxBalance();
+      const dimoBalance = await getCurrentDimoBalance();
+      const dcxBalance = await getCurrentDcxBalance();
       const dcxAllowance = await getDcxAllowance();
 
       return {
@@ -146,13 +152,16 @@ export const useContractGA = () => {
     try {
       const currentSession = await validateCurrentSession();
       if (!currentSession) return 0;
-      const { organization: organizationInfo, session } = currentSession;
-      if (!organizationInfo) return 0;
+      const { subOrganizationId, walletAddress, smartContractAddress } = currentSession;
+      const turnkeyClient = getSessionTurnkeyClient();
+
+      if (!turnkeyClient) return 0;
+
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
-        organizationInfo,
-        authClient: session.authenticator,
-        authKey: session.token,
+        subOrganizationId,
+        walletAddress,
+        client: turnkeyClient,
       });
 
       if (!kernelClient) {
@@ -160,7 +169,7 @@ export const useContractGA = () => {
       }
 
       const polBalance = await publicClient.getBalance({
-        address: organizationInfo.smartContractAddress,
+        address: smartContractAddress,
       });
 
       return Number(utils.fromWei(polBalance as bigint, 'ether'));
@@ -175,13 +184,15 @@ export const useContractGA = () => {
     try {
       const currentSession = await validateCurrentSession();
       if (!currentSession) return 0;
-      const { organization: organizationInfo, session } = currentSession;
-      if (!organizationInfo) return 0;
+      const { subOrganizationId, walletAddress, smartContractAddress } = currentSession;
+      const turnkeyClient = getSessionTurnkeyClient();
+
+      if (!turnkeyClient) return 0;
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
-        organizationInfo,
-        authClient: session.authenticator,
-        authKey: session.token,
+        subOrganizationId,
+        walletAddress,
+        client: turnkeyClient,
       });
 
       if (!kernelClient) {
@@ -197,9 +208,7 @@ export const useContractGA = () => {
         },
       });
 
-      const wmaticBalance = await contract.read.balanceOf([
-        organizationInfo.smartContractAddress,
-      ]);
+      const wmaticBalance = await contract.read.balanceOf([smartContractAddress]);
 
       return Number(utils.fromWei(wmaticBalance as bigint, 'ether'));
     } catch (e: unknown) {
@@ -213,13 +222,15 @@ export const useContractGA = () => {
     try {
       const currentSession = await validateCurrentSession();
       if (!currentSession) return 0;
-      const { organization: organizationInfo, session } = currentSession;
-      if (!organizationInfo) return 0;
+      const { subOrganizationId, walletAddress, smartContractAddress } = currentSession;
+      const turnkeyClient = getSessionTurnkeyClient();
+
+      if (!turnkeyClient) return 0;
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
-        organizationInfo,
-        authClient: session.authenticator,
-        authKey: session.token,
+        subOrganizationId,
+        walletAddress,
+        client: turnkeyClient,
       });
 
       if (!kernelClient) {
@@ -236,7 +247,7 @@ export const useContractGA = () => {
       });
 
       const currentAllowanceOnWei = await dimoContract.read.allowance([
-        organizationInfo!.smartContractAddress,
+        smartContractAddress,
         configuration.DLC_ADDRESS,
       ]);
 
@@ -252,13 +263,15 @@ export const useContractGA = () => {
     try {
       const currentSession = await validateCurrentSession();
       if (!currentSession) return 0;
-      const { organization: organizationInfo, session } = currentSession;
-      if (!organizationInfo) return 0;
+      const { subOrganizationId, walletAddress, smartContractAddress } = currentSession;
+      const turnkeyClient = getSessionTurnkeyClient();
+
+      if (!turnkeyClient) return 0;
       const publicClient = getPublicClient();
       const kernelClient = await getKernelClient({
-        organizationInfo,
-        authClient: session.authenticator,
-        authKey: session.token,
+        subOrganizationId,
+        walletAddress,
+        client: turnkeyClient,
       });
 
       if (!kernelClient) {
@@ -275,7 +288,7 @@ export const useContractGA = () => {
       });
 
       const currentAllowanceOnWei = await dimoContract.read.allowance([
-        organizationInfo!.smartContractAddress,
+        smartContractAddress,
         configuration.DCX_ADDRESS,
       ]);
 
@@ -293,13 +306,15 @@ export const useContractGA = () => {
   ): Promise<void> => {
     const currentSession = await validateCurrentSession();
     if (!currentSession) return;
-    const { organization: organizationInfo, session } = currentSession;
-    if (!organizationInfo) return;
+    const { subOrganizationId, walletAddress } = currentSession;
+    const turnkeyClient = getSessionTurnkeyClient();
+
+    if (!turnkeyClient) return;
     const publicClient = getPublicClient();
     const kernelClient = await getKernelClient({
-      organizationInfo,
-      authClient: session.authenticator,
-      authKey: session.token,
+      subOrganizationId,
+      walletAddress,
+      client: turnkeyClient,
     });
 
     if (!kernelClient) {

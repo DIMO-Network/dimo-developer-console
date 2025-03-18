@@ -21,7 +21,7 @@ export const useOnboarding = () => {
   const [balance, setBalance] = useState<number>(0);
   const router = useRouter();
   const { setIsOpen } = useContext(CreditsContext);
-  const { currentUser } = useGlobalAccount();
+  const { currentUser, getCurrentDcxBalance, getCurrentDimoBalance } = useGlobalAccount();
 
   const loadAppsAndWorkspace = async (): Promise<void> => {
     try {
@@ -32,7 +32,7 @@ export const useOnboarding = () => {
       const currentWorkspace = await getWorkspace();
       setWorkspace(currentWorkspace);
 
-      const dcxBalance = await getDcxBalance();
+      const dcxBalance = await getCurrentDcxBalance();
       setBalance(dcxBalance);
     } catch (error: unknown) {
       Sentry.captureException(error);
@@ -43,15 +43,16 @@ export const useOnboarding = () => {
 
   const setCtas = async () => {
     // if (isOwner(role)) {
-    //   const [balanceDCX, balanceDimo] = await Promise.all([
-    //     getDcxBalance(),
-    //     getDimoBalance(),
-    //   ]);
-    //   if (!(balanceDCX > 0 || balanceDimo > 0)) {
-    //     setCta({
-    //       label: 'Purchase DCX',
-    //       onClick: handleOpenBuyCreditsModal,
-    //     });
+    const [balanceDCX, balanceDimo] = await Promise.all([
+      getCurrentDcxBalance(),
+      getCurrentDimoBalance(),
+    ]);
+    if (!(balanceDCX > 0 || balanceDimo > 0)) {
+      setCta({
+        label: 'Purchase DCX',
+        onClick: handleOpenBuyCreditsModal,
+      });
+    }
     //   } else if (apps.length === 0) {
     //     setCta({
     //       label: 'Create an app',

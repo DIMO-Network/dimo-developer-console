@@ -38,12 +38,12 @@ const View = () => {
   const { setNotification } = useContext(NotificationContext);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentFlow = searchParams.get('flow') ?? 'wallet-creation';
+  const currentFlow = searchParams.get('flow') ?? 'company-information';
   const [flow, setFlow] = useState(currentFlow);
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
 
   const { Component: SignUpFlow, title } =
-    signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['wallet-creation'];
+    signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['company-information'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
     try {

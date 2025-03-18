@@ -1,8 +1,5 @@
 import { wagmiAbi } from '@/contracts/wagmi';
-import {
-  decodeErrorResult,
-  HttpRequestError,
-} from 'viem';
+import { decodeErrorResult, HttpRequestError } from 'viem';
 import Web3 from 'web3';
 
 export const generateWallet = () => {

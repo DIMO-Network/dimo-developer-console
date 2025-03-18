@@ -19,9 +19,24 @@ export const withGlobalAccounts = <P extends object>(
   const HOC: React.FC<P> = (props) => {
     const [user, setUser] = useState<IUserSession | null>(null);
 
-    const validateCurrentSession = async (): Promise<IGlobalAccountSession | null> => {
-      const storedSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      return storedSession;
+    const validateCurrentSession = async (): Promise<IUserSession | null> => {
+      if (!user) return null;
+
+      const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+
+      if (!session) {
+        return null;
+      }
+
+      const { expiry } = session;
+
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+
+      if (expiry < nowInSeconds) {
+        await logout();
+        return null;
+      }
+      return user;
     };
 
     const getCurrentDimoBalance = async (): Promise<number> => {

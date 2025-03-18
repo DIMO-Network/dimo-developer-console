@@ -1,11 +1,10 @@
 'use client';
 
 import { IUserSession } from '@/types/user';
-import { IGlobalAccountSession } from '@/types/wallet';
 import { createContext } from 'react';
 
 interface IProps {
-  validateCurrentSession: () => Promise<IGlobalAccountSession | null>;
+  validateCurrentSession: () => Promise<IUserSession | null>;
   currentUser: IUserSession | null;
   getCurrentDimoBalance: () => Promise<number>;
   getCurrentDcxBalance: () => Promise<number>;

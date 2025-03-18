@@ -26,9 +26,10 @@ const fifteenMinutes = 15 * 60;
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
     const router = useRouter();
-    const [user, setUser] = useState<{ email: string; subOrganizationId: string } | null>(
-      null,
-    );
+    const [user, setUser] = useState<{
+      email: string;
+      subOrganizationId: string;
+    } | null>(null);
 
     const createSession = async ({
       accessToken,
@@ -155,8 +156,6 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         credentialBundle,
         privateKey: key.privateKey,
       });
-
-      router.push('/app');
     };
 
     const logout = async () => {

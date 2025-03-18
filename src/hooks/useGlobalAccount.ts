@@ -1,54 +1,7 @@
 'use client';
 
 import { useContext } from 'react';
-import {
-  createSubOrganization,
-  getUserSubOrganization,
-  rewirePasskey,
-  startEmailRecovery,
-} from '@/services/globalAccount';
-import { ApiKeyStamper, AuthClient } from '@turnkey/sdk-browser';
-import {
-  generateP256KeyPair,
-  decryptCredentialBundle,
-  getPublicKey,
-} from '@turnkey/crypto';
-import { uint8ArrayToHexString, uint8ArrayFromHexString } from '@turnkey/encoding';
-import {
-  IGlobalAccountSession,
-  IKernelOperationStatus,
-  IPasskeyAttestation,
-  ISubOrganization,
-} from '@/types/wallet';
-import { TurnkeyClient } from '@turnkey/http';
-import configuration from '@/config';
-import config from '@/config';
-import { turnkeyConfig } from '@/config/turnkey';
-import {
-  decodeErrorResult,
-  encodeFunctionData,
-  getContract,
-  HttpRequestError,
-} from 'viem';
-
-import WMatic from '@/contracts/wmatic.json';
-import UniversalRouter from '@/contracts/uniswapRouter.json';
-
-import { wagmiAbi } from '@/contracts/wagmi';
-import { utils } from 'web3';
-import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
-
-import * as Sentry from '@sentry/nextjs';
-import { usePasskey } from '@/hooks';
-import { GlobalAccountSession, saveToSession } from '@/utils/sessionStorage';
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
-import {
-  EmbeddedKey,
-  getFromLocalStorage,
-  saveToLocalStorage,
-} from '@/utils/localStorage';
-import { getTurnkeyWallet } from '@/services/turnkey';
-import { getKernelClient } from '@/services/zerodev';
 
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 

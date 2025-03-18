@@ -1,5 +1,5 @@
 import config from '@/config';
-import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
+import { ISubOrganization, ICreateGlobalAccountRequest } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import axios, { AxiosError } from 'axios';
 
@@ -26,7 +26,7 @@ export const getUserSubOrganization = async (
 };
 
 export const createSubOrganization = async (
-  walletInfo: Partial<IWalletSubOrganization>,
+  walletInfo: Partial<ICreateGlobalAccountRequest>,
 ): Promise<ISubOrganization> => {
   const { data } = await globalAccountClient.post<ISubOrganization>(
     '/api/account',
