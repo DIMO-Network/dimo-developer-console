@@ -28,6 +28,12 @@ export const deleteMyApp = async (id: string) => {
   await client.delete<IApp>(`/api/my/apps/${id}`);
 };
 
+export const updateMyApp = async (id: string, app: Partial<IApp>) => {
+  const client = await dimoDevAPIClient();
+  const { data } = await client.put<IApp>(`/api/my/apps/${id}`, app);
+  return data;
+};
+
 export const createRedirectUri = async (id: string, newData: Partial<IRedirectUri>) => {
   const client = await dimoDevAPIClient();
   const { data } = await client.post<IRedirectUri>(

@@ -14,7 +14,6 @@ import { deleteCollaborator } from '@/actions/team';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { UserAvatar } from '@/components/UserAvatar';
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
@@ -33,7 +32,6 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
 
     return (
       <div className="flex flex-row items-center gap-3">
-        <UserAvatar name={name ?? email ?? ''} />
         <p>{name ?? email ?? ''}</p>
       </div>
     );
