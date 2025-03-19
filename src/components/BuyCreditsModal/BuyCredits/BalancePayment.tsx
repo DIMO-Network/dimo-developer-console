@@ -1,7 +1,7 @@
 'use client';
 
-import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
-import { useContractGA } from '@/hooks';
+import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { useContractGA, useGlobalAccount } from '@/hooks';
 import { useEffect, useState } from 'react';
 import classnames from 'classnames';
 import { Card } from '@/components/Card';
@@ -10,7 +10,6 @@ import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import configuration from '@/config';
 import * as Sentry from '@sentry/nextjs';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
@@ -23,7 +22,8 @@ interface ICryptoBalance {
 }
 
 export const BalancePayment = ({ onNext, transactionData }: IProps) => {
-  const { getDimoBalance, getPolBalance, getWmaticBalance } = useContractGA();
+  const { getPolBalance, getWmaticBalance } = useContractGA();
+  const { getCurrentDimoBalance, currentUser } = useGlobalAccount();
   const { getDimoPrice, getPolPrice, getWMaticPrice } = useCryptoPricing();
 
   const [balances, setBalances] = useState<ICryptoBalance[]>([]);
@@ -34,13 +34,11 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   });
 
   const getBalances = async (): Promise<void> => {
-    try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const organizationInfo = gaSession?.organization;
-      if (!organizationInfo) return;
+    try {      
+      if (!currentUser) return;
       const [dimoBalance, polBalance, wmaticBalance, dimoPrice, polPrice, wmaticPrice] =
         await Promise.all([
-          getDimoBalance(),
+          getCurrentDimoBalance(),
           getPolBalance(),
           getWmaticBalance(),
           getDimoPrice(),

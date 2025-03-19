@@ -66,7 +66,7 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin, handleCTA }) => {
           <div className="divider"></div>
         </div>
         <div className="sign-in__buttons">
-          <SignInButtons isSignIn={true} disabled={false} onCTA={handleCTA} />
+          <SignInButtons disabled={false} onCTA={handleCTA} />
         </div>
         <div className="sign-in__extra-links">
           <div className="flex flex-row">

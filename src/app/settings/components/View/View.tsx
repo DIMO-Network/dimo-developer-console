@@ -21,7 +21,7 @@ const View: FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
   const { currentUser } = useGlobalAccount();
-
+// TODO: check why curremtUser!.role is not working here
   return (
     <div className="settings-page">
       <div className="titles">
@@ -38,7 +38,7 @@ const View: FC = () => {
           <div className="team-information">
             <div className="team-header">
               <Title component="h2">Team Management</Title>
-              {isOwner(currentUser!.role) && (
+              {isOwner(currentUser?.role ?? '') && (
                 <Button className="primary" onClick={() => setIsOpen(!isOpen)}>
                   Invite team <PlusIcon className="h-5 w-5" />
                 </Button>

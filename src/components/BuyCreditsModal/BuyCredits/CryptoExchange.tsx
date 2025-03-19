@@ -1,6 +1,6 @@
 'use client';
 
-import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
+import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import { useContext, useEffect, useState } from 'react';
 import { Loading } from '@/components/Loading';
@@ -13,7 +13,6 @@ import DimoABI from '@/contracts/DimoTokenContract.json';
 import { utils } from 'web3';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import * as Sentry from '@sentry/nextjs';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IProps {
   onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
@@ -51,8 +50,8 @@ const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus }
 
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const { setNotification } = useContext(NotificationContext);
-  const { getDcxAllowance, processTransactions } = useContractGA();
-  const { depositWmatic, swapWmaticToDimo } = useGlobalAccount();
+  const { getDcxAllowance, processTransactions, depositWmatic, swapWmaticToDimo } = useContractGA();
+  const { currentUser } = useGlobalAccount();
 
   const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
     LoadingStatus.None,
@@ -65,9 +64,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       value: bigint;
       data: `0x${string}`;
     }[]
-  > => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
+  > => {    
     const transactions = [];
     const expendableDimo = transactionData!.requiredDimoAmount!;
 
@@ -94,7 +91,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
         abi: DimoCreditsABI,
         functionName: '0xec88fc37',
         args: [
-          organizationInfo!.smartContractAddress,
+          currentUser!.smartContractAddress,
           BigInt(utils.toWei(expendableDimo, 'ether')),
         ],
       }),
@@ -156,9 +153,6 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   };
 
   useEffect(() => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo?.subOrganizationId) return;
     if (!transactionData) return;
     if (transactionData.alreadyHasDimo) {
       setSwappingIntoDimo(LoadingStatus.Success);
@@ -170,9 +164,6 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   }, [swappingIntoDimo, transactionData]);
 
   useEffect(() => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo?.subOrganizationId) return;
     if (swappingIntoDimo === LoadingStatus.Success && mintingDCX === LoadingStatus.None) {
       void handleMintingDcx();
     }

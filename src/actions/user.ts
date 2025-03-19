@@ -1,7 +1,8 @@
 'use server';
 import { existUserByEmailOrAddress, getUserByToken } from '@/services/user';
-import { createSubOrganization, getUserSubOrganization } from '@/services/globalAccount';
+import { createSubOrganization, getUserSubOrganization, rewirePasskey, startEmailRecovery } from '@/services/globalAccount';
 import { ICreateGlobalAccountRequest, ISubOrganization } from '@/types/wallet';
+import { TSignedRequest } from '@turnkey/http';
 
 export const getUser = async () => {
   return getUserByToken();
@@ -37,4 +38,27 @@ export const createUserGlobalAccount = async (
 ): Promise<ISubOrganization> => {
   const newOrg = await createSubOrganization(request);
   return newOrg;
+};
+
+
+export const emailRecovery = async (email: string, targetPublicKey: string) => {
+   await startEmailRecovery({email, key: targetPublicKey});
+   return true;
+};
+
+export const saveNewPasskey = async ({
+  email,
+  signedRecoveryRequest,
+  signedAuthenticatorRemoval,
+}: {
+  email: string;
+  signedRecoveryRequest: TSignedRequest;
+  signedAuthenticatorRemoval: TSignedRequest;
+}) => {
+  await rewirePasskey({
+    email,
+    signedRecoveryRequest,
+    signedAuthenticatorRemoval,
+  });
+  return true;
 };

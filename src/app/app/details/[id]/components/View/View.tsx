@@ -20,8 +20,6 @@ import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriLi
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { Title } from '@/components/Title';
 import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
-import { IGlobalAccountSession } from '@/types/wallet';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
@@ -34,7 +32,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
-  const { currentUser, validateCurrentSession } = useGlobalAccount();
+  const { currentUser } = useGlobalAccount();
   const { workspace } = useOnboarding();
   const { processTransactions } = useContractGA();
   const router = useRouter();

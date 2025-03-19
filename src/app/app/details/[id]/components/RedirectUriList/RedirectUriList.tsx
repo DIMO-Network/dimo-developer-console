@@ -11,8 +11,6 @@ import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { Toggle } from '@/components/Toggle';
 import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
-import { IGlobalAccountSession } from '@/types/wallet';
 import { Button } from '@/components/Button';
 
 import configuration from '@/config';

@@ -1,10 +1,7 @@
 'use client';
-import { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { ReactNode, useContext, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { setCookie } from 'cookies-next/client';
-
-import Image from 'next/image';
-
 import { Anchor } from '@/components/Anchor';
 import { IAuth } from '@/types/auth';
 import { useAuth, useErrorHandler, usePasskey } from '@/hooks';
@@ -63,7 +60,8 @@ export const View = () => {
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     //await signIn(app, auth);
-    await handleExternalAuth(app);
+    console.info('handleCTA', app, auth);
+    handleExternalAuth(app);
   };
 
   const handleLogin = async (email: string) => {

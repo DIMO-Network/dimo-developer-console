@@ -41,6 +41,7 @@ interface IProps {
 
 interface IFormProps {
   register: UseFormRegister<CompanyInfoInputs>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<CompanyInfoInputs, any>;
   errors: FieldErrors<CompanyInfoInputs>;
 }

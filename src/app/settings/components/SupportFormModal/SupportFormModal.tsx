@@ -3,10 +3,9 @@ import { type FC, useContext } from 'react';
 import * as Sentry from '@sentry/nextjs';
 
 import { DevSupportForm } from '@/components/DevSupportForm';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 import { handleSupportRequest } from '@/app/settings/actions';
 import { IDevSupportForm, ISupportRequest } from '@/types/support';
-import { IGlobalAccountSession } from '@/types/wallet';
+
 import { Modal } from '@/components/Modal';
 import { NotificationContext } from '@/context/notificationContext';
 import { Title } from '@/components/Title';

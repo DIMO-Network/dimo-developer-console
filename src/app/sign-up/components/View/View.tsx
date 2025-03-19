@@ -41,7 +41,7 @@ const View = () => {
   const [flow, setFlow] = useState(currentFlow);
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
 
-  const { Component: SignUpFlow, title } =
+  const { Component: SignUpFlow } =
     signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['wallet-creation'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {

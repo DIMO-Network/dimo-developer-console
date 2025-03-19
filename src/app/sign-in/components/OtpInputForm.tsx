@@ -7,7 +7,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 
 interface IProps {}
 
-export const OtpInputForm: FC<IProps> = ({}) => {
+export const OtpInputForm: FC<IProps> = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const inputRefs = useRef<HTMLInputElement[]>([]);

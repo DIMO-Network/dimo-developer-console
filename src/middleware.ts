@@ -123,6 +123,7 @@ const validatePublicSession = async (request: NextRequest) => {
   return NextResponse.next();
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
   const hasError = request.nextUrl.searchParams.get('error');
   const token = await getToken({ req: request });

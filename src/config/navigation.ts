@@ -1,6 +1,5 @@
 import { type FC } from 'react';
 import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline';
-import { signOut } from 'next-auth/react';
 
 import {
   HomeIcon,
@@ -80,8 +79,7 @@ export const bottomMenu = [
     link: () => {
       turnkeyClient.logoutUser();
       removeFromSession(GlobalAccountSession);
-      removeFromLocalStorage(EmbeddedKey);
-      signOut({ callbackUrl: '/sign-in' });
+      removeFromLocalStorage(EmbeddedKey);      
     },
     external: false,
     disabled: false,

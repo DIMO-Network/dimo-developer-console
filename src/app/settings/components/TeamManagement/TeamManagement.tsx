@@ -26,8 +26,8 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   const { currentUser } = useGlobalAccount();
 
   const renderUserName = ({ ...teamCollaborator }: ITeamCollaborator) => {
-    const { User: currentUser, email = '' } = teamCollaborator ?? {};
-    const { name } = currentUser ?? {};
+    const { User: me, email = '' } = teamCollaborator ?? {};
+    const { name } = me ?? {};
 
     return (
       <div className="flex flex-row items-center gap-3">

@@ -13,9 +13,7 @@ import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA, useOnboarding } from '@/hooks';
-import { IGlobalAccountSession } from '@/types/wallet';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
 
 import configuration from '@/config';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
@@ -36,6 +34,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { workspace } = useOnboarding();
+  const { currentUser } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const {
     formState: { errors },
@@ -48,9 +47,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
   });
 
   const handleSetDomain = async (uri: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
+    if (!currentUser && !workspace) throw new Error('Web3 connection failed');
     const transaction = [
       {
         to: configuration.DLC_ADDRESS,

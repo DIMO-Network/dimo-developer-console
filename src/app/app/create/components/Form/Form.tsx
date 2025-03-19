@@ -15,7 +15,6 @@ import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
 import {
   IDesiredTokenAmount,
-  IGlobalAccountSession,
   ITokenBalance,
 } from '@/types/wallet';
 import { IWorkspace } from '@/types/workspace';
@@ -24,8 +23,7 @@ import { LoadingProps } from '@/components/LoadingModal';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA } from '@/hooks';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { useContractGA, useGlobalAccount } from '@/hooks';
 
 import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
@@ -46,10 +44,10 @@ interface IProps {
 export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
+  const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
   const {
     checkEnoughBalance,
-    getDesiredTokenAmount,
-    getDcxBalance,
+    getDesiredTokenAmount,    
     processTransactions,
   } = useContractGA();
   const router = useRouter();
@@ -104,9 +102,7 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
   const mintDCX = async (
     desiredTokenAmount: IDesiredTokenAmount,
     enoughBalance: ITokenBalance,
-  ) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
+  ) => {    
     const transactions = [];
     if (!enoughBalance.dcxAllowance) {
       transactions.push({
@@ -123,7 +119,7 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
       });
     }
 
-    const balanceDCX = await getDcxBalance();
+    const balanceDCX = await getCurrentDcxBalance();
 
     // Call mintInDimo 2 parameteres
     const dcxAmountInUSD = balanceDCX * Number(DCX_IN_USD);
@@ -137,7 +133,7 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
         abi: DimoCreditsABI,
         functionName: CONTRACT_METHODS.MINT_IN_DIMO,
         args: [
-          organizationInfo!.smartContractAddress,
+          currentUser!.smartContractAddress,
           utils.toWei(
             Math.ceil(missingAmount / Number(desiredTokenAmount.dimoCost)),
             'ether',
@@ -172,9 +168,8 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
     if (!isEmpty(workspace)) return workspace;
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo) throw new Error('There is not organization information');
+
+    if (!currentUser) throw new Error('There is not organization information');
 
     setLoadingStatus({
       label: 'Licensing the application...',

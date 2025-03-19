@@ -10,12 +10,11 @@ import { SignInButton } from '@/components/SignInButton';
 import AppleIcon from '../Icons/AppleIcon';
 
 interface SignInButtonProps {
-  isSignIn: boolean;
   disabled: boolean;
   onCTA: (a: string, d?: Partial<IAuth>) => void;
 }
 
-export const SignInButtons: FC<SignInButtonProps> = ({ isSignIn, disabled, onCTA }) => {
+export const SignInButtons: FC<SignInButtonProps> = ({ disabled, onCTA }) => {
   const { setNotification } = useContext(NotificationContext);
 
   const handlerLogin = (app: string, auth?: Partial<IAuth>) => {
@@ -32,19 +31,16 @@ export const SignInButtons: FC<SignInButtonProps> = ({ isSignIn, disabled, onCTA
     <>
       <SignInButton
         className="sm"
-        isSignIn={isSignIn}
         Icon={GoogleIcon}
         onClick={() => handlerLogin('google')}
       />
       <SignInButton
         className="sm"
-        isSignIn={isSignIn}
         Icon={AppleIcon}
         onClick={() => handlerLogin('apple')}
       />
       <SignInButton
         className="sm"
-        isSignIn={isSignIn}
         Icon={GitHubIcon}
         onClick={() => handlerLogin('github')}
       />
