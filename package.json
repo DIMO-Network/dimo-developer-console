@@ -56,6 +56,9 @@
     "web3": "^4.16.0"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.5",
+    "@graphql-codegen/client-preset": "^4.7.0",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^15.0.7",
     "@types/jest": "^29.5.14",
