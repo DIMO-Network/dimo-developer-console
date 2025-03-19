@@ -128,6 +128,14 @@ npm run start
 yarn start
 ```
 
+## GraphQL
+This repository uses [GraphQL Codegen](https://the-guild.dev/graphql/codegen) to automatically generate types and fragments from GraphQL schemas and operations.
+### Generating types
+When you finish writing the query or mutation, generate types by running
+```bash
+npm run compile
+```
+
 ## Project Structure
 
 This project is built with Next.js, which requires specific folder structures and file-naming conventions to structure the application. To understand this, read the docs at https://nextjs.org.
@@ -155,7 +163,7 @@ A brief description of the main folders and files in the project:
 - **React**: A JavaScript library for building user interfaces.
 - **CSS/PostCSS**: For styling components.
 - **JavaScript/ES6+**: Modern JavaScript syntax and features.
-
+- **Graphql**: A query language for interacting with APIs
 ## Contributing
 
 We welcome contributions to this project! If you would like to contribute, please follow these steps:
