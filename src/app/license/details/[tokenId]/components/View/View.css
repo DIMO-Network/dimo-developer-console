@@ -1,0 +1,19 @@
+.license-details-page {
+  @apply flex flex-col;
+
+  .subtitle {
+    @apply capitalize text-text-secondary text-sm;
+  }
+
+  .summary {
+    @apply pb-4;
+  }
+
+  .signers-content {
+    @apply p-4 bg-surface-raised rounded-2xl flex flex-col gap-4 justify-between;
+
+    .title {
+      @apply col-span-10;
+    }
+  }
+}
