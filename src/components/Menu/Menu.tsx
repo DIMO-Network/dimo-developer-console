@@ -36,7 +36,7 @@ export const Menu: FC<Props> = ({ onClose }) => {
         </div>
 
         {mainMenu.map((item) => {
-          return <MenuItem key={item.link} {...item} isHighlighted={pathname === item.link} onClick={handleClick} />;
+          return <MenuItem key={item.link} {...item} isHighlighted={pathname === item.link || item.alternativeLinks?.includes(pathname)} onClick={handleClick} />;
         })}
       </ul>
       <ul className="bottom-menu">

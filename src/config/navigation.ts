@@ -25,6 +25,7 @@ export const getPageTitle = (path: string) => {
 };
 
 const pageTitles: Record<string, string> = {
+  '/': 'Home',
   '/app': 'Home',
   '/integrations': 'Integrations',
   '/api-status': 'API Status',
@@ -39,6 +40,7 @@ export const mainMenu = [
     link: '/app',
     external: false,
     disabled: false,
+    alternativeLinks: ['/']
   },
   {
     label: 'Integrations',
