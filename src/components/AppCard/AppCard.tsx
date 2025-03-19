@@ -33,7 +33,7 @@ export const LicenseCard = (props: {license: FragmentType<typeof DeveloperLicens
         </div>
         <Anchor href={`/license/${license.tokenId}`}>
           <Button className={'dark w-full !h-10'}>
-            App Details
+            License Details
           </Button>
         </Anchor>
       </div>

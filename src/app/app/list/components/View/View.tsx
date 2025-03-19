@@ -25,7 +25,7 @@ export const View: FC = () => {
       </div>
       {!(balance && apps.length) && <Banner balance={balance} apps={apps} />}
       <LicenseList workspace={workspace} />
-      <AppList apps={apps}/>
+      {/*<AppList apps={apps}/>*/}
     </div>
   );
 };
