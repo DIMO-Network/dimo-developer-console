@@ -28,6 +28,7 @@ type Configuration = {
   gasPrice: number;
   ISSUED_TOPIC: `0x${string}`;
   CONTRACT_METHODS: Record<keyof typeof CONTRACT_METHODS, string>;
+  identityApiUrl: string;
 };
 
 const getCurrentEnvironment = (): string => {
@@ -57,12 +58,11 @@ export const getConfig = (): Configuration => {
       break;
   }
 
-  const configuration = {
+  return {
     environment: environment,
     ...defaultConfig,
     ...environmentConfig,
   } as Configuration;
-  return configuration;
 };
 
 const currentConfig = getConfig();

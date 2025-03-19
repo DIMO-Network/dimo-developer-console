@@ -15,9 +15,32 @@ interface IProps extends Partial<IApp> {
   onClick?: () => void;
 }
 
+interface LicenseCardProps {
+  name: string;
+  tokenId: number;
+  className?: string;
+}
+
 const AppIcon = {
   production: <DeveloperBoardIcon className="w-5 h-5" />,
   sandbox: <BeachAccessIcon className="w-5 h-5" />,
+};
+
+export const LicenseCard: FC<LicenseCardProps> = ({ name, tokenId, className }) => {
+  return (
+    <Card className={classNames('app-card', className)}>
+      <div className="content">
+        <div className={"flex w-full flex-row justify-between items-center"}>
+          <p className="title">{name}</p>
+        </div>
+        <Anchor href={`/license/${tokenId}`}>
+          <Button className={'dark w-full !h-10'}>
+            App Details
+          </Button>
+        </Anchor>
+      </div>
+    </Card>
+  );
 };
 
 export const AppCard: FC<IProps> = ({

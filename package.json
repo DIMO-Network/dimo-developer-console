@@ -16,6 +16,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.4",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@maticnetwork/maticjs": "^3.9.2",
@@ -39,6 +40,7 @@
     "cookies-next": "^5.1.0",
     "encoding": "^0.1.13",
     "googleapis": "^140.0.1",
+    "graphql": "^16.10.0",
     "lodash": "^4.17.21",
     "maskdata": "^1.3.3",
     "next": "^15.2.0",

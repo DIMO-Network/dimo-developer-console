@@ -41,6 +41,8 @@ export const backendUrl = 'http://localhost:3001/';
 
 export const frontendUrl = 'http://localhost:3000/';
 
+export const identityApiUrl = 'https://identity-api.dev.dimo.zone/query';
+
 export const RAINBOW_PROJECT = {
   ID: '528803928611a7781fb6b23eaf232224',
   NAME: 'Dimo Developer Console',
