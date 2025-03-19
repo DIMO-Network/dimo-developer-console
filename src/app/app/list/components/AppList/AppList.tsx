@@ -1,20 +1,20 @@
-import { useSession } from 'next-auth/react';
-import { type FC } from 'react';
-
-import { AppCard } from '@/components/AppCard';
-import { IApp } from '@/types/app';
-import { isOwner } from '@/utils/user';
-
-import './AppList.css';
+import {useSession} from 'next-auth/react';
+import {type FC} from 'react';
+import {AppCard} from '@/components/AppCard';
+import {IApp} from '@/types/app';
+import {isOwner} from '@/utils/user';
 import EmptyList from '@/app/app/list/components/EmptyList';
 import CreateAppButton from '@/app/app/list/components/CreateAppButton';
+
+import './AppList.css';
 
 interface IProps {
   apps: IApp[];
 }
-export const AppList: FC<IProps> = ({ apps }) => {
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
+
+export const AppList: FC<IProps> = ({apps}) => {
+  const {data: session} = useSession();
+  const {user: {role = ''} = {}} = session ?? {};
 
   const renderItem = (app: IApp, idx: number) => {
     return (

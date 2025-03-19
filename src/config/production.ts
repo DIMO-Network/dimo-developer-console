@@ -25,3 +25,5 @@ export const CONTRACT_METHODS = {
   ISSUE_IN_DC: '0xaf509d9f',
   MINT_IN_DIMO: '0xec88fc37',
 };
+
+export const identityApiUrl = 'https://identity-api.dimo.zone/query';
