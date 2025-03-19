@@ -1,9 +1,9 @@
-import {type FC} from 'react';
+import { type FC } from 'react';
 import classNames from 'classnames';
 
-import {BeachAccessIcon, DeveloperBoardIcon} from '@/components/Icons';
-import {Card} from '@/components/Card';
-import {ENVIRONMENTS_LABELS, IApp} from '@/types/app';
+import { BeachAccessIcon, DeveloperBoardIcon } from '@/components/Icons';
+import { Card } from '@/components/Card';
+import { ENVIRONMENTS_LABELS, IApp } from '@/types/app';
 
 import './AppCard.css';
 import { Anchor } from '@/components/Anchor';

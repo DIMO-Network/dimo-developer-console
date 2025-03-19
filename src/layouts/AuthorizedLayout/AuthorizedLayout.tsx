@@ -1,14 +1,15 @@
 'use client';
 import React from 'react';
 
-import { withCredits, withNotifications } from '@/hoc';
+import { withCredits, withNotifications, withGlobalAccounts, withApollo } from '@/hoc';
 
 import './AuthorizedLayout.css';
-import withGlobalAccounts from '@/hoc/GlobalAccountProvider';
 
 const View = withNotifications(
   withGlobalAccounts(
-    withCredits(({ children }: { children: React.ReactNode }) => <>{children}</>),
+    withApollo(
+      withCredits(({ children }: { children: React.ReactNode }) => <>{children}</>),
+    ),
   ),
 );
 

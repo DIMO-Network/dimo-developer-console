@@ -129,13 +129,17 @@ yarn start
 ```
 
 ## GraphQL
+
 This repository uses [GraphQL Codegen](https://the-guild.dev/graphql/codegen) to automatically generate Typescript types from GraphQL schemas and operations.
 
 ### How to generate types
+
 Write your query or mutation according to the docs, then generate types by running the following command
+
 ```bash
 npm run compile
 ```
+
 The types will be made available for export into the app from the `src/gql` directory.
 
 ## Project Structure
@@ -166,6 +170,7 @@ A brief description of the main folders and files in the project:
 - **CSS/PostCSS**: For styling components.
 - **JavaScript/ES6+**: Modern JavaScript syntax and features.
 - **GraphQL**: A query language for interacting with APIs
+
 ## Contributing
 
 We welcome contributions to this project! If you would like to contribute, please follow these steps:

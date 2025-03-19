@@ -1,6 +1,6 @@
 'use client';
-import {useEffect, useState} from "react";
-import {BackButton} from "@/components/BackButton";
+import { useEffect, useState } from 'react';
+import { BackButton } from '@/components/BackButton';
 
 import './View.css';
 
@@ -9,7 +9,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const {tokenId: tokenIdParam} = await params;
+      const { tokenId: tokenIdParam } = await params;
       setTokenId(tokenIdParam);
     };
     fetchData();

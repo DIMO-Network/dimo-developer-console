@@ -3,14 +3,14 @@ import { type FC } from 'react';
 
 import { Loader } from '@//components/Loader';
 import { Banner } from '@/app/app/list/components/Banner';
-import {useOnboarding, useUser} from '@/hooks';
-import Image from "next/image";
-import {LicenseList} from '@/app/license/list';
+import { useOnboarding, useUser } from '@/hooks';
+import Image from 'next/image';
+import { LicenseList } from '@/app/license/list';
 import './View.css';
 
 export const View: FC = () => {
   const { isLoading, apps, balance, workspace } = useOnboarding();
-  const {user} = useUser();
+  const { user } = useUser();
 
   if (isLoading) {
     return <Loader isLoading={true} />;

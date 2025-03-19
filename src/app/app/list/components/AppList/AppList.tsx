@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { type FC } from 'react';
 
 import { AppCard } from '@/components/AppCard';
@@ -6,13 +5,6 @@ import { IApp } from '@/types/app';
 import { isOwner } from '@/utils/user';
 
 import './AppList.css';
-=======
-import {useSession} from 'next-auth/react';
-import {type FC} from 'react';
-import {AppCard} from '@/components/AppCard';
-import {IApp} from '@/types/app';
-import {isOwner} from '@/utils/user';
->>>>>>> redesign
 import EmptyList from '@/app/app/list/components/EmptyList';
 import CreateAppButton from '@/app/app/list/components/CreateAppButton';
 import { useGlobalAccount } from '@/hooks';

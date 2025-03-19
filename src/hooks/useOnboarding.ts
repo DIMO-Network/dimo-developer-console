@@ -3,13 +3,11 @@
 import { useContext, useEffect, useState } from 'react';
 // import { useRouter } from 'next/navigation';
 
-
-
 import { CreditsContext } from '@/context/creditsContext';
 import { getApps } from '@/actions/app';
 import { getWorkspace } from '@/actions/workspace';
 import { IApp } from '@/types/app';
-import { isOwner } from '@/utils/user';
+// import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
 import { useGlobalAccount } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
@@ -20,7 +18,7 @@ export const useOnboarding = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState<number>(0);
   // const router = useRouter();
-  const { setIsOpen } = useContext(CreditsContext);  
+  const { setIsOpen } = useContext(CreditsContext);
   const { currentUser, getCurrentDcxBalance, getCurrentDimoBalance } = useGlobalAccount();
 
   const loadAppsAndWorkspace = async (): Promise<void> => {
