@@ -8,6 +8,8 @@ import { ENVIRONMENTS_LABELS, IApp } from '@/types/app';
 import './AppCard.css';
 import {Anchor} from "@/components/Anchor";
 import {Button} from "@/components/Button";
+import {FragmentType, useFragment} from "@/gql";
+import {DeveloperLicenseFragment} from "@/hooks/gql/queries/useGetDeveloperLicenseByTokenIdQuery";
 
 interface IProps extends Partial<IApp> {
   className?: string;
@@ -15,25 +17,21 @@ interface IProps extends Partial<IApp> {
   onClick?: () => void;
 }
 
-interface LicenseCardProps {
-  name: string;
-  tokenId: number;
-  className?: string;
-}
-
 const AppIcon = {
   production: <DeveloperBoardIcon className="w-5 h-5" />,
   sandbox: <BeachAccessIcon className="w-5 h-5" />,
 };
 
-export const LicenseCard: FC<LicenseCardProps> = ({ name, tokenId, className }) => {
+export const LicenseCard = (props: {license: FragmentType<typeof DeveloperLicenseFragment>, className?: string}) => {
+  const license = useFragment(DeveloperLicenseFragment, props.license);
+
   return (
-    <Card className={classNames('app-card', className)}>
+    <Card className={classNames('app-card', props.className)}>
       <div className="content">
         <div className={"flex w-full flex-row justify-between items-center"}>
-          <p className="title">{name}</p>
+          <p className="title">{license.alias}</p>
         </div>
-        <Anchor href={`/license/${tokenId}`}>
+        <Anchor href={`/license/${license.tokenId}`}>
           <Button className={'dark w-full !h-10'}>
             App Details
           </Button>

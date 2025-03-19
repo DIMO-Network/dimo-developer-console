@@ -13,7 +13,8 @@
     "start": "next start",
     "test": "jest",
     "test:update-snap": "jest -u",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "compile": "graphql-codegen"
   },
   "dependencies": {
     "@apollo/client": "^3.13.4",
