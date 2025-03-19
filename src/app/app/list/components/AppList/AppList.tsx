@@ -5,7 +5,7 @@ import {AppCard} from '@/components/AppCard';
 import {IApp} from '@/types/app';
 import {isOwner} from '@/utils/user';
 
-import './AppList.css';
+import '@/styles/AppList.css';
 import EmptyList from '@/app/app/list/components/EmptyList';
 import CreateAppButton from '@/app/app/list/components/CreateAppButton';
 

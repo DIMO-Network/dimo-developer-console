@@ -15,11 +15,11 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 type Documents = {
     "\n  fragment DeveloperLicenseSummary on DeveloperLicense {\n    owner\n    tokenId\n    alias\n    clientId\n  }\n": typeof types.DeveloperLicenseSummaryFragmentDoc,
-    "\n    query GetDeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n": typeof types.GetDeveloperLicenseByTokenIdDocument,
+    "\n    query DeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n": typeof types.DeveloperLicenseByTokenIdDocument,
 };
 const documents: Documents = {
     "\n  fragment DeveloperLicenseSummary on DeveloperLicense {\n    owner\n    tokenId\n    alias\n    clientId\n  }\n": types.DeveloperLicenseSummaryFragmentDoc,
-    "\n    query GetDeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n": types.GetDeveloperLicenseByTokenIdDocument,
+    "\n    query DeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n": types.DeveloperLicenseByTokenIdDocument,
 };
 
 /**
@@ -43,7 +43,7 @@ export function gql(source: "\n  fragment DeveloperLicenseSummary on DeveloperLi
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n    query GetDeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n"): (typeof documents)["\n    query GetDeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n"];
+export function gql(source: "\n    query DeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n"): (typeof documents)["\n    query DeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

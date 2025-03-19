@@ -1,0 +1,16 @@
+.app-card {
+  @apply flex flex-row justify-between items-center bg-surface-raised rounded-2xl;
+
+  .content {
+    @apply flex flex-col gap-2.5 flex-1;
+
+    .title {
+      @apply text-base font-black;
+    }
+
+  }
+}
+
+.app-card-description {
+  @apply text-sm text-white/50;
+}

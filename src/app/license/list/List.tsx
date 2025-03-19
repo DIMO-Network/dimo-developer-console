@@ -1,19 +1,22 @@
 import {FC, useMemo} from "react";
 import {IWorkspace} from "@/types/workspace";
+import {useQuery} from "@apollo/client";
 import {useSession} from "next-auth/react";
-import {useGetDeveloperLicenseByTokenId} from "@/hooks/gql/queries/useGetDeveloperLicenseByTokenIdQuery";
 import {Loader} from "@/components/Loader";
-import {LicenseCard} from "@/components/AppCard";
+import {LicenseCard} from "@/components/LicenseCard";
 import EmptyList from "@/app/app/list/components/EmptyList";
 import {isOwner} from "@/utils/user";
 import CreateAppButton from "@/app/app/list/components/CreateAppButton";
+import {DeveloperLicenseByTokenIdDocument} from "@/queries/DeveloperLicenseByTokenId";
+import '@/styles/AppList.css';
 
-import './AppList.css';
-
-export const LicenseList: FC<{ workspace?: IWorkspace }> = ({workspace}) => {
+export const List: FC<{ workspace?: IWorkspace }> = ({workspace}) => {
   const {data: session} = useSession();
   const {user: {role = ''} = {}} = session ?? {};
-  const {data, error, loading} = useGetDeveloperLicenseByTokenId(workspace?.token_id, {skip: !workspace?.token_id});
+  const {data, error, loading} = useQuery(DeveloperLicenseByTokenIdDocument, {
+    variables:{tokenId: workspace?.token_id ?? 0},
+    skip: !workspace?.token_id,
+  });
 
   const MainComponent = useMemo(() => {
     if (error) {

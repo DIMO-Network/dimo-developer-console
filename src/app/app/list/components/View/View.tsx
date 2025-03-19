@@ -2,11 +2,10 @@
 import { type FC } from 'react';
 
 import { Loader } from '@//components/Loader';
-import {AppList, LicenseList} from '@/app/app/list/components/AppList';
 import { Banner } from '@/app/app/list/components/Banner';
 import {useOnboarding, useUser} from '@/hooks';
 import Image from "next/image";
-
+import {List as LicenseList} from '@/app/license/list';
 import './View.css';
 
 export const View: FC = () => {
@@ -25,7 +24,6 @@ export const View: FC = () => {
       </div>
       {!(balance && apps.length) && <Banner balance={balance} apps={apps} />}
       <LicenseList workspace={workspace} />
-      {/*<AppList apps={apps}/>*/}
     </div>
   );
 };
