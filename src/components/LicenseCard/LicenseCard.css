@@ -1,4 +1,4 @@
-.app-card {
+.license-card {
   @apply flex flex-row justify-between items-center bg-surface-raised rounded-2xl;
 
   .content {
@@ -9,8 +9,4 @@
     }
 
   }
-}
-
-.app-card-description {
-  @apply text-sm text-white/50;
 }

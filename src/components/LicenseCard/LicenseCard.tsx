@@ -14,7 +14,7 @@ export const LicenseCard = (props: {
   const license = useFragment(DeveloperLicenseSummaryFragment, props.license);
 
   return (
-    <Card className={classNames('app-card', props.className)}>
+    <Card className={classNames('license-card', props.className)}>
       <div className="content">
         <div className={"flex w-full flex-row justify-between items-center"}>
           <p className="title">{license.alias}</p>

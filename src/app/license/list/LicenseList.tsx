@@ -8,9 +8,9 @@ import EmptyList from "@/app/app/list/components/EmptyList";
 import {isOwner} from "@/utils/user";
 import CreateAppButton from "@/app/app/list/components/CreateAppButton";
 import {DeveloperLicenseByTokenIdDocument} from "@/queries/DeveloperLicenseByTokenId";
-import '@/styles/AppList.css';
+import './LicenseList.css';
 
-export const List: FC<{ workspace?: IWorkspace }> = ({workspace}) => {
+export const LicenseList: FC<{ workspace?: IWorkspace }> = ({workspace}) => {
   const {data: session} = useSession();
   const {user: {role = ''} = {}} = session ?? {};
   const {data, error, loading} = useQuery(DeveloperLicenseByTokenIdDocument, {
@@ -31,7 +31,7 @@ export const List: FC<{ workspace?: IWorkspace }> = ({workspace}) => {
     }
     if (data?.developerLicense) {
       return (
-        <div className="app-list"><LicenseCard license={data.developerLicense}/></div>
+        <div className="license-list"><LicenseCard license={data.developerLicense}/></div>
       );
     }
     return (
@@ -40,7 +40,7 @@ export const List: FC<{ workspace?: IWorkspace }> = ({workspace}) => {
   }, [data, error, loading]);
 
   return (
-    <div className="app-list-content">
+    <div className="license-list-content">
       <div className="description">
         <p className="title">Your Developer Licenses</p>
         {isOwner(role) && !!data?.developerLicense && (

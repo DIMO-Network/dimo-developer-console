@@ -5,7 +5,7 @@ import { Loader } from '@//components/Loader';
 import { Banner } from '@/app/app/list/components/Banner';
 import {useOnboarding, useUser} from '@/hooks';
 import Image from "next/image";
-import {List as LicenseList} from '@/app/license/list';
+import {LicenseList} from '@/app/license/list';
 import './View.css';
 
 export const View: FC = () => {

@@ -1,2 +1,2 @@
 export * from './AppList';
-export {List} from "@/app/license/list/List";
+export {LicenseList} from "@/app/license/list/LicenseList";
