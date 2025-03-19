@@ -1,5 +1,8 @@
 'use client';
 import {useEffect, useState} from "react";
+import {BackButton} from "@/components/BackButton";
+
+import './View.css';
 
 export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   const [tokenId, setTokenId] = useState<string>('');
@@ -13,7 +16,12 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   }, [params]);
 
   return (
-    <p>TODO! - Implement the license details page for license {tokenId}</p>
+    <div className="license-details-page">
+      <div className="summary">
+        <BackButton />
+      </div>
+      <p>TODO - Implement the license details page for license {tokenId}</p>
+    </div>
   );
 };
 
