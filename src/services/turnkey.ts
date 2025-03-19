@@ -3,7 +3,6 @@ import { turnkeyConfig } from '@/config/turnkey';
 import { getFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 import { TurnkeyClient } from '@turnkey/http';
 import {
-  generateP256KeyPair,
   decryptCredentialBundle,
   getPublicKey,
 } from '@turnkey/crypto';

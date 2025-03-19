@@ -1,14 +1,14 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 
 import { CreditsContext } from '@/context/creditsContext';
 import { getApps } from '@/actions/app';
 import { getWorkspace } from '@/actions/workspace';
 import { IApp } from '@/types/app';
 import { IWorkspace } from '@/types/workspace';
-import { useContractGA, useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
 
 export const useOnboarding = () => {
@@ -16,7 +16,7 @@ export const useOnboarding = () => {
   const [workspace, setWorkspace] = useState<IWorkspace>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState<number>(0);
-  const router = useRouter();
+  // const router = useRouter();
   const { setIsOpen } = useContext(CreditsContext);
   const { currentUser, getCurrentDcxBalance, getCurrentDimoBalance } = useGlobalAccount();
 
@@ -69,9 +69,9 @@ export const useOnboarding = () => {
     void setCtas();
   }, [apps, currentUser]);
 
-  const handleCreateApp = () => {
-    router.push('/app/create');
-  };
+  // const handleCreateApp = () => {
+  //   router.push('/app/create');
+  // };
 
   const handleOpenBuyCreditsModal = () => {
     setIsOpen(true);

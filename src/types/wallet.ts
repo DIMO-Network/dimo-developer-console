@@ -1,5 +1,4 @@
 import { OnrampSessionResult } from '@stripe/crypto';
-import { AuthClient } from '@turnkey/sdk-browser';
 
 export interface ICreateGlobalAccountRequest {
   email: string;

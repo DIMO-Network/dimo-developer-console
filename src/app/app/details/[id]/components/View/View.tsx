@@ -3,7 +3,6 @@ import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
 import React, { useContext, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { encodeFunctionData } from 'viem';
 import { useRouter } from 'next/navigation';
 
@@ -20,7 +19,7 @@ import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriFo
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { Title } from '@/components/Title';
-import { useContractGA, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
 import { IGlobalAccountSession } from '@/types/wallet';
 import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
@@ -31,20 +30,19 @@ import './View.css';
 import { KeyIcon } from '@heroicons/react/20/solid';
 
 export const View = ({ params }: { params: Promise<{ id: string }> }) => {
-  const [app, setApp] = useState<IApp>();
-  const { data: session } = useSession();
+  const [app, setApp] = useState<IApp>();  
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
+  const { currentUser, validateCurrentSession } = useGlobalAccount();
   const { workspace } = useOnboarding();
   const { processTransactions } = useContractGA();
   const router = useRouter();
-  const { user: { role = '' } = {} } = session ?? {};
+  const { role } = currentUser!;
 
   useEffect(() => {
-    if (!role) return;
     refreshAppDetails();
-  }, [role]);
+  }, []);
 
   const refreshAppDetails = async () => {
     try {
@@ -65,10 +63,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   };
 
-  const handleEnableSigner = (signer: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
+  const handleEnableSigner = (signer: string)  => {    
+    if (!currentUser && !workspace) throw new Error('Web3 connection failed');
     return {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
@@ -81,9 +77,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleDisableSigner = (signer: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
+    if (!currentUser && !workspace) throw new Error('Web3 connection failed');
     return {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
@@ -96,9 +90,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleRemoveUri = (uri: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
+    if (!currentUser && !workspace) throw new Error('Web3 connection failed');
     return {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),

@@ -1,6 +1,5 @@
 'use client';
 
-import { IGlobalAccountSession } from '@/types/wallet';
 import { createContext, Dispatch, SetStateAction } from 'react';
 
 interface IProps {

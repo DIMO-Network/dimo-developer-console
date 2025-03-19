@@ -1,7 +1,6 @@
 'use client';
 import { useContext, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import * as Sentry from '@sentry/nextjs';
 
 import { BuildForForm, CompanyInfoForm, WalletCreation } from '@/app/sign-up/components';

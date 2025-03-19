@@ -4,7 +4,6 @@ import { maskStringV2 } from 'maskdata';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useState, type FC, useContext } from 'react';
 import { encodeFunctionData } from 'viem';
-import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
 import { ContentCopyIcon } from '@/components/Icons';
@@ -13,7 +12,7 @@ import { IApp, ISigner } from '@/types/app';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { useContractGA, useOnboarding } from '@/hooks';
+import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
 import { IGlobalAccountSession } from '@/types/wallet';
 import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
@@ -32,8 +31,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { workspace } = useOnboarding();
   const { processTransactions } = useContractGA();
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
+  const { currentUser, validateCurrentSession } = useGlobalAccount();
   const { setNotification } = useContext(NotificationContext);
 
   const handleCopy = (value: string) => {
@@ -42,9 +40,8 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   };
 
   const handleDisableSigner = async (signer: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
+    const currentSession = await validateCurrentSession();
+    if (!currentSession && !workspace) throw new Error('Web3 connection failed');
     const transaction = [
       {
         to: configuration.DLC_ADDRESS,
@@ -123,6 +120,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   };
 
   const renderDeleteSignerAction = ({ id = '', address: signer = '' }: ISigner) => {
+    const { role } = currentUser!;
     return (
       isOwner(role) && (
         <Button

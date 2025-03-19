@@ -5,7 +5,6 @@ import type { Metadata } from 'next';
 
 import { dimoFont } from '@/utils/font';
 import configuration from '@/config';
-import { withAuth } from '@/hoc';
 
 import '@/app/globals.css';
 

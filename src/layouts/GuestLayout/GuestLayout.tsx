@@ -6,13 +6,13 @@ import { withAuth, withNotifications } from '@/hoc';
 import '@/app/globals.css';
 
 const View = withNotifications(
-  withAuth(({ children }: { children: React.ReactNode }) => <>{children}</>),
+  withAuth(({ children }: { children: ReactNode }) => <>{children}</>),
 );
 
 export const GuestLayout = ({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) => <View>{children}</View>;
 
 export default GuestLayout;

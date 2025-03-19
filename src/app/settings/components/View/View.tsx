@@ -1,7 +1,6 @@
 'use client';
 import { FC, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
 import { isOwner } from '@/utils/user';
@@ -12,7 +11,7 @@ import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
 import { UserForm } from '@/app/settings/components/UserForm';
-import { useUser, useTeamCollaborators } from '@/hooks';
+import { useUser, useTeamCollaborators, useGlobalAccount } from '@/hooks';
 
 import './View.css';
 
@@ -20,9 +19,8 @@ const View: FC = () => {
   const { user } = useUser();
   const { isLoading, teamCollaborators, refreshData } = useTeamCollaborators();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
   const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
+  const { currentUser } = useGlobalAccount();
 
   return (
     <div className="settings-page">
@@ -40,7 +38,7 @@ const View: FC = () => {
           <div className="team-information">
             <div className="team-header">
               <Title component="h2">Team Management</Title>
-              {isOwner(role) && (
+              {isOwner(currentUser!.role) && (
                 <Button className="primary" onClick={() => setIsOpen(!isOpen)}>
                   Invite team <PlusIcon className="h-5 w-5" />
                 </Button>

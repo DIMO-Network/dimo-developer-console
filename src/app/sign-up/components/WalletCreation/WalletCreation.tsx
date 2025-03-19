@@ -1,11 +1,9 @@
 import { IAuth } from '@/types/auth';
-import { FC, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { useAuth, useGlobalAccount, usePasskey } from '@/hooks';
-import { BubbleLoader } from '@/components/BubbleLoader';
+import { FC, ReactNode, useContext, useEffect, useState } from 'react';
+import { useAuth, usePasskey } from '@/hooks';
 import { NotificationContext } from '@/context/notificationContext';
 import * as Sentry from '@sentry/nextjs';
-import { gtSuper } from '@/utils/font';
-import { Anchor } from '@/components/Anchor';
+
 import { createUserGlobalAccount } from '@/actions/user';
 import { PasskeySignup } from '@/app/sign-up/components/WalletCreation/PasskeySignup';
 import { useSearchParams } from 'next/navigation';
@@ -85,14 +83,12 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     try {
       const { success, encodedChallenge, attestation } = await tryCreatePasskey(email);
 
-      // const { subOrganizationId } = await createUserGlobalAccount({
-      //   email,
-      //   encodedChallenge,
-      //   attestation,
-      //   deployAccount: true,
-      // });
-
-      const subOrganizationId = '1234';
+      const { subOrganizationId } = await createUserGlobalAccount({
+        email,
+        encodedChallenge,
+        attestation,
+        deployAccount: true,
+      });
 
       setUser({
         email,

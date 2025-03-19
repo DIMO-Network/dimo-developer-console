@@ -21,7 +21,7 @@ import { isEmpty } from 'lodash';
 import { useRouter } from 'next/navigation';
 import { ComponentType, useState } from 'react';
 const halfHour = 30 * 60;
-const fifteenMinutes = 15 * 60;
+// const fifteenMinutes = 15 * 60;
 
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
@@ -44,7 +44,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     }) => {
       // const userCookies = await cookies();
       // userCookies.set('session-token', accessToken, { maxAge: sessionExpiration });
-
+      console.info('Session token:', accessToken);
       saveToLocalStorage(EmbeddedKey, privateKey);
 
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
@@ -88,7 +88,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     };
 
     const loginWithPasskey = async () => {
-      const { subOrganizationId, email } = user!;
+      const { subOrganizationId } = user!;
 
       if (!subOrganizationId) {
         throw new Error('No organization found');

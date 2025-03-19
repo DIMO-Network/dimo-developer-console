@@ -10,8 +10,9 @@ import { EmbeddedKey, getFromLocalStorage } from '@/utils/localStorage';
 import { getKernelAccount, getKernelClient, getPublicClient } from '@/services/zerodev';
 import { getContract } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
-import LicenseABI from '@/contracts/DimoLicenseContract.json';
+// import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import { TeamRoles } from '@/types/team';
 
 export const withGlobalAccounts = <P extends object>(
   WrappedComponent: ComponentType<P>,
@@ -150,6 +151,7 @@ export const withGlobalAccounts = <P extends object>(
         subOrganizationId: subOrganizationId,
         walletAddress: walletAddress,
         smartContractAddress: kernelAccount.address,
+        role: TeamRoles.OWNER,
       };
 
       setUser(user);

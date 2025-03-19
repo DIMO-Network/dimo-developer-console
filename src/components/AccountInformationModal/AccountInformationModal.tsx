@@ -11,7 +11,6 @@ import { useGlobalAccount, useLoading } from '@/hooks';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
 import { TokenBalance } from '@/components/TokenBalance';
-import { useContractGA } from '@/hooks';
 import config from '@/config';
 import * as Sentry from '@sentry/nextjs';
 
@@ -19,8 +18,6 @@ import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
-import { IGlobalAccountSession } from '@/types/wallet';
 
 interface IProps {}
 
@@ -71,8 +68,6 @@ export const AccountInformationModal: FC<IProps> = () => {
     if (!showAccountInformation) return;
     void getBalances();
   }, [showAccountInformation]);
-
-  const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
 
   return (
     <Modal

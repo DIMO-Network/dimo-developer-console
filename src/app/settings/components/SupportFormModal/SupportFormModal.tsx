@@ -1,5 +1,4 @@
 import { type FC, useContext } from 'react';
-import { useSession } from 'next-auth/react';
 
 import * as Sentry from '@sentry/nextjs';
 
@@ -13,6 +12,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { Title } from '@/components/Title';
 
 import './SupportFormModal.css';
+import { useGlobalAccount } from '@/hooks';
 
 interface SupportFormModalProps {
   isOpen: boolean;
@@ -20,14 +20,14 @@ interface SupportFormModalProps {
 }
 
 export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen }) => {
-  const { data: session } = useSession();
-  const { user: { name: userName, email: userEmail } = {} } = session ?? {};
   const { setNotification } = useContext(NotificationContext);
+  const { currentUser } = useGlobalAccount();
 
   const handleSubmit = async (data: IDevSupportForm) => {
-    try {
-      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const walletAddress = gaSession?.organization.smartContractAddress;
+    const userEmail = currentUser?.email;
+    const userName = currentUser?.email;
+    const walletAddress = currentUser?.walletAddress;
+    try {      
       const supportRequest: ISupportRequest = {
         userEmail: userEmail!,
         userName: userName!,

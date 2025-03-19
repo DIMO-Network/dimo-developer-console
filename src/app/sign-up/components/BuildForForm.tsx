@@ -5,7 +5,7 @@ import classnames from 'classnames';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { CarRentalIcon, ComputerIcon, UserIcon, PhoneIcon } from '@/components/Icons';
+import { ComputerIcon, UserIcon, PhoneIcon } from '@/components/Icons';
 import { IAuth } from '@/types/auth';
 import { Label } from '@/components/Label';
 import { TextError } from '@/components/TextError';
@@ -104,7 +104,7 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext }) => {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 w-full max-w-sm pt-4"
         >
-          <div className="text-sm ml-1">What you're looking to lauch with DIMO?</div>
+          <div className="text-sm ml-1">What you are looking to lauch with DIMO?</div>
           {buildForList.map(({ title, description, value, Icon, iconClassName }) => {
             return (
               <Card

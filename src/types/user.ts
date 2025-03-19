@@ -25,4 +25,5 @@ export interface IUserSession {
   subOrganizationId: string;
   walletAddress: `0x${string}`;
   smartContractAddress: `0x${string}`;
+  role: TeamRoles;
 }
