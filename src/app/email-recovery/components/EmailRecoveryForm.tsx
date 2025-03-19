@@ -21,7 +21,6 @@ interface IProps {
 }
 
 export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
-  
   const { setNotification } = useContext(NotificationContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
@@ -37,9 +36,9 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
     try {
       if (!email) return;
       setIsLoading(true);
-          const key = generateP256KeyPair();
-    const targetPublicKey = key.publicKeyUncompressed;
-    saveToLocalStorage(EmbeddedKey, key.privateKey);
+      const key = generateP256KeyPair();
+      const targetPublicKey = key.publicKeyUncompressed;
+      saveToLocalStorage(EmbeddedKey, key.privateKey);
       const success = await emailRecovery(email, targetPublicKey);
       if (success) {
         onNext('email-form');

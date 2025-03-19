@@ -2,10 +2,7 @@ import { ApiKeyStamper } from '@turnkey/sdk-server';
 import { turnkeyConfig } from '@/config/turnkey';
 import { getFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 import { TurnkeyClient } from '@turnkey/http';
-import {
-  decryptCredentialBundle,
-  getPublicKey,
-} from '@turnkey/crypto';
+import { decryptCredentialBundle, getPublicKey } from '@turnkey/crypto';
 import { uint8ArrayToHexString, uint8ArrayFromHexString } from '@turnkey/encoding';
 import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 import { IGlobalAccountSession } from '@/types/wallet';

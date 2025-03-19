@@ -79,7 +79,7 @@ export const bottomMenu = [
     link: () => {
       turnkeyClient.logoutUser();
       removeFromSession(GlobalAccountSession);
-      removeFromLocalStorage(EmbeddedKey);      
+      removeFromLocalStorage(EmbeddedKey);
     },
     external: false,
     disabled: false,

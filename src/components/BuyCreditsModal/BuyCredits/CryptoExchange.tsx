@@ -50,7 +50,8 @@ const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus }
 
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const { setNotification } = useContext(NotificationContext);
-  const { getDcxAllowance, processTransactions, depositWmatic, swapWmaticToDimo } = useContractGA();
+  const { getDcxAllowance, processTransactions, depositWmatic, swapWmaticToDimo } =
+    useContractGA();
   const { currentUser } = useGlobalAccount();
 
   const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
@@ -64,7 +65,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       value: bigint;
       data: `0x${string}`;
     }[]
-  > => {    
+  > => {
     const transactions = [];
     const expendableDimo = transactionData!.requiredDimoAmount!;
 

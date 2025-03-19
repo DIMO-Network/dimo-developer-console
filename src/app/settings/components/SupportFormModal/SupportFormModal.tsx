@@ -26,7 +26,7 @@ export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen 
     const userEmail = currentUser?.email;
     const userName = currentUser?.email;
     const walletAddress = currentUser?.walletAddress;
-    try {      
+    try {
       const supportRequest: ISupportRequest = {
         userEmail: userEmail!,
         userName: userName!,

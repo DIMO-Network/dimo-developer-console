@@ -53,7 +53,9 @@ export const Header: FC = () => {
         <button
           title="Account Information"
           className="account-information"
-          onClick={isOwner(currentUser!.role) ? handleOpenAccountInformationModal : undefined}
+          onClick={
+            isOwner(currentUser!.role) ? handleOpenAccountInformationModal : undefined
+          }
         >
           <WalletIcon className="h-4 w-4" />
         </button>

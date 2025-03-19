@@ -53,7 +53,12 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
       <div className="field">
         <Label htmlFor="userName" className="text-xs text-medium">
           User Name
-          <TextField type="text" value={currentUser?.email} readOnly role="user-name-input" />
+          <TextField
+            type="text"
+            value={currentUser?.email}
+            readOnly
+            role="user-name-input"
+          />
         </Label>
       </div>
       <div className="field">

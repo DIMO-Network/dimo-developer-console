@@ -70,7 +70,6 @@ export const CreditsAmount = ({ onNext }: IProps) => {
   };
 
   const handleStartPurchase = async () => {
-  
     if (!currentUser) return;
     const neededDimo = await getNeededDimoAmountForDcx(credits);
 

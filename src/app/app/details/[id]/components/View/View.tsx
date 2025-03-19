@@ -28,7 +28,7 @@ import './View.css';
 import { KeyIcon } from '@heroicons/react/20/solid';
 
 export const View = ({ params }: { params: Promise<{ id: string }> }) => {
-  const [app, setApp] = useState<IApp>();  
+  const [app, setApp] = useState<IApp>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
@@ -61,7 +61,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   };
 
-  const handleEnableSigner = (signer: string)  => {    
+  const handleEnableSigner = (signer: string) => {
     if (!currentUser && !workspace) throw new Error('Web3 connection failed');
     return {
       to: configuration.DLC_ADDRESS,

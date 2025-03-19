@@ -34,7 +34,7 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   });
 
   const getBalances = async (): Promise<void> => {
-    try {      
+    try {
       if (!currentUser) return;
       const [dimoBalance, polBalance, wmaticBalance, dimoPrice, polPrice, wmaticPrice] =
         await Promise.all([

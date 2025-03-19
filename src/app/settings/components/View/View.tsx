@@ -21,7 +21,7 @@ const View: FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
   const { currentUser } = useGlobalAccount();
-// TODO: check why curremtUser!.role is not working here
+  // TODO: check why curremtUser!.role is not working here
   return (
     <div className="settings-page">
       <div className="titles">

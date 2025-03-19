@@ -7,7 +7,7 @@ import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
-import {JWTPayload} from 'jose/dist/types';
+import { JWTPayload } from 'jose/dist/types';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
 

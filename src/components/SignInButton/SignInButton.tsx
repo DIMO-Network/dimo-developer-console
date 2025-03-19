@@ -8,12 +8,12 @@ import { IconProps } from '@/components/Icons';
 import './SignInButton.css';
 
 interface SignInButtonProps {
-  className: string;  
+  className: string;
   Icon: FC<IconProps>;
   onClick: (e: MouseEvent<HTMLElement>) => void;
 }
 
-export const SignInButton: FC<SignInButtonProps> = ({  
+export const SignInButton: FC<SignInButtonProps> = ({
   Icon,
   className: inputClassName = '',
   onClick,

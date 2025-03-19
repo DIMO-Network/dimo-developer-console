@@ -336,7 +336,7 @@ export const useContractGA = () => {
     await dimoContract.write.approve([addressToAllow, dimoInWei]);
   };
 
-    const getWmaticAllowance = async (): Promise<bigint> => {
+  const getWmaticAllowance = async (): Promise<bigint> => {
     try {
       const currentSession = await validateCurrentSession();
       if (!currentSession) return BigInt(0);
@@ -385,10 +385,11 @@ export const useContractGA = () => {
 
       const turnkeyClient = getSessionTurnkeyClient();
 
-      if (!turnkeyClient) return {
-        success: false,
-        reason: 'Error creating kernel client',
-      };
+      if (!turnkeyClient)
+        return {
+          success: false,
+          reason: 'Error creating kernel client',
+        };
 
       const kernelClient = await getKernelClient({
         subOrganizationId,
@@ -445,10 +446,11 @@ export const useContractGA = () => {
 
       const turnkeyClient = getSessionTurnkeyClient();
 
-      if (!turnkeyClient) return {
-        success: false,
-        reason: 'Error creating kernel client',
-      };
+      if (!turnkeyClient)
+        return {
+          success: false,
+          reason: 'Error creating kernel client',
+        };
 
       const kernelClient = await getKernelClient({
         subOrganizationId,

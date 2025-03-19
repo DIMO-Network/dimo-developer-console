@@ -28,7 +28,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { workspace } = useOnboarding();
   const { currentUser, validateCurrentSession } = useGlobalAccount();
-  const { processTransactions } = useContractGA();  
+  const { processTransactions } = useContractGA();
   const { setNotification } = useContext(NotificationContext);
 
   const recordsToShow = list.filter(({ deleted }) => !deleted);

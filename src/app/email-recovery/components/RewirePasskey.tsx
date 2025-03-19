@@ -18,7 +18,7 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
   const params = useSearchParams();
   const { getNewUserPasskey } = usePasskey();
 
-    const registerNewPasskey = async ({
+  const registerNewPasskey = async ({
     recoveryKey,
     email,
   }: {
@@ -28,7 +28,7 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
     const userInformation = await getUserInformation(email);
     const subOrganizationId = userInformation?.subOrganizationId;
     const ekey = getFromLocalStorage<string>(EmbeddedKey);
-    
+
     const client = getTurnkeyClient({
       authKey: recoveryKey,
       eKey: ekey!,

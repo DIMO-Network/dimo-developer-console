@@ -13,10 +13,7 @@ import { createApp } from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
-import {
-  IDesiredTokenAmount,
-  ITokenBalance,
-} from '@/types/wallet';
+import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
 import { LoadingProps } from '@/components/LoadingModal';
@@ -45,11 +42,8 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
-  const {
-    checkEnoughBalance,
-    getDesiredTokenAmount,    
-    processTransactions,
-  } = useContractGA();
+  const { checkEnoughBalance, getDesiredTokenAmount, processTransactions } =
+    useContractGA();
   const router = useRouter();
   const {
     formState: { errors },
@@ -102,7 +96,7 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
   const mintDCX = async (
     desiredTokenAmount: IDesiredTokenAmount,
     enoughBalance: ITokenBalance,
-  ) => {    
+  ) => {
     const transactions = [];
     if (!enoughBalance.dcxAllowance) {
       transactions.push({
