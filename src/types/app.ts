@@ -5,7 +5,6 @@ type ENVIRONMENTS = 'production' | 'sandbox';
 export enum ENVIRONMENTS_LABELS {
   production = 'Production',
   sandbox = 'Sandbox',
-  development = 'Development'
 }
 
 export interface ISigner {

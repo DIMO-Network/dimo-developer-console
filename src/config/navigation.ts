@@ -40,7 +40,6 @@ export const mainMenu = [
     link: '/app',
     external: false,
     disabled: false,
-    alternativeLinks: ['/']
   },
   {
     label: 'Integrations',
