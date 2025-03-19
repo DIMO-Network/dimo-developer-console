@@ -19,3 +19,11 @@ export interface IUser {
   deleted?: boolean;
   deleted_at?: Date;
 }
+
+export interface IUserSession {
+  email: string;
+  subOrganizationId: string;
+  walletAddress: `0x${string}`;
+  smartContractAddress: `0x${string}`;
+  role: TeamRoles;
+}

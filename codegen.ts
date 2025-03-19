@@ -1,6 +1,9 @@
 import { CodegenConfig } from '@graphql-codegen/cli';
 
-const URL = process.env.VERCEL_ENV === 'production' ? 'https://identity-api.dimo.zone/query' : 'https://identity-api.dev.dimo.zone/query'
+const URL =
+  process.env.VERCEL_ENV === 'production'
+    ? 'https://identity-api.dimo.zone/query'
+    : 'https://identity-api.dev.dimo.zone/query';
 
 const config: CodegenConfig = {
   schema: URL,
@@ -12,8 +15,8 @@ const config: CodegenConfig = {
       plugins: [],
       presetConfig: {
         gqlTagName: 'gql',
-      }
-    }
+      },
+    },
   },
   ignoreNoDocuments: true,
 };

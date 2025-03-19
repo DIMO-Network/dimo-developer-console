@@ -1,5 +1,5 @@
 import { RootLayout } from '@/layouts/RootLayout';
-import {Viewport} from "next";
+import { Viewport } from 'next';
 
 export const viewport: Viewport = {
   width: 'device-width',

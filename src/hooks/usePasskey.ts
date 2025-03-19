@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 
 export const usePasskey = () => {
-  const [isPasskeyAvailable, setIsPasskeyAvailable] = useState<boolean>(false);
+  const [isPasskeyAvailable, setIsPasskeyAvailable] = useState<boolean | null>(null);
 
   const validatePasskeyAvailability = async (): Promise<boolean> => {
     // Availability of "window.PublicKeyCredential" means WebAuthn is usable.
@@ -103,6 +103,7 @@ export const usePasskey = () => {
 
   useEffect(() => {
     validatePasskeyAvailability().then((isAvailable) => {
+      console.info('Passkey available:', isAvailable);
       setIsPasskeyAvailable(isAvailable);
     });
   }, []);

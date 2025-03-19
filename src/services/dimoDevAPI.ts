@@ -20,7 +20,7 @@ const addCookie = (arr: string[], cookieName: string, value: string) => {
 
 export const dimoDevAPIClient = async (timeout: number = 5000) => {
   const invitationCookie = 'invitation';
-  const tokenCookie = `${cookiePrefix}next-auth.session-token`;
+  const tokenCookie = `${cookiePrefix}session-token`;
 
   const userCookies: string[] = [];
   addCookie(userCookies, tokenCookie, await getCookie(tokenCookie));

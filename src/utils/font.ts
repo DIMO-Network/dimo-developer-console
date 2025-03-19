@@ -3,44 +3,49 @@ import localFont from 'next/font/local';
 export const dimoFont = localFont({
   src: [
     {
-      path: './../assets/fonts/Euclid Circular A Light.ttf',
-      weight: '300',
-      style: 'normal',
+      path: './../assets/fonts/Universal-Sans-Display-525.ttf',
+      weight: 'normal',
+      style: 'regular',
     },
     {
-      path: './../assets/fonts/Euclid Circular A Light Italic.ttf',
-      weight: '300',
+      path: './../assets/fonts/Universal-Sans-Display-525Italic.ttf',
+      weight: 'normal',
       style: 'italic',
     },
     {
-      path: './../assets/fonts/Euclid Circular A Regular.ttf',
-      weight: '400',
-      style: 'normal',
+      path: './../assets/fonts/Universal-Sans-Display-900.ttf',
+      weight: 'bold',
+      style: 'bold',
     },
     {
-      path: './../assets/fonts/Euclid Circular A Italic.ttf',
-      weight: '400',
-      style: 'italic',
+      path: './../assets/fonts/Universal-Sans-Display-900Italic.ttf',
+      weight: 'bold',
+      style: 'bold italic',
+    },
+  ],
+});
+
+export const gtSuper = localFont({
+  src: [
+    {
+      path: './../assets/fonts/GT-Super-Text-Bold-Italic.ttf',
+      weight: 'bold',
+      style: 'Bold Italic',
     },
     {
-      path: './../assets/fonts/Euclid Circular A Medium.ttf',
-      weight: '500',
-      style: 'normal',
+      path: './../assets/fonts/GT-Super-Text-Bold.ttf',
+      weight: 'bold',
+      style: 'Bold',
     },
     {
-      path: './../assets/fonts/Euclid Circular A Medium Italic.ttf',
-      weight: '500',
-      style: 'italic',
+      path: './../assets/fonts/GT-Super-Text-Book-Italic.ttf',
+      weight: 'normal',
+      style: 'Italic',
     },
     {
-      path: './../assets/fonts/Euclid Circular A Bold.ttf',
-      weight: '700',
-      style: 'normal',
-    },
-    {
-      path: './../assets/fonts/Euclid Circular A Bold Italic.ttf',
-      weight: '700',
-      style: 'italic',
+      path: './../assets/fonts/GT-Super-Text-Book.ttf',
+      weight: 'normal',
+      style: 'Book',
     },
   ],
 });

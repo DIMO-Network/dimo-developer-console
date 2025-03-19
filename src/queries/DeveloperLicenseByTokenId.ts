@@ -1,4 +1,4 @@
-import {gql} from "@/gql";
+import { gql } from '@/gql';
 
 export const DeveloperLicenseSummaryFragment = gql(`
   fragment DeveloperLicenseSummary on DeveloperLicense {

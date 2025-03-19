@@ -24,6 +24,7 @@ export const existUserByEmailOrAddress = async (item: string | null) => {
   const client = await dimoDevAPIClient();
   const { data } = await client.get<{
     existItem: boolean;
+    role: string;
   }>('/api/auth/exist', {
     params: {
       item,

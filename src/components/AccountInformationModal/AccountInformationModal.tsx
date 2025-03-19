@@ -7,11 +7,10 @@ import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
-import { useLoading } from '@/hooks';
+import { useGlobalAccount, useLoading } from '@/hooks';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
 import { TokenBalance } from '@/components/TokenBalance';
-import { useContractGA } from '@/hooks';
 import config from '@/config';
 import * as Sentry from '@sentry/nextjs';
 
@@ -19,8 +18,6 @@ import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
-import { IGlobalAccountSession } from '@/types/wallet';
 
 interface IProps {}
 
@@ -30,8 +27,8 @@ export const AccountInformationModal: FC<IProps> = () => {
   const { showAccountInformation, setShowAccountInformation } = useContext(
     AccountInformationContext,
   );
+  const { currentUser, getCurrentDcxBalance, getCurrentDimoBalance } = useGlobalAccount();
 
-  const { getDimoBalance, getDcxBalance } = useContractGA();
   const { getDimoPrice } = useCryptoPricing();
   const [balance, setBalance] = useState<{
     dcxBalance: number;
@@ -52,8 +49,8 @@ export const AccountInformationModal: FC<IProps> = () => {
   const loadBalances = async () => {
     try {
       const [dimoBalance, dcxBalance, dimoPrice] = await Promise.all([
-        getDimoBalance(),
-        getDcxBalance(),
+        getCurrentDimoBalance(),
+        getCurrentDcxBalance(),
         getDimoPrice(),
       ]);
       setBalance({ dimoBalance, dcxBalance, dimoPrice });
@@ -71,9 +68,6 @@ export const AccountInformationModal: FC<IProps> = () => {
     if (!showAccountInformation) return;
     void getBalances();
   }, [showAccountInformation]);
-
-  const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-  const organizationInfo = gaSession?.organization;
 
   return (
     <Modal
@@ -95,7 +89,7 @@ export const AccountInformationModal: FC<IProps> = () => {
                 name="email"
                 type="text"
                 readOnly={true}
-                value={get(organizationInfo, 'email', '')}
+                value={get(currentUser, 'email', '')}
               />
             </Label>
           </div>
@@ -106,12 +100,12 @@ export const AccountInformationModal: FC<IProps> = () => {
                 name="wallet"
                 type="text"
                 readOnly={true}
-                value={get(organizationInfo, 'smartContractAddress', '')}
+                value={get(currentUser, 'smartContractAddress', '')}
                 action={
                   <ContentCopyIcon
                     className="w5 h-5 fill-white/50 cursor-pointer"
                     onClick={() =>
-                      handleCopy(get(organizationInfo, 'smartContractAddress', ''))
+                      handleCopy(get(currentUser, 'smartContractAddress', ''))
                     }
                   />
                 }

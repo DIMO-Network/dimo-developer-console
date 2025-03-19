@@ -48,7 +48,7 @@
   }
 
   &.table-action-button {
-    @apply bg-transparent text-white border border-surface-raised hover:border-white
+    @apply bg-transparent text-white border border-surface-raised hover:border-white;
   }
 
   &.error {

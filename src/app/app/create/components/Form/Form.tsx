@@ -9,29 +9,24 @@ import { isEmpty } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
-import {createApp} from '@/actions/app';
+import { createApp } from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
-import {
-  IDesiredTokenAmount,
-  IGlobalAccountSession,
-  ITokenBalance,
-} from '@/types/wallet';
+import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
 import { LoadingProps } from '@/components/LoadingModal';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA } from '@/hooks';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { useContractGA, useGlobalAccount } from '@/hooks';
 
 import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
-import {Loading} from "@/components/Loading";
+import { Loading } from '@/components/Loading';
 import './Form.css';
 
 const { CONTRACT_METHODS } = configuration;
@@ -46,12 +41,9 @@ interface IProps {
 export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const {
-    checkEnoughBalance,
-    getDesiredTokenAmount,
-    getDcxBalance,
-    processTransactions,
-  } = useContractGA();
+  const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
+  const { checkEnoughBalance, getDesiredTokenAmount, processTransactions } =
+    useContractGA();
   const router = useRouter();
   const {
     formState: { errors },
@@ -105,8 +97,6 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
     desiredTokenAmount: IDesiredTokenAmount,
     enoughBalance: ITokenBalance,
   ) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
     const transactions = [];
     if (!enoughBalance.dcxAllowance) {
       transactions.push({
@@ -123,7 +113,7 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
       });
     }
 
-    const balanceDCX = await getDcxBalance();
+    const balanceDCX = await getCurrentDcxBalance();
 
     // Call mintInDimo 2 parameteres
     const dcxAmountInUSD = balanceDCX * Number(DCX_IN_USD);
@@ -137,7 +127,7 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
         abi: DimoCreditsABI,
         functionName: CONTRACT_METHODS.MINT_IN_DIMO,
         args: [
-          organizationInfo!.smartContractAddress,
+          currentUser!.smartContractAddress,
           utils.toWei(
             Math.ceil(missingAmount / Number(desiredTokenAmount.dimoCost)),
             'ether',
@@ -172,9 +162,8 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
     if (!isEmpty(workspace)) return workspace;
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo) throw new Error('There is not organization information');
+
+    if (!currentUser) throw new Error('There is not organization information');
 
     setLoadingStatus({
       label: 'Licensing the application...',
@@ -227,9 +216,9 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
 
   if (isLoading) {
     return (
-      <div className={"flex flex-col flex-1 items-center"}>
-        <Loading className={"!h-9 !w-9 text-primary-200"} />
-        <p className={"text-xl text-center mt-3"}>{loadingStatus?.label ?? 'Loading'}</p>
+      <div className={'flex flex-col flex-1 items-center'}>
+        <Loading className={'!h-9 !w-9 text-primary-200'} />
+        <p className={'text-xl text-center mt-3'}>{loadingStatus?.label ?? 'Loading'}</p>
       </div>
     );
   }
@@ -255,7 +244,8 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
               <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
             )}
             <p className="text-sm text-text-secondary font-normal">
-              This is the namespace used across all your apps. It is a public name visible to other developers and users in the ecosystem.
+              This is the namespace used across all your apps. It is a public name visible
+              to other developers and users in the ecosystem.
             </p>
           </Label>
         )}
@@ -276,7 +266,9 @@ export const Form: FC<IProps> = ({ workspace, onSuccess }) => {
           {errors?.app?.name && (
             <TextError errorMessage={errors?.app?.name?.message ?? ''} />
           )}
-          <p className="text-sm text-text-secondary font-normal">This name is for your reference only</p>
+          <p className="text-sm text-text-secondary font-normal">
+            This name is for your reference only
+          </p>
         </Label>
         <div className="flex flex-col pt-4 gap-4">
           <Button
