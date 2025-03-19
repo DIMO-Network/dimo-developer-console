@@ -31,7 +31,7 @@ export const LicenseCard = (props: {license: FragmentType<typeof DeveloperLicens
         <div className={"flex w-full flex-row justify-between items-center"}>
           <p className="title">{license.alias}</p>
         </div>
-        <Anchor href={`/license/${license.tokenId}`}>
+        <Anchor href={`/license/details/${license.tokenId}`}>
           <Button className={'dark w-full !h-10'}>
             License Details
           </Button>

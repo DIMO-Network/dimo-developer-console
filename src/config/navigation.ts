@@ -15,11 +15,13 @@ import { turnkeyClient } from './turnkey';
 import { removeFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
+const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
   if (APP_DETAILS_REGEX.test(path)) return 'App Details';
+  if (LICENSE_DETAILS_REGEX.test(path)) return 'License Details';
 };
 
 const pageTitles: Record<string, string> = {
