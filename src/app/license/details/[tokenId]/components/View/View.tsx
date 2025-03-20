@@ -8,6 +8,7 @@ import {useQuery} from "@apollo/client";
 import {Summary} from "@/app/license/details/[tokenId]/components/Summary";
 import {Signers} from "@/app/license/details/[tokenId]/components/Signers";
 import {RedirectUris} from "@/app/license/details/[tokenId]/components/RedirectUris";
+import {AppLoader} from "@/app/app/list/components/AppLoader";
 
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
@@ -21,10 +22,15 @@ const GET_DEVELOPER_LICENSE = gql(`
 
 export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   const [tokenId, setTokenId] = useState<number>();
-  const {data, loading, error} = useQuery(GET_DEVELOPER_LICENSE, {
+  const {data, loading, error, refetch} = useQuery(GET_DEVELOPER_LICENSE, {
     variables: {tokenId: tokenId as number},
     skip: !tokenId
   });
+
+  const handleRefetch = () => {
+    console.log('refresh called');
+    refetch({tokenId: tokenId});
+  };
 
   useEffect(() => {
     const getTokenId = async () => {
@@ -40,14 +46,20 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
 
   return (
     <div className="license-details-page">
-      <div className="summary">
-        <BackButton />
-        <Summary licenseSummary={data?.developerLicense} />
-      </div>
-      <div className={"flex flex-col gap-6"}>
-        <Signers />
-        <RedirectUris redirectUris={data?.developerLicense} />
-      </div>
+      {loading && <AppLoader isLoading={true} />}
+      {!loading && (
+        <>
+          <div className="summary">
+            <BackButton/>
+            <Summary licenseSummary={data?.developerLicense}/>
+          </div>
+          <div className={"flex flex-col gap-6"}>
+            <Signers/>
+            <RedirectUris license={data?.developerLicense} refetch={handleRefetch}/>
+          </div>
+        </>
+      )}
+
     </div>
   );
 };

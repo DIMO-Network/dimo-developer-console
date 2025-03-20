@@ -3,7 +3,6 @@ import React, {FC} from "react";
 
 import '../shared/Styles.css';
 import {Title} from "@/components/Title";
-import {useSession} from "next-auth/react";
 import {RedirectUriList} from "@/components/RedirectUriList";
 
 const REDIRECT_URIS_FRAGMENT = gql(`
@@ -18,13 +17,12 @@ const REDIRECT_URIS_FRAGMENT = gql(`
 `);
 
 interface Props {
-  redirectUris: FragmentType<typeof REDIRECT_URIS_FRAGMENT>
+  license: FragmentType<typeof REDIRECT_URIS_FRAGMENT>;
+  refetch: () => void
 }
 
-export const RedirectUris: FC<Props> = ({ redirectUris }) => {
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
-  const fragment = useFragment(REDIRECT_URIS_FRAGMENT, redirectUris);
+export const RedirectUris: FC<Props> = ({ license, refetch }) => {
+  const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
   return (
     <div className={"license-details-table"}>
       <div className={"license-details-table-header"}>
@@ -32,8 +30,8 @@ export const RedirectUris: FC<Props> = ({ redirectUris }) => {
       </div>
       <RedirectUriList
         redirectUris={fragment.redirectURIs.nodes}
-        refreshData={() => {}}
-        tokenId={}
+        refreshData={refetch}
+        tokenId={fragment.tokenId}
       />
     </div>
   );
