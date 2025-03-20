@@ -6,10 +6,10 @@ import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
-import xior, { XiorError } from 'xior';
+import axios, { AxiosError } from 'axios';
+import * as Sentry from '@sentry/nextjs';
 
-const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
-  configuration;
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
 
 const authMiddleware = withAuth({
   callbacks: {
@@ -30,10 +30,8 @@ const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
 };
 
 const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
-  if (error instanceof XiorError) {
-    const xiorError = error as XiorError;
-    const code = xiorError.cause;
-    if (code === 'ERR_NETWORK') {
+  if (error instanceof AxiosError) {
+    if (error.message === 'Network Error') {
       return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
     }
   }
@@ -41,26 +39,31 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
 };
 
 const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
-  if (error instanceof XiorError) {
-    const xiorError = error as XiorError;
-    const status = xiorError.response?.status;
+  if (error instanceof AxiosError) {
+    const status = error.response?.status;
     if (status === 401) {
       const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
-      xior.post(signOutUrl);
+      axios.post(signOutUrl);
       return 'sign-in?error=expired';
     }
   }
   return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
 };
 
-const validatePrivateSession = async (
-  request: NextRequest,
-  event: NextFetchEvent,
-) => {
+const validatePrivateSession = async (request: NextRequest, event: NextFetchEvent) => {
   const user = await getUserByToken();
+  //TODO: check if we need to use company_email_owner or email
   const subOrganization = await getUserSubOrganization(
-    user.company_email_owner!,
+    user.company_email_owner ?? user.email,
   );
+
+  if (!subOrganization) {
+    Sentry.captureMessage('Suborganization not found');
+    return NextResponse.redirect(new URL('/sign-in', request.url), {
+      status: 307,
+    });
+  }
+
   request.user = new LoggedUser(user, subOrganization);
 
   const isValidationPage = VALIDATION_PAGES.includes(request.nextUrl.pathname);
@@ -78,12 +81,9 @@ const validatePrivateSession = async (
   }
 
   if (!isCompliant && !flow) {
-    return NextResponse.redirect(
-      new URL(`/sign-up?flow=${missingFlow}`, request.url),
-      {
-        status: 307,
-      },
-    );
+    return NextResponse.redirect(new URL(`/sign-up?flow=${missingFlow}`, request.url), {
+      status: 307,
+    });
   }
 
   if (!isLoginPage) {
@@ -116,10 +116,7 @@ const validatePublicSession = async (request: NextRequest) => {
   return NextResponse.next();
 };
 
-export const middleware = async (
-  request: NextRequest,
-  event: NextFetchEvent,
-) => {
+export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
   const hasError = request.nextUrl.searchParams.get('error');
   const token = await getToken({ req: request });
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
@@ -131,6 +128,7 @@ export const middleware = async (
 
     return validatePublicSession(request);
   } catch (error: unknown) {
+    Sentry.captureException(error);
     console.error('Middleware error:', error);
     let path = handleConnectionError(error, isLoginPage);
     path = path ?? handleExpiredSession(error, isLoginPage);

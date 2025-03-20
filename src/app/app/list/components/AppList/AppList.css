@@ -1,6 +1,6 @@
 .app-list-content {
   .description {
-    @apply flex flex-row gap-2 w-full justify-between items-center;
+    @apply flex flex-row gap-2 w-full justify-between items-center mb-5;
 
     .title {
       @apply text-base leading-5;

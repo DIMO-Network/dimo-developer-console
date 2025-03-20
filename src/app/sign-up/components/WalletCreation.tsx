@@ -1,9 +1,10 @@
 import { IAuth } from '@/types/auth';
 import { FC, useContext, useEffect } from 'react';
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount, usePasskey } from '@/hooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { useSession } from 'next-auth/react';
 import { NotificationContext } from '@/context/notificationContext';
+import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
   auth?: Partial<IAuth>;
@@ -14,36 +15,37 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
   const { registerSubOrganization } = useGlobalAccount();
   const { data: session } = useSession();
+  const { isPasskeyAvailable } = usePasskey();
 
-  const handleWalletCreation = async () => {
+  const handleWalletCreation = async (email: string) => {
     try {
-      const isAvailable =
-        await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-
-      if (!isAvailable) {
+      const newOrg = await registerSubOrganization({
+        createWithoutPasskey: !isPasskeyAvailable,
+        email,
+      });
+      if (Object.keys(newOrg).length === 0) {
         setNotification(
-          'Your device does not support WebAuthn. Please use a different device to create your wallet.',
-          'WebAuthn not supported',
+          'Something went wrong while creating the user wallet',
+          'Oops...',
           'error',
         );
         return;
       }
-
-      await registerSubOrganization();
-
       onNext('wallet-creation', {});
     } catch (error) {
-      console.error(
+      Sentry.captureException(error);
+      console.error('Something went wrong while creating the user wallet', error);
+      setNotification(
         'Something went wrong while creating the user wallet',
-        error,
+        'Oops...',
+        'error',
       );
-      setNotification('Something went wrong', 'Oops...', 'error');
     }
   };
 
   useEffect(() => {
     if (!session) return;
-    handleWalletCreation().catch(console.error);
+    void handleWalletCreation(session.user.email!);
   }, [session]);
 
   return (

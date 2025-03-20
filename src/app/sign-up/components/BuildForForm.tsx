@@ -127,9 +127,7 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext }) => {
             role="build-for-something-else-input"
           />
         </Label>
-        {errors.buildForText && (
-          <TextError errorMessage="This field is required" />
-        )}
+        {errors.buildForText && <TextError errorMessage="This field is required" />}
       </Card>
       <div className="flex flex-col items-center">
         {isDirty && !buildFor && !buildForText && (

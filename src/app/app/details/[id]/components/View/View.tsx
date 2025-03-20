@@ -1,5 +1,6 @@
 'use client';
-import _ from 'lodash';
+import { get } from 'lodash';
+import * as Sentry from '@sentry/nextjs';
 
 import { useEffect, useState, useContext } from 'react';
 import { useSession } from 'next-auth/react';
@@ -19,7 +20,9 @@ import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriFo
 import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { Title } from '@/components/Title';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
+import { IGlobalAccountSession } from '@/types/wallet';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
@@ -33,26 +36,38 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
   const { workspace } = useOnboarding();
-  const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const router = useRouter();
   const { user: { role = '' } = {} } = session ?? {};
 
   useEffect(() => {
-    refreshAppDetails().catch(console.error);
-  }, []);
+    if (!role) return;
+    refreshAppDetails();
+  }, [role]);
 
   const refreshAppDetails = async () => {
-    setIsLoadingPage(true);
-    const { id: appId } = await params;
-    getAppByID(appId)
-      .then(setApp)
-      .finally(() => setIsLoadingPage(false));
+    try {
+      setIsLoadingPage(true);
+      const { id: appId } = await params;
+      const foundApp = await getAppByID(appId);
+      setApp(foundApp);
+    } catch (error: unknown) {
+      Sentry.captureException(error);
+      console.error({ error });
+      setNotification(
+        'Something went wrong while fetching the application details',
+        'Oops...',
+        'error',
+      );
+    } finally {
+      setIsLoadingPage(false);
+    }
   };
 
-  const handleEnableSigner = async (signer: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+  const handleEnableSigner = (signer: string) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
@@ -66,8 +81,9 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleDisableSigner = (signer: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
@@ -81,8 +97,9 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const handleRemoveUri = (uri: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
@@ -111,8 +128,9 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
       );
       await refreshAppDetails();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       console.error({ error });
-      const code = _.get(error, 'code', null);
+      const code = get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
       else
@@ -127,9 +145,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   const getAllDisableSignerTransactions = () => {
-    return (
-      app?.Signers?.map((signer) => handleDisableSigner(signer.address)) || []
-    );
+    return app?.Signers?.map((signer) => handleDisableSigner(signer.address)) || [];
   };
 
   const getAllRemoveUriTransactions = () => {
@@ -148,8 +164,9 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
       await deleteApp(appId);
       router.replace('/');
     } catch (error: unknown) {
+      Sentry.captureException(error);
       console.error({ error });
-      const code = _.get(error, 'code', null);
+      const code = get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
       else
@@ -196,23 +213,18 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               <RedirectUriForm
                 appId={app!.id!}
                 refreshData={refreshAppDetails}
+                list={app?.RedirectUris}
               />
             )}
           </div>
           <div className="signers-table">
             {app && (
-              <RedirectUriList
-                list={app?.RedirectUris}
-                refreshData={refreshAppDetails}
-              />
+              <RedirectUriList list={app?.RedirectUris} refreshData={refreshAppDetails} />
             )}
           </div>
           {isOwner(role) && (
             <div className="extra-actions">
-              <Button
-                className="error-simple"
-                onClick={handleDeleteApplication}
-              >
+              <Button className="error-simple" onClick={handleDeleteApplication}>
                 Delete application
               </Button>
             </div>

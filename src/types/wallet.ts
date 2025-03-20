@@ -1,4 +1,5 @@
 import { OnrampSessionResult } from '@stripe/crypto';
+import { AuthClient } from '@turnkey/sdk-browser';
 
 export interface IWalletSubOrganization {
   email: string;
@@ -27,6 +28,7 @@ export interface IEmailAuth {
 }
 
 export interface ISubOrganization {
+  email: string;
   subOrganizationId: string;
   emailVerified: boolean;
   walletAddress: `0x${string}`;
@@ -50,6 +52,15 @@ export interface IDcxPurchaseTransaction {
   requiredDimoAmount: bigint;
   currency: string;
   transactionHash: string;
+}
+
+export interface IGlobalAccountSession {
+  organization: ISubOrganization;
+  session: {
+    token: string;
+    expiry: number;
+    authenticator: AuthClient;
+  };
 }
 
 export interface IStripeCryptoEvent {

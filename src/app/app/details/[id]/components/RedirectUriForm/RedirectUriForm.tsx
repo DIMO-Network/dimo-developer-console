@@ -1,4 +1,5 @@
-import _ from 'lodash';
+import { get } from 'lodash';
+import * as Sentry from '@sentry/nextjs';
 
 import { useContext, useState, type FC } from 'react';
 import { isURL } from 'validator';
@@ -12,10 +13,12 @@ import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
-import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
+import { useContractGA, useOnboarding } from '@/hooks';
+import { IGlobalAccountSession } from '@/types/wallet';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import configuration from '@/config';
+import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import './RedirectUriForm.css';
 
@@ -26,13 +29,13 @@ interface IRedirectUri {
 interface IProps {
   appId: string;
   refreshData: () => void;
+  list: IRedirectUri[] | undefined;
 }
 
-export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
+export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { workspace } = useOnboarding();
-  const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const {
     formState: { errors },
@@ -45,8 +48,9 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
   });
 
   const handleSetDomain = async (uri: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = [
       {
         to: configuration.DLC_ADDRESS,
@@ -69,7 +73,8 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
       await createMyRedirectUri(uri, appId);
       refreshData();
     } catch (error: unknown) {
-      const code = _.get(error, 'code', null);
+      Sentry.captureException(error);
+      const code = get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
       else
@@ -81,6 +86,21 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const validateUrl = (str = '') => {
+    const isValidUrl = isURL(str, {
+      require_protocol: true,
+      require_tld: false,
+      protocols: ['http', 'https'],
+      allow_protocol_relative_urls: false,
+    });
+
+    const isUnique = !list?.find(({ uri }) => uri === str);
+
+    if (!isValidUrl) return 'Please enter a valid URL, must include http:// or https://';
+    if (!isUnique) return 'The URL is already in the list';
+    return true;
   };
 
   return (
@@ -96,12 +116,10 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData }) => {
                   message: 'The name should has maximum 150 characters',
                 },
                 validate: {
-                  url: (str = '') =>
-                    isURL(str, { require_tld: false }) ||
-                    'Invalid Redirect URI',
+                  url: validateUrl,
                 },
               })}
-              placeholder="www.google.com"
+              placeholder="https://www.google.com"
               className="redirectUri"
               role="redirect-url-input"
             />

@@ -15,8 +15,8 @@ export const Attention = () => {
         <div className="attention-message">
           <p className="attention-title">Attention required</p>
           <p className="attention-description">
-            Your developer account needs DCX to function properly, please
-            purchase more DCX to avoid service interruptions.
+            Your developer account needs DCX to function properly, please purchase more
+            DCX to avoid service interruptions.
           </p>
         </div>
         <div className="attention-cta">

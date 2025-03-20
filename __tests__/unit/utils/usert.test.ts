@@ -52,15 +52,13 @@ describe('shortenAddress', () => {
   });
 
   it('should throw an error if address does not start with 0x', () => {
-    expect(() =>
-      shortenAddress('1234567890123456789012345678901234567890'),
-    ).toThrow('Invalid Ethereum address');
+    expect(() => shortenAddress('1234567890123456789012345678901234567890')).toThrow(
+      'Invalid Ethereum address',
+    );
   });
 
   it('should throw an error if address is not 42 characters long', () => {
-    expect(() => shortenAddress('0x1234567890')).toThrow(
-      'Invalid Ethereum address',
-    );
+    expect(() => shortenAddress('0x1234567890')).toThrow('Invalid Ethereum address');
     expect(() =>
       shortenAddress('0x12345678901234567890123456789012345678901234'),
     ).toThrow('Invalid Ethereum address');

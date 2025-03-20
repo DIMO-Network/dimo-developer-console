@@ -1,6 +1,7 @@
 import { useState, type FC } from 'react';
 import { useSession } from 'next-auth/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import * as Sentry from '@sentry/nextjs';
 
 import {
   InvitationStatuses,
@@ -13,17 +14,13 @@ import { deleteCollaborator } from '@/actions/team';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { UserAvatar } from '@/components/UserAvatar';
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
   refreshData: () => void;
 }
 
-export const TeamManagement: FC<IProps> = ({
-  teamCollaborators,
-  refreshData,
-}) => {
+export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { data: session } = useSession();
@@ -35,7 +32,6 @@ export const TeamManagement: FC<IProps> = ({
 
     return (
       <div className="flex flex-row items-center gap-3">
-        <UserAvatar name={name ?? email ?? ''} />
         <p>{name ?? email ?? ''}</p>
       </div>
     );
@@ -82,17 +78,14 @@ export const TeamManagement: FC<IProps> = ({
       setLoadingStatus({ label: 'Collaborator removed', status: 'success' });
       refreshData();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       setLoadingStatus({ label: 'Something went wrong', status: 'error' });
     }
   };
 
   return (
     <>
-      <LoadingModal
-        isOpen={isOpened}
-        setIsOpen={setIsOpened}
-        {...loadingStatus}
-      />
+      <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
 
       <Table
         columns={[

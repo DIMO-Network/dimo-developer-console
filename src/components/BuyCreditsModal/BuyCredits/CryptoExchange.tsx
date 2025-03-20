@@ -1,6 +1,6 @@
 'use client';
 
-import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import { useContext, useEffect, useState } from 'react';
 import { Loading } from '@/components/Loading';
@@ -12,12 +12,11 @@ import { encodeFunctionData } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import { utils } from 'web3';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import * as Sentry from '@sentry/nextjs';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IProps {
-  onNext: (
-    flow: string,
-    transaction?: Partial<IDcxPurchaseTransaction>,
-  ) => void;
+  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
   transactionData?: Partial<IDcxPurchaseTransaction>;
 }
 
@@ -41,13 +40,7 @@ const StatusIcon = ({ status }: { status: LoadingStatus }) => {
   }
 };
 
-const ProcessCard = ({
-  title,
-  status,
-}: {
-  title: string;
-  status: LoadingStatus;
-}) => {
+const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus }) => {
   return (
     <div className="minting-card">
       <span>{title}</span>
@@ -58,16 +51,13 @@ const ProcessCard = ({
 
 export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   const { setNotification } = useContext(NotificationContext);
-  const { allowanceDCX, processTransactions } = useContractGA();
-  const { organizationInfo, depositWmatic, swapWmaticToDimo } =
-    useGlobalAccount();
+  const { getDcxAllowance, processTransactions } = useContractGA();
+  const { depositWmatic, swapWmaticToDimo } = useGlobalAccount();
 
   const [swappingIntoDimo, setSwappingIntoDimo] = useState<LoadingStatus>(
     LoadingStatus.None,
   );
-  const [mintingDCX, setMintingDCX] = useState<LoadingStatus>(
-    LoadingStatus.None,
-  );
+  const [mintingDCX, setMintingDCX] = useState<LoadingStatus>(LoadingStatus.None);
 
   const mintDCX = async (): Promise<
     {
@@ -76,8 +66,12 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       data: `0x${string}`;
     }[]
   > => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     const transactions = [];
     const expendableDimo = transactionData!.requiredDimoAmount!;
+
+    const allowanceDCX = await getDcxAllowance();
 
     if (allowanceDCX <= expendableDimo) {
       // Call approve
@@ -87,10 +81,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
         data: encodeFunctionData({
           abi: DimoABI,
           functionName: '0x095ea7b3',
-          args: [
-            configuration.DCX_ADDRESS,
-            BigInt(utils.toWei(expendableDimo, 'ether')),
-          ],
+          args: [configuration.DCX_ADDRESS, BigInt(utils.toWei(expendableDimo, 'ether'))],
         }),
       });
     }
@@ -128,6 +119,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       setMintingDCX(LoadingStatus.Success);
     } catch (error) {
       const e = error as Error;
+      Sentry.captureException(e);
       setNotification(e.message, 'Oops...', 'error');
       console.error('Error while minting DCX', error);
       setMintingDCX(LoadingStatus.Error);
@@ -140,9 +132,7 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       setSwappingIntoDimo(LoadingStatus.Loading);
 
       if (!transactionData?.alreadyHasWmatic) {
-        const depositResult = await depositWmatic(
-          transactionData!.maticAmount!,
-        );
+        const depositResult = await depositWmatic(transactionData!.maticAmount!);
         if (!depositResult.success) {
           setNotification(depositResult.reason!, 'Oops...', 'error');
           setSwappingIntoDimo(LoadingStatus.Error);
@@ -159,12 +149,15 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       setSwappingIntoDimo(LoadingStatus.Success);
       onNext('crypto-exchange', transactionData);
     } catch (error) {
+      Sentry.captureException(error);
       console.error('Error while swapping into DIMO', error);
       setSwappingIntoDimo(LoadingStatus.Error);
     }
   };
 
   useEffect(() => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo?.subOrganizationId) return;
     if (!transactionData) return;
     if (transactionData.alreadyHasDimo) {
@@ -172,19 +165,18 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
       return;
     }
     if (swappingIntoDimo === LoadingStatus.None) {
-      handleSwappingIntoDimo().catch(console.error);
+      void handleSwappingIntoDimo();
     }
-  }, [organizationInfo, swappingIntoDimo, transactionData]);
+  }, [swappingIntoDimo, transactionData]);
 
   useEffect(() => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo?.subOrganizationId) return;
-    if (
-      swappingIntoDimo === LoadingStatus.Success &&
-      mintingDCX === LoadingStatus.None
-    ) {
-      handleMintingDcx().catch(console.error);
+    if (swappingIntoDimo === LoadingStatus.Success && mintingDCX === LoadingStatus.None) {
+      void handleMintingDcx();
     }
-  }, [organizationInfo, swappingIntoDimo, mintingDCX]);
+  }, [swappingIntoDimo, mintingDCX]);
 
   return (
     <div className="minting-process">

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { setCookie } from 'cookies-next/client';
@@ -10,17 +10,21 @@ import { Anchor } from '@/components/Anchor';
 import { IAuth } from '@/types/auth';
 import { isCollaborator } from '@/utils/user';
 import { SignInButtons } from '@/components/SignInButton';
-import { useErrorHandler } from '@/hooks';
-import { useGlobalAccount } from '@/hooks';
+import { useErrorHandler, useGlobalAccount, usePasskey } from '@/hooks';
 import { withNotifications } from '@/hoc';
+import { NotificationContext } from '@/context/notificationContext';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 import './View.css';
+import * as Sentry from '@sentry/nextjs';
 
 export const View = () => {
   useErrorHandler();
-  const { organizationInfo, walletLogin } = useGlobalAccount();
+  const { setNotification } = useContext(NotificationContext);
+  const { loginWithPasskey, requestOtpLogin } = useContext(GlobalAccountAuthContext);
+  const { getUserGlobalAccountInfo } = useGlobalAccount();
+  const { isPasskeyAvailable } = usePasskey();
   const { data: session } = useSession();
-  const { role = '' } = session?.user ?? {};
   const searchParams = useSearchParams();
   const router = useRouter();
   const invitationCode = searchParams.get('code') ?? '';
@@ -34,14 +38,28 @@ export const View = () => {
     await signIn(app, auth);
   };
 
+  const handleLogin = async (email: string) => {
+    try {
+      const { hasPasskey } = await getUserGlobalAccountInfo(email);
+      if (hasPasskey && isPasskeyAvailable) {
+        await loginWithPasskey(email);
+      } else {
+        await requestOtpLogin(email);
+      }
+    } catch (error) {
+      Sentry.captureException(error);
+      setNotification('Something went wrong please try again', 'Oops', 'error');
+    }
+  };
+
   useEffect(() => {
-    if (isCollaborator(role)) {
+    if (!session) return;
+    if (isCollaborator(session.user.role)) {
       router.push('/app');
     } else {
-      if (!organizationInfo) return;
-      void walletLogin();
+      void handleLogin(session.user.email!);
     }
-  }, [organizationInfo, role]);
+  }, [session]);
 
   return (
     <main className="sign-in">
@@ -60,15 +78,22 @@ export const View = () => {
             <SignInButtons isSignIn={true} disabled={false} onCTA={handleCTA} />
           </section>
           <section className="sign-in__extra-links">
-            <div>
+            <div className="flex flex-row">
               <p className="terms-caption">
                 Lost your passkey?{' '}
+                <Anchor href="/email-recovery" target="_self" className="grey underline">
+                  Recover with your email
+                </Anchor>
+              </p>
+            </div>
+            <div className="flex flex-row">
+              <p className="terms-caption">
+                Having trouble logging in?{' '}
                 <Anchor
-                  href="/email-recovery"
-                  target="_self"
+                  href="mailto:developer-support@dimo.org"
                   className="grey underline"
                 >
-                  Recover with your email
+                  Contact our support team
                 </Anchor>
               </p>
             </div>

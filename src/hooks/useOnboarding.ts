@@ -12,35 +12,48 @@ import { IApp } from '@/types/app';
 import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
 import { useContractGA } from '@/hooks';
+import * as Sentry from '@sentry/nextjs';
+import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
   const [workspace, setWorkspace] = useState<IWorkspace>();
   const [cta, setCta] = useState<CTA>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [balance, setBalance] = useState<number>(0);
   const router = useRouter();
-  const { balanceDCX, balanceDimo } = useContractGA();
+  const { getDcxBalance, getDimoBalance } = useContractGA();
   const { setIsOpen } = useContext(CreditsContext);
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
+  const { hasSession } = useContext(GlobalAccountAuthContext);
 
-  useEffect(() => {
-    setIsLoading(true);
-    getApps()
-      .then(({ data: createdApps }) =>
-        setApps(createdApps.filter(({ deleted }) => !deleted)),
-      )
-      .finally(() => setIsLoading(false));
-  }, []);
+  const loadAppsAndWorkspace = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      const { data: createdApps } = await getApps();
+      setApps(createdApps.filter(({ deleted }) => !deleted));
 
-  useEffect(() => {
-    getWorkspace().then((currentWorkspace) => {
+      const currentWorkspace = await getWorkspace();
       setWorkspace(currentWorkspace);
-    });
-  }, []);
 
-  useEffect(() => {
+      if (isOwner(role)) {
+        const dcxBalance = await getDcxBalance();
+        setBalance(dcxBalance);
+      }
+    } catch (error: unknown) {
+      Sentry.captureException(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const setCtas = async () => {
     if (isOwner(role)) {
+      const [balanceDCX, balanceDimo] = await Promise.all([
+        getDcxBalance(),
+        getDimoBalance(),
+      ]);
       if (!(balanceDCX > 0 || balanceDimo > 0)) {
         setCta({
           label: 'Purchase DCX',
@@ -53,7 +66,17 @@ export const useOnboarding = () => {
         });
       }
     } else setCta(undefined);
-  }, [apps, balanceDCX, role]);
+  };
+
+  useEffect(() => {
+    if (!hasSession) return;
+    void loadAppsAndWorkspace();
+  }, [hasSession, role]);
+
+  useEffect(() => {
+    if (!hasSession) return;
+    void setCtas();
+  }, [apps, role, hasSession]);
 
   const handleCreateApp = () => {
     router.push('/app/create');
@@ -64,13 +87,13 @@ export const useOnboarding = () => {
   };
 
   return {
+    balance,
     apps,
     cta,
     isLoading,
     setIsLoading,
     handleCreateApp,
     handleOpenBuyCreditsModal,
-    balance: balanceDCX,
     workspace,
   };
 };

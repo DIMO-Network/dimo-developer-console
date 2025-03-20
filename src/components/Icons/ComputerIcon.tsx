@@ -37,12 +37,7 @@ export const ComputerIcon: FC<IconProps> = ({ className = '' }) => {
           <stop offset="1" stopColor="#B1E3FF" />
         </radialGradient>
         <clipPath id="clip0_1493_10913">
-          <rect
-            width="24"
-            height="24"
-            fill="white"
-            transform="translate(0.5 0.281982)"
-          />
+          <rect width="24" height="24" fill="white" transform="translate(0.5 0.281982)" />
         </clipPath>
       </defs>
     </svg>

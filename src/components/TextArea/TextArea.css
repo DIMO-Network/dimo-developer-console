@@ -1,0 +1,7 @@
+.text-area {
+  @apply rounded-lg py-2 px-4 outline-0 bg-grey-950 text-grey-50 flex flex-row;
+
+  textarea {
+    @apply w-full bg-transparent outline-0 resize-none;
+  }
+}

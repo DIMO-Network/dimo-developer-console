@@ -7,7 +7,6 @@ import { Banner } from '@/app/app/list/components/Banner';
 import { useOnboarding } from '@/hooks';
 import { Explanation } from '@/app/app/list/components/DCXExplanation';
 import { GetStarted } from '@/app/app/list/components/GetStarted';
-import { Attention } from '@/app/app/list/components/Attention';
 
 import './View.css';
 
@@ -27,7 +26,6 @@ export const View: FC = () => {
           {apps.length === 0 && (
             <GetStarted hasBalance={balance > 0} hasApps={apps.length > 0} />
           )}
-          {balance === 0 && apps.length > 0 && <Attention />}
           {apps.length > 0 && <AppList apps={apps} />}
         </div>
       )}

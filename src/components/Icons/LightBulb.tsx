@@ -12,10 +12,7 @@ export const LightBulb: FC<IconProps> = ({ className = '' }) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22Z"
-        fill="white"
-      />
+      <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22Z" fill="white" />
       <path
         d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22Z"
         fill="url(#paint0_radial_1329_3349)"

@@ -66,9 +66,7 @@ export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam }) => {
             })}
             role="namespace-input"
           />
-          {errors?.email && (
-            <TextError errorMessage="This field must be a valid email" />
-          )}
+          {errors?.email && <TextError errorMessage="This field must be a valid email" />}
         </Label>
       </div>
       <div className="field">
@@ -84,9 +82,7 @@ export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam }) => {
             value={config.ROLES[0]}
             role="company-region"
           />
-          {errors.role && (
-            <TextError errorMessage={errors.role.message ?? ''} />
-          )}
+          {errors.role && <TextError errorMessage={errors.role.message ?? ''} />}
         </Label>
       </div>
       <div className="cta">

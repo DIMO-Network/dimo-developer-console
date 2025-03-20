@@ -45,9 +45,7 @@ export const BuyCreditsModal: FC<IProps> = () => {
   const { Component: BuyCreditsFlow } =
     buyCreditsFlows[flow as keyof typeof buyCreditsFlows] ??
     buyCreditsFlows['credits-amount'];
-  const [transaction, setTransaction] = useState<
-    Partial<IDcxPurchaseTransaction>
-  >({});
+  const [transaction, setTransaction] = useState<Partial<IDcxPurchaseTransaction>>({});
 
   const handleIsOpen = (open: boolean) => {
     setIsOpen(open);
@@ -59,8 +57,7 @@ export const BuyCreditsModal: FC<IProps> = () => {
     transaction?: Partial<IDcxPurchaseTransaction>,
   ) => {
     setTransaction(transaction!);
-    const currentStep =
-      buyCreditsFlows[actualFlow as keyof typeof buyCreditsFlows];
+    const currentStep = buyCreditsFlows[actualFlow as keyof typeof buyCreditsFlows];
     const processes = Object.keys(buyCreditsFlows).reduce(
       (acc, elm) => ({
         ...acc,
@@ -69,27 +66,21 @@ export const BuyCreditsModal: FC<IProps> = () => {
       {},
     );
     const nextStep =
-      processes[(currentStep.order + 1) as keyof typeof processes] ??
-      'complete';
+      processes[(currentStep.order + 1) as keyof typeof processes] ?? 'complete';
     if (nextStep !== 'complete') setFlow(nextStep);
     else handleIsOpen(false);
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      setIsOpen={handleIsOpen}
-      className="buy-credits-modal"
-    >
+    <Modal isOpen={isOpen} setIsOpen={handleIsOpen} className="buy-credits-modal">
       <div className="buy-credits-content">
         <div className="buy-credits-header">
           <Title className="text-2xl" component="h3">
             Buy DCX
           </Title>
           <p className="description">
-            DCX, also known as DIMO Credits, is a stable token in the DIMO
-            ecosystem for the builders. All DCX purchases uses the DIMO Token as
-            medium.
+            DCX, also known as DIMO Credits, is a stable token in the DIMO ecosystem for
+            the builders. All DCX purchases uses the DIMO Token as medium.
           </p>
         </div>
         {BuyCreditsFlow && (

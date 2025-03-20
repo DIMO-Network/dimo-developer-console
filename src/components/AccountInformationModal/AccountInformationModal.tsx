@@ -7,32 +7,31 @@ import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
-import { useGlobalAccount, useLoading } from '@/hooks';
-import { useSession } from 'next-auth/react';
+import { useLoading } from '@/hooks';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
 import { TokenBalance } from '@/components/TokenBalance';
 import { useContractGA } from '@/hooks';
 import config from '@/config';
+import * as Sentry from '@sentry/nextjs';
 
 import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { IGlobalAccountSession } from '@/types/wallet';
 
 interface IProps {}
 
 export const AccountInformationModal: FC<IProps> = () => {
-  const { organizationInfo } = useGlobalAccount();
-  const { data: session } = useSession();
   const { setNotification } = useContext(NotificationContext);
   const { setIsOpen } = useContext(CreditsContext);
   const { showAccountInformation, setShowAccountInformation } = useContext(
     AccountInformationContext,
   );
 
-  const { getDimoBalance, getDcxBalance, dimoContract, dimoCreditsContract } =
-    useContractGA();
+  const { getDimoBalance, getDcxBalance } = useContractGA();
   const { getDimoPrice } = useCryptoPricing();
   const [balance, setBalance] = useState<{
     dcxBalance: number;
@@ -42,12 +41,7 @@ export const AccountInformationModal: FC<IProps> = () => {
 
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
-    setNotification(
-      'Wallet address copied to clipboard',
-      'Success',
-      'success',
-      1000,
-    );
+    setNotification('Wallet address copied to clipboard', 'Success', 'success', 1000);
   };
 
   const handleOpenBuyCreditsModal = () => {
@@ -56,21 +50,30 @@ export const AccountInformationModal: FC<IProps> = () => {
   };
 
   const loadBalances = async () => {
-    const dimoBalance = await getDimoBalance();
-    const dcxBalance = await getDcxBalance();
-    const dimoPrice = await getDimoPrice();
-    setBalance({ dimoBalance, dcxBalance, dimoPrice });
+    try {
+      const [dimoBalance, dcxBalance, dimoPrice] = await Promise.all([
+        getDimoBalance(),
+        getDcxBalance(),
+        getDimoPrice(),
+      ]);
+      setBalance({ dimoBalance, dcxBalance, dimoPrice });
+    } catch (error: unknown) {
+      Sentry.captureException(error);
+      console.error('Error while loading balances', error);
+      setNotification('Error while loading balances', 'Error', 'error');
+    }
   };
 
   const { handleAction: getBalances, loading: isLoadingBalances } =
     useLoading(loadBalances);
 
   useEffect(() => {
-    if (!(dimoContract && dimoCreditsContract)) return;
     if (!showAccountInformation) return;
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    getBalances().catch(console.error);
-  }, [dimoContract, dimoCreditsContract, showAccountInformation]);
+    void getBalances();
+  }, [showAccountInformation]);
+
+  const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+  const organizationInfo = gaSession?.organization;
 
   return (
     <Modal
@@ -92,7 +95,7 @@ export const AccountInformationModal: FC<IProps> = () => {
                 name="email"
                 type="text"
                 readOnly={true}
-                value={get(session, 'user.email', '')}
+                value={get(organizationInfo, 'email', '')}
               />
             </Label>
           </div>
@@ -108,9 +111,7 @@ export const AccountInformationModal: FC<IProps> = () => {
                   <ContentCopyIcon
                     className="w5 h-5 fill-white/50 cursor-pointer"
                     onClick={() =>
-                      handleCopy(
-                        get(organizationInfo, 'smartContractAddress', ''),
-                      )
+                      handleCopy(get(organizationInfo, 'smartContractAddress', ''))
                     }
                   />
                 }

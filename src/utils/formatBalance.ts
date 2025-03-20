@@ -1,3 +1,12 @@
+const findLast = <T>(arr: T[], predicate: (value: T) => boolean): T | undefined => {
+  for (let i = arr.length - 1; i >= 0; i--) {
+    if (predicate(arr[i])) {
+      return arr[i];
+    }
+  }
+  return undefined;
+};
+
 const formatter = (value: number, digits: number): string => {
   const lookup = [
     { value: 1, symbol: '' },
@@ -9,7 +18,7 @@ const formatter = (value: number, digits: number): string => {
     { value: 1e18, symbol: 'E' },
   ];
   const regexp = /\.0+$|(?<=\.[0-9]*[1-9])0+$/;
-  const item = lookup.findLast((item) => value >= item.value);
+  const item = findLast(lookup, (item) => value >= item.value);
 
   return item
     ? (value / item.value).toFixed(digits).replace(regexp, '') + item.symbol
@@ -31,9 +40,6 @@ export const formatSimpleBalance = (value: number): string => {
   return formatSimpleBalanceWithDigits(value, 2);
 };
 
-export const formatSimpleBalanceWithDigits = (
-  value: number,
-  digits: number,
-): string => {
+export const formatSimpleBalanceWithDigits = (value: number, digits: number): string => {
   return value.toLocaleString('en-US', { maximumFractionDigits: digits });
 };

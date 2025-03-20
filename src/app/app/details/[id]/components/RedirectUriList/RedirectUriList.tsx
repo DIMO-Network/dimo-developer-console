@@ -1,5 +1,5 @@
 import _ from 'lodash';
-
+import * as Sentry from '@sentry/nextjs';
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { encodeFunctionData } from 'viem';
@@ -11,7 +11,9 @@ import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { Toggle } from '@/components/Toggle';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { IGlobalAccountSession } from '@/types/wallet';
 
 import configuration from '@/config';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
@@ -25,7 +27,6 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { workspace } = useOnboarding();
-  const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
@@ -33,6 +34,8 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const recordsToShow = list.filter(({ deleted }) => !deleted);
 
   const handleSetDomain = async (uri: string, enabled: boolean) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     if (!organizationInfo) throw new Error('Web3 connection failed');
     const transaction = [
       {
@@ -60,11 +63,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
     );
   };
 
-  const handleUpdateStatus = async (
-    id: string,
-    uri: string,
-    newStatus: boolean,
-  ) => {
+  const handleUpdateStatus = async (id: string, uri: string, newStatus: boolean) => {
     try {
       setIsOpened(true);
       await handleSetDomain(uri, newStatus);
@@ -76,6 +75,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
       setLoadingStatus({ label: 'Redirect URI updated', status: 'success' });
       refreshData();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setLoadingStatus({
@@ -98,6 +98,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
       setLoadingStatus({ label: 'Redirect URI deleted', status: 'success' });
       refreshData();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setLoadingStatus({
@@ -112,6 +113,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
     return (
       isOwner(role) && (
         <button
+          title="Delete redirect URI"
           type="button"
           onClick={() => handleDeleteUri(id as string, uri)}
           key={`delete-action-${id}`}
@@ -131,11 +133,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
             data={recordsToShow}
             actions={[renderToggleStatus, renderDeleteRedirectUriAction]}
           />
-          <LoadingModal
-            isOpen={isOpened}
-            setIsOpen={setIsOpened}
-            {...loadingStatus}
-          />
+          <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
         </>
       )}
     </>

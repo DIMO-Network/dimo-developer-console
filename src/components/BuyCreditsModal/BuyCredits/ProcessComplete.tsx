@@ -2,26 +2,24 @@ import { useState } from 'react';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
 import { sendTokenBoughtEmail } from '@/actions/token';
 import { SuccessIcon } from '@/components/Icons';
 import { Title } from '@/components/Title';
-import { useGlobalAccount } from '@/hooks';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IProps {
-  onNext: (
-    flow: string,
-    transaction?: Partial<IDcxPurchaseTransaction>,
-  ) => void;
+  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
   transactionData?: Partial<IDcxPurchaseTransaction>;
 }
 
 export const ProcessComplete = ({ onNext, transactionData }: IProps) => {
   const [loading, setLoading] = useState(false);
-  const { organizationInfo } = useGlobalAccount();
 
   const handleFinish = () => {
     if (loading) return;
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
 
     setLoading(true);
     const transactionToSend = {
@@ -41,8 +39,7 @@ export const ProcessComplete = ({ onNext, transactionData }: IProps) => {
         Successfully Purchased DCX
       </Title>
       <p className="text-center">
-        Please check your inbox for the invoice. It should arrive within 24
-        hours.
+        Please check your inbox for the invoice. It should arrive within 24 hours.
       </p>
       <Button className="primary w-40 !h-9" onClick={handleFinish}>
         Finish

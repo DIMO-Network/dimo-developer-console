@@ -3,12 +3,12 @@ import { getCsrfToken } from 'next-auth/react';
 import { SiweMessage } from 'siwe';
 import { useAccount, useSignMessage } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
 import { SignInButton } from '@/components/SignInButton';
 import { SiweIcon } from '@/components/Icons';
+import * as Sentry from '@sentry/nextjs';
 interface SiweButtonProps {
   isSignIn: boolean;
   onCTA: (d: Partial<IAuth>) => void;
@@ -17,8 +17,7 @@ interface SiweButtonProps {
 export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
   const { signMessageAsync } = useSignMessage();
   const { setNotification } = useContext(NotificationContext);
-  const { address, isConnected } = useAccount();
-  const { openConnectModal } = useConnectModal();
+  const { address } = useAccount();
 
   const handleLogin = async () => {
     try {
@@ -40,6 +39,7 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
 
       onCTA({ address, message: JSON.stringify(message), signature });
     } catch (error) {
+      Sentry.captureException(error);
       setNotification('Something went wrong please try again', 'Oops', 'error');
     }
   };
@@ -51,11 +51,7 @@ export const Siwe: FC<SiweButtonProps> = ({ isSignIn, onCTA }) => {
       className="sm"
       onClick={(e) => {
         e.preventDefault();
-        if (!isConnected && openConnectModal) {
-          openConnectModal();
-        } else {
-          handleLogin();
-        }
+        handleLogin();
       }}
     />
   );

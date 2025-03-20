@@ -55,17 +55,8 @@ export const SelectField = forwardRef<Ref, IProps>(
         name={props.name || ''}
         render={({ field: { onChange, value: selectedOption, ref } }) => {
           return (
-            <div
-              className={className}
-              onClick={() => setShow(!show)}
-              role={role}
-            >
-              <select
-                {...props}
-                value={selectedOption}
-                role={`${role}-select`}
-                ref={ref}
-              >
+            <div className={className} onClick={() => setShow(!show)} role={role}>
+              <select {...props} value={selectedOption} role={`${role}-select`} ref={ref}>
                 {includeEmptyOption && <option></option>}
                 {options.map(({ value, text }) => (
                   <option value={value} key={value}>

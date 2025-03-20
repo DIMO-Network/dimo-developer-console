@@ -2,7 +2,7 @@
   @apply flex flex-col w-full;
 
   .field {
-    @apply w-full h-20;
+    @apply w-full;
   }
 
   .cta {

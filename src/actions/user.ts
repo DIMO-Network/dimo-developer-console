@@ -5,9 +5,6 @@ export const getUser = async () => {
   return getUserByToken();
 };
 
-export const existUserEmailOrAddress = async (
-  address: string | null,
-  provider: string | null,
-) => {
-  return existUserByEmailOrAddress(address, provider);
+export const existUserEmailOrAddress = async (address: string | null) => {
+  return existUserByEmailOrAddress(address);
 };

@@ -1,9 +1,5 @@
-import { type ReactElement, type FC } from 'react';
-import {
-  PlusCircleIcon,
-  CubeIcon,
-  CheckIcon,
-} from '@heroicons/react/24/outline';
+import { type ReactElement, type FC, ReactNode, useState, useEffect } from 'react';
+import { PlusCircleIcon, CubeIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
@@ -21,7 +17,30 @@ interface IProps {
 export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
   const { handleCreateApp, handleOpenBuyCreditsModal } = useOnboarding();
   const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
+  const [role, setRole] = useState<string>('');
+
+  useEffect(() => {
+    if (!session) return;
+    setRole(session.user?.role);
+  }, [session]);
+
+  const renderButtonContent = ({
+    actionLabel,
+    completed,
+  }: {
+    actionLabel: string;
+    completed: boolean;
+  }): ReactNode => {
+    if (!completed) {
+      if (isOwner(role)) {
+        return actionLabel;
+      }
+      if (isCollaborator(role)) {
+        return 'Pending';
+      }
+    }
+    return <CheckIcon className="h5 w-5 stroke-green-700" />;
+  };
 
   const renderAction = ({
     Icon,
@@ -52,9 +71,7 @@ export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
             onClick={isOwner(role) ? actionCta : undefined}
             type="button"
           >
-            {isOwner(role) && !completed && actionLabel}
-            {isCollaborator(role) && !completed && 'Pending'}
-            {completed && <CheckIcon className="h5 w-5 stroke-green-700" />}
+            {renderButtonContent({ actionLabel, completed })}
           </Button>
         </div>
       </div>
@@ -79,8 +96,7 @@ export const GetStarted: FC<IProps> = ({ hasBalance, hasApps }) => {
         {renderAction({
           Icon: <PlusCircleIcon className="h-5 w-5" />,
           title: 'Create an application',
-          description:
-            'Create an application as part of your Developer License',
+          description: 'Create an application as part of your Developer License',
           actionLabel: 'Create an app',
           actionCta: handleCreateApp,
           completed: hasApps,

@@ -51,8 +51,7 @@ export const View = () => {
     );
 
     const nextProcess =
-      processes[(currentProcess.order + 1) as keyof typeof processes] ??
-      'complete';
+      processes[(currentProcess.order + 1) as keyof typeof processes] ?? 'complete';
     if (nextProcess !== 'complete') setFlow(nextProcess);
     else router.replace('/sign-in');
   };

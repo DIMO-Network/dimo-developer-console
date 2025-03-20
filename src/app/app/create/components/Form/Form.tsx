@@ -1,28 +1,31 @@
 'use client';
 import { FC, useContext, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { encodeFunctionData } from 'viem';
 import { useRouter } from 'next/navigation';
 import { utils } from 'web3';
 
-import _ from 'lodash';
-import classNames from 'classnames';
+import { isEmpty } from 'lodash';
+import * as Sentry from '@sentry/nextjs';
 
-import { AppCard } from '@/components/AppCard';
 import { Button } from '@/components/Button';
 import { createApp } from '@/actions/app';
 import { createWorkspace } from '@/actions/workspace';
 import { decodeHex } from '@/utils/formatHex';
 import { IAppWithWorkspace } from '@/types/app';
-import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
+import {
+  IDesiredTokenAmount,
+  IGlobalAccountSession,
+  ITokenBalance,
+} from '@/types/wallet';
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
 import { LoadingProps, LoadingModal } from '@/components/LoadingModal';
-import { MultiCardOption } from '@/components/MultiCardOption';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA, useGlobalAccount } from '@/hooks';
+import { useContractGA } from '@/hooks';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import configuration from '@/config';
 import DimoABI from '@/contracts/DimoTokenContract.json';
@@ -30,6 +33,8 @@ import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 
 import './Form.css';
+
+const { CONTRACT_METHODS } = configuration;
 
 const { DCX_IN_USD = 0.001 } = process.env;
 
@@ -43,13 +48,11 @@ export const Form: FC<IProps> = ({ workspace }) => {
   const {
     checkEnoughBalance,
     getDesiredTokenAmount,
-    balanceDCX,
+    getDcxBalance,
     processTransactions,
   } = useContractGA();
-  const { organizationInfo } = useGlobalAccount();
   const router = useRouter();
   const {
-    control,
     formState: { errors },
     handleSubmit,
     register,
@@ -66,7 +69,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
       setIsLoading(true);
       setIsOpened(true);
       setLoadingStatus({
-        label: 'Preparing DCX to license the application...',
+        label: 'Preparing to license the application...',
         status: 'loading',
       });
 
@@ -75,27 +78,20 @@ export const Form: FC<IProps> = ({ workspace }) => {
       const transactions = [];
 
       if (!enoughBalance.dcx && !enoughBalance.dimo)
-        return setNotification(
-          'Insufficient DIMO or DCX balance',
-          'Oops...',
-          'error',
-        );
+        return setNotification('Insufficient DIMO or DCX balance', 'Oops...', 'error');
 
       if (!enoughBalance.dcx) {
-        transactions.push(
-          ...(await mintDCX(desiredTokenAmount, enoughBalance)),
-        );
+        transactions.push(...(await mintDCX(desiredTokenAmount, enoughBalance)));
       }
 
-      transactions.push(
-        ...(await prepareIssueInDC(desiredTokenAmount, enoughBalance)),
-      );
+      transactions.push(...(await prepareIssueInDC(desiredTokenAmount, enoughBalance)));
       if (transactions.length) {
         await processTransactions(transactions);
       }
 
       await handleCreateApp();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       setNotification(
         'Something went wrong while confirming the transaction',
         'Oops...',
@@ -111,6 +107,8 @@ export const Form: FC<IProps> = ({ workspace }) => {
     desiredTokenAmount: IDesiredTokenAmount,
     enoughBalance: ITokenBalance,
   ) => {
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
     const transactions = [];
     if (!enoughBalance.dcxAllowance) {
       transactions.push({
@@ -121,13 +119,13 @@ export const Form: FC<IProps> = ({ workspace }) => {
           functionName: 'approve',
           args: [
             configuration.DCX_ADDRESS,
-            BigInt(
-              utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether'),
-            ),
+            BigInt(utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether')),
           ],
         }),
       });
     }
+
+    const balanceDCX = await getDcxBalance();
 
     // Call mintInDimo 2 parameteres
     const dcxAmountInUSD = balanceDCX * Number(DCX_IN_USD);
@@ -139,7 +137,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
       value: BigInt(0),
       data: encodeFunctionData({
         abi: DimoCreditsABI,
-        functionName: '0xec88fc37',
+        functionName: CONTRACT_METHODS.MINT_IN_DIMO,
         args: [
           organizationInfo!.smartContractAddress,
           utils.toWei(
@@ -167,9 +165,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
           functionName: 'approve',
           args: [
             configuration.DLC_ADDRESS,
-            BigInt(
-              utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether'),
-            ),
+            BigInt(utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether')),
           ],
         }),
       },
@@ -177,17 +173,16 @@ export const Form: FC<IProps> = ({ workspace }) => {
   };
 
   const handleCreateWorkspace = async (workspaceData: Partial<IWorkspace>) => {
-    if (!_.isEmpty(workspace)) return workspace;
-    if (!organizationInfo)
-      throw new Error('There is not organization information');
+    if (!isEmpty(workspace)) return workspace;
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
+    if (!organizationInfo) throw new Error('There is not organization information');
 
     setLoadingStatus({
       label: 'Licensing the application...',
       status: 'loading',
     });
-    const workspaceName = String(
-      utils.fromAscii(workspaceData?.name ?? ''),
-    ).padEnd(66, '0');
+    const workspaceName = workspaceData?.name ?? '';
     setLoadingStatus({
       label: 'Creating developer license...',
       status: 'loading',
@@ -200,19 +195,16 @@ export const Form: FC<IProps> = ({ workspace }) => {
         value: BigInt(0),
         data: encodeFunctionData({
           abi: DimoLicenseABI,
-          functionName: '0xaf509d9f',
+          functionName: CONTRACT_METHODS.ISSUE_IN_DC,
           args: [workspaceName],
         }),
       },
     ];
 
     const { logs } = await processTransactions(transaction);
-    const {
-      topics: [, rawTokenId = '0x', rawOwner = '0x', rawClientId = '0x'] = [],
-    } =
+    const { topics: [, rawTokenId = '0x', rawOwner = '0x', rawClientId = '0x'] = [] } =
       logs?.find(
-        ({ topics: [topic = '0x'] = [] }) =>
-          topic === configuration.ISSUED_TOPIC,
+        ({ topics: [topic = '0x'] = [] }) => topic === configuration.ISSUED_TOPIC,
       ) ?? {};
 
     return createWorkspace({
@@ -228,18 +220,14 @@ export const Form: FC<IProps> = ({ workspace }) => {
     const { id: workspaceId = '' } = await handleCreateWorkspace(workspace);
     await createApp(workspaceId, {
       name: app.name,
-      scope: app.scope,
+      scope: 'production',
     });
     router.replace('/app');
   };
 
   return (
     <>
-      <LoadingModal
-        isOpen={isOpened}
-        setIsOpen={setIsOpened}
-        {...loadingStatus}
-      />
+      <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
       <form onSubmit={handleSubmit(onSubmit)}>
         {(!workspace || Object.keys(workspace).length === 0) && (
           <Label htmlFor="namespace" className="text-xs text-medium">
@@ -257,9 +245,7 @@ export const Form: FC<IProps> = ({ workspace }) => {
               role="namespace-input"
             />
             {errors?.workspace?.name && (
-              <TextError
-                errorMessage={errors?.workspace?.name?.message ?? ''}
-              />
+              <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
             )}
             <p className="text-sm text-grey-200">
               This is the namespace used across all your apps
@@ -283,54 +269,8 @@ export const Form: FC<IProps> = ({ workspace }) => {
           {errors?.app?.name && (
             <TextError errorMessage={errors?.app?.name?.message ?? ''} />
           )}
-          <p className="text-sm text-grey-200">
-            This name is for your reference only
-          </p>
+          <p className="text-sm text-grey-200">This name is for your reference only</p>
         </Label>
-        <div className="">
-          <Controller
-            control={control}
-            name="app.scope"
-            rules={{ required: true }}
-            render={({ field: { onChange, value: scope } }) => (
-              <MultiCardOption
-                options={[
-                  {
-                    value: 'sanbox',
-                    render: ({ selected }) => (
-                      <AppCard
-                        name="Sandbox"
-                        description="Connect to development vehicles"
-                        scope="sandbox"
-                        className={classNames('w-full', {
-                          '!border-white': selected,
-                        })}
-                      />
-                    ),
-                  },
-                  {
-                    value: 'production',
-                    render: ({ selected }) => (
-                      <AppCard
-                        name="Production"
-                        description="Connect to production vehicles"
-                        scope="production"
-                        className={classNames('w-full', {
-                          '!border-white': selected,
-                        })}
-                      />
-                    ),
-                  },
-                ]}
-                selected={scope}
-                onChange={onChange}
-              />
-            )}
-          />
-          {errors?.app?.scope && (
-            <TextError errorMessage="This field is required" />
-          )}
-        </div>
         <div className="flex flex-col pt-4">
           <Button
             type="submit"

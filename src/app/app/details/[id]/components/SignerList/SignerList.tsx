@@ -13,10 +13,13 @@ import { IApp, ISigner } from '@/types/app';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useOnboarding } from '@/hooks';
+import { IGlobalAccountSession } from '@/types/wallet';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
+import * as Sentry from '@sentry/nextjs';
 
 interface IProps {
   app: IApp;
@@ -27,7 +30,6 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { workspace } = useOnboarding();
-  const { organizationInfo } = useGlobalAccount();
   const { processTransactions } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
@@ -37,8 +39,9 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   };
 
   const handleDisableSigner = async (signer: string) => {
-    if (!organizationInfo && !workspace)
-      throw new Error('Web3 connection failed');
+    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+    const organizationInfo = gaSession?.organization;
+    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
     const transaction = [
       {
         to: configuration.DLC_ADDRESS,
@@ -92,6 +95,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
         status: 'success',
       });
     } catch (error: unknown) {
+      Sentry.captureException(error);
       console.error(error);
       setLoadingStatus({ label: 'Something went wrong', status: 'error' });
     }
@@ -109,13 +113,11 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
     );
   };
 
-  const renderDeleteSignerAction = ({
-    id = '',
-    api_key: signer = '',
-  }: ISigner) => {
+  const renderDeleteSignerAction = ({ id = '', address: signer = '' }: ISigner) => {
     return (
       isOwner(role) && (
         <button
+          title="Delete API key"
           type="button"
           onClick={() => handleDelete(id, signer)}
           key={`delete-action-${id}`}
@@ -138,6 +140,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
       setLoadingStatus({ label: 'API key deleted', status: 'success' });
       refreshData();
     } catch (error: unknown) {
+      Sentry.captureException(error);
       const code = _.get(error, 'code', null);
       if (code === 4001)
         setLoadingStatus({
@@ -163,11 +166,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
             data={app.Signers.filter(({ deleted }) => !deleted)}
             actions={[renderTestAuthenticationAction, renderDeleteSignerAction]}
           />
-          <LoadingModal
-            isOpen={isOpened}
-            setIsOpen={setIsOpened}
-            {...loadingStatus}
-          />
+          <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
         </>
       )}
     </>

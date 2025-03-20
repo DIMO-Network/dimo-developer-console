@@ -1,29 +1,26 @@
 'use server';
 import { ICoinMarketTokenResponse } from '@/types/wallet';
 import { unstable_cache as cache } from 'next/cache';
-import xior from 'xior';
+import axios from 'axios';
 import config from '@/config';
 
-const dimoApiClient = xior.create({
+const dimoApiClient = axios.create({
   baseURL: config.backendUrl,
 });
 
 const getCurrentDimoPrice = async (): Promise<number> => {
-  const { data } =
-    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/DIMO');
+  const { data } = await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/DIMO');
   return data.data.DIMO[0].quote.USD.price;
 };
 
 const getCurrentPolPrice = async (): Promise<number> => {
-  const { data } =
-    await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/POL');
+  const { data } = await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/POL');
   return data.data.POL[0].quote.USD.price;
 };
 
 const getCurrentWMaticPrice = async (): Promise<number> => {
   const { data } =
     await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/WMATIC');
-  console.info(data);
   return data.data.WMATIC[0].quote.USD.price;
 };
 

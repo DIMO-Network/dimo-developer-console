@@ -1,20 +1,19 @@
 'use client';
 
-import { IDcxPurchaseTransaction } from '@/types/wallet';
+import { IDcxPurchaseTransaction, IGlobalAccountSession } from '@/types/wallet';
 import { useContractGA } from '@/hooks';
 import { useEffect, useState } from 'react';
 import classnames from 'classnames';
 import { Card } from '@/components/Card';
-import useGlobalAccount from '../../../hooks/useGlobalAccount';
 import { Button } from '@/components/Button';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import configuration from '@/config';
+import * as Sentry from '@sentry/nextjs';
+import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
 
 interface IProps {
-  onNext: (
-    flow: string,
-    transaction?: Partial<IDcxPurchaseTransaction>,
-  ) => void;
+  onNext: (flow: string, transaction?: Partial<IDcxPurchaseTransaction>) => void;
   transactionData?: Partial<IDcxPurchaseTransaction>;
 }
 interface ICryptoBalance {
@@ -26,7 +25,6 @@ interface ICryptoBalance {
 export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   const { getDimoBalance, getPolBalance, getWmaticBalance } = useContractGA();
   const { getDimoPrice, getPolPrice, getWMaticPrice } = useCryptoPricing();
-  const { organizationInfo } = useGlobalAccount();
 
   const [balances, setBalances] = useState<ICryptoBalance[]>([]);
   const [selectedBalance, setSelectedBalance] = useState<ICryptoBalance>({
@@ -35,40 +33,42 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
     price: 0,
   });
 
-  const getBalances = async () => {
-    const [
-      dimoBalance,
-      polBalance,
-      wmaticBalance,
-      dimoPrice,
-      polPrice,
-      wmaticPrice,
-    ] = await Promise.all([
-      getDimoBalance(),
-      getPolBalance(),
-      getWmaticBalance(),
-      getDimoPrice(),
-      getPolPrice(),
-      getWMaticPrice(),
-    ]);
-    const balances = [
-      {
-        currency: 'dimo',
-        balance: dimoBalance,
-        price: dimoPrice,
-      },
-      {
-        currency: 'pol',
-        balance: polBalance,
-        price: polPrice,
-      },
-      {
-        currency: 'wmatic',
-        balance: wmaticBalance,
-        price: wmaticPrice,
-      },
-    ];
-    setBalances(balances);
+  const getBalances = async (): Promise<void> => {
+    try {
+      const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const organizationInfo = gaSession?.organization;
+      if (!organizationInfo) return;
+      const [dimoBalance, polBalance, wmaticBalance, dimoPrice, polPrice, wmaticPrice] =
+        await Promise.all([
+          getDimoBalance(),
+          getPolBalance(),
+          getWmaticBalance(),
+          getDimoPrice(),
+          getPolPrice(),
+          getWMaticPrice(),
+        ]);
+      const balances = [
+        {
+          currency: 'dimo',
+          balance: dimoBalance,
+          price: dimoPrice,
+        },
+        {
+          currency: 'pol',
+          balance: polBalance,
+          price: polPrice,
+        },
+        {
+          currency: 'wmatic',
+          balance: wmaticBalance,
+          price: wmaticPrice,
+        },
+      ];
+      setBalances(balances);
+    } catch (error: unknown) {
+      console.error('Error while loading balances', error);
+      Sentry.captureException(error);
+    }
   };
 
   const handleSelection = (value: ICryptoBalance) => {
@@ -76,17 +76,11 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   };
 
   const getAmountToProcess = (balance: ICryptoBalance): bigint => {
-    const env = process.env.VERCEL_ENV!;
-    const clientEnv = process.env.NEXT_PUBLIC_CE!;
-    const environment = env ?? clientEnv;
-
-    if (environment !== 'production') return BigInt(1);
+    if (configuration.environment !== 'production') return BigInt(1);
 
     const usdTarget = transactionData!.usdAmount!;
     const usdEquivalent = balance.balance * balance.price;
-
     const neededFromBalance = (balance.balance * usdTarget) / usdEquivalent;
-
     return BigInt(Math.ceil(neededFromBalance));
   };
 
@@ -116,17 +110,14 @@ export const BalancePayment = ({ onNext, transactionData }: IProps) => {
   };
 
   useEffect(() => {
-    if (!organizationInfo) return;
-    getBalances().catch(console.error);
-  }, [organizationInfo?.smartContractAddress]);
+    void getBalances();
+  }, []);
 
   return (
     <>
       <h1>Current Balances</h1>
       <div className="buy-credits-payment-methods">
-        {balances.length === 0 && (
-          <BubbleLoader isLoading={balances.length === 0} />
-        )}
+        {balances.length === 0 && <BubbleLoader isLoading={balances.length === 0} />}
         {balances.map((currentBalance) => {
           const { currency, balance, price } = currentBalance;
           const usdEquivalent = balance * price;
