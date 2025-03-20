@@ -1,5 +1,4 @@
-import {FragmentType, useFragment} from "@/gql";
-import {DeveloperLicenseSummaryFragment} from "@/queries/DeveloperLicenseByTokenId";
+import {FragmentType, gql, useFragment} from "@/gql";
 import {Card} from "@/components/Card";
 import classNames from "classnames";
 import {Anchor} from "@/components/Anchor";
@@ -7,12 +6,19 @@ import {Button} from "@/components/Button";
 
 import './LicenseCard.css';
 
+export const DEVELOPER_LICENSE_SUMMARY_FRAGMENT = gql(`
+  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {
+    alias
+    tokenId
+    clientId
+  }
+`);
+
 export const LicenseCard = (props: {
-  license: FragmentType<typeof DeveloperLicenseSummaryFragment>,
+  license: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>,
   className?: string
 }) => {
-  const license = useFragment(DeveloperLicenseSummaryFragment, props.license);
-
+  const license = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, props.license);
   return (
     <Card className={classNames('license-card', props.className)}>
       <div className="content">
