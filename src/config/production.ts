@@ -22,6 +22,6 @@ export const SwapRouterAddress: `0x${string}` =
   '0xE592427A0AEce92De3Edee1F18E0157C05861564';
 
 export const CONTRACT_METHODS = {
-  ISSUE_IN_DC: '0xaf509d9f',
+  ISSUE_IN_DC: '0x69054339',
   MINT_IN_DIMO: '0xec88fc37',
 };
