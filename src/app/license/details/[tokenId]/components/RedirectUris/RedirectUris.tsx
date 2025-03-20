@@ -8,6 +8,7 @@ import {RedirectUriList} from "@/components/RedirectUriList";
 
 const REDIRECT_URIS_FRAGMENT = gql(`
   fragment RedirectUriFragment on DeveloperLicense {
+    tokenId
     redirectURIs(first:100) {
       nodes {
         uri
