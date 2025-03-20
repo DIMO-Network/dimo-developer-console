@@ -1,4 +1,4 @@
-import {FragmentType, gql} from "@/gql";
+import {FragmentType, gql, useFragment} from "@/gql";
 import React, {FC} from "react";
 
 import '../shared/Styles.css';
@@ -7,6 +7,7 @@ import {useSession} from "next-auth/react";
 
 const REDIRECT_URIS_FRAGMENT = gql(`
   fragment RedirectUriFragment on DeveloperLicense {
+    tokenId
     redirectURIs(first:100) {
       nodes {
         uri
@@ -16,11 +17,13 @@ const REDIRECT_URIS_FRAGMENT = gql(`
 `);
 
 interface Props {
-  redirectUris: FragmentType<typeof REDIRECT_URIS_FRAGMENT>
+  license: FragmentType<typeof REDIRECT_URIS_FRAGMENT>
 }
-export const RedirectUris: FC<Props> = ({ redirectUris }) => {
+
+export const RedirectUris: FC<Props> = ({ license }) => {
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
+  const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
   return (
     <div className={"license-details-table"}>
       <div className={"license-details-table-header"}>
