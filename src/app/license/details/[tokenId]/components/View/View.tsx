@@ -14,7 +14,7 @@ const GET_DEVELOPER_LICENSE = gql(`
     developerLicense(by: {tokenId: $tokenId}) {
       ...DeveloperLicenseSummaryFragment   
       ...SignerFragment
-      ...RedirectUriFragment 
+      ...RedirectUriFragment
     }
   }
 `);
@@ -46,7 +46,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       </div>
       <div className={"flex flex-col gap-6"}>
         <Signers />
-        <RedirectUris redirectUris={data?.developerLicense} />
+        <RedirectUris license={data?.developerLicense} />
       </div>
     </div>
   );

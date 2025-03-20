@@ -14,16 +14,14 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  fragment RedirectUriFragment on DeveloperLicense {\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.RedirectUriFragmentFragmentDoc,
     "\n  fragment SignerFragment on DeveloperLicense {\n    signers(first:100) {\n      nodes {\n        address\n      }\n    }\n  }\n": typeof types.SignerFragmentFragmentDoc,
-    "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n      ...RedirectUriFragment \n    }\n  }\n": typeof types.GetDeveloperLicenseDocument,
+    "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n    }\n  }\n": typeof types.GetDeveloperLicenseDocument,
     "\n    query GetDeveloperLicensesByOwner($owner: Address!) {\n        developerLicenses(first: 100, filterBy: { owner: $owner }) {\n          nodes {\n            ...DeveloperLicenseSummaryFragment          \n          }\n        }\n    }\n": typeof types.GetDeveloperLicensesByOwnerDocument,
     "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n  }\n": typeof types.DeveloperLicenseSummaryFragmentFragmentDoc,
 };
 const documents: Documents = {
-    "\n  fragment RedirectUriFragment on DeveloperLicense {\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.RedirectUriFragmentFragmentDoc,
     "\n  fragment SignerFragment on DeveloperLicense {\n    signers(first:100) {\n      nodes {\n        address\n      }\n    }\n  }\n": types.SignerFragmentFragmentDoc,
-    "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n      ...RedirectUriFragment \n    }\n  }\n": types.GetDeveloperLicenseDocument,
+    "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n    }\n  }\n": types.GetDeveloperLicenseDocument,
     "\n    query GetDeveloperLicensesByOwner($owner: Address!) {\n        developerLicenses(first: 100, filterBy: { owner: $owner }) {\n          nodes {\n            ...DeveloperLicenseSummaryFragment          \n          }\n        }\n    }\n": types.GetDeveloperLicensesByOwnerDocument,
     "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n  }\n": types.DeveloperLicenseSummaryFragmentFragmentDoc,
 };
@@ -45,15 +43,11 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment RedirectUriFragment on DeveloperLicense {\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n"): (typeof documents)["\n  fragment RedirectUriFragment on DeveloperLicense {\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
 export function gql(source: "\n  fragment SignerFragment on DeveloperLicense {\n    signers(first:100) {\n      nodes {\n        address\n      }\n    }\n  }\n"): (typeof documents)["\n  fragment SignerFragment on DeveloperLicense {\n    signers(first:100) {\n      nodes {\n        address\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n      ...RedirectUriFragment \n    }\n  }\n"): (typeof documents)["\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n      ...RedirectUriFragment \n    }\n  }\n"];
+export function gql(source: "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n    }\n  }\n"): (typeof documents)["\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

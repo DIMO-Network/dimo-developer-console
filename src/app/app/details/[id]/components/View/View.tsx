@@ -17,7 +17,7 @@ import {isOwner} from '@/utils/user';
 import {Loader} from '@/components/Loader';
 import {NotificationContext} from '@/context/notificationContext';
 import {RedirectUriForm} from '@/app/app/details/[id]/components/RedirectUriForm';
-import {RedirectUriList} from '../../../../../../components/RedirectUriList';
+import {RedirectUriList} from '@/components/RedirectUriList';
 import {SignerList} from '@/app/app/details/[id]/components/SignerList';
 import {Title} from '@/components/Title';
 import {useContractGA, useOnboarding} from '@/hooks';
@@ -224,7 +224,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
             </div>
             <div className="signers-table">
               {app && (
-                <RedirectUriList list={app?.RedirectUris} refreshData={refreshAppDetails}/>
+                <RedirectUriList redirectUris={app?.RedirectUris} refreshData={refreshAppDetails} tokenId={workspace?.token_id ?? 0}/>
               )}
             </div>
           </div>
