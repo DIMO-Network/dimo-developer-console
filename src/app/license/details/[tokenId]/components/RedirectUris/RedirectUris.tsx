@@ -18,13 +18,13 @@ const REDIRECT_URIS_FRAGMENT = gql(`
 `);
 
 interface Props {
-  license: FragmentType<typeof REDIRECT_URIS_FRAGMENT>
+  redirectUris: FragmentType<typeof REDIRECT_URIS_FRAGMENT>
 }
 
-export const RedirectUris: FC<Props> = ({ license }) => {
+export const RedirectUris: FC<Props> = ({ redirectUris }) => {
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
-  const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
+  const fragment = useFragment(REDIRECT_URIS_FRAGMENT, redirectUris);
   return (
     <div className={"license-details-table"}>
       <div className={"license-details-table-header"}>

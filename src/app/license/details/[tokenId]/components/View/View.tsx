@@ -46,7 +46,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       </div>
       <div className={"flex flex-col gap-6"}>
         <Signers />
-        <RedirectUris license={data?.developerLicense} />
+        <RedirectUris redirectUris={data?.developerLicense} />
       </div>
     </div>
   );
