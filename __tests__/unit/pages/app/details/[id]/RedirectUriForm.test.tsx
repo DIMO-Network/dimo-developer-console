@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { RedirectUriForm } from '../../../../../../src/components/RedirectUriForm';
+import { RedirectUriForm } from '@/components/RedirectUriForm';
 
 describe('RedirectUriForm', () => {
   it('renders the redirect uri form on the app details page', () => {

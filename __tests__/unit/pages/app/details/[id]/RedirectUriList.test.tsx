@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { RedirectUriList } from '../../../../../../src/components/RedirectUriList';
+import { RedirectUriList } from '@/components/RedirectUriList';
 import { appListMock } from '@/mocks/appList';
 
 const [app] = appListMock;
