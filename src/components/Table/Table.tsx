@@ -41,7 +41,7 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
             })}
             {actions && (
               <td className="table-action-cell" key={`field-${item?.id as string}`}>
-                {actions?.map((action) => action(item))}
+                {actions?.map((action, index) => action(item, index))}
               </td>
             )}
           </tr>

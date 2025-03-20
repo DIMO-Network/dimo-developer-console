@@ -5,20 +5,13 @@ import { useContext, useState, type FC } from 'react';
 import { isURL } from 'validator';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
-import { encodeFunctionData } from 'viem';
 
 import { Button } from '@/components/Button';
-import { createMyRedirectUri } from '@/actions/app';
 import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useContractGA, useOnboarding } from '@/hooks';
-import { IGlobalAccountSession } from '@/types/wallet';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
-
-import configuration from '@/config';
-import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
+import {useSetRedirectUri} from '@/hooks';
 
 import './RedirectUriForm.css';
 
@@ -27,16 +20,14 @@ interface IRedirectUri {
 }
 
 interface IProps {
-  appId: string;
   refreshData: () => void;
-  list: IRedirectUri[] | undefined;
+  redirectUris: IRedirectUri[] | undefined;
+  tokenId: number;
 }
 
-export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
+export const RedirectUriForm: FC<IProps> = ({ refreshData, redirectUris, tokenId }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { workspace } = useOnboarding();
-  const { processTransactions } = useContractGA();
   const {
     formState: { errors },
     handleSubmit,
@@ -46,31 +37,14 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
-
-  const handleSetDomain = async (uri: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
-    const transaction = [
-      {
-        to: configuration.DLC_ADDRESS,
-        value: BigInt(0),
-        data: encodeFunctionData({
-          abi: DimoLicenseABI,
-          functionName: 'setRedirectUri',
-          args: [workspace?.token_id ?? 0, true, uri],
-        }),
-      },
-    ];
-    await processTransactions(transaction);
-  };
+  const setRedirectUri = useSetRedirectUri(tokenId);
 
   const addRedirectUri = async () => {
     try {
       setIsLoading(true);
       const { uri } = getValues();
-      await handleSetDomain(uri);
-      await createMyRedirectUri(uri, appId);
+      await setRedirectUri(uri, true);
+      setNotification('Successfully added the redirect URI. Refresh the page to view your changes.', 'Success!', 'success')
       refreshData();
     } catch (error: unknown) {
       Sentry.captureException(error);
@@ -96,7 +70,7 @@ export const RedirectUriForm: FC<IProps> = ({ appId, refreshData, list }) => {
       allow_protocol_relative_urls: false,
     });
 
-    const isUnique = !list?.find(({ uri }) => uri === str);
+    const isUnique = !redirectUris?.find(({ uri }) => uri === str);
 
     if (!isValidUrl) return 'Please enter a valid URL, must include http:// or https://';
     if (!isUnique) return 'The URL is already in the list';
