@@ -7,15 +7,29 @@ import {LicenseCard} from "@/components/LicenseCard";
 import EmptyList from "@/app/app/list/components/EmptyList";
 import {isOwner} from "@/utils/user";
 import CreateAppButton from "@/app/app/list/components/CreateAppButton";
-import {DeveloperLicenseByTokenIdDocument} from "@/queries/DeveloperLicenseByTokenId";
+import {gql} from "@/gql";
 import './LicenseList.css';
+import {getFromSession, GlobalAccountSession} from "@/utils/sessionStorage";
+import {IGlobalAccountSession} from "@/types/wallet";
 
-export const LicenseList: FC<{ workspace?: IWorkspace }> = ({workspace}) => {
+const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
+    query GetDeveloperLicensesByOwner($owner: Address!) {
+        developerLicenses(first: 100, filterBy: { owner: $owner }) {
+          nodes {
+            ...DeveloperLicenseSummaryFragment          
+          }
+        }
+    }
+`);
+
+export const LicenseList: FC<{ workspace?: IWorkspace }> = () => {
   const {data: session} = useSession();
   const {user: {role = ''} = {}} = session ?? {};
-  const {data, error, loading} = useQuery(DeveloperLicenseByTokenIdDocument, {
-    variables:{tokenId: workspace?.token_id ?? 0},
-    skip: !workspace?.token_id,
+  const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+  const ownerAddress = gaSession?.organization.smartContractAddress;
+  const {data, error, loading} = useQuery(GET_DEVELOPER_LICENSES_BY_OWNER, {
+    variables:{owner: ownerAddress ?? ''},
+    skip: !ownerAddress,
   });
 
   const MainComponent = useMemo(() => {
@@ -29,9 +43,11 @@ export const LicenseList: FC<{ workspace?: IWorkspace }> = ({workspace}) => {
         <Loader isLoading={true}/>
       );
     }
-    if (data?.developerLicense) {
+    if (data?.developerLicenses.nodes.length) {
       return (
-        <div className="license-list"><LicenseCard license={data.developerLicense}/></div>
+        <div className="license-list">
+          {data.developerLicenses.nodes.map((license, idx) => <LicenseCard license={license} key={idx} />)}
+        </div>
       );
     }
     return (
@@ -43,7 +59,7 @@ export const LicenseList: FC<{ workspace?: IWorkspace }> = ({workspace}) => {
     <div className="license-list-content">
       <div className="description">
         <p className="title">Your Developer Licenses</p>
-        {isOwner(role) && !!data?.developerLicense && (
+        {isOwner(role) && !!data?.developerLicenses.nodes.length && (
           <CreateAppButton/>
         )}
       </div>

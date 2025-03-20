@@ -244,6 +244,7 @@ export type DeveloperLicenseEdge = {
 };
 
 export type DeveloperLicenseFilterBy = {
+  owner?: InputMaybe<Scalars['Address']['input']>;
   signer?: InputMaybe<Scalars['Address']['input']>;
 };
 
@@ -901,17 +902,17 @@ export type VehiclesFilter = {
   year?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type DeveloperLicenseSummaryFragment = { __typename?: 'DeveloperLicense', owner: any, tokenId: number, alias?: string | null, clientId: any } & { ' $fragmentName'?: 'DeveloperLicenseSummaryFragment' };
-
-export type DeveloperLicenseByTokenIdQueryVariables = Exact<{
-  tokenId: Scalars['Int']['input'];
+export type GetDeveloperLicensesByOwnerQueryVariables = Exact<{
+  owner: Scalars['Address']['input'];
 }>;
 
 
-export type DeveloperLicenseByTokenIdQuery = { __typename?: 'Query', developerLicense: (
-    { __typename?: 'DeveloperLicense' }
-    & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragment': DeveloperLicenseSummaryFragment } }
-  ) };
+export type GetDeveloperLicensesByOwnerQuery = { __typename?: 'Query', developerLicenses: { __typename?: 'DeveloperLicenseConnection', nodes: Array<(
+      { __typename?: 'DeveloperLicense' }
+      & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragmentFragment': DeveloperLicenseSummaryFragmentFragment } }
+    )> } };
 
-export const DeveloperLicenseSummaryFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummary"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]} as unknown as DocumentNode<DeveloperLicenseSummaryFragment, unknown>;
-export const DeveloperLicenseByTokenIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DeveloperLicenseByTokenId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"tokenId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummary"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummary"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]} as unknown as DocumentNode<DeveloperLicenseByTokenIdQuery, DeveloperLicenseByTokenIdQueryVariables>;
+export type DeveloperLicenseSummaryFragmentFragment = { __typename?: 'DeveloperLicense', alias?: string | null, tokenId: number } & { ' $fragmentName'?: 'DeveloperLicenseSummaryFragmentFragment' };
+
+export const DeveloperLicenseSummaryFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}}]}}]} as unknown as DocumentNode<DeveloperLicenseSummaryFragmentFragment, unknown>;
+export const GetDeveloperLicensesByOwnerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeveloperLicensesByOwner"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"owner"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicenses"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}},{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"owner"},"value":{"kind":"Variable","name":{"kind":"Name","value":"owner"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}}]}}]} as unknown as DocumentNode<GetDeveloperLicensesByOwnerQuery, GetDeveloperLicensesByOwnerQueryVariables>;

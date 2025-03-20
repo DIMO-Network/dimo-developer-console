@@ -14,12 +14,12 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  fragment DeveloperLicenseSummary on DeveloperLicense {\n    owner\n    tokenId\n    alias\n    clientId\n  }\n": typeof types.DeveloperLicenseSummaryFragmentDoc,
-    "\n    query DeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n": typeof types.DeveloperLicenseByTokenIdDocument,
+    "\n    query GetDeveloperLicensesByOwner($owner: Address!) {\n        developerLicenses(first: 100, filterBy: { owner: $owner }) {\n          nodes {\n            ...DeveloperLicenseSummaryFragment          \n          }\n        }\n    }\n": typeof types.GetDeveloperLicensesByOwnerDocument,
+    "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n  }\n": typeof types.DeveloperLicenseSummaryFragmentFragmentDoc,
 };
 const documents: Documents = {
-    "\n  fragment DeveloperLicenseSummary on DeveloperLicense {\n    owner\n    tokenId\n    alias\n    clientId\n  }\n": types.DeveloperLicenseSummaryFragmentDoc,
-    "\n    query DeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n": types.DeveloperLicenseByTokenIdDocument,
+    "\n    query GetDeveloperLicensesByOwner($owner: Address!) {\n        developerLicenses(first: 100, filterBy: { owner: $owner }) {\n          nodes {\n            ...DeveloperLicenseSummaryFragment          \n          }\n        }\n    }\n": types.GetDeveloperLicensesByOwnerDocument,
+    "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n  }\n": types.DeveloperLicenseSummaryFragmentFragmentDoc,
 };
 
 /**
@@ -39,11 +39,11 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment DeveloperLicenseSummary on DeveloperLicense {\n    owner\n    tokenId\n    alias\n    clientId\n  }\n"): (typeof documents)["\n  fragment DeveloperLicenseSummary on DeveloperLicense {\n    owner\n    tokenId\n    alias\n    clientId\n  }\n"];
+export function gql(source: "\n    query GetDeveloperLicensesByOwner($owner: Address!) {\n        developerLicenses(first: 100, filterBy: { owner: $owner }) {\n          nodes {\n            ...DeveloperLicenseSummaryFragment          \n          }\n        }\n    }\n"): (typeof documents)["\n    query GetDeveloperLicensesByOwner($owner: Address!) {\n        developerLicenses(first: 100, filterBy: { owner: $owner }) {\n          nodes {\n            ...DeveloperLicenseSummaryFragment          \n          }\n        }\n    }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n    query DeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n"): (typeof documents)["\n    query DeveloperLicenseByTokenId($tokenId: Int!) {\n        developerLicense(by: { tokenId: $tokenId }) {\n            ...DeveloperLicenseSummary\n        }\n    }\n"];
+export function gql(source: "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n  }\n"): (typeof documents)["\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};
