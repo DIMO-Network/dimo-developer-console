@@ -10,6 +10,7 @@ export const DEVELOPER_LICENSE_SUMMARY_FRAGMENT = gql(`
   fragment DeveloperLicenseSummaryFragment on DeveloperLicense {
     alias
     tokenId
+    clientId
   }
 `);
 
