@@ -1,8 +1,12 @@
 import {gql} from "@/gql";
 
 const SIGNERS_FRAGMENT = gql(`
-  fragment SignersFragment on Signer {
-    address
+  fragment SignerFragment on DeveloperLicense {
+    signers(first:100) {
+      nodes {
+        address
+      }
+    }
   }
 `);
 
