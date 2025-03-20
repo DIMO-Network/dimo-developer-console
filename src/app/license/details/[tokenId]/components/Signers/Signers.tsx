@@ -1,15 +1,18 @@
-import {gql} from "@/gql";
+import {FragmentType, gql, useFragment} from "@/gql";
 import {Title} from "@/components/Title";
-import React, {useState} from "react";
+import React, {FC, useState} from "react";
 import {isOwner} from "@/utils/user";
 import {Button} from "@/components/Button";
 import {KeyIcon} from "@heroicons/react/20/solid";
 import {useSession} from "next-auth/react";
 
 import '../shared/Styles.css';
+import {isLicenseOwner} from "@/utils/sessionStorage";
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
+    owner
+    tokenId
     signers(first:100) {
       nodes {
         address
@@ -18,10 +21,13 @@ const SIGNERS_FRAGMENT = gql(`
   }
 `);
 
-export const Signers = () => {
+interface Props {
+  license: FragmentType<typeof SIGNERS_FRAGMENT>
+}
+
+export const Signers: FC<Props> = ({ license }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
+  const fragment = useFragment(SIGNERS_FRAGMENT, license);
   const handleGenerateSigner = () => {
 
   };
@@ -29,7 +35,7 @@ export const Signers = () => {
     <div className={"license-details-table"}>
       <div className={"license-details-table-header"}>
         <Title component="h2" className={"text-xl"}>API Keys</Title>
-        {isOwner(role) && (
+        {isLicenseOwner(fragment) && (
             <Button
               className="dark with-icon px-4"
               loading={isLoading}

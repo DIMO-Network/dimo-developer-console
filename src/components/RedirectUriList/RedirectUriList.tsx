@@ -2,9 +2,7 @@ import {get} from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 import {useState, type FC, useContext} from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { useSession } from 'next-auth/react';
 import { IRedirectUri } from '@/types/app';
-import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import {useSetRedirectUri} from '@/hooks';
@@ -20,13 +18,12 @@ interface IProps {
   redirectUris: RedirectUri[] | undefined;
   refreshData: () => void;
   tokenId: number;
+  isOwner: boolean;
 }
 
-export const RedirectUriList: FC<IProps> = ({ redirectUris = [], refreshData, tokenId }) => {
+export const RedirectUriList: FC<IProps> = ({ redirectUris = [], refreshData, tokenId, isOwner }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
   const { setNotification } = useContext(NotificationContext);
 
   const setRedirectUri = useSetRedirectUri(tokenId);
@@ -76,7 +73,7 @@ export const RedirectUriList: FC<IProps> = ({ redirectUris = [], refreshData, to
 
   const renderDeleteRedirectUriAction = ({ uri }: RedirectUri, index: number) => {
     return (
-      isOwner(role) && (
+      isOwner && (
         <Button
           className={"table-action-button"}
           title="Delete redirect URI"

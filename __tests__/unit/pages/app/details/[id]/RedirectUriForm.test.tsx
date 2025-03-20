@@ -1,10 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriForm';
+import { RedirectUriForm } from '../../../../../../src/components/RedirectUriForm';
 
 describe('RedirectUriForm', () => {
   it('renders the redirect uri form on the app details page', () => {
-    render(<RedirectUriForm appId="" />);
+    render(<RedirectUriForm tokenId={0} refreshData={() => {}} redirectUris={[]}  />);
 
     const signerAddressInputElm = screen.getByRole('redirect-url-input');
     const addUriBtn = screen.getByText('Add URI');
@@ -14,7 +14,7 @@ describe('RedirectUriForm', () => {
   });
 
   it('renders the redirect uri validation texts', () => {
-    render(<RedirectUriForm appId="" />);
+    render(<RedirectUriForm tokenId={0} refreshData={() => {}} redirectUris={[]} />);
 
     const signerAddressInputElm = screen.getByRole('redirect-url-input');
 

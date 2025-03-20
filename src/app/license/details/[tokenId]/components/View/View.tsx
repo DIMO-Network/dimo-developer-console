@@ -9,6 +9,7 @@ import {Summary} from "@/app/license/details/[tokenId]/components/Summary";
 import {Signers} from "@/app/license/details/[tokenId]/components/Signers";
 import {RedirectUris} from "@/app/license/details/[tokenId]/components/RedirectUris";
 import {AppLoader} from "@/app/app/list/components/AppLoader";
+import {Loader} from "@/components/Loader";
 
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
@@ -40,21 +41,24 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
     getTokenId();
   }, [params]);
 
-  if (!data?.developerLicense) {
-    return null;
+  if (loading) {
+    return (
+      <div className="license-details-page">
+        <Loader isLoading={true} />
+      </div>
+    );
   }
 
   return (
     <div className="license-details-page">
-      {loading && <AppLoader isLoading={true} />}
-      {!loading && (
+      {data?.developerLicense && (
         <>
           <div className="summary">
             <BackButton/>
             <Summary licenseSummary={data?.developerLicense}/>
           </div>
           <div className={"flex flex-col gap-6"}>
-            <Signers/>
+            <Signers license={data?.developerLicense}/>
             <RedirectUris license={data?.developerLicense} refetch={handleRefetch}/>
           </div>
         </>

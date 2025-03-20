@@ -16,7 +16,7 @@ import {IApp} from '@/types/app';
 import {isOwner} from '@/utils/user';
 import {Loader} from '@/components/Loader';
 import {NotificationContext} from '@/context/notificationContext';
-import {RedirectUriForm} from '@/app/app/details/[id]/components/RedirectUriForm';
+import {RedirectUriForm} from '../../../../../../components/RedirectUriForm';
 import {RedirectUriList} from '@/components/RedirectUriList';
 import {SignerList} from '@/app/app/details/[id]/components/SignerList';
 import {Title} from '@/components/Title';
@@ -215,16 +215,21 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               {isOwner(role) && app && (
                 <div className={"mt-4"}>
                   <RedirectUriForm
-                    appId={app!.id!}
+                    tokenId={workspace?.token_id ?? 0}
                     refreshData={refreshAppDetails}
-                    list={app?.RedirectUris}
+                    redirectUris={app?.RedirectUris}
                   />
                 </div>
               )}
             </div>
             <div className="signers-table">
               {app && (
-                <RedirectUriList redirectUris={app?.RedirectUris} refreshData={refreshAppDetails} tokenId={workspace?.token_id ?? 0}/>
+                <RedirectUriList
+                  redirectUris={app?.RedirectUris}
+                  refreshData={refreshAppDetails}
+                  tokenId={workspace?.token_id ?? 0}
+                  isOwner={isOwner(role)}
+                />
               )}
             </div>
           </div>

@@ -6,6 +6,7 @@ import {DEVELOPER_LICENSE_SUMMARY_FRAGMENT} from "@/components/LicenseCard";
 import {FC, useContext} from "react";
 
 import {NotificationContext} from "@/context/notificationContext";
+import {isLicenseOwner} from "@/utils/sessionStorage";
 
 interface Props {
   licenseSummary: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>
@@ -33,7 +34,7 @@ export const Summary: FC<Props> = ({ licenseSummary }) => {
         <Title className="text-xl">
           {license.alias}
         </Title>
-        <PencilIcon className="w-4 h-4 cursor-pointer text-text-secondary" onClick={handleEditClick}/>
+        {isLicenseOwner(license) && <PencilIcon className="w-4 h-4 cursor-pointer text-text-secondary" onClick={handleEditClick}/>}
       </div>
       <div className="flex flex-col md:flex-row md:items-center gap-2">
         <p className="text-base text-text-secondary font-medium">

@@ -11,6 +11,7 @@ export const DEVELOPER_LICENSE_SUMMARY_FRAGMENT = gql(`
     alias
     tokenId
     clientId
+    owner
   }
 `);
 
