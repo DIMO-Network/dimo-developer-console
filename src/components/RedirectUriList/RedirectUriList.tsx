@@ -2,7 +2,6 @@ import _ from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 import {useState, type FC, useContext} from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { encodeFunctionData } from 'viem';
 import { useSession } from 'next-auth/react';
 
 import { deleteMyRedirectUri, updateMyRedirectUri } from '@/actions/app';
@@ -11,13 +10,8 @@ import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { Toggle } from '@/components/Toggle';
-import { useContractGA, useOnboarding } from '@/hooks';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
-import { IGlobalAccountSession } from '@/types/wallet';
+import {useOnboarding, useSetRedirectUri} from '@/hooks';
 import {Button} from "@/components/Button";
-
-import configuration from '@/config';
-import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import {ContentCopyIcon} from "@/components/Icons";
 import {NotificationContext} from "@/context/notificationContext";
 
@@ -30,30 +24,13 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { workspace } = useOnboarding();
-  const { processTransactions } = useContractGA();
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
   const { setNotification } = useContext(NotificationContext);
 
   const recordsToShow = list.filter(({ deleted }) => !deleted);
 
-  const handleSetDomain = async (uri: string, enabled: boolean) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo) throw new Error('Web3 connection failed');
-    const transaction = [
-      {
-        to: configuration.DLC_ADDRESS,
-        value: BigInt(0),
-        data: encodeFunctionData({
-          abi: DimoLicenseABI,
-          functionName: 'setRedirectUri',
-          args: [workspace?.token_id ?? 0, enabled, uri],
-        }),
-      },
-    ];
-    await processTransactions(transaction);
-  };
+  const setRedirectUri = useSetRedirectUri(workspace?.token_id ?? 0);
 
   const renderToggleStatus = ({ id, uri, status }: IRedirectUri) => {
     return (
@@ -70,7 +47,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const handleUpdateStatus = async (id: string, uri: string, newStatus: boolean) => {
     try {
       setIsOpened(true);
-      await handleSetDomain(uri, newStatus);
+      await setRedirectUri(uri, newStatus);
       setLoadingStatus({
         label: 'Updating the selected redirect URI',
         status: 'loading',
@@ -93,7 +70,7 @@ export const RedirectUriList: FC<IProps> = ({ list = [], refreshData }) => {
   const handleDeleteUri = async (id: string, uri: string) => {
     try {
       setIsOpened(true);
-      await handleSetDomain(uri, false);
+      await setRedirectUri(uri, false);
       setLoadingStatus({
         label: 'Deleting the selected redirect URI',
         status: 'loading',

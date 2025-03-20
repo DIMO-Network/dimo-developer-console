@@ -17,7 +17,7 @@ import {isOwner} from '@/utils/user';
 import {Loader} from '@/components/Loader';
 import {NotificationContext} from '@/context/notificationContext';
 import {RedirectUriForm} from '@/app/app/details/[id]/components/RedirectUriForm';
-import {RedirectUriList} from '@/app/app/details/[id]/components/RedirectUriList';
+import {RedirectUriList} from '../../../../../../components/RedirectUriList';
 import {SignerList} from '@/app/app/details/[id]/components/SignerList';
 import {Title} from '@/components/Title';
 import {useContractGA, useOnboarding} from '@/hooks';
