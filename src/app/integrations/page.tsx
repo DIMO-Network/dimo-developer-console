@@ -1,5 +1,15 @@
-import {WebhooksPage} from "@/components/Webhooks/WebhooksPage";
+'use client';
 
-export default function Page () {
-    return <WebhooksPage></WebhooksPage>
-}
+import React, { Suspense, FC } from 'react';
+import { WebhooksPage } from '@/components/Webhooks/WebhooksPage';
+
+const WebhooksPage: FC = () => {
+
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <WebhooksPage />
+        </Suspense>
+    );
+};
+
+export default WebhooksPage;

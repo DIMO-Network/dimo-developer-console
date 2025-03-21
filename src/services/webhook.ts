@@ -1,3 +1,4 @@
+// src/services/webhook.ts
 'use server';
 import { Webhook, Condition } from '@/types/webhook';
 import xior from 'xior';
@@ -32,7 +33,7 @@ export const createWebhook = async (webhook: Partial<Webhook>): Promise<Webhook>
         trigger: webhook.trigger || 'Conditions Empty',
         setup: webhook.setup || 'Realtime',
         target_uri: webhook.target_uri || 'https://example.com/webhook',
-        signalName: webhook.signalName, // New dedicated field.
+        signalName: webhook.signalName, // new field
         developer_license_address: webhook.developer_license_address || '1234567890abcdef',
         status: webhook.status || 'Active',
         description: webhook.description || 'Default Description',
