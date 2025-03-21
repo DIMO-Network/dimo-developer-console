@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import './Webhooks.css';
-import { useWebhooks } from '@/hooks/useWebhooks';
 import { WebhookForm } from './WebhookForm';
 import { WebhookTable } from './WebhookTable';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
