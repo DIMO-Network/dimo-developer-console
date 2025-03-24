@@ -21,7 +21,7 @@ export const handleOnChainError = (error: HttpRequestError): string => {
       .replaceAll('"', '')
       .split(': ')[1] as `0x${string}`;
 
-    const value = decodeErrorResult({
+    const decodedError = decodeErrorResult({
       abi: wagmiAbi,
       data: errorData,
     });
