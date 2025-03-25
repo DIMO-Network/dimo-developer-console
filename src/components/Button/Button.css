@@ -21,6 +21,10 @@
     @apply border-2 bg-transparent border-[#201C1E] text-white;
   }
 
+  &.secondary-border-color {
+    @apply border-[#322D2F]
+  }
+
   &.white {
     @apply bg-white;
     &-outline {
