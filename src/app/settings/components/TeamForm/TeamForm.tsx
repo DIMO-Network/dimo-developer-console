@@ -7,10 +7,10 @@ import config from '@/config';
 import { Button } from '@/components/Button';
 import { IInvitation } from '@/types/team';
 import { Label } from '@/components/Label';
-import { PlusIcon } from '@/components/Icons';
 import { SelectField } from '@/components/SelectField';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
+import { EnvelopIcon } from '@/components/Icons';
 
 import './TeamForm.css';
 
@@ -92,10 +92,14 @@ export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam, onCancel }) => {
       </div>
       <div className="actions">
         <Button className="primary w-full" loading={isLoading} loadingColor="primary">
-          <PlusIcon className="w-5 h-5 mr-2" />
-          Send email invitation
+          <EnvelopIcon className="w-4 h-4 mr-2" />
+          Send invitation
         </Button>
-        <Button className="primary-outline w-full" onClick={onCancel} type="button">
+        <Button
+          className="primary-outline secondary-border-color w-full"
+          onClick={onCancel}
+          type="button"
+        >
           Cancel
         </Button>
       </div>
