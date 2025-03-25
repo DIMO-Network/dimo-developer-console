@@ -1,5 +1,5 @@
 .select-field {
-  @apply rounded-lg py-2 px-4 outline-0 bg-[#322D2F] text-white relative h-8 flex flex-row justify-between;
+  @apply rounded-lg py-2 px-4 outline-0 bg-[#322D2F] text-white relative h-8 flex flex-row justify-between font-normal;
 
   .selected {
     @apply text-grey-50;

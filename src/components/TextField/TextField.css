@@ -1,5 +1,5 @@
 .text-field {
-  @apply rounded-lg py-2 px-4 outline-0 bg-[#322D2F] text-white flex flex-row;
+  @apply rounded-lg py-2 px-4 outline-0 bg-[#322D2F] text-white flex flex-row font-normal;
 
   input {
     @apply w-full bg-transparent outline-0;
