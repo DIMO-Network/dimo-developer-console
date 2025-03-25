@@ -10,6 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { IPasskeyAttestation } from '@/types/wallet';
 import { OtpSignup } from './OtpSignup';
 import { isNull } from 'lodash';
+import { createNewUser } from '@/services/user';
 
 interface IProps {
   auth?: Partial<IAuth>;
@@ -28,7 +29,7 @@ const WalletCreationForm = ({
 }: {
   email: string;
   type: WalletCreationType;
-  singupComplete: () => void;
+  singupComplete: (walletAddress: `0x${string}`) => void;
 }): ReactNode => {
   switch (type) {
     case WalletCreationType.OTP:
@@ -45,7 +46,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const [walletCreationType, setWalletCreationType] = useState<WalletCreationType>(
     WalletCreationType.PASSKEY,
   );
-  const { setUser } = useAuth();
+  const { setUser, loginWithPasskey } = useAuth();
 
   const { isPasskeyAvailable, getNewUserPasskey } = usePasskey();
 
@@ -75,13 +76,26 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     }
   };
 
-  const globalAccountSignupComplete = () => {
-    onNext('wallet-creation', {});
+  const globalAccountSignupComplete = (walletAddress: `0x${string}`) => {
+    createNewUser({
+      name: email,
+      email: email,
+      address: walletAddress,
+    }).then(() => {
+      onNext('wallet-creation', {
+        email: email,
+        address: walletAddress,
+      });
+    });
   };
 
   const handleWalletCreation = async (email: string) => {
     try {
-      const { success, encodedChallenge, attestation } = await tryCreatePasskey(email);
+      const {
+        success: withPasskey,
+        encodedChallenge,
+        attestation,
+      } = await tryCreatePasskey(email);
 
       const { subOrganizationId } = await createUserGlobalAccount({
         email,
@@ -95,22 +109,22 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         subOrganizationId,
       });
 
-      if (!success) {
+      if (!withPasskey) {
         setWalletCreationType(WalletCreationType.OTP);
         return;
       }
 
-      globalAccountSignupComplete();
+      const { success, wallet } = await loginWithPasskey();
+      if (!success) {
+        setNotification(
+          'Something went wrong while creating the user wallet',
+          'Oops...',
+          'error',
+        );
+        return;
+      }
 
-      // if (Object.keys(newOrg).length === 0) {
-      //   setNotification(
-      //     'Something went wrong while creating the user wallet',
-      //     'Oops...',
-      //     'error',
-      //   );
-      //   return;
-      // }
-      // onNext('wallet-creation', {});
+      globalAccountSignupComplete(wallet);
     } catch (error) {
       Sentry.captureException(error);
       console.error('Something went wrong while creating the user wallet', error);

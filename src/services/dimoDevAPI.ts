@@ -19,18 +19,15 @@ const addCookie = (arr: string[], cookieName: string, value: string) => {
 };
 
 export const dimoDevAPIClient = async (timeout: number = 5000) => {
-  const invitationCookie = 'invitation';
   const tokenCookie = `${cookiePrefix}session-token`;
 
-  const userCookies: string[] = [];
-  addCookie(userCookies, tokenCookie, await getCookie(tokenCookie));
-  addCookie(userCookies, invitationCookie, await getCookie(invitationCookie));
+  const authToken = await getCookie(tokenCookie);
 
   return axios.create({
     baseURL: config.backendUrl,
     timeout,
     headers: {
-      Cookie: userCookies.join(';'),
+      Authorization: `Bearer ${authToken}`,
     },
   });
 };

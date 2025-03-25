@@ -26,17 +26,27 @@ const SignInForm = ({
   handleLogin,
   handleCTA,
   handlePasskeyRejected,
+  currentEmail,
+  currentWallet,
 }: {
   type: SignInType;
   handleLogin: (email: string) => Promise<void>;
   handleCTA: (app: string, auth?: Partial<IAuth>) => Promise<void>;
   handlePasskeyRejected: () => void;
+  currentEmail: string;
+  currentWallet: string | null;
 }): ReactNode => {
   switch (type) {
     case SignInType.OTP:
-      return <OtpInputForm />;
+      return <OtpInputForm currentEmail={currentEmail} currentWallet={currentWallet} />;
     case SignInType.PASSKEY:
-      return <PasskeyLogin handlePasskeyRejected={handlePasskeyRejected} />;
+      return (
+        <PasskeyLogin
+          currentEmail={currentEmail}
+          handlePasskeyRejected={handlePasskeyRejected}
+          currentWallet={currentWallet}
+        />
+      );
     default:
       return <SignInMethodForm handleCTA={handleCTA} handleLogin={handleLogin} />;
   }
@@ -56,7 +66,15 @@ export const View = () => {
     });
   }
 
-  const [signInType, setSignInType] = useState<SignInType>(SignInType.NONE);
+  const [signInProcess, setSignInProcess] = useState<{
+    email: string;
+    signInType: SignInType;
+    currentWallet: string | null;
+  }>({
+    email: '',
+    signInType: SignInType.NONE,
+    currentWallet: null,
+  });
 
   const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
     //await signIn(app, auth);
@@ -73,7 +91,8 @@ export const View = () => {
         return;
       }
 
-      const { role, subOrganizationId, hasPasskey } = userInformation;
+      const { role, subOrganizationId, hasPasskey, currentWalletAddress } =
+        userInformation;
 
       if (isCollaborator(role)) {
         router.push('/app');
@@ -86,9 +105,17 @@ export const View = () => {
       });
 
       if (hasPasskey && !isNull(isPasskeyAvailable) && isPasskeyAvailable) {
-        setSignInType(SignInType.PASSKEY);
+        setSignInProcess({
+          email: email,
+          signInType: SignInType.PASSKEY,
+          currentWallet: currentWalletAddress,
+        });
       } else {
-        setSignInType(SignInType.OTP);
+        setSignInProcess({
+          email: email,
+          signInType: SignInType.OTP,
+          currentWallet: currentWalletAddress,
+        });
       }
     } catch (error) {
       Sentry.captureException(error);
@@ -97,7 +124,10 @@ export const View = () => {
   };
 
   const handlePasskeyRejected = () => {
-    setSignInType(SignInType.OTP);
+    setSignInProcess((signInProcess) => ({
+      ...signInProcess,
+      signInType: SignInType.OTP,
+    }));
   };
 
   // useEffect(() => {
@@ -114,10 +144,12 @@ export const View = () => {
       <div className="sign-in__content">
         <img src={'/images/dimo-dev.svg'} alt="DIMO Logo" />
         <SignInForm
-          type={signInType}
+          currentEmail={signInProcess.email}
+          type={signInProcess.signInType}
           handleCTA={handleCTA}
           handleLogin={handleLogin}
           handlePasskeyRejected={handlePasskeyRejected}
+          currentWallet={signInProcess.currentWallet}
         />
         <div className="sign-in__extra-links mt-6">
           <div className="flex flex-row">

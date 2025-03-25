@@ -80,7 +80,7 @@ export const bottomMenu = [
     icon: ArrowLeftStartOnRectangleIcon as FC,
     iconClassName: 'h-5 w-5 fill-grey-200',
     link: () => {
-      turnkeyClient.logoutUser();
+      turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
     },

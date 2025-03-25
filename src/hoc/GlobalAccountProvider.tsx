@@ -1,18 +1,28 @@
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
 import { IUserSession } from '@/types/user';
 import { IGlobalAccountSession } from '@/types/wallet';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import {
+  getFromSession,
+  GlobalAccountSession,
+  removeFromSession,
+} from '@/utils/sessionStorage';
 import { ComponentType, useEffect, useState } from 'react';
 import { utils } from 'web3';
 import configuration from '@/config';
 import { getTurnkeyClient, getTurnkeyWalletAddress } from '@/services/turnkey';
-import { EmbeddedKey, getFromLocalStorage } from '@/utils/localStorage';
+import {
+  EmbeddedKey,
+  getFromLocalStorage,
+  removeFromLocalStorage,
+} from '@/utils/localStorage';
 import { getKernelAccount, getKernelClient, getPublicClient } from '@/services/zerodev';
 import { getContract } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 // import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import { TeamRoles } from '@/types/team';
+import { signOut } from '@/actions/user';
+import { turnkeyClient } from '@/config/turnkey';
 
 export const withGlobalAccounts = <P extends object>(
   WrappedComponent: ComponentType<P>,
@@ -158,11 +168,10 @@ export const withGlobalAccounts = <P extends object>(
     };
 
     const logout = async () => {
-      //   removeFromSession(GlobalAccountSession);
-      //   removeFromLocalStorage(EmbeddedKey);
-      //   const userCookies = await cookies();
-      //   userCookies.delete('session-token');
-      //   await turnkeyClient.logoutUser();
+      signOut();
+      turnkeyClient.logout();
+      removeFromSession(GlobalAccountSession);
+      removeFromLocalStorage(EmbeddedKey);
     };
 
     useEffect(() => {

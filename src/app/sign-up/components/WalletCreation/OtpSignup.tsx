@@ -7,7 +7,7 @@ import { useState, useRef, useEffect, FC } from 'react';
 
 interface IProps {
   email: string;
-  handleSignupComplete: () => void;
+  handleSignupComplete: (walletAddress: `0x${string}`) => void;
 }
 
 export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
@@ -77,8 +77,14 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
     const otpString = otp.join('');
     try {
       setIsLoading(true);
-      await completeOtpLogin({ otp: otpString, otpId });
-      handleSignupComplete();
+      const { success, wallet } = await completeOtpLogin({ otp: otpString, otpId });
+
+      if (!success) {
+        //setNotification('Invalid OTP code', 'Error', 'error');
+        return;
+      }
+
+      handleSignupComplete(wallet);
     } catch (error: unknown) {
       console.error(error);
       //Sentry.captureException(error);
@@ -96,7 +102,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
     if (pasteData.length === 6) {
       const newOtp = pasteData.split('');
       setOtp(newOtp);
-      //handleVerify();
+      handleVerify();
     }
   };
   return (

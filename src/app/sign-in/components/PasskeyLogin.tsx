@@ -1,19 +1,40 @@
+import { completeUserData } from '@/app/sign-up/actions';
 import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
+import { useRouter } from 'next/navigation';
 import { FC, useEffect } from 'react';
 
 interface IProps {
+  currentEmail: string;
   handlePasskeyRejected: () => void;
+  currentWallet: string | null;
 }
 
-export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected }) => {
+export const PasskeyLogin: FC<IProps> = ({
+  currentEmail,
+  handlePasskeyRejected,
+  currentWallet,
+}) => {
+  const router = useRouter();
   const { loginWithPasskey } = useAuth();
 
   const handleLoginWithPasskey = async () => {
     try {
-      await loginWithPasskey();
+      const { success, wallet } = await loginWithPasskey();
+
+      if (!success) {
+      }
+
+      if (currentWallet !== wallet) {
+        await completeUserData({
+          email: currentEmail,
+          address: wallet,
+        });
+      }
+
+      router.replace('/app');
     } catch (error: unknown) {
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {

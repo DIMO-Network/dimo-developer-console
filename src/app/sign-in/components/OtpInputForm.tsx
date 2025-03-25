@@ -4,10 +4,16 @@ import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
 import { FC, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { completeUserData } from '@/app/sign-up/actions';
 
-interface IProps {}
+interface IProps {
+  currentEmail: string;
+  currentWallet: string | null;
+}
 
-export const OtpInputForm: FC<IProps> = () => {
+export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const inputRefs = useRef<HTMLInputElement[]>([]);
@@ -74,7 +80,18 @@ export const OtpInputForm: FC<IProps> = () => {
     const otpString = otp.join('');
     try {
       setIsLoading(true);
-      await completeOtpLogin({ otp: otpString, otpId });
+      const { success, wallet } = await completeOtpLogin({ otp: otpString, otpId });
+      if (!success) {
+      }
+
+      if (currentWallet !== wallet) {
+        await completeUserData({
+          email: currentEmail,
+          address: wallet,
+        });
+      }
+
+      router.replace('/app');
     } catch (error) {
       //Sentry.captureException(error);
     } finally {
@@ -102,7 +119,7 @@ export const OtpInputForm: FC<IProps> = () => {
         </div>
         <div className="otp-login-text">
           <p>
-            Enter the code sent to <strong>{'bruce.w@batman.com'}</strong>
+            Enter the code sent to <strong>{currentEmail}</strong>
           </p>
         </div>
         <div className="otp-inputs">
