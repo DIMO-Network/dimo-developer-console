@@ -1,6 +1,7 @@
 import { useState, type FC } from 'react';
 import { useSession } from 'next-auth/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
+
 import * as Sentry from '@sentry/nextjs';
 
 import {

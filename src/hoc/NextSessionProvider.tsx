@@ -18,8 +18,8 @@ export const withNextSession = <P extends object>(WrappedComponent: ComponentTyp
       <SessionProvider>
         <QueryClientProvider client={queryClient}>
           <StripeCryptoContext.Provider value={{ stripeClientId, setStripeClientId }}>
-              <WrappedComponent {...props} />
-            </StripeCryptoContext.Provider>
+            <WrappedComponent {...props} />
+          </StripeCryptoContext.Provider>
         </QueryClientProvider>
       </SessionProvider>
     );

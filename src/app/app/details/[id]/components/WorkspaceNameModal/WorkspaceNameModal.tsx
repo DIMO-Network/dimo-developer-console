@@ -17,7 +17,7 @@ import { updateApp } from '@/actions/app';
 import { useContractGA } from '@/hooks';
 
 import configuration from '@/config';
-import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import DimoLicenseContract from '@/contracts/DimoLicenseContract.json';
 
 import './WorkspaceNameModal.css';
 
@@ -64,10 +64,10 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
   const setLicenseAlias = async ({ workspaceName: licenseAlias }: IFormInputs) => {
     if (licenseAlias === app.Workspace.name) return;
     const transaction = {
-      to: configuration.DCX_ADDRESS,
+      to: configuration.DLC_ADDRESS,
       value: BigInt(0),
       data: encodeFunctionData({
-        abi: DimoCreditsABI,
+        abi: DimoLicenseContract,
         functionName: 'setLicenseAlias',
         args: [tokenId, licenseAlias],
       }),
@@ -78,12 +78,13 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
   };
 
   const updateAppName = async (data: IFormInputs) => {
-    const { appName: newAppName } = data;
-    if (newAppName === app.name) return;
+    const { appName: newAppName, workspaceName: newWorkspaceName } = data;
+    if (newAppName === app.name && newWorkspaceName === app.Workspace.name) return;
 
     try {
       await updateApp(appId!, {
         name: newAppName,
+        Workspace: { name: newWorkspaceName },
       });
       app.name = newAppName;
     } catch (error) {
