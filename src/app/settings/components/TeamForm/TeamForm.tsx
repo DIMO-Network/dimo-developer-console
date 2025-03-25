@@ -22,9 +22,10 @@ const roleOptions = config.ROLES.map((roleName) => ({
 interface IProps {
   isLoading: boolean;
   inviteToTeam: (a: IInvitation) => Promise<void>;
+  onCancel: () => void;
 }
 
-export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam }) => {
+export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam, onCancel }) => {
   const {
     control,
     handleSubmit,
@@ -48,51 +49,54 @@ export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam }) => {
 
   return (
     <form className="form-team-invitation" onSubmit={handleSubmit(onSubmit)}>
-      <div className="field">
-        <Label htmlFor="email" className="text-xs text-medium">
-          Email
-          <TextField
-            type="text"
-            placeholder="Enter email"
-            {...register('email', {
-              required: 'This field is required',
-              maxLength: {
-                value: 120,
-                message: 'The name should has maximum 120 characters',
-              },
-              validate: {
-                isEmail: (str: string) => str && isEmail(str),
-              },
-            })}
-            role="namespace-input"
-          />
-          {errors?.email && <TextError errorMessage="This field must be a valid email" />}
-        </Label>
+      <div className="fields">
+        <div className="field">
+          <Label htmlFor="email" className="text-xs text-medium">
+            Email
+            <TextField
+              type="text"
+              placeholder="Enter email"
+              {...register('email', {
+                required: 'This field is required',
+                maxLength: {
+                  value: 120,
+                  message: 'The name should has maximum 120 characters',
+                },
+                validate: {
+                  isEmail: (str: string) => str && isEmail(str),
+                },
+              })}
+              role="namespace-input"
+            />
+            {errors?.email && (
+              <TextError errorMessage="This field must be a valid email" />
+            )}
+          </Label>
+        </div>
+        <div className="field">
+          <Label htmlFor="role" className="text-xs text-medium">
+            Role
+            <SelectField
+              {...register('role', {
+                required: 'This field is required',
+              })}
+              options={roleOptions}
+              control={control}
+              placeholder="Select a role"
+              value={config.ROLES[0]}
+              role="company-region"
+            />
+            {errors.role && <TextError errorMessage={errors.role.message ?? ''} />}
+          </Label>
+        </div>
       </div>
-      <div className="field">
-        <Label htmlFor="role" className="text-xs text-medium">
-          Role
-          <SelectField
-            {...register('role', {
-              required: 'This field is required',
-            })}
-            options={roleOptions}
-            control={control}
-            placeholder="Select a role"
-            value={config.ROLES[0]}
-            role="company-region"
-          />
-          {errors.role && <TextError errorMessage={errors.role.message ?? ''} />}
-        </Label>
-      </div>
-      <div className="cta">
-        <Button
-          className="primary px-4 w-full"
-          loading={isLoading}
-          loadingColor="primary"
-        >
+      <div className="actions">
+        <Button className="primary w-full" loading={isLoading} loadingColor="primary">
           <PlusIcon className="w-5 h-5 mr-2" />
           Send email invitation
+        </Button>
+        <Button className="primary-outline w-full" onClick={onCancel} type="button">
+          Cancel
         </Button>
       </div>
     </form>

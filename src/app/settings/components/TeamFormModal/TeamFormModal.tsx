@@ -43,6 +43,11 @@ export const TeamFormModal: FC<IProps> = ({ isOpen, setIsOpen }) => {
     }
   };
 
+  const onCancel = () => {
+    setIsOpen(false);
+    setIsLoading(false);
+  };
+
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="team-form-modal">
       <div className="team-form-content">
@@ -52,7 +57,7 @@ export const TeamFormModal: FC<IProps> = ({ isOpen, setIsOpen }) => {
           </Title>
           <p className="description">Invite your team to collaborate with you</p>
         </div>
-        <TeamForm isLoading={isLoading} inviteToTeam={onSubmit} />
+        <TeamForm isLoading={isLoading} inviteToTeam={onSubmit} onCancel={onCancel} />
       </div>
     </Modal>
   );
