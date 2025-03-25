@@ -56,7 +56,7 @@ export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen 
     <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="support-form-modal">
       <div className="support-form-content">
         <div className="support-form-header">
-          <Title className="text-2xl" component="h3">
+          <Title className="title" component="h3">
             Contact Developer Support
           </Title>
           <p className="description">
