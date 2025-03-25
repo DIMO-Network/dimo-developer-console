@@ -1,11 +1,14 @@
 .form-dev-support {
-  @apply flex flex-col w-full;
+  @apply flex flex-col w-full pt-6;
 
   .field {
     @apply w-full;
   }
 
-  .cta {
-    @apply flex w-full;
+  .fields {
+    @apply flex flex-col gap-6
+  }
+  .actions {
+    @apply flex flex-col gap-4 pt-6;
   }
 }
