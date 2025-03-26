@@ -2,6 +2,6 @@
   @apply border-b border-[#322D2F];
 
   .subtitle {
-    @apply text-3xl pb-2;
+    @apply text-3xl font-medium text-[#BABABA] pb-2;
   }
 }
