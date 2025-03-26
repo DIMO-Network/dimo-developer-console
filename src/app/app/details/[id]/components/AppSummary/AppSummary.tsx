@@ -56,7 +56,7 @@ export const AppSummary: FC<IProps> = ({ app }) => {
         setIsOpen={setIsModalOpen}
         license={{
           tokenId: workspace.token_id ?? 0,
-          alias: workspace.name ?? ''
+          alias: workspace.name ?? '',
         }}
       />
     </div>

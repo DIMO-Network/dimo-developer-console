@@ -3,14 +3,12 @@ import { type FC } from 'react';
 
 import { Loader } from '@//components/Loader';
 import { Banner } from '@/app/app/list/components/Banner';
-import { useOnboarding, useUser } from '@/hooks';
+import { useGlobalAccount, useOnboarding, useUser } from '@/hooks';
 import Image from 'next/image';
 import { LicenseList } from '@/app/license/list';
 import './View.css';
-import {gql} from "@/gql";
-import {useQuery} from "@apollo/client";
-import {getFromSession, GlobalAccountSession} from "@/utils/sessionStorage";
-import {IGlobalAccountSession} from "@/types/wallet";
+import { gql } from '@/gql';
+import { useQuery } from '@apollo/client';
 
 const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
   query GetDeveloperLicensesByOwner($owner: Address!) {
@@ -23,12 +21,11 @@ const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
 
 export const View: FC = () => {
   const { balance } = useOnboarding();
-  const {user} = useUser();
-  const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-  const ownerAddress = gaSession?.organization.smartContractAddress;
-  const {data, error, loading} = useQuery(GET_DEVELOPER_LICENSES_BY_OWNER, {
-    variables:{owner: ownerAddress ?? ''},
-    skip: !ownerAddress,
+  const { user } = useUser();
+  const { currentUser } = useGlobalAccount();
+  const { data, error, loading } = useQuery(GET_DEVELOPER_LICENSES_BY_OWNER, {
+    variables: { owner: currentUser?.smartContractAddress ?? '' },
+    skip: !currentUser?.smartContractAddress,
   });
 
   return (

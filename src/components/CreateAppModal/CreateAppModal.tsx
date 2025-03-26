@@ -1,8 +1,8 @@
-import {Modal} from "@/components/Modal";
-import {Title} from "@/components/Title";
-import {FC} from "react";
-import {Form} from "@/app/app/create/components";
-import {useOnboarding} from "@/hooks";
+import { Modal } from '@/components/Modal';
+import { Title } from '@/components/Title';
+import { FC } from 'react';
+import { Form } from '@/app/app/create/components';
+import { useOnboarding } from '@/hooks';
 
 import './CreateAppModal.css';
 
@@ -24,8 +24,8 @@ export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
             Create a new developer license
           </Title>
         </div>
-        <div className={"flex flex-1 w-full py-6"}>
-          <Form workspace={workspace} onSuccess={handleSuccess}/>
+        <div className={'flex flex-1 w-full py-6'}>
+          <Form workspace={workspace} onSuccess={handleSuccess} />
         </div>
       </div>
     </Modal>

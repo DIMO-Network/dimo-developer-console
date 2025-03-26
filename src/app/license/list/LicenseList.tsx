@@ -1,7 +1,7 @@
-import {FC} from "react";
-import {LicenseCard} from "@/components/LicenseCard";
-import EmptyList from "@/app/app/list/components/EmptyList";
-import {FragmentType, gql, useFragment} from "@/gql";
+import { FC } from 'react';
+import { LicenseCard } from '@/components/LicenseCard';
+import EmptyList from '@/app/app/list/components/EmptyList';
+import { FragmentType, gql, useFragment } from '@/gql';
 import './LicenseList.css';
 
 export const GET_LICENSE_SUMMARIES = gql(`
@@ -13,10 +13,10 @@ export const GET_LICENSE_SUMMARIES = gql(`
 `);
 
 interface Props {
-  licenseConnection: FragmentType<typeof GET_LICENSE_SUMMARIES>
+  licenseConnection: FragmentType<typeof GET_LICENSE_SUMMARIES>;
 }
 
-export const LicenseList: FC<Props> = ({licenseConnection}) => {
+export const LicenseList: FC<Props> = ({ licenseConnection }) => {
   const fragment = useFragment(GET_LICENSE_SUMMARIES, licenseConnection);
 
   return (
@@ -27,10 +27,12 @@ export const LicenseList: FC<Props> = ({licenseConnection}) => {
       {fragment.nodes.length ? (
         <div className="license-list">
           {fragment.nodes.map((licenseSummaryFragment, idx) => (
-            <LicenseCard license={licenseSummaryFragment} key={idx}/>)
-          )}
+            <LicenseCard license={licenseSummaryFragment} key={idx} />
+          ))}
         </div>
-      ) : <EmptyList />}
+      ) : (
+        <EmptyList />
+      )}
     </div>
   );
 };

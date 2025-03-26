@@ -22,7 +22,7 @@ import './WorkspaceNameModal.css';
 interface IProps {
   isOpen: boolean;
   setIsOpen: (s: boolean) => void;
-  license: {tokenId: number; alias?: string | null};
+  license: { tokenId: number; alias?: string | null };
   onSuccess?: () => void;
 }
 
@@ -30,7 +30,12 @@ interface IFormInputs {
   workspaceName: string;
 }
 
-export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, license, onSuccess }) => {
+export const WorkspaceNameModal: FC<IProps> = ({
+  isOpen,
+  setIsOpen,
+  license,
+  onSuccess,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const { processTransactions } = useContractGA();
   const { setNotification } = useContext(NotificationContext);
@@ -115,18 +120,26 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, license, onS
                 defaultValue={license.alias ?? ''}
                 className="field"
               />
-              <p className={"text-text-secondary font-normal"}>This is the namespace used across all your apps. It is a public name visible to other developers and users in the ecosystem.</p>
+              <p className={'text-text-secondary font-normal'}>
+                This is the namespace used across all your apps. It is a public name
+                visible to other developers and users in the ecosystem.
+              </p>
               {errors?.workspaceName && (
                 <TextError errorMessage={errors.workspaceName.message!} />
               )}
             </Label>
           </div>
         </div>
-        <div className={"flex flex-col gap-4 pt-6"}>
+        <div className={'flex flex-col gap-4 pt-6'}>
           <Button type="submit" className="light save-button" loading={isLoading}>
             Save Changes
           </Button>
-          <Button type="reset" className="primary-outline save-button" disabled={isLoading} onClick={() => setIsOpen(false)}>
+          <Button
+            type="reset"
+            className="primary-outline save-button"
+            disabled={isLoading}
+            onClick={() => setIsOpen(false)}
+          >
             Cancel
           </Button>
         </div>

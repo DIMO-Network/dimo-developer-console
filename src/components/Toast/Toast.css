@@ -2,7 +2,7 @@
   @apply pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-30;
 
   &.success {
-    @apply bg-feedback-success
+    @apply bg-feedback-success;
   }
 
   &-content {

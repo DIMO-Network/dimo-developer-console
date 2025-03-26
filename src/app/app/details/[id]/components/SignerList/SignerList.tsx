@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import { maskStringV2 } from 'maskdata';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import {useState, type FC, useContext} from 'react';
+import { useState, type FC, useContext } from 'react';
 
 import { Button } from '@/components/Button';
 import { ContentCopyIcon } from '@/components/Icons';

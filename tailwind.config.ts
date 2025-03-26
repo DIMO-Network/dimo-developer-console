@@ -28,7 +28,7 @@ const config: Config = {
         },
         'feedback': {
           success: '#0D7038',
-          error: '#8E3231'
+          error: '#8E3231',
         },
         'grey': {
           '50': '#f5f6f6',

@@ -7,6 +7,6 @@
 .copyable-row {
   @apply flex flex-row gap-2.5 bg-surface-raised py-2 px-3 rounded-xl items-center;
   p {
-    @apply text-base text-text-secondary
+    @apply text-base text-text-secondary;
   }
 }

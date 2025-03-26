@@ -1,13 +1,13 @@
-import {FragmentType, useFragment} from "@/gql";
-import {DEVELOPER_LICENSE_SUMMARY_FRAGMENT} from "@/components/LicenseCard";
-import {FC, useState} from "react";
-import {checkIsLicenseOwner} from "@/utils/sessionStorage";
-import {WorkspaceNameModal} from "@/components/WorkspaceNameModal";
-import {AliasAndTokenId} from "@/app/license/details/[tokenId]/components/Summary/components/AliasAndTokenId";
-import {ClientId} from "@/app/license/details/[tokenId]/components/Summary/components/ClientId";
+import { FragmentType, useFragment } from '@/gql';
+import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
+import { FC, useState } from 'react';
+import { checkIsLicenseOwner } from '@/utils/sessionStorage';
+import { WorkspaceNameModal } from '@/components/WorkspaceNameModal';
+import { AliasAndTokenId } from '@/app/license/details/[tokenId]/components/Summary/components/AliasAndTokenId';
+import { ClientId } from '@/app/license/details/[tokenId]/components/Summary/components/ClientId';
 
 interface Props {
-  licenseSummary: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>
+  licenseSummary: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
   refetch: () => void;
 }
 
@@ -37,4 +37,3 @@ export const Summary: FC<Props> = ({ licenseSummary, refetch }) => {
     </div>
   );
 };
-
