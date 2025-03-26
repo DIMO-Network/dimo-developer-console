@@ -1,5 +1,5 @@
 .button {
-  @apply rounded-full h-8 bg-white text-black font-medium inline-flex justify-center items-center px-4 py-2 flex flex-row gap-2;
+  @apply rounded-full h-8 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex-row gap-2 disabled:bg-green-500 disabled:cursor-not-allowed;
 
   span.content {
     @apply flex flex-row gap-1 items-center justify-center;
@@ -22,7 +22,7 @@
   }
 
   &.secondary-border-color {
-    @apply border-[#322D2F]
+    @apply border-[#322D2F];
   }
 
   &.white {
@@ -33,7 +33,11 @@
   }
 
   &.dark {
-    @apply bg-dark-grey-950 text-white;
+    @apply bg-cta-default text-white hover:border-white border-transparent border-2;
+  }
+
+  &.table-action-button {
+    @apply bg-transparent text-white border border-surface-raised hover:border-white;
   }
 
   &.error {

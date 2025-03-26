@@ -73,6 +73,11 @@ import { isEmpty } from 'lodash';
 const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 const halfHour = 30 * 60;
 
+export interface GlobalAccountWalletAddress {
+  walletAddress: `0x${string}`;
+  smartContractAddress: `0x${string}`;
+}
+
 export const useGlobalAccount = () => {
   const { getNewUserPasskey } = usePasskey();
   const { checkAuthenticated } = useContext(GlobalAccountAuthContext);
@@ -585,7 +590,7 @@ export const useGlobalAccount = () => {
   }: {
     subOrganizationId: string;
     authKey: string;
-  }) => {
+  }): Promise<GlobalAccountWalletAddress> => {
     const client = getTurnkeyClient(AuthClient.Iframe, authKey);
     const { wallets } = await client.getWallets({
       organizationId: subOrganizationId,

@@ -2,10 +2,10 @@
   @apply fixed inset-0 z-10 w-screen overflow-y-auto flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0;
 
   .dialog-panel {
-    @apply relative transform overflow-hidden rounded-2xl bg-[#201C1E] p-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm border border-dark-900;
+    @apply relative transform overflow-hidden rounded-2xl bg-dark-950 p-4 text-left shadow-xl transition-all sm:my-8 sm:w-full md:w-screen sm:max-w-sm border border-dark-900;
 
     .dialog-close-content {
-      @apply absolute right-0 top-0 hidden pr-4 pt-4 sm:block cursor-pointer z-10;
+      @apply absolute right-0 top-0 pr-4 pt-4 cursor-pointer z-10;
 
       .close-btn {
         @apply text-white hover:text-gray-500 focus:outline-none;

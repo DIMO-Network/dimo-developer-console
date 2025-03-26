@@ -10,9 +10,13 @@ import { NotificationContext } from '@/context/notificationContext';
 import { WorkspaceNameModal } from '@/app/app/details/[id]/components/WorkspaceNameModal';
 
 import './AppSummary.css';
+import {Button} from "@/components/Button";
+import {TrashIcon} from "@heroicons/react/24/outline";
 
 interface IProps {
   app: IApp;
+  isOwner: boolean;
+  handleDelete: () => void;
 }
 
 export const AppSummary: FC<IProps> = ({ app }) => {
@@ -23,7 +27,11 @@ export const AppSummary: FC<IProps> = ({ app }) => {
 
   const handleCopy = () => {
     void navigator.clipboard.writeText(clientId);
-    setNotification('Client ID copied!', 'Copying', 'info');
+    setNotification('Client ID copied!', 'Success', 'info');
+  };
+
+  const handleEditClick = () => {
+    setIsModalOpen(true);
   };
 
   const handleEditClick = () => {
@@ -51,6 +59,7 @@ export const AppSummary: FC<IProps> = ({ app }) => {
       </div>
       <WorkspaceNameModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} app={app} />
     </div>
+
   );
 };
 

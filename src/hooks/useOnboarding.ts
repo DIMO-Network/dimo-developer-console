@@ -1,8 +1,6 @@
 'use client';
-import { type CTA } from '@/app/app/list/components/Banner';
 
 import { useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 import { CreditsContext } from '@/context/creditsContext';
@@ -18,11 +16,9 @@ import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
   const [workspace, setWorkspace] = useState<IWorkspace>();
-  const [cta, setCta] = useState<CTA>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState<number>(0);
-  const router = useRouter();
-  const { getDcxBalance, getDimoBalance } = useContractGA();
+  const { getDcxBalance } = useContractGA();
   const { setIsOpen } = useContext(CreditsContext);
   const { data: session } = useSession();
   const { user: { role = '' } = {} } = session ?? {};
@@ -48,39 +44,10 @@ export const useOnboarding = () => {
     }
   };
 
-  const setCtas = async () => {
-    if (isOwner(role)) {
-      const [balanceDCX, balanceDimo] = await Promise.all([
-        getDcxBalance(),
-        getDimoBalance(),
-      ]);
-      if (!(balanceDCX > 0 || balanceDimo > 0)) {
-        setCta({
-          label: 'Purchase DCX',
-          onClick: handleOpenBuyCreditsModal,
-        });
-      } else if (apps.length === 0) {
-        setCta({
-          label: 'Create an app',
-          onClick: handleCreateApp,
-        });
-      }
-    } else setCta(undefined);
-  };
-
   useEffect(() => {
     if (!hasSession) return;
     void loadAppsAndWorkspace();
   }, [hasSession, role]);
-
-  useEffect(() => {
-    if (!hasSession) return;
-    void setCtas();
-  }, [apps, role, hasSession]);
-
-  const handleCreateApp = () => {
-    router.push('/app/create');
-  };
 
   const handleOpenBuyCreditsModal = () => {
     setIsOpen(true);
@@ -89,10 +56,8 @@ export const useOnboarding = () => {
   return {
     balance,
     apps,
-    cta,
     isLoading,
     setIsLoading,
-    handleCreateApp,
     handleOpenBuyCreditsModal,
     workspace,
   };

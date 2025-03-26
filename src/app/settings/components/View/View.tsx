@@ -58,6 +58,15 @@ const View: FC = () => {
               Developer support
             </Button>
           </div>
+          <div className="flex">
+            <Button
+              className="primary-outline"
+              onClick={() => setIsSupportModalOpen(true)}
+            >
+              <SupportAgentIcon className="fill-primary h-5 w-5" color="currentColor" />
+              Developer support
+            </Button>
+          </div>
         </>
       )}
       <SupportFormModal isOpen={isSupportModalOpen} setIsOpen={setIsSupportModalOpen} />

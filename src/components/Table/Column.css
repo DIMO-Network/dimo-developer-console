@@ -1,3 +1,3 @@
 .custom-table-column {
-  @apply px-3 py-1 text-left text-base font-medium capitalize text-white;
+  @apply text-left text-base font-medium capitalize text-white pb-3;
 }

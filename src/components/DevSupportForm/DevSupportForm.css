@@ -6,7 +6,7 @@
   }
 
   .fields {
-    @apply flex flex-col gap-6
+    @apply flex flex-col gap-6;
   }
   .actions {
     @apply flex flex-col gap-4 pt-6;
