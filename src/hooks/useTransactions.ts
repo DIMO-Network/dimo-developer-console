@@ -84,50 +84,50 @@ export const usePayLicenseFee = () => {
   const { checkEnoughBalance, getDesiredTokenAmount, processTransactions } =
     useContractGA();
 
-  const mintDCX = useCallback(async (
-    desiredTokenAmount: IDesiredTokenAmount,
-    enoughBalance: ITokenBalance,
-  ) => {
-    const transactions = [];
-    if (!enoughBalance.dcxAllowance) {
+  const mintDCX = useCallback(
+    async (desiredTokenAmount: IDesiredTokenAmount, enoughBalance: ITokenBalance) => {
+      const transactions = [];
+      if (!enoughBalance.dcxAllowance) {
+        transactions.push({
+          to: configuration.DC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoABI,
+            functionName: 'approve',
+            args: [
+              configuration.DCX_ADDRESS,
+              BigInt(utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether')),
+            ],
+          }),
+        });
+      }
+
+      const balanceDCX = await getCurrentDcxBalance();
+
+      // Call mintInDimo 2 parameteres
+      const dcxAmountInUSD = balanceDCX * Number(DCX_IN_USD);
+      const missingAmount = Math.ceil(
+        Number(desiredTokenAmount.licensePrice) - dcxAmountInUSD,
+      );
       transactions.push({
-        to: configuration.DC_ADDRESS,
+        to: configuration.DCX_ADDRESS,
         value: BigInt(0),
         data: encodeFunctionData({
-          abi: DimoABI,
-          functionName: 'approve',
+          abi: DimoCreditsABI,
+          functionName: CONTRACT_METHODS.MINT_IN_DIMO,
           args: [
-            configuration.DCX_ADDRESS,
-            BigInt(utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether')),
+            currentUser!.smartContractAddress,
+            utils.toWei(
+              Math.ceil(missingAmount / Number(desiredTokenAmount.dimoCost)),
+              'ether',
+            ),
           ],
         }),
       });
-    }
-
-    const balanceDCX = await getCurrentDcxBalance();
-
-    // Call mintInDimo 2 parameteres
-    const dcxAmountInUSD = balanceDCX * Number(DCX_IN_USD);
-    const missingAmount = Math.ceil(
-      Number(desiredTokenAmount.licensePrice) - dcxAmountInUSD,
-    );
-    transactions.push({
-      to: configuration.DCX_ADDRESS,
-      value: BigInt(0),
-      data: encodeFunctionData({
-        abi: DimoCreditsABI,
-        functionName: CONTRACT_METHODS.MINT_IN_DIMO,
-        args: [
-          currentUser!.smartContractAddress,
-          utils.toWei(
-            Math.ceil(missingAmount / Number(desiredTokenAmount.dimoCost)),
-            'ether',
-          ),
-        ],
-      }),
-    });
-    return transactions;
-  }, [currentUser, getCurrentDcxBalance]);
+      return transactions;
+    },
+    [currentUser, getCurrentDcxBalance],
+  );
 
   const prepareIssueInDC = async (
     desiredTokenAmount: IDesiredTokenAmount,
@@ -156,7 +156,7 @@ export const usePayLicenseFee = () => {
     const enoughBalance = await checkEnoughBalance();
     const transactions = [];
     if (!enoughBalance.dcx && !enoughBalance.dimo) {
-      return { success: false, reason: 'Insufficient DIMO or DCX balance'};
+      return { success: false, reason: 'Insufficient DIMO or DCX balance' };
     }
     if (!enoughBalance.dcx) {
       transactions.push(...(await mintDCX(desiredTokenAmount, enoughBalance)));
@@ -171,17 +171,20 @@ export const usePayLicenseFee = () => {
 
 export const useMintLicense = () => {
   const { processTransactions } = useContractGA();
-  return useCallback(async (licenseName: string) => {
-    return processTransactions([
-      {
-        to: configuration.DLC_ADDRESS,
-        value: BigInt(0),
-        data: encodeFunctionData({
-          abi: DimoLicenseABI,
-          functionName: CONTRACT_METHODS.ISSUE_IN_DC,
-          args: [licenseName],
-        }),
-      },
-    ]);
-  }, [processTransactions]);
+  return useCallback(
+    async (licenseName: string) => {
+      return processTransactions([
+        {
+          to: configuration.DLC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoLicenseABI,
+            functionName: CONTRACT_METHODS.ISSUE_IN_DC,
+            args: [licenseName],
+          }),
+        },
+      ]);
+    },
+    [processTransactions],
+  );
 };

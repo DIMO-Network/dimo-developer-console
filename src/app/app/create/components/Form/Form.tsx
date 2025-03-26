@@ -1,4 +1,4 @@
-import {FC, useContext, useState} from 'react';
+import { FC, useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import * as Sentry from '@sentry/nextjs';
@@ -12,7 +12,7 @@ import { LoadingProps } from '@/components/LoadingModal';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import {useGlobalAccount, usePayLicenseFee, useMintLicense} from '@/hooks';
+import { useGlobalAccount, usePayLicenseFee, useMintLicense } from '@/hooks';
 
 import configuration from '@/config';
 import { Loading } from '@/components/Loading';
@@ -47,13 +47,17 @@ export const Form: FC<IProps> = ({ onSuccess }) => {
         label: 'Preparing to create the developer license',
         status: 'loading',
       });
-      const {reason} = await payLicenseFee();
+      const { reason } = await payLicenseFee();
       if (reason) {
         return setNotification(reason, 'Oops...', 'error');
       }
       const { workspace } = getValues();
       await createDeveloperLicense(workspace);
-      setNotification('Developer license created! Refresh the page to see your changes.', 'Success', 'success');
+      setNotification(
+        'Developer license created! Refresh the page to see your changes.',
+        'Success',
+        'success',
+      );
       onSuccess();
     } catch (error: unknown) {
       Sentry.captureException(error);
@@ -85,7 +89,9 @@ export const Form: FC<IProps> = ({ onSuccess }) => {
     return (
       <div className={'flex flex-col flex-1 items-center gap-2'}>
         <Loading className={'!h-9 !w-9 text-primary-200'} />
-        <p className={'text-base font-bold text-center'}>{loadingStatus?.label ?? 'Loading'}</p>
+        <p className={'text-base font-bold text-center'}>
+          {loadingStatus?.label ?? 'Loading'}
+        </p>
       </div>
     );
   }
@@ -109,8 +115,8 @@ export const Form: FC<IProps> = ({ onSuccess }) => {
           <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
         )}
         <p className="text-sm text-text-secondary font-normal">
-          This is the namespace used across all your apps. It is a public name visible
-          to other developers and users in the ecosystem.
+          This is the namespace used across all your apps. It is a public name visible to
+          other developers and users in the ecosystem.
         </p>
       </Label>
       <div className="flex flex-col pt-4 gap-4">
