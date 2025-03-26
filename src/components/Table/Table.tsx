@@ -25,9 +25,9 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
           <tr>
             {columns.map(renderColumn)}
             {actions && (
-              <th scope="col" className="table-action-column">
-                <span className="sr-only">Actions</span>
-              </th>
+              <td className="table-action-cell" key={`field-${item?.id as string}`}>
+                {actions?.map((action, index) => action(item, index))}
+              </td>
             )}
           </tr>
         </thead>

@@ -6,20 +6,22 @@ import React, { useContext, useEffect, useState } from 'react';
 import { encodeFunctionData } from 'viem';
 import { useRouter } from 'next/navigation';
 
-import { AppSummary } from '@/app/app/details/[id]/components/AppSummary';
-import { BackButton } from '@/components/BackButton';
-import { Button } from '@/components/Button';
-import { createMySigner, deleteApp, getAppByID } from '@/actions/app';
-import { generateWallet } from '@/utils/wallet';
-import { IApp } from '@/types/app';
-import { isOwner } from '@/utils/user';
-import { Loader } from '@/components/Loader';
-import { NotificationContext } from '@/context/notificationContext';
-import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriForm';
-import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
-import { SignerList } from '@/app/app/details/[id]/components/SignerList';
-import { Title } from '@/components/Title';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import {AppSummary} from '@/app/app/details/[id]/components/AppSummary';
+import {BackButton} from '@/components/BackButton';
+import {Button} from '@/components/Button';
+import {createMySigner, deleteApp, getAppByID} from '@/actions/app';
+import {generateWallet} from '@/utils/wallet';
+import {IApp} from '@/types/app';
+import {isOwner} from '@/utils/user';
+import {Loader} from '@/components/Loader';
+import {NotificationContext} from '@/context/notificationContext';
+import {RedirectUriForm} from '../../../../../../components/RedirectUriForm';
+import {RedirectUriList} from '@/components/RedirectUriList';
+import {SignerList} from '@/app/app/details/[id]/components/SignerList';
+import {Title} from '@/components/Title';
+import {useContractGA, useOnboarding} from '@/hooks';
+import {IGlobalAccountSession} from '@/types/wallet';
+import {getFromSession, GlobalAccountSession} from '@/utils/sessionStorage';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
@@ -219,9 +221,9 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
               {isOwner(role) && app && (
                 <div className={'mt-4'}>
                   <RedirectUriForm
-                    appId={app!.id!}
+                    tokenId={workspace?.token_id ?? 0}
                     refreshData={refreshAppDetails}
-                    list={app?.RedirectUris}
+                    redirectUris={app?.RedirectUris}
                   />
                 </div>
               )}
@@ -229,8 +231,10 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
             <div className="signers-table">
               {app && (
                 <RedirectUriList
-                  list={app?.RedirectUris}
+                  redirectUris={app?.RedirectUris}
                   refreshData={refreshAppDetails}
+                  tokenId={workspace?.token_id ?? 0}
+                  isOwner={isOwner(role)}
                 />
               )}
             </div>
