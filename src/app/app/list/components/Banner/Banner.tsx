@@ -30,7 +30,7 @@ export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
       <div className={'flex flex-col flex-1 gap-4 w-full'}>
         <ActionCompletedRow text={'Create account'} />
         <ActionCompletedRow text={'Confirm your details'} />
-        {fragment.totalCount > 0 ? (
+        {false && fragment.totalCount > 0 ? (
           <ActionCompletedRow text={'Create your first app'} />
         ) : (
           <CTARow
