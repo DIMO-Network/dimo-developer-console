@@ -8,7 +8,7 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { formatToHumanReadable } from '@/utils/formatBalance';
 import { isCollaborator, isOwner } from '@/utils/user';
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount, useUser } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
 
 import './Header.css';
@@ -16,6 +16,7 @@ import { usePathname } from 'next/navigation';
 import { getPageTitle } from '@/config/navigation';
 
 export const Header: FC = () => {
+  const { user } = useUser();
   const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
   const [dcxBalance, setDcxBalance] = useState<string>('0');
   const { setIsOpen } = useContext(CreditsContext);
@@ -32,7 +33,7 @@ export const Header: FC = () => {
 
   const loadAndFormatDcxBalance = async () => {
     try {
-      if (isCollaborator(currentUser!.role)) return;
+      if (isCollaborator(currentUser?.role ?? '')) return;
       const balance = await getCurrentDcxBalance();
       setDcxBalance(formatToHumanReadable(balance));
     } catch (error: unknown) {
@@ -54,7 +55,9 @@ export const Header: FC = () => {
           title="Account Information"
           className="account-information"
           onClick={
-            isOwner(currentUser!.role) ? handleOpenAccountInformationModal : undefined
+            isOwner(currentUser?.role ?? '')
+              ? handleOpenAccountInformationModal
+              : undefined
           }
         >
           <WalletIcon className="h-4 w-4" />
@@ -68,14 +71,16 @@ export const Header: FC = () => {
           <button
             title="Add Credits"
             className="btn-add-credits"
-            onClick={isOwner(currentUser!.role) ? handleOpenBuyCreditsModal : undefined}
+            onClick={
+              isOwner(currentUser?.role ?? '') ? handleOpenBuyCreditsModal : undefined
+            }
             role="add-credits"
           >
-            {isOwner(currentUser!.role) && <PlusIcon className="h-4 w-4" />}
-            {!isOwner(currentUser!.role) && <EyeIcon className="h-4 w-4" />}
+            {isOwner(currentUser?.role ?? '') && <PlusIcon className="h-4 w-4" />}
+            {!isOwner(currentUser?.role ?? '') && <EyeIcon className="h-4 w-4" />}
           </button>
         </div>
-        <UserAvatar name={name ?? ''} />
+        <UserAvatar name={user?.name ?? ''} />
       </div>
     </header>
   );

@@ -3,18 +3,30 @@ import { type FC } from 'react';
 
 import { Loader } from '@//components/Loader';
 import { Banner } from '@/app/app/list/components/Banner';
-import { useOnboarding, useUser } from '@/hooks';
+import { useGlobalAccount, useOnboarding, useUser } from '@/hooks';
 import Image from 'next/image';
 import { LicenseList } from '@/app/license/list';
 import './View.css';
+import { gql } from '@/gql';
+import { useQuery } from '@apollo/client';
+
+const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
+  query GetDeveloperLicensesByOwner($owner: Address!) {
+    developerLicenses(first: 100, filterBy: { owner: $owner }) {
+      ...TotalDeveloperLicenseCountFragment
+      ...DeveloperLicenseSummariesOnConnection
+    }
+  }
+`);
 
 export const View: FC = () => {
-  const { isLoading, apps, balance, workspace } = useOnboarding();
+  const { balance } = useOnboarding();
   const { user } = useUser();
-
-  if (isLoading) {
-    return <Loader isLoading={true} />;
-  }
+  const { currentUser } = useGlobalAccount();
+  const { data, error, loading } = useQuery(GET_DEVELOPER_LICENSES_BY_OWNER, {
+    variables: { owner: currentUser?.smartContractAddress ?? '' },
+    skip: !currentUser?.smartContractAddress,
+  });
 
   return (
     <div className="app-list-page">
@@ -27,8 +39,14 @@ export const View: FC = () => {
         />
         <p className="title">Welcome, {user?.name.slice(0, user.name?.indexOf(' '))}</p>
       </div>
-      {!(balance && apps.length) && <Banner balance={balance} apps={apps} />}
-      <LicenseList workspace={workspace} />
+      {loading && <Loader isLoading={true} />}
+      {!!error && <p>There was an error fetching your developer licenses</p>}
+      {!!data?.developerLicenses && (
+        <>
+          <Banner balance={balance} licenseConnection={data.developerLicenses} />
+          <LicenseList licenseConnection={data.developerLicenses} />
+        </>
+      )}
     </div>
   );
 };

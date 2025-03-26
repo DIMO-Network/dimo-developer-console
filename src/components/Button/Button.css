@@ -1,5 +1,5 @@
 .button {
-  @apply rounded-full h-8 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex-row gap-2 disabled:bg-green-500 disabled:cursor-not-allowed;
+  @apply rounded-full h-10 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex-row gap-2 disabled:bg-green-500 disabled:cursor-not-allowed hover:border-white border-transparent border-2;
 
   span.content {
     @apply flex flex-row gap-2 items-center justify-center;
@@ -23,17 +23,7 @@
   }
 
   &.primary-outline {
-    @apply border bg-transparent;
-
-    border-color: rgb(183 242 235 / 1);
-    border-image: radial-gradient(
-        69.53% 323.91% at 69.53% 43.17%,
-        rgba(110, 228, 218, 0.48) 26.04%,
-        rgba(177, 227, 255, 0.6) 100%
-      )
-      border-box 1;
-    border-image-width: 1;
-    color: rgb(183 242 235 / 1);
+    @apply border-2 bg-transparent border-cta-default text-white hover:border-white;
   }
 
   &.white {
@@ -52,7 +42,7 @@
   }
 
   &.error {
-    @apply bg-red-500;
+    @apply bg-feedback-error text-white;
 
     &-outline {
       @apply bg-transparent border border-red-500 text-red-500;

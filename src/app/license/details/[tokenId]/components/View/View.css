@@ -6,7 +6,7 @@
   }
 
   .summary {
-    @apply pb-4;
+    @apply pb-6 border-b border-b-cta-default;
   }
 
   .signers-content {

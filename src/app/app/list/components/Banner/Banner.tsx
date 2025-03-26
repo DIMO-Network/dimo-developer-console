@@ -4,19 +4,21 @@ import CreateAppButton from '@/app/app/list/components/CreateAppButton';
 import AddCreditsButton from '@/app/app/list/components/AddCreditsButton';
 import { ActionCompletedRow } from '@/app/app/list/components/Banner/components/ActionCompletedRow';
 import { CTARow } from '@/app/app/list/components/Banner/components/CTARow';
-import { IApp } from '@/types/app';
+import { FragmentType, gql, useFragment } from '@/gql';
 
-export interface CTA {
-  label: string;
-  onClick: () => void;
-}
+export const GET_TOTAL_LICENSE_COUNT = gql(`
+  fragment TotalDeveloperLicenseCountFragment on DeveloperLicenseConnection {
+    totalCount
+  }
+`);
 
 interface Props {
   balance: number;
-  apps: IApp[];
+  licenseConnection: FragmentType<typeof GET_TOTAL_LICENSE_COUNT>;
 }
 
-export const Banner: FC<Props> = ({ balance, apps }) => {
+export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
+  const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
   return (
     <div className="banner-content">
       <div>
@@ -28,7 +30,7 @@ export const Banner: FC<Props> = ({ balance, apps }) => {
       <div className={'flex flex-col flex-1 gap-4 w-full'}>
         <ActionCompletedRow text={'Create account'} />
         <ActionCompletedRow text={'Confirm your details'} />
-        {apps.length ? (
+        {fragment.totalCount > 0 ? (
           <ActionCompletedRow text={'Create your first app'} />
         ) : (
           <CTARow
@@ -39,8 +41,8 @@ export const Banner: FC<Props> = ({ balance, apps }) => {
             CTA={<CreateAppButton className={'white-with-icon'} />}
           />
         )}
-        {apps.length ? (
-          balance ? (
+        {fragment.totalCount > 0 &&
+          (balance ? (
             <ActionCompletedRow text={'Add credits'} />
           ) : (
             <CTARow
@@ -50,8 +52,7 @@ export const Banner: FC<Props> = ({ balance, apps }) => {
               }
               CTA={<AddCreditsButton className={'white-with-icon'} />}
             />
-          )
-        ) : null}
+          ))}
       </div>
     </div>
   );

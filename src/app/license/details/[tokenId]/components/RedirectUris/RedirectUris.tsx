@@ -6,7 +6,7 @@ import { Title } from '@/components/Title';
 import { RedirectUriList } from '@/components/RedirectUriList';
 import { RedirectUriForm } from '@/components/RedirectUriForm';
 
-import { isLicenseOwner } from '@/utils/sessionStorage';
+import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 
 const REDIRECT_URIS_FRAGMENT = gql(`
   fragment RedirectUriFragment on DeveloperLicense {
@@ -27,15 +27,16 @@ interface Props {
 
 export const RedirectUris: FC<Props> = ({ license, refetch }) => {
   const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
+  const isLicenseOwner = useIsLicenseOwner(fragment);
   return (
-    <div className={'license-details-table'}>
-      <div className={'license-details-table-header'}>
+    <div className={'license-details-section'}>
+      <div className={'license-details-section-header'}>
         <Title component="h2" className={'text-xl'}>
           Authorized Redirect URIs
         </Title>
       </div>
-      {isLicenseOwner(fragment) && (
-        <div className={'mt-4'}>
+      {isLicenseOwner && (
+        <div>
           <RedirectUriForm
             tokenId={fragment.tokenId}
             refreshData={refetch}
@@ -43,12 +44,14 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
           />
         </div>
       )}
-      <RedirectUriList
-        isOwner={isLicenseOwner(fragment)}
-        redirectUris={fragment.redirectURIs.nodes}
-        refreshData={refetch}
-        tokenId={fragment.tokenId}
-      />
+      {!!fragment.redirectURIs.nodes.length && (
+        <RedirectUriList
+          isOwner={isLicenseOwner}
+          redirectUris={fragment.redirectURIs.nodes}
+          refreshData={refetch}
+          tokenId={fragment.tokenId}
+        />
+      )}
     </div>
   );
 };

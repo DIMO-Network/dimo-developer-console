@@ -1,0 +1,29 @@
+.workspace-name-modal {
+  .dialog-panel {
+    @apply min-w-[95vw] min-h-[95vh] ml-auto mr-auto my-auto md:m-auto md:h-auto md:min-w-[480px] md:min-h-0 p-6;
+  }
+}
+
+.workspace-name-content {
+  @apply flex flex-col flex-1;
+}
+
+.workspace-name-header {
+  @apply font-black pb-6;
+}
+
+.workspace-name-description {
+  @apply text-xs text-white/50 w-full h-full py-4;
+}
+
+.field {
+  @apply w-full;
+}
+
+.save-button {
+  @apply self-end w-full;
+}
+
+.fields-container {
+  @apply flex flex-col gap-4 w-full py-6;
+}

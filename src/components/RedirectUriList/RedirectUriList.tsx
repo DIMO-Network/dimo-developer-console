@@ -1,14 +1,15 @@
 import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
-import { useState, type FC, useContext } from 'react';
+import React, { useState, type FC, useContext } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { IRedirectUri } from '@/types/app';
-import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { useSetRedirectUri } from '@/hooks';
 import { Button } from '@/components/Button';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
+import { DeleteConfirmationModal } from '../DeleteConfirmationModal';
+import { LoadingStatusContext } from '@/context/LoadingStatusContext';
+import { withLoadingStatus } from '@/hoc';
 
 interface RedirectUri {
   uri: string;
@@ -21,37 +22,40 @@ interface IProps {
   isOwner: boolean;
 }
 
-export const RedirectUriList: FC<IProps> = ({
+const RedirectUriListComponent: FC<IProps> = ({
   redirectUris = [],
   refreshData,
   tokenId,
   isOwner,
 }) => {
-  const [isOpened, setIsOpened] = useState<boolean>(false);
-  const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
+  const { setLoadingStatus } = useContext(LoadingStatusContext);
   const { setNotification } = useContext(NotificationContext);
+  const [uriToDelete, setUriToDelete] = useState<string>();
 
   const setRedirectUri = useSetRedirectUri(tokenId);
 
+  const handleError = (error: unknown) => {
+    Sentry.captureException(error);
+    const code = get(error, 'code', null);
+    if (code === 4001)
+      setLoadingStatus({
+        label: 'The transaction was denied',
+        status: 'error',
+      });
+    else setLoadingStatus({ label: 'Something went wrong', status: 'error' });
+  };
+
   const handleDelete = async (uri: string) => {
     try {
-      setIsOpened(true);
-      await setRedirectUri(uri, false);
       setLoadingStatus({
         label: 'Deleting the selected redirect URI',
         status: 'loading',
       });
+      await setRedirectUri(uri, false);
       setLoadingStatus({ label: 'Redirect URI deleted', status: 'success' });
       refreshData();
     } catch (error: unknown) {
-      Sentry.captureException(error);
-      const code = get(error, 'code', null);
-      if (code === 4001)
-        setLoadingStatus({
-          label: 'The transaction was denied',
-          status: 'error',
-        });
-      else setLoadingStatus({ label: 'Something went wrong', status: 'error' });
+      handleError(error);
     }
   };
 
@@ -60,12 +64,20 @@ export const RedirectUriList: FC<IProps> = ({
     setNotification('Redirect URI copied!', 'Success', 'info');
   };
 
-  const renderCopyRedirectUriAction = ({ id, uri }: IRedirectUri) => {
+  const onConfirmDelete = () => {
+    if (!uriToDelete) {
+      throw new Error('No uri to delete');
+    }
+    handleDelete(uriToDelete);
+    setUriToDelete(undefined);
+  };
+
+  const renderCopyRedirectUriAction = ({ uri }: RedirectUri, index: number) => {
     return (
       <Button
         className={'table-action-button'}
         title="Copy Redirect URI"
-        key={`copy-redirect-uri-action-${id}`}
+        key={`copy-redirect-uri-action-${index}`}
         type={'button'}
         onClick={() => handleCopy(uri)}
       >
@@ -81,8 +93,8 @@ export const RedirectUriList: FC<IProps> = ({
           className={'table-action-button'}
           title="Delete redirect URI"
           type="button"
-          onClick={() => handleDelete(uri)}
-          key={`delete-action-${uri}-${index}`}
+          onClick={() => setUriToDelete(uri)}
+          key={`delete-action-${index}`}
         >
           <TrashIcon className="w-5 h-5 cursor-pointer" />
         </Button>
@@ -92,19 +104,24 @@ export const RedirectUriList: FC<IProps> = ({
 
   return (
     <>
-      {!!redirectUris.length && (
-        <>
-          <Table
-            columns={[{ name: 'uri', label: 'Authorized URIs' }]}
-            // @ts-expect-error not sure
-            data={redirectUris}
-            actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
-          />
-          <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
-        </>
-      )}
+      <Table
+        columns={[{ name: 'uri', label: 'Authorized URIs' }]}
+        // @ts-expect-error not sure
+        data={redirectUris}
+        actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
+      />
+      <DeleteConfirmationModal
+        isOpen={!!uriToDelete}
+        title={'Are you sure you want to delete this Redirect URI?'}
+        subtitle={'You will no longer be able to use this redirect URI in your app.'}
+        onConfirm={onConfirmDelete}
+        onCancel={() => {
+          setUriToDelete(undefined);
+        }}
+        confirmButtonClassName={'error'}
+      />
     </>
   );
 };
 
-export default RedirectUriList;
+export const RedirectUriList = withLoadingStatus(RedirectUriListComponent);
