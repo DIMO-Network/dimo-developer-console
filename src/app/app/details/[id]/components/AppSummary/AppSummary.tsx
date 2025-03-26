@@ -34,6 +34,10 @@ export const AppSummary: FC<IProps> = ({ app }) => {
     setIsModalOpen(true);
   };
 
+  const handleEditClick = () => {
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="summary">
       <div className="workspace-header">

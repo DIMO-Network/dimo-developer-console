@@ -122,5 +122,5 @@ export const otpLogin = async (otpVars: {
 
 // private functions
 const getRedirectUrl = (email: string) => {
-  return `${config.frontendUrl}/email-recovery?flow=rewire-passkey&email=${email}`;
+  return `${config.frontendUrl}email-recovery?flow=rewire-passkey&email=${email}`;
 };

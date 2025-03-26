@@ -2,16 +2,11 @@
   @apply rounded-full h-8 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex-row gap-2 disabled:bg-green-500 disabled:cursor-not-allowed;
 
   span.content {
-    @apply flex flex-row gap-2 items-center justify-center;
+    @apply flex flex-row gap-1 items-center justify-center;
   }
 
   &.primary {
-    background-color: rgb(183 242 235 / 1);
-    background-image: radial-gradient(
-      69.53% 323.91% at 69.53% 43.17%,
-      rgba(110, 228, 218, 0.48) 26.04%,
-      rgba(177, 227, 255, 0.6) 100%
-    );
+    @apply bg-white;
   }
 
   &.primary-solid {
@@ -23,17 +18,11 @@
   }
 
   &.primary-outline {
-    @apply border bg-transparent;
+    @apply border-2 bg-transparent border-[#201C1E] text-white;
+  }
 
-    border-color: rgb(183 242 235 / 1);
-    border-image: radial-gradient(
-        69.53% 323.91% at 69.53% 43.17%,
-        rgba(110, 228, 218, 0.48) 26.04%,
-        rgba(177, 227, 255, 0.6) 100%
-      )
-      border-box 1;
-    border-image-width: 1;
-    color: rgb(183 242 235 / 1);
+  &.secondary-border-color {
+    @apply border-[#322D2F];
   }
 
   &.white {
@@ -48,7 +37,7 @@
   }
 
   &.table-action-button {
-    @apply bg-transparent text-white border border-surface-raised hover:border-white
+    @apply bg-transparent text-white border border-surface-raised hover:border-white;
   }
 
   &.error {

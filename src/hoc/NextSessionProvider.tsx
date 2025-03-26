@@ -7,7 +7,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 
 import { StripeCryptoContext } from '@/context/StripeCryptoContext';
 import useStripeCrypto from '@/hooks/useStripeCrypto';
-import config from "@/config";
+import config from '@/config';
 
 const queryClient = new QueryClient();
 const apolloClient = new ApolloClient({

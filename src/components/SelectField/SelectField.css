@@ -1,5 +1,5 @@
 .select-field {
-  @apply rounded-lg py-2 px-4 outline-0 bg-grey-950 text-grey-50/50 relative h-8 flex flex-row justify-between;
+  @apply rounded-lg py-2 px-4 outline-0 bg-[#322D2F] text-white relative h-8 flex flex-row justify-between font-normal;
 
   .selected {
     @apply text-grey-50;
@@ -9,7 +9,7 @@
     @apply hidden;
   }
   .custom-menu {
-    @apply hidden absolute bg-grey-950 w-full left-0 rounded-lg p-4 mt-7 leading-5
+    @apply hidden absolute bg-[#322D2F] w-full left-0 rounded-lg p-4 mt-7 leading-5
             flex flex-col gap-2 max-h-48 overflow-y-auto text-grey-50 z-10;
 
     &.show {

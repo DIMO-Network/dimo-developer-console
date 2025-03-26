@@ -74,8 +74,8 @@ const MIN_SQRT_RATIO: bigint = BigInt('4295128739');
 const halfHour = 30 * 60;
 
 export interface GlobalAccountWalletAddress {
-  walletAddress: `0x${string}`,
-  smartContractAddress: `0x${string}`
+  walletAddress: `0x${string}`;
+  smartContractAddress: `0x${string}`;
 }
 
 export const useGlobalAccount = () => {

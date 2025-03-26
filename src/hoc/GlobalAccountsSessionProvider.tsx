@@ -185,7 +185,7 @@ export const withGlobalAccounts = <P extends object>(
       try {
         removeFromSession(GlobalAccountSession);
         removeFromLocalStorage(EmbeddedKey);
-        await turnkeyClient.logoutUser();
+        await turnkeyClient.logout();
         await signOut({ callbackUrl: '/sign-in' });
       } catch (e) {
         Sentry.captureException(e);

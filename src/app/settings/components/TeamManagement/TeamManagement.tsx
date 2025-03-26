@@ -1,6 +1,7 @@
 import { useState, type FC } from 'react';
 import { useSession } from 'next-auth/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
+
 import * as Sentry from '@sentry/nextjs';
 
 import {
@@ -14,6 +15,7 @@ import { deleteCollaborator } from '@/actions/team';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
+import { Card } from '@/components/Card';
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
@@ -29,25 +31,20 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   const renderUserName = ({ ...teamCollaborator }: ITeamCollaborator) => {
     const { User: currentUser, email = '' } = teamCollaborator ?? {};
     const { name } = currentUser ?? {};
+    const isPending = teamCollaborator.status === InvitationStatuses.PENDING;
 
     return (
       <div className="flex flex-row items-center gap-3">
-        <p>{name ?? email ?? ''}</p>
+        <p>
+          {name ?? email ?? ''} {isPending && `(${InvitationStatusLabels.PENDING})`}
+        </p>
       </div>
     );
   };
 
-  const renderRole = ({ ...teamCollaborator }: ITeamCollaborator) => {
-    if (teamCollaborator.status === InvitationStatuses.PENDING) {
-      return (
-        <div className="rounded-lg py-2 px-4 outline-0 bg-grey-950 text-grey-50/50">
-          {InvitationStatusLabels.PENDING}
-        </div>
-      );
-    }
-
-    return <>{TeamRolesLabels[teamCollaborator.role as TeamRoles]}</>;
-  };
+  const renderRole = ({ ...teamCollaborator }: ITeamCollaborator) => (
+    <>{TeamRolesLabels[teamCollaborator.role as TeamRoles]}</>
+  );
 
   const renderDeleteRemoveCollaborator = ({
     id,
@@ -86,22 +83,23 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   return (
     <>
       <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
-
-      <Table
-        columns={[
-          {
-            label: 'User',
-            name: 'User.name',
-            render: renderUserName,
-          },
-          {
-            name: 'role',
-            render: renderRole,
-          },
-        ]}
-        data={teamCollaborators}
-        actions={[renderDeleteRemoveCollaborator]}
-      />
+      <Card className="secondary team-information">
+        <Table
+          columns={[
+            {
+              label: 'User',
+              name: 'User.name',
+              render: renderUserName,
+            },
+            {
+              name: 'role',
+              render: renderRole,
+            },
+          ]}
+          data={teamCollaborators}
+          actions={[renderDeleteRemoveCollaborator]}
+        />
+      </Card>
     </>
   );
 };
