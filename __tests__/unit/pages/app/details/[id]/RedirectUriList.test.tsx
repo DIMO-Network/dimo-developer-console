@@ -8,7 +8,12 @@ const [app] = appListMock;
 describe('RedirectUriList', () => {
   it('renders the redirect uri list', () => {
     const { container } = render(
-      <RedirectUriList redirectUris={app.RedirectUris} refreshData={() => {}} tokenId={0} isOwner={true} />,
+      <RedirectUriList
+        redirectUris={app.RedirectUris}
+        refreshData={() => {}}
+        tokenId={0}
+        isOwner={true}
+      />,
     );
 
     const [redirectUri] = app.RedirectUris ?? [];

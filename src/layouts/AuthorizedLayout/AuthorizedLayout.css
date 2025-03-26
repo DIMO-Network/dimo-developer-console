@@ -3,19 +3,19 @@
 }
 
 .sidebar-container {
-  @apply hidden md:flex md:mr-6 md:w-52 md:flex-shrink-0 md:rounded-xl md:bg-surface-default
+  @apply hidden md:flex md:mr-6 md:w-52 md:flex-shrink-0 md:rounded-xl md:bg-surface-default;
 }
 
 .header-container {
-  @apply flex flex-row items-center justify-items-stretch
+  @apply flex flex-row items-center justify-items-stretch;
 }
 
 .menu-header-button {
-  @apply md:hidden
+  @apply md:hidden;
 }
 
 .full-screen-menu-container {
-  @apply fixed flex inset-y-0 left-0 w-screen bg-surface-default text-white z-50 transition-transform md:hidden
+  @apply fixed flex inset-y-0 left-0 w-screen bg-surface-default text-white z-50 transition-transform md:hidden;
 }
 
 .app-content {

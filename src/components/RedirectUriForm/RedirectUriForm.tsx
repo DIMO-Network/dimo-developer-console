@@ -11,7 +11,7 @@ import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import {useSetRedirectUri} from '@/hooks';
+import { useSetRedirectUri } from '@/hooks';
 
 import './RedirectUriForm.css';
 
@@ -44,7 +44,11 @@ export const RedirectUriForm: FC<IProps> = ({ refreshData, redirectUris, tokenId
       setIsLoading(true);
       const { uri } = getValues();
       await setRedirectUri(uri, true);
-      setNotification('Successfully added the redirect URI. Refresh the page to view your changes.', 'Success!', 'success')
+      setNotification(
+        'Successfully added the redirect URI. Refresh the page to view your changes.',
+        'Success!',
+        'success',
+      );
       refreshData();
     } catch (error: unknown) {
       Sentry.captureException(error);
@@ -111,7 +115,11 @@ export const RedirectUriForm: FC<IProps> = ({ refreshData, redirectUris, tokenId
           </Button>
         </div>
       </form>
-      {errors.uri && <div className={"mt-4"}><TextError errorMessage={errors.uri?.message ?? ''} /></div>}
+      {errors.uri && (
+        <div className={'mt-4'}>
+          <TextError errorMessage={errors.uri?.message ?? ''} />
+        </div>
+      )}
     </div>
   );
 };

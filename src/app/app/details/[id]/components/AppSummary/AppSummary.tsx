@@ -10,8 +10,6 @@ import { NotificationContext } from '@/context/notificationContext';
 import { WorkspaceNameModal } from '@/app/app/details/[id]/components/WorkspaceNameModal';
 
 import './AppSummary.css';
-import {Button} from "@/components/Button";
-import {TrashIcon} from "@heroicons/react/24/outline";
 
 interface IProps {
   app: IApp;
@@ -55,7 +53,6 @@ export const AppSummary: FC<IProps> = ({ app }) => {
       </div>
       <WorkspaceNameModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} app={app} />
     </div>
-
   );
 };
 

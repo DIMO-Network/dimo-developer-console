@@ -1,5 +1,4 @@
 'use client';
-import {IGlobalAccountSession} from "@/types/wallet";
 
 export const GlobalAccountSession = 'globalAccount';
 
@@ -23,8 +22,11 @@ export const removeFromSession = (key: string): void => {
   sessionStorage.removeItem(key);
 };
 
-export const isLicenseOwner = (license: { owner: string }) => {
-  const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-  const organizationInfo = gaSession?.organization;
-  return !!(organizationInfo?.smartContractAddress && organizationInfo.smartContractAddress === license.owner);
+export const isLicenseOwner = (license: { owner: string }) => { 
+  // return !!(
+  //   organizationInfo?.smartContractAddress &&
+  //   organizationInfo.smartContractAddress === license.owner
+  // );
+  // TODO: check how to implement with the new global account
+  return !!license.owner;
 };

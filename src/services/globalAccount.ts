@@ -1,5 +1,5 @@
 import config from '@/config';
-import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
+import { ISubOrganization, ICreateGlobalAccountRequest } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import axios, { AxiosError } from 'axios';
 
@@ -9,7 +9,7 @@ const globalAccountClient = axios.create({
 
 export const getUserSubOrganization = async (
   email: string,
-): Promise<ISubOrganization> => {
+): Promise<ISubOrganization | null> => {
   try {
     const { data } = await globalAccountClient.get<ISubOrganization>(
       `/api/account/${email}`,
@@ -18,7 +18,7 @@ export const getUserSubOrganization = async (
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
-        return {} as ISubOrganization;
+        return null;
       }
     }
     throw error;
@@ -26,7 +26,7 @@ export const getUserSubOrganization = async (
 };
 
 export const createSubOrganization = async (
-  walletInfo: Partial<IWalletSubOrganization>,
+  walletInfo: Partial<ICreateGlobalAccountRequest>,
 ): Promise<ISubOrganization> => {
   const { data } = await globalAccountClient.post<ISubOrganization>(
     '/api/account',

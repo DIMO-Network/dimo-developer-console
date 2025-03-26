@@ -5,10 +5,12 @@ import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { Button } from '@/components/Button';
 import { TextError } from '@/components/TextError';
-import { useGlobalAccount } from '@/hooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import * as Sentry from '@sentry/nextjs';
 import { NotificationContext } from '@/context/notificationContext';
+import { generateP256KeyPair } from '@turnkey/crypto';
+import { EmbeddedKey, saveToLocalStorage } from '@/utils/localStorage';
+import { emailRecovery } from '@/actions/user';
 
 interface EmailRecoveryFormInputs {
   email: string;
@@ -19,7 +21,6 @@ interface IProps {
 }
 
 export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
-  const { emailRecovery } = useGlobalAccount();
   const { setNotification } = useContext(NotificationContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
@@ -35,7 +36,10 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
     try {
       if (!email) return;
       setIsLoading(true);
-      const success = await emailRecovery(email);
+      const key = generateP256KeyPair();
+      const targetPublicKey = key.publicKeyUncompressed;
+      saveToLocalStorage(EmbeddedKey, key.privateKey);
+      const success = await emailRecovery(email, targetPublicKey);
       if (success) {
         onNext('email-form');
       }

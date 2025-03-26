@@ -1,14 +1,14 @@
-import {get} from 'lodash';
+import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
-import {useState, type FC, useContext} from 'react';
+import { useState, type FC, useContext } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { IRedirectUri } from '@/types/app';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import {useSetRedirectUri} from '@/hooks';
-import {Button} from "@/components/Button";
-import {ContentCopyIcon} from "@/components/Icons";
-import {NotificationContext} from "@/context/notificationContext";
+import { useSetRedirectUri } from '@/hooks';
+import { Button } from '@/components/Button';
+import { ContentCopyIcon } from '@/components/Icons';
+import { NotificationContext } from '@/context/notificationContext';
 
 interface RedirectUri {
   uri: string;
@@ -21,7 +21,12 @@ interface IProps {
   isOwner: boolean;
 }
 
-export const RedirectUriList: FC<IProps> = ({ redirectUris = [], refreshData, tokenId, isOwner }) => {
+export const RedirectUriList: FC<IProps> = ({
+  redirectUris = [],
+  refreshData,
+  tokenId,
+  isOwner,
+}) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { setNotification } = useContext(NotificationContext);
@@ -58,15 +63,13 @@ export const RedirectUriList: FC<IProps> = ({ redirectUris = [], refreshData, to
   const renderCopyRedirectUriAction = ({ id, uri }: IRedirectUri) => {
     return (
       <Button
-        className={"table-action-button"}
+        className={'table-action-button'}
         title="Copy Redirect URI"
         key={`copy-redirect-uri-action-${id}`}
-        type={"button"}
+        type={'button'}
         onClick={() => handleCopy(uri)}
-        >
-        <ContentCopyIcon
-          className="w-4 h-4 fill-text-secondary cursor-pointer"
-        />
+      >
+        <ContentCopyIcon className="w-4 h-4 fill-text-secondary cursor-pointer" />
       </Button>
     );
   };
@@ -75,7 +78,7 @@ export const RedirectUriList: FC<IProps> = ({ redirectUris = [], refreshData, to
     return (
       isOwner && (
         <Button
-          className={"table-action-button"}
+          className={'table-action-button'}
           title="Delete redirect URI"
           type="button"
           onClick={() => handleDelete(uri)}

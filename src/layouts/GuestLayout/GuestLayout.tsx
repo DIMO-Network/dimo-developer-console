@@ -1,20 +1,18 @@
 'use client';
 import React, { type ReactNode } from 'react';
 
-import { withNextSession, withGlobalAccounts, withNotifications } from '@/hoc';
+import { withAuth, withNotifications } from '@/hoc';
 
 import '@/app/globals.css';
 
 const View = withNotifications(
-  withNextSession(
-    withGlobalAccounts(({ children }: { children: ReactNode }) => <>{children}</>),
-  ),
+  withAuth(({ children }: { children: ReactNode }) => <>{children}</>),
 );
 
 export const GuestLayout = ({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) => <View>{children}</View>;
 
 export default GuestLayout;

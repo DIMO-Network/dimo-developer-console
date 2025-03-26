@@ -1,5 +1,4 @@
-import { JWT, getToken } from 'next-auth/jwt';
-import { withAuth } from 'next-auth/middleware';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { NextFetchEvent, NextResponse } from 'next/server';
 import { isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
@@ -8,20 +7,27 @@ import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
+import { JWTPayload } from 'jose/dist/types';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
 
-const authMiddleware = withAuth({
-  callbacks: {
-    authorized: ({ token }) => !!token,
-  },
-  pages: {
-    signIn: 'sign-in',
-    error: 'sign-in?error=true',
-  },
-});
+const getToken = async ({ req }: { req: NextRequest }) => {
+  const token = req.headers.get('Authorization')?.replace('Bearer ', '');
 
-const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
+  if (!token) {
+    return null;
+  }
+
+  const jwks = createRemoteJWKSet(new URL(process.env.JWT_KEY_SET_URL!));
+  const { payload } = await jwtVerify(token, jwks, {
+    algorithms: ['RS256'],
+    issuer: process.env.JWT_ISSUER,
+  });
+
+  return payload;
+};
+
+const mustBeAuthorize = (request: NextRequest, token: JWTPayload | null) => {
   const url = request.nextUrl.pathname;
 
   const isAPI = url.startsWith(API_PATH);
@@ -50,7 +56,7 @@ const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
   return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
 };
 
-const validatePrivateSession = async (request: NextRequest, event: NextFetchEvent) => {
+const validatePrivateSession = async (request: NextRequest) => {
   const user = await getUserByToken();
   //TODO: check if we need to use company_email_owner or email
   const subOrganization = await getUserSubOrganization(
@@ -67,7 +73,7 @@ const validatePrivateSession = async (request: NextRequest, event: NextFetchEven
   request.user = new LoggedUser(user, subOrganization);
 
   const isValidationPage = VALIDATION_PAGES.includes(request.nextUrl.pathname);
-  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  //const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
 
   const isCompliant = request.user?.isCompliant ?? false;
   const missingFlow = request.user?.missingFlow ?? null;
@@ -86,9 +92,10 @@ const validatePrivateSession = async (request: NextRequest, event: NextFetchEven
     });
   }
 
-  if (!isLoginPage) {
-    return authMiddleware(request, event);
-  }
+  // if (!isLoginPage) {
+  //   return authMiddleware(request, event);
+  // }
+
   return NextResponse.next();
 };
 
@@ -116,6 +123,7 @@ const validatePublicSession = async (request: NextRequest) => {
   return NextResponse.next();
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
   const hasError = request.nextUrl.searchParams.get('error');
   const token = await getToken({ req: request });
@@ -123,7 +131,7 @@ export const middleware = async (request: NextRequest, event: NextFetchEvent) =>
 
   try {
     if (token) {
-      return validatePrivateSession(request, event);
+      return validatePrivateSession(request);
     }
 
     return validatePublicSession(request);
