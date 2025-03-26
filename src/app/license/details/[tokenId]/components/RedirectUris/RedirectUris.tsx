@@ -1,12 +1,12 @@
-import {FragmentType, gql, useFragment} from "@/gql";
-import React, {FC} from "react";
+import { FragmentType, gql, useFragment } from '@/gql';
+import React, { FC } from 'react';
 
 import '../shared/Styles.css';
-import {Title} from "@/components/Title";
-import {RedirectUriList} from "@/components/RedirectUriList";
-import {RedirectUriForm} from "@/components/RedirectUriForm";
+import { Title } from '@/components/Title';
+import { RedirectUriList } from '@/components/RedirectUriList';
+import { RedirectUriForm } from '@/components/RedirectUriForm';
 
-import {isLicenseOwner} from "@/utils/sessionStorage";
+import { isLicenseOwner } from '@/utils/sessionStorage';
 
 const REDIRECT_URIS_FRAGMENT = gql(`
   fragment RedirectUriFragment on DeveloperLicense {
@@ -22,18 +22,20 @@ const REDIRECT_URIS_FRAGMENT = gql(`
 
 interface Props {
   license: FragmentType<typeof REDIRECT_URIS_FRAGMENT>;
-  refetch: () => void
+  refetch: () => void;
 }
 
 export const RedirectUris: FC<Props> = ({ license, refetch }) => {
   const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
   return (
-    <div className={"license-details-table"}>
-      <div className={"license-details-table-header"}>
-        <Title component="h2" className={"text-xl"}>Authorized Redirect URIs</Title>
+    <div className={'license-details-table'}>
+      <div className={'license-details-table-header'}>
+        <Title component="h2" className={'text-xl'}>
+          Authorized Redirect URIs
+        </Title>
       </div>
       {isLicenseOwner(fragment) && (
-        <div className={"mt-4"}>
+        <div className={'mt-4'}>
           <RedirectUriForm
             tokenId={fragment.tokenId}
             refreshData={refetch}

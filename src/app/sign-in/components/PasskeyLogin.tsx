@@ -1,10 +1,11 @@
 import { completeUserData } from '@/app/sign-up/actions';
 import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { NotificationContext } from '@/context/notificationContext';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
 import { useRouter } from 'next/navigation';
-import { FC, useEffect } from 'react';
+import { FC, useContext, useEffect } from 'react';
 
 interface IProps {
   currentEmail: string;
@@ -19,12 +20,15 @@ export const PasskeyLogin: FC<IProps> = ({
 }) => {
   const router = useRouter();
   const { loginWithPasskey } = useAuth();
+  const { setNotification } = useContext(NotificationContext);
 
   const handleLoginWithPasskey = async () => {
     try {
       const { success, wallet } = await loginWithPasskey();
 
       if (!success) {
+        setNotification('Failed to login with passkey', 'Oops...', 'error');
+        return;
       }
 
       if (currentWallet !== wallet) {

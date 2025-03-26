@@ -1,3 +1,4 @@
+'use server';
 import { cookies } from 'next/headers';
 import axios from 'axios';
 
@@ -11,11 +12,6 @@ export const cookiePrefix = useSecureCookies ? '__Secure-' : '';
 export const getCookie = async (cookieName: string, defaultValue = '') => {
   const nextCookies = await cookies();
   return nextCookies.get(cookieName)?.value ?? defaultValue;
-};
-
-const addCookie = (arr: string[], cookieName: string, value: string) => {
-  if (value) arr.push(`${cookieName}=${value}`);
-  return arr;
 };
 
 export const dimoDevAPIClient = async (timeout: number = 5000) => {

@@ -26,9 +26,9 @@ export const handleOnChainError = (error: HttpRequestError): string => {
       data: errorData,
     });
 
-    console.error('Error value:', value);
+    console.error('Error value:', decodedError);
 
-    const { args } = value;
+    const { args } = decodedError;
 
     return args[0];
   } catch (e: unknown) {

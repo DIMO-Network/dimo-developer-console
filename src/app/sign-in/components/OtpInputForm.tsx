@@ -3,9 +3,10 @@ import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { completeUserData } from '@/app/sign-up/actions';
+import { NotificationContext } from '@/context/notificationContext';
 
 interface IProps {
   currentEmail: string;
@@ -19,6 +20,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const { beginOtpLogin, completeOtpLogin } = useAuth();
   const [otpId, setOtpId] = useState<string>('');
+  const { setNotification } = useContext(NotificationContext);
 
   // Ensure we have 6 references for 6 inputs
   useEffect(() => {
@@ -82,6 +84,8 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
       setIsLoading(true);
       const { success, wallet } = await completeOtpLogin({ otp: otpString, otpId });
       if (!success) {
+        setNotification('Invalid OTP code', 'Oops...', 'error');
+        return;
       }
 
       if (currentWallet !== wallet) {

@@ -17,18 +17,18 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
   const renderColumn = ({ name, label }: IColumn) => {
     return <Column key={`th-${label ?? name}`}>{label ?? name}</Column>;
   };
-
+ // TODO: check that conditional actions access.
   return (
     <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
       <table className="table">
         <thead>
           <tr>
             {columns.map(renderColumn)}
-            {actions && (
+            {/* {actions && (
               <td className="table-action-cell" key={`field-${item?.id as string}`}>
                 {actions?.map((action, index) => action(item, index))}
               </td>
-            )}
+            )} */}
           </tr>
         </thead>
         <tbody className="table-body">

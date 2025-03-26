@@ -1,13 +1,11 @@
-import {FragmentType, gql, useFragment} from "@/gql";
-import {Title} from "@/components/Title";
-import React, {FC, useState} from "react";
-import {isOwner} from "@/utils/user";
-import {Button} from "@/components/Button";
-import {KeyIcon} from "@heroicons/react/20/solid";
-import {useSession} from "next-auth/react";
+import { FragmentType, gql, useFragment } from '@/gql';
+import { Title } from '@/components/Title';
+import React, { FC, useState } from 'react';
+import { Button } from '@/components/Button';
+import { KeyIcon } from '@heroicons/react/20/solid';
 
 import '../shared/Styles.css';
-import {isLicenseOwner} from "@/utils/sessionStorage";
+import { isLicenseOwner } from '@/utils/sessionStorage';
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -22,29 +20,29 @@ const SIGNERS_FRAGMENT = gql(`
 `);
 
 interface Props {
-  license: FragmentType<typeof SIGNERS_FRAGMENT>
+  license: FragmentType<typeof SIGNERS_FRAGMENT>;
 }
 
 export const Signers: FC<Props> = ({ license }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading,] = useState(false);
   const fragment = useFragment(SIGNERS_FRAGMENT, license);
-  const handleGenerateSigner = () => {
-
-  };
+  const handleGenerateSigner = () => {};
   return (
-    <div className={"license-details-table"}>
-      <div className={"license-details-table-header"}>
-        <Title component="h2" className={"text-xl"}>API Keys</Title>
+    <div className={'license-details-table'}>
+      <div className={'license-details-table-header'}>
+        <Title component="h2" className={'text-xl'}>
+          API Keys
+        </Title>
         {isLicenseOwner(fragment) && (
-            <Button
-              className="dark with-icon px-4"
-              loading={isLoading}
-              loadingColor="primary"
-              onClick={() => handleGenerateSigner()}
-            >
-              <KeyIcon className="w-4 h-4" />
-              Generate Key
-            </Button>
+          <Button
+            className="dark with-icon px-4"
+            loading={isLoading}
+            loadingColor="primary"
+            onClick={() => handleGenerateSigner()}
+          >
+            <KeyIcon className="w-4 h-4" />
+            Generate Key
+          </Button>
         )}
       </div>
       <div>

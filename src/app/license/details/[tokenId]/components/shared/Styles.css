@@ -3,5 +3,5 @@
 }
 
 .license-details-table-header {
-  @apply flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center
+  @apply flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center;
 }
