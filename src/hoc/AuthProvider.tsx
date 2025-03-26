@@ -42,7 +42,6 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       sessionExpiration: number;
     }) => {
       saveToken(accessToken, sessionExpiration);
-      console.info('Session token:', accessToken);
       saveToLocalStorage(EmbeddedKey, privateKey);
 
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {

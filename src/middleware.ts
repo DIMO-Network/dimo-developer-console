@@ -15,7 +15,7 @@ const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configura
 const getToken = async ({ req }: { req: NextRequest }) => {
   const tokenCookie = `${cookiePrefix}session-token`;
   const token = await getCookie(tokenCookie);
-  
+
   if (!token) {
     return null;
   }
@@ -73,29 +73,26 @@ const validatePrivateSession = async (request: NextRequest) => {
 
   request.user = new LoggedUser(user, subOrganization);
 
-  const isValidationPage = VALIDATION_PAGES.includes(request.nextUrl.pathname);
-  //const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
 
   const isCompliant = request.user?.isCompliant ?? false;
   const missingFlow = request.user?.missingFlow ?? null;
   const flow = request.nextUrl.searchParams.get('flow');
 
   //TODO: check how isLoginPage affects on safari
-  if (isValidationPage && isCompliant) {
+  if (isLoginPage && isCompliant) {
+    console.info('User is compliant');
     return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });
   }
 
   if (!isCompliant && !flow) {
+    console.info('Redirecting to sign-up');
     return NextResponse.redirect(new URL(`/sign-up?flow=${missingFlow}`, request.url), {
       status: 307,
     });
   }
-
-  // if (!isLoginPage) {
-  //   return authMiddleware(request, event);
-  // }
 
   return NextResponse.next();
 };

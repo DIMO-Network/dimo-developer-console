@@ -18,11 +18,13 @@ export const dimoDevAPIClient = async (timeout: number = 5000) => {
 
   const authToken = await getCookie(tokenCookie);
 
+  const authHeader = authToken ? `Bearer ${authToken}` : undefined;
+
   return axios.create({
     baseURL: config.backendUrl,
     timeout,
     headers: {
-      Authorization: `Bearer ${authToken}`,
+      Authorization: authHeader,
     },
   });
 };
