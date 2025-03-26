@@ -21,12 +21,3 @@ export const getFromSession = <T>(key: string): T | null => {
 export const removeFromSession = (key: string): void => {
   sessionStorage.removeItem(key);
 };
-
-export const checkIsLicenseOwner = (license: { owner: string }) => {
-  // return !!(
-  //   organizationInfo?.smartContractAddress &&
-  //   organizationInfo.smartContractAddress === license.owner
-  // );
-  // TODO: check how to implement with the new global account
-  return !!license.owner;
-};

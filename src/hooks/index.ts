@@ -13,3 +13,4 @@ export * from './usePasskey';
 export * from './useEventEmitter';
 export * from './useAuth';
 export * from './useTransactions';
+export * from './useIsLicenseOwner';

@@ -3,7 +3,6 @@ import { Title } from '@/components/Title';
 import React, { FC, useContext, useState } from 'react';
 import { Button } from '@/components/Button';
 import { KeyIcon } from '@heroicons/react/20/solid';
-import { checkIsLicenseOwner } from '@/utils/sessionStorage';
 import { Table } from '@/components/Table';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { SignerFragmentFragment } from '@/gql/graphql';
@@ -17,6 +16,7 @@ import { generateWallet } from '@/utils/wallet';
 import '../shared/Styles.css';
 import { withLoadingStatus } from '@/hoc';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
+import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -45,6 +45,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const fragment = useFragment(SIGNERS_FRAGMENT, license);
   const handleDisableSigner = useDisableSigner(fragment.tokenId);
   const handleEnableSigner = useEnableSigner(fragment.tokenId);
+  const isLicenseOwner = useIsLicenseOwner(fragment);
 
   const handleError = (error: unknown) => {
     Sentry.captureException(error);
@@ -88,7 +89,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   const renderDeleteSignerAction = (item: SignerNode, index: number) => {
-    if (checkIsLicenseOwner(fragment)) {
+    if (isLicenseOwner) {
       return (
         <Button
           className={'table-action-button'}
@@ -124,7 +125,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         <Title component="h2" className={'text-xl'}>
           API Keys
         </Title>
-        {checkIsLicenseOwner(fragment) && (
+        {isLicenseOwner && (
           <Button
             className="dark with-icon px-4"
             loadingColor="primary"
