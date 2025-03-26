@@ -6,7 +6,7 @@ import config from '@/config';
 const { NEXTAUTH_URL: nextAuthUrl = '' } = process.env;
 
 const useSecureCookies = nextAuthUrl.startsWith('https://');
-const cookiePrefix = useSecureCookies ? '__Secure-' : '';
+export const cookiePrefix = useSecureCookies ? '__Secure-' : '';
 
 export const getCookie = async (cookieName: string, defaultValue = '') => {
   const nextCookies = await cookies();
