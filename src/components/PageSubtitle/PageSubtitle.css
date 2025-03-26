@@ -1,0 +1,7 @@
+.subtitle-content {
+  @apply border-b border-[#322D2F];
+
+  .subtitle {
+    @apply text-3xl pb-2;
+  }
+}

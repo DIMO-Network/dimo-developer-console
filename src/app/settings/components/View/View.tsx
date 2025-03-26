@@ -8,13 +8,14 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { isOwner } from '@/utils/user';
 import { Loader } from '@/components/Loader';
+import { PageSubtitle } from '@/components/PageSubtitle';
 import { SupportAgentIcon } from '@/components/Icons';
 import { SupportFormModal } from '@/app/settings/components/SupportFormModal';
 import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
-import { useTeamCollaborators } from '@/hooks';
 import { UserDetails } from '@/app/settings/components/UserDetails';
+import { useTeamCollaborators } from '@/hooks';
 
 import './View.css';
 
@@ -30,6 +31,7 @@ const View: FC = () => {
       {isLoading && <Loader isLoading={true} />}
       {!isLoading && (
         <>
+          <PageSubtitle subtitle="Organization Settings" />
           <UserDetails />
           <Card className="primary team-information">
             <div className="team-header">
