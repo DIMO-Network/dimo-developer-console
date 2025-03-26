@@ -1,0 +1,12 @@
+.signer-generated-modal {
+  .dialog-panel {
+    @apply min-w-[95vw] min-h-[95vh] ml-auto mr-auto my-auto md:m-auto md:h-auto md:min-w-[480px] md:min-h-0 p-6;
+  }
+}
+
+.copyable-row {
+  @apply flex flex-row gap-2.5 bg-surface-raised py-2 px-3 rounded-xl items-center;
+  p {
+    @apply text-base text-text-secondary
+  }
+}

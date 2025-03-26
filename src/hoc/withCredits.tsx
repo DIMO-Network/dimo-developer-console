@@ -1,9 +1,9 @@
 'use client';
-import React, { ComponentType } from 'react';
+import React, {ComponentType} from 'react';
 
-import { CreditsContext } from '@/context/creditsContext';
-import { useCredits } from '@/hooks';
-import { BuyCreditsModal } from '@/components/BuyCreditsModal';
+import {CreditsContext} from '@/context/creditsContext';
+import {useCredits} from '@/hooks';
+import {BuyCreditsModal} from '@/components/BuyCreditsModal';
 
 export const withCredits = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
@@ -27,3 +27,4 @@ export const withCredits = <P extends object>(WrappedComponent: ComponentType<P>
 };
 
 export default withCredits;
+

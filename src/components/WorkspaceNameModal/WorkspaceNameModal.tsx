@@ -6,14 +6,12 @@ import { encodeFunctionData } from 'viem';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
-import { IApp } from '@/types/app';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { Title } from '@/components/Title';
-import { updateApp } from '@/actions/app';
 import { useContractGA } from '@/hooks';
 
 import configuration from '@/config';
@@ -24,23 +22,18 @@ import './WorkspaceNameModal.css';
 interface IProps {
   isOpen: boolean;
   setIsOpen: (s: boolean) => void;
-  app: IApp;
+  license: {tokenId: number; alias?: string | null};
+  onSuccess?: () => void;
 }
 
 interface IFormInputs {
   workspaceName: string;
-  appName: string;
 }
 
-export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
+export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, license, onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { processTransactions } = useContractGA();
   const { setNotification } = useContext(NotificationContext);
-  const {
-    name: appName,
-    id: appId,
-    Workspace: { name: workspaceName, token_id: tokenId },
-  } = app;
   const {
     register,
     handleSubmit,
@@ -50,8 +43,7 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      workspaceName,
-      appName,
+      workspaceName: license.alias ?? '',
     },
   });
 
@@ -62,49 +54,34 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
   }, [isOpen, reset]);
 
   const setLicenseAlias = async ({ workspaceName: licenseAlias }: IFormInputs) => {
-    if (licenseAlias === app.Workspace.name) return;
+    if (licenseAlias === license.alias) return;
     const transaction = {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
       data: encodeFunctionData({
         abi: DimoLicenseContract,
         functionName: 'setLicenseAlias',
-        args: [tokenId, licenseAlias],
+        args: [license.tokenId, licenseAlias],
       }),
     };
 
     await processTransactions([transaction]);
-    app.Workspace.name = licenseAlias;
-  };
-
-  const updateAppName = async (data: IFormInputs) => {
-    const { appName: newAppName, workspaceName: newWorkspaceName } = data;
-    if (newAppName === app.name && newWorkspaceName === app.Workspace.name) return;
-
-    try {
-      await updateApp(appId!, {
-        name: newAppName,
-        Workspace: { name: newWorkspaceName },
-      });
-      app.name = newAppName;
-    } catch (error) {
-      console.error('Failed to update app name', error);
-      Sentry.captureException(error);
-    }
   };
 
   const onSubmit = async (data: IFormInputs) => {
     setIsLoading(true);
     try {
-      await updateAppName(data);
       await setLicenseAlias(data);
       setNotification(
-        'Workspace and app names updated successfully',
+        'Developer license name updated successfully. Refresh to see your changes.',
         'Success',
         'success',
       );
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
-      setNotification('Failed to update workspace or app name', 'Oops...', 'error');
+      setNotification('Failed to update developer license name', 'Oops...', 'error');
       Sentry.captureException(error);
     } finally {
       setIsOpen(false);
@@ -118,58 +95,41 @@ export const WorkspaceNameModal: FC<IProps> = ({ isOpen, setIsOpen, app }) => {
       <form className="workspace-name-content" onSubmit={handleSubmit(onSubmit)}>
         <div className="workspace-name-header">
           <Title className="text-2xl" component="h3">
-            Edit Workspace and App Names
+            Edit Developer License Name
           </Title>
-          <p className="workspace-name-description">
-            Please update the workspace and app names below. Note that changing the
-            workspace name will impact all apps using this workspace.
-          </p>
         </div>
         <div className="fields-container">
           <div className="field">
-            <Label htmlFor="workspaceName" className="text-xs text-medium">
-              Workspace Name
+            <Label htmlFor="workspaceName" className="text-sm font-medium">
+              Developer License Name
               <TextField
                 {...register('workspaceName', {
-                  required: 'Workspace name is required',
+                  required: 'Developer license name is required',
                   maxLength: {
                     value: 100,
-                    message: 'Workspace name cannot exceed 100 characters',
+                    message: 'Name cannot exceed 100 characters',
                   },
                 })}
                 id="workspaceName"
-                placeholder="Enter Workspace Name"
-                defaultValue={workspaceName}
+                placeholder="Enter developer license name"
+                defaultValue={license.alias ?? ''}
                 className="field"
               />
+              <p className={"text-text-secondary font-normal"}>This is the namespace used across all your apps. It is a public name visible to other developers and users in the ecosystem.</p>
               {errors?.workspaceName && (
                 <TextError errorMessage={errors.workspaceName.message!} />
               )}
             </Label>
           </div>
-          <div className="field">
-            <Label htmlFor="appName" className="text-xs text-medium">
-              App Name
-              <TextField
-                {...register('appName', {
-                  required: 'App name is required',
-                  maxLength: {
-                    value: 100,
-                    message: 'App name cannot exceed 100 characters',
-                  },
-                })}
-                id="appName"
-                placeholder="Enter App Name"
-                defaultValue={appName}
-                className="field"
-              />
-              {errors?.appName && <TextError errorMessage={errors.appName.message!} />}
-            </Label>
-          </div>
         </div>
-        <Button type="submit" className="primary save-button" loading={isLoading}>
-          Save Changes
-        </Button>
+        <div className={"flex flex-col gap-4 pt-6"}>
+          <Button type="submit" className="light save-button" loading={isLoading}>
+            Save Changes
+          </Button>
+          <Button type="reset" className="primary-outline save-button" disabled={isLoading} onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+        </div>
       </form>
     </Modal>
   );

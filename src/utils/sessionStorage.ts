@@ -22,7 +22,7 @@ export const removeFromSession = (key: string): void => {
   sessionStorage.removeItem(key);
 };
 
-export const isLicenseOwner = (license: { owner: string }) => { 
+export const checkIsLicenseOwner = (license: { owner: string }) => {
   // return !!(
   //   organizationInfo?.smartContractAddress &&
   //   organizationInfo.smartContractAddress === license.owner

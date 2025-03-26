@@ -19,7 +19,7 @@ import { RedirectUriForm } from '@/components/RedirectUriForm';
 import { RedirectUriList } from '@/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { Title } from '@/components/Title';
-import { useContractGA, useGlobalAccount, useOnboarding } from '@/hooks';
+import { useContractGA, useEnableSigner, useGlobalAccount, useOnboarding } from '@/hooks';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
@@ -37,6 +37,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const { processTransactions } = useContractGA();
   const router = useRouter();
   const { role } = currentUser!;
+  const handleEnableSigner = useEnableSigner(workspace!.token_id);
 
   useEffect(() => {
     refreshAppDetails();
@@ -59,19 +60,6 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     } finally {
       setIsLoadingPage(false);
     }
-  };
-
-  const handleEnableSigner = (signer: string) => {
-    if (!currentUser && !workspace) throw new Error('Web3 connection failed');
-    return {
-      to: configuration.DLC_ADDRESS,
-      value: BigInt(0),
-      data: encodeFunctionData({
-        abi: DimoLicenseABI,
-        functionName: 'enableSigner',
-        args: [workspace?.token_id ?? 0, signer],
-      }),
-    };
   };
 
   const handleDisableSigner = (signer: string) => {
@@ -104,8 +92,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     try {
       setIsLoading(true);
       const account = generateWallet();
-      const transaction = handleEnableSigner(account.address);
-      await processTransactions([transaction]);
+      await handleEnableSigner(account.address);
       const { id: appId } = await params;
       await createMySigner(
         {

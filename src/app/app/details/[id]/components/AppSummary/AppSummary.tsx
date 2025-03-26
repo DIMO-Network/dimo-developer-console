@@ -7,7 +7,7 @@ import { IApp } from '@/types/app';
 import { Title } from '@/components/Title';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
-import { WorkspaceNameModal } from '@/app/app/details/[id]/components/WorkspaceNameModal';
+import { WorkspaceNameModal } from '@/components/WorkspaceNameModal';
 
 import './AppSummary.css';
 
@@ -51,7 +51,14 @@ export const AppSummary: FC<IProps> = ({ app }) => {
           onClick={handleCopy}
         />
       </div>
-      <WorkspaceNameModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} app={app} />
+      <WorkspaceNameModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        license={{
+          tokenId: workspace.token_id ?? 0,
+          alias: workspace.name ?? ''
+        }}
+      />
     </div>
   );
 };
