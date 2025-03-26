@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "predev": "npm run compile",
     "dev": "next dev",
     "sec": "next dev --experimental-https",
     "lint": "next lint",

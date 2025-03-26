@@ -8,12 +8,14 @@ import { getUserSubOrganization } from '@/services/globalAccount';
 import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 import { JWTPayload } from 'jose/dist/types';
+import { cookiePrefix, getCookie } from './services/dimoDevAPI';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
 
 const getToken = async ({ req }: { req: NextRequest }) => {
-  const token = req.headers.get('Authorization')?.replace('Bearer ', '');
-
+  const tokenCookie = `${cookiePrefix}session-token`;
+  const token = await getCookie(tokenCookie);
+  
   if (!token) {
     return null;
   }
@@ -62,7 +64,6 @@ const validatePrivateSession = async (request: NextRequest) => {
   const subOrganization = await getUserSubOrganization(
     user.company_email_owner ?? user.email,
   );
-
   if (!subOrganization) {
     Sentry.captureMessage('Suborganization not found');
     return NextResponse.redirect(new URL('/sign-in', request.url), {

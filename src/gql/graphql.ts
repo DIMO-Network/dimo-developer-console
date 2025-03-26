@@ -3,38 +3,30 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]?: Maybe<T[SubKey]>;
-};
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
-  [SubKey in K]: Maybe<T[SubKey]>;
-};
-export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = {
-  [_ in K]?: never;
-};
-export type Incremental<T> =
-  | T
-  | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string };
-  String: { input: string; output: string };
-  Boolean: { input: boolean; output: boolean };
-  Int: { input: number; output: number };
-  Float: { input: number; output: number };
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
   /** A 20-byte Ethereum address, encoded as a checksummed hex string with 0x prefix. */
-  Address: { input: any; output: any };
+  Address: { input: any; output: any; }
   /** BigDecimal decimal floating-point number, per the General Decimal Arithmetic specification. */
-  BigDecimal: { input: any; output: any };
+  BigDecimal: { input: any; output: any; }
   /** An integer of arbitrary precision, decimal-encoded. Typically a uint256. */
-  BigInt: { input: any; output: any };
+  BigInt: { input: any; output: any; }
   /** An array of byte, encoded as a lowercase hex string with 0x prefix. */
-  Bytes: { input: any; output: any };
+  Bytes: { input: any; output: any; }
   /**
    * A point in time, encoded per RFC-3999. Typically these will be in second precision,
    * just like the blockchain, and in UTC.
    */
-  Time: { input: any; output: any };
+  Time: { input: any; output: any; }
 };
 
 export type AftermarketDevice = Node & {
@@ -109,6 +101,7 @@ export type AftermarketDeviceEarnings = {
   history: EarningsConnection;
   totalTokens: Scalars['BigDecimal']['output'];
 };
+
 
 export type AftermarketDeviceEarningsHistoryArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -214,12 +207,14 @@ export type DeveloperLicense = {
   tokenId: Scalars['Int']['output'];
 };
 
+
 export type DeveloperLicenseRedirectUrIsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
+
 
 export type DeveloperLicenseSignersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -379,6 +374,7 @@ export type Manufacturer = Node & {
   tokenId: Scalars['Int']['output'];
 };
 
+
 export type ManufacturerAftermarketDevicesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -386,6 +382,7 @@ export type ManufacturerAftermarketDevicesArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
+
 
 export type ManufacturerDeviceDefinitionsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -489,10 +486,12 @@ export type Query = {
   vehicles: VehicleConnection;
 };
 
+
 /** The root query type for the GraphQL schema. */
 export type QueryAftermarketDeviceArgs = {
   by: AftermarketDeviceBy;
 };
+
 
 /** The root query type for the GraphQL schema. */
 export type QueryAftermarketDevicesArgs = {
@@ -503,10 +502,12 @@ export type QueryAftermarketDevicesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 /** The root query type for the GraphQL schema. */
 export type QueryDcnArgs = {
   by: DcnBy;
 };
+
 
 /** The root query type for the GraphQL schema. */
 export type QueryDcnsArgs = {
@@ -517,10 +518,12 @@ export type QueryDcnsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 /** The root query type for the GraphQL schema. */
 export type QueryDeveloperLicenseArgs = {
   by: DeveloperLicenseBy;
 };
+
 
 /** The root query type for the GraphQL schema. */
 export type QueryDeveloperLicensesArgs = {
@@ -531,25 +534,30 @@ export type QueryDeveloperLicensesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 /** The root query type for the GraphQL schema. */
 export type QueryDeviceDefinitionArgs = {
   by: DeviceDefinitionBy;
 };
+
 
 /** The root query type for the GraphQL schema. */
 export type QueryManufacturerArgs = {
   by: ManufacturerBy;
 };
 
+
 /** The root query type for the GraphQL schema. */
 export type QueryNodeArgs = {
   id: Scalars['ID']['input'];
 };
 
+
 /** The root query type for the GraphQL schema. */
 export type QueryRewardsArgs = {
   user: Scalars['Address']['input'];
 };
+
 
 /** The root query type for the GraphQL schema. */
 export type QueryStakesArgs = {
@@ -560,10 +568,12 @@ export type QueryStakesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 /** The root query type for the GraphQL schema. */
 export type QuerySyntheticDeviceArgs = {
   by: SyntheticDeviceBy;
 };
+
 
 /** The root query type for the GraphQL schema. */
 export type QuerySyntheticDevicesArgs = {
@@ -574,10 +584,12 @@ export type QuerySyntheticDevicesArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 /** The root query type for the GraphQL schema. */
 export type QueryVehicleArgs = {
   tokenId: Scalars['Int']['input'];
 };
+
 
 /** The root query type for the GraphQL schema. */
 export type QueryVehiclesArgs = {
@@ -774,6 +786,7 @@ export type UserRewards = {
   totalTokens: Scalars['BigDecimal']['output'];
 };
 
+
 export type UserRewardsHistoryArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -818,6 +831,7 @@ export type Vehicle = Node & {
   tokenId: Scalars['Int']['output'];
 };
 
+
 export type VehiclePrivilegesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -825,6 +839,7 @@ export type VehiclePrivilegesArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
+
 
 export type VehicleSacdsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -847,6 +862,7 @@ export type VehicleEarnings = {
   history: EarningsConnection;
   totalTokens: Scalars['BigDecimal']['output'];
 };
+
 
 export type VehicleEarningsHistoryArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -886,435 +902,34 @@ export type VehiclesFilter = {
   year?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type RedirectUriFragmentFragment = {
-  __typename?: 'DeveloperLicense';
-  owner: any;
-  tokenId: number;
-  redirectURIs: {
-    __typename?: 'RedirectURIConnection';
-    nodes: Array<{ __typename?: 'RedirectURI'; uri: string }>;
-  };
-} & { ' $fragmentName'?: 'RedirectUriFragmentFragment' };
+export type RedirectUriFragmentFragment = { __typename?: 'DeveloperLicense', owner: any, tokenId: number, redirectURIs: { __typename?: 'RedirectURIConnection', nodes: Array<{ __typename?: 'RedirectURI', uri: string }> } } & { ' $fragmentName'?: 'RedirectUriFragmentFragment' };
 
-export type SignerFragmentFragment = {
-  __typename?: 'DeveloperLicense';
-  owner: any;
-  tokenId: number;
-  signers: {
-    __typename?: 'SignerConnection';
-    nodes: Array<{ __typename?: 'Signer'; address: any }>;
-  };
-} & { ' $fragmentName'?: 'SignerFragmentFragment' };
+export type SignerFragmentFragment = { __typename?: 'DeveloperLicense', owner: any, tokenId: number, signers: { __typename?: 'SignerConnection', nodes: Array<{ __typename?: 'Signer', address: any }> } } & { ' $fragmentName'?: 'SignerFragmentFragment' };
 
 export type GetDeveloperLicenseQueryVariables = Exact<{
   tokenId: Scalars['Int']['input'];
 }>;
 
-export type DeveloperLicenseByTokenIdQuery = {
-  __typename?: 'Query';
-  developerLicense: { __typename?: 'DeveloperLicense' } & {
-    ' $fragmentRefs'?: {
-      DeveloperLicenseSummaryFragment: DeveloperLicenseSummaryFragmentFragment;
-    };
-  };
-};
 
-export type GetDeveloperLicenseQuery = {
-  __typename?: 'Query';
-  developerLicense: { __typename?: 'DeveloperLicense' } & {
-    ' $fragmentRefs'?: {
-      DeveloperLicenseSummaryFragmentFragment: DeveloperLicenseSummaryFragmentFragment;
-      SignerFragmentFragment: SignerFragmentFragment;
-      RedirectUriFragmentFragment: RedirectUriFragmentFragment;
-    };
-  };
-};
+export type GetDeveloperLicenseQuery = { __typename?: 'Query', developerLicense: (
+    { __typename?: 'DeveloperLicense' }
+    & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragmentFragment': DeveloperLicenseSummaryFragmentFragment;'SignerFragmentFragment': SignerFragmentFragment;'RedirectUriFragmentFragment': RedirectUriFragmentFragment } }
+  ) };
 
 export type GetDeveloperLicensesByOwnerQueryVariables = Exact<{
   owner: Scalars['Address']['input'];
 }>;
 
-export type GetDeveloperLicensesByOwnerQuery = {
-  __typename?: 'Query';
-  developerLicenses: {
-    __typename?: 'DeveloperLicenseConnection';
-    nodes: Array<
-      { __typename?: 'DeveloperLicense' } & {
-        ' $fragmentRefs'?: {
-          DeveloperLicenseSummaryFragmentFragment: DeveloperLicenseSummaryFragmentFragment;
-        };
-      }
-    >;
-  };
-};
 
-export type DeveloperLicenseSummaryFragmentFragment = {
-  __typename?: 'DeveloperLicense';
-  alias?: string | null;
-  tokenId: number;
-  clientId: any;
-  owner: any;
-} & { ' $fragmentName'?: 'DeveloperLicenseSummaryFragmentFragment' };
+export type GetDeveloperLicensesByOwnerQuery = { __typename?: 'Query', developerLicenses: { __typename?: 'DeveloperLicenseConnection', nodes: Array<(
+      { __typename?: 'DeveloperLicense' }
+      & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragmentFragment': DeveloperLicenseSummaryFragmentFragment } }
+    )> } };
 
-export const RedirectUriFragmentFragmentDoc = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'RedirectUriFragment' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'DeveloperLicense' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenId' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'redirectURIs' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'first' },
-                value: { kind: 'IntValue', value: '100' },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'nodes' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'uri' } }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<RedirectUriFragmentFragment, unknown>;
-export const SignerFragmentFragmentDoc = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'SignerFragment' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'DeveloperLicense' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenId' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'signers' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'first' },
-                value: { kind: 'IntValue', value: '100' },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'nodes' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'address' } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<SignerFragmentFragment, unknown>;
-export const DeveloperLicenseSummaryFragmentFragmentDoc = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'DeveloperLicenseSummaryFragment' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'DeveloperLicense' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'alias' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenId' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'clientId' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<DeveloperLicenseSummaryFragmentFragment, unknown>;
-export const GetDeveloperLicenseDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'query',
-      name: { kind: 'Name', value: 'GetDeveloperLicense' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'tokenId' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'developerLicense' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'by' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'tokenId' },
-                      value: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'tokenId' },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'DeveloperLicenseSummaryFragment' },
-                },
-                {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'SignerFragment' },
-                },
-                {
-                  kind: 'FragmentSpread',
-                  name: { kind: 'Name', value: 'RedirectUriFragment' },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'DeveloperLicenseSummaryFragment' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'DeveloperLicense' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'alias' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenId' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'clientId' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
-        ],
-      },
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'SignerFragment' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'DeveloperLicense' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenId' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'signers' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'first' },
-                value: { kind: 'IntValue', value: '100' },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'nodes' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      { kind: 'Field', name: { kind: 'Name', value: 'address' } },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'RedirectUriFragment' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'DeveloperLicense' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenId' } },
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'redirectURIs' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'first' },
-                value: { kind: 'IntValue', value: '100' },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'nodes' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [{ kind: 'Field', name: { kind: 'Name', value: 'uri' } }],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<GetDeveloperLicenseQuery, GetDeveloperLicenseQueryVariables>;
-export const GetDeveloperLicensesByOwnerDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'query',
-      name: { kind: 'Name', value: 'GetDeveloperLicensesByOwner' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'owner' } },
-          type: {
-            kind: 'NonNullType',
-            type: { kind: 'NamedType', name: { kind: 'Name', value: 'Address' } },
-          },
-        },
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'developerLicenses' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'first' },
-                value: { kind: 'IntValue', value: '100' },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'filterBy' },
-                value: {
-                  kind: 'ObjectValue',
-                  fields: [
-                    {
-                      kind: 'ObjectField',
-                      name: { kind: 'Name', value: 'owner' },
-                      value: { kind: 'Variable', name: { kind: 'Name', value: 'owner' } },
-                    },
-                  ],
-                },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                {
-                  kind: 'Field',
-                  name: { kind: 'Name', value: 'nodes' },
-                  selectionSet: {
-                    kind: 'SelectionSet',
-                    selections: [
-                      {
-                        kind: 'FragmentSpread',
-                        name: { kind: 'Name', value: 'DeveloperLicenseSummaryFragment' },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-    {
-      kind: 'FragmentDefinition',
-      name: { kind: 'Name', value: 'DeveloperLicenseSummaryFragment' },
-      typeCondition: {
-        kind: 'NamedType',
-        name: { kind: 'Name', value: 'DeveloperLicense' },
-      },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          { kind: 'Field', name: { kind: 'Name', value: 'alias' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'tokenId' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'clientId' } },
-          { kind: 'Field', name: { kind: 'Name', value: 'owner' } },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<
-  GetDeveloperLicensesByOwnerQuery,
-  GetDeveloperLicensesByOwnerQueryVariables
->;
+export type DeveloperLicenseSummaryFragmentFragment = { __typename?: 'DeveloperLicense', alias?: string | null, tokenId: number, clientId: any, owner: any } & { ' $fragmentName'?: 'DeveloperLicenseSummaryFragmentFragment' };
+
+export const RedirectUriFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RedirectUriFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}}]} as unknown as DocumentNode<RedirectUriFragmentFragment, unknown>;
+export const SignerFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SignerFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"signers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}}]}}]}}]}}]} as unknown as DocumentNode<SignerFragmentFragment, unknown>;
+export const DeveloperLicenseSummaryFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}}]}}]} as unknown as DocumentNode<DeveloperLicenseSummaryFragmentFragment, unknown>;
+export const GetDeveloperLicenseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeveloperLicense"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"tokenId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SignerFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"RedirectUriFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SignerFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"signers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RedirectUriFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}}]} as unknown as DocumentNode<GetDeveloperLicenseQuery, GetDeveloperLicenseQueryVariables>;
+export const GetDeveloperLicensesByOwnerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeveloperLicensesByOwner"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"owner"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicenses"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}},{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"owner"},"value":{"kind":"Variable","name":{"kind":"Name","value":"owner"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}}]}}]} as unknown as DocumentNode<GetDeveloperLicensesByOwnerQuery, GetDeveloperLicensesByOwnerQueryVariables>;
