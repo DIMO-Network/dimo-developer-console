@@ -79,12 +79,9 @@ export const useEnableSigner = (tokenId: number) => {
   );
 };
 
-export const usePayLicenseFee = () => {
+const useMintDcx = () => {
   const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
-  const { checkEnoughBalance, getDesiredTokenAmount, processTransactions } =
-    useContractGA();
-
-  const mintDCX = useCallback(
+  return useCallback(
     async (desiredTokenAmount: IDesiredTokenAmount, enoughBalance: ITokenBalance) => {
       const transactions = [];
       if (!enoughBalance.dcxAllowance) {
@@ -128,13 +125,18 @@ export const usePayLicenseFee = () => {
     },
     [currentUser, getCurrentDcxBalance],
   );
+};
+
+export const usePayLicenseFee = () => {
+  const { checkEnoughBalance, getDesiredTokenAmount, processTransactions } =
+    useContractGA();
+  const mintDCX = useMintDcx();
 
   const prepareIssueInDC = async (
     desiredTokenAmount: IDesiredTokenAmount,
     enoughBalance: ITokenBalance,
   ) => {
     if (enoughBalance.dlcAllowance) return [];
-
     return [
       {
         to: configuration.DC_ADDRESS,
