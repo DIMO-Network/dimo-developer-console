@@ -1,4 +1,4 @@
-import {CopyableRow} from "@/components/CopyableRow";
+import { CopyableRow } from '@/components/CopyableRow';
 
 export const ClientId = (props: { value: string }) => {
   return (
