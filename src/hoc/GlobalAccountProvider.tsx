@@ -57,11 +57,19 @@ export const withGlobalAccounts = <P extends object>(
       const eKey = getFromLocalStorage<string>(EmbeddedKey);
 
       if (!eKey || !session) {
+        await logout();
         return 0;
       }
 
       const { subOrganizationId, walletAddress, smartContractAddress } = user!;
-      const { token } = session;
+      const { token, expiry } = session;
+
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+
+      if (expiry < nowInSeconds) {
+        await logout();
+        return 0;
+      }
 
       const client = getTurnkeyClient({ authKey: token, eKey: eKey });
 
@@ -100,11 +108,19 @@ export const withGlobalAccounts = <P extends object>(
       const eKey = getFromLocalStorage<string>(EmbeddedKey);
 
       if (!eKey || !session) {
+        await logout();
         return 0;
       }
-
+      
       const { subOrganizationId, walletAddress, smartContractAddress } = user!;
-      const { token } = session;
+      const { token, expiry } = session;
+
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+
+      if (expiry < nowInSeconds) {
+        await logout();
+        return 0;
+      }
 
       const client = getTurnkeyClient({ authKey: token, eKey: eKey });
 
