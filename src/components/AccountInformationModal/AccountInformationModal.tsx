@@ -18,6 +18,7 @@ import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import {Button} from "@/components/Button";
 
 export const AccountInformationModal: FC = () => {
   const { setNotification } = useContext(NotificationContext);
@@ -135,6 +136,9 @@ export const AccountInformationModal: FC = () => {
             )}
           </div>
         </div>
+        <Button className={'primary-outline'} onClick={() => setShowAccountInformation(false)}>
+          Close
+        </Button>
       </div>
     </Modal>
   );
