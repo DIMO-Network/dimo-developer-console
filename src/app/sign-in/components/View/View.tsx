@@ -176,7 +176,12 @@ export const View = () => {
         </div>
       </div>
       <div className="sign-in__background">
-        <Image src={'/images/car_segment.svg'} alt="DIMO Background" width="684" height="832"/>
+        <Image
+          src={'/images/car_segment.svg'}
+          alt="DIMO Background"
+          width="684"
+          height="832"
+        />
       </div>
     </main>
   );

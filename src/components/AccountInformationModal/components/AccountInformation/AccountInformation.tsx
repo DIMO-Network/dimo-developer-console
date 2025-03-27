@@ -1,7 +1,7 @@
 import { Label } from '@/components/Label';
 import { get } from 'lodash';
 import { useGlobalAccount } from '@/hooks';
-import { CopyableRow } from "@/components/CopyableRow";
+import { CopyableRow } from '@/components/CopyableRow';
 
 import '../../shared/AccountInformationModal.css';
 
@@ -19,7 +19,11 @@ export const AccountInformation = () => {
       <div className="account-information-row">
         <Label htmlFor="email" className="text-xs text-medium">
           Organization Wallet Address
-          <CopyableRow value={get(currentUser, 'smartContractAddress', '')} name={'wallet'} onCopySuccessMessage={'Wallet address copied to clipboard'} />
+          <CopyableRow
+            value={get(currentUser, 'smartContractAddress', '')}
+            name={'wallet'}
+            onCopySuccessMessage={'Wallet address copied to clipboard'}
+          />
         </Label>
       </div>
     </div>

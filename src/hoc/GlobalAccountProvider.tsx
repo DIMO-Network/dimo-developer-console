@@ -111,7 +111,7 @@ export const withGlobalAccounts = <P extends object>(
         await logout();
         return 0;
       }
-      
+
       const { subOrganizationId, walletAddress, smartContractAddress } = user!;
       const { token, expiry } = session;
 

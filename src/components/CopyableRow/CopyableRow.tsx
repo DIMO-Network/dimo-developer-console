@@ -1,7 +1,7 @@
-import {FC, useContext} from 'react';
-import {TextField} from "@/components/TextField";
-import {ContentCopyIcon} from "@/components/Icons";
-import {NotificationContext} from "@/context/notificationContext";
+import { FC, useContext } from 'react';
+import { TextField } from '@/components/TextField';
+import { ContentCopyIcon } from '@/components/Icons';
+import { NotificationContext } from '@/context/notificationContext';
 
 interface IProps {
   value: string;
@@ -14,7 +14,12 @@ export const CopyableRow: FC<IProps> = ({ value, onCopySuccessMessage, name }) =
 
   const handleCopy = (copiedValue: string) => {
     void navigator.clipboard.writeText(copiedValue);
-    setNotification(onCopySuccessMessage ?? 'Value copied to clipboard', 'Success', 'success', 1000);
+    setNotification(
+      onCopySuccessMessage ?? 'Value copied to clipboard',
+      'Success',
+      'success',
+      1000,
+    );
   };
 
   return (

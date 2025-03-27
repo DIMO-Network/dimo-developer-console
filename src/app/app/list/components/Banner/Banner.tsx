@@ -1,10 +1,11 @@
-import React, { FC } from 'react';
+import React, { FC, useContext } from 'react';
 import './Banner.css';
 import CreateAppButton from '@/app/app/list/components/CreateAppButton';
 import AddCreditsButton from '@/app/app/list/components/AddCreditsButton';
 import { ActionCompletedRow } from '@/app/app/list/components/Banner/components/ActionCompletedRow';
 import { CTARow } from '@/app/app/list/components/Banner/components/CTARow';
 import { FragmentType, gql, useFragment } from '@/gql';
+import { NotificationContext } from '@/context/notificationContext';
 
 export const GET_TOTAL_LICENSE_COUNT = gql(`
   fragment TotalDeveloperLicenseCountFragment on DeveloperLicenseConnection {
@@ -19,6 +20,7 @@ interface Props {
 
 export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
   const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
+
   return (
     <div className="banner-content">
       <div>
