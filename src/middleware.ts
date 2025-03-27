@@ -10,8 +10,9 @@ import * as Sentry from '@sentry/nextjs';
 import { JWTPayload } from 'jose/dist/types';
 import { cookiePrefix, getCookie } from './services/dimoDevAPI';
 
-const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } = configuration;
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getToken = async ({ req }: { req: NextRequest }) => {
   const tokenCookie = `${cookiePrefix}session-token`;
   const token = await getCookie(tokenCookie);
