@@ -12,6 +12,7 @@ import {
 import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage';
 import { turnkeyClient } from './turnkey';
 import { removeFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
+import { signOut } from '@/actions/user';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
@@ -80,6 +81,7 @@ export const bottomMenu = [
     icon: ArrowLeftStartOnRectangleIcon as FC,
     iconClassName: 'h-5 w-5 fill-grey-200',
     link: () => {
+      signOut();
       turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
