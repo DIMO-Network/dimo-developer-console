@@ -21,7 +21,6 @@ export const AccountInformation = () => {
           Organization Wallet Address
           <CopyableRow
             value={get(currentUser, 'smartContractAddress', '')}
-            name={'wallet'}
             onCopySuccessMessage={'Wallet address copied to clipboard'}
           />
         </Label>

@@ -1,15 +1,13 @@
 import { FC, useContext } from 'react';
-import { TextField } from '@/components/TextField';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
 
 interface IProps {
   value: string;
   onCopySuccessMessage?: string;
-  name: string;
 }
 
-export const CopyableRow: FC<IProps> = ({ value, onCopySuccessMessage, name }) => {
+export const CopyableRow: FC<IProps> = ({ value, onCopySuccessMessage }) => {
   const { setNotification } = useContext(NotificationContext);
 
   const handleCopy = (copiedValue: string) => {
@@ -23,17 +21,16 @@ export const CopyableRow: FC<IProps> = ({ value, onCopySuccessMessage, name }) =
   };
 
   return (
-    <TextField
-      name={name}
-      type="text"
-      readOnly={true}
-      value={value}
-      action={
-        <ContentCopyIcon
-          className="w5 h-5 fill-white/50 cursor-pointer"
-          onClick={() => handleCopy(value)}
-        />
+    <div
+      className={
+        'flex flex-row gap-2.5 bg-surface-raised py-2 px-3 rounded-xl items-center'
       }
-    />
+    >
+      <p className={'text-sm text-text-secondary'}>{value}</p>
+      <ContentCopyIcon
+        className="w5 h-5 fill-white/50 cursor-pointer"
+        onClick={() => handleCopy(value)}
+      />
+    </div>
   );
 };
