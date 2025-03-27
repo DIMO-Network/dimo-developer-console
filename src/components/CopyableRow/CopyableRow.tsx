@@ -1,16 +1,20 @@
 import { FC } from 'react';
 import { CopyButton, ICopyButtonProps } from '@/components/CopyButton/CopyButton';
 
-interface IProps extends ICopyButtonProps {}
+import './CopyableRow.css';
 
-export const CopyableRow: FC<IProps> = ({ value, onCopySuccessMessage }) => {
+interface IProps extends ICopyButtonProps {
+  displayText?: string;
+}
+
+export const CopyableRow: FC<IProps> = ({ value, onCopySuccessMessage, displayText }) => {
   return (
     <div
       className={
-        'flex flex-row gap-2.5 bg-surface-raised py-2 px-3 rounded-xl items-center'
+        'copyable-row'
       }
     >
-      <p className={'text-sm text-text-secondary'}>{value}</p>
+      <p className={'text-sm text-text-secondary'}>{displayText ?? value}</p>
       <CopyButton value={value} onCopySuccessMessage={onCopySuccessMessage} />
     </div>
   );
