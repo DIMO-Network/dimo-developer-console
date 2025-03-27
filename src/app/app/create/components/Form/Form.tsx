@@ -88,7 +88,6 @@ export const Form: FC<IProps> = ({ onSuccess }) => {
   if (isLoading) {
     return (
       <div className={'flex flex-col flex-1 items-center gap-2'}>
-        {/*<Loading className={'!h-9 !w-9 text-primary-200'} />*/}
         <BubbleLoader isLoading={true} />
         <p className={'text-base font-bold text-center'}>
           {loadingStatus?.label ?? 'Loading'}

@@ -4,17 +4,17 @@ import classnames from 'classnames';
 
 interface IProps {
   isLoading: boolean;
-  size?: number;
+  isSmall?: boolean;
 }
 
-export const BubbleLoader: FC<IProps> = ({ isLoading, size = 4 }) => {
+export const BubbleLoader: FC<IProps> = ({ isLoading, isSmall = false }) => {
   return (
     <>
       {isLoading && (
         <div className="bubble-loader">
-          <div className={classnames('bubble bubble-1', `!w-${size} !h-${size}`)}></div>
-          <div className={classnames('bubble bubble-2', `!w-${size} !h-${size}`)}></div>
-          <div className={classnames('bubble bubble-3', `!w-${size} !h-${size}`)}></div>
+          <div className={classnames('bubble bubble-1', isSmall && `!w-2 !h-2`)}></div>
+          <div className={classnames('bubble bubble-2', isSmall && `!w-2 !h-2`)}></div>
+          <div className={classnames('bubble bubble-3', isSmall && `!w-2 !h-2`)}></div>
         </div>
       )}
     </>

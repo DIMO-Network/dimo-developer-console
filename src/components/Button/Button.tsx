@@ -30,7 +30,7 @@ export const Button: FC<ButtonProps> = ({
 
   return (
     <button {...props} onClick={handleClick} className={className}>
-      {loading && <BubbleLoader size={2} isLoading />}
+      {loading && <BubbleLoader isSmall isLoading />}
       {!loading && <span className="content">{children}</span>}
     </button>
   );
