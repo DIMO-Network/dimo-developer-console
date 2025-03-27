@@ -9,11 +9,7 @@ interface IProps extends ICopyButtonProps {
 
 export const CopyableRow: FC<IProps> = ({ value, onCopySuccessMessage, displayText }) => {
   return (
-    <div
-      className={
-        'copyable-row'
-      }
-    >
+    <div className={'copyable-row'}>
       <p className={'text-sm text-text-secondary'}>{displayText ?? value}</p>
       <CopyButton value={value} onCopySuccessMessage={onCopySuccessMessage} />
     </div>

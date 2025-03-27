@@ -6,7 +6,7 @@ import { Loading } from '@/components/Loading';
 import { Modal } from '@/components/Modal';
 
 import './LoadingModal.css';
-import {BubbleLoader} from "@/components/BubbleLoader";
+import { BubbleLoader } from '@/components/BubbleLoader';
 
 export interface LoadingProps {
   label?: string;

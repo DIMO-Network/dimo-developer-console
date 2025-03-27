@@ -6,7 +6,7 @@ import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
 
 import './APIKeyModal.css';
-import {CopyableRow} from "@/components/CopyableRow";
+import { CopyableRow } from '@/components/CopyableRow';
 
 interface Props {
   isOpen: boolean;
@@ -41,7 +41,11 @@ export const APIKeyModal: FC<Props> = ({ isOpen, apiKey, onClose }) => {
           <p className={'text-sm'}>
             Make sure to copy your API key now as you will not be able to see this again.
           </p>
-          <CopyableRow value={apiKey} displayText={text} onCopySuccessMessage={'API key copied!'} />
+          <CopyableRow
+            value={apiKey}
+            displayText={text}
+            onCopySuccessMessage={'API key copied!'}
+          />
         </div>
         <div className={'mt-4 flex flex-col flex-1 gap-4'}>
           <Button className={'w-full primary-outline'} onClick={onClose}>
