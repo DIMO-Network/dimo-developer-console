@@ -28,6 +28,7 @@ export const Header: FC = () => {
   };
 
   const handleOpenAccountInformationModal = () => {
+    console.log('CALLED THIS!!!!');
     setShowAccountInformation(true);
   };
 

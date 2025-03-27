@@ -23,6 +23,7 @@ export const View: FC = () => {
   const { balance } = useOnboarding();
   const { user } = useUser();
   const { currentUser } = useGlobalAccount();
+  console.log(currentUser);
   const { data, error, loading } = useQuery(GET_DEVELOPER_LICENSES_BY_OWNER, {
     variables: { owner: currentUser?.smartContractAddress ?? '' },
     skip: !currentUser?.smartContractAddress,
