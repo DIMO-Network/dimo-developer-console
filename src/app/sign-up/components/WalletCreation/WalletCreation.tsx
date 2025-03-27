@@ -10,7 +10,7 @@ import { useSearchParams } from 'next/navigation';
 import { IPasskeyAttestation } from '@/types/wallet';
 import { OtpSignup } from './OtpSignup';
 import { isNull } from 'lodash';
-import { createNewUser } from '@/services/user';
+import { createNewUser } from "@/app/sign-up/actions";
 
 interface IProps {
   auth?: Partial<IAuth>;

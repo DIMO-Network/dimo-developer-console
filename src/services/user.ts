@@ -1,6 +1,5 @@
 import { IUser } from '@/types/user';
 import { dimoDevAPIClient, getCookie } from '@/services/dimoDevAPI';
-import { IAuth } from '@/types/auth';
 
 export const getUserByToken = async () => {
   const client = await dimoDevAPIClient();
@@ -32,11 +31,5 @@ export const existUserByEmailOrAddress = async (item: string | null) => {
       item,
     },
   });
-  return data;
-};
-
-export const createNewUser = async (user: Partial<IAuth>) => {
-  const client = await dimoDevAPIClient();
-  const { data } = await client.post<IUser>('/api/user', user);
   return data;
 };
