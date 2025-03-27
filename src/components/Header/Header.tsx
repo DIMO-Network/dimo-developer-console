@@ -1,7 +1,7 @@
 import { useContext, type FC, useState, useEffect } from 'react';
 
 import { CreditsContext } from '@/context/creditsContext';
-import { PlusIcon, WalletIcon } from '@/components/Icons';
+import { PlusIcon } from '@/components/Icons';
 import { EyeIcon } from '@heroicons/react/24/outline';
 import { UserAvatar } from '@/components/UserAvatar';
 
@@ -51,17 +51,6 @@ export const Header: FC = () => {
     <header className="header">
       <p className="page-title">{getPageTitle(pathname) ?? ''}</p>
       <div className="user-information" role="user-information">
-        <button
-          title="Account Information"
-          className="account-information"
-          onClick={
-            isOwner(currentUser?.role ?? '')
-              ? handleOpenAccountInformationModal
-              : undefined
-          }
-        >
-          <WalletIcon className="h-4 w-4" />
-        </button>
         <div className="credits" role="credits-display">
           <div className="credits-info">
             <p className="credit-amount">{dcxBalance}</p>
@@ -80,7 +69,16 @@ export const Header: FC = () => {
             {!isOwner(currentUser?.role ?? '') && <EyeIcon className="h-4 w-4" />}
           </button>
         </div>
-        <UserAvatar name={user?.name ?? ''} />
+        <button
+          title="Account Information"
+          onClick={
+            isOwner(currentUser?.role ?? '')
+              ? handleOpenAccountInformationModal
+              : undefined
+          }
+        >
+          <UserAvatar name={user?.name ?? ''} />
+        </button>
       </div>
     </header>
   );

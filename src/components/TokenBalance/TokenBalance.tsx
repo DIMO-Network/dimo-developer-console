@@ -4,6 +4,8 @@ import {
   formatSimpleBalance,
   formatSimpleBalanceWithDigits,
 } from '@/utils/formatBalance';
+import classNames from 'classnames';
+import { Button } from '@/components/Button';
 
 interface IProps {
   token: string;
@@ -11,6 +13,7 @@ interface IProps {
   basePrice: number;
   canBuy: boolean;
   openBuyModal?: () => void;
+  iconClassName?: string;
 }
 
 export const TokenBalance = ({
@@ -19,31 +22,45 @@ export const TokenBalance = ({
   basePrice,
   canBuy,
   openBuyModal,
+  iconClassName,
 }: IProps) => {
   return (
     <div className="token-balance">
-      <div className="token-balance__icon">
-        <img alt={token} src={`/images/${token}_token_icon.svg`} />
-      </div>
-      <div className="token-balance__balance">
-        <div className="token-balance__balance-container">
-          <span className="text-sm font-bold">
-            {formatSimpleBalance(balance * basePrice)} USD
-          </span>
-          <span className="text-sm ">{`${formatSimpleBalanceWithDigits(balance, 3)} ${token.toUpperCase()}`}</span>
+      <div className={'flex flex-row gap-4 items-center'}>
+        <div className={classNames('token-balance__icon', iconClassName)}>
+          <img alt={token} src={`/images/${token}_token_icon.svg`} />
+        </div>
+        <div className="token-balance__balance">
+          <BalanceDisplay
+            balance={formatSimpleBalanceWithDigits(balance, 3)}
+            unitsDisplay={token.toUpperCase()}
+          />
+          <BalanceDisplay
+            balance={formatSimpleBalance(balance * basePrice)}
+            unitsDisplay={'USD'}
+          />
         </div>
       </div>
       {canBuy && (
-        <button
-          title="Buy DCX"
-          className="token-balance__buy-button"
-          onClick={openBuyModal}
-        >
-          <BuyDcxIcon />
-        </button>
+        <Button title="Buy DCX" className="dark" onClick={openBuyModal}>
+          Buy DCX
+        </Button>
       )}
     </div>
   );
 };
+
+const BalanceDisplay = ({
+  balance,
+  unitsDisplay,
+}: {
+  balance: string;
+  unitsDisplay: string;
+}) => (
+  <div className={'flex flex-row items-center gap-2'}>
+    <p className={'text-3xl font-medium'}>{balance}</p>
+    <p className={'text-base font-medium text-text-secondary'}>{unitsDisplay}</p>
+  </div>
+);
 
 export default TokenBalance;
