@@ -1,6 +1,6 @@
 import { type FC } from 'react';
 import './BubbleLoader.css';
-import classnames from 'classnames';
+import classnames from "classnames";
 
 interface IProps {
   isLoading: boolean;
