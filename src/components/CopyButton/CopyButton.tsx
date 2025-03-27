@@ -3,7 +3,6 @@ import { ContentCopyIcon } from '@/components/Icons';
 import { FC, useContext, useState } from 'react';
 import { NotificationContext } from '@/context/notificationContext';
 import classnames from 'classnames';
-import { Button } from '@/components/Button';
 
 export interface ICopyButtonProps {
   value: string;
