@@ -141,7 +141,14 @@ export const withGlobalAccounts = <P extends object>(
         return;
       }
 
-      const { subOrganizationId, email, token } = session;
+      const { subOrganizationId, email, token, expiry } = session;
+
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+
+      if (expiry < nowInSeconds) {
+        await logout();
+        return;
+      }
 
       const client = getTurnkeyClient({ authKey: token, eKey: eKey });
 
