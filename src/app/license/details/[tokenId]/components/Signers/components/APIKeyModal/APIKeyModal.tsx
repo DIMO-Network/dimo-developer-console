@@ -1,13 +1,12 @@
-import { FC, useContext } from 'react';
+import { FC } from 'react';
 import { maskStringV2 } from 'maskdata';
 
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
-import { ContentCopyIcon } from '@/components/Icons';
-import { NotificationContext } from '@/context/notificationContext';
 
 import './APIKeyModal.css';
+import { CopyableRow } from '@/components/CopyableRow';
 
 interface Props {
   isOpen: boolean;
@@ -42,7 +41,11 @@ export const APIKeyModal: FC<Props> = ({ isOpen, apiKey, onClose }) => {
           <p className={'text-sm'}>
             Make sure to copy your API key now as you will not be able to see this again.
           </p>
-          <CopyableApiKey text={text} value={apiKey} />
+          <CopyableRow
+            value={apiKey}
+            displayText={text}
+            onCopySuccessMessage={'API key copied!'}
+          />
         </div>
         <div className={'mt-4 flex flex-col flex-1 gap-4'}>
           <Button className={'w-full primary-outline'} onClick={onClose}>
@@ -51,28 +54,5 @@ export const APIKeyModal: FC<Props> = ({ isOpen, apiKey, onClose }) => {
         </div>
       </div>
     </Modal>
-  );
-};
-
-const CopyableApiKey = ({ value, text }: { value: string; text: string }) => {
-  const { setNotification } = useContext(NotificationContext);
-
-  const handleCopy = (valueToCopy: string) => {
-    void navigator.clipboard.writeText(valueToCopy);
-    setNotification('API Key copied', 'Success!', 'success');
-  };
-
-  return (
-    <div
-      className={
-        'flex flex-row gap-2.5 bg-surface-raised py-2 px-3 rounded-xl items-center max-w-full'
-      }
-    >
-      <p className={'text-base text-text-secondary line-clamp-1'}>{text}</p>
-      <ContentCopyIcon
-        className="w5 h-5 fill-white/50 cursor-pointer"
-        onClick={() => handleCopy(value)}
-      />
-    </div>
   );
 };

@@ -5,6 +5,13 @@
     @apply bg-feedback-success;
   }
 
+  &.error {
+    @apply bg-feedback-error;
+  }
+
+  &.info {
+  }
+
   &-content {
     @apply flex items-start p-4;
 
@@ -22,14 +29,14 @@
   }
 
   &-description {
-    @apply mt-1 text-sm text-gray-500;
+    @apply text-sm text-white;
   }
 
   &-close-content {
     @apply ml-4 flex flex-shrink-0;
 
     .toast-close-btn {
-      @apply inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
+      @apply inline-flex focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
     }
   }
 }

@@ -5,11 +5,12 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { Table } from '@/components/Table';
 import { useSetRedirectUri } from '@/hooks';
 import { Button } from '@/components/Button';
-import { ContentCopyIcon } from '@/components/Icons';
-import { NotificationContext } from '@/context/notificationContext';
 import { DeleteConfirmationModal } from '../DeleteConfirmationModal';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { withLoadingStatus } from '@/hoc';
+import { CopyButton } from '@/components/CopyButton';
+
+import '@/components/Button/Button.css';
 
 interface RedirectUri {
   uri: string;
@@ -29,7 +30,6 @@ const RedirectUriListComponent: FC<IProps> = ({
   isOwner,
 }) => {
   const { setLoadingStatus } = useContext(LoadingStatusContext);
-  const { setNotification } = useContext(NotificationContext);
   const [uriToDelete, setUriToDelete] = useState<string>();
 
   const setRedirectUri = useSetRedirectUri(tokenId);
@@ -59,11 +59,6 @@ const RedirectUriListComponent: FC<IProps> = ({
     }
   };
 
-  const handleCopy = (value: string) => {
-    void navigator.clipboard.writeText(value);
-    setNotification('Redirect URI copied!', 'Success', 'info');
-  };
-
   const onConfirmDelete = () => {
     if (!uriToDelete) {
       throw new Error('No uri to delete');
@@ -72,17 +67,13 @@ const RedirectUriListComponent: FC<IProps> = ({
     setUriToDelete(undefined);
   };
 
-  const renderCopyRedirectUriAction = ({ uri }: RedirectUri, index: number) => {
+  const renderCopyRedirectUriAction = ({ uri }: RedirectUri) => {
     return (
-      <Button
-        className={'table-action-button'}
-        title="Copy Redirect URI"
-        key={`copy-redirect-uri-action-${index}`}
-        type={'button'}
-        onClick={() => handleCopy(uri)}
-      >
-        <ContentCopyIcon className="w-4 h-4 fill-text-secondary cursor-pointer" />
-      </Button>
+      <CopyButton
+        value={uri}
+        onCopySuccessMessage={'Redirect URI copied!'}
+        className={'button table-action-button'}
+      />
     );
   };
 

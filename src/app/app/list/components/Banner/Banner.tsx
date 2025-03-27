@@ -19,6 +19,7 @@ interface Props {
 
 export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
   const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
+
   return (
     <div className="banner-content">
       <div>

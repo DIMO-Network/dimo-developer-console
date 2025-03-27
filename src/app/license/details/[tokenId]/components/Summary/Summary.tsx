@@ -21,7 +21,7 @@ export const Summary: FC<Props> = ({ licenseSummary, refetch }) => {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="inline-flex flex-col gap-2">
       <AliasAndTokenId
         tokenId={license.tokenId}
         alias={license.alias}
