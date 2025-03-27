@@ -1,25 +1,9 @@
-import { FC, useContext } from 'react';
-import { ContentCopyIcon } from '@/components/Icons';
-import { NotificationContext } from '@/context/notificationContext';
+import { FC } from 'react';
+import { CopyButton, ICopyButtonProps } from '@/components/CopyButton/CopyButton';
 
-interface IProps {
-  value: string;
-  onCopySuccessMessage?: string;
-}
+interface IProps extends ICopyButtonProps {}
 
 export const CopyableRow: FC<IProps> = ({ value, onCopySuccessMessage }) => {
-  const { setNotification } = useContext(NotificationContext);
-
-  const handleCopy = (copiedValue: string) => {
-    void navigator.clipboard.writeText(copiedValue);
-    setNotification(
-      onCopySuccessMessage ?? 'Value copied to clipboard',
-      'Success',
-      'success',
-      1000,
-    );
-  };
-
   return (
     <div
       className={
@@ -27,10 +11,7 @@ export const CopyableRow: FC<IProps> = ({ value, onCopySuccessMessage }) => {
       }
     >
       <p className={'text-sm text-text-secondary'}>{value}</p>
-      <ContentCopyIcon
-        className="w5 h-5 fill-white/50 cursor-pointer"
-        onClick={() => handleCopy(value)}
-      />
+      <CopyButton value={value} onCopySuccessMessage={onCopySuccessMessage} />
     </div>
   );
 };
