@@ -18,7 +18,7 @@ import './AccountInformationModal.css';
 import { CreditsContext } from '@/context/creditsContext';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import {Button} from "@/components/Button";
+import { Button } from '@/components/Button';
 
 export const AccountInformationModal: FC = () => {
   const { setNotification } = useContext(NotificationContext);
@@ -86,7 +86,9 @@ export const AccountInformationModal: FC = () => {
               <Label htmlFor="email" className="text-xs text-medium">
                 Owner Email
               </Label>
-              <p className={'text-text-secondary text-base'}>{currentUser?.email ?? ''}</p>
+              <p className={'text-text-secondary text-base'}>
+                {currentUser?.email ?? ''}
+              </p>
             </div>
             <div className="account-information-row">
               <Label htmlFor="email" className="text-xs text-medium">
@@ -112,7 +114,7 @@ export const AccountInformationModal: FC = () => {
           <div className="balances">
             {isLoadingBalances && (
               <>
-                <BubbleLoader isLoading={isLoadingBalances}/>
+                <BubbleLoader isLoading={isLoadingBalances} />
                 <p className="loading-text">Loading your balances...</p>
               </>
             )}
@@ -136,7 +138,10 @@ export const AccountInformationModal: FC = () => {
             )}
           </div>
         </div>
-        <Button className={'primary-outline'} onClick={() => setShowAccountInformation(false)}>
+        <Button
+          className={'primary-outline'}
+          onClick={() => setShowAccountInformation(false)}
+        >
           Close
         </Button>
       </div>

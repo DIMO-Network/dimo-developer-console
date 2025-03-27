@@ -16,7 +16,9 @@ const View = withNotifications(
   withGlobalAccounts(
     withCredits(
       withApollo(
-        withAccountInformation(({ children }: { children: React.ReactNode }) => <>{children}</>),
+        withAccountInformation(({ children }: { children: React.ReactNode }) => (
+          <>{children}</>
+        )),
       ),
     ),
   ),

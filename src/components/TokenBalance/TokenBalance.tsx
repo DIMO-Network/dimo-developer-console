@@ -4,8 +4,8 @@ import {
   formatSimpleBalance,
   formatSimpleBalanceWithDigits,
 } from '@/utils/formatBalance';
-import classNames from "classnames";
-import {Button} from "@/components/Button";
+import classNames from 'classnames';
+import { Button } from '@/components/Button';
 
 interface IProps {
   token: string;
@@ -42,11 +42,7 @@ export const TokenBalance = ({
         </div>
       </div>
       {canBuy && (
-        <Button
-          title="Buy DCX"
-          className="dark"
-          onClick={openBuyModal}
-        >
+        <Button title="Buy DCX" className="dark" onClick={openBuyModal}>
           Buy DCX
         </Button>
       )}
