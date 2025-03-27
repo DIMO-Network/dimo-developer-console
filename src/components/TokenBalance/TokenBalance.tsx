@@ -1,5 +1,4 @@
 import './TokenBalance.css';
-import { BuyDcxIcon } from '@/components/Icons';
 import {
   formatSimpleBalance,
   formatSimpleBalanceWithDigits,

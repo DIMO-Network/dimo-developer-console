@@ -7,6 +7,7 @@ import { IAuth } from '@/types/auth';
 import { useAuth, useErrorHandler, usePasskey } from '@/hooks';
 import { withNotifications } from '@/hoc';
 import { NotificationContext } from '@/context/notificationContext';
+import Image from 'next/image';
 
 import './View.css';
 import * as Sentry from '@sentry/nextjs';
@@ -142,7 +143,7 @@ export const View = () => {
   return (
     <main className="sign-in">
       <div className="sign-in__content">
-        <img src={'/images/dimo-dev.svg'} alt="DIMO Logo" />
+        <Image src={'/images/dimo-dev.svg'} alt="DIMO Logo" width={210} height={32} />
         <SignInForm
           currentEmail={signInProcess.email}
           type={signInProcess.signInType}
@@ -175,7 +176,7 @@ export const View = () => {
         </div>
       </div>
       <div className="sign-in__background">
-        <img src={'/images/car_segment.svg'} alt="DIMO Background" />
+        <Image src={'/images/car_segment.svg'} alt="DIMO Background" width="684" height="832"/>
       </div>
     </main>
   );
