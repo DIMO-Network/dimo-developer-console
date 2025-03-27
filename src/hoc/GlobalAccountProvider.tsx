@@ -23,12 +23,14 @@ import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import { TeamRoles } from '@/types/team';
 import { signOut } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
+import { useRouter } from 'next/navigation';
 
 export const withGlobalAccounts = <P extends object>(
   WrappedComponent: ComponentType<P>,
 ) => {
   const HOC: React.FC<P> = (props) => {
     const [user, setUser] = useState<IUserSession | null>(null);
+    const router = useRouter();
 
     const validateCurrentSession = async (): Promise<IUserSession | null> => {
       if (!user) return null;
@@ -179,6 +181,8 @@ export const withGlobalAccounts = <P extends object>(
       turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
+
+      router.replace('/sign-in');
     };
 
     useEffect(() => {
