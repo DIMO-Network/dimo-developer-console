@@ -19,9 +19,7 @@ import { CreditsContext } from '@/context/creditsContext';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { BubbleLoader } from '@/components/BubbleLoader';
 
-interface IProps {}
-
-export const AccountInformationModal: FC<IProps> = () => {
+export const AccountInformationModal: FC = () => {
   const { setNotification } = useContext(NotificationContext);
   const { setIsOpen } = useContext(CreditsContext);
   const { showAccountInformation, setShowAccountInformation } = useContext(
@@ -82,40 +80,38 @@ export const AccountInformationModal: FC<IProps> = () => {
           </Title>
         </div>
         <div className="account-information-body">
-          <div className="account-information-row">
-            <Label htmlFor="email" className="text-xs text-medium">
-              Owner Email
-              <TextField
-                name="email"
-                type="text"
-                readOnly={true}
-                value={get(currentUser, 'email', '')}
-              />
-            </Label>
+          <div className={'flex flex-col gap-4 p-4 bg-surface-default rounded-2xl'}>
+            <div className="account-information-row">
+              <Label htmlFor="email" className="text-xs text-medium">
+                Owner Email
+              </Label>
+              <p className={'text-text-secondary text-base'}>{currentUser?.email ?? ''}</p>
+            </div>
+            <div className="account-information-row">
+              <Label htmlFor="email" className="text-xs text-medium">
+                Organization Wallet Address
+                <TextField
+                  name="wallet"
+                  type="text"
+                  readOnly={true}
+                  value={get(currentUser, 'smartContractAddress', '')}
+                  action={
+                    <ContentCopyIcon
+                      className="w5 h-5 fill-white/50 cursor-pointer"
+                      onClick={() =>
+                        handleCopy(get(currentUser, 'smartContractAddress', ''))
+                      }
+                    />
+                  }
+                />
+              </Label>
+            </div>
           </div>
-          <div className="account-information-row">
-            <Label htmlFor="email" className="text-xs text-medium">
-              Organization Wallet Address
-              <TextField
-                name="wallet"
-                type="text"
-                readOnly={true}
-                value={get(currentUser, 'smartContractAddress', '')}
-                action={
-                  <ContentCopyIcon
-                    className="w5 h-5 fill-white/50 cursor-pointer"
-                    onClick={() =>
-                      handleCopy(get(currentUser, 'smartContractAddress', ''))
-                    }
-                  />
-                }
-              />
-            </Label>
-          </div>
+
           <div className="balances">
             {isLoadingBalances && (
               <>
-                <BubbleLoader isLoading={isLoadingBalances} />
+                <BubbleLoader isLoading={isLoadingBalances}/>
                 <p className="loading-text">Loading your balances...</p>
               </>
             )}
@@ -133,6 +129,7 @@ export const AccountInformationModal: FC<IProps> = () => {
                   basePrice={0.001}
                   canBuy={balance.dcxBalance < config.MINIMUM_CREDITS}
                   openBuyModal={handleOpenBuyCreditsModal}
+                  iconClassName={'border border-[#E80303]'}
                 />
               </>
             )}
@@ -142,5 +139,3 @@ export const AccountInformationModal: FC<IProps> = () => {
     </Modal>
   );
 };
-
-export default AccountInformationModal;

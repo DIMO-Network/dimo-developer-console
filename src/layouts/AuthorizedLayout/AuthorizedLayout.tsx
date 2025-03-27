@@ -14,9 +14,9 @@ import './AuthorizedLayout.css';
 
 const View = withNotifications(
   withGlobalAccounts(
-    withAccountInformation(
+    withCredits(
       withApollo(
-        withCredits(({ children }: { children: React.ReactNode }) => <>{children}</>),
+        withAccountInformation(({ children }: { children: React.ReactNode }) => <>{children}</>),
       ),
     ),
   ),

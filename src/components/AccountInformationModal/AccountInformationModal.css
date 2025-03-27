@@ -1,19 +1,19 @@
 .account-information-modal {
   .dialog-panel {
-    @apply !max-w-5xl;
+    @apply min-w-[95vw] min-h-[95vh] ml-auto mr-auto my-auto md:m-auto md:h-auto md:min-w-[480px] md:min-h-0;
   }
 
   .account-information-content {
-    @apply flex flex-col justify-center  items-center gap-y-4 pb-8  ml-auto mr-auto;
+    @apply flex flex-col justify-center gap-12 flex-1;
 
     .account-information-header {
-      @apply flex flex-col gap-2 text-center relative pt-8 pb-4 px-2 font-bold;
+      @apply flex flex-col gap-2 relative font-bold;
     }
 
     .account-information-body {
       @apply w-full flex flex-col gap-y-4;
       .account-information-row {
-        @apply w-full flex flex-col pr-10 gap-x-4;
+        @apply w-full flex flex-col gap-2;
       }
 
       .balances {
