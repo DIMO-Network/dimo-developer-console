@@ -15,8 +15,8 @@ import { TextField } from '@/components/TextField';
 import { useGlobalAccount, usePayLicenseFee, useMintLicense } from '@/hooks';
 
 import configuration from '@/config';
-import { Loading } from '@/components/Loading';
 import './Form.css';
+import { BubbleLoader } from '@/components/BubbleLoader';
 
 interface IProps {
   workspace?: IWorkspace;
@@ -88,7 +88,8 @@ export const Form: FC<IProps> = ({ onSuccess }) => {
   if (isLoading) {
     return (
       <div className={'flex flex-col flex-1 items-center gap-2'}>
-        <Loading className={'!h-9 !w-9 text-primary-200'} />
+        {/*<Loading className={'!h-9 !w-9 text-primary-200'} />*/}
+        <BubbleLoader isLoading={true} />
         <p className={'text-base font-bold text-center'}>
           {loadingStatus?.label ?? 'Loading'}
         </p>
@@ -126,7 +127,7 @@ export const Form: FC<IProps> = ({ onSuccess }) => {
           role="continue-button"
           loading={isLoading}
         >
-          Create application
+          Create
         </Button>
         <Button
           type="reset"
