@@ -1,15 +1,23 @@
 'use client';
 import React, { useState } from 'react';
 import { MenuButton } from '@/components/Menu/MenuButton';
-import { withCredits, withNotifications, withGlobalAccounts, withApollo } from '@/hoc';
+import {
+  withCredits,
+  withNotifications,
+  withGlobalAccounts,
+  withApollo,
+  withAccountInformation,
+} from '@/hoc';
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
 import './AuthorizedLayout.css';
 
 const View = withNotifications(
   withGlobalAccounts(
-    withApollo(
-      withCredits(({ children }: { children: React.ReactNode }) => <>{children}</>),
+    withAccountInformation(
+      withApollo(
+        withCredits(({ children }: { children: React.ReactNode }) => <>{children}</>),
+      ),
     ),
   ),
 );
