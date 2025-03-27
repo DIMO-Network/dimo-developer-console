@@ -110,7 +110,6 @@ export const AccountInformationModal: FC = () => {
               </Label>
             </div>
           </div>
-
           <div className="balances">
             {isLoadingBalances && (
               <>
