@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import { MenuButton } from '@/components/Menu/MenuButton';
 import {
   withCredits,
@@ -7,18 +7,22 @@ import {
   withGlobalAccounts,
   withApollo,
   withAccountInformation,
+  withLayout,
 } from '@/hoc';
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
 import './AuthorizedLayout.css';
+import { FullScreenMenu } from '@/components/Menu/FullScreenMenu';
 
-const View = withNotifications(
+const Providers = withNotifications(
   withGlobalAccounts(
-    withCredits(
-      withApollo(
-        withAccountInformation(({ children }: { children: React.ReactNode }) => (
-          <>{children}</>
-        )),
+    withLayout(
+      withCredits(
+        withApollo(
+          withAccountInformation(({ children }: { children: React.ReactNode }) => (
+            <>{children}</>
+          )),
+        ),
       ),
     ),
   ),
@@ -29,30 +33,30 @@ export const AuthorizedLayout = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  const [isFullMenuOpen, setIsFullMenuOpen] = useState(false);
   return (
-    <View>
-      <div className="main">
-        <div className="sidebar-container">
-          <Menu />
-        </div>
-        <div className="app-content">
-          <div className="header-container">
-            <div className="menu-header-button">
-              <MenuButton onClick={() => setIsFullMenuOpen(true)} />
-            </div>
-            <Header />
-          </div>
-          {isFullMenuOpen && (
-            <div className={'full-screen-menu-container'}>
-              <Menu onClose={() => setIsFullMenuOpen(false)} />
-            </div>
-          )}
+    <Providers>
+      <Layout>{children}</Layout>
+    </Providers>
+  );
+};
 
-          <main className="page-content">{children}</main>
-        </div>
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="main">
+      <div className="sidebar-container">
+        <Menu />
       </div>
-    </View>
+      <div className="app-content">
+        <div className="header-container">
+          <div className="menu-header-button">
+            <MenuButton />
+          </div>
+          <Header />
+        </div>
+        <FullScreenMenu />
+        <main className="page-content">{children}</main>
+      </div>
+    </div>
   );
 };
 

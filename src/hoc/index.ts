@@ -5,3 +5,4 @@ export * from './GlobalAccountProvider';
 export * from './withApollo';
 export * from './withLoadingStatus';
 export * from './withAccountInformation';
+export * from './withLayout';

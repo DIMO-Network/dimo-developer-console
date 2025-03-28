@@ -197,7 +197,6 @@ export const withGlobalAccounts = <P extends object>(
       turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
-
       router.replace('/sign-in');
     };
 
