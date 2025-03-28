@@ -6,8 +6,6 @@ import {
   SummarizeIcon,
   SupportAgentIcon,
 } from '@/components/Icons';
-import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline';
-import { FC } from 'react';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;

@@ -5,9 +5,9 @@ import { LayoutContext } from '@/context/LayoutContext';
 export const MenuButton: FC = () => {
   const { setIsFullScreenMenuOpen } = useContext(LayoutContext);
   const onPress = () => {
-    console.log('this was called');
     setIsFullScreenMenuOpen(true);
   };
+
   return (
     <button
       className={
