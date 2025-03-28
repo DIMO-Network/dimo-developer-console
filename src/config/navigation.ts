@@ -1,6 +1,3 @@
-import { type FC } from 'react';
-import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline';
-
 import {
   HomeIcon,
   IntegrationIcon,
@@ -9,10 +6,8 @@ import {
   SummarizeIcon,
   SupportAgentIcon,
 } from '@/components/Icons';
-import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage';
-import { turnkeyClient } from './turnkey';
-import { removeFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
-import { signOut } from '@/actions/user';
+import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline';
+import { FC } from 'react';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
@@ -76,20 +71,6 @@ export const mainMenu = [
 ];
 
 export const bottomMenu = [
-  {
-    label: 'Logout',
-    icon: ArrowLeftStartOnRectangleIcon as FC,
-    iconClassName: 'h-5 w-5 fill-grey-200',
-    link: () => {
-      console.log('CALLING THIS');
-      signOut();
-      turnkeyClient.logout();
-      removeFromSession(GlobalAccountSession);
-      removeFromLocalStorage(EmbeddedKey);
-    },
-    external: false,
-    disabled: false,
-  },
   {
     label: 'Settings',
     icon: SettingsIcon,

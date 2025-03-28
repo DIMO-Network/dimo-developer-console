@@ -14,10 +14,6 @@
   @apply md:hidden;
 }
 
-.full-screen-menu-container {
-  @apply fixed flex inset-y-0 left-0 w-screen bg-surface-default text-white z-50 transition-transform md:hidden;
-}
-
 .app-content {
   height: calc(100vh - 80px);
   @apply flex flex-col flex-1;
