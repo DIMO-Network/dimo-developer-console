@@ -15,7 +15,7 @@
     "test": "jest",
     "test:update-snap": "jest -u",
     "test:watch": "jest --watch",
-    "compile": "graphql-codegen"
+    "compile": "graphql-codegen --config src/codegen.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.13.4",

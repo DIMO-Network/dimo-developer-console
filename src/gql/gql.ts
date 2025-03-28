@@ -22,7 +22,7 @@ type Documents = {
     "\n  query GetVehicleCountByClientId($clientId:Address!) {\n    vehicles(first:0, filterBy:{privileged:$clientId}) {\n      totalCount\n    }\n  }\n": typeof types.GetVehicleCountByClientIdDocument,
     "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n      ...RedirectUriFragment\n      ...DeveloperLicenseVehiclesFragment\n    }\n  }\n": typeof types.GetDeveloperLicenseDocument,
     "\n  fragment DeveloperLicenseSummariesOnConnection on DeveloperLicenseConnection {\n    nodes {\n      ...DeveloperLicenseSummaryFragment\n    }\n  }\n": typeof types.DeveloperLicenseSummariesOnConnectionFragmentDoc,
-    "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n  }\n": typeof types.DeveloperLicenseSummaryFragmentFragmentDoc,
+    "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n    mintedAt\n  }\n": typeof types.DeveloperLicenseSummaryFragmentFragmentDoc,
 };
 const documents: Documents = {
     "\n  fragment TotalDeveloperLicenseCountFragment on DeveloperLicenseConnection {\n    totalCount\n  }\n": types.TotalDeveloperLicenseCountFragmentFragmentDoc,
@@ -33,7 +33,7 @@ const documents: Documents = {
     "\n  query GetVehicleCountByClientId($clientId:Address!) {\n    vehicles(first:0, filterBy:{privileged:$clientId}) {\n      totalCount\n    }\n  }\n": types.GetVehicleCountByClientIdDocument,
     "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n      ...RedirectUriFragment\n      ...DeveloperLicenseVehiclesFragment\n    }\n  }\n": types.GetDeveloperLicenseDocument,
     "\n  fragment DeveloperLicenseSummariesOnConnection on DeveloperLicenseConnection {\n    nodes {\n      ...DeveloperLicenseSummaryFragment\n    }\n  }\n": types.DeveloperLicenseSummariesOnConnectionFragmentDoc,
-    "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n  }\n": types.DeveloperLicenseSummaryFragmentFragmentDoc,
+    "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n    mintedAt\n  }\n": types.DeveloperLicenseSummaryFragmentFragmentDoc,
 };
 
 /**
@@ -85,7 +85,7 @@ export function gql(source: "\n  fragment DeveloperLicenseSummariesOnConnection 
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n  }\n"): (typeof documents)["\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n  }\n"];
+export function gql(source: "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n    mintedAt\n  }\n"): (typeof documents)["\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n    mintedAt\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

@@ -1,16 +1,12 @@
 import { CodegenConfig } from '@graphql-codegen/cli';
-
-const URL =
-  process.env.VERCEL_ENV === 'production'
-    ? 'https://identity-api.dimo.zone/query'
-    : 'https://identity-api.dev.dimo.zone/query';
+import appConfig from './config';
 
 const config: CodegenConfig = {
-  schema: URL,
+  schema: appConfig.identityApiUrl,
   // this assumes that all your source files are in a top-level `src/` directory - you might need to adjust this to your file structure
   documents: ['src/**/*.{ts,tsx}'],
   generates: {
-    './src/gql/': {
+    'src/gql/': {
       preset: 'client',
       plugins: [],
       presetConfig: {
