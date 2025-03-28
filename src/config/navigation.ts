@@ -81,6 +81,7 @@ export const bottomMenu = [
     icon: ArrowLeftStartOnRectangleIcon as FC,
     iconClassName: 'h-5 w-5 fill-grey-200',
     link: () => {
+      console.log('CALLING THIS');
       signOut();
       turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);

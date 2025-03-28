@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { type FC, useContext } from 'react';
 
 import { MenuItem } from '@/components/Menu/MenuItem';
 import { mainMenu, bottomMenu } from '@/config/navigation';
@@ -7,16 +7,17 @@ import './Menu.css';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { XMarkIcon } from '@heroicons/react/24/solid';
+import { LayoutContext } from '@/context/LayoutContext';
 
-interface Props {
-  onClose?: () => void;
-}
-
-export const Menu: FC<Props> = ({ onClose }) => {
+export const Menu: FC = () => {
+  const { isFullScreenMenuOpen, setIsFullScreenMenuOpen } = useContext(LayoutContext);
   const pathname = usePathname();
-  const handleClick = () => {
-    typeof onClose === 'function' ? onClose() : undefined;
+  const onClick = () => {
+    if (isFullScreenMenuOpen) {
+      setIsFullScreenMenuOpen(false);
+    }
   };
+
   return (
     <div className={'main-menu'}>
       <ul className="top-menu">
@@ -29,7 +30,7 @@ export const Menu: FC<Props> = ({ onClose }) => {
             className={'mb-10'}
           />
           <div className={'md:hidden'}>
-            <button onClick={onClose}>
+            <button onClick={() => setIsFullScreenMenuOpen(false)}>
               <XMarkIcon className={'size-6 text-white'} />
             </button>
           </div>
@@ -41,7 +42,7 @@ export const Menu: FC<Props> = ({ onClose }) => {
               key={item.link}
               {...item}
               isHighlighted={pathname === item.link}
-              onClick={handleClick}
+              onClick={onClick}
             />
           );
         })}
@@ -53,7 +54,7 @@ export const Menu: FC<Props> = ({ onClose }) => {
               key={item.label}
               {...item}
               isHighlighted={pathname === item.link}
-              onClick={handleClick}
+              onClick={onClick}
             />
           );
         })}

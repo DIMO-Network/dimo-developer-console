@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { type FC, PropsWithChildren } from 'react';
 
 import classNames from 'classnames';
 import Link from 'next/link';
@@ -27,6 +27,25 @@ export const MenuItem: FC<IProps> = ({
   isHighlighted,
   onClick,
 }) => {
+  const handleButtonClick = (linkFn: () => void) => {
+    linkFn();
+    onClick?.();
+  };
+
+  const Wrapper: FC<PropsWithChildren> = ({ children }) => {
+    if (typeof link === 'function') {
+      return <button onClick={() => handleButtonClick(link)}>{children}</button>;
+    }
+    return (
+      <Link
+        href={disabled ? '#' : link}
+        target={external ? '_blank' : '_self'}
+        onClick={onClick}
+      >
+        {children}
+      </Link>
+    );
+  };
   return (
     <li
       className={classNames({
@@ -35,13 +54,7 @@ export const MenuItem: FC<IProps> = ({
       })}
     >
       <Icon className={iconClassName} />
-      <Link
-        href={typeof link === 'string' && !disabled ? link : '#'}
-        target={external ? '_blank' : '_self'}
-        onClick={onClick}
-      >
-        {label}
-      </Link>
+      <Wrapper>{label}</Wrapper>
     </li>
   );
 };

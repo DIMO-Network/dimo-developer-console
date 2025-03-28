@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { MenuButton } from '@/components/Menu/MenuButton';
 import {
   withCredits,
@@ -7,18 +7,22 @@ import {
   withGlobalAccounts,
   withApollo,
   withAccountInformation,
+  withLayout,
 } from '@/hoc';
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
 import './AuthorizedLayout.css';
+import { LayoutContext } from '@/context/LayoutContext';
 
 const View = withNotifications(
   withGlobalAccounts(
-    withCredits(
-      withApollo(
-        withAccountInformation(({ children }: { children: React.ReactNode }) => (
-          <>{children}</>
-        )),
+    withLayout(
+      withCredits(
+        withApollo(
+          withAccountInformation(({ children }: { children: React.ReactNode }) => (
+            <>{children}</>
+          )),
+        ),
       ),
     ),
   ),
@@ -29,7 +33,7 @@ export const AuthorizedLayout = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  const [isFullMenuOpen, setIsFullMenuOpen] = useState(false);
+  const { isFullScreenMenuOpen, setIsFullScreenMenuOpen } = useContext(LayoutContext);
   return (
     <View>
       <div className="main">
@@ -39,16 +43,15 @@ export const AuthorizedLayout = ({
         <div className="app-content">
           <div className="header-container">
             <div className="menu-header-button">
-              <MenuButton onClick={() => setIsFullMenuOpen(true)} />
+              <MenuButton onClick={() => setIsFullScreenMenuOpen(true)} />
             </div>
             <Header />
           </div>
-          {isFullMenuOpen && (
+          {isFullScreenMenuOpen && (
             <div className={'full-screen-menu-container'}>
-              <Menu onClose={() => setIsFullMenuOpen(false)} />
+              <Menu />
             </div>
           )}
-
           <main className="page-content">{children}</main>
         </div>
       </div>
