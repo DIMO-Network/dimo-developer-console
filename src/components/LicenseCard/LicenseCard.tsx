@@ -12,7 +12,6 @@ export const DEVELOPER_LICENSE_SUMMARY_FRAGMENT = gql(`
     tokenId
     clientId
     owner
-    mintedAt
   }
 `);
 
