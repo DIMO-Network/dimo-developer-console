@@ -5,9 +5,7 @@ import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
 import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { completeUserData } from '@/app/sign-up/actions';
 import { NotificationContext } from '@/context/notificationContext';
-import { isNull } from 'lodash';
 import { captureException } from '@sentry/nextjs';
 
 interface IProps {

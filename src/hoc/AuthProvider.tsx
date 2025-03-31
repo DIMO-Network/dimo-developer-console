@@ -18,7 +18,7 @@ import {
   removeFromSession,
 } from '@/utils/sessionStorage';
 import { generateP256KeyPair } from '@turnkey/crypto';
-import { isEmpty, isNull } from 'lodash';
+import { isEmpty, isNull, isUndefined } from 'lodash';
 //import { cookies } from 'next/headers';
 import { ComponentType, useState } from 'react';
 const halfHour = 30 * 60;
@@ -61,7 +61,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     }: {
       credentialBundle: string;
       privateKey: string;
-      currentWalletValue: `0x${string}` | null;
+      currentWalletValue?: `0x${string}` | null;
     }) => {
       const { subOrganizationId } = user!;
       const client = getTurnkeyClient({ authKey: credentialBundle, eKey: privateKey });
@@ -88,6 +88,8 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         throw new Error('Could not login to Dimo');
       }
 
+      if (isUndefined(currentWalletValue)) return { token }; 
+
       if (isNull(currentWalletValue) || currentWalletValue !== kernelAccount.address) {
         await completeUserData({
           email: user!.email,
@@ -95,15 +97,16 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         });
       }
 
-      return { token };
+      return { token, newWalletAddress: kernelAccount.address };
     };
 
     const loginWithPasskey = async ({
       currentWalletValue,
     }: {
-      currentWalletValue: `0x${string}` | null;
+      currentWalletValue?: `0x${string}` | null;
     }): Promise<{
       success: boolean;
+      newWalletAddress?: `0x${string}`;
     }> => {
       const { subOrganizationId } = user!;
 
@@ -123,7 +126,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
       if (isEmpty(credentialBundle)) return { success: false };
 
-      const { token } = await signIntoDimo({
+      const { token, newWalletAddress } = await signIntoDimo({
         credentialBundle,
         privateKey: key.privateKey,
         currentWalletValue,
@@ -136,7 +139,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         privateKey: key.privateKey,
       });
 
-      return { success: true };
+      return { success: true, newWalletAddress };
     };
 
     const beginOtpLogin = async () => {
@@ -155,8 +158,8 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     }: {
       otp: string;
       otpId: string;
-      currentWalletValue: `0x${string}` | null;
-    }): Promise<{ success: boolean }> => {
+      currentWalletValue?: `0x${string}` | null;
+    }): Promise<{ success: boolean; newWalletAddress?: `0x${string}`; }> => {
       const { email } = user!;
       if (!email) return { success: false };
 
@@ -174,7 +177,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       const nowInSeconds = Math.ceil(Date.now() / 1000);
       const sessionExpiration = nowInSeconds + halfHour;
 
-      const { token } = await signIntoDimo({
+      const { token, newWalletAddress } = await signIntoDimo({
         credentialBundle,
         privateKey: key.privateKey,
         currentWalletValue,
@@ -187,7 +190,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         privateKey: key.privateKey,
       });
 
-      return { success: true };
+      return { success: true, newWalletAddress };
     };
 
     const logout = async () => {
