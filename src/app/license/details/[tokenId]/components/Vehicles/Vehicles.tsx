@@ -1,5 +1,4 @@
 import React, { FC } from 'react';
-import { Title } from '@/components/Title';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
@@ -8,6 +7,7 @@ import './Vehicles.css';
 import { Section, SectionHeader } from '@/components/Section';
 import { Button } from '@/components/Button';
 import Link from 'next/link';
+import { TotalVehicleCount } from '@/components/TotalVehicleCount';
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -59,10 +59,7 @@ const VehiclesTotalCount = ({
 }) => {
   return (
     <div className={'vehicle-count-container'}>
-      <div className={'flex flex-row items-center gap-2.5 pb-4 md:pb-0'}>
-        <Title className={'text-4xl'}>{totalCount}</Title>
-        <p>Connected Vehicles</p>
-      </div>
+      <TotalVehicleCount totalCount={totalCount} />
       <Link href={`/license/vehicles/${clientId}`}>
         <Button className={'table-action-button'}>Vehicle Details</Button>
       </Link>
