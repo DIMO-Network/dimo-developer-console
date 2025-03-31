@@ -9,7 +9,7 @@ import {
 import { ICreateGlobalAccountRequest, ISubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import { cookies } from 'next/headers';
-import { cookiePrefix } from '@/services/dimoDevAPI';
+import { cookieName } from '@/services/dimoDevAPI';
 
 export const getUser = async () => {
   return getUserByToken();
@@ -69,14 +69,12 @@ export const saveNewPasskey = async ({
 
 export const saveToken = async (token: string, sessionExpiration: number) => {
   const userCookies = await cookies();
-  const cookie = `${cookiePrefix}session-token`;
-  userCookies.set(cookie, token, { maxAge: sessionExpiration });
+  userCookies.set(cookieName, token, { maxAge: sessionExpiration });
   console.info('Session token:', token);
 };
 
 export const signOut = async () => {
-  const cookie = `${cookiePrefix}session-token`;
   const userCookies = await cookies();
-  userCookies.delete(cookie);
+  userCookies.delete(cookieName);
   return true;
 };

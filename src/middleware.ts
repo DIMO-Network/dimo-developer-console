@@ -8,14 +8,13 @@ import { getUserSubOrganization } from '@/services/globalAccount';
 import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 import { JWTPayload } from 'jose/dist/types';
-import { cookiePrefix, getCookie } from './services/dimoDevAPI';
+import { cookieName, getCookie } from './services/dimoDevAPI';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getToken = async ({ req }: { req: NextRequest }) => {
-  const tokenCookie = `${cookiePrefix}session-token`;
-  const token = await getCookie(tokenCookie);
+const getToken = async ({ req }: { req: NextRequest }) => {  
+  const token = await getCookie(cookieName);
 
   if (!token) {
     return null;
