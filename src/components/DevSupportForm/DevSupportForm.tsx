@@ -1,7 +1,7 @@
 import { type FC, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { useSession } from 'next-auth/react';
 
+import { useGlobalAccount } from '@/hooks';
 import { Button } from '@/components/Button';
 import { inquiryOptions, IDevSupportForm } from '@/types/support';
 import { Label } from '@/components/Label';
@@ -12,16 +12,16 @@ import { TextField } from '@/components/TextField';
 
 import './DevSupportForm.css';
 
+
 interface IProps {
   onSubmit: (data: IDevSupportForm) => Promise<void>;
   onCancel: () => void;
 }
 
 export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
-  const { data: session } = useSession();
-  const { user: { name: userName = '' } = {} } = session ?? {};
   const [isLoading, setIsLoading] = useState(false);
   const memoizedInquiryOptions = useMemo(() => inquiryOptions, []);
+  const { currentUser } = useGlobalAccount();
 
   const {
     control,
@@ -54,7 +54,12 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
       <div className="field">
         <Label htmlFor="userName" className="text-xs text-medium">
           User Name
-          <TextField type="text" value={userName!} readOnly role="user-name-input" />
+          <TextField
+            type="text"
+            value={currentUser?.email}
+            readOnly
+            role="user-name-input"
+          />
         </Label>
       </div>
       <div className="field">

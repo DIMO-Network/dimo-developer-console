@@ -1,13 +1,13 @@
-import { PlusIcon } from '@heroicons/react/24/outline';
-import { useSession } from 'next-auth/react';
 import { type FC } from 'react';
-import { useRouter } from 'next/navigation';
 
-import { Anchor } from '@/components/Anchor';
 import { AppCard } from '@/components/AppCard';
-import { Button } from '@/components/Button';
 import { IApp } from '@/types/app';
 import { isOwner } from '@/utils/user';
+
+import './AppList.css';
+import EmptyList from '@/app/app/list/components/EmptyList';
+import CreateAppButton from '@/app/app/list/components/CreateAppButton';
+import { useGlobalAccount } from '@/hooks';
 
 import './AppList.css';
 
@@ -15,34 +15,24 @@ interface IProps {
   apps: IApp[];
 }
 export const AppList: FC<IProps> = ({ apps }) => {
-  const router = useRouter();
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
-
-  const handleCreateApp = () => {
-    router.push('/app/create');
-  };
-
-  const renderItem = (app: IApp) => {
-    return (
-      <Anchor href={`/app/details/${app?.id}`} key={app?.id}>
-        <AppCard className="hover:!border-white" {...app} />
-      </Anchor>
-    );
+  const { currentUser } = useGlobalAccount();
+  const renderItem = (app: IApp, idx: number) => {
+    return <AppCard key={app.id ?? idx} className="hover:!border-white" {...app} />;
   };
 
   return (
     <div className="app-list-content">
       <div className="description">
-        <p className="title">Your applications</p>
-        {isOwner(role) && (
-          <Button className="primary px-3 with-icon w-36 mr-4" onClick={handleCreateApp}>
-            <PlusIcon className="w-4 h-4" />
-            Create new
-          </Button>
-        )}
+        <p className="title">Your Apps</p>
+        {isOwner(currentUser!.role) && !!apps.length && <CreateAppButton />}
       </div>
-      <div className="app-list">{apps.map(renderItem)}</div>
+      {apps.length ? (
+        <div className="app-list">{apps.map(renderItem)}</div>
+      ) : (
+        <div className={'empty-list'}>
+          <EmptyList />
+        </div>
+      )}
     </div>
   );
 };

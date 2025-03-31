@@ -20,7 +20,7 @@ const CreateAppPage = () => {
             <Title>Create a new app</Title>
           </div>
           <div className="form">
-            <Form workspace={workspace} />
+            <Form workspace={workspace} onSuccess={() => {}} />
           </div>
         </div>
       )}

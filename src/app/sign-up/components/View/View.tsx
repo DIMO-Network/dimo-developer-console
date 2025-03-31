@@ -1,7 +1,6 @@
 'use client';
 import { useContext, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import * as Sentry from '@sentry/nextjs';
 
 import { BuildForForm, CompanyInfoForm, WalletCreation } from '@/app/sign-up/components';
@@ -10,14 +9,15 @@ import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
 import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
+import { getUser } from '@/actions/user';
+import { Anchor } from '@/components/Anchor';
 
 import './View.css';
-import { getUser } from '@/actions/user';
 
 const signUpFlows = {
   'wallet-creation': {
     Component: WalletCreation,
-    title: "Let's get you a wallet",
+    title: 'Continue with passkey',
     order: 1,
   },
   'build-for': {
@@ -27,7 +27,7 @@ const signUpFlows = {
   },
   'company-information': {
     Component: CompanyInfoForm,
-    title: 'Our last question',
+    title: 'Final strecht',
     order: 3,
   },
 };
@@ -41,7 +41,7 @@ const View = () => {
   const [flow, setFlow] = useState(currentFlow);
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
 
-  const { Component: SignUpFlow, title } =
+  const { Component: SignUpFlow } =
     signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['wallet-creation'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
@@ -89,18 +89,33 @@ const View = () => {
   return (
     <main className="sign-up">
       <div className="sign-up__content">
-        <article className="sign-up__form">
-          <section className="sign-up__header">
-            <Image
-              src={'/images/build-on-dimo.png'}
-              alt="DIMO Logo"
-              width={176}
-              height={24}
-            />
-            <p>{title}</p>
-          </section>
-          {SignUpFlow && <SignUpFlow onNext={handleNext} auth={authData} />}
-        </article>
+        <img src={'/images/dimo-dev.svg'} alt="DIMO Logo" />
+        {SignUpFlow && <SignUpFlow onNext={handleNext} auth={authData} />}
+        <div className="sign-up__extra-links mt-6">
+          <div className="flex flex-row">
+            <p className="terms-caption">
+              By signing in, you are agreeing to our{' '}
+              <Anchor
+                href="https://docs.dimo.zone/dinc/developer-terms-of-service"
+                className="grey underline"
+                target="_blank"
+              >
+                terms of service
+              </Anchor>{' '}
+              and{' '}
+              <Anchor
+                href="https://dimo.zone/legal/privacy-policy"
+                className="grey underline"
+                target="_blank"
+              >
+                privacy policy
+              </Anchor>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="sign-up__background">
+        <img src={'/images/car_segment.svg'} alt="DIMO Background" />
       </div>
     </main>
   );

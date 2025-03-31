@@ -2,8 +2,7 @@
 import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
-import { useEffect, useState, useContext } from 'react';
-import { useSession } from 'next-auth/react';
+import React, { useContext, useEffect, useState } from 'react';
 import { encodeFunctionData } from 'viem';
 import { useRouter } from 'next/navigation';
 
@@ -16,34 +15,33 @@ import { IApp } from '@/types/app';
 import { isOwner } from '@/utils/user';
 import { Loader } from '@/components/Loader';
 import { NotificationContext } from '@/context/notificationContext';
-import { RedirectUriForm } from '@/app/app/details/[id]/components/RedirectUriForm';
-import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
+import { RedirectUriForm } from '@/components/RedirectUriForm';
+import { RedirectUriList } from '@/components/RedirectUriList';
 import { SignerList } from '@/app/app/details/[id]/components/SignerList';
 import { Title } from '@/components/Title';
-import { useContractGA, useOnboarding } from '@/hooks';
-import { IGlobalAccountSession } from '@/types/wallet';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { useContractGA, useEnableSigner, useGlobalAccount, useOnboarding } from '@/hooks';
 
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import configuration from '@/config';
 
 import './View.css';
+import { KeyIcon } from '@heroicons/react/20/solid';
 
 export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   const [app, setApp] = useState<IApp>();
-  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingPage, setIsLoadingPage] = useState<boolean>(true);
   const { setNotification } = useContext(NotificationContext);
+  const { currentUser } = useGlobalAccount();
   const { workspace } = useOnboarding();
   const { processTransactions } = useContractGA();
   const router = useRouter();
-  const { user: { role = '' } = {} } = session ?? {};
+  const { role } = currentUser!;
+  const handleEnableSigner = useEnableSigner(workspace!.token_id);
 
   useEffect(() => {
-    if (!role) return;
     refreshAppDetails();
-  }, [role]);
+  }, []);
 
   const refreshAppDetails = async () => {
     try {
@@ -64,27 +62,9 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     }
   };
 
-  const handleEnableSigner = (signer: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
-    const transaction = {
-      to: configuration.DLC_ADDRESS,
-      value: BigInt(0),
-      data: encodeFunctionData({
-        abi: DimoLicenseABI,
-        functionName: 'enableSigner',
-        args: [workspace?.token_id ?? 0, signer],
-      }),
-    };
-    return transaction;
-  };
-
   const handleDisableSigner = (signer: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
-    const transaction = {
+    if (!currentUser && !workspace) throw new Error('Web3 connection failed');
+    return {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
       data: encodeFunctionData({
@@ -93,14 +73,11 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         args: [workspace?.token_id ?? 0, signer],
       }),
     };
-    return transaction;
   };
 
   const handleRemoveUri = (uri: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
-    const transaction = {
+    if (!currentUser && !workspace) throw new Error('Web3 connection failed');
+    return {
       to: configuration.DLC_ADDRESS,
       value: BigInt(0),
       data: encodeFunctionData({
@@ -109,15 +86,13 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         args: [workspace?.token_id ?? 0, false, uri],
       }),
     };
-    return transaction;
   };
 
   const handleGenerateSigner = async () => {
     try {
       setIsLoading(true);
       const account = generateWallet();
-      const transaction = handleEnableSigner(account.address);
-      await processTransactions([transaction]);
+      await handleEnableSigner(account.address);
       const { id: appId } = await params;
       await createMySigner(
         {
@@ -171,7 +146,7 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
         setNotification('The transaction was denied', 'Oops...', 'error');
       else
         setNotification(
-          'Something went wrong while generating the API key',
+          'Something went wrong while deleting the app',
           'Oops...',
           'error',
         );
@@ -184,52 +159,72 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     <div className="page">
       <div className="summary">
         <BackButton />
-        {app && <AppSummary app={app} />}
+        {app && (
+          <AppSummary
+            app={app}
+            isOwner={isOwner(role)}
+            handleDelete={handleDeleteApplication}
+          />
+        )}
       </div>
       {isLoadingPage && <Loader isLoading={true} />}
       {!isLoadingPage && (
-        <>
+        <div className={'flex flex-col gap-6'}>
           <div className="signers-content">
-            <Title component="h2">Signers</Title>
-            {isOwner(role) && (
-              <div className="generate-signer">
-                <Button
-                  className="primary-outline px-4 w-full"
-                  loading={isLoading}
-                  loadingColor="primary"
-                  onClick={() => handleGenerateSigner()}
-                >
-                  Generate Key
-                </Button>
-              </div>
-            )}
-          </div>
-          <div className="signers-table">
-            {app && <SignerList app={app} refreshData={refreshAppDetails} />}
-          </div>
-          <div className="redirect-uri-content">
-            <Title component="h2">Authorized Redirect URIs</Title>
-            {isOwner(role) && app && (
-              <RedirectUriForm
-                appId={app!.id!}
-                refreshData={refreshAppDetails}
-                list={app?.RedirectUris}
-              />
-            )}
-          </div>
-          <div className="signers-table">
-            {app && (
-              <RedirectUriList list={app?.RedirectUris} refreshData={refreshAppDetails} />
-            )}
-          </div>
-          {isOwner(role) && (
-            <div className="extra-actions">
-              <Button className="error-simple" onClick={handleDeleteApplication}>
-                Delete application
-              </Button>
+            <div
+              className={
+                'flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center'
+              }
+            >
+              <Title component="h2" className={'text-xl'}>
+                API Keys
+              </Title>
+              {isOwner(role) && (
+                <div className="generate-signer">
+                  <Button
+                    className="dark with-icon px-4"
+                    loading={isLoading}
+                    loadingColor="primary"
+                    onClick={() => handleGenerateSigner()}
+                  >
+                    <KeyIcon className="w-4 h-4" />
+                    Generate Key
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
-        </>
+
+            <div className="signers-table">
+              {app && <SignerList app={app} refreshData={refreshAppDetails} />}
+            </div>
+          </div>
+          <div className={'signers-content'}>
+            <div className="redirect-uri-content">
+              <Title component="h2" className={'text-xl'}>
+                Authorized Redirect URIs
+              </Title>
+              {isOwner(role) && app && (
+                <div className={'mt-4'}>
+                  <RedirectUriForm
+                    tokenId={workspace?.token_id ?? 0}
+                    refreshData={refreshAppDetails}
+                    redirectUris={app?.RedirectUris}
+                  />
+                </div>
+              )}
+            </div>
+            <div className="signers-table">
+              {app && (
+                <RedirectUriList
+                  redirectUris={app?.RedirectUris}
+                  refreshData={refreshAppDetails}
+                  tokenId={workspace?.token_id ?? 0}
+                  isOwner={isOwner(role)}
+                />
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

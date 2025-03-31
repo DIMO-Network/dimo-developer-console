@@ -1,8 +1,24 @@
+.main {
+  @apply flex flex-row p-6 bg-surface-sunken min-h-screen items-stretch;
+}
+
+.sidebar-container {
+  @apply hidden md:flex md:mr-6 md:w-52 md:flex-shrink-0 md:rounded-xl md:bg-surface-default;
+}
+
+.header-container {
+  @apply flex flex-row items-center justify-items-stretch;
+}
+
+.menu-header-button {
+  @apply md:hidden;
+}
+
 .app-content {
   height: calc(100vh - 80px);
-  @apply flex flex-row;
+  @apply flex flex-col flex-1;
 }
 
 .page-content {
-  @apply overflow-y-auto p-8 w-full;
+  @apply overflow-y-auto py-6 w-full;
 }
