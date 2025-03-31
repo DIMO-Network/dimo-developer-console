@@ -1,6 +1,7 @@
 import { type FC, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { useGlobalAccount } from '@/hooks';
 import { Button } from '@/components/Button';
 import { inquiryOptions, IDevSupportForm } from '@/types/support';
 import { Label } from '@/components/Label';
@@ -10,7 +11,7 @@ import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 
 import './DevSupportForm.css';
-import { useGlobalAccount } from '@/hooks';
+
 
 interface IProps {
   onSubmit: (data: IDevSupportForm) => Promise<void>;
