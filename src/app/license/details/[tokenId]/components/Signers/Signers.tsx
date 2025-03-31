@@ -1,5 +1,4 @@
 import { FragmentType, gql, useFragment } from '@/gql';
-import { Title } from '@/components/Title';
 import React, { FC, useContext, useState } from 'react';
 import { Button } from '@/components/Button';
 import { KeyIcon } from '@heroicons/react/20/solid';
@@ -12,8 +11,8 @@ import { useDisableSigner, useEnableSigner } from '@/hooks';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/details/[tokenId]/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
+import { Section, SectionHeader } from '@/app/license/components/Section';
 
-import '../shared/Styles.css';
 import { withLoadingStatus } from '@/hoc';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
@@ -120,11 +119,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   return (
-    <div className={'license-details-section'}>
-      <div className={'license-details-section-header'}>
-        <Title component="h2" className={'text-xl'}>
-          API Keys
-        </Title>
+    <Section>
+      <SectionHeader title={'API Keys'}>
         {isLicenseOwner && (
           <Button
             className="dark with-icon px-4"
@@ -135,7 +131,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
             Generate Key
           </Button>
         )}
-      </div>
+      </SectionHeader>
       <div>
         {!!fragment.signers.nodes.length && (
           <Table
@@ -163,7 +159,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         apiKey={String(apiKey)?.replace('0x', '') ?? ''}
         onClose={() => setApiKey(undefined)}
       />
-    </div>
+    </Section>
   );
 };
 
