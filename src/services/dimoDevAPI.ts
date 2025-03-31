@@ -11,14 +11,16 @@ export const getCookie = async (cookieName: string, defaultValue = '') => {
 };
 
 export const dimoDevAPIClient = async (timeout: number = 5000, token?: string) => {
-  let authHeader = '';
+  let authHeader = undefined;
 
   if (token) {
     authHeader = `Bearer ${token}`;
   } else {
     const sessionToken = await getCookie(cookieName);
-    authHeader = `Bearer ${sessionToken}`;
-  }
+    if (sessionToken) {
+      authHeader = `Bearer ${sessionToken}`;
+    }    
+  } 
 
   return axios.create({
     baseURL: config.backendUrl,
