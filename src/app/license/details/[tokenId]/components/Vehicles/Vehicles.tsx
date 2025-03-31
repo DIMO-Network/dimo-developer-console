@@ -6,6 +6,8 @@ import { Loader } from '@/components/Loader';
 
 import './Vehicles.css';
 import { Section, SectionHeader } from '@/components/Section';
+import { Button } from '@/components/Button';
+import Link from 'next/link';
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -37,17 +39,33 @@ export const Vehicles: FC<IProps> = ({ license }) => {
       <div className={'flex flex-col flex-1'}>
         {!!error && <p>We had trouble fetching the connected vehicles</p>}
         {loading && <Loader isLoading={true} />}
-        {!!data && <VehiclesTotalCount totalCount={data.vehicles.totalCount} />}
+        {!!data && (
+          <VehiclesTotalCount
+            totalCount={data.vehicles.totalCount}
+            clientId={fragment.clientId}
+          />
+        )}
       </div>
     </Section>
   );
 };
 
-const VehiclesTotalCount = ({ totalCount }: { totalCount: number }) => {
+const VehiclesTotalCount = ({
+  totalCount,
+  clientId,
+}: {
+  totalCount: number;
+  clientId: string;
+}) => {
   return (
     <div className={'vehicle-count-container'}>
-      <Title className={'text-4xl'}>{totalCount}</Title>
-      <p>Connected Vehicles</p>
+      <div className={'flex flex-row items-center gap-2.5 pb-4 md:pb-0'}>
+        <Title className={'text-4xl'}>{totalCount}</Title>
+        <p>Connected Vehicles</p>
+      </div>
+      <Link href={`/license/vehicles/${clientId}`}>
+        <Button className={'table-action-button'}>Vehicle Details</Button>
+      </Link>
     </div>
   );
 };

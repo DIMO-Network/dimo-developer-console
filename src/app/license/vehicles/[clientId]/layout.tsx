@@ -3,13 +3,14 @@
 import { ReactNode, use } from 'react';
 import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
-import { Header } from '@/app/license/details/[tokenId]/vehicles/components/Header';
+import { Header } from '@/app/license/vehicles/[clientId]/components/Header';
 
-const DEVELOPER_LICENSE_DETAILS_PAGE_SUMMARY = gql(`
-  query DeveloperLicenseDetailsPageSummary($tokenId: Int!) {
-    developerLicense(by: {tokenId: $tokenId}) {
+const DEVELOPER_LICENSE_BY_CLIENT_ID_SUMMARY = gql(`
+  query DeveloperLicenseByClientIdSummary($clientId: Address!) {
+    developerLicense(by: {clientId: $clientId}) {
       tokenId
       alias
+      clientId
     }
   }
 `);
@@ -19,11 +20,11 @@ export default function DeveloperLicenseDetailsPageLayout({
   children,
 }: {
   children: ReactNode;
-  params: Promise<{ tokenId: string }>;
+  params: Promise<{ clientId: string }>;
 }) {
-  const { tokenId } = use(params);
-  const { data } = useQuery(DEVELOPER_LICENSE_DETAILS_PAGE_SUMMARY, {
-    variables: { tokenId: Number(tokenId) },
+  const { clientId } = use(params);
+  const { data } = useQuery(DEVELOPER_LICENSE_BY_CLIENT_ID_SUMMARY, {
+    variables: { clientId },
   });
   return (
     <div className={'flex flex-col'}>
