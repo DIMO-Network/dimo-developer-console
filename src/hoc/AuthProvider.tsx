@@ -88,13 +88,16 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         throw new Error('Could not login to Dimo');
       }
 
-      if (isUndefined(currentWalletValue)) return { token }; 
+      if (isUndefined(currentWalletValue)) return { token };
 
       if (isNull(currentWalletValue) || currentWalletValue !== kernelAccount.address) {
-        await completeUserData({
-          email: user!.email,
-          address: kernelAccount.address,
-        });
+        await completeUserData(
+          {
+            email: user!.email,
+            address: kernelAccount.address,
+          },
+          token.access_token,
+        );
       }
 
       return { token, newWalletAddress: kernelAccount.address };
@@ -159,7 +162,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       otp: string;
       otpId: string;
       currentWalletValue?: `0x${string}` | null;
-    }): Promise<{ success: boolean; newWalletAddress?: `0x${string}`; }> => {
+    }): Promise<{ success: boolean; newWalletAddress?: `0x${string}` }> => {
       const { email } = user!;
       if (!email) return { success: false };
 

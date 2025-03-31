@@ -77,7 +77,11 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
     const otpString = otp.join('');
     try {
       setIsLoading(true);
-      const { success, newWalletAddress } = await completeOtpLogin({ otp: otpString, otpId, currentWalletValue: null });
+      const { success, newWalletAddress } = await completeOtpLogin({
+        otp: otpString,
+        otpId,
+        currentWalletValue: null,
+      });
 
       if (!success) {
         //setNotification('Invalid OTP code', 'Error', 'error');

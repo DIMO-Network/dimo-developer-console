@@ -19,8 +19,8 @@ export const dimoDevAPIClient = async (timeout: number = 5000, token?: string) =
     const sessionToken = await getCookie(cookieName);
     if (sessionToken) {
       authHeader = `Bearer ${sessionToken}`;
-    }    
-  } 
+    }
+  }
 
   return axios.create({
     baseURL: config.backendUrl,
