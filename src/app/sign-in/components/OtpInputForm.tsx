@@ -7,6 +7,8 @@ import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { completeUserData } from '@/app/sign-up/actions';
 import { NotificationContext } from '@/context/notificationContext';
+import { isNull } from 'lodash';
+import { captureException } from '@sentry/nextjs';
 
 interface IProps {
   currentEmail: string;
@@ -88,7 +90,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
         return;
       }
 
-      if (currentWallet !== wallet) {
+      if (isNull(currentWallet) || currentWallet !== wallet) {
         await completeUserData({
           email: currentEmail,
           address: wallet,
@@ -97,7 +99,8 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
 
       router.replace('/app');
     } catch (error) {
-      //Sentry.captureException(error);
+      captureException(error);
+      setNotification('Failed to login with OTP', 'Oops...', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +115,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     if (pasteData.length === 6) {
       const newOtp = pasteData.split('');
       setOtp(newOtp);
-      //handleVerify();
+      handleVerify();
     }
   };
   return (

@@ -13,7 +13,8 @@ import { cookieName, getCookie } from './services/dimoDevAPI';
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getToken = async ({ req }: { req: NextRequest }) => {  
+const getToken = async ({ req }: { req: NextRequest }) => {
+  console.info(req.nextUrl.pathname);
   const token = await getCookie(cookieName);
 
   if (!token) {

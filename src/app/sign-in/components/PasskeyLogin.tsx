@@ -4,8 +4,10 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { NotificationContext } from '@/context/notificationContext';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
+import { isNull } from 'lodash';
 import { useRouter } from 'next/navigation';
 import { FC, useContext, useEffect } from 'react';
+import { captureException } from '@sentry/nextjs';
 
 interface IProps {
   currentEmail: string;
@@ -31,7 +33,7 @@ export const PasskeyLogin: FC<IProps> = ({
         return;
       }
 
-      if (currentWallet !== wallet) {
+      if (isNull(currentWallet) || currentWallet !== wallet) {
         await completeUserData({
           email: currentEmail,
           address: wallet,
@@ -45,6 +47,8 @@ export const PasskeyLogin: FC<IProps> = ({
           handlePasskeyRejected();
         }
       }
+      captureException(error);
+      setNotification('Failed to login with passkey', 'Oops...', 'error');
     }
   };
 

@@ -12,7 +12,6 @@ import { TextField } from '@/components/TextField';
 
 import './DevSupportForm.css';
 
-
 interface IProps {
   onSubmit: (data: IDevSupportForm) => Promise<void>;
   onCancel: () => void;
