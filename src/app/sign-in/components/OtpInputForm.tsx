@@ -12,7 +12,7 @@ import { captureException } from '@sentry/nextjs';
 
 interface IProps {
   currentEmail: string;
-  currentWallet: string | null;
+  currentWallet: `0x${string}` | null;
 }
 
 export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
@@ -84,17 +84,14 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     const otpString = otp.join('');
     try {
       setIsLoading(true);
-      const { success, wallet } = await completeOtpLogin({ otp: otpString, otpId });
+      const { success } = await completeOtpLogin({
+        otp: otpString,
+        otpId,
+        currentWalletValue: currentWallet,
+      });
       if (!success) {
         setNotification('Invalid OTP code', 'Oops...', 'error');
         return;
-      }
-
-      if (isNull(currentWallet) || currentWallet !== wallet) {
-        await completeUserData({
-          email: currentEmail,
-          address: wallet,
-        });
       }
 
       router.replace('/app');

@@ -4,12 +4,15 @@ import { createContext, Dispatch, SetStateAction } from 'react';
 
 interface IProps {
   setUser: Dispatch<SetStateAction<{ email: string; subOrganizationId: string } | null>>;
-  loginWithPasskey: () => Promise<{ success: boolean; wallet: `0x${string}` }>;
+  loginWithPasskey: (currentState: {
+    currentWalletValue: `0x${string}` | null;
+  }) => Promise<{ success: boolean }>;
   beginOtpLogin: () => Promise<string>;
   completeOtpLogin: (otp: {
     otp: string;
     otpId: string;
-  }) => Promise<{ success: boolean; wallet: `0x${string}` }>;
+    currentWalletValue: `0x${string}` | null;
+  }) => Promise<{ success: boolean }>;
   handleExternalAuth: (provider: string) => void;
   logout: () => Promise<void>;
 }
@@ -17,11 +20,11 @@ interface IProps {
 export const AuthContext = createContext<IProps>({
   setUser: () => {},
   loginWithPasskey: async () => {
-    return { success: false, wallet: '0x' };
+    return { success: false };
   },
   beginOtpLogin: async () => '',
   completeOtpLogin: async () => {
-    return { success: false, wallet: '0x' };
+    return { success: false };
   },
   handleExternalAuth: () => {},
   logout: async () => {},

@@ -10,34 +10,22 @@ import { FC, useContext, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 
 interface IProps {
-  currentEmail: string;
   handlePasskeyRejected: () => void;
-  currentWallet: string | null;
+  currentWallet: `0x${string}` | null;
 }
 
-export const PasskeyLogin: FC<IProps> = ({
-  currentEmail,
-  handlePasskeyRejected,
-  currentWallet,
-}) => {
+export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet }) => {
   const router = useRouter();
   const { loginWithPasskey } = useAuth();
   const { setNotification } = useContext(NotificationContext);
 
   const handleLoginWithPasskey = async () => {
     try {
-      const { success, wallet } = await loginWithPasskey();
+      const { success } = await loginWithPasskey({ currentWalletValue: currentWallet });
 
       if (!success) {
         setNotification('Failed to login with passkey', 'Oops...', 'error');
         return;
-      }
-
-      if (isNull(currentWallet) || currentWallet !== wallet) {
-        await completeUserData({
-          email: currentEmail,
-          address: wallet,
-        });
       }
 
       router.replace('/app');
