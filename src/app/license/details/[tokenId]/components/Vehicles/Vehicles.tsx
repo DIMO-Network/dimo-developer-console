@@ -5,6 +5,7 @@ import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
 
 import './Vehicles.css';
+import { Section, SectionHeader } from '@/components/Section';
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -31,18 +32,14 @@ export const Vehicles: FC<IProps> = ({ license }) => {
   });
 
   return (
-    <div className={'license-details-section'}>
-      <div className={'license-details-section-header'}>
-        <Title component="h2" className={'text-xl'}>
-          Vehicles
-        </Title>
-      </div>
+    <Section>
+      <SectionHeader title={'Vehicles'} />
       <div className={'flex flex-col flex-1'}>
         {!!error && <p>We had trouble fetching the connected vehicles</p>}
         {loading && <Loader isLoading={true} />}
         {!!data && <VehiclesTotalCount totalCount={data.vehicles.totalCount} />}
       </div>
-    </div>
+    </Section>
   );
 };
 
