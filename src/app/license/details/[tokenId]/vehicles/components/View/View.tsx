@@ -1,7 +1,11 @@
+import { Section, SectionHeader } from '@/components/Section';
+
 export const View = () => {
   return (
     <div>
-      <p>Vehicle details will go here!!</p>
+      <Section>
+        <SectionHeader title={'Vehicle Details'} />
+      </Section>
     </div>
   );
 };

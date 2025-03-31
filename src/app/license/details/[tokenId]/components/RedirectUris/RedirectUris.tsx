@@ -4,7 +4,7 @@ import { RedirectUriList } from '@/components/RedirectUriList';
 import { RedirectUriForm } from '@/components/RedirectUriForm';
 
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
-import { Section, SectionHeader } from '@/app/license/components/Section';
+import { Section, SectionHeader } from '@/components/Section';
 
 const REDIRECT_URIS_FRAGMENT = gql(`
   fragment RedirectUriFragment on DeveloperLicense {

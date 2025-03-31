@@ -11,7 +11,7 @@ import { useDisableSigner, useEnableSigner } from '@/hooks';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/details/[tokenId]/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
-import { Section, SectionHeader } from '@/app/license/components/Section';
+import { Section, SectionHeader } from '@/components/Section';
 
 import { withLoadingStatus } from '@/hoc';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
