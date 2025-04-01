@@ -1,10 +1,11 @@
 import _ from 'lodash';
-import { type FC } from 'react';
+import { useState, type FC } from 'react';
 
 import { type IColumn, Column } from './Column';
 import { Cell } from './Cell';
 
 import './Table.css';
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 
 interface IProps {
   columns: IColumn[];
@@ -12,6 +13,55 @@ interface IProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   actions?: FC<any>[];
 }
+
+// Uses tanstack
+export const PaginatedTable = ({
+  columns,
+  data,
+  pagination,
+  onPaginationChange,
+  rowCount,
+}) => {
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    onPaginationChange,
+    state: { pagination },
+    rowCount,
+  });
+  return (
+    <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
+      <table className="table">
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <Column key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </Column>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody className="table-body">
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id} className={'border-t border-t-cta-default'}>
+              {row.getVisibleCells().map((cell) => (
+                <Cell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </Cell>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 export const Table: FC<IProps> = ({ columns, data, actions }) => {
   const renderColumn = ({ name, label }: IColumn) => {
