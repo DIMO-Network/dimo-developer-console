@@ -6,6 +6,7 @@ import { use } from 'react';
 import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { TotalVehicleCount } from '@/components/TotalVehicleCount';
+import { ExampleVehicleTable } from '@/app/license/vehicles/[clientId]/components/ExampleVehicleTable';
 
 const DEVELOPER_LICENSE_VEHICLE_DETAILS = gql(`
   query DeveloperLicenseVehiclesQuery($clientId: Address!) {
@@ -25,6 +26,10 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     <div className={'flex flex-col gap-6'}>
       <Section>
         <TotalVehicleCount totalCount={data?.vehicles.totalCount ?? 0} />
+      </Section>
+      <Section>
+        <SectionHeader title={'Example vehicles'} />
+        <ExampleVehicleTable />
       </Section>
       <Section>
         <SectionHeader title={'Vehicle Details'} />
