@@ -3,22 +3,24 @@ import axios from 'axios';
 
 import config from '@/config';
 
-const { NEXTAUTH_URL: nextAuthUrl = '' } = process.env;
-
-const useSecureCookies = nextAuthUrl.startsWith('https://');
-export const cookiePrefix = useSecureCookies ? '__Secure-' : '';
+export const cookieName = 'session-token';
 
 export const getCookie = async (cookieName: string, defaultValue = '') => {
   const nextCookies = await cookies();
   return nextCookies.get(cookieName)?.value ?? defaultValue;
 };
 
-export const dimoDevAPIClient = async (timeout: number = 5000) => {
-  const tokenCookie = `${cookiePrefix}session-token`;
+export const dimoDevAPIClient = async (timeout: number = 5000, token?: string) => {
+  let authHeader = undefined;
 
-  const authToken = await getCookie(tokenCookie);
-
-  const authHeader = authToken ? `Bearer ${authToken}` : undefined;
+  if (token) {
+    authHeader = `Bearer ${token}`;
+  } else {
+    const sessionToken = await getCookie(cookieName);
+    if (sessionToken) {
+      authHeader = `Bearer ${sessionToken}`;
+    }
+  }
 
   return axios.create({
     baseURL: config.backendUrl,

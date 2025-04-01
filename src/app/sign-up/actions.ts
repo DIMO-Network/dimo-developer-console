@@ -5,8 +5,8 @@ import { IUser } from '@/types/user';
 import { Data } from '@/utils/restClient';
 import { IAuth } from '@/types/auth';
 
-export const completeUserData = async (user: Partial<IUser>) => {
-  const client = await dimoDevAPIClient();
+export const completeUserData = async (user: Partial<IUser>, token?: string) => {
+  const client = await dimoDevAPIClient(5000, token);
   const { data } = await client.put('/api/me/complete', user as Data);
   return data;
 };

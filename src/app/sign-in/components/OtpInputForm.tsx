@@ -5,12 +5,12 @@ import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
 import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { completeUserData } from '@/app/sign-up/actions';
 import { NotificationContext } from '@/context/notificationContext';
+import { captureException } from '@sentry/nextjs';
 
 interface IProps {
   currentEmail: string;
-  currentWallet: string | null;
+  currentWallet: `0x${string}` | null;
 }
 
 export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
@@ -82,22 +82,20 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     const otpString = otp.join('');
     try {
       setIsLoading(true);
-      const { success, wallet } = await completeOtpLogin({ otp: otpString, otpId });
+      const { success } = await completeOtpLogin({
+        otp: otpString,
+        otpId,
+        currentWalletValue: currentWallet,
+      });
       if (!success) {
         setNotification('Invalid OTP code', 'Oops...', 'error');
         return;
       }
 
-      if (currentWallet !== wallet) {
-        await completeUserData({
-          email: currentEmail,
-          address: wallet,
-        });
-      }
-
       router.replace('/app');
     } catch (error) {
-      //Sentry.captureException(error);
+      captureException(error);
+      setNotification('Failed to login with OTP', 'Oops...', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +110,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     if (pasteData.length === 6) {
       const newOtp = pasteData.split('');
       setOtp(newOtp);
-      //handleVerify();
+      handleVerify();
     }
   };
   return (

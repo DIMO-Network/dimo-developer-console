@@ -35,7 +35,7 @@ const SignInForm = ({
   handleCTA: (app: string, auth?: Partial<IAuth>) => Promise<void>;
   handlePasskeyRejected: () => void;
   currentEmail: string;
-  currentWallet: string | null;
+  currentWallet: `0x${string}` | null;
 }): ReactNode => {
   switch (type) {
     case SignInType.OTP:
@@ -43,7 +43,6 @@ const SignInForm = ({
     case SignInType.PASSKEY:
       return (
         <PasskeyLogin
-          currentEmail={currentEmail}
           handlePasskeyRejected={handlePasskeyRejected}
           currentWallet={currentWallet}
         />
@@ -70,7 +69,7 @@ export const View = () => {
   const [signInProcess, setSignInProcess] = useState<{
     email: string;
     signInType: SignInType;
-    currentWallet: string | null;
+    currentWallet: `0x${string}` | null;
   }>({
     email: '',
     signInType: SignInType.NONE,

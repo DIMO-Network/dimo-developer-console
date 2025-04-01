@@ -114,7 +114,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         return;
       }
 
-      const { success, wallet } = await loginWithPasskey();
+      const { success, newWalletAddress } = await loginWithPasskey({});
       if (!success) {
         setNotification(
           'Something went wrong while creating the user wallet',
@@ -124,7 +124,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         return;
       }
 
-      globalAccountSignupComplete(wallet);
+      globalAccountSignupComplete(newWalletAddress!);
     } catch (error) {
       Sentry.captureException(error);
       console.error('Something went wrong while creating the user wallet', error);
