@@ -1,8 +1,8 @@
 import React from 'react';
-import {PlusIcon} from "@heroicons/react/24/outline";
-import {Button} from "@/components/Button";
+import { PlusIcon } from '@heroicons/react/24/outline';
+import { Button } from '@/components/Button';
 import clsx from 'classnames';
-import {CreateAppModal} from "@/components/CreateAppModal";
+import { CreateAppModal } from '@/components/CreateAppModal';
 
 interface Props {
   className?: string;
@@ -13,12 +13,11 @@ const CreateAppButton: React.FC<Props> = ({ className = 'dark with-icon' }) => {
   return (
     <>
       <CreateAppModal isOpen={isModalOpen} handleIsOpen={setIsModalOpen} />
-      <Button className={clsx(className, "!h-10")} onClick={() => setIsModalOpen(true)}>
+      <Button className={clsx(className, '!h-10')} onClick={() => setIsModalOpen(true)}>
         <PlusIcon className="w-4 h-4" />
-        Create an app
+        Create a license
       </Button>
     </>
-
   );
 };
 export default CreateAppButton;

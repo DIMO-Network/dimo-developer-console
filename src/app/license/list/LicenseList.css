@@ -12,6 +12,6 @@
   }
 
   .empty-list {
-    @apply mt-10 md:mt-20
+    @apply mt-10 md:mt-20;
   }
 }

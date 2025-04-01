@@ -7,11 +7,9 @@ import { IApp } from '@/types/app';
 import { Title } from '@/components/Title';
 import { ContentCopyIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
-import { WorkspaceNameModal } from '@/app/app/details/[id]/components/WorkspaceNameModal';
+import { WorkspaceNameModal } from '@/components/WorkspaceNameModal';
 
 import './AppSummary.css';
-import {Button} from "@/components/Button";
-import {TrashIcon} from "@heroicons/react/24/outline";
 
 interface IProps {
   app: IApp;
@@ -28,10 +26,6 @@ export const AppSummary: FC<IProps> = ({ app }) => {
   const handleCopy = () => {
     void navigator.clipboard.writeText(clientId);
     setNotification('Client ID copied!', 'Success', 'info');
-  };
-
-  const handleEditClick = () => {
-    setIsModalOpen(true);
   };
 
   const handleEditClick = () => {
@@ -57,9 +51,15 @@ export const AppSummary: FC<IProps> = ({ app }) => {
           onClick={handleCopy}
         />
       </div>
-      <WorkspaceNameModal isOpen={isModalOpen} setIsOpen={setIsModalOpen} app={app} />
+      <WorkspaceNameModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        license={{
+          tokenId: workspace.token_id ?? 0,
+          alias: workspace.name ?? '',
+        }}
+      />
     </div>
-
   );
 };
 

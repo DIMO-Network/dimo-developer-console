@@ -1,9 +1,13 @@
 import { FC, useContext, useEffect } from 'react';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { useGlobalAccount } from '@/hooks';
+import { usePasskey } from '@/hooks';
 import { useSearchParams } from 'next/navigation';
 import { NotificationContext } from '@/context/notificationContext';
 import * as Sentry from '@sentry/nextjs';
+import { EmbeddedKey, getFromLocalStorage } from '@/utils/localStorage';
+import { getUserInformation, saveNewPasskey } from '@/actions/user';
+
+import { getTurnkeyClient } from '@/services/turnkey';
 
 interface IProps {
   onNext: (flow: string) => void;
@@ -12,7 +16,63 @@ interface IProps {
 export const RewirePasskey: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
   const params = useSearchParams();
-  const { registerNewPasskey } = useGlobalAccount();
+  const { getNewUserPasskey } = usePasskey();
+
+  const registerNewPasskey = async ({
+    recoveryKey,
+    email,
+  }: {
+    recoveryKey: string;
+    email: string;
+  }): Promise<void> => {
+    const userInformation = await getUserInformation(email);
+    const subOrganizationId = userInformation?.subOrganizationId;
+    const ekey = getFromLocalStorage<string>(EmbeddedKey);
+
+    const client = getTurnkeyClient({
+      authKey: recoveryKey,
+      eKey: ekey!,
+    });
+
+    const me = await client.getWhoami({ organizationId: subOrganizationId! });
+
+    const { attestation, encodedChallenge } = await getNewUserPasskey(me!.username!);
+
+    const { authenticators } = await client.getAuthenticators({
+      organizationId: me!.organizationId,
+      userId: me!.userId,
+    });
+
+    const signedRemoveAuthenticators = await client.stampDeleteAuthenticators({
+      type: 'ACTIVITY_TYPE_DELETE_AUTHENTICATORS',
+      timestampMs: Date.now().toString(),
+      organizationId: me!.organizationId,
+      parameters: {
+        userId: me!.userId,
+        authenticatorIds: authenticators!.map((auth) => auth.authenticatorId),
+      },
+    });
+
+    const signedRecoverUser = await client.stampRecoverUser({
+      type: 'ACTIVITY_TYPE_RECOVER_USER',
+      timestampMs: Date.now().toString(),
+      organizationId: me!.organizationId,
+      parameters: {
+        userId: me!.userId,
+        authenticator: {
+          authenticatorName: 'DIMO PASSKEY',
+          challenge: encodedChallenge,
+          attestation,
+        },
+      },
+    });
+
+    await saveNewPasskey({
+      email: me!.username!,
+      signedRecoveryRequest: signedRecoverUser,
+      signedAuthenticatorRemoval: signedRemoveAuthenticators,
+    });
+  };
 
   const handleRewirePasskey = async ({
     recoveryKey,

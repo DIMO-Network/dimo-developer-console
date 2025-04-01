@@ -13,24 +13,18 @@ export const getCookie = async (cookieName: string, defaultValue = '') => {
   return nextCookies.get(cookieName)?.value ?? defaultValue;
 };
 
-const addCookie = (arr: string[], cookieName: string, value: string) => {
-  if (value) arr.push(`${cookieName}=${value}`);
-  return arr;
-};
-
 export const dimoDevAPIClient = async (timeout: number = 5000) => {
-  const invitationCookie = 'invitation';
-  const tokenCookie = `${cookiePrefix}next-auth.session-token`;
+  const tokenCookie = `${cookiePrefix}session-token`;
 
-  const userCookies: string[] = [];
-  addCookie(userCookies, tokenCookie, await getCookie(tokenCookie));
-  addCookie(userCookies, invitationCookie, await getCookie(invitationCookie));
+  const authToken = await getCookie(tokenCookie);
+
+  const authHeader = authToken ? `Bearer ${authToken}` : undefined;
 
   return axios.create({
     baseURL: config.backendUrl,
     timeout,
     headers: {
-      Cookie: userCookies.join(';'),
+      Authorization: authHeader,
     },
   });
 };

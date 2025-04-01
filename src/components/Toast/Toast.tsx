@@ -2,16 +2,13 @@
 
 import { FC, Fragment, useState } from 'react';
 import { Transition } from '@headlessui/react';
-import {
-  XMarkIcon as XMarkIcon24,
-  InformationCircleIcon,
-} from '@heroicons/react/24/outline';
-import { CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { XMarkIcon } from '@heroicons/react/20/solid';
 import { INotification } from '@/hooks';
+import classnames from 'classnames';
 
 import './Toast.css';
 
-export const Toast: FC<INotification> = ({ title, message, type }) => {
+export const Toast: FC<INotification> = ({ message, type }) => {
   const [show, setShow] = useState(true);
 
   return (
@@ -26,25 +23,17 @@ export const Toast: FC<INotification> = ({ title, message, type }) => {
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
       >
-        <div className="toast">
+        <div className={classnames('toast', type)}>
           <div className="toast-content">
-            <div className="toast-icon-content">
-              {type === 'info' && (
-                <InformationCircleIcon
-                  className="h-6 w-6 stroke-black"
-                  aria-hidden="true"
-                />
-              )}
-              {type === 'success' && (
-                <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
-              )}
-              {type === 'error' && (
-                <XMarkIcon24 className="h-6 w-6 text-red-400" aria-hidden="true" />
-              )}
-            </div>
             <div className="toast-content-content">
-              <p className="toast-title">{title}</p>
-              <p className="toast-description">{message}</p>
+              <p
+                className={classnames(
+                  'toast-description',
+                  type === 'info' && '!text-black',
+                )}
+              >
+                {message}
+              </p>
             </div>
             <div className="toast-close-content">
               <button
@@ -56,7 +45,13 @@ export const Toast: FC<INotification> = ({ title, message, type }) => {
                 }}
               >
                 <span className="sr-only">Close</span>
-                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                <XMarkIcon
+                  className={classnames(
+                    'h-5 w-5 text-white hover:text-gray-500',
+                    type === 'info' && '!text-black',
+                  )}
+                  aria-hidden="true"
+                />
               </button>
             </div>
           </div>

@@ -6,9 +6,8 @@ import React, {
 } from 'react';
 import classnames from 'classnames';
 
-import { Loading } from '@/components/Loading';
-
 import './Button.css';
+import { BubbleLoader } from '@/components/BubbleLoader';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
@@ -20,7 +19,6 @@ export const Button: FC<ButtonProps> = ({
   children,
   className: inputClassName,
   loading = false,
-  loadingColor = 'black',
   onClick = () => {},
   ...props
 }) => {
@@ -32,7 +30,7 @@ export const Button: FC<ButtonProps> = ({
 
   return (
     <button {...props} onClick={handleClick} className={className}>
-      {loading && <Loading className={`text-${loadingColor}`} />}
+      {loading && <BubbleLoader isSmall isLoading />}
       {!loading && <span className="content">{children}</span>}
     </button>
   );

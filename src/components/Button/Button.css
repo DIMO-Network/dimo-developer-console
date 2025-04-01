@@ -1,5 +1,5 @@
 .button {
-  @apply rounded-full h-8 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex-row gap-2 disabled:bg-green-500 disabled:cursor-not-allowed;
+  @apply rounded-full h-10 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex-row gap-2 disabled:bg-green-500 disabled:cursor-not-allowed hover:border-white border-transparent border-2;
 
   span.content {
     @apply flex flex-row gap-1 items-center justify-center;
@@ -18,7 +18,7 @@
   }
 
   &.primary-outline {
-    @apply border-2 bg-transparent border-[#201C1E] text-white;
+    @apply border-2 bg-transparent border-cta-default text-white hover:border-white;
   }
 
   &.secondary-border-color {
@@ -41,7 +41,7 @@
   }
 
   &.error {
-    @apply bg-red-500;
+    @apply bg-feedback-error text-white;
 
     &-outline {
       @apply bg-transparent border border-red-500 text-red-500;

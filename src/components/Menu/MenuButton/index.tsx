@@ -1,13 +1,21 @@
-import {Bars3Icon} from "@heroicons/react/24/solid";
-import React, {FC} from "react";
+import { Bars3Icon } from '@heroicons/react/24/solid';
+import React, { FC, useContext } from 'react';
+import { LayoutContext } from '@/context/LayoutContext';
 
-interface MenuButtonProps {
-  onClick: () => void
-}
-export const MenuButton: FC<MenuButtonProps>  = ({ onClick }) => (
-  <button
-    className={'bg-surface-default rounded-2xl size-12 flex items-center justify-center'}
-    onClick={onClick}>
-    <Bars3Icon className={"size-6"}/>
-  </button>
-);
+export const MenuButton: FC = () => {
+  const { setIsFullScreenMenuOpen } = useContext(LayoutContext);
+  const onPress = () => {
+    setIsFullScreenMenuOpen(true);
+  };
+
+  return (
+    <button
+      className={
+        'bg-surface-default rounded-2xl size-12 flex items-center justify-center'
+      }
+      onClick={onPress}
+    >
+      <Bars3Icon className={'size-6'} />
+    </button>
+  );
+};

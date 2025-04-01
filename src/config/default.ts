@@ -24,6 +24,7 @@ export const REGIONS = [
 ];
 
 export const DEVELOPER_TYPES = [
+  'Personal Developer',
   'OEM',
   'Insurance',
   'Maintenance',

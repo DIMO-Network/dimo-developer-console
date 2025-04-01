@@ -1,7 +1,3 @@
-import { type FC } from 'react';
-import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline';
-import { signOut } from 'next-auth/react';
-
 import {
   HomeIcon,
   IntegrationIcon,
@@ -10,9 +6,6 @@ import {
   SummarizeIcon,
   SupportAgentIcon,
 } from '@/components/Icons';
-import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage';
-import { turnkeyClient } from './turnkey';
-import { removeFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
@@ -29,7 +22,7 @@ const pageTitles: Record<string, string> = {
   '/app': 'Home',
   '/integrations': 'Integrations',
   '/api-status': 'API Status',
-  '/settings': 'Settings'
+  '/settings': 'Settings',
 };
 
 export const mainMenu = [
@@ -76,19 +69,6 @@ export const mainMenu = [
 ];
 
 export const bottomMenu = [
-  {
-    label: 'Logout',
-    icon: ArrowLeftStartOnRectangleIcon as FC,
-    iconClassName: 'h-5 w-5 fill-grey-200',
-    link: () => {
-      turnkeyClient.logout();
-      removeFromSession(GlobalAccountSession);
-      removeFromLocalStorage(EmbeddedKey);
-      signOut({ callbackUrl: '/sign-in' });
-    },
-    external: false,
-    disabled: false,
-  },
   {
     label: 'Settings',
     icon: SettingsIcon,

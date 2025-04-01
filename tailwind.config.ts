@@ -14,19 +14,21 @@ const config: Config = {
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
       colors: {
+        'charcoal': '#141012',
         'surface': {
-          'default': '#141012',
-          'sunken': '#0A0508',
-          'raised': '#201C1E'
+          default: '#141012',
+          sunken: '#0A0508',
+          raised: '#201C1E',
         },
         'cta': {
-          'default': '#322D2F'
+          default: '#322D2F',
         },
         'text': {
-          'secondary': '#BABABA'
+          secondary: '#BABABA',
         },
         'feedback': {
-          'success': "#0D7038"
+          success: '#0D7038',
+          error: '#8E3231',
         },
         'grey': {
           '50': '#f5f6f6',

@@ -2,7 +2,6 @@
 
 import { FC, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { useSession } from 'next-auth/react';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -15,17 +14,16 @@ import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
 import { UserDetails } from '@/app/settings/components/UserDetails';
-import { useTeamCollaborators } from '@/hooks';
+import { useTeamCollaborators, useGlobalAccount } from '@/hooks';
 
 import './View.css';
 
 const View: FC = () => {
   const { isLoading, teamCollaborators, refreshData } = useTeamCollaborators();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
   const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
-
+  const { currentUser } = useGlobalAccount();
+  // TODO: check why curremtUser!.role is not working here
   return (
     <div className="settings-page">
       {isLoading && <Loader isLoading={true} />}
@@ -35,10 +33,10 @@ const View: FC = () => {
           <UserDetails />
           <Card className="primary team-information">
             <div className="team-header">
-              <Title component="h4" className="settings-card-title">
+              <Title component="h2" className="settings-card-title">
                 Team Management
               </Title>
-              {isOwner(role) && (
+              {isOwner(currentUser?.role ?? '') && (
                 <Button className="primary" onClick={() => setIsOpen(!isOpen)}>
                   <PlusIcon className="h-5 w-5" /> Invite Team Member
                 </Button>

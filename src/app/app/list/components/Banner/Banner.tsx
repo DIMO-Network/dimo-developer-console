@@ -1,39 +1,59 @@
-import React, {FC} from 'react';
+import React, { FC } from 'react';
 import './Banner.css';
-import CreateAppButton from "@/app/app/list/components/CreateAppButton";
-import AddCreditsButton from "@/app/app/list/components/AddCreditsButton";
-import {ActionCompletedRow} from "@/app/app/list/components/Banner/components/ActionCompletedRow";
-import {CTARow} from "@/app/app/list/components/Banner/components/CTARow";
-import {IApp} from "@/types/app";
+import CreateAppButton from '@/app/app/list/components/CreateAppButton';
+import AddCreditsButton from '@/app/app/list/components/AddCreditsButton';
+import { ActionCompletedRow } from '@/app/app/list/components/Banner/components/ActionCompletedRow';
+import { CTARow } from '@/app/app/list/components/Banner/components/CTARow';
+import { FragmentType, gql, useFragment } from '@/gql';
 
-export interface CTA {
-  label: string;
-  onClick: () => void;
-}
+export const GET_TOTAL_LICENSE_COUNT = gql(`
+  fragment TotalDeveloperLicenseCountFragment on DeveloperLicenseConnection {
+    totalCount
+  }
+`);
 
 interface Props {
   balance: number;
-  apps: IApp[];
+  licenseConnection: FragmentType<typeof GET_TOTAL_LICENSE_COUNT>;
 }
 
-export const Banner: FC<Props> = ({ balance, apps }) => {
+export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
+  const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
+
   return (
     <div className="banner-content">
       <div>
         <p className="font-black text-xl">Getting Started</p>
-        <p className="text-text-secondary text-sm mt-1">You’re on the way to building with DIMO!</p>
+        <p className="text-text-secondary text-sm mt-1">
+          You’re on the way to building with DIMO!
+        </p>
       </div>
-      <div className={"flex flex-col flex-1 gap-4 w-full"}>
+      <div className={'flex flex-col flex-1 gap-4 w-full'}>
         <ActionCompletedRow text={'Create account'} />
         <ActionCompletedRow text={'Confirm your details'} />
-        {apps.length ? (<ActionCompletedRow text={'Create your first app'} />) : (
+        {fragment.totalCount > 0 ? (
+          <ActionCompletedRow text={'Create your first app'} />
+        ) : (
           <CTARow
             text={'Create your first app'}
-            subtitle={"Now that your account is set up, it’s time to create your first application."}
-            CTA={<CreateAppButton className={"white-with-icon"} />}
+            subtitle={
+              'Now that your account is set up, it’s time to create your first application.'
+            }
+            CTA={<CreateAppButton className={'white-with-icon'} />}
           />
         )}
-        {apps.length ? (balance ? <ActionCompletedRow text={'Add credits'} /> : <CTARow text={'Add credits'} subtitle={'Your developer account needs DCX to function properly, purchase credits now'} CTA={<AddCreditsButton className={'white-with-icon'} />}/>) : null}
+        {fragment.totalCount > 0 &&
+          (balance ? (
+            <ActionCompletedRow text={'Add credits'} />
+          ) : (
+            <CTARow
+              text={'Add credits'}
+              subtitle={
+                'Your developer account needs DCX to function properly, purchase credits now'
+              }
+              CTA={<AddCreditsButton className={'white-with-icon'} />}
+            />
+          ))}
       </div>
     </div>
   );

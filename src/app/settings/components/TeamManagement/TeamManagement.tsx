@@ -1,5 +1,4 @@
 import { useState, type FC } from 'react';
-import { useSession } from 'next-auth/react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
 import * as Sentry from '@sentry/nextjs';
@@ -16,6 +15,7 @@ import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
 import { Card } from '@/components/Card';
+import { useGlobalAccount } from '@/hooks';
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
@@ -25,12 +25,11 @@ interface IProps {
 export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
+  const { currentUser } = useGlobalAccount();
 
   const renderUserName = ({ ...teamCollaborator }: ITeamCollaborator) => {
-    const { User: currentUser, email = '' } = teamCollaborator ?? {};
-    const { name } = currentUser ?? {};
+    const { User: me, email = '' } = teamCollaborator ?? {};
+    const { name } = me ?? {};
     const isPending = teamCollaborator.status === InvitationStatuses.PENDING;
 
     return (
@@ -51,7 +50,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
     role: invitationRole,
   }: ITeamCollaborator) => {
     return (
-      isOwner(role) &&
+      isOwner(currentUser!.role) &&
       invitationRole !== TeamRoles.OWNER && (
         <div
           className="flex flex-row items-center w-full h-full cursor-pointer"

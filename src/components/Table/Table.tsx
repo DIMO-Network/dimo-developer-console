@@ -17,33 +17,30 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
   const renderColumn = ({ name, label }: IColumn) => {
     return <Column key={`th-${label ?? name}`}>{label ?? name}</Column>;
   };
-
+  // TODO: check that conditional actions access.
   return (
     <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
       <table className="table">
         <thead className="table-header">
           <tr>
             {columns.map(renderColumn)}
-            {actions && (
-              <th scope="col" className="table-action-column">
-                <span className="sr-only">Actions</span>
-              </th>
-            )}
+            {/* {actions && (
+              <td className="table-action-cell" key={`field-${item?.id as string}`}>
+                {actions?.map((action, index) => action(item, index))}
+              </td>
+            )} */}
           </tr>
         </thead>
         <tbody className="table-body">
-          {data.map((item) => (
-            <tr
-              key={`column-${item?.id as string}`}
-              className={'border-t border-t-cta-default'}
-            >
+          {data.map((item, index) => (
+            <tr key={`row-${index}`} className={'border-t border-t-cta-default'}>
               {columns.map(({ name, render }) => {
                 const textNode = _.get(item, name, '');
                 const renderNode = render ? render(item) : null;
                 return <Cell key={name}>{renderNode || String(textNode)}</Cell>;
               })}
               {actions && (
-                <td className="table-action-cell" key={`field-${item?.id as string}`}>
+                <td className="table-action-cell" key={`row-action-cell-${index}`}>
                   {actions?.map((action, index) => action(item, index))}
                 </td>
               )}
