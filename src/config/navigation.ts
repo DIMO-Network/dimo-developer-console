@@ -9,12 +9,13 @@ import {
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
-
+const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
   if (APP_DETAILS_REGEX.test(path)) return 'App Details';
   if (LICENSE_DETAILS_REGEX.test(path)) return 'License Details';
+  if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed Vehicles';
 };
 
 const pageTitles: Record<string, string> = {

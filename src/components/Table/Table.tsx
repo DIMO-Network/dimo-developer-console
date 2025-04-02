@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { type FC } from 'react';
 
-import { type IColumn, Column } from './Column';
+import { Column, type IColumn } from './Column';
 import { Cell } from './Cell';
 
 import './Table.css';

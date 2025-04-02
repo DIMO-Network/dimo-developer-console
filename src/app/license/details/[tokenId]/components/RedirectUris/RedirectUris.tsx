@@ -1,12 +1,10 @@
 import { FragmentType, gql, useFragment } from '@/gql';
 import React, { FC } from 'react';
-
-import '../shared/Styles.css';
-import { Title } from '@/components/Title';
 import { RedirectUriList } from '@/components/RedirectUriList';
 import { RedirectUriForm } from '@/components/RedirectUriForm';
 
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
+import { Section, SectionHeader } from '@/components/Section';
 
 const REDIRECT_URIS_FRAGMENT = gql(`
   fragment RedirectUriFragment on DeveloperLicense {
@@ -29,12 +27,8 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
   const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
   const isLicenseOwner = useIsLicenseOwner(fragment);
   return (
-    <div className={'license-details-section'}>
-      <div className={'license-details-section-header'}>
-        <Title component="h2" className={'text-xl'}>
-          Authorized Redirect URIs
-        </Title>
-      </div>
+    <Section>
+      <SectionHeader title={'Authorized Redirect URIs'} />
       {isLicenseOwner && (
         <div>
           <RedirectUriForm
@@ -52,6 +46,6 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
           tokenId={fragment.tokenId}
         />
       )}
-    </div>
+    </Section>
   );
 };

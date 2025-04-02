@@ -1,10 +1,13 @@
 import React, { FC } from 'react';
-import { Title } from '@/components/Title';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
 
 import './Vehicles.css';
+import { Section, SectionHeader } from '@/components/Section';
+import { Button } from '@/components/Button';
+import Link from 'next/link';
+import { TotalVehicleCount } from '@/components/TotalVehicleCount';
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -31,26 +34,35 @@ export const Vehicles: FC<IProps> = ({ license }) => {
   });
 
   return (
-    <div className={'license-details-section'}>
-      <div className={'license-details-section-header'}>
-        <Title component="h2" className={'text-xl'}>
-          Vehicles
-        </Title>
-      </div>
+    <Section>
+      <SectionHeader title={'Vehicles'} />
       <div className={'flex flex-col flex-1'}>
         {!!error && <p>We had trouble fetching the connected vehicles</p>}
         {loading && <Loader isLoading={true} />}
-        {!!data && <VehiclesTotalCount totalCount={data.vehicles.totalCount} />}
+        {!!data && (
+          <VehiclesTotalCount
+            totalCount={data.vehicles.totalCount}
+            clientId={fragment.clientId}
+          />
+        )}
       </div>
-    </div>
+    </Section>
   );
 };
 
-const VehiclesTotalCount = ({ totalCount }: { totalCount: number }) => {
+const VehiclesTotalCount = ({
+  totalCount,
+  clientId,
+}: {
+  totalCount: number;
+  clientId: string;
+}) => {
   return (
     <div className={'vehicle-count-container'}>
-      <Title className={'text-4xl'}>{totalCount}</Title>
-      <p>Connected Vehicles</p>
+      <TotalVehicleCount totalCount={totalCount} />
+      <Link href={`/license/vehicles/${clientId}`}>
+        <Button className={'table-action-button'}>Vehicle Details</Button>
+      </Link>
     </div>
   );
 };
