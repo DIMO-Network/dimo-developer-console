@@ -97,13 +97,13 @@ export const View = () => {
           email: email,
           signInType: SignInType.PASSKEY,
           currentWallet: currentWalletAddress,
-        });        
+        });
       } else {
         setSignInProcess({
           email: email,
           signInType: SignInType.OTP,
           currentWallet: currentWalletAddress,
-        });        
+        });
       }
     } catch (error) {
       Sentry.captureException(error);

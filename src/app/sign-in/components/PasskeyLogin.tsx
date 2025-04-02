@@ -31,6 +31,7 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
           handlePasskeyRejected(true);
+          return;
         }
       }
       handlePasskeyRejected(false);
