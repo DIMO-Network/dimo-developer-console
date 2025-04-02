@@ -2,25 +2,25 @@ import { Anchor } from '@/components/Anchor';
 import { SignInButtons } from '@/components/SignInButton';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { IAuth } from '@/types/auth';
 import { gtSuper } from '@/utils/font';
 import { Button } from '@/components/Button';
 import { isEmpty } from 'lodash';
 import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { useAuth } from '@/hooks';
 
 interface IProps {
   handleLogin: (email: string) => Promise<void>;
-  handleCTA: (app: string, auth?: Partial<IAuth>) => Promise<void>;
 }
 
 interface EmailLoginFormInputs {
   email: string;
 }
 
-export const SignInMethodForm: FC<IProps> = ({ handleLogin, handleCTA }) => {
+export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { handleExternalAuth } = useAuth();
   const {
     register,
     handleSubmit,
@@ -66,14 +66,14 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin, handleCTA }) => {
           <div className="divider"></div>
         </div>
         <div className="sign-in__buttons">
-          <SignInButtons disabled={false} onCTA={handleCTA} />
+          <SignInButtons disabled={false} onCTA={handleExternalAuth} />
         </div>
         <div className="sign-in__extra-links">
           <div className="flex flex-row">
             <p className="terms-caption">
               Lost your passkey?{' '}
               <Anchor href="/email-recovery" target="_self" className="grey underline">
-                Recover with your email
+                Reset with your email
               </Anchor>
             </p>
           </div>

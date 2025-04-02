@@ -1,20 +1,17 @@
 'use client';
-import { ReactNode, useContext, useState } from 'react';
+import { ReactNode, useContext, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { setCookie } from 'cookies-next/client';
 import { Anchor } from '@/components/Anchor';
-import { IAuth } from '@/types/auth';
 import { useAuth, useErrorHandler, usePasskey } from '@/hooks';
 import { withNotifications } from '@/hoc';
 import { NotificationContext } from '@/context/notificationContext';
-import Image from 'next/image';
-
-import './View.css';
 import * as Sentry from '@sentry/nextjs';
 import { OtpInputForm, PasskeyLogin, SignInMethodForm } from '@/app/sign-in/components';
 import { getUserInformation } from '@/actions/user';
 import { isCollaborator } from '@/utils/user';
-import { isNull } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
+
+import './View.css';
 
 enum SignInType {
   NONE = 'none',
@@ -25,15 +22,13 @@ enum SignInType {
 const SignInForm = ({
   type,
   handleLogin,
-  handleCTA,
   handlePasskeyRejected,
   currentEmail,
   currentWallet,
 }: {
   type: SignInType;
   handleLogin: (email: string) => Promise<void>;
-  handleCTA: (app: string, auth?: Partial<IAuth>) => Promise<void>;
-  handlePasskeyRejected: () => void;
+  handlePasskeyRejected: (shouldFallback: boolean) => void;
   currentEmail: string;
   currentWallet: `0x${string}` | null;
 }): ReactNode => {
@@ -48,23 +43,23 @@ const SignInForm = ({
         />
       );
     default:
-      return <SignInMethodForm handleCTA={handleCTA} handleLogin={handleLogin} />;
+      return <SignInMethodForm handleLogin={handleLogin} />;
   }
 };
 
 export const View = () => {
   useErrorHandler();
   const { setNotification } = useContext(NotificationContext);
-  const { setUser, handleExternalAuth } = useAuth();
+  const { setUser, completeExternalAuth } = useAuth();
   const { isPasskeyAvailable } = usePasskey();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const invitationCode = searchParams.get('code') ?? '';
-  if (invitationCode) {
-    setCookie('invitation_code', invitationCode, {
-      maxAge: 60 * 60,
-    });
-  }
+  const authCode = searchParams.get('code') ?? '';
+  // if (invitationCode) {
+  //   setCookie('invitation_code', invitationCode, {
+  //     maxAge: 60 * 60,
+  //   });
+  // }
 
   const [signInProcess, setSignInProcess] = useState<{
     email: string;
@@ -75,12 +70,6 @@ export const View = () => {
     signInType: SignInType.NONE,
     currentWallet: null,
   });
-
-  const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
-    //await signIn(app, auth);
-    console.info('handleCTA', app, auth);
-    handleExternalAuth(app);
-  };
 
   const handleLogin = async (email: string) => {
     try {
@@ -103,19 +92,18 @@ export const View = () => {
         subOrganizationId: subOrganizationId,
         email: email,
       });
-
-      if (hasPasskey && !isNull(isPasskeyAvailable) && isPasskeyAvailable) {
+      if (hasPasskey && isPasskeyAvailable) {
         setSignInProcess({
           email: email,
           signInType: SignInType.PASSKEY,
           currentWallet: currentWalletAddress,
-        });
+        });        
       } else {
         setSignInProcess({
           email: email,
           signInType: SignInType.OTP,
           currentWallet: currentWalletAddress,
-        });
+        });        
       }
     } catch (error) {
       Sentry.captureException(error);
@@ -123,30 +111,41 @@ export const View = () => {
     }
   };
 
-  const handlePasskeyRejected = () => {
+  const handlePasskeyRejected = (shouldFallback: boolean) => {
     setSignInProcess((signInProcess) => ({
       ...signInProcess,
-      signInType: SignInType.OTP,
+      signInType: shouldFallback ? SignInType.OTP : SignInType.NONE,
     }));
   };
 
-  // useEffect(() => {
-  //   if (!session) return;
-  //   if (isCollaborator(session.user.role)) {
-  //     router.push('/app');
-  //   } else {
-  //     void handleLogin(session.user.email!);
-  //   }
-  // }, [session]);
+  const handleExternalAuth = async (provider: string) => {
+    try {
+      const { success, email } = await completeExternalAuth(provider);
+      console.info('External auth success', { success, email });
+      if (!success) {
+        setNotification('Failed to login with external provider', 'Oops...', 'error');
+        return;
+      }
+
+      handleLogin(email);
+    } catch (error) {
+      Sentry.captureException(error);
+      setNotification('Failed to login with external provider', 'Oops...', 'error');
+    }
+  };
+
+  useEffect(() => {
+    if (isNull(isPasskeyAvailable)) return;
+    if (isEmpty(authCode)) return;
+    void handleExternalAuth(authCode);
+  }, [authCode, isPasskeyAvailable]);
 
   return (
-    <main className="sign-in">
+    <div className="sign-in">
       <div className="sign-in__content">
-        <Image src={'/images/dimo-dev.svg'} alt="DIMO Logo" width={210} height={32} />
         <SignInForm
           currentEmail={signInProcess.email}
           type={signInProcess.signInType}
-          handleCTA={handleCTA}
           handleLogin={handleLogin}
           handlePasskeyRejected={handlePasskeyRejected}
           currentWallet={signInProcess.currentWallet}
@@ -174,15 +173,7 @@ export const View = () => {
           </div>
         </div>
       </div>
-      <div className="sign-in__background">
-        <Image
-          src={'/images/car_segment.svg'}
-          alt="DIMO Background"
-          width="684"
-          height="832"
-        />
-      </div>
-    </main>
+    </div>
   );
 };
 

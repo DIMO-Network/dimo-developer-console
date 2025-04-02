@@ -126,7 +126,7 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext }) => {
             );
           })}
           <Card
-            className="flex flex-col gap-4 card-border"
+            className="flex flex-col gap-4 card-border !rounded-2xl "
             onClick={() => handleSelection(buildForValues.somethingElse)}
           >
             <Label htmlFor="buildForText" className="text-sm text-medium">

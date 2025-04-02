@@ -1,6 +1,5 @@
-import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { NextFetchEvent, NextResponse } from 'next/server';
-import { isIn } from '@/utils/middlewareUtils';
+import { decodeJwtToken, isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
@@ -12,20 +11,14 @@ import { cookieName, getCookie } from './services/dimoDevAPI';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getToken = async ({ req }: { req: NextRequest }) => {
-  console.info(req);
+const getToken = async () => {
   const token = await getCookie(cookieName);
 
   if (!token) {
     return null;
   }
 
-  const jwks = createRemoteJWKSet(new URL(process.env.JWT_KEY_SET_URL!));
-  const { payload } = await jwtVerify(token, jwks, {
-    algorithms: ['RS256'],
-    issuer: process.env.JWT_ISSUER,
-  });
+  const payload = await decodeJwtToken(token);
 
   return payload;
 };
@@ -99,7 +92,7 @@ const validatePrivateSession = async (request: NextRequest) => {
 };
 
 const validatePublicSession = async (request: NextRequest) => {
-  const token = await getToken({ req: request });
+  const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const isAPIProtected = mustBeAuthorize(request, token);
   const isAPI = request.nextUrl.pathname.startsWith(API_PATH);
@@ -125,7 +118,7 @@ const validatePublicSession = async (request: NextRequest) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
   const hasError = request.nextUrl.searchParams.get('error');
-  const token = await getToken({ req: request });
+  const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
 
   try {

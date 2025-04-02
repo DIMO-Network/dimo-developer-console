@@ -14,6 +14,7 @@ interface IProps {
     currentWalletValue?: `0x${string}` | null;
   }) => Promise<{ success: boolean; newWalletAddress?: `0x${string}` }>;
   handleExternalAuth: (provider: string) => void;
+  completeExternalAuth: (code: string) => Promise<{ success: boolean; email: string }>;
   logout: () => Promise<void>;
 }
 
@@ -27,5 +28,8 @@ export const AuthContext = createContext<IProps>({
     return { success: false };
   },
   handleExternalAuth: () => {},
+  completeExternalAuth: async () => {
+    return { success: false, email: '' };
+  },
   logout: async () => {},
 });

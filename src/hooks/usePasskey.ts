@@ -3,13 +3,13 @@ import config from '@/config';
 import { turnkeyConfig } from '@/config/turnkey';
 import { IPasskeyAttestation } from '@/types/wallet';
 import { getWebAuthnAttestation } from '@turnkey/http';
-import { useEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 
 export const usePasskey = () => {
   const [isPasskeyAvailable, setIsPasskeyAvailable] = useState<boolean | null>(null);
 
-  const validatePasskeyAvailability = async (): Promise<boolean> => {
+  const validatePasskeyAvailability = useCallback(async (): Promise<boolean> => {
     // Availability of "window.PublicKeyCredential" means WebAuthn is usable.
     if (typeof window === 'undefined' || !window.PublicKeyCredential) return false;
     try {
@@ -34,7 +34,7 @@ export const usePasskey = () => {
       Sentry.captureException(e);
       return false;
     }
-  };
+  }, []);
 
   const generateRandomBuffer = (): ArrayBuffer => {
     const arr = new Uint8Array(32);
@@ -101,7 +101,8 @@ export const usePasskey = () => {
     return { attestation, encodedChallenge };
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    console.info('Checking passkey availability');
     validatePasskeyAvailability().then((isAvailable) => {
       console.info('Passkey available:', isAvailable);
       setIsPasskeyAvailable(isAvailable);

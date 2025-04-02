@@ -1,4 +1,4 @@
-import { getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
+import { exchangeDimoToken, getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
 import { saveToken, signOut } from '@/actions/user';
 import { completeUserData } from '@/app/sign-up/actions';
 import { passkeyClient, turnkeyClient } from '@/config/turnkey';
@@ -19,8 +19,10 @@ import {
 } from '@/utils/sessionStorage';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty, isNull, isUndefined } from 'lodash';
+import config from '@/config';
 //import { cookies } from 'next/headers';
 import { ComponentType, useState } from 'react';
+import { decodeJwtToken } from '@/utils/middlewareUtils';
 const halfHour = 30 * 60;
 // const fifteenMinutes = 15 * 60;
 
@@ -204,8 +206,18 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     };
 
     const handleExternalAuth = (provider: string) => {
-      const url = `${process.env.NEXT_PUBLIC_DIMO_AUTH_URL}/auth/${provider}?client_id=developer-platform&redirect_uri=${window.location.origin}&response_type=code&scope=openid profile email`;
+      const url = `${process.env.NEXT_PUBLIC_DIMO_AUTH_URL}/auth/${provider}?client_id=developer-platform&redirect_uri=${config.frontendUrl}sign-in&response_type=code&scope=openid profile email`;
       window.location.href = url;
+    };
+
+    const completeExternalAuth = async (
+      code: string,
+    ): Promise<{ success: boolean; email: string }> => {
+      const token = await exchangeDimoToken(code);
+      const payload = await decodeJwtToken(token.access_token);
+      console.info('External auth payload', { payload });
+      const { email } = payload;
+      return { success: true, email: email as string };
     };
 
     return (
@@ -217,6 +229,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
           completeOtpLogin,
           logout,
           handleExternalAuth,
+          completeExternalAuth,
         }}
       >
         <WrappedComponent {...props} />

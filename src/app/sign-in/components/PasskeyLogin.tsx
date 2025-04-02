@@ -8,7 +8,7 @@ import { FC, useContext, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 
 interface IProps {
-  handlePasskeyRejected: () => void;
+  handlePasskeyRejected: (shouldFallback: boolean) => void;
   currentWallet: `0x${string}` | null;
 }
 
@@ -30,9 +30,10 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
     } catch (error: unknown) {
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
-          handlePasskeyRejected();
+          handlePasskeyRejected(true);
         }
       }
+      handlePasskeyRejected(false);
       captureException(error);
       setNotification('Failed to login with passkey', 'Oops...', 'error');
     }

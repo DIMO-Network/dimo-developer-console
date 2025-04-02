@@ -3,7 +3,9 @@ import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
 import { Button } from '@/components/Button';
-import { useState, useRef, useEffect, FC } from 'react';
+import { useState, useRef, useEffect, FC, useContext } from 'react';
+import { captureException } from '@sentry/nextjs';
+import { NotificationContext } from '@/context/notificationContext';
 
 interface IProps {
   email: string;
@@ -11,6 +13,7 @@ interface IProps {
 }
 
 export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
+  const { setNotification } = useContext(NotificationContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const inputRefs = useRef<HTMLInputElement[]>([]);
@@ -84,14 +87,14 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
       });
 
       if (!success) {
-        //setNotification('Invalid OTP code', 'Error', 'error');
+        setNotification('Invalid OTP code', 'Error', 'error');
         return;
       }
 
       handleSignupComplete(newWalletAddress!);
     } catch (error: unknown) {
-      console.error(error);
-      //Sentry.captureException(error);
+      setNotification('Something went wrong', 'Error', 'error');
+      captureException(error);
     } finally {
       setIsLoading(false);
     }
@@ -109,6 +112,25 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
       handleVerify();
     }
   };
+
+  /**
+   * Resend the OTP code
+   */
+  const handleResendCode = async () => {
+    try {
+      setIsLoading(true);
+      const newOtpId = await beginOtpLogin();
+      setOtpId(newOtpId);
+      setOtp(Array(6).fill(''));
+      setNotification('New OTP code sent to your email', 'Success', 'success');
+    } catch (error) {
+      captureException(error);
+      setNotification('Failed to resend OTP code', 'Oops...', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="sign-up__form">
@@ -152,8 +174,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
           <Button
             className="border invert border-white !mt-3"
             role="continue-button"
-            onClick={handleVerify}
-            disabled={false}
+            onClick={handleResendCode}
           >
             Resend Code
           </Button>

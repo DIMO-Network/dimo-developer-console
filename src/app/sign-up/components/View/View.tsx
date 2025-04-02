@@ -87,7 +87,7 @@ const View = () => {
   };
 
   return (
-    <main className="sign-up">
+    <div className="sign-up">
       <div className="sign-up__content">
         <img src={'/images/dimo-dev.svg'} alt="DIMO Logo" />
         {SignUpFlow && <SignUpFlow onNext={handleNext} auth={authData} />}
@@ -114,10 +114,7 @@ const View = () => {
           </div>
         </div>
       </div>
-      <div className="sign-up__background">
-        <img src={'/images/car_segment.svg'} alt="DIMO Background" />
-      </div>
-    </main>
+    </div>
   );
 };
 
