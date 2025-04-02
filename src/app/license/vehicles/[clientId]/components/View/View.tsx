@@ -9,9 +9,8 @@ import { TotalVehicleCount } from '@/components/TotalVehicleCount';
 
 const DEVELOPER_LICENSE_VEHICLE_DETAILS = gql(`
   query DeveloperLicenseVehiclesQuery($clientId: Address!) {
-    vehicles(first: 100, filterBy: { privileged: $clientId }) {
+    vehicles(first: 0, filterBy: { privileged: $clientId }) {
       totalCount
-      ...DeveloperLicenseVehicleDetailsNodesFragment
     }
   }
 `);
@@ -26,9 +25,14 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       <Section>
         <TotalVehicleCount totalCount={data?.vehicles.totalCount ?? 0} />
       </Section>
+      {/*<Section>*/}
+      {/*  <SectionHeader title={'Example vehicles'} />*/}
+      {/*  /!*<ExampleVehicleTableWithPagination />*!/*/}
+      {/*  /!*<ExampleVehicleTable />*!/*/}
+      {/*</Section>*/}
       <Section>
         <SectionHeader title={'Vehicle Details'} />
-        {data?.vehicles && <VehicleDetailsTable vehicleConnection={data?.vehicles} />}
+        {data?.vehicles && <VehicleDetailsTable clientId={clientId} />}
       </Section>
     </div>
   );
