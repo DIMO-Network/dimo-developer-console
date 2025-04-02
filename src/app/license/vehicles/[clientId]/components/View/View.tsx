@@ -25,11 +25,6 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       <Section>
         <TotalVehicleCount totalCount={data?.vehicles.totalCount ?? 0} />
       </Section>
-      {/*<Section>*/}
-      {/*  <SectionHeader title={'Example vehicles'} />*/}
-      {/*  /!*<ExampleVehicleTableWithPagination />*!/*/}
-      {/*  /!*<ExampleVehicleTable />*!/*/}
-      {/*</Section>*/}
       <Section>
         <SectionHeader title={'Vehicle Details'} />
         {data?.vehicles && <VehicleDetailsTable clientId={clientId} />}
