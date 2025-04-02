@@ -1,2 +1,2 @@
 export * from './Table';
-export { PaginatedTable } from '@/components/Table/PaginatedTable';
+export * from '@/components/Table/PaginatedTable';
