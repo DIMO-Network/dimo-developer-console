@@ -27,7 +27,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       </Section>
       <Section>
         <SectionHeader title={'Vehicle Details'} />
-        {data?.vehicles && <VehicleDetailsTable clientId={clientId} />}
+        <VehicleDetailsTable clientId={clientId} />
       </Section>
     </div>
   );

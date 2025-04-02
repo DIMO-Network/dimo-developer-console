@@ -25,6 +25,7 @@ interface PaginatedTableProps<TData> {
   rowCount: number;
   loading?: boolean;
   pageInfo: { startCursor?: string | null; endCursor?: string | null };
+  pageSize: number;
 }
 
 export const PaginatedTable = <TData,>({
@@ -34,24 +35,25 @@ export const PaginatedTable = <TData,>({
   rowCount,
   loading,
   pageInfo,
+  pageSize,
 }: PaginatedTableProps<TData>) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize,
   });
   const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
     const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
     if (newPagination.pageIndex > pagination.pageIndex) {
       onPaginationChange({
         after: pageInfo.endCursor,
-        first: 10,
+        first: pageSize,
         last: null,
         before: null,
       });
     } else if (newPagination.pageIndex < pagination.pageIndex) {
       onPaginationChange({
         before: pageInfo.startCursor,
-        last: 10,
+        last: pageSize,
         after: null,
         first: null,
       });

@@ -1,11 +1,13 @@
 'use client';
-import { GetVehiclesByClientIdQuery } from '@/gql/graphql';
 import { FC } from 'react';
 import { PaginatedTable } from '@/components/Table';
-import { createColumnHelper, ColumnDef } from '@tanstack/table-core';
 import { useQuery } from '@apollo/client';
 import { gql } from '@/gql';
 import { Loader } from '@/components/Loader';
+import {
+  columns,
+  PAGE_SIZE,
+} from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable/constants';
 
 interface IProps {
   clientId: string;
@@ -33,29 +35,9 @@ const VEHICLES_BY_CLIENT_ID = gql(`
   }
 `);
 
-type VehicleNode = GetVehiclesByClientIdQuery['vehicles']['nodes'][0];
-const columnHelper = createColumnHelper<VehicleNode>();
-const columns: ColumnDef<VehicleNode>[] = [
-  // @ts-expect-error multiple properties are improperly typed, but not sure how to fix it
-  columnHelper.accessor('tokenId', {
-    header: 'Vehicle token ID',
-  }),
-  columnHelper.display({
-    id: 'vehicleMMY', // Unique ID since we're not directly accessing a property
-    header: 'Vehicle MMY',
-    cell: (info) => {
-      const definition = info.row.original.definition;
-      return (
-        <p>
-          {definition?.make} {definition?.model} {definition?.year}
-        </p>
-      );
-    },
-  }),
-];
 export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
   const { data, refetch, loading, error } = useQuery(VEHICLES_BY_CLIENT_ID, {
-    variables: { clientId, first: 10 },
+    variables: { clientId, first: PAGE_SIZE },
   });
   if (error) {
     return <p>Error: {error.message}</p>;
@@ -73,6 +55,7 @@ export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
       onPaginationChange={refetch}
       rowCount={data.vehicles.totalCount}
       pageInfo={data.vehicles.pageInfo}
+      pageSize={PAGE_SIZE}
     />
   );
 };
