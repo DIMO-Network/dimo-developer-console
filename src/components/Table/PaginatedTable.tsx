@@ -11,30 +11,59 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
 import { Column } from './Column';
 import { Cell } from './Cell';
 import './Table.css';
+import { useState } from 'react';
 
 interface PaginatedTableProps<TData> {
   columns: ColumnDef<TData>[];
   data: TData[];
-  pagination: PaginationState;
-  onPaginationChange: OnChangeFn<PaginationState>;
+  onPaginationChange: (pageChangeArgs: {
+    first?: number | null;
+    last?: number | null;
+    before?: string | null;
+    after?: string | null;
+  }) => void;
   rowCount: number;
   loading?: boolean;
+  pageInfo: { startCursor?: string | null; endCursor?: string | null };
 }
 
 export const PaginatedTable = <TData,>({
   columns,
   data,
-  pagination,
   onPaginationChange,
   rowCount,
   loading,
+  pageInfo,
 }: PaginatedTableProps<TData>) => {
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
+    const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
+    if (newPagination.pageIndex > pagination.pageIndex) {
+      onPaginationChange({
+        after: pageInfo.endCursor,
+        first: 10,
+        last: null,
+        before: null,
+      });
+    } else if (newPagination.pageIndex < pagination.pageIndex) {
+      onPaginationChange({
+        before: pageInfo.startCursor,
+        last: 10,
+        after: null,
+        first: null,
+      });
+    }
+    setPagination(newPagination);
+  };
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
-    onPaginationChange,
+    onPaginationChange: handlePaginationChange,
     state: { pagination },
     rowCount,
   });

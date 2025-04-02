@@ -1,13 +1,8 @@
 'use client';
 import { GetVehiclesByClientIdQuery } from '@/gql/graphql';
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { PaginatedTable } from '@/components/Table';
-import {
-  createColumnHelper,
-  ColumnDef,
-  OnChangeFn,
-  PaginationState,
-} from '@tanstack/table-core';
+import { createColumnHelper, ColumnDef } from '@tanstack/table-core';
 import { useQuery } from '@apollo/client';
 import { gql } from '@/gql';
 import { Loader } from '@/components/Loader';
@@ -62,29 +57,6 @@ export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
   const { data, refetch, loading, error } = useQuery(VEHICLES_BY_CLIENT_ID, {
     variables: { clientId, first: 10 },
   });
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-  const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
-    const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-    if (newPagination.pageIndex > pagination.pageIndex) {
-      refetch({
-        after: data?.vehicles.pageInfo.endCursor,
-        first: 10,
-        last: null,
-        before: null,
-      });
-    } else if (newPagination.pageIndex < pagination.pageIndex) {
-      refetch({
-        before: data?.vehicles.pageInfo.startCursor,
-        last: 10,
-        after: null,
-        first: null,
-      });
-    }
-    setPagination(newPagination);
-  };
   if (error) {
     return <p>Error: {error.message}</p>;
   }
@@ -98,9 +70,9 @@ export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
     <PaginatedTable
       data={data.vehicles.nodes}
       columns={columns}
-      pagination={pagination}
-      onPaginationChange={handlePaginationChange}
+      onPaginationChange={refetch}
       rowCount={data.vehicles.totalCount}
+      pageInfo={data.vehicles.pageInfo}
     />
   );
 };
