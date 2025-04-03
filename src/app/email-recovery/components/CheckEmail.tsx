@@ -1,30 +1,21 @@
 'use client';
 import { FC } from 'react';
-import { CheckIcon, ClickIcon } from '@/components/Icons';
+import { gtSuper } from '@/utils/font';
+import { Button } from '@/components/Button';
 
 interface IProps {}
 
 export const CheckEmail: FC<IProps> = () => {
   return (
-    <div className="text-left text-xl gap-8 mt-4">
-      <h1>Not seeing an email? Check your spam folder or</h1>
-      <h1>resend code</h1>
-      <div className="email-recovery__timeline">
-        <div className="time-line"></div>
-        <div className="steps">
-          <div className="step">
-            <div className="step-icon">
-              <CheckIcon />
-            </div>
-            <p>Email sent</p>
-          </div>
-          <div className="step">
-            <div className="step-icon">
-              <ClickIcon />
-            </div>
-            <p>Click link to confirm</p>
-          </div>
-        </div>
+    <div className="email-recovery__form">
+      <div className="email-recovery__header">
+        <p className={gtSuper.className}>Click the link in your email</p>
+      </div>
+      <div className="email-recovery__input">
+        <p>Not seeing an email? Check your spam folder or resend code.</p>
+        <Button type="button" className="border invert border-white" role="cancel-button">
+          Resend code
+        </Button>
       </div>
     </div>
   );

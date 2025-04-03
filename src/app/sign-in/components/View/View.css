@@ -1,12 +1,8 @@
 .sign-in {
-  @apply flex flex-row justify-center h-screen gap-4;
+  @apply flex flex-row justify-center gap-4;
 
   .sign-in__content {
-    @apply flex flex-col mx-6 w-full lg:mx-0 lg:w-1/2 items-center justify-center h-screen;
-
-    img {
-      @apply mb-12;
-    }
+    @apply flex flex-col mx-6 w-full lg:mx-0 items-center justify-center;
 
     .sign-in__form {
       @apply flex flex-col w-full max-w-sm gap-4 px-4 py-4 bg-charcoal rounded-3xl;
@@ -65,13 +61,6 @@
 
     .sign-in__buttons {
       @apply flex flex-row gap-4 pb-4 align-middle justify-center;
-    }
-  }
-
-  .sign-in__background {
-    @apply hidden lg:flex w-1/2 h-screen;
-    img {
-      @apply object-cover w-full h-full;
     }
   }
 }

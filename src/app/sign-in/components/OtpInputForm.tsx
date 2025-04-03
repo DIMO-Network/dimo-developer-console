@@ -110,9 +110,28 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     if (pasteData.length === 6) {
       const newOtp = pasteData.split('');
       setOtp(newOtp);
-      handleVerify();
+      // handleVerify();
     }
   };
+
+  /**
+   * Resend the OTP code
+   */
+  const handleResendCode = async () => {
+    try {
+      setIsLoading(true);
+      const newOtpId = await beginOtpLogin();
+      setOtpId(newOtpId);
+      setOtp(Array(6).fill(''));
+      setNotification('New OTP code sent to your email', 'Success', 'success');
+    } catch (error) {
+      captureException(error);
+      setNotification('Failed to resend OTP code', 'Oops...', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="sign-in__form">
@@ -156,7 +175,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
           <Button
             className="border invert border-white !mt-3"
             role="continue-button"
-            onClick={handleVerify}
+            onClick={handleResendCode}
             disabled={false}
           >
             Resend Code

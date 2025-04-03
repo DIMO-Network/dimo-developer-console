@@ -70,7 +70,6 @@ export const saveNewPasskey = async ({
 export const saveToken = async (token: string, sessionExpiration: number) => {
   const userCookies = await cookies();
   userCookies.set(cookieName, token, { maxAge: sessionExpiration });
-  console.info('Session token:', token);
 };
 
 export const signOut = async () => {

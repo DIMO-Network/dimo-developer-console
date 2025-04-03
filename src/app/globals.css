@@ -27,7 +27,7 @@ body {
 
 @layer base {
   body {
-    @apply text-sm font-light;
+    @apply text-sm font-light not-italic;
   }
 }
 

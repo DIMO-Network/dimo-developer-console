@@ -36,6 +36,7 @@ const typeOptions = DEVELOPER_TYPES.map((type) => ({
 })) as { value: string; text: string }[];
 
 interface IProps {
+  auth?: Partial<IAuth>;
   onNext: (flow: string, auth?: Partial<IAuth>) => void;
 }
 
@@ -159,7 +160,7 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
   );
 };
 
-export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
+export const CompanyInfoForm: FC<IProps> = ({ onNext, auth }) => {
   const {
     control,
     register,
@@ -179,6 +180,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext }) => {
 
   const updateUser = async (companyData: CompanyInfoInputs) => {
     onNext('company-information', {
+      ...auth,
       company: {
         ...companyData,
       },

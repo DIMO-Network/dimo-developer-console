@@ -1,4 +1,4 @@
-import { getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
+import { exchangeDimoToken, getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
 import { saveToken, signOut } from '@/actions/user';
 import { completeUserData } from '@/app/sign-up/actions';
 import { passkeyClient, turnkeyClient } from '@/config/turnkey';
@@ -19,9 +19,11 @@ import {
 } from '@/utils/sessionStorage';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty, isNull, isUndefined } from 'lodash';
+import config from '@/config';
 //import { cookies } from 'next/headers';
 import { ComponentType, useState } from 'react';
-const halfHour = 30 * 60;
+import { decodeJwtToken } from '@/utils/middlewareUtils';
+const halfHour = 60 * 30;
 // const fifteenMinutes = 15 * 60;
 
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
@@ -34,15 +36,17 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     const createSession = async ({
       accessToken,
       sessionExpiration,
+      tokenExpiration,
       credentialBundle,
       privateKey,
     }: {
       credentialBundle: string;
       privateKey: string;
       accessToken: string;
+      tokenExpiration: number;
       sessionExpiration: number;
     }) => {
-      saveToken(accessToken, sessionExpiration);
+      saveToken(accessToken, tokenExpiration);
       saveToLocalStorage(EmbeddedKey, privateKey);
 
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
@@ -137,7 +141,8 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
       await createSession({
         accessToken: token.access_token,
-        sessionExpiration,
+        tokenExpiration: halfHour, // for cookie expiration
+        sessionExpiration: sessionExpiration, // for session expiration
         credentialBundle,
         privateKey: key.privateKey,
       });
@@ -188,7 +193,8 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
       await createSession({
         accessToken: token.access_token,
-        sessionExpiration,
+        tokenExpiration: halfHour, // for cookie expiration
+        sessionExpiration: sessionExpiration, // for session expiration
         credentialBundle,
         privateKey: key.privateKey,
       });
@@ -204,8 +210,17 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     };
 
     const handleExternalAuth = (provider: string) => {
-      const url = `${process.env.NEXT_PUBLIC_DIMO_AUTH_URL}/auth/${provider}?client_id=developer-platform&redirect_uri=${window.location.origin}&response_type=code&scope=openid profile email`;
+      const url = `${process.env.NEXT_PUBLIC_DIMO_AUTH_URL}/auth/${provider}?client_id=developer-platform&redirect_uri=${config.frontendUrl}sign-in&response_type=code&scope=openid profile email`;
       window.location.href = url;
+    };
+
+    const completeExternalAuth = async (
+      code: string,
+    ): Promise<{ success: boolean; email: string }> => {
+      const token = await exchangeDimoToken(code);
+      const payload = await decodeJwtToken(token.access_token);
+      const { email } = payload;
+      return { success: true, email: email as string };
     };
 
     return (
@@ -217,6 +232,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
           completeOtpLogin,
           logout,
           handleExternalAuth,
+          completeExternalAuth,
         }}
       >
         <WrappedComponent {...props} />

@@ -19,6 +19,8 @@ const nextConfig = {
   reactStrictMode: false,
   env: {
     VERCEL_ENV: process.env.VERCEL_ENV,
+    JWT_KEY_SET_URL: process.env.JWT_KEY_SET_URL,
+    JWT_ISSUER: process.env.JWT_ISSUER,
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {

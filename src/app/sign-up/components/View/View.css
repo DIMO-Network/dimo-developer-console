@@ -2,7 +2,7 @@
   @apply flex flex-row justify-center h-screen gap-4;
 
   .sign-up__content {
-    @apply flex flex-col mx-6 w-full lg:mx-0 lg:w-1/2 items-center justify-center h-screen;
+    @apply flex flex-col mx-6 w-full lg:mx-0 items-center justify-center h-screen;
 
     img {
       @apply mb-12;
@@ -52,13 +52,6 @@
 
     .sign-up__buttons {
       @apply flex flex-col gap-4 pb-4 border-b border-grey-900;
-    }
-  }
-
-  .sign-up__background {
-    @apply hidden lg:flex w-1/2 h-screen;
-    img {
-      @apply object-cover w-full h-full;
     }
   }
 }
