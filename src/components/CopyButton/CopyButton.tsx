@@ -30,7 +30,13 @@ export const CopyButton: FC<ICopyButtonProps> = ({
         1000,
       );
     } catch (err) {
-      console.log('failed to copy');
+      setNotification(
+        'Failed to copy value',
+        'Error',
+        'error',
+        1000,
+      );
+      console.error('failed to copy', err);
     }
   };
 

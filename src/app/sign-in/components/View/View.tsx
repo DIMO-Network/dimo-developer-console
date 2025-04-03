@@ -120,8 +120,7 @@ export const View = () => {
 
   const handleExternalAuth = async (provider: string) => {
     try {
-      const { success, email } = await completeExternalAuth(provider);
-      console.info('External auth success', { success, email });
+      const { success, email } = await completeExternalAuth(provider);      
       if (!success) {
         setNotification('Failed to login with external provider', 'Oops...', 'error');
         return;

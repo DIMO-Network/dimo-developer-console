@@ -101,10 +101,8 @@ export const usePasskey = () => {
     return { attestation, encodedChallenge };
   };
 
-  useLayoutEffect(() => {
-    console.info('Checking passkey availability');
-    validatePasskeyAvailability().then((isAvailable) => {
-      console.info('Passkey available:', isAvailable);
+  useLayoutEffect(() => {    
+    validatePasskeyAvailability().then((isAvailable) => {      
       setIsPasskeyAvailable(isAvailable);
     });
   }, []);

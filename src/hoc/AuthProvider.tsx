@@ -214,8 +214,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       code: string,
     ): Promise<{ success: boolean; email: string }> => {
       const token = await exchangeDimoToken(code);
-      const payload = await decodeJwtToken(token.access_token);
-      console.info('External auth payload', { payload });
+      const payload = await decodeJwtToken(token.access_token);      
       const { email } = payload;
       return { success: true, email: email as string };
     };
