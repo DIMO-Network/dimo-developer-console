@@ -80,7 +80,7 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
                 Go back home
               </a>
               <button onClick={reset} className="text-sm font-semibold text-gray-900">
-                Re try
+                Retry
               </button>
             </div>
           </div>

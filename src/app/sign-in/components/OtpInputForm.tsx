@@ -110,7 +110,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     if (pasteData.length === 6) {
       const newOtp = pasteData.split('');
       setOtp(newOtp);
-      handleVerify();
+      // handleVerify();
     }
   };
 

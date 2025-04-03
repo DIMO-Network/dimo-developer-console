@@ -55,7 +55,7 @@ export const Menu: FC = withLoadingStatus(() => {
       <ul className="top-menu">
         <div className={'flex flex-row justify-between'}>
           <Image
-            src={'/images/dimo_dev_logo.svg'}
+            src={'/images/dimo-dev.svg'}
             alt="DIMO Logo"
             width={176}
             height={24}

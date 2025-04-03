@@ -15,7 +15,19 @@ export const getDimoChallenge = async (address: string) => {
     }),
   });
 
+  console.table({
+    scope: 'openid email',
+    response_type: 'code',
+    client_id: 'developer-platform',
+    domain: `${config.frontendUrl}sign-in`,
+    address: address,
+  });
+
   if (!response.ok) {
+    console.error('Error generating token', {
+      status: response.status,
+      statusText: response.statusText,
+    });
     throw new Error('Error generating challenge');
   }
 
@@ -36,8 +48,19 @@ export const getDimoToken = async (state: string, signedChallenge: string) => {
       signature: signedChallenge,
     }),
   });
+  console.table({
+    client_id: 'developer-platform',
+    domain: `${config.frontendUrl}sign-in`,
+    state: state,
+    grant_type: 'authorization_code',
+    signature: signedChallenge,
+  });
 
   if (!response.ok) {
+    console.error('Error generating token', {
+      status: response.status,
+      statusText: response.statusText,
+    });
     throw new Error('Error generating token');
   }
 
@@ -63,7 +86,18 @@ export const exchangeDimoToken = async (code: string) => {
     }),
   });
 
+  console.table({
+    client_id: 'developer-platform',
+    code: code,
+    grant_type: 'authorization_code',
+    redirect_uri: `${config.frontendUrl}sign-in`,
+  });
+
   if (!response.ok) {
+    console.error('Error exchanging token', {
+      status: response.status,
+      statusText: response.statusText,
+    });
     throw new Error('Error exchanging token');
   }
   return (await response.json()) as {
