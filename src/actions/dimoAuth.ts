@@ -15,14 +15,6 @@ export const getDimoChallenge = async (address: string) => {
     }),
   });
 
-  console.table({
-    scope: 'openid email',
-    response_type: 'code',
-    client_id: 'developer-platform',
-    domain: `${config.frontendUrl}sign-in`,
-    address: address,
-  });
-
   if (!response.ok) {
     console.error('Error generating token', {
       status: response.status,
@@ -47,13 +39,6 @@ export const getDimoToken = async (state: string, signedChallenge: string) => {
       grant_type: 'authorization_code',
       signature: signedChallenge,
     }),
-  });
-  console.table({
-    client_id: 'developer-platform',
-    domain: `${config.frontendUrl}sign-in`,
-    state: state,
-    grant_type: 'authorization_code',
-    signature: signedChallenge,
   });
 
   if (!response.ok) {
@@ -84,13 +69,6 @@ export const exchangeDimoToken = async (code: string) => {
       grant_type: 'authorization_code',
       redirect_uri: `${config.frontendUrl}sign-in`,
     }),
-  });
-
-  console.table({
-    client_id: 'developer-platform',
-    code: code,
-    grant_type: 'authorization_code',
-    redirect_uri: `${config.frontendUrl}sign-in`,
   });
 
   if (!response.ok) {
