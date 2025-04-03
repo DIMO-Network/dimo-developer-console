@@ -23,7 +23,7 @@ import config from '@/config';
 //import { cookies } from 'next/headers';
 import { ComponentType, useState } from 'react';
 import { decodeJwtToken } from '@/utils/middlewareUtils';
-const halfHour = 30 * 60;
+const halfHour = 60 * 30;
 // const fifteenMinutes = 15 * 60;
 
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
@@ -36,15 +36,17 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     const createSession = async ({
       accessToken,
       sessionExpiration,
+      tokenExpiration,
       credentialBundle,
       privateKey,
     }: {
       credentialBundle: string;
       privateKey: string;
       accessToken: string;
+      tokenExpiration: number;
       sessionExpiration: number;
     }) => {
-      saveToken(accessToken, sessionExpiration);
+      saveToken(accessToken, tokenExpiration);
       saveToLocalStorage(EmbeddedKey, privateKey);
 
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
@@ -139,7 +141,8 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
       await createSession({
         accessToken: token.access_token,
-        sessionExpiration,
+        tokenExpiration: halfHour, // for cookie expiration
+        sessionExpiration: sessionExpiration, // for session expiration
         credentialBundle,
         privateKey: key.privateKey,
       });
@@ -190,7 +193,8 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
       await createSession({
         accessToken: token.access_token,
-        sessionExpiration,
+        tokenExpiration: halfHour, // for cookie expiration
+        sessionExpiration: sessionExpiration, // for session expiration
         credentialBundle,
         privateKey: key.privateKey,
       });
@@ -214,7 +218,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       code: string,
     ): Promise<{ success: boolean; email: string }> => {
       const token = await exchangeDimoToken(code);
-      const payload = await decodeJwtToken(token.access_token);      
+      const payload = await decodeJwtToken(token.access_token);
       const { email } = payload;
       return { success: true, email: email as string };
     };

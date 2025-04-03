@@ -13,7 +13,6 @@ const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
 const getToken = async () => {
   const token = await getCookie(cookieName);
-
   if (!token) {
     return null;
   }
@@ -74,13 +73,13 @@ const validatePrivateSession = async (request: NextRequest) => {
   const flow = request.nextUrl.searchParams.get('flow');
 
   //TODO: check how isLoginPage affects on safari
-  if (isLoginPage && isCompliant) {    
+  if (isLoginPage && isCompliant) {
     return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });
   }
 
-  if (!isCompliant && !flow) {    
+  if (!isCompliant && !flow) {
     return NextResponse.redirect(new URL(`/sign-up?flow=${missingFlow}`, request.url), {
       status: 307,
     });
@@ -118,7 +117,6 @@ export const middleware = async (request: NextRequest, event: NextFetchEvent) =>
   const hasError = request.nextUrl.searchParams.get('error');
   const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
-
   try {
     if (token) {
       return validatePrivateSession(request);
