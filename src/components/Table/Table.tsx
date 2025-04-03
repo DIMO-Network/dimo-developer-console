@@ -21,7 +21,7 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
   return (
     <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
       <table className="table">
-        <thead>
+        <thead className="table-header">
           <tr>
             {columns.map(renderColumn)}
             {/* {actions && (

@@ -1,22 +1,24 @@
 'use client';
+
 import { FC, useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 
 import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
 import { isOwner } from '@/utils/user';
 import { Loader } from '@/components/Loader';
+import { PageSubtitle } from '@/components/PageSubtitle';
 import { SupportAgentIcon } from '@/components/Icons';
 import { SupportFormModal } from '@/app/settings/components/SupportFormModal';
 import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
-import { UserForm } from '@/app/settings/components/UserForm';
-import { useUser, useTeamCollaborators, useGlobalAccount } from '@/hooks';
+import { UserDetails } from '@/app/settings/components/UserDetails';
+import { useTeamCollaborators, useGlobalAccount } from '@/hooks';
 
 import './View.css';
 
 const View: FC = () => {
-  const { user } = useUser();
   const { isLoading, teamCollaborators, refreshData } = useTeamCollaborators();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
@@ -24,23 +26,19 @@ const View: FC = () => {
   // TODO: check why curremtUser!.role is not working here
   return (
     <div className="settings-page">
-      <div className="titles">
-        <Title>Settings</Title>
-        <p className="subtitle">General Settings for the Developer Console</p>
-      </div>
       {isLoading && <Loader isLoading={true} />}
       {!isLoading && (
         <>
-          <div className="user-information">
-            <Title component="h2">User</Title>
-            {user && <UserForm user={user} />}
-          </div>
-          <div className="team-information">
+          <PageSubtitle subtitle="Organization Settings" />
+          <UserDetails />
+          <Card className="primary team-information">
             <div className="team-header">
-              <Title component="h2">Team Management</Title>
+              <Title component="h2" className="settings-card-title">
+                Team Management
+              </Title>
               {isOwner(currentUser?.role ?? '') && (
                 <Button className="primary" onClick={() => setIsOpen(!isOpen)}>
-                  Invite team <PlusIcon className="h-5 w-5" />
+                  <PlusIcon className="h-5 w-5" /> Invite Team Member
                 </Button>
               )}
             </div>
@@ -48,7 +46,7 @@ const View: FC = () => {
               teamCollaborators={teamCollaborators.filter(({ deleted }) => !deleted)}
               refreshData={refreshData}
             />
-          </div>
+          </Card>
           <div className="flex">
             <Button
               className="primary-outline"

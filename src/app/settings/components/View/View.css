@@ -4,7 +4,7 @@
   .titles,
   .user-information,
   .team-information {
-    @apply flex flex-col gap-2;
+    @apply flex flex-col gap-4;
   }
 
   .team-header {
@@ -13,5 +13,9 @@
 
   .subtitle {
     @apply text-sm;
+  }
+
+  .settings-card-title {
+    @apply text-2xl font-black text-white;
   }
 }

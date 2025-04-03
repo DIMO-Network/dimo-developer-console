@@ -1,11 +1,15 @@
 .form-team-invitation {
-  @apply flex flex-col w-full;
+  @apply flex flex-col w-full pt-6;
+
+  .fields {
+    @apply flex flex-col gap-6
+  }
 
   .field {
     @apply w-full;
   }
 
-  .cta {
-    @apply flex w-full;
+  .actions {
+    @apply flex flex-col gap-4 pt-6;
   }
 }
