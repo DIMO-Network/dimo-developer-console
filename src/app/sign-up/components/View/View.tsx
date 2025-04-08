@@ -47,7 +47,7 @@ const View = () => {
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
     try {
       await completeUserData(auth);
-      router.replace('/app');
+      window.location.href = '/app';
     } catch (error) {
       console.error('Something went wrong while the completing user information', error);
       Sentry.captureException(error);
@@ -59,6 +59,7 @@ const View = () => {
     // Check if user already has a team, if so, redirect to app cause is an old user
     const user = await getUser();
     if (user?.team) {
+      history.replaceState({}, '', '/app');
       router.replace('/app');
       return;
     }

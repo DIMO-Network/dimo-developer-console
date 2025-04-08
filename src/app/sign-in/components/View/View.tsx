@@ -91,7 +91,7 @@ export const View = () => {
         userInformation;
 
       if (isCollaborator(role)) {
-        router.push('/app');
+        history.replaceState({}, '', '/app');
         return;
       }
 
@@ -99,7 +99,7 @@ export const View = () => {
         subOrganizationId: subOrganizationId,
         email: email,
       });
-      
+
       if (hasPasskey && isPasskeyAvailable) {
         setSignInProcess({
           email: email,

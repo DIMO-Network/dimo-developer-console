@@ -27,7 +27,7 @@ export const getUserInformation = async (email: string) => {
     return null;
   }
 
-  if(!existItem && organization) {
+  if (!existItem && organization) {
     return {
       existsOnGlobalAccount: true,
       existsOnDevConsole: false,

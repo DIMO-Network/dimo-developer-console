@@ -93,7 +93,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
         return;
       }
 
-      router.replace('/app');
+      window.location.href = '/app';
     } catch (error) {
       captureException(error);
       setNotification('Failed to login with OTP', 'Oops...', 'error');
