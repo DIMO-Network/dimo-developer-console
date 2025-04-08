@@ -86,6 +86,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
         otp: otpString,
         otpId,
         currentWalletValue: currentWallet,
+        exitstsOnDevConsole: true,
       });
       if (!success) {
         setNotification('Invalid OTP code', 'Oops...', 'error');

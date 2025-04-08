@@ -84,6 +84,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
         otp: otpString,
         otpId,
         currentWalletValue: null,
+        exitstsOnDevConsole: false,
       });
 
       if (!success) {
@@ -109,7 +110,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
     if (pasteData.length === 6) {
       const newOtp = pasteData.split('');
       setOtp(newOtp);
-      handleVerify();
+      //handleVerify();
     }
   };
 

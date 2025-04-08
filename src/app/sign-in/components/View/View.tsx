@@ -80,6 +80,13 @@ export const View = () => {
         return;
       }
 
+      const { existsOnDevConsole, existsOnGlobalAccount } = userInformation;
+
+      if (!existsOnDevConsole && existsOnGlobalAccount) {
+        router.push(`/sign-up?email=${encodeURIComponent(email)}&hasGlobalAccount=true`);
+        return;
+      }
+
       const { role, subOrganizationId, hasPasskey, currentWalletAddress } =
         userInformation;
 
@@ -92,6 +99,7 @@ export const View = () => {
         subOrganizationId: subOrganizationId,
         email: email,
       });
+      
       if (hasPasskey && isPasskeyAvailable) {
         setSignInProcess({
           email: email,

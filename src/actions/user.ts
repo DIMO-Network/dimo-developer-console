@@ -21,18 +21,27 @@ export const existUserEmailOrAddress = async (address: string | null) => {
 
 export const getUserInformation = async (email: string) => {
   const { existItem, role, currentWallet } = await existUserByEmailOrAddress(email);
-  if (!existItem) {
-    return null;
-  }
-
   const organization = await getUserSubOrganization(email);
-  if (!organization) {
+
+  if (!organization && !existItem) {
     return null;
   }
 
-  const { hasPasskey, subOrganizationId } = organization;
+  if(!existItem && organization) {
+    return {
+      existsOnGlobalAccount: true,
+      existsOnDevConsole: false,
+      role: role,
+      currentWalletAddress: currentWallet,
+      hasPasskey: organization.hasPasskey,
+      subOrganizationId: organization.subOrganizationId,
+    };
+  }
+
+  const { hasPasskey, subOrganizationId } = organization!;
 
   return {
+    existsOnGlobalAccount: true,
     existsOnDevConsole: existItem,
     currentWalletAddress: currentWallet,
     role,

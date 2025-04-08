@@ -11,6 +11,8 @@ import { IPasskeyAttestation } from '@/types/wallet';
 import { OtpSignup } from './OtpSignup';
 import { isNull } from 'lodash';
 import { createNewUser } from '@/app/sign-up/actions';
+import { AxiosError } from 'axios';
+import { getUserSubOrganization } from '@/services/globalAccount';
 
 interface IProps {
   auth?: Partial<IAuth>;
@@ -77,16 +79,61 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
   };
 
   const globalAccountSignupComplete = (walletAddress: `0x${string}`) => {
+    console.info('create user call');
     createNewUser({
       name: email,
       email: email,
       address: walletAddress,
+      auth: 'credentials',
+      auth_login: email, 
     }).then(() => {
       onNext('wallet-creation', {
         email: email,
         address: walletAddress,
       });
     });
+  };
+
+  const handleUserAlreadyHasGlobalAccount = async (email: string) => {
+    try {
+      const userInformation = await getUserSubOrganization(email);
+      if (!userInformation) {
+        setNotification('Something went wrong while creating the user wallet', 'Oops...', 'error');
+        return;
+      }
+      const { subOrganizationId, hasPasskey } = userInformation;
+
+      setUser({
+        email,
+        subOrganizationId,
+      });
+
+      if (!hasPasskey) {
+        setWalletCreationType(WalletCreationType.OTP);
+        return;
+      }
+
+      const { success, newWalletAddress } = await loginWithPasskey({ exitstsOnDevConsole: false });
+
+      if (!success) {
+        setNotification(
+          'Something went wrong while creating the user wallet',
+          'Oops...',
+          'error',
+        );
+        return;
+      }
+
+      globalAccountSignupComplete(newWalletAddress!);      
+    } catch (error) {
+      Sentry.captureException(error);
+      console.error('Something went wrong while creating the user wallet', error);
+      setNotification(
+        'Something went wrong while creating the user wallet',
+        'Oops...',
+        'error',
+      );
+    }
   };
 
   const handleWalletCreation = async (email: string) => {
@@ -114,7 +161,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         return;
       }
 
-      const { success, newWalletAddress } = await loginWithPasskey({});
+      const { success, newWalletAddress } = await loginWithPasskey({ exitstsOnDevConsole: false });
       if (!success) {
         setNotification(
           'Something went wrong while creating the user wallet',
@@ -125,7 +172,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
       }
 
       globalAccountSignupComplete(newWalletAddress!);
-    } catch (error) {
+    } catch (error: unknown) {      
       Sentry.captureException(error);
       console.error('Something went wrong while creating the user wallet', error);
       setNotification(
@@ -139,8 +186,13 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
   useEffect(() => {
     if (isNull(isPasskeyAvailable)) return;
     const email = searchParams.get('email');
+    const hasGlobalAccount = searchParams.get('hasGlobalAccount');
     if (!email) return;
     setEmail(email);
+    if (hasGlobalAccount === 'true') {
+      void handleUserAlreadyHasGlobalAccount(email);
+      return;
+    }
     void handleWalletCreation(email);
   }, [searchParams, isPasskeyAvailable]);
 

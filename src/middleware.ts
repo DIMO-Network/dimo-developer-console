@@ -118,7 +118,7 @@ export const middleware = async (request: NextRequest, event: NextFetchEvent) =>
   const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   try {
-    if (token) {
+    if (token && !isLoginPage) {
       return validatePrivateSession(request);
     }
 

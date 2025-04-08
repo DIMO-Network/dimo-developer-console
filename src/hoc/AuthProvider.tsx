@@ -61,10 +61,12 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     const signIntoDimo = async ({
       credentialBundle,
       privateKey,
+      existsOnDevConsole,
       currentWalletValue,
     }: {
       credentialBundle: string;
       privateKey: string;
+      existsOnDevConsole: boolean;
       currentWalletValue?: `0x${string}` | null;
     }) => {
       const { subOrganizationId } = user!;
@@ -92,9 +94,10 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         throw new Error('Could not login to Dimo');
       }
 
-      if (isUndefined(currentWalletValue)) return { token };
+      //console.info('currentWalletValue', currentWalletValue);
+      // if (isUndefined(currentWalletValue)) return { token };
 
-      if (isNull(currentWalletValue) || currentWalletValue !== kernelAccount.address) {
+      if (existsOnDevConsole && currentWalletValue !== kernelAccount.address) {
         await completeUserData(
           {
             email: user!.email,
@@ -109,8 +112,10 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
     const loginWithPasskey = async ({
       currentWalletValue,
+      exitstsOnDevConsole,
     }: {
       currentWalletValue?: `0x${string}` | null;
+      exitstsOnDevConsole: boolean;
     }): Promise<{
       success: boolean;
       newWalletAddress?: `0x${string}`;
@@ -137,6 +142,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         credentialBundle,
         privateKey: key.privateKey,
         currentWalletValue,
+        existsOnDevConsole: exitstsOnDevConsole,
       });
 
       await createSession({
@@ -163,10 +169,12 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       otp,
       otpId,
       currentWalletValue,
+      exitstsOnDevConsole,
     }: {
       otp: string;
       otpId: string;
       currentWalletValue?: `0x${string}` | null;
+      exitstsOnDevConsole: boolean;
     }): Promise<{ success: boolean; newWalletAddress?: `0x${string}` }> => {
       const { email } = user!;
       if (!email) return { success: false };
@@ -189,6 +197,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         credentialBundle,
         privateKey: key.privateKey,
         currentWalletValue,
+        existsOnDevConsole: exitstsOnDevConsole,
       });
 
       await createSession({

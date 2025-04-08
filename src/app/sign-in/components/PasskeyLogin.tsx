@@ -19,7 +19,7 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
 
   const handleLoginWithPasskey = async () => {
     try {
-      const { success } = await loginWithPasskey({ currentWalletValue: currentWallet });
+      const { success } = await loginWithPasskey({ currentWalletValue: currentWallet, exitstsOnDevConsole: true });
 
       if (!success) {
         setNotification('Failed to login with passkey', 'Oops...', 'error');
