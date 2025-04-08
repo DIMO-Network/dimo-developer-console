@@ -76,7 +76,7 @@ export const View = () => {
       const userInformation = await getUserInformation(email);
 
       if (!userInformation) {
-        router.push(`/sign-up?email=${email}`);
+        router.push(`/sign-up?email=${encodeURIComponent(email)}`);
         return;
       }
 
