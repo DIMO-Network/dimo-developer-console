@@ -11,7 +11,6 @@ import { IPasskeyAttestation } from '@/types/wallet';
 import { OtpSignup } from './OtpSignup';
 import { isNull } from 'lodash';
 import { createNewUser } from '@/app/sign-up/actions';
-import { AxiosError } from 'axios';
 import { getUserSubOrganization } from '@/services/globalAccount';
 
 interface IProps {

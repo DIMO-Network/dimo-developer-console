@@ -3,7 +3,6 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { NotificationContext } from '@/context/notificationContext';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
-import { useRouter } from 'next/navigation';
 import { FC, useContext, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 
@@ -13,7 +12,6 @@ interface IProps {
 }
 
 export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet }) => {
-  const router = useRouter();
   const { loginWithPasskey } = useAuth();
   const { setNotification } = useContext(NotificationContext);
 

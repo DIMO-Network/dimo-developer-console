@@ -4,7 +4,6 @@ import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
 import { FC, useContext, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { NotificationContext } from '@/context/notificationContext';
 import { captureException } from '@sentry/nextjs';
 
@@ -14,7 +13,6 @@ interface IProps {
 }
 
 export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const inputRefs = useRef<HTMLInputElement[]>([]);

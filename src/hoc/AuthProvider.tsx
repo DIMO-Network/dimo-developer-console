@@ -18,7 +18,7 @@ import {
   removeFromSession,
 } from '@/utils/sessionStorage';
 import { generateP256KeyPair } from '@turnkey/crypto';
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { isEmpty } from 'lodash';
 import config from '@/config';
 //import { cookies } from 'next/headers';
 import { ComponentType, useState } from 'react';
