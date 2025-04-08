@@ -78,8 +78,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     }
   };
 
-  const globalAccountSignupComplete = (walletAddress: `0x${string}`) => {
-    console.info('create user call');
+  const globalAccountSignupComplete = (walletAddress: `0x${string}`) => {    
     createNewUser({
       name: email,
       email: email,
