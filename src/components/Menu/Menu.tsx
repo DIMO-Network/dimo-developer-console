@@ -16,6 +16,7 @@ import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage'
 import { EmbeddedKey, removeFromLocalStorage } from '@/utils/localStorage';
 import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline';
 import * as Sentry from '@sentry/nextjs';
+import { queryClient } from '@/hoc/QueryProvider';
 
 export const Menu: FC = withLoadingStatus(() => {
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
@@ -27,6 +28,7 @@ export const Menu: FC = withLoadingStatus(() => {
       setLoadingStatus({ status: 'loading', label: 'Signing out' });
       await signOut();
       await turnkeyClient.logout();
+      queryClient.clear();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
       clearLoadingStatus();

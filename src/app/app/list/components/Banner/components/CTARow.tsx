@@ -1,13 +1,18 @@
 import React, { FC, ReactNode } from 'react';
 import { PlusCircleIcon } from '@heroicons/react/16/solid';
+import { ActionCompletedRow } from '@/app/app/list/components/Banner/components/ActionCompletedRow';
 
 interface CTARowProps {
   text: string;
   subtitle: string;
   CTA: ReactNode;
+  isComplete: boolean;
 }
 
-export const CTARow: FC<CTARowProps> = ({ text, subtitle, CTA }) => {
+export const CTARow: FC<CTARowProps> = ({ text, subtitle, CTA, isComplete }) => {
+  if (isComplete) {
+    return <ActionCompletedRow text={text} />;
+  }
   return (
     <div className={'flex flex-col md:flex-row justify-between w-full'}>
       <div className={'flex flex-row gap-2 items-center'}>

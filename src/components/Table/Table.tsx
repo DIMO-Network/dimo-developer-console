@@ -14,7 +14,10 @@ interface IProps {
 }
 
 export const Table: FC<IProps> = ({ columns, data, actions }) => {
-  const renderColumn = ({ name, label }: IColumn) => {
+  const renderColumn = ({ name, label, CustomHeader }: IColumn) => {
+    if (CustomHeader) {
+      return CustomHeader;
+    }
     return <Column key={`th-${label ?? name}`}>{label ?? name}</Column>;
   };
   // TODO: check that conditional actions access.

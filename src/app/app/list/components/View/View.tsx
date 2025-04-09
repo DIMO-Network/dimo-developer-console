@@ -9,6 +9,7 @@ import { LicenseList } from '@/app/license/list';
 import './View.css';
 import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
+import { BubbleLoader } from '@/components/BubbleLoader';
 
 const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
   query GetDeveloperLicensesByOwner($owner: Address!) {
@@ -21,24 +22,31 @@ const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
 
 export const View: FC = () => {
   const { balance } = useOnboarding();
-  const { user } = useUser();
+  const { data: user, isLoading } = useUser();
   const { currentUser } = useGlobalAccount();
   const { data, error, loading } = useQuery(GET_DEVELOPER_LICENSES_BY_OWNER, {
     variables: { owner: currentUser?.smartContractAddress ?? '' },
     skip: !currentUser?.smartContractAddress,
   });
-
+  const userFirstName = user?.name.slice(0, user.name?.indexOf(' '));
   return (
     <div className="app-list-page">
       <div className="welcome-message">
-        <Image
-          src={'/images/waving_hand.svg'}
-          width={16}
-          height={16}
-          alt={'waving-hand'}
-        />
-        <p className="title">Welcome, {user?.name.slice(0, user.name?.indexOf(' '))}</p>
+        {isLoading ? (
+          <BubbleLoader isLoading isSmall />
+        ) : (
+          <>
+            <Image
+              src={'/images/waving_hand.svg'}
+              width={16}
+              height={16}
+              alt={'waving-hand'}
+            />
+            <p className="title">Welcome{userFirstName ? `, ${userFirstName}` : '!'}</p>
+          </>
+        )}
       </div>
+
       {loading && <Loader isLoading={true} />}
       {!!error && <p>There was an error fetching your developer licenses</p>}
       {!!data?.developerLicenses && (

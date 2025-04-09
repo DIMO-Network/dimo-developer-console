@@ -7,6 +7,7 @@ export interface IColumn {
   name: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render?: FC<any>;
+  CustomHeader?: ReactNode;
 }
 
 interface IProps {
