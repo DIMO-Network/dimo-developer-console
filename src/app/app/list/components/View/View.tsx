@@ -20,6 +20,12 @@ const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
   }
 `);
 
+function getFirstName(name: string) {
+  const trimmed = name.trim();
+  const [firstName] = trimmed.split(' ');
+  return firstName || '';
+}
+
 export const View: FC = () => {
   const { balance } = useOnboarding();
   const { data: user, isLoading } = useUser();
@@ -28,7 +34,7 @@ export const View: FC = () => {
     variables: { owner: currentUser?.smartContractAddress ?? '' },
     skip: !currentUser?.smartContractAddress,
   });
-  const userFirstName = user?.name.slice(0, user.name?.indexOf(' '));
+  const userFirstName = getFirstName(user?.name ?? '');
   return (
     <div className="app-list-page">
       <div className="welcome-message">
