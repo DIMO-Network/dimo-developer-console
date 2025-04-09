@@ -7,7 +7,7 @@ import { useUser } from '@/hooks';
 import './UserDetails.css';
 
 export const UserDetails: FC = () => {
-  const { user } = useUser();
+  const { data: user } = useUser();
 
   if (!user) {
     return null;

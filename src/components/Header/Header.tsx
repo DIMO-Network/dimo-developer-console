@@ -2,7 +2,6 @@ import { useContext, type FC, useState, useEffect } from 'react';
 
 import { CreditsContext } from '@/context/creditsContext';
 import { PlusIcon, WalletIcon } from '@/components/Icons';
-import { EyeIcon } from '@heroicons/react/24/outline';
 import { UserAvatar } from '@/components/UserAvatar';
 
 import { AccountInformationContext } from '@/context/AccountInformationContext';
@@ -16,7 +15,7 @@ import { usePathname } from 'next/navigation';
 import { getPageTitle } from '@/config/navigation';
 
 export const Header: FC = () => {
-  const { user } = useUser();
+  const { data: user } = useUser();
   const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
   const [dcxBalance, setDcxBalance] = useState<string>('0');
   const { setIsOpen } = useContext(CreditsContext);

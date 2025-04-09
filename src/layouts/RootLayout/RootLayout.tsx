@@ -2,11 +2,13 @@
 
 import React from 'react';
 import type { Metadata } from 'next';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { dimoFont } from '@/utils/font';
 import configuration from '@/config';
 
 import '@/app/globals.css';
+
+const queryClient = new QueryClient();
 
 export const metadata: Metadata = {
   title: configuration.appName,
@@ -21,7 +23,9 @@ export const RootLayout = ({
 }>) => {
   return (
     <html lang="en">
-      <body className={dimoFont.className}>{children}</body>
+      <body className={dimoFont.className}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </body>
     </html>
   );
 };
