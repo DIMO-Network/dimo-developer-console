@@ -1,7 +1,7 @@
 import { useContext, type FC, useState, useEffect } from 'react';
 
 import { CreditsContext } from '@/context/creditsContext';
-import { PlusIcon } from '@/components/Icons';
+import { PlusIcon, WalletIcon } from '@/components/Icons';
 import { EyeIcon } from '@heroicons/react/24/outline';
 import { UserAvatar } from '@/components/UserAvatar';
 
@@ -53,21 +53,23 @@ export const Header: FC = () => {
       <div className="user-information" role="user-information">
         <div className="credits" role="credits-display">
           <div className="credits-info">
-            <p className="credit-amount">{dcxBalance}</p>
-            <p className="credit-text">Credits</p>
+            <div className={'flex flex-row items-center gap-1'}>
+              <WalletIcon className="w-4 h-4" />
+              <p className="credit-amount">{dcxBalance}</p>
+              <p className="credit-text">DCX</p>
+            </div>
+            <button
+              title="Add Credits"
+              className="btn-add-credits"
+              disabled={!isOwner(currentUser?.role ?? '')}
+              onClick={
+                isOwner(currentUser?.role ?? '') ? handleOpenBuyCreditsModal : undefined
+              }
+              role="add-credits"
+            >
+              <PlusIcon className="h-4 w-4" />
+            </button>
           </div>
-
-          <button
-            title="Add Credits"
-            className="btn-add-credits"
-            onClick={
-              isOwner(currentUser?.role ?? '') ? handleOpenBuyCreditsModal : undefined
-            }
-            role="add-credits"
-          >
-            {isOwner(currentUser?.role ?? '') && <PlusIcon className="h-4 w-4" />}
-            {!isOwner(currentUser?.role ?? '') && <EyeIcon className="h-4 w-4" />}
-          </button>
         </div>
         <button
           title="Account Information"

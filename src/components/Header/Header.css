@@ -11,14 +11,14 @@
     }
 
     .credits {
-      @apply flex flex-row items-center justify-center min-w-28 gap-2 bg-dark-grey-950 pl-4 pr-2 py-1 rounded-full;
+      @apply flex flex-row items-center justify-center min-w-28 gap-2 bg-surface-sunken pl-4 pr-2 py-1 rounded-full;
 
       .credits-info {
-        @apply flex flex-col;
+        @apply flex flex-row items-center gap-1 justify-between w-36;
       }
 
       .credit-amount {
-        @apply text-base;
+        @apply text-2xl font-medium;
       }
 
       .credit-text {
@@ -26,7 +26,7 @@
       }
 
       .btn-add-credits {
-        @apply rounded-full bg-[#6B6E6E] w-8 h-8 flex items-center justify-center;
+        @apply rounded-full bg-cta-default w-8 h-8 flex items-center justify-center;
       }
     }
   }
