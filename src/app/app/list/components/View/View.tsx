@@ -10,6 +10,7 @@ import './View.css';
 import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { RightPanel } from '@/app/app/list/components/RightPanel';
 
 const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
   query GetDeveloperLicensesByOwner($owner: Address!) {
@@ -36,31 +37,34 @@ export const View: FC = () => {
   });
   const userFirstName = getFirstName(user?.name ?? '');
   return (
-    <div className="app-list-page">
-      <div className="welcome-message">
-        {isLoading ? (
-          <BubbleLoader isLoading isSmall />
-        ) : (
+    <div className={'flex flex-1 flex-row'}>
+      <div className="app-list-page">
+        <div className="welcome-message">
+          {isLoading ? (
+            <BubbleLoader isLoading isSmall />
+          ) : (
+            <>
+              <Image
+                src={'/images/waving_hand.svg'}
+                width={16}
+                height={16}
+                alt={'waving-hand'}
+              />
+              <p className="title">Welcome{userFirstName ? `, ${userFirstName}` : '!'}</p>
+            </>
+          )}
+        </div>
+
+        {loading && <Loader isLoading={true} />}
+        {!!error && <p>There was an error fetching your developer licenses</p>}
+        {!!data?.developerLicenses && (
           <>
-            <Image
-              src={'/images/waving_hand.svg'}
-              width={16}
-              height={16}
-              alt={'waving-hand'}
-            />
-            <p className="title">Welcome{userFirstName ? `, ${userFirstName}` : '!'}</p>
+            <Banner balance={balance} licenseConnection={data.developerLicenses} />
+            <LicenseList licenseConnection={data.developerLicenses} />
           </>
         )}
       </div>
-
-      {loading && <Loader isLoading={true} />}
-      {!!error && <p>There was an error fetching your developer licenses</p>}
-      {!!data?.developerLicenses && (
-        <>
-          <Banner balance={balance} licenseConnection={data.developerLicenses} />
-          <LicenseList licenseConnection={data.developerLicenses} />
-        </>
-      )}
+      <RightPanel />
     </div>
   );
 };
