@@ -32,12 +32,12 @@ export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
         <ActionCompletedRow text={'Create account'} />
         <ActionCompletedRow text={'Confirm your details'} />
         {fragment.totalCount > 0 ? (
-          <ActionCompletedRow text={'Create your first app'} />
+          <ActionCompletedRow text={'Create your first license'} />
         ) : (
           <CTARow
-            text={'Create your first app'}
+            text={'Create your first license'}
             subtitle={
-              'Now that your account is set up, it’s time to create your first application.'
+              'Now that your account is set up, it’s time to create your first license.'
             }
             CTA={<CreateAppButton className={'white-with-icon'} />}
           />
