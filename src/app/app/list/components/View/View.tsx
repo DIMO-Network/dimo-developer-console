@@ -27,7 +27,7 @@ export const View: FC = () => {
     variables: { owner: currentUser?.smartContractAddress ?? '' },
     skip: !currentUser?.smartContractAddress,
   });
-  console.log(user?.name);
+
   return (
     <div className="app-list-page">
       <div className="welcome-message">

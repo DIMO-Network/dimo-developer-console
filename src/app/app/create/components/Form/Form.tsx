@@ -21,9 +21,10 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 interface IProps {
   workspace?: IWorkspace;
   onSuccess: () => void;
+  onClose?: () => void;
 }
 
-export const Form: FC<IProps> = ({ onSuccess }) => {
+export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const { currentUser } = useGlobalAccount();
@@ -133,7 +134,7 @@ export const Form: FC<IProps> = ({ onSuccess }) => {
           className="dark"
           role="cancel-button"
           loading={isLoading}
-          onClick={() => {}}
+          onClick={onClose}
         >
           Cancel
         </Button>
