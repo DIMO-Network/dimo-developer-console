@@ -1,0 +1,23 @@
+.credits {
+  @apply flex flex-row items-center justify-center min-w-28 gap-2 bg-surface-sunken pl-4 pr-2 py-1 rounded-full;
+
+  .credits-info {
+    @apply flex flex-row items-center gap-1 justify-between w-36;
+  }
+
+  .credit-amount {
+    @apply text-2xl font-medium;
+  }
+
+  .credit-text {
+    @apply text-xs uppercase text-gray-400;
+  }
+
+  .btn-add-credits {
+    @apply rounded-full bg-cta-default w-8 h-8 flex items-center justify-center;
+  }
+}
+
+.credits-large {
+  @apply p-4 rounded-2xl flex flex-col bg-surface-default
+}

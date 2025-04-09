@@ -1,11 +1,12 @@
 import { FC } from 'react';
 
 import './RightPanel.css';
-import Link from 'next/link';
+import { CreditsWidget } from '@/components/CreditsWidget';
 
 export const RightPanel: FC = () => {
   return (
     <div className={'right-panel-container'}>
+      <CreditsWidget variant={'large'} />
       <WhatsDCX />
     </div>
   );
