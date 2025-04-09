@@ -1,5 +1,5 @@
 .app-list-page {
-  @apply flex flex-col gap-4;
+  @apply flex flex-1 flex-col gap-4;
 
   .welcome-message {
     @apply flex flex-row gap-1 pb-2 border-b-cta-default border-b;
