@@ -17,9 +17,10 @@ interface Props {
   licenseConnection: FragmentType<typeof GET_TOTAL_LICENSE_COUNT>;
 }
 
+const ADD_CREDITS = 'Add credits';
+
 export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
   const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
-
   return (
     <div className="banner-content">
       <div>
@@ -31,29 +32,24 @@ export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
       <div className={'flex flex-col flex-1 gap-4 w-full'}>
         <ActionCompletedRow text={'Create account'} />
         <ActionCompletedRow text={'Confirm your details'} />
-        {fragment.totalCount > 0 ? (
-          <ActionCompletedRow text={'Create your first license'} />
-        ) : (
+        <CTARow
+          isComplete={fragment.totalCount > 0}
+          text={'Create your first license'}
+          subtitle={
+            'Now that your account is set up, it’s time to create your first license.'
+          }
+          CTA={<CreateAppButton className={'white-with-icon'} />}
+        />
+        {fragment.totalCount > 0 && (
           <CTARow
-            text={'Create your first license'}
+            isComplete={balance > 0}
+            text={ADD_CREDITS}
             subtitle={
-              'Now that your account is set up, it’s time to create your first license.'
+              'Your developer account needs DCX to function properly, purchase credits now'
             }
-            CTA={<CreateAppButton className={'white-with-icon'} />}
+            CTA={<AddCreditsButton className={'white-with-icon'} />}
           />
         )}
-        {fragment.totalCount > 0 &&
-          (balance ? (
-            <ActionCompletedRow text={'Add credits'} />
-          ) : (
-            <CTARow
-              text={'Add credits'}
-              subtitle={
-                'Your developer account needs DCX to function properly, purchase credits now'
-              }
-              CTA={<AddCreditsButton className={'white-with-icon'} />}
-            />
-          ))}
       </div>
     </div>
   );
