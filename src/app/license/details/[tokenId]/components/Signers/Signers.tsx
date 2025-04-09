@@ -16,6 +16,7 @@ import { Section, SectionHeader } from '@/components/Section';
 import { withLoadingStatus } from '@/hoc';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
+import Column from '@/components/Table/Column';
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -136,7 +137,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         {!!fragment.signers.nodes.length && (
           <Table
             columns={[
-              { name: 'address', label: 'Signer address' },
+              {
+                name: 'address',
+                label: 'Signer address',
+                CustomHeader: <SignerAddressHeader />,
+              },
               { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
             ]}
             data={fragment.signers.nodes}
@@ -162,5 +167,15 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     </Section>
   );
 };
+
+const SignerAddressHeader = () => (
+  <Column key={'signer-address-header'}>
+    <div>Signer address</div>
+    <p className={'max-w-[360px] text-text-secondary text-sm !normal-case'}>
+      *This is not your API key. If you have lost your API key, you will need to generate
+      a new one.
+    </p>
+  </Column>
+);
 
 export const Signers = withLoadingStatus(SignersComponent);
