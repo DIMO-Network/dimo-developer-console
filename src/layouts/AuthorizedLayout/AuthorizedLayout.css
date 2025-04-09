@@ -1,5 +1,5 @@
 .main {
-  @apply flex flex-row p-6 bg-surface-sunken min-h-screen items-stretch;
+  @apply flex flex-row py-6 pl-6 bg-surface-sunken min-h-screen items-stretch;
 }
 
 .sidebar-container {
@@ -7,7 +7,7 @@
 }
 
 .header-container {
-  @apply flex flex-row items-center justify-items-stretch;
+  @apply flex flex-row items-center justify-items-stretch pr-6;
 }
 
 .menu-header-button {
@@ -20,5 +20,5 @@
 }
 
 .page-content {
-  @apply overflow-y-auto py-6 w-full flex flex-row;
+  @apply overflow-y-auto py-6 pr-6 w-full flex flex-row;
 }
