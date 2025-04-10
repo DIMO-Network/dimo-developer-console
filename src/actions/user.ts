@@ -50,9 +50,12 @@ export const getUserInformation = async (email: string) => {
   };
 };
 
-export const createUserGlobalAccount = (
+export const createUserGlobalAccount = async (
   request: Partial<ICreateGlobalAccountRequest>,
-): Promise<ISubOrganization> => createSubOrganization(request);
+): Promise<ISubOrganization> => {
+  const response = await createSubOrganization(request);
+  return response;
+};
 
 export const emailRecovery = async (email: string, targetPublicKey: string) => {
   await startEmailRecovery({ email, key: targetPublicKey });
