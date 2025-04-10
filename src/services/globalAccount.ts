@@ -5,7 +5,7 @@ import axios, { AxiosError } from 'axios';
 
 const globalAccountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
-  timeout: 5*60*1000,
+  timeout: 5 * 60 * 1000,
 });
 
 export const getUserSubOrganization = async (

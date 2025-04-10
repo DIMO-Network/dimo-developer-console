@@ -60,14 +60,6 @@ const View = () => {
   };
 
   const handleNext = async (actualFlow: string, inputAuth?: Partial<IAuth>) => {
-    // Check if user already has a team, if so, redirect to app cause is an old user
-    const user = await getUser();
-    if (user?.team) {
-      history.replaceState({}, '', '/app');
-      router.replace('/app');
-      return;
-    }
-
     const newUserData = {
       ...authData,
       ...inputAuth,
