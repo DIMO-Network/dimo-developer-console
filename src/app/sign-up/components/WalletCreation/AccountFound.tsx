@@ -3,15 +3,17 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { gtSuper } from '@/utils/font';
 import { FC } from 'react';
 
-export const PasskeySignup: FC = () => {
+export const AccountFoundSignup: FC = () => {
   return (
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className={gtSuper.className}>Creating account with passkey</p>
+          <p className={gtSuper.className}>DIMO Account Found</p>
         </div>
         <div className="otp-login-text">
-          <p>Your DIMO account is being created. This may take a few seconds.</p>
+          <p>
+            You already have a DIMO account. Please validate your identity to continue.
+          </p>
         </div>
         <BubbleLoader isLoading={true} />
         <div className="sign-up__extra-links">

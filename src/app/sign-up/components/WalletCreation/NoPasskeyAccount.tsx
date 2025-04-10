@@ -3,15 +3,18 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { gtSuper } from '@/utils/font';
 import { FC } from 'react';
 
-export const PasskeySignup: FC = () => {
+export const NoPasskeySignup: FC = () => {
   return (
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className={gtSuper.className}>Creating account with passkey</p>
+          <p className={gtSuper.className}>Creating account without passkey</p>
         </div>
         <div className="otp-login-text">
-          <p>Your DIMO account is being created. This may take a few seconds.</p>
+          <p>
+            Your DIMO account is being created without a passkey, please check your inbox
+            for a 6-digit OTP.
+          </p>
         </div>
         <BubbleLoader isLoading={true} />
         <div className="sign-up__extra-links">

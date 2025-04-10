@@ -52,8 +52,9 @@ const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
 };
 
 const validatePrivateSession = async (request: NextRequest) => {
+  console.info('Validating private session', request.nextUrl.pathname);
   const user = await getUserByToken();
-  //TODO: check if we need to use company_email_owner or email
+  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const subOrganization = await getUserSubOrganization(
     user.company_email_owner ?? user.email,
   );
@@ -65,8 +66,6 @@ const validatePrivateSession = async (request: NextRequest) => {
   }
 
   request.user = new LoggedUser(user, subOrganization);
-
-  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
 
   const isCompliant = request.user?.isCompliant ?? false;
   const missingFlow = request.user?.missingFlow ?? null;
@@ -89,6 +88,7 @@ const validatePrivateSession = async (request: NextRequest) => {
 };
 
 const validatePublicSession = async (request: NextRequest) => {
+  console.info('Validating public session', request.nextUrl.pathname);
   const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const isAPIProtected = mustBeAuthorize(request, token);
@@ -118,7 +118,7 @@ export const middleware = async (request: NextRequest, event: NextFetchEvent) =>
   const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   try {
-    if (token && !isLoginPage) {
+    if (token) {
       return validatePrivateSession(request);
     }
 

@@ -1,5 +1,5 @@
 'use client';
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useState } from 'react';
 import {
   useForm,
   SubmitHandler,
@@ -17,6 +17,7 @@ import { SelectField } from '@/components/SelectField';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { gtSuper } from '@/utils/font';
+import { BubbleLoader } from '@/components/BubbleLoader';
 
 interface CompanyInfoInputs {
   name: string;
@@ -38,6 +39,7 @@ const typeOptions = DEVELOPER_TYPES.map((type) => ({
 interface IProps {
   auth?: Partial<IAuth>;
   onNext: (flow: string, auth?: Partial<IAuth>) => void;
+  isLoading?: boolean;
 }
 
 interface IFormProps {
@@ -51,7 +53,7 @@ const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
   return (
     <>
       <Label htmlFor="name" className="text-xs text-medium">
-        Company name
+        Company name *
         <TextField
           type="text"
           placeholder="ACME"
@@ -107,7 +109,7 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
   return (
     <>
       <Label htmlFor="name" className="text-xs text-medium">
-        Name
+        Name *
         <TextField
           type="text"
           placeholder="Bruce Wayne"
@@ -160,7 +162,7 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
   );
 };
 
-export const CompanyInfoForm: FC<IProps> = ({ onNext, auth }) => {
+export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
   const {
     control,
     register,
@@ -181,6 +183,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth }) => {
   const updateUser = async (companyData: CompanyInfoInputs) => {
     onNext('company-information', {
       ...auth,
+      name: companyData.name,
       company: {
         ...companyData,
       },
@@ -191,7 +194,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth }) => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className={gtSuper.className}>Final Strecht</p>
+          <p className={gtSuper.className}>Final Stretch</p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -219,7 +222,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth }) => {
 
           <div className="flex flex-col pt-4">
             <Button type="submit" className="primary" role="finish-button">
-              Finish sign up
+              {isLoading ? <BubbleLoader isLoading={isLoading} /> : 'Finish sign up'}
             </Button>
           </div>
         </form>

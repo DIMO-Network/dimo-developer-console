@@ -1,6 +1,6 @@
 import { exchangeDimoToken, getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
 import { saveToken, signOut } from '@/actions/user';
-import { completeUserData } from '@/app/sign-up/actions';
+import { completeUserData, createNewUser } from '@/app/sign-up/actions';
 import { passkeyClient, turnkeyClient } from '@/config/turnkey';
 import { AuthContext } from '@/context/AuthContext';
 import { initOtpLogin, otpLogin } from '@/services/globalAccount';
@@ -11,23 +11,27 @@ import {
   removeFromLocalStorage,
   EmbeddedKey,
   saveToLocalStorage,
+  getFromLocalStorage,
 } from '@/utils/localStorage';
 import {
   saveToSession,
   GlobalAccountSession,
   removeFromSession,
+  getFromSession,
 } from '@/utils/sessionStorage';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty } from 'lodash';
 import config from '@/config';
 //import { cookies } from 'next/headers';
-import { ComponentType, useState } from 'react';
+import { ComponentType, useEffect, useState } from 'react';
 import { decodeJwtToken } from '@/utils/middlewareUtils';
+import { useRouter } from 'next/navigation';
 const halfHour = 60 * 30;
 // const fifteenMinutes = 15 * 60;
 
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
+    const router = useRouter();
     const [user, setUser] = useState<{
       email: string;
       subOrganizationId: string;
@@ -94,8 +98,18 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         throw new Error('Could not login to Dimo');
       }
 
-      //console.info('currentWalletValue', currentWalletValue);
-      // if (isUndefined(currentWalletValue)) return { token };
+      if (!existsOnDevConsole) {
+        await createNewUser(
+          {
+            name: user!.email,
+            email: user!.email,
+            address: walletAddress,
+            auth: 'credentials',
+            auth_login: user!.email,
+          },
+          token.access_token,
+        );
+      }
 
       if (existsOnDevConsole && currentWalletValue !== kernelAccount.address) {
         await completeUserData(
@@ -231,6 +245,32 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       const { email } = payload;
       return { success: true, email: email as string };
     };
+
+    const loadUserInformation = async (): Promise<boolean> => {
+      const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+      const eKey = getFromLocalStorage<string>(EmbeddedKey);
+
+      if (!eKey || !session) {
+        return false;
+      }
+
+      const { expiry } = session;
+
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+
+      if (expiry < nowInSeconds) {
+        await logout();
+        return false;
+      }
+
+      return true;
+    };
+
+    useEffect(() => {
+      void loadUserInformation().then((isValid) => {
+        if (isValid) router.replace('/app');
+      });
+    }, []);
 
     return (
       <AuthContext.Provider

@@ -6,6 +6,8 @@ import { gtSuper } from '@/utils/font';
 import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { NotificationContext } from '@/context/notificationContext';
 import { captureException } from '@sentry/nextjs';
+import { BubbleLoader } from '@/components/BubbleLoader';
+import { redirect, useRouter } from 'next/navigation';
 
 interface IProps {
   currentEmail: string;
@@ -13,7 +15,9 @@ interface IProps {
 }
 
 export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRequestingNewOtp, setIsRequestingNewOtp] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const { beginOtpLogin, completeOtpLogin } = useAuth();
@@ -86,12 +90,13 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
         currentWalletValue: currentWallet,
         exitstsOnDevConsole: true,
       });
+
       if (!success) {
         setNotification('Invalid OTP code', 'Oops...', 'error');
         return;
       }
 
-      window.location.href = '/app';
+      router.replace('/app');
     } catch (error) {
       captureException(error);
       setNotification('Failed to login with OTP', 'Oops...', 'error');
@@ -118,7 +123,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
    */
   const handleResendCode = async () => {
     try {
-      setIsLoading(true);
+      setIsRequestingNewOtp(true);
       const newOtpId = await beginOtpLogin();
       setOtpId(newOtpId);
       setOtp(Array(6).fill(''));
@@ -127,7 +132,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
       captureException(error);
       setNotification('Failed to resend OTP code', 'Oops...', 'error');
     } finally {
-      setIsLoading(false);
+      setIsRequestingNewOtp(false);
     }
   };
 
@@ -166,10 +171,9 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
           <Button
             role="continue-button"
             onClick={handleVerify}
-            loading={isLoading}
             disabled={otp.some((digit) => !digit)}
           >
-            Sign In
+            {isLoading ? <BubbleLoader isLoading={isLoading} /> : 'Sign In'}
           </Button>
           <Button
             className="border invert border-white !mt-3"
@@ -177,7 +181,11 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
             onClick={handleResendCode}
             disabled={false}
           >
-            Resend Code
+            {isRequestingNewOtp ? (
+              <BubbleLoader isLoading={isRequestingNewOtp} />
+            ) : (
+              'Resend Code'
+            )}
           </Button>
         </div>
         <div className="sign-in__extra-links">

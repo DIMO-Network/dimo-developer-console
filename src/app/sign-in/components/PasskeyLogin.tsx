@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
 import { FC, useContext, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
+import { useRouter } from 'next/navigation';
 
 interface IProps {
   handlePasskeyRejected: (shouldFallback: boolean) => void;
@@ -12,6 +13,7 @@ interface IProps {
 }
 
 export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet }) => {
+  const router = useRouter();
   const { loginWithPasskey } = useAuth();
   const { setNotification } = useContext(NotificationContext);
 
@@ -27,7 +29,7 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
         return;
       }
 
-      window.location.href = '/app';
+      router.replace('/app');
     } catch (error: unknown) {
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {

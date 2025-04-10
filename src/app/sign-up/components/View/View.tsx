@@ -40,18 +40,22 @@ const View = () => {
   const currentFlow = searchParams.get('flow') ?? 'wallet-creation';
   const [flow, setFlow] = useState(currentFlow);
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { Component: SignUpFlow } =
     signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['wallet-creation'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
     try {
+      setIsLoading(true);
       await completeUserData(auth);
-      window.location.href = '/app';
+      router.replace('/app');
     } catch (error) {
       console.error('Something went wrong while the completing user information', error);
       Sentry.captureException(error);
       setNotification('Something went wrong', 'Oops...', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -91,7 +95,9 @@ const View = () => {
     <div className="sign-up">
       <div className="sign-up__content">
         <img src={'/images/dimo-dev.svg'} alt="DIMO Logo" />
-        {SignUpFlow && <SignUpFlow onNext={handleNext} auth={authData} />}
+        {SignUpFlow && (
+          <SignUpFlow onNext={handleNext} auth={authData} isLoading={isLoading} />
+        )}
         <div className="sign-up__extra-links mt-6">
           <div className="flex flex-row">
             <p className="terms-caption">

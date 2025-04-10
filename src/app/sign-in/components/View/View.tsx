@@ -91,7 +91,7 @@ export const View = () => {
         userInformation;
 
       if (isCollaborator(role)) {
-        history.replaceState({}, '', '/app');
+        window.location.href = '/app';
         return;
       }
 

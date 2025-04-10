@@ -12,6 +12,8 @@ import { OtpSignup } from './OtpSignup';
 import { isNull } from 'lodash';
 import { createNewUser } from '@/app/sign-up/actions';
 import { getUserSubOrganization } from '@/services/globalAccount';
+import { NoPasskeySignup } from './NoPasskeyAccount';
+import { AccountFoundSignup } from './AccountFound';
 
 interface IProps {
   auth?: Partial<IAuth>;
@@ -21,6 +23,8 @@ interface IProps {
 enum WalletCreationType {
   OTP = 'otp',
   PASSKEY = 'passkey',
+  NO_PASSKEY = 'no-passkey',
+  HAS_ACCOUNT = 'has-account',
 }
 
 const WalletCreationForm = ({
@@ -33,6 +37,10 @@ const WalletCreationForm = ({
   singupComplete: (walletAddress: `0x${string}`) => void;
 }): ReactNode => {
   switch (type) {
+    case WalletCreationType.NO_PASSKEY:
+      return <NoPasskeySignup />;
+    case WalletCreationType.HAS_ACCOUNT:
+      return <AccountFoundSignup />;
     case WalletCreationType.OTP:
       return <OtpSignup handleSignupComplete={singupComplete} email={email} />;
     case WalletCreationType.PASSKEY:
@@ -78,22 +86,16 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
   };
 
   const globalAccountSignupComplete = (walletAddress: `0x${string}`) => {
-    createNewUser({
-      name: email,
+    onNext('wallet-creation', {
       email: email,
       address: walletAddress,
-      auth: 'credentials',
-      auth_login: email,
-    }).then(() => {
-      onNext('wallet-creation', {
-        email: email,
-        address: walletAddress,
-      });
     });
   };
 
   const handleUserAlreadyHasGlobalAccount = async (email: string) => {
     try {
+      setWalletCreationType(WalletCreationType.HAS_ACCOUNT);
+
       const userInformation = await getUserSubOrganization(email);
       if (!userInformation) {
         setNotification(
@@ -147,6 +149,11 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         encodedChallenge,
         attestation,
       } = await tryCreatePasskey(email);
+
+      if (!withPasskey) {
+        setWalletCreationType(WalletCreationType.NO_PASSKEY);
+        return;
+      }
 
       const { subOrganizationId } = await createUserGlobalAccount({
         email,

@@ -9,6 +9,7 @@ import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { useAuth } from '@/hooks';
+import { isEmail } from 'validator';
 
 interface IProps {
   handleLogin: (email: string) => Promise<void>;
@@ -26,7 +27,10 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<EmailLoginFormInputs>();
+  } = useForm<EmailLoginFormInputs>({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  });
 
   const email = watch('email', '');
 
@@ -49,14 +53,28 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
         <form onSubmit={handleSubmit(onSubmit)} className="sign-in__input">
           <TextField
             {...register('email', {
-              required: true,
+              required: 'This field is required',
+              maxLength: {
+                value: 120,
+                message: 'The name should has maximum 120 characters',
+              },
+              validate: {
+                isEmail: (str: string) => {
+                  if (str && isEmail(str)) return true;
+                  return 'Not a valid email address';
+                },
+              },
             })}
             role="email-input"
             type="text"
             placeholder="email@address.com"
           />
-          {errors.email && <TextError errorMessage="This field is required" />}
-          <Button type="submit" disabled={isEmpty(email)} role="continue-button">
+          {errors.email && <TextError errorMessage={errors.email?.message ?? ''} />}
+          <Button
+            type="submit"
+            disabled={isEmpty(email) || !!errors.email}
+            role="continue-button"
+          >
             {isLoading ? <BubbleLoader isLoading={isLoading} /> : 'Continue'}
           </Button>
         </form>
