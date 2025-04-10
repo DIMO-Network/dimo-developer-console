@@ -98,7 +98,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
       console.info({
         email,
       });
-      
+
       const userInformation = await getUserSubOrganization(email);
       if (!userInformation) {
         setNotification(
@@ -212,7 +212,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     console.info({
       email,
       hasGlobalAccount,
-    })
+    });
     if (!email) return;
     setEmail(email);
     if (hasGlobalAccount === 'true') {
