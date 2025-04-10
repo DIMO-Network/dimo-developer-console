@@ -19,6 +19,7 @@ export const getUserSubOrganization = async (
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
+        console.error('User not found', error.response);
         return null;
       }
     }
