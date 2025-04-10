@@ -5,6 +5,7 @@ import axios, { AxiosError } from 'axios';
 
 const globalAccountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
+  timeout: 5*60*1000,
 });
 
 export const getUserSubOrganization = async (
@@ -12,7 +13,7 @@ export const getUserSubOrganization = async (
 ): Promise<ISubOrganization | null> => {
   try {
     const { data } = await globalAccountClient.get<ISubOrganization>(
-      `/api/account/${email}`,
+      `/api/account/${encodeURIComponent(email)}`,
     );
     return { ...data, email: email };
   } catch (error) {
