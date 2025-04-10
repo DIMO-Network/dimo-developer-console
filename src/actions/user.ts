@@ -50,7 +50,7 @@ export const getUserInformation = async (email: string) => {
   };
 };
 
-export const createUserGlobalAccount = async (
+export const createUserGlobalAccount = (
   request: Partial<ICreateGlobalAccountRequest>,
 ): Promise<ISubOrganization> => createSubOrganization(request);
 
