@@ -69,6 +69,7 @@ export const PaginatedTable = <TData,>({
     state: { pagination },
     rowCount,
   });
+
   return (
     <div className={'min-w-full'}>
       <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
@@ -102,7 +103,8 @@ export const PaginatedTable = <TData,>({
 
       <div className={'flex flex-row items-center justify-between pt-4'}>
         <p>
-          Showing {Math.min(table.getState().pagination.pageSize, data.length)} of{' '}
+          Showing {pagination.pageIndex * pagination.pageSize + 1}–
+          {Math.min((pagination.pageIndex + 1) * pagination.pageSize, rowCount)} of{' '}
           {rowCount}
         </p>
         <div className={'flex flex-row items-center'}>
