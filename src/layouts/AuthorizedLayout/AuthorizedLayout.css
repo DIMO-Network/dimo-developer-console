@@ -20,5 +20,5 @@
 }
 
 .page-content {
-  @apply overflow-y-auto py-6 pr-6 w-full flex flex-row;
+  @apply overflow-y-auto overflow-x-auto py-6 pr-6 w-full;
 }
