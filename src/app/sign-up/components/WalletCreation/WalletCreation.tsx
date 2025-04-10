@@ -154,6 +154,13 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         return;
       }
 
+      console.info({
+        email,
+        encodedChallenge,
+        attestation,
+        deployAccount: true,
+      });
+      
       const { subOrganizationId } = await createUserGlobalAccount({
         email,
         encodedChallenge,
