@@ -72,7 +72,7 @@ export const SelectField = forwardRef<Ref, IProps>(
               >
                 {selected.text || props.placeholder || ''}
               </p>
-              <ChevronDownIcon className="w-4 h-4" />
+              <ChevronDownIcon className="w-4 h-4 my-auto" />
               <div className={classnames('custom-menu', { show: show })}>
                 {options.map(({ value, text }) => (
                   <div

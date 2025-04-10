@@ -15,6 +15,7 @@ interface IProps {
 export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
   const { setNotification } = useContext(NotificationContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRequestingNewOtp, setIsRequestingNewOtp] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const { beginOtpLogin, completeOtpLogin } = useAuth();
@@ -175,6 +176,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
           <Button
             className="border invert border-white !mt-3"
             role="continue-button"
+            loading={isRequestingNewOtp}
             onClick={handleResendCode}
           >
             Resend Code

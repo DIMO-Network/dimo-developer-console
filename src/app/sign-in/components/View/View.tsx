@@ -91,7 +91,7 @@ export const View = () => {
         userInformation;
 
       if (isCollaborator(role)) {
-        window.location.href = '/app';
+        router.replace('/app');
         return;
       }
 

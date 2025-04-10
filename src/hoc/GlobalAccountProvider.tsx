@@ -156,6 +156,7 @@ export const withGlobalAccounts = <P extends object>(
       const eKey = getFromLocalStorage<string>(EmbeddedKey);
 
       if (!eKey || !session) {
+        await logout();
         return;
       }
 
@@ -193,10 +194,10 @@ export const withGlobalAccounts = <P extends object>(
     };
 
     const logout = async () => {
-      signOut();
       turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
+      signOut();
       router.replace('/sign-in');
     };
 

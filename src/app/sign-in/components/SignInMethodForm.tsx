@@ -74,8 +74,9 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
             type="submit"
             disabled={isEmpty(email) || !!errors.email}
             role="continue-button"
+            loading={isLoading}
           >
-            {isLoading ? <BubbleLoader isLoading={isLoading} /> : 'Continue'}
+            Continue
           </Button>
         </form>
         <div className="sign-in__divider">

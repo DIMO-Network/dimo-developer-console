@@ -51,9 +51,10 @@ const buildForList = [
 interface IProps {
   auth?: Partial<IAuth>;
   onNext: (flow: string, auth?: Partial<IAuth>) => void;
+  isLoading?: boolean;
 }
 
-export const BuildForForm: FC<IProps> = ({ auth, onNext }) => {
+export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const {
     register,
@@ -148,7 +149,12 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext }) => {
             )}
           </div>
           <div className="flex flex-col pt-4">
-            <Button type="submit" className="primary" role="continue-button">
+            <Button
+              type="submit"
+              loading={isLoading}
+              className="primary"
+              role="continue-button"
+            >
               Continue
             </Button>
           </div>

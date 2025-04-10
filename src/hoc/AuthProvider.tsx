@@ -27,7 +27,7 @@ import { ComponentType, useEffect, useState } from 'react';
 import { decodeJwtToken } from '@/utils/middlewareUtils';
 import { useRouter } from 'next/navigation';
 const halfHour = 60 * 30;
-// const fifteenMinutes = 15 * 60;
+const fifteenMinutes = 15 * 60;
 
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
@@ -103,7 +103,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
           {
             name: user!.email,
             email: user!.email,
-            address: walletAddress,
+            address: kernelAccount.address,
             auth: 'credentials',
             auth_login: user!.email,
           },
@@ -205,7 +205,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       if (isEmpty(credentialBundle)) return { success: false };
 
       const nowInSeconds = Math.ceil(Date.now() / 1000);
-      const sessionExpiration = nowInSeconds + halfHour;
+      const sessionExpiration = nowInSeconds + fifteenMinutes;
 
       const { token, newWalletAddress } = await signIntoDimo({
         credentialBundle,
@@ -216,7 +216,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
       await createSession({
         accessToken: token.access_token,
-        tokenExpiration: halfHour, // for cookie expiration
+        tokenExpiration: fifteenMinutes, // for cookie expiration
         sessionExpiration: sessionExpiration, // for session expiration
         credentialBundle,
         privateKey: key.privateKey,

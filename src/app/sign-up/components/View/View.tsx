@@ -1,5 +1,5 @@
 'use client';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as Sentry from '@sentry/nextjs';
 
@@ -46,10 +46,43 @@ const View = () => {
     signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['wallet-creation'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
+    setIsLoading(true);
+    await completeUserData(auth);
+    router.replace('/app');
+  };
+
+  const handleNext = async (actualFlow: string, inputAuth?: Partial<IAuth>) => {
     try {
       setIsLoading(true);
-      await completeUserData(auth);
-      router.replace('/app');
+      if (currentFlow !== 'wallet-creation') {
+        const user = await getUser();
+        inputAuth = {
+          ...inputAuth,
+          ...user,
+        };
+      }
+
+      const newUserData = {
+        ...authData,
+        ...inputAuth,
+        company: {
+          ...authData.company,
+          ...(inputAuth?.company ?? {}),
+        },
+      } as Partial<IAuth>;
+      setAuthData(newUserData);
+      const currentProcess = signUpFlows[actualFlow as keyof typeof signUpFlows];
+      const processes = Object.keys(signUpFlows).reduce(
+        (acc, elm) => ({
+          ...acc,
+          [signUpFlows[elm as keyof typeof signUpFlows].order]: elm,
+        }),
+        {},
+      );
+      const nextProcess =
+        processes[(currentProcess.order + 1) as keyof typeof processes] ?? 'complete';
+      if (nextProcess !== 'complete') setFlow(nextProcess);
+      else await handleCompleteUserData(newUserData);
     } catch (error) {
       console.error('Something went wrong while the completing user information', error);
       Sentry.captureException(error);
@@ -57,30 +90,6 @@ const View = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleNext = async (actualFlow: string, inputAuth?: Partial<IAuth>) => {
-    const newUserData = {
-      ...authData,
-      ...inputAuth,
-      company: {
-        ...authData.company,
-        ...(inputAuth?.company ?? {}),
-      },
-    } as Partial<IAuth>;
-    setAuthData(newUserData);
-    const currentProcess = signUpFlows[actualFlow as keyof typeof signUpFlows];
-    const processes = Object.keys(signUpFlows).reduce(
-      (acc, elm) => ({
-        ...acc,
-        [signUpFlows[elm as keyof typeof signUpFlows].order]: elm,
-      }),
-      {},
-    );
-    const nextProcess =
-      processes[(currentProcess.order + 1) as keyof typeof processes] ?? 'complete';
-    if (nextProcess !== 'complete') setFlow(nextProcess);
-    else await handleCompleteUserData(newUserData);
   };
 
   return (

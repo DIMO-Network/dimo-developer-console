@@ -172,20 +172,18 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
             role="continue-button"
             onClick={handleVerify}
             disabled={otp.some((digit) => !digit)}
+            loading={isLoading}
           >
-            {isLoading ? <BubbleLoader isLoading={isLoading} /> : 'Sign In'}
+            Sign In
           </Button>
           <Button
             className="border invert border-white !mt-3"
             role="continue-button"
             onClick={handleResendCode}
+            loading={isRequestingNewOtp}
             disabled={false}
           >
-            {isRequestingNewOtp ? (
-              <BubbleLoader isLoading={isRequestingNewOtp} />
-            ) : (
-              'Resend Code'
-            )}
+            Resend Code
           </Button>
         </div>
         <div className="sign-in__extra-links">
