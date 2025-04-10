@@ -175,17 +175,20 @@ export const useMintLicense = () => {
   const { processTransactions } = useContractGA();
   return useCallback(
     async (licenseName: string) => {
-      return processTransactions([
-        {
-          to: configuration.DLC_ADDRESS,
-          value: BigInt(0),
-          data: encodeFunctionData({
-            abi: DimoLicenseABI,
-            functionName: CONTRACT_METHODS.ISSUE_IN_DC,
-            args: [licenseName],
-          }),
-        },
-      ]);
+      return processTransactions(
+        [
+          {
+            to: configuration.DLC_ADDRESS,
+            value: BigInt(0),
+            data: encodeFunctionData({
+              abi: DimoLicenseABI,
+              functionName: CONTRACT_METHODS.ISSUE_IN_DC,
+              args: [licenseName],
+            }),
+          },
+        ],
+        { abi: DimoLicenseABI },
+      );
     },
     [processTransactions],
   );

@@ -61,6 +61,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
       );
       onSuccess();
     } catch (error: unknown) {
+      console.log('error in form', (error as Error).message);
       Sentry.captureException(error);
       setNotification(
         'Something went wrong while confirming the transaction',
