@@ -7,7 +7,7 @@ import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { NotificationContext } from '@/context/notificationContext';
 import { captureException } from '@sentry/nextjs';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface IProps {
   currentEmail: string;

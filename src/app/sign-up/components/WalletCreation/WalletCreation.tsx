@@ -10,7 +10,6 @@ import { useSearchParams } from 'next/navigation';
 import { IPasskeyAttestation } from '@/types/wallet';
 import { OtpSignup } from './OtpSignup';
 import { isNull } from 'lodash';
-import { createNewUser } from '@/app/sign-up/actions';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import { NoPasskeySignup } from './NoPasskeyAccount';
 import { AccountFoundSignup } from './AccountFound';
