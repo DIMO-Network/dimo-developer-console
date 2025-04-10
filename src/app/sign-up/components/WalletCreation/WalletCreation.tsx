@@ -95,6 +95,10 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     try {
       setWalletCreationType(WalletCreationType.HAS_ACCOUNT);
 
+      console.info({
+        email,
+      });
+      
       const userInformation = await getUserSubOrganization(email);
       if (!userInformation) {
         setNotification(
@@ -150,8 +154,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
       } = await tryCreatePasskey(email);
 
       if (!withPasskey) {
-        setWalletCreationType(WalletCreationType.NO_PASSKEY);
-        return;
+        setWalletCreationType(WalletCreationType.NO_PASSKEY);        
       }
 
       console.info({
@@ -160,7 +163,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         attestation,
         deployAccount: true,
       });
-      
+
       const { subOrganizationId } = await createUserGlobalAccount({
         email,
         encodedChallenge,
@@ -206,6 +209,10 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     if (isNull(isPasskeyAvailable)) return;
     const email = searchParams.get('email');
     const hasGlobalAccount = searchParams.get('hasGlobalAccount');
+    console.info({
+      email,
+      hasGlobalAccount,
+    })
     if (!email) return;
     setEmail(email);
     if (hasGlobalAccount === 'true') {
