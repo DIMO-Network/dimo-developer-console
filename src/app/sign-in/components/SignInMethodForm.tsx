@@ -7,7 +7,6 @@ import { Button } from '@/components/Button';
 import { isEmpty } from 'lodash';
 import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { BubbleLoader } from '@/components/BubbleLoader';
 import { useAuth } from '@/hooks';
 import { isEmail } from 'validator';
 

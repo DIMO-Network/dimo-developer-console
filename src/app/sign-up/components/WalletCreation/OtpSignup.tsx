@@ -120,7 +120,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
    */
   const handleResendCode = async () => {
     try {
-      setIsLoading(true);
+      setIsRequestingNewOtp(true);
       const newOtpId = await beginOtpLogin();
       setOtpId(newOtpId);
       setOtp(Array(6).fill(''));
@@ -129,7 +129,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
       captureException(error);
       setNotification('Failed to resend OTP code', 'Oops...', 'error');
     } finally {
-      setIsLoading(false);
+      setIsRequestingNewOtp(false);
     }
   };
 

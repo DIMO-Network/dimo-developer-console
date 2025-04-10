@@ -17,7 +17,6 @@ import { SelectField } from '@/components/SelectField';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { gtSuper } from '@/utils/font';
-import { BubbleLoader } from '@/components/BubbleLoader';
 
 interface CompanyInfoInputs {
   name: string;

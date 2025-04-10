@@ -113,6 +113,12 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         subOrganizationId,
       });
 
+      if (hasPasskey && isPasskeyAvailable) {
+        setWalletCreationType(WalletCreationType.PASSKEY);
+      } else {
+        setWalletCreationType(WalletCreationType.NO_PASSKEY);
+      }
+
       setCreationCompleted(true);
     } catch (error) {
       Sentry.captureException(error);
@@ -162,7 +168,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
   };
 
   const continueAfterCreation = async () => {
-    if (walletCreationType !== WalletCreationType.PASSKEY) {
+    if (walletCreationType === WalletCreationType.NO_PASSKEY) {
       setWalletCreationType(WalletCreationType.OTP);
       return;
     }

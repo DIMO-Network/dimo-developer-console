@@ -6,7 +6,6 @@ import { gtSuper } from '@/utils/font';
 import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { NotificationContext } from '@/context/notificationContext';
 import { captureException } from '@sentry/nextjs';
-import { BubbleLoader } from '@/components/BubbleLoader';
 import { useRouter } from 'next/navigation';
 
 interface IProps {

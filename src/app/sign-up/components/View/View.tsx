@@ -1,5 +1,5 @@
 'use client';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as Sentry from '@sentry/nextjs';
 
