@@ -58,7 +58,6 @@ export const useContractGA = () => {
       const receipt = await kernelClient.waitForUserOperationReceipt({
         hash: dcxExchangeOpHash,
       });
-      console.log('RECEIPT', receipt);
 
       if (receipt.reason) throw new Error(receipt.reason);
 

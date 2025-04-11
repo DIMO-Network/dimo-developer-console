@@ -24,7 +24,7 @@ export const LicenseList: FC<Props> = ({ licenseConnection }) => {
       <div className="description">
         <p className="title">Your Developer Licenses</p>
       </div>
-      {false && fragment.nodes.length ? (
+      {fragment.nodes.length ? (
         <div className="license-list">
           {fragment.nodes.map((licenseSummaryFragment, idx) => (
             <LicenseCard license={licenseSummaryFragment} key={idx} />

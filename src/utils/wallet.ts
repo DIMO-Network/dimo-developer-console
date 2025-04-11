@@ -19,7 +19,6 @@ export const handleOnChainError = (
     if (!error.details) {
       return 'Unknown error';
     }
-    console.log('error.details', error.details);
 
     const errorData: `0x${string}` = error.details
       .replaceAll('"', '')
