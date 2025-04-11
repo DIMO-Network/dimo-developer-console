@@ -14,9 +14,9 @@ import { signOut } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
 import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage';
 import { EmbeddedKey, removeFromLocalStorage } from '@/utils/localStorage';
-import { ArrowLeftStartOnRectangleIcon } from '@heroicons/react/24/outline';
 import * as Sentry from '@sentry/nextjs';
 import { queryClient } from '@/hoc/QueryProvider';
+import { LogoutIcon } from '@/components/Icons/LogoutIcon';
 
 export const Menu: FC = withLoadingStatus(() => {
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
@@ -45,7 +45,7 @@ export const Menu: FC = withLoadingStatus(() => {
 
   const logoutButtonConfig = {
     label: 'Logout',
-    icon: ArrowLeftStartOnRectangleIcon as FC,
+    icon: LogoutIcon,
     iconClassName: 'h-5 w-5 fill-grey-200',
     link: onSignOut,
     external: false,

@@ -4,7 +4,7 @@ import { ActionCompletedRow } from '@/app/app/list/components/Banner/components/
 
 interface CTARowProps {
   text: string;
-  subtitle: string;
+  subtitle?: string;
   CTA: ReactNode;
   isComplete: boolean;
 }
@@ -19,7 +19,7 @@ export const CTARow: FC<CTARowProps> = ({ text, subtitle, CTA, isComplete }) => 
         <PlusCircleIcon className="size-4 text-white" />
         <div>
           <p className={'text-base text-white'}>{text}</p>
-          <p className={'text-sm text-text-secondary'}>{subtitle}</p>
+          {!!subtitle && <p className={'text-sm text-text-secondary'}>{subtitle}</p>}
         </div>
       </div>
       <div className={'mt-4 md:mt-0'}>{CTA}</div>

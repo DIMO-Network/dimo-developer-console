@@ -17,8 +17,6 @@ interface Props {
   licenseConnection: FragmentType<typeof GET_TOTAL_LICENSE_COUNT>;
 }
 
-const ADD_CREDITS = 'Add credits';
-
 export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
   const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
   return (
@@ -43,10 +41,7 @@ export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
         {fragment.totalCount > 0 && (
           <CTARow
             isComplete={balance > 0}
-            text={ADD_CREDITS}
-            subtitle={
-              'Your developer account needs DCX to function properly, purchase credits now'
-            }
+            text={'Add credits'}
             CTA={<AddCreditsButton className={'white-with-icon'} />}
           />
         )}
