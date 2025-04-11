@@ -1,11 +1,10 @@
 'use client';
 
-import { encodeFunctionData, getContract, HttpRequestError } from 'viem';
+import { Abi, Call, encodeFunctionData, getContract, HttpRequestError } from 'viem';
 import { utils } from 'web3';
 import * as Sentry from '@sentry/nextjs';
 
 import useGlobalAccount from '@/hooks/useGlobalAccount';
-// import DimoABI from '@/contracts/DimoTokenContract.json';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import WMatic from '@/contracts/wmatic.json';
@@ -30,8 +29,10 @@ export const useContractGA = () => {
   const { validateCurrentSession, getCurrentDcxBalance, getCurrentDimoBalance } =
     useGlobalAccount();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const processTransactions = async (transactions: Array<any>) => {
+  const processTransactions = async (
+    transactions: Array<Call>,
+    options?: { abi?: Abi },
+  ) => {
     try {
       const currentSession = await validateCurrentSession();
       if (!currentSession) return {} as IKernelOperationStatus;
@@ -64,7 +65,7 @@ export const useContractGA = () => {
     } catch (e: unknown) {
       Sentry.captureException(e);
       if (e instanceof HttpRequestError) {
-        throw new Error(handleOnChainError(e as HttpRequestError));
+        throw new Error(handleOnChainError(e as HttpRequestError, options?.abi));
       }
       throw e;
     }
