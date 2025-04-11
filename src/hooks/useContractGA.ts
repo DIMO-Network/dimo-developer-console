@@ -1,11 +1,10 @@
 'use client';
 
-import { Abi, encodeFunctionData, getContract, HttpRequestError } from 'viem';
+import { Abi, Call, encodeFunctionData, getContract, HttpRequestError } from 'viem';
 import { utils } from 'web3';
 import * as Sentry from '@sentry/nextjs';
 
 import useGlobalAccount from '@/hooks/useGlobalAccount';
-// import DimoABI from '@/contracts/DimoTokenContract.json';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import WMatic from '@/contracts/wmatic.json';
@@ -31,8 +30,8 @@ export const useContractGA = () => {
     useGlobalAccount();
 
   const processTransactions = async (
-    transactions: Array<any>,
-    options?: { abi?: any },
+    transactions: Array<Call>,
+    options?: { abi?: Abi },
   ) => {
     try {
       const currentSession = await validateCurrentSession();

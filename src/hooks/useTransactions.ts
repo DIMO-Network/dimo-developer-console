@@ -1,5 +1,5 @@
 import configuration from '@/config';
-import { encodeFunctionData } from 'viem';
+import { Abi, encodeFunctionData } from 'viem';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import { useCallback } from 'react';
 import { useContractGA, useGlobalAccount } from '@/hooks';
@@ -187,7 +187,7 @@ export const useMintLicense = () => {
             }),
           },
         ],
-        { abi: DimoLicenseABI },
+        { abi: DimoLicenseABI as Abi },
       );
     },
     [processTransactions],

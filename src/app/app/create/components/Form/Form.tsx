@@ -33,6 +33,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
     handleSubmit,
     register,
     getValues,
+    setError,
   } = useForm<IAppWithWorkspace>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -62,6 +63,12 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
       onSuccess();
     } catch (error: unknown) {
       console.log('error in form', (error as Error).message);
+      if ((error as Error).message === 'AliasAlreadyInUse') {
+        setError('workspace.name', {
+          message:
+            'Developer License name already in use. Please try again using a different name.',
+        });
+      }
       Sentry.captureException(error);
       setNotification(
         'Something went wrong while confirming the transaction',
