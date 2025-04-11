@@ -62,11 +62,13 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
       );
       onSuccess();
     } catch (error: unknown) {
-      if ((error as Error).message === 'AliasAlreadyInUse') {
-        setError('workspace.name', {
-          message:
-            'Developer License name already in use. Please try again using a different name.',
-        });
+      if (error instanceof Error) {
+        if (error.message === 'AliasAlreadyInUse') {
+          setError('workspace.name', {
+            message:
+              'Developer License name already in use. Please try again using a different name.',
+          });
+        }
       }
       Sentry.captureException(error);
       setNotification(
