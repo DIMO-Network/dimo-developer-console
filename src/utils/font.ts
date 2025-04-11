@@ -5,7 +5,7 @@ export const dimoFont = localFont({
     {
       path: './../assets/fonts/Universal-Sans-Display-525.ttf',
       weight: 'normal',
-      style: 'regular',
+      style: 'normal',
     },
     {
       path: './../assets/fonts/Universal-Sans-Display-525Italic.ttf',
@@ -15,12 +15,12 @@ export const dimoFont = localFont({
     {
       path: './../assets/fonts/Universal-Sans-Display-900.ttf',
       weight: 'bold',
-      style: 'bold',
+      style: 'normal',
     },
     {
       path: './../assets/fonts/Universal-Sans-Display-900Italic.ttf',
       weight: 'bold',
-      style: 'bold italic',
+      style: 'italic',
     },
   ],
 });
@@ -30,22 +30,22 @@ export const gtSuper = localFont({
     {
       path: './../assets/fonts/GT-Super-Text-Bold-Italic.ttf',
       weight: 'bold',
-      style: 'Bold Italic',
+      style: 'italic',
     },
     {
       path: './../assets/fonts/GT-Super-Text-Bold.ttf',
       weight: 'bold',
-      style: 'Bold',
+      style: 'normal',
     },
     {
       path: './../assets/fonts/GT-Super-Text-Book-Italic.ttf',
       weight: 'normal',
-      style: 'Italic',
+      style: 'italic',
     },
     {
       path: './../assets/fonts/GT-Super-Text-Book.ttf',
       weight: 'normal',
-      style: 'Book',
+      style: 'normal',
     },
   ],
 });
