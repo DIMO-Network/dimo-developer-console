@@ -15,7 +15,7 @@ describe('getInitials', () => {
   });
 
   it('should handle single word names', () => {
-    expect(getInitials('John')).toBe('');
+    expect(getInitials('John')).toBe('J');
   });
 
   it('should handle empty strings', () => {

@@ -13,6 +13,9 @@ export const getInitials = (fullName: string): string => {
     const lastNameInitial = filteredNameParts[filteredNameParts.length - 1][0];
 
     return firstNameInitial.toUpperCase() + lastNameInitial.toUpperCase();
+  } else if (filteredNameParts.length >= 1) {
+    const firstNameInitial = filteredNameParts[0][0];
+    return firstNameInitial.toUpperCase();
   } else {
     return '';
   }
