@@ -2,7 +2,7 @@
 
 import { type FC, useEffect, useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
-import { encodeFunctionData } from 'viem';
+import { Abi, encodeFunctionData } from 'viem';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
@@ -42,6 +42,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
   const {
     register,
     handleSubmit,
+    setError,
     reset,
     formState: { errors },
   } = useForm<IFormInputs>({
@@ -69,8 +70,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
         args: [license.tokenId, licenseAlias],
       }),
     };
-
-    await processTransactions([transaction]);
+    await processTransactions([transaction], { abi: DimoLicenseContract as Abi });
   };
 
   const onSubmit = async (data: IFormInputs) => {
@@ -85,13 +85,21 @@ export const WorkspaceNameModal: FC<IProps> = ({
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error) {
-      setNotification('Failed to update developer license name', 'Oops...', 'error');
-      Sentry.captureException(error);
-    } finally {
       setIsOpen(false);
       reset();
       setIsLoading(false);
+    } catch (error) {
+      setIsLoading(false);
+      if (error instanceof Error) {
+        if (error.message === 'AliasAlreadyInUse') {
+          setError('workspaceName', {
+            message:
+              'Developer License name already in use. Please try again using a different name.',
+          });
+        }
+      }
+      setNotification('Failed to update developer license name', 'Oops...', 'error');
+      Sentry.captureException(error);
     }
   };
 
