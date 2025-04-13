@@ -105,7 +105,7 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 w-full max-w-sm pt-4"
         >
-          <div className="text-sm ml-1">What you are looking to lauch with DIMO?</div>
+          <div className="text-sm ml-1">What you are looking to launch with DIMO?</div>
           {buildForList.map(({ title, description, value, Icon, iconClassName }) => {
             return (
               <Card
