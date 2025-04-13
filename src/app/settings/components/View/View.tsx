@@ -35,12 +35,7 @@ const View: FC = () => {
             <div className="team-header">
               <Title component="h2" className="settings-card-title">
                 Team Management
-              </Title>
-              {isOwner(currentUser?.role ?? '') && (
-                <Button className="primary" onClick={() => setIsOpen(!isOpen)}>
-                  <PlusIcon className="h-5 w-5" /> Invite Team Member
-                </Button>
-              )}
+              </Title>             
             </div>
             <TeamManagement
               teamCollaborators={teamCollaborators.filter(({ deleted }) => !deleted)}
