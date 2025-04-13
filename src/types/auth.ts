@@ -11,3 +11,7 @@ export interface IAuth {
   signature?: `0x${string}`;
   isPasskey?: boolean;
 }
+
+export interface IPasskeyRecoveryState {
+  email: string;
+}

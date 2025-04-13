@@ -80,6 +80,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
         attestation,
       };
     } catch (error) {
+      console.error(error);
       return {
         success: false,
       };

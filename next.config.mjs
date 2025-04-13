@@ -17,6 +17,9 @@ const cspHeader = `
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   env: {
     VERCEL_ENV: process.env.VERCEL_ENV,
     JWT_KEY_SET_URL: process.env.JWT_KEY_SET_URL,

@@ -2,7 +2,7 @@ import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
 
-const { CONTRACT_METHODS } = defaultConfig;
+import type { CONTRACT_METHODS } from './default';
 
 type Configuration = {
   environment: string;

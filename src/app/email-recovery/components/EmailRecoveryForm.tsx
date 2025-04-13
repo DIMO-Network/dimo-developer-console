@@ -5,8 +5,7 @@ import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { Button } from '@/components/Button';
 import { TextError } from '@/components/TextError';
-import { BubbleLoader } from '@/components/BubbleLoader';
-import * as Sentry from '@sentry/nextjs';
+import { captureException } from '@sentry/nextjs';
 import { NotificationContext } from '@/context/notificationContext';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { EmbeddedKey, saveToLocalStorage } from '@/utils/localStorage';
@@ -14,13 +13,14 @@ import { emailRecovery } from '@/actions/user';
 import { gtSuper } from '@/utils/font';
 import { isEmpty } from 'lodash';
 import { useRouter } from 'next/navigation';
+import { IPasskeyRecoveryState } from '@/types/auth';
 
 interface EmailRecoveryFormInputs {
   email: string;
 }
 
 interface IProps {
-  onNext: (flow: string) => void;
+  onNext: (flow: string, state?: Partial<IPasskeyRecoveryState>) => void;
 }
 
 export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
@@ -45,11 +45,13 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
       saveToLocalStorage(EmbeddedKey, key.privateKey);
       const success = await emailRecovery(email, targetPublicKey);
       if (success) {
-        onNext('email-form');
+        onNext('email-form', {
+          email: email,
+        });
       }
     } catch (error) {
       setNotification('Something went wrong while sending the email', 'Oops...', 'error');
-      Sentry.captureException(error);
+      captureException(error);
     } finally {
       setIsLoading(false);
     }
@@ -74,8 +76,13 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
           />
         </Label>
         {errors.email && <TextError errorMessage="This field is required" />}
-        <Button type="submit" disabled={isEmpty(email)} role="continue-button">
-          {isLoading ? <BubbleLoader isLoading={isLoading} /> : 'Continue'}
+        <Button
+          type="submit"
+          disabled={isEmpty(email)}
+          loading={isLoading}
+          role="continue-button"
+        >
+          Continue
         </Button>
         <Button
           type="button"

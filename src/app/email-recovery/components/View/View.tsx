@@ -9,6 +9,7 @@ import {
 } from '@/app/email-recovery/components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { IPasskeyRecoveryState } from '@/types/auth';
 
 const emailRecoveryFlows = {
   'email-form': {
@@ -32,13 +33,18 @@ export const View = () => {
   useErrorHandler();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [currentState, setCurrentState] = useState<Partial<IPasskeyRecoveryState>>({});
   const currentFlow = searchParams.get('flow') ?? 'email-form';
   const [flow, setFlow] = useState(currentFlow);
   const { Component: EmailRecoveryFlow } =
     emailRecoveryFlows[flow as keyof typeof emailRecoveryFlows] ??
     emailRecoveryFlows['email-form'];
 
-  const handleNext = (actualFlow: string) => {
+  const handleNext = (actualFlow: string, state?: Partial<IPasskeyRecoveryState>) => {
+    setCurrentState({
+      ...currentState,
+      ...state,
+    });
     const currentProcess =
       emailRecoveryFlows[actualFlow as keyof typeof emailRecoveryFlows];
     const processes = Object.keys(emailRecoveryFlows).reduce(
@@ -58,7 +64,9 @@ export const View = () => {
   return (
     <div className="email-recovery">
       <div className="email-recovery__content">
-        {EmailRecoveryFlow && <EmailRecoveryFlow onNext={handleNext} />}
+        {EmailRecoveryFlow && (
+          <EmailRecoveryFlow onNext={handleNext} state={currentState} />
+        )}
       </div>
     </div>
   );
