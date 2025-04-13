@@ -1,11 +1,8 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { PlusIcon } from '@heroicons/react/24/outline';
-
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { isOwner } from '@/utils/user';
 import { Loader } from '@/components/Loader';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { SupportAgentIcon } from '@/components/Icons';
@@ -14,7 +11,7 @@ import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
 import { UserDetails } from '@/app/settings/components/UserDetails';
-import { useTeamCollaborators, useGlobalAccount } from '@/hooks';
+import { useTeamCollaborators } from '@/hooks';
 
 import './View.css';
 
@@ -22,8 +19,7 @@ const View: FC = () => {
   const { isLoading, teamCollaborators, refreshData } = useTeamCollaborators();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
-  const { currentUser } = useGlobalAccount();
-  // TODO: check why curremtUser!.role is not working here
+
   return (
     <div className="settings-page">
       {isLoading && <Loader isLoading={true} />}
@@ -35,7 +31,7 @@ const View: FC = () => {
             <div className="team-header">
               <Title component="h2" className="settings-card-title">
                 Team Management
-              </Title>             
+              </Title>
             </div>
             <TeamManagement
               teamCollaborators={teamCollaborators.filter(({ deleted }) => !deleted)}
