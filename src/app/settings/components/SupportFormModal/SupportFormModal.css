@@ -1,19 +1,25 @@
-.support-form-content {
-  @apply flex flex-col items-center gap-2 w-full;
+.support-form-modal {
+  .dialog-panel {
+    @apply min-w-[95vw] min-h-[95vh] ml-auto mr-auto my-auto md:m-auto md:h-auto md:min-w-[480px] md:min-h-0 p-6;
+  }
+  .support-form-content {
+    @apply flex flex-col items-center gap-2 w-full;
 
-  .support-form-header {
-    @apply flex flex-col gap-2 w-full;
+    .support-form-header {
+      @apply flex flex-col gap-2 w-full;
 
-    .title {
-      @apply text-2xl font-bold text-white;
+      .title {
+        @apply text-2xl font-bold text-white;
+      }
+
+      .description {
+        @apply text-white/50 w-full h-full;
+      }
     }
 
-    .description {
-      @apply text-white/50 w-full h-full;
+    .support-form-action {
+      @apply flex flex-col w-full;
     }
   }
 
-  .support-form-action {
-    @apply flex flex-col w-full;
-  }
 }
