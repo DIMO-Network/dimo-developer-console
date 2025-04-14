@@ -1,10 +1,12 @@
+'use client';
+
 import React from 'react';
 import type { Metadata } from 'next';
-
 import { dimoFont } from '@/utils/font';
 import configuration from '@/config';
 
 import '@/app/globals.css';
+import QueryProvider from '@/hoc/QueryProvider';
 
 export const metadata: Metadata = {
   title: configuration.appName,
@@ -19,7 +21,9 @@ export const RootLayout = ({
 }>) => {
   return (
     <html lang="en">
-      <body className={dimoFont.className}>{children}</body>
+      <body className={dimoFont.className}>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 };

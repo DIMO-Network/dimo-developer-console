@@ -1,50 +1,117 @@
 'use client';
-import { useContext, useEffect } from 'react';
-import { signIn, useSession } from 'next-auth/react';
+import { ReactNode, useContext, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { setCookie } from 'cookies-next/client';
-
-import Image from 'next/image';
-
 import { Anchor } from '@/components/Anchor';
-import { IAuth } from '@/types/auth';
-import { isCollaborator } from '@/utils/user';
-import { SignInButtons } from '@/components/SignInButton';
-import { useErrorHandler, useGlobalAccount, usePasskey } from '@/hooks';
+import { useAuth, useErrorHandler, usePasskey } from '@/hooks';
 import { withNotifications } from '@/hoc';
 import { NotificationContext } from '@/context/notificationContext';
-import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
+import * as Sentry from '@sentry/nextjs';
+import { OtpInputForm, PasskeyLogin, SignInMethodForm } from '@/app/sign-in/components';
+import { getUserInformation } from '@/actions/user';
+import { isCollaborator } from '@/utils/user';
+import { isEmpty, isNull } from 'lodash';
 
 import './View.css';
-import * as Sentry from '@sentry/nextjs';
+
+enum SignInType {
+  NONE = 'none',
+  OTP = 'otp',
+  PASSKEY = 'passkey',
+}
+
+const SignInForm = ({
+  type,
+  handleLogin,
+  handlePasskeyRejected,
+  currentEmail,
+  currentWallet,
+}: {
+  type: SignInType;
+  handleLogin: (email: string) => Promise<void>;
+  handlePasskeyRejected: (shouldFallback: boolean) => void;
+  currentEmail: string;
+  currentWallet: `0x${string}` | null;
+}): ReactNode => {
+  switch (type) {
+    case SignInType.OTP:
+      return <OtpInputForm currentEmail={currentEmail} currentWallet={currentWallet} />;
+    case SignInType.PASSKEY:
+      return (
+        <PasskeyLogin
+          handlePasskeyRejected={handlePasskeyRejected}
+          currentWallet={currentWallet}
+        />
+      );
+    default:
+      return <SignInMethodForm handleLogin={handleLogin} />;
+  }
+};
 
 export const View = () => {
   useErrorHandler();
   const { setNotification } = useContext(NotificationContext);
-  const { loginWithPasskey, requestOtpLogin } = useContext(GlobalAccountAuthContext);
-  const { getUserGlobalAccountInfo } = useGlobalAccount();
+  const { setUser, completeExternalAuth } = useAuth();
   const { isPasskeyAvailable } = usePasskey();
-  const { data: session } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const invitationCode = searchParams.get('code') ?? '';
-  if (invitationCode) {
-    setCookie('invitation_code', invitationCode, {
-      maxAge: 60 * 60,
-    });
-  }
+  const authCode = searchParams.get('code') ?? '';
+  // if (invitationCode) {
+  //   setCookie('invitation_code', invitationCode, {
+  //     maxAge: 60 * 60,
+  //   });
+  // }
 
-  const handleCTA = async (app: string, auth?: Partial<IAuth>) => {
-    await signIn(app, auth);
-  };
+  const [signInProcess, setSignInProcess] = useState<{
+    email: string;
+    signInType: SignInType;
+    currentWallet: `0x${string}` | null;
+  }>({
+    email: '',
+    signInType: SignInType.NONE,
+    currentWallet: null,
+  });
 
   const handleLogin = async (email: string) => {
     try {
-      const { hasPasskey } = await getUserGlobalAccountInfo(email);
+      const userInformation = await getUserInformation(email);
+
+      if (!userInformation) {
+        router.push(`/sign-up?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
+      const { existsOnDevConsole, existsOnGlobalAccount } = userInformation;
+
+      if (!existsOnDevConsole && existsOnGlobalAccount) {
+        router.push(`/sign-up?email=${encodeURIComponent(email)}&hasGlobalAccount=true`);
+        return;
+      }
+
+      const { role, subOrganizationId, hasPasskey, currentWalletAddress } =
+        userInformation;
+
+      if (isCollaborator(role)) {
+        router.replace('/app');
+        return;
+      }
+
+      setUser({
+        subOrganizationId: subOrganizationId,
+        email: email,
+      });
+
       if (hasPasskey && isPasskeyAvailable) {
-        await loginWithPasskey(email);
+        setSignInProcess({
+          email: email,
+          signInType: SignInType.PASSKEY,
+          currentWallet: currentWalletAddress,
+        });
       } else {
-        await requestOtpLogin(email);
+        setSignInProcess({
+          email: email,
+          signInType: SignInType.OTP,
+          currentWallet: currentWalletAddress,
+        });
       }
     } catch (error) {
       Sentry.captureException(error);
@@ -52,75 +119,68 @@ export const View = () => {
     }
   };
 
-  useEffect(() => {
-    if (!session) return;
-    if (isCollaborator(session.user.role)) {
-      router.push('/app');
-    } else {
-      void handleLogin(session.user.email!);
+  const handlePasskeyRejected = (shouldFallback: boolean) => {
+    setSignInProcess((signInProcess) => ({
+      ...signInProcess,
+      signInType: shouldFallback ? SignInType.OTP : SignInType.NONE,
+    }));
+  };
+
+  const handleExternalAuth = async (provider: string) => {
+    try {
+      const { success, email } = await completeExternalAuth(provider);
+      if (!success) {
+        setNotification('Failed to login with external provider', 'Oops...', 'error');
+        return;
+      }
+
+      handleLogin(email);
+    } catch (error) {
+      Sentry.captureException(error);
+      setNotification('Failed to login with external provider', 'Oops...', 'error');
     }
-  }, [session]);
+  };
+
+  useEffect(() => {
+    if (isNull(isPasskeyAvailable)) return;
+    if (isEmpty(authCode)) return;
+    void handleExternalAuth(authCode);
+  }, [authCode, isPasskeyAvailable]);
 
   return (
-    <main className="sign-in">
+    <div className="sign-in">
       <div className="sign-in__content">
-        <article className="sign-in__form">
-          <section className="sign-in__header">
-            <Image
-              src={'/images/build-on-dimo.png'}
-              alt="DIMO Logo"
-              width={176}
-              height={24}
-            />
-            <p>Welcome back!</p>
-          </section>
-          <section className="sign-in__buttons">
-            <SignInButtons isSignIn={true} disabled={false} onCTA={handleCTA} />
-          </section>
-          <section className="sign-in__extra-links">
-            <div className="flex flex-row">
-              <p className="terms-caption">
-                Lost your passkey?{' '}
-                <Anchor href="/email-recovery" target="_self" className="grey underline">
-                  Recover with your email
-                </Anchor>
-              </p>
-            </div>
-            <div className="flex flex-row">
-              <p className="terms-caption">
-                Having trouble logging in?{' '}
-                <Anchor
-                  href="mailto:developer-support@dimo.org"
-                  className="grey underline"
-                >
-                  Contact our support team
-                </Anchor>
-              </p>
-            </div>
-            <div className="flex flex-row">
-              <p className="terms-caption">
-                By signing in, you are agreeing to our{' '}
-                <Anchor
-                  href="https://docs.dimo.zone/dinc/developer-terms-of-service"
-                  className="grey underline"
-                  target="_blank"
-                >
-                  terms of service
-                </Anchor>{' '}
-                and{' '}
-                <Anchor
-                  href="https://dimo.zone/legal/privacy-policy"
-                  className="grey underline"
-                  target="_blank"
-                >
-                  privacy policy
-                </Anchor>
-              </p>
-            </div>
-          </section>
-        </article>
+        <SignInForm
+          currentEmail={signInProcess.email}
+          type={signInProcess.signInType}
+          handleLogin={handleLogin}
+          handlePasskeyRejected={handlePasskeyRejected}
+          currentWallet={signInProcess.currentWallet}
+        />
+        <div className="sign-in__extra-links mt-6">
+          <div className="flex flex-row">
+            <p className="terms-caption">
+              By signing in, you are agreeing to our{' '}
+              <Anchor
+                href="https://docs.dimo.zone/dinc/developer-terms-of-service"
+                className="grey underline"
+                target="_blank"
+              >
+                terms of service
+              </Anchor>{' '}
+              and{' '}
+              <Anchor
+                href="https://dimo.zone/legal/privacy-policy"
+                className="grey underline"
+                target="_blank"
+              >
+                privacy policy
+              </Anchor>
+            </p>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   );
 };
 

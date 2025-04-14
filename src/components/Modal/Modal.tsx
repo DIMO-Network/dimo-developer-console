@@ -7,18 +7,11 @@ import classNames from 'classnames';
 
 import './Modal.css';
 
-interface IAction {
-  render: FC;
-  label: string;
-  className: string;
-}
-
 interface IProps {
   isOpen: boolean;
   setIsOpen: (f: boolean) => void;
-  className: string;
+  className?: string;
   showClose?: boolean;
-  actions?: IAction[];
   children: ReactNode;
 }
 export const Modal: FC<IProps> = ({
@@ -40,7 +33,7 @@ export const Modal: FC<IProps> = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" />
+          <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
         </TransitionChild>
 
         <div className={classNames('modal-container', className)}>

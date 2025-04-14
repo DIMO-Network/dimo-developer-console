@@ -1,32 +1,25 @@
 'use client';
-import { type CTA } from '@/app/app/list/components/Banner';
 
 import { useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+// import { useRouter } from 'next/navigation';
 
 import { CreditsContext } from '@/context/creditsContext';
 import { getApps } from '@/actions/app';
 import { getWorkspace } from '@/actions/workspace';
 import { IApp } from '@/types/app';
-import { isOwner } from '@/utils/user';
+// import { isOwner } from '@/utils/user';
 import { IWorkspace } from '@/types/workspace';
-import { useContractGA } from '@/hooks';
+import { useGlobalAccount } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
-import { GlobalAccountAuthContext } from '@/context/GlobalAccountAuthContext';
 
 export const useOnboarding = () => {
   const [apps, setApps] = useState<IApp[]>([]);
   const [workspace, setWorkspace] = useState<IWorkspace>();
-  const [cta, setCta] = useState<CTA>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState<number>(0);
-  const router = useRouter();
-  const { getDcxBalance, getDimoBalance } = useContractGA();
+  // const router = useRouter();
   const { setIsOpen } = useContext(CreditsContext);
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
-  const { hasSession } = useContext(GlobalAccountAuthContext);
+  const { currentUser, getCurrentDcxBalance, getCurrentDimoBalance } = useGlobalAccount();
 
   const loadAppsAndWorkspace = async (): Promise<void> => {
     try {
@@ -37,10 +30,8 @@ export const useOnboarding = () => {
       const currentWorkspace = await getWorkspace();
       setWorkspace(currentWorkspace);
 
-      if (isOwner(role)) {
-        const dcxBalance = await getDcxBalance();
-        setBalance(dcxBalance);
-      }
+      const dcxBalance = await getCurrentDcxBalance();
+      setBalance(dcxBalance);
     } catch (error: unknown) {
       Sentry.captureException(error);
     } finally {
@@ -49,38 +40,39 @@ export const useOnboarding = () => {
   };
 
   const setCtas = async () => {
-    if (isOwner(role)) {
-      const [balanceDCX, balanceDimo] = await Promise.all([
-        getDcxBalance(),
-        getDimoBalance(),
-      ]);
-      if (!(balanceDCX > 0 || balanceDimo > 0)) {
-        setCta({
-          label: 'Purchase DCX',
-          onClick: handleOpenBuyCreditsModal,
-        });
-      } else if (apps.length === 0) {
-        setCta({
-          label: 'Create an app',
-          onClick: handleCreateApp,
-        });
-      }
-    } else setCta(undefined);
+    // if (isOwner(role)) {
+    const [balanceDCX, balanceDimo] = await Promise.all([
+      getCurrentDcxBalance(),
+      getCurrentDimoBalance(),
+    ]);
+    if (!(balanceDCX > 0 || balanceDimo > 0)) {
+      // setCta({
+      //   label: 'Purchase DCX',
+      //   onClick: handleOpenBuyCreditsModal,
+      // });
+    }
+    //   } else if (apps.length === 0) {
+    //     setCta({
+    //       label: 'Create an app',
+    //       onClick: handleCreateApp,
+    //     });
+    //   }
+    // } else setCta(undefined);
   };
 
   useEffect(() => {
-    if (!hasSession) return;
+    if (!currentUser) return;
     void loadAppsAndWorkspace();
-  }, [hasSession, role]);
+  }, [currentUser]);
 
   useEffect(() => {
-    if (!hasSession) return;
+    if (!currentUser) return;
     void setCtas();
-  }, [apps, role, hasSession]);
+  }, [apps, currentUser]);
 
-  const handleCreateApp = () => {
-    router.push('/app/create');
-  };
+  // const handleCreateApp = () => {
+  //   router.push('/app/create');
+  // };
 
   const handleOpenBuyCreditsModal = () => {
     setIsOpen(true);
@@ -89,10 +81,8 @@ export const useOnboarding = () => {
   return {
     balance,
     apps,
-    cta,
     isLoading,
     setIsLoading,
-    handleCreateApp,
     handleOpenBuyCreditsModal,
     workspace,
   };

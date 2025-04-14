@@ -1,24 +1,26 @@
 import config from '@/config';
-import { ISubOrganization, IWalletSubOrganization } from '@/types/wallet';
+import { ISubOrganization, ICreateGlobalAccountRequest } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import axios, { AxiosError } from 'axios';
 
 const globalAccountClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_GA_API!,
+  timeout: 5 * 60 * 1000,
 });
 
 export const getUserSubOrganization = async (
   email: string,
-): Promise<ISubOrganization> => {
+): Promise<ISubOrganization | null> => {
   try {
     const { data } = await globalAccountClient.get<ISubOrganization>(
-      `/api/account/${email}`,
+      `/api/account/${encodeURIComponent(email)}`,
     );
     return { ...data, email: email };
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 404) {
-        return {} as ISubOrganization;
+        console.error('User not found', { error: error, email });
+        return null;
       }
     }
     throw error;
@@ -26,7 +28,7 @@ export const getUserSubOrganization = async (
 };
 
 export const createSubOrganization = async (
-  walletInfo: Partial<IWalletSubOrganization>,
+  walletInfo: Partial<ICreateGlobalAccountRequest>,
 ): Promise<ISubOrganization> => {
   const { data } = await globalAccountClient.post<ISubOrganization>(
     '/api/account',

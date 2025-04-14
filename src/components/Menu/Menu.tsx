@@ -1,25 +1,94 @@
-import { type FC } from 'react';
+import { type FC, useContext } from 'react';
 
 import { MenuItem } from '@/components/Menu/MenuItem';
 import { mainMenu, bottomMenu } from '@/config/navigation';
 
 import './Menu.css';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+import { XMarkIcon } from '@heroicons/react/24/solid';
+import { LayoutContext } from '@/context/LayoutContext';
+import { LoadingStatusContext } from '@/context/LoadingStatusContext';
+import { withLoadingStatus } from '@/hoc';
+import { signOut } from '@/actions/user';
+import { turnkeyClient } from '@/config/turnkey';
+import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage';
+import { EmbeddedKey, removeFromLocalStorage } from '@/utils/localStorage';
+import * as Sentry from '@sentry/nextjs';
+import { queryClient } from '@/hoc/QueryProvider';
+import { LogoutIcon } from '@/components/Icons/LogoutIcon';
 
-interface IProps {}
+export const Menu: FC = withLoadingStatus(() => {
+  const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
+  const pathname = usePathname();
+  const router = useRouter();
 
-export const Menu: FC<IProps> = () => {
+  const onSignOut = async () => {
+    try {
+      setLoadingStatus({ status: 'loading', label: 'Signing out' });
+      await signOut();
+      await turnkeyClient.logout();
+      queryClient.clear();
+      removeFromSession(GlobalAccountSession);
+      removeFromLocalStorage(EmbeddedKey);
+      clearLoadingStatus();
+      router.replace('/sign-in');
+    } catch (err) {
+      Sentry.captureException(err);
+      setLoadingStatus({ status: 'error', label: 'There was a problem signing you out' });
+    }
+  };
+
+  const getIsHighlighted = (item: { link: string | (() => void) }) => {
+    return typeof item.link === 'string' && pathname === item.link;
+  };
+
+  const logoutButtonConfig = {
+    label: 'Logout',
+    icon: LogoutIcon,
+    iconClassName: 'h-5 w-5 fill-grey-200',
+    link: onSignOut,
+    external: false,
+    disabled: false,
+  };
+
   return (
-    <aside className="main-menu">
+    <div className={'main-menu'}>
       <ul className="top-menu">
+        <div className={'flex flex-row justify-between'}>
+          <Image
+            src={'/images/dimo-dev.svg'}
+            alt="DIMO Logo"
+            width={176}
+            height={24}
+            className={'mb-10'}
+          />
+          <MenuCloseButton />
+        </div>
+
         {mainMenu.map((item) => {
-          return <MenuItem key={item.link} {...item} />;
+          return (
+            <MenuItem key={item.link} {...item} isHighlighted={getIsHighlighted(item)} />
+          );
         })}
       </ul>
       <ul className="bottom-menu">
-        {bottomMenu.map((item) => {
-          return <MenuItem key={item.label} {...item} />;
-        })}
+        {[logoutButtonConfig, ...bottomMenu].map((item) => (
+          <MenuItem key={item.label} {...item} isHighlighted={getIsHighlighted(item)} />
+        ))}
       </ul>
-    </aside>
+    </div>
+  );
+});
+
+const MenuCloseButton = () => {
+  const { setIsFullScreenMenuOpen } = useContext(LayoutContext);
+
+  return (
+    <div className={'md:hidden'}>
+      <button onClick={() => setIsFullScreenMenuOpen(false)}>
+        <XMarkIcon className={'size-6 text-white'} />
+      </button>
+    </div>
   );
 };

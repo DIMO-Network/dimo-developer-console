@@ -5,22 +5,27 @@ import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { Button } from '@/components/Button';
 import { TextError } from '@/components/TextError';
-import { useGlobalAccount } from '@/hooks';
-import { BubbleLoader } from '@/components/BubbleLoader';
-import * as Sentry from '@sentry/nextjs';
+import { captureException } from '@sentry/nextjs';
 import { NotificationContext } from '@/context/notificationContext';
+import { generateP256KeyPair } from '@turnkey/crypto';
+import { EmbeddedKey, saveToLocalStorage } from '@/utils/localStorage';
+import { emailRecovery } from '@/actions/user';
+import { gtSuper } from '@/utils/font';
+import { isEmpty } from 'lodash';
+import { useRouter } from 'next/navigation';
+import { IPasskeyRecoveryState } from '@/types/auth';
 
 interface EmailRecoveryFormInputs {
   email: string;
 }
 
 interface IProps {
-  onNext: (flow: string) => void;
+  onNext: (flow: string, state?: Partial<IPasskeyRecoveryState>) => void;
 }
 
 export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
-  const { emailRecovery } = useGlobalAccount();
   const { setNotification } = useContext(NotificationContext);
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
     register,
@@ -35,28 +40,35 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
     try {
       if (!email) return;
       setIsLoading(true);
-      const success = await emailRecovery(email);
+      const key = generateP256KeyPair();
+      const targetPublicKey = key.publicKeyUncompressed;
+      saveToLocalStorage(EmbeddedKey, key.privateKey);
+      const success = await emailRecovery(email, targetPublicKey);
       if (success) {
-        onNext('email-form');
+        onNext('email-form', {
+          email: email,
+        });
       }
     } catch (error) {
       setNotification('Something went wrong while sending the email', 'Oops...', 'error');
-      Sentry.captureException(error);
+      captureException(error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-4 w-full max-w-sm pt-4"
-    >
-      <div className="flex flex-col gap-4 ">
+    <div className="email-recovery__form">
+      <div className="email-recovery__header">
+        <p className={gtSuper.className}>Reset Passkeys</p>
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="email-recovery__input">
+        <p>Your old passkeys will not longer work after the reset is complete</p>
         <Label htmlFor="email" className="text-xs text-medium">
+          Email
           <TextField
             type="text"
-            placeholder="Enter your email..."
+            placeholder="email@address.com"
             {...register('email', {
               required: true,
             })}
@@ -64,13 +76,24 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
           />
         </Label>
         {errors.email && <TextError errorMessage="This field is required" />}
-      </div>
-      <div className="flex flex-col pt-4">
-        <Button type="submit" className="primary" role="continue-button">
-          {isLoading ? <BubbleLoader isLoading={isLoading} /> : 'Continue'}
+        <Button
+          type="submit"
+          disabled={isEmpty(email)}
+          loading={isLoading}
+          role="continue-button"
+        >
+          Continue
         </Button>
-      </div>
-    </form>
+        <Button
+          type="button"
+          className="border invert border-white"
+          role="cancel-button"
+          onClick={() => router.back()}
+        >
+          Cancel
+        </Button>
+      </form>
+    </div>
   );
 };
 

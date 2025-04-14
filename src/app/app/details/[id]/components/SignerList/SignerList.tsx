@@ -2,9 +2,7 @@ import _ from 'lodash';
 
 import { maskStringV2 } from 'maskdata';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { useState, type FC } from 'react';
-import { encodeFunctionData } from 'viem';
-import { useSession } from 'next-auth/react';
+import { useState, type FC, useContext } from 'react';
 
 import { Button } from '@/components/Button';
 import { ContentCopyIcon } from '@/components/Icons';
@@ -13,13 +11,10 @@ import { IApp, ISigner } from '@/types/app';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { useContractGA, useOnboarding } from '@/hooks';
-import { IGlobalAccountSession } from '@/types/wallet';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
+import { useDisableSigner, useGlobalAccount, useOnboarding } from '@/hooks';
 
-import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
-import configuration from '@/config';
 import * as Sentry from '@sentry/nextjs';
+import { NotificationContext } from '@/context/notificationContext';
 
 interface IProps {
   app: IApp;
@@ -30,47 +25,35 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
   const { workspace } = useOnboarding();
-  const { processTransactions } = useContractGA();
-  const { data: session } = useSession();
-  const { user: { role = '' } = {} } = session ?? {};
-
+  const { currentUser } = useGlobalAccount();
+  const { setNotification } = useContext(NotificationContext);
+  const handleDisableSigner = useDisableSigner(workspace!.token_id);
   const handleCopy = (value: string) => {
     void navigator.clipboard.writeText(value);
+    setNotification('API Key copied', 'Success!', 'info');
   };
 
-  const handleDisableSigner = async (signer: string) => {
-    const gaSession = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-    const organizationInfo = gaSession?.organization;
-    if (!organizationInfo && !workspace) throw new Error('Web3 connection failed');
-    const transaction = [
-      {
-        to: configuration.DLC_ADDRESS,
-        value: BigInt(0),
-        data: encodeFunctionData({
-          abi: DimoLicenseABI,
-          functionName: 'disableSigner',
-          args: [workspace?.token_id ?? 0, signer],
-        }),
-      },
-    ];
-    await processTransactions(transaction);
-  };
-
-  const renderWithCopy = (columnName: string, data: Record<string, string>) => {
+  const renderColumn = (columnName: string, data: ISigner) => {
     const value = String(data[columnName]).replace('0x', '');
     return (
-      <p className="flex flex-row">
-        {maskStringV2(value, {
-          maskWith: '*',
-          unmaskedEndCharacters: 2,
-          unmaskedStartCharacters: 2,
-          maxMaskedCharacters: 20,
-        })}
+      <div
+        className={
+          'bg-surface-raised rounded-xl px-3 py-2 inline-flex flex-row items-center gap-2.5'
+        }
+      >
+        <p className="text-base text-text-secondary">
+          {maskStringV2(value, {
+            maskWith: '*',
+            unmaskedEndCharacters: 2,
+            unmaskedStartCharacters: 2,
+            maxMaskedCharacters: 20,
+          })}
+        </p>
         <ContentCopyIcon
-          className="w-4 h-4 ml-2 fill-white/50 cursor-pointer"
+          className="w-4 h-4 fill-text-secondary cursor-pointer"
           onClick={() => handleCopy(value)}
         />
-      </p>
+      </div>
     );
   };
 
@@ -104,7 +87,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   const renderTestAuthenticationAction = (signer: ISigner) => {
     return (
       <Button
-        className="white-outline px-4"
+        className="table-action-button"
         onClick={() => handleTestAuthentication(signer)}
         key={`test-action-${signer.id}`}
       >
@@ -114,16 +97,18 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
   };
 
   const renderDeleteSignerAction = ({ id = '', address: signer = '' }: ISigner) => {
+    const { role } = currentUser!;
     return (
       isOwner(role) && (
-        <button
+        <Button
+          className={'table-action-button'}
           title="Delete API key"
           type="button"
           onClick={() => handleDelete(id, signer)}
           key={`delete-action-${id}`}
         >
           <TrashIcon className="w-5 h-5" />
-        </button>
+        </Button>
       )
     );
   };
@@ -160,7 +145,7 @@ export const SignerList: FC<IProps> = ({ app, refreshData }) => {
               {
                 name: 'api_key',
                 label: 'API Key',
-                render: (item) => renderWithCopy('api_key', item),
+                render: (item: ISigner) => renderColumn('api_key', item),
               },
             ]}
             data={app.Signers.filter(({ deleted }) => !deleted)}

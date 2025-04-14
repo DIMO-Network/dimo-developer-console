@@ -1,9 +1,9 @@
 // global.d.ts
 import LoggedUser from '@/utils/loggedUser';
-import { NextRequestWithAuth } from 'next-auth/middleware';
+import { NextRequest as OriginalNextRequest } from 'next/server';
 
 declare global {
-  declare interface NextRequest extends NextRequestWithAuth {
+  declare interface NextRequest extends OriginalNextRequest {
     user?: LoggedUser | null;
   }
 }

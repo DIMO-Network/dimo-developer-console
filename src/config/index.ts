@@ -2,7 +2,7 @@ import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
 
-const { CONTRACT_METHODS } = defaultConfig;
+import type { CONTRACT_METHODS } from './default';
 
 type Configuration = {
   environment: string;
@@ -28,6 +28,7 @@ type Configuration = {
   gasPrice: number;
   ISSUED_TOPIC: `0x${string}`;
   CONTRACT_METHODS: Record<keyof typeof CONTRACT_METHODS, string>;
+  identityApiUrl: string;
 };
 
 const getCurrentEnvironment = (): string => {
@@ -57,12 +58,11 @@ export const getConfig = (): Configuration => {
       break;
   }
 
-  const configuration = {
+  return {
     environment: environment,
     ...defaultConfig,
     ...environmentConfig,
   } as Configuration;
-  return configuration;
 };
 
 const currentConfig = getConfig();

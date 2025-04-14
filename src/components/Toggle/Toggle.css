@@ -9,11 +9,11 @@
     @apply pointer-events-none absolute mx-auto h-4 w-9 rounded-full transition-colors duration-200 ease-in-out;
 
     &.active {
-      @apply bg-primary-400;
+      @apply bg-feedback-success;
     }
 
     &.inactive {
-      @apply bg-dark-grey-300;
+      @apply bg-[#818181];
     }
   }
 
@@ -21,11 +21,11 @@
     @apply pointer-events-none absolute left-0 inline-block h-5 w-5 transform rounded-full border border-gray-200 shadow ring-0 transition-transform duration-200 ease-in-out;
 
     &.active {
-      @apply translate-x-5 bg-primary-300;
+      @apply translate-x-5 bg-white;
     }
 
     &.inactive {
-      @apply translate-x-0 bg-dark-grey-400;
+      @apply translate-x-0 bg-[#4D4D4D];
     }
   }
 }

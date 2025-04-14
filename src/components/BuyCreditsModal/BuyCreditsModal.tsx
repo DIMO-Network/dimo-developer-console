@@ -14,8 +14,6 @@ import { IDcxPurchaseTransaction } from '@/types/wallet';
 
 import './BuyCreditsModal.css';
 
-interface IProps {}
-
 const buyCreditsFlows = {
   'credits-amount': {
     Component: CreditsAmount,
@@ -39,7 +37,7 @@ const buyCreditsFlows = {
   },
 };
 
-export const BuyCreditsModal: FC<IProps> = () => {
+export const BuyCreditsModal: FC = () => {
   const { isOpen, setIsOpen } = useContext(CreditsContext);
   const [flow, setFlow] = useState('credits-amount');
   const { Component: BuyCreditsFlow } =

@@ -1,20 +1,36 @@
 'use client';
 import React, { type ReactNode } from 'react';
 
-import { withNextSession, withGlobalAccounts, withNotifications } from '@/hoc';
+import { withAuth, withNotifications } from '@/hoc';
 
-import '@/app/globals.css';
+import './GuestLayout.css';
 
-const View = withNotifications(
-  withNextSession(
-    withGlobalAccounts(({ children }: { children: ReactNode }) => <>{children}</>),
-  ),
+const Providers = withNotifications(
+  withAuth(({ children }: { children: ReactNode }) => <>{children}</>),
 );
+
+const Layout = ({ children }: { children: ReactNode }) => {
+  return (
+    <main className="guest-layout">
+      <div className="sign-in-up-container">
+        <img src={'/images/dimo-dev.svg'} alt="DIMO Developer Console Logo" />
+        {children}
+      </div>
+      <div className="background-side-image">
+        <img src={'/images/car_segment.svg'} alt="DIMO Background" />
+      </div>
+    </main>
+  );
+};
 
 export const GuestLayout = ({
   children,
 }: Readonly<{
-  children: React.ReactNode;
-}>) => <View>{children}</View>;
+  children: ReactNode;
+}>) => (
+  <Providers>
+    <Layout>{children}</Layout>
+  </Providers>
+);
 
 export default GuestLayout;

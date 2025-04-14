@@ -1,7 +1,6 @@
 'use client';
 import { useContext, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import * as Sentry from '@sentry/nextjs';
 
 import { BuildForForm, CompanyInfoForm, WalletCreation } from '@/app/sign-up/components';
@@ -10,14 +9,15 @@ import { IAuth } from '@/types/auth';
 import { NotificationContext } from '@/context/notificationContext';
 import { useErrorHandler } from '@/hooks';
 import { withNotifications } from '@/hoc';
+import { getUser } from '@/actions/user';
+import { Anchor } from '@/components/Anchor';
 
 import './View.css';
-import { getUser } from '@/actions/user';
 
 const signUpFlows = {
   'wallet-creation': {
     Component: WalletCreation,
-    title: "Let's get you a wallet",
+    title: 'Continue with passkey',
     order: 1,
   },
   'build-for': {
@@ -27,7 +27,7 @@ const signUpFlows = {
   },
   'company-information': {
     Component: CompanyInfoForm,
-    title: 'Our last question',
+    title: 'Final strecht',
     order: 3,
   },
 };
@@ -40,69 +40,89 @@ const View = () => {
   const currentFlow = searchParams.get('flow') ?? 'wallet-creation';
   const [flow, setFlow] = useState(currentFlow);
   const [authData, setAuthData] = useState<Partial<IAuth>>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { Component: SignUpFlow, title } =
+  const { Component: SignUpFlow } =
     signUpFlows[flow as keyof typeof signUpFlows] ?? signUpFlows['wallet-creation'];
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
+    setIsLoading(true);
+    await completeUserData(auth);
+    router.replace('/app');
+  };
+
+  const handleNext = async (actualFlow: string, inputAuth?: Partial<IAuth>) => {
     try {
-      await completeUserData(auth);
-      router.replace('/app');
+      setIsLoading(true);
+      if (currentFlow !== 'wallet-creation') {
+        const user = await getUser();
+        inputAuth = {
+          ...inputAuth,
+          ...user,
+        };
+      }
+
+      const newUserData = {
+        ...authData,
+        ...inputAuth,
+        company: {
+          ...authData.company,
+          ...(inputAuth?.company ?? {}),
+        },
+      } as Partial<IAuth>;
+      setAuthData(newUserData);
+      const currentProcess = signUpFlows[actualFlow as keyof typeof signUpFlows];
+      const processes = Object.keys(signUpFlows).reduce(
+        (acc, elm) => ({
+          ...acc,
+          [signUpFlows[elm as keyof typeof signUpFlows].order]: elm,
+        }),
+        {},
+      );
+      const nextProcess =
+        processes[(currentProcess.order + 1) as keyof typeof processes] ?? 'complete';
+      if (nextProcess !== 'complete') setFlow(nextProcess);
+      else await handleCompleteUserData(newUserData);
     } catch (error) {
       console.error('Something went wrong while the completing user information', error);
       Sentry.captureException(error);
       setNotification('Something went wrong', 'Oops...', 'error');
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleNext = async (actualFlow: string, inputAuth?: Partial<IAuth>) => {
-    // Check if user already has a team, if so, redirect to app cause is an old user
-    const user = await getUser();
-    if (user?.team) {
-      router.replace('/app');
-      return;
-    }
-
-    const newUserData = {
-      ...authData,
-      ...inputAuth,
-      company: {
-        ...authData.company,
-        ...(inputAuth?.company ?? {}),
-      },
-    } as Partial<IAuth>;
-    setAuthData(newUserData);
-    const currentProcess = signUpFlows[actualFlow as keyof typeof signUpFlows];
-    const processes = Object.keys(signUpFlows).reduce(
-      (acc, elm) => ({
-        ...acc,
-        [signUpFlows[elm as keyof typeof signUpFlows].order]: elm,
-      }),
-      {},
-    );
-    const nextProcess =
-      processes[(currentProcess.order + 1) as keyof typeof processes] ?? 'complete';
-    if (nextProcess !== 'complete') setFlow(nextProcess);
-    else await handleCompleteUserData(newUserData);
   };
 
   return (
-    <main className="sign-up">
+    <div className="sign-up">
       <div className="sign-up__content">
-        <article className="sign-up__form">
-          <section className="sign-up__header">
-            <Image
-              src={'/images/build-on-dimo.png'}
-              alt="DIMO Logo"
-              width={176}
-              height={24}
-            />
-            <p>{title}</p>
-          </section>
-          {SignUpFlow && <SignUpFlow onNext={handleNext} auth={authData} />}
-        </article>
+        <img src={'/images/dimo-dev.svg'} alt="DIMO Logo" />
+        {SignUpFlow && (
+          <SignUpFlow onNext={handleNext} auth={authData} isLoading={isLoading} />
+        )}
+        <div className="sign-up__extra-links mt-6">
+          <div className="flex flex-row">
+            <p className="terms-caption">
+              By signing in, you are agreeing to our{' '}
+              <Anchor
+                href="https://docs.dimo.zone/dinc/developer-terms-of-service"
+                className="grey underline"
+                target="_blank"
+              >
+                terms of service
+              </Anchor>{' '}
+              and{' '}
+              <Anchor
+                href="https://dimo.zone/legal/privacy-policy"
+                className="grey underline"
+                target="_blank"
+              >
+                privacy policy
+              </Anchor>
+            </p>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   );
 };
 
