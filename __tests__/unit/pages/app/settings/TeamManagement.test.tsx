@@ -6,9 +6,11 @@ describe('TeamManagement', () => {
   it('renders the team management table', () => {
     const { container } = render(
       <TeamManagement
+        refreshData={() => {}}
         teamCollaborators={[
           {
             team_id: '12345',
+            status: 'pending',
             User: {
               name: 'John Doe',
               email: 'johndoe@gmail.com',
@@ -35,8 +37,10 @@ describe('TeamManagement', () => {
   it('renders the team management table without user', () => {
     const { container } = render(
       <TeamManagement
+        refreshData={() => {}}
         teamCollaborators={[
           {
+            status: 'pending',
             team_id: '12345',
             user_id: '12345',
             role: 'OWNER',
