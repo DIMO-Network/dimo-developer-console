@@ -14,7 +14,7 @@ Object.assign(navigator, {
 
 describe('AppSummary', () => {
   it('renders the app summary', () => {
-    render(<AppSummary app={app} />);
+    render(<AppSummary app={app} isOwner handleDelete={() => {}} />);
 
     const appNameElm = screen.getByText(app.name);
     const scopeElm = screen.getByText(app.scope);

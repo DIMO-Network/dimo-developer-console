@@ -14,9 +14,7 @@ Object.assign(navigator, {
 
 describe('SignerList', () => {
   it('renders the app summary', () => {
-    const { container } = render(
-      <SignerList list={app.Signers} refreshData={() => {}} />,
-    );
+    const { container } = render(<SignerList app={app} refreshData={() => {}} />);
 
     const [signer] = app.Signers ?? [];
     const [keyElm] = screen.getAllByText(signer.api_key);
