@@ -1,7 +1,7 @@
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { FC } from 'react';
-import { Form } from '@/app/app/create/components';
+import { Form } from '@/app/app/create/components/Form';
 import { useOnboarding } from '@/hooks';
 
 import './CreateAppModal.css';
