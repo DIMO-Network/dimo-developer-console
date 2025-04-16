@@ -1,6 +1,6 @@
 import React, { FC, ReactNode } from 'react';
 import { PlusCircleIcon } from '@heroicons/react/16/solid';
-import { ActionCompletedRow } from '@/app/app/list/components/Banner/components/ActionCompletedRow';
+import { ActionCompletedRow } from '@/components/OnboardingBanner/ActionCompletedRow';
 
 interface CTARowProps {
   text: string;
