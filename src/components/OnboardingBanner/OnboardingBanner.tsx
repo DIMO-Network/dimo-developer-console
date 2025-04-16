@@ -1,9 +1,9 @@
 import React, { FC } from 'react';
-import './Banner.css';
+import './OnboardingBanner.css';
 import CreateAppButton from '@/app/app/list/components/CreateAppButton';
 import AddCreditsButton from '@/app/app/list/components/AddCreditsButton';
-import { ActionCompletedRow } from '@/app/app/list/components/Banner/components/ActionCompletedRow';
-import { CTARow } from '@/app/app/list/components/Banner/components/CTARow';
+import { ActionCompletedRow } from '@/components/OnboardingBanner/components/ActionCompletedRow';
+import { CTARow } from '@/components/OnboardingBanner/components/CTARow';
 import { FragmentType, gql, useFragment } from '@/gql';
 
 export const GET_TOTAL_LICENSE_COUNT = gql(`
@@ -17,7 +17,7 @@ interface Props {
   licenseConnection: FragmentType<typeof GET_TOTAL_LICENSE_COUNT>;
 }
 
-export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
+export const OnboardingBanner: FC<Props> = ({ balance, licenseConnection }) => {
   const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
   return (
     <div className="banner-content">
@@ -50,4 +50,4 @@ export const Banner: FC<Props> = ({ balance, licenseConnection }) => {
   );
 };
 
-export default Banner;
+export default OnboardingBanner;

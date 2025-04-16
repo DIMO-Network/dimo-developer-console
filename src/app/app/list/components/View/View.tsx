@@ -1,8 +1,8 @@
 'use client';
 import { type FC } from 'react';
 
-import { Loader } from '@//components/Loader';
-import { Banner } from '@/app/app/list/components/Banner';
+import { Loader } from '@/components/Loader';
+import { OnboardingBanner } from '@/components/OnboardingBanner';
 import { useGlobalAccount, useOnboarding, useUser } from '@/hooks';
 import Image from 'next/image';
 import { LicenseList } from '@/app/license/list';
@@ -59,7 +59,10 @@ export const View: FC = () => {
         {!!error && <p>There was an error fetching your developer licenses</p>}
         {!!data?.developerLicenses && (
           <>
-            <Banner balance={balance} licenseConnection={data.developerLicenses} />
+            <OnboardingBanner
+              balance={balance}
+              licenseConnection={data.developerLicenses}
+            />
             <LicenseList licenseConnection={data.developerLicenses} />
           </>
         )}
