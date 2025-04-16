@@ -2,8 +2,8 @@ import React, { FC } from 'react';
 import './OnboardingBanner.css';
 import CreateAppButton from '@/app/app/list/components/CreateAppButton';
 import AddCreditsButton from '@/app/app/list/components/AddCreditsButton';
-import { ActionCompletedRow } from '@/components/OnboardingBanner/components/ActionCompletedRow';
-import { CTARow } from '@/components/OnboardingBanner/components/CTARow';
+import { ActionCompletedRow } from '@/components/OnboardingBanner/ActionCompletedRow';
+import { CTARow } from '@/components/OnboardingBanner/CTARow';
 import { FragmentType, gql, useFragment } from '@/gql';
 
 export const GET_TOTAL_LICENSE_COUNT = gql(`
