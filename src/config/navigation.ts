@@ -39,17 +39,15 @@ export const mainMenu = [
     label: 'Integrations',
     icon: IntegrationIcon,
     iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
-    link: '/integrations', // This is the main Integrations route
+    link: '/integrations',
     external: false,
     disabled: false,
-    // Add a subMenu array to define sub-navigation items
     subMenu: [
       {
         label: 'Webhooks',
         link: '/integrations/webhooks',
         external: false,
       },
-      // You can add more sub-menu items here if needed.
     ],
   },
   {

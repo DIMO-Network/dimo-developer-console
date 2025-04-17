@@ -1,4 +1,3 @@
-// /src/components/Webhooks/WebhooksPage.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -10,6 +9,7 @@ import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { TestWebhookModal } from './TestWebhookModal';
 import Button from '@/components/Button/Button';
 import Title from '@/components/Title/Title';
+import { Webhook } from '@/types/webhook';
 
 export const WebhooksPage = () => {
   const {
@@ -36,7 +36,7 @@ export const WebhooksPage = () => {
   } = useWebhooks();
 
   const [showTestModal, setShowTestModal] = useState(false);
-  const [webhookToTest, setWebhookToTest] = useState(null);
+  const [webhookToTest, setWebhookToTest] = useState<Webhook>();
 
   const handleRunWebhookTest = async () => {
     if (!webhookToTest) return;
@@ -115,7 +115,7 @@ export const WebhooksPage = () => {
       {showTestModal && webhookToTest && (
         <TestWebhookModal
           webhook={webhookToTest}
-          onRun={handleRunWebhookTest}
+          onTest={handleRunWebhookTest}
           onCancel={() => setShowTestModal(false)}
         />
       )}

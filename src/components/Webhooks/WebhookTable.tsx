@@ -40,7 +40,7 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({
           {webhooks.map((webhook) => (
             <React.Fragment key={webhook.id}>
               <tr onClick={() => toggleExpand(webhook.id)}>
-                <td>{webhook.description}</td>
+                <td>{'Webhook description goes here'}</td>
                 <td>{webhook.service}</td>
                 <td>{webhook.target_uri}</td>
                 <td>{webhook.status}</td>
