@@ -81,4 +81,5 @@ export const ISSUED_TOPIC: `0x${string}` =
 export const CONTRACT_METHODS = {
   ISSUE_IN_DC: '0x69054339',
   MINT_IN_DIMO: '0xec88fc37',
+  APPROVE_DCX_ALLOWANCE: '0x095ea7b3',
 };
