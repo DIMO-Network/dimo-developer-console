@@ -2,7 +2,7 @@
 
 import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { useContractGA, useGlobalAccount } from '@/hooks';
-import { useContext, useEffect, useState } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 import { Loading } from '@/components/Loading';
 import { CheckIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
@@ -49,7 +49,7 @@ const ProcessCard = ({ title, status }: { title: string; status: LoadingStatus }
   );
 };
 
-export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
+export const CryptoExchange: FC<IProps> = ({ onNext, transactionData }) => {
   const { setNotification } = useContext(NotificationContext);
   const { getDcxAllowance, processTransactions } = useContractGA();
   const { currentUser } = useGlobalAccount();
@@ -65,35 +65,35 @@ export const CryptoExchange = ({ onNext, transactionData }: IProps) => {
   > => {
     const transactions = [];
     const expendableDimo = transactionData!.requiredDimoAmount!;
+    const dcxAmount = transactionData!.dcxAmount!;
 
     const allowanceDCX = await getDcxAllowance();
 
     if (allowanceDCX <= expendableDimo) {
-      // Call approve
       transactions.push({
         to: configuration.DC_ADDRESS,
         value: BigInt(0),
         data: encodeFunctionData({
           abi: DimoABI,
-          functionName: CONTRACT_METHODS.APPROVE_DCX_ALLOWANCE,
+          functionName: CONTRACT_METHODS.APPROVE_ALLOWANCE,
           args: [configuration.DCX_ADDRESS, BigInt(utils.toWei(expendableDimo, 'ether'))],
         }),
       });
     }
 
-    // Call mintInDimo 2 parameteres
     transactions.push({
       to: configuration.DCX_ADDRESS,
       value: BigInt(0),
       data: encodeFunctionData({
         abi: DimoCreditsABI,
-        functionName: CONTRACT_METHODS.MINT_IN_DIMO,
+        functionName: CONTRACT_METHODS.MINT_DCX,
         args: [
           currentUser!.smartContractAddress,
-          BigInt(utils.toWei(expendableDimo, 'ether')),
+          BigInt(utils.toWei(dcxAmount, 'ether')),
         ],
       }),
     });
+
     return transactions;
   };
 

@@ -11,7 +11,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { PlusIcon, WalletIcon } from '@/components/Icons';
 import { TextError } from '@/components/TextError';
 import { TokenInput } from '@/components/TokenInput';
-import { useGlobalAccount } from '@/hooks';
+import { useContractGA, useGlobalAccount } from '@/hooks';
 
 import config from '@/config';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
@@ -49,6 +49,7 @@ interface IProps {
 export const CreditsAmount = ({ onNext }: IProps) => {
   const { currentUser, getCurrentDimoBalance } = useGlobalAccount();
   const { getDimoPrice } = useCryptoPricing();
+  const { getNeededDimoAmountForDcx } = useContractGA();
   const { setNotification } = useContext(NotificationContext);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
   const { control, watch } = useForm<IForm>({
@@ -71,11 +72,7 @@ export const CreditsAmount = ({ onNext }: IProps) => {
   const handleStartPurchase = async () => {
     if (!currentUser) return;
 
-    // get usd worth of credits
-    const usdAmount = credits * DCX_PRICE;
-
-    // get total dimo from usd amount
-    const neededDimo = BigInt(usdAmount) / BigInt(dimoPrice);
+    const neededDimo = await getNeededDimoAmountForDcx(credits!);
 
     if (paymentMethod === 'usd') {
       setNotification(
