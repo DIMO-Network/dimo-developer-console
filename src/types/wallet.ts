@@ -44,9 +44,6 @@ export interface IWallet {
 export interface IDcxPurchaseTransaction {
   destinationAddress: `0x${string}`;
   usdAmount: number;
-  maticAmount: bigint;
-  alreadyHasDimo: boolean;
-  alreadyHasWmatic: boolean;
   dcxAmount: bigint;
   requiredDimoAmount: bigint;
   currency: string;
