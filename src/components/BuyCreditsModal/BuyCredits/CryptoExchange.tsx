@@ -76,7 +76,7 @@ export const CryptoExchange: FC<IProps> = ({ onNext, transactionData }) => {
         data: encodeFunctionData({
           abi: DimoABI,
           functionName: CONTRACT_METHODS.APPROVE_ALLOWANCE,
-          args: [configuration.DCX_ADDRESS, BigInt(utils.toWei(expendableDimo, 'ether'))],
+          args: [configuration.DCX_ADDRESS, BigInt(utils.toWei(dcxAmount, 'ether'))],
         }),
       });
     }
