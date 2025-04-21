@@ -21,7 +21,7 @@ export const getPageTitle = (path: string) => {
 const pageTitles: Record<string, string> = {
   '/': 'Home',
   '/app': 'Home',
-  '/integrations': 'Integrations',
+  '/webhooks': 'Webhooks',
   '/api-status': 'API Status',
   '/settings': 'Settings',
 };
@@ -36,19 +36,12 @@ export const mainMenu = [
     disabled: false,
   },
   {
-    label: 'Integrations',
+    label: 'Webhooks',
     icon: IntegrationIcon,
     iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
-    link: '/integrations',
+    link: '/webhooks',
     external: false,
     disabled: false,
-    subMenu: [
-      {
-        label: 'Webhooks',
-        link: '/integrations/webhooks',
-        external: false,
-      },
-    ],
   },
   {
     label: 'Support',

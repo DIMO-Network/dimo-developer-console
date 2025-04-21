@@ -8,8 +8,8 @@ import { WebhookTable } from './WebhookTable';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { TestWebhookModal } from './TestWebhookModal';
 import Button from '@/components/Button/Button';
-import Title from '@/components/Title/Title';
 import { Webhook } from '@/types/webhook';
+import { Section, SectionHeader } from '@/components/Section';
 
 export const WebhooksPage = () => {
   const {
@@ -62,17 +62,11 @@ export const WebhooksPage = () => {
 
   return (
     <div className="webhooks-container">
-      <div className="webhooks-header">
-        <Title component="h1" className="webhooks-title">
-          Webhooks
-        </Title>
-        <Button className="create-webhook-button" onClick={handleShowCreateForm}>
-          + Create New
-        </Button>
+      <div className="flex flex-row gap-1 pb-2 border-b-cta-default border-b">
+        <p className={'text-base text-text-secondary font-medium'}>
+          Receive real-time updates from events
+        </p>
       </div>
-      <p className="webhooks-description">
-        Webhooks allow your application to receive real-time updates from events.
-      </p>
 
       {currentWebhook && (
         <WebhookForm
@@ -89,21 +83,6 @@ export const WebhooksPage = () => {
         />
       )}
 
-      <WebhookTable
-        webhooks={webhooks}
-        onEdit={setCurrentWebhook}
-        onDelete={(webhook) => {
-          setWebhookToDelete(webhook);
-          setShowDeleteConfirm(true);
-        }}
-        onTest={(webhook) => {
-          setWebhookToTest(webhook);
-          setShowTestModal(true);
-        }}
-        expandedWebhook={expandedWebhook}
-        setExpandedWebhook={setExpandedWebhook}
-      />
-
       {showDeleteConfirm && (
         <DeleteConfirmModal
           webhook={webhookToDelete}
@@ -119,6 +98,29 @@ export const WebhooksPage = () => {
           onCancel={() => setShowTestModal(false)}
         />
       )}
+      <div className="py-6">
+        <Section>
+          <SectionHeader title={'Webhooks'}>
+            <Button className="dark with-icon" onClick={handleShowCreateForm}>
+              + Create New
+            </Button>
+          </SectionHeader>
+          <WebhookTable
+            webhooks={webhooks}
+            onEdit={setCurrentWebhook}
+            onDelete={(webhook) => {
+              setWebhookToDelete(webhook);
+              setShowDeleteConfirm(true);
+            }}
+            onTest={(webhook) => {
+              setWebhookToTest(webhook);
+              setShowTestModal(true);
+            }}
+            expandedWebhook={expandedWebhook}
+            setExpandedWebhook={setExpandedWebhook}
+          />
+        </Section>
+      </div>
     </div>
   );
 };
