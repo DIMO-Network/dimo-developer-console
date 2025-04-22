@@ -22,6 +22,7 @@ const config: Config = {
         },
         'cta': {
           default: '#322D2F',
+          disabled: '#818181',
         },
         'text': {
           secondary: '#BABABA',
