@@ -8,6 +8,8 @@ import { useForm } from 'react-hook-form';
 import './Webhooks.css';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
+import { SelectField } from '@/components/SelectField';
+import { Section, SectionHeader } from '@/components/Section';
 
 interface WebhookFormProps {
   currentWebhook: Partial<Webhook> | null;
@@ -23,20 +25,55 @@ interface WebhookFormProps {
 }
 
 export const NewWebhookForm = () => {
-  const { register, getValues } = useForm({
+  const { register, getValues, control } = useForm({
     mode: 'onChange',
     reValidateMode: 'onChange',
   });
   console.log(getValues());
+
   return (
-    <div>
-      <Label>Webhook name</Label>
-      <TextField
-        {...register('name', {
-          required: 'Please enter a webhook name',
-        })}
-        placeholder="Enter a webhook name"
-      />
+    <div className={'flex flex-1 flex-col gap-6'}>
+      <div className={'flex flex-col gap-2.5'}>
+        <Label>Webhook name</Label>
+        <TextField
+          {...register('name', {
+            required: 'Please enter a webhook name',
+          })}
+          placeholder="Enter a webhook name"
+        />
+      </div>
+      <div className={'flex flex-col gap-2.5'}>
+        <Label>Service</Label>
+        <SelectField
+          placeholder={'Choose a service'}
+          {...register('service', {
+            required: 'Please select a webhook service',
+          })}
+          options={[
+            { value: 'Telemetry', text: 'Telemetry' },
+            { value: 'SACD', text: 'SACD' },
+          ]}
+          control={control}
+        />
+      </div>
+      <Section>
+        <SectionHeader title={'Build the conditions'} />
+        <p>TODO - implement the CEL builder tool</p>
+      </Section>
+      <div className={'flex flex-col gap-2.5'}>
+        <Label>Interval</Label>
+        <SelectField
+          placeholder={'Choose an interval'}
+          {...register('setup', {
+            required: 'Please select a webhook interval',
+          })}
+          options={[
+            { value: 'Realtime', text: 'Realtime' },
+            { value: 'Hourly', text: 'Hourly' },
+          ]}
+          control={control}
+        />
+      </div>
     </div>
   );
 };
