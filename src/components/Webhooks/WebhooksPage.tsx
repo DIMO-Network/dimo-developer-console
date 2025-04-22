@@ -10,6 +10,7 @@ import { TestWebhookModal } from './TestWebhookModal';
 import Button from '@/components/Button/Button';
 import { Webhook } from '@/types/webhook';
 import { Section, SectionHeader } from '@/components/Section';
+import Link from 'next/link';
 
 export const WebhooksPage = () => {
   const {
@@ -32,7 +33,6 @@ export const WebhooksPage = () => {
     handleUpdate,
     handleDelete,
     resetForm,
-    handleShowCreateForm,
   } = useWebhooks();
 
   const [showTestModal, setShowTestModal] = useState(false);
@@ -101,9 +101,9 @@ export const WebhooksPage = () => {
       <div className="py-6">
         <Section>
           <SectionHeader title={'Webhooks'}>
-            <Button className="dark with-icon" onClick={handleShowCreateForm}>
-              + Create New
-            </Button>
+            <Link href={'/webhooks/create/configure'}>
+              <Button className="dark with-icon">+ Create a webhook</Button>
+            </Link>
           </SectionHeader>
           <WebhookTable
             webhooks={webhooks}

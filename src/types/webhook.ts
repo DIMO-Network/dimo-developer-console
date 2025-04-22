@@ -10,4 +10,13 @@ export interface Webhook {
   status: string;
   created_at: string;
   updated_at: string;
+  signalName: string;
+  description: string;
+}
+
+export interface Condition {
+  id: string;
+  field: string;
+  operator: string;
+  value: string;
 }
