@@ -1,5 +1,3 @@
-import { OnrampSessionResult } from '@stripe/crypto';
-
 export interface ICreateGlobalAccountRequest {
   email: string;
   encodedChallenge: string;
@@ -56,13 +54,6 @@ export interface IGlobalAccountSession {
   subOrganizationId: string;
   token: string;
   expiry: number;
-}
-
-export interface IStripeCryptoEvent {
-  type: 'onramp_session_updated';
-  payload: {
-    session: OnrampSessionResult;
-  };
 }
 
 export interface Log {
