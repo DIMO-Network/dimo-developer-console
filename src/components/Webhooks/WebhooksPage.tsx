@@ -101,7 +101,7 @@ export const WebhooksPage = () => {
       <div className="py-6">
         <Section>
           <SectionHeader title={'Webhooks'}>
-            <Link href={'/webhooks/create/configure'}>
+            <Link href={'/webhooks/create'}>
               <Button className="dark with-icon">+ Create a webhook</Button>
             </Link>
           </SectionHeader>

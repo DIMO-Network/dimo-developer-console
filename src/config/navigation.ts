@@ -27,9 +27,7 @@ const pageTitles: Record<string, string> = {
   '/webhooks': 'Webhooks',
   '/api-status': 'API Status',
   '/settings': 'Settings',
-  '/webhooks/create/configure': 'Create a webhook',
-  '/webhooks/create/delivery': 'Specify delivery',
-  '/webhooks/create/vehicles': 'Specify vehicles',
+  '/webhooks/create': 'Create a webhook',
 };
 
 export const mainMenu = [

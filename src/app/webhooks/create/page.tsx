@@ -1,4 +1,6 @@
+import { View } from './components/View';
+
 const CreateWebhookPage = () => {
-  return <p>Create page will go here</p>;
+  return <View />;
 };
 export default CreateWebhookPage;

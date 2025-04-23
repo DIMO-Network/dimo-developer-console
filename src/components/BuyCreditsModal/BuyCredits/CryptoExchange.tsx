@@ -4,7 +4,7 @@ import { IDcxPurchaseTransaction } from '@/types/wallet';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import { FC, useContext, useEffect, useState } from 'react';
 import { Loading } from '@/components/Loading';
-import { CheckIcon } from '@/components/Icons';
+import { CryptoCheckIcon } from '@/components/Icons';
 import { NotificationContext } from '@/context/notificationContext';
 import { ErrorIcon } from '@/components/Icons';
 import configuration from '@/config';
@@ -30,7 +30,7 @@ enum LoadingStatus {
 const StatusIcon = ({ status }: { status: LoadingStatus }) => {
   switch (status) {
     case 'success':
-      return <CheckIcon />;
+      return <CryptoCheckIcon />;
     case 'error':
       return <ErrorIcon />;
     case 'loading':
