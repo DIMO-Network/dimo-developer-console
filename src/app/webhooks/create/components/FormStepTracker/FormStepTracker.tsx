@@ -1,33 +1,47 @@
 import React from 'react';
 import clsx from 'classnames';
 import { CheckIcon } from '@/components/Icons';
+import { WebhookFormStepName } from '@/components/Webhooks/NewWebhookForm';
 
-export const FormStepTracker = ({ curStep }: { curStep: number }) => {
+const formStepConfig = {
+  [WebhookFormStepName.CONFIGURE]: { text: 'Configure' },
+  [WebhookFormStepName.DELIVERY]: { text: 'Specify delivery' },
+  [WebhookFormStepName.SPECIFY_VEHICLES]: { text: 'Specify vehicles' },
+};
+
+export const FormStepTracker = ({
+  currentStep,
+  steps,
+}: {
+  currentStep: WebhookFormStepName;
+  steps: WebhookFormStepName[];
+}) => {
   return (
     <div className={'flex flex-col gap-4 p-4 bg-surface-default rounded-2xl'}>
       <ol className={'list-decimal space-y-4'}>
-        <FormStepTrackerRow text={'Configure'} stepIndex={0} currentStep={curStep} />
-        <FormStepTrackerRow
-          text={'Specify delivery'}
-          stepIndex={1}
-          currentStep={curStep}
-        />
-        <FormStepTrackerRow
-          text={'Specify vehicles'}
-          stepIndex={2}
-          currentStep={curStep}
-        />
+        {steps.map((step: WebhookFormStepName, index) => (
+          <FormStepTrackerRow
+            key={index}
+            steps={steps}
+            step={step}
+            currentStep={currentStep}
+          />
+        ))}
       </ol>
     </div>
   );
 };
-const FormStepTrackerRow = (props: {
-  text: string;
-  stepIndex: number;
-  currentStep: number;
+const FormStepTrackerRow = ({
+  step,
+  steps,
+  currentStep,
+}: {
+  step: WebhookFormStepName;
+  currentStep: WebhookFormStepName;
+  steps: WebhookFormStepName[];
 }) => {
-  const isComplete = props.currentStep > props.stepIndex;
-  const isActive = props.currentStep === props.stepIndex;
+  const isComplete = steps.indexOf(currentStep) > steps.indexOf(step);
+  const isActive = steps.indexOf(currentStep) === steps.indexOf(step);
   return (
     <li
       className={clsx(
@@ -48,7 +62,7 @@ const FormStepTrackerRow = (props: {
             )}
           />
         )}
-        <p>{props.text}</p>
+        <p>{formStepConfig[step].text}</p>
       </div>
     </li>
   );

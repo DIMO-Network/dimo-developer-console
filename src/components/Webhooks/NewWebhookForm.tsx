@@ -5,6 +5,7 @@ import Button from '@/components/Button/Button';
 import React from 'react';
 import { WebhookConfigStep } from '@/components/Webhooks/steps/Configuration';
 import { WebhookDeliveryStep } from '@/components/Webhooks/steps/Delivery';
+import { WebhookSpecifyVehiclesStep } from '@/components/Webhooks/steps/SpecifyVehicles';
 
 export enum WebhookFormStepName {
   CONFIGURE = 'configure',
@@ -13,28 +14,49 @@ export enum WebhookFormStepName {
 }
 
 export const NewWebhookForm = ({
-  step,
+  currentStep,
   onNext,
   onSubmit,
+  onPrevious,
+  steps,
 }: {
-  step: WebhookFormStepName;
+  currentStep: WebhookFormStepName;
+  steps: WebhookFormStepName[];
   onNext: () => void;
   onSubmit: () => void;
+  onPrevious: () => void;
 }) => {
   const methods = useForm();
   const renderStep = () => {
-    switch (step) {
+    switch (currentStep) {
       case WebhookFormStepName.CONFIGURE:
         return <WebhookConfigStep />;
       case WebhookFormStepName.DELIVERY:
         return <WebhookDeliveryStep />;
+      case WebhookFormStepName.SPECIFY_VEHICLES:
+        return <WebhookSpecifyVehiclesStep />;
       default:
         return null;
     }
   };
-  const buttonType = step === WebhookFormStepName.SPECIFY_VEHICLES ? 'submit' : 'button';
-  const buttonOnClick =
-    step === WebhookFormStepName.SPECIFY_VEHICLES ? undefined : onNext;
+  const getPrimaryButtonProps = () => {
+    const isLastStep = currentStep === steps[steps.length - 1];
+    return {
+      type: isLastStep ? 'submit' : 'button',
+      onClick: isLastStep ? undefined : onNext,
+      text: isLastStep ? 'Submit' : 'Next',
+    };
+  };
+
+  const getSecondaryButtonProps = () => {
+    const isFirstStep = currentStep === steps[0];
+    return {
+      text: isFirstStep ? 'Cancel' : 'Previous',
+    };
+  };
+
+  const { type, onClick, text } = getPrimaryButtonProps();
+  const { text: secondaryButtonText } = getSecondaryButtonProps();
   return (
     <FormProvider {...methods}>
       <form
@@ -43,14 +65,20 @@ export const NewWebhookForm = ({
       >
         {renderStep()}
         <div className={'flex flex-col-reverse md:flex-row pt-6 flex-1 gap-4'}>
-          <Button className={'flex-1 primary-outline'}>Cancel</Button>
+          <Button
+            className={'flex-1 primary-outline'}
+            onClick={onPrevious}
+            type={'button'}
+          >
+            {secondaryButtonText}
+          </Button>
           <Button
             className={'flex-1'}
-            type={buttonType}
+            type={type}
             disabled={!methods.formState.isValid}
-            onClick={buttonOnClick}
+            onClick={onClick}
           >
-            Next
+            {text}
           </Button>
         </div>
       </form>

@@ -6,6 +6,7 @@ import { TextError } from '@/components/TextError';
 import { SelectField } from '@/components/SelectField';
 import { Section, SectionHeader } from '@/components/Section';
 
+// TODO - if we go back to this step, how do we handle prepopulating the service / interval fields?
 export const WebhookConfigStep: FC = () => {
   const {
     register,
