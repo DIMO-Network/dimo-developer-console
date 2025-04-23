@@ -21,17 +21,19 @@ export const WebhookConfigStep: FC = () => {
   return (
     <>
       <div className={'flex flex-col gap-2.5'}>
-        <Label>Webhook name</Label>
+        <Label>Webhook description</Label>
         <TextField
-          {...register('name', {
-            required: 'Please enter a webhook name',
+          {...register('description', {
+            required: 'Please enter a webhook description',
           })}
-          placeholder="Enter a webhook name"
+          placeholder="Enter a description for your webhook"
         />
-        {errors.name && (
+        {errors.description && (
           <TextError
             errorMessage={
-              typeof errors.name.message === 'string' ? errors.name.message : ''
+              typeof errors.description.message === 'string'
+                ? errors.description.message
+                : ''
             }
           />
         )}
