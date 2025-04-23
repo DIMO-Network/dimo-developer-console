@@ -12,7 +12,12 @@ export const WebhookConfigStep: FC = () => {
     register,
     control,
     formState: { errors },
+    getValues,
+    watch,
   } = useFormContext();
+  const service = watch('service');
+  console.log('service', service);
+  console.log(getValues('service'));
   return (
     <>
       <div className={'flex flex-col gap-2.5'}>
@@ -34,6 +39,7 @@ export const WebhookConfigStep: FC = () => {
       <div className={'flex flex-col gap-2.5'}>
         <Label>Service</Label>
         <SelectField
+          value={getValues('service')}
           placeholder={'Choose a service'}
           {...register('service', {
             required: 'Please select a webhook service',
@@ -55,6 +61,7 @@ export const WebhookConfigStep: FC = () => {
       <div className={'flex flex-col gap-2.5'}>
         <Label>Interval</Label>
         <SelectField
+          value={getValues('setup')}
           placeholder={'Choose an interval'}
           {...register('setup', {
             required: 'Please select a webhook interval',

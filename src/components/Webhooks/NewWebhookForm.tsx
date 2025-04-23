@@ -42,7 +42,7 @@ export const NewWebhookForm = ({
   const getPrimaryButtonProps = () => {
     const isLastStep = currentStep === steps[steps.length - 1];
     return {
-      type: isLastStep ? 'submit' : 'button',
+      type: (isLastStep ? 'submit' : 'button') as 'submit' | 'button',
       onClick: isLastStep ? undefined : onNext,
       text: isLastStep ? 'Submit' : 'Next',
     };
