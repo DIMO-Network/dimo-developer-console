@@ -1,16 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Webhook, Condition } from '@/types/webhook';
+import { Condition, Webhook } from '@/types/webhook';
 import Button from '@/components/Button/Button';
-import { useForm } from 'react-hook-form';
 
 import './Webhooks.css';
-import { Label } from '@/components/Label';
-import { TextField } from '@/components/TextField';
-import { SelectField } from '@/components/SelectField';
-import { Section, SectionHeader } from '@/components/Section';
-import { TextError } from '@/components/TextError';
 
 interface WebhookFormProps {
   currentWebhook: Partial<Webhook> | null;
@@ -24,86 +18,6 @@ interface WebhookFormProps {
   onSave: () => void;
   onCancel: () => void;
 }
-
-export const NewWebhookForm = () => {
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm({
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-  });
-  const onSubmit = (data) => {
-    console.log('submitted', data);
-  };
-
-  return (
-    <div className={'flex flex-1 flex-col gap-6'}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className={'flex flex-col gap-2.5'}>
-          <Label>Webhook name</Label>
-          <TextField
-            {...register('name', {
-              required: 'Please enter a webhook name',
-            })}
-            placeholder="Enter a webhook name"
-          />
-          {errors.name && (
-            <TextError
-              errorMessage={
-                typeof errors.name.message === 'string' ? errors.name.message : ''
-              }
-            />
-          )}
-        </div>
-        <div className={'flex flex-col gap-2.5'}>
-          <Label>Service</Label>
-          <SelectField
-            placeholder={'Choose a service'}
-            {...register('service', {
-              required: 'Please select a webhook service',
-            })}
-            options={[
-              { value: 'Telemetry', text: 'Telemetry' },
-              { value: 'SACD', text: 'SACD' },
-            ]}
-            control={control}
-          />
-          {errors.service && (
-            <TextError errorMessage={(errors.service.message as string) ?? ''} />
-          )}
-        </div>
-        <Section>
-          <SectionHeader title={'Build the conditions'} />
-          <p>TODO - implement the CEL builder tool</p>
-        </Section>
-        <div className={'flex flex-col gap-2.5'}>
-          <Label>Interval</Label>
-          <SelectField
-            placeholder={'Choose an interval'}
-            {...register('setup', {
-              required: 'Please select a webhook interval',
-            })}
-            options={[
-              { value: 'Realtime', text: 'Realtime' },
-              { value: 'Hourly', text: 'Hourly' },
-            ]}
-            control={control}
-          />
-          {errors.setup && <TextError errorMessage={errors.setup.message ?? ''} />}
-        </div>
-        <div className={'flex flex-col-reverse md:flex-row pt-6 flex-1 gap-4'}>
-          <Button className={'flex-1 primary-outline'}>Cancel</Button>
-          <Button className={'flex-1'} type={'submit'} disabled={!isValid}>
-            Next
-          </Button>
-        </div>
-      </form>
-    </div>
-  );
-};
 
 export const WebhookForm: React.FC<WebhookFormProps> = ({
   currentWebhook,
