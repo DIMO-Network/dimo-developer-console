@@ -6,6 +6,7 @@ import React from 'react';
 import { WebhookConfigStep } from '@/components/Webhooks/steps/Configuration';
 import { WebhookDeliveryStep } from '@/components/Webhooks/steps/Delivery';
 import { WebhookSpecifyVehiclesStep } from '@/components/Webhooks/steps/SpecifyVehicles';
+import { WebhookCreateInput } from '@/types/webhook';
 
 export enum WebhookFormStepName {
   CONFIGURE = 'configure',
@@ -23,10 +24,10 @@ export const NewWebhookForm = ({
   currentStep: WebhookFormStepName;
   steps: WebhookFormStepName[];
   onNext: () => void;
-  onSubmit: () => void;
+  onSubmit: (data: WebhookCreateInput) => void;
   onPrevious: () => void;
 }) => {
-  const methods = useForm();
+  const methods = useForm<WebhookCreateInput>();
   const renderStep = () => {
     switch (currentStep) {
       case WebhookFormStepName.CONFIGURE:
@@ -39,14 +40,6 @@ export const NewWebhookForm = ({
         return null;
     }
   };
-  const getPrimaryButtonProps = () => {
-    const isLastStep = currentStep === steps[steps.length - 1];
-    return {
-      type: (isLastStep ? 'submit' : 'button') as 'submit' | 'button',
-      onClick: isLastStep ? undefined : onNext,
-      text: isLastStep ? 'Submit' : 'Next',
-    };
-  };
 
   const getSecondaryButtonProps = () => {
     const isFirstStep = currentStep === steps[0];
@@ -55,14 +48,11 @@ export const NewWebhookForm = ({
     };
   };
 
-  const { type, onClick, text } = getPrimaryButtonProps();
   const { text: secondaryButtonText } = getSecondaryButtonProps();
+  const isLastStep = currentStep === steps[steps.length - 1];
   return (
     <FormProvider {...methods}>
-      <form
-        onSubmit={methods.handleSubmit(onSubmit)}
-        className={'flex flex-1 flex-col gap-6'}
-      >
+      <form className={'flex flex-1 flex-col gap-6'}>
         {renderStep()}
         <div className={'flex flex-col-reverse md:flex-row pt-6 flex-1 gap-4'}>
           <Button
@@ -74,11 +64,10 @@ export const NewWebhookForm = ({
           </Button>
           <Button
             className={'flex-1'}
-            type={type}
-            disabled={!methods.formState.isValid}
-            onClick={onClick}
+            type={'button'}
+            onClick={isLastStep ? methods.handleSubmit(onSubmit) : onNext}
           >
-            {text}
+            {isLastStep ? 'Submit' : 'Next'}
           </Button>
         </div>
       </form>

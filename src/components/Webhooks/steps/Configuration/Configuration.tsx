@@ -5,6 +5,7 @@ import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
 import { SelectField } from '@/components/SelectField';
 import { Section, SectionHeader } from '@/components/Section';
+import { WebhookCreateInput } from '@/types/webhook';
 
 // TODO - if we go back to this step, how do we handle prepopulating the service / interval fields?
 export const WebhookConfigStep: FC = () => {
@@ -14,7 +15,7 @@ export const WebhookConfigStep: FC = () => {
     formState: { errors },
     getValues,
     watch,
-  } = useFormContext();
+  } = useFormContext<WebhookCreateInput>();
   const service = watch('service');
   console.log('service', service);
   console.log(getValues('service'));

@@ -1,7 +1,7 @@
 'use client';
 
 import { RightPanel } from '@/components/RightPanel';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { FormStepTracker } from '@/app/webhooks/create/components/FormStepTracker';
 
 import {
@@ -9,6 +9,9 @@ import {
   WebhookFormStepName,
 } from '@/components/Webhooks/NewWebhookForm';
 import { useRouter } from 'next/navigation';
+import { createWebhook } from '@/services/webhook';
+import { WebhookCreateInput } from '@/types/webhook';
+import { NotificationContext } from '@/context/notificationContext';
 
 const STEPS = [
   WebhookFormStepName.CONFIGURE,
@@ -19,18 +22,32 @@ const STEPS = [
 export const View = () => {
   const [formStep, setFormStep] = useState(0);
   const router = useRouter();
+  const { setNotification } = useContext(NotificationContext);
+
   const getStep = (stepIndex: number) => {
     return STEPS[stepIndex];
   };
 
-  const onSubmit = () => {
-    console.log('onSubmit was called');
+  const onSubmit = async (data: WebhookCreateInput) => {
+    try {
+      await createWebhook({
+        ...data,
+        data: 'speed',
+        trigger: 'valueNumber > 10',
+        status: 'Active',
+      });
+      setNotification('Webhook created successfully', '', 'success');
+    } catch (err) {
+      console.error('received error trying to create the webhook', err);
+      setNotification('Error creating webhook', '', 'error');
+    }
   };
   const onNext = () => {
     if (formStep === STEPS.length) {
       console.log('onSubmit should be called, not onNext');
       return;
     }
+
     setFormStep((prev) => prev + 1);
   };
   const onPrevious = () => {

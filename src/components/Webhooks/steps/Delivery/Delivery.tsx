@@ -3,12 +3,13 @@ import { useFormContext } from 'react-hook-form';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
+import { WebhookCreateInput } from '@/types/webhook';
 
 export const WebhookDeliveryStep: FC = () => {
   const {
     register,
     formState: { errors },
-  } = useFormContext();
+  } = useFormContext<WebhookCreateInput>();
   return (
     <div className={'flex flex-col gap-2'}>
       <Label>Webhook URL</Label>
@@ -21,10 +22,10 @@ export const WebhookDeliveryStep: FC = () => {
       <p className={'text-[#868888]'}>
         Enter a public, SSL-enabled URL where you will receive events
       </p>
-      {errors.name && (
+      {errors.target_uri && (
         <TextError
           errorMessage={
-            typeof errors.name.message === 'string' ? errors.name.message : ''
+            typeof errors.target_uri.message === 'string' ? errors.target_uri.message : ''
           }
         />
       )}

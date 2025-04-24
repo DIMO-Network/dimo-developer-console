@@ -14,6 +14,16 @@ export interface Webhook {
   description: string;
 }
 
+export interface WebhookCreateInput {
+  service: string;
+  data: string;
+  trigger: string;
+  setup: string;
+  description?: string;
+  target_uri: string;
+  status?: string;
+}
+
 export interface Condition {
   id: string;
   field: string;
