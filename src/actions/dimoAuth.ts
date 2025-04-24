@@ -1,6 +1,10 @@
 'use server';
 import config from '@/config';
-export const getDimoChallenge = async (address: string) => {
+
+export const getDimoChallenge = async (
+  address: string,
+  params: { client_id: string; domain: string },
+) => {
   const response = await fetch(`${process.env.JWT_ISSUER}/auth/web3/generate_challenge`, {
     method: 'POST',
     headers: {
@@ -9,8 +13,8 @@ export const getDimoChallenge = async (address: string) => {
     body: new URLSearchParams({
       scope: 'openid email',
       response_type: 'code',
-      client_id: 'developer-platform',
-      domain: `${config.frontendUrl}sign-in`,
+      client_id: params.client_id,
+      domain: params.domain,
       address: address,
     }),
   });

@@ -30,16 +30,12 @@ export const View = () => {
 
   const onSubmit = async (data: WebhookCreateInput) => {
     try {
-      await createWebhook({
-        ...data,
-        data: 'speed',
-        trigger: 'valueNumber > 10',
-        status: 'Active',
-      });
+      console.log('trying to create webhook');
+      await createWebhook(data);
       setNotification('Webhook created successfully', '', 'success');
     } catch (err) {
-      console.error('received error trying to create the webhook', err);
-      setNotification('Error creating webhook', '', 'error');
+      console.log('error creating webhook', err);
+      setNotification('There was an error creating your webhook', '', 'error');
     }
   };
   const onNext = () => {

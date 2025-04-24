@@ -86,7 +86,10 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         client: client,
       });
 
-      const { challenge, state } = await getDimoChallenge(kernelAccount.address);
+      const { challenge, state } = await getDimoChallenge(kernelAccount.address, {
+        client_id: 'developer-platform',
+        domain: `${config.frontendUrl}sign-in`,
+      });
 
       const signedChallenge = await kernelAccount.signMessage({
         message: challenge,

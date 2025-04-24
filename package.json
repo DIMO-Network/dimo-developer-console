@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.5",
+    "@dimo-network/data-sdk": "^1.2.5",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@maticnetwork/maticjs": "^3.9.2",

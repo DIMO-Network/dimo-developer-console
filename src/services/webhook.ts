@@ -1,9 +1,12 @@
 'use server';
 
-import { Webhook, Condition, WebhookCreateInput } from '@/types/webhook';
+import { Condition, Webhook, WebhookCreateInput } from '@/types/webhook';
 import xior from 'xior';
-import axios from 'axios';
-import { getSessionToken } from '@/services/dimoDevAPI';
+import axios, { AxiosHeaders } from 'axios';
+import configuration from '@/config';
+import { DIMO } from '@dimo-network/data-sdk';
+
+const dimo = new DIMO(configuration.environment === 'production' ? 'Production' : 'Dev');
 
 const getAuthToken = () => {
   return '';
@@ -19,18 +22,13 @@ const webhookApiClient = xior.create({
   },
 });
 
-const webhooksApiClientAxios = async () => {
-  const sessionToken = await getSessionToken();
-  if (!sessionToken) {
-    throw new Error('Missing session token');
-  }
-  console.log('session token', sessionToken);
+const webhooksApiClientAxios = async (devAuthHeaders: AxiosHeaders) => {
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Authorization': `Bearer ${sessionToken}`,
+      ...devAuthHeaders,
     },
   });
 };
@@ -46,29 +44,24 @@ export const fetchWebhooks = async (): Promise<Webhook[]> => {
 };
 
 export const createWebhook = async (webhook: WebhookCreateInput): Promise<Webhook> => {
-  try {
-    const payload = {
-      service: webhook.service || 'Telemetry',
-      trigger: webhook.trigger || 'Conditions Empty',
-      setup: webhook.setup || 'Realtime',
-      target_uri: webhook.target_uri || 'https://example.com/webhook',
-      // signalName: webhook.signalName, // new field
-      // developer_license_address: webhook.developer_license_address || '1234567890abcdef',
-      status: webhook.status || 'Active',
-      description: webhook.description || 'Default Description',
-    };
-    const client = await webhooksApiClientAxios();
-    const response = await client.post<Webhook>('/webhooks', payload);
-    const data = response.data;
-    console.log('received data', data);
-    return data;
-  } catch (err) {
-    console.log('caught an error', err.response.data);
-    throw err;
-  }
-
-  // const { data } = await client.post('/webhooks', payload);
-  // return data;
+  const devJwt = (await dimo.auth.getDeveloperJwt({
+    client_id: webhook.developerLicense.clientId,
+    domain: webhook.developerLicense.domain,
+    private_key: webhook.developerLicense.apiKey,
+  })) as { headers: { Authorization: string } };
+  const payload = {
+    service: webhook.service || 'Telemetry',
+    trigger: webhook.trigger || 'Conditions Empty',
+    setup: webhook.setup || 'Realtime',
+    target_uri: webhook.target_uri || 'https://example.com/webhook',
+    // signalName: webhook.signalName, // new field
+    // developer_license_address: webhook.developer_license_address || '1234567890abcdef',
+    status: webhook.status || 'Active',
+    description: webhook.description || 'Default Description',
+  };
+  const client = await webhooksApiClientAxios(devJwt.headers);
+  const response = await client.post<Webhook>('/webhooks', payload);
+  return response.data;
 };
 
 export const updateWebhook = async (

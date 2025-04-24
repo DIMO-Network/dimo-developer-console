@@ -1,26 +1,93 @@
 import React, { FC } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
 import { SelectField } from '@/components/SelectField';
 import { Section, SectionHeader } from '@/components/Section';
 import { WebhookCreateInput } from '@/types/webhook';
+import { gql } from '@/gql';
+import { useGlobalAccount } from '@/hooks';
+import { useQuery } from '@apollo/client';
 
-// TODO - if we go back to this step, how do we handle prepopulating the service / interval fields?
+const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
+  query GetDeveloperLicensesForWebhooks($owner: Address!) {
+    developerLicenses(first: 100, filterBy: { owner: $owner }) {
+      nodes {
+        alias
+        clientId
+        redirectURIs(first:100) {
+          nodes {
+            uri
+          }
+        }
+      }
+    }
+  }
+`);
+
 export const WebhookConfigStep: FC = () => {
   const {
     register,
     control,
     formState: { errors },
     getValues,
-    watch,
+    setValue,
   } = useFormContext<WebhookCreateInput>();
-  const service = watch('service');
-  console.log('service', service);
-  console.log(getValues('service'));
+  const { currentUser } = useGlobalAccount();
+  const { data } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
+    variables: { owner: currentUser?.smartContractAddress ?? '' },
+    skip: !currentUser?.smartContractAddress,
+  });
+  const validDeveloperLicenses = data?.developerLicenses.nodes.filter(
+    (it) => !!it.redirectURIs.nodes.length,
+  );
   return (
     <>
+      <div className={'flex flex-col gap-2.5'}>
+        <Label>Dev license</Label>
+        <SelectField
+          {...register('developerLicense.clientId', {
+            required: 'Please choose a Developer License',
+            onChange: (e) => {
+              const clientId = e.target.value;
+              const selected = data?.developerLicenses.nodes.find(
+                (l) => l.clientId === clientId,
+              );
+              if (selected) {
+                setValue(
+                  'developerLicense.domain',
+                  selected.redirectURIs.nodes[0]?.uri ?? '',
+                );
+              }
+            },
+          })}
+          options={
+            validDeveloperLicenses?.map((license) => ({
+              text: license.alias ?? license.clientId,
+              value: license.clientId,
+            })) ?? []
+          }
+          value={getValues('developerLicense.clientId')}
+          control={control}
+          placeholder={'Please choose a developer license'}
+        />
+      </div>
+      <div className="flex flex-col gap-2.5">
+        <Label>API Key</Label>
+        <Controller
+          name="developerLicense.apiKey"
+          control={control}
+          rules={{ required: 'Please enter a valid API key' }}
+          render={({ field }) => (
+            <TextField
+              placeholder="Paste your private API key here"
+              value={field.value ?? ''}
+              onChange={(e) => field.onChange(e.target.value)}
+            />
+          )}
+        />
+      </div>
       <div className={'flex flex-col gap-2.5'}>
         <Label>Webhook description</Label>
         <TextField
