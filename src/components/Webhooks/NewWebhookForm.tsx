@@ -67,6 +67,7 @@ export const NewWebhookForm = ({
             type={'button'}
             onClick={isLastStep ? methods.handleSubmit(onSubmit) : onNext}
             disabled={!methods.formState.isValid}
+            loading={methods.formState.isSubmitting}
           >
             {isLastStep ? 'Submit' : 'Next'}
           </Button>
