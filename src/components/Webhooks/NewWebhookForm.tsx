@@ -66,6 +66,7 @@ export const NewWebhookForm = ({
             className={'flex-1'}
             type={'button'}
             onClick={isLastStep ? methods.handleSubmit(onSubmit) : onNext}
+            disabled={!methods.formState.isValid}
           >
             {isLastStep ? 'Submit' : 'Next'}
           </Button>
