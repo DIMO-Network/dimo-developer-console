@@ -1,8 +1,8 @@
 'use client';
 
 import { RightPanel } from '@/components/RightPanel';
-import React, { useContext, useState } from 'react';
-import { FormStepTracker } from '@/app/webhooks/create/components/FormStepTracker';
+import React, { use, useContext, useEffect, useState } from 'react';
+import { FormStepTracker } from '@/app/webhooks/create/[clientId]/components/FormStepTracker';
 
 import {
   NewWebhookForm,
@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { createWebhook } from '@/services/webhook';
 import { WebhookCreateInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
+import { getDevJwt } from '@/utils/localStorage';
 
 const STEPS = [
   WebhookFormStepName.CONFIGURE,
@@ -19,11 +20,18 @@ const STEPS = [
   WebhookFormStepName.SPECIFY_VEHICLES,
 ];
 
-export const View = () => {
+export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
+  const { clientId } = use(params);
   const [formStep, setFormStep] = useState(0);
   const router = useRouter();
   const { setNotification } = useContext(NotificationContext);
 
+  useEffect(() => {
+    const devJwt = getDevJwt(clientId);
+    if (!devJwt) {
+      router.replace('/webhooks');
+    }
+  }, [clientId, router]);
   const getStep = (stepIndex: number) => {
     return STEPS[stepIndex];
   };
@@ -38,14 +46,15 @@ export const View = () => {
       setNotification('There was an error creating your webhook', '', 'error');
     }
   };
+
   const onNext = () => {
     if (formStep === STEPS.length) {
       console.log('onSubmit should be called, not onNext');
       return;
     }
-
     setFormStep((prev) => prev + 1);
   };
+
   const onPrevious = () => {
     if (formStep === 0) {
       return router.replace('/webhooks');
