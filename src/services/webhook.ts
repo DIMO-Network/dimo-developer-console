@@ -29,10 +29,10 @@ interface GetTokenParams {
 }
 
 interface GetDeveloperJwtResponse {
-  headers: { Authorization: string };
+  headers: { Authorization: `Bearer ${string}` };
 }
 
-const getDeveloperJwt = async (
+export const getDeveloperJwt = async (
   tokenParams: GetTokenParams,
 ): Promise<GetDeveloperJwtResponse> => {
   return await dimo.auth.getDeveloperJwt({

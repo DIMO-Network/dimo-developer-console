@@ -6,25 +6,9 @@ import { TextError } from '@/components/TextError';
 import { SelectField } from '@/components/SelectField';
 import { Section, SectionHeader } from '@/components/Section';
 import { WebhookCreateInput } from '@/types/webhook';
-import { gql } from '@/gql';
 import { useGlobalAccount } from '@/hooks';
 import { useQuery } from '@apollo/client';
-
-const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
-  query GetDeveloperLicensesForWebhooks($owner: Address!) {
-    developerLicenses(first: 100, filterBy: { owner: $owner }) {
-      nodes {
-        alias
-        clientId
-        redirectURIs(first:100) {
-          nodes {
-            uri
-          }
-        }
-      }
-    }
-  }
-`);
+import { DEVELOPER_LICENSES_FOR_WEBHOOKS } from '@/components/Webhooks';
 
 export const WebhookConfigStep: FC = () => {
   const {

@@ -10,10 +10,6 @@ export const getCookie = async (cookieName: string, defaultValue = '') => {
   return nextCookies.get(cookieName)?.value ?? defaultValue;
 };
 
-export const getSessionToken = async () => {
-  return getCookie(cookieName);
-};
-
 export const dimoDevAPIClient = async (timeout: number = 5000, token?: string) => {
   let authHeader = undefined;
 

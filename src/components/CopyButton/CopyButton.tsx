@@ -18,9 +18,9 @@ export const CopyButton: FC<ICopyButtonProps> = ({
   const { setNotification } = useContext(NotificationContext);
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = (copiedValue: string) => {
+  const handleCopy = () => {
     try {
-      void navigator.clipboard.writeText(copiedValue);
+      void navigator.clipboard.writeText(value);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       setNotification(
@@ -37,7 +37,7 @@ export const CopyButton: FC<ICopyButtonProps> = ({
 
   return (
     <button
-      onClick={() => handleCopy(value)}
+      onClick={handleCopy}
       className={classnames(className, 'transition')}
       disabled={copied}
     >
