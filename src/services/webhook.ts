@@ -2,7 +2,7 @@
 
 import { Condition, Webhook, WebhookCreateInput } from '@/types/webhook';
 import xior from 'xior';
-import axios, { AxiosHeaders } from 'axios';
+import axios from 'axios';
 import configuration from '@/config';
 import { DIMO } from '@dimo-network/data-sdk';
 
@@ -22,13 +22,34 @@ const webhookApiClient = xior.create({
   },
 });
 
-const webhooksApiClientAxios = async (devAuthHeaders: AxiosHeaders) => {
+interface GetTokenParams {
+  client_id: string;
+  domain: string;
+  private_key: string;
+}
+
+interface GetDeveloperJwtResponse {
+  headers: { Authorization: string };
+}
+
+const getDeveloperJwt = async (
+  tokenParams: GetTokenParams,
+): Promise<GetDeveloperJwtResponse> => {
+  return await dimo.auth.getDeveloperJwt({
+    client_id: tokenParams.client_id,
+    domain: tokenParams.domain,
+    private_key: tokenParams.private_key,
+  });
+};
+
+const getWebhooksApiClient = async (tokenParams: GetTokenParams) => {
+  const devJwt = await getDeveloperJwt(tokenParams);
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      ...devAuthHeaders,
+      ...devJwt.headers,
     },
   });
 };
@@ -44,11 +65,6 @@ export const fetchWebhooks = async (): Promise<Webhook[]> => {
 };
 
 export const createWebhook = async (webhook: WebhookCreateInput): Promise<Webhook> => {
-  const devJwt = (await dimo.auth.getDeveloperJwt({
-    client_id: webhook.developerLicense.clientId,
-    domain: webhook.developerLicense.domain,
-    private_key: webhook.developerLicense.apiKey,
-  })) as { headers: { Authorization: string } };
   const payload = {
     service: webhook.service || 'Telemetry',
     trigger: webhook.trigger || 'Conditions Empty',
@@ -59,7 +75,11 @@ export const createWebhook = async (webhook: WebhookCreateInput): Promise<Webhoo
     status: webhook.status || 'Active',
     description: webhook.description || 'Default Description',
   };
-  const client = await webhooksApiClientAxios(devJwt.headers);
+  const client = await getWebhooksApiClient({
+    client_id: webhook.developerLicense.clientId,
+    domain: webhook.developerLicense.domain,
+    private_key: webhook.developerLicense.apiKey,
+  });
   const response = await client.post<Webhook>('/webhooks', payload);
   return response.data;
 };
