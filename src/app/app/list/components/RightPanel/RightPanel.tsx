@@ -1,14 +1,13 @@
 import { FC } from 'react';
-
-import './RightPanel.css';
+import { RightPanel } from '@/components/RightPanel';
 import { CreditsWidget } from '@/components/CreditsWidget';
 
-export const RightPanel: FC = () => {
+export const AppListRightPanel: FC = () => {
   return (
-    <div className={'right-panel-container'}>
+    <RightPanel>
       <CreditsWidget variant={'large'} />
       <WhatsDCX />
-    </div>
+    </RightPanel>
   );
 };
 

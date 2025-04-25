@@ -1,11 +1,13 @@
-// /src/components/Webhooks/WebhookForm.tsx
+'use client';
+
 import React from 'react';
-import { Webhook, Condition } from '@/types/webhook';
+import { Condition, Webhook } from '@/types/webhook';
 import Button from '@/components/Button/Button';
-import Title from '@/components/Title/Title';
+
+import './Webhooks.css';
 
 interface WebhookFormProps {
-  currentWebhook: Partial<Webhook>;
+  currentWebhook: Partial<Webhook> | null;
   setCurrentWebhook: React.Dispatch<React.SetStateAction<Partial<Webhook> | null>>;
   conditions: Condition[];
   setConditions: React.Dispatch<React.SetStateAction<Condition[]>>;
@@ -45,20 +47,10 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
 
   return (
     <div className="webhook-form-container">
-      <Title>{currentWebhook.id ? 'Edit Webhook' : 'Create New Webhook'}</Title>
-
-      <label>Description</label>
-      <textarea
-        value={currentWebhook.description || ''}
-        onChange={(e) =>
-          setCurrentWebhook({ ...currentWebhook, description: e.target.value })
-        }
-      />
-
       <label>Target URI</label>
       <input
         type="text"
-        value={currentWebhook.target_uri || ''}
+        value={currentWebhook?.target_uri || ''}
         onChange={(e) =>
           setCurrentWebhook({ ...currentWebhook, target_uri: e.target.value })
         }
@@ -66,7 +58,7 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
 
       <label>Service</label>
       <select
-        value={currentWebhook.service || ''}
+        value={currentWebhook?.service || ''}
         onChange={(e) =>
           setCurrentWebhook({ ...currentWebhook, service: e.target.value })
         }
@@ -77,7 +69,7 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
 
       <label>Signal Name</label>
       <select
-        value={currentWebhook.signalName || ''}
+        value={currentWebhook?.signalName || ''}
         onChange={(e) =>
           setCurrentWebhook({ ...currentWebhook, signalName: e.target.value })
         }
@@ -95,7 +87,7 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
       <label>Trigger (CEL Expression)</label>
       <input
         type="text"
-        value={currentWebhook.trigger || ''}
+        value={currentWebhook?.trigger || ''}
         onChange={(e) =>
           setCurrentWebhook({ ...currentWebhook, trigger: e.target.value })
         }
@@ -157,7 +149,7 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
 
       <label>Setup</label>
       <select
-        value={currentWebhook.setup || ''}
+        value={currentWebhook?.setup || ''}
         onChange={(e) => setCurrentWebhook({ ...currentWebhook, setup: e.target.value })}
       >
         <option value="Realtime">Realtime</option>
@@ -166,7 +158,7 @@ export const WebhookForm: React.FC<WebhookFormProps> = ({
 
       <label>Status</label>
       <select
-        value={currentWebhook.status || ''}
+        value={currentWebhook?.status || ''}
         onChange={(e) => setCurrentWebhook({ ...currentWebhook, status: e.target.value })}
       >
         <option value="Active">Active</option>

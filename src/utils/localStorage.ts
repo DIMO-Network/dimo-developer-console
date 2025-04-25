@@ -2,6 +2,10 @@
 
 export const EmbeddedKey = 'GlobalAccountEmbeddedKey';
 export const OtpRequested = 'requestedOtp';
+export const getLocalStorageKeyForDevJWT = (clientId: string) => `devJwt_${clientId}`;
+
+export const getDevJwt = (clientId: string) =>
+  getFromLocalStorage<string>(getLocalStorageKeyForDevJWT(clientId));
 
 export const saveToLocalStorage = <T>(key: string, value: T): void => {
   const serializedValue = JSON.stringify(value);

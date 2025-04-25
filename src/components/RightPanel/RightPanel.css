@@ -1,0 +1,3 @@
+.right-panel-container {
+  @apply hidden lg:flex lg:flex-col lg:ml-6 lg:w-48 lg:flex-shrink-0 lg:rounded-xl lg:bg-transparent lg:gap-4;
+}

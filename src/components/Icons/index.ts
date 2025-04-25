@@ -9,7 +9,7 @@ export * from './BuyDcxIcon';
 export * from './BuyDcxIcon';
 export * from './CarRentalIcon';
 export * from './CheckIcon';
-export * from './CheckIcon';
+export * from './CryptoCheckIcon';
 export * from './ChevronDownIcon';
 export * from './ClickIcon';
 export * from './ClickIcon';

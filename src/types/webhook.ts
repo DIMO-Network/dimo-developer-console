@@ -10,4 +10,28 @@ export interface Webhook {
   status: string;
   created_at: string;
   updated_at: string;
+  signalName: string;
+  description: string;
+}
+
+export interface WebhookCreateInput {
+  service: string;
+  data: string;
+  trigger: string;
+  setup: string;
+  description?: string;
+  target_uri: string;
+  status?: string;
+  developerLicense: {
+    clientId: string;
+    domain: string;
+    apiKey: string;
+  };
+}
+
+export interface Condition {
+  id: string;
+  field: string;
+  operator: string;
+  value: string;
 }

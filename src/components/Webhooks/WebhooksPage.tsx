@@ -1,126 +1,160 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './Webhooks.css';
 import { useWebhooks } from '@/hooks/useWebhooks';
-import { WebhookForm } from './WebhookForm';
 import { WebhookTable } from './WebhookTable';
-import { DeleteConfirmModal } from './DeleteConfirmModal';
-import { TestWebhookModal } from './TestWebhookModal';
 import Button from '@/components/Button/Button';
-import { Webhook } from '@/types/webhook';
 import { Section, SectionHeader } from '@/components/Section';
+import Link from 'next/link';
+import { gql } from '@/gql';
+import { useGlobalAccount } from '@/hooks';
+import { useQuery } from '@apollo/client';
+import { useForm } from 'react-hook-form';
+import { SelectField } from '@/components/SelectField';
+import { getDevJwt } from '@/utils/localStorage';
+import { GenerateDevJWTModal } from '@/components/GenerateDevJWTModal';
+
+export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
+  query GetDeveloperLicensesForWebhooks($owner: Address!) {
+    developerLicenses(first: 100, filterBy: { owner: $owner }) {
+      nodes {
+        alias
+        clientId
+        redirectURIs(first:100) {
+          nodes {
+            uri
+          }
+        }
+      }
+    }
+  }
+`);
+
+interface LicenseSelectorForm {
+  developerLicense: {
+    clientId: string;
+    domain: string;
+    privateKey: string;
+  };
+}
+
+const useGetDevJwt = (clientId: string) => {
+  const [devJwt, setDevJwt] = useState('');
+
+  const refetch = useCallback(() => {
+    if (clientId) {
+      const item = getDevJwt(clientId);
+      if (item) {
+        setDevJwt(item);
+      }
+    }
+  }, [clientId]);
+
+  useEffect(() => {
+    refetch();
+  }, [clientId, refetch]);
+
+  return {
+    devJwt,
+    setDevJwt,
+  };
+};
 
 export const WebhooksPage = () => {
-  const {
-    webhooks,
-    currentWebhook,
-    setCurrentWebhook,
-    conditions,
-    setConditions,
-    logic,
-    setLogic,
-    signalNames,
-    generatedCEL,
-    expandedWebhook,
-    setExpandedWebhook,
-    showDeleteConfirm,
-    setShowDeleteConfirm,
-    webhookToDelete,
-    setWebhookToDelete,
-    handleCreate,
-    handleUpdate,
-    handleDelete,
-    resetForm,
-    handleShowCreateForm,
-  } = useWebhooks();
+  const [showGenerateJwtModal, setShowGenerateJwtModal] = useState(false);
+  const { currentUser } = useGlobalAccount();
+  const { data } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
+    variables: { owner: currentUser?.smartContractAddress ?? '' },
+    skip: !currentUser?.smartContractAddress,
+  });
+  const validDeveloperLicenses = data?.developerLicenses.nodes.filter(
+    (it) => !!it.redirectURIs.nodes.length,
+  );
+  const { control, watch, getValues, register, setValue } = useForm<LicenseSelectorForm>({
+    defaultValues: { developerLicense: { clientId: '', domain: '', privateKey: '' } },
+  });
+  const { clientId, domain } = watch('developerLicense');
+  const { devJwt, setDevJwt } = useGetDevJwt(clientId);
 
-  const [showTestModal, setShowTestModal] = useState(false);
-  const [webhookToTest, setWebhookToTest] = useState<Webhook>();
-
-  const handleRunWebhookTest = async () => {
-    if (!webhookToTest) return;
-    try {
-      const fakeData = { event: 'test_event', data: 'This is test data' };
-      const response = await fetch(webhookToTest.target_uri, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(fakeData),
-      });
-      if (response.ok) {
-        alert('Webhook triggered successfully.');
-      } else {
-        alert('Failed to trigger webhook. Please check the target URL.');
-      }
-    } catch (error) {
-      console.error('Error testing webhook:', error);
-      alert('An error occurred while testing the webhook.');
-    } finally {
-      setShowTestModal(false);
-    }
-  };
+  const { setCurrentWebhook, expandedWebhook, setExpandedWebhook } = useWebhooks();
 
   return (
     <div className="webhooks-container">
+      <GenerateDevJWTModal
+        isOpen={showGenerateJwtModal}
+        setIsOpen={setShowGenerateJwtModal}
+        tokenParams={{ client_id: clientId, domain: domain }}
+        onSuccess={setDevJwt}
+      />
       <div className="flex flex-row gap-1 pb-2 border-b-cta-default border-b">
         <p className={'text-base text-text-secondary font-medium'}>
           Receive real-time updates from events
         </p>
       </div>
-
-      {currentWebhook && (
-        <WebhookForm
-          currentWebhook={currentWebhook}
-          setCurrentWebhook={setCurrentWebhook}
-          conditions={conditions}
-          setConditions={setConditions}
-          logic={logic}
-          setLogic={setLogic}
-          signalNames={signalNames}
-          generatedCEL={generatedCEL}
-          onSave={currentWebhook.id ? handleUpdate : handleCreate}
-          onCancel={resetForm}
-        />
+      <SelectField
+        {...register('developerLicense.clientId', {
+          required: 'Please choose a Developer License',
+          onChange: (e) => {
+            const clientId = e.target.value;
+            const selected = data?.developerLicenses.nodes.find(
+              (l) => l.clientId === clientId,
+            );
+            if (selected) {
+              setValue(
+                'developerLicense.domain',
+                selected.redirectURIs.nodes[0]?.uri ?? '',
+              );
+              setValue('developerLicense.privateKey', '');
+            }
+          },
+        })}
+        control={control}
+        options={
+          validDeveloperLicenses?.map((license) => ({
+            text: license.alias ?? license.clientId,
+            value: license.clientId,
+          })) ?? []
+        }
+        value={getValues('developerLicense.clientId')}
+        placeholder={'Please choose a developer license'}
+      />
+      {clientId && domain && !devJwt && (
+        <div className={'pt-8'}>
+          <p className={'text-text-secondary'}>
+            Please generate a Developer JWT to view your webhook configurations.
+          </p>
+          <Button className={'mt-2'} onClick={() => setShowGenerateJwtModal(true)}>
+            Generate developer JWT
+          </Button>
+        </div>
       )}
 
-      {showDeleteConfirm && (
-        <DeleteConfirmModal
-          webhook={webhookToDelete}
-          onDelete={handleDelete}
-          onCancel={() => setShowDeleteConfirm(false)}
-        />
+      {!!devJwt && (
+        <div className="py-6">
+          <Section>
+            <SectionHeader title={'Webhooks'}>
+              <Link href={'/webhooks/create'}>
+                <Button className="dark with-icon">+ Create a webhook</Button>
+              </Link>
+            </SectionHeader>
+            <WebhookTable
+              onEdit={setCurrentWebhook}
+              clientId={clientId}
+              onDelete={() => {
+                // setWebhookToDelete(webhook);
+                // setShowDeleteConfirm(true);
+              }}
+              onTest={() => {
+                // setWebhookToTest(webhook);
+                // setShowTestModal(true);
+              }}
+              expandedWebhook={expandedWebhook}
+              setExpandedWebhook={setExpandedWebhook}
+            />
+          </Section>
+        </div>
       )}
-
-      {showTestModal && webhookToTest && (
-        <TestWebhookModal
-          webhook={webhookToTest}
-          onTest={handleRunWebhookTest}
-          onCancel={() => setShowTestModal(false)}
-        />
-      )}
-      <div className="py-6">
-        <Section>
-          <SectionHeader title={'Webhooks'}>
-            <Button className="dark with-icon" onClick={handleShowCreateForm}>
-              + Create New
-            </Button>
-          </SectionHeader>
-          <WebhookTable
-            webhooks={webhooks}
-            onEdit={setCurrentWebhook}
-            onDelete={(webhook) => {
-              setWebhookToDelete(webhook);
-              setShowDeleteConfirm(true);
-            }}
-            onTest={(webhook) => {
-              setWebhookToTest(webhook);
-              setShowTestModal(true);
-            }}
-            expandedWebhook={expandedWebhook}
-            setExpandedWebhook={setExpandedWebhook}
-          />
-        </Section>
-      </div>
     </div>
   );
 };

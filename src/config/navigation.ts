@@ -10,12 +10,15 @@ import {
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
+const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create$/;
+
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
   if (APP_DETAILS_REGEX.test(path)) return 'App Details';
   if (LICENSE_DETAILS_REGEX.test(path)) return 'License Details';
   if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed Vehicles';
+  if (CREATE_WEBHOOK_REGEX.test(path)) return 'Create a webhook';
 };
 
 const pageTitles: Record<string, string> = {
@@ -24,6 +27,7 @@ const pageTitles: Record<string, string> = {
   '/webhooks': 'Webhooks',
   '/api-status': 'API Status',
   '/settings': 'Settings',
+  '/webhooks/create': 'Create a webhook',
 };
 
 export const mainMenu = [
