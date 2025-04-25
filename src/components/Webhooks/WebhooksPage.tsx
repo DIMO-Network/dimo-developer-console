@@ -12,7 +12,7 @@ import { useGlobalAccount } from '@/hooks';
 import { useQuery } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
-import { getLocalStorageKeyForDevJWT, getFromLocalStorage } from '@/utils/localStorage';
+import { getDevJwt } from '@/utils/localStorage';
 import { GenerateDevJWTModal } from '@/components/GenerateDevJWTModal';
 
 export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
@@ -44,10 +44,8 @@ const useGetDevJwt = (clientId: string) => {
 
   const refetch = useCallback(() => {
     if (clientId) {
-      console.log('TRYING TO FETCH');
-      const item = getFromLocalStorage(getLocalStorageKeyForDevJWT(clientId));
-      console.log('ITEM', item);
-      if (item && typeof item === 'string') {
+      const item = getDevJwt(clientId);
+      if (item) {
         setDevJwt(item);
       }
     }
@@ -79,8 +77,8 @@ export const WebhooksPage = () => {
   const { clientId, domain } = watch('developerLicense');
   const { devJwt, setDevJwt } = useGetDevJwt(clientId);
 
-  const { webhooks, setCurrentWebhook, expandedWebhook, setExpandedWebhook } =
-    useWebhooks();
+  const { setCurrentWebhook, expandedWebhook, setExpandedWebhook } = useWebhooks();
+
   return (
     <div className="webhooks-container">
       <GenerateDevJWTModal
@@ -141,8 +139,8 @@ export const WebhooksPage = () => {
               </Link>
             </SectionHeader>
             <WebhookTable
-              webhooks={webhooks}
               onEdit={setCurrentWebhook}
+              clientId={clientId}
               onDelete={() => {
                 // setWebhookToDelete(webhook);
                 // setShowDeleteConfirm(true);

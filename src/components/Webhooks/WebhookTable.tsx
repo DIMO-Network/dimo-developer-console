@@ -1,28 +1,36 @@
 import React from 'react';
 import { Webhook } from '@/types/webhook';
 import Button from '@/components/Button/Button';
+import { useWebhooksNew } from '@/hooks/useWebhooks';
+import { Loader } from '@/components/Loader';
 
 interface WebhookTableProps {
-  webhooks: Webhook[];
   onEdit: (webhook: Webhook) => void;
   onDelete: (webhook: Webhook) => void;
   onTest: (webhook: Webhook) => void;
   expandedWebhook: string | null;
   setExpandedWebhook: React.Dispatch<React.SetStateAction<string | null>>;
+  clientId: string;
 }
 
 export const WebhookTable: React.FC<WebhookTableProps> = ({
-  webhooks,
   onEdit,
   onDelete,
   onTest,
   expandedWebhook,
   setExpandedWebhook,
+  clientId,
 }) => {
+  const { data, loading, error } = useWebhooksNew(clientId);
   const toggleExpand = (webhookId: string) => {
     setExpandedWebhook((prev) => (prev === webhookId ? null : webhookId));
   };
-
+  if (loading) {
+    return <Loader isLoading />;
+  }
+  if (error) {
+    return <p>There was an error fetching your webhooks</p>;
+  }
   return (
     <div className="webhook-table-container">
       <table className="webhook-table">
@@ -37,7 +45,7 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({
           </tr>
         </thead>
         <tbody>
-          {webhooks.map((webhook) => (
+          {data?.map((webhook) => (
             <React.Fragment key={webhook.id}>
               <tr onClick={() => toggleExpand(webhook.id)}>
                 <td>{'Webhook description goes here'}</td>

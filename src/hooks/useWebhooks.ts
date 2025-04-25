@@ -8,9 +8,43 @@ import {
   generateCEL,
 } from '@/services/webhook';
 import { Webhook, Condition } from '@/types/webhook';
+import { getDevJwt } from '@/utils/localStorage';
+
+export const useWebhooksNew = (clientId: string) => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<Webhook[]>();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = getDevJwt(clientId);
+        if (!token)
+          return setError(new Error(`No devJWT found for clientId ${clientId}`));
+        setLoading(true);
+        const data = await fetchWebhooks({ token });
+        setData(data);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err);
+        } else {
+          setError(new Error('Error while fetching webhooks'));
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [clientId]);
+  return {
+    data,
+    error,
+    loading,
+  };
+};
 
 export const useWebhooks = () => {
-  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
+  const [webhooks] = useState<Webhook[]>([]);
   const [currentWebhook, setCurrentWebhook] = useState<Partial<Webhook> | null>(null);
   const [parametersInput, setParametersInput] = useState<string>('{}');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -23,8 +57,8 @@ export const useWebhooks = () => {
 
   const loadWebhooks = async () => {
     try {
-      const data = await fetchWebhooks();
-      setWebhooks(data);
+      // const data = await fetchWebhooks();
+      // setWebhooks(data);
     } catch (error) {
       console.error('Error fetching webhooks:', error);
     }

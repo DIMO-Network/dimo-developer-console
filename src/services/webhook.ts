@@ -42,7 +42,12 @@ export const getDeveloperJwt = async (
   });
 };
 
-const getWebhooksApiClient = async (tokenParams: GetTokenParams) => {
+/** deprecated
+ * use getWebhooksApiClient instead.
+ * Any functions which call this need to pass in the devJWT
+ * @param tokenParams
+ */
+const deprecated_getWebhooksApiClient = async (tokenParams: GetTokenParams) => {
   const devJwt = await getDeveloperJwt(tokenParams);
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
@@ -54,13 +59,25 @@ const getWebhooksApiClient = async (tokenParams: GetTokenParams) => {
   });
 };
 
+const getWebhooksApiClient = async (token: string) => {
+  return axios.create({
+    baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+};
+
 export const fetchSignalNames = async (): Promise<string[]> => {
   const { data } = await webhookApiClient.get<string[]>('/webhooks/signals');
   return data;
 };
 
-export const fetchWebhooks = async (): Promise<Webhook[]> => {
-  const { data } = await webhookApiClient.get<Webhook[]>('/webhooks');
+export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webhook[]> => {
+  const client = await getWebhooksApiClient(token);
+  const { data } = await client.get<Webhook[]>('/webhooks');
   return data;
 };
 
@@ -75,7 +92,7 @@ export const createWebhook = async (webhook: WebhookCreateInput): Promise<Webhoo
     status: webhook.status || 'Active',
     description: webhook.description || 'Default Description',
   };
-  const client = await getWebhooksApiClient({
+  const client = await deprecated_getWebhooksApiClient({
     client_id: webhook.developerLicense.clientId,
     domain: webhook.developerLicense.domain,
     private_key: webhook.developerLicense.apiKey,
