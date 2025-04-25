@@ -25,25 +25,36 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const [formStep, setFormStep] = useState(0);
   const router = useRouter();
   const { setNotification } = useContext(NotificationContext);
+  const devJwt = getDevJwt(clientId);
 
   useEffect(() => {
-    const devJwt = getDevJwt(clientId);
     if (!devJwt) {
       router.replace('/webhooks');
     }
-  }, [clientId, router]);
+  }, [clientId, devJwt, router]);
+
   const getStep = (stepIndex: number) => {
     return STEPS[stepIndex];
   };
 
   const onSubmit = async (data: WebhookCreateInput) => {
     try {
-      console.log('trying to create webhook');
-      await createWebhook(data);
+      console.log('trying to create webhook', data);
+      if (!devJwt) {
+        return setNotification('No devJWT found', '', 'error');
+      }
+      await createWebhook(
+        { ...data, status: 'Active', data: 'speed', trigger: 'valueNumber > 100' },
+        devJwt,
+      );
       setNotification('Webhook created successfully', '', 'success');
-    } catch (err) {
-      console.log('error creating webhook', err);
-      setNotification('There was an error creating your webhook', '', 'error');
+      router.replace('/webhooks');
+    } catch (err: unknown) {
+      let message = 'There was an error creating your webhook';
+      if (err instanceof Error) {
+        message = err.message ?? message;
+      }
+      setNotification(message, '', 'error');
     }
   };
 

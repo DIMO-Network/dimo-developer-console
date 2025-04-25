@@ -22,11 +22,6 @@ export interface WebhookCreateInput {
   description?: string;
   target_uri: string;
   status?: string;
-  developerLicense: {
-    clientId: string;
-    domain: string;
-    apiKey: string;
-  };
 }
 
 export interface Condition {
