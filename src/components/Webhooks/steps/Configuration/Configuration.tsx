@@ -4,8 +4,8 @@ import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
 import { SelectField } from '@/components/SelectField';
-import { Section, SectionHeader } from '@/components/Section';
 import { WebhookCreateInput } from '@/types/webhook';
+import { ConditionsBuilder } from '@/components/Webhooks/ConditionsBuilder';
 
 export const WebhookConfigStep: FC = () => {
   const {
@@ -52,10 +52,7 @@ export const WebhookConfigStep: FC = () => {
           <TextError errorMessage={(errors.service.message as string) ?? ''} />
         )}
       </div>
-      <Section>
-        <SectionHeader title={'Build the conditions'} />
-        <p>TODO - implement the CEL builder tool</p>
-      </Section>
+      <ConditionsBuilder />
       <div className={'flex flex-col gap-2.5'}>
         <Label>Interval</Label>
         <SelectField
