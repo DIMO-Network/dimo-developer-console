@@ -12,8 +12,9 @@ import { useGlobalAccount } from '@/hooks';
 import { useQuery } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
-import { getDevJwt } from '@/utils/localStorage';
 import { GenerateDevJWTModal } from '@/components/GenerateDevJWTModal';
+import { getDevJwt } from '@/utils/devJwt';
+import { Label } from '@/components/Label';
 
 export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
   query GetDeveloperLicensesForWebhooks($owner: Address!) {
@@ -57,7 +58,7 @@ const useGetDevJwt = (clientId: string) => {
 
   return {
     devJwt,
-    setDevJwt,
+    refetch,
   };
 };
 
@@ -75,52 +76,56 @@ export const WebhooksPage = () => {
     defaultValues: { developerLicense: { clientId: '', domain: '', privateKey: '' } },
   });
   const { clientId, domain } = watch('developerLicense');
-  const { devJwt, setDevJwt } = useGetDevJwt(clientId);
+  const { devJwt, refetch } = useGetDevJwt(clientId);
 
   const { setCurrentWebhook, expandedWebhook, setExpandedWebhook } = useWebhooks();
 
   return (
-    <div className="webhooks-container">
+    <div className="flex flex-col gap-6">
       <GenerateDevJWTModal
         isOpen={showGenerateJwtModal}
         setIsOpen={setShowGenerateJwtModal}
         tokenParams={{ client_id: clientId, domain: domain }}
-        onSuccess={setDevJwt}
+        onSuccess={refetch}
       />
       <div className="flex flex-row gap-1 pb-2 border-b-cta-default border-b">
         <p className={'text-base text-text-secondary font-medium'}>
           Receive real-time updates from events
         </p>
       </div>
-      <SelectField
-        {...register('developerLicense.clientId', {
-          required: 'Please choose a Developer License',
-          onChange: (e) => {
-            const clientId = e.target.value;
-            const selected = data?.developerLicenses.nodes.find(
-              (l) => l.clientId === clientId,
-            );
-            if (selected) {
-              setValue(
-                'developerLicense.domain',
-                selected.redirectURIs.nodes[0]?.uri ?? '',
+      <div className={'flex flex-col gap-2.5'}>
+        <Label>Select a Developer License</Label>
+        <SelectField
+          {...register('developerLicense.clientId', {
+            required: 'Please choose a Developer License',
+            onChange: (e) => {
+              const clientId = e.target.value;
+              const selected = data?.developerLicenses.nodes.find(
+                (l) => l.clientId === clientId,
               );
-              setValue('developerLicense.privateKey', '');
-            }
-          },
-        })}
-        control={control}
-        options={
-          validDeveloperLicenses?.map((license) => ({
-            text: license.alias ?? license.clientId,
-            value: license.clientId,
-          })) ?? []
-        }
-        value={getValues('developerLicense.clientId')}
-        placeholder={'Please choose a developer license'}
-      />
+              if (selected) {
+                setValue(
+                  'developerLicense.domain',
+                  selected.redirectURIs.nodes[0]?.uri ?? '',
+                );
+                setValue('developerLicense.privateKey', '');
+              }
+            },
+          })}
+          control={control}
+          options={
+            validDeveloperLicenses?.map((license) => ({
+              text: license.alias ?? license.clientId,
+              value: license.clientId,
+            })) ?? []
+          }
+          value={getValues('developerLicense.clientId')}
+          placeholder={'Please choose a developer license'}
+        />
+      </div>
+
       {clientId && domain && !devJwt && (
-        <div className={'pt-8'}>
+        <div>
           <p className={'text-text-secondary'}>
             Please generate a Developer JWT to view your webhook configurations.
           </p>
@@ -131,10 +136,10 @@ export const WebhooksPage = () => {
       )}
 
       {!!devJwt && (
-        <div className="py-6">
+        <div>
           <Section>
             <SectionHeader title={'Webhooks'}>
-              <Link href={'/webhooks/create'}>
+              <Link href={`/webhooks/create/${clientId}`}>
                 <Button className="dark with-icon">+ Create a webhook</Button>
               </Link>
             </SectionHeader>

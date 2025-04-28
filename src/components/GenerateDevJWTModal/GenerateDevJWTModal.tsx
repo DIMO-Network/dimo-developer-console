@@ -6,9 +6,9 @@ import { Label } from '@/components/Label';
 import { Button } from '@/components/Button';
 import { getDeveloperJwt } from '@/services/webhook';
 import { NotificationContext } from '@/context/notificationContext';
-import { getLocalStorageKeyForDevJWT, saveToLocalStorage } from '@/utils/localStorage';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { CopyableRow } from '@/components/CopyableRow';
+import { saveDevJwt } from '@/utils/devJwt';
 
 interface IProps {
   isOpen: boolean;
@@ -43,7 +43,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
       const token = authHeader?.split(' ')[1] ?? '';
       console.log('This was the token generated from the function: ', token);
       setGeneratedKey(token);
-      saveToLocalStorage(getLocalStorageKeyForDevJWT(tokenParams.client_id), token);
+      saveDevJwt(tokenParams.client_id, token);
       onSuccess?.(token);
     } catch (err) {
       console.error('Failed to generate developer JWT', err);

@@ -42,23 +42,6 @@ export const getDeveloperJwt = async (
   });
 };
 
-/** deprecated
- * use getWebhooksApiClient instead.
- * Any functions which call this need to pass in the devJWT
- * @param tokenParams
- */
-const deprecated_getWebhooksApiClient = async (tokenParams: GetTokenParams) => {
-  const devJwt = await getDeveloperJwt(tokenParams);
-  return axios.create({
-    baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      ...devJwt.headers,
-    },
-  });
-};
-
 const getWebhooksApiClient = async (token: string) => {
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
@@ -81,24 +64,33 @@ export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webho
   return data;
 };
 
-export const createWebhook = async (webhook: WebhookCreateInput): Promise<Webhook> => {
+export const createWebhook = async (
+  webhook: WebhookCreateInput,
+  token: string,
+): Promise<Webhook> => {
   const payload = {
     service: webhook.service || 'Telemetry',
     trigger: webhook.trigger || 'Conditions Empty',
     setup: webhook.setup || 'Realtime',
     target_uri: webhook.target_uri || 'https://example.com/webhook',
-    // signalName: webhook.signalName, // new field
-    // developer_license_address: webhook.developer_license_address || '1234567890abcdef',
     status: webhook.status || 'Active',
     description: webhook.description || 'Default Description',
+    data: webhook.data,
   };
-  const client = await deprecated_getWebhooksApiClient({
-    client_id: webhook.developerLicense.clientId,
-    domain: webhook.developerLicense.domain,
-    private_key: webhook.developerLicense.apiKey,
-  });
-  const response = await client.post<Webhook>('/webhooks', payload);
-  return response.data;
+  const client = await getWebhooksApiClient(token);
+  try {
+    const response = await client.post<Webhook>('/webhooks', payload);
+    return response.data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      throw new Error(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          'Unknown error creating webhook',
+      );
+    }
+    throw new Error('Unexpected error creating webhook');
+  }
 };
 
 export const updateWebhook = async (

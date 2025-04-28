@@ -8,7 +8,8 @@ import {
   generateCEL,
 } from '@/services/webhook';
 import { Webhook, Condition } from '@/types/webhook';
-import { getDevJwt } from '@/utils/localStorage';
+
+import { getDevJwt } from '@/utils/devJwt';
 
 export const useWebhooksNew = (clientId: string) => {
   const [loading, setLoading] = useState<boolean>(true);
