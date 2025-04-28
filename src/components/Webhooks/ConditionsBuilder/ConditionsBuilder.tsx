@@ -1,25 +1,18 @@
 import { Section, SectionHeader } from '@/components/Section';
 import React from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useFieldArray, Control, UseFormRegister, useFormContext } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { WebhookCreateInput } from '@/types/webhook';
 
 export const ConditionsBuilder = () => {
-  const { control, register, getValues } = useForm<{
-    operator: string;
-    conditions: { field: string; operator: string; value: string }[];
-  }>({
-    defaultValues: {
-      operator: 'and',
-      conditions: [{ field: '', operator: '', value: '' }],
-    },
-  });
+  const { control, register, getValues } = useFormContext<WebhookCreateInput>();
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'conditions',
+    name: 'cel.conditions',
   });
   return (
     <Section>
@@ -27,12 +20,12 @@ export const ConditionsBuilder = () => {
       <div className={'flex flex-col gap-4'}>
         <div className={'flex flex-row items-center gap-2.5'}>
           <SelectField
-            {...register('operator')}
+            {...register('cel.operator')}
             options={[
               { text: 'All', value: 'and' },
               { text: 'At least one', value: 'or' },
             ]}
-            value={getValues('operator')}
+            value={getValues('cel.operator')}
             className={'min-w-[120px]'}
             control={control}
           />
@@ -60,29 +53,38 @@ export const ConditionsBuilder = () => {
   );
 };
 
-const ConditionRow = ({ index, control, register, remove }) => {
+interface ConditionRowProps {
+  index: number;
+  control: Control<WebhookCreateInput>;
+  register: UseFormRegister<WebhookCreateInput>;
+  remove: (index: number) => void;
+}
+
+const ConditionRow = ({ index, control, register, remove }: ConditionRowProps) => {
   return (
     <div className="flex flex-row items-center gap-2.5 flex-1 w-full">
       <SelectField
-        {...register(`conditions.${index}.field`)}
+        {...register(`cel.conditions.${index}.field`)}
         options={[
           { text: 'Field 1', value: 'field1' },
           { text: 'Field 2', value: 'field2' },
         ]}
         control={control}
+        className={'min-w-[120px]'}
         placeholder={'Select attribute'}
       />
       <SelectField
-        {...register(`conditions.${index}.operator`)}
+        {...register(`cel.conditions.${index}.operator`)}
         options={[
-          { text: 'equals', value: '==' },
+          { text: 'is equal to', value: '==' },
           { text: 'is greater than', value: '>' },
           { text: 'is less than', value: '<' },
         ]}
         control={control}
+        className={'min-w-[120px]'}
         placeholder={'Select operator'}
       />
-      <TextField {...register(`conditions.${index}.value`)} placeholder="value" />
+      <TextField {...register(`cel.conditions.${index}.value`)} placeholder="value" />
       <Button type="button" onClick={() => remove(index)} className="primary-outline">
         <TrashIcon className="w-5 h-5 cursor-pointer" />
       </Button>

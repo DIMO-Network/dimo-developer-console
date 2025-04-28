@@ -22,6 +22,10 @@ export interface WebhookCreateInput {
   description?: string;
   target_uri: string;
   status?: string;
+  cel: {
+    operator: string;
+    conditions: { field: string; operator: string; value: string }[];
+  };
 }
 
 export interface Condition {
