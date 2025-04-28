@@ -80,7 +80,7 @@ export const WebhooksPage = () => {
   const { setCurrentWebhook, expandedWebhook, setExpandedWebhook } = useWebhooks();
 
   return (
-    <div className="webhooks-container">
+    <div className="flex flex-col gap-6">
       <GenerateDevJWTModal
         isOpen={showGenerateJwtModal}
         setIsOpen={setShowGenerateJwtModal}
@@ -120,7 +120,7 @@ export const WebhooksPage = () => {
         placeholder={'Please choose a developer license'}
       />
       {clientId && domain && !devJwt && (
-        <div className={'pt-8'}>
+        <div>
           <p className={'text-text-secondary'}>
             Please generate a Developer JWT to view your webhook configurations.
           </p>
@@ -131,7 +131,7 @@ export const WebhooksPage = () => {
       )}
 
       {!!devJwt && (
-        <div className="py-6">
+        <div>
           <Section>
             <SectionHeader title={'Webhooks'}>
               <Link href={`/webhooks/create/${clientId}`}>
