@@ -27,7 +27,11 @@ export const NewWebhookForm = ({
   onSubmit: (data: WebhookCreateInput) => void;
   onPrevious: () => void;
 }) => {
-  const methods = useForm<WebhookCreateInput>();
+  const methods = useForm<WebhookCreateInput>({
+    defaultValues: {
+      cel: { operator: 'and', conditions: [{ field: '', value: '', operator: '' }] },
+    },
+  });
   const renderStep = () => {
     switch (currentStep) {
       case WebhookFormStepName.CONFIGURE:

@@ -14,13 +14,20 @@ export const ConditionsBuilder = () => {
     control,
     name: 'cel.conditions',
   });
+
+  const handleRemove = (index: number) => {
+    if (fields.length > 1) {
+      remove(index);
+    }
+  };
+
   return (
     <Section>
       <SectionHeader title={'Build the conditions'} />
       <div className={'flex flex-col gap-4'}>
         <div className={'flex flex-row items-center gap-2.5'}>
           <SelectField
-            {...register('cel.operator')}
+            {...register('cel.operator', { required: 'Operator is required' })}
             options={[
               { text: 'All', value: 'and' },
               { text: 'At least one', value: 'or' },
@@ -32,13 +39,26 @@ export const ConditionsBuilder = () => {
           <Label>of the following conditions match</Label>
         </div>
         {fields.map((field, index) => (
-          <ConditionRow
-            index={index}
-            key={field.id}
-            control={control}
-            register={register}
-            remove={remove}
-          />
+          <React.Fragment key={field.id}>
+            <ConditionRow
+              index={index}
+              control={control}
+              register={register}
+              getValues={getValues}
+              remove={handleRemove}
+            />
+            {index < fields.length - 1 && (
+              <div
+                className={
+                  'bg-cta-default rounded-lg py-2 px-4 self-start border border-border-disabled'
+                }
+              >
+                <p className={'text-text-secondary'}>
+                  {getValues('cel.operator') === 'and' ? 'And' : 'Or'}
+                </p>
+              </div>
+            )}
+          </React.Fragment>
         ))}
         <Button
           type="button"
@@ -58,13 +78,20 @@ interface ConditionRowProps {
   control: Control<WebhookCreateInput>;
   register: UseFormRegister<WebhookCreateInput>;
   remove: (index: number) => void;
+  getValues: ReturnType<typeof useFormContext<WebhookCreateInput>>['getValues'];
 }
 
-const ConditionRow = ({ index, control, register, remove }: ConditionRowProps) => {
+const ConditionRow = ({
+  index,
+  control,
+  register,
+  remove,
+  getValues,
+}: ConditionRowProps) => {
   return (
     <div className="flex flex-row items-center gap-2.5 flex-1 w-full">
       <SelectField
-        {...register(`cel.conditions.${index}.field`)}
+        {...register(`cel.conditions.${index}.field`, { required: 'Field is required' })}
         options={[
           { text: 'Field 1', value: 'field1' },
           { text: 'Field 2', value: 'field2' },
@@ -72,9 +99,12 @@ const ConditionRow = ({ index, control, register, remove }: ConditionRowProps) =
         control={control}
         className={'min-w-[120px]'}
         placeholder={'Select attribute'}
+        value={getValues(`cel.conditions.${index}.field`)}
       />
       <SelectField
-        {...register(`cel.conditions.${index}.operator`)}
+        {...register(`cel.conditions.${index}.operator`, {
+          required: 'Operator is required',
+        })}
         options={[
           { text: 'is equal to', value: '==' },
           { text: 'is greater than', value: '>' },
@@ -83,8 +113,15 @@ const ConditionRow = ({ index, control, register, remove }: ConditionRowProps) =
         control={control}
         className={'min-w-[120px]'}
         placeholder={'Select operator'}
+        value={getValues(`cel.conditions.${index}.operator`)}
       />
-      <TextField {...register(`cel.conditions.${index}.value`)} placeholder="value" />
+      <TextField
+        {...register(`cel.conditions.${index}.value`, {
+          required: 'Value is required',
+          validate: (value) => !isNaN(Number(value)) || 'Value must be a number',
+        })}
+        placeholder="value"
+      />
       <Button type="button" onClick={() => remove(index)} className="primary-outline">
         <TrashIcon className="w-5 h-5 cursor-pointer" />
       </Button>
