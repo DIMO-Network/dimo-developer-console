@@ -29,8 +29,8 @@ export const ConditionsBuilder = () => {
           <SelectField
             {...register('cel.operator', { required: 'Operator is required' })}
             options={[
-              { text: 'All', value: 'and' },
-              { text: 'At least one', value: 'or' },
+              { text: 'All', value: 'AND' },
+              { text: 'At least one', value: 'OR' },
             ]}
             value={getValues('cel.operator')}
             className={'min-w-[120px]'}
