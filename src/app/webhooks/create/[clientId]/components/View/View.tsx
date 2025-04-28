@@ -3,7 +3,6 @@
 import { RightPanel } from '@/components/RightPanel';
 import React, { use, useContext, useEffect, useState } from 'react';
 import { FormStepTracker } from '@/app/webhooks/create/[clientId]/components/FormStepTracker';
-
 import {
   NewWebhookForm,
   WebhookFormStepName,
@@ -12,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { createWebhook } from '@/services/webhook';
 import { WebhookCreateInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
-import { getDevJwt } from '@/utils/localStorage';
+import { getDevJwt } from '@/utils/devJwt';
 
 const STEPS = [
   WebhookFormStepName.CONFIGURE,
@@ -39,7 +38,6 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
 
   const onSubmit = async (data: WebhookCreateInput) => {
     try {
-      console.log('trying to create webhook', data);
       if (!devJwt) {
         return setNotification('No devJWT found', '', 'error');
       }
@@ -72,6 +70,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     }
     setFormStep((prev) => prev - 1);
   };
+
   return (
     <div className={'flex flex-1 flex-row'}>
       <div className={'flex flex-col flex-1'}>

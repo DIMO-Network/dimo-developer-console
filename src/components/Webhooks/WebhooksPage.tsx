@@ -12,8 +12,8 @@ import { useGlobalAccount } from '@/hooks';
 import { useQuery } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
-import { getDevJwt } from '@/utils/localStorage';
 import { GenerateDevJWTModal } from '@/components/GenerateDevJWTModal';
+import { getDevJwt } from '@/utils/devJwt';
 
 export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
   query GetDeveloperLicensesForWebhooks($owner: Address!) {
@@ -57,7 +57,7 @@ const useGetDevJwt = (clientId: string) => {
 
   return {
     devJwt,
-    setDevJwt,
+    refetch,
   };
 };
 
@@ -75,7 +75,7 @@ export const WebhooksPage = () => {
     defaultValues: { developerLicense: { clientId: '', domain: '', privateKey: '' } },
   });
   const { clientId, domain } = watch('developerLicense');
-  const { devJwt, setDevJwt } = useGetDevJwt(clientId);
+  const { devJwt, refetch } = useGetDevJwt(clientId);
 
   const { setCurrentWebhook, expandedWebhook, setExpandedWebhook } = useWebhooks();
 
@@ -85,7 +85,7 @@ export const WebhooksPage = () => {
         isOpen={showGenerateJwtModal}
         setIsOpen={setShowGenerateJwtModal}
         tokenParams={{ client_id: clientId, domain: domain }}
-        onSuccess={setDevJwt}
+        onSuccess={refetch}
       />
       <div className="flex flex-row gap-1 pb-2 border-b-cta-default border-b">
         <p className={'text-base text-text-secondary font-medium'}>
