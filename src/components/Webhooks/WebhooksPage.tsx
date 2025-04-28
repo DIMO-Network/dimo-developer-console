@@ -14,6 +14,7 @@ import { useForm } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
 import { GenerateDevJWTModal } from '@/components/GenerateDevJWTModal';
 import { getDevJwt } from '@/utils/devJwt';
+import { Label } from '@/components/Label';
 
 export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
   query GetDeveloperLicensesForWebhooks($owner: Address!) {
@@ -92,33 +93,37 @@ export const WebhooksPage = () => {
           Receive real-time updates from events
         </p>
       </div>
-      <SelectField
-        {...register('developerLicense.clientId', {
-          required: 'Please choose a Developer License',
-          onChange: (e) => {
-            const clientId = e.target.value;
-            const selected = data?.developerLicenses.nodes.find(
-              (l) => l.clientId === clientId,
-            );
-            if (selected) {
-              setValue(
-                'developerLicense.domain',
-                selected.redirectURIs.nodes[0]?.uri ?? '',
+      <div className={'flex flex-col gap-2.5'}>
+        <Label>Select a Developer License</Label>
+        <SelectField
+          {...register('developerLicense.clientId', {
+            required: 'Please choose a Developer License',
+            onChange: (e) => {
+              const clientId = e.target.value;
+              const selected = data?.developerLicenses.nodes.find(
+                (l) => l.clientId === clientId,
               );
-              setValue('developerLicense.privateKey', '');
-            }
-          },
-        })}
-        control={control}
-        options={
-          validDeveloperLicenses?.map((license) => ({
-            text: license.alias ?? license.clientId,
-            value: license.clientId,
-          })) ?? []
-        }
-        value={getValues('developerLicense.clientId')}
-        placeholder={'Please choose a developer license'}
-      />
+              if (selected) {
+                setValue(
+                  'developerLicense.domain',
+                  selected.redirectURIs.nodes[0]?.uri ?? '',
+                );
+                setValue('developerLicense.privateKey', '');
+              }
+            },
+          })}
+          control={control}
+          options={
+            validDeveloperLicenses?.map((license) => ({
+              text: license.alias ?? license.clientId,
+              value: license.clientId,
+            })) ?? []
+          }
+          value={getValues('developerLicense.clientId')}
+          placeholder={'Please choose a developer license'}
+        />
+      </div>
+
       {clientId && domain && !devJwt && (
         <div>
           <p className={'text-text-secondary'}>
