@@ -14,6 +14,11 @@ export interface Webhook {
   description: string;
 }
 
+export interface CelCondition {
+  field: string;
+  operator: string;
+  value: string;
+}
 export interface WebhookCreateInput {
   service: string;
   data: string;
@@ -24,12 +29,12 @@ export interface WebhookCreateInput {
   status?: string;
   cel: {
     operator: string;
-    conditions: { field: string; operator: string; value: string }[];
+    conditions: CelCondition[];
   };
 }
 
 export interface Condition {
-  id: string;
+  // id: string;
   field: string;
   operator: string;
   value: string;

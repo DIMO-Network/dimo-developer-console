@@ -29,7 +29,7 @@ export const NewWebhookForm = ({
 }) => {
   const methods = useForm<WebhookCreateInput>({
     defaultValues: {
-      cel: { operator: 'and', conditions: [{ field: '', value: '', operator: '' }] },
+      cel: { operator: 'AND', conditions: [{ field: '', value: '', operator: '' }] },
     },
   });
   const renderStep = () => {

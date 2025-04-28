@@ -1,5 +1,5 @@
 import { Section, SectionHeader } from '@/components/Section';
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { useFieldArray, Control, UseFormRegister, useFormContext } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
 import { Label } from '@/components/Label';
@@ -7,13 +7,47 @@ import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { WebhookCreateInput } from '@/types/webhook';
+import { generateCEL } from '@/services/webhook';
+import { NotificationContext } from '@/context/notificationContext';
+import { capitalize } from 'lodash';
 
 export const ConditionsBuilder = () => {
   const { control, register, getValues, watch } = useFormContext<WebhookCreateInput>();
+  const { setNotification } = useContext(NotificationContext);
+  const [cel, setCel] = useState('');
+  const [loadingCel, setLoadingCel] = useState<boolean>(false);
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'cel.conditions',
   });
+
+  // Save handler: validate all fields, call API if valid
+  const handleSave = async () => {
+    const { cel } = getValues();
+
+    const hasInvalidCondition = cel.conditions.some(
+      (cond) => !cond.field || !cond.operator || !cond.value,
+    );
+
+    if (!cel.operator || hasInvalidCondition) {
+      setNotification('Please complete all condition fields before saving.', '', 'error');
+      return;
+    }
+
+    try {
+      setLoadingCel(true);
+      const response = await generateCEL({
+        conditions: cel.conditions,
+        logic: cel.operator,
+      });
+      setCel(response);
+    } catch {
+      setNotification('Failed to generate CEL', '', 'error');
+    } finally {
+      setLoadingCel(false);
+    }
+  };
 
   const handleRemove = (index: number) => {
     if (fields.length > 1) {
@@ -54,20 +88,35 @@ export const ConditionsBuilder = () => {
                 }
               >
                 <p className={'text-text-secondary'}>
-                  {watch('cel.operator') === 'and' ? 'And' : 'Or'}
+                  {capitalize(watch('cel.operator'))}
                 </p>
               </div>
             )}
           </React.Fragment>
         ))}
-        <Button
-          type="button"
-          onClick={() => append({ field: '', operator: '', value: '' })}
-          className="self-start"
-        >
-          <PlusIcon className="w-5 h-5" />
-          Add Condition
-        </Button>
+        <div className="flex flex-row gap-2">
+          <Button
+            type="button"
+            onClick={handleSave}
+            className="self-start primary-outline"
+            loading={loadingCel}
+          >
+            Generate CEL
+          </Button>
+          <Button
+            type="button"
+            onClick={() => append({ field: '', operator: '', value: '' })}
+            className="self-start"
+          >
+            <PlusIcon className="w-5 h-5" />
+            Add Condition
+          </Button>
+        </div>
+        {!!cel && (
+          <div className={'bg-surface-default py-2 px-3 rounded-xl'}>
+            <p className={'text-text-secondary'}>{cel}</p>
+          </div>
+        )}
       </div>
     </Section>
   );
@@ -93,8 +142,8 @@ const ConditionRow = ({
       <SelectField
         {...register(`cel.conditions.${index}.field`, { required: 'Field is required' })}
         options={[
-          { text: 'Field 1', value: 'field1' },
-          { text: 'Field 2', value: 'field2' },
+          { text: 'Odometer', value: 'odometer' },
+          { text: 'Speed', value: 'speed' },
         ]}
         control={control}
         className={'min-w-[120px]'}
