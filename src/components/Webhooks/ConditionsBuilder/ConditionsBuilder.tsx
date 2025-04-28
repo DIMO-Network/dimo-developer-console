@@ -9,7 +9,7 @@ import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { WebhookCreateInput } from '@/types/webhook';
 
 export const ConditionsBuilder = () => {
-  const { control, register, getValues } = useFormContext<WebhookCreateInput>();
+  const { control, register, getValues, watch } = useFormContext<WebhookCreateInput>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'cel.conditions',
@@ -54,7 +54,7 @@ export const ConditionsBuilder = () => {
                 }
               >
                 <p className={'text-text-secondary'}>
-                  {getValues('cel.operator') === 'and' ? 'And' : 'Or'}
+                  {watch('cel.operator') === 'and' ? 'And' : 'Or'}
                 </p>
               </div>
             )}
