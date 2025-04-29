@@ -5,7 +5,7 @@ import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
 import { SelectField } from '@/components/SelectField';
 import { WebhookCreateInput } from '@/types/webhook';
-import { ConditionsBuilder } from '@/components/Webhooks/ConditionsBuilder';
+import { CELBuilder } from './CELBuilder';
 
 export const WebhookConfigStep: FC = () => {
   const {
@@ -52,7 +52,7 @@ export const WebhookConfigStep: FC = () => {
           <TextError errorMessage={(errors.service.message as string) ?? ''} />
         )}
       </div>
-      <ConditionsBuilder />
+      <CELBuilder />
       <div className={'flex flex-col gap-2.5'}>
         <Label>Interval</Label>
         <SelectField

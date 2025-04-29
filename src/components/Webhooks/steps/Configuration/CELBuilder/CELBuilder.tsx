@@ -1,6 +1,6 @@
 import { Section, SectionHeader } from '@/components/Section';
-import React, { useContext, useState } from 'react';
-import { useFieldArray, Control, UseFormRegister, useFormContext } from 'react-hook-form';
+import React, { useContext, useState, useEffect } from 'react';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
@@ -10,8 +10,9 @@ import { WebhookCreateInput } from '@/types/webhook';
 import { generateCEL } from '@/services/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { capitalize } from 'lodash';
+import { conditionConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
 
-export const ConditionsBuilder = () => {
+export const CELBuilder = () => {
   const { control, register, getValues, watch } = useFormContext<WebhookCreateInput>();
   const { setNotification } = useContext(NotificationContext);
   const [cel, setCel] = useState('');
@@ -22,19 +23,15 @@ export const ConditionsBuilder = () => {
     name: 'cel.conditions',
   });
 
-  // Save handler: validate all fields, call API if valid
   const handleSave = async () => {
     const { cel } = getValues();
-
     const hasInvalidCondition = cel.conditions.some(
       (cond) => !cond.field || !cond.operator || !cond.value,
     );
-
     if (!cel.operator || hasInvalidCondition) {
       setNotification('Please complete all condition fields before saving.', '', 'error');
       return;
     }
-
     try {
       setLoadingCel(true);
       const response = await generateCEL({
@@ -74,13 +71,7 @@ export const ConditionsBuilder = () => {
         </div>
         {fields.map((field, index) => (
           <React.Fragment key={field.id}>
-            <ConditionRow
-              index={index}
-              control={control}
-              register={register}
-              getValues={getValues}
-              remove={handleRemove}
-            />
+            <ConditionRow index={index} remove={handleRemove} />
             {index < fields.length - 1 && (
               <div
                 className={
@@ -124,53 +115,77 @@ export const ConditionsBuilder = () => {
 
 interface ConditionRowProps {
   index: number;
-  control: Control<WebhookCreateInput>;
-  register: UseFormRegister<WebhookCreateInput>;
   remove: (index: number) => void;
-  getValues: ReturnType<typeof useFormContext<WebhookCreateInput>>['getValues'];
 }
 
-const ConditionRow = ({
-  index,
-  control,
-  register,
-  remove,
-  getValues,
-}: ConditionRowProps) => {
+const ConditionRow = ({ index, remove }: ConditionRowProps) => {
+  const { control, register, getValues, setValue, watch } =
+    useFormContext<WebhookCreateInput>();
+
+  // Get the selected field to determine config
+  const selectedField = watch(`cel.conditions.${index}.field`);
+  const config =
+    conditionConfig.find((c) => c.field === selectedField) || conditionConfig[0];
+
+  useEffect(() => {
+    setValue(`cel.conditions.${index}.operator`, '==');
+    setValue(`cel.conditions.${index}.value`, '');
+  }, [selectedField, index, setValue]);
+
+  const operatorOptions =
+    config.inputType === 'number'
+      ? [
+          { text: 'is equal to', value: '==' },
+          { text: 'is greater than', value: '>' },
+          { text: 'is less than', value: '<' },
+        ]
+      : [{ text: 'is equal to', value: '==' }];
+
   return (
     <div className="flex flex-row items-center gap-2.5 flex-1 w-full">
       <SelectField
         {...register(`cel.conditions.${index}.field`, { required: 'Field is required' })}
-        options={[
-          { text: 'Odometer', value: 'odometer' },
-          { text: 'Speed', value: 'speed' },
-        ]}
+        options={conditionConfig.map((c) => ({
+          text: c.label,
+          value: c.field,
+        }))}
         control={control}
         className={'min-w-[120px]'}
         placeholder={'Select attribute'}
         value={getValues(`cel.conditions.${index}.field`)}
       />
       <SelectField
+        key={`operator-${index}-${selectedField}`}
         {...register(`cel.conditions.${index}.operator`, {
           required: 'Operator is required',
         })}
-        options={[
-          { text: 'is equal to', value: '==' },
-          { text: 'is greater than', value: '>' },
-          { text: 'is less than', value: '<' },
-        ]}
+        options={operatorOptions}
         control={control}
         className={'min-w-[120px]'}
         placeholder={'Select operator'}
-        value={getValues(`cel.conditions.${index}.operator`)}
+        value={watch(`cel.conditions.${index}.operator`)}
       />
-      <TextField
-        {...register(`cel.conditions.${index}.value`, {
-          required: 'Value is required',
-          validate: (value) => !isNaN(Number(value)) || 'Value must be a number',
-        })}
-        placeholder="value"
-      />
+      {/* Render input based on config.inputType */}
+      {config?.inputType === 'number' && (
+        <TextField
+          {...register(`cel.conditions.${index}.value`, config.validation)}
+          placeholder="value"
+        />
+      )}
+      {config?.inputType === 'boolean' && (
+        <SelectField
+          key={`value-${index}-${selectedField}`}
+          {...register(`cel.conditions.${index}.value`, config.validation)}
+          options={[
+            { value: 'true', text: 'True' },
+            { value: 'false', text: 'False' },
+          ]}
+          control={control}
+          className="min-w-[120px]"
+          placeholder="Select value"
+          value={watch(`cel.conditions.${index}.operator`)}
+        />
+      )}
       <Button type="button" onClick={() => remove(index)} className="primary-outline">
         <TrashIcon className="w-5 h-5 cursor-pointer" />
       </Button>
