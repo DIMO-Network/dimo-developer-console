@@ -24,6 +24,9 @@ const config: Config = {
           default: '#322D2F',
           disabled: '#818181',
         },
+        'border': {
+          disabled: '#BABABA',
+        },
         'text': {
           secondary: '#BABABA',
         },

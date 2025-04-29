@@ -10,22 +10,34 @@ export interface Webhook {
   status: string;
   created_at: string;
   updated_at: string;
-  signalName: string;
+  // signalName: string;
   description: string;
 }
 
-export interface WebhookCreateInput {
+export interface CelCondition {
+  field: string;
+  operator: string;
+  value: string;
+}
+export interface WebhookFormInput {
   service: string;
-  data: string;
-  trigger: string;
   setup: string;
-  description?: string;
+  description: string;
   target_uri: string;
-  status?: string;
+  cel: {
+    operator: string;
+    conditions: CelCondition[];
+  };
 }
 
+export type WebhookCreateInput = Omit<WebhookFormInput, 'cel'> & {
+  status: string;
+  data: string;
+  trigger: string;
+};
+
 export interface Condition {
-  id: string;
+  // id: string;
   field: string;
   operator: string;
   value: string;

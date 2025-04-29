@@ -4,11 +4,11 @@ import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { Button } from '@/components/Button';
-import { getDeveloperJwt } from '@/services/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { CopyableRow } from '@/components/CopyableRow';
 import { saveDevJwt } from '@/utils/devJwt';
+import { getDeveloperJwt } from '@/services/dimoDev';
 
 interface IProps {
   isOpen: boolean;

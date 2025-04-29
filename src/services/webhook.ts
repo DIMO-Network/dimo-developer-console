@@ -3,10 +3,7 @@
 import { Condition, Webhook, WebhookCreateInput } from '@/types/webhook';
 import xior from 'xior';
 import axios from 'axios';
-import configuration from '@/config';
-import { DIMO } from '@dimo-network/data-sdk';
-
-const dimo = new DIMO(configuration.environment === 'production' ? 'Production' : 'Dev');
+import { conditionsConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
 
 const getAuthToken = () => {
   return '';
@@ -22,33 +19,17 @@ const webhookApiClient = xior.create({
   },
 });
 
-interface GetTokenParams {
-  client_id: string;
-  domain: string;
-  private_key: string;
-}
-
-interface GetDeveloperJwtResponse {
-  headers: { Authorization: `Bearer ${string}` };
-}
-
-export const getDeveloperJwt = async (
-  tokenParams: GetTokenParams,
-): Promise<GetDeveloperJwtResponse> => {
-  return await dimo.auth.getDeveloperJwt({
-    client_id: tokenParams.client_id,
-    domain: tokenParams.domain,
-    private_key: tokenParams.private_key,
-  });
-};
-
-const getWebhooksApiClient = async (token: string) => {
+const getWebhooksApiClient = (token?: string) => {
+  let authHeader = undefined;
+  if (token) {
+    authHeader = `Bearer ${token}`;
+  }
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      'Authorization': authHeader,
     },
   });
 };
@@ -59,7 +40,7 @@ export const fetchSignalNames = async (): Promise<string[]> => {
 };
 
 export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webhook[]> => {
-  const client = await getWebhooksApiClient(token);
+  const client = getWebhooksApiClient(token);
   const { data } = await client.get<Webhook[]>('/webhooks');
   return data;
 };
@@ -69,15 +50,15 @@ export const createWebhook = async (
   token: string,
 ): Promise<Webhook> => {
   const payload = {
-    service: webhook.service || 'Telemetry',
-    trigger: webhook.trigger || 'Conditions Empty',
-    setup: webhook.setup || 'Realtime',
-    target_uri: webhook.target_uri || 'https://example.com/webhook',
-    status: webhook.status || 'Active',
-    description: webhook.description || 'Default Description',
+    service: webhook.service,
+    trigger: webhook.trigger,
+    setup: webhook.setup,
+    target_uri: webhook.target_uri,
+    status: webhook.status,
+    description: webhook.description,
     data: webhook.data,
   };
-  const client = await getWebhooksApiClient(token);
+  const client = getWebhooksApiClient(token);
   try {
     const response = await client.post<Webhook>('/webhooks', payload);
     return response.data;
@@ -103,7 +84,6 @@ export const updateWebhook = async (
     trigger: webhook.trigger,
     setup: webhook.setup,
     target_uri: webhook.target_uri,
-    signalName: webhook.signalName,
     status: webhook.status,
     description: webhook.description,
   };
@@ -115,11 +95,51 @@ export const deleteWebhook = async (id: string): Promise<void> => {
   await webhookApiClient.delete(`/webhooks/${id}`);
 };
 
-export const generateCEL = async (
-  conditions: Condition[],
-  logic: string,
-): Promise<string> => {
-  const { data } = await webhookApiClient.post<{ cel_expression: string }>('/build-cel', {
+export const formatAndGenerateCEL = async (cel: {
+  operator: string;
+  conditions: Condition[];
+}) => {
+  const hasInvalidCondition = cel.conditions.some(
+    (cond) => !cond.field || !cond.operator || !cond.value,
+  );
+  if (!cel.operator || hasInvalidCondition) {
+    throw new Error('Please complete all condition fields before saving.');
+  }
+  const transformedConditions = cel.conditions.map((cond) => {
+    const fieldConfig = conditionsConfig.find((c) => c.field === cond.field);
+    // TODO - figure out how to handle nested CELs
+    if (fieldConfig?.multiFields?.length) {
+      return {
+        logic: 'OR',
+        conditions: fieldConfig.multiFields.map((f) => ({
+          field: f,
+          operator: cond.operator,
+          value: cond.value,
+        })),
+      };
+    }
+    return {
+      field: cond.field,
+      operator: cond.operator,
+      value: cond.value,
+    };
+  });
+  return await generateCEL({
+    // @ts-expect-error backend needs fixing for this to work
+    conditions: transformedConditions,
+    logic: cel.operator,
+  });
+};
+
+export const generateCEL = async ({
+  conditions,
+  logic,
+}: {
+  conditions: Condition[];
+  logic: string;
+}): Promise<string> => {
+  const client = getWebhooksApiClient();
+  const { data } = await client.post<{ cel_expression: string }>('/build-cel', {
     conditions,
     logic,
   });

@@ -3,7 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
-import { WebhookCreateInput } from '@/types/webhook';
+import { WebhookFormInput } from '@/types/webhook';
 import { isURL } from 'validator';
 
 const validateUrl = (str: string) => {
@@ -25,7 +25,7 @@ export const WebhookDeliveryStep: FC = () => {
   const {
     register,
     formState: { errors },
-  } = useFormContext<WebhookCreateInput>();
+  } = useFormContext<WebhookFormInput>();
   return (
     <div className={'flex flex-col gap-2'}>
       <Label>Webhook URL</Label>

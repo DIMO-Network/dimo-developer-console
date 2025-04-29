@@ -6,7 +6,7 @@ import React from 'react';
 import { WebhookConfigStep } from '@/components/Webhooks/steps/Configuration';
 import { WebhookDeliveryStep } from '@/components/Webhooks/steps/Delivery';
 import { WebhookSpecifyVehiclesStep } from '@/components/Webhooks/steps/SpecifyVehicles';
-import { WebhookCreateInput } from '@/types/webhook';
+import { WebhookFormInput } from '@/types/webhook';
 
 export enum WebhookFormStepName {
   CONFIGURE = 'configure',
@@ -20,14 +20,20 @@ export const NewWebhookForm = ({
   onSubmit,
   onPrevious,
   steps,
+  shouldSubmit,
 }: {
   currentStep: WebhookFormStepName;
   steps: WebhookFormStepName[];
   onNext: () => void;
-  onSubmit: (data: WebhookCreateInput) => void;
+  onSubmit: (data: WebhookFormInput) => void;
   onPrevious: () => void;
+  shouldSubmit: boolean;
 }) => {
-  const methods = useForm<WebhookCreateInput>();
+  const methods = useForm<WebhookFormInput>({
+    defaultValues: {
+      cel: { operator: 'AND', conditions: [{ field: '', value: '', operator: '' }] },
+    },
+  });
   const renderStep = () => {
     switch (currentStep) {
       case WebhookFormStepName.CONFIGURE:
@@ -65,11 +71,11 @@ export const NewWebhookForm = ({
           <Button
             className={'flex-1'}
             type={'button'}
-            onClick={isLastStep ? methods.handleSubmit(onSubmit) : onNext}
+            onClick={shouldSubmit ? methods.handleSubmit(onSubmit) : onNext}
             disabled={!methods.formState.isValid}
             loading={methods.formState.isSubmitting}
           >
-            {isLastStep ? 'Submit' : 'Next'}
+            {isLastStep ? 'Finish' : 'Next'}
           </Button>
         </div>
       </form>
