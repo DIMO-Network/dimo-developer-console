@@ -34,10 +34,30 @@ export const CELBuilder = () => {
     }
     try {
       setLoadingCel(true);
+      const transformedConditions = cel.conditions.map((cond) => {
+        const fieldConfig = conditionConfig.find((c) => c.field === cond.field);
+        if (fieldConfig?.multiFields?.length) {
+          return {
+            logic: 'OR',
+            conditions: fieldConfig.multiFields.map((f) => ({
+              field: f,
+              operator: cond.operator,
+              value: cond.value,
+            })),
+          };
+        }
+        return {
+          field: cond.field,
+          operator: cond.operator,
+          value: cond.value,
+        };
+      });
+      console.log('TRANSFORMED CONDITIONS', transformedConditions);
       const response = await generateCEL({
-        conditions: cel.conditions,
+        conditions: transformedConditions,
         logic: cel.operator,
       });
+      console.log('response', response);
       setCel(response);
     } catch {
       setNotification('Failed to generate CEL', '', 'error');
