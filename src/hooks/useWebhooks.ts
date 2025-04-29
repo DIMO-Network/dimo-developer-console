@@ -83,7 +83,7 @@ export const useWebhooks = () => {
     const generateAndSetCEL = async () => {
       try {
         if (conditions.length > 0 && logic) {
-          const celExpression = await generateCEL(conditions, logic);
+          const celExpression = await generateCEL({ conditions, logic });
           setGeneratedCEL(celExpression);
           if (currentWebhook) {
             setCurrentWebhook({
