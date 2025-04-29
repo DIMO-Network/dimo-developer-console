@@ -8,8 +8,8 @@ import {
   WebhookFormStepName,
 } from '@/components/Webhooks/NewWebhookForm';
 import { useRouter } from 'next/navigation';
-import { createWebhook } from '@/services/webhook';
-import { WebhookCreateInput } from '@/types/webhook';
+import { createWebhook, formatAndGenerateCEL } from '@/services/webhook';
+import { WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { getDevJwt } from '@/utils/devJwt';
 
@@ -36,13 +36,15 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     return STEPS[stepIndex];
   };
 
-  const onSubmit = async (data: WebhookCreateInput) => {
+  const onSubmit = async (data: WebhookFormInput) => {
     try {
       if (!devJwt) {
         return setNotification('No devJWT found', '', 'error');
       }
+      const trigger = await formatAndGenerateCEL(data.cel);
+      // TODO - how do we generate the data?
       await createWebhook(
-        { ...data, status: 'Active', data: 'speed', trigger: 'valueNumber > 100' },
+        { ...data, status: 'Active', data: 'speed', trigger: trigger },
         devJwt,
       );
       setNotification('Webhook created successfully', '', 'success');
@@ -81,6 +83,18 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
           onNext={onNext}
           onPrevious={onPrevious}
         />
+        {/*<WebhookForm*/}
+        {/*  currentWebhook={{ id: 1 }}*/}
+        {/*  setCurrentWebhook={() => {}}*/}
+        {/*  conditions={[{ field: '', operator: '', value: '>' }]}*/}
+        {/*  setConditions={() => {}}*/}
+        {/*  logic={''}*/}
+        {/*  setLogic={() => {}}*/}
+        {/*  signalNames={[]}*/}
+        {/*  generatedCEL={''}*/}
+        {/*  onSave={() => {}}*/}
+        {/*  onCancel={() => {}}*/}
+        {/*/>*/}
       </div>
       <RightPanel>
         <FormStepTracker currentStep={getStep(formStep)} steps={STEPS} />
