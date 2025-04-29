@@ -21,7 +21,6 @@ export interface CelCondition {
 }
 export interface WebhookFormInput {
   service: string;
-  trigger: string;
   setup: string;
   description: string;
   target_uri: string;
@@ -31,9 +30,10 @@ export interface WebhookFormInput {
   };
 }
 
-export type WebhookCreateInput = WebhookFormInput & {
+export type WebhookCreateInput = Omit<WebhookFormInput, 'cel'> & {
   status: string;
   data: string;
+  trigger: string;
 };
 
 export interface Condition {
