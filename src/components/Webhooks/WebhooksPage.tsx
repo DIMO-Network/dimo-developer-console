@@ -48,6 +48,8 @@ const useGetDevJwt = (clientId: string) => {
       const item = getDevJwt(clientId);
       if (item) {
         setDevJwt(item);
+      } else {
+        setDevJwt('');
       }
     }
   }, [clientId]);
@@ -77,7 +79,6 @@ export const WebhooksPage = () => {
   });
   const { clientId, domain } = watch('developerLicense');
   const { devJwt, refetch } = useGetDevJwt(clientId);
-
   const { setCurrentWebhook, expandedWebhook, setExpandedWebhook } = useWebhooks();
 
   return (

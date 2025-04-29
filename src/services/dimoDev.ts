@@ -7,9 +7,7 @@ export const dimoDevClient = axios.create({
   timeout: 5 * 60 * 1000,
 });
 
-const dimo = new DIMO(
-  true || configuration.environment === 'production' ? 'Production' : 'Dev',
-);
+const dimo = new DIMO(configuration.environment === 'production' ? 'Production' : 'Dev');
 
 interface GetTokenParams {
   client_id: string;
