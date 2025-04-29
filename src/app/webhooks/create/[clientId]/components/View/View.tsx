@@ -20,11 +20,10 @@ const STEPS = [
 ];
 
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
-  const [createdWebhook, setCreatedWebhook] = useState<Webhook>();
   const { clientId } = use(params);
-  const [formStep, setFormStep] = useState<WebhookFormStepName>(
-    WebhookFormStepName.CONFIGURE,
-  );
+  const [createdWebhook, setCreatedWebhook] = useState<Webhook>();
+  const [formStep, setFormStep] = useState<WebhookFormStepName>(STEPS[0]);
+
   const router = useRouter();
   const { setNotification } = useContext(NotificationContext);
   const devJwt = getDevJwt(clientId);

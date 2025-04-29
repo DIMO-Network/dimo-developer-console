@@ -3,7 +3,7 @@ const numericValidation = {
   validate: (value: string) => !isNaN(Number(value)) || 'Value must be a number',
 };
 
-export const conditionConfig = [
+export const conditionsConfig = [
   {
     field: 'isIgnitionOn',
     label: 'Is Ignition On',

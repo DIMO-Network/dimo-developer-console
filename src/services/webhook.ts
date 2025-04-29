@@ -3,7 +3,7 @@
 import { Condition, Webhook, WebhookCreateInput } from '@/types/webhook';
 import xior from 'xior';
 import axios from 'axios';
-import { conditionConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
+import { conditionsConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
 
 const getAuthToken = () => {
   return '';
@@ -106,7 +106,7 @@ export const formatAndGenerateCEL = async (cel: {
     throw new Error('Please complete all condition fields before saving.');
   }
   const transformedConditions = cel.conditions.map((cond) => {
-    const fieldConfig = conditionConfig.find((c) => c.field === cond.field);
+    const fieldConfig = conditionsConfig.find((c) => c.field === cond.field);
     // TODO - figure out how to handle nested CELs
     if (fieldConfig?.multiFields?.length) {
       return {

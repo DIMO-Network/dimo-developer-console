@@ -10,7 +10,7 @@ import { WebhookFormInput } from '@/types/webhook';
 import { formatAndGenerateCEL } from '@/services/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { capitalize } from 'lodash';
-import { conditionConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
+import { conditionsConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
 
 export const CELBuilder = () => {
   const { control, register, getValues, watch } = useFormContext<WebhookFormInput>();
@@ -115,11 +115,9 @@ interface ConditionRowProps {
 const ConditionRow = ({ index, remove }: ConditionRowProps) => {
   const { control, register, getValues, setValue, watch } =
     useFormContext<WebhookFormInput>();
-
-  // Get the selected field to determine config
   const selectedField = watch(`cel.conditions.${index}.field`);
   const config =
-    conditionConfig.find((c) => c.field === selectedField) || conditionConfig[0];
+    conditionsConfig.find((c) => c.field === selectedField) || conditionsConfig[0];
 
   useEffect(() => {
     setValue(`cel.conditions.${index}.operator`, '==');
@@ -139,7 +137,7 @@ const ConditionRow = ({ index, remove }: ConditionRowProps) => {
     <div className="flex flex-row items-center gap-2.5 flex-1 w-full">
       <SelectField
         {...register(`cel.conditions.${index}.field`, { required: 'Field is required' })}
-        options={conditionConfig.map((c) => ({
+        options={conditionsConfig.map((c) => ({
           text: c.label,
           value: c.field,
         }))}
@@ -159,7 +157,6 @@ const ConditionRow = ({ index, remove }: ConditionRowProps) => {
         placeholder={'Select operator'}
         value={watch(`cel.conditions.${index}.operator`)}
       />
-      {/* Render input based on config.inputType */}
       {config?.inputType === 'number' && (
         <TextField
           {...register(`cel.conditions.${index}.value`, config.validation)}
