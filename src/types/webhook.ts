@@ -10,7 +10,7 @@ export interface Webhook {
   status: string;
   created_at: string;
   updated_at: string;
-  signalName: string;
+  // signalName: string;
   description: string;
 }
 

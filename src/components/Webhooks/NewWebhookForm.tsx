@@ -20,12 +20,14 @@ export const NewWebhookForm = ({
   onSubmit,
   onPrevious,
   steps,
+  shouldSubmit,
 }: {
   currentStep: WebhookFormStepName;
   steps: WebhookFormStepName[];
   onNext: () => void;
   onSubmit: (data: WebhookFormInput) => void;
   onPrevious: () => void;
+  shouldSubmit: boolean;
 }) => {
   const methods = useForm<WebhookFormInput>({
     defaultValues: {
@@ -69,11 +71,11 @@ export const NewWebhookForm = ({
           <Button
             className={'flex-1'}
             type={'button'}
-            onClick={isLastStep ? methods.handleSubmit(onSubmit) : onNext}
+            onClick={shouldSubmit ? methods.handleSubmit(onSubmit) : onNext}
             disabled={!methods.formState.isValid}
             loading={methods.formState.isSubmitting}
           >
-            {isLastStep ? 'Submit' : 'Next'}
+            {isLastStep ? 'Finish' : 'Next'}
           </Button>
         </div>
       </form>
