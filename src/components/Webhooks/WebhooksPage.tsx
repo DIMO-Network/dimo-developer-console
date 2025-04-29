@@ -47,11 +47,10 @@ const useGetDevJwt = (clientId: string) => {
     if (clientId) {
       const item = getDevJwt(clientId);
       if (item) {
-        setDevJwt(item);
-      } else {
-        setDevJwt('');
+        return setDevJwt(item);
       }
     }
+    return setDevJwt('');
   }, [clientId]);
 
   useEffect(() => {
