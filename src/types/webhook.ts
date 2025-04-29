@@ -19,19 +19,22 @@ export interface CelCondition {
   operator: string;
   value: string;
 }
-export interface WebhookCreateInput {
+export interface WebhookFormInput {
   service: string;
-  data: string;
   trigger: string;
   setup: string;
-  description?: string;
+  description: string;
   target_uri: string;
-  status?: string;
   cel: {
     operator: string;
     conditions: CelCondition[];
   };
 }
+
+export type WebhookCreateInput = WebhookFormInput & {
+  status: string;
+  data: string;
+};
 
 export interface Condition {
   // id: string;

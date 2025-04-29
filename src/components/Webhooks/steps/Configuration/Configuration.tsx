@@ -4,7 +4,7 @@ import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
 import { SelectField } from '@/components/SelectField';
-import { WebhookCreateInput } from '@/types/webhook';
+import { WebhookFormInput } from '@/types/webhook';
 import { CELBuilder } from './CELBuilder';
 
 export const WebhookConfigStep: FC = () => {
@@ -13,7 +13,7 @@ export const WebhookConfigStep: FC = () => {
     control,
     formState: { errors },
     getValues,
-  } = useFormContext<WebhookCreateInput>();
+  } = useFormContext<WebhookFormInput>();
   return (
     <>
       <div className={'flex flex-col gap-2.5'}>

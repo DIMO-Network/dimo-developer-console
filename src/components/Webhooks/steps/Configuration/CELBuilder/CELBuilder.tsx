@@ -6,14 +6,14 @@ import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { WebhookCreateInput } from '@/types/webhook';
-import { generateCEL } from '@/services/webhook';
+import { WebhookFormInput } from '@/types/webhook';
+import { formatAndGenerateCEL } from '@/services/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { capitalize } from 'lodash';
 import { conditionConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
 
 export const CELBuilder = () => {
-  const { control, register, getValues, watch } = useFormContext<WebhookCreateInput>();
+  const { control, register, getValues, watch } = useFormContext<WebhookFormInput>();
   const { setNotification } = useContext(NotificationContext);
   const [cel, setCel] = useState('');
   const [loadingCel, setLoadingCel] = useState<boolean>(false);
@@ -24,43 +24,17 @@ export const CELBuilder = () => {
   });
 
   const handleSave = async () => {
-    const { cel } = getValues();
-    const hasInvalidCondition = cel.conditions.some(
-      (cond) => !cond.field || !cond.operator || !cond.value,
-    );
-    if (!cel.operator || hasInvalidCondition) {
-      setNotification('Please complete all condition fields before saving.', '', 'error');
-      return;
-    }
     try {
+      const { cel: celValues } = getValues();
       setLoadingCel(true);
-      const transformedConditions = cel.conditions.map((cond) => {
-        const fieldConfig = conditionConfig.find((c) => c.field === cond.field);
-        if (fieldConfig?.multiFields?.length) {
-          return {
-            logic: 'OR',
-            conditions: fieldConfig.multiFields.map((f) => ({
-              field: f,
-              operator: cond.operator,
-              value: cond.value,
-            })),
-          };
-        }
-        return {
-          field: cond.field,
-          operator: cond.operator,
-          value: cond.value,
-        };
-      });
-      console.log('TRANSFORMED CONDITIONS', transformedConditions);
-      const response = await generateCEL({
-        conditions: transformedConditions,
-        logic: cel.operator,
-      });
-      console.log('response', response);
+      const response = await formatAndGenerateCEL(celValues);
       setCel(response);
-    } catch {
-      setNotification('Failed to generate CEL', '', 'error');
+    } catch (err: unknown) {
+      let errorMsg = 'Error generating CEL';
+      if (err instanceof Error) {
+        errorMsg = err.message || errorMsg;
+      }
+      setNotification(errorMsg, '', 'error');
     } finally {
       setLoadingCel(false);
     }
@@ -140,7 +114,7 @@ interface ConditionRowProps {
 
 const ConditionRow = ({ index, remove }: ConditionRowProps) => {
   const { control, register, getValues, setValue, watch } =
-    useFormContext<WebhookCreateInput>();
+    useFormContext<WebhookFormInput>();
 
   // Get the selected field to determine config
   const selectedField = watch(`cel.conditions.${index}.field`);

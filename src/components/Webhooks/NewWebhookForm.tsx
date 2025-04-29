@@ -6,7 +6,7 @@ import React from 'react';
 import { WebhookConfigStep } from '@/components/Webhooks/steps/Configuration';
 import { WebhookDeliveryStep } from '@/components/Webhooks/steps/Delivery';
 import { WebhookSpecifyVehiclesStep } from '@/components/Webhooks/steps/SpecifyVehicles';
-import { WebhookCreateInput } from '@/types/webhook';
+import { WebhookFormInput } from '@/types/webhook';
 
 export enum WebhookFormStepName {
   CONFIGURE = 'configure',
@@ -24,10 +24,10 @@ export const NewWebhookForm = ({
   currentStep: WebhookFormStepName;
   steps: WebhookFormStepName[];
   onNext: () => void;
-  onSubmit: (data: WebhookCreateInput) => void;
+  onSubmit: (data: WebhookFormInput) => void;
   onPrevious: () => void;
 }) => {
-  const methods = useForm<WebhookCreateInput>({
+  const methods = useForm<WebhookFormInput>({
     defaultValues: {
       cel: { operator: 'AND', conditions: [{ field: '', value: '', operator: '' }] },
     },
