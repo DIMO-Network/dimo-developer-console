@@ -1,4 +1,3 @@
-// Dynamic condition config
 const numericValidation = {
   required: 'Value is required',
   validate: (value: string) => !isNaN(Number(value)) || 'Value must be a number',
