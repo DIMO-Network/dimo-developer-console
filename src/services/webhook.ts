@@ -125,6 +125,7 @@ export const formatAndGenerateCEL = async (cel: {
     };
   });
   return await generateCEL({
+    // @ts-expect-error backend needs fixing for this to work
     conditions: transformedConditions,
     logic: cel.operator,
   });
