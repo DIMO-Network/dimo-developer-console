@@ -253,7 +253,7 @@
   background-color: #2d3748;
 }
 
-.row-border {
+.cell-bottom-border {
   @apply border-b border-b-[#322D2F];
 }
 
