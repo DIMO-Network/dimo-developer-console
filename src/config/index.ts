@@ -53,9 +53,6 @@ export const getConfig = (): Configuration => {
       break;
     // Assuming 'development' should fall back to default
     case 'development':
-      // TODO - delete before merging
-      environmentConfig = productionConfig;
-      break;
     default:
       environmentConfig = {};
       break;
