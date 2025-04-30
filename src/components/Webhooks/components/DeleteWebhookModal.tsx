@@ -6,31 +6,37 @@ import { Modal } from '@/components/Modal';
 import { WebhookDetailsCard } from '@/components/Webhooks/components/WebhookDetailsCard';
 import { NotificationContext } from '@/context/notificationContext';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { useWebhooks } from '@/hooks/useWebhooks';
 
 interface IProps {
   webhook: Webhook;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  clientId: string;
+  onSuccess?: () => void;
 }
 
 export const DeleteWebhookModal: React.FC<IProps> = ({
   webhook,
   isOpen,
   setIsOpen,
-  clientId,
+  onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const { setNotification } = useContext(NotificationContext);
-  const { refetch } = useWebhooks(clientId, { enabled: false });
+
+  const onClose = useCallback(() => {
+    if (isDeleted) {
+      setIsDeleted(false);
+    }
+    setIsOpen(false);
+  }, [isDeleted, setIsOpen]);
+
   const onDelete = useCallback(async () => {
     try {
       setIsLoading(true);
       setNotification('Successfully deleted webhook', '', 'success');
       setIsDeleted(true);
-      refetch();
+      onSuccess?.();
     } catch (err) {
       let errorMessage = 'There was an error testing your webhook';
       if (err instanceof Error) {
@@ -40,7 +46,7 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [setNotification]);
+  }, [onSuccess, setNotification]);
 
   const title = useMemo(() => {
     if (isLoading) {
@@ -75,7 +81,7 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
     if (isLoading) return null;
     if (isDeleted)
       return (
-        <Button onClick={() => setIsOpen(false)} className={'primary-outline'}>
+        <Button onClick={onClose} className={'primary-outline'}>
           Done
         </Button>
       );
@@ -84,15 +90,15 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
         <Button onClick={onDelete} className={'error'}>
           Delete Webhook
         </Button>
-        <Button className={'primary-outline'} onClick={() => setIsOpen(false)}>
+        <Button className={'primary-outline'} onClick={onClose}>
           Cancel
         </Button>
       </div>
     );
-  }, [isDeleted, isLoading, onDelete, setIsOpen]);
+  }, [isDeleted, isLoading, onClose, onDelete]);
 
   return (
-    <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
+    <Modal isOpen={isOpen} setIsOpen={onClose}>
       <div className={'flex w-full flex-col gap-12'}>
         <Title>{title}</Title>
         {Body}
