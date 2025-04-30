@@ -1,29 +1,27 @@
 import React from 'react';
 import { Webhook } from '@/types/webhook';
-import Button from '@/components/Button/Button';
 import { useWebhooksNew } from '@/hooks/useWebhooks';
 import { Loader } from '@/components/Loader';
+
+import '../Table/Table.css';
+import { WebhookTableHeader } from '@/components/Webhooks/WebhookTable/WebhookTableHeader';
+import { WebhookTableRow } from '@/components/Webhooks/WebhookTable/WebhookTableRow';
+import { ExpandedRow } from '@/components/Webhooks/WebhookTable/ExpandedRow';
 
 interface WebhookTableProps {
   onEdit: (webhook: Webhook) => void;
   onDelete: (webhook: Webhook) => void;
   onTest: (webhook: Webhook) => void;
-  expandedWebhook: string | null;
-  setExpandedWebhook: React.Dispatch<React.SetStateAction<string | null>>;
   clientId: string;
 }
 
-export const WebhookTable: React.FC<WebhookTableProps> = ({
-  onEdit,
-  onDelete,
-  onTest,
-  expandedWebhook,
-  setExpandedWebhook,
-  clientId,
-}) => {
+const headers = [null, 'Description', 'Service', 'Setup', 'Status'];
+
+export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
   const { data, loading, error } = useWebhooksNew(clientId);
+  const [expandedWebhookId, setExpandedWebhookId] = React.useState<string>();
   const toggleExpand = (webhookId: string) => {
-    setExpandedWebhook((prev) => (prev === webhookId ? null : webhookId));
+    setExpandedWebhookId((prev) => (prev === webhookId ? undefined : webhookId));
   };
   if (loading) {
     return <Loader isLoading />;
@@ -31,68 +29,27 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({
   if (error) {
     return <p>There was an error fetching your webhooks</p>;
   }
+
   return (
-    <div className="webhook-table-container">
-      <table className="webhook-table">
-        <thead>
+    <div className="min-w-full bg-surface-default rounded-xl py-4">
+      <table className="table border-separate border-spacing-0">
+        <thead className={'table-header'}>
           <tr>
-            <th>Description</th>
-            <th>Service</th>
-            <th>Target URI</th>
-            <th>Status</th>
-            <th>Setup</th>
-            <th>Actions</th>
+            {headers.map((header, index) => (
+              <WebhookTableHeader key={index}>{header}</WebhookTableHeader>
+            ))}
           </tr>
         </thead>
-        <tbody>
-          {data?.map((webhook) => (
+        <tbody className={'table-body'}>
+          {data?.map((webhook, index) => (
             <React.Fragment key={webhook.id}>
-              <tr onClick={() => toggleExpand(webhook.id)}>
-                <td>{'Webhook description goes here'}</td>
-                <td>{webhook.service}</td>
-                <td>{webhook.target_uri}</td>
-                <td>{webhook.status}</td>
-                <td>{webhook.setup}</td>
-                <td className="webhook-actions">
-                  <Button
-                    className="edit-webhook-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(webhook);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    className="delete-webhook-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(webhook);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    className="test-webhook-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTest(webhook);
-                    }}
-                  >
-                    Test
-                  </Button>
-                </td>
-              </tr>
-              {expandedWebhook === webhook.id && (
-                <tr className="expanded-row">
-                  <td colSpan={6}>
-                    <div className="expanded-content">
-                      <h4>CEL Expression</h4>
-                      <p>{webhook.trigger}</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
+              <WebhookTableRow
+                isLast={index === data?.length - 1}
+                webhook={webhook}
+                onClick={() => toggleExpand(webhook.id)}
+                isExpanded={expandedWebhookId === webhook.id}
+              />
+              {expandedWebhookId === webhook.id && <ExpandedRow webhook={webhook} />}
             </React.Fragment>
           ))}
         </tbody>

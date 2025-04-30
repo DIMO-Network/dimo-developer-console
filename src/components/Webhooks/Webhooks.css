@@ -253,11 +253,12 @@
   background-color: #2d3748;
 }
 
+.cell-bottom-border {
+  @apply border-b border-b-[#322D2F];
+}
+
 .expanded-row {
-  background-color: #1a202c;
   color: #edf2f7;
-  padding: 1rem;
-  border-top: 1px solid #4a5568;
 }
 
 .test-webhook-overlay {
