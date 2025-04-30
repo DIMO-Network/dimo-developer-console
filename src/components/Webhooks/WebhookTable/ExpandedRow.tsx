@@ -4,22 +4,22 @@ import Button from '@/components/Button/Button';
 import React, { useState } from 'react';
 
 import '../Webhooks.css';
-import { TestWebhookModal } from '@/components/Webhooks/TestWebhookModal';
+import { TestWebhookModal } from '@/components/Webhooks/components/TestWebhookModal';
+import { DeleteWebhookModal } from '@/components/Webhooks/components/DeleteWebhookModal';
 
 export const ExpandedRow = ({ webhook }: { webhook: Webhook }) => {
   const [isTestOpen, setIsTestOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const onTest = () => {};
   const onEdit = () => {};
-  const onDelete = () => {};
+
   return (
     <>
-      <TestWebhookModal
+      <TestWebhookModal webhook={webhook} isOpen={isTestOpen} setIsOpen={setIsTestOpen} />
+      <DeleteWebhookModal
         webhook={webhook}
-        onTest={onTest}
-        onCancel={() => setIsTestOpen(false)}
-        isOpen={isTestOpen}
-        setIsOpen={setIsTestOpen}
+        isOpen={isDeleteOpen}
+        setIsOpen={setIsDeleteOpen}
       />
       <tr className="expanded-row bg-surface-sunken border-t-0">
         <td colSpan={5} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
@@ -58,13 +58,7 @@ export const ExpandedRow = ({ webhook }: { webhook: Webhook }) => {
                 >
                   Edit
                 </Button>
-                <Button
-                  className="primary-outline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                >
+                <Button className="primary-outline" onClick={() => setIsDeleteOpen(true)}>
                   Delete
                 </Button>
               </div>
