@@ -1,6 +1,6 @@
 import React from 'react';
 import { Webhook } from '@/types/webhook';
-import { useWebhooksNew } from '@/hooks/useWebhooks';
+import { useWebhooks } from '@/hooks/useWebhooks';
 import { Loader } from '@/components/Loader';
 
 import '../Table/Table.css';
@@ -18,12 +18,12 @@ interface WebhookTableProps {
 const headers = [null, 'Description', 'Service', 'Setup', 'Status'];
 
 export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
-  const { data, loading, error } = useWebhooksNew(clientId);
+  const { data, isLoading, error } = useWebhooks(clientId);
   const [expandedWebhookId, setExpandedWebhookId] = React.useState<string>();
   const toggleExpand = (webhookId: string) => {
     setExpandedWebhookId((prev) => (prev === webhookId ? undefined : webhookId));
   };
-  if (loading) {
+  if (isLoading) {
     return <Loader isLoading />;
   }
   if (error) {
@@ -49,7 +49,9 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
                 onClick={() => toggleExpand(webhook.id)}
                 isExpanded={expandedWebhookId === webhook.id}
               />
-              {expandedWebhookId === webhook.id && <ExpandedRow webhook={webhook} />}
+              {expandedWebhookId === webhook.id && (
+                <ExpandedRow webhook={webhook} clientId={clientId} />
+              )}
             </React.Fragment>
           ))}
         </tbody>

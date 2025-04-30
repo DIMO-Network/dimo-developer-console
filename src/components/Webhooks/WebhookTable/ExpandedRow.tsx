@@ -7,7 +7,13 @@ import '../Webhooks.css';
 import { TestWebhookModal } from '@/components/Webhooks/components/TestWebhookModal';
 import { DeleteWebhookModal } from '@/components/Webhooks/components/DeleteWebhookModal';
 
-export const ExpandedRow = ({ webhook }: { webhook: Webhook }) => {
+export const ExpandedRow = ({
+  webhook,
+  clientId,
+}: {
+  webhook: Webhook;
+  clientId: string;
+}) => {
   const [isTestOpen, setIsTestOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -20,6 +26,7 @@ export const ExpandedRow = ({ webhook }: { webhook: Webhook }) => {
         webhook={webhook}
         isOpen={isDeleteOpen}
         setIsOpen={setIsDeleteOpen}
+        clientId={clientId}
       />
       <tr className="expanded-row bg-surface-sunken border-t-0">
         <td colSpan={5} className={'px-4 pb-4 pt-3 cell-bottom-border'}>

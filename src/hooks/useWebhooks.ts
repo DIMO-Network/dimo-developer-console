@@ -8,43 +8,56 @@ import {
   generateCEL,
 } from '@/services/webhook';
 import { Webhook, Condition } from '@/types/webhook';
+import { useQuery } from '@tanstack/react-query';
 
 import { getDevJwt } from '@/utils/devJwt';
 
-export const useWebhooksNew = (clientId: string) => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<Webhook[]>();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = getDevJwt(clientId);
-        if (!token)
-          return setError(new Error(`No devJWT found for clientId ${clientId}`));
-        setLoading(true);
-        const data = await fetchWebhooks({ token });
-        setData(data);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err);
-        } else {
-          setError(new Error('Error while fetching webhooks'));
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [clientId]);
-  return {
-    data,
-    error,
-    loading,
-  };
+const handleFetchWebhooks = async (clientId: string) => {
+  const token = getDevJwt(clientId);
+  if (!token) throw new Error(`No devJWT found for client ${clientId}`);
+  const data = await fetchWebhooks({ token });
+  return (
+    [
+      {
+        id: '1',
+        service: 'Telemetry',
+        data: 'speed',
+        trigger: 'event.speed > 100',
+        setup: 'Hourly',
+        parameters: {},
+        target_uri: 'https://n8n.soba.work/webhook/bbeadcfc-c28a-4e4e-bd52-4bfbdc09ec31',
+        developer_license_address: '',
+        status: 'Active',
+        created_at: new Date().toString(),
+        updated_at: new Date().toString(),
+        description: 'My test webhook',
+      },
+      {
+        id: '2',
+        service: 'Telemetry',
+        data: 'speed',
+        trigger: 'event.speed > 100',
+        setup: 'Hourly',
+        parameters: {},
+        target_uri: 'https://n8n.soba.work/webhook/bbeadcfc-c28a-4e4e-bd52-4bfbdc09ec31',
+        developer_license_address: '',
+        status: 'Active',
+        created_at: new Date().toString(),
+        updated_at: new Date().toString(),
+        description: 'My test webhook 2',
+      },
+    ] ?? data
+  );
+};
+export const useWebhooks = (clientId: string, options?: { enabled?: boolean }) => {
+  return useQuery({
+    queryKey: ['webhooks', clientId],
+    queryFn: () => handleFetchWebhooks(clientId),
+    ...options,
+  });
 };
 
-export const useWebhooks = () => {
+export const DEPRECATED_useWebhooks = () => {
   const [webhooks] = useState<Webhook[]>([]);
   const [currentWebhook, setCurrentWebhook] = useState<Partial<Webhook> | null>(null);
   const [parametersInput, setParametersInput] = useState<string>('{}');
