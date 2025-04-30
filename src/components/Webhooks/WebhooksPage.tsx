@@ -78,7 +78,7 @@ export const WebhooksPage = () => {
   });
   const { clientId, domain } = watch('developerLicense');
   const { devJwt, refetch } = useGetDevJwt(clientId);
-  const { setCurrentWebhook, expandedWebhook, setExpandedWebhook } = useWebhooks();
+  const { setCurrentWebhook } = useWebhooks();
 
   return (
     <div className="flex flex-col gap-6">
@@ -154,8 +154,6 @@ export const WebhooksPage = () => {
                 // setWebhookToTest(webhook);
                 // setShowTestModal(true);
               }}
-              expandedWebhook={expandedWebhook}
-              setExpandedWebhook={setExpandedWebhook}
             />
           </Section>
         </div>

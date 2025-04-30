@@ -100,7 +100,7 @@ export const View = () => {
         email: email,
       });
 
-      if (hasPasskey && isPasskeyAvailable) {
+      if (hasPasskey && false) {
         setSignInProcess({
           email: email,
           signInType: SignInType.PASSKEY,
