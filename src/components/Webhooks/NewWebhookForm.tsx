@@ -30,6 +30,7 @@ export const NewWebhookForm = ({
   shouldSubmit: boolean;
 }) => {
   const methods = useForm<WebhookFormInput>({
+    mode: 'onChange',
     defaultValues: {
       cel: { operator: 'AND', conditions: [{ field: '', value: '', operator: '' }] },
     },

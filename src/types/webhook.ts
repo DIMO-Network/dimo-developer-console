@@ -10,7 +10,6 @@ export interface Webhook {
   status: string;
   created_at: string;
   updated_at: string;
-  // signalName: string;
   description: string;
 }
 
@@ -24,6 +23,7 @@ export interface WebhookFormInput {
   setup: string;
   description: string;
   target_uri: string;
+  verification_token: string;
   cel: {
     operator: string;
     conditions: CelCondition[];
@@ -37,7 +37,6 @@ export type WebhookCreateInput = Omit<WebhookFormInput, 'cel'> & {
 };
 
 export interface Condition {
-  // id: string;
   field: string;
   operator: string;
   value: string;

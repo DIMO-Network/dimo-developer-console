@@ -3,7 +3,6 @@
 import { Condition, Webhook, WebhookCreateInput } from '@/types/webhook';
 import xior from 'xior';
 import axios from 'axios';
-import { conditionsConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
 
 const getAuthToken = () => {
   return '';
@@ -41,7 +40,7 @@ export const fetchSignalNames = async (): Promise<string[]> => {
 
 export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webhook[]> => {
   const client = getWebhooksApiClient(token);
-  const { data } = await client.get<Webhook[]>('/webhooks');
+  const { data } = await client.get<Webhook[]>('/v1/webhooks');
   return data;
 };
 
@@ -49,18 +48,9 @@ export const createWebhook = async (
   webhook: WebhookCreateInput,
   token: string,
 ): Promise<Webhook> => {
-  const payload = {
-    service: webhook.service,
-    trigger: webhook.trigger,
-    setup: webhook.setup,
-    target_uri: webhook.target_uri,
-    status: webhook.status,
-    description: webhook.description,
-    data: webhook.data,
-  };
-  const client = getWebhooksApiClient(token);
   try {
-    const response = await client.post<Webhook>('/webhooks', payload);
+    const client = getWebhooksApiClient(token);
+    const response = await client.post<Webhook>('/v1/webhooks', webhook);
     return response.data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
@@ -99,34 +89,17 @@ export const formatAndGenerateCEL = async (cel: {
   operator: string;
   conditions: Condition[];
 }) => {
+  if (cel.conditions.length !== 1) {
+    throw new Error('Must have exactly one CEL condition');
+  }
   const hasInvalidCondition = cel.conditions.some(
     (cond) => !cond.field || !cond.operator || !cond.value,
   );
   if (!cel.operator || hasInvalidCondition) {
     throw new Error('Please complete all condition fields before saving.');
   }
-  const transformedConditions = cel.conditions.map((cond) => {
-    const fieldConfig = conditionsConfig.find((c) => c.field === cond.field);
-    // TODO - figure out how to handle nested CELs
-    if (fieldConfig?.multiFields?.length) {
-      return {
-        logic: 'OR',
-        conditions: fieldConfig.multiFields.map((f) => ({
-          field: f,
-          operator: cond.operator,
-          value: cond.value,
-        })),
-      };
-    }
-    return {
-      field: cond.field,
-      operator: cond.operator,
-      value: cond.value,
-    };
-  });
   return await generateCEL({
-    // @ts-expect-error backend needs fixing for this to work
-    conditions: transformedConditions,
+    conditions: cel.conditions,
     logic: cel.operator,
   });
 };

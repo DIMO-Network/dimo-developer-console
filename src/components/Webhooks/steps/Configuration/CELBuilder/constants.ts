@@ -1,6 +1,11 @@
 const numericValidation = {
   required: 'Value is required',
-  validate: (value: string) => !isNaN(Number(value)) || 'Value must be a number',
+  validate: (val: string) => !isNaN(Number(val)),
+};
+
+const booleanValidation = {
+  required: 'Value is required',
+  validate: (value: string) => value === 'true' || value === 'false',
 };
 
 export const conditionsConfig = [
@@ -8,9 +13,7 @@ export const conditionsConfig = [
     field: 'isIgnitionOn',
     label: 'Is Ignition On',
     inputType: 'boolean',
-    validation: {
-      required: 'Value is required',
-    },
+    validation: booleanValidation,
   },
   {
     field: 'powertrainTractionBatteryCurrentPower',
@@ -22,24 +25,12 @@ export const conditionsConfig = [
     field: 'powertrainTractionBatteryChargingIsCharging',
     label: 'Battery is charging',
     inputType: 'boolean',
-    validation: {
-      required: 'Value is required',
-    },
+    validation: booleanValidation,
   },
   {
     field: 'powertrainTransmissionTravelledDistance',
     label: 'Odometer',
     inputType: 'number',
-    validation: numericValidation,
-  },
-  {
-    field: 'fuel_level',
-    label: 'Fuel Level',
-    inputType: 'number',
-    multiFields: [
-      'powertrainFuelSystemRelativeLevel',
-      'powertrainFuelSystemAbsoluteLevel',
-    ],
     validation: numericValidation,
   },
   {

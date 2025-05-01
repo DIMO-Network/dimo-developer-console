@@ -42,10 +42,7 @@ export const WebhookConfigStep: FC = () => {
           {...register('service', {
             required: 'Please select a webhook service',
           })}
-          options={[
-            { value: 'Telemetry', text: 'Telemetry' },
-            { value: 'SACD', text: 'SACD' },
-          ]}
+          options={[{ value: 'Telemetry', text: 'Telemetry' }]}
           control={control}
         />
         {errors.service && (
