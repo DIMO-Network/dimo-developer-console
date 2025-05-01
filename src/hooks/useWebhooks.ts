@@ -1,50 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  fetchWebhooks,
   createWebhook,
-  updateWebhook,
   deleteWebhook,
   fetchSignalNames,
+  fetchWebhooks,
   generateCEL,
+  updateWebhook,
 } from '@/services/webhook';
-import { Webhook, Condition } from '@/types/webhook';
+import { Condition, Webhook } from '@/types/webhook';
+import { useQuery } from '@tanstack/react-query';
 
 import { getDevJwt } from '@/utils/devJwt';
 
-export const useWebhooksNew = (clientId: string) => {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<Webhook[]>();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = getDevJwt(clientId);
-        if (!token)
-          return setError(new Error(`No devJWT found for clientId ${clientId}`));
-        setLoading(true);
-        const data = await fetchWebhooks({ token });
-        setData(data);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err);
-        } else {
-          setError(new Error('Error while fetching webhooks'));
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [clientId]);
-  return {
-    data,
-    error,
-    loading,
-  };
+const handleFetchWebhooks = async (clientId: string) => {
+  const token = getDevJwt(clientId);
+  if (!token) throw new Error(`No devJWT found for client ${clientId}`);
+  return await fetchWebhooks({ token });
+};
+export const useWebhooks = (clientId: string, options?: { enabled?: boolean }) => {
+  return useQuery({
+    queryKey: ['webhooks', clientId],
+    queryFn: () => handleFetchWebhooks(clientId),
+    ...options,
+  });
 };
 
-export const useWebhooks = () => {
+export const DEPRECATED_useWebhooks = () => {
   const [webhooks] = useState<Webhook[]>([]);
   const [currentWebhook, setCurrentWebhook] = useState<Partial<Webhook> | null>(null);
   const [parametersInput, setParametersInput] = useState<string>('{}');
