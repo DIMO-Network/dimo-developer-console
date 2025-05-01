@@ -13,7 +13,7 @@
     }
 
     .dialog-content {
-      @apply sm:flex sm:items-start sm:flex-col w-full;
+      @apply sm:flex sm:items-start sm:flex-col;
     }
 
     .dialog-action-content {

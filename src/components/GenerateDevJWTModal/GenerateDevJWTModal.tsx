@@ -106,7 +106,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
-      <div className={'flex flex-col flex-1'}>
+      <div className={'flex flex-col flex-1 w-full'}>
         <div className={'pb-6'}>
           <Title component={'h2'} className={'text-2xl !leading-8'}>
             {title}
