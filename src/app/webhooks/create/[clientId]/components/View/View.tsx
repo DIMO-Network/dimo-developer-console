@@ -12,6 +12,7 @@ import { createWebhook, formatAndGenerateCEL } from '@/services/webhook';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { getDevJwt } from '@/utils/devJwt';
+import { uniq } from 'lodash';
 
 const STEPS = [
   WebhookFormStepName.CONFIGURE,
@@ -36,10 +37,12 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
 
   const createWebhookFromInput = async (data: WebhookFormInput, authToken: string) => {
     const trigger = await formatAndGenerateCEL(data.cel);
-
-    // TODO - figure out how to generate data when multiple signals are included in the trigger
+    const signals = uniq(data.cel.conditions.map((it) => it.field));
+    if (signals.length !== 1) {
+      throw new Error('Only one signal is allowed in the webhook trigger');
+    }
     return await createWebhook(
-      { ...data, status: 'Active', data: 'speed', trigger: trigger },
+      { ...data, status: 'Active', data: signals[0], trigger: trigger },
       authToken,
     );
   };

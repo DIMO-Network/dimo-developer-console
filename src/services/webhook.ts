@@ -41,7 +41,7 @@ export const fetchSignalNames = async (): Promise<string[]> => {
 
 export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webhook[]> => {
   const client = getWebhooksApiClient(token);
-  const { data } = await client.get<Webhook[]>('/webhooks');
+  const { data } = await client.get<Webhook[]>('/v1/webhooks');
   return data;
 };
 
@@ -60,7 +60,7 @@ export const createWebhook = async (
   };
   const client = getWebhooksApiClient(token);
   try {
-    const response = await client.post<Webhook>('/webhooks', payload);
+    const response = await client.post<Webhook>('/v1/webhooks', payload);
     return response.data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
