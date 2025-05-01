@@ -49,19 +49,6 @@ export const CELBuilder = () => {
     <Section>
       <SectionHeader title={'Build the conditions'} />
       <div className={'flex flex-col gap-4'}>
-        {/*<div className={'flex flex-row items-center gap-2.5'}>*/}
-        {/*  <SelectField*/}
-        {/*    {...register('cel.operator', { required: 'Operator is required' })}*/}
-        {/*    options={[*/}
-        {/*      { text: 'All', value: 'AND' },*/}
-        {/*      { text: 'At least one', value: 'OR' },*/}
-        {/*    ]}*/}
-        {/*    value={getValues('cel.operator')}*/}
-        {/*    className={'min-w-[120px]'}*/}
-        {/*    control={control}*/}
-        {/*  />*/}
-        {/*  <Label>of the following conditions match</Label>*/}
-        {/*</div>*/}
         {fields.map((field, index) => (
           <React.Fragment key={field.id}>
             <ConditionRow index={index} remove={handleRemove} />
@@ -87,14 +74,6 @@ export const CELBuilder = () => {
           >
             Generate CEL
           </Button>
-          {/*<Button*/}
-          {/*  type="button"*/}
-          {/*  onClick={() => append({ field: '', operator: '', value: '' })}*/}
-          {/*  className="self-start"*/}
-          {/*>*/}
-          {/*  <PlusIcon className="w-5 h-5" />*/}
-          {/*  Add Condition*/}
-          {/*</Button>*/}
         </div>
         {!!cel && (
           <div className={'bg-surface-default py-2 px-3 rounded-xl'}>
@@ -112,16 +91,20 @@ interface ConditionRowProps {
 }
 
 const ConditionRow = ({ index, remove }: ConditionRowProps) => {
-  const { control, register, getValues, setValue, watch } =
+  const { control, register, getValues, setValue, watch, resetField, trigger } =
     useFormContext<WebhookFormInput>();
   const selectedField = watch(`cel.conditions.${index}.field`);
   const config =
     conditionsConfig.find((c) => c.field === selectedField) || conditionsConfig[0];
 
+  console.log('cel conditions', watch(`cel.conditions.${index}`));
+
   useEffect(() => {
+    console.log('calling useEffect');
     setValue(`cel.conditions.${index}.operator`, '==');
-    setValue(`cel.conditions.${index}.value`, '');
-  }, [selectedField, index, setValue]);
+    resetField(`cel.conditions.${index}.value`, { defaultValue: '' });
+    trigger(`cel.conditions.${index}.value`);
+  }, [selectedField, index, setValue, resetField, trigger]);
 
   const operatorOptions =
     config.inputType === 'number'
@@ -160,6 +143,7 @@ const ConditionRow = ({ index, remove }: ConditionRowProps) => {
         <TextField
           {...register(`cel.conditions.${index}.value`, config.validation)}
           placeholder="value"
+          type="number"
         />
       )}
       {config?.inputType === 'boolean' && (
@@ -173,7 +157,7 @@ const ConditionRow = ({ index, remove }: ConditionRowProps) => {
           control={control}
           className="min-w-[120px]"
           placeholder="Select value"
-          value={watch(`cel.conditions.${index}.operator`)}
+          value={watch(`cel.conditions.${index}.value`)}
         />
       )}
       <Button type="button" onClick={() => remove(index)} className="primary-outline">
