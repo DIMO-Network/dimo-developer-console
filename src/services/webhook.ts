@@ -49,18 +49,9 @@ export const createWebhook = async (
   webhook: WebhookCreateInput,
   token: string,
 ): Promise<Webhook> => {
-  const payload = {
-    service: webhook.service,
-    trigger: webhook.trigger,
-    setup: webhook.setup,
-    target_uri: webhook.target_uri,
-    status: webhook.status,
-    description: webhook.description,
-    data: webhook.data,
-  };
-  const client = getWebhooksApiClient(token);
   try {
-    const response = await client.post<Webhook>('/v1/webhooks', payload);
+    const client = getWebhooksApiClient(token);
+    const response = await client.post<Webhook>('/v1/webhooks', webhook);
     return response.data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
