@@ -34,16 +34,6 @@ export const conditionsConfig = [
     validation: numericValidation,
   },
   {
-    field: 'fuel_level',
-    label: 'Fuel Level',
-    inputType: 'number',
-    multiFields: [
-      'powertrainFuelSystemRelativeLevel',
-      'powertrainFuelSystemAbsoluteLevel',
-    ],
-    validation: numericValidation,
-  },
-  {
     field: 'powertrainTractionBatteryStateOfChargeCurrent',
     label: 'Charge level',
     inputType: 'number',

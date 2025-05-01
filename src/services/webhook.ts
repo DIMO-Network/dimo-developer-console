@@ -3,7 +3,6 @@
 import { Condition, Webhook, WebhookCreateInput } from '@/types/webhook';
 import xior from 'xior';
 import axios from 'axios';
-import { conditionsConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
 
 const getAuthToken = () => {
   return '';
@@ -90,34 +89,17 @@ export const formatAndGenerateCEL = async (cel: {
   operator: string;
   conditions: Condition[];
 }) => {
+  if (cel.conditions.length !== 1) {
+    throw new Error('Must have exactly one CEL condition');
+  }
   const hasInvalidCondition = cel.conditions.some(
     (cond) => !cond.field || !cond.operator || !cond.value,
   );
   if (!cel.operator || hasInvalidCondition) {
     throw new Error('Please complete all condition fields before saving.');
   }
-  const transformedConditions = cel.conditions.map((cond) => {
-    const fieldConfig = conditionsConfig.find((c) => c.field === cond.field);
-    // TODO - figure out how to handle nested CELs
-    if (fieldConfig?.multiFields?.length) {
-      return {
-        logic: 'OR',
-        conditions: fieldConfig.multiFields.map((f) => ({
-          field: f,
-          operator: cond.operator,
-          value: cond.value,
-        })),
-      };
-    }
-    return {
-      field: cond.field,
-      operator: cond.operator,
-      value: cond.value,
-    };
-  });
   return await generateCEL({
-    // @ts-expect-error backend needs fixing for this to work
-    conditions: transformedConditions,
+    conditions: cel.conditions,
     logic: cel.operator,
   });
 };
