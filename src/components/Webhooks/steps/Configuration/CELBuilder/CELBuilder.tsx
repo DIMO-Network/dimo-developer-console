@@ -2,10 +2,9 @@ import { Section, SectionHeader } from '@/components/Section';
 import React, { useContext, useState, useEffect } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
-import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { TrashIcon } from '@heroicons/react/24/outline';
 import { WebhookFormInput } from '@/types/webhook';
 import { formatAndGenerateCEL } from '@/services/webhook';
 import { NotificationContext } from '@/context/notificationContext';
@@ -13,12 +12,12 @@ import { capitalize } from 'lodash';
 import { conditionsConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
 
 export const CELBuilder = () => {
-  const { control, register, getValues, watch } = useFormContext<WebhookFormInput>();
+  const { control, getValues, watch } = useFormContext<WebhookFormInput>();
   const { setNotification } = useContext(NotificationContext);
   const [cel, setCel] = useState('');
   const [loadingCel, setLoadingCel] = useState<boolean>(false);
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, remove } = useFieldArray({
     control,
     name: 'cel.conditions',
   });
@@ -50,19 +49,19 @@ export const CELBuilder = () => {
     <Section>
       <SectionHeader title={'Build the conditions'} />
       <div className={'flex flex-col gap-4'}>
-        <div className={'flex flex-row items-center gap-2.5'}>
-          <SelectField
-            {...register('cel.operator', { required: 'Operator is required' })}
-            options={[
-              { text: 'All', value: 'AND' },
-              { text: 'At least one', value: 'OR' },
-            ]}
-            value={getValues('cel.operator')}
-            className={'min-w-[120px]'}
-            control={control}
-          />
-          <Label>of the following conditions match</Label>
-        </div>
+        {/*<div className={'flex flex-row items-center gap-2.5'}>*/}
+        {/*  <SelectField*/}
+        {/*    {...register('cel.operator', { required: 'Operator is required' })}*/}
+        {/*    options={[*/}
+        {/*      { text: 'All', value: 'AND' },*/}
+        {/*      { text: 'At least one', value: 'OR' },*/}
+        {/*    ]}*/}
+        {/*    value={getValues('cel.operator')}*/}
+        {/*    className={'min-w-[120px]'}*/}
+        {/*    control={control}*/}
+        {/*  />*/}
+        {/*  <Label>of the following conditions match</Label>*/}
+        {/*</div>*/}
         {fields.map((field, index) => (
           <React.Fragment key={field.id}>
             <ConditionRow index={index} remove={handleRemove} />
@@ -88,14 +87,14 @@ export const CELBuilder = () => {
           >
             Generate CEL
           </Button>
-          <Button
-            type="button"
-            onClick={() => append({ field: '', operator: '', value: '' })}
-            className="self-start"
-          >
-            <PlusIcon className="w-5 h-5" />
-            Add Condition
-          </Button>
+          {/*<Button*/}
+          {/*  type="button"*/}
+          {/*  onClick={() => append({ field: '', operator: '', value: '' })}*/}
+          {/*  className="self-start"*/}
+          {/*>*/}
+          {/*  <PlusIcon className="w-5 h-5" />*/}
+          {/*  Add Condition*/}
+          {/*</Button>*/}
         </div>
         {!!cel && (
           <div className={'bg-surface-default py-2 px-3 rounded-xl'}>
