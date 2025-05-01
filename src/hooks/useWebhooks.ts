@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  fetchWebhooks,
   createWebhook,
-  updateWebhook,
   deleteWebhook,
   fetchSignalNames,
+  fetchWebhooks,
   generateCEL,
+  updateWebhook,
 } from '@/services/webhook';
-import { Webhook, Condition } from '@/types/webhook';
+import { Condition, Webhook } from '@/types/webhook';
 import { useQuery } from '@tanstack/react-query';
 
 import { getDevJwt } from '@/utils/devJwt';
@@ -15,39 +15,7 @@ import { getDevJwt } from '@/utils/devJwt';
 const handleFetchWebhooks = async (clientId: string) => {
   const token = getDevJwt(clientId);
   if (!token) throw new Error(`No devJWT found for client ${clientId}`);
-  const data = await fetchWebhooks({ token });
-  return (
-    [
-      {
-        id: '1',
-        service: 'Telemetry',
-        data: 'speed',
-        trigger: 'event.speed > 100',
-        setup: 'Hourly',
-        parameters: {},
-        target_uri: 'https://n8n.soba.work/webhook/bbeadcfc-c28a-4e4e-bd52-4bfbdc09ec31',
-        developer_license_address: '',
-        status: 'Active',
-        created_at: new Date().toString(),
-        updated_at: new Date().toString(),
-        description: 'My test webhook',
-      },
-      {
-        id: '2',
-        service: 'Telemetry',
-        data: 'speed',
-        trigger: 'event.speed > 100',
-        setup: 'Hourly',
-        parameters: {},
-        target_uri: 'https://n8n.soba.work/webhook/bbeadcfc-c28a-4e4e-bd52-4bfbdc09ec31',
-        developer_license_address: '',
-        status: 'Active',
-        created_at: new Date().toString(),
-        updated_at: new Date().toString(),
-        description: 'My test webhook 2',
-      },
-    ] ?? data
-  );
+  return await fetchWebhooks({ token });
 };
 export const useWebhooks = (clientId: string, options?: { enabled?: boolean }) => {
   return useQuery({
