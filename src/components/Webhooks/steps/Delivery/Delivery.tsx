@@ -56,12 +56,21 @@ export const WebhookDeliveryStep: FC = () => {
           {...register('verification_token', {
             required: 'Please enter a valid string',
           })}
-          placeholder="Enter the URL where you want to receive events"
+          placeholder="Enter a verification token"
         />
         <p className={'text-[#868888]'}>
           Please enter a string that you will use as your verification token. The above
           URL must return this as a plain/text string.
         </p>
+        {errors.verification_token && (
+          <TextError
+            errorMessage={
+              typeof errors.verification_token.message === 'string'
+                ? errors.verification_token.message
+                : ''
+            }
+          />
+        )}
       </div>
     </div>
   );

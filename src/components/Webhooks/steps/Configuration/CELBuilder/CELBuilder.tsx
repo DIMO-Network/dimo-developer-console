@@ -97,10 +97,7 @@ const ConditionRow = ({ index, remove }: ConditionRowProps) => {
   const config =
     conditionsConfig.find((c) => c.field === selectedField) || conditionsConfig[0];
 
-  console.log('cel conditions', watch(`cel.conditions.${index}`));
-
   useEffect(() => {
-    console.log('calling useEffect');
     setValue(`cel.conditions.${index}.operator`, '==');
     resetField(`cel.conditions.${index}.value`, { defaultValue: '' });
     trigger(`cel.conditions.${index}.value`);
