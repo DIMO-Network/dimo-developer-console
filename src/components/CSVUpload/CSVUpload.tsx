@@ -40,7 +40,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      delimiter: ',', // explicitly set
+      delimiter: ',',
       complete: (results) => {
         const { data, errors } = results;
 
@@ -142,7 +142,6 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           <input
             type="file"
             accept=".csv"
-            multiple
             onChange={handleInputChange}
             className="hidden"
           />
