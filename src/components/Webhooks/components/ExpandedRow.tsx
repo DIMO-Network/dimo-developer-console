@@ -14,12 +14,14 @@ export const ExpandedRow = ({
   onEdit,
   onDelete,
   clientId,
+  colSpan,
 }: {
   webhook: Webhook;
   clientId: string;
   onTest: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  colSpan: number;
 }) => {
   const { setNotification } = useContext(NotificationContext);
   const [status, setStatus] = useState<string>(webhook.status);
@@ -42,7 +44,7 @@ export const ExpandedRow = ({
 
   return (
     <tr className="expanded-row bg-surface-sunken border-t-0">
-      <td colSpan={6} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
+      <td colSpan={colSpan} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
         <div className="expanded-content space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2 text-text-secondary">

@@ -135,6 +135,7 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
                   onTest={() => setIsTestOpen(true)}
                   onDelete={() => setIsDeleteOpen(true)}
                   onEdit={() => {}}
+                  colSpan={columns.length + 1} /* +1 to handle the chevron icon */
                 />
               )}
             </React.Fragment>
