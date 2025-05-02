@@ -8,7 +8,7 @@ import {
   WebhookFormStepName,
 } from '@/components/Webhooks/NewWebhookForm';
 import { useRouter } from 'next/navigation';
-import { createWebhook, formatAndGenerateCEL } from '@/services/webhook';
+import { createWebhook, formatAndGenerateCEL, subscribeAll } from '@/services/webhook';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { getDevJwt } from '@/utils/devJwt';
@@ -65,13 +65,34 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     }
   };
 
-  const onSubscribe = () => {
-    if (!createdWebhook) {
-      return setNotification('No webhook was found', '', 'error');
+  const onSubscribe = async (data: WebhookFormInput) => {
+    try {
+      if (!createdWebhook) {
+        return setNotification('No webhook was found', '', 'error');
+      }
+      if (!devJwt) {
+        return setNotification('No devJWT found', '', 'error');
+      }
+      if (!(data.subscribe?.allVehicles || data.subscribe?.vehicleTokenIds?.length)) {
+        return onFinish();
+      }
+      if (data.subscribe?.allVehicles) {
+        console.log(createdWebhook.id);
+        const response = await subscribeAll(createdWebhook.id, devJwt);
+        console.log('got response', response);
+      }
+      setNotification('Successfully subscribed vehicles', '', 'success');
+      onFinish();
+    } catch (err) {
+      let message = 'There was an error subscribing these vehicles';
+      if (err instanceof Error) {
+        message = err.message ?? message;
+      }
+      setNotification(message, '', 'error');
     }
-    // TODO - implement subscribe here
+  };
 
-    setNotification('Successfully subscribed vehicles', '', 'success');
+  const onFinish = () => {
     router.replace('/webhooks');
   };
 

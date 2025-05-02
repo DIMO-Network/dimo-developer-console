@@ -1,13 +1,14 @@
 import { Toggle } from '@/components/Toggle';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Title } from '@/components/Title';
+import { WebhookFormInput } from '@/types/webhook';
 
-// TODO - if we toggle this off, how do we handle the field validation?
-export const WebhookSpecifyVehiclesStep = () => {
-  const { control } = useFormContext();
+export const WebhookSubscribeVehiclesStep = () => {
+  const { control, watch } = useFormContext<WebhookFormInput>();
+  console.log(watch('subscribe'));
   return (
     <Controller
-      name="includeAllVehicles"
+      name="subscribe.allVehicles"
       control={control}
       defaultValue={true}
       render={({ field }) => (

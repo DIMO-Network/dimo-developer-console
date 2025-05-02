@@ -118,3 +118,20 @@ export const generateCEL = async ({
   });
   return data.cel_expression;
 };
+
+export const subscribeAll = async (webhookId: string, token: string) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/all`);
+    return data;
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      throw new Error(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          'Unknown error creating webhook',
+      );
+    }
+    throw new Error('Unexpected error creating webhook');
+  }
+};
