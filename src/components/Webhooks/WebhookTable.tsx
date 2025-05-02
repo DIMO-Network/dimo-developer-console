@@ -4,7 +4,7 @@ import { Webhook } from '@/types/webhook';
 import { useWebhooks } from '@/hooks/useWebhooks';
 import { Loader } from '@/components/Loader';
 import { StatusBadge } from '@/components/Webhooks/components/StatusBadge';
-import { ExpandedRow } from '@/components/Webhooks/WebhookTable/ExpandedRow';
+import { ExpandedRow } from '@/components/Webhooks/components/ExpandedRow';
 
 import '../Table/Table.css';
 import { TestWebhookModal } from '@/components/Webhooks/components/TestWebhookModal';
