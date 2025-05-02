@@ -8,7 +8,12 @@ import {
   WebhookFormStepName,
 } from '@/components/Webhooks/NewWebhookForm';
 import { useRouter } from 'next/navigation';
-import { createWebhook, formatAndGenerateCEL } from '@/services/webhook';
+import {
+  createWebhook,
+  formatAndGenerateCEL,
+  subscribeAll,
+  subscribeVehicle,
+} from '@/services/webhook';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { getDevJwt } from '@/utils/devJwt';
@@ -54,7 +59,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       }
       const newWebhook = await createWebhookFromInput(data, devJwt);
       setCreatedWebhook(newWebhook);
-      setNotification('Webhook created successfully', '', 'success');
+      setNotification('Webhook created successfully', '', 'success', 3000);
       onNext();
     } catch (err: unknown) {
       let message = 'There was an error creating your webhook';
@@ -65,13 +70,59 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     }
   };
 
-  const onSubscribe = () => {
-    if (!createdWebhook) {
-      return setNotification('No webhook was found', '', 'error');
-    }
-    // TODO - implement subscribe here
+  const subscribeVehicleIds = async (
+    webhookId: string,
+    tokenIds: string[],
+    token: string,
+  ) => {
+    const results = await Promise.allSettled(
+      tokenIds.map((tokenId) =>
+        subscribeVehicle({ webhookId, vehicleTokenId: tokenId, token }),
+      ),
+    );
+    const failures = results.filter((r) => r.status === 'rejected');
+    return failures.length;
+  };
 
-    setNotification('Successfully subscribed vehicles', '', 'success');
+  const onSubscribe = async (data: WebhookFormInput) => {
+    try {
+      if (!createdWebhook) {
+        return setNotification('No webhook was found', '', 'error');
+      }
+      if (!devJwt) {
+        return setNotification('No devJWT found', '', 'error');
+      }
+      if (!(data.subscribe?.allVehicles || data.subscribe?.vehicleTokenIds?.length)) {
+        return onFinish();
+      }
+      if (data.subscribe?.allVehicles) {
+        await subscribeAll(createdWebhook.id, devJwt);
+        setNotification('Successfully subscribed vehicles', '', 'success');
+        onFinish();
+      } else if (data.subscribe.vehicleTokenIds?.length) {
+        const failures = await subscribeVehicleIds(
+          createdWebhook.id,
+          data.subscribe.vehicleTokenIds,
+          devJwt,
+        );
+
+        if (failures > 0) {
+          setNotification(`${failures} vehicle(s) failed to subscribe.`, '', 'error');
+        } else {
+          setNotification('Successfully subscribed vehicles', '', 'success');
+        }
+        onFinish();
+      }
+    } catch (err) {
+      let message = 'There was an error subscribing these vehicles';
+      if (err instanceof Error) {
+        message = err.message ?? message;
+      }
+      setNotification(message, '', 'error');
+    }
+  };
+
+  const onFinish = () => {
     router.replace('/webhooks');
   };
 

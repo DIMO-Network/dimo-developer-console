@@ -28,9 +28,13 @@ export interface WebhookFormInput {
     operator: string;
     conditions: CelCondition[];
   };
+  subscribe?: {
+    allVehicles?: boolean;
+    vehicleTokenIds?: string[];
+  };
 }
 
-export type WebhookCreateInput = Omit<WebhookFormInput, 'cel'> & {
+export type WebhookCreateInput = Omit<WebhookFormInput, 'cel' | 'subscribe'> & {
   status: string;
   data: string;
   trigger: string;

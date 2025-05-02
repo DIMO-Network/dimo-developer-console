@@ -5,7 +5,7 @@ import Button from '@/components/Button/Button';
 import React from 'react';
 import { WebhookConfigStep } from '@/components/Webhooks/steps/Configuration';
 import { WebhookDeliveryStep } from '@/components/Webhooks/steps/Delivery';
-import { WebhookSpecifyVehiclesStep } from '@/components/Webhooks/steps/SpecifyVehicles';
+import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/steps/SubscribeVehicles';
 import { WebhookFormInput } from '@/types/webhook';
 
 export enum WebhookFormStepName {
@@ -33,6 +33,9 @@ export const NewWebhookForm = ({
     mode: 'onChange',
     defaultValues: {
       cel: { operator: 'AND', conditions: [{ field: '', value: '', operator: '' }] },
+      subscribe: {
+        allVehicles: true,
+      },
     },
   });
   const renderStep = () => {
@@ -42,7 +45,7 @@ export const NewWebhookForm = ({
       case WebhookFormStepName.DELIVERY:
         return <WebhookDeliveryStep />;
       case WebhookFormStepName.SPECIFY_VEHICLES:
-        return <WebhookSpecifyVehiclesStep />;
+        return <WebhookSubscribeVehiclesStep />;
       default:
         return null;
     }
