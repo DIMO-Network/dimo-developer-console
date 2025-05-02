@@ -70,7 +70,7 @@ export const updateWebhook = async (
   token: string,
 ): Promise<Webhook> => {
   try {
-    const { data } = await getWebhooksApiClient(token).put(`/webhooks/${id}`, webhook);
+    const { data } = await getWebhooksApiClient(token).put(`/v1/webhooks/${id}`, webhook);
     return data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
