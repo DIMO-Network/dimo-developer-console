@@ -107,7 +107,7 @@ export const DEPRECATED_useWebhooks = () => {
         trigger: generatedCEL,
         parameters: parsedParameters,
       };
-      await updateWebhook(currentWebhook.id, payload);
+      await updateWebhook(currentWebhook.id, payload, '');
       await loadWebhooks();
       resetForm();
     } catch (error) {

@@ -67,18 +67,21 @@ export const createWebhook = async (
 export const updateWebhook = async (
   id: string,
   webhook: Partial<Webhook>,
+  token: string,
 ): Promise<Webhook> => {
-  const payload = {
-    service: webhook.service,
-    data: webhook.data,
-    trigger: webhook.trigger,
-    setup: webhook.setup,
-    target_uri: webhook.target_uri,
-    status: webhook.status,
-    description: webhook.description,
-  };
-  const { data } = await webhookApiClient.put<Webhook>(`/webhooks/${id}`, payload);
-  return data;
+  try {
+    const { data } = await getWebhooksApiClient(token).put(`/webhooks/${id}`, webhook);
+    return data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      throw new Error(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          'Unknown error creating webhook',
+      );
+    }
+    throw new Error('Unexpected error creating webhook');
+  }
 };
 
 export const deleteWebhook = async (id: string): Promise<void> => {
