@@ -5,6 +5,8 @@ import { useWebhooks } from '@/hooks/useWebhooks';
 import { Loader } from '@/components/Loader';
 import { StatusBadge } from '@/components/Webhooks/components/StatusBadge';
 import { ExpandedRow } from '@/components/Webhooks/components/ExpandedRow';
+import { fetchWebhookById } from '@/services/webhook';
+import { BubbleLoader } from '@/components/BubbleLoader';
 
 import '../Table/Table.css';
 import { TestWebhookModal } from '@/components/Webhooks/components/TestWebhookModal';
@@ -20,6 +22,7 @@ import {
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/16/solid';
 import Cell from '@/components/Table/Cell';
 import Column from '@/components/Table/Column';
+import { getDevJwt } from '@/utils/devJwt';
 
 interface WebhookTableProps {
   onEdit: (webhook: Webhook) => void;
@@ -46,11 +49,17 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
       { header: 'Service', accessorKey: 'service' },
       { header: 'Setup', accessorKey: 'setup' },
       {
+        header: 'Vehicles',
+        cell: ({ row }) => (
+          <VehicleCount webhookId={row.original.id} clientId={clientId} />
+        ),
+      },
+      {
         header: 'Status',
         cell: ({ row }) => <StatusBadge status={row.original.status} />,
       },
     ],
-    [],
+    [clientId],
   );
 
   const table = useReactTable({
@@ -134,4 +143,42 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
       </table>
     </div>
   );
+};
+
+const VehicleCount = ({
+  webhookId,
+  clientId,
+}: {
+  webhookId: string;
+  clientId: string;
+}) => {
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [vehicleCount, setVehicleCount] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    const fetchVehicleCount = async () => {
+      try {
+        const devjwt = getDevJwt(clientId);
+        if (!devjwt) {
+          setIsLoading(false);
+          return setVehicleCount(0);
+        }
+        const data = await fetchWebhookById({ id: webhookId, token: devjwt });
+        setVehicleCount(data.length ?? 0);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch vehicle count:', error);
+        setVehicleCount(0);
+        setIsLoading(false);
+      }
+    };
+
+    fetchVehicleCount();
+  }, [clientId, webhookId]);
+
+  if (isLoading) {
+    return <BubbleLoader isLoading isSmall className={'!justify-start'} />;
+  }
+
+  return <>{vehicleCount}</>;
 };

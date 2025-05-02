@@ -42,7 +42,7 @@ export const ExpandedRow = ({
 
   return (
     <tr className="expanded-row bg-surface-sunken border-t-0">
-      <td colSpan={5} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
+      <td colSpan={6} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
         <div className="expanded-content space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2 text-text-secondary">

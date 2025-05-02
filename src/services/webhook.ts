@@ -44,6 +44,29 @@ export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webho
   return data;
 };
 
+export const fetchWebhookById = async ({
+  id,
+  token,
+}: {
+  id: string;
+  token: string;
+}): Promise<string[]> => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const response = await client.get<string[]>(`/v1/webhooks/${id}`);
+    return response.data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      throw new Error(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          'Unknown error fetching webhook',
+      );
+    }
+    throw new Error('Unexpected error creating webhook');
+  }
+};
+
 export const createWebhook = async (
   webhook: WebhookCreateInput,
   token: string,
@@ -77,7 +100,7 @@ export const updateWebhook = async (
       throw new Error(
         err.response?.data?.message ||
           err.response?.data?.error ||
-          'Unknown error creating webhook',
+          'Unknown error updating webhook',
       );
     }
     throw new Error('Unexpected error creating webhook');
@@ -132,7 +155,7 @@ export const subscribeAll = async (webhookId: string, token: string) => {
       throw new Error(
         err.response?.data?.message ||
           err.response?.data?.error ||
-          'Unknown error creating webhook',
+          'Unknown error subscribing all',
       );
     }
     throw new Error('Unexpected error creating webhook');
@@ -159,7 +182,7 @@ export const subscribeVehicle = async ({
       throw new Error(
         err.response?.data?.message ||
           err.response?.data?.error ||
-          'Unknown error creating webhook',
+          'Unknown error subscribing vehicle',
       );
     }
     throw new Error('Unexpected error creating webhook');
