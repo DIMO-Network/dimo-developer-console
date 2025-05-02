@@ -59,7 +59,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       }
       const newWebhook = await createWebhookFromInput(data, devJwt);
       setCreatedWebhook(newWebhook);
-      setNotification('Webhook created successfully', '', 'success');
+      setNotification('Webhook created successfully', '', 'success', 3000);
       onNext();
     } catch (err: unknown) {
       let message = 'There was an error creating your webhook';
