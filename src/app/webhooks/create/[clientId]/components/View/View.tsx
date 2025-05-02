@@ -15,6 +15,7 @@ import { getDevJwt } from '@/utils/devJwt';
 import { uniq } from 'lodash';
 
 const STEPS = [
+  WebhookFormStepName.SPECIFY_VEHICLES,
   WebhookFormStepName.CONFIGURE,
   WebhookFormStepName.DELIVERY,
   WebhookFormStepName.SPECIFY_VEHICLES,
