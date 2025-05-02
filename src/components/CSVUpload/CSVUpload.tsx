@@ -8,16 +8,22 @@ import { NotificationContext } from '@/context/notificationContext';
 interface CSVUploadProps {
   value: string[];
   onChange: (ids: string[]) => void;
+  fileInfo: { name: string; count: number }[];
+  onMetadataChange: (files: { name: string; count: number }[]) => void;
 }
 
-export const CSVUpload: React.FC<CSVUploadProps> = ({ value, onChange }) => {
+export const CSVUpload: React.FC<CSVUploadProps> = ({
+  value,
+  onChange,
+  fileInfo,
+  onMetadataChange,
+}) => {
   const [error, setError] = useState<string | null>(null);
-  const [files, setFiles] = useState<{ name: string; count: number }[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const { setNotification } = useContext(NotificationContext);
 
   const handleFile = (file: File) => {
-    if (files.some((f) => f.name === file.name)) {
+    if (fileInfo.some((f) => f.name === file.name)) {
       return setNotification('Duplicate file upload', '', 'error');
     }
 
@@ -54,7 +60,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ value, onChange }) => {
         }
 
         setError(null);
-        setFiles((prev) => [...prev, { name: file.name, count: ids.length }]);
+        onMetadataChange([...fileInfo, { name: file.name, count: ids.length }]);
         onChange([...value, ...ids]);
       },
       error: () => setError('Failed to parse CSV.'),
@@ -81,8 +87,8 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ value, onChange }) => {
   };
 
   const handleDelete = (index: number) => {
-    const removed = files[index];
-    setFiles(files.filter((_, i) => i !== index));
+    const removed = fileInfo[index];
+    onMetadataChange(fileInfo.filter((_, i) => i !== index));
     const newIds = [...value];
     newIds.splice(value.length - removed.count, removed.count);
     onChange(newIds);
@@ -90,10 +96,10 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({ value, onChange }) => {
 
   return (
     <>
-      {files.length > 0 && (
+      {fileInfo.length > 0 && (
         <div className="space-y-2 text-left mb-6">
           <Title className="text-sm font-medium">List of vehicles</Title>
-          {files.map((f, idx) => (
+          {fileInfo.map((f, idx) => (
             <div
               key={idx}
               className="flex items-center justify-between bg-[#2A2A2A] px-4 py-3 rounded-lg text-white"

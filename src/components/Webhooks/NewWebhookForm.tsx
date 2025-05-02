@@ -33,6 +33,9 @@ export const NewWebhookForm = ({
     mode: 'onChange',
     defaultValues: {
       cel: { operator: 'AND', conditions: [{ field: '', value: '', operator: '' }] },
+      subscribe: {
+        allVehicles: true,
+      },
     },
   });
   const renderStep = () => {

@@ -8,14 +8,18 @@ import {
   WebhookFormStepName,
 } from '@/components/Webhooks/NewWebhookForm';
 import { useRouter } from 'next/navigation';
-import { createWebhook, formatAndGenerateCEL, subscribeAll } from '@/services/webhook';
+import {
+  createWebhook,
+  formatAndGenerateCEL,
+  subscribeAll,
+  subscribeVehicle,
+} from '@/services/webhook';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { getDevJwt } from '@/utils/devJwt';
 import { uniq } from 'lodash';
 
 const STEPS = [
-  WebhookFormStepName.SPECIFY_VEHICLES,
   WebhookFormStepName.CONFIGURE,
   WebhookFormStepName.DELIVERY,
   WebhookFormStepName.SPECIFY_VEHICLES,
@@ -66,6 +70,20 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     }
   };
 
+  const subscribeVehicleIds = async (
+    webhookId: string,
+    tokenIds: string[],
+    token: string,
+  ) => {
+    const results = await Promise.allSettled(
+      tokenIds.map((tokenId) =>
+        subscribeVehicle({ webhookId, vehicleTokenId: tokenId, token }),
+      ),
+    );
+    const failures = results.filter((r) => r.status === 'rejected');
+    return failures.length;
+  };
+
   const onSubscribe = async (data: WebhookFormInput) => {
     try {
       if (!createdWebhook) {
@@ -78,12 +96,23 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
         return onFinish();
       }
       if (data.subscribe?.allVehicles) {
-        console.log(createdWebhook.id);
-        const response = await subscribeAll(createdWebhook.id, devJwt);
-        console.log('got response', response);
+        await subscribeAll(createdWebhook.id, devJwt);
+        setNotification('Successfully subscribed vehicles', '', 'success');
+        onFinish();
+      } else if (data.subscribe.vehicleTokenIds?.length) {
+        const failures = await subscribeVehicleIds(
+          createdWebhook.id,
+          data.subscribe.vehicleTokenIds,
+          devJwt,
+        );
+
+        if (failures > 0) {
+          setNotification(`${failures} vehicle(s) failed to subscribe.`, '', 'error');
+        } else {
+          setNotification('Successfully subscribed vehicles', '', 'success');
+        }
+        onFinish();
       }
-      setNotification('Successfully subscribed vehicles', '', 'success');
-      onFinish();
     } catch (err) {
       let message = 'There was an error subscribing these vehicles';
       if (err instanceof Error) {

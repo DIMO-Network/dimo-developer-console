@@ -4,10 +4,12 @@ import { Title } from '@/components/Title';
 import { WebhookFormInput } from '@/types/webhook';
 import { Section } from '@/components/Section';
 import { CSVUpload } from '@/components/CSVUpload';
+import { useState } from 'react';
 
 export const WebhookSubscribeVehiclesStep = () => {
   const { control, watch } = useFormContext<WebhookFormInput>();
   const allVehicles = watch('subscribe.allVehicles');
+  const [fileInfo, setFileInfo] = useState<{ name: string; count: number }[]>([]);
 
   return (
     <>
@@ -33,7 +35,12 @@ export const WebhookSubscribeVehiclesStep = () => {
               control={control}
               defaultValue={[]}
               render={({ field: { onChange, value } }) => (
-                <CSVUpload value={value} onChange={onChange} />
+                <CSVUpload
+                  value={Array.isArray(value) ? value : []}
+                  onChange={onChange}
+                  fileInfo={fileInfo}
+                  onMetadataChange={setFileInfo}
+                />
               )}
             />
           </div>
