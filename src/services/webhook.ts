@@ -3,6 +3,7 @@
 import { Condition, Webhook, WebhookCreateInput } from '@/types/webhook';
 import xior from 'xior';
 import axios from 'axios';
+import { extractAxiosMessage } from '@/utils/api';
 
 const getAuthToken = () => {
   return '';
@@ -44,6 +45,22 @@ export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webho
   return data;
 };
 
+export const fetchWebhookById = async ({
+  webhookId,
+  token,
+}: {
+  webhookId: string;
+  token: string;
+}): Promise<string[]> => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const response = await client.get<string[]>(`/v1/webhooks/${webhookId}`);
+    return response.data;
+  } catch (err) {
+    throw new Error(extractAxiosMessage(err, 'Unknown error fetching webhook'));
+  }
+};
+
 export const createWebhook = async (
   webhook: WebhookCreateInput,
   token: string,
@@ -52,37 +69,37 @@ export const createWebhook = async (
     const client = getWebhooksApiClient(token);
     const response = await client.post<Webhook>('/v1/webhooks', webhook);
     return response.data;
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      throw new Error(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          'Unknown error creating webhook',
-      );
-    }
-    throw new Error('Unexpected error creating webhook');
+  } catch (err) {
+    throw new Error(extractAxiosMessage(err, 'Unknown error creating webhook'));
   }
 };
 
 export const updateWebhook = async (
   id: string,
   webhook: Partial<Webhook>,
+  token: string,
 ): Promise<Webhook> => {
-  const payload = {
-    service: webhook.service,
-    data: webhook.data,
-    trigger: webhook.trigger,
-    setup: webhook.setup,
-    target_uri: webhook.target_uri,
-    status: webhook.status,
-    description: webhook.description,
-  };
-  const { data } = await webhookApiClient.put<Webhook>(`/webhooks/${id}`, payload);
-  return data;
+  try {
+    const { data } = await getWebhooksApiClient(token).put(`/v1/webhooks/${id}`, webhook);
+    return data;
+  } catch (err) {
+    throw new Error(extractAxiosMessage(err, 'Unknown error updating webhook'));
+  }
 };
 
-export const deleteWebhook = async (id: string): Promise<void> => {
-  await webhookApiClient.delete(`/webhooks/${id}`);
+export const deleteWebhook = async ({
+  webhookId,
+  token,
+}: {
+  webhookId: string;
+  token: string;
+}): Promise<void> => {
+  try {
+    const client = getWebhooksApiClient(token);
+    await client.delete(`/v1/webhooks/${webhookId}`);
+  } catch (err) {
+    throw new Error(extractAxiosMessage(err, 'Unknown error deleting webhook'));
+  }
 };
 
 export const formatAndGenerateCEL = async (cel: {
@@ -125,14 +142,7 @@ export const subscribeAll = async (webhookId: string, token: string) => {
     const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/all`);
     return data;
   } catch (err) {
-    if (axios.isAxiosError(err)) {
-      throw new Error(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          'Unknown error creating webhook',
-      );
-    }
-    throw new Error('Unexpected error creating webhook');
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing all'));
   }
 };
 
@@ -152,13 +162,6 @@ export const subscribeVehicle = async ({
     );
     return data;
   } catch (err) {
-    if (axios.isAxiosError(err)) {
-      throw new Error(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          'Unknown error creating webhook',
-      );
-    }
-    throw new Error('Unexpected error creating webhook');
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
   }
 };

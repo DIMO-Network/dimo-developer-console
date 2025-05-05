@@ -11,6 +11,7 @@ export interface Webhook {
   created_at: string;
   updated_at: string;
   description: string;
+  failure_count: number;
 }
 
 export interface CelCondition {
