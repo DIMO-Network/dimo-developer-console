@@ -9,7 +9,7 @@ import { WebhookFormInput } from '@/types/webhook';
 import { formatAndGenerateCEL } from '@/services/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { capitalize } from 'lodash';
-import { conditionsConfig } from '@/components/Webhooks/steps/Configuration/CELBuilder/constants';
+import { conditionsConfig } from '@/components/Webhooks/fields/CELBuilder/constants';
 
 export const CELBuilder = () => {
   const { control, getValues, watch } = useFormContext<WebhookFormInput>();

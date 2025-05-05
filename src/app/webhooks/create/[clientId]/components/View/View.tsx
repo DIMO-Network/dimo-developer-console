@@ -18,6 +18,7 @@ import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { getDevJwt } from '@/utils/devJwt';
 import { uniq } from 'lodash';
+import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 
 const STEPS = [
   WebhookFormStepName.CONFIGURE,
@@ -123,6 +124,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   };
 
   const onFinish = () => {
+    invalidateQuery(clientId);
     router.replace('/webhooks');
   };
 

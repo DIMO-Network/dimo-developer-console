@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import './Webhooks.css';
-import { DEPRECATED_useWebhooks } from '@/hooks/useWebhooks';
 import { WebhookTable } from './WebhookTable';
 import Button from '@/components/Button/Button';
 import { Section, SectionHeader } from '@/components/Section';
@@ -78,7 +77,6 @@ export const WebhooksPage = () => {
   });
   const { clientId, domain } = watch('developerLicense');
   const { devJwt, refetch } = useGetDevJwt(clientId);
-  const { setCurrentWebhook } = DEPRECATED_useWebhooks();
 
   return (
     <div className="flex flex-col gap-6">
@@ -144,7 +142,7 @@ export const WebhooksPage = () => {
               </Link>
             </SectionHeader>
             <WebhookTable
-              onEdit={setCurrentWebhook}
+              onEdit={() => {}}
               clientId={clientId}
               onDelete={() => {
                 // setWebhookToDelete(webhook);
