@@ -7,11 +7,11 @@ import '../Webhooks.css';
 import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
 import { captureException } from '@sentry/nextjs';
+import Link from 'next/link';
 
 export const ExpandedRow = ({
   webhook,
   onTest,
-  onEdit,
   onDelete,
   clientId,
   colSpan,
@@ -19,7 +19,6 @@ export const ExpandedRow = ({
   webhook: Webhook;
   clientId: string;
   onTest: () => void;
-  onEdit: () => void;
   onDelete: () => void;
   colSpan: number;
 }) => {
@@ -66,9 +65,10 @@ export const ExpandedRow = ({
               <Button className="primary-outline" onClick={onTest}>
                 Test
               </Button>
-              <Button className="primary-outline" onClick={onEdit}>
-                Edit
-              </Button>
+              <Link href={`/webhooks/${webhook.id.trim()}/edit`}>
+                <Button className="primary-outline">Edit</Button>
+              </Link>
+
               <Button className="primary-outline" onClick={onDelete}>
                 Delete
               </Button>

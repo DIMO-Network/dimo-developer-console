@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { Webhook } from '@/types/webhook';
-import { useWebhooks } from '@/hooks/useWebhooks';
+import { useWebhooks } from '@/hooks/queries/useWebhooks';
 import { Loader } from '@/components/Loader';
 import { StatusBadge } from '@/components/Webhooks/components/StatusBadge';
 import { ExpandedRow } from '@/components/Webhooks/components/ExpandedRow';
@@ -140,7 +140,6 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
                   clientId={clientId}
                   onTest={() => setIsTestOpen(true)}
                   onDelete={() => setIsDeleteOpen(true)}
-                  onEdit={() => {}}
                   colSpan={columns.length + 1} /* +1 to handle the chevron icon */
                 />
               )}

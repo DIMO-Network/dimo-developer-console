@@ -1,6 +1,6 @@
-import { useWebhookVehiclesById } from '@/hooks/useWebhooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import React from 'react';
+import { useWebhookVehiclesById } from '@/hooks/queries/useWebhookVehiclesById';
 
 export const VehicleCount = ({
   webhookId,

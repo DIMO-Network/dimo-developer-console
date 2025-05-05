@@ -3,9 +3,9 @@
 import { FormProvider, useForm } from 'react-hook-form';
 import Button from '@/components/Button/Button';
 import React from 'react';
-import { WebhookConfigStep } from '@/components/Webhooks/steps/Configuration';
-import { WebhookDeliveryStep } from '@/components/Webhooks/steps/Delivery';
-import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/steps/SubscribeVehicles';
+import { WebhookConfigStep } from '@/components/Webhooks/create/Configuration';
+import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
+import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/create/SubscribeVehicles';
 import { WebhookFormInput } from '@/types/webhook';
 
 export enum WebhookFormStepName {
