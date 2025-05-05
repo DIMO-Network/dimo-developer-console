@@ -9,7 +9,7 @@
     }
 
     .sign-up__form {
-      @apply flex flex-col w-full max-w-sm gap-4 px-4 py-4 bg-charcoal rounded-3xl;
+      @apply flex flex-col w-full max-w-sm gap-4 px-4 py-4 bg-surface-default rounded-3xl;
     }
 
     .otp-login-text {

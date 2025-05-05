@@ -55,11 +55,6 @@ export const View = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const authCode = searchParams.get('code') ?? '';
-  // if (invitationCode) {
-  //   setCookie('invitation_code', invitationCode, {
-  //     maxAge: 60 * 60,
-  //   });
-  // }
 
   const [signInProcess, setSignInProcess] = useState<{
     email: string;
@@ -134,7 +129,7 @@ export const View = () => {
         return;
       }
 
-      handleLogin(email);
+      await handleLogin(email);
     } catch (error) {
       Sentry.captureException(error);
       setNotification('Failed to login with external provider', 'Oops...', 'error');
