@@ -45,15 +45,15 @@ export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webho
 };
 
 export const fetchWebhookById = async ({
-  id,
+  webhookId,
   token,
 }: {
-  id: string;
+  webhookId: string;
   token: string;
 }): Promise<string[]> => {
   try {
     const client = getWebhooksApiClient(token);
-    const response = await client.get<string[]>(`/v1/webhooks/${id}`);
+    const response = await client.get<string[]>(`/v1/webhooks/${webhookId}`);
     return response.data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {

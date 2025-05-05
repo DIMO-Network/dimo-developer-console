@@ -5,9 +5,8 @@ import { useWebhooks } from '@/hooks/useWebhooks';
 import { Loader } from '@/components/Loader';
 import { StatusBadge } from '@/components/Webhooks/components/StatusBadge';
 import { ExpandedRow } from '@/components/Webhooks/components/ExpandedRow';
-import { fetchWebhookById } from '@/services/webhook';
 import { BubbleLoader } from '@/components/BubbleLoader';
-
+import { useWebhookVehiclesById } from '@/hooks/useWebhooks';
 import '../Table/Table.css';
 import { TestWebhookModal } from '@/components/Webhooks/components/TestWebhookModal';
 import { DeleteWebhookModal } from '@/components/Webhooks/components/DeleteWebhookModal';
@@ -22,7 +21,6 @@ import {
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/16/solid';
 import Cell from '@/components/Table/Cell';
 import Column from '@/components/Table/Column';
-import { getDevJwt } from '@/utils/devJwt';
 
 interface WebhookTableProps {
   onEdit: (webhook: Webhook) => void;
@@ -153,33 +151,11 @@ const VehicleCount = ({
   webhookId: string;
   clientId: string;
 }) => {
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [vehicleCount, setVehicleCount] = React.useState<number | null>(null);
-
-  React.useEffect(() => {
-    const fetchVehicleCount = async () => {
-      try {
-        const devjwt = getDevJwt(clientId);
-        if (!devjwt) {
-          setIsLoading(false);
-          return setVehicleCount(0);
-        }
-        const data = await fetchWebhookById({ id: webhookId, token: devjwt });
-        setVehicleCount(data.length ?? 0);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Failed to fetch vehicle count:', error);
-        setVehicleCount(0);
-        setIsLoading(false);
-      }
-    };
-
-    fetchVehicleCount();
-  }, [clientId, webhookId]);
+  const { data, isLoading } = useWebhookVehiclesById({ webhookId, clientId });
 
   if (isLoading) {
     return <BubbleLoader isLoading isSmall className={'!justify-start'} />;
   }
 
-  return <>{vehicleCount}</>;
+  return <>{data?.length ?? 0}</>;
 };
