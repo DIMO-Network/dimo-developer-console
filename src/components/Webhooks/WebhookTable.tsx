@@ -5,22 +5,21 @@ import { useWebhooks } from '@/hooks/useWebhooks';
 import { Loader } from '@/components/Loader';
 import { StatusBadge } from '@/components/Webhooks/components/StatusBadge';
 import { ExpandedRow } from '@/components/Webhooks/components/ExpandedRow';
-import { BubbleLoader } from '@/components/BubbleLoader';
-import { useWebhookVehiclesById } from '@/hooks/useWebhooks';
 import '../Table/Table.css';
 import { TestWebhookModal } from '@/components/Webhooks/components/TestWebhookModal';
 import { DeleteWebhookModal } from '@/components/Webhooks/components/DeleteWebhookModal';
 
 import {
   ColumnDef,
+  flexRender,
   getCoreRowModel,
   useReactTable,
-  flexRender,
 } from '@tanstack/react-table';
 
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/16/solid';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
 import Cell from '@/components/Table/Cell';
 import Column from '@/components/Table/Column';
+import { VehicleCount } from '@/components/Webhooks/components/VehicleCount';
 
 interface WebhookTableProps {
   onEdit: (webhook: Webhook) => void;
@@ -72,6 +71,13 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
   }
   if (error) {
     return <p>There was an error fetching your webhooks</p>;
+  }
+  if (!data || data.length === 0) {
+    return (
+      <p className="text-text-secondary text-center pb-4">
+        You haven’t created any webhooks yet.
+      </p>
+    );
   }
 
   return (
@@ -144,20 +150,4 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
       </table>
     </div>
   );
-};
-
-const VehicleCount = ({
-  webhookId,
-  clientId,
-}: {
-  webhookId: string;
-  clientId: string;
-}) => {
-  const { data, isLoading } = useWebhookVehiclesById({ webhookId, clientId });
-
-  if (isLoading) {
-    return <BubbleLoader isLoading isSmall className={'!justify-start'} />;
-  }
-
-  return <>{data?.length ?? 0}</>;
 };
