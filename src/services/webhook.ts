@@ -3,13 +3,7 @@
 import { Condition, Webhook, WebhookCreateInput } from '@/types/webhook';
 import xior from 'xior';
 import axios from 'axios';
-
-const extractAxiosMessage = (err: unknown, fallback: string): string => {
-  if (axios.isAxiosError(err)) {
-    return err.response?.data?.message || err.response?.data?.error || fallback;
-  }
-  return `Unexpected error: ${fallback.toLowerCase()}`;
-};
+import { extractAxiosMessage } from '@/utils/api';
 
 const getAuthToken = () => {
   return '';

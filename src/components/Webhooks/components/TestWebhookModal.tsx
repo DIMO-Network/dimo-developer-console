@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react';
+import axios from 'axios';
 import { Webhook } from '@/types/webhook';
 import Button from '@/components/Button/Button';
 import Title from '@/components/Title/Title';
@@ -6,6 +7,7 @@ import { Modal } from '@/components/Modal';
 import { WebhookDetailsCard } from '@/components/Webhooks/components/WebhookDetailsCard';
 import { NotificationContext } from '@/context/notificationContext';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { extractAxiosMessage } from '@/utils/api';
 
 interface TestWebhookModalProps {
   webhook: Webhook;
@@ -21,11 +23,23 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { setNotification } = useContext(NotificationContext);
 
+  const handleRunWebhookTest = async () => {
+    try {
+      const fakeData = { event: 'test_event', data: 'This is test data' };
+      await axios.post(webhook.target_uri, fakeData, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      setNotification('Webhook triggered successfully.', '', 'success');
+    } catch (err: unknown) {
+      const message = extractAxiosMessage(err, 'An error occurred testing the webhook');
+      setNotification(message, '', 'error');
+    }
+  };
+
   const onTest = async () => {
     try {
       setIsLoading(true);
-      // TODO - implement test
-      setNotification('Successfully sent test!', '', 'success');
+      await handleRunWebhookTest();
     } catch (err: unknown) {
       let errorMessage = 'There was an error testing your webhook';
       if (err instanceof Error) {
@@ -86,7 +100,7 @@ const TestWebhookFooter: React.FC<{
     <div className="flex flex-col gap-4">
       <Button onClick={onTest}>Send a test</Button>
       <Button className="primary-outline" onClick={onCancel}>
-        Cancel
+        Close
       </Button>
     </div>
   );
