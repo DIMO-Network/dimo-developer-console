@@ -39,7 +39,7 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
     setExpandedWebhookId((prev) => (prev === webhookId ? undefined : webhookId));
   };
 
-  const webhook = data?.find((it) => it.id === expandedWebhookId);
+  const expandedWebhook = data?.find((it) => it.id === expandedWebhookId);
 
   const columns = React.useMemo<ColumnDef<Webhook>[]>(
     () => [
@@ -52,6 +52,7 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
           <VehicleCount webhookId={row.original.id} clientId={clientId} />
         ),
       },
+      { header: 'Errors', accessorKey: 'failure_count' },
       {
         header: 'Status',
         cell: ({ row }) => <StatusBadge status={row.original.status} />,
@@ -75,19 +76,20 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
 
   return (
     <div className="min-w-full bg-surface-default rounded-xl py-4">
-      {webhook && (
+      {expandedWebhook && (
         <TestWebhookModal
-          webhook={webhook}
+          webhook={expandedWebhook}
           isOpen={isTestOpen}
           setIsOpen={setIsTestOpen}
         />
       )}
-      {webhook && (
+      {expandedWebhook && (
         <DeleteWebhookModal
-          webhook={webhook}
+          webhook={expandedWebhook}
           isOpen={isDeleteOpen}
           setIsOpen={setIsDeleteOpen}
           onSuccess={refetch}
+          clientId={clientId}
         />
       )}
       <table className="table">
