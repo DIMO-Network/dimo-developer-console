@@ -39,30 +39,55 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
-      <div className={'flex flex-col flex-1 w-full gap-12'}>
+      <div className="flex flex-col flex-1 w-full gap-12">
         <Title>{isLoading ? 'Sending a test...' : 'Test Webhook'}</Title>
-        {isLoading ? (
-          <div className={'flex flex-1 justify-center items-center'}>
-            <BubbleLoader isLoading={true} />
-          </div>
-        ) : (
-          <div className={'flex flex-col gap-4'}>
-            <p>
-              Would you like to test this webhook? A test will be sent to the specified
-              Target URI.
-            </p>
-            <WebhookDetailsCard webhook={webhook} />
-          </div>
-        )}
-        {!isLoading && (
-          <div className={'flex flex-col gap-4'}>
-            <Button onClick={onTest}>Send a test</Button>
-            <Button className={'primary-outline'} onClick={() => setIsOpen(false)}>
-              Cancel
-            </Button>
-          </div>
-        )}
+        <TestWebhookBody isLoading={isLoading} webhook={webhook} />
+        <TestWebhookFooter
+          isLoading={isLoading}
+          onTest={onTest}
+          onCancel={() => setIsOpen(false)}
+        />
       </div>
     </Modal>
+  );
+};
+
+const TestWebhookBody: React.FC<{
+  isLoading: boolean;
+  webhook: Webhook;
+}> = ({ isLoading, webhook }) => {
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 justify-center items-center">
+        <BubbleLoader isLoading />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <p>
+        Would you like to test this webhook? A test will be sent to the specified Target
+        URI.
+      </p>
+      <WebhookDetailsCard webhook={webhook} />
+    </div>
+  );
+};
+
+const TestWebhookFooter: React.FC<{
+  isLoading: boolean;
+  onTest: () => void;
+  onCancel: () => void;
+}> = ({ isLoading, onTest, onCancel }) => {
+  if (isLoading) return null;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Button onClick={onTest}>Send a test</Button>
+      <Button className="primary-outline" onClick={onCancel}>
+        Cancel
+      </Button>
+    </div>
   );
 };
