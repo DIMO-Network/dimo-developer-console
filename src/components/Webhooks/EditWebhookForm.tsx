@@ -7,6 +7,7 @@ import {
   WebhookIntervalField,
   WebhookTargetUriField,
   CELBuilder,
+  SubscribedVehicles,
 } from '@/components/Webhooks/fields';
 import { Button } from '@/components/Button';
 import { formatAndGenerateCEL, updateWebhook } from '@/services/webhook';
@@ -23,10 +24,16 @@ type EditWebhookFormProps = {
   webhook: Webhook;
 };
 
+enum FormState {
+  EDIT_FORM = 'EDIT_FORM',
+  SUBSCRIBE_VEHICLES = 'SUBSCRIBE_VEHICLES',
+}
+
 export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
   clientId,
   webhook,
 }) => {
+  const [, setFormState] = useState<FormState>(FormState.EDIT_FORM);
   const [isDiscardingChanges, setIsDiscardingChanges] = useState(false);
   const { setNotification } = useContext(NotificationContext);
   const methods = useForm<WebhookFormInput>({
@@ -71,6 +78,16 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
     }
   };
 
+  const goToSubscribedVehicles = () => {
+    if (isDirty) {
+      return setNotification(
+        'Please save or discard changes before proceeding',
+        '',
+        'error',
+      );
+    }
+    setFormState(FormState.SUBSCRIBE_VEHICLES);
+  };
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
@@ -79,6 +96,11 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
         <WebhookServiceField />
         <CELBuilder />
         <WebhookIntervalField />
+        <SubscribedVehicles
+          webhookId={webhook.id}
+          clientId={clientId}
+          goToSubscribedVehicles={goToSubscribedVehicles}
+        />
         <div className="flex w-full gap-4">
           <Button
             type="button"

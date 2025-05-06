@@ -37,3 +37,4 @@ export * from './SupportAgentIcon';
 export * from './UserIcon';
 export * from './WalletIcon';
 export * from './WarningAmberIcon';
+export * from './EditIcon';
