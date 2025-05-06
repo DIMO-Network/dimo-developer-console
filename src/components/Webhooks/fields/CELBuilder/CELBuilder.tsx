@@ -32,7 +32,6 @@ export const CELBuilder = () => {
   const handleSave = async () => {
     try {
       const { cel: celValues } = getValues();
-      console.log('CEL VALUES', celValues);
       setLoadingCel(true);
       const response = await formatAndGenerateCEL(celValues);
       setCel(response);
