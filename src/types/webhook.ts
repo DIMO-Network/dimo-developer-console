@@ -14,6 +14,13 @@ export interface Webhook {
   failure_count: number;
 }
 
+export type WebhookEditableFields = Partial<
+  Pick<
+    Webhook,
+    'service' | 'data' | 'trigger' | 'setup' | 'target_uri' | 'status' | 'description'
+  >
+>;
+
 export interface CelCondition {
   field: string;
   operator: string;
@@ -24,7 +31,7 @@ export interface WebhookFormInput {
   setup: string;
   description: string;
   target_uri: string;
-  verification_token: string;
+  verification_token?: string;
   cel: {
     operator: string;
     conditions: CelCondition[];

@@ -141,18 +141,7 @@ export const WebhooksPage = () => {
                 <Button className="dark with-icon">+ Create a webhook</Button>
               </Link>
             </SectionHeader>
-            <WebhookTable
-              onEdit={() => {}}
-              clientId={clientId}
-              onDelete={() => {
-                // setWebhookToDelete(webhook);
-                // setShowDeleteConfirm(true);
-              }}
-              onTest={() => {
-                // setWebhookToTest(webhook);
-                // setShowTestModal(true);
-              }}
-            />
+            <WebhookTable clientId={clientId} />
           </Section>
         </div>
       )}

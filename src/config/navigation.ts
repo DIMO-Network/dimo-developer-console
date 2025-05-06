@@ -11,7 +11,7 @@ const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
 const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create\/[^/]+$/;
-const EDIT_WEBHOOK_REGEX = /^\/webhooks\/[^/]+\/edit$/;
+const EDIT_WEBHOOK_REGEX = /^\/webhooks\/edit\/[^/]+\/[^/]+$/;
 
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];

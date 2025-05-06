@@ -1,8 +1,6 @@
 import { Section, SectionHeader } from '@/components/Section';
 import React, { useContext, useState, useEffect } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { SelectField } from '@/components/SelectField';
-import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { WebhookFormInput } from '@/types/webhook';
@@ -21,6 +19,15 @@ export const CELBuilder = () => {
     control,
     name: 'cel.conditions',
   });
+
+  useEffect(() => {
+    const defaultValues = getValues();
+    if (defaultValues?.cel?.conditions?.length) {
+      handleSave();
+    }
+    // Purposely not adding deps because we don't want this to re-run
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSave = async () => {
     try {
@@ -91,16 +98,21 @@ interface ConditionRowProps {
 }
 
 const ConditionRow = ({ index, remove }: ConditionRowProps) => {
-  const { control, register, getValues, setValue, watch, resetField, trigger } =
+  const { register, setValue, watch, resetField, trigger } =
     useFormContext<WebhookFormInput>();
   const selectedField = watch(`cel.conditions.${index}.field`);
   const config =
     conditionsConfig.find((c) => c.field === selectedField) || conditionsConfig[0];
 
+  const prevFieldRef = React.useRef<string | undefined>();
   useEffect(() => {
-    setValue(`cel.conditions.${index}.operator`, '==');
-    resetField(`cel.conditions.${index}.value`, { defaultValue: '' });
-    trigger(`cel.conditions.${index}.value`);
+    const prevField = prevFieldRef.current;
+    if (prevField !== undefined && prevField !== selectedField) {
+      setValue(`cel.conditions.${index}.operator`, '==');
+      resetField(`cel.conditions.${index}.value`, { defaultValue: '' });
+      trigger(`cel.conditions.${index}.value`);
+    }
+    prevFieldRef.current = selectedField;
   }, [selectedField, index, setValue, resetField, trigger]);
 
   const operatorOptions =
@@ -114,48 +126,56 @@ const ConditionRow = ({ index, remove }: ConditionRowProps) => {
 
   return (
     <div className="flex flex-row items-center gap-2.5 flex-1 w-full">
-      <SelectField
+      <select
         {...register(`cel.conditions.${index}.field`, { required: 'Field is required' })}
-        options={conditionsConfig.map((c) => ({
-          text: c.label,
-          value: c.field,
-        }))}
-        control={control}
-        className={'min-w-[120px]'}
-        placeholder={'Select attribute'}
-        value={getValues(`cel.conditions.${index}.field`)}
-      />
-      <SelectField
-        key={`operator-${index}-${selectedField}`}
+        className="bg-cta-default text-white text-sm rounded-md px-3 py-2 min-w-[120px] border border-border-default focus:outline-none"
+        defaultValue=""
+      >
+        <option value="" disabled>
+          Select attribute
+        </option>
+        {conditionsConfig.map((c) => (
+          <option key={c.field} value={c.field}>
+            {c.label}
+          </option>
+        ))}
+      </select>
+      <select
         {...register(`cel.conditions.${index}.operator`, {
           required: 'Operator is required',
         })}
-        options={operatorOptions}
-        control={control}
-        className={'min-w-[120px]'}
-        placeholder={'Select operator'}
-        value={watch(`cel.conditions.${index}.operator`)}
-      />
+        className="bg-cta-default text-white text-sm rounded-md px-3 py-2 min-w-[120px] border border-border-default focus:outline-none"
+        defaultValue=""
+      >
+        <option value="" disabled>
+          Select operator
+        </option>
+        {operatorOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.text}
+          </option>
+        ))}
+      </select>
       {config?.inputType === 'number' && (
-        <TextField
+        <input
           {...register(`cel.conditions.${index}.value`, config.validation)}
-          placeholder="value"
+          placeholder="Enter a number"
           type="number"
+          className="bg-cta-default text-white min-w-[120px] border border-border-default"
         />
       )}
       {config?.inputType === 'boolean' && (
-        <SelectField
-          key={`value-${index}-${selectedField}`}
+        <select
           {...register(`cel.conditions.${index}.value`, config.validation)}
-          options={[
-            { value: 'true', text: 'True' },
-            { value: 'false', text: 'False' },
-          ]}
-          control={control}
-          className="min-w-[120px]"
-          placeholder="Select value"
-          value={watch(`cel.conditions.${index}.value`)}
-        />
+          className="bg-cta-default text-white text-sm rounded-md px-3 py-2 border border-border-default focus:outline-none min-w-[120px]"
+          defaultValue=""
+        >
+          <option value="" disabled>
+            Select value
+          </option>
+          <option value="true">True</option>
+          <option value="false">False</option>
+        </select>
       )}
       <Button type="button" onClick={() => remove(index)} className="primary-outline">
         <TrashIcon className="w-5 h-5 cursor-pointer" />

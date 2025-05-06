@@ -22,9 +22,6 @@ import Column from '@/components/Table/Column';
 import { VehicleCount } from '@/components/Webhooks/components/VehicleCount';
 
 interface WebhookTableProps {
-  onEdit: (webhook: Webhook) => void;
-  onDelete: (webhook: Webhook) => void;
-  onTest: (webhook: Webhook) => void;
   clientId: string;
 }
 

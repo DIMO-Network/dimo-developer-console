@@ -65,7 +65,7 @@ export const ExpandedRow = ({
               <Button className="primary-outline" onClick={onTest}>
                 Test
               </Button>
-              <Link href={`/webhooks/${webhook.id.trim()}/edit`}>
+              <Link href={`/webhooks/edit/${clientId}/${webhook.id.trim()}`}>
                 <Button className="primary-outline">Edit</Button>
               </Link>
 
