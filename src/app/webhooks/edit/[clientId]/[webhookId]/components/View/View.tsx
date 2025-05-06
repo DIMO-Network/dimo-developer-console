@@ -11,6 +11,7 @@ import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
 import { DiscardChangesModal } from '@/app/webhooks/edit/[clientId]/[webhookId]/components/DiscardChangesModal';
 import { useRouter } from 'next/navigation';
+import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 
 export const View = ({
   params,
@@ -56,6 +57,7 @@ export const View = ({
         getDevJwt(clientId) ?? '',
       );
       setNotification('Webhook updated successfully', '', 'success');
+      invalidateQuery(clientId);
     } catch (err) {
       console.error(err);
       setNotification('Error updating webhook', '', 'error');

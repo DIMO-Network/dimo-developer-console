@@ -51,7 +51,7 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
             className="primary-outline flex-1"
             onClick={() => onCancel(isDirty)}
           >
-            Cancel
+            {isDirty ? 'Cancel' : 'Go back'}
           </Button>
           <Button
             type="submit"
