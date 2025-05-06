@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useContext } from 'react';
+import { use, useContext, useState } from 'react';
 import { EditWebhookForm } from '@/components/Webhooks/EditWebhookForm';
 import { useWebhookById } from '@/hooks/queries/useWebhookById';
 import { Loader } from '@/components/Loader';
@@ -9,6 +9,8 @@ import { formatAndGenerateCEL, updateWebhook } from '@/services/webhook';
 import { uniq } from 'lodash';
 import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
+import { DiscardChangesModal } from '@/app/webhooks/edit/[clientId]/[webhookId]/components/DiscardChangesModal';
+import { useRouter } from 'next/navigation';
 
 export const View = ({
   params,
@@ -16,9 +18,10 @@ export const View = ({
   params: Promise<{ webhookId: string; clientId: string }>;
 }) => {
   const { webhookId, clientId } = use(params);
+  const [isDiscardChangesModalOpen, setIsDiscardChangesModalOpen] = useState(false);
   const { data, isLoading, error } = useWebhookById({ webhookId, clientId });
   const { setNotification } = useContext(NotificationContext);
-
+  const router = useRouter();
   const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel'] => {
     const { data, trigger } = webhook;
 
@@ -31,6 +34,13 @@ export const View = ({
       conditions: [{ field: data, operator, value }],
       operator: 'AND',
     };
+  };
+
+  const onCancel = (isDirty?: boolean) => {
+    if (isDirty) {
+      return setIsDiscardChangesModalOpen(true);
+    }
+    goBack();
   };
 
   const onSubmit = async (data: WebhookFormInput) => {
@@ -52,6 +62,10 @@ export const View = ({
     }
   };
 
+  const goBack = () => {
+    router.replace('/webhooks');
+  };
+
   if (isLoading) {
     return <Loader isLoading />;
   }
@@ -63,9 +77,17 @@ export const View = ({
   }
 
   return (
-    <EditWebhookForm
-      defaultValues={{ ...data, cel: extractCELFromWebhook(data) }}
-      onSubmit={onSubmit}
-    />
+    <>
+      <EditWebhookForm
+        defaultValues={{ ...data, cel: extractCELFromWebhook(data) }}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+      />
+      <DiscardChangesModal
+        isOpen={isDiscardChangesModalOpen}
+        onClose={() => setIsDiscardChangesModalOpen(false)}
+        onConfirm={goBack}
+      />
+    </>
   );
 };

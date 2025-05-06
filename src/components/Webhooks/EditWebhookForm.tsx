@@ -13,11 +13,13 @@ import { Button } from '@/components/Button';
 type EditWebhookFormProps = {
   defaultValues: WebhookFormInput;
   onSubmit: (data: WebhookFormInput) => void;
+  onCancel: (isDirty?: boolean) => void;
 };
 
 export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
   defaultValues,
   onSubmit,
+  onCancel,
 }) => {
   const methods = useForm<WebhookFormInput>({ defaultValues });
   const {
@@ -44,7 +46,11 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
         <CELBuilder />
         <WebhookIntervalField />
         <div className="flex w-full gap-4">
-          <Button type="button" className="primary-outline flex-1" disabled={!isDirty}>
+          <Button
+            type="button"
+            className="primary-outline flex-1"
+            onClick={() => onCancel(isDirty)}
+          >
             Cancel
           </Button>
           <Button
