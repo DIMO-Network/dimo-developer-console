@@ -24,7 +24,7 @@ export interface WebhookFormInput {
   setup: string;
   description: string;
   target_uri: string;
-  verification_token: string;
+  verification_token?: string;
   cel: {
     operator: string;
     conditions: CelCondition[];
