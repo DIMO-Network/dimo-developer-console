@@ -23,11 +23,21 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
   const {
     handleSubmit,
     formState: { isDirty, isValid, isSubmitting },
+    reset,
   } = methods;
+
+  const wrappedOnSubmit = async (values: WebhookFormInput) => {
+    try {
+      await onSubmit(values);
+      reset(values);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit(wrappedOnSubmit)} className="flex flex-col gap-6">
         <WebhookDescriptionField />
         <WebhookTargetUriField />
         <WebhookServiceField />
