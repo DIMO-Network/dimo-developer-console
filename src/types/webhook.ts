@@ -14,6 +14,13 @@ export interface Webhook {
   failure_count: number;
 }
 
+export type WebhookEditableFields = Partial<
+  Pick<
+    Webhook,
+    'service' | 'data' | 'trigger' | 'setup' | 'target_uri' | 'status' | 'description'
+  >
+>;
+
 export interface CelCondition {
   field: string;
   operator: string;

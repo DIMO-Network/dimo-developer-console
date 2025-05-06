@@ -8,6 +8,7 @@ import {
   WebhookTargetUriField,
   CELBuilder,
 } from '@/components/Webhooks/fields';
+import { Button } from '@/components/Button';
 
 type EditWebhookFormProps = {
   defaultValues: WebhookFormInput;
@@ -18,20 +19,33 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
   defaultValues,
   onSubmit,
 }) => {
-  console.log(defaultValues.cel);
   const methods = useForm<WebhookFormInput>({ defaultValues });
+  const {
+    handleSubmit,
+    formState: { isDirty, isValid, isSubmitting },
+  } = methods;
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <WebhookDescriptionField />
         <WebhookTargetUriField />
         <WebhookServiceField />
         <CELBuilder />
         <WebhookIntervalField />
-        <button type="submit" className="primary">
-          Save Changes
-        </button>
+        <div className="flex w-full gap-4">
+          <Button type="button" className="primary-outline flex-1" disabled={!isDirty}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            className="flex-1"
+            disabled={!isDirty || !isValid}
+            loading={isSubmitting}
+          >
+            Save Changes
+          </Button>
+        </div>
       </form>
     </FormProvider>
   );

@@ -1,6 +1,11 @@
 'use server';
 
-import { Condition, Webhook, WebhookCreateInput } from '@/types/webhook';
+import {
+  Condition,
+  Webhook,
+  WebhookCreateInput,
+  WebhookEditableFields,
+} from '@/types/webhook';
 import xior from 'xior';
 import axios from 'axios';
 import { extractAxiosMessage } from '@/utils/api';
@@ -76,7 +81,7 @@ export const createWebhook = async (
 
 export const updateWebhook = async (
   id: string,
-  webhook: Partial<Webhook>,
+  webhook: WebhookEditableFields,
   token: string,
 ): Promise<Webhook> => {
   try {

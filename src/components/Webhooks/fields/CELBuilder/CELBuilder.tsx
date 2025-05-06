@@ -20,6 +20,15 @@ export const CELBuilder = () => {
     name: 'cel.conditions',
   });
 
+  useEffect(() => {
+    const defaultValues = getValues();
+    if (defaultValues?.cel?.conditions?.length) {
+      handleSave();
+    }
+    // Purposely not adding deps because we don't want this to re-run
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSave = async () => {
     try {
       const { cel: celValues } = getValues();

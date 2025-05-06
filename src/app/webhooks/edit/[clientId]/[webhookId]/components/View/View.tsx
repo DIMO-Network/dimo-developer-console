@@ -1,10 +1,14 @@
 'use client';
 
-import { use } from 'react';
+import { use, useContext } from 'react';
 import { EditWebhookForm } from '@/components/Webhooks/EditWebhookForm';
 import { useWebhookById } from '@/hooks/queries/useWebhookById';
 import { Loader } from '@/components/Loader';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
+import { formatAndGenerateCEL, updateWebhook } from '@/services/webhook';
+import { uniq } from 'lodash';
+import { getDevJwt } from '@/utils/devJwt';
+import { NotificationContext } from '@/context/notificationContext';
 
 export const View = ({
   params,
@@ -13,6 +17,8 @@ export const View = ({
 }) => {
   const { webhookId, clientId } = use(params);
   const { data, isLoading, error } = useWebhookById({ webhookId, clientId });
+  const { setNotification } = useContext(NotificationContext);
+
   const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel'] => {
     const { data, trigger } = webhook;
 
@@ -26,6 +32,26 @@ export const View = ({
       operator: 'AND',
     };
   };
+
+  const onSubmit = async (data: WebhookFormInput) => {
+    try {
+      const trigger = await formatAndGenerateCEL(data.cel);
+      const signals = uniq(data.cel.conditions.map((it) => it.field));
+      if (signals.length !== 1) {
+        throw new Error('Only one signal is allowed in the webhook trigger');
+      }
+      await updateWebhook(
+        webhookId,
+        { ...data, data: signals[0], trigger },
+        getDevJwt(clientId) ?? '',
+      );
+      setNotification('Webhook updated successfully', '', 'success');
+    } catch (err) {
+      console.error(err);
+      setNotification('Error updating webhook', '', 'error');
+    }
+  };
+
   if (isLoading) {
     return <Loader isLoading />;
   }
@@ -39,7 +65,7 @@ export const View = ({
   return (
     <EditWebhookForm
       defaultValues={{ ...data, cel: extractCELFromWebhook(data) }}
-      onSubmit={() => {}}
+      onSubmit={onSubmit}
     />
   );
 };
