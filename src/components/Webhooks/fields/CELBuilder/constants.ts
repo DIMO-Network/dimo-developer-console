@@ -39,4 +39,40 @@ export const conditionsConfig = [
     inputType: 'number',
     validation: numericValidation,
   },
+  {
+    field: 'powertrainFuelSystemRelativeLevel',
+    label: 'Fuel System Relative Level',
+    inputType: 'number',
+    validation: numericValidation,
+  },
+  {
+    field: 'powertrainFuelSystemAbsoluteLevel',
+    label: 'Fuel System Absolute Level',
+    inputType: 'number',
+    validation: numericValidation,
+  },
+  {
+    field: 'chassisAxleRow1WheelLeftTirePressure',
+    label: 'Tire pressure (front left)',
+    inputType: 'number',
+    validation: numericValidation,
+  },
+  {
+    field: 'chassisAxleRow1WheelRightTirePressure',
+    label: 'Tire pressure (front right)',
+    inputType: 'number',
+    validation: numericValidation,
+  },
+  {
+    field: 'chassisAxleRow2WheelLeftTirePressure',
+    label: 'Tire pressure (back left)',
+    inputType: 'number',
+    validation: numericValidation,
+  },
+  {
+    field: 'chassisAxleRow2WheelRightTirePressure',
+    label: 'Tire pressure (back right)',
+    inputType: 'number',
+    validation: numericValidation,
+  },
 ];
