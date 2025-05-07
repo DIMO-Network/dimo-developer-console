@@ -19,6 +19,7 @@ import { extractCELFromWebhook } from '@/utils/webhook';
 import { useRouter } from 'next/navigation';
 import { DiscardChangesModal } from '@/app/webhooks/edit/[clientId]/[webhookId]/components/DiscardChangesModal';
 import { SubscribedVehicles } from '@/components/Webhooks/edit/SubscribedVehicles';
+import { BackButton } from '@/components/BackButton';
 
 type EditWebhookFormProps = {
   clientId: string;
@@ -90,7 +91,15 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
     setFormState(FormState.SUBSCRIBE_VEHICLES);
   };
   if (formState === FormState.SUBSCRIBE_VEHICLES) {
-    return <SubscribedVehicles webhookId={webhook.id.trim()} clientId={clientId} />;
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <BackButton onBack={() => setFormState(FormState.EDIT_FORM)} />
+          Edit webhook
+        </div>
+        <SubscribedVehicles webhookId={webhook.id.trim()} clientId={clientId} />
+      </div>
+    );
   }
   return (
     <FormProvider {...methods}>
