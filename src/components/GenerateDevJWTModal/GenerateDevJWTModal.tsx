@@ -41,7 +41,6 @@ export const GenerateDevJWTModal: FC<IProps> = ({
       });
       const authHeader = devJwt.headers.Authorization;
       const token = authHeader?.split(' ')[1] ?? '';
-      console.log('This was the token generated from the function: ', token);
       setGeneratedKey(token);
       saveDevJwt(tokenParams.client_id, token);
       onSuccess?.(token);
