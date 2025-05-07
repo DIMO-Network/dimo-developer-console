@@ -6,23 +6,8 @@ import {
   WebhookCreateInput,
   WebhookEditableFields,
 } from '@/types/webhook';
-import xior from 'xior';
 import axios from 'axios';
 import { extractAxiosMessage } from '@/utils/api';
-
-const getAuthToken = () => {
-  return '';
-  // return localStorage.getItem('developer_jwt') || '';
-};
-
-const webhookApiClient = xior.create({
-  baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Authorization': `Bearer ${getAuthToken()}`,
-  },
-});
 
 const getWebhooksApiClient = (token?: string) => {
   let authHeader = undefined;
@@ -37,11 +22,6 @@ const getWebhooksApiClient = (token?: string) => {
       'Authorization': authHeader,
     },
   });
-};
-
-export const fetchSignalNames = async (): Promise<string[]> => {
-  const { data } = await webhookApiClient.get<string[]>('/webhooks/signals');
-  return data;
 };
 
 export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webhook[]> => {
@@ -103,7 +83,6 @@ export const deleteWebhook = async ({
     const client = getWebhooksApiClient(token);
     await client.delete(`/v1/webhooks/${webhookId}`);
   } catch (err) {
-    console.log(err, webhookId, token);
     throw new Error(extractAxiosMessage(err, 'Unknown error deleting webhook'));
   }
 };
