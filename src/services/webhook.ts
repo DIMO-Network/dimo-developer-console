@@ -167,13 +167,6 @@ export const subscribeVehicle = async ({
     );
     return data;
   } catch (err) {
-    console.log(
-      'ERROR TRYING TO SUBSCRIBE A VEHICLE',
-      err,
-      token,
-      webhookId,
-      vehicleTokenId,
-    );
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
   }
 };
@@ -192,6 +185,22 @@ export const unsubscribeVehicle = async ({
     const { data } = await client.delete(
       `/v1/webhooks/${webhookId}/unsubscribe/${vehicleTokenId}`,
     );
+    return data;
+  } catch (err) {
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
+  }
+};
+
+export const unsubscribeAllVehicles = async ({
+  webhookId,
+  token,
+}: {
+  webhookId: string;
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.delete(`/v1/webhooks/${webhookId}/unsubscribe/all`);
     return data;
   } catch (err) {
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));

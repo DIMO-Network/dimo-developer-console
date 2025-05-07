@@ -11,6 +11,7 @@ import { PaginatedTable } from '@/components/Table';
 import { Button } from '@/components/Button';
 import { AddVehiclesModal } from '@/components/Webhooks/edit/AddVehiclesModal';
 import { UnsubscribeVehiclesModal } from '@/components/Webhooks/edit/UnsubscribeVehiclesModal';
+import { UnsubscribeAllModal } from '@/components/Webhooks/edit/UnsubscribeAllModal';
 
 interface Props {
   webhookId: string;
@@ -28,6 +29,7 @@ const columns: ColumnDef<string>[] = [
 export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isUnsubscribing, setIsUnsubscribing] = useState(false);
+  const [isUnsubscribeAll, setIsUnsubscribeAll] = useState(false);
   const { data, isLoading, error } = useWebhookVehiclesById({ webhookId, clientId });
   if (isLoading) {
     return <Loader isLoading />;
@@ -55,6 +57,13 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
         clientId={clientId}
         onSuccess={() => invalidateQuery({ webhookId, clientId })}
       />
+      <UnsubscribeAllModal
+        isOpen={isUnsubscribeAll}
+        setIsOpen={setIsUnsubscribeAll}
+        webhookId={webhookId}
+        clientId={clientId}
+        onSuccess={() => invalidateQuery({ webhookId, clientId })}
+      />
       <Title className={'text-xl'}>Who do you want to subscribe?</Title>
       <Section>
         <SectionHeader title={'Subscribed vehicles'}>
@@ -68,7 +77,9 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
           <Button className="dark" onClick={() => setIsUnsubscribing(true)}>
             Unsubscribe vehicles
           </Button>
-          <Button className="dark">Unsubscribe all</Button>
+          <Button className="dark" onClick={() => setIsUnsubscribeAll(true)}>
+            Unsubscribe all
+          </Button>
         </div>
         <PaginatedTable data={data} columns={columns} />
       </Section>
