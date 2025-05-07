@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import {
   createWebhook,
   formatAndGenerateCEL,
-  subscribeAll,
+  subscribeAllVehicles,
   subscribeVehicleIds,
 } from '@/services/webhook';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
@@ -83,7 +83,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
         return onFinish();
       }
       if (data.subscribe?.allVehicles) {
-        await subscribeAll(createdWebhook.id, devJwt);
+        await subscribeAllVehicles(createdWebhook.id, devJwt);
         setNotification('Successfully subscribed vehicles', '', 'success');
         onFinish();
       } else if (data.subscribe.vehicleTokenIds?.length) {

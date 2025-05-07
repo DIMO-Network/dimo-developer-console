@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useContext, useState } from 'react';
 import {
   invalidateQuery,
   useWebhookVehiclesById,
@@ -12,6 +12,9 @@ import { Button } from '@/components/Button';
 import { AddVehiclesModal } from '@/components/Webhooks/edit/AddVehiclesModal';
 import { UnsubscribeVehiclesModal } from '@/components/Webhooks/edit/UnsubscribeVehiclesModal';
 import { UnsubscribeAllModal } from '@/components/Webhooks/edit/UnsubscribeAllModal';
+import { subscribeAllVehicles, unsubscribeAllVehicles } from '@/services/webhook';
+import { getDevJwt } from '@/utils/devJwt';
+import { NotificationContext } from '@/context/notificationContext';
 
 interface Props {
   webhookId: string;
@@ -30,6 +33,10 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isUnsubscribing, setIsUnsubscribing] = useState(false);
   const [isUnsubscribeAll, setIsUnsubscribeAll] = useState(false);
+  const [unsubscribingAll, setUnsubscribingAll] = useState(false);
+  const [subscribingAll, setSubscribingAll] = useState(false);
+  const { setNotification } = useContext(NotificationContext);
+
   const { data, isLoading, error } = useWebhookVehiclesById({ webhookId, clientId });
   if (isLoading) {
     return <Loader isLoading />;
@@ -40,6 +47,34 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
   if (!data) {
     return <p>No webhook found</p>;
   }
+
+  const subscribeAll = async () => {
+    try {
+      setSubscribingAll(true);
+      await subscribeAllVehicles(webhookId, getDevJwt(clientId) ?? '');
+      setNotification('Successfully subscribed all vehicles', '', 'success');
+      invalidateQuery({ webhookId, clientId });
+    } catch (err) {
+      console.error(err);
+      setNotification('Failed to subscribe all vehicles', '', 'error');
+    } finally {
+      setSubscribingAll(false);
+    }
+  };
+
+  const unsubscribeAll = async () => {
+    try {
+      setUnsubscribingAll(true);
+      await unsubscribeAllVehicles({ webhookId, token: getDevJwt(clientId) ?? '' });
+      setNotification('Successfully unsubscribed all vehicles', '', 'success');
+      invalidateQuery({ webhookId, clientId });
+    } catch (err) {
+      console.error(err);
+      setNotification('Failed to unsubscribe all vehicles', '', 'error');
+    } finally {
+      setUnsubscribingAll(false);
+    }
+  };
 
   return (
     <div className={'flex flex-col gap-4'}>
@@ -66,6 +101,20 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
       />
       <Title className={'text-xl'}>Who do you want to subscribe?</Title>
       <Section>
+        <SectionHeader title="Manual controls" />
+        <p className={'text-text-secondary'}>
+          Manually subscribe or unsubscribe all vehicles linked to this webhook.
+        </p>
+        <div className="flex gap-2">
+          <Button className="dark" onClick={subscribeAll} disabled={subscribingAll}>
+            {subscribingAll ? 'Subscribing...' : 'Subscribe all vehicles'}
+          </Button>
+          <Button className="dark" onClick={unsubscribeAll} disabled={unsubscribingAll}>
+            {unsubscribingAll ? 'Unsubscribing...' : 'Unsubscribe all vehicles'}
+          </Button>
+        </div>
+      </Section>
+      <Section>
         <SectionHeader title={'Subscribed vehicles'}>
           <Title className={'text-xl'}>{data.length}</Title>
         </SectionHeader>
@@ -76,9 +125,6 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
           </Button>
           <Button className="dark" onClick={() => setIsUnsubscribing(true)}>
             Unsubscribe vehicles
-          </Button>
-          <Button className="dark" onClick={() => setIsUnsubscribeAll(true)}>
-            Unsubscribe all
           </Button>
         </div>
         <PaginatedTable data={data} columns={columns} />
