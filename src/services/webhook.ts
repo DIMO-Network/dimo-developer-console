@@ -103,6 +103,7 @@ export const deleteWebhook = async ({
     const client = getWebhooksApiClient(token);
     await client.delete(`/v1/webhooks/${webhookId}`);
   } catch (err) {
+    console.log(err, webhookId, token);
     throw new Error(extractAxiosMessage(err, 'Unknown error deleting webhook'));
   }
 };
@@ -141,7 +142,7 @@ export const generateCEL = async ({
   return data.cel_expression;
 };
 
-export const subscribeAll = async (webhookId: string, token: string) => {
+export const subscribeAllVehicles = async (webhookId: string, token: string) => {
   try {
     const client = getWebhooksApiClient(token);
     const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/all`);
