@@ -15,6 +15,8 @@ import { UnsubscribeAllModal } from '@/components/Webhooks/edit/UnsubscribeAllMo
 import { subscribeAllVehicles, unsubscribeAllVehicles } from '@/services/webhook';
 import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
+import { CSV_UPLOAD_ROW_TITLE } from '@/components/CSVUpload';
+import { saveAs } from 'file-saver';
 
 interface Props {
   webhookId: string;
@@ -76,6 +78,14 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
     }
   };
 
+  const downloadCsv = () => {
+    if (!data.length) return;
+
+    const csvContent = [CSV_UPLOAD_ROW_TITLE, ...data].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'subscribed-vehicles.csv');
+  };
+
   return (
     <div className={'flex flex-col gap-4'}>
       <AddVehiclesModal
@@ -119,7 +129,9 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
           <Title className={'text-xl'}>{data.length}</Title>
         </SectionHeader>
         <div className="flex gap-2 pb-4">
-          <Button className="dark">Download CSV</Button>
+          <Button className="dark" onClick={downloadCsv}>
+            Download CSV
+          </Button>
           <Button className="dark" onClick={() => setIsAdding(true)}>
             Add vehicles
           </Button>

@@ -12,6 +12,7 @@ interface CSVUploadProps {
   onMetadataChange: (files: { name: string; count: number }[]) => void;
   showTitle?: boolean;
 }
+export const CSV_UPLOAD_ROW_TITLE = 'tokenId';
 
 export const CSVUpload: React.FC<CSVUploadProps> = ({
   vehicleTokenIds,
@@ -53,7 +54,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
 
         const ids: string[] = [];
         for (const row of data as Record<string, string>[]) {
-          const id = row['tokenId'];
+          const id = row[CSV_UPLOAD_ROW_TITLE];
           if (!id || isNaN(Number(id))) {
             setError('Each row must have a numeric tokenId.');
             return;
