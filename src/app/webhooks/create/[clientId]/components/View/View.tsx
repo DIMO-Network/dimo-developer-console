@@ -101,11 +101,8 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
         onFinish();
       }
     } catch (err) {
-      let message = 'There was an error subscribing these vehicles';
-      if (err instanceof Error) {
-        message = err.message ?? message;
-      }
-      setNotification(message, '', 'error');
+      console.error(err);
+      setNotification('Failed to subscribe all vehicles', '', 'error');
     }
   };
 
