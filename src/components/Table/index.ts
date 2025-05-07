@@ -1,2 +1,3 @@
 export * from './Table';
-export * from '@/components/Table/PaginatedTable';
+export * from './PaginatedTableIdentityAPI';
+export * from './PaginatedTable';

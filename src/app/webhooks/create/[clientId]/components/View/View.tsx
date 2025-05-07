@@ -11,8 +11,8 @@ import { useRouter } from 'next/navigation';
 import {
   createWebhook,
   formatAndGenerateCEL,
-  subscribeAll,
-  subscribeVehicle,
+  subscribeAllVehicles,
+  subscribeVehicleIds,
 } from '@/services/webhook';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
@@ -71,20 +71,6 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     }
   };
 
-  const subscribeVehicleIds = async (
-    webhookId: string,
-    tokenIds: string[],
-    token: string,
-  ) => {
-    const results = await Promise.allSettled(
-      tokenIds.map((tokenId) =>
-        subscribeVehicle({ webhookId, vehicleTokenId: tokenId, token }),
-      ),
-    );
-    const failures = results.filter((r) => r.status === 'rejected');
-    return failures.length;
-  };
-
   const onSubscribe = async (data: WebhookFormInput) => {
     try {
       if (!createdWebhook) {
@@ -97,7 +83,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
         return onFinish();
       }
       if (data.subscribe?.allVehicles) {
-        await subscribeAll(createdWebhook.id, devJwt);
+        await subscribeAllVehicles(createdWebhook.id, devJwt);
         setNotification('Successfully subscribed vehicles', '', 'success');
         onFinish();
       } else if (data.subscribe.vehicleTokenIds?.length) {

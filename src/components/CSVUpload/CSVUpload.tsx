@@ -6,17 +6,20 @@ import { Title } from '@/components/Title';
 import { NotificationContext } from '@/context/notificationContext';
 
 interface CSVUploadProps {
-  value: string[];
+  vehicleTokenIds: string[];
   onChange: (ids: string[]) => void;
   fileInfo: { name: string; count: number }[];
   onMetadataChange: (files: { name: string; count: number }[]) => void;
+  showTitle?: boolean;
 }
+export const CSV_UPLOAD_ROW_TITLE = 'tokenId';
 
 export const CSVUpload: React.FC<CSVUploadProps> = ({
-  value,
+  vehicleTokenIds,
   onChange,
   fileInfo,
   onMetadataChange,
+  showTitle = true,
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -51,7 +54,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
 
         const ids: string[] = [];
         for (const row of data as Record<string, string>[]) {
-          const id = row['tokenId'];
+          const id = row[CSV_UPLOAD_ROW_TITLE];
           if (!id || isNaN(Number(id))) {
             setError('Each row must have a numeric tokenId.');
             return;
@@ -61,7 +64,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
 
         setError(null);
         onMetadataChange([...fileInfo, { name: file.name, count: ids.length }]);
-        onChange([...value, ...ids]);
+        onChange([...vehicleTokenIds, ...ids]);
       },
       error: () => setError('Failed to parse CSV.'),
     });
@@ -89,8 +92,8 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
   const handleDelete = (index: number) => {
     const removed = fileInfo[index];
     onMetadataChange(fileInfo.filter((_, i) => i !== index));
-    const newIds = [...value];
-    newIds.splice(value.length - removed.count, removed.count);
+    const newIds = [...vehicleTokenIds];
+    newIds.splice(vehicleTokenIds.length - removed.count, removed.count);
     onChange(newIds);
   };
 
@@ -115,7 +118,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           ))}
         </div>
       )}
-      <Title className="text-sm font-medium">Add vehicles</Title>
+      {showTitle && <Title className="text-sm font-medium">Add vehicles</Title>}
       <div
         onDragOver={(e) => e.preventDefault()}
         onDragEnter={() => setIsDragging(true)}

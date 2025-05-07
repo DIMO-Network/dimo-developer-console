@@ -103,6 +103,7 @@ export const deleteWebhook = async ({
     const client = getWebhooksApiClient(token);
     await client.delete(`/v1/webhooks/${webhookId}`);
   } catch (err) {
+    console.log(err, webhookId, token);
     throw new Error(extractAxiosMessage(err, 'Unknown error deleting webhook'));
   }
 };
@@ -141,7 +142,7 @@ export const generateCEL = async ({
   return data.cel_expression;
 };
 
-export const subscribeAll = async (webhookId: string, token: string) => {
+export const subscribeAllVehicles = async (webhookId: string, token: string) => {
   try {
     const client = getWebhooksApiClient(token);
     const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/all`);
@@ -169,4 +170,68 @@ export const subscribeVehicle = async ({
   } catch (err) {
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
   }
+};
+
+export const unsubscribeVehicle = async ({
+  webhookId,
+  vehicleTokenId,
+  token,
+}: {
+  webhookId: string;
+  vehicleTokenId: string;
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.delete(
+      `/v1/webhooks/${webhookId}/unsubscribe/${vehicleTokenId}`,
+    );
+    return data;
+  } catch (err) {
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
+  }
+};
+
+export const unsubscribeAllVehicles = async ({
+  webhookId,
+  token,
+}: {
+  webhookId: string;
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.delete(`/v1/webhooks/${webhookId}/unsubscribe/all`);
+    return data;
+  } catch (err) {
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
+  }
+};
+
+export const subscribeVehicleIds = async (
+  webhookId: string,
+  tokenIds: string[],
+  token: string,
+) => {
+  const results = await Promise.allSettled(
+    tokenIds.map((tokenId) =>
+      subscribeVehicle({ webhookId, vehicleTokenId: tokenId, token }),
+    ),
+  );
+  const failures = results.filter((r) => r.status === 'rejected');
+  return failures.length;
+};
+
+export const unsubscribeVehicleIds = async (
+  webhookId: string,
+  tokenIds: string[],
+  token: string,
+) => {
+  const results = await Promise.allSettled(
+    tokenIds.map((tokenId) =>
+      unsubscribeVehicle({ webhookId, vehicleTokenId: tokenId, token }),
+    ),
+  );
+  const failures = results.filter((r) => r.status === 'rejected');
+  return failures.length;
 };

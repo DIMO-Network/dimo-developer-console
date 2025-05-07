@@ -394,6 +394,7 @@ export type ManufacturerDeviceDefinitionsArgs = {
 
 export type ManufacturerBy = {
   name?: InputMaybe<Scalars['String']['input']>;
+  slug?: InputMaybe<Scalars['String']['input']>;
   tokenId?: InputMaybe<Scalars['Int']['input']>;
 };
 
