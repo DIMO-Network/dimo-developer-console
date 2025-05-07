@@ -9,7 +9,7 @@ interface Props {
   webhookId: string;
   goToSubscribedVehicles: () => void;
 }
-export const SubscribedVehicles: FC<Props> = ({
+export const SubscribedVehiclesPreview: FC<Props> = ({
   clientId,
   webhookId,
   goToSubscribedVehicles,

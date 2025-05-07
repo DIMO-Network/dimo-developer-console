@@ -4,4 +4,4 @@ export * from './Interval';
 export * from './Service';
 export * from './TargetURI';
 export * from './VerificationToken';
-export * from './SubscribedVehicles';
+export * from '../edit/SubscribedVehiclesPreview';

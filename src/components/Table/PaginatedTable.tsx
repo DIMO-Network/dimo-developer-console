@@ -1,78 +1,41 @@
+import { useState } from 'react';
 import {
+  ColumnDef,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
-  ColumnDef,
-  PaginationState,
-  OnChangeFn,
 } from '@tanstack/react-table';
+import Column from '@/components/Table/Column';
+import Cell from '@/components/Table/Cell';
 import { Button } from '@/components/Button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
-import { Column } from './Column';
-import { Cell } from './Cell';
-import './Table.css';
-import { useState } from 'react';
 
-interface PaginatedTableProps<TData> {
-  columns: ColumnDef<TData>[];
-  data: TData[];
-  onPaginationChange: (pageChangeArgs: {
-    first?: number | null;
-    last?: number | null;
-    before?: string | null;
-    after?: string | null;
-  }) => void;
-  rowCount: number;
-  loading?: boolean;
-  pageInfo: { startCursor?: string | null; endCursor?: string | null };
-  pageSize: number;
+interface PaginatedTableProps<T> {
+  data: T[];
+  columns: ColumnDef<T>[];
 }
 
-export const PaginatedTable = <TData,>({
-  columns,
-  data,
-  onPaginationChange,
-  rowCount,
-  loading,
-  pageInfo,
-  pageSize,
-}: PaginatedTableProps<TData>) => {
+export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize,
+    pageSize: 10,
   });
-  const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
-    const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-    if (newPagination.pageIndex > pagination.pageIndex) {
-      onPaginationChange({
-        after: pageInfo.endCursor,
-        first: pageSize,
-        last: null,
-        before: null,
-      });
-    } else if (newPagination.pageIndex < pagination.pageIndex) {
-      onPaginationChange({
-        before: pageInfo.startCursor,
-        last: pageSize,
-        after: null,
-        first: null,
-      });
-    }
-    setPagination(newPagination);
-  };
+
   const table = useReactTable({
     data,
     columns,
+    state: {
+      pagination,
+    },
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
-    onPaginationChange: handlePaginationChange,
-    state: { pagination },
-    rowCount,
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
-    <div className={'min-w-full'}>
-      <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
+    <>
+      <div className="overflow-x-auto min-w-full bg-surface-default rounded-xl p-4">
         <table className="table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -87,7 +50,7 @@ export const PaginatedTable = <TData,>({
               </tr>
             ))}
           </thead>
-          <tbody className="table-body">
+          <tbody>
             {table.getRowModel().rows.map((row) => (
               <tr key={row.id} className={'border-t border-t-cta-default'}>
                 {row.getVisibleCells().map((cell) => (
@@ -100,17 +63,16 @@ export const PaginatedTable = <TData,>({
           </tbody>
         </table>
       </div>
-
-      <div className={'flex flex-row items-center justify-between pt-4'}>
+      <div className="flex items-center justify-between text-sm text-text-secondary">
         <p>
           Showing {pagination.pageIndex * pagination.pageSize + 1}–
-          {Math.min((pagination.pageIndex + 1) * pagination.pageSize, rowCount)} of{' '}
-          {rowCount}
+          {Math.min((pagination.pageIndex + 1) * pagination.pageSize, data.length)} of{' '}
+          {data.length} subscribed vehicles
         </p>
-        <div className={'flex flex-row items-center'}>
+        <div className="flex items-center gap-2">
           <Button
             className={'table-action-button'}
-            disabled={!table.getCanPreviousPage() || loading}
+            disabled={!table.getCanPreviousPage()}
             onClick={() => table.previousPage()}
           >
             <ChevronLeftIcon className={'w-4 h-4'} />
@@ -118,13 +80,13 @@ export const PaginatedTable = <TData,>({
           <p>{pagination.pageIndex + 1}</p>
           <Button
             className={'table-action-button'}
-            disabled={!table.getCanNextPage() || loading}
+            disabled={!table.getCanNextPage()}
             onClick={() => table.nextPage()}
           >
             <ChevronRightIcon className={'w-4 h-4'} />
           </Button>
         </div>
       </div>
-    </div>
+    </>
   );
-};
+}
