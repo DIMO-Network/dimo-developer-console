@@ -8,6 +8,7 @@ import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
 import { captureException } from '@sentry/nextjs';
 import Link from 'next/link';
+import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 
 export const ExpandedRow = ({
   webhook,
@@ -32,9 +33,11 @@ export const ExpandedRow = ({
       if (!token) {
         return setNotification('No devJWT found', '', 'error');
       }
+      setNotification(`Toggling webhook status to: ${newStatus}...`, '', 'info');
       await updateWebhook(webhook.id, { status: newStatus }, token);
       setStatus(newStatus);
       setNotification('Successfully updated webhook status', '', 'success');
+      invalidateQuery(clientId);
     } catch (error) {
       captureException(error);
       setNotification('Failed to update webhook status', '', 'error');
