@@ -65,9 +65,12 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
       </div>
       <div className="flex items-center justify-between text-sm text-text-secondary">
         <p>
-          Showing {pagination.pageIndex * pagination.pageSize + 1}–
-          {Math.min((pagination.pageIndex + 1) * pagination.pageSize, data.length)} of{' '}
-          {data.length} subscribed vehicles
+          {data.length === 0
+            ? 'Showing 0 of 0'
+            : `Showing ${pagination.pageIndex * pagination.pageSize + 1}–${Math.min(
+                (pagination.pageIndex + 1) * pagination.pageSize,
+                data.length,
+              )} of ${data.length}`}
         </p>
         <div className="flex items-center gap-2">
           <Button
