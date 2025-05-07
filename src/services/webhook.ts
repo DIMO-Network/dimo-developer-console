@@ -167,6 +167,27 @@ export const subscribeVehicle = async ({
     );
     return data;
   } catch (err) {
+    console.log(
+      'ERROR TRYING TO SUBSCRIBE A VEHICLE',
+      err,
+      token,
+      webhookId,
+      vehicleTokenId,
+    );
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
   }
+};
+
+export const subscribeVehicleIds = async (
+  webhookId: string,
+  tokenIds: string[],
+  token: string,
+) => {
+  const results = await Promise.allSettled(
+    tokenIds.map((tokenId) =>
+      subscribeVehicle({ webhookId, vehicleTokenId: tokenId, token }),
+    ),
+  );
+  const failures = results.filter((r) => r.status === 'rejected');
+  return failures.length;
 };

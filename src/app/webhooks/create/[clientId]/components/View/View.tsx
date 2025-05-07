@@ -12,7 +12,7 @@ import {
   createWebhook,
   formatAndGenerateCEL,
   subscribeAll,
-  subscribeVehicle,
+  subscribeVehicleIds,
 } from '@/services/webhook';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
@@ -69,20 +69,6 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       }
       setNotification(message, '', 'error');
     }
-  };
-
-  const subscribeVehicleIds = async (
-    webhookId: string,
-    tokenIds: string[],
-    token: string,
-  ) => {
-    const results = await Promise.allSettled(
-      tokenIds.map((tokenId) =>
-        subscribeVehicle({ webhookId, vehicleTokenId: tokenId, token }),
-      ),
-    );
-    const failures = results.filter((r) => r.status === 'rejected');
-    return failures.length;
   };
 
   const onSubscribe = async (data: WebhookFormInput) => {

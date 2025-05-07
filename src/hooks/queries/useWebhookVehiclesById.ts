@@ -1,6 +1,7 @@
 import { getDevJwt } from '@/utils/devJwt';
 import { fetchWebhookById } from '@/services/webhook';
 import { useQuery } from '@tanstack/react-query';
+import { queryClient } from '@/hoc/QueryProvider';
 
 interface FetchWebhookVehiclesByIdParams {
   webhookId: string;
@@ -16,9 +17,20 @@ const handleFetchWebhookVehiclesById = async ({
   return await fetchWebhookById({ webhookId, token });
 };
 
+const getQueryKey = (params: FetchWebhookVehiclesByIdParams) => [
+  'webhook-vehicles',
+  params,
+];
+export const invalidateQuery = (params: FetchWebhookVehiclesByIdParams) => {
+  return queryClient.invalidateQueries({
+    queryKey: getQueryKey(params),
+    refetchType: 'all',
+  });
+};
+
 export const useWebhookVehiclesById = (params: FetchWebhookVehiclesByIdParams) => {
   return useQuery({
-    queryKey: ['webhook-vehicles', params],
+    queryKey: getQueryKey(params),
     queryFn: () => handleFetchWebhookVehiclesById(params),
   });
 };

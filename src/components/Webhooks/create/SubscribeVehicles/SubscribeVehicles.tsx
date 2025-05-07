@@ -36,7 +36,7 @@ export const WebhookSubscribeVehiclesStep = () => {
               defaultValue={[]}
               render={({ field: { onChange, value } }) => (
                 <CSVUpload
-                  value={Array.isArray(value) ? value : []}
+                  vehicleTokenIds={Array.isArray(value) ? value : []}
                   onChange={onChange}
                   fileInfo={fileInfo}
                   onMetadataChange={setFileInfo}

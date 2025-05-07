@@ -90,7 +90,7 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
     setFormState(FormState.SUBSCRIBE_VEHICLES);
   };
   if (formState === FormState.SUBSCRIBE_VEHICLES) {
-    return <SubscribedVehicles webhookId={webhook.id} clientId={clientId} />;
+    return <SubscribedVehicles webhookId={webhook.id.trim()} clientId={clientId} />;
   }
   return (
     <FormProvider {...methods}>
