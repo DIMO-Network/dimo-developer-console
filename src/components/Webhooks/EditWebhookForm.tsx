@@ -7,7 +7,6 @@ import {
   WebhookIntervalField,
   WebhookTargetUriField,
   CELBuilder,
-  SubscribedVehiclesPreview,
 } from '@/components/Webhooks/fields';
 import { Button } from '@/components/Button';
 import { formatAndGenerateCEL, updateWebhook } from '@/services/webhook';
@@ -20,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { DiscardChangesModal } from '@/app/webhooks/edit/[clientId]/[webhookId]/components/DiscardChangesModal';
 import { SubscribedVehicles } from '@/components/Webhooks/edit/SubscribedVehicles';
 import { BackButton } from '@/components/BackButton';
+import { SubscribedVehiclesPreview } from '@/components/Webhooks/edit/SubscribedVehiclesPreview';
 
 type EditWebhookFormProps = {
   clientId: string;
