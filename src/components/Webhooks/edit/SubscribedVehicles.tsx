@@ -87,8 +87,18 @@ const AddVehiclesModal: FC<AddVehiclesModalProps> = ({
   const [loading, setLoading] = useState(false);
   const devJwt = getDevJwt(clientId);
   const { setNotification } = useContext(NotificationContext);
+  const { data: existingVehicles } = useWebhookVehiclesById({ webhookId, clientId });
 
   const handleSubmit = async () => {
+    const duplicates = vehicleTokenIds.filter((id) => existingVehicles?.includes(id));
+    if (duplicates.length > 0) {
+      setNotification(
+        `The following IDs are already subscribed: ${duplicates.join(', ')}`,
+        '',
+        'error',
+      );
+      return;
+    }
     try {
       setLoading(true);
       const failures = await subscribeVehicleIds(
