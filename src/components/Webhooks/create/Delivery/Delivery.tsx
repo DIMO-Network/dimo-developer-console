@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import {
   WebhookTargetUriField,
   WebhookVerificationTokenField,
-} from '@/components/Webhooks';
+} from '@/components/Webhooks/fields';
 
 export const WebhookDeliveryStep: FC = () => {
   return (
