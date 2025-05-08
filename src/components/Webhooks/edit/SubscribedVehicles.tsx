@@ -53,8 +53,12 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
   const subscribeAll = async () => {
     try {
       setSubscribingAll(true);
-      await subscribeAllVehicles(webhookId, getDevJwt(clientId) ?? '');
-      setNotification('Successfully subscribed all vehicles', '', 'success');
+      const response = await subscribeAllVehicles(webhookId, getDevJwt(clientId) ?? '');
+      setNotification(
+        response?.message ?? 'Successfully subscribed all vehicles',
+        '',
+        'success',
+      );
       invalidateQuery({ webhookId, clientId });
     } catch (err) {
       console.error(err);

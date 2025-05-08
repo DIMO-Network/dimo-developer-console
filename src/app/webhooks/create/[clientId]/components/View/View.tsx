@@ -83,8 +83,12 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
         return onFinish();
       }
       if (data.subscribe?.allVehicles) {
-        await subscribeAllVehicles(createdWebhook.id, devJwt);
-        setNotification('Successfully subscribed vehicles', '', 'success');
+        const response = await subscribeAllVehicles(createdWebhook.id, devJwt);
+        setNotification(
+          response?.message ?? 'Successfully subscribed all vehicles',
+          '',
+          'success',
+        );
         onFinish();
       } else if (data.subscribe.vehicleTokenIds?.length) {
         const failures = await subscribeVehicleIds(
