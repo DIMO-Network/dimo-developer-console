@@ -103,6 +103,7 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
   }
   return (
     <FormProvider {...methods}>
+      <BackButton onBack={() => onCancel(isDirty)} />
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <WebhookDescriptionField />
         <WebhookTargetUriField />
