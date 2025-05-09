@@ -8,6 +8,7 @@ import {
 } from '@/types/webhook';
 import axios from 'axios';
 import { extractAxiosMessage } from '@/utils/api';
+import { conditionsConfig } from '@/utils/webhook';
 
 const getWebhooksApiClient = (token?: string) => {
   let authHeader = undefined;
@@ -87,23 +88,27 @@ export const deleteWebhook = async ({
   }
 };
 
-export const formatAndGenerateCEL = async (cel: {
-  operator: string;
-  conditions: Condition[];
-}) => {
+export const formatAndGenerateCEL = async (cel: { conditions: Condition[] }) => {
   if (cel.conditions.length !== 1) {
     throw new Error('Must have exactly one CEL condition');
   }
   const hasInvalidCondition = cel.conditions.some(
     (cond) => !cond.field || !cond.operator || !cond.value,
   );
-  if (!cel.operator || hasInvalidCondition) {
+  if (hasInvalidCondition) {
     throw new Error('Please complete all condition fields before saving.');
   }
-  return await generateCEL({
-    conditions: cel.conditions,
-    logic: cel.operator,
-  });
+  const condition = cel.conditions[0];
+  const conditionConfig = conditionsConfig.find((it) => it.field === condition.field);
+  if (!conditionConfig) {
+    throw new Error('Could not find condition config');
+  }
+  const valueType =
+    conditionConfig.inputType === 'number' ? 'valueNumber' : 'valueString';
+  return {
+    data: cel.conditions[0].field,
+    trigger: `${valueType} ${condition.operator} ${condition.value}`,
+  };
 };
 
 export const generateCEL = async ({

@@ -10,7 +10,6 @@ import {
 } from '@/components/Webhooks/fields';
 import { Button } from '@/components/Button';
 import { formatAndGenerateCEL, updateWebhook } from '@/services/webhook';
-import { uniq } from 'lodash';
 import { getDevJwt } from '@/utils/devJwt';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 import { NotificationContext } from '@/context/notificationContext';
@@ -59,21 +58,17 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
     router.replace('/webhooks');
   };
 
-  const onSubmit = async (data: WebhookFormInput) => {
+  const onSubmit = async (formData: WebhookFormInput) => {
     try {
-      const trigger = await formatAndGenerateCEL(data.cel);
-      const signals = uniq(data.cel.conditions.map((it) => it.field));
-      if (signals.length !== 1) {
-        throw new Error('Only one signal is allowed in the webhook trigger');
-      }
+      const { trigger, data } = await formatAndGenerateCEL(formData.cel);
       await updateWebhook(
         webhook.id,
-        { ...data, data: signals[0], trigger },
+        { ...formData, data, trigger },
         getDevJwt(clientId) ?? '',
       );
       setNotification('Webhook updated successfully', '', 'success');
       invalidateQuery(clientId);
-      reset(data);
+      reset(formData);
     } catch (err) {
       console.error(err);
       setNotification('Error updating webhook', '', 'error');

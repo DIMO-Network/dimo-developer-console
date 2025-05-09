@@ -17,7 +17,6 @@ import {
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { getDevJwt } from '@/utils/devJwt';
-import { uniq } from 'lodash';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 
 const STEPS = [
@@ -41,14 +40,13 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     }
   }, [clientId, devJwt, router]);
 
-  const createWebhookFromInput = async (data: WebhookFormInput, authToken: string) => {
-    const trigger = await formatAndGenerateCEL(data.cel);
-    const signals = uniq(data.cel.conditions.map((it) => it.field));
-    if (signals.length !== 1) {
-      throw new Error('Only one signal is allowed in the webhook trigger');
-    }
+  const createWebhookFromInput = async (
+    formData: WebhookFormInput,
+    authToken: string,
+  ) => {
+    const { data, trigger } = await formatAndGenerateCEL(formData.cel);
     return await createWebhook(
-      { ...data, status: 'Active', data: signals[0], trigger: trigger },
+      { ...formData, status: 'Active', data, trigger },
       authToken,
     );
   };
@@ -123,10 +121,14 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     }
   };
 
+  const onBack = () => {
+    router.replace('/webhooks');
+  };
+
   const onPrevious = () => {
     const curStepIndex = STEPS.indexOf(formStep);
     if (curStepIndex === 0) {
-      return router.replace('/webhooks');
+      return onBack();
     }
     const prevStep = STEPS[curStepIndex - 1];
     setFormStep(prevStep);
