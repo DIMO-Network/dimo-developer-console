@@ -12,7 +12,6 @@ import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 
 export const ExpandedRow = ({
   webhook,
-  onTest,
   onDelete,
   clientId,
   colSpan,
@@ -65,9 +64,9 @@ export const ExpandedRow = ({
               <Toggle checked={status === 'Active'} onToggle={onToggleStatus} />
             </div>
             <div className="flex gap-2">
-              <Button className="primary-outline" onClick={onTest}>
-                Test
-              </Button>
+              {/*<Button className="primary-outline" onClick={onTest}>*/}
+              {/*  Test*/}
+              {/*</Button>*/}
               <Link href={`/webhooks/edit/${clientId}/${webhook.id.trim()}`}>
                 <Button className="primary-outline">Edit</Button>
               </Link>
