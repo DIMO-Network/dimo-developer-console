@@ -1,10 +1,10 @@
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
-import { conditionsConfig } from '@/components/Webhooks/fields/CELBuilder/constants';
 import React, { useEffect } from 'react';
 import { SelectWithChevron } from '@/components/Webhooks/fields/CELBuilder/SelectWithChevron';
 import { Button } from '@/components/Button';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { conditionsConfig } from '@/utils/webhook';
 
 interface ConditionRowProps {
   index: number;
