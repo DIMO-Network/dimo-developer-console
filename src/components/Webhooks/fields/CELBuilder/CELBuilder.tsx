@@ -27,7 +27,7 @@ export const CELBuilder = () => {
       const { cel: celValues } = getValues();
       setLoadingCel(true);
       const response = await formatAndGenerateCEL(celValues);
-      setCel(response);
+      setCel(JSON.stringify(response, null, 2));
     } catch (err: unknown) {
       let errorMsg = 'Error generating CEL';
       if (err instanceof Error) {
@@ -77,7 +77,7 @@ export const CELBuilder = () => {
         </div>
         {!!cel && (
           <div className={'bg-surface-default py-2 px-3 rounded-xl'}>
-            <p className={'text-text-secondary'}>{cel}</p>
+            <p className={'text-text-secondary font-mono'}>{cel}</p>
           </div>
         )}
       </div>
