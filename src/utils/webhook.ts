@@ -13,13 +13,20 @@ export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel']
     operator: 'AND',
   };
 };
+
+export const BOOL_VARIATIONS = {
+  true: "'true'",
+  false: "'false'",
+};
+
 const numericValidation = {
   required: 'Value is required',
   validate: (val: string) => !isNaN(Number(val)),
 };
 const booleanValidation = {
   required: 'Value is required',
-  validate: (value: string) => value === 'true' || value === 'false',
+  validate: (value: string) =>
+    value === BOOL_VARIATIONS.true || value === BOOL_VARIATIONS.false,
 };
 export const conditionsConfig = [
   {
