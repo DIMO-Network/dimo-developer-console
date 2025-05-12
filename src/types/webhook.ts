@@ -38,7 +38,7 @@ export interface WebhookFormInput {
   };
   subscribe?: {
     allVehicles?: boolean;
-    vehicleTokenIds?: string[];
+    file?: File;
   };
 }
 
