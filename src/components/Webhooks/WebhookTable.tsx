@@ -91,7 +91,11 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
           webhook={expandedWebhook}
           isOpen={isDeleteOpen}
           setIsOpen={setIsDeleteOpen}
-          onSuccess={refetch}
+          onSuccess={() => {
+            setIsDeleteOpen(false);
+            setExpandedWebhookId(undefined);
+            refetch();
+          }}
           clientId={clientId}
         />
       )}
