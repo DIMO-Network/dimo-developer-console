@@ -192,34 +192,6 @@ export const unsubscribeAllVehicles = async ({
   }
 };
 
-export const subscribeVehicleIds = async (
-  webhookId: string,
-  tokenIds: string[],
-  token: string,
-) => {
-  const results = await Promise.allSettled(
-    tokenIds.map((tokenId) =>
-      subscribeVehicle({ webhookId, vehicleTokenId: tokenId, token }),
-    ),
-  );
-  const failures = results.filter((r) => r.status === 'rejected');
-  return failures.length;
-};
-
-export const unsubscribeVehicleIds = async (
-  webhookId: string,
-  tokenIds: string[],
-  token: string,
-) => {
-  const results = await Promise.allSettled(
-    tokenIds.map((tokenId) =>
-      unsubscribeVehicle({ webhookId, vehicleTokenId: tokenId, token }),
-    ),
-  );
-  const failures = results.filter((r) => r.status === 'rejected');
-  return failures.length;
-};
-
 export const subscribeByCsv = async ({
   webhookId,
   token,
@@ -243,5 +215,28 @@ export const subscribeByCsv = async ({
     return data;
   } catch (err) {
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing by CSV'));
+  }
+};
+
+export const unsubscribeByCsv = async ({
+  webhookId,
+  token,
+  formData,
+}: {
+  webhookId: string;
+  token: string;
+  formData: FormData;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.delete(`/v1/webhooks/${webhookId}/unsubscribe/csv`, {
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return data;
+  } catch (err) {
+    throw new Error(extractAxiosMessage(err, 'Unknown error unsubscribing by CSV'));
   }
 };
