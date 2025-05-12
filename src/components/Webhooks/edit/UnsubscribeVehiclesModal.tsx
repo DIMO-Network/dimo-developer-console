@@ -15,7 +15,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
   clientId,
   onSuccess,
 }) => {
-  const [file, setFile] = useState<File | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [vehicleTokenIds, setVehicleTokenIds] = useState<string[]>([]);
   const [fileInfo, setFileInfo] = useState<{ name: string; count: number }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,11 +23,11 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
   const { setNotification } = useContext(NotificationContext);
 
   const handleSubmit = async () => {
-    if (!file) return;
+    if (!uploadedFile) return;
     try {
       setLoading(true);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', uploadedFile);
       const response = await unsubscribeByCsv({
         webhookId,
         formData,
@@ -40,7 +40,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
       );
       onSuccess?.();
       setIsOpen(false);
-      setFile(null);
+      setUploadedFile(null);
       setVehicleTokenIds([]);
       setFileInfo([]);
     } catch (err) {
@@ -61,11 +61,11 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
           fileInfo={fileInfo}
           onMetadataChange={setFileInfo}
           showTitle={false}
-          onFileUpload={setFile}
+          onFileUpload={setUploadedFile}
         />
       </div>
       <div className="flex flex-col w-full gap-4 pt-4">
-        <Button onClick={handleSubmit} disabled={!file || loading}>
+        <Button onClick={handleSubmit} disabled={!uploadedFile || loading}>
           {loading ? 'Unsubscribing...' : 'Unsubscribe'}
         </Button>
         <Button onClick={() => setIsOpen(false)} className="dark">
