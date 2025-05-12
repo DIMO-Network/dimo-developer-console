@@ -219,3 +219,29 @@ export const unsubscribeVehicleIds = async (
   const failures = results.filter((r) => r.status === 'rejected');
   return failures.length;
 };
+
+export const subscribeByCsv = async ({
+  webhookId,
+  token,
+  formData,
+}: {
+  webhookId: string;
+  token: string;
+  formData: FormData;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.post(
+      `/v1/webhooks/${webhookId}/subscribe/csv`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+    return data;
+  } catch (err) {
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing by CSV'));
+  }
+};
