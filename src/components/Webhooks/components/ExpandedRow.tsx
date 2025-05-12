@@ -9,6 +9,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { captureException } from '@sentry/nextjs';
 import Link from 'next/link';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
+import { useWebhookVehiclesById } from '@/hooks/queries/useWebhookVehiclesById';
 
 export const ExpandedRow = ({
   webhook,
@@ -24,6 +25,21 @@ export const ExpandedRow = ({
 }) => {
   const { setNotification } = useContext(NotificationContext);
   const [status, setStatus] = useState<string>(webhook.status);
+  const { data: subscribedVehicles } = useWebhookVehiclesById({
+    webhookId: webhook.id,
+    clientId,
+  });
+
+  const handleDelete = () => {
+    if (subscribedVehicles?.length) {
+      return setNotification(
+        'Please unsubscribe all vehicles before deleting the webhook',
+        '',
+        'error',
+      );
+    }
+    onDelete();
+  };
 
   const onToggleStatus = useCallback(async () => {
     const newStatus = status === 'Active' ? 'Inactive' : 'Active';
@@ -71,7 +87,7 @@ export const ExpandedRow = ({
                 <Button className="primary-outline">Edit</Button>
               </Link>
 
-              <Button className="primary-outline" onClick={onDelete}>
+              <Button className="primary-outline" onClick={handleDelete}>
                 Delete
               </Button>
             </div>
