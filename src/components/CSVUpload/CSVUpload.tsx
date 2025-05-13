@@ -11,6 +11,7 @@ interface CSVUploadProps {
   fileInfo: { name: string; count: number }[];
   onMetadataChange: (files: { name: string; count: number }[]) => void;
   showTitle?: boolean;
+  onFileUpload: (file: File) => void;
 }
 export const CSV_UPLOAD_ROW_TITLE = 'tokenId';
 
@@ -20,12 +21,17 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
   fileInfo,
   onMetadataChange,
   showTitle = true,
+  onFileUpload,
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const { setNotification } = useContext(NotificationContext);
 
   const handleFile = (file: File) => {
+    if (fileInfo.length > 0) {
+      return setNotification('Only one file can be uploaded at a time', '', 'error');
+    }
+
     if (fileInfo.some((f) => f.name === file.name)) {
       return setNotification('Duplicate file upload', '', 'error');
     }
@@ -65,6 +71,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
         setError(null);
         onMetadataChange([...fileInfo, { name: file.name, count: ids.length }]);
         onChange([...vehicleTokenIds, ...ids]);
+        onFileUpload(file);
       },
       error: () => setError('Failed to parse CSV.'),
     });

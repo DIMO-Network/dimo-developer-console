@@ -12,7 +12,7 @@ import {
   createWebhook,
   formatAndGenerateCEL,
   subscribeAllVehicles,
-  subscribeVehicleIds,
+  subscribeByCsv,
 } from '@/services/webhook';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
@@ -77,9 +77,6 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       if (!devJwt) {
         return setNotification('No devJWT found', '', 'error');
       }
-      if (!(data.subscribe?.allVehicles || data.subscribe?.vehicleTokenIds?.length)) {
-        return onFinish();
-      }
       if (data.subscribe?.allVehicles) {
         const response = await subscribeAllVehicles(createdWebhook.id, devJwt);
         setNotification(
@@ -88,20 +85,21 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
           'success',
         );
         onFinish();
-      } else if (data.subscribe.vehicleTokenIds?.length) {
-        const failures = await subscribeVehicleIds(
-          createdWebhook.id,
-          data.subscribe.vehicleTokenIds,
-          devJwt,
+      } else if (data.subscribe?.file) {
+        const formData = new FormData();
+        formData.append('file', data.subscribe.file);
+        const response = await subscribeByCsv({
+          webhookId: createdWebhook.id,
+          token: devJwt,
+          formData,
+        });
+        setNotification(
+          response.message ?? 'Successfully subscribed vehicles',
+          '',
+          'success',
         );
-
-        if (failures > 0) {
-          setNotification(`${failures} vehicle(s) failed to subscribe.`, '', 'error');
-        } else {
-          setNotification('Successfully subscribed vehicles', '', 'success');
-        }
-        onFinish();
       }
+      onFinish();
     } catch (err) {
       console.error(err);
       setNotification('Failed to subscribe all vehicles', '', 'error');
