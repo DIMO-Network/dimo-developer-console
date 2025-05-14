@@ -98,7 +98,9 @@ export const GenerateDevJWTModal: FC<IProps> = ({
         <Button loading={isLoading} onClick={handleGenerate}>
           Generate
         </Button>
-        <Button className={'primary-outline'}>Cancel</Button>
+        <Button className={'primary-outline'} onClick={() => setIsOpen(false)}>
+          Cancel
+        </Button>
       </>
     );
   }, [generatedKey, handleGenerate, isLoading, setIsOpen]);

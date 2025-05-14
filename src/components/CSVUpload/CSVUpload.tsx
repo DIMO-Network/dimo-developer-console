@@ -139,6 +139,9 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           Drag and drop or upload CSV with a list of vehicle IDs
         </p>
         <p className="text-sm text-white mt-4">
+          Please format your CSV with a single column and the header <code>tokenId</code>.
+        </p>
+        <p className="text-sm text-white mt-4">
           Accepts .csv file types
           <br />
           Maximum file size 50 MB.

@@ -128,6 +128,40 @@ export type AftermarketDevicesFilter = {
   owner?: InputMaybe<Scalars['Address']['input']>;
 };
 
+export type Connection = {
+  __typename?: 'Connection';
+  /** The address of the connection. This is the most commonly used identifier. */
+  address: Scalars['Address']['output'];
+  /** The block timestamp for the mint of the connection. */
+  mintedAt: Scalars['Time']['output'];
+  /** The name of the connection. This can be at most 32 bytes long. */
+  name: Scalars['String']['output'];
+  /** The owner of the connection. Connections are transferable, so this may change over time. */
+  owner: Scalars['Address']['output'];
+  /** The token id of the connection as an NFT. This tends to be very large. */
+  tokenId: Scalars['BigInt']['output'];
+};
+
+export type ConnectionBy = {
+  address?: InputMaybe<Scalars['Address']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  tokenId?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
+export type ConnectionConnection = {
+  __typename?: 'ConnectionConnection';
+  edges: Array<ConnectionEdge>;
+  nodes: Array<Connection>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type ConnectionEdge = {
+  __typename?: 'ConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Connection;
+};
+
 /** Represents a DIMO Canonical Name. This is a unique identifier for a vehicle. */
 export type Dcn = Node & {
   __typename?: 'DCN';
@@ -452,6 +486,10 @@ export type Query = {
    * Ordered by token id, descending.
    */
   aftermarketDevices: AftermarketDeviceConnection;
+  /** Retrieve a particular connection. */
+  connection: Connection;
+  /** List connection licenses. Sorts by minting time, descending. */
+  connections: ConnectionConnection;
   /** View a particular DIMO Canonical Name. */
   dcn: Dcn;
   /** List DIMO Canonical Names. */
@@ -499,6 +537,21 @@ export type QueryAftermarketDevicesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   filterBy?: InputMaybe<AftermarketDevicesFilter>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** The root query type for the GraphQL schema. */
+export type QueryConnectionArgs = {
+  by: ConnectionBy;
+};
+
+
+/** The root query type for the GraphQL schema. */
+export type QueryConnectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
