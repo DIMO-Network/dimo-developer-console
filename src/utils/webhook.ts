@@ -14,11 +14,6 @@ export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel']
   };
 };
 
-export const BOOL_VARIATIONS = {
-  true: "'true'",
-  false: "'false'",
-};
-
 const numericValidation = {
   required: 'Value is required',
   validate: (val: string) => !isNaN(Number(val)),
