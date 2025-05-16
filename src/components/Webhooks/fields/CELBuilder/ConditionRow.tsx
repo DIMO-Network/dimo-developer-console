@@ -30,7 +30,7 @@ export const ConditionRow = ({ index, remove }: ConditionRowProps) => {
   }, [selectedField, index, setValue, resetField, trigger]);
 
   const operatorOptions =
-    config.inputType === 'number'
+    config.signalType === 'number'
       ? [
           { label: 'is equal to', value: '==' },
           { label: 'is greater than', value: '>' },
@@ -60,7 +60,7 @@ export const ConditionRow = ({ index, remove }: ConditionRowProps) => {
           ...operatorOptions,
         ]}
       />
-      {config?.inputType === 'number' && (
+      {config?.signalType === 'number' && (
         <div className={'text-field'}>
           <input
             {...register(`cel.conditions.${index}.value`, config.validation)}
@@ -69,7 +69,7 @@ export const ConditionRow = ({ index, remove }: ConditionRowProps) => {
           />
         </div>
       )}
-      {config?.inputType === 'boolean' && (
+      {config?.signalType === 'boolean' && (
         <SelectWithChevron
           {...register(`cel.conditions.${index}.value`, config.validation)}
           defaultValue=""
