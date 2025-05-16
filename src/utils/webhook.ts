@@ -14,83 +14,82 @@ export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel']
   };
 };
 
-export const BOOL_VARIATIONS = {
-  true: "'true'",
-  false: "'false'",
-};
-
 const numericValidation = {
   required: 'Value is required',
   validate: (val: string) => !isNaN(Number(val)),
 };
+
 const booleanValidation = {
   required: 'Value is required',
-  validate: (value: string) =>
-    value === BOOL_VARIATIONS.true || value === BOOL_VARIATIONS.false,
+  validate: (value: string) => {
+    const parsedValue = Number(value);
+    return parsedValue === 1 || parsedValue === 0;
+  },
 };
+
 export const conditionsConfig = [
   {
-    field: 'Vehicle.Powertrain.CombustionEngine.IsRunning',
+    field: 'isIgnitionOn',
     label: 'Is Ignition On',
     inputType: 'boolean',
     validation: booleanValidation,
   },
   {
-    field: 'Vehicle.Powertrain.TractionBattery.CurrentPower',
+    field: 'powertrainTractionBatteryCurrentPower',
     label: 'Battery current power',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'Vehicle.Powertrain.TractionBattery.Charging.IsCharging',
+    field: 'powertrainTractionBatteryChargingIsCharging',
     label: 'Battery is charging',
     inputType: 'boolean',
     validation: booleanValidation,
   },
   {
-    field: 'Vehicle.TraveledDistance',
+    field: 'powertrainTransmissionTravelledDistance',
     label: 'Odometer',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'Vehicle.Powertrain.TractionBattery.StateOfCharge.Current',
+    field: 'powertrainTractionBatteryStateOfChargeCurrent',
     label: 'Charge level',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'Vehicle.Powertrain.FuelSystem.RelativeLevel',
+    field: 'powertrainFuelSystemRelativeLevel',
     label: 'Fuel System Relative Level',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'Vehicle.Powertrain.FuelSystem.AbsoluteLevel',
+    field: 'powertrainFuelSystemAbsoluteLevel',
     label: 'Fuel System Absolute Level',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'Vehicle.Chassis.Axle.Row1.Wheel.Left.Tire.Pressure',
+    field: 'chassisAxleRow1WheelLeftTirePressure',
     label: 'Tire pressure (front left)',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'Vehicle.Chassis.Axle.Row1.Wheel.Right.Tire.Pressure',
+    field: 'chassisAxleRow1WheelRightTirePressure',
     label: 'Tire pressure (front right)',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'Vehicle.Chassis.Axle.Row2.Wheel.Left.Tire.Pressure',
+    field: 'chassisAxleRow2WheelLeftTirePressure',
     label: 'Tire pressure (back left)',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'Vehicle.Chassis.Axle.Row2.Wheel.Right.Tire.Pressure',
+    field: 'chassisAxleRow2WheelRightTirePressure',
     label: 'Tire pressure (back right)',
     inputType: 'number',
     validation: numericValidation,

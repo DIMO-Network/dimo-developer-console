@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { SelectWithChevron } from '@/components/Webhooks/fields/CELBuilder/SelectWithChevron';
 import { Button } from '@/components/Button';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { BOOL_VARIATIONS, conditionsConfig } from '@/utils/webhook';
+import { conditionsConfig } from '@/utils/webhook';
 
 interface ConditionRowProps {
   index: number;
@@ -75,8 +75,8 @@ export const ConditionRow = ({ index, remove }: ConditionRowProps) => {
           defaultValue=""
           options={[
             { value: '', label: 'Select value', isPlaceholder: true },
-            { value: BOOL_VARIATIONS.true, label: 'True' },
-            { value: BOOL_VARIATIONS.false, label: 'False' },
+            { value: 1, label: 'True' },
+            { value: 0, label: 'False' },
           ]}
         />
       )}

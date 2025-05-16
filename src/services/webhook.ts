@@ -104,7 +104,10 @@ export const formatAndGenerateCEL = async (cel: { conditions: Condition[] }) => 
     throw new Error('Could not find condition config');
   }
   const valueType =
-    conditionConfig.inputType === 'number' ? 'valueNumber' : 'valueString';
+    conditionConfig.inputType === 'number' || conditionConfig.inputType === 'boolean'
+      ? 'valueNumber'
+      : 'valueString';
+
   return {
     data: cel.conditions[0].field,
     trigger: `${valueType} ${condition.operator} ${condition.value}`,
