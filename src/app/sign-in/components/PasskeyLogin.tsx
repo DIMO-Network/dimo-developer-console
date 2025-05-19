@@ -1,3 +1,5 @@
+'use client';
+
 import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { NotificationContext } from '@/context/notificationContext';

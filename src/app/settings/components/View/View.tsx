@@ -1,12 +1,9 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Loader } from '@/components/Loader';
 import { PageSubtitle } from '@/components/PageSubtitle';
-import { SupportAgentIcon } from '@/components/Icons';
-import { SupportFormModal } from '@/app/settings/components/SupportFormModal';
 import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
@@ -14,11 +11,11 @@ import { UserDetails } from '@/app/settings/components/UserDetails';
 import { useTeamCollaborators } from '@/hooks';
 
 import './View.css';
+import { DeveloperSupportButton } from '@/components/DeveloperSupportButton';
 
 const View: FC = () => {
   const { isLoading, teamCollaborators, refreshData } = useTeamCollaborators();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isSupportModalOpen, setIsSupportModalOpen] = useState<boolean>(false);
 
   return (
     <div className="settings-page">
@@ -38,18 +35,9 @@ const View: FC = () => {
               refreshData={refreshData}
             />
           </Card>
-          <div className="flex">
-            <Button
-              className="primary-outline"
-              onClick={() => setIsSupportModalOpen(true)}
-            >
-              <SupportAgentIcon className="fill-primary h-5 w-5" color="currentColor" />
-              Developer support
-            </Button>
-          </div>
+          <DeveloperSupportButton variant={'large'} />
         </>
       )}
-      <SupportFormModal isOpen={isSupportModalOpen} setIsOpen={setIsSupportModalOpen} />
       <TeamFormModal isOpen={isOpen} setIsOpen={setIsOpen} />
     </div>
   );

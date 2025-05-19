@@ -40,7 +40,7 @@ export const Menu: FC = withLoadingStatus(() => {
   };
 
   const getIsHighlighted = (item: { link: string | (() => void) }) => {
-    return typeof item.link === 'string' && pathname === item.link;
+    return typeof item.link === 'string' && pathname.startsWith(item.link);
   };
 
   const logoutButtonConfig = {

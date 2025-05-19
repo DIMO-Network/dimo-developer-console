@@ -33,7 +33,7 @@ export const SelectField = forwardRef<Ref, IProps>(
       value: defaultValue,
       ...props
     },
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _ref,
   ) => {
     const [show, setShow] = useState<boolean>(false);

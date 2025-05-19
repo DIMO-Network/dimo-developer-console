@@ -25,7 +25,6 @@ export class RestClient {
     customHeaders: Record<string, string> = {},
   ): Promise<T> {
     const url = new URL(resource, this.baseUrl);
-    // eslint-disable-next-line no-undef
     const options: globalThis.RequestInit = {
       method,
       headers: {

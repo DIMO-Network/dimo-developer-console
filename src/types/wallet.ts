@@ -1,5 +1,3 @@
-import { OnrampSessionResult } from '@stripe/crypto';
-
 export interface ICreateGlobalAccountRequest {
   email: string;
   encodedChallenge: string;
@@ -44,9 +42,6 @@ export interface IWallet {
 export interface IDcxPurchaseTransaction {
   destinationAddress: `0x${string}`;
   usdAmount: number;
-  maticAmount: bigint;
-  alreadyHasDimo: boolean;
-  alreadyHasWmatic: boolean;
   dcxAmount: bigint;
   requiredDimoAmount: bigint;
   currency: string;
@@ -59,13 +54,6 @@ export interface IGlobalAccountSession {
   subOrganizationId: string;
   token: string;
   expiry: number;
-}
-
-export interface IStripeCryptoEvent {
-  type: 'onramp_session_updated';
-  payload: {
-    session: OnrampSessionResult;
-  };
 }
 
 export interface Log {

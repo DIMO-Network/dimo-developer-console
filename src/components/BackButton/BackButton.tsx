@@ -3,11 +3,18 @@ import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 import './BackButton.css';
+import { FC } from 'react';
 
-export const BackButton = () => {
+interface Props {
+  onBack?: () => void;
+}
+export const BackButton: FC<Props> = ({ onBack }) => {
   const router = useRouter();
 
   const handleBack = () => {
+    if (onBack) {
+      return onBack();
+    }
     router.back();
   };
 

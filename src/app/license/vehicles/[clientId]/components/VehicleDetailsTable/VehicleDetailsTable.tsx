@@ -1,6 +1,6 @@
 'use client';
 import { FC } from 'react';
-import { PaginatedTable } from '@/components/Table';
+import { PaginatedTableIdentityAPI } from '@/components/Table';
 import { useQuery } from '@apollo/client';
 import { gql } from '@/gql';
 import { Loader } from '@/components/Loader';
@@ -49,7 +49,7 @@ export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
     return null;
   }
   return (
-    <PaginatedTable
+    <PaginatedTableIdentityAPI
       data={data.vehicles.nodes}
       columns={columns}
       onPaginationChange={refetch}

@@ -10,6 +10,7 @@ import { Signers } from '@/app/license/details/[tokenId]/components/Signers';
 import { RedirectUris } from '@/app/license/details/[tokenId]/components/RedirectUris';
 import { Loader } from '@/components/Loader';
 import { Vehicles } from '@/app/license/details/[tokenId]/components/Vehicles';
+import { useRouter } from 'next/navigation';
 
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
@@ -28,7 +29,11 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
   });
+  const router = useRouter();
 
+  const goBack = () => {
+    router.replace('/app');
+  };
   const handleRefetch = () => {
     refetch({ tokenId: tokenId });
   };
@@ -62,7 +67,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       {data?.developerLicense && (
         <>
           <div className="summary">
-            <BackButton />
+            <BackButton onBack={goBack} />
             <Summary licenseSummary={data.developerLicense} refetch={handleRefetch} />
           </div>
           <div className={'flex flex-col gap-6 pt-6'}>

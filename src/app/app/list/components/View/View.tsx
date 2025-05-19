@@ -1,8 +1,8 @@
 'use client';
 import { type FC } from 'react';
 
-import { Loader } from '@//components/Loader';
-import { Banner } from '@/app/app/list/components/Banner';
+import { Loader } from '@/components/Loader';
+import { OnboardingBanner } from '@/components/OnboardingBanner';
 import { useGlobalAccount, useOnboarding, useUser } from '@/hooks';
 import Image from 'next/image';
 import { LicenseList } from '@/app/license/list';
@@ -10,7 +10,7 @@ import './View.css';
 import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { RightPanel } from '@/app/app/list/components/RightPanel';
+import { AppListRightPanel } from '@/app/app/list/components/RightPanel';
 
 const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
   query GetDeveloperLicensesByOwner($owner: Address!) {
@@ -59,12 +59,15 @@ export const View: FC = () => {
         {!!error && <p>There was an error fetching your developer licenses</p>}
         {!!data?.developerLicenses && (
           <>
-            <Banner balance={balance} licenseConnection={data.developerLicenses} />
+            <OnboardingBanner
+              balance={balance}
+              licenseConnection={data.developerLicenses}
+            />
             <LicenseList licenseConnection={data.developerLicenses} />
           </>
         )}
       </div>
-      <RightPanel />
+      <AppListRightPanel />
     </div>
   );
 };

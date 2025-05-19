@@ -41,5 +41,17 @@ export const formatSimpleBalance = (value: number): string => {
 };
 
 export const formatSimpleBalanceWithDigits = (value: number, digits: number): string => {
-  return value.toLocaleString('en-US', { maximumFractionDigits: digits });
+  return value.toLocaleString('en-US', {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
+  });
+};
+
+export const formatToCurrency = (value: number): string => {
+  return value.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  });
 };

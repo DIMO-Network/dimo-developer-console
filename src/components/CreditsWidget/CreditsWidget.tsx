@@ -2,7 +2,7 @@ import { FC, useContext, useEffect, useState } from 'react';
 import { useGlobalAccount } from '@/hooks';
 import { CreditsContext } from '@/context/creditsContext';
 import { isCollaborator, isOwner } from '@/utils/user';
-import { formatToHumanReadable } from '@/utils/formatBalance';
+import { formatToCurrency } from '@/utils/formatBalance';
 import * as Sentry from '@sentry/nextjs';
 import { PlusIcon, WalletIcon } from '@/components/Icons';
 
@@ -14,6 +14,8 @@ interface ICreditsWidgetProps {
   variant?: 'small' | 'large';
 }
 
+const DCX_IN_USD = 0.001;
+
 export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) => {
   const [dcxBalance, setDcxBalance] = useState<string>('0');
   const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
@@ -23,7 +25,7 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
     try {
       if (isCollaborator(currentUser?.role ?? '')) return;
       const balance = await getCurrentDcxBalance();
-      setDcxBalance(formatToHumanReadable(balance));
+      setDcxBalance(formatToCurrency(balance * DCX_IN_USD));
     } catch (error: unknown) {
       Sentry.captureException(error);
       console.error(error);
@@ -49,7 +51,6 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
             <div className={'flex flex-col'}>
               <div className={'flex flex-row gap-2.5 items-center'}>
                 <p className="text-4xl font-medium">{dcxBalance}</p>
-                <p className="text-xl font-medium text-text-secondary">DCX</p>
               </div>
               <p className={'text-text-secondary text-xs font-normal'}>Current Balance</p>
             </div>
@@ -71,7 +72,6 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
         <div className={'flex flex-row items-center gap-1'}>
           <WalletIcon className="w-4 h-4" />
           <p className="credit-amount">{dcxBalance}</p>
-          <p className="credit-text">DCX</p>
         </div>
         <button
           title="Add Credits"

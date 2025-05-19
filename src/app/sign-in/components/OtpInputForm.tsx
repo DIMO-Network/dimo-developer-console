@@ -1,3 +1,5 @@
+'use client';
+
 import { Anchor } from '@/components/Anchor';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';

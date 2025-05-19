@@ -10,18 +10,23 @@ import {
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
+const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create\/[^/]+$/;
+const EDIT_WEBHOOK_REGEX = /^\/webhooks\/edit\/[^/]+\/[^/]+$/;
+
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
   if (APP_DETAILS_REGEX.test(path)) return 'App Details';
   if (LICENSE_DETAILS_REGEX.test(path)) return 'License Details';
   if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed Vehicles';
+  if (CREATE_WEBHOOK_REGEX.test(path)) return 'Create a webhook';
+  if (EDIT_WEBHOOK_REGEX.test(path)) return 'Edit webhook';
 };
 
 const pageTitles: Record<string, string> = {
   '/': 'Home',
   '/app': 'Home',
-  '/integrations': 'Integrations',
+  '/webhooks': 'Webhooks',
   '/api-status': 'API Status',
   '/settings': 'Settings',
 };
@@ -36,10 +41,10 @@ export const mainMenu = [
     disabled: false,
   },
   {
-    label: 'Integrations',
+    label: 'Webhooks',
     icon: IntegrationIcon,
     iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
-    link: '/integrations',
+    link: '/webhooks',
     external: false,
     disabled: true,
   },

@@ -47,7 +47,7 @@ interface IProps {
 }
 
 export const CreditsAmount = ({ onNext }: IProps) => {
-  const { currentUser } = useGlobalAccount();
+  const { currentUser, getCurrentDimoBalance } = useGlobalAccount();
   const { getDimoPrice } = useCryptoPricing();
   const { getNeededDimoAmountForDcx } = useContractGA();
   const { setNotification } = useContext(NotificationContext);
@@ -71,7 +71,8 @@ export const CreditsAmount = ({ onNext }: IProps) => {
 
   const handleStartPurchase = async () => {
     if (!currentUser) return;
-    const neededDimo = await getNeededDimoAmountForDcx(credits);
+
+    const neededDimo = await getNeededDimoAmountForDcx(credits!);
 
     if (paymentMethod === 'usd') {
       setNotification(
@@ -89,7 +90,17 @@ export const CreditsAmount = ({ onNext }: IProps) => {
     smartContractAddress: `0x${string}`,
     neededDimo: bigint,
   ) => {
-    onNext('crypto-purchase', {
+    const dimoBalance = await getCurrentDimoBalance();
+    if (dimoBalance < neededDimo) {
+      setNotification(
+        'Not enough DIMO in wallet. Please add more DIMO to your wallet.',
+        'Error',
+        'error',
+      );
+      return;
+    }
+
+    onNext('credits-amount', {
       destinationAddress: smartContractAddress,
       usdAmount: credits * DCX_PRICE,
       dcxAmount: BigInt(credits!),
