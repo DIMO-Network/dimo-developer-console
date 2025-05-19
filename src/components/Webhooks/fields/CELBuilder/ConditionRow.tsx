@@ -63,6 +63,7 @@ export const ConditionRow = ({ index, remove }: ConditionRowProps) => {
       {config?.inputType === 'number' && (
         <div className={'text-field'}>
           <input
+            // @ts-expect-error validation type isn't strict enough
             {...register(`cel.conditions.${index}.value`, config.validation)}
             placeholder="Enter a number"
             type="number"
@@ -71,6 +72,7 @@ export const ConditionRow = ({ index, remove }: ConditionRowProps) => {
       )}
       {config?.inputType === 'boolean' && (
         <SelectWithChevron
+          // @ts-expect-error validation type isn't strict enough
           {...register(`cel.conditions.${index}.value`, config.validation)}
           defaultValue=""
           options={[
