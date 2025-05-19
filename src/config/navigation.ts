@@ -46,7 +46,7 @@ export const mainMenu = [
     iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
     link: '/webhooks',
     external: false,
-    disabled: false,
+    disabled: true,
   },
   {
     label: 'Support',

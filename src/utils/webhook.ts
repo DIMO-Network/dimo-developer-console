@@ -1,4 +1,5 @@
 import { Webhook, WebhookFormInput } from '@/types/webhook';
+import { RegisterOptions } from 'react-hook-form';
 
 export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel'] => {
   const { data, trigger } = webhook;
@@ -14,12 +15,21 @@ export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel']
   };
 };
 
-const numericValidation = {
+type InputType = 'number' | 'boolean';
+
+interface ConditionConfig {
+  field: string;
+  label: string;
+  inputType: InputType;
+  validation: RegisterOptions;
+}
+
+const numericValidation: RegisterOptions = {
   required: 'Value is required',
   validate: (val: string) => !isNaN(Number(val)),
 };
 
-const booleanValidation = {
+const booleanValidation: RegisterOptions = {
   required: 'Value is required',
   validate: (value: string) => {
     const parsedValue = Number(value);
@@ -27,7 +37,13 @@ const booleanValidation = {
   },
 };
 
-export const conditionsConfig = [
+export const conditionsConfig: ConditionConfig[] = [
+  {
+    field: 'speed',
+    label: 'Speed',
+    inputType: 'number',
+    validation: numericValidation,
+  },
   {
     field: 'isIgnitionOn',
     label: 'Is Ignition On',
