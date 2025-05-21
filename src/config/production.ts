@@ -29,3 +29,5 @@ export const CONTRACT_METHODS = {
 };
 
 export const identityApiUrl = 'https://identity-api.dimo.zone/query';
+
+export const DIMO_ESCROW_ADDRESS = '0x123';

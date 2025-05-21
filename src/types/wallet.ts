@@ -95,3 +95,56 @@ export interface IDesiredTokenAmount {
   dimo: bigint;
   dcx: bigint;
 }
+
+export interface PaymentSACD {
+  specVersion: string;
+  timestamp: string;
+  type: string;
+  data: {
+    grantor: {
+      address: `0x${string}`;
+      name: string;
+      additionalInfo: {
+        [k: string]: unknown;
+      };
+    };
+    grantee: {
+      address: `0x${string}`;
+      name: string;
+      additionalInfo: {
+        [k: string]: unknown;
+      };
+    };
+    expiresAt: string;
+    agreements: {
+      type: string;
+      asset: string;
+      payment: {
+        amount: number;
+        recurrence: 'monthly' | 'one-time';
+        terms: {
+          initialPayment: number;
+          paymentMethod: string;
+        };
+      };
+      purpose: string;
+      attachments: {
+        name: string;
+        description: string;
+        contentType: string;
+        url: string;
+      }[];
+      signatures: {
+        signer: string;
+        signature: string;
+        timestamp: string;
+      }[];
+    }[];
+  };
+  extensions: {
+    invoicing: {
+      invoiceFrequency: string;
+      invoiceRecipient: string;
+    };
+  };
+}

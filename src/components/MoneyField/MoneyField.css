@@ -1,0 +1,7 @@
+.money-field {
+  @apply rounded-lg text-4xl py-2 px-4 outline-0 bg-cta-default text-white flex flex-row font-normal;
+
+  input {
+    @apply w-full text-[#6B6E6E] bg-transparent outline-0 font-normal !text-4xl;
+  }
+}
