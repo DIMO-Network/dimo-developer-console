@@ -137,6 +137,11 @@ export const View = () => {
   };
 
   useEffect(() => {
+    if (!router) return;
+    router.prefetch('/app');
+  }, [router]);
+
+  useEffect(() => {
     if (isNull(isPasskeyAvailable)) return;
     if (isEmpty(authCode)) return;
     void handleExternalAuth(authCode);

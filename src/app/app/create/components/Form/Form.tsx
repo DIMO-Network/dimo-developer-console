@@ -13,10 +13,11 @@ import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { useGlobalAccount, usePayLicenseFee, useMintLicense } from '@/hooks';
-
-import configuration from '@/config';
-import './Form.css';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import configuration from '@/config';
+import mixpanel from 'mixpanel-browser';
+
+import './Form.css';
 
 interface IProps {
   workspace?: IWorkspace;
@@ -60,6 +61,12 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
         'Success',
         'success',
       );
+
+      mixpanel.track('Developer License Created', {
+        distinct_id: currentUser!.smartContractAddress!,
+        workspace: workspace.name,
+      });
+
       onSuccess();
     } catch (error: unknown) {
       if (error instanceof Error) {

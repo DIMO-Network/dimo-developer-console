@@ -18,12 +18,12 @@ import {
 import { getKernelAccount, getKernelClient, getPublicClient } from '@/services/zerodev';
 import { getContract } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
-// import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import { TeamRoles } from '@/types/team';
 import { signOut } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
+import mixpanel from 'mixpanel-browser';
 
 export const withGlobalAccounts = <P extends object>(
   WrappedComponent: ComponentType<P>,
@@ -99,8 +99,6 @@ export const withGlobalAccounts = <P extends object>(
       ]);
 
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
-
-      return 0;
     };
 
     const getCurrentDcxBalance = async (): Promise<number> => {
@@ -190,14 +188,21 @@ export const withGlobalAccounts = <P extends object>(
         role: TeamRoles.OWNER,
       };
 
+      mixpanel.identify(kernelAccount.address);
+      mixpanel.people.set({
+        $email: email,
+        $subOrganizationId: subOrganizationId,
+        $role: TeamRoles.OWNER,
+      });
+
       setUser(user);
     };
 
     const logout = async () => {
-      turnkeyClient.logout();
+      await turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
-      signOut();
+      await signOut();
       router.replace('/sign-in');
     };
 

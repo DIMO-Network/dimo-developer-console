@@ -22,10 +22,10 @@ import {
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty } from 'lodash';
 import config from '@/config';
-//import { cookies } from 'next/headers';
 import { ComponentType, useEffect, useState } from 'react';
 import { decodeJwtToken } from '@/utils/middlewareUtils';
 import { useRouter } from 'next/navigation';
+import mixpanel from 'mixpanel-browser';
 const halfHour = 60 * 30;
 const fifteenMinutes = 15 * 60;
 
@@ -50,7 +50,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       tokenExpiration: number;
       sessionExpiration: number;
     }) => {
-      saveToken(accessToken, tokenExpiration);
+      await saveToken(accessToken, tokenExpiration);
       saveToLocalStorage(EmbeddedKey, privateKey);
 
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
@@ -167,6 +167,11 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         privateKey: key.privateKey,
       });
 
+      mixpanel.track('Sign In', {
+        'distinct_id': newWalletAddress!,
+        'Sign In Method': 'Passkey',
+      });
+
       return { success: true, newWalletAddress };
     };
 
@@ -222,12 +227,17 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         privateKey: key.privateKey,
       });
 
+      mixpanel.track('Sign In', {
+        'distinct_id': newWalletAddress!,
+        'Sign In Method': 'OTP',
+      });
+
       return { success: true, newWalletAddress };
     };
 
     const logout = async () => {
-      signOut();
-      turnkeyClient.logout();
+      await signOut();
+      await turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
     };

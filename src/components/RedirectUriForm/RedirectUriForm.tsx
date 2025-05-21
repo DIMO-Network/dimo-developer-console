@@ -14,6 +14,7 @@ import { TextField } from '@/components/TextField';
 import { useSetRedirectUri } from '@/hooks';
 
 import './RedirectUriForm.css';
+import mixpanel from 'mixpanel-browser';
 
 interface IRedirectUri {
   uri: string;
@@ -23,9 +24,15 @@ interface IProps {
   refreshData: () => void;
   redirectUris: IRedirectUri[] | undefined;
   tokenId: number;
+  owner: string;
 }
 
-export const RedirectUriForm: FC<IProps> = ({ refreshData, redirectUris, tokenId }) => {
+export const RedirectUriForm: FC<IProps> = ({
+  refreshData,
+  redirectUris,
+  tokenId,
+  owner,
+}) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
   const {
@@ -49,6 +56,11 @@ export const RedirectUriForm: FC<IProps> = ({ refreshData, redirectUris, tokenId
         'Success!',
         'success',
       );
+      mixpanel.track('Redirect URI added', {
+        distinct_id: owner,
+        uri,
+        tokenId,
+      });
       refreshData();
     } catch (error: unknown) {
       Sentry.captureException(error);

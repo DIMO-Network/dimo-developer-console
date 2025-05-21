@@ -17,6 +17,7 @@ import { withLoadingStatus } from '@/hoc';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
+import mixpanel from 'mixpanel-browser';
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -69,6 +70,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       clearLoadingStatus();
       setApiKey(account.privateKey);
       await refetch();
+      mixpanel.track('API Key Generated', {
+        distinct_id: fragment.owner,
+        tokenId: fragment.tokenId,
+        signerAddress: account.address,
+      });
     } catch (error: unknown) {
       handleError(error);
     }
