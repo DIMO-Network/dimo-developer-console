@@ -9,6 +9,7 @@ import {
 import axios from 'axios';
 import { extractAxiosMessage } from '@/utils/api';
 import { conditionsConfig } from '@/utils/webhook';
+import { captureException } from '@sentry/nextjs';
 
 const getWebhooksApiClient = (token?: string) => {
   let authHeader = undefined;
@@ -26,9 +27,14 @@ const getWebhooksApiClient = (token?: string) => {
 };
 
 export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webhook[]> => {
-  const client = getWebhooksApiClient(token);
-  const { data } = await client.get<Webhook[]>('/v1/webhooks');
-  return data;
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.get<Webhook[]>('/v1/webhooks');
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error fetching webhooks'));
+  }
 };
 
 export const fetchWebhookById = async ({
@@ -43,6 +49,7 @@ export const fetchWebhookById = async ({
     const response = await client.get<string[]>(`/v1/webhooks/${webhookId}`);
     return response.data;
   } catch (err) {
+    captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error fetching webhook'));
   }
 };
@@ -56,6 +63,7 @@ export const createWebhook = async (
     const response = await client.post<Webhook>('/v1/webhooks', webhook);
     return response.data;
   } catch (err) {
+    captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error creating webhook'));
   }
 };
@@ -69,6 +77,7 @@ export const updateWebhook = async (
     const { data } = await getWebhooksApiClient(token).put(`/v1/webhooks/${id}`, webhook);
     return data;
   } catch (err) {
+    captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error updating webhook'));
   }
 };
@@ -84,6 +93,7 @@ export const deleteWebhook = async ({
     const client = getWebhooksApiClient(token);
     await client.delete(`/v1/webhooks/${webhookId}`);
   } catch (err) {
+    captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error deleting webhook'));
   }
 };
@@ -114,68 +124,14 @@ export const formatAndGenerateCEL = async (cel: { conditions: Condition[] }) => 
   };
 };
 
-export const generateCEL = async ({
-  conditions,
-  logic,
-}: {
-  conditions: Condition[];
-  logic: string;
-}): Promise<string> => {
-  const client = getWebhooksApiClient();
-  const { data } = await client.post<{ cel_expression: string }>('/build-cel', {
-    conditions,
-    logic,
-  });
-  return data.cel_expression;
-};
-
 export const subscribeAllVehicles = async (webhookId: string, token: string) => {
   try {
     const client = getWebhooksApiClient(token);
     const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/all`);
     return data;
   } catch (err) {
+    captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing all'));
-  }
-};
-
-export const subscribeVehicle = async ({
-  webhookId,
-  vehicleTokenId,
-  token,
-}: {
-  webhookId: string;
-  vehicleTokenId: string;
-  token: string;
-}) => {
-  try {
-    const client = getWebhooksApiClient(token);
-    const { data } = await client.post(
-      `/v1/webhooks/${webhookId}/subscribe/${vehicleTokenId}`,
-    );
-    return data;
-  } catch (err) {
-    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
-  }
-};
-
-export const unsubscribeVehicle = async ({
-  webhookId,
-  vehicleTokenId,
-  token,
-}: {
-  webhookId: string;
-  vehicleTokenId: string;
-  token: string;
-}) => {
-  try {
-    const client = getWebhooksApiClient(token);
-    const { data } = await client.delete(
-      `/v1/webhooks/${webhookId}/unsubscribe/${vehicleTokenId}`,
-    );
-    return data;
-  } catch (err) {
-    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
   }
 };
 
@@ -191,6 +147,7 @@ export const unsubscribeAllVehicles = async ({
     const { data } = await client.delete(`/v1/webhooks/${webhookId}/unsubscribe/all`);
     return data;
   } catch (err) {
+    captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
   }
 };
@@ -217,6 +174,7 @@ export const subscribeByCsv = async ({
     );
     return data;
   } catch (err) {
+    captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing by CSV'));
   }
 };
@@ -240,6 +198,7 @@ export const unsubscribeByCsv = async ({
     });
     return data;
   } catch (err) {
+    captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error unsubscribing by CSV'));
   }
 };
