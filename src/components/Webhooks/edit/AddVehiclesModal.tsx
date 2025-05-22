@@ -7,6 +7,7 @@ import { Title } from '@/components/Title';
 import { CSVUpload } from '@/components/CSVUpload';
 import { Button } from '@/components/Button';
 import { SubscribeVehiclesActionModalProps } from '@/components/Webhooks/edit/types';
+import { captureException } from '@sentry/nextjs';
 
 export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
   isOpen,
@@ -48,7 +49,7 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
       setFileInfo([]);
       setUploadedFile(null);
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('Failed to subscribe vehicles. Please try again.', '', 'error');
     } finally {
       setLoading(false);

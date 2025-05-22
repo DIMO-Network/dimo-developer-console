@@ -18,6 +18,7 @@ import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { getDevJwt } from '@/utils/devJwt';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
+import { captureException } from '@sentry/nextjs';
 
 const STEPS = [
   WebhookFormStepName.CONFIGURE,
@@ -65,6 +66,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       if (err instanceof Error) {
         message = err.message ?? message;
       }
+      captureException(err);
       setNotification(message, '', 'error');
     }
   };
@@ -101,7 +103,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       }
       onFinish();
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('Failed to subscribe all vehicles', '', 'error');
     }
   };

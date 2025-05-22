@@ -19,6 +19,7 @@ import { DiscardChangesModal } from '@/app/webhooks/edit/[clientId]/[webhookId]/
 import { SubscribedVehicles } from '@/components/Webhooks/edit/SubscribedVehicles';
 import { BackButton } from '@/components/BackButton';
 import { SubscribedVehiclesPreview } from '@/components/Webhooks/edit/SubscribedVehiclesPreview';
+import { captureException } from '@sentry/nextjs';
 
 type EditWebhookFormProps = {
   clientId: string;
@@ -70,7 +71,7 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
       invalidateQuery(clientId);
       reset(formData);
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('Error updating webhook', '', 'error');
     }
   };

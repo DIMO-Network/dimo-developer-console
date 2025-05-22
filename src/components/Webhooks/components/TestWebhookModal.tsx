@@ -8,6 +8,7 @@ import { WebhookDetailsCard } from '@/components/Webhooks/components/WebhookDeta
 import { NotificationContext } from '@/context/notificationContext';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { extractAxiosMessage } from '@/utils/api';
+import { captureException } from '@sentry/nextjs';
 
 interface TestWebhookModalProps {
   webhook: Webhook;
@@ -31,6 +32,7 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
       });
       setNotification('Webhook triggered successfully.', '', 'success');
     } catch (err: unknown) {
+      captureException(err);
       const message = extractAxiosMessage(err, 'An error occurred testing the webhook');
       setNotification(message, '', 'error');
     }
