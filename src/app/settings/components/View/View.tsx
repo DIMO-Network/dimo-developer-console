@@ -8,7 +8,7 @@ import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
 import { Title } from '@/components/Title';
 import { UserDetails } from '@/app/settings/components/UserDetails';
-import { useTeamCollaborators } from '@/hooks';
+import { useMixPanel, useTeamCollaborators } from '@/hooks';
 
 import './View.css';
 import { DeveloperSupportButton } from '@/components/DeveloperSupportButton';
@@ -16,6 +16,7 @@ import { DeveloperSupportButton } from '@/components/DeveloperSupportButton';
 const View: FC = () => {
   const { isLoading, teamCollaborators, refreshData } = useTeamCollaborators();
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { trackEvent } = useMixPanel();
 
   return (
     <div className="settings-page">
@@ -38,7 +39,13 @@ const View: FC = () => {
           <DeveloperSupportButton variant={'large'} />
         </>
       )}
-      <TeamFormModal isOpen={isOpen} setIsOpen={setIsOpen} />
+      <TeamFormModal
+        isOpen={isOpen}
+        setIsOpen={(value: boolean) => {
+          trackEvent('Open Developer Support Form');
+          setIsOpen(value);
+        }}
+      />
     </div>
   );
 };

@@ -2,7 +2,7 @@
 import { ReactNode, useContext, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Anchor } from '@/components/Anchor';
-import { useAuth, useErrorHandler, usePasskey } from '@/hooks';
+import { useAuth, useErrorHandler, useMixPanel, usePasskey } from '@/hooks';
 import { withNotifications } from '@/hoc';
 import { NotificationContext } from '@/context/notificationContext';
 import * as Sentry from '@sentry/nextjs';
@@ -51,6 +51,7 @@ export const View = () => {
   useErrorHandler();
   const { setNotification } = useContext(NotificationContext);
   const { setUser, completeExternalAuth } = useAuth();
+  const { trackEvent } = useMixPanel();
   const { isPasskeyAvailable } = usePasskey();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -81,6 +82,12 @@ export const View = () => {
         router.push(`/sign-up?email=${encodeURIComponent(email)}&hasGlobalAccount=true`);
         return;
       }
+
+      trackEvent('Sign In Attempt', {
+        'type': 'Internal Auth',
+        'distinct_id': email,
+        'Sign In Method': 'Email',
+      });
 
       const { role, subOrganizationId, hasPasskey, currentWalletAddress } =
         userInformation;
@@ -135,6 +142,11 @@ export const View = () => {
       setNotification('Failed to login with external provider', 'Oops...', 'error');
     }
   };
+
+  useEffect(() => {
+    if (!router) return;
+    router.prefetch('/app');
+  }, [router]);
 
   useEffect(() => {
     if (isNull(isPasskeyAvailable)) return;

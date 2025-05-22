@@ -35,6 +35,7 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
             tokenId={fragment.tokenId}
             refreshData={refetch}
             redirectUris={fragment.redirectURIs.nodes}
+            owner={fragment.owner}
           />
         </div>
       )}

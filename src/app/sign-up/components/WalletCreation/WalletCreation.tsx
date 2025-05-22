@@ -1,7 +1,7 @@
 'use client';
 import { IAuth } from '@/types/auth';
 import { FC, ReactNode, useContext, useEffect, useState } from 'react';
-import { useAuth, usePasskey } from '@/hooks';
+import { useAuth, useMixPanel, usePasskey } from '@/hooks';
 import { NotificationContext } from '@/context/notificationContext';
 import * as Sentry from '@sentry/nextjs';
 
@@ -51,6 +51,7 @@ const WalletCreationForm = ({
 export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setNotification } = useContext(NotificationContext);
   const searchParams = useSearchParams();
+  const { trackEvent } = useMixPanel();
   const [email, setEmail] = useState<string>('');
   const [walletCreationType, setWalletCreationType] = useState<WalletCreationType>(
     WalletCreationType.PASSKEY,
@@ -143,6 +144,11 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
       if (!withPasskey) {
         setWalletCreationType(WalletCreationType.NO_PASSKEY);
       }
+
+      trackEvent('Account Creation', {
+        distinct_id: email,
+        withPasskey: withPasskey,
+      });
 
       const { subOrganizationId } = await createUserGlobalAccount({
         email,

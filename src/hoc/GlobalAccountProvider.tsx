@@ -6,7 +6,7 @@ import {
   GlobalAccountSession,
   removeFromSession,
 } from '@/utils/sessionStorage';
-import { ComponentType, useEffect, useState } from 'react';
+import React, { ComponentType, useEffect, useState } from 'react';
 import { utils } from 'web3';
 import configuration from '@/config';
 import { getTurnkeyClient, getTurnkeyWalletAddress } from '@/services/turnkey';
@@ -18,18 +18,19 @@ import {
 import { getKernelAccount, getKernelClient, getPublicClient } from '@/services/zerodev';
 import { getContract } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
-// import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import { TeamRoles } from '@/types/team';
 import { signOut } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
+import { useMixPanel } from '@/hooks';
 
 export const withGlobalAccounts = <P extends object>(
   WrappedComponent: ComponentType<P>,
 ) => {
   const HOC: React.FC<P> = (props) => {
     const [user, setUser] = useState<IUserSession | null>(null);
+    const { identifyUser } = useMixPanel();
     const router = useRouter();
 
     const validateCurrentSession = async (): Promise<IUserSession | null> => {
@@ -99,8 +100,6 @@ export const withGlobalAccounts = <P extends object>(
       ]);
 
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
-
-      return 0;
     };
 
     const getCurrentDcxBalance = async (): Promise<number> => {
@@ -190,14 +189,20 @@ export const withGlobalAccounts = <P extends object>(
         role: TeamRoles.OWNER,
       };
 
+      identifyUser(kernelAccount.address, {
+        $email: email,
+        $subOrganizationId: subOrganizationId,
+        $role: TeamRoles.OWNER,
+      });
+
       setUser(user);
     };
 
     const logout = async () => {
-      turnkeyClient.logout();
+      await turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
-      signOut();
+      await signOut();
       router.replace('/sign-in');
     };
 
