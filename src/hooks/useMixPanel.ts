@@ -28,7 +28,7 @@ export const useMixPanel = () => {
       persistence: 'localStorage',
       debug: false,
       ignore_dnt: true,
-      autocapture: true,
+      autocapture: false,
     });
   };
 
