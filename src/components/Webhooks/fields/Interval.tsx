@@ -22,7 +22,11 @@ export const WebhookIntervalField = () => {
         {...register('setup', {
           required: 'Please select a webhook interval',
         })}
-        options={[{ value: 'Realtime', text: 'Realtime' }]}
+        options={[
+          { value: 'Realtime', text: 'Realtime' },
+          { value: 'Hourly', text: 'Hourly' },
+          { value: 'Daily', text: 'Daily' },
+        ]}
         control={control}
       />
       {errors.setup && (
