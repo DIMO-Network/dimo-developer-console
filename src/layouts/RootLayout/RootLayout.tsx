@@ -7,7 +7,7 @@ import configuration from '@/config';
 
 import '@/app/globals.css';
 import QueryProvider from '@/hoc/QueryProvider';
-import { initMixPanel } from '@/config/mixPanelClient';
+import { useMixPanel } from '@/hooks';
 
 export const metadata: Metadata = {
   title: configuration.appName,
@@ -20,8 +20,8 @@ export const RootLayout = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
+  const { initMixPanel } = useMixPanel();
   useEffect(() => {
-    console.info('initializing mixpanel');
     initMixPanel();
   }, []);
 

@@ -7,7 +7,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { SignerFragmentFragment } from '@/gql/graphql';
 import * as Sentry from '@sentry/nextjs';
 import { get } from 'lodash';
-import { useDisableSigner, useEnableSigner } from '@/hooks';
+import { useDisableSigner, useEnableSigner, useMixPanel } from '@/hooks';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/details/[tokenId]/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
@@ -17,7 +17,6 @@ import { withLoadingStatus } from '@/hoc';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
-import mixpanel from 'mixpanel-browser';
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -42,6 +41,7 @@ type SignerNode = SignerFragmentFragment['signers']['nodes'][0];
 const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const [apiKey, setApiKey] = useState<string>();
   const [signerToDelete, setSignerToDelete] = useState<string>();
+  const { trackEvent } = useMixPanel();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const fragment = useFragment(SIGNERS_FRAGMENT, license);
   const handleDisableSigner = useDisableSigner(fragment.tokenId);
@@ -70,7 +70,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       clearLoadingStatus();
       setApiKey(account.privateKey);
       await refetch();
-      mixpanel.track('API Key Generated', {
+      trackEvent('API Key Generated', {
         distinct_id: fragment.owner,
         tokenId: fragment.tokenId,
         signerAddress: account.address,

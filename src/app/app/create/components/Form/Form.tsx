@@ -12,10 +12,9 @@ import { LoadingProps } from '@/components/LoadingModal';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useGlobalAccount, usePayLicenseFee, useMintLicense } from '@/hooks';
+import { useGlobalAccount, usePayLicenseFee, useMintLicense, useMixPanel } from '@/hooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import configuration from '@/config';
-import mixpanel from 'mixpanel-browser';
 
 import './Form.css';
 
@@ -28,6 +27,7 @@ interface IProps {
 export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
+  const { trackEvent } = useMixPanel();
   const { currentUser } = useGlobalAccount();
   const {
     formState: { errors },
@@ -62,7 +62,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
         'success',
       );
 
-      mixpanel.track('Developer License Created', {
+      trackEvent('Developer License Created', {
         distinct_id: currentUser!.smartContractAddress!,
         workspace: workspace.name,
       });

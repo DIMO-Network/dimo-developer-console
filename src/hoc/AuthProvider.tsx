@@ -22,16 +22,17 @@ import {
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty } from 'lodash';
 import config from '@/config';
-import { ComponentType, useEffect, useState } from 'react';
+import React, { ComponentType, useEffect, useState } from 'react';
 import { decodeJwtToken } from '@/utils/middlewareUtils';
 import { useRouter } from 'next/navigation';
-import mixpanel from 'mixpanel-browser';
+import { useMixPanel } from '@/hooks';
 const halfHour = 60 * 30;
 const fifteenMinutes = 15 * 60;
 
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
     const router = useRouter();
+    const { trackEvent } = useMixPanel();
     const [user, setUser] = useState<{
       email: string;
       subOrganizationId: string;
@@ -167,7 +168,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         privateKey: key.privateKey,
       });
 
-      mixpanel.track('Sign In', {
+      trackEvent('Sign In', {
         'distinct_id': newWalletAddress!,
         'Sign In Method': 'Passkey',
       });
@@ -227,7 +228,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         privateKey: key.privateKey,
       });
 
-      mixpanel.track('Sign In', {
+      trackEvent('Sign In', {
         'distinct_id': newWalletAddress!,
         'Sign In Method': 'OTP',
       });

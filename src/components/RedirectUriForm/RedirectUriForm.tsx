@@ -11,10 +11,9 @@ import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useSetRedirectUri } from '@/hooks';
+import { useMixPanel, useSetRedirectUri } from '@/hooks';
 
 import './RedirectUriForm.css';
-import mixpanel from 'mixpanel-browser';
 
 interface IRedirectUri {
   uri: string;
@@ -35,6 +34,7 @@ export const RedirectUriForm: FC<IProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
+  const { trackEvent } = useMixPanel();
   const {
     formState: { errors },
     handleSubmit,
@@ -56,7 +56,8 @@ export const RedirectUriForm: FC<IProps> = ({
         'Success!',
         'success',
       );
-      mixpanel.track('Redirect URI added', {
+
+      trackEvent('Redirect URI added', {
         distinct_id: owner,
         uri,
         tokenId,

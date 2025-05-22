@@ -6,7 +6,7 @@ import {
   GlobalAccountSession,
   removeFromSession,
 } from '@/utils/sessionStorage';
-import { ComponentType, useEffect, useState } from 'react';
+import React, { ComponentType, useEffect, useState } from 'react';
 import { utils } from 'web3';
 import configuration from '@/config';
 import { getTurnkeyClient, getTurnkeyWalletAddress } from '@/services/turnkey';
@@ -23,13 +23,14 @@ import { TeamRoles } from '@/types/team';
 import { signOut } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
-import mixpanel from 'mixpanel-browser';
+import { useMixPanel } from '@/hooks';
 
 export const withGlobalAccounts = <P extends object>(
   WrappedComponent: ComponentType<P>,
 ) => {
   const HOC: React.FC<P> = (props) => {
     const [user, setUser] = useState<IUserSession | null>(null);
+    const { identifyUser } = useMixPanel();
     const router = useRouter();
 
     const validateCurrentSession = async (): Promise<IUserSession | null> => {
@@ -188,8 +189,7 @@ export const withGlobalAccounts = <P extends object>(
         role: TeamRoles.OWNER,
       };
 
-      mixpanel.identify(kernelAccount.address);
-      mixpanel.people.set({
+      identifyUser(kernelAccount.address, {
         $email: email,
         $subOrganizationId: subOrganizationId,
         $role: TeamRoles.OWNER,
