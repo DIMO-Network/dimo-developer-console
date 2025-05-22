@@ -84,7 +84,7 @@ export const View = () => {
       }
 
       trackEvent('Sign In Attempt', {
-        'type': 'Internal',
+        'type': 'Internal Auth',
         'distinct_id': email,
         'Sign In Method': 'Email',
       });
