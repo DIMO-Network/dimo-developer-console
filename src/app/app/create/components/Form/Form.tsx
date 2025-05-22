@@ -12,11 +12,11 @@ import { LoadingProps } from '@/components/LoadingModal';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useGlobalAccount, usePayLicenseFee, useMintLicense } from '@/hooks';
-
-import configuration from '@/config';
-import './Form.css';
+import { useGlobalAccount, usePayLicenseFee, useMintLicense, useMixPanel } from '@/hooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import configuration from '@/config';
+
+import './Form.css';
 
 interface IProps {
   workspace?: IWorkspace;
@@ -27,6 +27,7 @@ interface IProps {
 export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
+  const { trackEvent } = useMixPanel();
   const { currentUser } = useGlobalAccount();
   const {
     formState: { errors },
@@ -60,6 +61,12 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
         'Success',
         'success',
       );
+
+      trackEvent('Developer License Created', {
+        distinct_id: currentUser!.smartContractAddress!,
+        workspace: workspace.name,
+      });
+
       onSuccess();
     } catch (error: unknown) {
       if (error instanceof Error) {
