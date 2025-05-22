@@ -9,6 +9,7 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { CopyableRow } from '@/components/CopyableRow';
 import { saveDevJwt } from '@/utils/devJwt';
 import { getDeveloperJwt } from '@/services/dimoDev';
+import { captureException } from '@sentry/nextjs';
 
 interface IProps {
   isOpen: boolean;
@@ -45,6 +46,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
       saveDevJwt(tokenParams.client_id, token);
       onSuccess?.(token);
     } catch (err) {
+      captureException(err);
       console.error('Failed to generate developer JWT', err);
       setNotification('Failed to generate developer JWT', '', 'error');
     } finally {

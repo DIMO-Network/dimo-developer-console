@@ -9,6 +9,7 @@ import { WebhookDetailsCard } from '@/components/Webhooks/components/WebhookDeta
 import { NotificationContext } from '@/context/notificationContext';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { getDevJwt } from '@/utils/devJwt';
+import { captureException } from '@sentry/nextjs';
 
 interface IProps {
   webhook: Webhook;
@@ -48,6 +49,7 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
       if (err instanceof Error) {
         errorMessage = err.message ?? errorMessage;
       }
+      captureException(err);
       setNotification(errorMessage, '', 'error');
     },
   });

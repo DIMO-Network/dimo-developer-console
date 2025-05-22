@@ -17,6 +17,7 @@ import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
 import { CSV_UPLOAD_ROW_TITLE } from '@/components/CSVUpload';
 import { saveAs } from 'file-saver';
+import { captureException } from '@sentry/nextjs';
 
 interface Props {
   webhookId: string;
@@ -61,7 +62,7 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
       );
       invalidateQuery({ webhookId, clientId });
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('Failed to subscribe all vehicles', '', 'error');
     } finally {
       setSubscribingAll(false);
@@ -75,7 +76,7 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
       setNotification('Successfully unsubscribed all vehicles', '', 'success');
       invalidateQuery({ webhookId, clientId });
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('Failed to unsubscribe all vehicles', '', 'error');
     } finally {
       setUnsubscribingAll(false);

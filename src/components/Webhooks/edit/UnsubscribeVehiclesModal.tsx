@@ -7,6 +7,7 @@ import { CSVUpload } from '@/components/CSVUpload';
 import { Button } from '@/components/Button';
 import { SubscribeVehiclesActionModalProps } from '@/components/Webhooks/edit/types';
 import { unsubscribeByCsv } from '@/services/webhook';
+import { captureException } from '@sentry/nextjs';
 
 export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
   isOpen,
@@ -44,7 +45,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
       setVehicleTokenIds([]);
       setFileInfo([]);
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('Failed to unsubscribe vehicles. Please try again.', '', 'error');
     } finally {
       setLoading(false);
