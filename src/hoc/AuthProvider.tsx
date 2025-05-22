@@ -247,7 +247,6 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       const url = `${process.env.NEXT_PUBLIC_DIMO_AUTH_URL}/auth/${provider}?client_id=developer-platform&redirect_uri=${config.frontendUrl}sign-in&response_type=code&scope=openid profile email`;
       trackEvent('Sign In Attempt', {
         'type': 'External Auth',
-        'distinct_id': user!.email,
         'Sign In Method': provider,
       });
       window.location.href = url;
