@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getAllDevJwts } from '@/utils/devJwt';
-
-interface StoredJwt {
-  token: string;
-  createdAt: number;
-}
+import { getAllDevJwts, StoredJwt } from '@/utils/devJwt';
 
 export const useGetDevJwts = (clientId: string) => {
   const [devJwts, setDevJwts] = useState<StoredJwt[]>([]);
