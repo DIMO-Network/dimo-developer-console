@@ -15,7 +15,7 @@ interface IProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   tokenParams: { client_id: string; domain: string };
-  onSuccess?: (newDevJwt: string) => void;
+  onSuccess?: () => void;
 }
 
 export const GenerateDevJWTModal: FC<IProps> = ({
@@ -44,7 +44,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
       const token = authHeader?.split(' ')[1] ?? '';
       setGeneratedKey(token);
       saveDevJwt(tokenParams.client_id, token);
-      onSuccess?.(token);
+      onSuccess?.();
     } catch (err) {
       captureException(err);
       console.error('Failed to generate developer JWT', err);
@@ -56,12 +56,13 @@ export const GenerateDevJWTModal: FC<IProps> = ({
 
   const title = useMemo(() => {
     if (generatedKey) return 'JWT generated';
-    return 'Get JWT';
+    return 'Generate new JWT';
   }, [generatedKey]);
 
   const subtitle = useMemo(() => {
     if (generatedKey) return '';
-    return 'This will generate a Developer JWT using the first available Redirect URI below and your Client ID. Enter one of your saved API Keys to get started.';
+
+    return 'This will generate a new Developer JWT using your Client ID and the first available Redirect URI. Enter one of your saved API Keys to get started.';
   }, [generatedKey]);
 
   const MainComponent = useMemo(() => {
