@@ -7,7 +7,7 @@ import { jwtDecode } from 'jwt-decode';
 
 const getKey = (clientId: string) => `devJwt_${clientId}_list_v1`;
 
-interface StoredJwt {
+export interface StoredJwt {
   token: string;
   createdAt: number;
 }
