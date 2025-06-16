@@ -103,7 +103,6 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       {devJwts.length > 0 ? (
         <Table
           columns={columns}
-          // @ts-expect-error data type
           data={devJwts}
           actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
         />
