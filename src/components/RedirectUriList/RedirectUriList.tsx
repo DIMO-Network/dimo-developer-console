@@ -97,7 +97,6 @@ const RedirectUriListComponent: FC<IProps> = ({
     <>
       <Table
         columns={[{ name: 'uri', label: 'Authorized URIs' }]}
-        // @ts-expect-error not sure
         data={redirectUris}
         actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
       />
