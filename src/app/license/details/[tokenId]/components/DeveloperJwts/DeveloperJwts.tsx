@@ -1,11 +1,14 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Section, SectionHeader } from '@/components/Section';
 import { Table } from '@/components/Table';
-import { getAllDevJwts } from '@/utils/devJwt';
-import { CopyableRow } from '@/components/CopyableRow';
+import { getAllDevJwts, removeDevJwt } from '@/utils/devJwt';
 import { GenerateDevJWT } from '@/components/GenerateDevJWT';
 import { jwtDecode } from 'jwt-decode';
+import { Button } from '@/components/Button';
+import { TrashIcon } from '@heroicons/react/24/outline';
+import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
+import { CopyButton } from '@/components/CopyButton';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
   fragment DeveloperJwtsFragment on DeveloperLicense {
@@ -19,7 +22,32 @@ interface Props {
 
 export const DeveloperJwts: FC<Props> = ({ license }) => {
   const fragment = useFragment(DEVELOPER_JWTS_FRAGMENT, license);
-  const jwts = getAllDevJwts(fragment.clientId);
+  const [jwts, setJwts] = useState(getAllDevJwts(fragment.clientId));
+  const [jwtToDelete, setJwtToDelete] = useState<string>();
+
+  const handleDelete = (token: string) => {
+    removeDevJwt(fragment.clientId, token);
+    setJwts(getAllDevJwts(fragment.clientId));
+  };
+
+  const renderCopyRedirectUriAction = (item: { token: string }) => (
+    <CopyButton
+      value={item.token}
+      onCopySuccessMessage="JWT copied!"
+      className="button table-action-button"
+    />
+  );
+
+  const renderDeleteRedirectUriAction = (item: { token: string }) => (
+    <Button
+      className="table-action-button"
+      title="Delete JWT"
+      type="button"
+      onClick={() => setJwtToDelete(item.token)}
+    >
+      <TrashIcon className="w-5 h-5" />
+    </Button>
+  );
 
   const columns = [
     {
@@ -28,13 +56,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       render: (item: { token: string }) => {
         const visiblePart = item.token.slice(0, 16);
         const maskedPart = '*'.repeat(32);
-        return (
-          <CopyableRow
-            value={item.token}
-            displayText={`${visiblePart}${maskedPart}`}
-            onCopySuccessMessage="JWT copied!"
-          />
-        );
+        return <span>{`${visiblePart}${maskedPart}`}</span>;
       },
     },
     {
@@ -71,11 +93,28 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
         />
       </SectionHeader>
       {jwts.length > 0 ? (
-        // @ts-expect-error data type
-        <Table columns={columns} data={jwts} />
+        <Table
+          columns={columns}
+          // @ts-expect-error data type
+          data={jwts}
+          actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
+        />
       ) : (
         <p className="text-text-secondary">No developer JWTs found</p>
       )}
+      <DeleteConfirmationModal
+        isOpen={!!jwtToDelete}
+        title="Are you sure you want to delete this JWT?"
+        subtitle="You will no longer be able to use this JWT in your app."
+        onConfirm={() => {
+          if (jwtToDelete) {
+            handleDelete(jwtToDelete);
+            setJwtToDelete(undefined);
+          }
+        }}
+        onCancel={() => setJwtToDelete(undefined)}
+        confirmButtonClassName="error"
+      />
     </Section>
   );
 };
