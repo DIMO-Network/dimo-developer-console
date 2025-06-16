@@ -68,7 +68,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
     },
     {
       name: 'createdAt',
-      label: 'Created',
+      label: 'Created At',
       render: (item: { createdAt: number }) => (
         <span>{new Date(item.createdAt).toLocaleString()}</span>
       ),
