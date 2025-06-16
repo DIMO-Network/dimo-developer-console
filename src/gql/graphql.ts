@@ -67,6 +67,8 @@ export type AftermarketDevice = Node & {
    * a long decimal number.
    */
   serial?: Maybe<Scalars['String']['output']>;
+  /** The DID for this aftermarket device's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The ERC-721 token id for the device. */
   tokenId: Scalars['Int']['output'];
   /** The vehicle, if any, with which the device is paired. */
@@ -83,6 +85,8 @@ export type AftermarketDeviceBy = {
   imei?: InputMaybe<Scalars['String']['input']>;
   /** serial number of the aftermarket device */
   serial?: InputMaybe<Scalars['String']['input']>;
+  /** The DID of the aftermarket device in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
   /** token id of the aftermarket device NFT */
   tokenId?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -138,6 +142,8 @@ export type Connection = {
   name: Scalars['String']['output'];
   /** The owner of the connection. Connections are transferable, so this may change over time. */
   owner: Scalars['Address']['output'];
+  /** The DID for this connection's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The token id of the connection as an NFT. This tends to be very large. */
   tokenId: Scalars['BigInt']['output'];
 };
@@ -145,6 +151,8 @@ export type Connection = {
 export type ConnectionBy = {
   address?: InputMaybe<Scalars['Address']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  /** The DID of the connection in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
   tokenId?: InputMaybe<Scalars['BigInt']['input']>;
 };
 
@@ -177,6 +185,8 @@ export type Dcn = Node & {
   node: Scalars['Bytes']['output'];
   /** Ethereum address of domain owner. */
   owner: Scalars['Address']['output'];
+  /** The DID for this DCN's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The token id for the domain. This is simply the node reinterpreted as a uint256. */
   tokenId: Scalars['BigInt']['output'];
   /** Vehicle, if any, to which the domain is attached. */
@@ -187,6 +197,8 @@ export type Dcn = Node & {
 export type DcnBy = {
   name?: InputMaybe<Scalars['String']['input']>;
   node?: InputMaybe<Scalars['Bytes']['input']>;
+  /** The DID of the DCN in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** The Connection type for DCN. */
@@ -237,6 +249,8 @@ export type DeveloperLicense = {
   owner: Scalars['Address']['output'];
   redirectURIs: RedirectUriConnection;
   signers: SignerConnection;
+  /** The DID for this license's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The token id of the license as an NFT. */
   tokenId: Scalars['Int']['output'];
 };
@@ -260,6 +274,8 @@ export type DeveloperLicenseSignersArgs = {
 export type DeveloperLicenseBy = {
   alias?: InputMaybe<Scalars['String']['input']>;
   clientId?: InputMaybe<Scalars['Address']['input']>;
+  /** The DID of the developer license in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
   tokenId?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -404,6 +420,8 @@ export type Manufacturer = Node & {
   owner: Scalars['Address']['output'];
   /** Id of the Tableland table holding the manufacturer's device definitions. */
   tableId?: Maybe<Scalars['Int']['output']>;
+  /** The DID for this manufacturer's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The ERC-721 token id for the manufacturer. */
   tokenId: Scalars['Int']['output'];
 };
@@ -429,7 +447,25 @@ export type ManufacturerDeviceDefinitionsArgs = {
 export type ManufacturerBy = {
   name?: InputMaybe<Scalars['String']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
+  /** The DID of the manufacturer in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
   tokenId?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** The Connection type for Manufacturer. */
+export type ManufacturerConnection = {
+  __typename?: 'ManufacturerConnection';
+  edges: Array<ManufacturerEdge>;
+  nodes: Array<Manufacturer>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+/** An edge in a ManufacturerConnection. */
+export type ManufacturerEdge = {
+  __typename?: 'ManufacturerEdge';
+  cursor: Scalars['String']['output'];
+  node: Manufacturer;
 };
 
 export type Node = {
@@ -502,6 +538,12 @@ export type Query = {
   deviceDefinition: DeviceDefinition;
   /** View a particular manufacturer. */
   manufacturer: Manufacturer;
+  /**
+   * List minted manufacturers.
+   *
+   * These are always ordered by Name in ascending order. Returns all of them
+   */
+  manufacturers: ManufacturerConnection;
   /** View a particular node. */
   node?: Maybe<Node>;
   /** List rewards for a user. */
@@ -641,7 +683,8 @@ export type QuerySyntheticDevicesArgs = {
 
 /** The root query type for the GraphQL schema. */
 export type QueryVehicleArgs = {
-  tokenId: Scalars['Int']['input'];
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
+  tokenId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -743,6 +786,8 @@ export type Stake = {
   points: Scalars['Int']['output'];
   /** The block timestamp for the transaction that created this stake. */
   stakedAt: Scalars['Time']['output'];
+  /** The DID for this stake's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The token id of the license as an NFT. */
   tokenId: Scalars['Int']['output'];
   /** The vehicle to which the stake is attached, if it is attached. */
@@ -779,14 +824,21 @@ export type SyntheticDevice = Node & {
   __typename?: 'SyntheticDevice';
   /** The Ethereum address for the device. */
   address: Scalars['Address']['output'];
+  /** The parent connection for the synthetic device. */
+  connection: Connection;
   /** An opaque global identifier for this syntheticDevice. */
   id: Scalars['ID']['output'];
-  /** Type of integration for the synthetic device. */
+  /**
+   * Type of integration for the synthetic device.
+   * @deprecated Use the `connection` field instead. For newer synthetic devices, this field will be zero.
+   */
   integrationId: Scalars['Int']['output'];
   /** The block timestamp at which this device was minted. */
   mintedAt: Scalars['Time']['output'];
   /** Encoded name of the device */
   name: Scalars['String']['output'];
+  /** The DID for this synthetic device's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The ERC-721 token id for the device. */
   tokenId: Scalars['Int']['output'];
   /** The vehicle with which the synthetic device is paired. */
@@ -797,6 +849,8 @@ export type SyntheticDevice = Node & {
 export type SyntheticDeviceBy = {
   /** The Ethereum address for the synthetic device. */
   address?: InputMaybe<Scalars['Address']['input']>;
+  /** The DID of the synthetic device in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
   /** The token id for the synthetic device. */
   tokenId?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -881,6 +935,8 @@ export type Vehicle = Node & {
   stake?: Maybe<Stake>;
   /** The paired synthetic device, if any. */
   syntheticDevice?: Maybe<SyntheticDevice>;
+  /** The DID for this vehicle's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The ERC-721 token id for the vehicle. */
   tokenId: Scalars['Int']['output'];
 };
@@ -966,6 +1022,8 @@ export type GetDeveloperLicensesByOwnerQuery = { __typename?: 'Query', developer
     & { ' $fragmentRefs'?: { 'TotalDeveloperLicenseCountFragmentFragment': TotalDeveloperLicenseCountFragmentFragment;'DeveloperLicenseSummariesOnConnectionFragment': DeveloperLicenseSummariesOnConnectionFragment } }
   ) };
 
+export type DeveloperJwtsFragmentFragment = { __typename?: 'DeveloperLicense', clientId: any } & { ' $fragmentName'?: 'DeveloperJwtsFragmentFragment' };
+
 export type RedirectUriFragmentFragment = { __typename?: 'DeveloperLicense', owner: any, tokenId: number, redirectURIs: { __typename?: 'RedirectURIConnection', nodes: Array<{ __typename?: 'RedirectURI', uri: string }> } } & { ' $fragmentName'?: 'RedirectUriFragmentFragment' };
 
 export type SignerFragmentFragment = { __typename?: 'DeveloperLicense', owner: any, tokenId: number, signers: { __typename?: 'SignerConnection', nodes: Array<{ __typename?: 'Signer', address: any, enabledAt: any }> } } & { ' $fragmentName'?: 'SignerFragmentFragment' };
@@ -986,7 +1044,7 @@ export type GetDeveloperLicenseQueryVariables = Exact<{
 
 export type GetDeveloperLicenseQuery = { __typename?: 'Query', developerLicense: (
     { __typename?: 'DeveloperLicense' }
-    & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragmentFragment': DeveloperLicenseSummaryFragmentFragment;'SignerFragmentFragment': SignerFragmentFragment;'RedirectUriFragmentFragment': RedirectUriFragmentFragment;'DeveloperLicenseVehiclesFragmentFragment': DeveloperLicenseVehiclesFragmentFragment } }
+    & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragmentFragment': DeveloperLicenseSummaryFragmentFragment;'SignerFragmentFragment': SignerFragmentFragment;'RedirectUriFragmentFragment': RedirectUriFragmentFragment;'DeveloperLicenseVehiclesFragmentFragment': DeveloperLicenseVehiclesFragmentFragment;'DeveloperJwtsFragmentFragment': DeveloperJwtsFragmentFragment } }
   ) };
 
 export type DeveloperLicenseSummariesOnConnectionFragment = { __typename?: 'DeveloperLicenseConnection', nodes: Array<(
@@ -1030,6 +1088,7 @@ export type GetDeveloperLicensesForWebhooksQueryVariables = Exact<{
 
 export type GetDeveloperLicensesForWebhooksQuery = { __typename?: 'Query', developerLicenses: { __typename?: 'DeveloperLicenseConnection', nodes: Array<{ __typename?: 'DeveloperLicense', alias?: string | null, clientId: any, redirectURIs: { __typename?: 'RedirectURIConnection', nodes: Array<{ __typename?: 'RedirectURI', uri: string }> } }> } };
 
+export const DeveloperJwtsFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperJwtsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]} as unknown as DocumentNode<DeveloperJwtsFragmentFragment, unknown>;
 export const RedirectUriFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RedirectUriFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}}]} as unknown as DocumentNode<RedirectUriFragmentFragment, unknown>;
 export const SignerFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SignerFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"signers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"enabledAt"}}]}}]}}]}}]} as unknown as DocumentNode<SignerFragmentFragment, unknown>;
 export const DeveloperLicenseVehiclesFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseVehiclesFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]} as unknown as DocumentNode<DeveloperLicenseVehiclesFragmentFragment, unknown>;
@@ -1038,7 +1097,7 @@ export const DeveloperLicenseSummariesOnConnectionFragmentDoc = {"kind":"Documen
 export const TotalDeveloperLicenseCountFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TotalDeveloperLicenseCountFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicenseConnection"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}}]}}]} as unknown as DocumentNode<TotalDeveloperLicenseCountFragmentFragment, unknown>;
 export const GetDeveloperLicensesByOwnerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeveloperLicensesByOwner"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"owner"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicenses"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}},{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"owner"},"value":{"kind":"Variable","name":{"kind":"Name","value":"owner"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TotalDeveloperLicenseCountFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummariesOnConnection"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TotalDeveloperLicenseCountFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicenseConnection"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummariesOnConnection"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicenseConnection"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"}}]}}]}}]} as unknown as DocumentNode<GetDeveloperLicensesByOwnerQuery, GetDeveloperLicensesByOwnerQueryVariables>;
 export const GetVehicleCountByClientIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetVehicleCountByClientId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"vehicles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"0"}},{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"privileged"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}}]}}]}}]} as unknown as DocumentNode<GetVehicleCountByClientIdQuery, GetVehicleCountByClientIdQueryVariables>;
-export const GetDeveloperLicenseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeveloperLicense"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"tokenId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SignerFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"RedirectUriFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseVehiclesFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SignerFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"signers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"enabledAt"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RedirectUriFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseVehiclesFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]} as unknown as DocumentNode<GetDeveloperLicenseQuery, GetDeveloperLicenseQueryVariables>;
+export const GetDeveloperLicenseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeveloperLicense"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"tokenId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SignerFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"RedirectUriFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseVehiclesFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperJwtsFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SignerFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"signers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"enabledAt"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RedirectUriFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseVehiclesFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperJwtsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]} as unknown as DocumentNode<GetDeveloperLicenseQuery, GetDeveloperLicenseQueryVariables>;
 export const GetVehiclesByClientIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetVehiclesByClientId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"last"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"before"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"after"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"vehicles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"privileged"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"last"},"value":{"kind":"Variable","name":{"kind":"Name","value":"last"}}},{"kind":"Argument","name":{"kind":"Name","value":"before"},"value":{"kind":"Variable","name":{"kind":"Name","value":"before"}}},{"kind":"Argument","name":{"kind":"Name","value":"after"},"value":{"kind":"Variable","name":{"kind":"Name","value":"after"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"startCursor"}},{"kind":"Field","name":{"kind":"Name","value":"endCursor"}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}}]}},{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"definition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"make"}},{"kind":"Field","name":{"kind":"Name","value":"model"}},{"kind":"Field","name":{"kind":"Name","value":"year"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetVehiclesByClientIdQuery, GetVehiclesByClientIdQueryVariables>;
 export const DeveloperLicenseVehiclesQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DeveloperLicenseVehiclesQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"vehicles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"0"}},{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"privileged"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}}]}}]}}]} as unknown as DocumentNode<DeveloperLicenseVehiclesQueryQuery, DeveloperLicenseVehiclesQueryQueryVariables>;
 export const DeveloperLicenseByClientIdSummaryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DeveloperLicenseByClientIdSummary"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"clientId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]}}]} as unknown as DocumentNode<DeveloperLicenseByClientIdSummaryQuery, DeveloperLicenseByClientIdSummaryQueryVariables>;
