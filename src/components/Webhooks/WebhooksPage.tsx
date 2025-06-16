@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import './Webhooks.css';
 import { WebhookTable } from './WebhookTable';
 import Button from '@/components/Button/Button';
@@ -12,8 +12,8 @@ import { useQuery } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
 import { GenerateDevJWT } from '@/components/GenerateDevJWT';
-import { getAllDevJwts } from '@/utils/devJwt';
 import { Label } from '@/components/Label';
+import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 
 export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
   query GetDeveloperLicensesForWebhooks($owner: Address!) {
@@ -38,33 +38,6 @@ interface LicenseSelectorForm {
     privateKey: string;
   };
 }
-
-interface StoredJwt {
-  token: string;
-  createdAt: number;
-}
-
-const useGetDevJwts = (clientId: string) => {
-  const [devJwts, setDevJwts] = useState<StoredJwt[]>([]);
-
-  const refetch = useCallback(() => {
-    if (clientId) {
-      const tokens = getAllDevJwts(clientId);
-      setDevJwts(tokens);
-    } else {
-      setDevJwts([]);
-    }
-  }, [clientId]);
-
-  useEffect(() => {
-    refetch();
-  }, [clientId, refetch]);
-
-  return {
-    devJwts,
-    refetch,
-  };
-};
 
 export const WebhooksPage = () => {
   const { currentUser } = useGlobalAccount();

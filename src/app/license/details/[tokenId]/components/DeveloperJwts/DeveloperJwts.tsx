@@ -2,17 +2,23 @@ import { FC, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Section, SectionHeader } from '@/components/Section';
 import { Table } from '@/components/Table';
-import { getAllDevJwts, removeDevJwt } from '@/utils/devJwt';
+import { removeDevJwt } from '@/utils/devJwt';
 import { GenerateDevJWT } from '@/components/GenerateDevJWT';
 import { jwtDecode } from 'jwt-decode';
 import { Button } from '@/components/Button';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { CopyButton } from '@/components/CopyButton';
+import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
   fragment DeveloperJwtsFragment on DeveloperLicense {
     clientId
+    redirectURIs(first:100) {
+      nodes {
+        uri
+      }
+    }
   }
 `);
 
@@ -22,12 +28,12 @@ interface Props {
 
 export const DeveloperJwts: FC<Props> = ({ license }) => {
   const fragment = useFragment(DEVELOPER_JWTS_FRAGMENT, license);
-  const [jwts, setJwts] = useState(getAllDevJwts(fragment.clientId));
+  const { devJwts, refetch } = useGetDevJwts(fragment.clientId);
   const [jwtToDelete, setJwtToDelete] = useState<string>();
 
   const handleDelete = (token: string) => {
     removeDevJwt(fragment.clientId, token);
-    setJwts(getAllDevJwts(fragment.clientId));
+    refetch();
   };
 
   const renderCopyRedirectUriAction = (item: { token: string }) => (
@@ -54,9 +60,10 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       name: 'token',
       label: 'JWT',
       render: (item: { token: string }) => {
-        const visiblePart = item.token.slice(0, 16);
-        const maskedPart = '*'.repeat(32);
-        return <span>{`${visiblePart}${maskedPart}`}</span>;
+        const visibleStart = item.token.slice(0, 16);
+        const visibleEnd = item.token.slice(-4);
+        const maskedPart = '*'.repeat(28);
+        return <span>{`${visibleStart}${maskedPart}${visibleEnd}`}</span>;
       },
     },
     {
@@ -88,15 +95,16 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       <SectionHeader title="Developer JWTs">
         <GenerateDevJWT
           clientId={fragment.clientId}
-          domain=""
+          domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
           buttonText="Generate new JWT"
+          onSuccess={refetch}
         />
       </SectionHeader>
-      {jwts.length > 0 ? (
+      {devJwts.length > 0 ? (
         <Table
           columns={columns}
           // @ts-expect-error data type
-          data={jwts}
+          data={devJwts}
           actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
         />
       ) : (
