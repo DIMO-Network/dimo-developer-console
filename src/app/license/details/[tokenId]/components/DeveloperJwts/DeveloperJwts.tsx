@@ -10,9 +10,11 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { CopyButton } from '@/components/CopyButton';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import { useIsLicenseOwner } from '@/hooks';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
   fragment DeveloperJwtsFragment on DeveloperLicense {
+    owner
     clientId
     redirectURIs(first:100) {
       nodes {
@@ -30,6 +32,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
   const fragment = useFragment(DEVELOPER_JWTS_FRAGMENT, license);
   const { devJwts, refetch } = useGetDevJwts(fragment.clientId);
   const [jwtToDelete, setJwtToDelete] = useState<string>();
+  const isLicenseOwner = useIsLicenseOwner(fragment);
 
   const handleDelete = (token: string) => {
     removeDevJwt(fragment.clientId, token);
@@ -91,6 +94,10 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       },
     },
   ];
+
+  if (!isLicenseOwner) {
+    return null;
+  }
 
   return (
     <Section>
