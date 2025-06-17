@@ -1,4 +1,4 @@
-import { FC, useCallback, useContext, useMemo, useState } from 'react';
+import { FC, useCallback, useContext, useMemo, useState, useEffect } from 'react';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
@@ -29,6 +29,14 @@ export const GenerateDevJWTModal: FC<IProps> = ({
   const [generatedKey, setGeneratedKey] = useState('');
   const { setNotification } = useContext(NotificationContext);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setText('');
+      setGeneratedKey('');
+      setIsLoading(false);
+    }
+  }, [isOpen]);
+
   const handleGenerate = useCallback(async () => {
     if (!text) {
       return setNotification('Please enter a valid API key', '', 'error');
@@ -47,7 +55,6 @@ export const GenerateDevJWTModal: FC<IProps> = ({
       onSuccess?.();
     } catch (err) {
       captureException(err);
-      console.error('Failed to generate developer JWT', err);
       setNotification('Failed to generate developer JWT', '', 'error');
     } finally {
       setIsLoading(false);

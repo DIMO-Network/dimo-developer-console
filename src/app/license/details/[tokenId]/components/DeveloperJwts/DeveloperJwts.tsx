@@ -36,16 +36,18 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
     refetch();
   };
 
-  const renderCopyRedirectUriAction = (item: { token: string }) => (
+  const renderCopyButton = (item: { token: string }) => (
     <CopyButton
+      key={`item_${item.token}_copy_button`}
       value={item.token}
       onCopySuccessMessage="JWT copied!"
       className="button table-action-button"
     />
   );
 
-  const renderDeleteRedirectUriAction = (item: { token: string }) => (
+  const renderDeleteButton = (item: { token: string }) => (
     <Button
+      key={`item_${item.token}_delete_button`}
       className="table-action-button"
       title="Delete JWT"
       type="button"
@@ -104,7 +106,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
         <Table
           columns={columns}
           data={devJwts}
-          actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
+          actions={[renderCopyButton, renderDeleteButton]}
         />
       ) : (
         <p className="text-text-secondary">No developer JWTs found</p>
