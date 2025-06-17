@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import './Webhooks.css';
 import { WebhookTable } from './WebhookTable';
 import Button from '@/components/Button/Button';
@@ -11,9 +11,9 @@ import { useGlobalAccount } from '@/hooks';
 import { useQuery } from '@apollo/client';
 import { useForm } from 'react-hook-form';
 import { SelectField } from '@/components/SelectField';
-import { GenerateDevJWTModal } from '@/components/GenerateDevJWTModal';
-import { getDevJwt } from '@/utils/devJwt';
+import { GenerateDevJWT } from '@/components/GenerateDevJWT';
 import { Label } from '@/components/Label';
+import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 
 export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
   query GetDeveloperLicensesForWebhooks($owner: Address!) {
@@ -39,31 +39,7 @@ interface LicenseSelectorForm {
   };
 }
 
-const useGetDevJwt = (clientId: string) => {
-  const [devJwt, setDevJwt] = useState('');
-
-  const refetch = useCallback(() => {
-    if (clientId) {
-      const item = getDevJwt(clientId);
-      if (item) {
-        return setDevJwt(item);
-      }
-    }
-    return setDevJwt('');
-  }, [clientId]);
-
-  useEffect(() => {
-    refetch();
-  }, [clientId, refetch]);
-
-  return {
-    devJwt,
-    refetch,
-  };
-};
-
 export const WebhooksPage = () => {
-  const [showGenerateJwtModal, setShowGenerateJwtModal] = useState(false);
   const { currentUser } = useGlobalAccount();
   const { data } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
     variables: { owner: currentUser?.smartContractAddress ?? '' },
@@ -76,16 +52,11 @@ export const WebhooksPage = () => {
     defaultValues: { developerLicense: { clientId: '', domain: '', privateKey: '' } },
   });
   const { clientId, domain } = watch('developerLicense');
-  const { devJwt, refetch } = useGetDevJwt(clientId);
+  const { devJwts, refetch } = useGetDevJwts(clientId);
+  const hasValidJwt = devJwts.length > 0;
 
   return (
     <div className="flex flex-col gap-6">
-      <GenerateDevJWTModal
-        isOpen={showGenerateJwtModal}
-        setIsOpen={setShowGenerateJwtModal}
-        tokenParams={{ client_id: clientId, domain: domain }}
-        onSuccess={refetch}
-      />
       <div className="flex flex-row gap-1 pb-2 border-b-cta-default border-b">
         <p className={'text-base text-text-secondary font-medium'}>
           Receive real-time updates from events
@@ -122,28 +93,29 @@ export const WebhooksPage = () => {
         />
       </div>
 
-      {clientId && domain && !devJwt && (
+      {clientId && domain && !hasValidJwt && (
         <div>
           <p className={'text-text-secondary'}>
             Please generate a Developer JWT to view your webhook configurations.
           </p>
-          <Button className={'mt-2'} onClick={() => setShowGenerateJwtModal(true)}>
-            Generate developer JWT
-          </Button>
+          <GenerateDevJWT
+            clientId={clientId}
+            domain={domain}
+            onSuccess={refetch}
+            buttonClassName="mt-2"
+          />
         </div>
       )}
 
-      {!!devJwt && (
-        <div>
-          <Section>
-            <SectionHeader title={'Webhooks'}>
-              <Link href={`/webhooks/create/${clientId}`}>
-                <Button className="dark with-icon">+ Create a webhook</Button>
-              </Link>
-            </SectionHeader>
-            <WebhookTable clientId={clientId} />
-          </Section>
-        </div>
+      {hasValidJwt && (
+        <Section>
+          <SectionHeader title={'Webhooks'}>
+            <Link href={`/webhooks/create/${clientId}`}>
+              <Button className="dark with-icon">+ Create a webhook</Button>
+            </Link>
+          </SectionHeader>
+          <WebhookTable clientId={clientId} />
+        </Section>
       )}
     </div>
   );

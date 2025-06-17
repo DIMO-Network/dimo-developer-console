@@ -10,6 +10,7 @@ import { Signers } from '@/app/license/details/[tokenId]/components/Signers';
 import { RedirectUris } from '@/app/license/details/[tokenId]/components/RedirectUris';
 import { Loader } from '@/components/Loader';
 import { Vehicles } from '@/app/license/details/[tokenId]/components/Vehicles';
+import { DeveloperJwts } from '@/app/license/details/[tokenId]/components/DeveloperJwts';
 import { useRouter } from 'next/navigation';
 
 const GET_DEVELOPER_LICENSE = gql(`
@@ -19,6 +20,7 @@ const GET_DEVELOPER_LICENSE = gql(`
       ...SignerFragment
       ...RedirectUriFragment
       ...DeveloperLicenseVehiclesFragment
+      ...DeveloperJwtsFragment
     }
   }
 `);
@@ -71,6 +73,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
             <Summary licenseSummary={data.developerLicense} refetch={handleRefetch} />
           </div>
           <div className={'flex flex-col gap-6 pt-6'}>
+            <DeveloperJwts license={data.developerLicense} />
             <Signers license={data.developerLicense} refetch={handleRefetch} />
             <RedirectUris license={data.developerLicense} refetch={handleRefetch} />
             <Vehicles license={data.developerLicense} />
