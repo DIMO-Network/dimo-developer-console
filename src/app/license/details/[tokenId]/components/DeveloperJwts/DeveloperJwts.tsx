@@ -114,7 +114,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       <DeleteConfirmationModal
         isOpen={!!jwtToDelete}
         title="Are you sure you want to delete this JWT?"
-        subtitle="You will no longer be able to use this JWT in your app."
+        subtitle=""
         onConfirm={() => {
           if (jwtToDelete) {
             handleDelete(jwtToDelete);
