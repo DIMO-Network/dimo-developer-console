@@ -7,6 +7,7 @@ import { NewWebhookForm } from '@/components/Webhooks/NewWebhookForm';
 import { useRouter } from 'next/navigation';
 import { getDevJwt } from '@/utils/devJwt';
 import { FormStepContextProvider } from '@/hoc';
+import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const { clientId } = use(params);
@@ -19,11 +20,16 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     }
   }, [clientId, devJwt, router]);
 
+  const onComplete = () => {
+    invalidateQuery(clientId);
+    router.replace('/webhooks');
+  };
+
   return (
     <FormStepContextProvider>
       <div className={'flex flex-1 flex-row'}>
         <div className={'flex flex-col flex-1'}>
-          <NewWebhookForm clientId={clientId} />
+          <NewWebhookForm clientId={clientId} onComplete={onComplete} />
         </div>
         <RightPanel>
           <FormStepTracker />

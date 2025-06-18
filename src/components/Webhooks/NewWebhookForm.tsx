@@ -5,8 +5,6 @@ import React, { useContext } from 'react';
 import { WebhookFormInput } from '@/types/webhook';
 import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
-import { invalidateQuery } from '@/hooks/queries/useWebhooks';
-import { useRouter } from 'next/navigation';
 import { captureException } from '@sentry/nextjs';
 import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/create/SubscribeVehicles';
 import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
@@ -35,7 +33,13 @@ const FormStepComponent = () => {
   }
 };
 
-export const NewWebhookForm = ({ clientId }: { clientId: string }) => {
+export const NewWebhookForm = ({
+  clientId,
+  onComplete,
+}: {
+  clientId: string;
+  onComplete: () => void;
+}) => {
   const devJwt = getDevJwt(clientId);
   const {
     onPrevious,
@@ -46,7 +50,6 @@ export const NewWebhookForm = ({ clientId }: { clientId: string }) => {
     onSubmit,
     shouldExit,
   } = useWebhookCreateFormContext();
-  const router = useRouter();
   const { setNotification } = useContext(NotificationContext);
 
   const methods = useForm<WebhookFormInput>({
@@ -67,9 +70,9 @@ export const NewWebhookForm = ({ clientId }: { clientId: string }) => {
       const { message } = await onSubmit(data, devJwt);
       setNotification(message, '', 'success');
       if (shouldExit) {
-        invalidateQuery(clientId);
-        router.replace('/webhooks');
+        return onComplete();
       }
+      onNext();
     } catch (err) {
       captureException(err);
       setNotification('Something went wrong completing the operation', '', 'error');
