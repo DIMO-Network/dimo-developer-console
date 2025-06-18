@@ -8,17 +8,13 @@ import {
   WebhookFormStepName,
 } from '@/components/Webhooks/NewWebhookForm';
 import { useRouter } from 'next/navigation';
-import {
-  createWebhook,
-  formatAndGenerateCEL,
-  subscribeAllVehicles,
-  subscribeByCsv,
-} from '@/services/webhook';
+import { createWebhook, subscribeAllVehicles, subscribeByCsv } from '@/services/webhook';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { getDevJwt } from '@/utils/devJwt';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 import { captureException } from '@sentry/nextjs';
+import { formatWebhookFormData } from '@/utils/webhook';
 
 const STEPS = [
   WebhookFormStepName.CONFIGURE,
@@ -62,7 +58,6 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const { clientId } = use(params);
   const [createdWebhook, setCreatedWebhook] = useState<Webhook>();
   const { formStep, onNext, onPrevious } = useFormSteps();
-  // const [formStep, setFormStep] = useState<WebhookFormStepName>(STEPS[0]);
 
   const router = useRouter();
   const { setNotification } = useContext(NotificationContext);
@@ -74,24 +69,14 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     }
   }, [clientId, devJwt, router]);
 
-  const createWebhookFromInput = async (
-    formData: WebhookFormInput,
-    authToken: string,
-  ) => {
-    const { data, trigger } = await formatAndGenerateCEL(formData.cel);
-    return await createWebhook(
-      { ...formData, status: 'Active', data, trigger },
-      authToken,
-    );
-  };
-
   const handleSubmit = async (data: WebhookFormInput) => {
     try {
       if (!devJwt) {
         return setNotification('No devJWT found', '', 'error');
       }
-      const newWebhook = await createWebhookFromInput(data, devJwt);
-      setCreatedWebhook(newWebhook);
+      const webhookCreateData = formatWebhookFormData(data);
+      const webhook = await createWebhook(webhookCreateData, devJwt);
+      setCreatedWebhook(webhook);
       setNotification('Webhook created successfully', '', 'success', 3000);
       onNext();
     } catch (err: unknown) {

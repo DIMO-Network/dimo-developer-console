@@ -9,11 +9,11 @@ import {
   CELBuilder,
 } from '@/components/Webhooks/fields';
 import { Button } from '@/components/Button';
-import { formatAndGenerateCEL, updateWebhook } from '@/services/webhook';
+import { updateWebhook } from '@/services/webhook';
 import { getDevJwt } from '@/utils/devJwt';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 import { NotificationContext } from '@/context/notificationContext';
-import { extractCELFromWebhook } from '@/utils/webhook';
+import { extractCELFromWebhook, formatAndGenerateCEL } from '@/utils/webhook';
 import { useRouter } from 'next/navigation';
 import { DiscardChangesModal } from '@/app/webhooks/edit/[clientId]/[webhookId]/components/DiscardChangesModal';
 import { SubscribedVehicles } from '@/components/Webhooks/edit/SubscribedVehicles';
@@ -61,7 +61,7 @@ export const EditWebhookForm: React.FC<EditWebhookFormProps> = ({
 
   const onSubmit = async (formData: WebhookFormInput) => {
     try {
-      const { trigger, data } = await formatAndGenerateCEL(formData.cel);
+      const { trigger, data } = formatAndGenerateCEL(formData.cel);
       await updateWebhook(
         webhook.id,
         { ...formData, data, trigger },
