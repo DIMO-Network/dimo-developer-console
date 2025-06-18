@@ -1,3 +1,5 @@
+import { WebhookFormStepName } from '@/components/Webhooks/NewWebhookForm';
+
 export interface Webhook {
   id: string;
   service: string;
@@ -52,4 +54,22 @@ export interface Condition {
   field: string;
   operator: string;
   value: string;
+}
+
+export class FormStep {
+  private stepName: WebhookFormStepName;
+  private title: string;
+
+  constructor(stepName: WebhookFormStepName, title: string) {
+    this.stepName = stepName;
+    this.title = title;
+  }
+
+  getName() {
+    return this.stepName;
+  }
+
+  getTitle() {
+    return this.title;
+  }
 }

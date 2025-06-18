@@ -1,10 +1,18 @@
 'use client';
 
 import { FormProvider, useForm } from 'react-hook-form';
-import Button from '@/components/Button/Button';
-import React from 'react';
+import React, { useContext } from 'react';
 import { WebhookFormInput } from '@/types/webhook';
-import { FormStep } from '@/app/webhooks/create/[clientId]/components/View';
+import { getDevJwt } from '@/utils/devJwt';
+import { NotificationContext } from '@/context/notificationContext';
+import { invalidateQuery } from '@/hooks/queries/useWebhooks';
+import { useRouter } from 'next/navigation';
+import { captureException } from '@sentry/nextjs';
+import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/create/SubscribeVehicles';
+import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
+import { WebhookConfigStep } from '@/components/Webhooks/create/Configuration';
+import Footer from './Footer';
+import { useWebhookCreateFormContext } from '@/hoc';
 
 export enum WebhookFormStepName {
   CONFIGURE = 'configure',
@@ -12,21 +20,35 @@ export enum WebhookFormStepName {
   SPECIFY_VEHICLES = 'specify_vehicles',
 }
 
-export const NewWebhookForm = ({
-  currentStep,
-  onNext,
-  onSubmit,
-  onPrevious,
-  steps,
-  shouldSubmit,
-}: {
-  currentStep: FormStep;
-  steps: FormStep[];
-  onNext: () => void;
-  onSubmit: (data: WebhookFormInput) => void;
-  onPrevious: () => void;
-  shouldSubmit: boolean;
-}) => {
+const FormStepComponent = () => {
+  const { getCurrentStep } = useWebhookCreateFormContext();
+  const step = getCurrentStep();
+  switch (step.getName()) {
+    case WebhookFormStepName.SPECIFY_VEHICLES:
+      return <WebhookSubscribeVehiclesStep />;
+    case WebhookFormStepName.DELIVERY:
+      return <WebhookDeliveryStep />;
+    case WebhookFormStepName.CONFIGURE:
+      return <WebhookConfigStep />;
+    default:
+      return null;
+  }
+};
+
+export const NewWebhookForm = ({ clientId }: { clientId: string }) => {
+  const devJwt = getDevJwt(clientId);
+  const {
+    onPrevious,
+    onNext,
+    isFirstStep,
+    isLastStep,
+    shouldSubmit,
+    onSubmit,
+    shouldExit,
+  } = useWebhookCreateFormContext();
+  const router = useRouter();
+  const { setNotification } = useContext(NotificationContext);
+
   const methods = useForm<WebhookFormInput>({
     mode: 'onChange',
     defaultValues: {
@@ -37,39 +59,37 @@ export const NewWebhookForm = ({
     },
   });
 
-  const getSecondaryButtonProps = () => {
-    const isFirstStep = currentStep === steps[0];
-    return {
-      text: isFirstStep ? 'Cancel' : 'Previous',
-    };
-  };
-
-  const { text: secondaryButtonText } = getSecondaryButtonProps();
-  const isLastStep = currentStep === steps[steps.length - 1];
-  const FormStepComponent = currentStep.getComponent();
+  const wrappedOnSubmit = methods.handleSubmit(async (data: WebhookFormInput) => {
+    if (!devJwt) {
+      return setNotification('No developer JWT found', '', 'error');
+    }
+    try {
+      const { message } = await onSubmit(data, devJwt);
+      setNotification(message, '', 'success');
+      if (shouldExit) {
+        invalidateQuery(clientId);
+        router.replace('/webhooks');
+      }
+    } catch (err) {
+      captureException(err);
+      setNotification('Something went wrong completing the operation', '', 'error');
+    }
+  });
 
   return (
     <FormProvider {...methods}>
       <form className={'flex flex-1 flex-col gap-6'}>
         <FormStepComponent />
-        <div className={'flex flex-col-reverse md:flex-row pt-6 flex-1 gap-4'}>
-          <Button
-            className={'flex-1 primary-outline'}
-            onClick={onPrevious}
-            type={'button'}
-          >
-            {secondaryButtonText}
-          </Button>
-          <Button
-            className={'flex-1'}
-            type={'button'}
-            onClick={shouldSubmit ? methods.handleSubmit(onSubmit) : onNext}
-            disabled={!methods.formState.isValid}
-            loading={methods.formState.isSubmitting}
-          >
-            {isLastStep ? 'Finish' : 'Next'}
-          </Button>
-        </div>
+        <Footer
+          onPrevious={onPrevious}
+          onNext={onNext}
+          onSubmit={wrappedOnSubmit}
+          isFirstStep={isFirstStep}
+          isLastStep={isLastStep}
+          shouldSubmit={shouldSubmit}
+          isValid={methods.formState.isValid}
+          isSubmitting={methods.formState.isSubmitting}
+        />
       </form>
     </FormProvider>
   );

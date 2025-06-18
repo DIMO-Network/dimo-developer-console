@@ -1,17 +1,19 @@
 import React from 'react';
 import clsx from 'classnames';
 import { CheckIcon } from '@/components/Icons';
-import { FormStep } from '@/app/webhooks/create/[clientId]/components/View';
 
-export const FormStepTracker = ({ steps }: { steps: FormStep[] }) => {
+import { FormStep, useWebhookCreateFormContext } from '@/hoc';
+
+export const FormStepTracker = () => {
+  const { steps, stepIndex } = useWebhookCreateFormContext();
   return (
     <div className={'flex flex-col gap-4 p-4 bg-surface-default rounded-2xl'}>
       <ol className={'list-decimal space-y-4'}>
         {steps.map((step, index) => (
           <FormStepTrackerRow
             key={index}
-            isActive={false}
-            isComplete={false}
+            isActive={stepIndex === index}
+            isComplete={index < stepIndex}
             step={step}
           />
         ))}
@@ -19,6 +21,7 @@ export const FormStepTracker = ({ steps }: { steps: FormStep[] }) => {
     </div>
   );
 };
+
 const FormStepTrackerRow = ({
   step,
   isActive,
