@@ -1,7 +1,7 @@
 'use client';
 
 import { RightPanel } from '@/components/RightPanel';
-import React, { use, useContext, useEffect, useState } from 'react';
+import React, { use, useContext, useEffect, useMemo, useState } from 'react';
 import { FormStepTracker } from '@/app/webhooks/create/[clientId]/components/FormStepTracker';
 import {
   NewWebhookForm,
@@ -15,16 +15,62 @@ import { getDevJwt } from '@/utils/devJwt';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 import { captureException } from '@sentry/nextjs';
 import { formatWebhookFormData } from '@/utils/webhook';
+import { WebhookConfigStep } from '@/components/Webhooks/create/Configuration';
+import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
+import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/create/SubscribeVehicles';
+
+export class FormStep {
+  private stepName: WebhookFormStepName;
+  private title: string;
+  private Component: React.ElementType;
+
+  constructor(
+    stepName: WebhookFormStepName,
+    title: string,
+    Component: React.ElementType,
+  ) {
+    this.stepName = stepName;
+    this.title = title;
+    this.Component = Component;
+  }
+
+  getName() {
+    return this.stepName;
+  }
+
+  getTitle() {
+    return this.title;
+  }
+
+  getComponent() {
+    return this.Component;
+  }
+
+  canSubmit() {
+    return (
+      this.stepName === WebhookFormStepName.DELIVERY ||
+      this.stepName === WebhookFormStepName.SPECIFY_VEHICLES
+    );
+  }
+}
 
 const STEPS = [
-  WebhookFormStepName.CONFIGURE,
-  WebhookFormStepName.DELIVERY,
-  WebhookFormStepName.SPECIFY_VEHICLES,
+  new FormStep(WebhookFormStepName.CONFIGURE, 'Configure', WebhookConfigStep),
+  new FormStep(WebhookFormStepName.DELIVERY, 'Specify delivery', WebhookDeliveryStep),
+  new FormStep(
+    WebhookFormStepName.SPECIFY_VEHICLES,
+    'Specify vehicles',
+    WebhookSubscribeVehiclesStep,
+  ),
 ];
 
 const useFormSteps = () => {
-  const [formStep, setFormStep] = useState<WebhookFormStepName>(STEPS[0]);
+  const [formStep, setFormStep] = useState<FormStep>(STEPS[0]);
   const router = useRouter();
+
+  const shouldSubmit = useMemo(() => {
+    return formStep.canSubmit();
+  }, [formStep]);
 
   const onNext = () => {
     const curStepIndex = STEPS.indexOf(formStep);
@@ -51,13 +97,14 @@ const useFormSteps = () => {
     formStep,
     onNext,
     onPrevious,
+    shouldSubmit,
   };
 };
 
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const { clientId } = use(params);
   const [createdWebhook, setCreatedWebhook] = useState<Webhook>();
-  const { formStep, onNext, onPrevious } = useFormSteps();
+  const { formStep, onNext, onPrevious, shouldSubmit } = useFormSteps();
 
   const router = useRouter();
   const { setNotification } = useContext(NotificationContext);
@@ -137,19 +184,18 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
         <NewWebhookForm
           currentStep={formStep}
           steps={STEPS}
-          shouldSubmit={
-            formStep === WebhookFormStepName.DELIVERY ||
-            formStep === WebhookFormStepName.SPECIFY_VEHICLES
-          }
+          shouldSubmit={shouldSubmit}
           onSubmit={
-            formStep === WebhookFormStepName.DELIVERY ? handleSubmit : onSubscribe
+            formStep.getName() === WebhookFormStepName.DELIVERY
+              ? handleSubmit
+              : onSubscribe
           }
           onNext={onNext}
           onPrevious={onPrevious}
         />
       </div>
       <RightPanel>
-        <FormStepTracker currentStep={formStep} steps={STEPS} />
+        <FormStepTracker steps={STEPS} />
       </RightPanel>
     </div>
   );

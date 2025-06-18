@@ -1,30 +1,18 @@
 import React from 'react';
 import clsx from 'classnames';
 import { CheckIcon } from '@/components/Icons';
-import { WebhookFormStepName } from '@/components/Webhooks/NewWebhookForm';
+import { FormStep } from '@/app/webhooks/create/[clientId]/components/View';
 
-const formStepConfig = {
-  [WebhookFormStepName.CONFIGURE]: { text: 'Configure' },
-  [WebhookFormStepName.DELIVERY]: { text: 'Specify delivery' },
-  [WebhookFormStepName.SPECIFY_VEHICLES]: { text: 'Specify vehicles' },
-};
-
-export const FormStepTracker = ({
-  currentStep,
-  steps,
-}: {
-  currentStep: WebhookFormStepName;
-  steps: WebhookFormStepName[];
-}) => {
+export const FormStepTracker = ({ steps }: { steps: FormStep[] }) => {
   return (
     <div className={'flex flex-col gap-4 p-4 bg-surface-default rounded-2xl'}>
       <ol className={'list-decimal space-y-4'}>
-        {steps.map((step: WebhookFormStepName, index) => (
+        {steps.map((step, index) => (
           <FormStepTrackerRow
             key={index}
-            steps={steps}
+            isActive={false}
+            isComplete={false}
             step={step}
-            currentStep={currentStep}
           />
         ))}
       </ol>
@@ -33,15 +21,13 @@ export const FormStepTracker = ({
 };
 const FormStepTrackerRow = ({
   step,
-  steps,
-  currentStep,
+  isActive,
+  isComplete,
 }: {
-  step: WebhookFormStepName;
-  currentStep: WebhookFormStepName;
-  steps: WebhookFormStepName[];
+  step: FormStep;
+  isActive: boolean;
+  isComplete: boolean;
 }) => {
-  const isComplete = steps.indexOf(currentStep) > steps.indexOf(step);
-  const isActive = steps.indexOf(currentStep) === steps.indexOf(step);
   return (
     <li
       className={clsx(
@@ -62,7 +48,7 @@ const FormStepTrackerRow = ({
             )}
           />
         )}
-        <p>{formStepConfig[step].text}</p>
+        <p>{step.getTitle()}</p>
       </div>
     </li>
   );
