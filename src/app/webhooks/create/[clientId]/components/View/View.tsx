@@ -26,10 +26,43 @@ const STEPS = [
   WebhookFormStepName.SPECIFY_VEHICLES,
 ];
 
+const useFormSteps = () => {
+  const [formStep, setFormStep] = useState<WebhookFormStepName>(STEPS[0]);
+  const router = useRouter();
+
+  const onNext = () => {
+    const curStepIndex = STEPS.indexOf(formStep);
+    if (curStepIndex > -1 && curStepIndex < STEPS.length - 1) {
+      const nextStep = STEPS[curStepIndex + 1];
+      setFormStep(nextStep);
+    }
+  };
+
+  const onBack = () => {
+    router.replace('/webhooks');
+  };
+
+  const onPrevious = () => {
+    const curStepIndex = STEPS.indexOf(formStep);
+    if (curStepIndex === 0) {
+      return onBack();
+    }
+    const prevStep = STEPS[curStepIndex - 1];
+    setFormStep(prevStep);
+  };
+
+  return {
+    formStep,
+    onNext,
+    onPrevious,
+  };
+};
+
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const { clientId } = use(params);
   const [createdWebhook, setCreatedWebhook] = useState<Webhook>();
-  const [formStep, setFormStep] = useState<WebhookFormStepName>(STEPS[0]);
+  const { formStep, onNext, onPrevious } = useFormSteps();
+  // const [formStep, setFormStep] = useState<WebhookFormStepName>(STEPS[0]);
 
   const router = useRouter();
   const { setNotification } = useContext(NotificationContext);
@@ -111,27 +144,6 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const onFinish = () => {
     invalidateQuery(clientId);
     router.replace('/webhooks');
-  };
-
-  const onNext = () => {
-    const curStepIndex = STEPS.indexOf(formStep);
-    if (curStepIndex > -1 && curStepIndex < STEPS.length - 1) {
-      const nextStep = STEPS[curStepIndex + 1];
-      setFormStep(nextStep);
-    }
-  };
-
-  const onBack = () => {
-    router.replace('/webhooks');
-  };
-
-  const onPrevious = () => {
-    const curStepIndex = STEPS.indexOf(formStep);
-    if (curStepIndex === 0) {
-      return onBack();
-    }
-    const prevStep = STEPS[curStepIndex - 1];
-    setFormStep(prevStep);
   };
 
   return (
