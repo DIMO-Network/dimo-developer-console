@@ -9,7 +9,7 @@ const getOption = (license: LocalDeveloperLicense): SelectOption => ({
 
 const getOptions = (licenses: LocalDeveloperLicense[]) => {
   return [
-    { value: '', label: 'Select attribute', isPlaceholder: true },
+    { value: '', label: 'Select Developer License', isPlaceholder: true },
     ...licenses.map(getOption),
   ];
 };
