@@ -1,6 +1,7 @@
 import { LocalDeveloperLicense } from '@/types/webhook';
 import { SelectOption, SelectWithChevron } from '@/components/SelectWithChevron';
 import React from 'react';
+import { Label } from '@/components/Label';
 
 const getOption = (license: LocalDeveloperLicense): SelectOption => ({
   label: license.label,
@@ -26,10 +27,13 @@ export const DevLicenseSelector = ({
   };
 
   return (
-    <SelectWithChevron
-      options={getOptions(developerLicenses)}
-      onChange={handleChange}
-      defaultValue=""
-    />
+    <div className={'flex flex-col gap-2.5'}>
+      <Label>Select a Developer License</Label>
+      <SelectWithChevron
+        options={getOptions(developerLicenses)}
+        onChange={handleChange}
+        defaultValue=""
+      />
+    </div>
   );
 };

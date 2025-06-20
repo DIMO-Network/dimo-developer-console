@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import { LocalDeveloperLicense } from '@/types/webhook';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { NotificationContext } from '@/context/notificationContext';
-import { Label } from '@/components/Label';
 import { DevLicenseSelector } from '@/components/Webhooks/components/DeveloperLicenseSelector';
 import { Header } from '@/app/webhooks/components/Header/Header';
 import { MainWebhooksPageBody } from '@/app/webhooks/components/WebhooksPageBody/WebhooksPageBody';
@@ -24,14 +23,10 @@ export const WebhooksPage = () => {
   return (
     <div className="flex flex-col gap-6">
       <Header />
-      <div className={'flex flex-col gap-2.5'}>
-        <Label>Select a Developer License</Label>
-        <DevLicenseSelector
-          developerLicenses={developerLicenses}
-          onChange={onLicenseSelect}
-        />
-      </div>
-
+      <DevLicenseSelector
+        developerLicenses={developerLicenses}
+        onChange={onLicenseSelect}
+      />
       {!!selectedDeveloperLicense && (
         <MainWebhooksPageBody developerLicense={selectedDeveloperLicense} />
       )}

@@ -84,21 +84,21 @@ export type DeveloperLicenseForWebhook =
   GetDeveloperLicensesForWebhooksQuery['developerLicenses']['nodes'][0];
 
 export class LocalDeveloperLicense {
-  private remoteDeveloperLicense: DeveloperLicenseForWebhook;
+  private gqlDeveloperLicense: DeveloperLicenseForWebhook;
 
   constructor(remoteDeveloperLicense: DeveloperLicenseForWebhook) {
-    this.remoteDeveloperLicense = remoteDeveloperLicense;
+    this.gqlDeveloperLicense = remoteDeveloperLicense;
   }
 
   get clientId() {
-    return this.remoteDeveloperLicense.clientId;
+    return this.gqlDeveloperLicense.clientId;
   }
 
   get label() {
-    return this.remoteDeveloperLicense.alias || this.remoteDeveloperLicense.clientId;
+    return this.gqlDeveloperLicense.alias || this.gqlDeveloperLicense.clientId;
   }
 
   get firstRedirectURI() {
-    return this.remoteDeveloperLicense.redirectURIs.nodes[0].uri;
+    return this.gqlDeveloperLicense.redirectURIs.nodes[0].uri;
   }
 }
