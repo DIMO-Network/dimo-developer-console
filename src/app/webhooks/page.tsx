@@ -2,7 +2,7 @@
 
 import React, { Suspense, FC } from 'react';
 
-import { WebhooksPage as View } from './components/View';
+import { WebhooksPage as View } from './webhooksPage/View';
 
 const WebhooksPage: FC = () => {
   return (

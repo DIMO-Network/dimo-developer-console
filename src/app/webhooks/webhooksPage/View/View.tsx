@@ -3,8 +3,8 @@ import { LocalDeveloperLicense } from '@/types/webhook';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { NotificationContext } from '@/context/notificationContext';
 import { DevLicenseSelector } from '@/components/Webhooks/components/DeveloperLicenseSelector';
-import { Header } from '@/app/webhooks/components/Header/Header';
-import { MainWebhooksPageBody } from '@/app/webhooks/components/WebhooksPageBody/WebhooksPageBody';
+import { Header } from '@/app/webhooks/webhooksPage/Header';
+import { MainWebhooksPageBody } from '@/app/webhooks/webhooksPage/Body';
 
 export const WebhooksPage = () => {
   const [selectedDeveloperLicense, setSelectedDeveloperLicense] =

@@ -1,8 +1,11 @@
 import { LocalDeveloperLicense } from '@/types/webhook';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
-import { WebhooksSection } from '@/app/webhooks/components/WebhooksTableSection/WebhooksTableSection';
 import React from 'react';
+import { Section, SectionHeader } from '@/components/Section';
+import Link from 'next/link';
+import Button from '../../../../components/Button/Button';
+import { WebhookTable } from '@/components/Webhooks/WebhookTable';
 
 export const MainWebhooksPageBody = ({
   developerLicense,
@@ -20,5 +23,14 @@ export const MainWebhooksPageBody = ({
       />
     );
   }
-  return <WebhooksSection clientId={developerLicense.clientId} />;
+  return (
+    <Section>
+      <SectionHeader title={'Webhooks'}>
+        <Link href={`/webhooks/create/${developerLicense.clientId}`}>
+          <Button className="dark with-icon">+ Create a webhook</Button>
+        </Link>
+      </SectionHeader>
+      <WebhookTable clientId={developerLicense.clientId} />
+    </Section>
+  );
 };
