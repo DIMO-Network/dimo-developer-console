@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getAllDevJwts, StoredJwt } from '@/utils/devJwt';
 
-export const useGetDevJwts = (clientId: string) => {
+export const useGetDevJwts = (clientId?: string) => {
   const [devJwts, setDevJwts] = useState<StoredJwt[]>([]);
 
   const refetch = useCallback(() => {

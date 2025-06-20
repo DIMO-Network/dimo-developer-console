@@ -6,9 +6,6 @@ import { WebhookFormInput } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { capitalize } from 'lodash';
 import { ConditionRow } from '@/components/Webhooks/fields/CELBuilder/ConditionRow';
-
-import './CELBuilder.css';
-import '../../../TextField/TextField.css';
 import { formatAndGenerateCEL } from '@/utils/webhook';
 
 export const CELBuilder = () => {

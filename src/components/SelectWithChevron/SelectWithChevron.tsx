@@ -1,8 +1,15 @@
 import React from 'react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 
+import './SelectWithChevron.css';
+export interface SelectOption {
+  value: string | number;
+  label: string;
+  isPlaceholder?: boolean;
+}
+
 interface SelectWithChevronProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  options?: { value: string | number; label: string; isPlaceholder?: boolean }[];
+  options?: SelectOption[];
 }
 
 export const SelectWithChevron: React.FC<SelectWithChevronProps> = ({
