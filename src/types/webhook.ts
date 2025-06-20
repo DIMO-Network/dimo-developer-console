@@ -53,3 +53,27 @@ export interface Condition {
   operator: string;
   value: string;
 }
+
+export enum WebhookFormStepName {
+  CONFIGURE = 'configure',
+  DELIVERY = 'delivery',
+  SPECIFY_VEHICLES = 'specify_vehicles',
+}
+
+export class FormStep {
+  private stepName: WebhookFormStepName;
+  private title: string;
+
+  constructor(stepName: WebhookFormStepName, title: string) {
+    this.stepName = stepName;
+    this.title = title;
+  }
+
+  getName() {
+    return this.stepName;
+  }
+
+  getTitle() {
+    return this.title;
+  }
+}

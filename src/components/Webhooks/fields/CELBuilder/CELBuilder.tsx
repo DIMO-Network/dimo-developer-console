@@ -3,13 +3,13 @@ import React, { useContext, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { Button } from '@/components/Button';
 import { WebhookFormInput } from '@/types/webhook';
-import { formatAndGenerateCEL } from '@/services/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { capitalize } from 'lodash';
 import { ConditionRow } from '@/components/Webhooks/fields/CELBuilder/ConditionRow';
 
 import './CELBuilder.css';
 import '../../../TextField/TextField.css';
+import { formatAndGenerateCEL } from '@/utils/webhook';
 
 export const CELBuilder = () => {
   const { control, getValues, watch } = useFormContext<WebhookFormInput>();
@@ -26,7 +26,7 @@ export const CELBuilder = () => {
     try {
       const { cel: celValues } = getValues();
       setLoadingCel(true);
-      const response = await formatAndGenerateCEL(celValues);
+      const response = formatAndGenerateCEL(celValues);
       setCel(JSON.stringify(response, null, 2));
     } catch (err: unknown) {
       let errorMsg = 'Error generating CEL';
