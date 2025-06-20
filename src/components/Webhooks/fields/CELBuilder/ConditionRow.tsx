@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import React, { useEffect } from 'react';
-import { SelectWithChevron } from '@/components/Webhooks/fields/CELBuilder/SelectWithChevron';
+import { SelectWithChevron } from '@/components/SelectWithChevron/SelectWithChevron';
 import { Button } from '@/components/Button';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { conditionsConfig } from '@/utils/webhook';

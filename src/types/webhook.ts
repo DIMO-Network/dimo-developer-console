@@ -1,3 +1,5 @@
+import { GetDeveloperLicensesForWebhooksQuery } from '@/gql/graphql';
+
 export interface Webhook {
   id: string;
   service: string;
@@ -75,5 +77,28 @@ export class FormStep {
 
   getTitle() {
     return this.title;
+  }
+}
+
+export type DeveloperLicenseForWebhook =
+  GetDeveloperLicensesForWebhooksQuery['developerLicenses']['nodes'][0];
+
+export class LocalDeveloperLicense {
+  private remoteDeveloperLicense: DeveloperLicenseForWebhook;
+
+  constructor(remoteDeveloperLicense: DeveloperLicenseForWebhook) {
+    this.remoteDeveloperLicense = remoteDeveloperLicense;
+  }
+
+  get clientId() {
+    return this.remoteDeveloperLicense.clientId;
+  }
+
+  get label() {
+    return this.remoteDeveloperLicense.alias || this.remoteDeveloperLicense.clientId;
+  }
+
+  get firstRedirectURI() {
+    return this.remoteDeveloperLicense.redirectURIs.nodes[0].uri;
   }
 }

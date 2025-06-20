@@ -3,7 +3,7 @@ import Button from '@/components/Button/Button';
 import { GenerateDevJWTModal } from '@/components/GenerateDevJWTModal';
 
 interface GenerateDevJWTProps {
-  clientId: string;
+  clientId?: string;
   domain?: string | null;
   onSuccess?: () => void;
   buttonText?: string;
@@ -32,7 +32,7 @@ export const GenerateDevJWT: FC<GenerateDevJWTProps> = ({
       <GenerateDevJWTModal
         isOpen={showGenerateJwtModal}
         setIsOpen={setShowGenerateJwtModal}
-        tokenParams={{ client_id: clientId, domain: domain ?? '' }}
+        tokenParams={{ client_id: clientId ?? '', domain: domain ?? '' }}
         onSuccess={onSuccess}
       />
     </>
