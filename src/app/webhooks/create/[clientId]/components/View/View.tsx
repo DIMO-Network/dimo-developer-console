@@ -14,6 +14,13 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const router = useRouter();
   const devJwt = getDevJwt(clientId);
 
+  const getToken = () => {
+    if (!devJwt) {
+      throw new Error('No devJWT found');
+    }
+    return devJwt;
+  };
+
   useEffect(() => {
     if (!devJwt) {
       router.replace('/webhooks');
@@ -29,7 +36,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     <FormStepContextProvider>
       <div className={'flex flex-1 flex-row'}>
         <div className={'flex flex-col flex-1'}>
-          <NewWebhookForm clientId={clientId} onComplete={onComplete} />
+          <NewWebhookForm onComplete={onComplete} getToken={getToken} />
         </div>
         <RightPanel>
           <FormStepTracker />

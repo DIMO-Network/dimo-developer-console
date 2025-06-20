@@ -2,8 +2,7 @@
 
 import { FormProvider, useForm } from 'react-hook-form';
 import React, { useContext } from 'react';
-import { WebhookFormInput } from '@/types/webhook';
-import { getDevJwt } from '@/utils/devJwt';
+import { WebhookFormInput, WebhookFormStepName } from '@/types/webhook';
 import { NotificationContext } from '@/context/notificationContext';
 import { captureException } from '@sentry/nextjs';
 import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/create/SubscribeVehicles';
@@ -11,12 +10,6 @@ import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
 import { WebhookConfigStep } from '@/components/Webhooks/create/Configuration';
 import Footer from './Footer';
 import { useWebhookCreateFormContext } from '@/hoc';
-
-export enum WebhookFormStepName {
-  CONFIGURE = 'configure',
-  DELIVERY = 'delivery',
-  SPECIFY_VEHICLES = 'specify_vehicles',
-}
 
 const FormStepComponent = () => {
   const { getCurrentStep } = useWebhookCreateFormContext();
@@ -34,22 +27,14 @@ const FormStepComponent = () => {
 };
 
 export const NewWebhookForm = ({
-  clientId,
   onComplete,
+  getToken,
 }: {
-  clientId: string;
   onComplete: () => void;
+  getToken: () => string;
 }) => {
-  const devJwt = getDevJwt(clientId);
-  const {
-    onPrevious,
-    onNext,
-    isFirstStep,
-    isLastStep,
-    shouldSubmit,
-    onSubmit,
-    shouldExit,
-  } = useWebhookCreateFormContext();
+  const { onPrevious, onNext, isFirstStep, isLastStep, shouldSubmit, onSubmit } =
+    useWebhookCreateFormContext();
   const { setNotification } = useContext(NotificationContext);
 
   const methods = useForm<WebhookFormInput>({
@@ -63,13 +48,10 @@ export const NewWebhookForm = ({
   });
 
   const wrappedOnSubmit = methods.handleSubmit(async (data: WebhookFormInput) => {
-    if (!devJwt) {
-      return setNotification('No developer JWT found', '', 'error');
-    }
     try {
-      const { message } = await onSubmit(data, devJwt);
+      const { message } = await onSubmit(data, getToken());
       setNotification(message, '', 'success');
-      if (shouldExit) {
+      if (isLastStep) {
         return onComplete();
       }
       onNext();

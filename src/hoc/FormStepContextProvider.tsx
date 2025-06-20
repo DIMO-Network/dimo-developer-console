@@ -1,4 +1,3 @@
-import { WebhookFormStepName } from '@/components/Webhooks/NewWebhookForm';
 import React, {
   createContext,
   FC,
@@ -8,7 +7,12 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { FormStep, Webhook, WebhookFormInput } from '@/types/webhook';
+import {
+  FormStep,
+  Webhook,
+  WebhookFormInput,
+  WebhookFormStepName,
+} from '@/types/webhook';
 import { formatWebhookFormData } from '@/utils/webhook';
 import { createWebhook, subscribeAllVehicles, subscribeByCsv } from '@/services/webhook';
 
@@ -30,7 +34,6 @@ interface ContextProps {
   updateCreatedWebhook: (webhook: Webhook) => void;
   shouldSubmit: boolean;
   onSubmit: (data: WebhookFormInput, token: string) => Promise<{ message: string }>;
-  shouldExit: boolean;
 }
 
 export const FormStepContext = createContext<ContextProps | undefined>(undefined);
@@ -125,7 +128,6 @@ export const FormStepContextProvider: FC<PropsWithChildren> = ({ children }) => 
         updateCreatedWebhook,
         shouldSubmit,
         onSubmit,
-        shouldExit: isLastStep,
       }}
     >
       {children}

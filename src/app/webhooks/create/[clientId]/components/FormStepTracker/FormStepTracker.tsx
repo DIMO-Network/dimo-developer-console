@@ -1,8 +1,7 @@
 import React from 'react';
 import clsx from 'classnames';
 import { CheckIcon } from '@/components/Icons';
-
-import { FormStep, useWebhookCreateFormContext } from '@/hoc';
+import { useWebhookCreateFormContext } from '@/hoc';
 
 export const FormStepTracker = () => {
   const { steps, stepIndex } = useWebhookCreateFormContext();
@@ -14,7 +13,7 @@ export const FormStepTracker = () => {
             key={index}
             isActive={stepIndex === index}
             isComplete={index < stepIndex}
-            step={step}
+            title={step.getTitle()}
           />
         ))}
       </ol>
@@ -23,11 +22,11 @@ export const FormStepTracker = () => {
 };
 
 const FormStepTrackerRow = ({
-  step,
+  title,
   isActive,
   isComplete,
 }: {
-  step: FormStep;
+  title: string;
   isActive: boolean;
   isComplete: boolean;
 }) => {
@@ -51,7 +50,7 @@ const FormStepTrackerRow = ({
             )}
           />
         )}
-        <p>{step.getTitle()}</p>
+        <p>{title}</p>
       </div>
     </li>
   );

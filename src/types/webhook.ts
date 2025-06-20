@@ -1,5 +1,3 @@
-import { WebhookFormStepName } from '@/components/Webhooks/NewWebhookForm';
-
 export interface Webhook {
   id: string;
   service: string;
@@ -54,6 +52,12 @@ export interface Condition {
   field: string;
   operator: string;
   value: string;
+}
+
+export enum WebhookFormStepName {
+  CONFIGURE = 'configure',
+  DELIVERY = 'delivery',
+  SPECIFY_VEHICLES = 'specify_vehicles',
 }
 
 export class FormStep {
