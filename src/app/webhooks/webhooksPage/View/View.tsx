@@ -4,13 +4,16 @@ import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidD
 import { NotificationContext } from '@/context/notificationContext';
 import { DevLicenseSelector } from '@/components/Webhooks/components/DeveloperLicenseSelector';
 import { Header } from '@/app/webhooks/webhooksPage/Header';
-import { MainWebhooksPageBody } from '@/app/webhooks/webhooksPage/Body';
+import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
+import { WebhooksTableSection } from '@/components/Webhooks/components/WebhooksTableSection';
 
 export const WebhooksPage = () => {
   const [selectedDeveloperLicense, setSelectedDeveloperLicense] =
     useState<LocalDeveloperLicense>();
   const { developerLicenses } = useValidDeveloperLicenses();
   const { setNotification } = useContext(NotificationContext);
+  const { devJwts, refetch } = useGetDevJwts(selectedDeveloperLicense?.clientId);
 
   const onLicenseSelect = (clientId: string) => {
     const selectedLicense = developerLicenses.find((l) => l.clientId === clientId);
@@ -27,9 +30,16 @@ export const WebhooksPage = () => {
         developerLicenses={developerLicenses}
         onChange={onLicenseSelect}
       />
-      {!!selectedDeveloperLicense && (
-        <MainWebhooksPageBody developerLicense={selectedDeveloperLicense} />
-      )}
+      {!!selectedDeveloperLicense &&
+        (devJwts.length ? (
+          <WebhooksTableSection clientId={selectedDeveloperLicense.clientId} />
+        ) : (
+          <GenerateDevJWTSection
+            clientId={selectedDeveloperLicense.clientId}
+            redirectUri={selectedDeveloperLicense.firstRedirectURI}
+            onSuccess={refetch}
+          />
+        ))}
     </div>
   );
 };
