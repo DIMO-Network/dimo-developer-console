@@ -33,7 +33,11 @@ interface ContextProps {
   createdWebhook: Webhook | undefined;
   updateCreatedWebhook: (webhook: Webhook) => void;
   shouldSubmit: boolean;
-  onSubmit: (data: WebhookFormInput, token: string) => Promise<{ message: string }>;
+  onSubmit: (
+    data: WebhookFormInput,
+    token: string,
+  ) => Promise<{ message: string } | void>;
+  canGoToPrevious: boolean;
 }
 
 export const FormStepContext = createContext<ContextProps | undefined>(undefined);
@@ -91,7 +95,7 @@ export const FormStepContextProvider: FC<PropsWithChildren> = ({ children }) => 
       });
       return { message: response.message };
     } else {
-      throw new Error('Unhandled webhook subscribe type');
+      return { message: 'No vehicles subscribed' };
     }
   };
 
@@ -101,6 +105,13 @@ export const FormStepContextProvider: FC<PropsWithChildren> = ({ children }) => 
       stepName === WebhookFormStepName.DELIVERY ||
       stepName === WebhookFormStepName.SPECIFY_VEHICLES
     );
+  }, [getCurrentStep]);
+
+  const canGoToPrevious = useMemo(() => {
+    const stepName = getCurrentStep().getName();
+    // If we go back from the specify vehicles, the webhook form will be submitted again if the user proceeds from the delivery step
+    // Causing a second webhook to be created, and potential confusion
+    return stepName !== WebhookFormStepName.SPECIFY_VEHICLES;
   }, [getCurrentStep]);
 
   const onSubmit = (data: WebhookFormInput, token: string) => {
@@ -128,6 +139,7 @@ export const FormStepContextProvider: FC<PropsWithChildren> = ({ children }) => 
         updateCreatedWebhook,
         shouldSubmit,
         onSubmit,
+        canGoToPrevious,
       }}
     >
       {children}

@@ -21,22 +21,26 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     return devJwt;
   };
 
+  const goBack = () => {
+    router.replace('/webhooks');
+  };
+
   useEffect(() => {
     if (!devJwt) {
-      router.replace('/webhooks');
+      goBack();
     }
-  }, [clientId, devJwt, router]);
+  }, [clientId, devJwt]);
 
   const onComplete = () => {
     invalidateQuery(clientId);
-    router.replace('/webhooks');
+    goBack();
   };
 
   return (
     <FormStepContextProvider>
       <div className={'flex flex-1 flex-row'}>
         <div className={'flex flex-col flex-1'}>
-          <NewWebhookForm onComplete={onComplete} getToken={getToken} />
+          <NewWebhookForm onComplete={onComplete} getToken={getToken} onExit={goBack} />
         </div>
         <RightPanel>
           <FormStepTracker />

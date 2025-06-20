@@ -29,12 +29,21 @@ const FormStepComponent = () => {
 export const NewWebhookForm = ({
   onComplete,
   getToken,
+  onExit,
 }: {
   onComplete: () => void;
   getToken: () => string;
+  onExit: () => void;
 }) => {
-  const { onPrevious, onNext, isFirstStep, isLastStep, shouldSubmit, onSubmit } =
-    useWebhookCreateFormContext();
+  const {
+    onPrevious,
+    onNext,
+    isFirstStep,
+    isLastStep,
+    shouldSubmit,
+    onSubmit,
+    canGoToPrevious,
+  } = useWebhookCreateFormContext();
   const { setNotification } = useContext(NotificationContext);
 
   const methods = useForm<WebhookFormInput>({
@@ -49,15 +58,21 @@ export const NewWebhookForm = ({
 
   const wrappedOnSubmit = methods.handleSubmit(async (data: WebhookFormInput) => {
     try {
-      const { message } = await onSubmit(data, getToken());
-      setNotification(message, '', 'success');
+      const response = await onSubmit(data, getToken());
+      if (response?.message) {
+        setNotification(response.message, '', 'success');
+      }
       if (isLastStep) {
         return onComplete();
       }
       onNext();
     } catch (err) {
       captureException(err);
-      setNotification('Something went wrong completing the operation', '', 'error');
+      let msg = 'Something went wrong completing the operation';
+      if (err instanceof Error) {
+        msg = err.message || msg;
+      }
+      setNotification(msg, '', 'error');
     }
   });
 
@@ -66,14 +81,15 @@ export const NewWebhookForm = ({
       <form className={'flex flex-1 flex-col gap-6'}>
         <FormStepComponent />
         <Footer
-          onPrevious={onPrevious}
+          previousDisabled={!canGoToPrevious}
+          onPrevious={isFirstStep ? onExit : onPrevious}
           onNext={onNext}
           onSubmit={wrappedOnSubmit}
-          isFirstStep={isFirstStep}
-          isLastStep={isLastStep}
           shouldSubmit={shouldSubmit}
           isValid={methods.formState.isValid}
           isSubmitting={methods.formState.isSubmitting}
+          prevButtonText={isFirstStep ? 'Cancel' : 'Previous'}
+          nextButtonText={isLastStep ? 'Finish' : 'Next'}
         />
       </form>
     </FormProvider>
