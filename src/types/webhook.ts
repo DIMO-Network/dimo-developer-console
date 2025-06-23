@@ -102,3 +102,8 @@ export class LocalDeveloperLicense {
     return this.gqlDeveloperLicense.redirectURIs.nodes[0].uri;
   }
 }
+
+export enum EditWebhookFormState {
+  EDIT_FORM = 'EDIT_FORM',
+  SUBSCRIBE_VEHICLES = 'SUBSCRIBE_VEHICLES',
+}

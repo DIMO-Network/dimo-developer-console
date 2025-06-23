@@ -1,9 +1,10 @@
 'use client';
 
 import { use } from 'react';
-import { EditWebhookForm } from '@/components/Webhooks/EditWebhookForm';
+import { EditWebhook } from '@/components/Webhooks/EditWebhook';
 import { useWebhookById } from '@/hooks/queries/useWebhookById';
 import { Loader } from '@/components/Loader';
+import { EditWebhookContextProvider } from '@/hoc/EditWebhookProvider';
 
 export const View = ({
   params,
@@ -23,5 +24,9 @@ export const View = ({
     return <p>no webhook found</p>;
   }
 
-  return <EditWebhookForm webhook={data} clientId={clientId} />;
+  return (
+    <EditWebhookContextProvider>
+      <EditWebhook webhook={data} clientId={clientId} />
+    </EditWebhookContextProvider>
+  );
 };
