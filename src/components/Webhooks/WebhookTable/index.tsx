@@ -16,9 +16,11 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
   if (isLoading) {
     return <Loader isLoading />;
   }
+
   if (error) {
     return <p>There was an error fetching your webhooks</p>;
   }
+
   if (!data || data.length === 0) {
     return (
       <p className="text-text-secondary text-center pb-4">

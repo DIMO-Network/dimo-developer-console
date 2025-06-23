@@ -4,8 +4,6 @@ import { useWebhooks } from '@/hooks/queries/useWebhooks';
 
 interface WebhookTableContextProps {
   toggleExpandedWebhookId: (webhookId: string) => void;
-  isTestOpen: boolean;
-  setIsTestOpen: (isTestOpen: boolean) => void;
   isDeleteOpen: boolean;
   setIsDeleteOpen: (isDeleteOpen: boolean) => void;
   expandedWebhook: Webhook | undefined;
@@ -20,7 +18,6 @@ export const WebhookTableContextProvider: React.FC<
 > = ({ children, clientId }) => {
   const { data } = useWebhooks(clientId);
   const [expandedWebhookId, setExpandedWebhookId] = React.useState<string>();
-  const [isTestOpen, setIsTestOpen] = React.useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
 
   const toggleExpandedWebhookId = (webhookId: string) => {
@@ -37,8 +34,6 @@ export const WebhookTableContextProvider: React.FC<
     <WebhookTableContext.Provider
       value={{
         toggleExpandedWebhookId,
-        isTestOpen,
-        setIsTestOpen,
         isDeleteOpen,
         setIsDeleteOpen,
         expandedWebhook,
