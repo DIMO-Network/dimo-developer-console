@@ -3,8 +3,8 @@ import { useWebhooks } from '@/hooks/queries/useWebhooks';
 import { Loader } from '@/components/Loader';
 import '../../Table/Table.css';
 import { WebhookTableContextProvider } from '@/components/Webhooks/providers/WebhookTableContextProvider';
-import { WebhookActionModals } from '@/components/Webhooks/WebhookTable/WebhookActionModals';
-import { Table } from '@/components/Webhooks/WebhookTable/Table';
+import { ActionModals } from '@/components/Webhooks/WebhookTable/ActionModals';
+import { WebhooksTable } from '@/components/Webhooks/WebhookTable/WebhooksTable';
 
 interface WebhookTableProps {
   clientId: string;
@@ -30,8 +30,8 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
   return (
     <WebhookTableContextProvider clientId={clientId}>
       <div className="min-w-full bg-surface-default rounded-xl py-4">
-        <WebhookActionModals clientId={clientId} />
-        <Table webhooks={data ?? []} clientId={clientId} />
+        <ActionModals clientId={clientId} />
+        <WebhooksTable webhooks={data ?? []} clientId={clientId} />
       </div>
     </WebhookTableContextProvider>
   );

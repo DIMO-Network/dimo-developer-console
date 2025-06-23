@@ -32,7 +32,7 @@ const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
     },
   ];
 };
-export const Table = ({
+export const WebhooksTable = ({
   webhooks,
   clientId,
 }: {

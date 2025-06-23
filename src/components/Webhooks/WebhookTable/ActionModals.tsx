@@ -4,7 +4,7 @@ import React from 'react';
 import { TestWebhookModal } from '@/components/Webhooks/components/TestWebhookModal';
 import { DeleteWebhookModal } from '@/components/Webhooks/components/DeleteWebhookModal';
 
-export const WebhookActionModals = ({ clientId }: { clientId: string }) => {
+export const ActionModals = ({ clientId }: { clientId: string }) => {
   const {
     expandedWebhook,
     isTestOpen,
