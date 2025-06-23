@@ -25,7 +25,7 @@ export const ExpandedRow = ({
   const { setNotification } = useContext(NotificationContext);
   const handleDeletePress = useHandleDeletePress();
 
-  const handleChangeStatus = () => {
+  const handleChangeStatus = async () => {
     setNotification(`Updating webhook status`, '', 'info');
     try {
       await toggleStatus();
