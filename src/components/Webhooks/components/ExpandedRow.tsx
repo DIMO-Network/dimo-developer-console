@@ -21,15 +21,19 @@ export const ExpandedRow = ({
   clientId: string;
   colSpan: number;
 }) => {
-  const { status, toggleStatus } = useToggleStatus(webhook, clientId);
+  const { status, toggleStatus, nextStatus } = useToggleStatus(webhook, clientId);
   const { setNotification } = useContext(NotificationContext);
   const handleDeletePress = useHandleDeletePress();
 
   const handleChangeStatus = async () => {
-    setNotification(`Updating webhook status`, '', 'info');
+    setNotification(`Updating webhook status to ${nextStatus}`, '', 'info');
     try {
       await toggleStatus();
-      setNotification('Successfully updated webhook status', '', 'success');
+      setNotification(
+        `Successfully updated webhook status to ${nextStatus}`,
+        '',
+        'success',
+      );
       invalidateQuery(clientId);
     } catch (error) {
       captureException(error);

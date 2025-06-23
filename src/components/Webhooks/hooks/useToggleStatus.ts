@@ -5,19 +5,20 @@ import { updateWebhook } from '@/services/webhook';
 
 export const useToggleStatus = (webhook: Webhook, clientId: string) => {
   const [status, setStatus] = useState<string>(webhook.status);
+  const nextStatus = status === 'Active' ? 'Inactive' : 'Active';
 
   const toggleStatus = async () => {
-    const newStatus = status === 'Active' ? 'Inactive' : 'Active';
     const token = getDevJwt(clientId);
     if (!token) {
       throw new Error('No devJWT found');
     }
-    await updateWebhook(webhook.id, { status: newStatus }, token);
-    setStatus(newStatus);
+    await updateWebhook(webhook.id, { status: nextStatus }, token);
+    setStatus(nextStatus);
   };
 
   return {
     status,
     toggleStatus,
+    nextStatus,
   };
 };
