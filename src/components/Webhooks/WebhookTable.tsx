@@ -77,7 +77,7 @@ const WebhookTableContextProvider: React.FC<
   );
 };
 
-const useWebhookTableContext = () => {
+export const useWebhookTableContext = () => {
   const context = useContext(WebhookTableContext);
   if (!context) {
     throw new Error('useWebhookTableContext must be used within a WebhookTableContext');
@@ -139,6 +139,12 @@ const WebhookActionModals = ({ clientId }: { clientId: string }) => {
     resetExpandedWebhookId,
   } = useWebhookTableContext();
 
+  const onDeleteSuccess = () => {
+    setIsDeleteOpen(false);
+    resetExpandedWebhookId();
+    invalidateQuery(clientId);
+  };
+
   if (!expandedWebhook) {
     return null;
   }
@@ -154,11 +160,7 @@ const WebhookActionModals = ({ clientId }: { clientId: string }) => {
         webhook={expandedWebhook}
         isOpen={isDeleteOpen}
         setIsOpen={setIsDeleteOpen}
-        onSuccess={() => {
-          setIsDeleteOpen(false);
-          resetExpandedWebhookId();
-          invalidateQuery(clientId);
-        }}
+        onSuccess={onDeleteSuccess}
         clientId={clientId}
       />
     </React.Fragment>
@@ -166,8 +168,7 @@ const WebhookActionModals = ({ clientId }: { clientId: string }) => {
 };
 
 const Table = ({ webhooks, clientId }: { webhooks: Webhook[]; clientId: string }) => {
-  const { toggleExpandedWebhookId, setIsTestOpen, setIsDeleteOpen, expandedWebhook } =
-    useWebhookTableContext();
+  const { toggleExpandedWebhookId, expandedWebhook } = useWebhookTableContext();
   const table = useReactTable({
     data: webhooks,
     columns: getColumns(clientId),
@@ -199,8 +200,6 @@ const Table = ({ webhooks, clientId }: { webhooks: Webhook[]; clientId: string }
               <ExpandedRow
                 webhook={row.original}
                 clientId={clientId}
-                onTest={() => setIsTestOpen(true)}
-                onDelete={() => setIsDeleteOpen(true)}
                 colSpan={table.getAllColumns().length + 1}
               />
             )}
