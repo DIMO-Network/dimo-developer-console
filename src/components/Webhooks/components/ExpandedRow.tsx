@@ -1,12 +1,9 @@
 import { Webhook } from '@/types/webhook';
-import React, { useContext } from 'react';
+import React from 'react';
 import '../Webhooks.css';
 import { WebhookUrlDisplay } from '@/components/Webhooks/components/WebhookUrlDisplay';
 import { StatusToggle } from '@/components/Webhooks/components/StatusToggle';
 import { DeleteButton } from '@/components/Webhooks/components/DeleteButton';
-import { NotificationContext } from '@/context/notificationContext';
-import { invalidateQuery } from '@/hooks/queries/useWebhooks';
-import { captureException } from '@sentry/nextjs';
 import { useToggleStatus } from '@/components/Webhooks/hooks/useToggleStatus';
 import { EditButton } from '@/components/Webhooks/components/EditButton';
 import { useHandleDeletePress } from '@/components/Webhooks/hooks/useHandleDeletePress';
@@ -21,25 +18,8 @@ export const ExpandedRow = ({
   clientId: string;
   colSpan: number;
 }) => {
-  const { status, toggleStatus, nextStatus } = useToggleStatus(webhook, clientId);
-  const { setNotification } = useContext(NotificationContext);
+  const { status, handleChangeStatus } = useToggleStatus(webhook, clientId);
   const handleDeletePress = useHandleDeletePress();
-
-  const handleChangeStatus = async () => {
-    setNotification(`Updating webhook status to ${nextStatus}`, '', 'info');
-    try {
-      await toggleStatus();
-      setNotification(
-        `Successfully updated webhook status to ${nextStatus}`,
-        '',
-        'success',
-      );
-      invalidateQuery(clientId);
-    } catch (error) {
-      captureException(error);
-      setNotification('Failed to update webhook status', '', 'error');
-    }
-  };
 
   return (
     <tr className="expanded-row bg-surface-sunken border-t-0">
