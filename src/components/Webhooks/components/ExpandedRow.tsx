@@ -1,15 +1,16 @@
 import { Webhook } from '@/types/webhook';
-import Button from '@/components/Button/Button';
-import React from 'react';
+import React, { useContext } from 'react';
 import '../Webhooks.css';
-import Link from 'next/link';
 import { WebhookUrlDisplay } from '@/components/Webhooks/components/WebhookUrlDisplay';
 import { StatusToggle } from '@/components/Webhooks/components/StatusToggle';
 import { DeleteButton } from '@/components/Webhooks/components/DeleteButton';
-
-const getWebhookEditUrl = (webhook: Webhook, clientId: string) => {
-  return `/webhooks/edit/${clientId}/${webhook.id.trim()}`;
-};
+import { NotificationContext } from '@/context/notificationContext';
+import { invalidateQuery } from '@/hooks/queries/useWebhooks';
+import { captureException } from '@sentry/nextjs';
+import { useToggleStatus } from '@/components/Webhooks/hooks/useToggleStatus';
+import { EditButton } from '@/components/Webhooks/components/EditButton';
+import { useHandleDeletePress } from '@/components/Webhooks/hooks/useHandleDeletePress';
+import { getWebhookEditUrl } from '@/components/Webhooks/utils';
 
 export const ExpandedRow = ({
   webhook,
@@ -20,33 +21,56 @@ export const ExpandedRow = ({
   clientId: string;
   colSpan: number;
 }) => {
+  const { status, toggleStatus } = useToggleStatus(webhook, clientId);
+  const { setNotification } = useContext(NotificationContext);
+  const handleDeletePress = useHandleDeletePress();
+
+  const handleChangeStatus = () => {
+    setNotification(`Updating webhook status`, '', 'info');
+    try {
+      await toggleStatus();
+      setNotification('Successfully updated webhook status', '', 'success');
+      invalidateQuery(clientId);
+    } catch (error) {
+      captureException(error);
+      setNotification('Failed to update webhook status', '', 'error');
+    }
+  };
+
   return (
     <tr className="expanded-row bg-surface-sunken border-t-0">
       <td colSpan={colSpan} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
         <div className="expanded-content space-y-4">
           <WebhookUrlDisplay url={webhook.target_uri} />
-          <Actions webhook={webhook} clientId={clientId} />
+          <Actions
+            onDelete={handleDeletePress}
+            onChangeStatus={handleChangeStatus}
+            isActive={status === 'Active'}
+            editUrl={getWebhookEditUrl(webhook, clientId)}
+          />
         </div>
       </td>
     </tr>
   );
 };
 
-const EditButton = ({ webhook, clientId }: { webhook: Webhook; clientId: string }) => {
-  return (
-    <Link href={getWebhookEditUrl(webhook, clientId)}>
-      <Button className="primary-outline">Edit</Button>
-    </Link>
-  );
-};
-
-const Actions = ({ webhook, clientId }: { webhook: Webhook; clientId: string }) => {
+const Actions = ({
+  onDelete,
+  isActive,
+  onChangeStatus,
+  editUrl,
+}: {
+  onDelete: () => void;
+  isActive: boolean;
+  onChangeStatus: () => void;
+  editUrl: string;
+}) => {
   return (
     <div className="flex items-center justify-between">
-      <StatusToggle webhook={webhook} clientId={clientId} />
+      <StatusToggle isActive={isActive} onToggleStatus={onChangeStatus} />
       <div className="flex gap-2">
-        <EditButton webhook={webhook} clientId={clientId} />
-        <DeleteButton webhook={webhook} clientId={clientId} />
+        <EditButton editUrl={editUrl} />
+        <DeleteButton onDelete={onDelete} />
       </div>
     </div>
   );
