@@ -4,8 +4,6 @@ import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { useFormContext } from 'react-hook-form';
 import { useEditWebhookContext } from '@/hoc/EditWebhookProvider';
 import { NotificationContext } from '@/context/notificationContext';
-import { formatAndGenerateCEL } from '@/utils/webhook';
-import { updateWebhook } from '@/services/webhook';
 import { getDevJwt } from '@/utils/devJwt';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 import { captureException } from '@sentry/nextjs';
@@ -30,17 +28,12 @@ export const EditWebhookForm = ({
     reset,
     formState: { isDirty, isValid, isSubmitting },
   } = useFormContext<WebhookFormInput>();
-  const { onCancel } = useEditWebhookContext();
+  const { onCancel, submitForm } = useEditWebhookContext();
   const { setNotification } = useContext(NotificationContext);
 
   const onSubmit = async (formData: WebhookFormInput) => {
     try {
-      const { trigger, data } = formatAndGenerateCEL(formData.cel);
-      await updateWebhook(
-        webhook.id,
-        { ...formData, data, trigger },
-        getDevJwt(clientId) ?? '',
-      );
+      await submitForm(formData, webhook, getDevJwt(clientId) ?? '');
       setNotification('Webhook updated successfully', '', 'success');
       invalidateQuery(clientId);
       reset(formData);
@@ -67,6 +60,7 @@ export const EditWebhookForm = ({
     </form>
   );
 };
+
 const Footer = ({
   isDirty,
   isValid,

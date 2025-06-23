@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
-import { EditWebhookFormState } from '@/types/webhook';
+import { EditWebhookFormState, Webhook, WebhookFormInput } from '@/types/webhook';
 import { useRouter } from 'next/navigation';
+import { formatAndGenerateCEL } from '@/utils/webhook';
+import { updateWebhook } from '@/services/webhook';
 
 type EditWebhookContextProps = {
   formState: EditWebhookFormState;
@@ -8,9 +10,15 @@ type EditWebhookContextProps = {
   onCancel: (isDirty: boolean) => void;
   isDiscardingChanges: boolean;
   setIsDiscardingChanges: (isDiscardingChanges: boolean) => void;
+  submitForm: (
+    formData: WebhookFormInput,
+    webhook: Webhook,
+    token: string,
+  ) => Promise<void>;
 };
 
 const EditWebhookContext = createContext<EditWebhookContextProps | undefined>(undefined);
+
 export const EditWebhookContextProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
@@ -31,6 +39,15 @@ export const EditWebhookContextProvider: React.FC<React.PropsWithChildren> = ({
     router.replace('/webhooks');
   };
 
+  const submitForm = async (
+    formData: WebhookFormInput,
+    webhook: Webhook,
+    token: string,
+  ) => {
+    const { trigger, data } = formatAndGenerateCEL(formData.cel);
+    await updateWebhook(webhook.id, { ...formData, data, trigger }, token);
+  };
+
   return (
     <EditWebhookContext.Provider
       value={{
@@ -39,12 +56,14 @@ export const EditWebhookContextProvider: React.FC<React.PropsWithChildren> = ({
         onCancel,
         isDiscardingChanges,
         setIsDiscardingChanges,
+        submitForm,
       }}
     >
       {children}
     </EditWebhookContext.Provider>
   );
 };
+
 export const useEditWebhookContext = () => {
   const context = useContext(EditWebhookContext);
   if (!context) {

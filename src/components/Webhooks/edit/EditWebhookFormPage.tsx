@@ -3,7 +3,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useEditWebhookContext } from '@/hoc/EditWebhookProvider';
 import React from 'react';
 import { extractCELFromWebhook } from '@/utils/webhook';
-import { useRouter } from 'next/navigation';
 import { DiscardChangesModal } from '@/app/webhooks/edit/[clientId]/[webhookId]/components/DiscardChangesModal';
 import { BackButton } from '@/components/BackButton';
 import { EditWebhookForm } from '@/components/Webhooks/edit/EditWebhookForm';
@@ -21,23 +20,15 @@ export const EditWebhookFormPage: React.FC<EditWebhookFormProps> = ({
   const methods = useForm<WebhookFormInput>({
     defaultValues: { ...webhook, cel: extractCELFromWebhook(webhook) },
   });
-  const {
-    formState: { isDirty },
-  } = methods;
-  const router = useRouter();
-
-  const goBack = () => {
-    router.replace('/webhooks');
-  };
 
   return (
     <FormProvider {...methods}>
       <DiscardChangesModal
         isOpen={isDiscardingChanges}
         onClose={() => setIsDiscardingChanges(false)}
-        onConfirm={goBack}
+        onConfirm={() => onCancel(false)}
       />
-      <BackButton onBack={() => onCancel(isDirty)} />
+      <BackButton onBack={() => onCancel(methods.formState.isDirty)} />
       <EditWebhookForm webhook={webhook} clientId={clientId} />
     </FormProvider>
   );
