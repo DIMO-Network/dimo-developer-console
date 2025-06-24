@@ -1,3 +1,5 @@
+import { GetDeveloperLicensesForWebhooksQuery } from '@/gql/graphql';
+
 export interface Webhook {
   id: string;
   service: string;
@@ -52,4 +54,56 @@ export interface Condition {
   field: string;
   operator: string;
   value: string;
+}
+
+export enum WebhookFormStepName {
+  CONFIGURE = 'configure',
+  DELIVERY = 'delivery',
+  SPECIFY_VEHICLES = 'specify_vehicles',
+}
+
+export class FormStep {
+  private stepName: WebhookFormStepName;
+  private title: string;
+
+  constructor(stepName: WebhookFormStepName, title: string) {
+    this.stepName = stepName;
+    this.title = title;
+  }
+
+  getName() {
+    return this.stepName;
+  }
+
+  getTitle() {
+    return this.title;
+  }
+}
+
+export type DeveloperLicenseForWebhook =
+  GetDeveloperLicensesForWebhooksQuery['developerLicenses']['nodes'][0];
+
+export class LocalDeveloperLicense {
+  private gqlDeveloperLicense: DeveloperLicenseForWebhook;
+
+  constructor(remoteDeveloperLicense: DeveloperLicenseForWebhook) {
+    this.gqlDeveloperLicense = remoteDeveloperLicense;
+  }
+
+  get clientId() {
+    return this.gqlDeveloperLicense.clientId;
+  }
+
+  get label() {
+    return this.gqlDeveloperLicense.alias || this.gqlDeveloperLicense.clientId;
+  }
+
+  get firstRedirectURI() {
+    return this.gqlDeveloperLicense.redirectURIs.nodes[0].uri;
+  }
+}
+
+export enum EditWebhookFormState {
+  EDIT_FORM = 'EDIT_FORM',
+  SUBSCRIBE_VEHICLES = 'SUBSCRIBE_VEHICLES',
 }
