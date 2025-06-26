@@ -46,7 +46,7 @@ const sponsorUserOperation = async ({
   const chain = getChain();
   const zerodevPaymaster = createZeroDevPaymasterClient({
     chain: chain,
-    transport: http(`${turnkeyConfig.paymasterRpc}?provider=${provider}`),
+    transport: http(`${turnkeyConfig.bundlerRpc}/chain/${chain.id}?provider=${provider}`),
   });
   return zerodevPaymaster.sponsorUserOperation({
     userOperation,
@@ -82,7 +82,9 @@ const buildFallbackKernelClients = async ({
     const kernelClient = createKernelAccountClient({
       account: kernelAccount,
       chain: chain,
-      bundlerTransport: http(`${turnkeyConfig.bundleRpc}?provider=${provider}`),
+      bundlerTransport: http(
+        `${turnkeyConfig.bundlerRpc}/chain/${chain.id}?provider=${provider}`,
+      ),
       client: kernelAccount.client,
       paymaster: {
         getPaymasterData: (userOperation) => {

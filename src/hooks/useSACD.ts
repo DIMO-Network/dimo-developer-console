@@ -1,23 +1,39 @@
 import { PaymentSACD } from '@/types/wallet';
 import config from '@/config';
+import useGlobalAccount from '@/hooks/useGlobalAccount';
+import { getSessionTurnkeyClient } from '@/services/turnkey';
+import { getKernelClient } from '@/services/zerodev';
+import { formatSimpleBalanceWithDigits } from '@/utils/formatBalance';
+import { isValidAddress } from '@ethereumjs/util';
 
 export const useSACD = () => {
+  const { validateCurrentSession } = useGlobalAccount();
+
   const generateSACDTemplate = ({
     amount,
     paymentLinkUrl,
-    smartContractAddress,
+    grantee,
+    targetWallet,
     email,
     name,
   }: {
     amount: number;
     paymentLinkUrl: string;
-    smartContractAddress: `0x${string}`;
+    grantee: `0x${string}`;
+    targetWallet?: `0x${string}` | null;
     email: string;
     name: string;
   }): PaymentSACD => {
     const fiveMinutesFromNow = new Date(Date.now() + 5 * 60 * 1000);
     const now = new Date(Date.now());
-    const dcxDid: string = `did:erc20:${config.CONTRACT_NETWORK}:${config.DCX_ADDRESS}`;
+
+    const granteeAdditionalInfo: Record<string, unknown> = {
+      email: email,
+    };
+
+    if (targetWallet && isValidAddress(targetWallet)) {
+      granteeAdditionalInfo.beneficiary = targetWallet;
+    }
 
     const sacd: PaymentSACD = {
       specVersion: '1.0',
@@ -26,26 +42,26 @@ export const useSACD = () => {
       data: {
         grantor: {
           address: config.DIMO_ESCROW_ADDRESS,
-          name: 'Dimo',
+          name: 'DIMO',
           additionalInfo: {},
         },
         grantee: {
-          address: smartContractAddress,
+          address: grantee,
           name: name,
-          additionalInfo: {
-            email: email,
-          },
+          additionalInfo: granteeAdditionalInfo,
         },
+        effectiveAt: now.toISOString(),
         expiresAt: fiveMinutesFromNow.toISOString(),
+        additionalDates: {},
         agreements: [
           {
             type: 'payment',
-            asset: dcxDid,
+            asset: 'did:fiat:USD',
             payment: {
-              amount: amount,
+              amount: formatSimpleBalanceWithDigits(amount, 2),
               recurrence: 'one-time',
               terms: {
-                initialPayment: 0,
+                initialPayment: formatSimpleBalanceWithDigits(amount, 2),
                 paymentMethod: 'direct transfer',
               },
             },
@@ -55,19 +71,19 @@ export const useSACD = () => {
                 name: 'Dimo Credits Purchase',
                 description: 'Purchase of DCX',
                 contentType: 'application/json',
-                url: paymentLinkUrl,
+                uri: paymentLinkUrl,
               },
             ],
-            signatures: [],
+            extensions: {
+              invoicing: {
+                invoiceFrequency: 'one-time',
+                invoiceRecipient: email,
+              },
+            },
           },
         ],
       },
-      extensions: {
-        invoicing: {
-          invoiceFrequency: 'one-time',
-          invoiceRecipient: email,
-        },
-      },
+      signature: `0x${'0'.repeat(130)}`, // Placeholder for signature
     };
 
     return sacd;
@@ -76,7 +92,7 @@ export const useSACD = () => {
   const uploadSACD = async (
     sacd: PaymentSACD,
   ): Promise<{ success: boolean; cid: string }> => {
-    const response = await fetch(``, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_IPFS_URL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -92,8 +108,38 @@ export const useSACD = () => {
     return data;
   };
 
+  const signSACD = async (sacd: PaymentSACD): Promise<PaymentSACD> => {
+    const currentUser = await validateCurrentSession();
+
+    if (!currentUser) return {} as PaymentSACD;
+    const { subOrganizationId, walletAddress } = currentUser;
+
+    const turnkeyClient = getSessionTurnkeyClient();
+
+    if (!turnkeyClient) return {} as PaymentSACD;
+
+    const kernelClient = await getKernelClient({
+      subOrganizationId,
+      walletAddress: walletAddress,
+      client: turnkeyClient,
+    });
+
+    if (!kernelClient) return {} as PaymentSACD;
+
+    const sacdStr = JSON.stringify(sacd, null, 2);
+
+    const signed = await kernelClient.account.signMessage({
+      message: sacdStr,
+    });
+
+    sacd.signature = signed;
+
+    return sacd;
+  };
+
   return {
     generateSACDTemplate,
     uploadSACD,
+    signSACD,
   };
 };

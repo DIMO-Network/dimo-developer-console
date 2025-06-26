@@ -107,7 +107,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   };
 
   const onFinish = () => {
-    invalidateQuery(clientId);
+    void invalidateQuery(clientId);
     router.replace('/webhooks');
   };
 

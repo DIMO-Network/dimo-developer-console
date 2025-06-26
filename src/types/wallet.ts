@@ -115,15 +115,19 @@ export interface PaymentSACD {
         [k: string]: unknown;
       };
     };
+    effectiveAt: string;
     expiresAt: string;
+    additionalDates: {
+      [key: string]: unknown;
+    };
     agreements: {
       type: string;
       asset: string;
       payment: {
-        amount: number;
+        amount: string;
         recurrence: 'monthly' | 'one-time';
         terms: {
-          initialPayment: number;
+          initialPayment: string;
           paymentMethod: string;
         };
       };
@@ -132,19 +136,15 @@ export interface PaymentSACD {
         name: string;
         description: string;
         contentType: string;
-        url: string;
+        uri: string;
       }[];
-      signatures: {
-        signer: string;
-        signature: string;
-        timestamp: string;
-      }[];
+      extensions: {
+        invoicing: {
+          invoiceFrequency: string;
+          invoiceRecipient: string;
+        };
+      };
     }[];
   };
-  extensions: {
-    invoicing: {
-      invoiceFrequency: string;
-      invoiceRecipient: string;
-    };
-  };
+  signature: `0x${string}`;
 }

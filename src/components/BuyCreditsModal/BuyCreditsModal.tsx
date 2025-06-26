@@ -5,19 +5,28 @@ import { CreditsContext } from '@/context/creditsContext';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 
-import './BuyCreditsModal.css';
 import { Button } from '@/components/Button';
 import { generatePaymentLink } from '@/services/token';
 import { MoneyField } from '@/components/MoneyField';
 import { useForm } from 'react-hook-form';
 
 import { TextError } from '@/components/TextError';
-import { useGlobalAccount, useUser } from '@/hooks';
+import { useContractGA, useGlobalAccount, useUser } from '@/hooks';
 import { useSACD } from '@/hooks/useSACD';
 import { Toggle } from '@/components/Toggle';
+import SacdAbi from '@/contracts/Sacd.json';
+import config from '@/config';
+
+import './BuyCreditsModal.css';
+import { Abi, encodeFunctionData, zeroAddress } from 'viem';
+import { ethers } from 'ethers';
+
+import { TextField } from '@/components/TextField';
+import { isValidAddress } from '@ethereumjs/util';
+import { captureException } from '@sentry/nextjs';
 
 interface IForm {
-  amount: number;
+  amount: string;
   externalTargetWallet: `0x${string}`;
 }
 
@@ -27,7 +36,8 @@ export const BuyCreditsModal: FC = () => {
   const { currentUser } = useGlobalAccount();
   const { data: user } = useUser();
   const [isForAnotherAccount, setIsForAnotherAccount] = useState<boolean>(false);
-  const { generateSACDTemplate, uploadSACD } = useSACD();
+  const { generateSACDTemplate, uploadSACD, signSACD } = useSACD();
+  const { processTransactions } = useContractGA();
 
   const {
     register,
@@ -38,12 +48,13 @@ export const BuyCreditsModal: FC = () => {
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
-      amount: 0,
+      amount: '',
       externalTargetWallet: '' as `0x${string}`,
     },
   });
 
-  const amount = watch('amount', 0);
+  const amount = watch('amount', '');
+  const externalTargetWallet = watch('externalTargetWallet', '' as `0x${string}`);
 
   const handleIsOpen = (open: boolean) => {
     setIsOpen(open);
@@ -52,14 +63,25 @@ export const BuyCreditsModal: FC = () => {
   const handleProceedToPayment = async () => {
     try {
       setIsLoading(true);
-      const { url } = await generatePaymentLink(amount);
+
+      const { url } = await generatePaymentLink({ amount: Number(amount) });
+
+      let beneficiary: `0x${string}` | null = null;
+
+      if (isForAnotherAccount) {
+        beneficiary = externalTargetWallet;
+      }
+
       let sacd = generateSACDTemplate({
-        amount: amount,
-        smartContractAddress: currentUser!.smartContractAddress,
+        amount: +amount,
+        grantee: currentUser!.smartContractAddress,
+        targetWallet: beneficiary,
         email: user!.email,
         name: user!.name,
         paymentLinkUrl: url,
       });
+
+      sacd = await signSACD(sacd);
 
       const { success, cid } = await uploadSACD(sacd);
 
@@ -67,29 +89,37 @@ export const BuyCreditsModal: FC = () => {
         throw new Error('Failed to upload SACD');
       }
 
-      sacd = {
-        ...sacd,
-        data: {
-          ...sacd.data,
-          agreements: [
-            {
-              ...sacd.data.agreements[0],
-              attachments: [
-                ...sacd.data.agreements[0].attachments,
-                {
-                  name: 'Dimo Credits Purchase',
-                  description: 'Purchase of DCX',
-                  contentType: 'application/json',
-                  url: `https://ipfs.io/ipfs/${cid}`,
-                },
-              ],
-            },
+      const fiveMinutesFromNow = Date.now() + 5 * 60 * 1000;
+      const encodedCurrency = ethers.encodeBytes32String('USD').slice(0, 8);
+
+      const sacdTransaction = {
+        to: config.DIMO_SACD_ADDRESS,
+        value: BigInt(0),
+        data: encodeFunctionData({
+          abi: SacdAbi,
+          functionName: 'setPayment',
+          args: [
+            zeroAddress,
+            currentUser!.smartContractAddress,
+            BigInt(+amount * 100),
+            BigInt(fiveMinutesFromNow),
+            encodedCurrency,
+            `https://ipfs.io/ipfs/${cid}`,
           ],
-        },
+        }),
       };
+
+      const process = await processTransactions([sacdTransaction], {
+        abi: SacdAbi as Abi,
+      });
+
+      if (!process.success) {
+        throw new Error('Failed to process SACD transaction');
+      }
 
       window.location.href = url;
     } catch (e: unknown) {
+      captureException(e);
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -115,11 +145,13 @@ export const BuyCreditsModal: FC = () => {
             <label htmlFor="amount" className="text-xs text-medium">
               Purchase Amount
               <MoneyField
+                placeholder="0.00"
                 {...register('amount', {
                   required: true,
                   validate: {
-                    positive: (value) => value > 0 || 'Amount must be greater than 0',
-                    min: (value) => value >= 10 || `Minimum amount is $10.00`,
+                    positive: (value) =>
+                      Number(value) > 0 || 'Amount must be greater than 0',
+                    min: (value) => Number(value) >= 10 || `Minimum amount is $10.00`,
                   },
                 })}
               />
@@ -127,10 +159,38 @@ export const BuyCreditsModal: FC = () => {
             {errors.amount && <TextError errorMessage={errors.amount.message ?? ''} />}
           </div>
           <div className="w-full flex flex-col gap-y-4">
-            <Toggle
-              checked={isForAnotherAccount}
-              onToggle={(checked) => setIsForAnotherAccount(checked)}
-            />
+            <div className="flex flex-row gap-2 items-center">
+              <Toggle
+                checked={isForAnotherAccount}
+                onToggle={(checked) => setIsForAnotherAccount(checked)}
+              />
+              <label className="text-xs text-medium ml-2">
+                Purchase for another account
+              </label>
+            </div>
+            {isForAnotherAccount ? (
+              <>
+                <label>
+                  Account Address
+                  <TextField
+                    placeholder="0x123..."
+                    {...register('externalTargetWallet', {
+                      required: isForAnotherAccount,
+                      validate: {
+                        validAddress: (value) => {
+                          return isValidAddress(value) || 'Invalid Ethereum address';
+                        },
+                      },
+                    })}
+                  />
+                </label>
+                {errors.externalTargetWallet && (
+                  <TextError errorMessage={errors.externalTargetWallet.message ?? ''} />
+                )}
+              </>
+            ) : (
+              <></>
+            )}
           </div>
           <div className="credits-action w-full mt-4">
             <Button type="submit" className="primary !h-9 w-full" loading={isLoading}>

@@ -56,7 +56,7 @@ export const useContractGA = () => {
 
       if (receipt.reason) throw new Error(receipt.reason);
 
-      return receipt;
+      return receipt as IKernelOperationStatus;
     } catch (e: unknown) {
       Sentry.captureException(e);
       if (e instanceof HttpRequestError) {

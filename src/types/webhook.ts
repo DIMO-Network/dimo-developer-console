@@ -53,3 +53,8 @@ export interface Condition {
   operator: string;
   value: string;
 }
+
+export interface AvailableSignal {
+  name: string;
+  unit: string;
+}

@@ -67,6 +67,8 @@ export type AftermarketDevice = Node & {
    * a long decimal number.
    */
   serial?: Maybe<Scalars['String']['output']>;
+  /** The DID for this aftermarket device's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The ERC-721 token id for the device. */
   tokenId: Scalars['Int']['output'];
   /** The vehicle, if any, with which the device is paired. */
@@ -83,6 +85,8 @@ export type AftermarketDeviceBy = {
   imei?: InputMaybe<Scalars['String']['input']>;
   /** serial number of the aftermarket device */
   serial?: InputMaybe<Scalars['String']['input']>;
+  /** The DID of the aftermarket device in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
   /** token id of the aftermarket device NFT */
   tokenId?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -128,6 +132,44 @@ export type AftermarketDevicesFilter = {
   owner?: InputMaybe<Scalars['Address']['input']>;
 };
 
+export type Connection = {
+  __typename?: 'Connection';
+  /** The address of the connection. This is the most commonly used identifier. */
+  address: Scalars['Address']['output'];
+  /** The block timestamp for the mint of the connection. */
+  mintedAt: Scalars['Time']['output'];
+  /** The name of the connection. This can be at most 32 bytes long. */
+  name: Scalars['String']['output'];
+  /** The owner of the connection. Connections are transferable, so this may change over time. */
+  owner: Scalars['Address']['output'];
+  /** The DID for this connection's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
+  /** The token id of the connection as an NFT. This tends to be very large. */
+  tokenId: Scalars['BigInt']['output'];
+};
+
+export type ConnectionBy = {
+  address?: InputMaybe<Scalars['Address']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** The DID of the connection in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
+  tokenId?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
+export type ConnectionConnection = {
+  __typename?: 'ConnectionConnection';
+  edges: Array<ConnectionEdge>;
+  nodes: Array<Connection>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type ConnectionEdge = {
+  __typename?: 'ConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node: Connection;
+};
+
 /** Represents a DIMO Canonical Name. This is a unique identifier for a vehicle. */
 export type Dcn = Node & {
   __typename?: 'DCN';
@@ -143,6 +185,8 @@ export type Dcn = Node & {
   node: Scalars['Bytes']['output'];
   /** Ethereum address of domain owner. */
   owner: Scalars['Address']['output'];
+  /** The DID for this DCN's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The token id for the domain. This is simply the node reinterpreted as a uint256. */
   tokenId: Scalars['BigInt']['output'];
   /** Vehicle, if any, to which the domain is attached. */
@@ -153,6 +197,8 @@ export type Dcn = Node & {
 export type DcnBy = {
   name?: InputMaybe<Scalars['String']['input']>;
   node?: InputMaybe<Scalars['Bytes']['input']>;
+  /** The DID of the DCN in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** The Connection type for DCN. */
@@ -203,6 +249,8 @@ export type DeveloperLicense = {
   owner: Scalars['Address']['output'];
   redirectURIs: RedirectUriConnection;
   signers: SignerConnection;
+  /** The DID for this license's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The token id of the license as an NFT. */
   tokenId: Scalars['Int']['output'];
 };
@@ -226,6 +274,8 @@ export type DeveloperLicenseSignersArgs = {
 export type DeveloperLicenseBy = {
   alias?: InputMaybe<Scalars['String']['input']>;
   clientId?: InputMaybe<Scalars['Address']['input']>;
+  /** The DID of the developer license in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
   tokenId?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -370,6 +420,8 @@ export type Manufacturer = Node & {
   owner: Scalars['Address']['output'];
   /** Id of the Tableland table holding the manufacturer's device definitions. */
   tableId?: Maybe<Scalars['Int']['output']>;
+  /** The DID for this manufacturer's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The ERC-721 token id for the manufacturer. */
   tokenId: Scalars['Int']['output'];
 };
@@ -395,7 +447,25 @@ export type ManufacturerDeviceDefinitionsArgs = {
 export type ManufacturerBy = {
   name?: InputMaybe<Scalars['String']['input']>;
   slug?: InputMaybe<Scalars['String']['input']>;
+  /** The DID of the manufacturer in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
   tokenId?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** The Connection type for Manufacturer. */
+export type ManufacturerConnection = {
+  __typename?: 'ManufacturerConnection';
+  edges: Array<ManufacturerEdge>;
+  nodes: Array<Manufacturer>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+/** An edge in a ManufacturerConnection. */
+export type ManufacturerEdge = {
+  __typename?: 'ManufacturerEdge';
+  cursor: Scalars['String']['output'];
+  node: Manufacturer;
 };
 
 export type Node = {
@@ -452,6 +522,10 @@ export type Query = {
    * Ordered by token id, descending.
    */
   aftermarketDevices: AftermarketDeviceConnection;
+  /** Retrieve a particular connection. */
+  connection: Connection;
+  /** List connection licenses. Sorts by minting time, descending. */
+  connections: ConnectionConnection;
   /** View a particular DIMO Canonical Name. */
   dcn: Dcn;
   /** List DIMO Canonical Names. */
@@ -464,6 +538,12 @@ export type Query = {
   deviceDefinition: DeviceDefinition;
   /** View a particular manufacturer. */
   manufacturer: Manufacturer;
+  /**
+   * List minted manufacturers.
+   *
+   * These are always ordered by Name in ascending order. Returns all of them
+   */
+  manufacturers: ManufacturerConnection;
   /** View a particular node. */
   node?: Maybe<Node>;
   /** List rewards for a user. */
@@ -499,6 +579,21 @@ export type QueryAftermarketDevicesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   filterBy?: InputMaybe<AftermarketDevicesFilter>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** The root query type for the GraphQL schema. */
+export type QueryConnectionArgs = {
+  by: ConnectionBy;
+};
+
+
+/** The root query type for the GraphQL schema. */
+export type QueryConnectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -588,7 +683,8 @@ export type QuerySyntheticDevicesArgs = {
 
 /** The root query type for the GraphQL schema. */
 export type QueryVehicleArgs = {
-  tokenId: Scalars['Int']['input'];
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
+  tokenId?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -690,6 +786,8 @@ export type Stake = {
   points: Scalars['Int']['output'];
   /** The block timestamp for the transaction that created this stake. */
   stakedAt: Scalars['Time']['output'];
+  /** The DID for this stake's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The token id of the license as an NFT. */
   tokenId: Scalars['Int']['output'];
   /** The vehicle to which the stake is attached, if it is attached. */
@@ -726,14 +824,21 @@ export type SyntheticDevice = Node & {
   __typename?: 'SyntheticDevice';
   /** The Ethereum address for the device. */
   address: Scalars['Address']['output'];
+  /** The parent connection for the synthetic device. */
+  connection: Connection;
   /** An opaque global identifier for this syntheticDevice. */
   id: Scalars['ID']['output'];
-  /** Type of integration for the synthetic device. */
+  /**
+   * Type of integration for the synthetic device.
+   * @deprecated Use the `connection` field instead. For newer synthetic devices, this field will be zero.
+   */
   integrationId: Scalars['Int']['output'];
   /** The block timestamp at which this device was minted. */
   mintedAt: Scalars['Time']['output'];
   /** Encoded name of the device */
   name: Scalars['String']['output'];
+  /** The DID for this synthetic device's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The ERC-721 token id for the device. */
   tokenId: Scalars['Int']['output'];
   /** The vehicle with which the synthetic device is paired. */
@@ -744,6 +849,8 @@ export type SyntheticDevice = Node & {
 export type SyntheticDeviceBy = {
   /** The Ethereum address for the synthetic device. */
   address?: InputMaybe<Scalars['Address']['input']>;
+  /** The DID of the synthetic device in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID?: InputMaybe<Scalars['String']['input']>;
   /** The token id for the synthetic device. */
   tokenId?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -828,6 +935,8 @@ export type Vehicle = Node & {
   stake?: Maybe<Stake>;
   /** The paired synthetic device, if any. */
   syntheticDevice?: Maybe<SyntheticDevice>;
+  /** The DID for this vehicle's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */
+  tokenDID: Scalars['String']['output'];
   /** The ERC-721 token id for the vehicle. */
   tokenId: Scalars['Int']['output'];
 };

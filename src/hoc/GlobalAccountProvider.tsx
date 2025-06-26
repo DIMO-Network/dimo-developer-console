@@ -99,8 +99,6 @@ export const withGlobalAccounts = <P extends object>(
       ]);
 
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
-
-      return 0;
     };
 
     const getCurrentDcxBalance = async (): Promise<number> => {

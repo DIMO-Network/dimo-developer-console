@@ -12,10 +12,17 @@ export const tokenBoughtEmail = async (
   return data;
 };
 
-export const generatePaymentLink = async (amount: number) => {
+export const generatePaymentLink = async ({
+  amount,
+  targetWallet,
+}: {
+  amount: number;
+  targetWallet?: `0x${string}` | null;
+}) => {
   const client = await dimoDevAPIClient();
   const { data } = await client.post<{ id: string; url: string }>('/api/crypto/payment', {
     amount,
+    wallet: targetWallet,
   });
   return data;
 };

@@ -1,6 +1,7 @@
 'use server';
 
 import {
+  AvailableSignal,
   Condition,
   Webhook,
   WebhookCreateInput,
@@ -22,6 +23,21 @@ const getWebhooksApiClient = (token?: string) => {
       'Authorization': authHeader,
     },
   });
+};
+
+export const fetchAvailableSignals = async ({
+  token,
+}: {
+  token: string;
+}): Promise<AvailableSignal[]> => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.get<AvailableSignal[]>('/v1/webhooks/signals');
+    return data;
+  } catch (err) {
+    //captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error fetching available signals'));
+  }
 };
 
 export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webhook[]> => {
