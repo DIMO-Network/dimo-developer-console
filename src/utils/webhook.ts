@@ -129,15 +129,22 @@ export const formatWebhookFormData = (
   };
 };
 
-export const formatAndGenerateCEL = (cel: { conditions: Condition[] }) => {
+export const validateCel = (cel: { conditions: Condition[] }) => {
   if (cel.conditions.length !== 1) {
-    throw new Error('Must have exactly one CEL condition');
+    return 'Must have exactly one CEL condition';
   }
   const hasInvalidCondition = cel.conditions.some(
     (cond) => !cond.field || !cond.operator || !cond.value,
   );
   if (hasInvalidCondition) {
-    throw new Error('Please complete all condition fields before saving.');
+    return 'Please complete all condition fields before saving.';
+  }
+};
+
+export const formatAndGenerateCEL = (cel: { conditions: Condition[] }) => {
+  const errorMessage = validateCel(cel);
+  if (errorMessage) {
+    throw new Error(errorMessage);
   }
   const condition = cel.conditions[0];
   const conditionConfig = conditionsConfig.find((it) => it.field === condition.field);
