@@ -13,7 +13,10 @@ const numberOperatorOptions = [
 const booleanOperatorOptions = [{ label: 'is equal to', value: '==' }];
 
 const getOperatorOptions = (inputType: InputType) => {
-  return inputType === 'number' ? numberOperatorOptions : booleanOperatorOptions;
+  return [
+    { value: '', label: 'Select operator', isPlaceholder: true },
+    ...(inputType === 'number' ? numberOperatorOptions : booleanOperatorOptions),
+  ];
 };
 
 export const OperatorSelector = ({ index }: { index: number }) => {
@@ -25,10 +28,7 @@ export const OperatorSelector = ({ index }: { index: number }) => {
         required: 'Operator is required',
       })}
       defaultValue=""
-      options={[
-        { value: '', label: 'Select operator', isPlaceholder: true },
-        ...getOperatorOptions(config.inputType),
-      ]}
+      options={getOperatorOptions(config.inputType)}
     />
   );
 };
