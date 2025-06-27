@@ -1,7 +1,7 @@
 import { InputType } from 'node:zlib';
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
-import { useTriggerBuilderConfig } from '@/components/Webhooks/hooks/useTriggerBuilderConfig';
+import { useFindTriggerConfig } from '@/components/Webhooks/hooks/useFindTriggerConfig';
 import { SelectWithChevron } from '@/components/SelectWithChevron';
 import React from 'react';
 
@@ -18,7 +18,7 @@ const getOperatorOptions = (inputType: InputType) => {
 
 export const OperatorSelector = ({ index }: { index: number }) => {
   const { register } = useFormContext<WebhookFormInput>();
-  const config = useTriggerBuilderConfig(index);
+  const config = useFindTriggerConfig(index);
   return (
     <SelectWithChevron
       {...register(`cel.conditions.${index}.operator`, {

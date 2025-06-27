@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
-import { useTriggerBuilderConfig } from '@/components/Webhooks/hooks/useTriggerBuilderConfig';
+import { useFindTriggerConfig } from '@/components/Webhooks/hooks/useFindTriggerConfig';
 import { SelectWithChevron } from '@/components/SelectWithChevron';
 import React from 'react';
 
@@ -12,7 +12,7 @@ const booleanValueOptions = [
 
 export const ValueInput = ({ index }: { index: number }) => {
   const { register } = useFormContext<WebhookFormInput>();
-  const config = useTriggerBuilderConfig(index);
+  const config = useFindTriggerConfig(index);
   // @ts-expect-error validation type isn't strict enough
   const registerReturn = register(`cel.conditions.${index}.value`, config.validation);
 
