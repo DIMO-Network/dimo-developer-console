@@ -18,12 +18,19 @@ const getOptions = (licenses: LocalDeveloperLicense[]) => {
 export const DevLicenseSelector = ({
   developerLicenses,
   onChange,
+  selectedLicense,
 }: {
   developerLicenses: LocalDeveloperLicense[];
-  onChange: (clientId: string) => void;
+  onChange: (license: LocalDeveloperLicense) => void;
+  selectedLicense?: LocalDeveloperLicense;
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    return onChange(e.target.value);
+    const newSelectedLicense = developerLicenses.find(
+      (it) => it.clientId === e.target.value,
+    );
+    if (newSelectedLicense) {
+      onChange(newSelectedLicense);
+    }
   };
 
   return (
@@ -32,7 +39,7 @@ export const DevLicenseSelector = ({
       <SelectWithChevron
         options={getOptions(developerLicenses)}
         onChange={handleChange}
-        defaultValue=""
+        value={selectedLicense?.clientId ?? ''}
       />
     </div>
   );

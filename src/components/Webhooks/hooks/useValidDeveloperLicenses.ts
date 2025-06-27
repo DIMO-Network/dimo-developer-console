@@ -21,7 +21,7 @@ export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
 
 export const useValidDeveloperLicenses = () => {
   const { currentUser } = useGlobalAccount();
-  const { data } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
+  const { data, ...rest } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
     variables: { owner: currentUser?.smartContractAddress ?? '' },
     skip: !currentUser?.smartContractAddress,
   });
@@ -36,5 +36,6 @@ export const useValidDeveloperLicenses = () => {
   return {
     developerLicenses:
       data?.developerLicenses.nodes.filter(isValid).map(convertLicense) ?? [],
+    ...rest,
   };
 };
