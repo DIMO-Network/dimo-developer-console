@@ -5,7 +5,7 @@ import { Header } from '@/app/webhooks/webhooksPage/Header';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
 import { WebhooksTableSection } from '@/components/Webhooks/components/WebhooksTableSection';
-import { GraphqlQueryPageWrapper } from '@/components/GraphqlQueryPageWrapper';
+import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { LocalDeveloperLicense } from '@/types/webhook';
 
 const MainComponent = () => {
@@ -48,13 +48,13 @@ export const WebhooksPage = () => {
   return (
     <div className="flex flex-col gap-6">
       <Header />
-      <GraphqlQueryPageWrapper
+      <QueryPageWrapper
         loading={loading}
         error={error}
         customErrorMessage={'There was a problem fetching your Developer Licenses'}
       >
         <MainComponent />
-      </GraphqlQueryPageWrapper>
+      </QueryPageWrapper>
     </div>
   );
 };
