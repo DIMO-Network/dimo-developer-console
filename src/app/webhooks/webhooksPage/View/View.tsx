@@ -1,37 +1,37 @@
-import React, { useContext, useState } from 'react';
-import { LocalDeveloperLicense } from '@/types/webhook';
+import React, { useEffect, useState } from 'react';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
-import { NotificationContext } from '@/context/notificationContext';
 import { DevLicenseSelector } from '@/components/Webhooks/components/DeveloperLicenseSelector';
 import { Header } from '@/app/webhooks/webhooksPage/Header';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
 import { WebhooksTableSection } from '@/components/Webhooks/components/WebhooksTableSection';
+import { GraphqlQueryPageWrapper } from '@/components/GraphqlQueryPageWrapper';
+import { LocalDeveloperLicense } from '@/types/webhook';
 
-export const WebhooksPage = () => {
+const MainComponent = () => {
   const [selectedDeveloperLicense, setSelectedDeveloperLicense] =
     useState<LocalDeveloperLicense>();
-  const { developerLicenses } = useValidDeveloperLicenses();
-  const { setNotification } = useContext(NotificationContext);
-  const { devJwts, refetch } = useGetDevJwts(selectedDeveloperLicense?.clientId);
+  const { developerLicenses, loading } = useValidDeveloperLicenses();
+  const { refetch, isAuthenticatedAsDev } = useGetDevJwts(
+    selectedDeveloperLicense?.clientId,
+  );
 
-  const onLicenseSelect = (clientId: string) => {
-    const selectedLicense = developerLicenses.find((l) => l.clientId === clientId);
-    if (!selectedLicense) {
-      return setNotification('Could not find developer license', '', 'error');
+  useEffect(() => {
+    if (!loading && developerLicenses.length === 1 && !selectedDeveloperLicense) {
+      console.log("IS RUNNING THIS, BUT SHOULDN'T BE");
+      setSelectedDeveloperLicense(developerLicenses[0]);
     }
-    setSelectedDeveloperLicense(selectedLicense);
-  };
+  }, [loading, developerLicenses, selectedDeveloperLicense]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <Header />
+    <>
       <DevLicenseSelector
         developerLicenses={developerLicenses}
-        onChange={onLicenseSelect}
+        onChange={setSelectedDeveloperLicense}
+        selectedLicense={selectedDeveloperLicense}
       />
       {!!selectedDeveloperLicense &&
-        (devJwts.length ? (
+        (isAuthenticatedAsDev ? (
           <WebhooksTableSection clientId={selectedDeveloperLicense.clientId} />
         ) : (
           <GenerateDevJWTSection
@@ -40,6 +40,22 @@ export const WebhooksPage = () => {
             onSuccess={refetch}
           />
         ))}
+    </>
+  );
+};
+
+export const WebhooksPage = () => {
+  const { loading, error } = useValidDeveloperLicenses();
+  return (
+    <div className="flex flex-col gap-6">
+      <Header />
+      <GraphqlQueryPageWrapper
+        loading={loading}
+        error={error}
+        customErrorMessage={'There was a problem fetching your Developer Licenses'}
+      >
+        <MainComponent />
+      </GraphqlQueryPageWrapper>
     </div>
   );
 };

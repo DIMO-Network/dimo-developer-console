@@ -1,0 +1,1 @@
+export { GraphqlQueryPageWrapper } from './GraphqlQueryPageWrapper';
