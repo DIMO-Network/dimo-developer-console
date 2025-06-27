@@ -141,21 +141,23 @@ export const validateCel = (cel: { conditions: Condition[] }) => {
   }
 };
 
+const getValueType = (condition: Condition) => {
+  const conditionConfig = conditionsConfig.find((it) => it.field === condition.field);
+  if (!conditionConfig) {
+    throw new Error('Could not find condition config');
+  }
+  return conditionConfig.inputType === 'number' || conditionConfig.inputType === 'boolean'
+    ? 'valueNumber'
+    : 'valueString';
+};
+
 export const formatAndGenerateCEL = (cel: { conditions: Condition[] }) => {
   const errorMessage = validateCel(cel);
   if (errorMessage) {
     throw new Error(errorMessage);
   }
   const condition = cel.conditions[0];
-  const conditionConfig = conditionsConfig.find((it) => it.field === condition.field);
-  if (!conditionConfig) {
-    throw new Error('Could not find condition config');
-  }
-  const valueType =
-    conditionConfig.inputType === 'number' || conditionConfig.inputType === 'boolean'
-      ? 'valueNumber'
-      : 'valueString';
-
+  const valueType = getValueType(condition);
   return {
     data: cel.conditions[0].field,
     trigger: `${valueType} ${condition.operator} ${condition.value}`,
