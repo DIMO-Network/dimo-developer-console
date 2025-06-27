@@ -18,7 +18,6 @@ const MainComponent = () => {
 
   useEffect(() => {
     if (!loading && developerLicenses.length === 1 && !selectedDeveloperLicense) {
-      console.log("IS RUNNING THIS, BUT SHOULDN'T BE");
       setSelectedDeveloperLicense(developerLicenses[0]);
     }
   }, [loading, developerLicenses, selectedDeveloperLicense]);
