@@ -25,7 +25,6 @@ export const WebhookTriggerPreview = ({ cel }: { cel: WebhookFormInput['cel'] })
 
   useEffect(() => {
     if (cel && !generatedCEL && !validateCel(cel)) {
-      console.log('calling this');
       generateCelExpression();
     }
   }, [cel, generateCelExpression, generatedCEL]);
