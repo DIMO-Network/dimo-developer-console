@@ -20,5 +20,6 @@ export const useGetDevJwts = (clientId?: string) => {
   return {
     devJwts,
     refetch,
+    isAuthenticatedAsDev: !!devJwts.length,
   };
 };

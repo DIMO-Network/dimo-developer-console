@@ -20,7 +20,7 @@ export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel']
   };
 };
 
-type InputType = 'number' | 'boolean';
+export type InputType = 'number' | 'boolean';
 
 interface ConditionConfig {
   field: string;
@@ -129,26 +129,35 @@ export const formatWebhookFormData = (
   };
 };
 
-export const formatAndGenerateCEL = (cel: { conditions: Condition[] }) => {
+export const validateCel = (cel: { conditions: Condition[] }) => {
   if (cel.conditions.length !== 1) {
-    throw new Error('Must have exactly one CEL condition');
+    return 'Must have exactly one CEL condition';
   }
   const hasInvalidCondition = cel.conditions.some(
     (cond) => !cond.field || !cond.operator || !cond.value,
   );
   if (hasInvalidCondition) {
-    throw new Error('Please complete all condition fields before saving.');
+    return 'Please complete all condition fields before saving.';
   }
-  const condition = cel.conditions[0];
+};
+
+const getValueType = (condition: Condition) => {
   const conditionConfig = conditionsConfig.find((it) => it.field === condition.field);
   if (!conditionConfig) {
     throw new Error('Could not find condition config');
   }
-  const valueType =
-    conditionConfig.inputType === 'number' || conditionConfig.inputType === 'boolean'
-      ? 'valueNumber'
-      : 'valueString';
+  return conditionConfig.inputType === 'number' || conditionConfig.inputType === 'boolean'
+    ? 'valueNumber'
+    : 'valueString';
+};
 
+export const formatAndGenerateCEL = (cel: { conditions: Condition[] }) => {
+  const errorMessage = validateCel(cel);
+  if (errorMessage) {
+    throw new Error(errorMessage);
+  }
+  const condition = cel.conditions[0];
+  const valueType = getValueType(condition);
   return {
     data: cel.conditions[0].field,
     trigger: `${valueType} ${condition.operator} ${condition.value}`,
