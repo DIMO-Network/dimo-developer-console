@@ -20,7 +20,7 @@ export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel']
   };
 };
 
-type InputType = 'number' | 'boolean';
+export type InputType = 'number' | 'boolean';
 
 interface ConditionConfig {
   field: string;

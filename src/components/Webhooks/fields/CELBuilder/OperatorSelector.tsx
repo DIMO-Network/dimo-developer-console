@@ -1,9 +1,9 @@
-import { InputType } from 'node:zlib';
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import { useFindTriggerConfig } from '@/components/Webhooks/hooks/useFindTriggerConfig';
 import { SelectWithChevron } from '@/components/SelectWithChevron';
 import React from 'react';
+import { InputType } from '@/utils/webhook';
 
 const numberOperatorOptions = [
   { label: 'is equal to', value: '==' },
