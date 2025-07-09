@@ -68,9 +68,9 @@ export const mainMenu = [
     label: 'API Status',
     icon: MonitorHeartIcon,
     iconClassName: 'h-5 w-5',
-    link: '/api-status',
-    external: false,
-    disabled: true,
+    link: 'https://status.dimo.co/',
+    external: true,
+    disabled: false,
   },
 ];
 
