@@ -92,6 +92,7 @@ NEXT_PUBLIC_TURNKEY_API_BASE_URL="https://api.turnkey.com"
 NEXT_PUBLIC_RPID="localhost"
 NEXT_PUBLIC_GA_API=<YOUR_ACCOUNTS_API_URL>
 ```
+Make sure that the `NEXT_PUBLIC_GA_API` maps to your [Accounts API](https://github.com/DIMO-Network/accounts/tree/main) deployment URL.
 
 3. Install the dependencies:
 
