@@ -5,6 +5,7 @@ import {
   SettingsIcon,
   SummarizeIcon,
   SupportAgentIcon,
+  ToolsIcon,
 } from '@/components/Icons';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
@@ -27,6 +28,7 @@ const pageTitles: Record<string, string> = {
   '/': 'Home',
   '/app': 'Home',
   '/webhooks': 'Webhooks',
+  '/simulator': 'Simulator',
   '/api-status': 'API Status',
   '/settings': 'Settings',
 };
@@ -45,6 +47,14 @@ export const mainMenu = [
     icon: IntegrationIcon,
     iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
     link: '/webhooks',
+    external: false,
+    disabled: false,
+  },
+  {
+    label: 'Simulator',
+    icon: ToolsIcon,
+    iconClassName: 'h-5 w-5',
+    link: '/simulator',
     external: false,
     disabled: false,
   },
