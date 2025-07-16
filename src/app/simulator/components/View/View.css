@@ -1,0 +1,21 @@
+.simulator-vehicles-section {
+  @apply w-full;
+}
+
+.simulator-vehicles-section .empty-state {
+  @apply flex items-center justify-center;
+}
+
+.simulator-vehicles-section .empty-state p {
+  @apply text-base font-medium;
+}
+
+@media (max-width: 768px) {
+  .simulator-vehicles-section .card .flex-row {
+    @apply flex-col items-start gap-4;
+  }
+
+  .simulator-vehicles-section .card .flex-row .text-xl {
+    @apply text-lg;
+  }
+}
