@@ -38,3 +38,4 @@ export * from './UserIcon';
 export * from './WalletIcon';
 export * from './WarningAmberIcon';
 export * from './EditIcon';
+export * from './ConnectionsIcon';

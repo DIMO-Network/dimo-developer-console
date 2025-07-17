@@ -5,8 +5,8 @@ import {
   SettingsIcon,
   SummarizeIcon,
   SupportAgentIcon,
+  ConnectionsIcon,
 } from '@/components/Icons';
-import ConnectionsIcon from '@/components/Icons/ConnectionsIcon';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
@@ -78,7 +78,7 @@ export const mainMenu = [
     label: 'Connections',
     icon: ConnectionsIcon,
     iconClassName: 'h-5 w-5',
-    link: '#',
+    link: '/connections',
     external: false,
     // TODO: Check for dev license
     disabled: false,
