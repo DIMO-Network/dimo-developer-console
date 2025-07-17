@@ -1,0 +1,15 @@
+.connections-page {
+  @apply flex flex-col gap-8;
+}
+
+.connections-page .subtitle {
+  @apply text-lg;
+}
+
+.connections-page .empty-state {
+  @apply flex items-center justify-center py-16;
+}
+
+.connections-page .empty-state-message {
+  @apply text-center text-text-secondary;
+}
