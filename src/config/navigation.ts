@@ -6,6 +6,7 @@ import {
   SummarizeIcon,
   SupportAgentIcon,
 } from '@/components/Icons';
+import ConnectionsIcon from '@/components/Icons/ConnectionsIcon';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
@@ -28,6 +29,7 @@ const pageTitles: Record<string, string> = {
   '/app': 'Home',
   '/webhooks': 'Webhooks',
   '/api-status': 'API Status',
+  '/connections': 'Connections',
   '/settings': 'Settings',
 };
 
@@ -70,6 +72,15 @@ export const mainMenu = [
     iconClassName: 'h-5 w-5',
     link: 'https://status.dimo.co/',
     external: true,
+    disabled: false,
+  },
+  {
+    label: 'Connections',
+    icon: ConnectionsIcon,
+    iconClassName: 'h-5 w-5',
+    link: '#',
+    external: false,
+    // TODO: Check for dev license
     disabled: false,
   },
 ];
