@@ -1,18 +1,35 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { Section } from '@/components/Section';
 import { SectionHeader } from '@/components/Section/Header';
 import { Button } from '@/components/Button';
 import { PlusIcon } from '@/components/Icons';
+import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
+import { QueryPageWrapper } from '@/components/QueryPageWrapper';
+import { LocalDeveloperLicense } from '@/types/webhook';
 
 import './View.css';
 
-const View: React.FC = () => {
+const MainComponent: React.FC = () => {
+  const router = useRouter();
+  const [firstDeveloperLicense, setFirstDeveloperLicense] =
+    useState<LocalDeveloperLicense>();
+  const { developerLicenses, loading } = useValidDeveloperLicenses();
+
+  useEffect(() => {
+    if (!loading && developerLicenses.length === 1 && !firstDeveloperLicense) {
+      setFirstDeveloperLicense(developerLicenses[0]);
+    }
+  }, [loading, developerLicenses, firstDeveloperLicense]);
+
   const handleCreateConnection = () => {
-    // TODO: Navigating to next pg w clientId
-    console.log('Clicky');
+    if (firstDeveloperLicense?.clientId) {
+      router.push(`/connections/create/${firstDeveloperLicense.clientId}`);
+    }
   };
+  console.log(firstDeveloperLicense);
 
   return (
     <div className="connections-page">
@@ -20,7 +37,11 @@ const View: React.FC = () => {
 
       <Section>
         <SectionHeader title="Connections">
-          <Button className="dark with-icon" onClick={handleCreateConnection}>
+          <Button
+            className="dark with-icon"
+            onClick={handleCreateConnection}
+            disabled={!firstDeveloperLicense?.clientId}
+          >
             <PlusIcon className="w-4 h-4" />
             Create a connection
           </Button>
@@ -33,6 +54,20 @@ const View: React.FC = () => {
         </div>
       </Section>
     </div>
+  );
+};
+
+const View: React.FC = () => {
+  const { loading, error } = useValidDeveloperLicenses();
+
+  return (
+    <QueryPageWrapper
+      loading={loading}
+      error={error}
+      customErrorMessage={'There was a problem fetching your Developer Licenses'}
+    >
+      <MainComponent />
+    </QueryPageWrapper>
   );
 };
 
