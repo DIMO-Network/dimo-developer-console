@@ -57,7 +57,7 @@ export interface IGlobalAccountSession {
 }
 
 export interface Log {
-  topics?: `0x${string}`;
+  topics?: `0x${string}`[];
 }
 
 export interface IKernelOperationStatus {
