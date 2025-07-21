@@ -137,7 +137,7 @@ export const BuyCreditsModal: FC = () => {
           </div>
           <div className="buy-credits-description">
             <p className="description">
-              The base price to accessing one vehicle is $.125 per month.
+              The base price to accessing one vehicle is $1.25 per month.
             </p>
             <a href="">Learn more.</a>
           </div>
