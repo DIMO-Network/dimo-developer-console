@@ -6,6 +6,7 @@ import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
 import { SubscribeVehiclesActionModalProps } from '@/components/Webhooks/edit/types';
 import { unsubscribeAllVehicles } from '@/services/webhook';
+import { captureException } from '@sentry/nextjs';
 
 export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
   isOpen,
@@ -26,7 +27,7 @@ export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
       onSuccess?.();
       setIsOpen(false);
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('An error occurred while unsubscribing all vehicles.', '', 'error');
     } finally {
       setLoading(false);

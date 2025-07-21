@@ -1,4 +1,4 @@
-import { FC, useCallback, useContext, useMemo, useState } from 'react';
+import { FC, useCallback, useContext, useMemo, useState, useEffect } from 'react';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
@@ -9,12 +9,13 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { CopyableRow } from '@/components/CopyableRow';
 import { saveDevJwt } from '@/utils/devJwt';
 import { getDeveloperJwt } from '@/services/dimoDev';
+import { captureException } from '@sentry/nextjs';
 
 interface IProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   tokenParams: { client_id: string; domain: string };
-  onSuccess?: (newDevJwt: string) => void;
+  onSuccess?: () => void;
 }
 
 export const GenerateDevJWTModal: FC<IProps> = ({
@@ -27,6 +28,14 @@ export const GenerateDevJWTModal: FC<IProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [generatedKey, setGeneratedKey] = useState('');
   const { setNotification } = useContext(NotificationContext);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setText('');
+      setGeneratedKey('');
+      setIsLoading(false);
+    }
+  }, [isOpen]);
 
   const handleGenerate = useCallback(async () => {
     if (!text) {
@@ -43,9 +52,9 @@ export const GenerateDevJWTModal: FC<IProps> = ({
       const token = authHeader?.split(' ')[1] ?? '';
       setGeneratedKey(token);
       saveDevJwt(tokenParams.client_id, token);
-      onSuccess?.(token);
+      onSuccess?.();
     } catch (err) {
-      console.error('Failed to generate developer JWT', err);
+      captureException(err);
       setNotification('Failed to generate developer JWT', '', 'error');
     } finally {
       setIsLoading(false);
@@ -54,12 +63,13 @@ export const GenerateDevJWTModal: FC<IProps> = ({
 
   const title = useMemo(() => {
     if (generatedKey) return 'JWT generated';
-    return 'Get JWT';
+    return 'Generate new JWT';
   }, [generatedKey]);
 
   const subtitle = useMemo(() => {
     if (generatedKey) return '';
-    return 'This will generate a Developer JWT using the first available Redirect URI below and your Client ID. Enter one of your saved API Keys to get started.';
+
+    return 'This will generate a new Developer JWT using your Client ID and the first available Redirect URI. Enter one of your saved API Keys to get started.';
   }, [generatedKey]);
 
   const MainComponent = useMemo(() => {
@@ -98,7 +108,9 @@ export const GenerateDevJWTModal: FC<IProps> = ({
         <Button loading={isLoading} onClick={handleGenerate}>
           Generate
         </Button>
-        <Button className={'primary-outline'}>Cancel</Button>
+        <Button className={'primary-outline'} onClick={() => setIsOpen(false)}>
+          Cancel
+        </Button>
       </>
     );
   }, [generatedKey, handleGenerate, isLoading, setIsOpen]);

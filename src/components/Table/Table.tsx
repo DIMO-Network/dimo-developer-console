@@ -8,7 +8,8 @@ import './Table.css';
 
 interface IProps {
   columns: IColumn[];
-  data: Record<string, unknown>[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: Record<string, any>[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   actions?: FC<any>[];
 }

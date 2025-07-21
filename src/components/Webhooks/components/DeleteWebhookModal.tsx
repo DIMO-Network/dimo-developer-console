@@ -9,6 +9,8 @@ import { WebhookDetailsCard } from '@/components/Webhooks/components/WebhookDeta
 import { NotificationContext } from '@/context/notificationContext';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { getDevJwt } from '@/utils/devJwt';
+import { captureException } from '@sentry/nextjs';
+import { useHasSubscribedVehicles } from '@/components/Webhooks/hooks/useHasSubscribedVehicles';
 
 interface IProps {
   webhook: Webhook;
@@ -27,6 +29,14 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
 }) => {
   const [isDeleted, setIsDeleted] = useState(false);
   const { setNotification } = useContext(NotificationContext);
+  const hasSubscribedVehicles = useHasSubscribedVehicles(webhook.id, clientId);
+
+  const onDelete = () => {
+    if (hasSubscribedVehicles) {
+      throw new Error('All vehicles must be unsubscribed before deleting');
+    }
+    return deleteWebhook({ webhookId: webhook.id, token: getDevJwt(clientId) ?? '' });
+  };
 
   const onClose = useCallback(() => {
     if (isDeleted) {
@@ -36,8 +46,7 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
   }, [isDeleted, setIsOpen]);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: () =>
-      deleteWebhook({ webhookId: webhook.id, token: getDevJwt(clientId) ?? '' }),
+    mutationFn: onDelete,
     onSuccess: () => {
       setNotification('Successfully deleted webhook', '', 'success');
       setIsDeleted(true);
@@ -48,6 +57,7 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
       if (err instanceof Error) {
         errorMessage = err.message ?? errorMessage;
       }
+      captureException(err);
       setNotification(errorMessage, '', 'error');
     },
   });

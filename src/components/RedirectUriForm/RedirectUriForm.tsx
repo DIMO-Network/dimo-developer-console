@@ -11,7 +11,7 @@ import { Label } from '@/components/Label';
 import { NotificationContext } from '@/context/notificationContext';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useSetRedirectUri } from '@/hooks';
+import { useMixPanel, useSetRedirectUri } from '@/hooks';
 
 import './RedirectUriForm.css';
 
@@ -23,11 +23,18 @@ interface IProps {
   refreshData: () => void;
   redirectUris: IRedirectUri[] | undefined;
   tokenId: number;
+  owner: string;
 }
 
-export const RedirectUriForm: FC<IProps> = ({ refreshData, redirectUris, tokenId }) => {
+export const RedirectUriForm: FC<IProps> = ({
+  refreshData,
+  redirectUris,
+  tokenId,
+  owner,
+}) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
+  const { trackEvent } = useMixPanel();
   const {
     formState: { errors },
     handleSubmit,
@@ -49,6 +56,12 @@ export const RedirectUriForm: FC<IProps> = ({ refreshData, redirectUris, tokenId
         'Success!',
         'success',
       );
+
+      trackEvent('Redirect URI added', {
+        distinct_id: owner,
+        uri,
+        tokenId,
+      });
       refreshData();
     } catch (error: unknown) {
       Sentry.captureException(error);

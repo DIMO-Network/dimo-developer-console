@@ -21,8 +21,9 @@ export const WebhookVerificationTokenField = () => {
         placeholder="Enter a verification token"
       />
       <p className="text-[#868888]">
-        Please enter a string that you will use as your verification token. The above URL
-        must return this as a plain/text string.
+        Choose any unique string to verify ownership of your webhook URL. When we send a
+        verification request, your server must respond with this exact string in plain
+        text. This ensures you control the destination URL.
       </p>
       {errors.verification_token && (
         <TextError

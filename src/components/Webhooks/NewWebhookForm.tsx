@@ -1,34 +1,51 @@
 'use client';
 
 import { FormProvider, useForm } from 'react-hook-form';
-import Button from '@/components/Button/Button';
-import React from 'react';
-import { WebhookConfigStep } from '@/components/Webhooks/create/Configuration';
-import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
+import React, { useContext } from 'react';
+import { WebhookFormInput, WebhookFormStepName } from '@/types/webhook';
+import { NotificationContext } from '@/context/notificationContext';
+import { captureException } from '@sentry/nextjs';
 import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/create/SubscribeVehicles';
-import { WebhookFormInput } from '@/types/webhook';
+import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
+import { WebhookConfigStep } from '@/components/Webhooks/create/Configuration';
+import Footer from './Footer';
+import { useWebhookCreateFormContext } from '@/hoc';
 
-export enum WebhookFormStepName {
-  CONFIGURE = 'configure',
-  DELIVERY = 'delivery',
-  SPECIFY_VEHICLES = 'specify_vehicles',
-}
+const FormStepComponent = () => {
+  const { getCurrentStep } = useWebhookCreateFormContext();
+  const step = getCurrentStep();
+  switch (step.getName()) {
+    case WebhookFormStepName.SPECIFY_VEHICLES:
+      return <WebhookSubscribeVehiclesStep />;
+    case WebhookFormStepName.DELIVERY:
+      return <WebhookDeliveryStep />;
+    case WebhookFormStepName.CONFIGURE:
+      return <WebhookConfigStep />;
+    default:
+      return null;
+  }
+};
 
 export const NewWebhookForm = ({
-  currentStep,
-  onNext,
-  onSubmit,
-  onPrevious,
-  steps,
-  shouldSubmit,
+  onComplete,
+  getToken,
+  onExit,
 }: {
-  currentStep: WebhookFormStepName;
-  steps: WebhookFormStepName[];
-  onNext: () => void;
-  onSubmit: (data: WebhookFormInput) => void;
-  onPrevious: () => void;
-  shouldSubmit: boolean;
+  onComplete: () => void;
+  getToken: () => string;
+  onExit: () => void;
 }) => {
+  const {
+    onPrevious,
+    onNext,
+    isFirstStep,
+    isLastStep,
+    shouldSubmit,
+    onSubmit,
+    canGoToPrevious,
+  } = useWebhookCreateFormContext();
+  const { setNotification } = useContext(NotificationContext);
+
   const methods = useForm<WebhookFormInput>({
     mode: 'onChange',
     defaultValues: {
@@ -38,50 +55,42 @@ export const NewWebhookForm = ({
       },
     },
   });
-  const renderStep = () => {
-    switch (currentStep) {
-      case WebhookFormStepName.CONFIGURE:
-        return <WebhookConfigStep />;
-      case WebhookFormStepName.DELIVERY:
-        return <WebhookDeliveryStep />;
-      case WebhookFormStepName.SPECIFY_VEHICLES:
-        return <WebhookSubscribeVehiclesStep />;
-      default:
-        return null;
+
+  const wrappedOnSubmit = methods.handleSubmit(async (data: WebhookFormInput) => {
+    try {
+      const response = await onSubmit(data, getToken());
+      if (response?.message) {
+        setNotification(response.message, '', 'success');
+      }
+      if (isLastStep) {
+        return onComplete();
+      }
+      onNext();
+    } catch (err) {
+      captureException(err);
+      let msg = 'Something went wrong completing the operation';
+      if (err instanceof Error) {
+        msg = err.message || msg;
+      }
+      setNotification(msg, '', 'error');
     }
-  };
+  });
 
-  const getSecondaryButtonProps = () => {
-    const isFirstStep = currentStep === steps[0];
-    return {
-      text: isFirstStep ? 'Cancel' : 'Previous',
-    };
-  };
-
-  const { text: secondaryButtonText } = getSecondaryButtonProps();
-  const isLastStep = currentStep === steps[steps.length - 1];
   return (
     <FormProvider {...methods}>
       <form className={'flex flex-1 flex-col gap-6'}>
-        {renderStep()}
-        <div className={'flex flex-col-reverse md:flex-row pt-6 flex-1 gap-4'}>
-          <Button
-            className={'flex-1 primary-outline'}
-            onClick={onPrevious}
-            type={'button'}
-          >
-            {secondaryButtonText}
-          </Button>
-          <Button
-            className={'flex-1'}
-            type={'button'}
-            onClick={shouldSubmit ? methods.handleSubmit(onSubmit) : onNext}
-            disabled={!methods.formState.isValid}
-            loading={methods.formState.isSubmitting}
-          >
-            {isLastStep ? 'Finish' : 'Next'}
-          </Button>
-        </div>
+        <FormStepComponent />
+        <Footer
+          previousDisabled={!canGoToPrevious}
+          onPrevious={isFirstStep ? onExit : onPrevious}
+          onNext={onNext}
+          onSubmit={wrappedOnSubmit}
+          shouldSubmit={shouldSubmit}
+          isValid={methods.formState.isValid}
+          isSubmitting={methods.formState.isSubmitting}
+          prevButtonText={isFirstStep ? 'Cancel' : 'Previous'}
+          nextButtonText={isLastStep ? 'Finish' : 'Next'}
+        />
       </form>
     </FormProvider>
   );

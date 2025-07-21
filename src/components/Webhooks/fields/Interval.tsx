@@ -25,6 +25,7 @@ export const WebhookIntervalField = () => {
         options={[
           { value: 'Realtime', text: 'Realtime' },
           { value: 'Hourly', text: 'Hourly' },
+          { value: 'Daily', text: 'Daily' },
         ]}
         control={control}
       />

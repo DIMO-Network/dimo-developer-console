@@ -22,16 +22,17 @@ import {
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty } from 'lodash';
 import config from '@/config';
-//import { cookies } from 'next/headers';
-import { ComponentType, useEffect, useState } from 'react';
+import React, { ComponentType, useEffect, useState } from 'react';
 import { decodeJwtToken } from '@/utils/middlewareUtils';
 import { useRouter } from 'next/navigation';
+import { useMixPanel } from '@/hooks';
 const halfHour = 60 * 30;
 const fifteenMinutes = 15 * 60;
 
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {
     const router = useRouter();
+    const { trackEvent } = useMixPanel();
     const [user, setUser] = useState<{
       email: string;
       subOrganizationId: string;
@@ -50,7 +51,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       tokenExpiration: number;
       sessionExpiration: number;
     }) => {
-      saveToken(accessToken, tokenExpiration);
+      await saveToken(accessToken, tokenExpiration);
       saveToLocalStorage(EmbeddedKey, privateKey);
 
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
@@ -167,6 +168,11 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         privateKey: key.privateKey,
       });
 
+      trackEvent('Sign In', {
+        'distinct_id': newWalletAddress!,
+        'Sign In Method': 'Passkey',
+      });
+
       return { success: true, newWalletAddress };
     };
 
@@ -222,18 +228,27 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         privateKey: key.privateKey,
       });
 
+      trackEvent('Sign In', {
+        'distinct_id': newWalletAddress!,
+        'Sign In Method': 'OTP',
+      });
+
       return { success: true, newWalletAddress };
     };
 
     const logout = async () => {
-      signOut();
-      turnkeyClient.logout();
+      await signOut();
+      await turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
     };
 
     const handleExternalAuth = (provider: string) => {
       const url = `${process.env.NEXT_PUBLIC_DIMO_AUTH_URL}/auth/${provider}?client_id=developer-platform&redirect_uri=${config.frontendUrl}sign-in&response_type=code&scope=openid profile email`;
+      trackEvent('Sign In Attempt', {
+        'type': 'External Auth',
+        'Sign In Method': provider,
+      });
       window.location.href = url;
     };
 

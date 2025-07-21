@@ -1,12 +1,13 @@
 import { FC, useContext, useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
-import { unsubscribeVehicleIds } from '@/services/webhook';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { CSVUpload } from '@/components/CSVUpload';
 import { Button } from '@/components/Button';
 import { SubscribeVehiclesActionModalProps } from '@/components/Webhooks/edit/types';
+import { unsubscribeByCsv } from '@/services/webhook';
+import { captureException } from '@sentry/nextjs';
 
 export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
   isOpen,
@@ -15,6 +16,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
   clientId,
   onSuccess,
 }) => {
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [vehicleTokenIds, setVehicleTokenIds] = useState<string[]>([]);
   const [fileInfo, setFileInfo] = useState<{ name: string; count: number }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -22,24 +24,28 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
   const { setNotification } = useContext(NotificationContext);
 
   const handleSubmit = async () => {
+    if (!uploadedFile) return;
     try {
       setLoading(true);
-      const failures = await unsubscribeVehicleIds(
+      const formData = new FormData();
+      formData.append('file', uploadedFile);
+      const response = await unsubscribeByCsv({
         webhookId,
-        vehicleTokenIds,
-        devJwt ?? '',
+        formData,
+        token: devJwt ?? '',
+      });
+      setNotification(
+        response?.message ?? 'Successfully unsubscribed vehicles',
+        '',
+        'success',
       );
-      if (failures > 0) {
-        setNotification(`${failures} vehicle(s) failed to unsubscribe.`, '', 'error');
-      } else {
-        setNotification('Successfully unsubscribed vehicles', '', 'success');
-      }
       onSuccess?.();
       setIsOpen(false);
+      setUploadedFile(null);
       setVehicleTokenIds([]);
       setFileInfo([]);
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('Failed to unsubscribe vehicles. Please try again.', '', 'error');
     } finally {
       setLoading(false);
@@ -56,10 +62,11 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
           fileInfo={fileInfo}
           onMetadataChange={setFileInfo}
           showTitle={false}
+          onFileUpload={setUploadedFile}
         />
       </div>
       <div className="flex flex-col w-full gap-4 pt-4">
-        <Button onClick={handleSubmit} disabled={!vehicleTokenIds.length || loading}>
+        <Button onClick={handleSubmit} disabled={!uploadedFile || loading}>
           {loading ? 'Unsubscribing...' : 'Unsubscribe'}
         </Button>
         <Button onClick={() => setIsOpen(false)} className="dark">

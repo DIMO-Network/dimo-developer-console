@@ -17,6 +17,7 @@ import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
 import { CSV_UPLOAD_ROW_TITLE } from '@/components/CSVUpload';
 import { saveAs } from 'file-saver';
+import { captureException } from '@sentry/nextjs';
 
 interface Props {
   webhookId: string;
@@ -53,11 +54,15 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
   const subscribeAll = async () => {
     try {
       setSubscribingAll(true);
-      await subscribeAllVehicles(webhookId, getDevJwt(clientId) ?? '');
-      setNotification('Successfully subscribed all vehicles', '', 'success');
+      const response = await subscribeAllVehicles(webhookId, getDevJwt(clientId) ?? '');
+      setNotification(
+        response?.message ?? 'Successfully subscribed all vehicles',
+        '',
+        'success',
+      );
       invalidateQuery({ webhookId, clientId });
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('Failed to subscribe all vehicles', '', 'error');
     } finally {
       setSubscribingAll(false);
@@ -71,7 +76,7 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
       setNotification('Successfully unsubscribed all vehicles', '', 'success');
       invalidateQuery({ webhookId, clientId });
     } catch (err) {
-      console.error(err);
+      captureException(err);
       setNotification('Failed to unsubscribe all vehicles', '', 'error');
     } finally {
       setUnsubscribingAll(false);

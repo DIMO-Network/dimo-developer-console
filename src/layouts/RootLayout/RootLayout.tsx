@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Metadata } from 'next';
 import { dimoFont } from '@/utils/font';
 import configuration from '@/config';
 
 import '@/app/globals.css';
 import QueryProvider from '@/hoc/QueryProvider';
+import { useMixPanel } from '@/hooks';
 
 export const metadata: Metadata = {
   title: configuration.appName,
@@ -19,6 +20,11 @@ export const RootLayout = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
+  const { initMixPanel } = useMixPanel();
+  useEffect(() => {
+    initMixPanel();
+  }, []);
+
   return (
     <html lang="en">
       <body className={dimoFont.className}>
