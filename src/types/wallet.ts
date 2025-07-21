@@ -98,7 +98,7 @@ export interface IDesiredTokenAmount {
 
 export interface PaymentSACD {
   specVersion: string;
-  timestamp: string;
+  time: string;
   type: string;
   data: {
     grantor: {

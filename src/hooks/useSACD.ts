@@ -37,7 +37,7 @@ export const useSACD = () => {
 
     const sacd: PaymentSACD = {
       specVersion: '1.0',
-      timestamp: now.toISOString(),
+      time: now.toISOString(),
       type: 'dimo.sacd',
       data: {
         grantor: {
