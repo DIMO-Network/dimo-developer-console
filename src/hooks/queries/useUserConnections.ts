@@ -39,8 +39,7 @@ const GET_CONNECTION_DETAILS = gql`
 
 export const useUserConnections = () => {
   const { currentUser } = useGlobalAccount();
-  console.log('Users org wallet: ', currentUser?.smartContractAddress);
-  console.log('Users personal owner wallet: ', currentUser?.walletAddress);
+
   return useQuery({
     queryKey: ['user-connections', currentUser?.walletAddress],
     queryFn: async () => {
