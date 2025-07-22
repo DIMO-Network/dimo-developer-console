@@ -2,27 +2,25 @@
 
 import React, { use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getDevJwt } from '@/utils/devJwt';
 import { BackButton } from '@/components/BackButton';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 
-export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
-  const { clientId } = use(params);
+export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
+  const { owner } = use(params);
   const router = useRouter();
-  const devJwt = getDevJwt(clientId);
 
   const goBack = () => {
     router.replace('/connections');
   };
 
   useEffect(() => {
-    if (!devJwt) {
+    if (!owner) {
       goBack();
     }
-  }, [clientId, devJwt]);
+  }, [owner]);
 
   const handleNext = () => {
     // TODO: Add popup w details

@@ -1,35 +1,55 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { Section } from '@/components/Section';
 import { SectionHeader } from '@/components/Section/Header';
 import { Button } from '@/components/Button';
 import { PlusIcon } from '@/components/Icons';
-import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
-import { LocalDeveloperLicense } from '@/types/webhook';
+import { useGlobalAccount } from '@/hooks';
+import { useUserConnections } from '@/hooks';
 
 import './View.css';
 
 const MainComponent: React.FC = () => {
   const router = useRouter();
-  const [firstDeveloperLicense, setFirstDeveloperLicense] =
-    useState<LocalDeveloperLicense>();
-  const { developerLicenses, loading } = useValidDeveloperLicenses();
-
-  useEffect(() => {
-    if (!loading && developerLicenses.length === 1 && !firstDeveloperLicense) {
-      setFirstDeveloperLicense(developerLicenses[0]);
-    }
-  }, [loading, developerLicenses, firstDeveloperLicense]);
+  const { currentUser } = useGlobalAccount();
+  const owner = currentUser?.walletAddress;
+  const { data: connectionData, isLoading } = useUserConnections();
 
   const handleCreateConnection = () => {
-    if (firstDeveloperLicense?.clientId) {
-      router.push(`/connections/create/${firstDeveloperLicense.clientId}`);
-    }
+    //TODO: Create connection modal + owner address?
+    router.push(`/connections/create/${owner}`);
   };
-  console.log(firstDeveloperLicense);
+
+  const renderContent = () => {
+    if (connectionData?.hasConnections) {
+      return (
+        <div className="connections-list">
+          <p>You have {connectionData.connections.length} connection(s).</p>
+          {/* Connection table tbd */}
+          <div className="connections-table">
+            {connectionData.connections.map((connection) => (
+              <div key={connection.address} className="connection-item">
+                <p>Address: {connection.address}</p>
+                <p>Owner: {connection.owner}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    console.log(connectionData);
+    return (
+      <div className="empty-state">
+        <p className="empty-state-message">
+          You haven&apos;t created any connections yet.
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="connections-page">
@@ -37,34 +57,32 @@ const MainComponent: React.FC = () => {
 
       <Section>
         <SectionHeader title="Connections">
-          <Button
-            className="dark with-icon"
-            onClick={handleCreateConnection}
-            disabled={!firstDeveloperLicense?.clientId}
-          >
-            <PlusIcon className="w-4 h-4" />
-            Create a connection
-          </Button>
+          {!connectionData?.hasConnections && (
+            <Button
+              className="dark with-icon"
+              onClick={handleCreateConnection}
+              disabled={isLoading}
+            >
+              <PlusIcon className="w-4 h-4" />
+              Create a connection
+            </Button>
+          )}
         </SectionHeader>
 
-        <div className="empty-state">
-          <p className="empty-state-message">
-            You haven&apos;t created any connections yet.
-          </p>
-        </div>
+        {renderContent()}
       </Section>
     </div>
   );
 };
 
 const View: React.FC = () => {
-  const { loading, error } = useValidDeveloperLicenses();
+  const { isLoading, error } = useUserConnections();
 
   return (
     <QueryPageWrapper
-      loading={loading}
-      error={error}
-      customErrorMessage={'There was a problem fetching your Developer Licenses'}
+      loading={isLoading}
+      error={error || undefined}
+      customErrorMessage={'There was a problem fetching your connections'}
     >
       <MainComponent />
     </QueryPageWrapper>
