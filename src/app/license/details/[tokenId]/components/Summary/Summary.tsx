@@ -8,7 +8,7 @@ import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 
 interface Props {
   licenseSummary: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 export const Summary: FC<Props> = ({ licenseSummary, refetch }) => {

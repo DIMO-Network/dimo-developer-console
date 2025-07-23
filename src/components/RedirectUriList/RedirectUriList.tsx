@@ -18,7 +18,7 @@ interface RedirectUri {
 
 interface IProps {
   redirectUris: RedirectUri[] | undefined;
-  refreshData: () => void;
+  refreshData: () => Promise<void>;
   tokenId: number;
   isOwner: boolean;
 }
@@ -52,8 +52,8 @@ const RedirectUriListComponent: FC<IProps> = ({
         status: 'loading',
       });
       await setRedirectUri(uri, false);
+      await refreshData();
       setLoadingStatus({ label: 'Redirect URI deleted', status: 'success' });
-      refreshData();
     } catch (error: unknown) {
       handleError(error);
     }
