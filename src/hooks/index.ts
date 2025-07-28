@@ -15,3 +15,4 @@ export * from './useAuth';
 export * from './useTransactions';
 export * from './useIsLicenseOwner';
 export * from './useMixPanel';
+export * from './useCreditTracker';

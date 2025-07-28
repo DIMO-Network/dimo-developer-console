@@ -100,7 +100,7 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
         </div>
       </div>
       <div className="actions">
-        <Button className="primary w-full" loading={isLoading} loadingColor="primary">
+        <Button className="primary w-full" loading={isLoading}>
           Submit
         </Button>
         <Button

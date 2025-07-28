@@ -139,7 +139,12 @@ export const BuyCreditsModal: FC = () => {
             <p className="description">
               The base price to accessing one vehicle is $1.25 per month.
             </p>
-            <a href="">Learn more.</a>
+            <a
+              href="https://docs.dimo.org/developer-platform/developer-guide/dimo-credits"
+              target="_blank"
+            >
+              Learn more.
+            </a>
           </div>
           <div className="w-full gap-y-4">
             <label htmlFor="amount" className="text-xs text-medium">

@@ -69,7 +69,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       await handleEnableSigner(account.address);
       clearLoadingStatus();
       setApiKey(account.privateKey);
-      await refetch();
+      refetch();
       trackEvent('API Key Generated', {
         distinct_id: fragment.owner,
         tokenId: fragment.tokenId,
@@ -129,11 +129,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     <Section>
       <SectionHeader title={'API Keys'}>
         {isLicenseOwner && (
-          <Button
-            className="dark with-icon px-4"
-            loadingColor="primary"
-            onClick={handleGenerateSigner}
-          >
+          <Button className="dark with-icon px-4" onClick={handleGenerateSigner}>
             <KeyIcon className="w-4 h-4" />
             Generate Key
           </Button>
@@ -146,7 +142,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               {
                 name: 'address',
                 label: 'Signer address',
-                CustomHeader: <SignerAddressHeader />,
+                CustomHeader: <SignerAddressHeader key="header-addr" />,
               },
               { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
             ]}
