@@ -20,7 +20,7 @@ const REDIRECT_URIS_FRAGMENT = gql(`
 
 interface Props {
   license: FragmentType<typeof REDIRECT_URIS_FRAGMENT>;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 export const RedirectUris: FC<Props> = ({ license, refetch }) => {

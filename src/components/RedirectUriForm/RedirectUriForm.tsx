@@ -20,7 +20,7 @@ interface IRedirectUri {
 }
 
 interface IProps {
-  refreshData: () => void;
+  refreshData: () => Promise<void>;
   redirectUris: IRedirectUri[] | undefined;
   tokenId: number;
   owner: string;
@@ -40,6 +40,7 @@ export const RedirectUriForm: FC<IProps> = ({
     handleSubmit,
     register,
     getValues,
+    reset,
   } = useForm<IRedirectUri>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -51,6 +52,7 @@ export const RedirectUriForm: FC<IProps> = ({
       setIsLoading(true);
       const { uri } = getValues();
       await setRedirectUri(uri, true);
+      await refreshData();
       setNotification(
         'Successfully added the redirect URI. Refresh the page to view your changes.',
         'Success!',
@@ -62,7 +64,7 @@ export const RedirectUriForm: FC<IProps> = ({
         uri,
         tokenId,
       });
-      refreshData();
+      reset();
     } catch (error: unknown) {
       Sentry.captureException(error);
       const code = get(error, 'code', null);

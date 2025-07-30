@@ -13,6 +13,8 @@ import { Vehicles } from '@/app/license/details/[tokenId]/components/Vehicles';
 import { DeveloperJwts } from '@/app/license/details/[tokenId]/components/DeveloperJwts';
 import { useRouter } from 'next/navigation';
 
+const IDENTITY_API_UPDATE_DELAY = 6000;
+
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
     developerLicense(by: {tokenId: $tokenId}) {
@@ -36,8 +38,15 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   const goBack = () => {
     router.replace('/app');
   };
-  const handleRefetch = () => {
-    refetch({ tokenId: tokenId });
+  const handleRefetch = async () => {
+    return new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        refetch({ tokenId: tokenId })
+          .then(() => resolve())
+          .catch(reject);
+        // Identity api takes some time to update the data, so we wait for some time
+      }, IDENTITY_API_UPDATE_DELAY);
+    });
   };
 
   useEffect(() => {
