@@ -38,7 +38,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
     router.replace('/app');
   };
   const handleRefetch = () => {
-    refetch({ tokenId: tokenId });
+    void refetch({ tokenId: tokenId });
   };
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       const { tokenId: tokenIdParam } = await params;
       setTokenId(Number(tokenIdParam));
     };
-    getTokenId();
+    void getTokenId();
   }, [params]);
 
   if (loading) {

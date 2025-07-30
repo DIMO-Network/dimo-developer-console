@@ -10,7 +10,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { CopyButton } from '@/components/CopyButton';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
-import { useIsLicenseOwner } from '@/hooks';
+import { useEventEmitter, useIsLicenseOwner } from '@/hooks';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
   fragment DeveloperJwtsFragment on DeveloperLicense {
@@ -33,10 +33,12 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
   const { devJwts, refetch } = useGetDevJwts(fragment.clientId);
   const [jwtToDelete, setJwtToDelete] = useState<string>();
   const isLicenseOwner = useIsLicenseOwner(fragment);
+  const { publishEvent } = useEventEmitter<unknown>('developer-jwt-updated');
 
   const handleDelete = (token: string) => {
     removeDevJwt(fragment.clientId, token);
     refetch();
+    publishEvent({});
   };
 
   const renderCopyButton = (item: { token: string }) => (
@@ -106,7 +108,10 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
           clientId={fragment.clientId}
           domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
           buttonText="Generate new JWT"
-          onSuccess={refetch}
+          onSuccess={() => {
+            refetch();
+            publishEvent({});
+          }}
         />
       </SectionHeader>
       {devJwts.length > 0 ? (
