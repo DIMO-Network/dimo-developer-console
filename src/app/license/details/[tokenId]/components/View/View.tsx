@@ -55,7 +55,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       const { tokenId: tokenIdParam } = await params;
       setTokenId(Number(tokenIdParam));
     };
-    getTokenId();
+    void getTokenId();
   }, [params]);
 
   if (loading) {

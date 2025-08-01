@@ -1,7 +1,13 @@
 import { getCreditConsumptionByLicense } from '@/services/creditTracker';
 
 export const useCreditTracker = () => {
-  const getUsageByLicense = async (licenseId: string | number) => {
+  const getUsageByLicense = async ({
+    licenseId,
+    devJwt,
+  }: {
+    licenseId: `0x${string}`;
+    devJwt: string;
+  }) => {
     const fromDate = new Date();
     fromDate.setMonth(fromDate.getMonth() - 1); // Default to one month ago
     const toDate = new Date(); // Default to today
@@ -10,6 +16,7 @@ export const useCreditTracker = () => {
       licenseId,
       fromDate: fromDate.toISOString(),
       toDate: toDate.toISOString(),
+      devJwt,
     });
   };
 
