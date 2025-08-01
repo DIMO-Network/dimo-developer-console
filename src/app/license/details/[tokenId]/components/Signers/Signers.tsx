@@ -69,7 +69,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       await handleEnableSigner(account.address);
       clearLoadingStatus();
       setApiKey(account.privateKey);
-      refetch();
+      await refetch();
       trackEvent('API Key Generated', {
         distinct_id: fragment.owner,
         tokenId: fragment.tokenId,
