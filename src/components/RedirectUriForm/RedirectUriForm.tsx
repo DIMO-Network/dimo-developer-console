@@ -122,7 +122,6 @@ export const RedirectUriForm: FC<IProps> = ({
           <Button
             className="white with-icon px-4"
             loading={isLoading}
-            loadingColor="primary"
             disabled={!!errors.uri}
           >
             <PlusIcon className="w-5 h-5" />

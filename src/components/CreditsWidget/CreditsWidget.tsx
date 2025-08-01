@@ -69,7 +69,7 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
   return (
     <div className="credits" role="credits-display">
       <div className="credits-info">
-        <div className={'flex flex-row items-center gap-1'}>
+        <div className={'flex flex-row items-center gap-2'}>
           <WalletIcon className="w-4 h-4" />
           <p className="credit-amount">{dcxBalance}</p>
         </div>

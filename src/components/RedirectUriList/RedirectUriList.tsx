@@ -59,17 +59,18 @@ const RedirectUriListComponent: FC<IProps> = ({
     }
   };
 
-  const onConfirmDelete = () => {
+  const onConfirmDelete = async () => {
     if (!uriToDelete) {
       throw new Error('No uri to delete');
     }
-    handleDelete(uriToDelete);
+    await handleDelete(uriToDelete);
     setUriToDelete(undefined);
   };
 
-  const renderCopyRedirectUriAction = ({ uri }: RedirectUri) => {
+  const renderCopyRedirectUriAction = ({ uri }: RedirectUri, index: number) => {
     return (
       <CopyButton
+        key={`copy-action-${index}`}
         value={uri}
         onCopySuccessMessage={'Redirect URI copied!'}
         className={'button table-action-button'}

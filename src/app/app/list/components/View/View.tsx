@@ -16,7 +16,7 @@ const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
   query GetDeveloperLicensesByOwner($owner: Address!) {
     developerLicenses(first: 100, filterBy: { owner: $owner }) {
       ...TotalDeveloperLicenseCountFragment
-      ...DeveloperLicenseSummariesOnConnection
+      ...DeveloperLicenseSummariesOnConnection      
     }
   }
 `);

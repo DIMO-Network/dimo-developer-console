@@ -148,3 +148,12 @@ export interface PaymentSACD {
   };
   signature: `0x${string}`;
 }
+
+export interface ICreditUsage {
+  fromDate: string;
+  toDate: string;
+  licenseId: string;
+  numOfAssets: number;
+  numOfCreditsGrantsPurchased: number;
+  numOfCreditsUsed: number;
+}

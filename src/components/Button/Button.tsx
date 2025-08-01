@@ -12,7 +12,6 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   loading?: boolean;
-  loadingColor?: string;
 }
 
 export const Button: FC<ButtonProps> = ({
