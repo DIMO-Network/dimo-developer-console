@@ -33,7 +33,7 @@ const SIGNERS_FRAGMENT = gql(`
 
 interface Props {
   license: FragmentType<typeof SIGNERS_FRAGMENT>;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 type SignerNode = SignerFragmentFragment['signers']['nodes'][0];
@@ -69,7 +69,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       await handleEnableSigner(account.address);
       clearLoadingStatus();
       setApiKey(account.privateKey);
-      refetch();
+      await refetch();
       trackEvent('API Key Generated', {
         distinct_id: fragment.owner,
         tokenId: fragment.tokenId,
@@ -87,8 +87,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         status: 'loading',
       });
       await handleDisableSigner(signer);
+      await refetch();
       setLoadingStatus({ label: 'API key deleted', status: 'success' });
-      refetch();
     } catch (error: unknown) {
       handleError(error);
     }

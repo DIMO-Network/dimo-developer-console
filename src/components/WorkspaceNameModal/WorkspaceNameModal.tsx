@@ -23,7 +23,7 @@ interface IProps {
   isOpen: boolean;
   setIsOpen: (s: boolean) => void;
   license: { tokenId: number; alias?: string | null };
-  onSuccess?: () => void;
+  onSuccess?: () => Promise<void>;
 }
 
 interface IFormInputs {
@@ -83,7 +83,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
         'success',
       );
       if (onSuccess) {
-        onSuccess();
+        await onSuccess();
       }
       setIsOpen(false);
       reset();

@@ -71,26 +71,28 @@ cd dimo-developer-console
 - Create a `.env.local` file in the root directory of the project and add the follwing environment variables:
 
 ```bash
-NEXT_PUBLIC_TURNKEY_API_BASE_URL=<YOUR_SECRET>
-NEXT_PUBLIC_TURNKEY_API_PRIVATE_KEY=<YOUR_SECRET>
-NEXT_PUBLIC_TURNKEY_API_PUBLIC_KEY=<YOUR_SECRET>
-NEXT_PUBLIC_TURNKEY_ORGANIZATION_ID=<YOUR_SECRET>
-NEXT_PUBLIC_RPID="localhost" # In production, use your top level domain where the app credentials are hosted
-NEXT_PUBLIC_RPC_URL=<YOUR_SECRET>
-NEXT_PUBLIC_BUNDLER_RPC=<YOUR_SECRET>
-NEXT_PUBLIC_PAYMASTER_RPC=<YOUR_SECRET>
-NEXT_PUBLIC_GA_API="http://localhost:3002" # Or wherever your Accounts API is running
-GOOGLE_CLIENT_ID=<YOUR_SECRET>
-GOOGLE_CLIENT_SECRET=<YOUR_SECRET>
-GITHUB_CLIENT_ID=<YOUR_SECRET>
-GITHUB_CLIENT_SECRET=<YOUR_SECRET>
-NEXTAUTH_SECRET=<YOUR_SECRET>
-NEXTAUTH_URL="http://localhost:3000/"
-# TODO - potentially delete JWT_PRIVATE_KEY, since it's not read
-JWT_PRIVATE_KEY=<YOUR_SECRET> # Should be the same as the NEXTAUTH_SECRET
+TURNKEY_ORGANIZATION_ID=<YOUR_SECRET>
+TURNKEY_API_PRIVATE_KEY=<YOUR_SECRET>
+TURNKEY_API_PUBLIC_KEY=<YOUR_SECRET>
+TURNKEY_API_BASE_URL="https://api.turnkey.com"
+
+ZERODEV_PROJECT_ID=<YOUR_SECRET>
+BUNDLER_RPC=<YOUR_RPC>
+PAYMASTER_RPC=<YOUR_RPC>
 VERCEL_ENV="development"
-STRIPE_API_KEY=<YOUR_SECRET>
+
+JWT_KEY_SET_URL="https://auth.dev.dimo.zone/keys"
+JWT_ISSUER="https://auth.dev.dimo.zone"
+
+NEXT_PUBLIC_TURNKEY_API_BASE_URL="https://api.turnkey.com"
+NEXT_PUBLIC_DIMO_AUTH_URL="https://auth.dev.dimo.zone"
+NEXT_PUBLIC_RPC_URL=<YOUR_RPC>
+RPC_URL=<YOUR_RPC>
+NEXT_PUBLIC_TURNKEY_API_BASE_URL="https://api.turnkey.com"
+NEXT_PUBLIC_RPID="localhost"
+NEXT_PUBLIC_GA_API=<YOUR_ACCOUNTS_API_URL>
 ```
+Make sure that the `NEXT_PUBLIC_GA_API` maps to your [Accounts API](https://github.com/DIMO-Network/accounts/tree/main) deployment URL.
 
 3. Install the dependencies:
 

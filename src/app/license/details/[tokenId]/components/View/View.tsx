@@ -14,6 +14,8 @@ import { DeveloperJwts } from '@/app/license/details/[tokenId]/components/Develo
 import { useRouter } from 'next/navigation';
 import { Usage } from '@/app/license/details/[tokenId]/components/Usage/Usage';
 
+const IDENTITY_API_UPDATE_DELAY = 6000;
+
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
     developerLicense(by: {tokenId: $tokenId}) {
@@ -37,8 +39,15 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   const goBack = () => {
     router.replace('/app');
   };
-  const handleRefetch = () => {
-    void refetch({ tokenId: tokenId });
+  const handleRefetch = async () => {
+    return new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        refetch({ tokenId: tokenId })
+          .then(() => resolve())
+          .catch(reject);
+        // Identity api takes some time to update the data, so we wait for some time
+      }, IDENTITY_API_UPDATE_DELAY);
+    });
   };
 
   useEffect(() => {
