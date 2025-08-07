@@ -35,7 +35,7 @@ export const fetchAvailableSignals = async ({
     const { data } = await client.get<AvailableSignal[]>('/v1/webhooks/signals');
     return data;
   } catch (err) {
-    //captureException(err);
+    captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error fetching available signals'));
   }
 };
