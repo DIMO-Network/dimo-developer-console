@@ -14,7 +14,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection\n    }\n  }\n": typeof types.GetDeveloperLicensesByOwnerDocument,
+    "\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection      \n    }\n  }\n": typeof types.GetDeveloperLicensesByOwnerDocument,
     "\n  fragment DeveloperJwtsFragment on DeveloperLicense {\n    owner\n    clientId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.DeveloperJwtsFragmentFragmentDoc,
     "\n  fragment RedirectUriFragment on DeveloperLicense {\n    owner\n    tokenId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.RedirectUriFragmentFragmentDoc,
     "\n  fragment SignerFragment on DeveloperLicense {\n    owner\n    tokenId\n    signers(first:100) {\n      nodes {\n        address\n        enabledAt\n      }\n    }\n  }\n": typeof types.SignerFragmentFragmentDoc,
@@ -30,7 +30,7 @@ type Documents = {
     "\n  query GetDeveloperLicensesForWebhooks($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      nodes {\n        alias\n        clientId\n        redirectURIs(first:100) {\n          nodes {\n            uri\n          }\n        }\n      }\n    }\n  }\n": typeof types.GetDeveloperLicensesForWebhooksDocument,
 };
 const documents: Documents = {
-    "\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection\n    }\n  }\n": types.GetDeveloperLicensesByOwnerDocument,
+    "\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection      \n    }\n  }\n": types.GetDeveloperLicensesByOwnerDocument,
     "\n  fragment DeveloperJwtsFragment on DeveloperLicense {\n    owner\n    clientId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.DeveloperJwtsFragmentFragmentDoc,
     "\n  fragment RedirectUriFragment on DeveloperLicense {\n    owner\n    tokenId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.RedirectUriFragmentFragmentDoc,
     "\n  fragment SignerFragment on DeveloperLicense {\n    owner\n    tokenId\n    signers(first:100) {\n      nodes {\n        address\n        enabledAt\n      }\n    }\n  }\n": types.SignerFragmentFragmentDoc,
@@ -63,7 +63,7 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection\n    }\n  }\n"): (typeof documents)["\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection\n    }\n  }\n"];
+export function gql(source: "\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection      \n    }\n  }\n"): (typeof documents)["\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection      \n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

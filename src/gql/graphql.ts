@@ -819,6 +819,30 @@ export type StakeFilterBy = {
   owner?: InputMaybe<Scalars['Address']['input']>;
 };
 
+export type StorageNode = {
+  __typename?: 'StorageNode';
+  /** The address for the storage node. This is the location of the node's deployed contract. */
+  address: Scalars['Address']['output'];
+  /** The label for the storage node. This is unique. */
+  label: Scalars['String']['output'];
+  /** The timestamp of the block in which this node was minted. */
+  mintedAt: Scalars['Time']['output'];
+  /** The owner of the storage node. Nodes are transferable, so this may change over time. */
+  owner: Scalars['Address']['output'];
+  /** The DID for this node's NFT in the format did:erc721:<chainID>:<contractAddress>:<tokenId>. */
+  tokenDID: Scalars['String']['output'];
+  /**
+   * The token id of the storage node as an NFT. Since this is uint256(keccak256(bytes(label))),
+   * it tends to be very large.
+   */
+  tokenId: Scalars['BigInt']['output'];
+  /**
+   * The URI for the node. This will host the well-known URIs that tell clients how to send in
+   * and retrieve data for this vehicle.
+   */
+  uri: Scalars['String']['output'];
+};
+
 /** The SyntheticDevice is a software connection established to connect the vehicle to the DIMO network. */
 export type SyntheticDevice = Node & {
   __typename?: 'SyntheticDevice';
@@ -933,6 +957,12 @@ export type Vehicle = Node & {
   /** A Relay-style connection listing any active SACD permission grants on this vehicle. */
   sacds: SacdConnection;
   stake?: Maybe<Stake>;
+  /**
+   * Description of the storage node to which the vehicle's data should be sent. If this is
+   * not set, then the vehicle may be attached to the original Digital Infrastructure, Inc.
+   * node.
+   */
+  storageNode?: Maybe<StorageNode>;
   /** The paired synthetic device, if any. */
   syntheticDevice?: Maybe<SyntheticDevice>;
   /** The DID for this vehicle's token ID in the format did:erc721:<chainID>:<contractAddress>:<tokenId> */

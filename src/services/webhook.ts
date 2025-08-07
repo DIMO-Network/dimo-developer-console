@@ -1,6 +1,11 @@
 'use server';
 
-import { Webhook, WebhookCreateInput, WebhookEditableFields } from '@/types/webhook';
+import {
+  AvailableSignal,
+  Webhook,
+  WebhookCreateInput,
+  WebhookEditableFields,
+} from '@/types/webhook';
 import axios from 'axios';
 import { extractAxiosMessage } from '@/utils/api';
 import { captureException } from '@sentry/nextjs';
@@ -18,6 +23,21 @@ const getWebhooksApiClient = (token?: string) => {
       'Authorization': authHeader,
     },
   });
+};
+
+export const fetchAvailableSignals = async ({
+  token,
+}: {
+  token: string;
+}): Promise<AvailableSignal[]> => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.get<AvailableSignal[]>('/v1/webhooks/signals');
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error fetching available signals'));
+  }
 };
 
 export const fetchWebhooks = async ({ token }: { token: string }): Promise<Webhook[]> => {
