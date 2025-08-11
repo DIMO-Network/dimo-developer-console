@@ -84,7 +84,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
           <Title className="text-2xl" component="h3">
             Purchase Connection License
           </Title>
-          <p className="font-light pt-4">
+          <p className="pt-4 text-sm text-text-secondary font-normal">
             By proceeding, you are agreeing to approve payment of $100 (100,000 DCX) for
             your DIMO Connection License. If you do not have enough DCX in your account,
             you will be unable to create a Connection License.
