@@ -56,6 +56,11 @@ export interface Condition {
   value: string;
 }
 
+export interface AvailableSignal {
+  name: string;
+  unit: string;
+}
+
 export enum WebhookFormStepName {
   CONFIGURE = 'configure',
   DELIVERY = 'delivery',

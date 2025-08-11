@@ -2,7 +2,7 @@
   @apply flex flex-row items-center justify-center min-w-28 gap-2 bg-surface-sunken pl-4 pr-2 py-1 rounded-full;
 
   .credits-info {
-    @apply flex flex-row items-center gap-1 justify-between w-36;
+    @apply flex flex-row items-center gap-2 justify-between min-w-36;
   }
 
   .credit-amount {

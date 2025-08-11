@@ -12,6 +12,9 @@ import { Loader } from '@/components/Loader';
 import { Vehicles } from '@/app/license/details/[tokenId]/components/Vehicles';
 import { DeveloperJwts } from '@/app/license/details/[tokenId]/components/DeveloperJwts';
 import { useRouter } from 'next/navigation';
+import { Usage } from '@/app/license/details/[tokenId]/components/Usage/Usage';
+
+const IDENTITY_API_UPDATE_DELAY = 6000;
 
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
@@ -36,8 +39,15 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   const goBack = () => {
     router.replace('/app');
   };
-  const handleRefetch = () => {
-    refetch({ tokenId: tokenId });
+  const handleRefetch = async () => {
+    return new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        refetch({ tokenId: tokenId })
+          .then(() => resolve())
+          .catch(reject);
+        // Identity api takes some time to update the data, so we wait for some time
+      }, IDENTITY_API_UPDATE_DELAY);
+    });
   };
 
   useEffect(() => {
@@ -45,7 +55,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       const { tokenId: tokenIdParam } = await params;
       setTokenId(Number(tokenIdParam));
     };
-    getTokenId();
+    void getTokenId();
   }, [params]);
 
   if (loading) {
@@ -73,10 +83,13 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
             <Summary licenseSummary={data.developerLicense} refetch={handleRefetch} />
           </div>
           <div className={'flex flex-col gap-6 pt-6'}>
+            <div className={'flex w-full flex-row gap-4'}>
+              <Usage license={data.developerLicense} />
+              <Vehicles license={data.developerLicense} />
+            </div>
             <DeveloperJwts license={data.developerLicense} />
             <Signers license={data.developerLicense} refetch={handleRefetch} />
             <RedirectUris license={data.developerLicense} refetch={handleRefetch} />
-            <Vehicles license={data.developerLicense} />
           </div>
         </>
       )}

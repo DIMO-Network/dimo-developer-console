@@ -18,7 +18,7 @@ interface RedirectUri {
 
 interface IProps {
   redirectUris: RedirectUri[] | undefined;
-  refreshData: () => void;
+  refreshData: () => Promise<void>;
   tokenId: number;
   isOwner: boolean;
 }
@@ -52,24 +52,25 @@ const RedirectUriListComponent: FC<IProps> = ({
         status: 'loading',
       });
       await setRedirectUri(uri, false);
+      await refreshData();
       setLoadingStatus({ label: 'Redirect URI deleted', status: 'success' });
-      refreshData();
     } catch (error: unknown) {
       handleError(error);
     }
   };
 
-  const onConfirmDelete = () => {
+  const onConfirmDelete = async () => {
     if (!uriToDelete) {
       throw new Error('No uri to delete');
     }
-    handleDelete(uriToDelete);
+    await handleDelete(uriToDelete);
     setUriToDelete(undefined);
   };
 
-  const renderCopyRedirectUriAction = ({ uri }: RedirectUri) => {
+  const renderCopyRedirectUriAction = ({ uri }: RedirectUri, index: number) => {
     return (
       <CopyButton
+        key={`copy-action-${index}`}
         value={uri}
         onCopySuccessMessage={'Redirect URI copied!'}
         className={'button table-action-button'}

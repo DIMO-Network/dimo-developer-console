@@ -91,7 +91,7 @@ export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam, onCancel }) => {
         </div>
       </div>
       <div className="actions">
-        <Button className="primary w-full" loading={isLoading} loadingColor="primary">
+        <Button className="primary w-full" loading={isLoading}>
           <EnvelopIcon className="w-4 h-4 mr-2" />
           Send invitation
         </Button>

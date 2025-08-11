@@ -7,7 +7,7 @@ import './Vehicles.css';
 import { Section, SectionHeader } from '@/components/Section';
 import { Button } from '@/components/Button';
 import Link from 'next/link';
-import { TotalVehicleCount } from '@/components/TotalVehicleCount';
+import { TotalCount } from '@/components/TotalVehicleCount';
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -15,7 +15,7 @@ export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   }
 `);
 
-const GET_VEHICLE_COUNT_BY_CLIENT_ID = gql(`
+export const GET_VEHICLE_COUNT_BY_CLIENT_ID = gql(`
   query GetVehicleCountByClientId($clientId:Address!) {
     vehicles(first:0, filterBy:{privileged:$clientId}) {
       totalCount
@@ -34,19 +34,21 @@ export const Vehicles: FC<IProps> = ({ license }) => {
   });
 
   return (
-    <Section>
-      <SectionHeader title={'Vehicles'} />
-      <div className={'flex flex-col flex-1'}>
-        {!!error && <p>We had trouble fetching the connected vehicles</p>}
-        {loading && <Loader isLoading={true} />}
-        {!!data && (
-          <VehiclesTotalCount
-            totalCount={data.vehicles.totalCount}
-            clientId={fragment.clientId}
-          />
-        )}
-      </div>
-    </Section>
+    <div className={'w-full'}>
+      <Section>
+        <SectionHeader title={'Vehicles'} />
+        <div className={'flex flex-col flex-1'}>
+          {!!error && <p>We had trouble fetching the connected vehicles</p>}
+          {loading && <Loader isLoading={true} />}
+          {!!data && (
+            <VehiclesTotalCount
+              totalCount={data.vehicles.totalCount}
+              clientId={fragment.clientId}
+            />
+          )}
+        </div>
+      </Section>
+    </div>
   );
 };
 
@@ -59,7 +61,7 @@ const VehiclesTotalCount = ({
 }) => {
   return (
     <div className={'vehicle-count-container'}>
-      <TotalVehicleCount totalCount={totalCount} />
+      <TotalCount totalCount={totalCount} countedThings="Connected Vehicles" />
       <Link href={`/license/vehicles/${clientId}`}>
         <Button className={'table-action-button'}>Vehicle Details</Button>
       </Link>
