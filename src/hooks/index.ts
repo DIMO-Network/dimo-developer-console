@@ -16,3 +16,4 @@ export * from './useTransactions';
 export * from './useIsLicenseOwner';
 export * from './useMixPanel';
 export * from './useCreditTracker';
+export * from './queries/useUserConnections';
