@@ -123,6 +123,27 @@ export const subscribeAllVehicles = async (webhookId: string, token: string) => 
   }
 };
 
+export const subscribeVehiclesList = async ({
+  webhookId,
+  vehicleTokenIds,
+  token,
+}: {
+  webhookId: string;
+  vehicleTokenIds: string[];
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/list`, {
+      vehicleTokenIds,
+    });
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicles'));
+  }
+};
+
 export const unsubscribeAllVehicles = async ({
   webhookId,
   token,
@@ -140,6 +161,28 @@ export const unsubscribeAllVehicles = async ({
   }
 };
 
+export const unsubscribeVehiclesList = async ({
+  webhookId,
+  vehicleTokenIds,
+  token,
+}: {
+  webhookId: string;
+  vehicleTokenIds: string[];
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.delete(`/v1/webhooks/${webhookId}/unsubscribe/list`, {
+      data: { vehicleTokenIds },
+    });
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error unsubscribing vehicles'));
+  }
+};
+
+// BARRETT TODO: Remove old CSV after testing
 export const subscribeByCsv = async ({
   webhookId,
   token,
@@ -167,6 +210,7 @@ export const subscribeByCsv = async ({
   }
 };
 
+// BARRETT TODO: Remove old CSV after testing
 export const unsubscribeByCsv = async ({
   webhookId,
   token,
