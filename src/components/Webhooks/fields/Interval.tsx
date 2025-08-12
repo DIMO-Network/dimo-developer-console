@@ -5,24 +5,23 @@ import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
 import React from 'react';
 
-export const WebhookIntervalField = () => {
+export const WebhookCooldownField = () => {
   const {
     register,
     formState: { errors },
   } = useFormContext<WebhookFormInput>();
 
-  const validateCooldown = (value: string) => {
-    if (!value || value.trim() === '') {
+  const validateCooldown = (value: number) => {
+    if (value === undefined || value === null) {
       return 'Please enter a cooldown period in seconds';
     }
-    const numValue = parseInt(value, 10);
-    if (isNaN(numValue)) {
+    if (isNaN(value)) {
       return 'Please enter a valid number';
     }
-    if (numValue < 0) {
+    if (value < 0) {
       return 'Cooldown must be 0 or greater';
     }
-    if (numValue > 86400) {
+    if (value > 86400) {
       return 'Cooldown cannot exceed 86400 seconds (24 hours)';
     }
     return true;
@@ -35,17 +34,18 @@ export const WebhookIntervalField = () => {
         type="number"
         min="0"
         max="86400"
-        {...register('setup', {
+        {...register('coolDownPeriod', {
           required: 'Please enter a cooldown period in seconds',
           validate: validateCooldown,
+          valueAsNumber: true,
         })}
         placeholder="Enter cooldown period in seconds (e.g., 30)"
       />
       <p className="text-[#868888] text-sm">
         Minimum time between webhook calls for the same event (0 for realtime)
       </p>
-      {errors.setup && (
-        <TextError errorMessage={(errors.setup.message as string) ?? ''} />
+      {errors.coolDownPeriod && (
+        <TextError errorMessage={(errors.coolDownPeriod.message as string) ?? ''} />
       )}
     </div>
   );

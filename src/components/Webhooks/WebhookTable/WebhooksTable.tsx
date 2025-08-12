@@ -19,8 +19,15 @@ import { StatusBadge } from '@/components/Webhooks/components/StatusBadge';
 const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
   return [
     { header: 'Description', accessorKey: 'description' },
+    {
+      header: 'Display Name',
+      cell: ({ row }) => row.original.displayName || '-',
+    },
     { header: 'Service', accessorKey: 'service' },
-    { header: 'Setup', accessorKey: 'setup' },
+    {
+      header: 'Cooldown',
+      cell: ({ row }) => `${row.original.coolDownPeriod}s`,
+    },
     {
       header: 'Vehicles',
       cell: ({ row }) => <VehicleCount webhookId={row.original.id} clientId={clientId} />,

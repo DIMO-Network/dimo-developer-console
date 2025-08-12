@@ -10,7 +10,7 @@ export const useToggleStatus = (webhook: Webhook, clientId: string) => {
   const [status, setStatus] = useState<string>(webhook.status);
   const { setNotification } = useContext(NotificationContext);
 
-  const nextStatus = status === 'Active' ? 'Inactive' : 'Active';
+  const nextStatus = status === 'enabled' ? 'disabled' : 'enabled';
 
   const toggleStatus = async () => {
     const token = getDevJwt(clientId);

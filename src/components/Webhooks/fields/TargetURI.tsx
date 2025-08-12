@@ -27,7 +27,7 @@ export const WebhookTargetUriField = () => {
     <div className="flex flex-col gap-2">
       <Label>Webhook URL</Label>
       <TextField
-        {...register('target_uri', {
+        {...register('targetURL', {
           required: 'Please enter a valid URL',
           validate: validateUrl,
         })}
@@ -36,10 +36,10 @@ export const WebhookTargetUriField = () => {
       <p className="text-[#868888]">
         Enter a public, SSL-enabled URL where you will receive events
       </p>
-      {errors.target_uri && (
+      {errors.targetURL && (
         <TextError
           errorMessage={
-            typeof errors.target_uri.message === 'string' ? errors.target_uri.message : ''
+            typeof errors.targetURL.message === 'string' ? errors.targetURL.message : ''
           }
         />
       )}

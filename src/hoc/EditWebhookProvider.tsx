@@ -39,13 +39,13 @@ export const EditWebhookContextProvider: React.FC<React.PropsWithChildren> = ({
     router.replace('/webhooks');
   };
 
-  const submitForm = async (
+  const submitFormLogic = async (
     formData: WebhookFormInput,
     webhook: Webhook,
     token: string,
   ) => {
-    const { trigger, data } = formatAndGenerateCEL(formData.cel);
-    await updateWebhook(webhook.id, { ...formData, data, trigger }, token);
+    const { metricName, condition } = formatAndGenerateCEL(formData.cel);
+    await updateWebhook(webhook.id, { ...formData, metricName, condition }, token);
   };
 
   return (
@@ -56,7 +56,7 @@ export const EditWebhookContextProvider: React.FC<React.PropsWithChildren> = ({
         onCancel,
         isDiscardingChanges,
         setIsDiscardingChanges,
-        submitForm,
+        submitForm: submitFormLogic,
       }}
     >
       {children}

@@ -10,7 +10,8 @@ import { captureException } from '@sentry/nextjs';
 import {
   CELBuilder,
   WebhookDescriptionField,
-  WebhookIntervalField,
+  WebhookDisplayNameField,
+  WebhookCooldownField,
   WebhookServiceField,
   WebhookTargetUriField,
 } from '@/components/Webhooks/fields';
@@ -46,10 +47,11 @@ export const EditWebhookForm = ({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
       <WebhookDescriptionField />
+      <WebhookDisplayNameField />
       <WebhookTargetUriField />
       <WebhookServiceField />
       <CELBuilder />
-      <WebhookIntervalField />
+      <WebhookCooldownField />
       <WebhookVehicles webhookId={webhook.id} clientId={clientId} />
       <Footer
         isDirty={isDirty}
