@@ -1,10 +1,10 @@
 import { FC, useContext, useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
-import { subscribeByCsv } from '@/services/webhook';
+import { subscribeVehiclesList } from '@/services/webhook';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
-import { CSVUpload } from '@/components/CSVUpload';
+import { VehicleTokenIdsInput } from '@/components/VehicleTokenIdsInput';
 import { Button } from '@/components/Button';
 import { SubscribeVehiclesActionModalProps } from '@/components/Webhooks/edit/types';
 import { captureException } from '@sentry/nextjs';
@@ -17,37 +17,35 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
   onSuccess,
 }) => {
   const [vehicleTokenIds, setVehicleTokenIds] = useState<string[]>([]);
-  const [fileInfo, setFileInfo] = useState<{ name: string; count: number }[]>([]);
   const [loading, setLoading] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [inputError, setInputError] = useState<string>('');
   const devJwt = getDevJwt(clientId);
   const { setNotification } = useContext(NotificationContext);
 
   const handleSubmit = async () => {
-    if (!uploadedFile) {
-      setNotification('No file uploaded.', '', 'error');
+    if (vehicleTokenIds.length === 0) {
+      setInputError('Please enter at least one vehicle token ID.');
       return;
     }
+
     try {
       setLoading(true);
+      setInputError('');
 
-      const formData = new FormData();
-      formData.append('file', uploadedFile);
-      const response = await subscribeByCsv({
+      const response = await subscribeVehiclesList({
         webhookId,
-        formData,
+        vehicleTokenIds,
         token: devJwt ?? '',
       });
+
       setNotification(
-        response?.message ?? 'Successfully subscribed vehicles',
+        response?.message ?? `Successfully subscribed ${vehicleTokenIds.length} vehicles`,
         '',
         'success',
       );
       onSuccess?.();
       setIsOpen(false);
       setVehicleTokenIds([]);
-      setFileInfo([]);
-      setUploadedFile(null);
     } catch (err) {
       captureException(err);
       setNotification('Failed to subscribe vehicles. Please try again.', '', 'error');
@@ -56,24 +54,32 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
     }
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+    setVehicleTokenIds([]);
+    setInputError('');
+  };
+
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <Title>Add vehicles</Title>
       <div className={'py-6'}>
-        <CSVUpload
+        <VehicleTokenIdsInput
           vehicleTokenIds={vehicleTokenIds}
           onChange={setVehicleTokenIds}
-          fileInfo={fileInfo}
-          onMetadataChange={setFileInfo}
-          showTitle={false}
-          onFileUpload={setUploadedFile}
+          label="Vehicle Token IDs to Subscribe"
+          error={inputError}
+          placeholder="Enter vehicle token IDs to subscribe to this webhook"
+          disabled={loading}
         />
       </div>
       <div className="flex flex-col w-full gap-4 pt-4">
-        <Button onClick={handleSubmit} disabled={!uploadedFile || loading}>
-          {loading ? 'Adding...' : 'Add'}
+        <Button onClick={handleSubmit} disabled={vehicleTokenIds.length === 0 || loading}>
+          {loading
+            ? 'Adding...'
+            : `Add ${vehicleTokenIds.length} Vehicle${vehicleTokenIds.length !== 1 ? 's' : ''}`}
         </Button>
-        <Button onClick={() => setIsOpen(false)} className="dark">
+        <Button onClick={handleClose} className="dark">
           Cancel
         </Button>
       </div>

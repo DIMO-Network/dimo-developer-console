@@ -22,7 +22,7 @@ export const WebhookServiceField = () => {
         {...register('service', {
           required: 'Please select a webhook service',
         })}
-        options={[{ value: 'Telemetry', text: 'Telemetry' }]}
+        options={[{ value: 'telemetry.signals', text: 'Telemetry – Signals' }]}
         control={control}
       />
       {errors.service && (

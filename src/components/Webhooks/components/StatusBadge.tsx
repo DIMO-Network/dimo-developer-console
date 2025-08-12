@@ -9,8 +9,11 @@ interface Props {
 export const StatusBadge: FC<Props> = ({ status }) => {
   const getBackgroundColor = () => {
     switch (status.toLowerCase()) {
-      case 'active':
+      case 'enabled':
         return 'bg-feedback-success';
+      case 'failed':
+        return 'bg-feedback-error';
+      case 'disabled':
       default:
         return 'bg-cta-default';
     }

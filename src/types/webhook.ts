@@ -3,23 +3,31 @@ import { GetDeveloperLicensesForWebhooksQuery } from '@/gql/graphql';
 export interface Webhook {
   id: string;
   service: string;
-  data: string;
-  trigger: string;
-  setup: string;
+  metricName: string;
+  condition: string;
+  coolDownPeriod: number;
   parameters: Record<string, unknown>;
-  target_uri: string;
+  targetURL: string;
   developer_license_address: string;
   status: string;
   created_at: string;
   updated_at: string;
   description: string;
+  displayName?: string;
   failure_count: number;
 }
 
 export type WebhookEditableFields = Partial<
   Pick<
     Webhook,
-    'service' | 'data' | 'trigger' | 'setup' | 'target_uri' | 'status' | 'description'
+    | 'service'
+    | 'metricName'
+    | 'condition'
+    | 'coolDownPeriod'
+    | 'targetURL'
+    | 'status'
+    | 'description'
+    | 'displayName'
   >
 >;
 
@@ -30,24 +38,25 @@ export interface CelCondition {
 }
 export interface WebhookFormInput {
   service: string;
-  setup: string;
+  coolDownPeriod: number;
   description: string;
-  target_uri: string;
-  verification_token?: string;
+  displayName?: string;
+  targetURL: string;
+  verificationToken?: string;
   cel: {
     operator: string;
     conditions: CelCondition[];
   };
   subscribe?: {
     allVehicles?: boolean;
-    file?: File;
+    vehicleTokenIds?: string[];
   };
 }
 
 export type WebhookCreateInput = Omit<WebhookFormInput, 'cel' | 'subscribe'> & {
   status: string;
-  data: string;
-  trigger: string;
+  metricName: string;
+  condition: string;
 };
 
 export interface Condition {
