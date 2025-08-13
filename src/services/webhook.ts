@@ -123,6 +123,27 @@ export const subscribeAllVehicles = async (webhookId: string, token: string) => 
   }
 };
 
+export const subscribeSingleVehicle = async ({
+  webhookId,
+  vehicleTokenId,
+  token,
+}: {
+  webhookId: string;
+  vehicleTokenId: string;
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.post(
+      `/v1/webhooks/${webhookId}/subscribe/${vehicleTokenId}`,
+    );
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
+  }
+};
+
 export const subscribeVehiclesList = async ({
   webhookId,
   vehicleTokenIds,
@@ -144,6 +165,30 @@ export const subscribeVehiclesList = async ({
   }
 };
 
+export const subscribeVehicles = async ({
+  webhookId,
+  vehicleTokenIds,
+  token,
+}: {
+  webhookId: string;
+  vehicleTokenIds: string[];
+  token: string;
+}) => {
+  if (vehicleTokenIds.length === 1) {
+    return subscribeSingleVehicle({
+      webhookId,
+      vehicleTokenId: vehicleTokenIds[0],
+      token,
+    });
+  } else {
+    return subscribeVehiclesList({
+      webhookId,
+      vehicleTokenIds,
+      token,
+    });
+  }
+};
+
 export const unsubscribeAllVehicles = async ({
   webhookId,
   token,
@@ -158,6 +203,27 @@ export const unsubscribeAllVehicles = async ({
   } catch (err) {
     captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
+  }
+};
+
+export const unsubscribeSingleVehicle = async ({
+  webhookId,
+  vehicleTokenId,
+  token,
+}: {
+  webhookId: string;
+  vehicleTokenId: string;
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.delete(
+      `/v1/webhooks/${webhookId}/unsubscribe/${vehicleTokenId}`,
+    );
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error unsubscribing vehicle'));
   }
 };
 
@@ -179,6 +245,31 @@ export const unsubscribeVehiclesList = async ({
   } catch (err) {
     captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error unsubscribing vehicles'));
+  }
+};
+
+// Smart unsubscription function that chooses the appropriate endpoint
+export const unsubscribeVehicles = async ({
+  webhookId,
+  vehicleTokenIds,
+  token,
+}: {
+  webhookId: string;
+  vehicleTokenIds: string[];
+  token: string;
+}) => {
+  if (vehicleTokenIds.length === 1) {
+    return unsubscribeSingleVehicle({
+      webhookId,
+      vehicleTokenId: vehicleTokenIds[0],
+      token,
+    });
+  } else {
+    return unsubscribeVehiclesList({
+      webhookId,
+      vehicleTokenIds,
+      token,
+    });
   }
 };
 

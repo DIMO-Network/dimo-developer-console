@@ -1,7 +1,7 @@
 import { FC, useContext, useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
-import { subscribeVehiclesList } from '@/services/webhook';
+import { subscribeVehicles } from '@/services/webhook';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { VehicleTokenIdsInput } from '@/components/VehicleTokenIdsInput';
@@ -32,14 +32,15 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
       setLoading(true);
       setInputError('');
 
-      const response = await subscribeVehiclesList({
+      const response = await subscribeVehicles({
         webhookId,
         vehicleTokenIds,
         token: devJwt ?? '',
       });
 
       setNotification(
-        response?.message ?? `Successfully subscribed ${vehicleTokenIds.length} vehicles`,
+        response?.message ??
+          `Successfully subscribed ${vehicleTokenIds.length} vehicle${vehicleTokenIds.length !== 1 ? 's' : ''}`,
         '',
         'success',
       );
@@ -48,6 +49,7 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
       setVehicleTokenIds([]);
     } catch (err) {
       captureException(err);
+      console.error('Vehicle subscription error:', err);
       setNotification('Failed to subscribe vehicles. Please try again.', '', 'error');
     } finally {
       setLoading(false);

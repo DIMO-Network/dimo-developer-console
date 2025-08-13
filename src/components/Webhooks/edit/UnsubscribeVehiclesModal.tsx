@@ -6,7 +6,7 @@ import { Title } from '@/components/Title';
 import { VehicleTokenIdsInput } from '@/components/VehicleTokenIdsInput';
 import { Button } from '@/components/Button';
 import { SubscribeVehiclesActionModalProps } from '@/components/Webhooks/edit/types';
-import { unsubscribeVehiclesList } from '@/services/webhook';
+import { unsubscribeVehicles } from '@/services/webhook';
 import { captureException } from '@sentry/nextjs';
 
 export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
@@ -32,7 +32,8 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
       setLoading(true);
       setInputError('');
 
-      const response = await unsubscribeVehiclesList({
+      // Uses smart function that chooses single or list endpoint automatically
+      const response = await unsubscribeVehicles({
         webhookId,
         vehicleTokenIds,
         token: devJwt ?? '',
@@ -40,7 +41,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
 
       setNotification(
         response?.message ??
-          `Successfully unsubscribed ${vehicleTokenIds.length} vehicles`,
+          `Successfully unsubscribed ${vehicleTokenIds.length} vehicle${vehicleTokenIds.length !== 1 ? 's' : ''}`,
         '',
         'success',
       );
@@ -49,6 +50,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
       setVehicleTokenIds([]);
     } catch (err) {
       captureException(err);
+      console.error('Vehicle unsubscription error:', err);
       setNotification('Failed to unsubscribe vehicles. Please try again.', '', 'error');
     } finally {
       setLoading(false);
