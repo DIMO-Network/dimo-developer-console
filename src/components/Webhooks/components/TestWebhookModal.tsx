@@ -27,7 +27,7 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
   const handleRunWebhookTest = async () => {
     try {
       const fakeData = { event: 'test_event', data: 'This is test data' };
-      await axios.post(webhook.target_uri, fakeData, {
+      await axios.post(webhook.targetURL, fakeData, {
         headers: { 'Content-Type': 'application/json' },
       });
       setNotification('Webhook triggered successfully.', '', 'success');

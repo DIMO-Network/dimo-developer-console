@@ -7,15 +7,15 @@ import {
 import { RegisterOptions } from 'react-hook-form';
 
 export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel'] => {
-  const { data, trigger } = webhook;
+  const { metricName, condition } = webhook;
 
   const operatorRegex = /([=!><]=|[><])/;
-  const parts = trigger.split(operatorRegex).map((part) => part.trim());
+  const parts = condition.split(operatorRegex).map((part) => part.trim());
   const operator = parts[1] ?? '';
   const value = parts[2] ?? '';
 
   return {
-    conditions: [{ field: data, operator, value }],
+    conditions: [{ field: metricName, operator, value }],
     operator: 'AND',
   };
 };
@@ -120,12 +120,12 @@ export const conditionsConfig: ConditionConfig[] = [
 export const formatWebhookFormData = (
   webhookFormData: WebhookFormInput,
 ): WebhookCreateInput => {
-  const { data, trigger } = formatAndGenerateCEL(webhookFormData.cel);
+  const { metricName, condition } = formatAndGenerateCEL(webhookFormData.cel);
   return {
     ...webhookFormData,
-    status: 'Active',
-    data,
-    trigger,
+    status: 'enabled',
+    metricName,
+    condition,
   };
 };
 
@@ -159,7 +159,7 @@ export const formatAndGenerateCEL = (cel: { conditions: Condition[] }) => {
   const condition = cel.conditions[0];
   const valueType = getValueType(condition);
   return {
-    data: cel.conditions[0].field,
-    trigger: `${valueType} ${condition.operator} ${condition.value}`,
+    metricName: cel.conditions[0].field,
+    condition: `${valueType} ${condition.operator} ${condition.value}`,
   };
 };

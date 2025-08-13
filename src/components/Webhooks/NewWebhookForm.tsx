@@ -49,6 +49,7 @@ export const NewWebhookForm = ({
   const methods = useForm<WebhookFormInput>({
     mode: 'onChange',
     defaultValues: {
+      coolDownPeriod: 0,
       cel: { operator: 'AND', conditions: [{ field: '', value: '', operator: '' }] },
       subscribe: {
         allVehicles: true,
