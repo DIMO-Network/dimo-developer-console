@@ -125,18 +125,16 @@ export const subscribeAllVehicles = async (webhookId: string, token: string) => 
 
 export const subscribeSingleVehicle = async ({
   webhookId,
-  vehicleTokenId,
+  assetDID,
   token,
 }: {
   webhookId: string;
-  vehicleTokenId: string;
+  assetDID: string;
   token: string;
 }) => {
   try {
     const client = getWebhooksApiClient(token);
-    const { data } = await client.post(
-      `/v1/webhooks/${webhookId}/subscribe/${vehicleTokenId}`,
-    );
+    const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/${assetDID}`);
     return data;
   } catch (err) {
     captureException(err);
@@ -146,17 +144,17 @@ export const subscribeSingleVehicle = async ({
 
 export const subscribeVehiclesList = async ({
   webhookId,
-  vehicleTokenIds,
+  assetDIDs,
   token,
 }: {
   webhookId: string;
-  vehicleTokenIds: string[];
+  assetDIDs: string[];
   token: string;
 }) => {
   try {
     const client = getWebhooksApiClient(token);
     const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/list`, {
-      vehicleTokenIds,
+      assetDIDs,
     });
     return data;
   } catch (err) {
@@ -167,23 +165,23 @@ export const subscribeVehiclesList = async ({
 
 export const subscribeVehicles = async ({
   webhookId,
-  vehicleTokenIds,
+  assetDIDs,
   token,
 }: {
   webhookId: string;
-  vehicleTokenIds: string[];
+  assetDIDs: string[];
   token: string;
 }) => {
-  if (vehicleTokenIds.length === 1) {
+  if (assetDIDs.length === 1) {
     return subscribeSingleVehicle({
       webhookId,
-      vehicleTokenId: vehicleTokenIds[0],
+      assetDID: assetDIDs[0],
       token,
     });
   } else {
     return subscribeVehiclesList({
       webhookId,
-      vehicleTokenIds,
+      assetDIDs,
       token,
     });
   }
@@ -208,17 +206,17 @@ export const unsubscribeAllVehicles = async ({
 
 export const unsubscribeSingleVehicle = async ({
   webhookId,
-  vehicleTokenId,
+  assetDID,
   token,
 }: {
   webhookId: string;
-  vehicleTokenId: string;
+  assetDID: string;
   token: string;
 }) => {
   try {
     const client = getWebhooksApiClient(token);
     const { data } = await client.delete(
-      `/v1/webhooks/${webhookId}/unsubscribe/${vehicleTokenId}`,
+      `/v1/webhooks/${webhookId}/unsubscribe/${assetDID}`,
     );
     return data;
   } catch (err) {
@@ -229,17 +227,17 @@ export const unsubscribeSingleVehicle = async ({
 
 export const unsubscribeVehiclesList = async ({
   webhookId,
-  vehicleTokenIds,
+  assetDIDs,
   token,
 }: {
   webhookId: string;
-  vehicleTokenIds: string[];
+  assetDIDs: string[];
   token: string;
 }) => {
   try {
     const client = getWebhooksApiClient(token);
     const { data } = await client.delete(`/v1/webhooks/${webhookId}/unsubscribe/list`, {
-      data: { vehicleTokenIds },
+      data: { assetDIDs },
     });
     return data;
   } catch (err) {
@@ -251,23 +249,23 @@ export const unsubscribeVehiclesList = async ({
 // Smart unsubscription function that chooses the appropriate endpoint
 export const unsubscribeVehicles = async ({
   webhookId,
-  vehicleTokenIds,
+  assetDIDs,
   token,
 }: {
   webhookId: string;
-  vehicleTokenIds: string[];
+  assetDIDs: string[];
   token: string;
 }) => {
-  if (vehicleTokenIds.length === 1) {
+  if (assetDIDs.length === 1) {
     return unsubscribeSingleVehicle({
       webhookId,
-      vehicleTokenId: vehicleTokenIds[0],
+      assetDID: assetDIDs[0],
       token,
     });
   } else {
     return unsubscribeVehiclesList({
       webhookId,
-      vehicleTokenIds,
+      assetDIDs,
       token,
     });
   }

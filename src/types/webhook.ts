@@ -49,7 +49,7 @@ export interface WebhookFormInput {
   };
   subscribe?: {
     allVehicles?: boolean;
-    vehicleTokenIds?: string[];
+    assetDIDs?: string[];
   };
 }
 
