@@ -123,24 +123,67 @@ export const subscribeAllVehicles = async (webhookId: string, token: string) => 
   }
 };
 
-export const subscribeVehiclesList = async ({
+export const subscribeSingleVehicle = async ({
   webhookId,
-  vehicleTokenIds,
+  assetDID,
   token,
 }: {
   webhookId: string;
-  vehicleTokenIds: string[];
+  assetDID: string;
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/${assetDID}`);
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
+  }
+};
+
+export const subscribeVehiclesList = async ({
+  webhookId,
+  assetDIDs,
+  token,
+}: {
+  webhookId: string;
+  assetDIDs: string[];
   token: string;
 }) => {
   try {
     const client = getWebhooksApiClient(token);
     const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/list`, {
-      vehicleTokenIds,
+      assetDIDs,
     });
     return data;
   } catch (err) {
     captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicles'));
+  }
+};
+
+export const subscribeVehicles = async ({
+  webhookId,
+  assetDIDs,
+  token,
+}: {
+  webhookId: string;
+  assetDIDs: string[];
+  token: string;
+}) => {
+  if (assetDIDs.length === 1) {
+    return subscribeSingleVehicle({
+      webhookId,
+      assetDID: assetDIDs[0],
+      token,
+    });
+  } else {
+    return subscribeVehiclesList({
+      webhookId,
+      assetDIDs,
+      token,
+    });
   }
 };
 
@@ -161,24 +204,70 @@ export const unsubscribeAllVehicles = async ({
   }
 };
 
-export const unsubscribeVehiclesList = async ({
+export const unsubscribeSingleVehicle = async ({
   webhookId,
-  vehicleTokenIds,
+  assetDID,
   token,
 }: {
   webhookId: string;
-  vehicleTokenIds: string[];
+  assetDID: string;
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.delete(
+      `/v1/webhooks/${webhookId}/unsubscribe/${assetDID}`,
+    );
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error unsubscribing vehicle'));
+  }
+};
+
+export const unsubscribeVehiclesList = async ({
+  webhookId,
+  assetDIDs,
+  token,
+}: {
+  webhookId: string;
+  assetDIDs: string[];
   token: string;
 }) => {
   try {
     const client = getWebhooksApiClient(token);
     const { data } = await client.delete(`/v1/webhooks/${webhookId}/unsubscribe/list`, {
-      data: { vehicleTokenIds },
+      data: { assetDIDs },
     });
     return data;
   } catch (err) {
     captureException(err);
     throw new Error(extractAxiosMessage(err, 'Unknown error unsubscribing vehicles'));
+  }
+};
+
+// Smart unsubscription function that chooses the appropriate endpoint
+export const unsubscribeVehicles = async ({
+  webhookId,
+  assetDIDs,
+  token,
+}: {
+  webhookId: string;
+  assetDIDs: string[];
+  token: string;
+}) => {
+  if (assetDIDs.length === 1) {
+    return unsubscribeSingleVehicle({
+      webhookId,
+      assetDID: assetDIDs[0],
+      token,
+    });
+  } else {
+    return unsubscribeVehiclesList({
+      webhookId,
+      assetDIDs,
+      token,
+    });
   }
 };
 

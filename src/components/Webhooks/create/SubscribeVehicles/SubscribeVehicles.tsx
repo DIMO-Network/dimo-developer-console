@@ -3,17 +3,17 @@ import { useFormContext, Controller } from 'react-hook-form';
 import { Title } from '@/components/Title';
 import { WebhookFormInput } from '@/types/webhook';
 import { Section } from '@/components/Section';
-import { VehicleTokenIdsInput } from '@/components/VehicleTokenIdsInput';
+import { AssetDIDsInput } from '@/components/AssetDIDsInput';
 import { useState } from 'react';
 
 export const WebhookSubscribeVehiclesStep = () => {
   const { control, watch, setValue } = useFormContext<WebhookFormInput>();
   const allVehicles = watch('subscribe.allVehicles');
-  const [vehicleTokenIds, setVehicleTokenIds] = useState<string[]>([]);
+  const [assetDIDs, setAssetDIDs] = useState<string[]>([]);
 
-  const handleVehicleTokenIdsChange = (tokenIds: string[]) => {
-    setVehicleTokenIds(tokenIds);
-    setValue('subscribe.vehicleTokenIds', tokenIds);
+  const handleAssetDIDsChange = (assetDIDs: string[]) => {
+    setAssetDIDs(assetDIDs);
+    setValue('subscribe.assetDIDs', assetDIDs);
   };
 
   return (
@@ -35,11 +35,11 @@ export const WebhookSubscribeVehiclesStep = () => {
       {!allVehicles && (
         <Section>
           <div>
-            <VehicleTokenIdsInput
-              vehicleTokenIds={vehicleTokenIds}
-              onChange={handleVehicleTokenIdsChange}
+            <AssetDIDsInput
+              assetDIDs={assetDIDs}
+              onChange={handleAssetDIDsChange}
               label="Select specific vehicles"
-              placeholder="Enter the token IDs of vehicles you want to subscribe to this webhook"
+              placeholder="Enter the asset DIDs of vehicles you want to subscribe to this webhook"
             />
           </div>
         </Section>

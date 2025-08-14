@@ -17,7 +17,7 @@ import { formatWebhookFormData } from '@/utils/webhook';
 import {
   createWebhook,
   subscribeAllVehicles,
-  subscribeVehiclesList,
+  subscribeVehicles,
 } from '@/services/webhook';
 
 const steps = [
@@ -89,16 +89,16 @@ export const FormStepContextProvider: FC<PropsWithChildren> = ({ children }) => 
     if (webhookData.subscribe?.allVehicles) {
       const response = await subscribeAllVehicles(createdWebhook.id, token);
       return { message: response.message };
-    } else if (webhookData.subscribe?.vehicleTokenIds?.length) {
-      const response = await subscribeVehiclesList({
+    } else if (webhookData.subscribe?.assetDIDs?.length) {
+      const response = await subscribeVehicles({
         webhookId: createdWebhook.id,
-        vehicleTokenIds: webhookData.subscribe.vehicleTokenIds,
+        assetDIDs: webhookData.subscribe.assetDIDs,
         token,
       });
       return {
         message:
           response.message ||
-          `Successfully subscribed ${webhookData.subscribe.vehicleTokenIds.length} vehicles`,
+          `Successfully subscribed ${webhookData.subscribe.assetDIDs.length} vehicle${webhookData.subscribe.assetDIDs.length !== 1 ? 's' : ''}`,
       };
     } else {
       return { message: 'No vehicles subscribed' };
