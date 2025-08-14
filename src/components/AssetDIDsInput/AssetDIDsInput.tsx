@@ -15,7 +15,7 @@ interface AssetDIDsInputProps {
 export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
   assetDIDs,
   onChange,
-  placeholder = 'Enter asset DIDs, one per line or comma-separated',
+  placeholder = 'Enter vehicle DIDs, one per line or comma-separated',
   label = 'Asset DIDs',
   error,
   disabled = false,
@@ -41,12 +41,12 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
     for (const id of ids) {
       // Asset DIDs can be alphanumeric, not just numeric like vehicle token IDs
       if (!/^[a-zA-Z0-9._-]+$/.test(id)) {
-        return `Invalid asset DID: "${id}". Asset DIDs must contain only letters, numbers, dots, hyphens, and underscores.`;
+        return `Invalid vehicle DID: "${id}". Asset DIDs must contain only letters, numbers, dots, hyphens, and underscores.`;
       }
     }
 
     if (ids.length > 1000) {
-      return 'Too many asset DIDs. Maximum of 1000 DIDs allowed.';
+      return 'Too many vehicle DIDs. Maximum of 1000 DIDs allowed.';
     }
 
     return '';
@@ -100,11 +100,15 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
       {displayError && <TextError errorMessage={displayError} />}
 
       <div className="text-sm text-text-secondary">
-        <p>You can enter asset DIDs in the following ways:</p>
+        <p>You can enter vehicle DIDs in the following ways:</p>
         <ul className="list-disc list-inside mt-1 space-y-1">
-          <li>One per line: did:dimo:123, did:dimo:456, did:dimo:789</li>
-          <li>Comma-separated: did:dimo:123, did:dimo:456, did:dimo:789</li>
-          <li>Mixed format is also supported</li>
+          <li>
+            One per line: did:erc721:137:0x123, did:erc721:137:0x456, did:erc721:137:0x789
+          </li>
+          <li>
+            Comma-separated: did:erc721:137:0x123, did:erc721:137:0x456,
+            did:erc721:137:0x789
+          </li>
         </ul>
       </div>
     </div>
