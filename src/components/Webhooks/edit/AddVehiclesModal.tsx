@@ -1,10 +1,10 @@
 import { FC, useContext, useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
 import { NotificationContext } from '@/context/notificationContext';
-import { subscribeVehiclesList } from '@/services/webhook';
+import { subscribeVehicles } from '@/services/webhook';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
-import { VehicleTokenIdsInput } from '@/components/VehicleTokenIdsInput';
+import { AssetDIDsInput } from '@/components/AssetDIDsInput';
 import { Button } from '@/components/Button';
 import { SubscribeVehiclesActionModalProps } from '@/components/Webhooks/edit/types';
 import { captureException } from '@sentry/nextjs';
@@ -16,15 +16,15 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
   clientId,
   onSuccess,
 }) => {
-  const [vehicleTokenIds, setVehicleTokenIds] = useState<string[]>([]);
+  const [assetDIDs, setAssetDIDs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputError, setInputError] = useState<string>('');
   const devJwt = getDevJwt(clientId);
   const { setNotification } = useContext(NotificationContext);
 
   const handleSubmit = async () => {
-    if (vehicleTokenIds.length === 0) {
-      setInputError('Please enter at least one vehicle token ID.');
+    if (assetDIDs.length === 0) {
+      setInputError('Please enter at least one asset DID.');
       return;
     }
 
@@ -32,22 +32,24 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
       setLoading(true);
       setInputError('');
 
-      const response = await subscribeVehiclesList({
+      const response = await subscribeVehicles({
         webhookId,
-        vehicleTokenIds,
+        assetDIDs,
         token: devJwt ?? '',
       });
 
       setNotification(
-        response?.message ?? `Successfully subscribed ${vehicleTokenIds.length} vehicles`,
+        response?.message ??
+          `Successfully subscribed ${assetDIDs.length} vehicle${assetDIDs.length !== 1 ? 's' : ''}`,
         '',
         'success',
       );
       onSuccess?.();
       setIsOpen(false);
-      setVehicleTokenIds([]);
+      setAssetDIDs([]);
     } catch (err) {
       captureException(err);
+      console.error('Vehicle subscription error:', err);
       setNotification('Failed to subscribe vehicles. Please try again.', '', 'error');
     } finally {
       setLoading(false);
@@ -56,7 +58,7 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
 
   const handleClose = () => {
     setIsOpen(false);
-    setVehicleTokenIds([]);
+    setAssetDIDs([]);
     setInputError('');
   };
 
@@ -64,20 +66,20 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <Title>Add vehicles</Title>
       <div className={'py-6'}>
-        <VehicleTokenIdsInput
-          vehicleTokenIds={vehicleTokenIds}
-          onChange={setVehicleTokenIds}
-          label="Vehicle Token IDs to Subscribe"
+        <AssetDIDsInput
+          assetDIDs={assetDIDs}
+          onChange={setAssetDIDs}
+          label="Asset DIDs to Subscribe"
           error={inputError}
-          placeholder="Enter vehicle token IDs to subscribe to this webhook"
+          placeholder="Enter asset DIDs to subscribe to this webhook"
           disabled={loading}
         />
       </div>
       <div className="flex flex-col w-full gap-4 pt-4">
-        <Button onClick={handleSubmit} disabled={vehicleTokenIds.length === 0 || loading}>
+        <Button onClick={handleSubmit} disabled={assetDIDs.length === 0 || loading}>
           {loading
             ? 'Adding...'
-            : `Add ${vehicleTokenIds.length} Vehicle${vehicleTokenIds.length !== 1 ? 's' : ''}`}
+            : `Add ${assetDIDs.length} Vehicle${assetDIDs.length !== 1 ? 's' : ''}`}
         </Button>
         <Button onClick={handleClose} className="dark">
           Cancel
