@@ -141,7 +141,14 @@ export const NewWebhookForm = ({
 
   return (
     <FormProvider {...methods}>
-      <form className={'flex flex-1 flex-col gap-6'}>
+      <form
+        className={'flex flex-1 flex-col gap-6'}
+        onSubmit={(e) => {
+          console.log('🚫 Form submission prevented');
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
         <FormStepComponent />
         <Footer
           previousDisabled={!canGoToPrevious}
