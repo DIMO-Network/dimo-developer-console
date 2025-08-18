@@ -39,9 +39,12 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
     if (ids.length === 0) return '';
 
     for (const id of ids) {
-      // Asset DIDs can be alphanumeric, not just numeric like vehicle token IDs
-      if (!/^[a-zA-Z0-9._-]+$/.test(id)) {
-        return `Invalid vehicle DID: "${id}". Asset DIDs must contain only letters, numbers, dots, hyphens, and underscores.`;
+      if (id.trim().length === 0) {
+        return 'Asset DIDs cannot be empty.';
+      }
+
+      if (id.length > 200) {
+        return `Asset DID too long: "${id}". Maximum length is 200 characters.`;
       }
     }
 
