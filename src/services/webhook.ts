@@ -9,31 +9,69 @@ import {
 import axios from 'axios';
 import { extractAxiosMessage } from '@/utils/api';
 import { captureException } from '@sentry/nextjs';
+import { jwtDecode } from 'jwt-decode';
 
 const getWebhooksApiClient = (token?: string) => {
-  console.log('WEBHOOK API CLIENT JWT CHECK');
+  console.log('==========================================');
+  console.log('🚀 WEBHOOK API CLIENT DEBUG');
+  console.log('==========================================');
   console.log('Environment:', typeof window !== 'undefined' ? 'Browser' : 'Server');
   console.log(
     'Domain:',
     typeof window !== 'undefined' ? window.location.hostname : 'N/A',
   );
+  console.log('VERCEL_ENV:', process.env.VERCEL_ENV);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
   console.log('Token provided to webhook client:', !!token);
   console.log('API Base URL:', process.env.NEXT_PUBLIC_EVENTS_API_URL);
 
   if (token) {
-    console.log('Webhook JWT Preview:', token.substring(0, 20) + '...');
-    console.log(
-      'JWT Type: Likely from getDevJwt (localStorage) if called from client components',
-    );
+    console.log('🔍 TOKEN ANALYSIS:');
+    console.log('Webhook JWT Preview:', token.substring(0, 30) + '...');
+    console.log('Webhook JWT Length:', token.length);
+    console.log('JWT starts with expected format:', token.startsWith('eyJ'));
+
+    try {
+      const decoded = jwtDecode(token);
+      const now = Math.floor(Date.now() / 1000);
+      console.log('📋 JWT CLAIMS:');
+      console.log('- Issuer (iss):', decoded.iss);
+      console.log('- Subject (sub):', decoded.sub);
+      console.log('- Audience (aud):', decoded.aud);
+      console.log(
+        '- Expires (exp):',
+        decoded.exp ? new Date(decoded.exp * 1000).toISOString() : 'No expiration',
+      );
+      console.log(
+        '- Issued At (iat):',
+        decoded.iat ? new Date(decoded.iat * 1000).toISOString() : 'No issued at',
+      );
+      console.log('- Current Time:', new Date().toISOString());
+      console.log('- Token Expired:', decoded.exp ? now > decoded.exp : false);
+      console.log(
+        '- Time until expiry (minutes):',
+        decoded.exp ? Math.round((decoded.exp - now) / 60) : 'N/A',
+      );
+    } catch (error) {
+      console.error('❌ JWT DECODE ERROR:', error);
+      console.log('This might indicate a malformed token!');
+    }
   } else {
-    console.log('No JWT provided to webhook client');
+    console.log('❌ NO JWT PROVIDED');
+    console.log('This will result in unauthenticated request');
   }
-  console.log('--- End Webhook API JWT Check ---');
 
   let authHeader = undefined;
   if (token) {
     authHeader = `Bearer ${token}`;
+    console.log('✅ Authorization header set');
+  } else {
+    console.log('❌ No Authorization header - API call will likely fail with 403');
   }
+
+  console.log('==========================================');
+  console.log('--- End Webhook API JWT Check ---');
+
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
     headers: {

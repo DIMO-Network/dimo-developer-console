@@ -12,26 +12,58 @@ import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const { clientId } = use(params);
   const router = useRouter();
+
+  console.log('==========================================');
+  console.log('🏗️ WEBHOOK CREATE VIEW DEBUG');
+  console.log('==========================================');
+  console.log('Client ID from params:', clientId);
+  console.log(
+    'Current URL:',
+    typeof window !== 'undefined' ? window.location.href : 'N/A',
+  );
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('VERCEL_ENV:', process.env.VERCEL_ENV);
+
   const devJwt = getDevJwt(clientId);
 
+  console.log('🎯 POST-RETRIEVAL CHECK:');
+  console.log('devJWT retrieved successfully:', !!devJwt);
+  if (!devJwt) {
+    console.log('❌ NO DEV JWT - User will be redirected back');
+  }
+  console.log('==========================================');
+
   const getToken = () => {
-    if (!devJwt) {
+    console.log('🔄 getToken() called - Real-time JWT check');
+    const currentJwt = getDevJwt(clientId);
+    if (!currentJwt) {
+      console.error('❌ CRITICAL: No devJWT found when getToken() called');
       throw new Error('No devJWT found');
     }
-    return devJwt;
+    console.log('✅ JWT retrieved successfully in getToken()');
+    return currentJwt;
   };
 
   const goBack = () => {
+    console.log('↩️ Redirecting back to webhooks list');
     router.replace('/webhooks');
   };
 
   useEffect(() => {
+    console.log('🔍 useEffect - JWT validation check');
+    console.log('clientId:', clientId);
+    console.log('devJwt exists:', !!devJwt);
+
     if (!devJwt) {
+      console.log('❌ No JWT found in useEffect - redirecting');
       goBack();
+    } else {
+      console.log('✅ JWT validation passed in useEffect');
     }
   }, [clientId, devJwt]);
 
   const onComplete = () => {
+    console.log('🎉 Webhook creation completed successfully');
     invalidateQuery(clientId);
     goBack();
   };
