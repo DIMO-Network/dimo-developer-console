@@ -104,13 +104,22 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
 
       <div className="text-sm text-text-secondary">
         <p>You can enter vehicle DIDs in the following ways:</p>
-        <ul className="list-disc list-inside mt-1 space-y-1">
+        <ul className="list-disc mt-1 space-y-1">
           <li>
-            One per line: did:erc721:137:0x123, did:erc721:137:0x456, did:erc721:137:0x789
+            <div>One per line:</div>
+            <div className="font-mono text-xs p-2 mt-1 rounded">
+              did:erc721:137:0x123:123
+              <br />
+              did:erc721:137:0x456:456
+              <br />
+              did:erc721:137:0x789:789
+            </div>
           </li>
           <li>
-            Comma-separated: did:erc721:137:0x123, did:erc721:137:0x456,
-            did:erc721:137:0x789
+            <div>Comma-separated:</div>
+            <div className="font-mono text-xs p-2 mt-1 rounded">
+              did:erc721:137:0x123:123, did:erc721:137:0x456:456, did:erc721:137:0x789:789
+            </div>
           </li>
         </ul>
       </div>
