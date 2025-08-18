@@ -71,7 +71,8 @@ export const NewWebhookForm = ({
     console.log('Form Data Preview:', {
       targetURL: data.targetURL,
       verificationToken: data.verificationToken ? 'PROVIDED' : 'MISSING',
-      signals: data.signals?.length || 0,
+      service: data.service,
+      conditions: data.cel?.conditions?.length || 0,
     });
 
     try {
