@@ -54,8 +54,24 @@ const getValidTokens = (clientId: string): StoredJwt[] => {
 };
 
 export const getDevJwt = (clientId: string) => {
+  console.log('CHECK LOCAL JWT CLIENT SIDE ');
+  console.log('Environment:', typeof window !== 'undefined' ? 'Browser' : 'Server');
+  console.log(
+    'Domain:',
+    typeof window !== 'undefined' ? window.location.hostname : 'N/A',
+  );
+  console.log('Client ID:', clientId);
+
   const validTokens = getValidTokens(clientId);
-  return validTokens.length ? validTokens[0].token : null;
+  const token = validTokens.length ? validTokens[0].token : null;
+
+  console.log('💻Local JWT Found:', !!token);
+  if (token) {
+    console.log('Local JWT Preview:', token.substring(0, 20) + '...');
+  }
+  console.log('--- End localStorage JWT Check ---');
+
+  return token;
 };
 
 export const getAllDevJwts = (clientId: string) => {

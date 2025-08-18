@@ -15,7 +15,7 @@ interface AssetDIDsInputProps {
 export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
   assetDIDs,
   onChange,
-  placeholder = 'Enter asset DIDs, one per line or comma-separated',
+  placeholder = 'Enter vehicle DIDs, one per line or comma-separated',
   label = 'Asset DIDs',
   error,
   disabled = false,
@@ -39,14 +39,17 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
     if (ids.length === 0) return '';
 
     for (const id of ids) {
-      // Asset DIDs can be alphanumeric, not just numeric like vehicle token IDs
-      if (!/^[a-zA-Z0-9._-]+$/.test(id)) {
-        return `Invalid asset DID: "${id}". Asset DIDs must contain only letters, numbers, dots, hyphens, and underscores.`;
+      if (id.trim().length === 0) {
+        return 'Asset DIDs cannot be empty.';
+      }
+
+      if (id.length > 200) {
+        return `Asset DID too long: "${id}". Maximum length is 200 characters.`;
       }
     }
 
     if (ids.length > 1000) {
-      return 'Too many asset DIDs. Maximum of 1000 DIDs allowed.';
+      return 'Too many vehicle DIDs. Maximum of 1000 DIDs allowed.';
     }
 
     return '';
@@ -100,11 +103,24 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
       {displayError && <TextError errorMessage={displayError} />}
 
       <div className="text-sm text-text-secondary">
-        <p>You can enter asset DIDs in the following ways:</p>
-        <ul className="list-disc list-inside mt-1 space-y-1">
-          <li>One per line: did:dimo:123, did:dimo:456, did:dimo:789</li>
-          <li>Comma-separated: did:dimo:123, did:dimo:456, did:dimo:789</li>
-          <li>Mixed format is also supported</li>
+        <p>You can enter vehicle DIDs in the following ways:</p>
+        <ul className="list-disc mt-1 space-y-1">
+          <li>
+            <div>One per line:</div>
+            <div className="font-mono text-xs p-2 mt-1 rounded">
+              did:erc721:137:0x123:123
+              <br />
+              did:erc721:137:0x456:456
+              <br />
+              did:erc721:137:0x789:789
+            </div>
+          </li>
+          <li>
+            <div>Comma-separated:</div>
+            <div className="font-mono text-xs p-2 mt-1 rounded">
+              did:erc721:137:0x123:123, did:erc721:137:0x456:456, did:erc721:137:0x789:789
+            </div>
+          </li>
         </ul>
       </div>
     </div>

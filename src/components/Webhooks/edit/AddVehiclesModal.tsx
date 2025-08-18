@@ -28,6 +28,17 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
       return;
     }
 
+    console.log('VEHICLE SUBSCRIPTION JWT TRACE');
+    console.log('Component type: Client Component (uses getDevJwt)');
+    console.log('Environment:', typeof window !== 'undefined' ? 'Browser' : 'Server');
+    console.log(
+      'Domain:',
+      typeof window !== 'undefined' ? window.location.hostname : 'N/A',
+    );
+    console.log('Client ID for JWT:', clientId);
+    console.log('JWT from getDevJwt available:', !!devJwt);
+    console.log('--- End Vehicle Subscription JWT Trace ---');
+
     try {
       setLoading(true);
       setInputError('');
