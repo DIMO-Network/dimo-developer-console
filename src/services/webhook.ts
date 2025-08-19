@@ -7,70 +7,14 @@ import {
 import axios from 'axios';
 import { extractAxiosMessage } from '@/utils/api';
 import { captureException } from '@sentry/nextjs';
-import { jwtDecode } from 'jwt-decode';
 
 const getWebhooksApiClient = (token?: string) => {
-  console.log('==========================================');
-  console.log('🚀 WEBHOOK API CLIENT DEBUG');
-  console.log('==========================================');
-  console.log('Environment:', typeof window !== 'undefined' ? 'Browser' : 'Server');
-  console.log(
-    'Domain:',
-    typeof window !== 'undefined' ? window.location.hostname : 'N/A',
-  );
-  console.log('VERCEL_ENV:', process.env.VERCEL_ENV);
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-  console.log('Token provided to webhook client:', !!token);
-  console.log('API Base URL:', process.env.NEXT_PUBLIC_EVENTS_API_URL);
-
-  if (token) {
-    console.log('🔍 TOKEN ANALYSIS:');
-    console.log('Webhook JWT Preview:', token.substring(0, 30) + '...');
-    console.log('Webhook JWT Length:', token.length);
-    console.log('JWT starts with expected format:', token.startsWith('eyJ'));
-
-    try {
-      const decoded = jwtDecode(token);
-      const now = Math.floor(Date.now() / 1000);
-      console.log('📋 JWT CLAIMS:');
-      console.log('- Issuer (iss):', decoded.iss);
-      console.log('- Subject (sub):', decoded.sub);
-      console.log('- Audience (aud):', decoded.aud);
-      console.log(
-        '- Expires (exp):',
-        decoded.exp ? new Date(decoded.exp * 1000).toISOString() : 'No expiration',
-      );
-      console.log(
-        '- Issued At (iat):',
-        decoded.iat ? new Date(decoded.iat * 1000).toISOString() : 'No issued at',
-      );
-      console.log('- Current Time:', new Date().toISOString());
-      console.log('- Token Expired:', decoded.exp ? now > decoded.exp : false);
-      console.log(
-        '- Time until expiry (minutes):',
-        decoded.exp ? Math.round((decoded.exp - now) / 60) : 'N/A',
-      );
-    } catch (error) {
-      console.error('❌ JWT DECODE ERROR:', error);
-      console.log('This might indicate a malformed token!');
-    }
-  } else {
-    console.log('❌ NO JWT PROVIDED');
-    console.log('This will result in unauthenticated request');
-  }
-
   let authHeader = undefined;
   if (token) {
     authHeader = `Bearer ${token}`;
-    console.log('✅ Authorization header set');
-  } else {
-    console.log('❌ No Authorization header - API call will likely fail with 403');
   }
 
-  console.log('==========================================');
-  console.log('--- End Webhook API JWT Check ---');
-
-  const client = axios.create({
+  return axios.create({
     baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
     headers: {
       'Content-Type': 'application/json',
@@ -78,60 +22,6 @@ const getWebhooksApiClient = (token?: string) => {
       'Authorization': authHeader,
     },
   });
-
-  // Add request interceptor for detailed logging
-  client.interceptors.request.use(
-    (config) => {
-      console.log('🚀 OUTGOING WEBHOOK API REQUEST:');
-      console.log('Method:', config.method?.toUpperCase());
-      console.log('URL:', `${config.baseURL}${config.url}`);
-      console.log('Headers:', JSON.stringify(config.headers, null, 2));
-      console.log('Data:', JSON.stringify(config.data, null, 2));
-      console.log('==========================================');
-      return config;
-    },
-    (error) => {
-      console.error('❌ REQUEST INTERCEPTOR ERROR:', error);
-      return Promise.reject(error);
-    },
-  );
-
-  // Add response interceptor for detailed logging
-  client.interceptors.response.use(
-    (response) => {
-      console.log('✅ SUCCESSFUL WEBHOOK API RESPONSE:');
-      console.log('Status:', response.status);
-      console.log('Status Text:', response.statusText);
-      console.log('Headers:', JSON.stringify(response.headers, null, 2));
-      console.log('Data:', JSON.stringify(response.data, null, 2));
-      console.log('==========================================');
-      return response;
-    },
-    (error) => {
-      console.error('❌ WEBHOOK API ERROR RESPONSE:');
-      console.error('Error Message:', error.message);
-      console.error('Error Code:', error.code);
-      if (error.response) {
-        console.error('Response Status:', error.response.status);
-        console.error('Response Status Text:', error.response.statusText);
-        console.error(
-          'Response Headers:',
-          JSON.stringify(error.response.headers, null, 2),
-        );
-        console.error('Response Data:', JSON.stringify(error.response.data, null, 2));
-      } else if (error.request) {
-        console.error('No response received. Request details:');
-        console.error('Request URL:', error.config?.url);
-        console.error('Request Method:', error.config?.method);
-      } else {
-        console.error('Error setting up request:', error.message);
-      }
-      console.error('==========================================');
-      return Promise.reject(error);
-    },
-  );
-
-  return client;
 };
 
 export const fetchAvailableSignals = async ({

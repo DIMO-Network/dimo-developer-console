@@ -9,13 +9,6 @@ import * as Sentry from '@sentry/nextjs';
 import { JWTPayload } from 'jose/dist/types';
 import { cookieName, getCookie } from './services/dimoDevAPI';
 
-// Add comprehensive environment debugging
-console.log('🔍 MIDDLEWARE ENVIRONMENT DEBUG');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('VERCEL_ENV:', process.env.VERCEL_ENV);
-console.log('VERCEL_URL:', process.env.VERCEL_URL);
-console.log('Events API URL:', process.env.NEXT_PUBLIC_EVENTS_API_URL);
-
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
 const getToken = async () => {
@@ -121,22 +114,6 @@ const validatePublicSession = async (request: NextRequest) => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
-  const { pathname, origin } = request.nextUrl;
-
-  // Log environment details for webhook-related requests
-  if (pathname.includes('/webhook') || pathname.includes('/app/webhooks')) {
-    console.log('🔍 WEBHOOK MIDDLEWARE DEBUG');
-    console.log('Request URL:', request.url);
-    console.log('Origin:', origin);
-    console.log('Pathname:', pathname);
-    console.log(
-      'User-Agent:',
-      request.headers.get('user-agent')?.substring(0, 50) + '...',
-    );
-    console.log('Referer:', request.headers.get('referer'));
-    console.log('Host:', request.headers.get('host'));
-  }
-
   const hasError = request.nextUrl.searchParams.get('error');
   const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
