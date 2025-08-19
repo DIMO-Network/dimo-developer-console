@@ -15,10 +15,11 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const devJwt = getDevJwt(clientId);
 
   const getToken = () => {
-    if (!devJwt) {
+    const currentJwt = getDevJwt(clientId);
+    if (!currentJwt) {
       throw new Error('No devJWT found');
     }
-    return devJwt;
+    return currentJwt;
   };
 
   const goBack = () => {

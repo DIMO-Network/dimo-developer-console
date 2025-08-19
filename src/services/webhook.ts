@@ -1,5 +1,3 @@
-'use server';
-
 import {
   AvailableSignal,
   Webhook,
@@ -11,29 +9,11 @@ import { extractAxiosMessage } from '@/utils/api';
 import { captureException } from '@sentry/nextjs';
 
 const getWebhooksApiClient = (token?: string) => {
-  console.log('WEBHOOK API CLIENT JWT CHECK');
-  console.log('Environment:', typeof window !== 'undefined' ? 'Browser' : 'Server');
-  console.log(
-    'Domain:',
-    typeof window !== 'undefined' ? window.location.hostname : 'N/A',
-  );
-  console.log('Token provided to webhook client:', !!token);
-  console.log('API Base URL:', process.env.NEXT_PUBLIC_EVENTS_API_URL);
-
-  if (token) {
-    console.log('Webhook JWT Preview:', token.substring(0, 20) + '...');
-    console.log(
-      'JWT Type: Likely from getDevJwt (localStorage) if called from client components',
-    );
-  } else {
-    console.log('No JWT provided to webhook client');
-  }
-  console.log('--- End Webhook API JWT Check ---');
-
   let authHeader = undefined;
   if (token) {
     authHeader = `Bearer ${token}`;
   }
+
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
     headers: {

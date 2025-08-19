@@ -12,11 +12,17 @@ export const getFromLocalStorage = <T>(key: string): T | null => {
   if (typeof window === 'undefined') {
     return null;
   }
-  const serializedValue = localStorage.getItem(key);
-  if (!serializedValue) {
+
+  try {
+    const serializedValue = localStorage.getItem(key);
+    if (!serializedValue) {
+      return null;
+    }
+    return JSON.parse(serializedValue);
+  } catch (error) {
+    console.error('❌ localStorage access or JSON parsing error:', error);
     return null;
   }
-  return JSON.parse(serializedValue);
 };
 
 export const removeFromLocalStorage = (key: string): void => {
