@@ -43,7 +43,6 @@ export const NewWebhookForm = ({
     shouldSubmit,
     onSubmit,
     canGoToPrevious,
-    getCurrentStep,
   } = useWebhookCreateFormContext();
   const { setNotification } = useContext(NotificationContext);
 
@@ -59,82 +58,23 @@ export const NewWebhookForm = ({
   });
 
   const wrappedOnSubmit = methods.handleSubmit(async (data: WebhookFormInput) => {
-    const currentStep = getCurrentStep();
-    const stepName = currentStep.getName();
-
-    console.log('==========================================');
-    console.log('📝 WEBHOOK FORM SUBMISSION DEBUG');
-    console.log('==========================================');
-    console.log('Current Step:', stepName);
-    console.log('Should Submit:', shouldSubmit);
-    console.log('Is Last Step:', isLastStep);
-    console.log('Form Data Preview:', {
-      targetURL: data.targetURL,
-      verificationToken: data.verificationToken ? 'PROVIDED' : 'MISSING',
-      service: data.service,
-      conditions: data.cel?.conditions?.length || 0,
-    });
-
     try {
-      console.log('🔐 Attempting to get token...');
       const token = getToken();
-      console.log('✅ Token retrieved for submission:', !!token);
-      console.log('Token preview:', token.substring(0, 30) + '...');
-
-      console.log('📡 Calling onSubmit with data and token...');
       const response = await onSubmit(data, token);
 
-      console.log('✅ onSubmit completed successfully');
-      console.log('Response:', response);
-
       if (response?.message) {
-        console.log('📢 Setting success notification:', response.message);
         setNotification(response.message, '', 'success');
       }
       if (isLastStep) {
-        console.log('🏁 Final step completed - calling onComplete');
         return onComplete();
       }
-      console.log('➡️ Moving to next step');
       onNext();
     } catch (err) {
-      console.error('==========================================');
-      console.error('❌ WEBHOOK FORM SUBMISSION ERROR');
-      console.error('==========================================');
-      console.error('Error object:', err);
-      console.error('Error type:', typeof err);
-      console.error('Error constructor:', err?.constructor?.name);
-
-      if (err instanceof Error) {
-        console.error('Error message:', err.message);
-        console.error('Error stack:', err.stack);
-      }
-
-      // Check if it's a network/API error
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as unknown;
-        console.error(
-          'HTTP Status:',
-          (axiosError as { response?: { status?: number } }).response?.status,
-        );
-        console.error(
-          'Response data:',
-          (axiosError as { response?: { data?: unknown } }).response?.data,
-        );
-        console.error(
-          'Response headers:',
-          (axiosError as { response?: { headers?: unknown } }).response?.headers,
-        );
-      }
-
-      console.error('==========================================');
-
       captureException(err);
       let msg = 'Something went wrong completing the operation';
       if (err instanceof Error) {
         msg = err.message || msg;
       }
-      console.log('📢 Setting error notification:', msg);
       setNotification(msg, '', 'error');
     }
   });
@@ -144,7 +84,6 @@ export const NewWebhookForm = ({
       <form
         className={'flex flex-1 flex-col gap-6'}
         onSubmit={(e) => {
-          console.log('🚫 Form submission prevented');
           e.preventDefault();
           e.stopPropagation();
         }}
