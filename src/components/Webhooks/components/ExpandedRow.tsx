@@ -25,11 +25,11 @@ export const ExpandedRow = ({
     <tr className="expanded-row bg-surface-sunken border-t-0">
       <td colSpan={colSpan} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
         <div className="expanded-content space-y-4">
-          <WebhookUrlDisplay url={webhook.target_uri} />
+          <WebhookUrlDisplay url={webhook.targetURL} />
           <Actions
             onDelete={handleDeletePress}
             onChangeStatus={handleChangeStatus}
-            isActive={status === 'Active'}
+            isActive={status === 'enabled'}
             editUrl={getWebhookEditUrl(webhook, clientId)}
           />
         </div>

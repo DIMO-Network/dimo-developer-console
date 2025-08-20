@@ -26,34 +26,28 @@ export const saveDevJwt = (clientId: string, token: string) => {
 };
 
 const getValidTokens = (clientId: string): StoredJwt[] => {
-  const tokens = getFromLocalStorage<StoredJwt[]>(getKey(clientId));
-  if (!tokens || !tokens.length) return [];
+  const key = getKey(clientId);
+  const tokens = getFromLocalStorage<StoredJwt[]>(key) || [];
 
-  const now = Math.floor(Date.now() / 1000);
-  const validTokens = tokens.filter(({ token }) => {
+  const now = Date.now();
+  const validTokens = tokens.filter((storedJwt) => {
     try {
-      const { exp } = jwtDecode(token);
-      return exp && exp > now;
+      const decoded = jwtDecode(storedJwt.token);
+      const exp = decoded.exp ? decoded.exp * 1000 : null;
+      return exp ? now <= exp : true;
     } catch {
       return false;
     }
   });
 
-  // If no valid tokens remain, remove all tokens
-  if (!validTokens.length) {
-    removeFromLocalStorage(getKey(clientId));
-    return [];
-  }
-
-  // Update storage with only valid tokens
-  if (validTokens.length !== tokens.length) {
-    saveToLocalStorage(getKey(clientId), validTokens);
-  }
-
   return validTokens.sort((a, b) => b.createdAt - a.createdAt);
 };
 
 export const getDevJwt = (clientId: string) => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
   const validTokens = getValidTokens(clientId);
   return validTokens.length ? validTokens[0].token : null;
 };

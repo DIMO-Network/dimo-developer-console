@@ -15,7 +15,7 @@ export const WebhookVerificationTokenField = () => {
     <div className="flex flex-col gap-2">
       <Label>Verification Token</Label>
       <TextField
-        {...register('verification_token', {
+        {...register('verificationToken', {
           required: 'Please enter a valid string',
         })}
         placeholder="Enter a verification token"
@@ -25,11 +25,11 @@ export const WebhookVerificationTokenField = () => {
         verification request, your server must respond with this exact string in plain
         text. This ensures you control the destination URL.
       </p>
-      {errors.verification_token && (
+      {errors.verificationToken && (
         <TextError
           errorMessage={
-            typeof errors.verification_token.message === 'string'
-              ? errors.verification_token.message
+            typeof errors.verificationToken.message === 'string'
+              ? errors.verificationToken.message
               : ''
           }
         />

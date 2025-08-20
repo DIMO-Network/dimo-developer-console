@@ -1,5 +1,3 @@
-'use server';
-
 import {
   AvailableSignal,
   Webhook,
@@ -15,6 +13,7 @@ const getWebhooksApiClient = (token?: string) => {
   if (token) {
     authHeader = `Bearer ${token}`;
   }
+
   return axios.create({
     baseURL: process.env.NEXT_PUBLIC_EVENTS_API_URL,
     headers: {
@@ -123,6 +122,70 @@ export const subscribeAllVehicles = async (webhookId: string, token: string) => 
   }
 };
 
+export const subscribeSingleVehicle = async ({
+  webhookId,
+  assetDID,
+  token,
+}: {
+  webhookId: string;
+  assetDID: string;
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/${assetDID}`);
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicle'));
+  }
+};
+
+export const subscribeVehiclesList = async ({
+  webhookId,
+  assetDIDs,
+  token,
+}: {
+  webhookId: string;
+  assetDIDs: string[];
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.post(`/v1/webhooks/${webhookId}/subscribe/list`, {
+      assetDIDs,
+    });
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error subscribing vehicles'));
+  }
+};
+
+export const subscribeVehicles = async ({
+  webhookId,
+  assetDIDs,
+  token,
+}: {
+  webhookId: string;
+  assetDIDs: string[];
+  token: string;
+}) => {
+  if (assetDIDs.length === 1) {
+    return subscribeSingleVehicle({
+      webhookId,
+      assetDID: assetDIDs[0],
+      token,
+    });
+  } else {
+    return subscribeVehiclesList({
+      webhookId,
+      assetDIDs,
+      token,
+    });
+  }
+};
+
 export const unsubscribeAllVehicles = async ({
   webhookId,
   token,
@@ -140,6 +203,74 @@ export const unsubscribeAllVehicles = async ({
   }
 };
 
+export const unsubscribeSingleVehicle = async ({
+  webhookId,
+  assetDID,
+  token,
+}: {
+  webhookId: string;
+  assetDID: string;
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.delete(
+      `/v1/webhooks/${webhookId}/unsubscribe/${assetDID}`,
+    );
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error unsubscribing vehicle'));
+  }
+};
+
+export const unsubscribeVehiclesList = async ({
+  webhookId,
+  assetDIDs,
+  token,
+}: {
+  webhookId: string;
+  assetDIDs: string[];
+  token: string;
+}) => {
+  try {
+    const client = getWebhooksApiClient(token);
+    const { data } = await client.delete(`/v1/webhooks/${webhookId}/unsubscribe/list`, {
+      data: { assetDIDs },
+    });
+    return data;
+  } catch (err) {
+    captureException(err);
+    throw new Error(extractAxiosMessage(err, 'Unknown error unsubscribing vehicles'));
+  }
+};
+
+// Smart unsubscription function that chooses the appropriate endpoint
+export const unsubscribeVehicles = async ({
+  webhookId,
+  assetDIDs,
+  token,
+}: {
+  webhookId: string;
+  assetDIDs: string[];
+  token: string;
+}) => {
+  if (assetDIDs.length === 1) {
+    return unsubscribeSingleVehicle({
+      webhookId,
+      assetDID: assetDIDs[0],
+      token,
+    });
+  } else {
+    return unsubscribeVehiclesList({
+      webhookId,
+      assetDIDs,
+      token,
+    });
+  }
+};
+
+// BARRETT TODO: Remove old CSV after testing
 export const subscribeByCsv = async ({
   webhookId,
   token,
@@ -167,6 +298,7 @@ export const subscribeByCsv = async ({
   }
 };
 
+// BARRETT TODO: Remove old CSV after testing
 export const unsubscribeByCsv = async ({
   webhookId,
   token,

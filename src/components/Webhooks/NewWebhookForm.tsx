@@ -49,6 +49,7 @@ export const NewWebhookForm = ({
   const methods = useForm<WebhookFormInput>({
     mode: 'onChange',
     defaultValues: {
+      coolDownPeriod: 0,
       cel: { operator: 'AND', conditions: [{ field: '', value: '', operator: '' }] },
       subscribe: {
         allVehicles: true,
@@ -58,7 +59,9 @@ export const NewWebhookForm = ({
 
   const wrappedOnSubmit = methods.handleSubmit(async (data: WebhookFormInput) => {
     try {
-      const response = await onSubmit(data, getToken());
+      const token = getToken();
+      const response = await onSubmit(data, token);
+
       if (response?.message) {
         setNotification(response.message, '', 'success');
       }
@@ -78,7 +81,13 @@ export const NewWebhookForm = ({
 
   return (
     <FormProvider {...methods}>
-      <form className={'flex flex-1 flex-col gap-6'}>
+      <form
+        className={'flex flex-1 flex-col gap-6'}
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
         <FormStepComponent />
         <Footer
           previousDisabled={!canGoToPrevious}
