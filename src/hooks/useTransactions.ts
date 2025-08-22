@@ -219,6 +219,8 @@ export const useMintConnection = () => {
 
       // THREE TRANSACTIONS
       // First approving 10k DCX, then minting, then approve DCX
+
+      // TODO: Need to add args and ensure taht requiredDCX amount is correct (convert to 100 USD? Or??)
       const transactions = [
         {
           to: configuration.DC_ADDRESS,
@@ -230,11 +232,11 @@ export const useMintConnection = () => {
           }),
         },
         {
-          to: configuration.DCC_ADDRESS, // WIP BARRETT TODO: Confirm address
+          to: configuration.DCC_ADDRESS,
           value: BigInt(0),
           data: encodeFunctionData({
-            abi: DimoConnectionABI, // TBD.
-            functionName: 'mintConnection', // TBD.
+            abi: DimoConnectionABI, // TBD - pretty sure this is correct, confirm w lorran
+            functionName: 'mintConnection', // TBD - not sure this is correct/where this comes from
             args: [connectionName],
           }),
         },
