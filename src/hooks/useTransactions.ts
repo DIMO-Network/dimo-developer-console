@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import DimoConnectionABI from '@/contracts/DimoConnectionABI.json';
 import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
 import { utils } from 'web3';
 
@@ -195,25 +196,65 @@ export const useMintLicense = () => {
 };
 
 export const useMintConnection = () => {
-  const { validateCurrentSession } = useGlobalAccount();
-  const { processTransactions } = useContractGA();
+  const { validateCurrentSession, getCurrentDcxBalance } = useGlobalAccount();
+  const { checkEnoughBalance, processTransactions } = useContractGA();
   return useCallback(
     async (connectionName: string) => {
       const currentSession = await validateCurrentSession();
+      const enoughBalance = await checkEnoughBalance();
+
+      const dcxBalance = await getCurrentDcxBalance();
+      const requiredDCX = 100000;
+
+      if (dcxBalance < requiredDCX) {
+        return {
+          success: false,
+          reason: `Insufficient DCX balance. Required: ${requiredDCX} DCX, Current: ${dcxBalance.toLocaleString()} DCX`,
+        };
+      }
       if (!currentSession) throw new Error('Web3 connection failed');
-      const transaction = [
+      if (!enoughBalance.dcx && !enoughBalance.dimo) {
+        return { success: false, reason: 'Insufficient DIMO or DCX balance' };
+      }
+
+      // THREE TRANSACTIONS
+      // First approving 10k DCX, then minting, then approve DCX
+      const transactions = [
+        {
+          to: configuration.DC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoABI,
+            functionName: 'approve', // TBD.
+            args: [],
+          }),
+        },
         {
           to: configuration.DCC_ADDRESS, // WIP BARRETT TODO: Confirm address
           value: BigInt(0),
           data: encodeFunctionData({
-            abi: ConnectionABI, // TBD.
+            abi: DimoConnectionABI, // TBD.
             functionName: 'mintConnection', // TBD.
             args: [connectionName],
           }),
         },
+        {
+          to: configuration.DC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoABI,
+            functionName: 'approve',
+            args: [],
+          }),
+        },
       ];
-      return await processTransactions(transaction, { abi: ConnectionABI });
+      return await processTransactions(transactions, { abi: DimoConnectionABI as Abi });
     },
-    [processTransactions, validateCurrentSession],
+    [
+      checkEnoughBalance,
+      getCurrentDcxBalance,
+      processTransactions,
+      validateCurrentSession,
+    ],
   );
 };
