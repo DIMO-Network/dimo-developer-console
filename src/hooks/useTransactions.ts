@@ -193,3 +193,27 @@ export const useMintLicense = () => {
     [processTransactions],
   );
 };
+
+export const useMintConnection = () => {
+  const { validateCurrentSession } = useGlobalAccount();
+  const { processTransactions } = useContractGA();
+  return useCallback(
+    async (connectionName: string) => {
+      const currentSession = await validateCurrentSession();
+      if (!currentSession) throw new Error('Web3 connection failed');
+      const transaction = [
+        {
+          to: configuration.DCC_ADDRESS, // WIP BARRETT TODO: Confirm address
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: ConnectionABI, // TBD.
+            functionName: 'mintConnection', // TBD.
+            args: [connectionName],
+          }),
+        },
+      ];
+      return await processTransactions(transaction, { abi: ConnectionABI });
+    },
+    [processTransactions, validateCurrentSession],
+  );
+};
