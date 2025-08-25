@@ -1,5 +1,5 @@
 import { FragmentType, gql, useFragment } from '@/gql';
-import React, { FC, useContext, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { Button } from '@/components/Button';
 import { KeyIcon } from '@heroicons/react/20/solid';
 import { Table } from '@/components/Table';
@@ -7,7 +7,14 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { SignerFragmentFragment } from '@/gql/graphql';
 import * as Sentry from '@sentry/nextjs';
 import { get } from 'lodash';
-import { useDisableSigner, useEnableSigner, useMixPanel } from '@/hooks';
+import {
+  useDimoAuth,
+  useDisableSigner,
+  useEnableSigner,
+  useEventEmitter,
+  useGlobalAccount,
+  useMixPanel,
+} from '@/hooks';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/details/[tokenId]/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
@@ -39,6 +46,7 @@ interface Props {
 type SignerNode = SignerFragmentFragment['signers']['nodes'][0];
 
 const SignersComponent: FC<Props> = ({ license, refetch }) => {
+  const { currentUser } = useGlobalAccount();
   const [apiKey, setApiKey] = useState<string>();
   const [signerToDelete, setSignerToDelete] = useState<string>();
   const { trackEvent } = useMixPanel();
@@ -47,6 +55,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const handleDisableSigner = useDisableSigner(fragment.tokenId);
   const handleEnableSigner = useEnableSigner(fragment.tokenId);
   const isLicenseOwner = useIsLicenseOwner(fragment);
+  const { publishEvent } = useEventEmitter<{ client_id: `0x${string}` }>(
+    'generate-my-developer-jwt',
+  );
+
+  const { hasGlobalAccountPrivateKey } = useDimoAuth();
 
   const handleError = (error: unknown) => {
     Sentry.captureException(error);
@@ -112,11 +125,35 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     }
   };
 
+  // Check if current wallet address is listed in the signers
+  const isSigner = (owner: `0x${string}`) => {
+    return fragment.signers.nodes.some((signer) => signer.address === owner);
+  };
+
+  const handleOwnerSigner = async () => {
+    try {
+      const { hasPrivateKey, privateKeyAddress } = await hasGlobalAccountPrivateKey();
+      if (!hasPrivateKey) return;
+      if (!isSigner(privateKeyAddress!)) {
+        await handleEnableSigner(privateKeyAddress!);
+        await refetch();
+      }
+      publishEvent({ client_id: privateKeyAddress! }, true);
+    } catch (error: unknown) {
+      handleError(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!currentUser) return;
+    void handleOwnerSigner();
+  }, [currentUser]);
+
   const onConfirmDelete = () => {
     if (!signerToDelete) {
       throw new Error('No signer to delete');
     }
-    handleDelete(signerToDelete);
+    void handleDelete(signerToDelete);
     setSignerToDelete(undefined);
   };
 

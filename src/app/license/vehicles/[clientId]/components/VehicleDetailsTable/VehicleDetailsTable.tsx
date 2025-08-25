@@ -25,6 +25,7 @@ const VEHICLES_BY_CLIENT_ID = gql(`
       }
       nodes {
         tokenId
+        tokenDID
         definition {
           make
           model
