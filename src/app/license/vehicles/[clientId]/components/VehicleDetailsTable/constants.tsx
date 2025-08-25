@@ -8,6 +8,9 @@ export const columns: ColumnDef<VehicleNode>[] = [
   columnHelper.accessor('tokenId', {
     header: 'Vehicle token ID',
   }),
+  columnHelper.accessor('tokenDID', {
+    header: 'Vehicle token DID',
+  }),
   columnHelper.display({
     id: 'vehicleMMY', // Unique ID since we're not directly accessing a property
     header: 'Vehicle MMY',
