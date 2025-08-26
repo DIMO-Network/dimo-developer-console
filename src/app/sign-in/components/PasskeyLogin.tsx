@@ -23,7 +23,7 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
     try {
       const { success } = await loginWithPasskey({
         currentWalletValue: currentWallet,
-        exitsOnDevConsole: true,
+        existOnDevConsole: true,
       });
 
       if (!success) {

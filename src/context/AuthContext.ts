@@ -6,14 +6,14 @@ interface IProps {
   setUser: Dispatch<SetStateAction<{ email: string; subOrganizationId: string } | null>>;
   loginWithPasskey: (currentState: {
     currentWalletValue?: `0x${string}` | null;
-    exitsOnDevConsole: boolean;
+    existOnDevConsole: boolean;
   }) => Promise<{ success: boolean; newWalletAddress?: `0x${string}` }>;
   beginOtpLogin: () => Promise<string>;
   completeOtpLogin: (otp: {
     otp: string;
     otpId: string;
     currentWalletValue?: `0x${string}` | null;
-    exitsOnDevConsole: boolean;
+    existOnDevConsole: boolean;
   }) => Promise<{ success: boolean; newWalletAddress?: `0x${string}` }>;
   handleExternalAuth: (provider: string) => void;
   completeExternalAuth: (code: string) => Promise<{ success: boolean; email: string }>;

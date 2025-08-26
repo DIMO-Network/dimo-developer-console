@@ -85,7 +85,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
         otp: otpString,
         otpId,
         currentWalletValue: null,
-        exitstsOnDevConsole: false,
+        existOnDevConsole: false,
       });
 
       if (!success) {

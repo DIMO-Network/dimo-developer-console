@@ -89,7 +89,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
         otp: otpString,
         otpId,
         currentWalletValue: currentWallet,
-        exitsOnDevConsole: true,
+        existOnDevConsole: true,
       });
 
       if (!success) {

@@ -181,7 +181,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     }
 
     const { success, newWalletAddress } = await loginWithPasskey({
-      exitstsOnDevConsole: false,
+      existOnDevConsole: false,
     });
 
     if (!success) {

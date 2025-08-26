@@ -136,10 +136,10 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
     const loginWithPasskey = async ({
       currentWalletValue,
-      exitsOnDevConsole,
+      existOnDevConsole,
     }: {
       currentWalletValue?: `0x${string}` | null;
-      exitsOnDevConsole: boolean;
+      existOnDevConsole: boolean;
     }): Promise<{
       success: boolean;
       newWalletAddress?: `0x${string}`;
@@ -166,7 +166,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         credentialBundle,
         privateKey: key.privateKey,
         currentWalletValue,
-        existsOnDevConsole: exitsOnDevConsole,
+        existsOnDevConsole: existOnDevConsole,
       });
 
       await createSession({
@@ -198,12 +198,12 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       otp,
       otpId,
       currentWalletValue,
-      exitsOnDevConsole,
+      existOnDevConsole,
     }: {
       otp: string;
       otpId: string;
       currentWalletValue?: `0x${string}` | null;
-      exitsOnDevConsole: boolean;
+      existOnDevConsole: boolean;
     }): Promise<{ success: boolean; newWalletAddress?: `0x${string}` }> => {
       const { email } = user!;
       if (!email) return { success: false };
@@ -226,7 +226,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
         credentialBundle,
         privateKey: key.privateKey,
         currentWalletValue,
-        existsOnDevConsole: exitsOnDevConsole,
+        existsOnDevConsole: existOnDevConsole,
       });
 
       await createSession({
