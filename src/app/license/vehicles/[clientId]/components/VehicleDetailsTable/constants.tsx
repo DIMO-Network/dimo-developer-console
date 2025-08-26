@@ -8,6 +8,7 @@ export const columns: ColumnDef<VehicleNode>[] = [
   columnHelper.accessor('tokenId', {
     header: 'Vehicle token ID',
   }),
+  // @ts-expect-error multiple properties are improperly typed, but not sure how to fix it
   columnHelper.accessor('tokenDID', {
     header: 'Vehicle token DID',
   }),
