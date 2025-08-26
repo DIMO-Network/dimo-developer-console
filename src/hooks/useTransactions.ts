@@ -217,36 +217,24 @@ export const useMintConnection = () => {
         return { success: false, reason: 'Insufficient DIMO or DCX balance' };
       }
 
-      // THREE TRANSACTIONS
-      // First approving 10k DCX, then minting, then approve DCX
-
-      // TODO: Need to add args and ensure taht requiredDCX amount is correct (convert to 100 USD? Or??)
+      // TODO: Need to ensure that requiredDCX amount is correct (convert to 100 USD? Or??)
       const transactions = [
         {
-          to: configuration.DC_ADDRESS,
+          to: configuration.DC_ADDRESS, //0x21xFE...
           value: BigInt(0),
           data: encodeFunctionData({
             abi: DimoABI,
-            functionName: 'approve', // TBD.
-            args: [],
+            functionName: 'approve',
+            args: [configuration.DCC_ADDRESS, requiredDCX], //spender=DCC 0x41799...,amount=10,000***
           }),
         },
         {
           to: configuration.DCC_ADDRESS,
           value: BigInt(0),
           data: encodeFunctionData({
-            abi: DimoConnectionABI, // TBD - pretty sure this is correct, confirm w lorran
-            functionName: 'mintConnection', // TBD - not sure this is correct/where this comes from
-            args: [connectionName],
-          }),
-        },
-        {
-          to: configuration.DC_ADDRESS,
-          value: BigInt(0),
-          data: encodeFunctionData({
-            abi: DimoABI,
-            functionName: 'approve',
-            args: [],
+            abi: DimoConnectionABI, // TBD - somewhat sure this is correct, confirm w lorran?
+            functionName: CONTRACT_METHODS.MINT_CONNECTION, // congirm this is how to distinguish between mint (0xd0def521), simple vs. mint (0xd34047b6) choose type
+            args: [connectionName], //_name?
           }),
         },
       ];

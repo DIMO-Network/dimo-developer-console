@@ -30,12 +30,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
   const handlePurchaseAlert = () => {
     setIsPendingPurchase(true);
-    // setTimeout(() => {
-    //   setIsPendingPurchase(false);
-    //   // Navigate to the credentials page with the connection name as a parameter
-    //   const encodedName = encodeURIComponent(connectionName);
-    //   router.push(`/connections/create/${owner}/credentials?name=${encodedName}`);
-    // }, 3000);
+    //Three things will happen here: 1) Approve payment, 2) mint Connection 3) generate two AA wallets (do later)
   };
 
   return (
@@ -61,7 +56,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
               <TextField
                 id="connectionName"
                 type="text"
-                placeholder="NewOracle"
+                placeholder="Connection Name"
                 className="mt-1"
                 value={connectionName}
                 onChange={(e) => setConnectionName(e.target.value)}

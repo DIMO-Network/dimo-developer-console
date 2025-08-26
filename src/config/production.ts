@@ -26,6 +26,7 @@ export const CONTRACT_METHODS = {
   MINT_IN_DIMO: '0xec88fc37',
   APPROVE_ALLOWANCE: '0x095ea7b3',
   MINT_DCX: '0x40c10f19',
+  MINT_CONNECTION: '0xd0def521',
 };
 
 export const identityApiUrl = 'https://identity-api.dimo.zone/query';
@@ -33,3 +34,5 @@ export const identityApiUrl = 'https://identity-api.dimo.zone/query';
 export const DIMO_ESCROW_ADDRESS = '0x69977330D192701071D9b370Ac849065A545dEA5';
 
 export const DIMO_SACD_ADDRESS = '0x3c152B5d96769661008Ff404224d6530FCAC766d';
+
+export const DCC_ADDRESS = '0x41799E9Dc893722844E771a1C1cAf3BBc2876132'; // Connections
