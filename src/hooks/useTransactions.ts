@@ -204,12 +204,16 @@ export const useMintConnection = () => {
       const enoughBalance = await checkEnoughBalance();
 
       const dcxBalance = await getCurrentDcxBalance();
-      const requiredDCX = 100000;
+
+      // Connection minting cost in USD.
+      const connectionCostUSD = 100;
+      // Convert USD to DCX using the same pattern as other parts of the codebase - needed?
+      const requiredDCX = Math.ceil(connectionCostUSD / Number(DCX_IN_USD));
 
       if (dcxBalance < requiredDCX) {
         return {
           success: false,
-          reason: `Insufficient DCX balance. Required: ${requiredDCX} DCX, Current: ${dcxBalance.toLocaleString()} DCX`,
+          reason: `Insufficient DCX balance. Required: ${requiredDCX.toLocaleString()} DCX, Current: ${dcxBalance.toLocaleString()} DCX`,
         };
       }
       if (!currentSession) throw new Error('Web3 connection failed');
@@ -233,7 +237,7 @@ export const useMintConnection = () => {
           value: BigInt(0),
           data: encodeFunctionData({
             abi: DimoConnectionABI, // TBD - somewhat sure this is correct, confirm w lorran?
-            functionName: CONTRACT_METHODS.MINT_CONNECTION, // congirm this is how to distinguish between mint (0xd0def521), simple vs. mint (0xd34047b6) choose type
+            functionName: CONTRACT_METHODS.MINT_CONNECTION, // confirm this is how to distinguish between mint (0xd0def521), simple vs. mint (0xd34047b6) choose type
             args: [connectionName], //_name?
           }),
         },
