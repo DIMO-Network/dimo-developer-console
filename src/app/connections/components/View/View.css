@@ -36,7 +36,7 @@
 }
 
 .connection-public-key {
-  @apply text-text-secondary font-mono text-sm break-all;
+  @apply text-text-secondary text-lg break-all;
 }
 
 .connection-details-btn {
