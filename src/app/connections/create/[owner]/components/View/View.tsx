@@ -8,15 +8,20 @@ import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
+import { useMintConnection } from '@/hooks/useTransactions';
 
 export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   const { owner } = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialConnectionName = searchParams.get('name') || 'NewOracle';
+  const initialConnectionName = searchParams.get('name') || 'NewConnection';
   const [connectionName, setConnectionName] = useState(initialConnectionName);
   const [isPendingPurchase, setIsPendingPurchase] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const mintConnection = useMintConnection();
 
   const goBack = useCallback(() => {
     router.replace('/connections');
@@ -30,8 +35,40 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
   const handlePurchaseAlert = () => {
     setIsPendingPurchase(true);
-    //Three things will happen here: 1) Approve payment, 2) mint Connection 3) generate two AA wallets (do later)
+    setError(null);
   };
+
+  const handleContinuePayment = useCallback(async () => {
+    setIsProcessingPayment(true);
+    setError(null);
+    try {
+      const result = await mintConnection(connectionName);
+
+      console.log('MINT TEST RESULT:', result);
+
+      if (result.success === false) {
+        console.error('Connection minting failed', result.reason);
+        setError(result.reason || 'Failed to mint connection');
+        return;
+      }
+
+      setIsPendingPurchase(false);
+
+      // BARRETT TODO: Instead of redirecting back, need to generate the two AA wallets
+      router.replace('/connections');
+    } catch (error) {
+      console.error('Connection minter error:', error);
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  }, [connectionName, mintConnection, router]);
+
+  const handleCancelPayment = useCallback(() => {
+    console.log('User cancelled payment');
+    setIsPendingPurchase(false);
+    setError(null);
+  }, []);
 
   return (
     <>
@@ -80,13 +117,34 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
             Purchase Connection License
           </Title>
           <p className="pt-4 text-sm text-text-secondary font-normal">
-            By proceeding, you are agreeing to approve payment of $100 (100,000 DCX) for
-            your DIMO Connection License. If you do not have enough DCX in your account,
-            you will be unable to create a Connection License.
+            By proceeding, you are agreeing to approve payment of 2,000 $DIMO tokens for
+            your DIMO Connection License. If you do not have enough $DIMO tokens in your
+            account, you will be unable to create a Connection License.
           </p>
-          <div className="purchase-buttons pt-6">
-            <Button className="w-48">Cancel</Button>
-            <Button className="w-48">Continue with Payment</Button>
+
+          {error && (
+            <div className="pt-4">
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+                {error}
+              </p>
+            </div>
+          )}
+
+          <div className="purchase-buttons pt-6 flex gap-4">
+            <Button
+              className="w-48"
+              onClick={handleCancelPayment}
+              disabled={isProcessingPayment}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="w-48"
+              onClick={handleContinuePayment}
+              disabled={isProcessingPayment}
+            >
+              {isProcessingPayment ? 'Processing...' : 'Continue with Payment'}
+            </Button>
           </div>
         </div>
       </Modal>

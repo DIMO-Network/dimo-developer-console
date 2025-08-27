@@ -196,59 +196,81 @@ export const useMintLicense = () => {
 };
 
 export const useMintConnection = () => {
-  const { validateCurrentSession, getCurrentDcxBalance } = useGlobalAccount();
+  const { validateCurrentSession, currentUser } = useGlobalAccount();
   const { checkEnoughBalance, processTransactions } = useContractGA();
   return useCallback(
     async (connectionName: string) => {
       const currentSession = await validateCurrentSession();
       const enoughBalance = await checkEnoughBalance();
 
-      const dcxBalance = await getCurrentDcxBalance();
+      // Connection minting cost: 2,000 $DIMO tokens
+      const requiredDIMO = 2000;
+      const requiredDIMOInWei = BigInt(utils.toWei(requiredDIMO.toString(), 'ether'));
 
-      // Connection minting cost in USD.
-      const connectionCostUSD = 100;
-      // Convert USD to DCX using the same pattern as other parts of the codebase - needed?
-      const requiredDCX = Math.ceil(connectionCostUSD / Number(DCX_IN_USD));
-
-      if (dcxBalance < requiredDCX) {
-        return {
-          success: false,
-          reason: `Insufficient DCX balance. Required: ${requiredDCX.toLocaleString()} DCX, Current: ${dcxBalance.toLocaleString()} DCX`,
-        };
-      }
       if (!currentSession) throw new Error('Web3 connection failed');
-      if (!enoughBalance.dcx && !enoughBalance.dimo) {
-        return { success: false, reason: 'Insufficient DIMO or DCX balance' };
+      if (!currentUser) throw new Error('User not found');
+      if (!enoughBalance.dimo) {
+        return { success: false, reason: 'Insufficient DIMO balance' };
       }
 
-      // TODO: Need to ensure that requiredDCX amount is correct (convert to 100 USD? Or??)
       const transactions = [
+        // Transaction 1: approve use of 2,000 $DIMO tokens
         {
-          to: configuration.DC_ADDRESS, //0x21xFE...
+          to: configuration.DC_ADDRESS,
           value: BigInt(0),
           data: encodeFunctionData({
             abi: DimoABI,
             functionName: 'approve',
-            args: [configuration.DCC_ADDRESS, requiredDCX], //spender=DCC 0x41799...,amount=10,000***
+            args: [configuration.DCC_ADDRESS, requiredDIMOInWei],
           }),
         },
+        // Transaction 2: mint a connection license
         {
           to: configuration.DCC_ADDRESS,
           value: BigInt(0),
           data: encodeFunctionData({
-            abi: DimoConnectionABI, // TBD - somewhat sure this is correct, confirm w lorran?
-            functionName: CONTRACT_METHODS.MINT_CONNECTION, // confirm this is how to distinguish between mint (0xd0def521), simple vs. mint (0xd34047b6) choose type
-            args: [connectionName], //_name?
+            abi: DimoConnectionABI,
+            functionName: CONTRACT_METHODS.MINT_CONNECTION,
+            args: [currentUser.smartContractAddress, connectionName],
+          }),
+        },
+        // Transaction 3: approve use of 0 $DIMO tokens
+        {
+          to: configuration.DC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoABI,
+            functionName: 'approve',
+            args: [configuration.DCC_ADDRESS, BigInt(0)],
           }),
         },
       ];
-      return await processTransactions(transactions, { abi: DimoConnectionABI as Abi });
+
+      const result = await processTransactions(transactions, {
+        abi: DimoConnectionABI as Abi,
+      });
+
+      // Logging WIP -- BARRETT remove before pub
+      if (result && typeof result === 'object' && 'logs' in result) {
+        console.log('📝 Event logs from transactions:');
+        result.logs?.forEach((log: unknown, index: number) => {
+          const logData = log as {
+            address?: string;
+            topics?: string[];
+            blockNumber?: number;
+            transactionHash?: string;
+          };
+          console.log(`  Log ${index}:`, {
+            address: logData.address,
+            topics: logData.topics,
+            blockNumber: logData.blockNumber,
+            transactionHash: logData.transactionHash,
+          });
+        });
+      }
+
+      return result;
     },
-    [
-      checkEnoughBalance,
-      getCurrentDcxBalance,
-      processTransactions,
-      validateCurrentSession,
-    ],
+    [checkEnoughBalance, currentUser, processTransactions, validateCurrentSession],
   );
 };
