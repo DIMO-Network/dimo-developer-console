@@ -8,7 +8,7 @@ import { Button } from '@/components/Button';
 import { PlusIcon } from '@/components/Icons';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { useGlobalAccount } from '@/hooks';
-import { useUserConnections } from '@/hooks';
+import { useMyConnections } from '@/hooks/queries/useMyConnections';
 
 import './View.css';
 
@@ -16,24 +16,48 @@ const MainComponent: React.FC = () => {
   const router = useRouter();
   const { currentUser } = useGlobalAccount();
   const owner = currentUser?.walletAddress;
-  const { data: connectionData, isLoading } = useUserConnections();
+  const { data: connections, isLoading } = useMyConnections();
 
   const handleCreateConnection = () => {
-    //TODO: Create connection modal + owner address?
     router.push(`/connections/create/${owner}`);
   };
 
   const renderContent = () => {
-    if (connectionData?.hasConnections) {
+    const hasConnections = connections && connections.length > 0;
+
+    if (hasConnections) {
       return (
         <div className="connections-list">
-          <p>You have {connectionData.connections.length} connection(s).</p>
-          {/* Connection table tbd */}
-          <div className="connections-table">
-            {connectionData.connections.map((connection) => (
-              <div key={connection.address} className="connection-item">
-                <p>Address: {connection.address}</p>
-                <p>Owner: {connection.owner}</p>
+          <div className="connections-grid">
+            {connections.map((connection) => (
+              <div key={connection.id} className="connection-card">
+                <div className="connection-card-header">
+                  <h3 className="connection-name">{connection.name}</h3>
+                  <div className="connection-icon">
+                    {/* BARRETT TODO: Add in SVGs from Figma */}
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="connection-public-key">
+                  {connection.connection_license_public_key}
+                </div>
+                <button
+                  className="connection-details-btn"
+                  onClick={() => router.push(`/connections/${connection.id}`)}
+                >
+                  Connection Details
+                </button>
               </div>
             ))}
           </div>
@@ -41,7 +65,6 @@ const MainComponent: React.FC = () => {
       );
     }
 
-    console.log(connectionData);
     return (
       <div className="empty-state">
         <p className="empty-state-message">
@@ -57,7 +80,7 @@ const MainComponent: React.FC = () => {
 
       <Section>
         <SectionHeader title="Connections">
-          {!connectionData?.hasConnections && (
+          {(!connections || connections.length === 0) && (
             <Button
               className="dark with-icon"
               onClick={handleCreateConnection}
@@ -76,7 +99,7 @@ const MainComponent: React.FC = () => {
 };
 
 const View: React.FC = () => {
-  const { isLoading, error } = useUserConnections();
+  const { isLoading, error } = useMyConnections();
 
   return (
     <QueryPageWrapper

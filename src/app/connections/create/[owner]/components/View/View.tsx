@@ -9,6 +9,9 @@ import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
 import { useMintConnection } from '@/hooks/useTransactions';
+// import { generateConnectionWallets } from '@/services/connectionWallets';
+// import { createConnection } from '@/actions/connections';
+import { invalidateMyConnectionsQuery } from '@/hooks/queries/useMyConnections';
 
 export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   const { owner } = use(params);
@@ -52,12 +55,13 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         return;
       }
 
+      await invalidateMyConnectionsQuery();
+
       setIsPendingPurchase(false);
 
-      // BARRETT TODO: Instead of redirecting back, need to generate the two AA wallets
       router.replace('/connections');
     } catch (error) {
-      console.error('Connection minter error:', error);
+      console.error('Connection creation error:', error);
       setError(error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setIsProcessingPayment(false);
@@ -117,9 +121,10 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
             Purchase Connection License
           </Title>
           <p className="pt-4 text-sm text-text-secondary font-normal">
-            By proceeding, you are agreeing to approve payment of 2,000 $DIMO tokens for
-            your DIMO Connection License. If you do not have enough $DIMO tokens in your
-            account, you will be unable to create a Connection License.
+            By proceeding, you are agreeing to approve payment of $100 worth of $DIMO
+            tokens at market prices for your DIMO Connection License. If you do not have
+            enough $DIMO tokens in your account, you will be unable to create a Connection
+            License.
           </p>
 
           {error && (
