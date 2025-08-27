@@ -250,25 +250,6 @@ export const useMintConnection = () => {
         abi: DimoConnectionABI as Abi,
       });
 
-      // Logging WIP -- BARRETT remove before pub
-      if (result && typeof result === 'object' && 'logs' in result) {
-        console.log('📝 Event logs from transactions:');
-        result.logs?.forEach((log: unknown, index: number) => {
-          const logData = log as {
-            address?: string;
-            topics?: string[];
-            blockNumber?: number;
-            transactionHash?: string;
-          };
-          console.log(`  Log ${index}:`, {
-            address: logData.address,
-            topics: logData.topics,
-            blockNumber: logData.blockNumber,
-            transactionHash: logData.transactionHash,
-          });
-        });
-      }
-
       return result;
     },
     [checkEnoughBalance, currentUser, processTransactions, validateCurrentSession],
