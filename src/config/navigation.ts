@@ -33,7 +33,7 @@ const pageTitles: Record<string, string> = {
   '/settings': 'Settings',
 };
 
-export const mainMenu = [
+const baseMainMenu = [
   {
     label: 'Home',
     icon: HomeIcon,
@@ -74,16 +74,30 @@ export const mainMenu = [
     external: true,
     disabled: false,
   },
-  {
-    label: 'Connections',
-    icon: ConnectionsIcon,
-    iconClassName: 'h-5 w-5',
-    link: '/connections',
-    external: false,
-    // TODO: Check for dev license
-    disabled: false,
-  },
 ];
+
+const connectionsMenuItem = {
+  label: 'Connections',
+  icon: ConnectionsIcon,
+  iconClassName: 'h-5 w-5',
+  link: '/connections',
+  external: false,
+  disabled: false,
+};
+
+/**
+ * Get main menu items, optionally including Connections tab
+ * @param includeConnections - Whether to include the Connections tab (requires developer license)
+ */
+export const getMainMenu = (includeConnections: boolean = true) => {
+  if (includeConnections) {
+    return [...baseMainMenu, connectionsMenuItem];
+  }
+  return baseMainMenu;
+};
+
+// Keep the old export for backward compatibility for now, always includes Connections
+export const mainMenu = getMainMenu(true);
 
 export const bottomMenu = [
   {

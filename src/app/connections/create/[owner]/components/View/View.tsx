@@ -9,8 +9,8 @@ import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
 import { useMintConnection } from '@/hooks/useTransactions';
-// import { generateConnectionWallets } from '@/services/connectionWallets';
-// import { createConnection } from '@/actions/connections';
+import { generateConnectionWallets } from '@/services/connectionWallets';
+import { createConnection } from '@/actions/connections';
 import { invalidateMyConnectionsQuery } from '@/hooks/queries/useMyConnections';
 
 export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
@@ -45,6 +45,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     setIsProcessingPayment(true);
     setError(null);
     try {
+      // Step 1: Mint the connection license on-chain
       const result = await mintConnection(connectionName);
 
       console.log('MINT TEST RESULT:', result);
@@ -54,6 +55,19 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         setError(result.reason || 'Failed to mint connection');
         return;
       }
+
+      // Step 2: Generate connection wallets and credentials
+      console.log('Generating connection wallets...');
+      const wallets = await generateConnectionWallets();
+
+      // Step 3: Save connection data to database
+      console.log('Saving connection to database...');
+      await createConnection({
+        name: connectionName,
+        connection_license_public_key: wallets.connectionLicense.publicKey,
+        connection_license_private_key: wallets.connectionLicense.privateKey,
+        device_issuance_key: wallets.deviceIssuance.privateKey,
+      });
 
       await invalidateMyConnectionsQuery();
 
