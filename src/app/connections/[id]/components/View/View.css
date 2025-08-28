@@ -1,0 +1,59 @@
+.connection-details-page {
+  @apply flex flex-col gap-8 p-6;
+}
+
+.connection-details-header {
+  @apply flex flex-col gap-2;
+}
+
+.connection-title-section {
+  @apply flex flex-col gap-1 pb-4 border-b border-[#322D2F];
+}
+
+.connection-title {
+  @apply text-2xl font-bold text-white m-0;
+}
+
+.environment-badge {
+  @apply text-text-secondary text-sm;
+}
+
+.connection-license-section {
+  @apply bg-surface-raised border border-[#322D2F] rounded-2xl p-6;
+}
+
+.section-header {
+  @apply flex items-center justify-between mb-6;
+}
+
+.section-title {
+  @apply text-xl font-semibold text-white m-0;
+}
+
+.section-icon {
+  @apply text-text-secondary w-6 h-6;
+}
+
+.license-fields {
+  @apply flex flex-col gap-6;
+}
+
+.field-row {
+  @apply flex flex-col gap-2;
+}
+
+.field-label {
+  @apply text-text-secondary text-sm font-medium;
+}
+
+.field-value-container {
+  @apply flex items-center justify-between;
+}
+
+.field-value {
+  @apply text-white text-lg flex-1 break-all;
+}
+
+.field-value-container button {
+  @apply bg-cta-default text-white border-0 p-2 rounded-full hover:bg-opacity-80 transition-all duration-200;
+}

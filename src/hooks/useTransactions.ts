@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import DimoConnectionABI from '@/contracts/DimoConnectionABI.json';
 import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
 import { utils } from 'web3';
 
@@ -191,5 +192,66 @@ export const useMintLicense = () => {
       );
     },
     [processTransactions],
+  );
+};
+
+export const useMintConnection = () => {
+  const { validateCurrentSession, currentUser } = useGlobalAccount();
+  const { checkEnoughBalance, processTransactions } = useContractGA();
+  return useCallback(
+    async (connectionName: string) => {
+      const currentSession = await validateCurrentSession();
+      const enoughBalance = await checkEnoughBalance();
+
+      // Connection minting cost: 2,000 $DIMO tokens
+      const requiredDIMO = 2000;
+      const requiredDIMOInWei = BigInt(utils.toWei(requiredDIMO.toString(), 'ether'));
+
+      if (!currentSession) throw new Error('Web3 connection failed');
+      if (!currentUser) throw new Error('User not found');
+      if (!enoughBalance.dimo) {
+        return { success: false, reason: 'Insufficient DIMO balance' };
+      }
+
+      const transactions = [
+        // Transaction 1: approve use of 2,000 $DIMO tokens
+        {
+          to: configuration.DC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoABI,
+            functionName: 'approve',
+            args: [configuration.DCC_ADDRESS, requiredDIMOInWei],
+          }),
+        },
+        // Transaction 2: mint a connection license
+        {
+          to: configuration.DCC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoConnectionABI,
+            functionName: CONTRACT_METHODS.MINT_CONNECTION,
+            args: [currentUser.smartContractAddress, connectionName],
+          }),
+        },
+        // Transaction 3: approve use of 0 $DIMO tokens
+        {
+          to: configuration.DC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoABI,
+            functionName: 'approve',
+            args: [configuration.DCC_ADDRESS, BigInt(0)],
+          }),
+        },
+      ];
+
+      const result = await processTransactions(transactions, {
+        abi: DimoConnectionABI as Abi,
+      });
+
+      return result;
+    },
+    [checkEnoughBalance, currentUser, processTransactions, validateCurrentSession],
   );
 };

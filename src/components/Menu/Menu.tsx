@@ -1,7 +1,8 @@
 import { type FC, useContext } from 'react';
 
 import { MenuItem } from '@/components/Menu/MenuItem';
-import { mainMenu, bottomMenu } from '@/config/navigation';
+import { getMainMenu, bottomMenu } from '@/config/navigation';
+import { useHasDeveloperLicenses } from '@/hooks';
 
 import './Menu.css';
 import Image from 'next/image';
@@ -22,6 +23,7 @@ export const Menu: FC = withLoadingStatus(() => {
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const pathname = usePathname();
   const router = useRouter();
+  const { hasDeveloperLicenses } = useHasDeveloperLicenses();
 
   const onSignOut = async () => {
     try {
@@ -52,6 +54,8 @@ export const Menu: FC = withLoadingStatus(() => {
     disabled: false,
   };
 
+  const menuItems = getMainMenu(hasDeveloperLicenses);
+
   return (
     <div className={'main-menu'}>
       <ul className="top-menu">
@@ -66,7 +70,7 @@ export const Menu: FC = withLoadingStatus(() => {
           <MenuCloseButton />
         </div>
 
-        {mainMenu.map((item) => {
+        {menuItems.map((item) => {
           return (
             <MenuItem key={item.link} {...item} isHighlighted={getIsHighlighted(item)} />
           );

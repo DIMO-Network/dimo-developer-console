@@ -16,4 +16,6 @@ export * from './useTransactions';
 export * from './useIsLicenseOwner';
 export * from './useMixPanel';
 export * from './useCreditTracker';
+export * from './useHasDeveloperLicenses';
+export * from './queries/useMyConnections';
 export * from './useDimoAuth';
