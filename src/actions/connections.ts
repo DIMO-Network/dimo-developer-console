@@ -50,11 +50,19 @@ export const createConnection = async (
 };
 
 export const getMyConnections = async (): Promise<Connection[]> => {
-  console.log('🔵 getMyConnections called');
+  console.log('🔵 getMyConnections server action called');
+
+  // Add more detailed environment logging
+  console.log('🔵 Server environment check:', {
+    nodeEnv: process.env.NODE_ENV,
+    vercelEnv: process.env.VERCEL_ENV,
+    hasBackendUrl: !!process.env.BACKEND_URL,
+  });
 
   try {
     const client = await dimoDevAPIClient();
-    console.log('🔵 API client created, making GET request to /api/my/connections');
+    console.log('🔵 API client created successfully');
+    console.log('🔵 Making GET request to /api/my/connections');
 
     const response = await client.get('/api/my/connections');
     console.log('✅ getMyConnections response status:', response.status);
@@ -70,19 +78,31 @@ export const getMyConnections = async (): Promise<Connection[]> => {
     console.log('✅ Returning', connections.length, 'connections');
     return connections;
   } catch (error: unknown) {
-    console.error('❌ getMyConnections failed:', error);
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as any;
-      console.error('❌ Response status:', axiosError.response?.status);
-      console.error('❌ Response data:', axiosError.response?.data);
-      console.error('❌ Response headers:', axiosError.response?.headers);
-    } else if (error && typeof error === 'object' && 'request' in error) {
-      const axiosError = error as any;
-      console.error('❌ No response received:', axiosError.request);
-    } else if (error && typeof error === 'object' && 'message' in error) {
-      console.error('❌ Request setup error:', (error as Error).message);
+    console.error('❌ getMyConnections server action failed:', error);
+
+    // More detailed error logging
+    if (error && typeof error === 'object') {
+      if ('response' in error) {
+        const axiosError = error as any;
+        console.error('❌ Axios response error:', {
+          status: axiosError.response?.status,
+          statusText: axiosError.response?.statusText,
+          data: axiosError.response?.data,
+          headers: axiosError.response?.headers,
+        });
+      } else if ('request' in error) {
+        const axiosError = error as any;
+        console.error('❌ Axios request error (no response):', axiosError.request);
+      } else if ('message' in error) {
+        console.error('❌ General error:', (error as Error).message);
+        console.error('❌ Error stack:', (error as Error).stack);
+      }
     }
-    throw error;
+
+    // Re-throw with more context
+    throw new Error(
+      `Failed to fetch connections: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
   }
 };
 
