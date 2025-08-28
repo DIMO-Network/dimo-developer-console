@@ -34,7 +34,11 @@ export const withGlobalAccounts = <P extends object>(
     const router = useRouter();
 
     const validateCurrentSession = async (): Promise<IUserSession | null> => {
-      if (!user) return null;
+      const sessionUser = await loadUserSession();
+
+      if (!sessionUser) {
+        return null;
+      }
 
       const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
 
@@ -50,7 +54,7 @@ export const withGlobalAccounts = <P extends object>(
         await logout();
         return null;
       }
-      return user;
+      return sessionUser;
     };
 
     const getCurrentDimoBalance = async (): Promise<number> => {
@@ -150,13 +154,13 @@ export const withGlobalAccounts = <P extends object>(
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
     };
 
-    const loadUserInformation = async (): Promise<void> => {
+    const loadUserSession = async (): Promise<IUserSession | null> => {
       const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
       const eKey = getFromLocalStorage<string>(EmbeddedKey);
 
       if (!eKey || !session) {
         await logout();
-        return;
+        return null;
       }
 
       const { subOrganizationId, email, token, expiry } = session;
@@ -165,7 +169,7 @@ export const withGlobalAccounts = <P extends object>(
 
       if (expiry < nowInSeconds) {
         await logout();
-        return;
+        return null;
       }
 
       const client = getTurnkeyClient({ authKey: token, eKey: eKey });
@@ -189,7 +193,14 @@ export const withGlobalAccounts = <P extends object>(
         role: TeamRoles.OWNER,
       };
 
-      identifyUser(kernelAccount.address, {
+      return user;
+    };
+
+    const loadUserInformation = async (): Promise<void> => {
+      const user = await loadUserSession();
+      if (!user) return;
+      const { email, smartContractAddress, subOrganizationId } = user;
+      identifyUser(smartContractAddress, {
         $email: email,
         $subOrganizationId: subOrganizationId,
         $role: TeamRoles.OWNER,
