@@ -17,19 +17,7 @@ const MainComponent: React.FC = () => {
   const router = useRouter();
   const { currentUser } = useGlobalAccount();
   const owner = currentUser?.walletAddress;
-  const { data: connections, isLoading, error } = useMyConnections();
-
-  console.log('🔵 MainComponent render - currentUser:', {
-    hasUser: !!currentUser,
-    walletAddress: currentUser?.walletAddress,
-    smartContractAddress: currentUser?.smartContractAddress,
-  });
-  console.log('🔵 MainComponent render - connections state:', {
-    isLoading,
-    hasError: !!error,
-    connectionsCount: connections?.length ?? 'undefined',
-    connectionsData: connections,
-  });
+  const { data: connections, isLoading } = useMyConnections();
 
   const handleCreateConnection = () => {
     router.push(`/connections/create/${owner}`);
@@ -37,7 +25,6 @@ const MainComponent: React.FC = () => {
 
   const renderContent = () => {
     const hasConnections = connections && connections.length > 0;
-    console.log(hasConnections);
 
     if (hasConnections) {
       return (
@@ -102,21 +89,6 @@ const MainComponent: React.FC = () => {
 
 const View: React.FC = () => {
   const { isLoading, error } = useMyConnections();
-
-  console.log('🔵 View component render - QueryPageWrapper props:', {
-    loading: isLoading,
-    hasError: !!error,
-    errorMessage: error?.message || 'no error',
-  });
-
-  if (error) {
-    console.error('❌ View component error details:', {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-      cause: error.cause,
-    });
-  }
 
   return (
     <QueryPageWrapper
