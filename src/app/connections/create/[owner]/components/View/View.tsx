@@ -127,7 +127,9 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
             Purchase Connection License
           </Title>
           <p className="pt-4 text-sm text-text-secondary font-normal">
-            By proceeding, you are agreeing to approve payment of $100 worth of $DIMO
+            <span className="text-red-600 font-bold">Warning!</span> By proceeding, you
+            are agreeing to approve payment of{' '}
+            <span className="text-red-600 font-bold">$100 worth of $DIMO </span>
             tokens at market prices for your DIMO Connection License. If you do not have
             enough $DIMO tokens in your account, you will be unable to create a Connection
             License.
