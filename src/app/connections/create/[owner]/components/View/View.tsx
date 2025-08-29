@@ -7,6 +7,7 @@ import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
+import { LoadingModal } from '@/components/LoadingModal';
 import { useMintConnection } from '@/hooks/useTransactions';
 import { generateConnectionWallets } from '@/services/connectionWallets';
 import { createConnection } from '@/actions/connections';
@@ -117,8 +118,15 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         </div>
       </div>
 
+      <LoadingModal
+        isOpen={isProcessingPayment}
+        setIsOpen={() => {}}
+        label="Creating connection, please wait..."
+        status="loading"
+      />
+
       <Modal
-        isOpen={isPendingPurchase}
+        isOpen={isPendingPurchase && !isProcessingPayment}
         setIsOpen={setIsPendingPurchase}
         className="purchase-confirmation"
       >
@@ -133,6 +141,9 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
             tokens at market prices for your DIMO Connection License. If you do not have
             enough $DIMO tokens in your account, you will be unable to create a Connection
             License.
+            <br></br>
+            Most developers do not need to purchase a connection license, so please do so
+            at your own risk.
           </p>
 
           {error && (
@@ -156,7 +167,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
               onClick={handleContinuePayment}
               disabled={isProcessingPayment}
             >
-              {isProcessingPayment ? 'Processing...' : 'Continue with Payment'}
+              Continue with Payment
             </Button>
           </div>
         </div>
