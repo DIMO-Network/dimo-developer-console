@@ -2,12 +2,12 @@
 
 import React, { use, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { BackButton } from '@/components/BackButton';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
+import { LoadingModal } from '@/components/LoadingModal';
 import { useMintConnection } from '@/hooks/useTransactions';
 import { generateConnectionWallets } from '@/services/connectionWallets';
 import { createConnection } from '@/actions/connections';
@@ -73,7 +73,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
       setIsPendingPurchase(false);
 
-      router.replace('/connections');
+      router.replace('/connections?success=connection-created');
     } catch (error) {
       console.error('Connection creation error:', error);
       setError(error instanceof Error ? error.message : 'An unexpected error occurred');
@@ -91,13 +91,6 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   return (
     <>
       <div className="flex flex-col gap-8">
-        <div className="flex items-center gap-4">
-          <BackButton onBack={goBack} />
-          <Title component="h1" className="text-2xl font-bold">
-            Create a connection
-          </Title>
-        </div>
-
         <div className="max-w-2xl">
           <Title component="h2" className="text-xl mb-6">
             New connection
@@ -125,8 +118,15 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         </div>
       </div>
 
+      <LoadingModal
+        isOpen={isProcessingPayment}
+        setIsOpen={() => {}}
+        label="Creating connection, please wait..."
+        status="loading"
+      />
+
       <Modal
-        isOpen={isPendingPurchase}
+        isOpen={isPendingPurchase && !isProcessingPayment}
         setIsOpen={setIsPendingPurchase}
         className="purchase-confirmation"
       >
@@ -135,10 +135,15 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
             Purchase Connection License
           </Title>
           <p className="pt-4 text-sm text-text-secondary font-normal">
-            By proceeding, you are agreeing to approve payment of $100 worth of $DIMO
+            <span className="text-red-600 font-bold">Warning!</span> By proceeding, you
+            are agreeing to approve payment of{' '}
+            <span className="text-red-600 font-bold">$100 worth of $DIMO </span>
             tokens at market prices for your DIMO Connection License. If you do not have
             enough $DIMO tokens in your account, you will be unable to create a Connection
             License.
+            <br></br>
+            Most developers do not need to purchase a connection license, so please do so
+            at your own risk.
           </p>
 
           {error && (
@@ -162,7 +167,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
               onClick={handleContinuePayment}
               disabled={isProcessingPayment}
             >
-              {isProcessingPayment ? 'Processing...' : 'Continue with Payment'}
+              Continue with Payment
             </Button>
           </div>
         </div>

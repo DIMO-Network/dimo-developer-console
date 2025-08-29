@@ -13,6 +13,8 @@ const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
 const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create\/[^/]+$/;
 const EDIT_WEBHOOK_REGEX = /^\/webhooks\/edit\/[^/]+\/[^/]+$/;
+const CREATE_CONNECTION_REGEX = /^\/connections\/create\/[^/]+$/;
+const CONNECTION_DETAILS_REGEX = /^\/connections\/[^/]+$/;
 
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
@@ -22,6 +24,8 @@ export const getPageTitle = (path: string) => {
   if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed Vehicles';
   if (CREATE_WEBHOOK_REGEX.test(path)) return 'Create a webhook';
   if (EDIT_WEBHOOK_REGEX.test(path)) return 'Edit webhook';
+  if (CREATE_CONNECTION_REGEX.test(path)) return 'Create a Connection';
+  if (CONNECTION_DETAILS_REGEX.test(path)) return 'Connection Details';
 };
 
 const pageTitles: Record<string, string> = {

@@ -1,8 +1,6 @@
 'use client';
 
 import React, { use } from 'react';
-import { useRouter } from 'next/navigation';
-import { BackButton } from '@/components/BackButton';
 import { Title } from '@/components/Title';
 import { CopyButton } from '@/components/CopyButton';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
@@ -12,16 +10,10 @@ import { getConnectionById } from '@/actions/connections';
 import './View.css';
 
 const MainComponent = ({ connectionId }: { connectionId: string }) => {
-  const router = useRouter();
-
   const { data: connection } = useQuery({
     queryKey: ['connection', connectionId],
     queryFn: () => getConnectionById(connectionId),
   });
-
-  const goBack = () => {
-    router.push('/connections');
-  };
 
   const maskKey = () => {
     return '*'.repeat(20);
@@ -32,11 +24,8 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
   return (
     <div className="connection-details-page">
       <div className="connection-details-header">
-        <BackButton onBack={goBack} />
         <div className="connection-title-section">
-          <Title component="h1" className="connection-title">
-            {connection.name}
-          </Title>
+          <h1 className="connection-title">{connection.name}</h1>
           <span className="environment-badge">Production</span>
         </div>
       </div>
