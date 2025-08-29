@@ -93,9 +93,6 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-4">
           <BackButton onBack={goBack} />
-          <Title component="h1" className="text-2xl font-bold">
-            Create a connection
-          </Title>
         </div>
 
         <div className="max-w-2xl">

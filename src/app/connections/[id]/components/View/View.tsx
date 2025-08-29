@@ -34,9 +34,6 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
       <div className="connection-details-header">
         <BackButton onBack={goBack} />
         <div className="connection-title-section">
-          <Title component="h1" className="connection-title">
-            {connection.name}
-          </Title>
           <span className="environment-badge">Production</span>
         </div>
       </div>
