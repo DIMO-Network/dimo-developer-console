@@ -2,7 +2,6 @@
 
 import React, { use, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { BackButton } from '@/components/BackButton';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
@@ -91,10 +90,6 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   return (
     <>
       <div className="flex flex-col gap-8">
-        <div className="flex items-center gap-4">
-          <BackButton onBack={goBack} />
-        </div>
-
         <div className="max-w-2xl">
           <Title component="h2" className="text-xl mb-6">
             New connection
