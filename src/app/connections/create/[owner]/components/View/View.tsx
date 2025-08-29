@@ -72,7 +72,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
       setIsPendingPurchase(false);
 
-      router.replace('/connections');
+      router.replace('/connections?success=connection-created');
     } catch (error) {
       console.error('Connection creation error:', error);
       setError(error instanceof Error ? error.message : 'An unexpected error occurred');
