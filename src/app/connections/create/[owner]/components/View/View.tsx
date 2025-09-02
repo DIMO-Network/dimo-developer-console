@@ -8,6 +8,7 @@ import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
 import { LoadingModal } from '@/components/LoadingModal';
+import { TextError } from '@/components/TextError';
 import { useMintConnection } from '@/hooks/useTransactions';
 import { generateConnectionWallets } from '@/services/connectionWallets';
 import { createConnection } from '@/actions/connections';
@@ -23,8 +24,27 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   const [isPendingPurchase, setIsPendingPurchase] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nameValidationError, setNameValidationError] = useState<string | null>(null);
 
   const mintConnection = useMintConnection();
+
+  const validateConnectionName = useCallback((name: string) => {
+    const nameBytes = new TextEncoder().encode(name).length;
+    if (nameBytes > 32) {
+      return 'Connection name is too long. Please use a name that is 32 characters or fewer.';
+    }
+    return null;
+  }, []);
+
+  const handleConnectionNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newName = e.target.value;
+      setConnectionName(newName);
+      const validationError = validateConnectionName(newName);
+      setNameValidationError(validationError);
+    },
+    [validateConnectionName],
+  );
 
   const goBack = useCallback(() => {
     router.replace('/connections');
@@ -48,8 +68,6 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       // Step 1: Mint the connection license on-chain
       const result = await mintConnection(connectionName);
 
-      console.log('MINT TEST RESULT:', result);
-
       if (result.success === false) {
         console.error('Connection minting failed', result.reason);
         setError(result.reason || 'Failed to mint connection');
@@ -57,11 +75,9 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       }
 
       // Step 2: Generate connection wallets and credentials
-      console.log('Generating connection wallets...');
       const wallets = await generateConnectionWallets();
 
       // Step 3: Save connection data to database
-      console.log('Saving connection to database...');
       await createConnection({
         name: connectionName,
         connection_license_public_key: wallets.connectionLicense.publicKey,
@@ -107,11 +123,20 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
                 placeholder="Connection Name"
                 className="mt-1"
                 value={connectionName}
-                onChange={(e) => setConnectionName(e.target.value)}
+                onChange={handleConnectionNameChange}
               />
+              {nameValidationError && (
+                <div className="mt-2">
+                  <TextError errorMessage={nameValidationError} />
+                </div>
+              )}
             </div>
 
-            <Button className="w-full" onClick={handlePurchaseAlert}>
+            <Button
+              className="w-full"
+              onClick={handlePurchaseAlert}
+              disabled={!!nameValidationError}
+            >
               Purchase Connection License
             </Button>
           </div>
@@ -134,17 +159,20 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
           <Title className="text-2xl" component="h3">
             Purchase Connection License
           </Title>
-          <p className="pt-4 text-sm text-text-secondary font-normal">
-            <span className="text-red-600 font-bold">Warning!</span> By proceeding, you
-            are agreeing to approve payment of{' '}
-            <span className="text-red-600 font-bold">$100 worth of $DIMO </span>
-            tokens at market prices for your DIMO Connection License. If you do not have
-            enough $DIMO tokens in your account, you will be unable to create a Connection
-            License.
-            <br></br>
-            Most developers do not need to purchase a connection license, so please do so
-            at your own risk.
-          </p>
+          <div className="pt-4 text-sm text-text-secondary font-normal text-justify leading-relaxed">
+            <p className="mb-4">
+              <span className="text-red-600 font-bold">Warning!</span> By proceeding, you
+              are agreeing to approve payment of{' '}
+              <span className="text-red-600 font-bold">$100 worth of $DIMO</span> tokens
+              at market prices for your DIMO Connection License. If you do not have enough
+              $DIMO tokens in your account, you will be unable to create a Connection
+              License.
+            </p>
+            <p>
+              You only need to purchase a license if you are planning on hosting a DIMO
+              Oracle.
+            </p>
+          </div>
 
           {error && (
             <div className="pt-4">
