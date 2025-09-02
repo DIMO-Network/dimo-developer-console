@@ -277,6 +277,17 @@ export const useMintConnection = () => {
           (error as Error)?.message || (error as Error)?.toString() || 'Unknown error';
 
         if (
+          errorMessage.includes('ERC20: transfer amount exceeds balance') ||
+          errorMessage.includes('transfer amount exceeds balance') ||
+          errorMessage.includes('insufficient balance')
+        ) {
+          return {
+            success: false,
+            reason: 'You do not have enough $DIMO to mint a connection.',
+          };
+        }
+
+        if (
           errorMessage.includes('NameAlreadyInUse') ||
           errorMessage.includes('name already in use')
         ) {
