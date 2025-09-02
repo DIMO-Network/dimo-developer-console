@@ -5,8 +5,10 @@ import { useCallback } from 'react';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
+import DimoConnectionABI from '@/contracts/DimoConnectionABI.json';
 import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
 import { utils } from 'web3';
+import { getCurrentDimoPrice } from '@/services/pricing';
 
 const { CONTRACT_METHODS } = configuration;
 
@@ -191,5 +193,122 @@ export const useMintLicense = () => {
       );
     },
     [processTransactions],
+  );
+};
+
+export const useMintConnection = () => {
+  const { validateCurrentSession, currentUser } = useGlobalAccount();
+  const { checkEnoughBalance, processTransactions } = useContractGA();
+  return useCallback(
+    async (connectionName: string) => {
+      const nameBytes = new TextEncoder().encode(connectionName).length;
+      if (nameBytes > 32) {
+        return {
+          success: false,
+          reason:
+            'Connection name is too long. Please use a name that is 32 characters or fewer.',
+        };
+      }
+
+      const currentSession = await validateCurrentSession();
+      const enoughBalance = await checkEnoughBalance();
+
+      // Get current DIMO price and calculate required tokens for $100 USD
+      const dimoPrice = await getCurrentDimoPrice();
+      const targetUsdAmount = 100;
+      // handle price fluctuations
+      const bufferPercentage = 0.05;
+
+      // Calculate required DIMO tokens: $100 / DIMO price + 5% buffer for price flux.
+      const baseDimoAmount = targetUsdAmount / dimoPrice;
+      const requiredDIMO = baseDimoAmount * (1 + bufferPercentage);
+      const requiredDIMOInWei = BigInt(utils.toWei(requiredDIMO.toString(), 'ether'));
+
+      if (!currentSession) throw new Error('Web3 connection failed');
+      if (!currentUser) throw new Error('User not found');
+      if (!enoughBalance.dimo) {
+        return {
+          success: false,
+          reason: `Insufficient DIMO balance. You need at least ${requiredDIMO.toFixed(2)} DIMO tokens (approximately $${targetUsdAmount}) to mint a connection.`,
+        };
+      }
+
+      const transactions = [
+        // Transaction 1: approve use of required $DIMO tokens ($100 USD worth + 5% buffer).
+        {
+          to: configuration.DC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoABI,
+            functionName: 'approve',
+            args: [configuration.DCC_ADDRESS, requiredDIMOInWei],
+          }),
+        },
+        // Transaction 2: mint a connection license
+        {
+          to: configuration.DCC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoConnectionABI,
+            functionName: CONTRACT_METHODS.MINT_CONNECTION,
+            args: [currentUser.smartContractAddress, connectionName],
+          }),
+        },
+        // Transaction 3: approve use of 0 $DIMO tokens
+        {
+          to: configuration.DC_ADDRESS,
+          value: BigInt(0),
+          data: encodeFunctionData({
+            abi: DimoABI,
+            functionName: 'approve',
+            args: [configuration.DCC_ADDRESS, BigInt(0)],
+          }),
+        },
+      ];
+
+      try {
+        const result = await processTransactions(transactions, {
+          abi: DimoConnectionABI as Abi,
+        });
+
+        return result;
+      } catch (error: unknown) {
+        const errorMessage =
+          (error as Error)?.message || (error as Error)?.toString() || 'Unknown error';
+
+        if (
+          errorMessage.includes('ERC20: transfer amount exceeds balance') ||
+          errorMessage.includes('transfer amount exceeds balance') ||
+          errorMessage.includes('insufficient balance')
+        ) {
+          return {
+            success: false,
+            reason: 'You do not have enough $DIMO to mint a connection.',
+          };
+        }
+
+        if (
+          errorMessage.includes('NameAlreadyInUse') ||
+          errorMessage.includes('name already in use')
+        ) {
+          return {
+            success: false,
+            reason:
+              'This connection name is already taken. Please choose a different name and try again.',
+          };
+        }
+
+        if (errorMessage.includes('NameInvalidLength')) {
+          return {
+            success: false,
+            reason:
+              'Connection name is too long. Please use a name that is 32 characters or fewer.',
+          };
+        }
+
+        throw error;
+      }
+    },
+    [checkEnoughBalance, currentUser, processTransactions, validateCurrentSession],
   );
 };

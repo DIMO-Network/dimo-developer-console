@@ -28,10 +28,14 @@ function getFirstName(name: string) {
 }
 
 export const View: FC = () => {
-  const { balance } = useOnboarding();
-  const { data: user, isLoading } = useUser();
+  const { balance, isLoading: loadingBalance } = useOnboarding();
+  const { data: user, isLoading: loadingUser } = useUser();
   const { currentUser } = useGlobalAccount();
-  const { data, error, loading } = useQuery(GET_DEVELOPER_LICENSES_BY_OWNER, {
+  const {
+    data,
+    error,
+    loading: loadingDevLicenses,
+  } = useQuery(GET_DEVELOPER_LICENSES_BY_OWNER, {
     variables: { owner: currentUser?.smartContractAddress ?? '' },
     skip: !currentUser?.smartContractAddress,
   });
@@ -40,7 +44,7 @@ export const View: FC = () => {
     <div className={'flex flex-1 flex-row'}>
       <div className="app-list-page">
         <div className="welcome-message">
-          {isLoading ? (
+          {loadingUser ? (
             <BubbleLoader isLoading isSmall />
           ) : (
             <>
@@ -55,7 +59,7 @@ export const View: FC = () => {
           )}
         </div>
 
-        {loading && <Loader isLoading={true} />}
+        {loadingBalance && loadingDevLicenses && <Loader isLoading={true} />}
         {!!error && <p>There was an error fetching your developer licenses</p>}
         {!!data?.developerLicenses && (
           <>

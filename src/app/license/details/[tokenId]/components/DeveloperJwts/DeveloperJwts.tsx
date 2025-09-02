@@ -1,4 +1,5 @@
-import { FC, useState } from 'react';
+'use client';
+import { FC, useEffect, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Section, SectionHeader } from '@/components/Section';
 import { Table } from '@/components/Table';
@@ -10,7 +11,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { CopyButton } from '@/components/CopyButton';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
-import { useEventEmitter, useIsLicenseOwner } from '@/hooks';
+import { useEventEmitter, useIsLicenseOwner, useDimoAuth } from '@/hooks';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
   fragment DeveloperJwtsFragment on DeveloperLicense {
@@ -33,12 +34,23 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
   const { devJwts, refetch } = useGetDevJwts(fragment.clientId);
   const [jwtToDelete, setJwtToDelete] = useState<string>();
   const isLicenseOwner = useIsLicenseOwner(fragment);
-  const { publishEvent } = useEventEmitter<unknown>('developer-jwt-updated');
+  const { getGlobalAccountDeveloperJwt } = useDimoAuth();
+  const { publishEvent: publishJwtUpdated } = useEventEmitter<unknown>(
+    'developer-jwt-updated',
+  );
+  const { eventData } = useEventEmitter<{ client_id: `0x${string}` }>(
+    'generate-my-developer-jwt',
+  );
 
   const handleDelete = (token: string) => {
     removeDevJwt(fragment.clientId, token);
     refetch();
-    publishEvent({});
+    publishJwtUpdated({}, true);
+  };
+
+  const handleGenerateSuccess = () => {
+    refetch();
+    publishJwtUpdated({}, true);
   };
 
   const renderCopyButton = (item: { token: string }) => (
@@ -97,6 +109,27 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
     },
   ];
 
+  const processEventData = async () => {
+    try {
+      if (!eventData) return;
+      if (devJwts.length > 0) return;
+      if (fragment.redirectURIs.nodes.length === 0) return;
+      const domain = fragment.redirectURIs.nodes[0]?.uri ?? undefined;
+      if (!domain) return;
+      const success = await getGlobalAccountDeveloperJwt({
+        clientId: fragment.clientId,
+        domain: domain,
+      });
+      if (success) handleGenerateSuccess();
+    } catch (error) {
+      console.error('Error processing event data', error);
+    }
+  };
+
+  useEffect(() => {
+    void processEventData();
+  }, [eventData]);
+
   if (!isLicenseOwner) {
     return null;
   }
@@ -108,10 +141,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
           clientId={fragment.clientId}
           domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
           buttonText="Generate new JWT"
-          onSuccess={() => {
-            refetch();
-            publishEvent({});
-          }}
+          onSuccess={handleGenerateSuccess}
         />
       </SectionHeader>
       {devJwts.length > 0 ? (

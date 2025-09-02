@@ -5,6 +5,7 @@ import {
   SettingsIcon,
   SummarizeIcon,
   SupportAgentIcon,
+  ConnectionsIcon,
 } from '@/components/Icons';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
@@ -12,6 +13,8 @@ const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
 const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create\/[^/]+$/;
 const EDIT_WEBHOOK_REGEX = /^\/webhooks\/edit\/[^/]+\/[^/]+$/;
+const CREATE_CONNECTION_REGEX = /^\/connections\/create\/[^/]+$/;
+const CONNECTION_DETAILS_REGEX = /^\/connections\/[^/]+$/;
 
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
@@ -21,6 +24,8 @@ export const getPageTitle = (path: string) => {
   if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed Vehicles';
   if (CREATE_WEBHOOK_REGEX.test(path)) return 'Create a webhook';
   if (EDIT_WEBHOOK_REGEX.test(path)) return 'Edit webhook';
+  if (CREATE_CONNECTION_REGEX.test(path)) return 'Create a Connection';
+  if (CONNECTION_DETAILS_REGEX.test(path)) return 'Connection Details';
 };
 
 const pageTitles: Record<string, string> = {
@@ -28,10 +33,11 @@ const pageTitles: Record<string, string> = {
   '/app': 'Home',
   '/webhooks': 'Webhooks',
   '/api-status': 'API Status',
+  '/connections': 'Connections',
   '/settings': 'Settings',
 };
 
-export const mainMenu = [
+const baseMainMenu = [
   {
     label: 'Home',
     icon: HomeIcon,
@@ -73,6 +79,29 @@ export const mainMenu = [
     disabled: false,
   },
 ];
+
+const connectionsMenuItem = {
+  label: 'Connections',
+  icon: ConnectionsIcon,
+  iconClassName: 'h-5 w-5',
+  link: '/connections',
+  external: false,
+  disabled: false,
+};
+
+/**
+ * Get main menu items, optionally including Connections tab
+ * @param includeConnections - Whether to include the Connections tab (requires developer license)
+ */
+export const getMainMenu = (includeConnections: boolean = true) => {
+  if (includeConnections) {
+    return [...baseMainMenu, connectionsMenuItem];
+  }
+  return baseMainMenu;
+};
+
+// Keep the old export for backward compatibility for now, always includes Connections
+export const mainMenu = getMainMenu(true);
 
 export const bottomMenu = [
   {

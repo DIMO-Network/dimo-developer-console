@@ -23,7 +23,7 @@ const config = [
   ...ts.configs.recommended,
   ...pluginQuery.configs['flat/recommended'],
   prettierConfigRecommended,
-  { ignores: ['.next/*'] },
+  { ignores: ['.next/*', './next-env.d.ts'] },
 ];
 
 export default config;

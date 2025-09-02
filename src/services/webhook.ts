@@ -270,7 +270,6 @@ export const unsubscribeVehicles = async ({
   }
 };
 
-// BARRETT TODO: Remove old CSV after testing
 export const subscribeByCsv = async ({
   webhookId,
   token,
@@ -298,7 +297,6 @@ export const subscribeByCsv = async ({
   }
 };
 
-// BARRETT TODO: Remove old CSV after testing
 export const unsubscribeByCsv = async ({
   webhookId,
   token,

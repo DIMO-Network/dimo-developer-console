@@ -1,0 +1,44 @@
+.connections-page {
+  @apply flex flex-col gap-8;
+}
+
+.connections-page .subtitle {
+  @apply text-lg;
+}
+
+.connections-page .empty-state {
+  @apply flex items-center justify-center py-16;
+}
+
+.connections-page .empty-state-message {
+  @apply text-center text-text-secondary;
+}
+
+.connections-grid {
+  @apply grid gap-6 mt-6;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}
+
+.connection-card {
+  @apply bg-black rounded-2xl p-4 flex flex-col gap-3;
+}
+
+.connection-card-header {
+  @apply flex justify-between items-center;
+}
+
+.connection-name {
+  @apply text-white text-lg font-semibold m-0;
+}
+
+.connection-icon {
+  @apply text-text-secondary flex items-center justify-center w-6 h-6;
+}
+
+.connection-public-key {
+  @apply text-text-secondary text-lg break-all;
+}
+
+.connection-details-btn {
+  @apply bg-cta-default text-white border-0 py-2.5 px-4 rounded-full text-sm font-medium cursor-pointer transition-colors duration-200 hover:border-white border-2 border-transparent;
+}

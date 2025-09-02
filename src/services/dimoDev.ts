@@ -1,3 +1,4 @@
+'use server';
 import axios from 'axios';
 import { DIMO } from '@dimo-network/data-sdk';
 import configuration from '@/config';

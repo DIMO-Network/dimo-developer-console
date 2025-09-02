@@ -19,6 +19,9 @@ interface Props {
 
 export const OnboardingBanner: FC<Props> = ({ balance, licenseConnection }) => {
   const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
+
+  if (balance > 0) return <></>;
+
   return (
     <div className="banner-content">
       <div>

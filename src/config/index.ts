@@ -18,6 +18,7 @@ type Configuration = {
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
   CONTRACT_NETWORK: bigint;
+  DCC_ADDRESS: `0x${string}`;
   DLC_ADDRESS: `0x${string}`;
   DC_ADDRESS: `0x${string}`;
   DCX_ADDRESS: `0x${string}`;
