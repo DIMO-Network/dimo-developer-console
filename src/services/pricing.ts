@@ -8,7 +8,7 @@ const dimoApiClient = axios.create({
   baseURL: config.backendUrl,
 });
 
-const getCurrentDimoPrice = async (): Promise<number> => {
+export const getCurrentDimoPrice = async (): Promise<number> => {
   const { data } = await dimoApiClient.get<ICoinMarketTokenResponse>('/api/crypto/DIMO');
   return data.data.DIMO[0].quote.USD.price;
 };
