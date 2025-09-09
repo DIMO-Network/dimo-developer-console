@@ -6,7 +6,7 @@ import { Button } from '@/components/Button';
 
 import './LicenseCard.css';
 import { useQuery } from '@apollo/client';
-import { GET_VEHICLE_COUNT_BY_CLIENT_ID } from '@/app/license/details/[tokenId]/components/Vehicles';
+import { GET_VEHICLE_COUNT_BY_CLIENT_ID } from '@/app/license/[tokenId]/details/components/Vehicles';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { WarningAmberIcon } from '@/components/Icons';
 
@@ -58,7 +58,7 @@ export const LicenseCard = (props: {
           <p className="title">{license.alias}</p>
           <NoVehiclesWarning clientId={license.clientId} />
         </div>
-        <Anchor href={`/license/details/${license.tokenId}`}>
+        <Anchor href={`/license/${license.tokenId}/details`}>
           <Button className={'dark w-full !h-10'}>License Details</Button>
         </Anchor>
       </div>

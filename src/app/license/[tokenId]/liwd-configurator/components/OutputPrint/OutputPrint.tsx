@@ -1,0 +1,223 @@
+import { FC, useState } from 'react';
+import { SegmentedControl } from '@/components/SegmentedControl';
+import { UseFormWatch } from 'react-hook-form';
+import {
+  DynamicFormProps,
+  ComponentType,
+  PERMISSIONS,
+} from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
+import { FragmentType, useFragment } from '@/gql';
+import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
+
+interface IOutputPrintProps {
+  license: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
+  watch: UseFormWatch<DynamicFormProps>;
+}
+
+type RawCode = { __raw: string };
+
+const raw = (code: string): RawCode => ({ __raw: code });
+
+const BASE_URL = 'https://login.dimo.org';
+export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
+  const fragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
+  const [viewMode, setViewMode] = useState<'code' | 'url'>('code');
+  const values = watch();
+  const parseArray = (val?: string) =>
+    val
+      ?.split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+  const tryParseJSON = (val?: string) => {
+    try {
+      return val ? JSON.parse(val) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const formatProps = (props: Record<string, unknown>): string => {
+    return Object.entries(props)
+      .filter(([, v]) => {
+        if (v === undefined || v === null || v === '') return false;
+        if (Array.isArray(v) && v.length === 0) return false;
+        return true;
+      })
+      .map(([k, v]) => {
+        if ((v as RawCode)?.__raw) return `  ${k}={${(v as RawCode).__raw}}`;
+        if (typeof v === 'string') return `  ${k}="${v}"`;
+        if (typeof v === 'boolean') return `  ${k}={${v}}`;
+        if (Array.isArray(v))
+          return `  ${k}={[${v
+            .map((x) =>
+              (x as RawCode)?.__raw
+                ? (x as RawCode).__raw
+                : typeof x === 'string'
+                  ? `"${x}"`
+                  : x,
+            )
+            .join(', ')}]}`;
+        if (typeof v === 'object') {
+          return `  ${k}={${JSON.stringify(v, null, 2)
+            .split('\n')
+            .map((line, i) => (i === 0 ? line : '  ' + line))
+            .join('\n')}}`;
+        }
+        return `  ${k}={${v}}`;
+      })
+      .join('\n');
+  };
+
+  const formatComponent = (component: ComponentType) => {
+    switch (component) {
+      case 'LoginWithDimo':
+        return 'EMAIL_INPUT';
+      case 'ShareVehiclesWithDimo':
+        return 'VEHICLE_MANAGER';
+      case 'ExecuteAdvancedTransactionWithDimo':
+        return 'ADVANCED_TRANSACTION';
+    }
+  };
+
+  const buildUrl = (): string => {
+    const params = new URLSearchParams();
+
+    const add = (key: string, val: unknown) => {
+      if (val === undefined || val === null || val === '') return;
+      if (Array.isArray(val)) {
+        if (val.length === 0) return;
+        params.set(key, val.join(','));
+      } else if (typeof val === 'object') {
+        params.set(key, JSON.stringify(val));
+      } else {
+        params.set(key, String(val));
+      }
+    };
+
+    // Shared
+    add('clientId', fragment?.clientId);
+    add('redirectUri', values.redirectUri);
+    add('entryState', formatComponent(values.component));
+    add('utm', values.utm);
+    add('expirationDate', values.expirationDate);
+
+    if (values.component === 'LoginWithDimo') {
+      add('vehicles', parseArray(values.vehicles));
+      add('vehicleMakes', parseArray(values.vehicleMakes));
+      add('powerTrainTypes', parseArray(values.powerTrainTypes));
+    }
+
+    if (values.component === 'ShareVehiclesWithDimo') {
+      if (values.permissionsMode === 'template') {
+        add('permissionTemplateId', values.permissionTemplateId);
+      } else if (values.permissionsMode === 'custom') {
+        add(
+          'permissions',
+          values.permissions?.map((k: string) => {
+            const p = PERMISSIONS.find((p) => p.key === k);
+            if (p) return '1';
+            return '0';
+          }),
+        );
+      }
+    }
+
+    if (values.component === 'ExecuteAdvancedTransactionWithDimo') {
+      add('value', values.value);
+      add('abi', tryParseJSON(values.abi));
+      add('functionName', values.functionName);
+      add('args', parseArray(values.args));
+    }
+
+    return `${BASE_URL}/?${params.toString()}`;
+  };
+
+  const renderSnippet = () => {
+    const baseProps: Record<string, unknown> = {
+      mode: values.mode,
+      utm: values.utm,
+      altTitle: values.altTitle,
+      authenticatedLabel: values.authenticatedLabel,
+      unAuthenticatedLabel: values.unAuthenticatedLabel,
+      expirationDate: values.expirationDate,
+      onSuccess: raw('(authData) => console.log("Success:", authData)'),
+      onError: raw('(error) => console.error("Error:", error)'),
+    };
+
+    let codeSnippet = '';
+
+    if (values.component === 'LoginWithDimo') {
+      const props = {
+        ...baseProps,
+        vehicles: parseArray(values.vehicles),
+        vehicleMakes: parseArray(values.vehicleMakes),
+        powerTrainTypes: parseArray(values.powerTrainTypes),
+      };
+      codeSnippet = `<LoginWithDimo\n${formatProps(props)}\n/>`;
+    }
+
+    if (values.component === 'ShareVehiclesWithDimo') {
+      const props = {
+        ...baseProps,
+        permissionTemplateId:
+          values.permissionsMode === 'template' ? values.permissionTemplateId : undefined,
+        permissions:
+          values.permissionsMode === 'custom'
+            ? values.permissions?.map((k: string) =>
+                raw(PERMISSIONS.find((p) => p.key === k)?.enum),
+              )
+            : undefined,
+      };
+      codeSnippet = `<ShareVehiclesWithDimo\n${formatProps(props)}\n/>`;
+    }
+
+    if (values.component === 'ExecuteAdvancedTransactionWithDimo') {
+      const props = {
+        ...baseProps,
+        value: values.value,
+        abi: tryParseJSON(values.abi),
+        functionName: values.functionName,
+        args: parseArray(values.args),
+      };
+      codeSnippet = `<ExecuteAdvanceTransactionWithDimo\n${formatProps(props)}\n/>`;
+    }
+
+    return `initializeDimoSDK({\n\tclientId: '${fragment?.clientId ?? ''}',\n\tredirectUri: '${values.redirectUri ?? ''}',\n});\n\n${codeSnippet}`;
+  };
+
+  return (
+    <>
+      {/* Toggle */}
+      <div className="pt-4">
+        <label className="block font-semibold mb-1">View as:</label>
+        <SegmentedControl
+          value={viewMode}
+          options={[
+            { value: 'code', label: 'Code' },
+            { value: 'url', label: 'Url' },
+          ]}
+          onChange={(value) => setViewMode(value)}
+        />
+      </div>
+
+      {/* Output */}
+      <div className="pt-4 relative">
+        <h3 className="font-semibold mb-2">Generated Code</h3>
+        <pre className="bg-surface-raised p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
+          {viewMode === 'code' ? renderSnippet() : buildUrl()}
+        </pre>
+        <button
+          className="absolute top-2 right-2 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 shadow-md"
+          onClick={() =>
+            navigator.clipboard.writeText(
+              viewMode === 'code' ? renderSnippet() : buildUrl(),
+            )
+          }
+        >
+          Copy
+        </button>
+      </div>
+    </>
+  );
+};

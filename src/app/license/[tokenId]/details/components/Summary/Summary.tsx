@@ -2,8 +2,8 @@ import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import { FC, useState } from 'react';
 import { WorkspaceNameModal } from '@/components/WorkspaceNameModal';
-import { AliasAndTokenId } from '@/app/license/details/[tokenId]/components/Summary/components/AliasAndTokenId';
-import { ClientId } from '@/app/license/details/[tokenId]/components/Summary/components/ClientId';
+import { AliasAndTokenId } from '@/app/license/[tokenId]/details/components/Summary/components/AliasAndTokenId';
+import { ClientId } from '@/app/license/[tokenId]/details/components/Summary/components/ClientId';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 
 interface Props {

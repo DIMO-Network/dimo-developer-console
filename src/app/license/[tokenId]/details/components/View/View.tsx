@@ -5,14 +5,14 @@ import { BackButton } from '@/components/BackButton';
 import './View.css';
 import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
-import { Summary } from '@/app/license/details/[tokenId]/components/Summary';
-import { Signers } from '@/app/license/details/[tokenId]/components/Signers';
-import { RedirectUris } from '@/app/license/details/[tokenId]/components/RedirectUris';
+import { Summary } from '@/app/license/[tokenId]/details/components/Summary';
+import { Signers } from '@/app/license/[tokenId]/details/components/Signers';
+import { RedirectUris } from '@/app/license/[tokenId]/details/components/RedirectUris';
 import { Loader } from '@/components/Loader';
-import { Vehicles } from '@/app/license/details/[tokenId]/components/Vehicles';
-import { DeveloperJwts } from '@/app/license/details/[tokenId]/components/DeveloperJwts';
+import { Vehicles } from '@/app/license/[tokenId]/details/components/Vehicles';
+import { DeveloperJwts } from '@/app/license/[tokenId]/details/components/DeveloperJwts';
 import { useRouter } from 'next/navigation';
-import { Usage } from '@/app/license/details/[tokenId]/components/Usage/Usage';
+import { Usage } from '@/app/license/[tokenId]/details/components/Usage/Usage';
 
 const IDENTITY_API_UPDATE_DELAY = 6000;
 
