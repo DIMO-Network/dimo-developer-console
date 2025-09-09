@@ -16,7 +16,7 @@ import {
   useMixPanel,
 } from '@/hooks';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
-import { APIKeyModal } from '@/app/license/details/[tokenId]/components/Signers/components/APIKeyModal';
+import { APIKeyModal } from '@/app/license/[tokenId]/details/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
 
 import { withLoadingStatus } from '@/hoc';
