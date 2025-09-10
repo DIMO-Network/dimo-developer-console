@@ -18,12 +18,12 @@ import {
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/details/[tokenId]/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
-import { Section, SectionHeader } from '@/components/Section';
 
 import { withLoadingStatus } from '@/hoc';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
+import CollapsibleSection from '@/components/CollapsibleSection/CollapsibleSection';
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -163,47 +163,49 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   return (
-    <Section>
-      <SectionHeader title={'API Keys'}>
+    <CollapsibleSection>
+      <CollapsibleSection.Title title={'API Keys'}>
         {isLicenseOwner && (
           <Button className="dark with-icon px-4" onClick={handleGenerateSigner}>
             <KeyIcon className="w-4 h-4" />
             Generate Key
           </Button>
         )}
-      </SectionHeader>
-      <div>
-        {!!fragment.signers.nodes.length && (
-          <Table
-            columns={[
-              {
-                name: 'address',
-                label: 'Signer address',
-                CustomHeader: <SignerAddressHeader key="header-addr" />,
-              },
-              { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
-            ]}
-            data={fragment.signers.nodes}
-            actions={[renderDeleteSignerAction]}
-          />
-        )}
-      </div>
-      <DeleteConfirmationModal
-        isOpen={!!signerToDelete}
-        title={'Are you sure you want to delete this API key?'}
-        subtitle={'You will no longer be able to use this key in your app.'}
-        onConfirm={onConfirmDelete}
-        onCancel={() => {
-          setSignerToDelete(undefined);
-        }}
-        confirmButtonClassName={'error'}
-      />
-      <APIKeyModal
-        isOpen={!!apiKey}
-        apiKey={String(apiKey)?.replace('0x', '') ?? ''}
-        onClose={() => setApiKey(undefined)}
-      />
-    </Section>
+      </CollapsibleSection.Title>
+      <CollapsibleSection.Content>
+        <div>
+          {!!fragment.signers.nodes.length && (
+            <Table
+              columns={[
+                {
+                  name: 'address',
+                  label: 'Signer address',
+                  CustomHeader: <SignerAddressHeader key="header-addr" />,
+                },
+                { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
+              ]}
+              data={fragment.signers.nodes}
+              actions={[renderDeleteSignerAction]}
+            />
+          )}
+        </div>
+        <DeleteConfirmationModal
+          isOpen={!!signerToDelete}
+          title={'Are you sure you want to delete this API key?'}
+          subtitle={'You will no longer be able to use this key in your app.'}
+          onConfirm={onConfirmDelete}
+          onCancel={() => {
+            setSignerToDelete(undefined);
+          }}
+          confirmButtonClassName={'error'}
+        />
+        <APIKeyModal
+          isOpen={!!apiKey}
+          apiKey={String(apiKey)?.replace('0x', '') ?? ''}
+          onClose={() => setApiKey(undefined)}
+        />
+      </CollapsibleSection.Content>
+    </CollapsibleSection>
   );
 };
 

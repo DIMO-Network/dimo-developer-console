@@ -1,7 +1,6 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
-import { Section, SectionHeader } from '@/components/Section';
 import { Table } from '@/components/Table';
 import { removeDevJwt } from '@/utils/devJwt';
 import { GenerateDevJWT } from '@/components/GenerateDevJWT';
@@ -12,6 +11,7 @@ import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { CopyButton } from '@/components/CopyButton';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useEventEmitter, useIsLicenseOwner, useDimoAuth } from '@/hooks';
+import CollapsibleSection from '@/components/CollapsibleSection/CollapsibleSection';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
   fragment DeveloperJwtsFragment on DeveloperLicense {
@@ -135,37 +135,39 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
   }
 
   return (
-    <Section>
-      <SectionHeader title="Developer JWTs">
+    <CollapsibleSection>
+      <CollapsibleSection.Title title="Developer JWTs">
         <GenerateDevJWT
           clientId={fragment.clientId}
           domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
           buttonText="Generate new JWT"
           onSuccess={handleGenerateSuccess}
         />
-      </SectionHeader>
-      {devJwts.length > 0 ? (
-        <Table
-          columns={columns}
-          data={devJwts}
-          actions={[renderCopyButton, renderDeleteButton]}
+      </CollapsibleSection.Title>
+      <CollapsibleSection.Content>
+        {devJwts.length > 0 ? (
+          <Table
+            columns={columns}
+            data={devJwts}
+            actions={[renderCopyButton, renderDeleteButton]}
+          />
+        ) : (
+          <p className="text-text-secondary">No developer JWTs found</p>
+        )}
+        <DeleteConfirmationModal
+          isOpen={!!jwtToDelete}
+          title="Are you sure you want to delete this JWT?"
+          subtitle=""
+          onConfirm={() => {
+            if (jwtToDelete) {
+              handleDelete(jwtToDelete);
+              setJwtToDelete(undefined);
+            }
+          }}
+          onCancel={() => setJwtToDelete(undefined)}
+          confirmButtonClassName="error"
         />
-      ) : (
-        <p className="text-text-secondary">No developer JWTs found</p>
-      )}
-      <DeleteConfirmationModal
-        isOpen={!!jwtToDelete}
-        title="Are you sure you want to delete this JWT?"
-        subtitle=""
-        onConfirm={() => {
-          if (jwtToDelete) {
-            handleDelete(jwtToDelete);
-            setJwtToDelete(undefined);
-          }
-        }}
-        onCancel={() => setJwtToDelete(undefined)}
-        confirmButtonClassName="error"
-      />
-    </Section>
+      </CollapsibleSection.Content>
+    </CollapsibleSection>
   );
 };
