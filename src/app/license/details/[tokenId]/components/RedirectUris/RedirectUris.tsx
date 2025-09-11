@@ -4,7 +4,7 @@ import { RedirectUriList } from '@/components/RedirectUriList';
 import { RedirectUriForm } from '@/components/RedirectUriForm';
 
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
-import CollapsibleSection from '@/components/CollapsibleSection/CollapsibleSection';
+import { CollapsibleSection } from '@/components/CollapsibleSection';
 
 const REDIRECT_URIS_FRAGMENT = gql(`
   fragment RedirectUriFragment on DeveloperLicense {

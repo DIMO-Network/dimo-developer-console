@@ -28,4 +28,4 @@ const CollapsibleSection: CollapsibleSectionType = ({ children }) => {
 
 CollapsibleSection.Title = CollapsibleHeader;
 CollapsibleSection.Content = CollapsibleContent;
-export default CollapsibleSection;
+export { CollapsibleSection };

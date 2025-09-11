@@ -23,7 +23,7 @@ import { withLoadingStatus } from '@/hoc';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
-import CollapsibleSection from '@/components/CollapsibleSection/CollapsibleSection';
+import { CollapsibleSection } from '@/components/CollapsibleSection';
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {

@@ -11,7 +11,7 @@ import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { CopyButton } from '@/components/CopyButton';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useEventEmitter, useIsLicenseOwner, useDimoAuth } from '@/hooks';
-import CollapsibleSection from '@/components/CollapsibleSection/CollapsibleSection';
+import { CollapsibleSection } from '@/components/CollapsibleSection';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
   fragment DeveloperJwtsFragment on DeveloperLicense {
