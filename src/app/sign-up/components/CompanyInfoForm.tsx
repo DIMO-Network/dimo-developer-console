@@ -176,7 +176,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
   const type = watch('type', '');
 
   const onSubmit: SubmitHandler<CompanyInfoInputs> = (data) => {
-    updateUser(data);
+    void updateUser(data);
   };
 
   const updateUser = async (companyData: CompanyInfoInputs) => {
@@ -199,7 +199,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 w-full max-w-sm pt-4"
         >
-          <Label htmlFor="region" className="text-xs text-medium">
+          <Label htmlFor="type" className="text-xs text-medium">
             Business/Developer Type *
             <SelectField
               {...register('type', {

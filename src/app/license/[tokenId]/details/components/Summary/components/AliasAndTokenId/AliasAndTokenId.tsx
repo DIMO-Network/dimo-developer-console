@@ -5,7 +5,7 @@ export const AliasAndTokenId = (props: {
   tokenId: number;
   alias?: string | null;
   canEdit: boolean;
-  onEdit: () => void;
+  onEdit?: () => void;
 }) => {
   return (
     <div className="flex flex-row gap-2 items-center">
