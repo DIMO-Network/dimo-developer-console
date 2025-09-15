@@ -8,6 +8,7 @@ import {
 } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
 import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
+import configuration from '@/config';
 
 interface IOutputPrintProps {
   license: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
@@ -18,11 +19,18 @@ type RawCode = { __raw: string };
 
 const raw = (code: string): RawCode => ({ __raw: code });
 
-const BASE_URL = 'https://login.dimo.org';
 export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
   const fragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
   const [viewMode, setViewMode] = useState<'code' | 'url'>('code');
   const values = watch();
+
+  const getBaseUrl = (): string => {
+    if (configuration.environment === 'production') {
+      return 'https://login.dimo.org';
+    }
+    return 'https://login.dev.dimo.org';
+  };
+
   const parseArray = (val?: string) =>
     val
       ?.split(',')
@@ -130,7 +138,9 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
       add('args', parseArray(values.args as string));
     }
 
-    return `${BASE_URL}/?${params.toString()}`;
+    const baseUrl = getBaseUrl();
+
+    return `${baseUrl}/?${params.toString()}`;
   };
 
   const renderSnippet = () => {
