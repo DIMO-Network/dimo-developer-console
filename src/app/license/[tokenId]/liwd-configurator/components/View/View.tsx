@@ -77,9 +77,9 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
             control={control}
             register={register}
           />
+          <OutputPrint watch={watch} license={data.developerLicense} />
         </>
       )}
-      <OutputPrint watch={watch} license={data?.developerLicense} />
     </div>
   );
 };

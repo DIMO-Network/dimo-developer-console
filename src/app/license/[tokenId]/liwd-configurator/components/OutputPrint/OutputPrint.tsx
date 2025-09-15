@@ -125,9 +125,9 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
 
     if (values.component === 'ExecuteAdvancedTransactionWithDimo') {
       add('value', values.value);
-      add('abi', tryParseJSON(values.abi));
+      add('abi', tryParseJSON(values.abi as string));
       add('functionName', values.functionName);
-      add('args', parseArray(values.args));
+      add('args', parseArray(values.args as string));
     }
 
     return `${BASE_URL}/?${params.toString()}`;
@@ -148,7 +148,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
     let codeSnippet = '';
 
     if (values.component === 'LoginWithDimo') {
-      const props = {
+      const props: Record<string, unknown> = {
         ...baseProps,
         vehicles: parseArray(values.vehicles),
         vehicleMakes: parseArray(values.vehicleMakes),
@@ -158,14 +158,14 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
     }
 
     if (values.component === 'ShareVehiclesWithDimo') {
-      const props = {
+      const props: Record<string, unknown> = {
         ...baseProps,
         permissionTemplateId:
           values.permissionsMode === 'template' ? values.permissionTemplateId : undefined,
         permissions:
           values.permissionsMode === 'custom'
             ? values.permissions?.map((k: string) =>
-                raw(PERMISSIONS.find((p) => p.key === k)?.enum),
+                raw(PERMISSIONS.find((p) => p.key === k)?.enum ?? 'none'),
               )
             : undefined,
       };
@@ -173,12 +173,12 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
     }
 
     if (values.component === 'ExecuteAdvancedTransactionWithDimo') {
-      const props = {
+      const props: Record<string, unknown> = {
         ...baseProps,
         value: values.value,
-        abi: tryParseJSON(values.abi),
+        abi: tryParseJSON(values.abi as string),
         functionName: values.functionName,
-        args: parseArray(values.args),
+        args: parseArray(values.args as string),
       };
       codeSnippet = `<ExecuteAdvanceTransactionWithDimo\n${formatProps(props)}\n/>`;
     }

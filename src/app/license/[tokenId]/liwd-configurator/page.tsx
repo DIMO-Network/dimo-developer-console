@@ -1,4 +1,3 @@
-import { type FC } from 'react';
 import { Metadata } from 'next';
 
 import { View } from './components/View';
@@ -8,5 +7,5 @@ export const metadata: Metadata = {
   title: `Settings | ${configuration.appName}`,
 };
 
-const LIWDConfiguratorPage: FC = View;
+const LIWDConfiguratorPage = View;
 export default LIWDConfiguratorPage;

@@ -9,9 +9,9 @@ interface SharedProps {
 }
 
 interface LoginWithDimoProps extends SharedProps {
-  vehicles?: string[];
-  vehicleMakes?: string[];
-  powerTrainTypes?: string[];
+  vehicles?: string;
+  vehicleMakes?: string;
+  powerTrainTypes?: string;
 }
 
 interface ShareVehiclesWithDimoProps extends SharedProps {
@@ -22,9 +22,9 @@ interface ShareVehiclesWithDimoProps extends SharedProps {
 
 interface ExecuteAdvanceTransactionWithDimoProps extends SharedProps {
   value: string;
-  abi: Record<string, unknown>;
+  abi: Record<string, unknown> | string | null;
   functionName: string;
-  args: string[];
+  args: string[] | string;
 }
 
 export type ComponentType =
