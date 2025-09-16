@@ -9,6 +9,8 @@ import {
 import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import configuration from '@/config';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface IOutputPrintProps {
   license: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
@@ -120,14 +122,12 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
       if (values.permissionsMode === 'template') {
         add('permissionTemplateId', values.permissionTemplateId);
       } else if (values.permissionsMode === 'custom') {
-        add(
-          'permissions',
-          values.permissions?.map((k: string) => {
-            const p = PERMISSIONS.find((p) => p.key === k);
-            if (p) return '1';
-            return '0';
-          }),
-        );
+        const permissionValues = PERMISSIONS.map((p) => {
+          const k = values.permissions?.find((vp) => vp === p.key);
+          if (k) return '1';
+          return '0';
+        });
+        add('permissions', permissionValues?.join(''));
       }
     }
 
@@ -214,9 +214,20 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
       {/* Output */}
       <div className="pt-4 relative">
         <h3 className="font-semibold mb-2">Generated Code</h3>
-        <pre className="bg-surface-raised p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
-          {viewMode === 'code' ? renderSnippet() : buildUrl()}
-        </pre>
+        {viewMode === 'code' ? (
+          <SyntaxHighlighter
+            language="tsx"
+            style={oneDark}
+            customStyle={{ borderRadius: '0.5rem', padding: '1rem' }}
+          >
+            {renderSnippet()}
+          </SyntaxHighlighter>
+        ) : (
+          <pre className="bg-surface-raised p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
+            {buildUrl()}
+          </pre>
+        )}
+
         <button
           className="absolute top-2 right-2 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 shadow-md"
           onClick={() =>

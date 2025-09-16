@@ -5,6 +5,7 @@ import { Control, Controller, FieldErrors, UseFormRegister } from 'react-hook-fo
 import { DynamicFormProps } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
 
 import { Toggle } from '@/components/Toggle';
+import { DatePicker } from '@/components/DatePicker';
 
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
@@ -20,18 +21,6 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
   return (
     <>
       <div className={'flex flex-row gap-4 w-full'}>
-        <Label htmlFor="website" className="text-xs text-medium w-full">
-          Permissions Template Id
-          <TextField
-            type="text"
-            placeholder="1"
-            {...register('permissionTemplateId', {
-              required: false,
-              validate: {},
-            })}
-            role="company-website-input"
-          />
-        </Label>
         <Label htmlFor="website" className="text-xs text-medium w-full">
           Vehicles
           <TextField
@@ -72,14 +61,15 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
         </Label>
         <Label htmlFor="website" className="text-xs text-medium w-full">
           Expiration Date
-          <TextField
-            type="text"
-            placeholder=""
-            {...register('expirationDate', {
-              required: false,
-              validate: {},
-            })}
-            role="company-website-input"
+          <Controller
+            control={control}
+            name="expirationDate"
+            render={({ field }) => (
+              <DatePicker
+                value={field.value ? new Date(field.value) : undefined}
+                onChange={(value) => field.onChange(value?.toLocaleString() ?? '')}
+              />
+            )}
           />
         </Label>
       </div>

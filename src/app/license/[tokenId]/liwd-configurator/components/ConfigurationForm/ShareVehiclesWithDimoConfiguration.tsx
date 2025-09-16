@@ -14,6 +14,7 @@ import {
 } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
 import { Toggle } from '@/components/Toggle';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import { DatePicker } from '@/components/DatePicker';
 
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
@@ -61,14 +62,15 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
       <div className={'flex flex-row gap-4 w-full'}>
         <Label htmlFor="website" className="text-xs text-medium w-full">
           Expiration Date
-          <TextField
-            type="text"
-            placeholder=""
-            {...register('expirationDate', {
-              required: false,
-              validate: {},
-            })}
-            role="company-website-input"
+          <Controller
+            control={control}
+            name="expirationDate"
+            render={({ field }) => (
+              <DatePicker
+                value={field.value ? new Date(field.value) : undefined}
+                onChange={(value) => field.onChange(value?.toLocaleString() ?? '')}
+              />
+            )}
           />
         </Label>
       </div>
