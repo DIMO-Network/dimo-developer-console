@@ -28,7 +28,7 @@ export const Summary: FC<Props> = ({ licenseSummary, refetch }) => {
         canEdit={isLicenseOwner}
         onEdit={handleEditClick}
       />
-      <ClientId value={license.clientId} />
+      <ClientId value={license.clientId} tokenId={license.tokenId} />
       <WorkspaceNameModal
         isOpen={isEditModalOpen}
         setIsOpen={setIsEditModalOpen}

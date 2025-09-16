@@ -1,3 +1,5 @@
+'use client';
+
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import './DatePicker.css';
@@ -42,7 +44,11 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
   }, []);
 
   function formatDate(date?: Date) {
-    return date ? date.toISOString().split('T')[0] : '';
+    if (!date) return '';
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${mm}-${dd}-${yyyy}`;
   }
   return (
     <div className="date-picker" ref={ref}>

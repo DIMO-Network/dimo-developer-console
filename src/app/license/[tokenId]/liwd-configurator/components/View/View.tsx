@@ -47,6 +47,9 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   } = useForm<DynamicFormProps>({
     mode: 'onChange',
     reValidateMode: 'onChange',
+    defaultValues: {
+      component: 'LoginWithDimo',
+    },
   });
 
   if (loading) {

@@ -67,7 +67,7 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
             render={({ field }) => (
               <DatePicker
                 value={field.value ? new Date(field.value) : undefined}
-                onChange={(value) => field.onChange(value?.toLocaleString() ?? '')}
+                onChange={(value) => field.onChange(value ?? '')}
               />
             )}
           />

@@ -90,6 +90,14 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
     }
   };
 
+  function formatDate(date?: Date) {
+    if (!date) return '';
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${mm}-${dd}-${yyyy}`;
+  }
+
   const buildUrl = (): string => {
     const params = new URLSearchParams();
 
@@ -110,7 +118,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
     add('redirectUri', values.redirectUri);
     add('entryState', formatComponent(values.component));
     add('utm', values.utm);
-    add('expirationDate', values.expirationDate);
+    add('expirationDate', formatDate(new Date(values.expirationDate)));
 
     if (values.component === 'LoginWithDimo') {
       add('vehicles', parseArray(values.vehicles));
@@ -150,7 +158,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
       altTitle: values.altTitle,
       authenticatedLabel: values.authenticatedLabel,
       unAuthenticatedLabel: values.unAuthenticatedLabel,
-      expirationDate: values.expirationDate,
+      expirationDate: formatDate(new Date(values.expirationDate)),
       onSuccess: raw('(authData) => console.log("Success:", authData)'),
       onError: raw('(error) => console.error("Error:", error)'),
     };
