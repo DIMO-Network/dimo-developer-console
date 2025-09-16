@@ -67,7 +67,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
                   ? `"${x}"`
                   : x,
             )
-            .join(', ')}]}`;
+            .join(`,\n${''.padEnd(k.length + 5, ' ')}`)}]}`;
         if (typeof v === 'object') {
           return `  ${k}={${JSON.stringify(v, null, 2)
             .split('\n')
@@ -118,7 +118,10 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
     add('redirectUri', values.redirectUri);
     add('entryState', formatComponent(values.component));
     add('utm', values.utm);
-    add('expirationDate', formatDate(new Date(values.expirationDate)));
+    add(
+      'expirationDate',
+      values.expirationDate ? formatDate(new Date(values.expirationDate)) : undefined,
+    );
 
     if (values.component === 'LoginWithDimo') {
       add('vehicles', parseArray(values.vehicles));
@@ -158,7 +161,9 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
       altTitle: values.altTitle,
       authenticatedLabel: values.authenticatedLabel,
       unAuthenticatedLabel: values.unAuthenticatedLabel,
-      expirationDate: formatDate(new Date(values.expirationDate)),
+      expirationDate: values.expirationDate
+        ? formatDate(new Date(values.expirationDate))
+        : undefined,
       onSuccess: raw('(authData) => console.log("Success:", authData)'),
       onError: raw('(error) => console.error("Error:", error)'),
     };

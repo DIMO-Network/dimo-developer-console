@@ -65,7 +65,7 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
       {show && (
         <div className="absolute mt-2 w-64 bg-surface-raised shadow-lg rounded-md z-10">
           <div className="flex justify-between items-center p-2">
-            <button
+            <div
               onClick={() => {
                 if (month === 0) {
                   setMonth(11);
@@ -74,17 +74,17 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
                   setMonth((m) => m - 1);
                 }
               }}
-              className="px-2"
+              className="px-2 cursor-pointer"
             >
               ‹
-            </button>
+            </div>
             <div className="font-medium">
               {new Date(year, month).toLocaleString('default', {
                 month: 'long',
                 year: 'numeric',
               })}
             </div>
-            <button
+            <div
               onClick={() => {
                 if (month === 11) {
                   setMonth(0);
@@ -93,10 +93,10 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
                   setMonth((m) => m + 1);
                 }
               }}
-              className="px-2"
+              className="px-2 cursor-pointer"
             >
               ›
-            </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-7 text-center text-sm text-gray-500 border-t pt-2">

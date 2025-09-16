@@ -66,10 +66,12 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             control={control}
             name="expirationDate"
             render={({ field }) => (
-              <DatePicker
-                value={field.value ? new Date(field.value) : undefined}
-                onChange={(value) => field.onChange(value ?? '')}
-              />
+              <div className={'w-full'}>
+                <DatePicker
+                  value={field.value ? new Date(field.value) : undefined}
+                  onChange={(value) => field.onChange(value ?? '')}
+                />
+              </div>
             )}
           />
         </Label>
