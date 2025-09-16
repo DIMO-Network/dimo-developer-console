@@ -1,7 +1,14 @@
 import { FC } from 'react';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
-import { Control, Controller, FieldErrors, UseFormRegister } from 'react-hook-form';
+import {
+  Control,
+  Controller,
+  FieldErrors,
+  useFormContext,
+  UseFormRegister,
+  useWatch,
+} from 'react-hook-form';
 import { DynamicFormProps } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
 
 import { Toggle } from '@/components/Toggle';
@@ -18,6 +25,12 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
   register,
   control,
 }: IFormProps) => {
+  const altTitle = useWatch({
+    control,
+    name: 'altTitle',
+  });
+
+  const { setValue } = useFormContext<DynamicFormProps>();
   return (
     <>
       <div className={'flex flex-row gap-4 w-full'}>
@@ -82,41 +95,47 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
               <div className="flex flex-row gap-2 items-center w-4/12">
                 <Toggle
                   checked={field.value}
-                  onToggle={(checked) => field.onChange(checked)}
+                  onToggle={(checked) => {
+                    field.onChange(checked);
+                    if (!checked) {
+                      setValue('unAuthenticatedLabel', '');
+                      setValue('authenticatedLabel', '');
+                    }
+                  }}
                 />
                 <label className="text-xs text-medium ml-2">Use Custom Labels</label>
               </div>
-              {field.value && (
-                <>
-                  <Label htmlFor="website" className="text-xs text-medium w-full">
-                    Authenticated Label
-                    <TextField
-                      type="text"
-                      placeholder=""
-                      {...register('authenticatedLabel', {
-                        required: false,
-                        validate: {},
-                      })}
-                      role="company-website-input"
-                    />
-                  </Label>
-                  <Label htmlFor="website" className="text-xs text-medium w-full">
-                    Unauthenticated Label
-                    <TextField
-                      type="text"
-                      placeholder=""
-                      {...register('unAuthenticatedLabel', {
-                        required: false,
-                        validate: {},
-                      })}
-                      role="company-website-input"
-                    />
-                  </Label>
-                </>
-              )}
             </>
           )}
         />
+        {altTitle && (
+          <>
+            <Label htmlFor="website" className="text-xs text-medium w-full">
+              Authenticated Label
+              <TextField
+                type="text"
+                placeholder=""
+                {...register('authenticatedLabel', {
+                  required: false,
+                  validate: {},
+                })}
+                role="company-website-input"
+              />
+            </Label>
+            <Label htmlFor="website" className="text-xs text-medium w-full">
+              Unauthenticated Label
+              <TextField
+                type="text"
+                placeholder=""
+                {...register('unAuthenticatedLabel', {
+                  required: false,
+                  validate: {},
+                })}
+                role="company-website-input"
+              />
+            </Label>
+          </>
+        )}
       </div>
     </>
   );
