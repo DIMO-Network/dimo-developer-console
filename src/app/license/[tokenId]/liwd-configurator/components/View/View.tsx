@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { ConfigurationForm } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm';
 import { OutputPrint } from '@/app/license/[tokenId]/liwd-configurator/components/OutputPrint';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { DynamicFormProps } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
 
 import './View.css';
@@ -39,12 +39,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
     void getTokenId();
   }, [params]);
 
-  const {
-    control,
-    register,
-    watch,
-    formState: { errors },
-  } = useForm<DynamicFormProps>({
+  const methods = useForm<DynamicFormProps>({
     mode: 'onChange',
     reValidateMode: 'onChange',
     defaultValues: {
@@ -72,16 +67,10 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
     <div className="liwd-configurator-page">
       <PageSubtitle subtitle="Login With Dimo Configurator" />
       {data?.developerLicense && (
-        <>
-          <ConfigurationForm
-            license={data?.developerLicense}
-            watch={watch}
-            errors={errors}
-            control={control}
-            register={register}
-          />
-          <OutputPrint watch={watch} license={data.developerLicense} />
-        </>
+        <FormProvider {...methods}>
+          <ConfigurationForm license={data?.developerLicense} />
+          <OutputPrint license={data.developerLicense} />
+        </FormProvider>
       )}
     </div>
   );

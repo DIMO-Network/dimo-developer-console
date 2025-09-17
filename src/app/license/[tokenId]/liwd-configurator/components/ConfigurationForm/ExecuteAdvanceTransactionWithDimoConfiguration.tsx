@@ -1,14 +1,13 @@
 import { FC } from 'react';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
-import { Control, FieldErrors, UseFormRegister } from 'react-hook-form';
+import { Control, UseFormRegister } from 'react-hook-form';
 import { DynamicFormProps } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
 
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<DynamicFormProps, any>;
-  errors: FieldErrors<DynamicFormProps>;
 }
 
 export const ExecuteAdvanceTransactionWithDimoConfiguration: FC<IFormProps> = ({

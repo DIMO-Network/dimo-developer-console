@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
-import { Control, FieldErrors, UseFormRegister, UseFormWatch } from 'react-hook-form';
+import { Control, UseFormRegister, useFormContext } from 'react-hook-form';
 import { LoginWithDimoConfiguration } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/LoginWithDimoConfiguration';
 import { ShareVehiclesWithDimoConfiguration } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
 import { ExecuteAdvanceTransactionWithDimoConfiguration } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/ExecuteAdvanceTransactionWithDimoConfiguration';
@@ -27,11 +27,6 @@ const REDIRECT_URIS_FRAGMENT = gql(`
 
 interface Props {
   license: FragmentType<typeof REDIRECT_URIS_FRAGMENT>;
-  register: UseFormRegister<DynamicFormProps>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<DynamicFormProps, any>;
-  errors: FieldErrors<DynamicFormProps>;
-  watch: UseFormWatch<DynamicFormProps>;
 }
 
 interface IFormProps {
@@ -39,38 +34,19 @@ interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<DynamicFormProps, any>;
-  errors: FieldErrors<DynamicFormProps>;
 }
 
-const Configuration: FC<IFormProps> = ({
-  component,
-  control,
-  register,
-  errors,
-}: IFormProps) => {
+const Configuration: FC<IFormProps> = ({ component, control, register }: IFormProps) => {
   switch (component) {
     case 'LoginWithDimo':
-      return (
-        <LoginWithDimoConfiguration
-          control={control}
-          register={register}
-          errors={errors}
-        />
-      );
+      return <LoginWithDimoConfiguration control={control} register={register} />;
     case 'ShareVehiclesWithDimo':
-      return (
-        <ShareVehiclesWithDimoConfiguration
-          control={control}
-          register={register}
-          errors={errors}
-        />
-      );
+      return <ShareVehiclesWithDimoConfiguration control={control} register={register} />;
     case 'ExecuteAdvancedTransactionWithDimo':
       return (
         <ExecuteAdvanceTransactionWithDimoConfiguration
           control={control}
           register={register}
-          errors={errors}
         />
       );
     default:
@@ -78,15 +54,10 @@ const Configuration: FC<IFormProps> = ({
   }
 };
 
-export const ConfigurationForm: FC<Props> = ({
-  license,
-  watch,
-  control,
-  register,
-  errors,
-}) => {
+export const ConfigurationForm: FC<Props> = ({ license }) => {
   const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
 
+  const { register, control, watch } = useFormContext<DynamicFormProps>();
   const component = watch('component', 'LoginWithDimo');
 
   return (
@@ -150,12 +121,7 @@ export const ConfigurationForm: FC<Props> = ({
             />
           </Label>
         </div>
-        <Configuration
-          component={component}
-          control={control}
-          register={register}
-          errors={errors}
-        />
+        <Configuration component={component} control={control} register={register} />
       </form>
     </>
   );

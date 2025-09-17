@@ -1,6 +1,5 @@
 import { FC, useState } from 'react';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { UseFormWatch } from 'react-hook-form';
 import {
   DynamicFormProps,
   ComponentType,
@@ -11,19 +10,20 @@ import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import configuration from '@/config';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useFormContext } from 'react-hook-form';
 
 interface IOutputPrintProps {
   license: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
-  watch: UseFormWatch<DynamicFormProps>;
 }
 
 type RawCode = { __raw: string };
 
 const raw = (code: string): RawCode => ({ __raw: code });
 
-export const OutputPrint: FC<IOutputPrintProps> = ({ watch, license }) => {
+export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
   const fragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
   const [viewMode, setViewMode] = useState<'code' | 'url'>('code');
+  const { watch } = useFormContext<DynamicFormProps>();
   const values = watch();
 
   const getBaseUrl = (): string => {

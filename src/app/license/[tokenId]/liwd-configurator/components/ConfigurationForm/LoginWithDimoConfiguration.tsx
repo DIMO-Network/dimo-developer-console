@@ -4,7 +4,6 @@ import { Label } from '@/components/Label';
 import {
   Control,
   Controller,
-  FieldErrors,
   useFormContext,
   UseFormRegister,
   useWatch,
@@ -18,7 +17,6 @@ interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<DynamicFormProps, any>;
-  errors: FieldErrors<DynamicFormProps>;
 }
 
 export const LoginWithDimoConfiguration: FC<IFormProps> = ({
