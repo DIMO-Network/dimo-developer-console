@@ -66,7 +66,7 @@ const baseMainMenu = [
     label: 'Documentation',
     icon: SummarizeIcon,
     iconClassName: 'h-5 w-5',
-    link: 'https://docs.dimo.zone/developer-platform',
+    link: 'https://dimo.org/docs',
     external: true,
     disabled: false,
   },
