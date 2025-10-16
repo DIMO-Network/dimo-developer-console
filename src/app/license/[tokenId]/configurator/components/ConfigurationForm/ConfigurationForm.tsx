@@ -13,7 +13,7 @@ import {
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
 
-const FRAGMENT_USER_CONFIG = gql(`
+export const USER_CONFIG_FRAGMENT = gql(`
   fragment UserConfigurationFragment on DeveloperLicense {
     tokenId
     clientId
@@ -27,7 +27,7 @@ const FRAGMENT_USER_CONFIG = gql(`
 `);
 
 interface Props {
-  license: FragmentType<typeof FRAGMENT_USER_CONFIG>;
+  license: FragmentType<typeof USER_CONFIG_FRAGMENT>;
   submit: (data: DynamicFormProps) => void;
 }
 
@@ -57,7 +57,7 @@ const Configuration: FC<IFormProps> = ({ component, control, register }: IFormPr
 };
 
 export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
-  const fragment = useFragment(FRAGMENT_USER_CONFIG, license);
+  const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
 
   const { register, control, watch, handleSubmit } = useFormContext<DynamicFormProps>();
   const component = watch('component', 'LoginWithDimo');

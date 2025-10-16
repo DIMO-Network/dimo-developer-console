@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { FragmentType, gql, useFragment } from '@/gql';
+import { FragmentType, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
 import { Control, UseFormRegister, useFormContext } from 'react-hook-form';
@@ -12,19 +12,7 @@ import {
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
-
-const USER_CONFIG_FRAGMENT = gql(`
-  fragment UserConfigurationFragment on DeveloperLicense {
-    tokenId
-    clientId
-    owner
-    redirectURIs(first:100) {
-      nodes {
-        uri
-      }
-    }
-  }
-`);
+import { USER_CONFIG_FRAGMENT } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 
 interface Props {
   license: FragmentType<typeof USER_CONFIG_FRAGMENT>;

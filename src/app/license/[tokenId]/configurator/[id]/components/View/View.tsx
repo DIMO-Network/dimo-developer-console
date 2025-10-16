@@ -14,7 +14,7 @@ import {
 import { getConfiguration, saveConfiguration } from '@/actions/configurations';
 import { useRouter } from 'next/router';
 import './View.css';
-import { GET_DEVELOPER_LICENSE } from '@/app/license/[tokenId]/details/components/View';
+import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/View/View';
 
 const parseArray = (val?: string) =>
   val
@@ -110,7 +110,7 @@ export const View = ({
   const [tokenId, setTokenId] = useState<number>();
   const [configurationId, setConfigurationId] = useState<string>();
   const [configuration, setConfiguration] = useState<DynamicFormProps>();
-  const { data, loading, error } = useQuery(GET_DEVELOPER_LICENSE, {
+  const { data, loading, error } = useQuery(DEVELOPER_LICENSE_INFO, {
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
   });

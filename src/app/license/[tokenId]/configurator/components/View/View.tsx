@@ -1,6 +1,5 @@
 'use client';
 
-import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
 import { useEffect, useState } from 'react';
@@ -15,15 +14,17 @@ import {
 import { saveConfiguration } from '@/actions/configurations';
 import { useRouter } from 'next/router';
 import './View.css';
+import { gql } from '@/gql';
 
-const GET_DEVELOPER_LICENSE = gql(`
-  query GetDeveloperLicense($tokenId: Int!) {
+export const DEVELOPER_LICENSE_INFO = gql(`
+  query DeveloperLicenseInfo($tokenId: Int!) {
     developerLicense(by: {tokenId: $tokenId}) {
       ...DeveloperLicenseSummaryFragment   
       ...SignerFragment
       ...RedirectUriFragment
       ...DeveloperLicenseVehiclesFragment
-      ...DeveloperJwtsFragment      
+      ...DeveloperJwtsFragment
+      ...UserConfigurationFragment
     }
   }
 `);
@@ -116,7 +117,7 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
 
 export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   const [tokenId, setTokenId] = useState<number>();
-  const { data, loading, error } = useQuery(GET_DEVELOPER_LICENSE, {
+  const { data, loading, error } = useQuery(DEVELOPER_LICENSE_INFO, {
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
   });

@@ -16,7 +16,7 @@ import { Usage } from '@/app/license/[tokenId]/details/components/Usage/Usage';
 
 const IDENTITY_API_UPDATE_DELAY = 6000;
 
-export const GET_DEVELOPER_LICENSE = gql(`
+const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
     developerLicense(by: {tokenId: $tokenId}) {
       ...DeveloperLicenseSummaryFragment   
