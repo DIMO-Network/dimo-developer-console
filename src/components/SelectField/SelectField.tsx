@@ -30,19 +30,18 @@ export const SelectField = forwardRef<Ref, IProps>(
       role,
       includeEmptyOption = true,
       control,
-      value: defaultValue,
       ...props
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _ref,
   ) => {
     const [show, setShow] = useState<boolean>(false);
-    const [selected, setSelected] = useState<IOption>(
+    /*    const [selected, setSelected] = useState<IOption>(
       options.find((item) => item.value === defaultValue) ?? {
         value: '',
         text: '',
       },
-    );
+    );*/
     const className = classnames('select-field', inputClassName);
 
     const handleSelection = (value: string, text: string) => {
@@ -54,6 +53,13 @@ export const SelectField = forwardRef<Ref, IProps>(
         control={control}
         name={props.name || ''}
         render={({ field: { onChange, value: selectedOption, ref } }) => {
+          const selectedOptionData = options.find(
+            (item) => item.value === selectedOption,
+          ) ?? {
+            value: '',
+            text: '',
+          };
+
           return (
             <div className={className} onClick={() => setShow(!show)} role={role}>
               <select {...props} value={selectedOption} role={`${role}-select`} ref={ref}>
@@ -66,11 +72,11 @@ export const SelectField = forwardRef<Ref, IProps>(
               </select>
               <p
                 className={classnames({
-                  selected: Boolean(selected.value),
+                  selected: Boolean(selectedOptionData.value),
                 })}
                 role={`${role}-text`}
               >
-                {selected.text || props.placeholder || ''}
+                {selectedOptionData.text || props.placeholder || ''}
               </p>
               <ChevronDownIcon className="w-4 h-4 my-auto" />
               <div className={classnames('custom-menu', { show: show })}>

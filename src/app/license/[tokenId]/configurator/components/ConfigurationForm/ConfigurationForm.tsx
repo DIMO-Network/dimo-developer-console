@@ -12,6 +12,7 @@ import {
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
+import { Button } from '@/components/Button';
 
 export const USER_CONFIG_FRAGMENT = gql(`
   fragment UserConfigurationFragment on DeveloperLicense {
@@ -108,21 +109,6 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
           </Label>
         </div>
         <div className="flex flex-row w-full gap-4">
-          <Label htmlFor="mode" className="text-xs text-medium w-full">
-            Mode
-            <SelectField
-              {...register('mode', {
-                required: 'This field is required',
-              })}
-              options={[
-                { value: 'popup', text: 'Popup' },
-                { value: 'redirect', text: 'Redirect' },
-              ]}
-              control={control}
-              placeholder="Select"
-              role="mode-select"
-            />
-          </Label>
           <Label htmlFor="redirectUri" className="text-xs text-medium w-full">
             Redirect URI
             <SelectField
@@ -152,9 +138,10 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
           </Label>
         </div>
         <Configuration component={component} control={control} register={register} />
-        <button type="submit" className="btn btn-primary">
-          Save
-        </button>
+
+        <Button type="submit" className="primary">
+          Update
+        </Button>
       </form>
     </>
   );

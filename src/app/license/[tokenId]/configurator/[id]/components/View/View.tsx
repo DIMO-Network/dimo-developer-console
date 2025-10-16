@@ -11,8 +11,7 @@ import {
   DynamicFormProps,
   PERMISSIONS,
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
-import { getConfiguration, saveConfiguration } from '@/actions/configurations';
-import { useRouter } from 'next/router';
+import { getConfiguration, updateConfiguration } from '@/actions/configurations';
 import './View.css';
 import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/View/View';
 
@@ -38,6 +37,17 @@ const formatComponent = (component: ComponentType) => {
       return 'VEHICLE_MANAGER';
     case 'ExecuteAdvancedTransactionWithDimo':
       return 'ADVANCED_TRANSACTION';
+  }
+};
+
+const InverseFormatComponent = (component: string) => {
+  switch (component) {
+    case 'EMAIL_INPUT':
+      return 'LoginWithDimo';
+    case 'VEHICLE_MANAGER':
+      return 'ShareVehiclesWithDimo';
+    case 'ADVANCED_TRANSACTION':
+      return 'ExecuteAdvancedTransactionWithDimo';
   }
 };
 
@@ -109,12 +119,10 @@ export const View = ({
 }) => {
   const [tokenId, setTokenId] = useState<number>();
   const [configurationId, setConfigurationId] = useState<string>();
-  const [configuration, setConfiguration] = useState<DynamicFormProps>();
   const { data, loading, error } = useQuery(DEVELOPER_LICENSE_INFO, {
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
   });
-  const router = useRouter();
 
   useEffect(() => {
     const getTokenId = async () => {
@@ -129,21 +137,6 @@ export const View = ({
     void getConfigurationId();
   }, [params]);
 
-  useEffect(() => {
-    if (!configurationId) return;
-    const populateConfiguration = async () => {
-      const saveConfiguration = await getConfiguration({ id: configurationId });
-      setConfiguration({
-        component: 'LoginWithDimo',
-        configuration_name: saveConfiguration.configuration_name,
-        ...saveConfiguration.configuration,
-      } as DynamicFormProps);
-      console.info(configuration);
-    };
-
-    void populateConfiguration();
-  }, [configurationId]);
-
   const methods = useForm<DynamicFormProps>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -152,16 +145,33 @@ export const View = ({
     },
   });
 
+  const { reset } = methods;
+
+  useEffect(() => {
+    if (!configurationId) return;
+    const populateConfiguration = async () => {
+      const response = await getConfiguration({ id: configurationId });
+      const savedConfiguration = response.configuration;
+      const formatted = {
+        ...savedConfiguration,
+        component: InverseFormatComponent(savedConfiguration['entryState'] as string),
+        configuration_name: response.configuration_name,
+      } as DynamicFormProps;
+      reset(formatted);
+    };
+
+    void populateConfiguration();
+  }, [configurationId, reset]);
+
   const submit = async (data: DynamicFormProps) => {
     const body = {
+      id: configurationId!,
       client_id: data.client_id,
       configuration_name: data.configuration_name,
       configuration: buildJson(data),
     };
 
-    const { id } = await saveConfiguration(body);
-
-    router.replace(`/license/${tokenId}/configurator/${id}`);
+    await updateConfiguration(body);
   };
 
   if (loading) {

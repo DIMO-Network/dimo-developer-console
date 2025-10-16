@@ -27,8 +27,10 @@ export const getConfiguration = async ({
   id: string;
 }): Promise<IConfiguration> => {
   const client = await dimoDevAPIClient();
-  const { data } = await client.get<IConfiguration>(`/api/my/configurations/${id}`);
-  return data;
+  const { data } = await client.get<{ configuration: IConfiguration }>(
+    `/api/my/configurations/${id}`,
+  );
+  return data.configuration;
 };
 
 export const saveConfiguration = async ({

@@ -12,7 +12,7 @@ import {
   PERMISSIONS,
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { saveConfiguration } from '@/actions/configurations';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import './View.css';
 import { gql } from '@/gql';
 
