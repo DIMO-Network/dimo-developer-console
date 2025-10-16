@@ -27,7 +27,7 @@ const FRAGMENT_USER_CONFIG = gql(`
 `);
 
 interface Props {
-  license: FragmentType<typeof USER_CONFIG_FRAGMENT>;
+  license: FragmentType<typeof FRAGMENT_USER_CONFIG>;
   submit: (data: DynamicFormProps) => void;
 }
 
