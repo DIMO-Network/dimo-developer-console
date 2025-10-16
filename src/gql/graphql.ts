@@ -557,6 +557,10 @@ export type Query = {
    * Ordered by token id, descending.
    */
   syntheticDevices: SyntheticDeviceConnection;
+  /** Retrieve a particular template. */
+  template: Template;
+  /** List templates. Sorts by minting time, descending. */
+  templates: TemplateConnection;
   /** View a particular vehicle. */
   vehicle: Vehicle;
   /**
@@ -682,6 +686,21 @@ export type QuerySyntheticDevicesArgs = {
 
 
 /** The root query type for the GraphQL schema. */
+export type QueryTemplateArgs = {
+  by: TemplateBy;
+};
+
+
+/** The root query type for the GraphQL schema. */
+export type QueryTemplatesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** The root query type for the GraphQL schema. */
 export type QueryVehicleArgs = {
   tokenDID?: InputMaybe<Scalars['String']['input']>;
   tokenId?: InputMaybe<Scalars['Int']['input']>;
@@ -729,6 +748,8 @@ export type Sacd = {
   permissions: Scalars['String']['output'];
   /** Permission source */
   source: Scalars['String']['output'];
+  /** The template used for this permission grant, if any */
+  template?: Maybe<Template>;
 };
 
 /** The Connection type for Sacds. */
@@ -912,6 +933,39 @@ export type SyntheticDevicesFilter = {
   owner?: InputMaybe<Scalars['Address']['input']>;
 };
 
+export type Template = {
+  __typename?: 'Template';
+  asset: Scalars['Address']['output'];
+  cid: Scalars['String']['output'];
+  /** The block timestamp at which this template was created */
+  createdAt: Scalars['Time']['output'];
+  /** Creator of the template */
+  creator: Scalars['Address']['output'];
+  /** Hex string of permissions */
+  permissions: Scalars['String']['output'];
+  /** The token id of the template as an NFT */
+  tokenId: Scalars['BigInt']['output'];
+};
+
+export type TemplateBy = {
+  cid?: InputMaybe<Scalars['String']['input']>;
+  tokenId?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
+export type TemplateConnection = {
+  __typename?: 'TemplateConnection';
+  edges: Array<TemplateEdge>;
+  nodes: Array<Template>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type TemplateEdge = {
+  __typename?: 'TemplateEdge';
+  cursor: Scalars['String']['output'];
+  node: Template;
+};
+
 export type UserRewards = {
   __typename?: 'UserRewards';
   history: EarningsConnection;
@@ -1052,6 +1106,18 @@ export type GetDeveloperLicensesByOwnerQuery = { __typename?: 'Query', developer
     & { ' $fragmentRefs'?: { 'TotalDeveloperLicenseCountFragmentFragment': TotalDeveloperLicenseCountFragmentFragment;'DeveloperLicenseSummariesOnConnectionFragment': DeveloperLicenseSummariesOnConnectionFragment } }
   ) };
 
+export type UserConfigurationFragmentFragment = { __typename?: 'DeveloperLicense', tokenId: number, clientId: any, owner: any, redirectURIs: { __typename?: 'RedirectURIConnection', nodes: Array<{ __typename?: 'RedirectURI', uri: string }> } } & { ' $fragmentName'?: 'UserConfigurationFragmentFragment' };
+
+export type GetDeveloperLicenseQueryVariables = Exact<{
+  tokenId: Scalars['Int']['input'];
+}>;
+
+
+export type GetDeveloperLicenseQuery = { __typename?: 'Query', developerLicense: (
+    { __typename?: 'DeveloperLicense' }
+    & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragmentFragment': DeveloperLicenseSummaryFragmentFragment;'SignerFragmentFragment': SignerFragmentFragment;'RedirectUriFragmentFragment': RedirectUriFragmentFragment;'DeveloperLicenseVehiclesFragmentFragment': DeveloperLicenseVehiclesFragmentFragment;'DeveloperJwtsFragmentFragment': DeveloperJwtsFragmentFragment } }
+  ) };
+
 export type DeveloperJwtsFragmentFragment = { __typename?: 'DeveloperLicense', owner: any, clientId: any, redirectURIs: { __typename?: 'RedirectURIConnection', nodes: Array<{ __typename?: 'RedirectURI', uri: string }> } } & { ' $fragmentName'?: 'DeveloperJwtsFragmentFragment' };
 
 export type RedirectUriFragmentFragment = { __typename?: 'DeveloperLicense', owner: any, tokenId: number, redirectURIs: { __typename?: 'RedirectURIConnection', nodes: Array<{ __typename?: 'RedirectURI', uri: string }> } } & { ' $fragmentName'?: 'RedirectUriFragmentFragment' };
@@ -1066,16 +1132,6 @@ export type GetVehicleCountByClientIdQueryVariables = Exact<{
 
 
 export type GetVehicleCountByClientIdQuery = { __typename?: 'Query', vehicles: { __typename?: 'VehicleConnection', totalCount: number } };
-
-export type GetDeveloperLicenseQueryVariables = Exact<{
-  tokenId: Scalars['Int']['input'];
-}>;
-
-
-export type GetDeveloperLicenseQuery = { __typename?: 'Query', developerLicense: (
-    { __typename?: 'DeveloperLicense' }
-    & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragmentFragment': DeveloperLicenseSummaryFragmentFragment;'SignerFragmentFragment': SignerFragmentFragment;'RedirectUriFragmentFragment': RedirectUriFragmentFragment;'DeveloperLicenseVehiclesFragmentFragment': DeveloperLicenseVehiclesFragmentFragment;'DeveloperJwtsFragmentFragment': DeveloperJwtsFragmentFragment } }
-  ) };
 
 export type DeveloperLicenseSummariesOnConnectionFragment = { __typename?: 'DeveloperLicenseConnection', nodes: Array<(
     { __typename?: 'DeveloperLicense' }
@@ -1128,6 +1184,7 @@ export type CheckHasDeveloperLicensesQuery = { __typename?: 'Query', developerLi
     & { ' $fragmentRefs'?: { 'TotalDeveloperLicenseCountFragmentFragment': TotalDeveloperLicenseCountFragmentFragment } }
   ) };
 
+export const UserConfigurationFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"UserConfigurationFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}}]} as unknown as DocumentNode<UserConfigurationFragmentFragment, unknown>;
 export const DeveloperJwtsFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperJwtsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}}]} as unknown as DocumentNode<DeveloperJwtsFragmentFragment, unknown>;
 export const RedirectUriFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RedirectUriFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}}]} as unknown as DocumentNode<RedirectUriFragmentFragment, unknown>;
 export const SignerFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SignerFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"signers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"enabledAt"}}]}}]}}]}}]} as unknown as DocumentNode<SignerFragmentFragment, unknown>;
@@ -1136,8 +1193,8 @@ export const DeveloperLicenseSummaryFragmentFragmentDoc = {"kind":"Document","de
 export const DeveloperLicenseSummariesOnConnectionFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummariesOnConnection"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicenseConnection"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}}]}}]} as unknown as DocumentNode<DeveloperLicenseSummariesOnConnectionFragment, unknown>;
 export const TotalDeveloperLicenseCountFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TotalDeveloperLicenseCountFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicenseConnection"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}}]}}]} as unknown as DocumentNode<TotalDeveloperLicenseCountFragmentFragment, unknown>;
 export const GetDeveloperLicensesByOwnerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeveloperLicensesByOwner"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"owner"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicenses"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}},{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"owner"},"value":{"kind":"Variable","name":{"kind":"Name","value":"owner"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TotalDeveloperLicenseCountFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummariesOnConnection"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TotalDeveloperLicenseCountFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicenseConnection"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummariesOnConnection"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicenseConnection"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"}}]}}]}}]} as unknown as DocumentNode<GetDeveloperLicensesByOwnerQuery, GetDeveloperLicensesByOwnerQueryVariables>;
-export const GetVehicleCountByClientIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetVehicleCountByClientId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"vehicles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"0"}},{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"privileged"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}}]}}]}}]} as unknown as DocumentNode<GetVehicleCountByClientIdQuery, GetVehicleCountByClientIdQueryVariables>;
 export const GetDeveloperLicenseDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeveloperLicense"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"tokenId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"tokenId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"SignerFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"RedirectUriFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperLicenseVehiclesFragment"}},{"kind":"FragmentSpread","name":{"kind":"Name","value":"DeveloperJwtsFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseSummaryFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"owner"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SignerFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"signers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"address"}},{"kind":"Field","name":{"kind":"Name","value":"enabledAt"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RedirectUriFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperLicenseVehiclesFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"DeveloperJwtsFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"DeveloperLicense"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"owner"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}},{"kind":"Field","name":{"kind":"Name","value":"redirectURIs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"100"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}}]}}]}}]}}]} as unknown as DocumentNode<GetDeveloperLicenseQuery, GetDeveloperLicenseQueryVariables>;
+export const GetVehicleCountByClientIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetVehicleCountByClientId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"vehicles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"0"}},{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"privileged"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}}]}}]}}]} as unknown as DocumentNode<GetVehicleCountByClientIdQuery, GetVehicleCountByClientIdQueryVariables>;
 export const GetVehiclesByClientIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetVehiclesByClientId"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"last"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"before"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"after"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"vehicles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"privileged"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"last"},"value":{"kind":"Variable","name":{"kind":"Name","value":"last"}}},{"kind":"Argument","name":{"kind":"Name","value":"before"},"value":{"kind":"Variable","name":{"kind":"Name","value":"before"}}},{"kind":"Argument","name":{"kind":"Name","value":"after"},"value":{"kind":"Variable","name":{"kind":"Name","value":"after"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}},{"kind":"Field","name":{"kind":"Name","value":"pageInfo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"startCursor"}},{"kind":"Field","name":{"kind":"Name","value":"endCursor"}},{"kind":"Field","name":{"kind":"Name","value":"hasNextPage"}},{"kind":"Field","name":{"kind":"Name","value":"hasPreviousPage"}}]}},{"kind":"Field","name":{"kind":"Name","value":"nodes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"tokenDID"}},{"kind":"Field","name":{"kind":"Name","value":"definition"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"make"}},{"kind":"Field","name":{"kind":"Name","value":"model"}},{"kind":"Field","name":{"kind":"Name","value":"year"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetVehiclesByClientIdQuery, GetVehiclesByClientIdQueryVariables>;
 export const DeveloperLicenseVehiclesQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DeveloperLicenseVehiclesQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"vehicles"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"IntValue","value":"0"}},{"kind":"Argument","name":{"kind":"Name","value":"filterBy"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"privileged"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"totalCount"}}]}}]}}]} as unknown as DocumentNode<DeveloperLicenseVehiclesQueryQuery, DeveloperLicenseVehiclesQueryQueryVariables>;
 export const DeveloperLicenseByClientIdSummaryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"DeveloperLicenseByClientIdSummary"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"Address"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"developerLicense"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"by"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"clientId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"tokenId"}},{"kind":"Field","name":{"kind":"Name","value":"alias"}},{"kind":"Field","name":{"kind":"Name","value":"clientId"}}]}}]}}]} as unknown as DocumentNode<DeveloperLicenseByClientIdSummaryQuery, DeveloperLicenseByClientIdSummaryQueryVariables>;

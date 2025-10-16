@@ -11,7 +11,7 @@ import {
 import {
   DynamicFormProps,
   PERMISSIONS,
-} from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
+} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { Toggle } from '@/components/Toggle';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { DatePicker } from '@/components/DatePicker';
@@ -55,6 +55,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
   const permissionsMode = useWatch({
     control,
     name: 'permissionsMode',
+    defaultValue: 'template',
   });
   const altTitle = useWatch({
     control,

@@ -8,7 +8,7 @@ import {
   UseFormRegister,
   useWatch,
 } from 'react-hook-form';
-import { DynamicFormProps } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
+import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 
 import { Toggle } from '@/components/Toggle';
 import { DatePicker } from '@/components/DatePicker';
