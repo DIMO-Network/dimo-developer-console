@@ -36,18 +36,7 @@ export const SelectField = forwardRef<Ref, IProps>(
     _ref,
   ) => {
     const [show, setShow] = useState<boolean>(false);
-    /*    const [selected, setSelected] = useState<IOption>(
-      options.find((item) => item.value === defaultValue) ?? {
-        value: '',
-        text: '',
-      },
-    );*/
     const className = classnames('select-field', inputClassName);
-
-    const handleSelection = (value: string, text: string) => {
-      setSelected({ value, text });
-    };
-
     return (
       <Controller
         control={control}
@@ -85,8 +74,8 @@ export const SelectField = forwardRef<Ref, IProps>(
                     className="custom-item"
                     key={value}
                     onClick={() => {
-                      handleSelection(value, text);
                       onChange(value);
+                      setShow(false);
                     }}
                   >
                     {text}
