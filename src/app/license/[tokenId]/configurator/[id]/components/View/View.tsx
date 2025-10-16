@@ -1,6 +1,5 @@
 'use client';
 
-import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
 import { useEffect, useState } from 'react';
@@ -12,21 +11,10 @@ import {
   DynamicFormProps,
   PERMISSIONS,
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
-import { saveConfiguration } from '@/actions/configurations';
+import { getConfiguration, saveConfiguration } from '@/actions/configurations';
 import { useRouter } from 'next/router';
 import './View.css';
-
-const GET_DEVELOPER_LICENSE = gql(`
-  query GetDeveloperLicense($tokenId: Int!) {
-    developerLicense(by: {tokenId: $tokenId}) {
-      ...DeveloperLicenseSummaryFragment   
-      ...SignerFragment
-      ...RedirectUriFragment
-      ...DeveloperLicenseVehiclesFragment
-      ...DeveloperJwtsFragment      
-    }
-  }
-`);
+import { GET_DEVELOPER_LICENSE } from '@/app/license/[tokenId]/details/components/View';
 
 const parseArray = (val?: string) =>
   val
@@ -114,8 +102,14 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
   return params;
 };
 
-export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
+export const View = ({
+  params,
+}: {
+  params: Promise<{ tokenId: string; id: string }>;
+}) => {
   const [tokenId, setTokenId] = useState<number>();
+  const [configurationId, setConfigurationId] = useState<string>();
+  const [configuration, setConfiguration] = useState<DynamicFormProps>();
   const { data, loading, error } = useQuery(GET_DEVELOPER_LICENSE, {
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
@@ -127,8 +121,28 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       const { tokenId: tokenIdParam } = await params;
       setTokenId(Number(tokenIdParam));
     };
+    const getConfigurationId = async () => {
+      const { id: configurationId } = await params;
+      setConfigurationId(configurationId);
+    };
     void getTokenId();
+    void getConfigurationId();
   }, [params]);
+
+  useEffect(() => {
+    if (!configurationId) return;
+    const populateConfiguration = async () => {
+      const saveConfiguration = await getConfiguration({ id: configurationId });
+      setConfiguration({
+        component: 'LoginWithDimo',
+        configuration_name: saveConfiguration.configuration_name,
+        ...saveConfiguration.configuration,
+      } as DynamicFormProps);
+      console.info(configuration);
+    };
+
+    void populateConfiguration();
+  }, [configurationId]);
 
   const methods = useForm<DynamicFormProps>({
     mode: 'onChange',

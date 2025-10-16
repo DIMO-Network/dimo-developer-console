@@ -12,7 +12,6 @@ import {
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
-import { GET_DEVELOPER_LICENSE } from '@/app/license/[tokenId]/details/components/View';
 
 const USER_CONFIG_FRAGMENT = gql(`
   fragment UserConfigurationFragment on DeveloperLicense {
@@ -28,7 +27,7 @@ const USER_CONFIG_FRAGMENT = gql(`
 `);
 
 interface Props {
-  license: FragmentType<typeof GET_DEVELOPER_LICENSE>;
+  license: FragmentType<typeof USER_CONFIG_FRAGMENT>;
   submit: (data: DynamicFormProps) => void;
 }
 
