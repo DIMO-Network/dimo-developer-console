@@ -23,7 +23,7 @@ const GET_DEVELOPER_LICENSE = gql(`
       ...SignerFragment
       ...RedirectUriFragment
       ...DeveloperLicenseVehiclesFragment
-      ...DeveloperJwtsFragment
+      ...DeveloperJwtsFragment      
     }
   }
 `);
