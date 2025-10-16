@@ -4,7 +4,7 @@ import {
   DynamicFormProps,
   ComponentType,
   PERMISSIONS,
-} from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
+} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import configuration from '@/config';

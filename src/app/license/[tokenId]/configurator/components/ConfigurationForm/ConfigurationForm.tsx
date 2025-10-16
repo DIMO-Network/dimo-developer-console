@@ -3,20 +3,21 @@ import { FragmentType, gql, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
 import { Control, UseFormRegister, useFormContext } from 'react-hook-form';
-import { LoginWithDimoConfiguration } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/LoginWithDimoConfiguration';
-import { ShareVehiclesWithDimoConfiguration } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
-import { ExecuteAdvanceTransactionWithDimoConfiguration } from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/ExecuteAdvanceTransactionWithDimoConfiguration';
+import { LoginWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/LoginWithDimoConfiguration';
+import { ShareVehiclesWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
+import { ExecuteAdvanceTransactionWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ExecuteAdvanceTransactionWithDimoConfiguration';
 import {
   DynamicFormProps,
   ComponentType,
-} from '@/app/license/[tokenId]/liwd-configurator/components/ConfigurationForm/types';
+} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
 
-const REDIRECT_URIS_FRAGMENT = gql(`
-  fragment RedirectUriFragment on DeveloperLicense {
-    owner
+const USER_CONFIG_FRAGMENT = gql(`
+  fragment UserConfigurationFragment on DeveloperLicense {
     tokenId
+    clientId
+    owner
     redirectURIs(first:100) {
       nodes {
         uri
@@ -26,7 +27,8 @@ const REDIRECT_URIS_FRAGMENT = gql(`
 `);
 
 interface Props {
-  license: FragmentType<typeof REDIRECT_URIS_FRAGMENT>;
+  license: FragmentType<typeof USER_CONFIG_FRAGMENT>;
+  submit: (data: DynamicFormProps) => void;
 }
 
 interface IFormProps {
@@ -54,15 +56,43 @@ const Configuration: FC<IFormProps> = ({ component, control, register }: IFormPr
   }
 };
 
-export const ConfigurationForm: FC<Props> = ({ license }) => {
-  const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
+export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
+  const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
 
-  const { register, control, watch } = useFormContext<DynamicFormProps>();
+  const { register, control, watch, handleSubmit } = useFormContext<DynamicFormProps>();
   const component = watch('component', 'LoginWithDimo');
 
   return (
     <>
-      <form className="flex flex-col gap-4 w-full">
+      <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit(submit)}>
+        <div className="flex flex-row w-full gap-4">
+          <Label htmlFor="website" className="text-xs text-medium w-full">
+            Configuration name
+            <TextField
+              type="text"
+              placeholder=""
+              {...register('configuration_name', {
+                required: false,
+                validate: {},
+              })}
+              role="company-website-input"
+            />
+          </Label>
+          <Label htmlFor="website" className="text-xs text-medium w-full">
+            Client Id
+            <TextField
+              type="text"
+              placeholder=""
+              readOnly={true}
+              value={fragment?.clientId}
+              {...register('client_id', {
+                required: false,
+                validate: {},
+              })}
+              role="company-website-input"
+            />
+          </Label>
+        </div>
         <div>
           <Label htmlFor="component" className="text-xs text-medium">
             Which component?
@@ -122,6 +152,9 @@ export const ConfigurationForm: FC<Props> = ({ license }) => {
           </Label>
         </div>
         <Configuration component={component} control={control} register={register} />
+        <button type="submit" className="btn btn-primary">
+          Save
+        </button>
       </form>
     </>
   );
