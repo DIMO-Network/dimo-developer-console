@@ -111,21 +111,6 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
           </Label>
         </div>
         <div className="flex flex-row w-full gap-4">
-          <Label htmlFor="mode" className="text-xs text-medium w-full">
-            Mode
-            <SelectField
-              {...register('mode', {
-                required: 'This field is required',
-              })}
-              options={[
-                { value: 'popup', text: 'Popup' },
-                { value: 'redirect', text: 'Redirect' },
-              ]}
-              control={control}
-              placeholder="Select"
-              role="mode-select"
-            />
-          </Label>
           <Label htmlFor="redirectUri" className="text-xs text-medium w-full">
             Redirect URI
             <SelectField

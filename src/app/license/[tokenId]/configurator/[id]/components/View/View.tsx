@@ -187,12 +187,7 @@ export const View = ({
 
       await updateConfiguration(body);
 
-      setNotification(
-        'Configuration successfully updated',
-        '',
-        'success',
-      );
-
+      setNotification('Configuration successfully updated', '', 'success');
     } catch (error) {
       console.error(error);
       setNotification('Failed to update Configuration. Please try again.', '', 'error');

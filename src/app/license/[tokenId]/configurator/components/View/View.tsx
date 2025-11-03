@@ -151,11 +151,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
 
       const { id } = await saveConfiguration(body);
 
-      setNotification(
-        'Configuration successfully created',
-        '',
-        'success',
-      );
+      setNotification('Configuration successfully created', '', 'success');
 
       router.replace(`/license/${tokenId}/configurator/${id}`);
     } catch (error) {
