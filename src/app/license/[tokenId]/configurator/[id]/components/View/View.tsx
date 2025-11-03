@@ -2,7 +2,7 @@
 
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -14,6 +14,7 @@ import {
 import { getConfiguration, updateConfiguration } from '@/actions/configurations';
 import './View.css';
 import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/View/View';
+import { NotificationContext } from '@/context/notificationContext';
 
 const parseArray = (val?: string) =>
   val
@@ -103,6 +104,7 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
 
     if (values.requireAttestation) {
       const cloudEvent = {
+        eventType: 'dimo.attestation',
         source: '*',
         ids: ['*'],
         tags: values.attestation.tags,
@@ -132,6 +134,7 @@ export const View = ({
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
   });
+  const { setNotification } = useContext(NotificationContext);
 
   useEffect(() => {
     const getTokenId = async () => {
@@ -174,14 +177,26 @@ export const View = ({
   }, [configurationId, reset]);
 
   const submit = async (data: DynamicFormProps) => {
-    const body = {
-      id: configurationId!,
-      client_id: data.client_id,
-      configuration_name: data.configuration_name,
-      configuration: buildJson(data),
-    };
+    try {
+      const body = {
+        id: configurationId!,
+        client_id: data.client_id,
+        configuration_name: data.configuration_name,
+        configuration: buildJson(data),
+      };
 
-    await updateConfiguration(body);
+      await updateConfiguration(body);
+
+      setNotification(
+        'Configuration successfully updated',
+        '',
+        'success',
+      );
+
+    } catch (error) {
+      console.error(error);
+      setNotification('Failed to update Configuration. Please try again.', '', 'error');
+    }
   };
 
   if (loading) {

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { saveConfiguration } from '@/actions/configurations';
 import { useRouter } from 'next/navigation';
 import './View.css';
 import { gql } from '@/gql';
+import { NotificationContext } from '@/context/notificationContext';
 
 export const DEVELOPER_LICENSE_INFO = gql(`
   query DeveloperLicenseInfo($tokenId: Int!) {
@@ -122,6 +123,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
     skip: !tokenId,
   });
   const router = useRouter();
+  const { setNotification } = useContext(NotificationContext);
 
   useEffect(() => {
     const getTokenId = async () => {
@@ -140,15 +142,26 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   });
 
   const submit = async (data: DynamicFormProps) => {
-    const body = {
-      client_id: data.client_id,
-      configuration_name: data.configuration_name,
-      configuration: buildJson(data),
-    };
+    try {
+      const body = {
+        client_id: data.client_id,
+        configuration_name: data.configuration_name,
+        configuration: buildJson(data),
+      };
 
-    const { id } = await saveConfiguration(body);
+      const { id } = await saveConfiguration(body);
 
-    router.replace(`/license/${tokenId}/configurator/${id}`);
+      setNotification(
+        'Configuration successfully created',
+        '',
+        'success',
+      );
+
+      router.replace(`/license/${tokenId}/configurator/${id}`);
+    } catch (error) {
+      console.log(error);
+      setNotification('Failed to create Configuration. Please try again.', '', 'error');
+    }
   };
 
   if (loading) {
