@@ -140,7 +140,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
         <Configuration component={component} control={control} register={register} />
 
         <Button type="submit" className="primary">
-          Update
+          Save
         </Button>
       </form>
     </>

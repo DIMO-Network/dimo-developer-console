@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { Control, UseFormRegister } from 'react-hook-form';
-import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
+import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/types';
 
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;

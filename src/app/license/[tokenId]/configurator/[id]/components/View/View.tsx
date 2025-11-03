@@ -4,13 +4,13 @@ import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
 import { useEffect, useState } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
-import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
+import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   ComponentType,
   DynamicFormProps,
   PERMISSIONS,
-} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
+} from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/types';
 import { getConfiguration, updateConfiguration } from '@/actions/configurations';
 import './View.css';
 import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/View/View';
@@ -100,6 +100,15 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
       });
       add('permissions', permissionValues?.join(''));
     }
+
+    if (values.requireAttestation) {
+      const cloudEvent = {
+        source: '*',
+        ids: ['*'],
+        tags: values.attestation.tags,
+      };
+      add('cloudEvent', cloudEvent);
+    }
   }
 
   if (values.component === 'ExecuteAdvancedTransactionWithDimo') {
@@ -156,6 +165,7 @@ export const View = ({
         ...savedConfiguration,
         component: InverseFormatComponent(savedConfiguration['entryState'] as string),
         configuration_name: response.configuration_name,
+        configuration_id: response.id,
       } as DynamicFormProps;
       reset(formatted);
     };
