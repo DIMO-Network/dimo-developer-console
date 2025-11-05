@@ -50,6 +50,12 @@ export const conditionsConfig: ConditionConfig[] = [
     validation: numericValidation,
   },
   {
+    field: 'obdIsPluggedIn',
+    label: 'Device Plugged In',
+    inputType: 'boolean',
+    validation: booleanValidation,
+  },
+  {
     field: 'isIgnitionOn',
     label: 'Is Ignition On',
     inputType: 'boolean',
