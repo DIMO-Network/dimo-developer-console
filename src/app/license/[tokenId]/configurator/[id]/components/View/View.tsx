@@ -169,6 +169,7 @@ export const View = ({
         component: InverseFormatComponent(savedConfiguration['entryState'] as string),
         configuration_name: response.configuration_name,
         configuration_id: response.id,
+        attestation: JSON.parse(savedConfiguration['cloudEvent'] as string),
       } as DynamicFormProps;
       reset(formatted);
     };
