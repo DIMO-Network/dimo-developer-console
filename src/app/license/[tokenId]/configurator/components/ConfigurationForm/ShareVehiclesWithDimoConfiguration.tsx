@@ -1,7 +1,13 @@
 import { FC } from 'react';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
-import { Control, Controller, UseFormRegister, useWatch } from 'react-hook-form';
+import {
+  Control,
+  Controller,
+  UseFormRegister,
+  useWatch,
+  useFormContext,
+} from 'react-hook-form';
 import {
   DynamicFormProps,
   PERMISSIONS,
