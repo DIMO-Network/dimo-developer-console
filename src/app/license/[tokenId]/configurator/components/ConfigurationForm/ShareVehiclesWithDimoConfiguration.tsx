@@ -13,6 +13,8 @@ import {
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { DatePicker } from '@/components/DatePicker';
+import { Toggle } from '@/components/Toggle';
+import { ATTESTATION_TAGS } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/types';
 
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
@@ -54,6 +56,10 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
     control,
     name: 'permissionsMode',
     defaultValue: 'template',
+  });
+  const requireAttestation = useWatch({
+    control,
+    name: 'requireAttestation',
   });
   return (
     <>
@@ -118,6 +124,56 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
                         field.onChange(field.value.filter((v: string) => v !== p.key));
                       } else {
                         field.onChange([...(field.value || []), p.key]);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          />
+        )}
+      </div>
+      <div className={'flex flex-row gap-4 w-full'}>
+        <Controller
+          name="requireAttestation"
+          control={control}
+          render={({ field }) => (
+            <>
+              <div className="flex flex-row gap-2 items-center w-4/12">
+                <Toggle
+                  checked={field.value}
+                  onToggle={(checked) => {
+                    field.onChange(checked);
+                    if (!checked) {
+                      setValue('attestation.tags', []);
+                    }
+                  }}
+                />
+                <label className="text-xs text-medium ml-2">Attestations</label>
+              </div>
+            </>
+          )}
+        />
+      </div>
+      <div className={'flex flex-row gap-4 w-full'}>
+        {requireAttestation && (
+          <Controller
+            name="attestation.tags"
+            control={control}
+            defaultValue={[]}
+            render={({ field }) => (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+                {ATTESTATION_TAGS.map((p) => (
+                  <PermissionCard
+                    key={p.value}
+                    title={p.title}
+                    description={p.description}
+                    selected={field.value?.includes(p.value)}
+                    onToggle={() => {
+                      if (field.value?.includes(p.value)) {
+                        field.onChange(field.value.filter((v: string) => v !== p.value));
+                      } else {
+                        field.onChange([...(field.value || []), p.value]);
                       }
                     }}
                   />

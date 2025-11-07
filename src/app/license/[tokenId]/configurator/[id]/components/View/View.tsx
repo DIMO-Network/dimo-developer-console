@@ -187,8 +187,8 @@ export const View = ({
           ? 'template'
           : 'custom',
         permissions: savedConfiguration['permissionTemplateId']
-          ? inverseFormatPermissions(savedConfiguration['permissions'] as string)
-          : undefined,
+          ? undefined
+          : inverseFormatPermissions(savedConfiguration['permissions'] as string),
         requireAttestation: !!savedConfiguration['cloudEvent'],
         attestation: savedConfiguration['cloudEvent']
           ? JSON.parse(savedConfiguration['cloudEvent'] as string)

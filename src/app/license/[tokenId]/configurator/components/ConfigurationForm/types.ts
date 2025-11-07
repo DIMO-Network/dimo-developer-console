@@ -16,10 +16,19 @@ interface LoginWithDimoProps extends SharedProps {
   powerTrainTypes?: string;
 }
 
+interface AttestationsProps {
+  source: string;
+  tags: string[];
+  ids: string[];
+  eventType: string;
+}
+
 interface ShareVehiclesWithDimoProps extends SharedProps {
   permissionsMode: 'template' | 'custom';
   permissionTemplateId: string | null;
   permissions: string[];
+  requireAttestation: boolean;
+  attestation: AttestationsProps;
 }
 
 interface ExecuteAdvanceTransactionWithDimoProps extends SharedProps {
@@ -89,5 +98,23 @@ export const PERMISSIONS = [
     enum: 'Permissions.GetApproximateLocation',
     title: 'Approximate Location',
     description: 'Access to approximate location data',
+  },
+];
+
+export const ATTESTATION_TAGS = [
+  {
+    value: 'DriversLicense',
+    title: "Driver's License",
+    description: "Driver's License",
+  },
+  {
+    value: 'Insurance',
+    title: 'Insurance',
+    description: 'Insurance',
+  },
+  {
+    value: 'ServiceRecords',
+    title: 'Service Records',
+    description: 'Service Records',
   },
 ];
