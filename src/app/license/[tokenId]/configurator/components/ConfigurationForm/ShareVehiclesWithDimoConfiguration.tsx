@@ -1,12 +1,7 @@
 import { FC } from 'react';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
-import {
-  Control,
-  Controller,
-  UseFormRegister,
-  useWatch,
-} from 'react-hook-form';
+import { Control, Controller, UseFormRegister, useWatch } from 'react-hook-form';
 import {
   DynamicFormProps,
   PERMISSIONS,
@@ -61,6 +56,9 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
     control,
     name: 'requireAttestation',
   });
+
+  const { setValue } = useFormContext<DynamicFormProps>();
+
   return (
     <>
       <div className={'flex flex-row gap-4 w-full'}>
