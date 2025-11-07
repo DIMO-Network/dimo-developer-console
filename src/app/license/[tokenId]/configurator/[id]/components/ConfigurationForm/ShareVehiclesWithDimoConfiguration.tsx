@@ -58,11 +58,6 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
     name: 'permissionsMode',
     defaultValue: 'template',
   });
-  const altTitle = useWatch({
-    control,
-    name: 'altTitle',
-  });
-
   const requireAttestation = useWatch({
     control,
     name: 'requireAttestation',

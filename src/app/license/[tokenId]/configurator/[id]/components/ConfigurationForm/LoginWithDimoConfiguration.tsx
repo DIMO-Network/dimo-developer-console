@@ -1,16 +1,9 @@
 import { FC } from 'react';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
-import {
-  Control,
-  Controller,
-  useFormContext,
-  UseFormRegister,
-  useWatch,
-} from 'react-hook-form';
+import { Control, Controller, UseFormRegister } from 'react-hook-form';
 import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/types';
 
-import { Toggle } from '@/components/Toggle';
 import { DatePicker } from '@/components/DatePicker';
 
 interface IFormProps {
@@ -23,12 +16,6 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
   register,
   control,
 }: IFormProps) => {
-  const altTitle = useWatch({
-    control,
-    name: 'altTitle',
-  });
-
-  const { setValue } = useFormContext<DynamicFormProps>();
   return (
     <>
       <div className={'flex flex-row gap-4 w-full'}>
