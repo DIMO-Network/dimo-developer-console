@@ -1,0 +1,3 @@
+.liwd-configurator-page {
+  @apply flex flex-col gap-8;
+}
