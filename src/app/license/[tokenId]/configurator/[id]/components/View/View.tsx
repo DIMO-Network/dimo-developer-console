@@ -52,6 +52,24 @@ const InverseFormatComponent = (component: string) => {
   }
 };
 
+const formatPermissions = (permissions: string[] | undefined) => {
+  return PERMISSIONS.map((p) => {
+    const k = permissions?.find((vp) => vp === p.key);
+    if (k) return '1';
+    return '0';
+  });
+};
+
+const inverseFormatPermissions = (formattedPermissions: string) => {
+  return formattedPermissions
+    .split('')
+    .map((p, i) => {
+      if (p === '0') return '';
+      return PERMISSIONS[i].key;
+    })
+    .filter((p) => p !== '');
+};
+
 function formatDate(date?: Date) {
   if (!date) return '';
   const yyyy = date.getFullYear();
@@ -94,11 +112,7 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
     if (values.permissionsMode === 'template') {
       add('permissionTemplateId', values.permissionTemplateId);
     } else if (values.permissionsMode === 'custom') {
-      const permissionValues = PERMISSIONS.map((p) => {
-        const k = values.permissions?.find((vp) => vp === p.key);
-        if (k) return '1';
-        return '0';
-      });
+      const permissionValues = formatPermissions(values.permissions);
       add('permissions', permissionValues?.join(''));
     }
 
@@ -169,6 +183,13 @@ export const View = ({
         component: InverseFormatComponent(savedConfiguration['entryState'] as string),
         configuration_name: response.configuration_name,
         configuration_id: response.id,
+        permissionsMode: savedConfiguration['permissionTemplateId']
+          ? 'template'
+          : 'custom',
+        permissions: savedConfiguration['permissionTemplateId']
+          ? inverseFormatPermissions(savedConfiguration['permissions'] as string)
+          : undefined,
+        requireAttestation: !!savedConfiguration['cloudEvent'],
         attestation: savedConfiguration['cloudEvent']
           ? JSON.parse(savedConfiguration['cloudEvent'] as string)
           : undefined,

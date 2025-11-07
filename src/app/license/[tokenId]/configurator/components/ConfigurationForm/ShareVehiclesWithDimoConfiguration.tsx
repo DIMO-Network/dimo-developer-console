@@ -82,58 +82,6 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           />
         </Label>
       </div>
-
-      <div className={'flex flex-row gap-4 w-full'}>
-        <Controller
-          name="altTitle"
-          control={control}
-          render={({ field }) => (
-            <>
-              <div className="flex flex-row gap-2 items-center w-4/12">
-                <Toggle
-                  checked={field.value}
-                  onToggle={(checked) => {
-                    field.onChange(checked);
-                    if (!checked) {
-                      setValue('unAuthenticatedLabel', '');
-                      setValue('authenticatedLabel', '');
-                    }
-                  }}
-                />
-                <label className="text-xs text-medium ml-2">Use Custom Labels</label>
-              </div>
-            </>
-          )}
-        />
-        {altTitle && (
-          <>
-            <Label htmlFor="website" className="text-xs text-medium w-full">
-              Authenticated Label
-              <TextField
-                type="text"
-                placeholder=""
-                {...register('authenticatedLabel', {
-                  required: false,
-                  validate: {},
-                })}
-                role="company-website-input"
-              />
-            </Label>
-            <Label htmlFor="website" className="text-xs text-medium w-full">
-              Unauthenticated Label
-              <TextField
-                type="text"
-                placeholder=""
-                {...register('unAuthenticatedLabel', {
-                  required: false,
-                  validate: {},
-                })}
-                role="company-website-input"
-              />
-            </Label>
-          </>
-        )}
-      </div>
       <div className={'flex flex-row gap-4 w-full'}>
         <SegmentedControl
           options={[
