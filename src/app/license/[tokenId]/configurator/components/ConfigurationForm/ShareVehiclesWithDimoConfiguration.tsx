@@ -4,7 +4,6 @@ import { Label } from '@/components/Label';
 import {
   Control,
   Controller,
-  useFormContext,
   UseFormRegister,
   useWatch,
 } from 'react-hook-form';
