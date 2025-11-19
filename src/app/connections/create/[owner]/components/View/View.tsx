@@ -137,7 +137,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
               onClick={handlePurchaseAlert}
               disabled={!!nameValidationError}
             >
-              Purchase Connection License
+              Create Connection License
             </Button>
           </div>
         </div>
@@ -157,20 +157,17 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       >
         <div>
           <Title className="text-2xl" component="h3">
-            Purchase Connection License
+            Create Connection License
           </Title>
           <div className="pt-4 text-sm text-text-secondary font-normal text-justify leading-relaxed">
             <p className="mb-4">
-              <span className="text-red-600 font-bold">Warning!</span> By proceeding, you
-              are agreeing to approve payment of{' '}
-              <span className="text-red-600 font-bold">$100 worth of $DIMO</span> tokens
-              at market prices for your DIMO Connection License. If you do not have enough
-              $DIMO tokens in your account, you will be unable to create a Connection
-              License.
+              You are about to create a DIMO Connection License. This license allows you
+              to host a DIMO Oracle and connect vehicles to the DIMO network.
             </p>
             <p>
-              You only need to purchase a license if you are planning on hosting a DIMO
-              Oracle.
+              You only need a connection license if you are planning on hosting a DIMO
+              Oracle. Once created, you&apos;ll receive the necessary credentials to
+              manage your connection.
             </p>
           </div>
 
@@ -195,7 +192,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
               onClick={handleContinuePayment}
               disabled={isProcessingPayment}
             >
-              Continue with Payment
+              Create Connection
             </Button>
           </div>
         </div>

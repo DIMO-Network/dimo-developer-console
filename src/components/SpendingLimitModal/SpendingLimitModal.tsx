@@ -76,8 +76,7 @@ export const SpendingLimitModal: FC<IProps> = ({
             Set spending limit
           </Title>
           <p className="description">
-            Approve the Developer License to spend $DIMO on your connected wallet, we
-            recommend approving more than $100 USD worth of $DIMO
+            Approve the Developer License to spend $DIMO on your connected wallet
           </p>
         </div>
         <TokenInput control={control} name="credits" description="$DIMO" />
