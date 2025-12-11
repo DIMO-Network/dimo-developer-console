@@ -29,6 +29,26 @@ export type Scalars = {
   Time: { input: any; output: any; }
 };
 
+export type Account = {
+  __typename?: 'Account';
+  /** The account's Ethereum address. */
+  address: Scalars['Address']['output'];
+  /** Lists active account SACDs granted by this account. */
+  sacds: SacdConnection;
+};
+
+
+export type AccountSacdsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type AccountBy = {
+  address?: InputMaybe<Scalars['Address']['input']>;
+};
+
 export type AftermarketDevice = Node & {
   __typename?: 'AftermarketDevice';
   /** The Ethereum address for the device. */
@@ -515,6 +535,11 @@ export type PrivilegesConnection = {
 /** The root query type for the GraphQL schema. */
 export type Query = {
   __typename?: 'Query';
+  /**
+   * Retrieves information about an account. Right now, this is mainly to show
+   * SACDs for user information.
+   */
+  account: Account;
   /** View a particular aftermarket device. */
   aftermarketDevice: AftermarketDevice;
   /**
@@ -569,6 +594,12 @@ export type Query = {
    * For now, these are always ordered by token ID in descending order.
    */
   vehicles: VehicleConnection;
+};
+
+
+/** The root query type for the GraphQL schema. */
+export type QueryAccountArgs = {
+  by: AccountBy;
 };
 
 
