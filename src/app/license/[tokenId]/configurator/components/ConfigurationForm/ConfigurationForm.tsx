@@ -61,7 +61,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
   const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
 
   const { register, control, watch, handleSubmit } = useFormContext<DynamicFormProps>();
-  const component = watch('component', 'LoginWithDimo');
+  const component = watch('component', 'ShareVehiclesWithDimo');
 
   return (
     <>
