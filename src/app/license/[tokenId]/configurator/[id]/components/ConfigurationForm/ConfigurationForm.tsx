@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useContext } from 'react';
 import { FragmentType, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
@@ -14,6 +14,8 @@ import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
 import { USER_CONFIG_FRAGMENT } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 import { Button } from '@/components/Button';
+import configuration from '@/config';
+import { NotificationContext } from '@/context/notificationContext';
 
 interface Props {
   license: FragmentType<typeof USER_CONFIG_FRAGMENT>;
@@ -47,9 +49,28 @@ const Configuration: FC<IFormProps> = ({ component, control, register }: IFormPr
 
 export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
   const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
+  const { setNotification } = useContext(NotificationContext);
 
   const { register, control, watch, handleSubmit } = useFormContext<DynamicFormProps>();
   const component = watch('component', 'ShareVehiclesWithDimo');
+  const configurationId = watch('configuration_id');
+
+  const getBaseUrl = (): string => {
+    if (configuration.environment === 'production') {
+      return 'https://login.dimo.org';
+    }
+    return 'https://login.dev.dimo.org';
+  };
+
+  const handleCopyConfigurationLink = () => {
+    if (!configurationId) {
+      setNotification('Configuration ID is not available', '', 'error');
+      return;
+    }
+    const url = `${getBaseUrl()}/?configurationId=${configurationId}`;
+    navigator.clipboard.writeText(url);
+    setNotification('Configuration link copied to clipboard', '', 'success');
+  };
 
   return (
     <>
@@ -57,15 +78,26 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
         <div className="flex flex-row w-full gap-4">
           <Label htmlFor="website" className="text-xs text-medium w-full">
             Configuration Id
-            <TextField
-              type="text"
-              placeholder=""
-              {...register('configuration_id', {
-                required: false,
-                validate: {},
-              })}
-              role="company-website-input"
-            />
+            <div className="flex gap-2 items-center">
+              <TextField
+                type="text"
+                placeholder=""
+                {...register('configuration_id', {
+                  required: false,
+                  validate: {},
+                })}
+                role="company-website-input"
+                readOnly
+              />
+              <button
+                type="button"
+                onClick={handleCopyConfigurationLink}
+                className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 whitespace-nowrap"
+                title="Copy configuration link"
+              >
+                Copy Link
+              </button>
+            </div>
           </Label>
         </div>
         <div className="flex flex-row w-full gap-4">
