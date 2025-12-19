@@ -20,7 +20,7 @@ type Documents = {
     "\n  fragment DeveloperJwtsFragment on DeveloperLicense {\n    owner\n    clientId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.DeveloperJwtsFragmentFragmentDoc,
     "\n  fragment RedirectUriFragment on DeveloperLicense {\n    owner\n    tokenId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.RedirectUriFragmentFragmentDoc,
     "\n  fragment SignerFragment on DeveloperLicense {\n    owner\n    tokenId\n    signers(first:100) {\n      nodes {\n        address\n        enabledAt\n      }\n    }\n  }\n": typeof types.SignerFragmentFragmentDoc,
-    "\n  fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {\n    clientId\n  }\n": typeof types.DeveloperLicenseVehiclesFragmentFragmentDoc,
+    "\n  fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {\n    clientId\n    tokenId\n  }\n": typeof types.DeveloperLicenseVehiclesFragmentFragmentDoc,
     "\n  query GetVehicleCountByClientId($clientId:Address!) {\n    vehicles(first:0, filterBy:{privileged:$clientId}) {\n      totalCount\n    }\n  }\n": typeof types.GetVehicleCountByClientIdDocument,
     "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n      ...RedirectUriFragment\n      ...DeveloperLicenseVehiclesFragment\n      ...DeveloperJwtsFragment\n    }\n  }\n": typeof types.GetDeveloperLicenseDocument,
     "\n  fragment DeveloperLicenseSummariesOnConnection on DeveloperLicenseConnection {\n    nodes {\n      ...DeveloperLicenseSummaryFragment\n    }\n  }\n": typeof types.DeveloperLicenseSummariesOnConnectionFragmentDoc,
@@ -39,7 +39,7 @@ const documents: Documents = {
     "\n  fragment DeveloperJwtsFragment on DeveloperLicense {\n    owner\n    clientId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.DeveloperJwtsFragmentFragmentDoc,
     "\n  fragment RedirectUriFragment on DeveloperLicense {\n    owner\n    tokenId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.RedirectUriFragmentFragmentDoc,
     "\n  fragment SignerFragment on DeveloperLicense {\n    owner\n    tokenId\n    signers(first:100) {\n      nodes {\n        address\n        enabledAt\n      }\n    }\n  }\n": types.SignerFragmentFragmentDoc,
-    "\n  fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {\n    clientId\n  }\n": types.DeveloperLicenseVehiclesFragmentFragmentDoc,
+    "\n  fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {\n    clientId\n    tokenId\n  }\n": types.DeveloperLicenseVehiclesFragmentFragmentDoc,
     "\n  query GetVehicleCountByClientId($clientId:Address!) {\n    vehicles(first:0, filterBy:{privileged:$clientId}) {\n      totalCount\n    }\n  }\n": types.GetVehicleCountByClientIdDocument,
     "\n  query GetDeveloperLicense($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment   \n      ...SignerFragment\n      ...RedirectUriFragment\n      ...DeveloperLicenseVehiclesFragment\n      ...DeveloperJwtsFragment\n    }\n  }\n": types.GetDeveloperLicenseDocument,
     "\n  fragment DeveloperLicenseSummariesOnConnection on DeveloperLicenseConnection {\n    nodes {\n      ...DeveloperLicenseSummaryFragment\n    }\n  }\n": types.DeveloperLicenseSummariesOnConnectionFragmentDoc,
@@ -93,7 +93,7 @@ export function gql(source: "\n  fragment SignerFragment on DeveloperLicense {\n
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {\n    clientId\n  }\n"): (typeof documents)["\n  fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {\n    clientId\n  }\n"];
+export function gql(source: "\n  fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {\n    clientId\n    tokenId\n  }\n"): (typeof documents)["\n  fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {\n    clientId\n    tokenId\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
