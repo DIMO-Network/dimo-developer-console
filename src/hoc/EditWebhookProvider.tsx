@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { EditWebhookFormState, Webhook, WebhookFormInput } from '@/types/webhook';
 import { useRouter } from 'next/navigation';
-import { formatAndGenerateCEL } from '@/utils/webhook';
+import { formatAndGenerateCEL, isEventService } from '@/utils/webhook';
 import { updateWebhook } from '@/services/webhook';
 
 type EditWebhookContextProps = {
@@ -44,8 +44,20 @@ export const EditWebhookContextProvider: React.FC<React.PropsWithChildren> = ({
     webhook: Webhook,
     token: string,
   ) => {
-    const { metricName, condition } = formatAndGenerateCEL(formData.cel);
-    await updateWebhook(webhook.id, { ...formData, metricName, condition }, token);
+    if (isEventService(formData.service)) {
+      const metricName = formData.cel.conditions[0]?.field;
+      if (!metricName) {
+        throw new Error('Please select an event name');
+      }
+      await updateWebhook(
+        webhook.id,
+        { ...formData, metricName, condition: 'true' },
+        token,
+      );
+    } else {
+      const { metricName, condition } = formatAndGenerateCEL(formData.cel);
+      await updateWebhook(webhook.id, { ...formData, metricName, condition }, token);
+    }
   };
 
   return (

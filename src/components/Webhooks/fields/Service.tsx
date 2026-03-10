@@ -3,7 +3,7 @@ import { WebhookFormInput } from '@/types/webhook';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
 import { TextError } from '@/components/TextError';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export const WebhookServiceField = () => {
   const {
@@ -11,7 +11,20 @@ export const WebhookServiceField = () => {
     control,
     formState: { errors },
     getValues,
+    setValue,
+    watch,
   } = useFormContext<WebhookFormInput>();
+
+  const service = watch('service');
+  const prevServiceRef = useRef<string | undefined>();
+
+  useEffect(() => {
+    const prev = prevServiceRef.current;
+    if (prev !== undefined && prev !== service) {
+      setValue('cel.conditions', [{ field: '', operator: '', value: '' }]);
+    }
+    prevServiceRef.current = service;
+  }, [service, setValue]);
 
   return (
     <div className={'flex flex-col gap-2.5'}>

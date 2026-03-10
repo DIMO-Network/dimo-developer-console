@@ -9,6 +9,13 @@ import { RegisterOptions } from 'react-hook-form';
 export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel'] => {
   const { metricName, condition } = webhook;
 
+  if (isEventService(webhook.service)) {
+    return {
+      conditions: [{ field: metricName, operator: '', value: '' }],
+      operator: 'AND',
+    };
+  }
+
   const operatorRegex = /([=!><]=|[><])/;
   const parts = condition.split(operatorRegex).map((part) => part.trim());
   const operator = parts[1] ?? '';
@@ -41,6 +48,18 @@ const booleanValidation: RegisterOptions = {
     return parsedValue === 1 || parsedValue === 0;
   },
 };
+
+export const eventNamesByService: Record<string, { value: string; label: string }[]> = {
+  'events.behavior': [
+    { value: 'harshBraking', label: 'Harsh Braking' },
+    { value: 'extremeBraking', label: 'Extreme Braking' },
+    { value: 'harshAcceleration', label: 'Harsh Acceleration' },
+    { value: 'harshCornering', label: 'Harsh Cornering' },
+  ],
+  'events.safety': [{ value: 'collision', label: 'Collision' }],
+};
+
+export const isEventService = (service: string): boolean => service.startsWith('events.');
 
 export const conditionsConfig: ConditionConfig[] = [
   {
@@ -126,6 +145,18 @@ export const conditionsConfig: ConditionConfig[] = [
 export const formatWebhookFormData = (
   webhookFormData: WebhookFormInput,
 ): WebhookCreateInput => {
+  if (isEventService(webhookFormData.service)) {
+    const metricName = webhookFormData.cel.conditions[0]?.field;
+    if (!metricName) {
+      throw new Error('Please select an event name');
+    }
+    return {
+      ...webhookFormData,
+      status: 'enabled',
+      metricName,
+      condition: 'true',
+    };
+  }
   const { metricName, condition } = formatAndGenerateCEL(webhookFormData.cel);
   return {
     ...webhookFormData,
