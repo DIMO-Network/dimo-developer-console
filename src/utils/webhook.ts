@@ -50,92 +50,92 @@ const booleanValidation: RegisterOptions = {
 };
 
 export const eventNamesByService: Record<string, { value: string; label: string }[]> = {
-  'events.behavior': [
-    { value: 'harshBraking', label: 'Harsh Braking' },
-    { value: 'extremeBraking', label: 'Extreme Braking' },
-    { value: 'harshAcceleration', label: 'Harsh Acceleration' },
-    { value: 'harshCornering', label: 'Harsh Cornering' },
+  events: [
+    { value: 'behavior.harshBraking', label: 'Harsh Braking' },
+    { value: 'behavior.extremeBraking', label: 'Extreme Braking' },
+    { value: 'behavior.harshAcceleration', label: 'Harsh Acceleration' },
+    { value: 'behavior.harshCornering', label: 'Harsh Cornering' },
+    { value: 'safety.collision', label: 'Collision' },
   ],
-  'events.safety': [{ value: 'collision', label: 'Collision' }],
 };
 
-export const isEventService = (service: string): boolean => service.startsWith('events.');
+export const isEventService = (service: string): boolean => service === 'events';
 
 export const conditionsConfig: ConditionConfig[] = [
   {
-    field: 'speed',
+    field: 'vss.speed',
     label: 'Speed',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'obdIsPluggedIn',
+    field: 'vss.obdIsPluggedIn',
     label: 'Device Plugged In',
     inputType: 'boolean',
     validation: booleanValidation,
   },
   {
-    field: 'isIgnitionOn',
+    field: 'vss.isIgnitionOn',
     label: 'Is Ignition On',
     inputType: 'boolean',
     validation: booleanValidation,
   },
   {
-    field: 'powertrainTractionBatteryCurrentPower',
+    field: 'vss.powertrainTractionBatteryCurrentPower',
     label: 'Battery current power',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'powertrainTractionBatteryChargingIsCharging',
+    field: 'vss.powertrainTractionBatteryChargingIsCharging',
     label: 'Battery is charging',
     inputType: 'boolean',
     validation: booleanValidation,
   },
   {
-    field: 'powertrainTransmissionTravelledDistance',
+    field: 'vss.powertrainTransmissionTravelledDistance',
     label: 'Odometer',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'powertrainTractionBatteryStateOfChargeCurrent',
+    field: 'vss.powertrainTractionBatteryStateOfChargeCurrent',
     label: 'Charge level',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'powertrainFuelSystemRelativeLevel',
+    field: 'vss.powertrainFuelSystemRelativeLevel',
     label: 'Fuel System Relative Level',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'powertrainFuelSystemAbsoluteLevel',
+    field: 'vss.powertrainFuelSystemAbsoluteLevel',
     label: 'Fuel System Absolute Level',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'chassisAxleRow1WheelLeftTirePressure',
+    field: 'vss.chassisAxleRow1WheelLeftTirePressure',
     label: 'Tire pressure (front left)',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'chassisAxleRow1WheelRightTirePressure',
+    field: 'vss.chassisAxleRow1WheelRightTirePressure',
     label: 'Tire pressure (front right)',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'chassisAxleRow2WheelLeftTirePressure',
+    field: 'vss.chassisAxleRow2WheelLeftTirePressure',
     label: 'Tire pressure (back left)',
     inputType: 'number',
     validation: numericValidation,
   },
   {
-    field: 'chassisAxleRow2WheelRightTirePressure',
+    field: 'vss.chassisAxleRow2WheelRightTirePressure',
     label: 'Tire pressure (back right)',
     inputType: 'number',
     validation: numericValidation,

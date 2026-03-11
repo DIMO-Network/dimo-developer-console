@@ -36,9 +36,8 @@ export const WebhookServiceField = () => {
           required: 'Please select a webhook service',
         })}
         options={[
-          { value: 'signals.vss', text: 'VSS Signals' },
-          { value: 'events.behavior', text: 'Driving Behavior' },
-          { value: 'events.safety', text: 'Safety Events' },
+          { value: 'signals', text: 'VSS Signals' },
+          { value: 'events', text: 'Events' },
         ]}
         control={control}
       />
