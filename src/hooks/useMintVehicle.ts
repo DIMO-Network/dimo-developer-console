@@ -1,0 +1,79 @@
+import { useCallback } from 'react';
+import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
+import { useContractGA, useGlobalAccount } from '@/hooks';
+import configuration from '@/config';
+import DimoRegistryABI from '@/contracts/DimoRegistryABI.json';
+import { decodeHex } from '@/utils/formatHex';
+import { buildDeviceDefinitionId } from '@/app/app/list/components/VehicleSimulator/constants';
+
+// keccak256("VehicleNodeMinted(uint256,uint256,address)")
+const VEHICLE_NODE_MINTED_TOPIC = keccak256(
+  toBytes('VehicleNodeMinted(uint256,uint256,address)'),
+);
+
+export interface MintVehicleParams {
+  manufacturerNodeId: number;
+  makeSlug: string;
+  modelSlug: string;
+  year: number;
+  clientId: `0x${string}`;
+}
+
+export const useMintVehicle = () => {
+  const { processTransactions } = useContractGA();
+  const { currentUser } = useGlobalAccount();
+
+  return useCallback(
+    async ({
+      manufacturerNodeId,
+      makeSlug,
+      modelSlug,
+      year,
+      clientId,
+    }: MintVehicleParams) => {
+      if (!currentUser?.smartContractAddress) throw new Error('User session is invalid');
+
+      const deviceDefinitionId = buildDeviceDefinitionId(makeSlug, modelSlug, year);
+
+      const result = await processTransactions(
+        [
+          {
+            to: configuration.DIMO_REGISTRY_ADDRESS,
+            value: BigInt(0),
+            data: encodeFunctionData({
+              abi: DimoRegistryABI as Abi,
+              functionName: 'mintVehicleWithDeviceDefinition',
+              args: [
+                BigInt(manufacturerNodeId),
+                currentUser.smartContractAddress,
+                deviceDefinitionId,
+                [],
+                {
+                  grantee: clientId,
+                  permissions: BigInt('0xFFFFFFFFFFFFFFFF'),
+                  expiration: BigInt(0),
+                  source: '',
+                },
+              ],
+            }),
+          },
+        ],
+        { abi: DimoRegistryABI as Abi },
+      );
+
+      // Extract tokenId from VehicleNodeMinted event logs (topics[1] = tokenId)
+      const { topics: [, rawTokenId = '0x'] = [] } =
+        result.logs?.find(
+          ({ topics: [topic = '0x'] = [] }) => topic === VEHICLE_NODE_MINTED_TOPIC,
+        ) ?? {};
+
+      const tokenId =
+        rawTokenId !== '0x'
+          ? Number(decodeHex(rawTokenId as `0x${string}`, 'uint256'))
+          : null;
+
+      return { ...result, tokenId };
+    },
+    [currentUser, processTransactions],
+  );
+};
