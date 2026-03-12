@@ -3,6 +3,6 @@
     @apply flex flex-col justify-center items-center w-full gap-2 h-32;
   }
   .description {
-    @apply text-base font-bold;
+    @apply text-base font-bold text-center;
   }
 }

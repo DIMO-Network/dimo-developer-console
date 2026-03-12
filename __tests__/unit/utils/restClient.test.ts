@@ -101,9 +101,7 @@ describe('RestClient', () => {
     global.fetch = mockFetch;
 
     // Mock console.error
-    const consoleErrorMock = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
+    const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     try {
       await restClient.get('/nonexistent');
@@ -111,9 +109,7 @@ describe('RestClient', () => {
     } catch (error: any) {
       expect(error).toBeInstanceOf(Error);
       expect(error.message).toBe('Error message');
-      expect(consoleErrorMock).toHaveBeenCalledWith(
-        `Failed to GET data: 404 Not Found`,
-      );
+      expect(consoleErrorMock).toHaveBeenCalledWith(`Failed to GET data: 404 Not Found`);
     }
 
     // Restore console.error

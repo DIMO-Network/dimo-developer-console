@@ -1,9 +1,0 @@
-.explanation-content {
-  .title {
-    @apply text-2xl py-4;
-  }
-
-  .description-content {
-    @apply inline text-base leading-6;
-  }
-}

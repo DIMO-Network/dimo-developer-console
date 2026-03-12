@@ -25,7 +25,6 @@ export class RestClient {
     customHeaders: Record<string, string> = {},
   ): Promise<T> {
     const url = new URL(resource, this.baseUrl);
-    // eslint-disable-next-line no-undef
     const options: globalThis.RequestInit = {
       method,
       headers: {
@@ -60,12 +59,7 @@ export class RestClient {
     Object.keys(queryParams).forEach((key) =>
       url.searchParams.append(key, queryParams[key]),
     );
-    return await this.execute<T>(
-      'GET',
-      url.toString(),
-      undefined,
-      customHeaders,
-    );
+    return await this.execute<T>('GET', url.toString(), undefined, customHeaders);
   }
 
   async post<T>(

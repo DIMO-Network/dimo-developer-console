@@ -7,11 +7,23 @@
     @apply flex flex-col items-center gap-2 mr-auto ml-auto;
 
     .buy-credits-header {
-      @apply flex flex-col gap-2 text-center relative pt-8 pb-4 px-2 font-bold;
+      @apply flex flex-col relative font-bold text-left;
+    }
+
+    .buy-credits-description {
+      @apply flex flex-col text-xs relative pt-0 px-0 pb-0 font-bold;
 
       .description {
-        @apply text-xs text-white/50 w-full h-full py-4;
+        @apply text-white/50 w-full h-full py-1;
       }
+    }
+
+    .credits-costs {
+      @apply text-center pt-1 text-sm;
+    }
+
+    .buy-credits-payment-methods {
+      @apply flex flex-col gap-4 w-full max-w-sm pt-4 mb-4;
     }
 
     .dcx-input {

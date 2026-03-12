@@ -9,9 +9,5 @@ interface IProps {
 }
 
 export const TextError: FC<IProps> = ({ errorMessage, className }) => {
-  return (
-    <span className={classNames('error-message', className)}>
-      {errorMessage}
-    </span>
-  );
+  return <span className={classNames('error-message', className)}>{errorMessage}</span>;
 };

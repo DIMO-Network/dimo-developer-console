@@ -8,4 +8,12 @@
   &.card-border {
     @apply border border-grey-950;
   }
+
+  &.primary {
+    @apply bg-[#201C1E] rounded-2xl;
+  }
+
+  &.secondary {
+    @apply bg-[#141012] rounded-xl;
+  }
 }

@@ -9,18 +9,15 @@ import './SignInButton.css';
 
 interface SignInButtonProps {
   className: string;
-  isSignIn: boolean;
   Icon: FC<IconProps>;
   onClick: (e: MouseEvent<HTMLElement>) => void;
 }
 
 export const SignInButton: FC<SignInButtonProps> = ({
-  isSignIn,
   Icon,
   className: inputClassName = '',
   onClick,
 }) => {
-  const buttonText = isSignIn ? 'Sign In' : 'Sign Up';
   const className = classnames('icon', inputClassName);
 
   return (
@@ -31,7 +28,6 @@ export const SignInButton: FC<SignInButtonProps> = ({
       onClick={onClick}
     >
       <Icon className={className} />
-      {buttonText}
     </Button>
   );
 };

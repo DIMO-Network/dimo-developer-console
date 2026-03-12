@@ -9,10 +9,7 @@ interface IProps {
   onToggle?: (v: boolean) => void;
 }
 
-export const Toggle: FC<IProps> = ({
-  checked = false,
-  onToggle = () => {},
-}) => {
+export const Toggle: FC<IProps> = ({ checked = false, onToggle = () => {} }) => {
   const [enabled, setEnabled] = useState(checked);
 
   const handleToggle = (value: boolean) => {

@@ -10,6 +10,8 @@ import {
   createSigner,
   deleteSigner,
   testMyApp,
+  deleteMyApp,
+  updateMyApp,
 } from '@/services/app';
 import { IApp, IRedirectUri, ISigner } from '@/types/app';
 
@@ -19,6 +21,10 @@ export const getAppByID = async (id: string) => {
 
 export const createApp = async (workspaceId: string, app: Partial<IApp>) => {
   return createMyApp(workspaceId, app);
+};
+
+export const deleteApp = async (id: string) => {
+  return deleteMyApp(id);
 };
 
 export const testApp = async (app: IApp, signer: ISigner) => {
@@ -37,17 +43,11 @@ export const deleteMyRedirectUri = async (id: string) => {
   return deleteRedirectUri(id);
 };
 
-export const updateMyRedirectUri = async (
-  id: string,
-  newData: Partial<IRedirectUri>,
-) => {
+export const updateMyRedirectUri = async (id: string, newData: Partial<IRedirectUri>) => {
   return updateRedirectUri(id, newData);
 };
 
-export const createMySigner = async (
-  newData: Partial<ISigner>,
-  appId: string,
-) => {
+export const createMySigner = async (newData: Partial<ISigner>, appId: string) => {
   return createSigner(appId, {
     api_key: newData.api_key,
     address: newData.address,
@@ -56,4 +56,8 @@ export const createMySigner = async (
 
 export const deleteMySigner = async (id: string) => {
   return deleteSigner(id);
+};
+
+export const updateApp = async (id: string, app: Partial<IApp>) => {
+  return updateMyApp(id, app);
 };

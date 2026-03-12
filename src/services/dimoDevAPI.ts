@@ -1,36 +1,32 @@
 import { cookies } from 'next/headers';
-import xior from 'xior';
+import axios from 'axios';
 
 import config from '@/config';
 
-const { NEXTAUTH_URL: nextAuthUrl = '' } = process.env;
-
-const useSecureCookies = nextAuthUrl.startsWith('https://');
-export const cookiePrefix = useSecureCookies ? '__Secure-' : '';
+export const cookieName = 'session-token';
 
 export const getCookie = async (cookieName: string, defaultValue = '') => {
   const nextCookies = await cookies();
   return nextCookies.get(cookieName)?.value ?? defaultValue;
 };
 
-const addCookie = (arr: string[], cookieName: string, value: string) => {
-  if (value) arr.push(`${cookieName}=${value}`);
-  return arr;
-};
+export const dimoDevAPIClient = async (timeout: number = 5000, token?: string) => {
+  let authHeader = undefined;
 
-export const dimoDevAPIClient = async (timeout: number = 5000) => {
-  const invitationCookie = 'invitation';
-  const tokenCookie = `${cookiePrefix}next-auth.session-token`;
+  if (token) {
+    authHeader = `Bearer ${token}`;
+  } else {
+    const sessionToken = await getCookie(cookieName);
+    if (sessionToken) {
+      authHeader = `Bearer ${sessionToken}`;
+    }
+  }
 
-  const userCookies: string[] = [];
-  addCookie(userCookies, tokenCookie, await getCookie(tokenCookie));
-  addCookie(userCookies, invitationCookie, await getCookie(invitationCookie));
-
-  return xior.create({
+  return axios.create({
     baseURL: config.backendUrl,
     timeout,
     headers: {
-      Cookie: userCookies.join(';'),
+      Authorization: authHeader,
     },
   });
 };

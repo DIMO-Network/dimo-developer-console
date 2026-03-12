@@ -20,10 +20,7 @@ describe('MenuItem Component', () => {
     );
 
     expect(screen.getByText('Menu Item')).toBeInTheDocument();
-    expect(screen.getByRole('link')).toHaveAttribute(
-      'href',
-      'https://example.com',
-    );
+    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://example.com');
     expect(screen.getByTestId('icon')).toHaveClass('icon-class');
   });
 
@@ -55,9 +52,7 @@ describe('MenuItem Component', () => {
     );
 
     waitFor(() => {
-      expect(screen.getByText('Disabled Menu Item')).toHaveClass(
-        '!text-grey-200/50',
-      );
+      expect(screen.getByText('Disabled Menu Item')).toHaveClass('!text-grey-200/50');
     });
     expect(screen.getByRole('link')).toHaveAttribute('href', '#');
     fireEvent.click(screen.getByRole('link'));

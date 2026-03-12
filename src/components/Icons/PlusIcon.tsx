@@ -14,11 +14,7 @@ export const PlusIcon: FC<IconProps> = ({ className }) => {
       stroke="currentColor"
       className={className}
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 4.5v15m7.5-7.5h-15"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
   );
 };

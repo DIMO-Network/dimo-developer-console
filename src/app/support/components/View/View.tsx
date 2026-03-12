@@ -15,8 +15,7 @@ const View: FC = () => {
       <div className="titles">
         <Title>Support</Title>
         <p className="subtitle">
-          Please select an option below so our support team can address your
-          issue.
+          Please select an option below so our support team can address your issue.
         </p>
       </div>
       <div className="contact-cards">

@@ -1,10 +1,9 @@
 'use client';
 
-import _ from 'lodash';
+import { get } from 'lodash';
 
 import { useState, useContext, type FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { utils } from 'web3';
 
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
@@ -12,6 +11,7 @@ import { NotificationContext } from '@/context/notificationContext';
 import { Title } from '@/components/Title';
 import { TokenInput } from '@/components/TokenInput';
 import { useContractGA } from '@/hooks';
+import * as Sentry from '@sentry/nextjs';
 
 import configuration from '@/config';
 
@@ -36,7 +36,7 @@ export const SpendingLimitModal: FC<IProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
-  const { dimoContract } = useContractGA();
+  const { approveNewSpendingLimit } = useContractGA();
   const { control, handleSubmit, getValues } = useForm<IForm>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -48,15 +48,13 @@ export const SpendingLimitModal: FC<IProps> = ({
   const setSpendingLimit = async () => {
     try {
       setIsLoading(true);
-      if (dimoContract) {
-        const { credits } = getValues();
-        const dimoInWei = utils.toWei(credits, 'ether');
-        await dimoContract.write.approve([addressToAllow, dimoInWei]);
-        setIsOpen(false);
-        onSubmit(credits);
-      }
+      const { credits } = getValues();
+      await approveNewSpendingLimit(credits, addressToAllow);
+      setIsOpen(false);
+      onSubmit(credits);
     } catch (error: unknown) {
-      const code = _.get(error, 'code', null);
+      Sentry.captureException(error);
+      const code = get(error, 'code', null);
       if (code === 4001)
         setNotification('The transaction was denied', 'Oops...', 'error');
       else
@@ -72,17 +70,14 @@ export const SpendingLimitModal: FC<IProps> = ({
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="buy-credits-modal">
-      <form
-        className="buy-credits-content"
-        onSubmit={handleSubmit(setSpendingLimit)}
-      >
+      <form className="buy-credits-content" onSubmit={handleSubmit(setSpendingLimit)}>
         <div className="buy-credits-header">
           <Title className="text-2xl" component="h3">
             Set spending limit
           </Title>
           <p className="description">
-            Approve the Developer License to spend $DIMO on your connected
-            wallet, we recommend approving more than $100 USD worth of $DIMO
+            Approve the Developer License to spend $DIMO on your connected wallet, we
+            recommend approving more than $100 USD worth of $DIMO
           </p>
         </div>
         <TokenInput control={control} name="credits" description="$DIMO" />

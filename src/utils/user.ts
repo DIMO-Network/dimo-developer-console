@@ -1,3 +1,9 @@
+import { TeamRoles } from '@/types/team';
+
+export const isOwner = (role: string): boolean => role === TeamRoles.OWNER;
+
+export const isCollaborator = (role: string): boolean => role === TeamRoles.COLLABORATOR;
+
 export const getInitials = (fullName: string): string => {
   const nameParts = fullName.split(' ');
   const filteredNameParts = nameParts.filter((part) => part.length > 0);
@@ -7,6 +13,9 @@ export const getInitials = (fullName: string): string => {
     const lastNameInitial = filteredNameParts[filteredNameParts.length - 1][0];
 
     return firstNameInitial.toUpperCase() + lastNameInitial.toUpperCase();
+  } else if (filteredNameParts.length >= 1) {
+    const firstNameInitial = filteredNameParts[0][0];
+    return firstNameInitial.toUpperCase();
   } else {
     return '';
   }

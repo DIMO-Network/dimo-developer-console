@@ -1,0 +1,19 @@
+.redirect-uri-form {
+  @apply flex flex-col;
+
+  form {
+    @apply flex flex-col md:flex-row flex-1 w-full gap-2.5 md:items-center;
+
+    .field {
+      @apply flex flex-col flex-[0.9] justify-center;
+    }
+
+    .cta {
+      @apply col-span-2;
+
+      button {
+        @apply w-full;
+      }
+    }
+  }
+}

@@ -4,14 +4,9 @@ import { useForm } from 'react-hook-form';
 
 import { TokenInput } from '@/components/TokenInput';
 
-const renderWithForm = (
-  ui: React.ReactElement,
-  { defaultValues = {} } = {},
-) => {
+const renderWithForm = (ui: React.ReactElement, { defaultValues = {} } = {}) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const Wrapper: React.FC<{ children: ReactElement<any, any> }> = ({
-    children,
-  }) => {
+  const Wrapper: React.FC<{ children: ReactElement<any, any> }> = ({ children }) => {
     const { control } = useForm({
       defaultValues,
     });

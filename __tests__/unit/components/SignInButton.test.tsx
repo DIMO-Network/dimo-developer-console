@@ -10,7 +10,6 @@ describe('SignInButton', () => {
     render(
       <SignInButton
         className="sm"
-        isSignIn={true}
         Icon={GoogleIcon}
         onClick={() => handlerGitHubLogin('google')}
       />,
@@ -31,7 +30,6 @@ describe('SignInButton', () => {
     render(
       <SignInButton
         className="sm"
-        isSignIn={false}
         Icon={GoogleIcon}
         onClick={() => handlerGitHubLogin('google')}
       />,

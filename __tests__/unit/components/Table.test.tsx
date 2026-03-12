@@ -53,9 +53,7 @@ describe('Table', () => {
   });
 
   it('renders a table with actions', () => {
-    const renderAction = () => (
-      <ContentCopyIcon className="2-5 h-5 fill-white" />
-    );
+    const renderAction = () => <ContentCopyIcon className="2-5 h-5 fill-white" />;
     const { container } = render(
       <Table
         columns={[

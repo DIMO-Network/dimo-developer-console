@@ -1,27 +1,28 @@
-import { JWT, getToken } from 'next-auth/jwt';
-import { withAuth } from 'next-auth/middleware';
 import { NextFetchEvent, NextResponse } from 'next/server';
-import { isIn } from '@/utils/middlewareUtils';
+import { decodeJwtToken, isIn } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
-import xior, { isXiorError, XiorError } from 'xior';
+import axios, { AxiosError } from 'axios';
+import * as Sentry from '@sentry/nextjs';
+import { JWTPayload } from 'jose/dist/types';
+import { cookieName, getCookie } from './services/dimoDevAPI';
 
-const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS, VALIDATION_PAGES } =
-  configuration;
+const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
-const authMiddleware = withAuth({
-  callbacks: {
-    authorized: ({ token }) => !!token,
-  },
-  pages: {
-    signIn: 'sign-in',
-    error: 'sign-in?error=true',
-  },
-});
+const getToken = async () => {
+  const token = await getCookie(cookieName);
+  if (!token) {
+    return null;
+  }
 
-const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
+  const payload = await decodeJwtToken(token);
+
+  return payload;
+};
+
+const mustBeAuthorize = (request: NextRequest, token: JWTPayload | null) => {
   const url = request.nextUrl.pathname;
 
   const isAPI = url.startsWith(API_PATH);
@@ -30,10 +31,8 @@ const mustBeAuthorize = (request: NextRequest, token: JWT | null) => {
 };
 
 const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
-  if (isXiorError(error)) {
-    const xiorError = error as XiorError;
-    const code = xiorError.cause;
-    if (code === 'ERR_NETWORK') {
+  if (error instanceof AxiosError) {
+    if (error.message === 'Network Error') {
       return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
     }
   }
@@ -41,59 +40,56 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
 };
 
 const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
-  if (isXiorError(error)) {
-    const xiorError = error as XiorError;
-    const status = xiorError.response?.status;
+  if (error instanceof AxiosError) {
+    const status = error.response?.status;
     if (status === 401) {
       const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
-      xior.post(signOutUrl);
+      axios.post(signOutUrl);
       return 'sign-in?error=expired';
     }
   }
   return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
 };
 
-const validatePrivateSession = async (
-  request: NextRequest,
-  event: NextFetchEvent,
-) => {
+const validatePrivateSession = async (request: NextRequest) => {
+  console.info('Validating private session', request.nextUrl.pathname);
   const user = await getUserByToken();
+  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const subOrganization = await getUserSubOrganization(
     user.company_email_owner ?? user.email,
   );
-  request.user = new LoggedUser(user, subOrganization);
+  if (!subOrganization) {
+    Sentry.captureMessage('Suborganization not found');
+    return NextResponse.redirect(new URL('/sign-in', request.url), {
+      status: 307,
+    });
+  }
 
-  const isValidationPage = VALIDATION_PAGES.includes(request.nextUrl.pathname);
-  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  request.user = new LoggedUser(user, subOrganization);
 
   const isCompliant = request.user?.isCompliant ?? false;
   const missingFlow = request.user?.missingFlow ?? null;
   const flow = request.nextUrl.searchParams.get('flow');
 
   //TODO: check how isLoginPage affects on safari
-  if (isValidationPage && isCompliant) {
+  if (isLoginPage && isCompliant) {
     return NextResponse.redirect(new URL('/app', request.url), {
       status: 307,
     });
   }
 
   if (!isCompliant && !flow) {
-    return NextResponse.redirect(
-      new URL(`/sign-up?flow=${missingFlow}`, request.url),
-      {
-        status: 307,
-      },
-    );
+    return NextResponse.redirect(new URL(`/sign-up?flow=${missingFlow}`, request.url), {
+      status: 307,
+    });
   }
 
-  if (!isLoginPage) {
-    return authMiddleware(request, event);
-  }
   return NextResponse.next();
 };
 
 const validatePublicSession = async (request: NextRequest) => {
-  const token = await getToken({ req: request });
+  console.info('Validating public session', request.nextUrl.pathname);
+  const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const isAPIProtected = mustBeAuthorize(request, token);
   const isAPI = request.nextUrl.pathname.startsWith(API_PATH);
@@ -116,21 +112,19 @@ const validatePublicSession = async (request: NextRequest) => {
   return NextResponse.next();
 };
 
-export const middleware = async (
-  request: NextRequest,
-  event: NextFetchEvent,
-) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
   const hasError = request.nextUrl.searchParams.get('error');
-  const token = await getToken({ req: request });
+  const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
-
   try {
     if (token) {
-      return validatePrivateSession(request, event);
+      return validatePrivateSession(request);
     }
 
     return validatePublicSession(request);
   } catch (error: unknown) {
+    Sentry.captureException(error);
     console.error('Middleware error:', error);
     let path = handleConnectionError(error, isLoginPage);
     path = path ?? handleExpiredSession(error, isLoginPage);

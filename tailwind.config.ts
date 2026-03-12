@@ -14,7 +14,26 @@ const config: Config = {
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
       colors: {
-        grey: {
+        'surface': {
+          default: '#141012',
+          sunken: '#0A0508',
+          raised: '#201C1E',
+        },
+        'cta': {
+          default: '#322D2F',
+          disabled: '#818181',
+        },
+        'border': {
+          disabled: '#BABABA',
+        },
+        'text': {
+          secondary: '#BABABA',
+        },
+        'feedback': {
+          success: '#0D7038',
+          error: '#8E3231',
+        },
+        'grey': {
           '50': '#f5f6f6',
           '100': '#e4e8e9',
           '200': '#ccd4d5',
@@ -40,7 +59,7 @@ const config: Config = {
           '900': '#363c43',
           '950': '#24292f',
         },
-        dark: {
+        'dark': {
           '50': '#f7f8f8',
           '100': '#edeef1',
           '200': '#d8dbdf',
@@ -54,7 +73,7 @@ const config: Config = {
           '950': '#131417',
         },
 
-        primary: {
+        'primary': {
           '50': '#f1fcfa',
           '100': '#d0f7f2',
           '200': '#b7f2eb',
@@ -67,7 +86,7 @@ const config: Config = {
           '900': '#184849',
           '950': '#08292b',
         },
-        red: {
+        'red': {
           '50': '#fff1f1',
           '100': '#ffe1e1',
           '200': '#ffc8c8',

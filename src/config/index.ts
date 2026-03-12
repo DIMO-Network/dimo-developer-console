@@ -2,7 +2,10 @@ import * as defaultConfig from './default';
 import * as productionConfig from './production';
 import * as previewConfig from './preview';
 
+import type { CONTRACT_METHODS } from './default';
+
 type Configuration = {
+  environment: string;
   appName: string;
   LOGIN_PAGES: string[];
   VALIDATION_PAGES: string[];
@@ -15,6 +18,7 @@ type Configuration = {
   frontendUrl: string;
   RAINBOW_PROJECT: Record<string, string>;
   CONTRACT_NETWORK: bigint;
+  DCC_ADDRESS: `0x${string}`;
   DLC_ADDRESS: `0x${string}`;
   DC_ADDRESS: `0x${string}`;
   DCX_ADDRESS: `0x${string}`;
@@ -23,18 +27,28 @@ type Configuration = {
   MINIMUM_CREDITS: number;
   masFeePerGas: number;
   gasPrice: number;
-  desiredAmountOfDCX: number;
-  desiredAmountOfDimo: number;
   ISSUED_TOPIC: `0x${string}`;
+  CONTRACT_METHODS: Record<keyof typeof CONTRACT_METHODS, string>;
+  identityApiUrl: string;
+  DIMO_ESCROW_ADDRESS: `0x${string}`;
+  DIMO_SACD_ADDRESS: `0x${string}`;
+  DIMO_REGISTRY_ADDRESS: `0x${string}`;
+};
+
+const getCurrentEnvironment = (): string => {
+  let environment = process.env.VERCEL_ENV!;
+  if (!environment) {
+    environment = process.env.NEXT_PUBLIC_VERCEL_ENV!;
+  }
+  return environment;
 };
 
 export const getConfig = (): Configuration => {
   // Determine the current environment
-  const env = process.env.VERCEL_ENV;
-
+  const environment = getCurrentEnvironment();
   // Select the appropriate configuration to merge with default based on the environment
   let environmentConfig = {};
-  switch (env) {
+  switch (environment) {
     case 'production':
       environmentConfig = productionConfig;
       break;
@@ -48,11 +62,13 @@ export const getConfig = (): Configuration => {
       break;
   }
 
-  // Use lodash to deeply merge the default configuration with the environment-specific configuration
   return {
+    environment: environment,
     ...defaultConfig,
     ...environmentConfig,
   } as Configuration;
 };
 
-export default getConfig();
+const currentConfig = getConfig();
+
+export default currentConfig;

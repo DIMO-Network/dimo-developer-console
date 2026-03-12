@@ -1,6 +1,10 @@
 .table {
   @apply min-w-full;
 
+  .table-header {
+    @apply border-b border-[#322D2F];
+  }
+
   .table-body {
     @apply divide-y divide-dark-grey-950;
   }
@@ -10,6 +14,6 @@
   }
 
   .table-action-cell {
-    @apply relative whitespace-nowrap px-3 py-1 text-right text-xs inline-flex gap-4 justify-center items-center;
+    @apply relative whitespace-nowrap px-3 py-3 text-right text-xs gap-2.5 justify-end items-center flex;
   }
 }

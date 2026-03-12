@@ -1,0 +1,19 @@
+.guest-layout {
+  @apply flex flex-row justify-center h-screen gap-4;
+
+  .sign-in-up-container {
+    @apply flex flex-col mx-6 w-full lg:mx-0 lg:w-1/2 items-center justify-center h-screen;
+
+    img {
+      @apply mb-12;
+    }
+  }
+
+  .background-side-image {
+    @apply hidden lg:flex w-1/2 h-screen;
+
+    img {
+      @apply object-cover w-full h-full;
+    }
+  }
+}

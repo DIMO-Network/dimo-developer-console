@@ -1,4 +1,4 @@
-# Developer Console API
+# Developer Console
 
 This repository hosts the codebase for the DIMO Developer Console, powering the platform at `https://console.dimo.org`. The app facilitates seamless interactions and management of developer licenses within the DIMO ecosystem.
 
@@ -24,9 +24,10 @@ Before you begin, ensure you have the following installed on your machine:
 
 - [Node.js](https://nodejs.org/en/download/package-manager) (v20.x or later)
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
-- A Google Developer Account and GitHub Account for OAuth integration.
 
 ### Set Up Google and GitHub OAuth Applications
+
+Log in happens through one of two OAuth providers: Google or Github.
 
 1. Create a Google OAuth App:
 
@@ -48,6 +49,14 @@ Before you begin, ensure you have the following installed on your machine:
   Under OAuth scopes, ensure the app requests access to email addresses in read-only mode.
 - Note down your Client ID and Client Secret. These will be used in your environment variables.
 
+### Run the Dev Console API locally
+
+Follow the setup steps [here](https://github.com/DIMO-Network/dimo-developer-console-api/tree/master?tab=readme-ov-file#developer-console-api) to run the Dev Console API locally.
+
+### Run the Accounts API locally
+
+Follow the setup steps [here](https://github.com/DIMO-Network/accounts?tab=readme-ov-file#dimo-waas) to run the Accounts API locally.
+
 ### Installation
 
 1. Clone the repository:
@@ -59,18 +68,32 @@ cd dimo-developer-console
 
 2. Set up environment variables:
 
-- Create a .env.local file in the root directory of the project:
+- Create a `.env.local` file in the root directory of the project and add the follwing environment variables:
 
 ```bash
-GITHUB_CLIENT_ID=<YOUR_GITHUB_CLIENT_ID>
-GITHUB_CLIENT_SECRET=<YOUR_GITHUB_CLIENT_SECRET>
+TURNKEY_ORGANIZATION_ID=<YOUR_SECRET>
+TURNKEY_API_PRIVATE_KEY=<YOUR_SECRET>
+TURNKEY_API_PUBLIC_KEY=<YOUR_SECRET>
+TURNKEY_API_BASE_URL="https://api.turnkey.com"
 
-GOOGLE_CLIENT_ID=<YOUR_GOOGLE_CLIENT_ID>
-GOOGLE_CLIENT_SECRET=<YOUR_GOOGLE_CLIENT_SECRET>
+ZERODEV_PROJECT_ID=<YOUR_SECRET>
+BUNDLER_RPC=<YOUR_RPC>
+PAYMASTER_RPC=<YOUR_RPC>
+VERCEL_ENV="development"
 
-NEXTAUTH_SECRET=<YOUR_NEXTAUTH_SECRET>
-NEXTAUTH_URL=http://localhost:3000/
+JWT_KEY_SET_URL="https://auth.dev.dimo.zone/keys"
+JWT_ISSUER="https://auth.dev.dimo.zone"
+
+NEXT_PUBLIC_TURNKEY_API_BASE_URL="https://api.turnkey.com"
+NEXT_PUBLIC_DIMO_AUTH_URL="https://auth.dev.dimo.zone"
+NEXT_PUBLIC_RPC_URL=<YOUR_RPC>
+RPC_URL=<YOUR_RPC>
+NEXT_PUBLIC_TURNKEY_API_BASE_URL="https://api.turnkey.com"
+NEXT_PUBLIC_RPID="localhost"
+NEXT_PUBLIC_GA_API=<YOUR_ACCOUNTS_API_URL>
 ```
+
+Make sure that the `NEXT_PUBLIC_GA_API` maps to your [Accounts API](https://github.com/DIMO-Network/accounts/tree/main) deployment URL.
 
 3. Install the dependencies:
 
@@ -108,7 +131,23 @@ npm run start
 yarn start
 ```
 
+## GraphQL
+
+This repository uses [GraphQL Codegen](https://the-guild.dev/graphql/codegen) to automatically generate Typescript types from GraphQL schemas and operations.
+
+### How to generate types
+
+Write your query or mutation according to the docs, then generate types by running the following command
+
+```bash
+npm run compile
+```
+
+The types will be made available for export into the app from the `src/gql` directory.
+
 ## Project Structure
+
+This project is built with Next.js, which requires specific folder structures and file-naming conventions to structure the application. To understand this, read the docs at https://nextjs.org.
 
 A brief description of the main folders and files in the project:
 
@@ -133,6 +172,7 @@ A brief description of the main folders and files in the project:
 - **React**: A JavaScript library for building user interfaces.
 - **CSS/PostCSS**: For styling components.
 - **JavaScript/ES6+**: Modern JavaScript syntax and features.
+- **GraphQL**: A query language for interacting with APIs
 
 ## Contributing
 

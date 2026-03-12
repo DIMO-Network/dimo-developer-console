@@ -16,16 +16,10 @@ const initContract = async (
 };
 
 export const initDimoSmartContract = async (fromAddress: `0x${string}`) => {
-  return initContract(
-    fromAddress,
-    configuration.DC_ADDRESS as `0x${string}`,
-    DimoABI,
-  );
+  return initContract(fromAddress, configuration.DC_ADDRESS as `0x${string}`, DimoABI);
 };
 
-export const initDimoLicenseSmartContract = async (
-  fromAddress: `0x${string}`,
-) => {
+export const initDimoLicenseSmartContract = async (fromAddress: `0x${string}`) => {
   return initContract(
     fromAddress,
     configuration.DLC_ADDRESS as `0x${string}`,

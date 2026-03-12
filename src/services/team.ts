@@ -4,17 +4,12 @@ import { Paginated } from '@/types/pagination';
 
 export const getMyTeamCollaborators = async () => {
   const client = await dimoDevAPIClient();
-  return await client.get<Paginated<ITeamCollaborator>>(
-    '/api/my/team/collaborator',
-  );
+  return await client.get<Paginated<ITeamCollaborator>>('/api/my/team/collaborator');
 };
 
 export const inviteCollaboratorToMyTeam = async (invitation: IInvitation) => {
   const client = await dimoDevAPIClient();
-  return await client.post<{ message: string }>(
-    '/api/my/team/invitation',
-    invitation,
-  );
+  return await client.post<{ message: string }>('/api/my/team/invitation', invitation);
 };
 
 export const deleteMyTeamCollaborator = async (id: string) => {

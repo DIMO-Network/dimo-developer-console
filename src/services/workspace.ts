@@ -9,9 +9,6 @@ export const getMyWorkspace = async () => {
 
 export const createMyWorkspace = async (workspace: IWorkspace) => {
   const client = await dimoDevAPIClient();
-  const { data } = await client.post<IWorkspace>(
-    '/api/my/workspace',
-    workspace,
-  );
+  const { data } = await client.post<IWorkspace>('/api/my/workspace', workspace);
   return data;
 };

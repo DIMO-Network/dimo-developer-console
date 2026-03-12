@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { RedirectUriList } from '@/app/app/details/[id]/components/RedirectUriList';
+import { RedirectUriList } from '@/components/RedirectUriList';
 import { appListMock } from '@/mocks/appList';
 
 const [app] = appListMock;
@@ -8,7 +8,12 @@ const [app] = appListMock;
 describe('RedirectUriList', () => {
   it('renders the redirect uri list', () => {
     const { container } = render(
-      <RedirectUriList list={app.RedirectUris} refreshData={() => {}} />,
+      <RedirectUriList
+        redirectUris={app.RedirectUris}
+        refreshData={() => {}}
+        tokenId={0}
+        isOwner={true}
+      />,
     );
 
     const [redirectUri] = app.RedirectUris ?? [];

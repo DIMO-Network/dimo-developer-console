@@ -1,9 +1,7 @@
-import { OnrampSessionResult } from '@stripe/crypto';
-
-export interface IWalletSubOrganization {
+export interface ICreateGlobalAccountRequest {
   email: string;
-  encodedChallenge?: string;
-  attestation?: IPasskeyAttestation;
+  encodedChallenge: string;
+  attestation: IPasskeyAttestation;
   deployAccount: boolean;
 }
 
@@ -27,6 +25,7 @@ export interface IEmailAuth {
 }
 
 export interface ISubOrganization {
+  email: string;
   subOrganizationId: string;
   emailVerified: boolean;
   walletAddress: `0x${string}`;
@@ -43,23 +42,22 @@ export interface IWallet {
 export interface IDcxPurchaseTransaction {
   destinationAddress: `0x${string}`;
   usdAmount: number;
-  maticAmount: string;
-  alreadyHasDimo: boolean;
-  dcxAmount: number;
-  requiredDimoAmount: number;
+  dcxAmount: bigint;
+  requiredDimoAmount: bigint;
   currency: string;
   transactionHash: string;
 }
 
-export interface IStripeCryptoEvent {
-  type: 'onramp_session_updated';
-  payload: {
-    session: OnrampSessionResult;
-  };
+export interface IGlobalAccountSession {
+  email: string;
+  role: string;
+  subOrganizationId: string;
+  token: string;
+  expiry: number;
 }
 
 export interface Log {
-  topics?: `0x${string}`;
+  topics?: `0x${string}`[];
 }
 
 export interface IKernelOperationStatus {
@@ -70,12 +68,92 @@ export interface IKernelOperationStatus {
 
 export interface ICoinMarketTokenResponse {
   data: {
-    DIMO: {
-      quote: {
-        USD: {
-          price: number;
+    DIMO: ICryptoQuote[];
+    POL: ICryptoQuote[];
+    WMATIC: ICryptoQuote[];
+  };
+}
+
+export interface ICryptoQuote {
+  quote: {
+    USD: {
+      price: number;
+    };
+  };
+}
+
+export interface ITokenBalance {
+  dimo: boolean;
+  dlcAllowance: boolean;
+  dcx: boolean;
+  dcxAllowance: boolean;
+}
+
+export interface IDesiredTokenAmount {
+  licensePrice: number;
+  dimoCost: number;
+  dimo: bigint;
+  dcx: bigint;
+}
+
+export interface PaymentSACD {
+  specVersion: string;
+  time: string;
+  type: string;
+  data: {
+    grantor: {
+      address: `0x${string}`;
+      name: string;
+      additionalInfo: {
+        [k: string]: unknown;
+      };
+    };
+    grantee: {
+      address: `0x${string}`;
+      name: string;
+      additionalInfo: {
+        [k: string]: unknown;
+      };
+    };
+    effectiveAt: string;
+    expiresAt: string;
+    additionalDates: {
+      [key: string]: unknown;
+    };
+    agreements: {
+      type: string;
+      asset: string;
+      payment: {
+        amount: string;
+        recurrence: 'monthly' | 'one-time';
+        terms: {
+          initialPayment: string;
+          paymentMethod: string;
+        };
+      };
+      purpose: string;
+      attachments: {
+        name: string;
+        description: string;
+        contentType: string;
+        uri: string;
+      }[];
+      extensions: {
+        invoicing: {
+          invoiceFrequency: string;
+          invoiceRecipient: string;
         };
       };
     }[];
   };
+  signature: `0x${string}`;
+}
+
+export interface ICreditUsage {
+  fromDate: string;
+  toDate: string;
+  licenseId: string;
+  numOfAssets: number;
+  numOfCreditsGrantsPurchased: number;
+  numOfCreditsUsed: number;
 }

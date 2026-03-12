@@ -3,6 +3,7 @@ import { MinusIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { Control, Controller } from 'react-hook-form';
 
 import './TokenInput.css';
+import { formatSimpleBalanceWithDigits } from '@/utils/formatBalance';
 
 interface ISuggestion {
   label: string | number;
@@ -23,7 +24,7 @@ export type Ref = HTMLInputElement;
 export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
   (
     { name, control, suggestions = [], showControls = false, description = '' },
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _ref,
   ) => {
     const handleChange = (newValue: number) => {
@@ -32,7 +33,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
     };
 
     const formatValue = (value: number) => {
-      return value.toLocaleString('en-US');
+      return formatSimpleBalanceWithDigits(value, 0);
     };
 
     return (
@@ -64,9 +65,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
                   role="token-value-input"
                   ref={ref}
                 />
-                {description && (
-                  <span className="description">{description}</span>
-                )}
+                {description && <span className="description">{description}</span>}
               </div>
               {showControls && (
                 <button

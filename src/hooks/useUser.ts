@@ -1,17 +1,13 @@
 'use client';
 
 import { getUser } from '@/actions/user';
-import { IUser } from '@/types/user';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 export const useUser = () => {
-  const [user, setUser] = useState<IUser>();
-
-  useEffect(() => {
-    getUser().then(setUser);
-  }, []);
-
-  return { user, setUser };
+  return useQuery({
+    queryKey: ['user'],
+    queryFn: getUser,
+  });
 };
 
 export default useUser;

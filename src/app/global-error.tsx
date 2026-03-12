@@ -1,49 +1,50 @@
 'use client';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import localFont from 'next/font/local';
 import classNames from 'classnames';
+import * as Sentry from '@sentry/nextjs';
 
 const euclid = localFont({
   src: [
     {
-      path: './../assets/fonts/Euclid Circular A Light.ttf',
-      weight: '300',
-      style: 'normal',
+      path: './../assets/fonts/GT-Super-Text-Bold-Italic.ttf',
+      weight: 'bold',
+      style: 'Bold Italic',
     },
     {
-      path: './../assets/fonts/Euclid Circular A Light Italic.ttf',
-      weight: '300',
+      path: './../assets/fonts/GT-Super-Text-Bold.ttf',
+      weight: 'bold',
+      style: 'Bold',
+    },
+    {
+      path: './../assets/fonts/GT-Super-Text-Book-Italic.ttf',
+      weight: 'normal',
+      style: 'Italic',
+    },
+    {
+      path: './../assets/fonts/GT-Super-Text-Book.ttf',
+      weight: 'normal',
+      style: 'Book',
+    },
+    {
+      path: './../assets/fonts/Universal-Sans-Display-525.ttf',
+      weight: 'normal',
+      style: 'regular',
+    },
+    {
+      path: './../assets/fonts/Universal-Sans-Display-525Italic.ttf',
+      weight: 'normal',
       style: 'italic',
     },
     {
-      path: './../assets/fonts/Euclid Circular A Regular.ttf',
-      weight: '400',
-      style: 'normal',
+      path: './../assets/fonts/Universal-Sans-Display-900.ttf',
+      weight: 'bold',
+      style: 'bold',
     },
     {
-      path: './../assets/fonts/Euclid Circular A Italic.ttf',
-      weight: '400',
-      style: 'italic',
-    },
-    {
-      path: './../assets/fonts/Euclid Circular A Medium.ttf',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: './../assets/fonts/Euclid Circular A Medium Italic.ttf',
-      weight: '500',
-      style: 'italic',
-    },
-    {
-      path: './../assets/fonts/Euclid Circular A Bold.ttf',
-      weight: '700',
-      style: 'normal',
-    },
-    {
-      path: './../assets/fonts/Euclid Circular A Bold Italic.ttf',
-      weight: '700',
-      style: 'italic',
+      path: './../assets/fonts/Universal-Sans-Display-900Italic.ttf',
+      weight: 'bold',
+      style: 'bold italic',
     },
   ],
 });
@@ -54,7 +55,10 @@ interface IProps {
 }
 
 const ErrorPage: FC<IProps> = ({ error, reset }) => {
-  console.error({ error });
+  useEffect(() => {
+    Sentry.captureException(error);
+    console.error({ error });
+  }, [error]);
 
   return (
     <html lang="en" className="h-full">
@@ -75,11 +79,8 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
               >
                 Go back home
               </a>
-              <button
-                onClick={reset}
-                className="text-sm font-semibold text-gray-900"
-              >
-                Re try
+              <button onClick={reset} className="text-sm font-semibold text-gray-900">
+                Retry
               </button>
             </div>
           </div>

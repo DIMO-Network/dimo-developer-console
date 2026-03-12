@@ -3,15 +3,10 @@ import { AbiItem } from 'web3-utils';
 import contractABI from '../contracts/DimoCreditABI.json';
 import config from '@/config';
 
-const web3 = new Web3(
-  'https://polygon-mumbai.infura.io/v3/YOUR_INFURA_PROJECT_ID',
-); // TODO: Replace with Infura ID and send to .env
+const web3 = new Web3('https://polygon-mumbai.infura.io/v3/YOUR_INFURA_PROJECT_ID'); // TODO: Replace with Infura ID and send to .env
 
 // Load contract ABI
-const contract = new web3.eth.Contract(
-  contractABI as AbiItem[],
-  config.DC_ADDRESS,
-);
+const contract = new web3.eth.Contract(contractABI as AbiItem[], config.DC_ADDRESS);
 
 export async function mintDimoCredits(txHash: string) {
   try {

@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useSession } from 'next-auth/react';
-
 import { render, screen } from '@testing-library/react';
 import { Header } from '@/components/Header';
 

@@ -1,196 +1,319 @@
-import { useEffect, useState } from 'react';
-import { getContract, HttpRequestError } from 'viem';
-import { utils } from 'web3';
+'use client';
 
+import { Abi, Call, getContract, HttpRequestError } from 'viem';
+import { utils } from 'web3';
+import * as Sentry from '@sentry/nextjs';
 import useGlobalAccount from '@/hooks/useGlobalAccount';
-import DimoABI from '@/contracts/DimoTokenContract.json';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
-import { IKernelOperationStatus, ISubOrganization } from '@/types/wallet';
+import {
+  IDesiredTokenAmount,
+  IKernelOperationStatus,
+  ITokenBalance,
+} from '@/types/wallet';
 
 import configuration from '@/config';
-import { bundlerActions, ENTRYPOINT_ADDRESS_V07 } from 'permissionless';
+import { getCachedDimoPrice } from '@/services/pricing';
+import { handleOnChainError } from '@/utils/wallet';
+import { getKernelClient, getPublicClient } from '@/services/zerodev';
+import { getSessionTurnkeyClient } from '@/services/turnkey';
+
+const { DCX_IN_USD = 0.001 } = process.env;
 
 export const useContractGA = () => {
-  const {
-    organizationInfo,
-    getKernelClient,
-    getPublicClient,
-    handleOnChainError,
-  } = useGlobalAccount();
-  const [balanceDimo, setBalanceDimo] = useState<number>(0);
-  const [balanceDCX, setBalanceDCX] = useState<number>(0);
-  const [allowanceDLC, setAllowanceDLC] = useState<number>(0);
-  const [allowanceDCX, setAllowanceDCX] = useState<number>(0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [dimoContract, setDimoContract] = useState<any>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [licenseContract, setLicenseContract] = useState<any>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [dimoCreditsContract, setDimoCreditsContract] = useState<any>();
+  const { validateCurrentSession, getCurrentDcxBalance, getCurrentDimoBalance } =
+    useGlobalAccount();
 
-  useEffect(() => {
-    const handleGetContracts = async () => {
-      if (!organizationInfo) return;
-
-      const kernelClient = (await getKernelClient(
-        organizationInfo as ISubOrganization,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      )) as any;
-      const publicClient = getPublicClient();
-
-      if (!kernelClient) return;
-
-      setDimoContract(
-        getContract({
-          address: configuration.DC_ADDRESS,
-          abi: DimoABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          },
-        }),
-      );
-
-      setLicenseContract(
-        getContract({
-          address: configuration.DLC_ADDRESS,
-          abi: LicenseABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          },
-        }),
-      );
-
-      setDimoCreditsContract(
-        getContract({
-          address: configuration.DCX_ADDRESS,
-          abi: DimoCreditsABI,
-          client: {
-            public: publicClient,
-            wallet: kernelClient,
-          },
-        }),
-      );
-    };
-
-    handleGetContracts().catch(console.error);
-  }, [organizationInfo?.smartContractAddress]);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const processTransactions = async (transactions: Array<any>) => {
-    if (!organizationInfo) return {} as IKernelOperationStatus;
+  const processTransactions = async (
+    transactions: Array<Call>,
+    options?: { abi?: Abi },
+  ) => {
     try {
-      const kernelClient = await getKernelClient(organizationInfo);
+      const currentSession = await validateCurrentSession();
+      if (!currentSession) return {} as IKernelOperationStatus;
+      const { subOrganizationId, walletAddress } = currentSession;
+
+      const turnkeyClient = getSessionTurnkeyClient();
+
+      if (!turnkeyClient) return {} as IKernelOperationStatus;
+
+      const kernelClient = await getKernelClient({
+        subOrganizationId,
+        walletAddress: walletAddress,
+        client: turnkeyClient,
+      });
 
       if (!kernelClient) return {} as IKernelOperationStatus;
 
+      const operation = await kernelClient.account.encodeCalls(transactions);
       const dcxExchangeOpHash = await kernelClient.sendUserOperation({
-        userOperation: {
-          callData: await kernelClient.account.encodeCallData(transactions),
-        },
+        callData: operation,
       });
 
-      const bundlerClient = kernelClient.extend(
-        bundlerActions(ENTRYPOINT_ADDRESS_V07),
-      );
-
-      const receipt = await bundlerClient.waitForUserOperationReceipt({
+      const receipt = await kernelClient.waitForUserOperationReceipt({
         hash: dcxExchangeOpHash,
       });
 
       if (receipt.reason) throw new Error(receipt.reason);
 
-      return receipt;
+      return {
+        success: receipt.success,
+        reason: receipt.reason,
+        logs: receipt.logs.map((log) => ({ topics: log.topics })),
+      } as IKernelOperationStatus;
     } catch (e: unknown) {
+      Sentry.captureException(e);
       if (e instanceof HttpRequestError) {
-        throw new Error(handleOnChainError(e as HttpRequestError));
+        throw new Error(handleOnChainError(e as HttpRequestError, options?.abi));
       }
       throw e;
     }
   };
 
-  const getDcxBalance = async (): Promise<number> => {
-    if (!dimoCreditsContract) return 0;
-    const currentBalanceOnWei = await dimoCreditsContract.read.balanceOf([
-      organizationInfo!.smartContractAddress,
-    ]);
-    return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
+  const getDesiredTokenAmount = async (): Promise<IDesiredTokenAmount> => {
+    const DEFAULT_AMOUNTS = {
+      dimo: BigInt(0),
+      dcx: BigInt(0),
+      licensePrice: 0,
+      dimoCost: 0,
+    };
+
+    try {
+      const currentSession = await validateCurrentSession();
+      if (!currentSession) return DEFAULT_AMOUNTS;
+      const { subOrganizationId, walletAddress } = currentSession;
+      const turnkeyClient = getSessionTurnkeyClient();
+      if (!turnkeyClient) return DEFAULT_AMOUNTS;
+
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient({
+        subOrganizationId: subOrganizationId,
+        walletAddress: walletAddress,
+        client: turnkeyClient,
+      });
+
+      if (!kernelClient) return DEFAULT_AMOUNTS;
+
+      const dimoPrice = await getCachedDimoPrice();
+
+      const contract = getContract({
+        address: configuration.DLC_ADDRESS,
+        abi: LicenseABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const currentLicenseCost = await contract.read.licenseCostInUsd1e18();
+      const desiredDimoAmount = Number(currentLicenseCost) / Number(dimoPrice);
+      const desiredDCXAmount = Number(currentLicenseCost) / Number(DCX_IN_USD);
+
+      return {
+        dimo: BigInt(desiredDimoAmount),
+        dcx: BigInt(desiredDCXAmount),
+        licensePrice: Number(currentLicenseCost),
+        dimoCost: Number(dimoPrice),
+      };
+    } catch (e: unknown) {
+      Sentry.captureException(e);
+      console.error(e);
+      return DEFAULT_AMOUNTS;
+    }
   };
-  const getDimoBalance = async (): Promise<number> => {
-    if (!dimoContract) return 0;
-    const currentBalanceOnWei = await dimoContract.read.balanceOf([
-      organizationInfo!.smartContractAddress,
-    ]);
-    return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
+
+  const checkEnoughBalance = async (): Promise<ITokenBalance> => {
+    const DEFAULT_TOKEN_BALANCE = {
+      dimo: false,
+      dcx: false,
+      dcxAllowance: false,
+      dlcAllowance: false,
+    };
+    try {
+      const currentSession = await validateCurrentSession();
+      if (!currentSession) return DEFAULT_TOKEN_BALANCE;
+      const desiredTokenAmount = await getDesiredTokenAmount();
+      const dimoBalance = await getCurrentDimoBalance();
+      const dcxBalance = await getCurrentDcxBalance();
+      const dcxAllowance = await getDcxAllowance();
+
+      return {
+        dimo: dimoBalance >= Number(desiredTokenAmount.dimo),
+        dlcAllowance: dcxAllowance >= Number(desiredTokenAmount.dcx),
+        dcx: dcxBalance >= Number(desiredTokenAmount.dcx),
+        dcxAllowance: dcxAllowance >= Number(desiredTokenAmount.dimo),
+      };
+    } catch (e: unknown) {
+      Sentry.captureException(e);
+      console.error('Error while checking balance', e);
+      return DEFAULT_TOKEN_BALANCE;
+    }
   };
 
-  useEffect(() => {
-    if (!dimoContract || !organizationInfo) return;
+  const getDcxAllowance = async (): Promise<number> => {
+    try {
+      const currentSession = await validateCurrentSession();
+      if (!currentSession) return 0;
+      const { subOrganizationId, walletAddress, smartContractAddress } = currentSession;
+      const turnkeyClient = getSessionTurnkeyClient();
 
-    dimoContract.read
-      .balanceOf([organizationInfo!.smartContractAddress])
-      .then((currentBalanceWei: unknown) => {
-        setBalanceDimo(
-          Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
-        );
-      })
-      .catch(console.error);
+      if (!turnkeyClient) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient({
+        subOrganizationId,
+        walletAddress,
+        client: turnkeyClient,
+      });
 
-    dimoCreditsContract.read
-      .balanceOf([organizationInfo!.smartContractAddress])
-      .then((currentBalanceWei: unknown) => {
-        setBalanceDCX(
-          Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
-        );
-      })
-      .catch(console.error);
+      if (!kernelClient) {
+        return 0;
+      }
 
-    dimoContract.read
-      .allowance([
-        organizationInfo.smartContractAddress,
+      const dimoContract = getContract({
+        address: configuration.DC_ADDRESS,
+        abi: DimoCreditsABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const currentAllowanceOnWei = await dimoContract.read.allowance([
+        smartContractAddress,
         configuration.DLC_ADDRESS,
-      ])
-      .then((currentBalanceWei: unknown) => {
-        setAllowanceDLC(
-          Math.ceil(
-            Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
-          ),
-        );
-      })
-      .catch(console.error);
+      ]);
 
-    dimoContract.read
-      .allowance([
-        organizationInfo.smartContractAddress,
+      return Number(utils.fromWei(currentAllowanceOnWei as bigint, 'ether'));
+    } catch (e: unknown) {
+      Sentry.captureException(e);
+      console.error(e);
+      return 0;
+    }
+  };
+
+  const getDimoAllowance = async (): Promise<number> => {
+    try {
+      const currentSession = await validateCurrentSession();
+      if (!currentSession) return 0;
+      const { subOrganizationId, walletAddress, smartContractAddress } = currentSession;
+      const turnkeyClient = getSessionTurnkeyClient();
+
+      if (!turnkeyClient) return 0;
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient({
+        subOrganizationId,
+        walletAddress,
+        client: turnkeyClient,
+      });
+
+      if (!kernelClient) {
+        return 0;
+      }
+
+      const dimoContract = getContract({
+        address: configuration.DC_ADDRESS,
+        abi: DimoCreditsABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const currentAllowanceOnWei = await dimoContract.read.allowance([
+        smartContractAddress,
         configuration.DCX_ADDRESS,
-      ])
-      .then((currentBalanceWei: unknown) => {
-        setAllowanceDCX(
-          Math.ceil(
-            Number(utils.fromWei(currentBalanceWei as bigint, 'ether')),
-          ),
-        );
-      })
-      .catch(console.error);
-  }, [dimoContract, organizationInfo?.smartContractAddress]);
+      ]);
+
+      return Number(utils.fromWei(currentAllowanceOnWei as bigint, 'ether'));
+    } catch (e: unknown) {
+      Sentry.captureException(e);
+      console.error(e);
+      return 0;
+    }
+  };
+
+  const approveNewSpendingLimit = async (
+    amount: number,
+    addressToAllow: `0x${string}`,
+  ): Promise<void> => {
+    const currentSession = await validateCurrentSession();
+    if (!currentSession) return;
+    const { subOrganizationId, walletAddress } = currentSession;
+    const turnkeyClient = getSessionTurnkeyClient();
+
+    if (!turnkeyClient) return;
+    const publicClient = getPublicClient();
+    const kernelClient = await getKernelClient({
+      subOrganizationId,
+      walletAddress,
+      client: turnkeyClient,
+    });
+
+    if (!kernelClient) {
+      return;
+    }
+
+    const dimoContract = getContract({
+      address: configuration.DC_ADDRESS,
+      abi: DimoCreditsABI,
+      client: {
+        public: publicClient,
+        wallet: kernelClient,
+      },
+    });
+
+    const dimoInWei = utils.toWei(amount, 'ether');
+    await dimoContract.write.approve([addressToAllow, dimoInWei]);
+  };
+
+  const getNeededDimoAmountForDcx = async (amount: number): Promise<bigint> => {
+    try {
+      const currentSession = await validateCurrentSession();
+      if (!currentSession) return BigInt(0);
+      const { subOrganizationId, walletAddress } = currentSession;
+      const turnkeyClient = getSessionTurnkeyClient();
+
+      if (!turnkeyClient) return BigInt(0);
+      const publicClient = getPublicClient();
+      const kernelClient = await getKernelClient({
+        subOrganizationId,
+        walletAddress,
+        client: turnkeyClient,
+      });
+
+      if (!kernelClient) {
+        return BigInt(0);
+      }
+
+      const contract = getContract({
+        address: configuration.DCX_ADDRESS,
+        abi: DimoCreditsABI,
+        client: {
+          public: publicClient,
+          wallet: kernelClient,
+        },
+      });
+
+      const quote = await contract.read.getQuoteDc([
+        BigInt(utils.toWei(amount, 'ether')),
+      ]);
+
+      return BigInt(Math.ceil(Number(utils.fromWei(quote as bigint, 'ether'))));
+    } catch (e) {
+      Sentry.captureException(e);
+      const errorReason = handleOnChainError(e as HttpRequestError);
+      console.error('Error getting needed dimo amount', errorReason);
+      return BigInt(0);
+    }
+  };
 
   return {
-    dimoContract,
-    licenseContract,
-    dimoCreditsContract,
-    address: organizationInfo?.smartContractAddress,
-    balanceDimo,
-    balanceDCX,
-    allowanceDLC,
-    allowanceDCX,
+    approveNewSpendingLimit,
+    getDcxAllowance,
+    getDimoAllowance,
     processTransactions,
-    getDcxBalance,
-    getDimoBalance,
-    hasEnoughBalanceDCX: balanceDCX >= configuration.desiredAmountOfDCX,
-    hasEnoughBalanceDimo: balanceDCX >= configuration.desiredAmountOfDimo,
-    hasEnoughAllowanceDLC: allowanceDLC >= configuration.desiredAmountOfDCX,
-    hasEnoughAllowanceDCX: allowanceDCX >= configuration.desiredAmountOfDimo,
+    getDesiredTokenAmount,
+    checkEnoughBalance,
+    getNeededDimoAmountForDcx,
   };
 };
