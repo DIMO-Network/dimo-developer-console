@@ -81,6 +81,7 @@ export const View: FC = () => {
           <>
             <OnboardingBanner
               balance={balance}
+              isLoading={loadingBalance}
               licenseConnection={data.developerLicenses}
             />
             <LicenseList licenseConnection={data.developerLicenses} />

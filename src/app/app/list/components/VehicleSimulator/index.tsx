@@ -1,9 +1,9 @@
 'use client';
 import { FC, useContext, useState } from 'react';
-import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
 import { useMintVehicle } from '@/hooks';
 import { MAKES, YEARS, VehicleMake } from './constants';
+import './VehicleSimulator.css';
 
 interface MintedVehicle {
   tokenId: number;
@@ -15,6 +15,14 @@ interface MintedVehicle {
 interface Props {
   clientId: `0x${string}`;
 }
+
+const MAKE_ABBRS: Record<string, string> = {
+  toyota: 'TOY',
+  ford: 'FORD',
+  tesla: 'TSL',
+  bmw: 'BMW',
+  honda: 'HON',
+};
 
 export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const { setNotification } = useContext(NotificationContext);
@@ -35,6 +43,16 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
     setSelectedMakeSlug(makeSlug);
     setSelectedModelSlug('');
   };
+
+  const selectionPreview = (() => {
+    if (!selectedMakeSlug) return 'No vehicle configured';
+    const makeName = selectedMake?.label ?? selectedMakeSlug;
+    const modelLabel =
+      selectedMake?.models.find((m) => m.slug === selectedModelSlug)?.label ??
+      selectedModelSlug;
+    const parts = [selectedYear, makeName, modelLabel].filter(Boolean);
+    return parts.join(' · ');
+  })();
 
   const handleMint = async () => {
     if (!selectedMake || !selectedModelSlug || !selectedYear) return;
@@ -81,104 +99,154 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
   return (
     <div className="license-list-content">
-      <div className="description">
-        <p className="title">Vehicle Simulator</p>
-        <p className="text-sm text-text-secondary">
-          Mint a simulated test vehicle on Polygon Amoy for development and testing.
-        </p>
+      {/* Header */}
+      <div className="vehicle-sim-header">
+        <div className="vehicle-sim-header-text">
+          <p className="title">Vehicle Simulator</p>
+          <p className="text-sm text-text-secondary">
+            Mint simulated test vehicles on Polygon Amoy.
+          </p>
+        </div>
+        <span className="vehicle-sim-testnet-badge">Testnet</span>
       </div>
 
-      <div className="flex flex-col gap-4 max-w-sm">
-        {/* Make */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="sim-make" className="text-sm font-medium">
-            Make
-          </label>
-          <select
-            id="sim-make"
-            aria-label="Make"
-            className="rounded-lg border border-surface-stroke bg-surface-raised px-3 py-2 text-sm"
-            value={selectedMakeSlug}
-            disabled={isLoading}
-            onChange={(e) => handleMakeChange(e.target.value)}
-          >
-            <option value="">Select make</option>
+      {/* Step-by-step configurator */}
+      <div className="vehicle-sim-steps">
+        {/* Step 01 — Make */}
+        <div className="vehicle-sim-step">
+          <span className="vehicle-sim-step-label">01 — Make</span>
+          <div className="vehicle-sim-make-grid" role="group" aria-label="Select make">
             {MAKES.map((make) => (
-              <option key={make.slug} value={make.slug}>
-                {make.label}
-              </option>
+              <button
+                key={make.slug}
+                type="button"
+                aria-pressed={selectedMakeSlug === make.slug}
+                aria-label={make.label}
+                disabled={isLoading}
+                onClick={() => handleMakeChange(make.slug)}
+                className={`vehicle-sim-make-card${selectedMakeSlug === make.slug ? ' selected' : ''}`}
+              >
+                <span className="vehicle-sim-make-abbr">
+                  {MAKE_ABBRS[make.slug] ?? make.slug.slice(0, 4).toUpperCase()}
+                </span>
+                <span className="vehicle-sim-make-name">{make.label}</span>
+              </button>
             ))}
-          </select>
+          </div>
         </div>
 
-        {/* Model */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="sim-model" className="text-sm font-medium">
-            Model
-          </label>
-          <select
-            id="sim-model"
-            aria-label="Model"
-            className="rounded-lg border border-surface-stroke bg-surface-raised px-3 py-2 text-sm disabled:opacity-50"
-            value={selectedModelSlug}
-            disabled={!selectedMakeSlug || isLoading}
-            onChange={(e) => setSelectedModelSlug(e.target.value)}
-          >
-            <option value="">Select model</option>
-            {selectedMake?.models.map((model) => (
-              <option key={model.slug} value={model.slug}>
+        {/* Step 02 — Model */}
+        <div className={`vehicle-sim-step${!selectedMakeSlug ? ' locked' : ''}`}>
+          <span className="vehicle-sim-step-label">02 — Model</span>
+          <div className="vehicle-sim-pill-group" role="group" aria-label="Select model">
+            {(selectedMake?.models ?? []).map((model) => (
+              <button
+                key={model.slug}
+                type="button"
+                aria-pressed={selectedModelSlug === model.slug}
+                aria-label={model.label}
+                disabled={!selectedMakeSlug || isLoading}
+                onClick={() => setSelectedModelSlug(model.slug)}
+                className={`vehicle-sim-pill${selectedModelSlug === model.slug ? ' selected' : ''}`}
+              >
                 {model.label}
-              </option>
+              </button>
             ))}
-          </select>
+            {!selectedMake && (
+              <span
+                className="vehicle-sim-pill"
+                style={{ opacity: 0.3, pointerEvents: 'none' }}
+              >
+                Select a make first
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Year */}
-        <div className="flex flex-col gap-1">
-          <label htmlFor="sim-year" className="text-sm font-medium">
-            Year
-          </label>
-          <select
-            id="sim-year"
-            aria-label="Year"
-            className="rounded-lg border border-surface-stroke bg-surface-raised px-3 py-2 text-sm disabled:opacity-50"
-            value={selectedYear}
-            disabled={isLoading}
-            onChange={(e) => setSelectedYear(e.target.value)}
-          >
-            <option value="">Select year</option>
+        {/* Step 03 — Year */}
+        <div className={`vehicle-sim-step${!selectedModelSlug ? ' locked' : ''}`}>
+          <span className="vehicle-sim-step-label">03 — Year</span>
+          <div className="vehicle-sim-pill-group" role="group" aria-label="Select year">
             {YEARS.map((year) => (
-              <option key={year} value={year}>
+              <button
+                key={year}
+                type="button"
+                aria-pressed={selectedYear === String(year)}
+                aria-label={String(year)}
+                disabled={!selectedModelSlug || isLoading}
+                onClick={() => setSelectedYear(String(year))}
+                className={`vehicle-sim-pill${selectedYear === String(year) ? ' selected' : ''}`}
+              >
                 {year}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
         </div>
-
-        <Button
-          className="white !h-10"
-          disabled={!canMint}
-          loading={isLoading}
-          onClick={handleMint}
-        >
-          Create a simulated vehicle
-        </Button>
       </div>
 
-      {/* Minted vehicles list */}
-      {mintedVehicles.length > 0 && (
-        <div className="flex flex-col gap-2 mt-4">
-          <p className="text-sm font-medium">Simulated Vehicles</p>
-          <div className="flex flex-col gap-2">
-            {mintedVehicles.map((vehicle, idx) => (
-              <div
-                key={idx}
-                className="flex flex-row items-center justify-between rounded-lg border border-surface-stroke bg-surface-raised px-4 py-3 text-sm"
+      {/* Divider + Mint action */}
+      <div className="vehicle-sim-divider" />
+      <div className="vehicle-sim-mint-row">
+        <span className="vehicle-sim-selection-preview" aria-live="polite">
+          {selectionPreview}
+        </span>
+        <button
+          type="button"
+          className="vehicle-sim-mint-btn"
+          disabled={!canMint || isLoading}
+          onClick={handleMint}
+          aria-label="Mint simulated vehicle"
+        >
+          {isLoading ? (
+            <>
+              <span className="vehicle-sim-spinner" aria-hidden="true" />
+              Minting…
+            </>
+          ) : (
+            <>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
               >
-                <span className="font-medium">
-                  {vehicle.make} {vehicle.model} {vehicle.year}
-                </span>
-                <span className="text-text-secondary">Token ID: {vehicle.tokenId}</span>
+                <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v5" />
+                <circle cx="18" cy="17" r="3" />
+                <circle cx="8" cy="17" r="3" />
+              </svg>
+              Mint Vehicle
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Simulated fleet */}
+      {mintedVehicles.length > 0 && (
+        <div className="vehicle-sim-fleet">
+          <div className="vehicle-sim-fleet-header">
+            <span className="vehicle-sim-step-label">Simulated Fleet</span>
+            <span className="vehicle-sim-fleet-count">
+              {mintedVehicles.length} vehicle{mintedVehicles.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <div className="vehicle-sim-fleet-list">
+            {mintedVehicles.map((vehicle, idx) => (
+              <div key={idx} className="vehicle-sim-card">
+                <div className="vehicle-sim-card-left">
+                  <span className="vehicle-sim-card-vehicle">
+                    {vehicle.year} {vehicle.make} {vehicle.model}
+                  </span>
+                  <span className="vehicle-sim-card-network">Polygon Amoy</span>
+                </div>
+                <div className="vehicle-sim-card-right">
+                  <span className="vehicle-sim-card-token-label">Token ID</span>
+                  <span className="vehicle-sim-card-token-id">#{vehicle.tokenId}</span>
+                </div>
               </div>
             ))}
           </div>

@@ -15,7 +15,9 @@ const mockClientId = '0x1234567890123456789012345678901234567890' as `0x${string
 describe('VehicleSimulator', () => {
   const renderComponent = () =>
     render(
-      <NotificationContext.Provider value={{ setNotification: mockSetNotification }}>
+      <NotificationContext.Provider
+        value={{ setNotification: mockSetNotification, notifications: [] }}
+      >
         <MockedProvider>
           <VehicleSimulator clientId={mockClientId} />
         </MockedProvider>
@@ -27,33 +29,40 @@ describe('VehicleSimulator', () => {
     expect(screen.getByText('Vehicle Simulator')).toBeInTheDocument();
   });
 
-  it('renders the Make, Model, and Year dropdowns', () => {
+  it('renders make selector buttons', () => {
     renderComponent();
-    expect(screen.getByLabelText('Make')).toBeInTheDocument();
-    expect(screen.getByLabelText('Model')).toBeInTheDocument();
-    expect(screen.getByLabelText('Year')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Toyota' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ford' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tesla' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'BMW' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Honda' })).toBeInTheDocument();
   });
 
   it('disables the mint button until all fields are selected', () => {
     renderComponent();
-    const button = screen.getByRole('button', { name: /create a simulated vehicle/i });
-    expect(button).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: /mint simulated vehicle/i }),
+    ).toBeDisabled();
   });
 
-  it('enables the mint button when all dropdowns are selected', () => {
+  it('enables the mint button when make, model, and year are all selected', () => {
     renderComponent();
-    fireEvent.change(screen.getByLabelText('Make'), { target: { value: 'toyota' } });
-    fireEvent.change(screen.getByLabelText('Model'), { target: { value: 'camry' } });
-    fireEvent.change(screen.getByLabelText('Year'), { target: { value: '2022' } });
-    const button = screen.getByRole('button', { name: /create a simulated vehicle/i });
-    expect(button).not.toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Toyota' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Camry' }));
+    fireEvent.click(screen.getByRole('button', { name: '2022' }));
+    expect(
+      screen.getByRole('button', { name: /mint simulated vehicle/i }),
+    ).not.toBeDisabled();
   });
 
-  it('resets model when make changes', () => {
+  it('resets selected model when make changes', () => {
     renderComponent();
-    fireEvent.change(screen.getByLabelText('Make'), { target: { value: 'toyota' } });
-    fireEvent.change(screen.getByLabelText('Model'), { target: { value: 'camry' } });
-    fireEvent.change(screen.getByLabelText('Make'), { target: { value: 'ford' } });
-    expect((screen.getByLabelText('Model') as HTMLSelectElement).value).toBe('');
+    fireEvent.click(screen.getByRole('button', { name: 'Toyota' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Camry' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ford' }));
+    // Mint button should still be disabled since model was reset
+    expect(
+      screen.getByRole('button', { name: /mint simulated vehicle/i }),
+    ).toBeDisabled();
   });
 });
