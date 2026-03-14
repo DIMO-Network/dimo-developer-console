@@ -11,6 +11,11 @@ import { TotalCount } from '@/components/TotalVehicleCount';
 import { useRouter } from 'next/navigation';
 import { AxiosError } from 'axios';
 import { getConfigurationByClientId } from '@/actions/configurations';
+import { VehicleSimulatorModal } from '@/app/app/list/components/VehicleSimulator/VehicleSimulatorModal';
+import configuration from '@/config';
+
+// Only available on testnet (Polygon Amoy = 80002)
+const IS_TESTNET = configuration.CONTRACT_NETWORK === BigInt(80_002);
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -64,6 +69,9 @@ export const Vehicles: FC<IProps> = ({ license }) => {
     <div className={'w-full'}>
       <Section>
         <SectionHeader title={'Vehicles'}>
+          {IS_TESTNET && (
+            <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
+          )}
           {ready && (
             <Button
               className="dark with-icon px-4"

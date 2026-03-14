@@ -5,13 +5,12 @@ import { Loader } from '@/components/Loader';
 import { OnboardingBanner } from '@/components/OnboardingBanner';
 import { useGlobalAccount, useOnboarding, useUser } from '@/hooks';
 import Image from 'next/image';
-import { LicenseList, GET_LICENSE_SUMMARIES } from '@/app/license/list';
+import { LicenseList } from '@/app/license/list';
 import './View.css';
-import { FragmentType, gql, useFragment } from '@/gql';
+import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { AppListRightPanel } from '@/app/app/list/components/RightPanel';
-import { VehicleSimulator } from '@/app/app/list/components/VehicleSimulator';
 
 const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
   query GetDeveloperLicensesByOwner($owner: Address!) {
@@ -27,20 +26,6 @@ function getFirstName(name: string) {
   const [firstName] = trimmed.split(' ');
   return firstName || '';
 }
-
-/**
- * Wrapper that unwraps fragment data and passes clientId to VehicleSimulator.
- */
-const VehicleSimulatorSection: FC<{
-  licenseConnection: FragmentType<typeof GET_LICENSE_SUMMARIES>;
-}> = ({ licenseConnection }) => {
-  const { nodes } = useFragment(GET_LICENSE_SUMMARIES, licenseConnection);
-  // nodes[0] carries DeveloperLicenseSummaryFragment data inline via fragment masking.
-  // Cast through unknown to access clientId without a second useFragment call.
-  const firstNode = nodes[0] as { clientId?: `0x${string}` } | undefined;
-  if (!firstNode?.clientId) return null;
-  return <VehicleSimulator clientId={firstNode.clientId} />;
-};
 
 export const View: FC = () => {
   const { balance, isLoading: loadingBalance } = useOnboarding();
@@ -85,7 +70,6 @@ export const View: FC = () => {
               licenseConnection={data.developerLicenses}
             />
             <LicenseList licenseConnection={data.developerLicenses} />
-            <VehicleSimulatorSection licenseConnection={data.developerLicenses} />
           </>
         )}
       </div>

@@ -1,5 +1,6 @@
 'use client';
 import { FC, useContext, useState } from 'react';
+import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
 import { useMintVehicle } from '@/hooks';
 import { MAKES, YEARS, VehicleMake } from './constants';
@@ -190,39 +191,14 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         <span className="vehicle-sim-selection-preview" aria-live="polite">
           {selectionPreview}
         </span>
-        <button
-          type="button"
-          className="vehicle-sim-mint-btn"
-          disabled={!canMint || isLoading}
+        <Button
+          className="white !h-9 shrink-0"
+          disabled={!canMint}
+          loading={isLoading}
           onClick={handleMint}
-          aria-label="Mint simulated vehicle"
         >
-          {isLoading ? (
-            <>
-              <span className="vehicle-sim-spinner" aria-hidden="true" />
-              Minting…
-            </>
-          ) : (
-            <>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v5" />
-                <circle cx="18" cy="17" r="3" />
-                <circle cx="8" cy="17" r="3" />
-              </svg>
-              Mint Vehicle
-            </>
-          )}
-        </button>
+          Mint Vehicle
+        </Button>
       </div>
 
       {/* Simulated fleet */}

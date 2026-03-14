@@ -40,9 +40,7 @@ describe('VehicleSimulator', () => {
 
   it('disables the mint button until all fields are selected', () => {
     renderComponent();
-    expect(
-      screen.getByRole('button', { name: /mint simulated vehicle/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: /mint vehicle/i })).toBeDisabled();
   });
 
   it('enables the mint button when make, model, and year are all selected', () => {
@@ -50,9 +48,7 @@ describe('VehicleSimulator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Toyota' }));
     fireEvent.click(screen.getByRole('button', { name: 'Camry' }));
     fireEvent.click(screen.getByRole('button', { name: '2022' }));
-    expect(
-      screen.getByRole('button', { name: /mint simulated vehicle/i }),
-    ).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /mint vehicle/i })).not.toBeDisabled();
   });
 
   it('resets selected model when make changes', () => {
@@ -61,8 +57,6 @@ describe('VehicleSimulator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Camry' }));
     fireEvent.click(screen.getByRole('button', { name: 'Ford' }));
     // Mint button should still be disabled since model was reset
-    expect(
-      screen.getByRole('button', { name: /mint simulated vehicle/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: /mint vehicle/i })).toBeDisabled();
   });
 });
