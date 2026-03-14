@@ -99,7 +99,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   };
 
   return (
-    <div className="license-list-content">
+    <div className="license-list-content w-full">
       {/* Header */}
       <div className="vehicle-sim-header">
         <div className="vehicle-sim-header-text">
@@ -108,7 +108,6 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
             Mint simulated test vehicles on Polygon Amoy.
           </p>
         </div>
-        <span className="vehicle-sim-testnet-badge">Testnet</span>
       </div>
 
       {/* Step-by-step configurator */}
