@@ -43,7 +43,6 @@ export const Vehicles: FC<IProps> = ({ license }) => {
   });
   const router = useRouter();
   const [configurationId, setConfigurationId] = useState<string>('');
-  const [ready, setReady] = useState<boolean>(false);
 
   useEffect(() => {
     if (!fragment.clientId) return;
@@ -57,8 +56,6 @@ export const Vehicles: FC<IProps> = ({ license }) => {
           return;
         }
         console.error(error);
-      } finally {
-        setReady(true);
       }
     };
 
@@ -69,12 +66,13 @@ export const Vehicles: FC<IProps> = ({ license }) => {
     <div className={'w-full'}>
       <Section>
         <SectionHeader title={'Vehicles'}>
-          {IS_TESTNET && (
-            <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
-          )}
-          {ready && (
+          <div className={'flex flex-row gap-2'}>
+            {IS_TESTNET && (
+              <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
+            )}
             <Button
               className="dark with-icon px-4"
+              disabled={!configurationId}
               onClick={() => {
                 router.push(
                   `/license/${fragment.tokenId}/configurator/${configurationId}`,
@@ -83,7 +81,7 @@ export const Vehicles: FC<IProps> = ({ license }) => {
             >
               Configure Vehicle Sharing
             </Button>
-          )}
+          </div>
         </SectionHeader>
         <div className={'flex flex-col flex-1'}>
           {!!error && <p>We had trouble fetching the connected vehicles</p>}
