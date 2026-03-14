@@ -8,6 +8,7 @@ import { useQuery } from '@apollo/client';
 import { Title } from '@/components/Title';
 import configuration from '@/config';
 import { MAKES } from '@/app/app/list/components/VehicleSimulator/constants';
+import { VEHICLES_BY_CLIENT_ID } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable';
 
 const IS_TESTNET = configuration.CONTRACT_NETWORK === BigInt(80_002);
 const SIMULATOR_MAKE_LABELS = new Set(MAKES.map((m) => m.label));
@@ -20,25 +21,13 @@ const DEVELOPER_LICENSE_VEHICLE_DETAILS = gql(`
   }
 `);
 
-const SIMULATOR_VEHICLE_DEFS = gql(`
-  query SimulatorVehicleDefs($clientId: Address!) {
-    vehicles(first: 1000, filterBy: { privileged: $clientId }) {
-      nodes {
-        definition {
-          make
-        }
-      }
-    }
-  }
-`);
-
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const { clientId } = use(params);
   const { data } = useQuery(DEVELOPER_LICENSE_VEHICLE_DETAILS, {
     variables: { clientId },
   });
-  const { data: defsData } = useQuery(SIMULATOR_VEHICLE_DEFS, {
-    variables: { clientId },
+  const { data: defsData } = useQuery(VEHICLES_BY_CLIENT_ID, {
+    variables: { clientId, first: 1000 },
     skip: !IS_TESTNET,
   });
 

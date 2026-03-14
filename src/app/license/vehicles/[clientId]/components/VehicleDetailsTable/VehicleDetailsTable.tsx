@@ -13,7 +13,7 @@ interface IProps {
   clientId: string;
 }
 
-const VEHICLES_BY_CLIENT_ID = gql(`
+export const VEHICLES_BY_CLIENT_ID = gql(`
   query GetVehiclesByClientId($clientId: Address!, $first: Int, $last: Int, $before: String, $after: String) {
     vehicles(filterBy:{ privileged: $clientId }, first: $first, last: $last, before:$before, after:$after) {
       totalCount
