@@ -1,10 +1,32 @@
 'use client';
 import { FC, useContext, useState } from 'react';
+import { useQuery, gql } from '@apollo/client';
 import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
 import { useMintVehicle } from '@/hooks';
 import { MAKES, YEARS, VehicleMake } from './constants';
 import './VehicleSimulator.css';
+
+const MAX_TEST_VEHICLES = 1;
+const SIMULATOR_MAKE_LABELS = new Set(MAKES.map((m) => m.label));
+
+export const GET_SIMULATOR_VEHICLES = gql(`
+  query GetSimulatorVehicles($clientId: Address!) {
+    vehicles(filterBy: { privileged: $clientId }, first: 100) {
+      nodes {
+        definition {
+          make
+        }
+      }
+    }
+  }
+`);
+
+interface SimulatorVehiclesData {
+  vehicles: {
+    nodes: Array<{ definition: { make: string } | null }>;
+  };
+}
 
 interface MintedVehicle {
   tokenId: number;
@@ -35,10 +57,22 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [mintedVehicles, setMintedVehicles] = useState<MintedVehicle[]>([]);
 
+  const { data: vehicleData, refetch: refetchVehicles } = useQuery<SimulatorVehiclesData>(
+    GET_SIMULATOR_VEHICLES,
+    { variables: { clientId } },
+  );
+
+  const existingTestCount =
+    vehicleData?.vehicles.nodes.filter(
+      (v) => v.definition?.make && SIMULATOR_MAKE_LABELS.has(v.definition.make),
+    ).length ?? 0;
+
+  const atLimit = existingTestCount + mintedVehicles.length >= MAX_TEST_VEHICLES;
+
   const selectedMake: VehicleMake | undefined = MAKES.find(
     (m) => m.slug === selectedMakeSlug,
   );
-  const canMint = !!selectedMakeSlug && !!selectedModelSlug && !!selectedYear;
+  const canMint = !!selectedMakeSlug && !!selectedModelSlug && !!selectedYear && !atLimit;
 
   const handleMakeChange = (makeSlug: string) => {
     setSelectedMakeSlug(makeSlug);
@@ -87,6 +121,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       ]);
 
       setNotification('Vehicle minted successfully!', 'Success', 'success');
+      void refetchVehicles();
     } catch {
       setNotification(
         'Something went wrong while minting the vehicle',
@@ -188,7 +223,9 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       <div className="vehicle-sim-divider" />
       <div className="vehicle-sim-mint-row">
         <span className="vehicle-sim-selection-preview" aria-live="polite">
-          {selectionPreview}
+          {atLimit
+            ? `Limit reached — only ${MAX_TEST_VEHICLES} test vehicle per account`
+            : selectionPreview}
         </span>
         <Button
           className="white !h-9 shrink-0"
