@@ -1,39 +1,17 @@
 'use client';
 import { FC, useContext, useState } from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
 import { useMintVehicle } from '@/hooks';
+import {
+  getSimulatedVehicles,
+  recordSimulatedVehicle,
+} from '@/actions/simulatedVehicles';
 import { MAKES, YEARS, VehicleMake } from './constants';
 import './VehicleSimulator.css';
 
 const MAX_TEST_VEHICLES = 1;
-const SIMULATOR_MAKE_LABELS = new Set(MAKES.map((m) => m.label));
-
-export const GET_SIMULATOR_VEHICLES = gql(`
-  query GetSimulatorVehicles($clientId: Address!) {
-    vehicles(filterBy: { privileged: $clientId }, first: 100) {
-      nodes {
-        definition {
-          make
-        }
-      }
-    }
-  }
-`);
-
-interface SimulatorVehiclesData {
-  vehicles: {
-    nodes: Array<{ definition: { make: string } | null }>;
-  };
-}
-
-interface MintedVehicle {
-  tokenId: number;
-  make: string;
-  model: string;
-  year: number;
-}
 
 interface Props {
   clientId: `0x${string}`;
@@ -50,24 +28,19 @@ const MAKE_ABBRS: Record<string, string> = {
 export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const { setNotification } = useContext(NotificationContext);
   const mintVehicle = useMintVehicle();
+  const queryClient = useQueryClient();
 
   const [selectedMakeSlug, setSelectedMakeSlug] = useState('');
   const [selectedModelSlug, setSelectedModelSlug] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [mintedVehicles, setMintedVehicles] = useState<MintedVehicle[]>([]);
 
-  const { data: vehicleData, refetch: refetchVehicles } = useQuery<SimulatorVehiclesData>(
-    GET_SIMULATOR_VEHICLES,
-    { variables: { clientId } },
-  );
+  const { data: storedVehicles = [] } = useQuery({
+    queryKey: ['simulated-vehicles', clientId],
+    queryFn: () => getSimulatedVehicles({ clientId }),
+  });
 
-  const existingTestCount =
-    vehicleData?.vehicles.nodes.filter(
-      (v) => v.definition?.make && SIMULATOR_MAKE_LABELS.has(v.definition.make),
-    ).length ?? 0;
-
-  const atLimit = existingTestCount + mintedVehicles.length >= MAX_TEST_VEHICLES;
+  const atLimit = storedVehicles.length >= MAX_TEST_VEHICLES;
 
   const selectedMake: VehicleMake | undefined = MAKES.find(
     (m) => m.slug === selectedMakeSlug,
@@ -110,18 +83,17 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         selectedMake.models.find((m) => m.slug === selectedModelSlug)?.label ??
         selectedModelSlug;
 
-      setMintedVehicles((prev) => [
-        ...prev,
-        {
-          tokenId: result.tokenId ?? 0,
-          make: selectedMake.label,
-          model: modelLabel,
-          year: Number(selectedYear),
-        },
-      ]);
+      await recordSimulatedVehicle({
+        tokenId: result.tokenId ?? 0,
+        make: selectedMake.label,
+        model: modelLabel,
+        year: Number(selectedYear),
+        clientId,
+      });
+
+      await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
 
       setNotification('Vehicle minted successfully!', 'Success', 'success');
-      void refetchVehicles();
     } catch {
       setNotification(
         'Something went wrong while minting the vehicle',
@@ -238,17 +210,17 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       </div>
 
       {/* Simulated fleet */}
-      {mintedVehicles.length > 0 && (
+      {storedVehicles.length > 0 && (
         <div className="vehicle-sim-fleet">
           <div className="vehicle-sim-fleet-header">
             <span className="vehicle-sim-step-label">Simulated Fleet</span>
             <span className="vehicle-sim-fleet-count">
-              {mintedVehicles.length} vehicle{mintedVehicles.length !== 1 ? 's' : ''}
+              {storedVehicles.length} vehicle{storedVehicles.length !== 1 ? 's' : ''}
             </span>
           </div>
           <div className="vehicle-sim-fleet-list">
-            {mintedVehicles.map((vehicle, idx) => (
-              <div key={idx} className="vehicle-sim-card">
+            {storedVehicles.map((vehicle) => (
+              <div key={vehicle.id} className="vehicle-sim-card">
                 <div className="vehicle-sim-card-left">
                   <span className="vehicle-sim-card-vehicle">
                     {vehicle.year} {vehicle.make} {vehicle.model}
@@ -257,7 +229,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
                 </div>
                 <div className="vehicle-sim-card-right">
                   <span className="vehicle-sim-card-token-label">Token ID</span>
-                  <span className="vehicle-sim-card-token-id">#{vehicle.tokenId}</span>
+                  <span className="vehicle-sim-card-token-id">#{vehicle.token_id}</span>
                 </div>
               </div>
             ))}
