@@ -1,46 +1,57 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { VehicleSimulator, GET_SIMULATOR_VEHICLES } from '../index';
-import { MockedProvider } from '@apollo/client/testing';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { VehicleSimulator } from '../index';
 import { NotificationContext } from '@/context/notificationContext';
 
-// Mock useMintVehicle — no Web3 infrastructure needed in unit tests
 jest.mock('@/hooks', () => ({
   useMintVehicle: jest.fn(() => jest.fn()),
 }));
 
+jest.mock('@/actions/simulatedVehicles', () => ({
+  getSimulatedVehicles: jest.fn(),
+  recordSimulatedVehicle: jest.fn(),
+}));
+
+const { getSimulatedVehicles } = jest.requireMock('@/actions/simulatedVehicles');
+
 const mockSetNotification = jest.fn();
 const mockClientId = '0x1234567890123456789012345678901234567890' as `0x${string}`;
 
-type SimulatorNode = { definition: { make: string } | null };
-
-const makeVehiclesMock = (nodes: SimulatorNode[]) => ({
-  request: {
-    query: GET_SIMULATOR_VEHICLES,
-    variables: { clientId: mockClientId },
-  },
-  result: {
-    data: {
-      vehicles: { nodes },
-    },
-  },
+const makeStoredVehicle = (overrides = {}) => ({
+  id: 'uuid-1',
+  user_id: 'user-1',
+  token_id: 42,
+  make: 'Toyota',
+  model: 'Camry',
+  year: 2022,
+  client_id: mockClientId,
+  created_at: '2026-01-01T00:00:00Z',
+  updated_at: '2026-01-01T00:00:00Z',
+  ...overrides,
 });
 
-const emptyVehiclesMock = makeVehiclesMock([]);
-const oneTestVehicleMock = makeVehiclesMock([{ definition: { make: 'Toyota' } }]);
-
-describe('VehicleSimulator', () => {
-  const renderComponent = (mocks = [emptyVehiclesMock]) =>
-    render(
+const renderComponent = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return render(
+    <QueryClientProvider client={queryClient}>
       <NotificationContext.Provider
         value={{ setNotification: mockSetNotification, notifications: [] }}
       >
-        <MockedProvider mocks={mocks} addTypename={false}>
-          <VehicleSimulator clientId={mockClientId} />
-        </MockedProvider>
-      </NotificationContext.Provider>,
-    );
+        <VehicleSimulator clientId={mockClientId} />
+      </NotificationContext.Provider>
+    </QueryClientProvider>,
+  );
+};
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  getSimulatedVehicles.mockResolvedValue([]);
+});
+
+describe('VehicleSimulator', () => {
   it('renders the section heading', () => {
     renderComponent();
     expect(screen.getByText('Vehicle Simulator')).toBeInTheDocument();
@@ -73,12 +84,12 @@ describe('VehicleSimulator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Toyota' }));
     fireEvent.click(screen.getByRole('button', { name: 'Camry' }));
     fireEvent.click(screen.getByRole('button', { name: 'Ford' }));
-    // Mint button should still be disabled since model was reset
     expect(screen.getByRole('button', { name: /mint vehicle/i })).toBeDisabled();
   });
 
-  it('disables mint button and shows limit message when test vehicle limit is reached', async () => {
-    renderComponent([oneTestVehicleMock]);
+  it('disables mint and shows limit message when stored vehicle count is at limit', async () => {
+    getSimulatedVehicles.mockResolvedValue([makeStoredVehicle()]);
+    renderComponent();
     await waitFor(() => {
       expect(screen.getByText(/limit reached/i)).toBeInTheDocument();
     });
