@@ -32,7 +32,7 @@ export default function DeveloperLicenseDetailsPageLayout({
   const router = useRouter();
 
   const onBack = () => {
-    router.replace(`/license/${data?.developerLicense.tokenId}/details`);
+    router.replace(`/license/${data?.developerLicense?.tokenId}/details`);
   };
 
   return (
