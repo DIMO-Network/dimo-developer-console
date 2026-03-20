@@ -14,7 +14,7 @@ The make selection cards in `VehicleSimulator` display monospace abbreviations (
 
 ## Solution
 
-Replace the abbreviation `<span>` in each make card with an inline SVG brand logo sourced from the `simple-icons` package. Logos render in monochrome via `currentColor` so the white→black colour inversion on the `.selected` state works for free.
+Replace the abbreviation `<span>` in each make card with an inline SVG brand logo sourced from the `simple-icons` package. Logos render in monochrome via explicit CSS colour rules so the white→black inversion on `.selected` works correctly.
 
 ---
 
@@ -22,59 +22,87 @@ Replace the abbreviation `<span>` in each make card with an inline SVG brand log
 
 ### Dependency
 
-Install `simple-icons` as a production dependency. It exports one object per brand with a `path` field (SVG path data for a 24×24 viewBox) and a `slug` field. No additional wrapper package is needed.
+Install `simple-icons` as a production dependency. It exports one named object per brand with a `path` field (SVG path data for a 24×24 viewBox).
 
 ### Data layer — `constants.ts`
 
-Add `siSlug: string` to the `VehicleMake` interface. Set the slug for each make:
+Add `siPath: string` to the `VehicleMake` interface. Populate it using **named imports** from `simple-icons` — one import per make — and store only `icon.path`. This approach is fully tree-shakeable (no namespace import) and eliminates any runtime lookup failure since the path is a required typed field.
 
-| Make   | siSlug |
-| ------ | ------ |
-| Toyota | toyota |
-| Ford   | ford   |
-| Tesla  | tesla  |
-| BMW    | bmw    |
-| Honda  | honda  |
+```ts
+import { siToyota, siFord, siTesla, siBmw, siHonda } from 'simple-icons';
 
-These slugs map directly to `simple-icons` named exports (e.g. `siToyota`).
+export interface VehicleMake {
+  label: string;
+  slug: string;
+  nodeId: number;
+  siPath: string;
+  models: { label: string; slug: string }[];
+}
+```
+
+Each make entry sets `siPath` from the imported icon:
+
+| Make   | Import   | siPath value  |
+| ------ | -------- | ------------- |
+| Toyota | siToyota | siToyota.path |
+| Ford   | siFord   | siFord.path   |
+| Tesla  | siTesla  | siTesla.path  |
+| BMW    | siBmw    | siBmw.path    |
+| Honda  | siHonda  | siHonda.path  |
+
+Because `siPath` is a required field on the interface, TypeScript enforces it at compile time — no runtime `null` fallback is needed.
 
 ### Component — `index.tsx`
 
 - Remove the `MAKE_ABBRS` constant.
-- Add a small co-located `MakeIcon` component:
+- Add a small co-located `MakeIcon` component that accepts the pre-resolved SVG path:
 
   ```tsx
-  import * as si from 'simple-icons';
-
-  const MakeIcon: FC<{ slug: string }> = ({ slug }) => {
-    const key = `si${slug.charAt(0).toUpperCase()}${slug.slice(1)}` as keyof typeof si;
-    const icon = si[key] as { path: string } | undefined;
-    if (!icon) return null;
-    return (
-      <svg className="vehicle-sim-make-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d={icon.path} fill="currentColor" />
-      </svg>
-    );
-  };
+  const MakeIcon: FC<{ path: string }> = ({ path }) => (
+    <svg className="vehicle-sim-make-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d={path} fill="currentColor" />
+    </svg>
+  );
   ```
 
-- In the card JSX, replace `<span className="vehicle-sim-make-abbr">…</span>` with `<MakeIcon slug={make.siSlug} />`.
+- In the card JSX, replace `<span className="vehicle-sim-make-abbr">…</span>` with `<MakeIcon path={make.siPath} />`.
 
 ### Styles — `VehicleSimulator.css`
 
-- Remove `.vehicle-sim-make-abbr` rule block.
-- Add `.vehicle-sim-make-icon` with `width: 20px; height: 20px; display: block;`. Color is inherited via `currentColor`; the existing `.selected` rule already sets the card's text colour to black, so the icon inverts automatically.
+Remove the entire `.vehicle-sim-make-abbr` rule block, **including** the nested `.vehicle-sim-make-abbr` sub-rule inside `.selected` (which becomes dead CSS once the element is gone).
+
+Add `.vehicle-sim-make-icon`:
+
+```css
+.vehicle-sim-make-icon {
+  @apply w-5 h-5 block text-text-secondary;
+}
+```
+
+Inside the existing `.selected` block, add a rule to invert the icon to black:
+
+```css
+&.selected {
+  /* existing rules … */
+
+  .vehicle-sim-make-icon {
+    @apply text-black;
+  }
+}
+```
+
+Using explicit `text-text-secondary` / `text-black` rather than relying on `currentColor` inheritance from the button ensures the icon colour is unambiguous in both states.
 
 ---
 
 ## Files Changed
 
-| File                                                                | Change                                                         |
-| ------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `package.json`                                                      | Add `simple-icons` dependency                                  |
-| `src/app/app/list/components/VehicleSimulator/constants.ts`         | Add `siSlug` to `VehicleMake` interface and each entry         |
-| `src/app/app/list/components/VehicleSimulator/index.tsx`            | Remove `MAKE_ABBRS`, add `MakeIcon`, update card JSX           |
-| `src/app/app/list/components/VehicleSimulator/VehicleSimulator.css` | Replace `.vehicle-sim-make-abbr` with `.vehicle-sim-make-icon` |
+| File                                                                | Change                                                                                                                   |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `package.json`                                                      | Add `simple-icons` dependency                                                                                            |
+| `src/app/app/list/components/VehicleSimulator/constants.ts`         | Named imports of 5 icons; add `siPath: string` to `VehicleMake`; populate each entry                                     |
+| `src/app/app/list/components/VehicleSimulator/index.tsx`            | Remove `MAKE_ABBRS`; add `MakeIcon`; update card JSX                                                                     |
+| `src/app/app/list/components/VehicleSimulator/VehicleSimulator.css` | Remove `.vehicle-sim-make-abbr` (including dead sub-rule in `.selected`); add `.vehicle-sim-make-icon` with colour rules |
 
 ---
 
@@ -84,13 +112,13 @@ These slugs map directly to `simple-icons` named exports (e.g. `siToyota`).
 - Fleet card display — untouched
 - Model and year pill selectors — untouched
 - Mint logic, server actions, TanStack Query setup — untouched
-- Existing tests — no behaviour change; snapshot update needed for the card markup
 
 ---
 
 ## Testing
 
-- Run `npm test -- --testPathPattern=VehicleSimulator` — all tests should pass (snapshot will need updating with `npm run test:update-snap`).
+- Run `npm run test:update-snap` — snapshot for the make card markup will update; verify the diff shows the icon SVG replacing the abbr span.
+- Run `npm test -- --testPathPattern=VehicleSimulator` — all tests should pass.
 - Run `npm run compile` — TypeScript should exit 0.
 - Run `npm run lint` — ESLint should exit 0.
-- Manual: verify each make card shows a logo, selected state inverts to black, disabled state dims correctly.
+- Manual: verify each make card shows a logo; selected state inverts to black; disabled state dims correctly.

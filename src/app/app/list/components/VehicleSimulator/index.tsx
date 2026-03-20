@@ -17,13 +17,11 @@ interface Props {
   clientId: `0x${string}`;
 }
 
-const MAKE_ABBRS: Record<string, string> = {
-  toyota: 'TOY',
-  ford: 'FORD',
-  tesla: 'TSL',
-  bmw: 'BMW',
-  honda: 'HON',
-};
+const MakeIcon: FC<{ path: string }> = ({ path }) => (
+  <svg className="vehicle-sim-make-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d={path} fill="currentColor" />
+  </svg>
+);
 
 export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const { setNotification } = useContext(NotificationContext);
@@ -133,9 +131,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
                 onClick={() => handleMakeChange(make.slug)}
                 className={`vehicle-sim-make-card${selectedMakeSlug === make.slug ? ' selected' : ''}`}
               >
-                <span className="vehicle-sim-make-abbr">
-                  {MAKE_ABBRS[make.slug] ?? make.slug.slice(0, 4).toUpperCase()}
-                </span>
+                <MakeIcon path={make.siPath} />
                 <span className="vehicle-sim-make-name">{make.label}</span>
               </button>
             ))}

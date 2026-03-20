@@ -52,7 +52,7 @@
   &.selected {
     @apply bg-white border-white;
 
-    .vehicle-sim-make-abbr {
+    .vehicle-sim-make-icon {
       @apply text-black;
     }
 
@@ -61,9 +61,8 @@
     }
   }
 
-  .vehicle-sim-make-abbr {
-    @apply text-[11px] font-mono font-bold tracking-widest text-text-secondary
-           leading-none;
+  .vehicle-sim-make-icon {
+    @apply w-5 h-5 block text-text-secondary;
   }
 
   .vehicle-sim-make-name {

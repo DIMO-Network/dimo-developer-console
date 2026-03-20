@@ -53,6 +53,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.68.0",
     "react-syntax-highlighter": "^15.6.6",
+    "simple-icons": "^16.12.0",
     "siwe": "^2.3.2",
     "validator": "^13.15.23",
     "wagmi": "^2.19.5",
