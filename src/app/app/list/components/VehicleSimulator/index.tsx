@@ -1,8 +1,7 @@
 'use client';
 import { FC, useContext, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLazyQuery } from '@apollo/client';
-import { gql } from '@/gql';
+import { useLazyQuery, gql } from '@apollo/client';
 import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
 import { useMintVehicle } from '@/hooks';
