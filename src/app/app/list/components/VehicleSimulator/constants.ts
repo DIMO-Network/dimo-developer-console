@@ -68,5 +68,5 @@ export function buildDeviceDefinitionId(
   modelSlug: string,
   year: number,
 ): string {
-  return `${makeSlug}-${modelSlug}-${year}`;
+  return `${makeSlug}_${modelSlug}_${year}`;
 }
