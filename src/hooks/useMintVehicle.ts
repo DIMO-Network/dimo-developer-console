@@ -13,7 +13,6 @@ const VEHICLE_NODE_MINTED_TOPIC = keccak256(
 export interface MintVehicleParams {
   manufacturerNodeId: number;
   deviceDefinitionId: string;
-  clientId: `0x${string}`;
 }
 
 export const useMintVehicle = () => {
@@ -21,7 +20,7 @@ export const useMintVehicle = () => {
   const { currentUser } = useGlobalAccount();
 
   return useCallback(
-    async ({ manufacturerNodeId, deviceDefinitionId, clientId }: MintVehicleParams) => {
+    async ({ manufacturerNodeId, deviceDefinitionId }: MintVehicleParams) => {
       if (!currentUser?.smartContractAddress) throw new Error('User session is invalid');
 
       const result = await processTransactions(
@@ -37,14 +36,6 @@ export const useMintVehicle = () => {
                 currentUser.smartContractAddress,
                 deviceDefinitionId,
                 [],
-                {
-                  grantee: clientId,
-                  permissions: BigInt('0xFFFFFFFFFFFFFFFF'),
-                  expiration: BigInt(
-                    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-                  ),
-                  source: '',
-                },
               ],
             }),
           },

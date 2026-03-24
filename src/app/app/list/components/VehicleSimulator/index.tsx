@@ -78,7 +78,6 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       const result = await mintVehicle({
         manufacturerNodeId: selectedMake.nodeId,
         deviceDefinitionId,
-        clientId,
       });
 
       if (!result.success) {
