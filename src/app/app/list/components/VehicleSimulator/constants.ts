@@ -12,7 +12,7 @@ export const MAKES: VehicleMake[] = [
   {
     label: 'Toyota',
     slug: 'toyota',
-    nodeId: 131,
+    nodeId: 128,
     siPath: siToyota.path,
     models: [
       { label: 'Camry', slug: 'camry' },
@@ -22,7 +22,7 @@ export const MAKES: VehicleMake[] = [
   {
     label: 'Ford',
     slug: 'ford',
-    nodeId: 41,
+    nodeId: 40,
     siPath: siFord.path,
     models: [
       { label: 'F-150', slug: 'f-150' },
@@ -32,7 +32,7 @@ export const MAKES: VehicleMake[] = [
   {
     label: 'Tesla',
     slug: 'tesla',
-    nodeId: 130,
+    nodeId: 127,
     siPath: siTesla.path,
     models: [
       { label: 'Model 3', slug: 'model-3' },
@@ -52,7 +52,7 @@ export const MAKES: VehicleMake[] = [
   {
     label: 'Honda',
     slug: 'honda',
-    nodeId: 48,
+    nodeId: 47,
     siPath: siHonda.path,
     models: [
       { label: 'Civic', slug: 'civic' },
