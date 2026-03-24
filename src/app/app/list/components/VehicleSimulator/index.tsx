@@ -1,6 +1,8 @@
 'use client';
 import { FC, useContext, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLazyQuery } from '@apollo/client';
+import { gql } from '@/gql';
 import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
 import { useMintVehicle } from '@/hooks';
@@ -10,6 +12,18 @@ import {
 } from '@/actions/simulatedVehicles';
 import { MAKES, YEARS, VehicleMake } from './constants';
 import './VehicleSimulator.css';
+
+const GET_DEVICE_DEFINITION_ID = gql(`
+  query GetDeviceDefinitionId($tokenId: Int!, $model: String!, $year: Int!) {
+    manufacturer(by: { tokenId: $tokenId }) {
+      deviceDefinitions(filterBy: { model: $model, year: $year }, first: 1) {
+        nodes {
+          deviceDefinitionId
+        }
+      }
+    }
+  }
+`);
 
 const MAX_TEST_VEHICLES = 1;
 
@@ -27,6 +41,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const { setNotification } = useContext(NotificationContext);
   const mintVehicle = useMintVehicle();
   const queryClient = useQueryClient();
+  const [fetchDeviceDefinitionId] = useLazyQuery(GET_DEVICE_DEFINITION_ID);
 
   const [selectedMakeSlug, setSelectedMakeSlug] = useState('');
   const [selectedModelSlug, setSelectedModelSlug] = useState('');
@@ -64,11 +79,34 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
     if (!selectedMake || !selectedModelSlug || !selectedYear) return;
     try {
       setIsLoading(true);
+
+      const modelLabel =
+        selectedMake.models.find((m) => m.slug === selectedModelSlug)?.label ??
+        selectedModelSlug;
+
+      const { data: ddData } = await fetchDeviceDefinitionId({
+        variables: {
+          tokenId: selectedMake.nodeId,
+          model: modelLabel,
+          year: Number(selectedYear),
+        },
+      });
+
+      const deviceDefinitionId =
+        ddData?.manufacturer?.deviceDefinitions?.nodes?.[0]?.deviceDefinitionId;
+
+      if (!deviceDefinitionId) {
+        setNotification(
+          `No device definition found for ${modelLabel} ${selectedYear}`,
+          'Error',
+          'error',
+        );
+        return;
+      }
+
       const result = await mintVehicle({
         manufacturerNodeId: selectedMake.nodeId,
-        makeSlug: selectedMake.slug,
-        modelSlug: selectedModelSlug,
-        year: Number(selectedYear),
+        deviceDefinitionId,
         clientId,
       });
 
@@ -76,10 +114,6 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         setNotification(result.reason ?? 'Minting failed', 'Error', 'error');
         return;
       }
-
-      const modelLabel =
-        selectedMake.models.find((m) => m.slug === selectedModelSlug)?.label ??
-        selectedModelSlug;
 
       await recordSimulatedVehicle({
         tokenId: result.tokenId ?? 0,

@@ -4,7 +4,6 @@ import { useContractGA, useGlobalAccount } from '@/hooks';
 import configuration from '@/config';
 import DimoRegistryABI from '@/contracts/DimoRegistryABI.json';
 import { decodeHex } from '@/utils/formatHex';
-import { buildDeviceDefinitionId } from '@/app/app/list/components/VehicleSimulator/constants';
 
 // keccak256("VehicleNodeMinted(uint256,uint256,address)")
 const VEHICLE_NODE_MINTED_TOPIC = keccak256(
@@ -13,9 +12,7 @@ const VEHICLE_NODE_MINTED_TOPIC = keccak256(
 
 export interface MintVehicleParams {
   manufacturerNodeId: number;
-  makeSlug: string;
-  modelSlug: string;
-  year: number;
+  deviceDefinitionId: string;
   clientId: `0x${string}`;
 }
 
@@ -24,16 +21,8 @@ export const useMintVehicle = () => {
   const { currentUser } = useGlobalAccount();
 
   return useCallback(
-    async ({
-      manufacturerNodeId,
-      makeSlug,
-      modelSlug,
-      year,
-      clientId,
-    }: MintVehicleParams) => {
+    async ({ manufacturerNodeId, deviceDefinitionId, clientId }: MintVehicleParams) => {
       if (!currentUser?.smartContractAddress) throw new Error('User session is invalid');
-
-      const deviceDefinitionId = buildDeviceDefinitionId(makeSlug, modelSlug, year);
 
       const result = await processTransactions(
         [
