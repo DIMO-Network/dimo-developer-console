@@ -51,7 +51,9 @@ export const useMintVehicle = () => {
                 {
                   grantee: clientId,
                   permissions: BigInt('0xFFFFFFFFFFFFFFFF'),
-                  expiration: BigInt(0),
+                  expiration: BigInt(
+                    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+                  ),
                   source: '',
                 },
               ],
@@ -61,8 +63,8 @@ export const useMintVehicle = () => {
         { abi: DimoRegistryABI as Abi },
       );
 
-      // Extract tokenId from VehicleNodeMinted event logs (topics[1] = tokenId)
-      const { topics: [, rawTokenId = '0x'] = [] } =
+      // Extract tokenId from VehicleNodeMinted event logs (topics[2] = tokenId, topics[1] = manufacturerNode)
+      const { topics: [, , rawTokenId = '0x'] = [] } =
         result.logs?.find(
           ({ topics: [topic = '0x'] = [] }) => topic === VEHICLE_NODE_MINTED_TOPIC,
         ) ?? {};

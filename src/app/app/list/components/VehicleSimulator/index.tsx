@@ -92,9 +92,9 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
 
       setNotification('Vehicle minted successfully!', 'Success', 'success');
-    } catch {
+    } catch (e) {
       setNotification(
-        'Something went wrong while minting the vehicle',
+        e instanceof Error ? e.message : 'Something went wrong while minting the vehicle',
         'Oops...',
         'error',
       );

@@ -30,12 +30,13 @@ export const useContractGA = () => {
   ) => {
     try {
       const currentSession = await validateCurrentSession();
-      if (!currentSession) return {} as IKernelOperationStatus;
+      if (!currentSession) throw new Error('No active session — please sign in again');
       const { subOrganizationId, walletAddress } = currentSession;
 
       const turnkeyClient = getSessionTurnkeyClient();
 
-      if (!turnkeyClient) return {} as IKernelOperationStatus;
+      if (!turnkeyClient)
+        throw new Error('Turnkey client unavailable — please sign in again');
 
       const kernelClient = await getKernelClient({
         subOrganizationId,
@@ -43,7 +44,7 @@ export const useContractGA = () => {
         client: turnkeyClient,
       });
 
-      if (!kernelClient) return {} as IKernelOperationStatus;
+      if (!kernelClient) throw new Error('Failed to initialize kernel client');
 
       const operation = await kernelClient.account.encodeCalls(transactions);
       const dcxExchangeOpHash = await kernelClient.sendUserOperation({
