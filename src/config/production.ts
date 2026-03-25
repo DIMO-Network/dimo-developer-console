@@ -44,3 +44,5 @@ export const DIMO_REGISTRY_ADDRESS: `0x${string}` =
 // VEHICLE NFT MAINNET
 export const VEHICLE_NFT_ADDRESS: `0x${string}` =
   '0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF';
+
+export const VEHICLE_SIMULATOR_URL = 'https://dimo-vehicle-simulator.vercel.app';

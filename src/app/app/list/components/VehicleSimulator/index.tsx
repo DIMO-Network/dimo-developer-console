@@ -3,10 +3,11 @@ import { FC, useContext, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
-import { useMintVehicle } from '@/hooks';
+import { useMintVehicle, useGlobalAccount } from '@/hooks';
 import {
   getSimulatedVehicles,
   recordSimulatedVehicle,
+  registerVehicleWithSimulator,
 } from '@/actions/simulatedVehicles';
 import { MAKES, YEARS, VehicleMake, buildDeviceDefinitionId } from './constants';
 import './VehicleSimulator.css';
@@ -26,6 +27,7 @@ const MakeIcon: FC<{ path: string }> = ({ path }) => (
 export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const { setNotification } = useContext(NotificationContext);
   const mintVehicle = useMintVehicle();
+  const { currentUser } = useGlobalAccount();
   const queryClient = useQueryClient();
 
   const [selectedMakeSlug, setSelectedMakeSlug] = useState('');
@@ -91,6 +93,11 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         model: modelLabel,
         year: Number(selectedYear),
         clientId,
+      });
+
+      await registerVehicleWithSimulator({
+        tokenId: result.tokenId ?? 0,
+        ownerWalletAddress: currentUser!.smartContractAddress,
       });
 
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });

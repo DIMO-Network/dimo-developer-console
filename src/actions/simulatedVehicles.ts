@@ -1,6 +1,7 @@
 'use server';
 
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
+import configuration from '@/config';
 
 export interface SimulatedVehicle {
   id: string;
@@ -51,4 +52,30 @@ export const recordSimulatedVehicle = async ({
     },
   );
   return data.data;
+};
+
+export const registerVehicleWithSimulator = async ({
+  tokenId,
+  ownerWalletAddress,
+}: {
+  tokenId: number;
+  ownerWalletAddress: string;
+}): Promise<{ token_id: number; status: string }> => {
+  const response = await fetch(
+    `${configuration.VEHICLE_SIMULATOR_URL}/api/vehicles/register`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token_id: tokenId,
+        owner_wallet_address: ownerWalletAddress,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Simulator registration failed: ${response.statusText}`);
+  }
+
+  return response.json();
 };

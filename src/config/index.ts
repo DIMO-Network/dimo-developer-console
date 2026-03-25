@@ -34,6 +34,7 @@ type Configuration = {
   DIMO_SACD_ADDRESS: `0x${string}`;
   DIMO_REGISTRY_ADDRESS: `0x${string}`;
   VEHICLE_NFT_ADDRESS: `0x${string}`;
+  VEHICLE_SIMULATOR_URL: string;
 };
 
 const getCurrentEnvironment = (): string => {
