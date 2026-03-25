@@ -26,7 +26,7 @@ export const useMintVehicle = () => {
       const result = await processTransactions(
         [
           {
-            to: configuration.DIMO_REGISTRY_ADDRESS,
+            to: configuration.VEHICLE_NFT_ADDRESS,
             value: BigInt(0),
             data: encodeFunctionData({
               abi: DimoRegistryABI as Abi,

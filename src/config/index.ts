@@ -33,6 +33,7 @@ type Configuration = {
   DIMO_ESCROW_ADDRESS: `0x${string}`;
   DIMO_SACD_ADDRESS: `0x${string}`;
   DIMO_REGISTRY_ADDRESS: `0x${string}`;
+  VEHICLE_NFT_ADDRESS: `0x${string}`;
 };
 
 const getCurrentEnvironment = (): string => {
