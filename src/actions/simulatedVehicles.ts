@@ -74,7 +74,10 @@ export const registerVehicleWithSimulator = async ({
   );
 
   if (!response.ok) {
-    throw new Error(`Simulator registration failed: ${response.statusText}`);
+    console.error(
+      `Simulator registration failed: ${response.status} ${response.statusText}`,
+    );
+    return { token_id: tokenId, status: 'registration_failed' };
   }
 
   return response.json();
