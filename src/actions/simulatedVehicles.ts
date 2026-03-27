@@ -61,24 +61,29 @@ export const registerVehicleWithSimulator = async ({
   tokenId: number;
   ownerWalletAddress: string;
 }): Promise<{ token_id: number; status: string }> => {
-  const response = await fetch(
-    `${configuration.VEHICLE_SIMULATOR_URL}/api/vehicles/register`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token_id: tokenId,
-        owner_wallet_address: ownerWalletAddress,
-      }),
-    },
-  );
-
-  if (!response.ok) {
-    console.error(
-      `Simulator registration failed: ${response.status} ${response.statusText}`,
+  try {
+    const response = await fetch(
+      `${configuration.VEHICLE_SIMULATOR_URL}/api/vehicles/register`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token_id: tokenId,
+          owner_wallet_address: ownerWalletAddress,
+        }),
+      },
     );
+
+    if (!response.ok) {
+      console.error(
+        `Simulator registration failed: ${response.status} ${response.statusText}`,
+      );
+      return { token_id: tokenId, status: 'registration_failed' };
+    }
+
+    return response.json();
+  } catch (e) {
+    console.error('Simulator registration error:', e);
     return { token_id: tokenId, status: 'registration_failed' };
   }
-
-  return response.json();
 };

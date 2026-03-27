@@ -9,7 +9,6 @@ import { Button } from '@/components/Button';
 import Link from 'next/link';
 import { TotalCount } from '@/components/TotalVehicleCount';
 import { useRouter } from 'next/navigation';
-import { AxiosError } from 'axios';
 import { getConfigurationByClientId } from '@/actions/configurations';
 import { VehicleSimulatorModal } from '@/app/app/list/components/VehicleSimulator/VehicleSimulatorModal';
 import configuration from '@/config';
@@ -51,11 +50,8 @@ export const Vehicles: FC<IProps> = ({ license }) => {
       try {
         const { id } = await getConfigurationByClientId({ client_id: clientId });
         setConfigurationId(id);
-      } catch (error: unknown) {
-        if (error instanceof AxiosError) {
-          return;
-        }
-        console.error(error);
+      } catch {
+        // configuration ID not found — "Configure Vehicle Sharing" button stays disabled
       }
     };
 
