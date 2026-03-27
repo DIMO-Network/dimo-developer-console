@@ -22,10 +22,14 @@ interface GetDeveloperJwtResponse {
 
 export const getDeveloperJwt = async (
   tokenParams: GetTokenParams,
-): Promise<GetDeveloperJwtResponse> => {
-  return await dimo.auth.getDeveloperJwt({
-    client_id: tokenParams.client_id,
-    domain: tokenParams.domain,
-    private_key: tokenParams.private_key,
-  });
+): Promise<GetDeveloperJwtResponse | null> => {
+  try {
+    return await dimo.auth.getDeveloperJwt({
+      client_id: tokenParams.client_id,
+      domain: tokenParams.domain,
+      private_key: tokenParams.private_key,
+    });
+  } catch {
+    return null;
+  }
 };
