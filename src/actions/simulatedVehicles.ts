@@ -20,11 +20,15 @@ export const getSimulatedVehicles = async ({
 }: {
   clientId: string;
 }): Promise<SimulatedVehicle[]> => {
-  const client = await dimoDevAPIClient();
-  const { data } = await client.get<{ data: SimulatedVehicle[] }>(
-    `/api/my/simulated-vehicles?clientId=${clientId}`,
-  );
-  return data.data;
+  try {
+    const client = await dimoDevAPIClient();
+    const { data } = await client.get<{ data: SimulatedVehicle[] }>(
+      `/api/my/simulated-vehicles?clientId=${clientId}`,
+    );
+    return data.data;
+  } catch {
+    return [];
+  }
 };
 
 export const recordSimulatedVehicle = async ({
