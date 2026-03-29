@@ -90,7 +90,16 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       console.log('[VehicleSimulator] Simulator deregister result', deregResult);
 
       console.log('[VehicleSimulator] Deleting simulated vehicle record', { vehicleId });
-      await deleteSimulatedVehicle({ vehicleId });
+      const deleteResult = await deleteSimulatedVehicle({ vehicleId });
+      if (!deleteResult.success) {
+        console.warn('[VehicleSimulator] Delete record failed', deleteResult);
+        setNotification(
+          deleteResult.message ?? 'Failed to remove vehicle record',
+          'Error',
+          'error',
+        );
+        return;
+      }
 
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
       console.log('[VehicleSimulator] Vehicle removed', { vehicleId, tokenId });

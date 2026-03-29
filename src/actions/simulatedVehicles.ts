@@ -2,6 +2,7 @@
 
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 import configuration from '@/config';
+import { AxiosError } from 'axios';
 
 export interface SimulatedVehicle {
   id: string;
@@ -62,9 +63,19 @@ export const deleteSimulatedVehicle = async ({
   vehicleId,
 }: {
   vehicleId: string;
-}): Promise<void> => {
-  const client = await dimoDevAPIClient();
-  await client.delete(`/api/my/simulated-vehicles/${vehicleId}`);
+}): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const client = await dimoDevAPIClient();
+    await client.delete(`/api/my/simulated-vehicles/${vehicleId}`);
+    return { success: true };
+  } catch (error: unknown) {
+    const message =
+      error instanceof AxiosError
+        ? error?.response?.data?.message || error?.message
+        : 'Failed to delete simulated vehicle';
+    console.error('deleteSimulatedVehicle error:', { vehicleId, message, error });
+    return { success: false, message };
+  }
 };
 
 export const deregisterVehicleFromSimulator = async ({
