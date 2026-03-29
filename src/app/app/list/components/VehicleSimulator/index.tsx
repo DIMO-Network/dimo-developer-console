@@ -3,7 +3,7 @@ import { FC, useContext, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
-import { useMintVehicle, useGlobalAccount } from '@/hooks';
+import { useMintVehicle, useBurnVehicle, useGlobalAccount } from '@/hooks';
 import {
   getSimulatedVehicles,
   recordSimulatedVehicle,
@@ -30,6 +30,7 @@ const MakeIcon: FC<{ path: string }> = ({ path }) => (
 export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const { setNotification } = useContext(NotificationContext);
   const mintVehicle = useMintVehicle();
+  const burnVehicle = useBurnVehicle();
   const { currentUser } = useGlobalAccount();
   const queryClient = useQueryClient();
 
@@ -69,6 +70,20 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const handleDelete = async (vehicleId: string, tokenId: number) => {
     try {
       setDeletingId(vehicleId);
+
+      console.log('[VehicleSimulator] Burning vehicle on-chain', { tokenId });
+      const burnResult = await burnVehicle({ tokenId });
+      console.log('[VehicleSimulator] Burn result', burnResult);
+
+      if (!burnResult.success) {
+        console.warn('[VehicleSimulator] Burn failed', { reason: burnResult.reason });
+        setNotification(
+          burnResult.reason ?? 'Failed to burn vehicle on-chain',
+          'Error',
+          'error',
+        );
+        return;
+      }
 
       console.log('[VehicleSimulator] Deregistering vehicle from simulator', { tokenId });
       const deregResult = await deregisterVehicleFromSimulator({ tokenId });
