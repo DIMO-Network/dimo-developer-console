@@ -74,8 +74,8 @@ export const useMintVehicle = () => {
 
       // VehicleNodeMinted: topics[2] = tokenId; ERC-721 Transfer mint: topics[3] = tokenId
       const rawTokenId = mintedLog
-        ? (mintedLog.topics[2] ?? '0x')
-        : (transferMintLog?.topics[3] ?? '0x');
+        ? (mintedLog.topics?.[2] ?? '0x')
+        : (transferMintLog?.topics?.[3] ?? '0x');
 
       const tokenId =
         rawTokenId !== '0x'
