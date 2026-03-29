@@ -156,6 +156,10 @@
   @apply flex flex-col items-end gap-0.5 shrink-0;
 }
 
+.vehicle-sim-delete-btn {
+  @apply mt-1 text-text-secondary hover:text-red-400 disabled:opacity-40 transition-colors;
+}
+
 .vehicle-sim-card-token-label {
   @apply text-[9px] uppercase tracking-[0.18em] text-text-secondary font-mono leading-none;
 }

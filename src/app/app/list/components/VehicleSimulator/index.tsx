@@ -8,7 +8,10 @@ import {
   getSimulatedVehicles,
   recordSimulatedVehicle,
   registerVehicleWithSimulator,
+  deleteSimulatedVehicle,
+  deregisterVehicleFromSimulator,
 } from '@/actions/simulatedVehicles';
+import { TrashIcon } from '@heroicons/react/24/outline';
 import { MAKES, YEARS, VehicleMake, buildDeviceDefinitionId } from './constants';
 import './VehicleSimulator.css';
 
@@ -34,6 +37,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const [selectedModelSlug, setSelectedModelSlug] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const { data: storedVehicles = [] } = useQuery({
     queryKey: ['simulated-vehicles', clientId],
@@ -61,6 +65,31 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
     const parts = [selectedYear, makeName, modelLabel].filter(Boolean);
     return parts.join(' · ');
   })();
+
+  const handleDelete = async (vehicleId: string, tokenId: number) => {
+    try {
+      setDeletingId(vehicleId);
+
+      console.log('[VehicleSimulator] Deregistering vehicle from simulator', { tokenId });
+      const deregResult = await deregisterVehicleFromSimulator({ tokenId });
+      console.log('[VehicleSimulator] Simulator deregister result', deregResult);
+
+      console.log('[VehicleSimulator] Deleting simulated vehicle record', { vehicleId });
+      await deleteSimulatedVehicle({ vehicleId });
+
+      await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
+      console.log('[VehicleSimulator] Vehicle removed', { vehicleId, tokenId });
+    } catch (e) {
+      console.error('[VehicleSimulator] Delete error', e);
+      setNotification(
+        e instanceof Error ? e.message : 'Failed to remove vehicle',
+        'Error',
+        'error',
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const handleMint = async () => {
     if (!selectedMake || !selectedModelSlug || !selectedYear) return;
@@ -281,6 +310,15 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
                 <div className="vehicle-sim-card-right">
                   <span className="vehicle-sim-card-token-label">Token ID</span>
                   <span className="vehicle-sim-card-token-id">#{vehicle.token_id}</span>
+                  <button
+                    type="button"
+                    aria-label="Remove vehicle"
+                    disabled={deletingId === vehicle.id}
+                    onClick={() => handleDelete(vehicle.id, vehicle.token_id)}
+                    className="vehicle-sim-delete-btn"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             ))}
