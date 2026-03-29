@@ -77,15 +77,35 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         Number(selectedYear),
       );
 
+      console.log('[VehicleSimulator] Minting vehicle', {
+        make: selectedMake.label,
+        model: modelLabel,
+        year: selectedYear,
+        manufacturerNodeId: selectedMake.nodeId,
+        deviceDefinitionId,
+        clientId,
+      });
+
       const result = await mintVehicle({
         manufacturerNodeId: selectedMake.nodeId,
         deviceDefinitionId,
       });
 
+      console.log('[VehicleSimulator] mintVehicle result', result);
+
       if (!result.success) {
+        console.warn('[VehicleSimulator] Mint failed', { reason: result.reason });
         setNotification(result.reason ?? 'Minting failed', 'Error', 'error');
         return;
       }
+
+      console.log('[VehicleSimulator] Recording simulated vehicle', {
+        tokenId: result.tokenId,
+        make: selectedMake.label,
+        model: modelLabel,
+        year: Number(selectedYear),
+        clientId,
+      });
 
       await recordSimulatedVehicle({
         tokenId: result.tokenId ?? 0,
@@ -95,15 +115,24 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         clientId,
       });
 
-      await registerVehicleWithSimulator({
+      console.log('[VehicleSimulator] Registering vehicle with simulator', {
+        tokenId: result.tokenId,
+        ownerWalletAddress: currentUser!.smartContractAddress,
+      });
+
+      const registration = await registerVehicleWithSimulator({
         tokenId: result.tokenId ?? 0,
         ownerWalletAddress: currentUser!.smartContractAddress,
       });
 
+      console.log('[VehicleSimulator] Simulator registration result', registration);
+
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
 
+      console.log('[VehicleSimulator] Mint complete — tokenId', result.tokenId);
       setNotification('Vehicle minted successfully!', 'Success', 'success');
     } catch (e) {
+      console.error('[VehicleSimulator] Mint error', e);
       setNotification(
         e instanceof Error ? e.message : 'Something went wrong while minting the vehicle',
         'Oops...',
