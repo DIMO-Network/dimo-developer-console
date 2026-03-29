@@ -44,10 +44,21 @@ export const useMintVehicle = () => {
       );
 
       // Extract tokenId from VehicleNodeMinted event logs (topics[2] = tokenId, topics[1] = manufacturerNode)
-      const { topics: [, , rawTokenId = '0x'] = [] } =
-        result.logs?.find(
-          ({ topics: [topic = '0x'] = [] }) => topic === VEHICLE_NODE_MINTED_TOPIC,
-        ) ?? {};
+      const mintedLog = result.logs?.find(
+        ({ topics: [topic = '0x'] = [] }) => topic === VEHICLE_NODE_MINTED_TOPIC,
+      );
+
+      if (!mintedLog) {
+        console.warn(
+          '[useMintVehicle] VehicleNodeMinted event not found in transaction logs',
+          {
+            expectedTopic: VEHICLE_NODE_MINTED_TOPIC,
+            logs: result.logs,
+          },
+        );
+      }
+
+      const { topics: [, , rawTokenId = '0x'] = [] } = mintedLog ?? {};
 
       const tokenId =
         rawTokenId !== '0x'

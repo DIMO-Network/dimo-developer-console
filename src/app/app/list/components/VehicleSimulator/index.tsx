@@ -99,6 +99,21 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         return;
       }
 
+      if (result.tokenId === null) {
+        console.error(
+          '[VehicleSimulator] Mint succeeded but tokenId is null — VehicleNodeMinted event not found in logs',
+          {
+            logs: result.logs,
+          },
+        );
+        setNotification(
+          'Mint succeeded but vehicle token ID could not be read. Please try again.',
+          'Error',
+          'error',
+        );
+        return;
+      }
+
       console.log('[VehicleSimulator] Recording simulated vehicle', {
         tokenId: result.tokenId,
         make: selectedMake.label,
