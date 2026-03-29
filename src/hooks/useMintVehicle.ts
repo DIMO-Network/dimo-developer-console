@@ -10,6 +10,12 @@ const VEHICLE_NODE_MINTED_TOPIC = keccak256(
   toBytes('VehicleNodeMinted(uint256,uint256,address)'),
 );
 
+// keccak256("Transfer(address,address,uint256)") — ERC-721 standard
+const ERC721_TRANSFER_TOPIC = keccak256(toBytes('Transfer(address,address,uint256)'));
+
+const ZERO_ADDRESS_PADDED =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+
 export interface MintVehicleParams {
   manufacturerNodeId: number;
   deviceDefinitionId: string;
@@ -43,12 +49,20 @@ export const useMintVehicle = () => {
         { abi: DimoRegistryABI as Abi },
       );
 
-      // Extract tokenId from VehicleNodeMinted event logs (topics[2] = tokenId, topics[1] = manufacturerNode)
+      // Extract tokenId from VehicleNodeMinted event (topics[2] = tokenId, topics[1] = manufacturerNode)
       const mintedLog = result.logs?.find(
         ({ topics: [topic = '0x'] = [] }) => topic === VEHICLE_NODE_MINTED_TOPIC,
       );
 
-      if (!mintedLog) {
+      // Fallback: ERC-721 Transfer from zero address (topics[1] = from, topics[3] = tokenId)
+      const transferMintLog = !mintedLog
+        ? result.logs?.find(
+            ({ topics: [topic = '0x', from = '0x'] = [] }) =>
+              topic === ERC721_TRANSFER_TOPIC && from === ZERO_ADDRESS_PADDED,
+          )
+        : undefined;
+
+      if (!mintedLog && !transferMintLog) {
         console.warn(
           '[useMintVehicle] VehicleNodeMinted event not found in transaction logs',
           {
@@ -58,7 +72,10 @@ export const useMintVehicle = () => {
         );
       }
 
-      const { topics: [, , rawTokenId = '0x'] = [] } = mintedLog ?? {};
+      // VehicleNodeMinted: topics[2] = tokenId; ERC-721 Transfer mint: topics[3] = tokenId
+      const rawTokenId = mintedLog
+        ? (mintedLog.topics[2] ?? '0x')
+        : (transferMintLog?.topics[3] ?? '0x');
 
       const tokenId =
         rawTokenId !== '0x'

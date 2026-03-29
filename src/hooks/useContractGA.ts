@@ -57,10 +57,14 @@ export const useContractGA = () => {
 
       if (receipt.reason) throw new Error(receipt.reason);
 
+      // Prefer receipt.receipt.logs (raw Ethereum tx receipt) over receipt.logs
+      // (bundler-filtered UserOperation logs), as some bundlers return incomplete logs.
+      const logs = receipt.receipt?.logs?.length ? receipt.receipt.logs : receipt.logs;
+
       return {
         success: receipt.success,
         reason: receipt.reason,
-        logs: receipt.logs.map((log) => ({ topics: log.topics })),
+        logs: logs.map((log) => ({ topics: log.topics })),
       } as IKernelOperationStatus;
     } catch (e: unknown) {
       Sentry.captureException(e);
