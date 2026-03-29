@@ -20,3 +20,4 @@ export * from './useHasDeveloperLicenses';
 export * from './queries/useMyConnections';
 export * from './useDimoAuth';
 export { useMintVehicle } from './useMintVehicle';
+export { useBurnVehicle } from './useBurnVehicle';
