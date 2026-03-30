@@ -181,6 +181,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         make: selectedMake.label,
         model: modelLabel,
         year: Number(selectedYear),
+        powertrainType: selectedModel!.powertrainType,
         sacdGrantee: '0x299671D2b32ED62Cc61ce65D8f2b9e4f78486B37',
       });
 
@@ -345,7 +346,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       <div className="vehicle-sim-mint-row">
         <span className="vehicle-sim-selection-preview" aria-live="polite">
           {atLimit
-            ? `Limit reached — only ${MAX_TEST_VEHICLES} test vehicle per account`
+            ? `Limit reached — only ${MAX_TEST_VEHICLES} per account`
             : selectionPreview}
         </span>
         <Button

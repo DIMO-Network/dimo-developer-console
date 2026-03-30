@@ -1,9 +1,12 @@
 import { siToyota, siFord, siTesla, siBmw, siHonda } from 'simple-icons';
 
+export type PowertrainType = 'ICE' | 'HEV' | 'PHEV' | 'BEV' | 'FCEV';
+
 export interface VehicleModel {
   label: string;
   slug: string;
   years: number[];
+  powertrainType: PowertrainType;
 }
 
 export interface VehicleMake {
@@ -21,8 +24,13 @@ export const MAKES: VehicleMake[] = [
     nodeId: 131,
     siPath: siToyota.path,
     models: [
-      { label: '4Runner', slug: '4runner', years: [2022, 2023, 2024] },
-      { label: 'RAV4', slug: 'rav4', years: [2022, 2023, 2024] },
+      {
+        label: '4Runner',
+        slug: '4runner',
+        years: [2022, 2023, 2024],
+        powertrainType: 'ICE',
+      },
+      { label: 'RAV4', slug: 'rav4', years: [2022, 2023, 2024], powertrainType: 'ICE' },
     ],
   },
   {
@@ -31,8 +39,8 @@ export const MAKES: VehicleMake[] = [
     nodeId: 41,
     siPath: siFord.path,
     models: [
-      { label: 'F-150', slug: 'f-150', years: [2022, 2023] },
-      { label: 'Mustang', slug: 'mustang', years: [2022, 2023] },
+      { label: 'F-150', slug: 'f-150', years: [2022, 2023], powertrainType: 'ICE' },
+      { label: 'Mustang', slug: 'mustang', years: [2022, 2023], powertrainType: 'ICE' },
     ],
   },
   {
@@ -41,8 +49,18 @@ export const MAKES: VehicleMake[] = [
     nodeId: 130,
     siPath: siTesla.path,
     models: [
-      { label: 'Model 3', slug: 'model-3', years: [2022, 2023, 2024, 2025, 2026] },
-      { label: 'Model Y', slug: 'model-y', years: [2022, 2023, 2024, 2025, 2026] },
+      {
+        label: 'Model 3',
+        slug: 'model-3',
+        years: [2022, 2023, 2024, 2025, 2026],
+        powertrainType: 'BEV',
+      },
+      {
+        label: 'Model Y',
+        slug: 'model-y',
+        years: [2022, 2023, 2024, 2025, 2026],
+        powertrainType: 'BEV',
+      },
     ],
   },
   {
@@ -51,8 +69,8 @@ export const MAKES: VehicleMake[] = [
     nodeId: 13,
     siPath: siBmw.path,
     models: [
-      { label: '3 Series', slug: '3-series', years: [2024, 2025] },
-      { label: 'X5', slug: 'x5', years: [2022, 2023] },
+      { label: '3 Series', slug: '3-series', years: [2024, 2025], powertrainType: 'ICE' },
+      { label: 'X5', slug: 'x5', years: [2022, 2023], powertrainType: 'ICE' },
     ],
   },
   {
@@ -61,8 +79,8 @@ export const MAKES: VehicleMake[] = [
     nodeId: 48,
     siPath: siHonda.path,
     models: [
-      { label: 'Civic', slug: 'civic', years: [2022, 2023] },
-      { label: 'CR-V', slug: 'cr-v', years: [2022, 2023, 2024] },
+      { label: 'Civic', slug: 'civic', years: [2022, 2023], powertrainType: 'ICE' },
+      { label: 'CR-V', slug: 'cr-v', years: [2022, 2023, 2024], powertrainType: 'ICE' },
     ],
   },
 ];

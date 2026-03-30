@@ -31,6 +31,7 @@ export interface MintVehicleParams {
   make: string;
   model: string;
   year: number;
+  powertrainType: string;
   sacdGrantee?: `0x${string}`;
 }
 
@@ -45,6 +46,7 @@ export const useMintVehicle = () => {
       make,
       model,
       year,
+      powertrainType,
       sacdGrantee,
     }: MintVehicleParams) => {
       if (!currentUser?.smartContractAddress) throw new Error('User session is invalid');
@@ -53,6 +55,7 @@ export const useMintVehicle = () => {
         { attribute: 'Make', info: make },
         { attribute: 'Model', info: model },
         { attribute: 'Year', info: String(year) },
+        { attribute: 'PowertrainType', info: powertrainType },
       ];
 
       const result = await processTransactions(
