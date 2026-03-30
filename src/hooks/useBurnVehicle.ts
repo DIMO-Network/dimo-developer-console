@@ -9,20 +9,25 @@ export const useBurnVehicle = () => {
 
   return useCallback(
     async ({ tokenId }: { tokenId: number }) => {
-      return processTransactions(
-        [
-          {
-            to: configuration.VEHICLE_NFT_ADDRESS,
-            value: BigInt(0),
-            data: encodeFunctionData({
-              abi: DimoVehicleIdABI as Abi,
-              functionName: 'burn',
-              args: [BigInt(tokenId)],
-            }),
-          },
-        ],
-        { abi: DimoVehicleIdABI as Abi },
-      );
+      try {
+        return await processTransactions(
+          [
+            {
+              to: configuration.VEHICLE_NFT_ADDRESS,
+              value: BigInt(0),
+              data: encodeFunctionData({
+                abi: DimoVehicleIdABI as Abi,
+                functionName: 'burn',
+                args: [BigInt(tokenId)],
+              }),
+            },
+          ],
+          { abi: DimoVehicleIdABI as Abi },
+        );
+      } catch (e: unknown) {
+        const reason = e instanceof Error ? e.message : 'Burn failed';
+        return { success: false, reason, logs: [] };
+      }
     },
     [processTransactions],
   );
