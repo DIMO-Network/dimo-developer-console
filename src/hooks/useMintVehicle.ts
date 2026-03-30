@@ -3,7 +3,7 @@ import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import configuration from '@/config';
 import DimoRegistryABI from '@/contracts/DimoRegistryABI.json';
-import DimoVehicleIdABI from '@/contracts/DimoVehicleIdABI.json';
+import SacdABI from '@/contracts/Sacd.json';
 import { decodeHex } from '@/utils/formatHex';
 
 // keccak256("VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string)")
@@ -109,30 +109,35 @@ export const useMintVehicle = () => {
           : null;
 
       if (tokenId !== null && sacdGrantee) {
-        console.log('[useMintVehicle] Setting SACD', { tokenId, grantee: sacdGrantee });
+        console.log('[useMintVehicle] Setting SACD permissions', {
+          tokenId,
+          grantee: sacdGrantee,
+        });
         await processTransactions(
           [
             {
-              to: configuration.VEHICLE_NFT_ADDRESS,
+              to: configuration.DIMO_SACD_ADDRESS,
               value: BigInt(0),
               data: encodeFunctionData({
-                abi: DimoVehicleIdABI as Abi,
-                functionName: 'setSacd',
+                abi: SacdABI as Abi,
+                functionName: 'setPermissions',
                 args: [
+                  configuration.VEHICLE_NFT_ADDRESS,
                   BigInt(tokenId),
-                  {
-                    grantee: sacdGrantee,
-                    permissions: ALL_PERMISSIONS,
-                    expiration: SACD_EXPIRATION,
-                    source: '',
-                  },
+                  sacdGrantee,
+                  ALL_PERMISSIONS,
+                  SACD_EXPIRATION,
+                  '',
                 ],
               }),
             },
           ],
-          { abi: DimoVehicleIdABI as Abi },
+          { abi: SacdABI as Abi },
         );
-        console.log('[useMintVehicle] SACD set', { tokenId, grantee: sacdGrantee });
+        console.log('[useMintVehicle] SACD permissions set', {
+          tokenId,
+          grantee: sacdGrantee,
+        });
       }
 
       return { ...result, tokenId };
