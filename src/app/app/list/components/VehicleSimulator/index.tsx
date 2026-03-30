@@ -1,6 +1,7 @@
 'use client';
 import { FC, useContext, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Abi } from 'viem';
 import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
 import { useMintVehicle, useBurnVehicle, useGlobalAccount } from '@/hooks';
@@ -11,7 +12,10 @@ import {
   deleteSimulatedVehicle,
   deregisterVehicleFromSimulator,
 } from '@/actions/simulatedVehicles';
-import { TrashIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { getPublicClient } from '@/services/zerodev';
+import DimoVehicleIdABI from '@/contracts/DimoVehicleIdABI.json';
+import configuration from '@/config';
 import { MAKES, VehicleMake, buildDeviceDefinitionId } from './constants';
 import './VehicleSimulator.css';
 
@@ -43,6 +47,28 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const { data: storedVehicles = [] } = useQuery({
     queryKey: ['simulated-vehicles', clientId],
     queryFn: () => getSimulatedVehicles({ clientId }),
+  });
+
+  const { data: removedOnChain = new Set<number>() } = useQuery({
+    queryKey: ['vehicle-on-chain-status', storedVehicles.map((v) => v.token_id)],
+    enabled: storedVehicles.length > 0,
+    queryFn: async () => {
+      const publicClient = getPublicClient();
+      const results = await Promise.all(
+        storedVehicles.map((v) =>
+          publicClient
+            .readContract({
+              address: configuration.VEHICLE_NFT_ADDRESS,
+              abi: DimoVehicleIdABI as Abi,
+              functionName: 'exists',
+              args: [BigInt(v.token_id)],
+            })
+            .then((exists) => ({ tokenId: v.token_id, exists: exists as boolean }))
+            .catch(() => ({ tokenId: v.token_id, exists: false })),
+        ),
+      );
+      return new Set(results.filter((r) => !r.exists).map((r) => r.tokenId));
+    },
   });
 
   const atLimit = storedVehicles.length >= MAX_TEST_VEHICLES;
@@ -102,6 +128,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
       console.log('[VehicleSimulator] Vehicle removed', { vehicleId, tokenId });
+      setNotification('Vehicle removed successfully', 'Success', 'success');
     } catch (e) {
       console.error('[VehicleSimulator] Delete error', e);
       setNotification(
@@ -141,6 +168,9 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       const result = await mintVehicle({
         manufacturerNodeId: selectedMake.nodeId,
         deviceDefinitionId,
+        make: selectedMake.label,
+        model: modelLabel,
+        year: Number(selectedYear),
       });
 
       console.log('[VehicleSimulator] mintVehicle result', result);
@@ -324,29 +354,42 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
             </span>
           </div>
           <div className="vehicle-sim-fleet-list">
-            {storedVehicles.map((vehicle) => (
-              <div key={vehicle.id} className="vehicle-sim-card">
-                <div className="vehicle-sim-card-left">
-                  <span className="vehicle-sim-card-vehicle">
-                    {vehicle.year} {vehicle.make} {vehicle.model}
-                  </span>
-                  <span className="vehicle-sim-card-network">Polygon</span>
+            {storedVehicles.map((vehicle) => {
+              const isRemovedOnChain = removedOnChain.has(vehicle.token_id);
+              return (
+                <div
+                  key={vehicle.id}
+                  className={`vehicle-sim-card${isRemovedOnChain ? ' vehicle-sim-card--stale' : ''}`}
+                >
+                  <div className="vehicle-sim-card-left">
+                    <span className="vehicle-sim-card-vehicle">
+                      {vehicle.year} {vehicle.make} {vehicle.model}
+                    </span>
+                    {isRemovedOnChain ? (
+                      <span className="vehicle-sim-card-stale-badge">
+                        <ExclamationTriangleIcon className="h-3 w-3" />
+                        Removed on-chain
+                      </span>
+                    ) : (
+                      <span className="vehicle-sim-card-network">Polygon</span>
+                    )}
+                  </div>
+                  <div className="vehicle-sim-card-right">
+                    <span className="vehicle-sim-card-token-label">Token ID</span>
+                    <span className="vehicle-sim-card-token-id">#{vehicle.token_id}</span>
+                    <button
+                      type="button"
+                      aria-label="Remove vehicle"
+                      disabled={deletingId === vehicle.id}
+                      onClick={() => handleDelete(vehicle.id, vehicle.token_id)}
+                      className="vehicle-sim-delete-btn"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="vehicle-sim-card-right">
-                  <span className="vehicle-sim-card-token-label">Token ID</span>
-                  <span className="vehicle-sim-card-token-id">#{vehicle.token_id}</span>
-                  <button
-                    type="button"
-                    aria-label="Remove vehicle"
-                    disabled={deletingId === vehicle.id}
-                    onClick={() => handleDelete(vehicle.id, vehicle.token_id)}
-                    className="vehicle-sim-delete-btn"
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

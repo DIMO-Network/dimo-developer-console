@@ -20,6 +20,9 @@ const ZERO_ADDRESS_PADDED =
 export interface MintVehicleParams {
   manufacturerNodeId: number;
   deviceDefinitionId: string;
+  make: string;
+  model: string;
+  year: number;
 }
 
 export const useMintVehicle = () => {
@@ -27,8 +30,20 @@ export const useMintVehicle = () => {
   const { currentUser } = useGlobalAccount();
 
   return useCallback(
-    async ({ manufacturerNodeId, deviceDefinitionId }: MintVehicleParams) => {
+    async ({
+      manufacturerNodeId,
+      deviceDefinitionId,
+      make,
+      model,
+      year,
+    }: MintVehicleParams) => {
       if (!currentUser?.smartContractAddress) throw new Error('User session is invalid');
+
+      const attrInfo = [
+        { attribute: 'Make', info: make },
+        { attribute: 'Model', info: model },
+        { attribute: 'Year', info: String(year) },
+      ];
 
       const result = await processTransactions(
         [
@@ -42,7 +57,7 @@ export const useMintVehicle = () => {
                 BigInt(manufacturerNodeId),
                 currentUser.smartContractAddress,
                 deviceDefinitionId,
-                [],
+                attrInfo,
               ],
             }),
           },

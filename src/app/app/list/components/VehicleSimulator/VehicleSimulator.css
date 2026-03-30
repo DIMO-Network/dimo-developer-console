@@ -127,6 +127,10 @@
          rounded-lg border border-[#322D2F] bg-surface-raised
          px-4 py-3 gap-4;
   animation: vehicle-sim-slide-in 0.25s ease-out both;
+
+  &.vehicle-sim-card--stale {
+    @apply border-amber-800/60 bg-amber-950/20;
+  }
 }
 
 @keyframes vehicle-sim-slide-in {
@@ -150,6 +154,11 @@
 
 .vehicle-sim-card-network {
   @apply text-[10px] text-text-secondary font-mono tracking-wide;
+}
+
+.vehicle-sim-card-stale-badge {
+  @apply flex flex-row items-center gap-1
+         text-[10px] text-amber-500 font-mono tracking-wide;
 }
 
 .vehicle-sim-card-right {
