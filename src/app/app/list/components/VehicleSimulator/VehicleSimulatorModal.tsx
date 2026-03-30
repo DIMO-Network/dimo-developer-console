@@ -17,7 +17,7 @@ export const VehicleSimulatorModal: FC<Props> = ({ clientId }) => {
         onClick={() => setIsOpen(true)}
         className="text-sm text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
       >
-        Vehicles
+        ・
       </button>
       <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
         <VehicleSimulator clientId={clientId} />

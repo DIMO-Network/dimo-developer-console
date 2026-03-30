@@ -74,7 +74,7 @@ const baseMainMenu = [
     label: 'API Status',
     icon: MonitorHeartIcon,
     iconClassName: 'h-5 w-5',
-    link: 'https://status.dimo.co/',
+    link: 'https://stats.uptimerobot.com/snU0rkEEah',
     external: true,
     disabled: false,
   },
