@@ -3,6 +3,7 @@ import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import configuration from '@/config';
 import DimoRegistryABI from '@/contracts/DimoRegistryABI.json';
+import DimoVehicleIdABI from '@/contracts/DimoVehicleIdABI.json';
 import { decodeHex } from '@/utils/formatHex';
 
 // keccak256("VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string)")
@@ -17,12 +18,20 @@ const ERC721_TRANSFER_TOPIC = keccak256(toBytes('Transfer(address,address,uint25
 const ZERO_ADDRESS_PADDED =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
+// All 8 DIMO permissions (bits 1–8): non-location telemetry, commands,
+// current location, all-time location, credentials, streams, raw data, approximate location
+const ALL_PERMISSIONS = BigInt(510);
+
+// ~75 years — effectively permanent for a test vehicle
+const SACD_EXPIRATION = BigInt(4102444800);
+
 export interface MintVehicleParams {
   manufacturerNodeId: number;
   deviceDefinitionId: string;
   make: string;
   model: string;
   year: number;
+  sacdGrantee?: `0x${string}`;
 }
 
 export const useMintVehicle = () => {
@@ -36,6 +45,7 @@ export const useMintVehicle = () => {
       make,
       model,
       year,
+      sacdGrantee,
     }: MintVehicleParams) => {
       if (!currentUser?.smartContractAddress) throw new Error('User session is invalid');
 
@@ -97,6 +107,33 @@ export const useMintVehicle = () => {
         rawTokenId !== '0x'
           ? Number(decodeHex(rawTokenId as `0x${string}`, 'uint256'))
           : null;
+
+      if (tokenId !== null && sacdGrantee) {
+        console.log('[useMintVehicle] Setting SACD', { tokenId, grantee: sacdGrantee });
+        await processTransactions(
+          [
+            {
+              to: configuration.VEHICLE_NFT_ADDRESS,
+              value: BigInt(0),
+              data: encodeFunctionData({
+                abi: DimoVehicleIdABI as Abi,
+                functionName: 'setSacd',
+                args: [
+                  BigInt(tokenId),
+                  {
+                    grantee: sacdGrantee,
+                    permissions: ALL_PERMISSIONS,
+                    expiration: SACD_EXPIRATION,
+                    source: '',
+                  },
+                ],
+              }),
+            },
+          ],
+          { abi: DimoVehicleIdABI as Abi },
+        );
+        console.log('[useMintVehicle] SACD set', { tokenId, grantee: sacdGrantee });
+      }
 
       return { ...result, tokenId };
     },

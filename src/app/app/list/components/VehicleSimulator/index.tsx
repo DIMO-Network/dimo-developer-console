@@ -181,6 +181,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         make: selectedMake.label,
         model: modelLabel,
         year: Number(selectedYear),
+        sacdGrantee: '0x299671D2b32ED62Cc61ce65D8f2b9e4f78486B37',
       });
 
       console.log('[VehicleSimulator] mintVehicle result', result);
