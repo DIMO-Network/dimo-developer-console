@@ -1,4 +1,4 @@
-import { MAKES, YEARS, buildDeviceDefinitionId } from '../constants';
+import { MAKES, buildDeviceDefinitionId } from '../constants';
 
 describe('VehicleSimulator constants', () => {
   it('has exactly 5 makes', () => {
@@ -11,14 +11,18 @@ describe('VehicleSimulator constants', () => {
     });
   });
 
-  it('years range from 2022 to 2026 inclusive', () => {
-    expect(YEARS).toEqual([2022, 2023, 2024, 2025, 2026]);
+  it('each model has at least one year available', () => {
+    MAKES.forEach((make) => {
+      make.models.forEach((model) => {
+        expect(model.years.length).toBeGreaterThan(0);
+      });
+    });
   });
 
   it('buildDeviceDefinitionId produces correct slug', () => {
-    expect(buildDeviceDefinitionId('toyota', 'camry', 2022)).toBe('toyota-camry-2022');
-    expect(buildDeviceDefinitionId('mercedes-benz', 's-class', 2023)).toBe(
-      'mercedes-benz-s-class-2023',
+    expect(buildDeviceDefinitionId('toyota', '4runner', 2022)).toBe(
+      'toyota_4runner_2022',
     );
+    expect(buildDeviceDefinitionId('tesla', 'model-3', 2024)).toBe('tesla_model-3_2024');
   });
 });

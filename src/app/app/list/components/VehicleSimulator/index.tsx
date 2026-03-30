@@ -12,7 +12,7 @@ import {
   deregisterVehicleFromSimulator,
 } from '@/actions/simulatedVehicles';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { MAKES, YEARS, VehicleMake, buildDeviceDefinitionId } from './constants';
+import { MAKES, VehicleMake, buildDeviceDefinitionId } from './constants';
 import './VehicleSimulator.css';
 
 const MAX_TEST_VEHICLES = 1;
@@ -50,11 +50,14 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const selectedMake: VehicleMake | undefined = MAKES.find(
     (m) => m.slug === selectedMakeSlug,
   );
+  const selectedModel = selectedMake?.models.find((m) => m.slug === selectedModelSlug);
+  const availableYears = selectedModel?.years ?? [];
   const canMint = !!selectedMakeSlug && !!selectedModelSlug && !!selectedYear && !atLimit;
 
   const handleMakeChange = (makeSlug: string) => {
     setSelectedMakeSlug(makeSlug);
     setSelectedModelSlug('');
+    setSelectedYear('');
   };
 
   const selectionPreview = (() => {
@@ -276,7 +279,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         <div className={`vehicle-sim-step${!selectedModelSlug ? ' locked' : ''}`}>
           <span className="vehicle-sim-step-label">03 — Year</span>
           <div className="vehicle-sim-pill-group" role="group" aria-label="Select year">
-            {YEARS.map((year) => (
+            {availableYears.map((year) => (
               <button
                 key={year}
                 type="button"
