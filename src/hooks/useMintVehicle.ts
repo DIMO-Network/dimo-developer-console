@@ -5,9 +5,10 @@ import configuration from '@/config';
 import DimoRegistryABI from '@/contracts/DimoRegistryABI.json';
 import { decodeHex } from '@/utils/formatHex';
 
-// keccak256("VehicleNodeMinted(uint256,uint256,address)")
+// keccak256("VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string)")
+// This is the actual event emitted by mintVehicleWithDeviceDefinition on the DimoRegistry
 const VEHICLE_NODE_MINTED_TOPIC = keccak256(
-  toBytes('VehicleNodeMinted(uint256,uint256,address)'),
+  toBytes('VehicleNodeMintedWithDeviceDefinition(uint256,uint256,address,string)'),
 );
 
 // keccak256("Transfer(address,address,uint256)") — ERC-721 standard

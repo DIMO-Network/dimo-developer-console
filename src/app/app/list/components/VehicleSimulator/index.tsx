@@ -76,13 +76,9 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       console.log('[VehicleSimulator] Burn result', burnResult);
 
       if (!burnResult.success) {
-        console.warn('[VehicleSimulator] Burn failed', { reason: burnResult.reason });
-        setNotification(
-          burnResult.reason ?? 'Failed to burn vehicle on-chain',
-          'Error',
-          'error',
-        );
-        return;
+        console.warn('[VehicleSimulator] Burn failed — proceeding with cleanup anyway', {
+          reason: burnResult.reason,
+        });
       }
 
       console.log('[VehicleSimulator] Deregistering vehicle from simulator', { tokenId });
