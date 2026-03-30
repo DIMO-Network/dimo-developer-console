@@ -171,13 +171,17 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         clientId,
       });
 
-      await recordSimulatedVehicle({
+      const recordResult = await recordSimulatedVehicle({
         tokenId: result.tokenId ?? 0,
         make: selectedMake.label,
         model: modelLabel,
         year: Number(selectedYear),
         clientId,
       });
+
+      if (!recordResult.success) {
+        console.warn('[VehicleSimulator] Failed to record vehicle', recordResult);
+      }
 
       console.log('[VehicleSimulator] Registering vehicle with simulator', {
         tokenId: result.tokenId,
@@ -213,9 +217,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       <div className="vehicle-sim-header">
         <div className="vehicle-sim-header-text">
           <p className="title">Vehicle Simulator</p>
-          <p className="text-sm text-text-secondary">
-            Mint simulated test vehicles on Polygon Amoy.
-          </p>
+          <p className="text-sm text-text-secondary">Mint simulated test vehicles.</p>
         </div>
       </div>
 
@@ -325,7 +327,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
                   <span className="vehicle-sim-card-vehicle">
                     {vehicle.year} {vehicle.make} {vehicle.model}
                   </span>
-                  <span className="vehicle-sim-card-network">Polygon Amoy</span>
+                  <span className="vehicle-sim-card-network">Polygon</span>
                 </div>
                 <div className="vehicle-sim-card-right">
                   <span className="vehicle-sim-card-token-label">Token ID</span>

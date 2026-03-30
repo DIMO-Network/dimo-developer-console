@@ -44,19 +44,28 @@ export const recordSimulatedVehicle = async ({
   model: string;
   year: number;
   clientId: string;
-}): Promise<SimulatedVehicle> => {
-  const client = await dimoDevAPIClient();
-  const { data } = await client.post<{ data: SimulatedVehicle }>(
-    `/api/my/simulated-vehicles`,
-    {
-      token_id: tokenId,
-      make,
-      model,
-      year,
-      client_id: clientId,
-    },
-  );
-  return data.data;
+}): Promise<{ success: boolean; data?: SimulatedVehicle; message?: string }> => {
+  try {
+    const client = await dimoDevAPIClient();
+    const { data } = await client.post<{ data: SimulatedVehicle }>(
+      `/api/my/simulated-vehicles`,
+      {
+        token_id: tokenId,
+        make,
+        model,
+        year,
+        client_id: clientId,
+      },
+    );
+    return { success: true, data: data.data };
+  } catch (error: unknown) {
+    const message =
+      error instanceof AxiosError
+        ? error?.response?.data?.message || error?.message
+        : 'Failed to record simulated vehicle';
+    console.error('recordSimulatedVehicle error:', { tokenId, message, error });
+    return { success: false, message };
+  }
 };
 
 export const deleteSimulatedVehicle = async ({
