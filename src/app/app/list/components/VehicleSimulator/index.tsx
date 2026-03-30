@@ -116,7 +116,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       console.log('[VehicleSimulator] Deleting simulated vehicle record', { vehicleId });
       const deleteResult = await deleteSimulatedVehicle({ vehicleId });
-      if (!deleteResult.success) {
+      if (!deleteResult.success && deleteResult.status !== 404) {
         console.warn('[VehicleSimulator] Delete record failed', {
           vehicleId,
           status: deleteResult.status,
@@ -128,6 +128,12 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           'error',
         );
         return;
+      }
+      if (deleteResult.status === 404) {
+        console.warn(
+          '[VehicleSimulator] Delete record returned 404 — treating as already removed',
+          { vehicleId },
+        );
       }
 
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
