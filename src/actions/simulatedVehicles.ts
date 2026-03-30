@@ -72,18 +72,25 @@ export const deleteSimulatedVehicle = async ({
   vehicleId,
 }: {
   vehicleId: string;
-}): Promise<{ success: boolean; message?: string }> => {
+}): Promise<{ success: boolean; message?: string; status?: number }> => {
   try {
     const client = await dimoDevAPIClient();
     await client.delete(`/api/my/simulated-vehicles/${vehicleId}`);
     return { success: true };
   } catch (error: unknown) {
+    const status = error instanceof AxiosError ? error?.response?.status : undefined;
+    const responseBody = error instanceof AxiosError ? error?.response?.data : undefined;
     const message =
       error instanceof AxiosError
         ? error?.response?.data?.message || error?.message
         : 'Failed to delete simulated vehicle';
-    console.error('deleteSimulatedVehicle error:', { vehicleId, message, error });
-    return { success: false, message };
+    console.error('deleteSimulatedVehicle error:', {
+      vehicleId,
+      status,
+      message,
+      responseBody,
+    });
+    return { success: false, message, status };
   }
 };
 

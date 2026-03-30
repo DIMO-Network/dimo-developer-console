@@ -117,7 +117,11 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       console.log('[VehicleSimulator] Deleting simulated vehicle record', { vehicleId });
       const deleteResult = await deleteSimulatedVehicle({ vehicleId });
       if (!deleteResult.success) {
-        console.warn('[VehicleSimulator] Delete record failed', deleteResult);
+        console.warn('[VehicleSimulator] Delete record failed', {
+          vehicleId,
+          status: deleteResult.status,
+          message: deleteResult.message,
+        });
         setNotification(
           deleteResult.message ?? 'Failed to remove vehicle record',
           'Error',
