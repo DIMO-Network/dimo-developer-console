@@ -1,6 +1,5 @@
 'use client';
 import { FC, useState } from 'react';
-import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
 import { VehicleSimulator } from './index';
 
@@ -13,9 +12,13 @@ export const VehicleSimulatorModal: FC<Props> = ({ clientId }) => {
 
   return (
     <>
-      <Button className="dark with-icon px-4" onClick={() => setIsOpen(true)}>
-        Mint Test Vehicle
-      </Button>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="text-sm text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
+      >
+        Vehicles
+      </button>
       <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
         <VehicleSimulator clientId={clientId} />
       </Modal>
