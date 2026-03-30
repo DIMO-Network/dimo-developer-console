@@ -128,9 +128,15 @@ export const deregisterVehicleFromSimulator = async ({
 export const registerVehicleWithSimulator = async ({
   tokenId,
   ownerWalletAddress,
+  make,
+  model,
+  year,
 }: {
   tokenId: number;
   ownerWalletAddress: string;
+  make: string;
+  model: string;
+  year: number;
 }): Promise<{ token_id: number; status: string }> => {
   try {
     const response = await fetch(
@@ -141,6 +147,7 @@ export const registerVehicleWithSimulator = async ({
         body: JSON.stringify({
           token_id: tokenId,
           owner_wallet_address: ownerWalletAddress,
+          device_definition: { make, model, year },
         }),
       },
     );

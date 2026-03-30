@@ -234,6 +234,9 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       const registration = await registerVehicleWithSimulator({
         tokenId: result.tokenId ?? 0,
         ownerWalletAddress: currentUser!.smartContractAddress,
+        make: selectedMake.label,
+        model: modelLabel,
+        year: Number(selectedYear),
       });
 
       console.log('[VehicleSimulator] Simulator registration result', registration);
