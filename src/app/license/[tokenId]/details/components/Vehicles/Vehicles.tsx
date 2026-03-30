@@ -1,3 +1,4 @@
+'use client';
 import React, { FC, useEffect, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { useQuery } from '@apollo/client';
@@ -11,10 +12,6 @@ import { TotalCount } from '@/components/TotalVehicleCount';
 import { useRouter } from 'next/navigation';
 import { getConfigurationByClientId } from '@/actions/configurations';
 import { VehicleSimulatorModal } from '@/app/app/list/components/VehicleSimulator/VehicleSimulatorModal';
-import configuration from '@/config';
-
-// Only available on testnet (Polygon Amoy = 80002)
-const IS_TESTNET = configuration.CONTRACT_NETWORK === BigInt(80_002);
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -63,9 +60,7 @@ export const Vehicles: FC<IProps> = ({ license }) => {
       <Section>
         <SectionHeader title={'Vehicles'}>
           <div className={'flex flex-row gap-2'}>
-            {IS_TESTNET && (
-              <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
-            )}
+            <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
             <Button
               className="dark with-icon px-4"
               disabled={!configurationId}
