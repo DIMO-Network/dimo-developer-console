@@ -48,6 +48,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
         domain: tokenParams.domain,
         private_key: text,
       });
+      if (!devJwt) throw new Error('Failed to get developer JWT');
       const authHeader = devJwt.headers.Authorization;
       const token = authHeader?.split(' ')[1] ?? '';
       setGeneratedKey(token);

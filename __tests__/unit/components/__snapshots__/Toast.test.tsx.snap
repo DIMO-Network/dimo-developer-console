@@ -3,39 +3,14 @@
 exports[`Toast renders a success notification 1`] = `
 <div>
   <div
-    class="toast"
+    class="toast success"
   >
     <div
       class="toast-content"
     >
       <div
-        class="toast-icon-content"
-      >
-        <svg
-          aria-hidden="true"
-          class="h-6 w-6 text-green-400"
-          data-slot="icon"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </div>
-      <div
         class="toast-content-content"
       >
-        <p
-          class="toast-title"
-        >
-          Success
-        </p>
         <p
           class="toast-description"
         >
@@ -57,7 +32,7 @@ exports[`Toast renders a success notification 1`] = `
           </span>
           <svg
             aria-hidden="true"
-            class="h-5 w-5"
+            class="h-5 w-5 text-white hover:text-gray-500"
             data-slot="icon"
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -77,39 +52,14 @@ exports[`Toast renders a success notification 1`] = `
 exports[`Toast renders an error notification 1`] = `
 <div>
   <div
-    class="toast"
+    class="toast error"
   >
     <div
       class="toast-content"
     >
       <div
-        class="toast-icon-content"
-      >
-        <svg
-          aria-hidden="true"
-          class="h-6 w-6 text-red-400"
-          data-slot="icon"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M6 18 18 6M6 6l12 12"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </div>
-      <div
         class="toast-content-content"
       >
-        <p
-          class="toast-title"
-        >
-          Error
-        </p>
         <p
           class="toast-description"
         >
@@ -131,7 +81,7 @@ exports[`Toast renders an error notification 1`] = `
           </span>
           <svg
             aria-hidden="true"
-            class="h-5 w-5"
+            class="h-5 w-5 text-white hover:text-gray-500"
             data-slot="icon"
             fill="currentColor"
             viewBox="0 0 20 20"

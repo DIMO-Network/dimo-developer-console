@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, type FC } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
@@ -70,7 +72,14 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
         label: 'Deleting the selected collaborator',
         status: 'loading',
       });
-      await deleteCollaborator(id);
+      const result = await deleteCollaborator(id);
+      if (result?.success === false) {
+        setLoadingStatus({
+          label: result.message ?? 'Something went wrong',
+          status: 'error',
+        });
+        return;
+      }
       setLoadingStatus({ label: 'Collaborator removed', status: 'success' });
       refreshData();
     } catch (error: unknown) {

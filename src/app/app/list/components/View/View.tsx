@@ -40,6 +40,7 @@ export const View: FC = () => {
     skip: !currentUser?.smartContractAddress,
   });
   const userFirstName = getFirstName(user?.name ?? '');
+
   return (
     <div className={'flex flex-1 flex-row'}>
       <div className="app-list-page">
@@ -65,6 +66,7 @@ export const View: FC = () => {
           <>
             <OnboardingBanner
               balance={balance}
+              isLoading={loadingBalance}
               licenseConnection={data.developerLicenses}
             />
             <LicenseList licenseConnection={data.developerLicenses} />

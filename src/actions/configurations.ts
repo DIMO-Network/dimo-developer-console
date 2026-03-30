@@ -13,12 +13,15 @@ export const getConfigurationByClientId = async ({
 }: {
   client_id: string;
 }): Promise<{ id: string }> => {
-  const client = await dimoDevAPIClient();
-  const { data } = await client.get<IConfiguration>(
-    `/api/my/configurations?clientId=${client_id}`,
-  );
-
-  return { id: data.id };
+  try {
+    const client = await dimoDevAPIClient();
+    const { data } = await client.get<IConfiguration>(
+      `/api/my/configurations?clientId=${client_id}`,
+    );
+    return { id: data.id };
+  } catch {
+    return { id: '' };
+  }
 };
 
 export const getConfiguration = async ({

@@ -149,15 +149,17 @@ export const useDimoAuth = () => {
 
     const privateKey = await getPrivateKey();
 
-    const { headers } = await getDeveloperJwt({
+    const result = await getDeveloperJwt({
       client_id: clientId,
       domain: domain,
       private_key: privateKey!,
     });
 
-    if (!headers) {
+    if (!result?.headers) {
       return false;
     }
+
+    const { headers } = result;
 
     const { Authorization } = headers;
 

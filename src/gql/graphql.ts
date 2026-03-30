@@ -539,30 +539,30 @@ export type Query = {
    * Retrieves information about an account. Right now, this is mainly to show
    * SACDs for user information.
    */
-  account: Account;
+  account?: Maybe<Account>;
   /** View a particular aftermarket device. */
-  aftermarketDevice: AftermarketDevice;
+  aftermarketDevice?: Maybe<AftermarketDevice>;
   /**
    * List aftermarket devices.
    * Ordered by token id, descending.
    */
   aftermarketDevices: AftermarketDeviceConnection;
   /** Retrieve a particular connection. */
-  connection: Connection;
+  connection?: Maybe<Connection>;
   /** List connection licenses. Sorts by minting time, descending. */
   connections: ConnectionConnection;
   /** View a particular DIMO Canonical Name. */
-  dcn: Dcn;
+  dcn?: Maybe<Dcn>;
   /** List DIMO Canonical Names. */
   dcns: DcnConnection;
   /** Retrieve a particular developer license. */
-  developerLicense: DeveloperLicense;
+  developerLicense?: Maybe<DeveloperLicense>;
   /** List developer licenses. Sorts by token id, descending. */
   developerLicenses: DeveloperLicenseConnection;
   /** View a particular device definition. */
-  deviceDefinition: DeviceDefinition;
+  deviceDefinition?: Maybe<DeviceDefinition>;
   /** View a particular manufacturer. */
-  manufacturer: Manufacturer;
+  manufacturer?: Maybe<Manufacturer>;
   /**
    * List minted manufacturers.
    *
@@ -574,20 +574,20 @@ export type Query = {
   /** List rewards for a user. */
   rewards?: Maybe<UserRewards>;
   /** List developer licenses. Sorts by token id, descending. */
-  stakes: StakeConnection;
+  stakes?: Maybe<StakeConnection>;
   /** View a particular synthetic device. */
-  syntheticDevice: SyntheticDevice;
+  syntheticDevice?: Maybe<SyntheticDevice>;
   /**
    * List synthetic devices.
    * Ordered by token id, descending.
    */
   syntheticDevices: SyntheticDeviceConnection;
   /** Retrieve a particular template. */
-  template: Template;
+  template?: Maybe<Template>;
   /** List templates. Sorts by minting time, descending. */
   templates: TemplateConnection;
   /** View a particular vehicle. */
-  vehicle: Vehicle;
+  vehicle?: Maybe<Vehicle>;
   /**
    * List minted vehicles.
    *
@@ -1039,6 +1039,8 @@ export type Vehicle = Node & {
   owner: Scalars['Address']['output'];
   /** A Relay-style connection listing any active privilege grants on this vehicle. */
   privileges: PrivilegesConnection;
+  /** The active SACD for this vehicle and the specified grantee, if there is one. */
+  sacd?: Maybe<Sacd>;
   /** A Relay-style connection listing any active SACD permission grants on this vehicle. */
   sacds: SacdConnection;
   stake?: Maybe<Stake>;
@@ -1063,6 +1065,11 @@ export type VehiclePrivilegesArgs = {
   filterBy?: InputMaybe<PrivilegeFilterBy>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type VehicleSacdArgs = {
+  grantee: Scalars['Address']['input'];
 };
 
 
@@ -1144,10 +1151,10 @@ export type DeveloperLicenseInfoQueryVariables = Exact<{
 }>;
 
 
-export type DeveloperLicenseInfoQuery = { __typename?: 'Query', developerLicense: (
+export type DeveloperLicenseInfoQuery = { __typename?: 'Query', developerLicense?: (
     { __typename?: 'DeveloperLicense' }
     & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragmentFragment': DeveloperLicenseSummaryFragmentFragment;'SignerFragmentFragment': SignerFragmentFragment;'RedirectUriFragmentFragment': RedirectUriFragmentFragment;'DeveloperLicenseVehiclesFragmentFragment': DeveloperLicenseVehiclesFragmentFragment;'DeveloperJwtsFragmentFragment': DeveloperJwtsFragmentFragment;'UserConfigurationFragmentFragment': UserConfigurationFragmentFragment } }
-  ) };
+  ) | null };
 
 export type DeveloperJwtsFragmentFragment = { __typename?: 'DeveloperLicense', owner: any, clientId: any, redirectURIs: { __typename?: 'RedirectURIConnection', nodes: Array<{ __typename?: 'RedirectURI', uri: string }> } } & { ' $fragmentName'?: 'DeveloperJwtsFragmentFragment' };
 
@@ -1169,10 +1176,10 @@ export type GetDeveloperLicenseQueryVariables = Exact<{
 }>;
 
 
-export type GetDeveloperLicenseQuery = { __typename?: 'Query', developerLicense: (
+export type GetDeveloperLicenseQuery = { __typename?: 'Query', developerLicense?: (
     { __typename?: 'DeveloperLicense' }
     & { ' $fragmentRefs'?: { 'DeveloperLicenseSummaryFragmentFragment': DeveloperLicenseSummaryFragmentFragment;'SignerFragmentFragment': SignerFragmentFragment;'RedirectUriFragmentFragment': RedirectUriFragmentFragment;'DeveloperLicenseVehiclesFragmentFragment': DeveloperLicenseVehiclesFragmentFragment;'DeveloperJwtsFragmentFragment': DeveloperJwtsFragmentFragment } }
-  ) };
+  ) | null };
 
 export type DeveloperLicenseSummariesOnConnectionFragment = { __typename?: 'DeveloperLicenseConnection', nodes: Array<(
     { __typename?: 'DeveloperLicense' }
@@ -1202,7 +1209,7 @@ export type DeveloperLicenseByClientIdSummaryQueryVariables = Exact<{
 }>;
 
 
-export type DeveloperLicenseByClientIdSummaryQuery = { __typename?: 'Query', developerLicense: { __typename?: 'DeveloperLicense', tokenId: number, alias?: string | null, clientId: any } };
+export type DeveloperLicenseByClientIdSummaryQuery = { __typename?: 'Query', developerLicense?: { __typename?: 'DeveloperLicense', tokenId: number, alias?: string | null, clientId: any } | null };
 
 export type DeveloperLicenseSummaryFragmentFragment = { __typename?: 'DeveloperLicense', alias?: string | null, tokenId: number, clientId: any, owner: any } & { ' $fragmentName'?: 'DeveloperLicenseSummaryFragmentFragment' };
 
