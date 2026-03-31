@@ -46,7 +46,7 @@ const sponsorUserOperation = async ({
   const chain = getChain();
   const zerodevPaymaster = createZeroDevPaymasterClient({
     chain: chain,
-    transport: http(`${turnkeyConfig.paymasterRpc}?provider=${provider}`),
+    transport: http(`${turnkeyConfig.bundlerRpc}/chain/${chain.id}?provider=${provider}`),
   });
   return zerodevPaymaster.sponsorUserOperation({
     userOperation,
