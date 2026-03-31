@@ -176,3 +176,14 @@
 .vehicle-sim-card-token-id {
   @apply text-sm font-mono text-white leading-tight;
 }
+
+/* ─── Busy overlay ──────────────────────────────────────────────────── */
+
+.vehicle-sim-overlay {
+  @apply absolute inset-0 z-10 flex flex-col items-center justify-center gap-3
+         rounded-lg bg-black/60 backdrop-blur-[2px];
+}
+
+.vehicle-sim-overlay-label {
+  @apply text-xs font-mono tracking-[0.15em] uppercase text-text-secondary;
+}

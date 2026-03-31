@@ -13,6 +13,7 @@ import {
   deregisterVehicleFromSimulator,
 } from '@/actions/simulatedVehicles';
 import { TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { BubbleLoader } from '@/components/BubbleLoader';
 import { getPublicClient } from '@/services/zerodev';
 import DimoVehicleIdABI from '@/contracts/DimoVehicleIdABI.json';
 import configuration from '@/config';
@@ -259,8 +260,18 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
     }
   };
 
+  const isBusy = isLoading || deletingId !== null;
+  const busyLabel = isLoading ? 'Minting vehicle...' : 'Removing vehicle...';
+
   return (
-    <div className="license-list-content w-full">
+    <div className="license-list-content w-full relative">
+      {isBusy && (
+        <div className="vehicle-sim-overlay" aria-live="polite" aria-label={busyLabel}>
+          <BubbleLoader isLoading />
+          <span className="vehicle-sim-overlay-label">{busyLabel}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="vehicle-sim-header">
         <div className="vehicle-sim-header-text">

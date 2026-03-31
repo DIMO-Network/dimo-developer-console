@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
 import { useContractGA, useGlobalAccount } from '@/hooks';
+import { useSACD } from '@/hooks/useSACD';
 import configuration from '@/config';
 import DimoRegistryABI from '@/contracts/DimoRegistryABI.json';
 import SacdABI from '@/contracts/Sacd.json';
@@ -38,6 +39,7 @@ export interface MintVehicleParams {
 export const useMintVehicle = () => {
   const { processTransactions } = useContractGA();
   const { currentUser } = useGlobalAccount();
+  const { signAndUploadPermissionSACD } = useSACD();
 
   return useCallback(
     async ({
@@ -110,6 +112,22 @@ export const useMintVehicle = () => {
           : null;
 
       if (tokenId !== null && sacdGrantee) {
+        const chainId = Number(configuration.CONTRACT_NETWORK);
+        const asset = `did:erc721:${chainId}:${configuration.VEHICLE_NFT_ADDRESS}:${tokenId}`;
+
+        console.log('[useMintVehicle] Generating and uploading SACD agreement', {
+          tokenId,
+          grantee: sacdGrantee,
+          asset,
+        });
+        const sacdSource = await signAndUploadPermissionSACD({
+          grantee: sacdGrantee,
+          grantor: currentUser.smartContractAddress,
+          asset,
+          expiration: SACD_EXPIRATION,
+        });
+        console.log('[useMintVehicle] SACD agreement uploaded', { sacdSource });
+
         console.log('[useMintVehicle] Setting SACD permissions', {
           tokenId,
           grantee: sacdGrantee,
@@ -128,7 +146,7 @@ export const useMintVehicle = () => {
                   sacdGrantee,
                   ALL_PERMISSIONS,
                   SACD_EXPIRATION,
-                  '',
+                  sacdSource,
                 ],
               }),
             },
@@ -143,6 +161,6 @@ export const useMintVehicle = () => {
 
       return { ...result, tokenId };
     },
-    [currentUser, processTransactions],
+    [currentUser, processTransactions, signAndUploadPermissionSACD],
   );
 };
