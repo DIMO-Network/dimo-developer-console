@@ -63,10 +63,11 @@ export const Vehicles: FC<IProps> = ({ license }) => {
             <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
             <Button
               className="dark with-icon px-4"
-              disabled={!configurationId}
               onClick={() => {
                 router.push(
-                  `/license/${fragment.tokenId}/configurator/${configurationId}`,
+                  configurationId
+                    ? `/license/${fragment.tokenId}/configurator/${configurationId}`
+                    : `/license/${fragment.tokenId}/configurator`,
                 );
               }}
             >
