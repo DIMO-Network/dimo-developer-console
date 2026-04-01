@@ -1,4 +1,4 @@
-import { siToyota, siFord, siTesla, siBmw, siHonda } from 'simple-icons';
+import { siToyota, siFord, siChevrolet, siBmw, siHonda } from 'simple-icons';
 
 export type PowertrainType = 'ICE' | 'HEV' | 'PHEV' | 'BEV' | 'FCEV';
 
@@ -44,22 +44,22 @@ export const MAKES: VehicleMake[] = [
     ],
   },
   {
-    label: 'Tesla',
-    slug: 'tesla',
-    nodeId: 130,
-    siPath: siTesla.path,
+    label: 'Chevrolet',
+    slug: 'chevrolet',
+    nodeId: 21,
+    siPath: siChevrolet.path,
     models: [
       {
-        label: 'Model 3',
-        slug: 'model-3',
-        years: [2022, 2023, 2024, 2025, 2026],
-        powertrainType: 'BEV',
+        label: 'Silverado 1500',
+        slug: 'silverado-1500',
+        years: [2022, 2023, 2024],
+        powertrainType: 'ICE',
       },
       {
-        label: 'Model Y',
-        slug: 'model-y',
-        years: [2022, 2023, 2024, 2025, 2026],
-        powertrainType: 'BEV',
+        label: 'Equinox',
+        slug: 'equinox',
+        years: [2022, 2023, 2024],
+        powertrainType: 'ICE',
       },
     ],
   },
