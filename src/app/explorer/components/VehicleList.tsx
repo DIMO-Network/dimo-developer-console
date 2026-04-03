@@ -1,8 +1,7 @@
 'use client';
 
 import { FC, useState, useMemo } from 'react';
-import { useQuery } from '@apollo/client';
-import { gql } from '@/gql';
+import { useQuery, gql } from '@apollo/client';
 import { Loader } from '@/components/Loader';
 import { Button } from '@/components/Button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
