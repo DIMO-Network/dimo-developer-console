@@ -9,6 +9,7 @@ import {
   PAGE_SIZE,
 } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable/constants';
 import { getSimulatedVehicles } from '@/actions/simulatedVehicles';
+import { useRouter } from 'next/navigation';
 
 interface IProps {
   clientId: string;
@@ -38,6 +39,7 @@ export const VEHICLES_BY_CLIENT_ID = gql(`
 `);
 
 export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
+  const router = useRouter();
   const { data, refetch, loading, error } = useQuery(VEHICLES_BY_CLIENT_ID, {
     variables: { clientId, first: PAGE_SIZE },
   });
@@ -66,6 +68,7 @@ export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
       rowCount={data.vehicles.totalCount}
       pageInfo={data.vehicles.pageInfo}
       pageSize={PAGE_SIZE}
+      onRowClick={(row) => router.push(`/explorer/${row.tokenId}`)}
     />
   );
 };

@@ -70,11 +70,17 @@ export const Menu: FC = withLoadingStatus(() => {
           <MenuCloseButton />
         </div>
 
-        {menuItems.map((item) => {
-          return (
-            <MenuItem key={item.link} {...item} isHighlighted={getIsHighlighted(item)} />
-          );
-        })}
+        {menuItems
+          .filter((item) => !('hidden' in item && item.hidden))
+          .map((item) => {
+            return (
+              <MenuItem
+                key={item.link}
+                {...item}
+                isHighlighted={getIsHighlighted(item)}
+              />
+            );
+          })}
       </ul>
       <ul className="bottom-menu">
         {[logoutButtonConfig, ...bottomMenu].map((item) => (

@@ -99,7 +99,12 @@ const VehiclesTotalCount = ({
 }) => {
   return (
     <div className={'vehicle-count-container'}>
-      <TotalCount totalCount={totalCount} countedThings="Connected Vehicles" />
+      <Link
+        href={`/license/vehicles/${clientId}`}
+        className="hover:opacity-80 transition-opacity cursor-pointer"
+      >
+        <TotalCount totalCount={totalCount} countedThings="Connected Vehicles" />
+      </Link>
       <Link href={`/license/vehicles/${clientId}`}>
         <Button className={'table-action-button'}>Vehicle Details</Button>
       </Link>

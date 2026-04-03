@@ -6,6 +6,7 @@ import {
   SummarizeIcon,
   SupportAgentIcon,
   ConnectionsIcon,
+  ChipIcon,
 } from '@/components/Icons';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
@@ -35,6 +36,17 @@ const pageTitles: Record<string, string> = {
   '/api-status': 'API Status',
   '/connections': 'Connections',
   '/settings': 'Settings',
+  '/explorer': 'Data Explorer',
+};
+
+const dataExplorerMenuItem = {
+  label: 'Data Explorer',
+  icon: ChipIcon,
+  iconClassName: 'h-5 w-5',
+  link: '/explorer',
+  external: false,
+  disabled: false,
+  hidden: true,
 };
 
 const baseMainMenu = [
@@ -94,10 +106,10 @@ const connectionsMenuItem = {
  * @param includeConnections - Whether to include the Connections tab (requires developer license)
  */
 export const getMainMenu = (includeConnections: boolean = true) => {
-  if (includeConnections) {
-    return [...baseMainMenu, connectionsMenuItem];
-  }
-  return baseMainMenu;
+  const items = includeConnections
+    ? [...baseMainMenu, connectionsMenuItem, dataExplorerMenuItem]
+    : [...baseMainMenu, dataExplorerMenuItem];
+  return items;
 };
 
 // Keep the old export for backward compatibility for now, always includes Connections
