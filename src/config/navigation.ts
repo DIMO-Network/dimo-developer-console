@@ -10,6 +10,7 @@ import {
 } from '@/components/Icons';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
+const EXPLORER_VEHICLE_REGEX = /^\/explorer\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
 const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create\/[^/]+$/;
@@ -21,6 +22,7 @@ export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
   if (APP_DETAILS_REGEX.test(path)) return 'App Details';
+  if (EXPLORER_VEHICLE_REGEX.test(path)) return 'Data Explorer';
   if (LICENSE_DETAILS_REGEX.test(path)) return 'License Details';
   if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed Vehicles';
   if (CREATE_WEBHOOK_REGEX.test(path)) return 'Create a webhook';
