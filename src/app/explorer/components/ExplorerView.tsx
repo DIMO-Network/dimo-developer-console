@@ -41,7 +41,7 @@ const ExplorerContent = () => {
             />
           </div>
           <div className="flex-1 flex flex-col">
-            <VehicleData tokenId={selectedTokenId} />
+            <VehicleData clientId={selectedLicense.clientId} tokenId={selectedTokenId} />
           </div>
         </div>
       )}
