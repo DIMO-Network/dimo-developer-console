@@ -64,20 +64,24 @@ export const useVehicleData = (
       });
       try {
         // Step 1: Exchange developer JWT for a vehicle-scoped JWT
+        console.log('[useVehicleData] fetching vehicle JWT for tokenId', tokenId);
         const dimo = await getDimo();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = await (dimo.tokenexchange as any).getVehicleJwt({
           headers: { Authorization: `Bearer ${devJwt}` },
           tokenId,
         });
+        console.log('[useVehicleData] vehicle JWT result:', result);
         const vehicleAuthHeader: string = result.headers.Authorization;
 
         // Step 2: Query available signals via data-sdk telemetry
+        console.log('[useVehicleData] querying availableSignals');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const telemetryResult = await (dimo.telemetry as any).query({
           headers: { Authorization: vehicleAuthHeader },
           query: `query GetAvailable { availableSignals(tokenId: ${tokenId}) }`,
         });
+        console.log('[useVehicleData] telemetry result:', telemetryResult);
 
         if (telemetryResult.errors?.length) {
           throw new Error(telemetryResult.errors[0]?.message ?? 'GraphQL error');
@@ -92,6 +96,7 @@ export const useVehicleData = (
           });
         }
       } catch (err) {
+        console.error('[useVehicleData] error:', err);
         if (!cancelled) {
           setState({
             availableSignals: [],
