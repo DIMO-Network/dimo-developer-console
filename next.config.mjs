@@ -17,6 +17,7 @@ const cspHeader = `
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  transpilePackages: ['@dimo-network/data-sdk'],
   eslint: {
     ignoreDuringBuilds: true,
   },

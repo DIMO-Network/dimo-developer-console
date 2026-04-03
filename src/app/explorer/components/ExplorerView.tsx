@@ -8,10 +8,12 @@ import { LocalDeveloperLicense } from '@/types/webhook';
 import { VehicleList } from './VehicleList';
 import { VehicleData } from './VehicleData';
 
-const ExplorerContent = () => {
+const ExplorerContent = ({ initialTokenId }: { initialTokenId?: number }) => {
   const { developerLicenses, loading } = useValidDeveloperLicenses();
   const [selectedLicense, setSelectedLicense] = useState<LocalDeveloperLicense>();
-  const [selectedTokenId, setSelectedTokenId] = useState<number | null>(null);
+  const [selectedTokenId, setSelectedTokenId] = useState<number | null>(
+    initialTokenId ?? null,
+  );
 
   useEffect(() => {
     if (!loading && developerLicenses.length === 1 && !selectedLicense) {
@@ -49,7 +51,7 @@ const ExplorerContent = () => {
   );
 };
 
-export const ExplorerView = () => {
+export const ExplorerView = ({ initialTokenId }: { initialTokenId?: number } = {}) => {
   const { loading, error } = useValidDeveloperLicenses();
   return (
     <div className="flex flex-col gap-6">
@@ -58,7 +60,7 @@ export const ExplorerView = () => {
         error={error}
         customErrorMessage="There was a problem fetching your Developer Licenses"
       >
-        <ExplorerContent />
+        <ExplorerContent initialTokenId={initialTokenId} />
       </QueryPageWrapper>
     </div>
   );

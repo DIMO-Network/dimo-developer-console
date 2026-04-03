@@ -2,6 +2,7 @@
 
 import { FC, useState, useMemo } from 'react';
 import { useQuery, gql } from '@apollo/client';
+import { useRouter } from 'next/navigation';
 import { Loader } from '@/components/Loader';
 import { Button } from '@/components/Button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
@@ -51,6 +52,7 @@ export const VehicleList: FC<Props> = ({
   selectedTokenId,
   onSelectVehicle,
 }) => {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
   const [cursors, setCursors] = useState<{ after?: string; before?: string }>({
@@ -122,7 +124,10 @@ export const VehicleList: FC<Props> = ({
             return (
               <button
                 key={vehicle.tokenId}
-                onClick={() => onSelectVehicle(vehicle.tokenId)}
+                onClick={() => {
+                  onSelectVehicle(vehicle.tokenId);
+                  router.push(`/explorer/${vehicle.tokenId}`);
+                }}
                 className={`flex flex-col items-start w-full text-left px-3 py-3 rounded-lg border-b border-b-cta-default last:border-b-0 transition-colors ${
                   isSelected
                     ? 'bg-cta-default text-white'
