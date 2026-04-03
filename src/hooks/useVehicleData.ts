@@ -1,12 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DIMO } from '@dimo-network/data-sdk';
 import { getDevJwt } from '@/utils/devJwt';
 
-const dimo = new DIMO('Production');
-
-const TELEMETRY_URL = 'https://telemetry-api.dimo.zone/query';
+// Lazy singleton — only instantiated on first actual use (client-side), never at module eval time
+let _dimo: InstanceType<typeof import('@dimo-network/data-sdk').DIMO> | null = null;
+const getDimo = async () => {
+  if (!_dimo) {
+    const { DIMO } = await import('@dimo-network/data-sdk');
+    _dimo = new DIMO('Production');
+  }
+  return _dimo;
+};
 
 export interface VehicleDataState {
   availableSignals: string[];
@@ -59,6 +64,7 @@ export const useVehicleData = (
       });
       try {
         // Step 1: Exchange developer JWT for a vehicle-scoped JWT
+        const dimo = await getDimo();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = await (dimo.tokenexchange as any).getVehicleJwt({
           headers: { Authorization: `Bearer ${devJwt}` },
@@ -66,30 +72,20 @@ export const useVehicleData = (
         });
         const vehicleAuthHeader: string = result.headers.Authorization;
 
-        // Step 2: Query available signals from telemetry API
-        const response = await fetch(TELEMETRY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': vehicleAuthHeader,
-          },
-          body: JSON.stringify({
-            query: `query GetAvailable { availableSignals(tokenId: ${tokenId}) }`,
-          }),
+        // Step 2: Query available signals via data-sdk telemetry
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const telemetryResult = await (dimo.telemetry as any).query({
+          headers: { Authorization: vehicleAuthHeader },
+          query: `query GetAvailable { availableSignals(tokenId: ${tokenId}) }`,
         });
 
-        if (!response.ok) {
-          throw new Error(`Telemetry API responded with ${response.status}`);
-        }
-
-        const json = await response.json();
-        if (json.errors?.length) {
-          throw new Error(json.errors[0]?.message ?? 'GraphQL error');
+        if (telemetryResult.errors?.length) {
+          throw new Error(telemetryResult.errors[0]?.message ?? 'GraphQL error');
         }
 
         if (!cancelled) {
           setState({
-            availableSignals: json.data?.availableSignals ?? [],
+            availableSignals: telemetryResult.data?.availableSignals ?? [],
             loading: false,
             error: null,
             missingDevJwt: false,
