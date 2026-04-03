@@ -31,6 +31,15 @@ const GET_VEHICLES_FOR_EXPLORER = gql(`
 
 const PAGE_SIZE = 10;
 
+interface VehicleNode {
+  tokenId: number;
+  definition?: {
+    make?: string | null;
+    model?: string | null;
+    year?: number | null;
+  } | null;
+}
+
 interface Props {
   clientId: string;
   selectedTokenId: number | null;
@@ -53,7 +62,7 @@ export const VehicleList: FC<Props> = ({
     variables: { clientId, first: PAGE_SIZE, ...cursors },
   });
 
-  const vehicles = data?.vehicles.nodes ?? [];
+  const vehicles: VehicleNode[] = data?.vehicles.nodes ?? [];
   const pageInfo = data?.vehicles.pageInfo;
   const totalCount = data?.vehicles.totalCount ?? 0;
 
