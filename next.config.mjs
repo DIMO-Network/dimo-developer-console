@@ -1,4 +1,7 @@
 import { withSentryConfig } from '@sentry/nextjs';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 const cspHeader = `
     default-src 'self';
@@ -33,6 +36,12 @@ const nextConfig = {
         fs: false,
         net: false,
         tls: false,
+      };
+      // Force CJS build of data-sdk to avoid circular dependency issues in the ESM bundle
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@dimo-network/data-sdk':
+          require.resolve('@dimo-network/data-sdk/dist/cjs/index.js'),
       };
     }
     return config;
