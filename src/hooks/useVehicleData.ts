@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getVehicleJwt } from '@dimo-network/data-sdk';
+import { DIMO } from '@dimo-network/data-sdk';
 import { getDevJwt } from '@/utils/devJwt';
+
+const dimo = new DIMO('Production');
 
 const TELEMETRY_URL = 'https://telemetry-api.dimo.zone/query';
 
@@ -57,10 +59,11 @@ export const useVehicleData = (
       });
       try {
         // Step 1: Exchange developer JWT for a vehicle-scoped JWT
-        const result = await getVehicleJwt(
-          { headers: { Authorization: `Bearer ${devJwt}` }, tokenId },
-          'Production',
-        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await (dimo.tokenexchange as any).getVehicleJwt({
+          headers: { Authorization: `Bearer ${devJwt}` },
+          tokenId,
+        });
         const vehicleAuthHeader: string = result.headers.Authorization;
 
         // Step 2: Query available signals from telemetry API
