@@ -6,7 +6,7 @@ import { Anchor } from '@/components/Anchor';
 import { Button } from '@/components/Button';
 import { useQuery } from '@apollo/client';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { WarningAmberIcon } from '@/components/Icons';
+import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';
 import { GET_VEHICLE_COUNT_BY_CLIENT_ID } from '@/app/license/[tokenId]/details/components/Vehicles';
 import { getConfigurationByClientId } from '@/actions/configurations';
 
@@ -97,24 +97,14 @@ export const LicenseCard = (props: {
           {sharingLinkLoading ? (
             <BubbleLoader isLoading isSmall />
           ) : sharingLink ? (
-            <div className="flex items-center gap-2">
-              <a
-                href={sharingLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-mono text-primary truncate hover:underline"
-                title={sharingLink}
-              >
-                {sharingLink}
-              </a>
-              <button
-                onClick={() => navigator.clipboard.writeText(sharingLink)}
-                className="shrink-0 text-[10px] text-text-secondary hover:text-text-primary transition-colors"
-                title="Copy to clipboard"
-              >
-                Copy
-              </button>
-            </div>
+            <button
+              onClick={() => navigator.clipboard.writeText(sharingLink)}
+              className="flex items-center gap-1.5 w-fit text-xs text-primary hover:opacity-70 transition-opacity"
+              title={sharingLink}
+            >
+              Vehicle Sharing Link
+              <ContentCopyIcon className="w-3.5 h-3.5" />
+            </button>
           ) : (
             <Anchor href={`/license/${license.tokenId}/configurator`}>
               <span className="text-xs text-text-secondary hover:text-text-primary transition-colors">

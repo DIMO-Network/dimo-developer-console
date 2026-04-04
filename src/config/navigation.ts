@@ -4,7 +4,6 @@ import {
   MonitorHeartIcon,
   SettingsIcon,
   SummarizeIcon,
-  SupportAgentIcon,
   ConnectionsIcon,
   ChipIcon,
 } from '@/components/Icons';
@@ -66,14 +65,6 @@ const baseMainMenu = [
     iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
     link: '/webhooks',
     external: false,
-    disabled: false,
-  },
-  {
-    label: 'Support',
-    icon: SupportAgentIcon,
-    iconClassName: 'h-5 w-5',
-    link: 'https://discord.com/channels/892438668453740634/940719111971946546',
-    external: true,
     disabled: false,
   },
   {
