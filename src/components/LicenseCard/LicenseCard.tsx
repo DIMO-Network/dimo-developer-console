@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Card } from '@/components/Card';
 import classNames from 'classnames';
@@ -9,6 +9,7 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';
 import { GET_VEHICLE_COUNT_BY_CLIENT_ID } from '@/app/license/[tokenId]/details/components/Vehicles';
 import { getConfigurationByClientId } from '@/actions/configurations';
+import { NotificationContext } from '@/context/notificationContext';
 
 import './LicenseCard.css';
 
@@ -31,6 +32,7 @@ export const LicenseCard = (props: {
   className?: string;
 }) => {
   const license = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, props.license);
+  const { setNotification } = useContext(NotificationContext);
 
   const { data: vehicleData, loading: vehicleLoading } = useQuery(
     GET_VEHICLE_COUNT_BY_CLIENT_ID,
@@ -90,29 +92,27 @@ export const LicenseCard = (props: {
         </div>
 
         {/* Sharing link */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] uppercase tracking-wider text-text-secondary">
-            Sharing Link
-          </span>
-          {sharingLinkLoading ? (
-            <BubbleLoader isLoading isSmall />
-          ) : sharingLink ? (
-            <button
-              onClick={() => navigator.clipboard.writeText(sharingLink)}
-              className="flex items-center gap-1.5 w-fit text-xs text-primary hover:opacity-70 transition-opacity"
-              title={sharingLink}
-            >
-              Vehicle Sharing Link
-              <ContentCopyIcon className="w-3.5 h-3.5" />
-            </button>
-          ) : (
-            <Anchor href={`/license/${license.tokenId}/configurator`}>
-              <span className="text-xs text-text-secondary hover:text-text-primary transition-colors">
-                Not configured — set up vehicle sharing →
-              </span>
-            </Anchor>
-          )}
-        </div>
+        {sharingLinkLoading ? (
+          <BubbleLoader isLoading isSmall />
+        ) : sharingLink ? (
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(sharingLink);
+              setNotification('Sharing link copied', '', 'success');
+            }}
+            className="flex items-center gap-2 w-fit text-xs text-primary hover:opacity-70 transition-opacity"
+            title={sharingLink}
+          >
+            <ContentCopyIcon className="w-4 h-4 shrink-0" />
+            Vehicle Sharing Link
+          </button>
+        ) : (
+          <Anchor href={`/license/${license.tokenId}/configurator`}>
+            <span className="text-xs text-text-secondary hover:text-text-primary transition-colors">
+              Not configured — set up vehicle sharing →
+            </span>
+          </Anchor>
+        )}
 
         {/* CTA */}
         <Anchor href={`/license/${license.tokenId}/details`}>
