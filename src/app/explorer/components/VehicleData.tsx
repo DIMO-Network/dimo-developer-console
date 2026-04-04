@@ -1,12 +1,55 @@
 'use client';
 
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { useVehicleData } from '@/hooks/useVehicleData';
 import { Loader } from '@/components/Loader';
 
 interface Props {
   clientId: string;
   tokenId: number | null;
+}
+
+function colorizeJson(json: string): React.ReactNode[] {
+  // Matches: "key": (object key), "string" (value), true/false, null, numbers
+  const tokenRegex =
+    /("(?:\\.|[^"\\])*"(?:\s*:)?|true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g;
+  const parts: React.ReactNode[] = [];
+  let last = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = tokenRegex.exec(json)) !== null) {
+    if (match.index > last) {
+      parts.push(json.slice(last, match.index));
+    }
+    const token = match[0];
+    let cls: string;
+    if (token.endsWith(':')) {
+      cls = 'text-blue-400'; // object key
+    } else if (token.startsWith('"')) {
+      cls = 'text-green-400'; // string value
+    } else if (token === 'true' || token === 'false') {
+      cls = 'text-yellow-400';
+    } else if (token === 'null') {
+      cls = 'text-text-secondary';
+    } else {
+      cls = 'text-orange-400'; // number
+    }
+    parts.push(
+      <span key={match.index} className={cls}>
+        {token}
+      </span>,
+    );
+    last = match.index + token.length;
+  }
+
+  if (last < json.length) {
+    parts.push(json.slice(last));
+  }
+  return parts;
+}
+
+function ColoredJson({ data }: { data: unknown }) {
+  return <>{colorizeJson(JSON.stringify(data, null, 2))}</>;
 }
 
 export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
@@ -61,21 +104,19 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
       )}
 
       {!loading && !error && !missingDevJwt && latestSignals.length > 0 && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 min-h-0">
           <p className="text-xs text-text-secondary">
             Latest Signals ({latestSignals.length})
           </p>
-          <pre className="text-xs font-mono bg-surface-raised border border-[#322D2F] rounded-lg p-4 overflow-auto whitespace-pre text-text-primary leading-relaxed">
-            {JSON.stringify(
-              Object.fromEntries(
+          <pre className="text-xs font-mono bg-surface-raised border border-[#322D2F] rounded-lg p-4 overflow-auto h-96 whitespace-pre leading-relaxed">
+            <ColoredJson
+              data={Object.fromEntries(
                 latestSignals.map(({ signal, timestamp, value }) => [
                   signal,
                   { timestamp, value },
                 ]),
-              ),
-              null,
-              2,
-            )}
+              )}
+            />
           </pre>
         </div>
       )}
