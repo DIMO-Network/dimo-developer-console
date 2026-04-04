@@ -53,8 +53,14 @@ function ColoredJson({ data }: { data: unknown }) {
 }
 
 export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
-  const { availableSignals, latestSignals, loading, error, missingDevJwt } =
-    useVehicleData(clientId, tokenId);
+  const {
+    availableSignals,
+    latestSignals,
+    latestSignalsError,
+    loading,
+    error,
+    missingDevJwt,
+  } = useVehicleData(clientId, tokenId);
 
   if (tokenId === null) {
     return (
@@ -99,6 +105,18 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
                 {signal}
               </span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {!loading && !error && !missingDevJwt && latestSignalsError && (
+        <div className="flex items-start gap-2 rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-3 py-2">
+          <span className="text-yellow-400 text-sm leading-none mt-px">⚠</span>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-xs font-medium text-yellow-400">
+              Latest signals unavailable
+            </p>
+            <p className="text-xs text-yellow-400/70">{latestSignalsError}</p>
           </div>
         </div>
       )}

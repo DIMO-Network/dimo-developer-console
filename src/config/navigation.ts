@@ -48,7 +48,7 @@ const dataExplorerMenuItem = {
   link: '/explorer',
   external: false,
   disabled: false,
-  hidden: true,
+  hidden: false,
 };
 
 const baseMainMenu = [

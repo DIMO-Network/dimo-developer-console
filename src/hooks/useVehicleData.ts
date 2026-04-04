@@ -9,57 +9,43 @@ export type { LatestSignal };
 export interface VehicleDataState {
   availableSignals: string[];
   latestSignals: LatestSignal[];
+  latestSignalsError: string | null;
   loading: boolean;
   error: string | null;
   missingDevJwt: boolean;
 }
 
+const EMPTY: VehicleDataState = {
+  availableSignals: [],
+  latestSignals: [],
+  latestSignalsError: null,
+  loading: false,
+  error: null,
+  missingDevJwt: false,
+};
+
 export const useVehicleData = (
   clientId: string | undefined,
   tokenId: number | null,
 ): VehicleDataState => {
-  const [state, setState] = useState<VehicleDataState>({
-    availableSignals: [],
-    latestSignals: [],
-    loading: false,
-    error: null,
-    missingDevJwt: false,
-  });
+  const [state, setState] = useState<VehicleDataState>(EMPTY);
 
   useEffect(() => {
     if (!clientId || tokenId === null) {
-      setState({
-        availableSignals: [],
-        latestSignals: [],
-        loading: false,
-        error: null,
-        missingDevJwt: false,
-      });
+      setState(EMPTY);
       return;
     }
 
     const devJwt = getDevJwt(clientId);
     if (!devJwt) {
-      setState({
-        availableSignals: [],
-        latestSignals: [],
-        loading: false,
-        error: null,
-        missingDevJwt: true,
-      });
+      setState({ ...EMPTY, missingDevJwt: true });
       return;
     }
 
     let cancelled = false;
 
     const fetchData = async () => {
-      setState({
-        availableSignals: [],
-        latestSignals: [],
-        loading: true,
-        error: null,
-        missingDevJwt: false,
-      });
+      setState({ ...EMPTY, loading: true });
       try {
         const res = await fetch('/api/vehicle-signals', {
           method: 'POST',
@@ -74,6 +60,7 @@ export const useVehicleData = (
           setState({
             availableSignals: json.availableSignals ?? [],
             latestSignals: json.latestSignals ?? [],
+            latestSignalsError: json.latestSignalsError ?? null,
             loading: false,
             error: null,
             missingDevJwt: false,
@@ -82,11 +69,8 @@ export const useVehicleData = (
       } catch (err) {
         if (!cancelled) {
           setState({
-            availableSignals: [],
-            latestSignals: [],
-            loading: false,
+            ...EMPTY,
             error: err instanceof Error ? err.message : 'Failed to fetch vehicle data',
-            missingDevJwt: false,
           });
         }
       }
