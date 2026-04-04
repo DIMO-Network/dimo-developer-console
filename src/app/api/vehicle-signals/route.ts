@@ -3,6 +3,36 @@ import { DIMO } from '@dimo-network/data-sdk';
 
 const dimo = new DIMO('Production');
 
+// Signals whose `value` field is an object rather than a scalar.
+// All others are treated as scalars via `{ timestamp value }`.
+const COMPLEX_VALUE_FIELDS: Record<string, string> = {
+  currentLocationCoordinates: '{ latitude longitude hdop }',
+};
+
+function buildSignalsLatestQuery(tokenId: number, signals: string[]): string {
+  const fields = signals
+    .map((signal) => {
+      const valueSubFields = COMPLEX_VALUE_FIELDS[signal];
+      return valueSubFields
+        ? `    ${signal} { timestamp value ${valueSubFields} }`
+        : `    ${signal} { timestamp value }`;
+    })
+    .join('\n');
+
+  return `query GetLatestSignals {
+  signalsLatest(tokenId: ${tokenId}) {
+    lastSeen
+${fields}
+  }
+}`;
+}
+
+export interface LatestSignal {
+  signal: string;
+  timestamp: string;
+  value: unknown;
+}
+
 export async function POST(req: NextRequest) {
   const { tokenId, devJwt } = (await req.json()) as {
     tokenId: number;
@@ -21,19 +51,42 @@ export async function POST(req: NextRequest) {
     });
     const vehicleAuthHeader: string = vehicleJwtResult.headers.Authorization;
 
+    // Step 1: available signals
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const telemetryResult = await (dimo.telemetry as any).query({
+    const availableResult = await (dimo.telemetry as any).query({
       headers: { Authorization: vehicleAuthHeader },
       query: `query GetAvailable { availableSignals(tokenId: ${tokenId}) }`,
     });
 
-    if (telemetryResult.errors?.length) {
-      throw new Error(telemetryResult.errors[0]?.message ?? 'GraphQL error');
+    if (availableResult.errors?.length) {
+      throw new Error(availableResult.errors[0]?.message ?? 'GraphQL error');
     }
 
-    return NextResponse.json({
-      availableSignals: telemetryResult.data?.availableSignals ?? [],
-    });
+    const availableSignals: string[] = availableResult.data?.availableSignals ?? [];
+
+    // Step 2: latest values for all available signals
+    let latestSignals: LatestSignal[] = [];
+    if (availableSignals.length > 0) {
+      const query = buildSignalsLatestQuery(tokenId, availableSignals);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const latestResult = await (dimo.telemetry as any).query({
+        headers: { Authorization: vehicleAuthHeader },
+        query,
+      });
+
+      if (!latestResult.errors?.length) {
+        const raw = latestResult.data?.signalsLatest ?? {};
+        latestSignals = availableSignals
+          .map((signal) => {
+            const entry = raw[signal];
+            if (!entry) return null;
+            return { signal, timestamp: entry.timestamp as string, value: entry.value };
+          })
+          .filter((s): s is LatestSignal => s !== null);
+      }
+    }
+
+    return NextResponse.json({ availableSignals, latestSignals });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to fetch vehicle data';
     return NextResponse.json({ error: message }, { status: 500 });

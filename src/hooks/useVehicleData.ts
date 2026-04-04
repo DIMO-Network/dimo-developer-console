@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
+import type { LatestSignal } from '@/app/api/vehicle-signals/route';
+
+export type { LatestSignal };
 
 export interface VehicleDataState {
   availableSignals: string[];
+  latestSignals: LatestSignal[];
   loading: boolean;
   error: string | null;
   missingDevJwt: boolean;
@@ -16,6 +20,7 @@ export const useVehicleData = (
 ): VehicleDataState => {
   const [state, setState] = useState<VehicleDataState>({
     availableSignals: [],
+    latestSignals: [],
     loading: false,
     error: null,
     missingDevJwt: false,
@@ -25,6 +30,7 @@ export const useVehicleData = (
     if (!clientId || tokenId === null) {
       setState({
         availableSignals: [],
+        latestSignals: [],
         loading: false,
         error: null,
         missingDevJwt: false,
@@ -36,6 +42,7 @@ export const useVehicleData = (
     if (!devJwt) {
       setState({
         availableSignals: [],
+        latestSignals: [],
         loading: false,
         error: null,
         missingDevJwt: true,
@@ -48,6 +55,7 @@ export const useVehicleData = (
     const fetchData = async () => {
       setState({
         availableSignals: [],
+        latestSignals: [],
         loading: true,
         error: null,
         missingDevJwt: false,
@@ -65,6 +73,7 @@ export const useVehicleData = (
         if (!cancelled) {
           setState({
             availableSignals: json.availableSignals ?? [],
+            latestSignals: json.latestSignals ?? [],
             loading: false,
             error: null,
             missingDevJwt: false,
@@ -74,6 +83,7 @@ export const useVehicleData = (
         if (!cancelled) {
           setState({
             availableSignals: [],
+            latestSignals: [],
             loading: false,
             error: err instanceof Error ? err.message : 'Failed to fetch vehicle data',
             missingDevJwt: false,
