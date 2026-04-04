@@ -10,7 +10,7 @@ import './View.css';
 import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { AppListRightPanel } from '@/app/app/list/components/RightPanel';
+// import { AppListRightPanel } from '@/app/app/list/components/RightPanel';
 
 const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
   query GetDeveloperLicensesByOwner($owner: Address!) {
@@ -73,7 +73,7 @@ export const View: FC = () => {
           </>
         )}
       </div>
-      <AppListRightPanel />
+      {/* <AppListRightPanel /> */}
     </div>
   );
 };
