@@ -116,8 +116,16 @@ export const GenerateDevJWTModal: FC<IProps> = ({
     );
   }, [generatedKey, handleGenerate, isLoading, setIsOpen]);
 
+  // Prevent backdrop click / Escape from closing while loading or after key is generated —
+  // the user must explicitly click Cancel, Generate, or Done.
+  const isDismissible = !isLoading && !generatedKey;
+
   return (
-    <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
+    <Modal
+      isOpen={isOpen}
+      setIsOpen={isDismissible ? setIsOpen : () => {}}
+      showClose={isDismissible}
+    >
       <div className={'flex flex-col flex-1 w-full'}>
         <div className={'pb-6'}>
           <Title component={'h2'} className={'text-2xl !leading-8'}>
