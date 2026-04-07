@@ -49,6 +49,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const { currentUser } = useGlobalAccount();
   const [apiKey, setApiKey] = useState<string>();
   const [signerToDelete, setSignerToDelete] = useState<string>();
+  const [optimisticAdditions, setOptimisticAdditions] = useState<SignerNode[]>([]);
+  const [pendingRemovals, setPendingRemovals] = useState<Set<string>>(new Set());
   const { trackEvent } = useMixPanel();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const fragment = useFragment(SIGNERS_FRAGMENT, license);
@@ -82,7 +84,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       await handleEnableSigner(account.address);
       clearLoadingStatus();
       setApiKey(account.privateKey);
-      await refetch();
+      setOptimisticAdditions((prev) => [
+        ...prev,
+        { address: account.address, enabledAt: new Date().toISOString() },
+      ]);
+      refetch().then(() => setOptimisticAdditions([]));
       trackEvent('API Key Generated', {
         distinct_id: fragment.owner,
         tokenId: fragment.tokenId,
@@ -100,12 +106,20 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         status: 'loading',
       });
       await handleDisableSigner(signer);
-      await refetch();
+      setPendingRemovals((prev) => new Set([...prev, signer]));
+      refetch().then(() => setPendingRemovals(new Set()));
       setLoadingStatus({ label: 'API key deleted', status: 'success' });
     } catch (error: unknown) {
       handleError(error);
     }
   };
+
+  const displaySigners = [
+    ...fragment.signers.nodes.filter((s) => !pendingRemovals.has(s.address)),
+    ...optimisticAdditions.filter(
+      (s) => !fragment.signers.nodes.some((n) => n.address === s.address),
+    ),
+  ];
 
   const renderDeleteSignerAction = (item: SignerNode, index: number) => {
     if (isLicenseOwner) {
@@ -174,7 +188,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       </CollapsibleSection.Title>
       <CollapsibleSection.Content>
         <div>
-          {!!fragment.signers.nodes.length && (
+          {!!displaySigners.length && (
             <Table
               columns={[
                 {
@@ -184,7 +198,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                 },
                 { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
               ]}
-              data={fragment.signers.nodes}
+              data={displaySigners}
               actions={[renderDeleteSignerAction]}
             />
           )}
