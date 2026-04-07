@@ -22,7 +22,7 @@ export const CollapsibleHeader: FC<PropsWithChildren<IProps>> = ({ children, tit
         </Title>
       )}
       <div className={'w-fit flex flex-row gap-2 items-center'}>
-        {children}
+        <div onClick={(e) => e.stopPropagation()}>{children}</div>
         {isOpen ? (
           <ChevronUpIcon className={'h-6 w-6'} />
         ) : (

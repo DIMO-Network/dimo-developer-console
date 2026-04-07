@@ -24,6 +24,7 @@ interface IProps {
   redirectUris: IRedirectUri[] | undefined;
   tokenId: number;
   owner: string;
+  onAdded?: (uri: string) => void;
 }
 
 export const RedirectUriForm: FC<IProps> = ({
@@ -31,6 +32,7 @@ export const RedirectUriForm: FC<IProps> = ({
   redirectUris,
   tokenId,
   owner,
+  onAdded,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setNotification } = useContext(NotificationContext);
@@ -52,12 +54,9 @@ export const RedirectUriForm: FC<IProps> = ({
       setIsLoading(true);
       const { uri } = getValues();
       await setRedirectUri(uri, true);
-      await refreshData();
-      setNotification(
-        'Successfully added the redirect URI. Refresh the page to view your changes.',
-        'Success!',
-        'success',
-      );
+      if (onAdded) onAdded(uri);
+      else void refreshData();
+      setNotification('Successfully added the redirect URI.', 'Success!', 'success');
 
       trackEvent('Redirect URI added', {
         distinct_id: owner,

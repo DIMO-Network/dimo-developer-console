@@ -213,12 +213,12 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           }}
           confirmButtonClassName={'error'}
         />
-        <APIKeyModal
-          isOpen={!!apiKey}
-          apiKey={String(apiKey)?.replace('0x', '') ?? ''}
-          onClose={() => setApiKey(undefined)}
-        />
       </CollapsibleSection.Content>
+      <APIKeyModal
+        isOpen={!!apiKey}
+        apiKey={String(apiKey)?.replace('0x', '') ?? ''}
+        onClose={() => setApiKey(undefined)}
+      />
     </CollapsibleSection>
   );
 };

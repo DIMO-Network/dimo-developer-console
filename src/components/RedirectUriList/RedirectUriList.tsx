@@ -21,6 +21,7 @@ interface IProps {
   refreshData: () => Promise<void>;
   tokenId: number;
   isOwner: boolean;
+  onRemoved?: (uri: string) => void;
 }
 
 const RedirectUriListComponent: FC<IProps> = ({
@@ -28,6 +29,7 @@ const RedirectUriListComponent: FC<IProps> = ({
   refreshData,
   tokenId,
   isOwner,
+  onRemoved,
 }) => {
   const { setLoadingStatus } = useContext(LoadingStatusContext);
   const [uriToDelete, setUriToDelete] = useState<string>();
@@ -52,7 +54,8 @@ const RedirectUriListComponent: FC<IProps> = ({
         status: 'loading',
       });
       await setRedirectUri(uri, false);
-      await refreshData();
+      if (onRemoved) onRemoved(uri);
+      else void refreshData();
       setLoadingStatus({ label: 'Redirect URI deleted', status: 'success' });
     } catch (error: unknown) {
       handleError(error);
