@@ -28,7 +28,7 @@ import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
-import { getUserByToken } from '@/services/user';
+import { getUser } from '@/actions/user';
 
 const RENTAL_OS_URL = 'https://fleets.dimo.co/';
 const RENTAL_OS_REGISTER_ENDPOINT = 'https://fleets.dimo.co/tenant/register';
@@ -160,7 +160,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       if (!devJwt) throw new Error('Failed to retrieve developer JWT');
 
       setLoadingStatus({ status: 'loading', label: 'Registering RentalOS tenant...' });
-      const user = await getUserByToken();
+      const user = await getUser();
+      if (!user) throw new Error('Failed to retrieve user profile');
       const nameParts = (user.name ?? '').trim().split(/\s+/);
       const firstName = nameParts[0] ?? '';
       const lastName = nameParts.slice(1).join(' ');
