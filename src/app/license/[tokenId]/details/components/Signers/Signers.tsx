@@ -14,7 +14,10 @@ import {
   useEventEmitter,
   useGlobalAccount,
   useMixPanel,
+  useSetRedirectUri,
 } from '@/hooks';
+import { getDevJwt } from '@/utils/devJwt';
+import { getFromLocalStorage, saveToLocalStorage } from '@/utils/localStorage';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/[tokenId]/details/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
@@ -25,14 +28,29 @@ import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 
+const FLEETS_DIMO_URL = 'https://fleets.dimo.co/';
+const FLEETS_REGISTER_ENDPOINT = 'https://fleets.dimo.co/tenant/register';
+
+const fleetOSSignerKey = (clientId: string) => `fleetOS_signer_${clientId}`;
+const getFleetOSSigner = (clientId: string) =>
+  getFromLocalStorage<string>(fleetOSSignerKey(clientId));
+const saveFleetOSSigner = (clientId: string, address: string) =>
+  saveToLocalStorage(fleetOSSignerKey(clientId), address);
+
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
     owner
+    clientId
     tokenId
     signers(first:100) {
       nodes {
         address
         enabledAt
+      }
+    }
+    redirectURIs(first:100) {
+      nodes {
+        uri
       }
     }
   }
@@ -51,6 +69,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const [signerToDelete, setSignerToDelete] = useState<string>();
   const [optimisticAdditions, setOptimisticAdditions] = useState<SignerNode[]>([]);
   const [pendingRemovals, setPendingRemovals] = useState<Set<string>>(new Set());
+  const [fleetOSSigner, setFleetOSSigner] = useState<string | null>(() =>
+    getFleetOSSigner(fragment.clientId),
+  );
   const { trackEvent } = useMixPanel();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const fragment = useFragment(SIGNERS_FRAGMENT, license);
@@ -61,7 +82,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     'generate-my-developer-jwt',
   );
 
-  const { hasGlobalAccountPrivateKey } = useDimoAuth();
+  const { hasGlobalAccountPrivateKey, getGlobalAccountDeveloperJwt } = useDimoAuth();
+  const setFleetRedirectUri = useSetRedirectUri(fragment.tokenId);
 
   const handleError = (error: unknown) => {
     Sentry.captureException(error);
@@ -95,6 +117,76 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         signerAddress: account.address,
       });
     } catch (error: unknown) {
+      handleError(error);
+    }
+  };
+
+  const handleGenerateFleetOSTenant = async () => {
+    let enabledSignerAddress: string | undefined;
+
+    try {
+      const hasFleetUri = fragment.redirectURIs.nodes.some(
+        (n) => n.uri === FLEETS_DIMO_URL,
+      );
+      if (!hasFleetUri) {
+        setLoadingStatus({
+          status: 'loading',
+          label: 'Adding FleetOS as an authorized redirect URI...',
+        });
+        await setFleetRedirectUri(FLEETS_DIMO_URL, true);
+      }
+
+      setLoadingStatus({ status: 'loading', label: 'Generating API key for FleetOS...' });
+      const account = generateWallet();
+      await handleEnableSigner(account.address);
+      enabledSignerAddress = account.address;
+
+      setLoadingStatus({ status: 'loading', label: 'Generating developer JWT...' });
+      const jwtSuccess = await getGlobalAccountDeveloperJwt({
+        clientId: fragment.clientId,
+        domain: FLEETS_DIMO_URL,
+      });
+      if (!jwtSuccess) throw new Error('Failed to generate developer JWT');
+
+      const devJwt = getDevJwt(fragment.clientId);
+      if (!devJwt) throw new Error('Failed to retrieve developer JWT');
+
+      setLoadingStatus({ status: 'loading', label: 'Registering FleetOS tenant...' });
+      const response = await fetch(FLEETS_REGISTER_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${devJwt}`,
+        },
+        body: JSON.stringify({
+          clientId: fragment.clientId,
+          redirectUri: FLEETS_DIMO_URL,
+          apiKey: account.privateKey,
+        }),
+      });
+      if (!response.ok)
+        throw new Error(`FleetOS registration failed: ${response.statusText}`);
+
+      saveFleetOSSigner(fragment.clientId, account.address);
+      setFleetOSSigner(account.address);
+
+      clearLoadingStatus();
+      setApiKey(account.privateKey);
+      setOptimisticAdditions((prev) => [
+        ...prev,
+        { address: account.address, enabledAt: new Date().toISOString() },
+      ]);
+      refetch().then(() => setOptimisticAdditions([]));
+
+      trackEvent('FleetOS Tenant Generated', {
+        distinct_id: fragment.owner,
+        tokenId: fragment.tokenId,
+        signerAddress: account.address,
+      });
+    } catch (error: unknown) {
+      if (enabledSignerAddress) {
+        await handleDisableSigner(enabledSignerAddress).catch(() => {});
+      }
       handleError(error);
     }
   };
@@ -180,10 +272,16 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     <CollapsibleSection>
       <CollapsibleSection.Title title={'API Keys'}>
         {isLicenseOwner && (
-          <Button className="dark with-icon px-4" onClick={handleGenerateSigner}>
-            <KeyIcon className="w-4 h-4" />
-            Generate Key
-          </Button>
+          <>
+            <Button className="dark with-icon px-4" onClick={handleGenerateFleetOSTenant}>
+              <KeyIcon className="w-4 h-4" />
+              Generate FleetOS Tenant
+            </Button>
+            <Button className="dark with-icon px-4" onClick={handleGenerateSigner}>
+              <KeyIcon className="w-4 h-4" />
+              Generate Key
+            </Button>
+          </>
         )}
       </CollapsibleSection.Title>
       <CollapsibleSection.Content>
@@ -195,6 +293,16 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                   name: 'address',
                   label: 'Signer address',
                   CustomHeader: <SignerAddressHeader key="header-addr" />,
+                  render: (item: SignerNode) => (
+                    <div className="flex items-center gap-2">
+                      <span>{item.address}</span>
+                      {item.address === fleetOSSigner && (
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-cta-default text-white whitespace-nowrap">
+                          FleetOS
+                        </span>
+                      )}
+                    </div>
+                  ),
                 },
                 { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
               ]}
