@@ -65,6 +65,7 @@ type SignerNode = SignerFragmentFragment['signers']['nodes'][0];
 
 const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const { currentUser } = useGlobalAccount();
+  const fragment = useFragment(SIGNERS_FRAGMENT, license);
   const [apiKey, setApiKey] = useState<string>();
   const [signerToDelete, setSignerToDelete] = useState<string>();
   const [optimisticAdditions, setOptimisticAdditions] = useState<SignerNode[]>([]);
@@ -74,7 +75,6 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   );
   const { trackEvent } = useMixPanel();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
-  const fragment = useFragment(SIGNERS_FRAGMENT, license);
   const handleDisableSigner = useDisableSigner(fragment.tokenId);
   const handleEnableSigner = useEnableSigner(fragment.tokenId);
   const isLicenseOwner = useIsLicenseOwner(fragment);
