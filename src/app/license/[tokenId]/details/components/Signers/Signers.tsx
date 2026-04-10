@@ -1,9 +1,10 @@
 import { FragmentType, gql, useFragment } from '@/gql';
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { Button } from '@/components/Button';
-import { KeyIcon } from '@heroicons/react/20/solid';
+import { KeyIcon, TruckIcon } from '@heroicons/react/20/solid';
 import { Table } from '@/components/Table';
 import { TrashIcon } from '@heroicons/react/24/outline';
+import { Modal } from '@/components/Modal';
 import { SignerFragmentFragment } from '@/gql/graphql';
 import * as Sentry from '@sentry/nextjs';
 import { get } from 'lodash';
@@ -70,6 +71,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const [signerToDelete, setSignerToDelete] = useState<string>();
   const [optimisticAdditions, setOptimisticAdditions] = useState<SignerNode[]>([]);
   const [pendingRemovals, setPendingRemovals] = useState<Set<string>>(new Set());
+  const [showFleetOSConfirm, setShowFleetOSConfirm] = useState(false);
   const [fleetOSSigner, setFleetOSSigner] = useState<string | null>(() =>
     getFleetOSSigner(fragment.clientId),
   );
@@ -273,9 +275,12 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       <CollapsibleSection.Title title={'API Keys'}>
         {isLicenseOwner && (
           <>
-            <Button className="dark with-icon px-4" onClick={handleGenerateFleetOSTenant}>
-              <KeyIcon className="w-4 h-4" />
-              Generate FleetOS Tenant
+            <Button
+              className="dark with-icon px-4"
+              onClick={() => setShowFleetOSConfirm(true)}
+            >
+              <TruckIcon className="w-4 h-4" />
+              Register FleetOS
             </Button>
             <Button className="dark with-icon px-4" onClick={handleGenerateSigner}>
               <KeyIcon className="w-4 h-4" />
@@ -327,6 +332,49 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         apiKey={String(apiKey)?.replace('0x', '') ?? ''}
         onClose={() => setApiKey(undefined)}
       />
+      <Modal
+        isOpen={showFleetOSConfirm}
+        setIsOpen={(open) => setShowFleetOSConfirm(open)}
+        className="max-w-md"
+      >
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-xl font-semibold">Register FleetOS</h2>
+            <p className="text-text-secondary text-sm">
+              This will set up your developer license with FleetOS in one step:
+            </p>
+            <ul className="text-text-secondary text-sm list-disc pl-5 flex flex-col gap-1">
+              <li>
+                Add <span className="font-mono text-xs">fleets.dimo.co</span> as an
+                authorized redirect URI (if not already)
+              </li>
+              <li>Generate a new API key and register it as a signer</li>
+              <li>Register your tenant with the FleetOS API using a developer JWT</li>
+            </ul>
+            <p className="text-text-secondary text-sm mt-2">
+              You will need to approve on-chain transactions. Do not close this window
+              once started.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              className="primary flex-1"
+              onClick={() => {
+                setShowFleetOSConfirm(false);
+                void handleGenerateFleetOSTenant();
+              }}
+            >
+              Proceed
+            </Button>
+            <Button
+              className="primary-outline flex-1"
+              onClick={() => setShowFleetOSConfirm(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </CollapsibleSection>
   );
 };
