@@ -37,7 +37,7 @@ const rentalOSSignerKey = (clientId: string) => `rentalOS_signer_${clientId}`;
 const getRentalOSSigner = (clientId: string) =>
   getFromLocalStorage<string>(rentalOSSignerKey(clientId));
 const saveRentalOSSigner = (clientId: string, address: string) =>
-  saveToLocalStorage(rentalOSSignerKey(clientId), address);
+  saveToLocalStorage(rentalOSSignerKey(clientId), address.toLowerCase());
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -236,7 +236,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       if (!response?.ok) throw lastError ?? new Error('RentalOS registration failed');
 
       saveRentalOSSigner(fragment.clientId, account.address);
-      setRentalOSSigner(account.address);
+      setRentalOSSigner(account.address.toLowerCase());
 
       clearLoadingStatus();
       setApiKey(account.privateKey);
@@ -375,7 +375,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                   render: (item: SignerNode) => (
                     <div className="flex items-center gap-2">
                       <span>{item.address}</span>
-                      {item.address === rentalOSSigner && (
+                      {item.address.toLowerCase() === rentalOSSigner && (
                         <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-cta-default text-white whitespace-nowrap">
                           RentalOS
                         </span>
