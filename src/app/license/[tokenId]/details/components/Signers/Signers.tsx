@@ -274,7 +274,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     <CollapsibleSection>
       <CollapsibleSection.Title title={'API Keys'}>
         {isLicenseOwner && (
-          <>
+          <div className="flex gap-2">
             <Button
               className="dark with-icon px-4"
               onClick={() => setShowFleetOSConfirm(true)}
@@ -286,7 +286,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               <KeyIcon className="w-4 h-4" />
               Generate Key
             </Button>
-          </>
+          </div>
         )}
       </CollapsibleSection.Title>
       <CollapsibleSection.Content>
@@ -332,28 +332,21 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         apiKey={String(apiKey)?.replace('0x', '') ?? ''}
         onClose={() => setApiKey(undefined)}
       />
-      <Modal
-        isOpen={showFleetOSConfirm}
-        setIsOpen={(open) => setShowFleetOSConfirm(open)}
-        className="max-w-md"
-      >
+      <Modal isOpen={showFleetOSConfirm} setIsOpen={setShowFleetOSConfirm}>
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <h2 className="text-xl font-semibold">Register FleetOS</h2>
             <p className="text-text-secondary text-sm">
-              This will set up your developer license with FleetOS in one step:
+              Clicking <strong>Proceed</strong> will:
             </p>
             <ul className="text-text-secondary text-sm list-disc pl-5 flex flex-col gap-1">
-              <li>
-                Add <span className="font-mono text-xs">fleets.dimo.co</span> as an
-                authorized redirect URI (if not already)
-              </li>
-              <li>Generate a new API key and register it as a signer</li>
-              <li>Register your tenant with the FleetOS API using a developer JWT</li>
+              <li>Add FleetOS as an authorized redirect URI</li>
+              <li>Generate and register a new API key</li>
+              <li>Register your tenant with FleetOS</li>
             </ul>
-            <p className="text-text-secondary text-sm mt-2">
-              You will need to approve on-chain transactions. Do not close this window
-              once started.
+            <p className="text-text-secondary text-sm">
+              You&apos;ll need to approve transactions. Don&apos;t close this window once
+              started.
             </p>
           </div>
           <div className="flex gap-3">
