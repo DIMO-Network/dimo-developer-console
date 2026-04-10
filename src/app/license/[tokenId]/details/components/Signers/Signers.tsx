@@ -28,15 +28,16 @@ import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
+import { getUserByToken } from '@/services/user';
 
-const FLEETS_DIMO_URL = 'https://fleets.dimo.co/';
-const FLEETS_REGISTER_ENDPOINT = 'https://fleets.dimo.co/tenant/register';
+const RENTAL_OS_URL = 'https://fleets.dimo.co/';
+const RENTAL_OS_REGISTER_ENDPOINT = 'https://fleets.dimo.co/tenant/register';
 
-const fleetOSSignerKey = (clientId: string) => `fleetOS_signer_${clientId}`;
-const getFleetOSSigner = (clientId: string) =>
-  getFromLocalStorage<string>(fleetOSSignerKey(clientId));
-const saveFleetOSSigner = (clientId: string, address: string) =>
-  saveToLocalStorage(fleetOSSignerKey(clientId), address);
+const rentalOSSignerKey = (clientId: string) => `rentalOS_signer_${clientId}`;
+const getRentalOSSigner = (clientId: string) =>
+  getFromLocalStorage<string>(rentalOSSignerKey(clientId));
+const saveRentalOSSigner = (clientId: string, address: string) =>
+  saveToLocalStorage(rentalOSSignerKey(clientId), address);
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -71,9 +72,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const [signerToDelete, setSignerToDelete] = useState<string>();
   const [optimisticAdditions, setOptimisticAdditions] = useState<SignerNode[]>([]);
   const [pendingRemovals, setPendingRemovals] = useState<Set<string>>(new Set());
-  const [showFleetOSConfirm, setShowFleetOSConfirm] = useState(false);
-  const [fleetOSSigner, setFleetOSSigner] = useState<string | null>(() =>
-    getFleetOSSigner(fragment.clientId),
+  const [showRentalOSConfirm, setShowRentalOSConfirm] = useState(false);
+  const [rentalOSSigner, setRentalOSSigner] = useState<string | null>(() =>
+    getRentalOSSigner(fragment.clientId),
   );
   const { trackEvent } = useMixPanel();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
@@ -123,24 +124,27 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     }
   };
 
-  const handleGenerateFleetOSTenant = async () => {
+  const handleGenerateRentalOSTenant = async () => {
     let addedRedirectUri = false;
     let enabledSignerAddress: string | undefined;
 
     try {
       const hasFleetUri = fragment.redirectURIs.nodes.some(
-        (n) => n.uri === FLEETS_DIMO_URL,
+        (n) => n.uri === RENTAL_OS_URL,
       );
       if (!hasFleetUri) {
         setLoadingStatus({
           status: 'loading',
-          label: 'Adding FleetOS as an authorized redirect URI...',
+          label: 'Adding RentalOS as an authorized redirect URI...',
         });
-        await setFleetRedirectUri(FLEETS_DIMO_URL, true);
+        await setFleetRedirectUri(RENTAL_OS_URL, true);
         addedRedirectUri = true;
       }
 
-      setLoadingStatus({ status: 'loading', label: 'Generating API key for FleetOS...' });
+      setLoadingStatus({
+        status: 'loading',
+        label: 'Generating API key for RentalOS...',
+      });
       const account = generateWallet();
       await handleEnableSigner(account.address);
       enabledSignerAddress = account.address;
@@ -148,15 +152,19 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       setLoadingStatus({ status: 'loading', label: 'Generating developer JWT...' });
       const jwtSuccess = await getGlobalAccountDeveloperJwt({
         clientId: fragment.clientId,
-        domain: FLEETS_DIMO_URL,
+        domain: RENTAL_OS_URL,
       });
       if (!jwtSuccess) throw new Error('Failed to generate developer JWT');
 
       const devJwt = getDevJwt(fragment.clientId);
       if (!devJwt) throw new Error('Failed to retrieve developer JWT');
 
-      setLoadingStatus({ status: 'loading', label: 'Registering FleetOS tenant...' });
-      const response = await fetch(FLEETS_REGISTER_ENDPOINT, {
+      setLoadingStatus({ status: 'loading', label: 'Registering RentalOS tenant...' });
+      const user = await getUserByToken();
+      const nameParts = (user.name ?? '').trim().split(/\s+/);
+      const firstName = nameParts[0] ?? '';
+      const lastName = nameParts.slice(1).join(' ');
+      const response = await fetch(RENTAL_OS_REGISTER_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,15 +172,20 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         },
         body: JSON.stringify({
           clientId: fragment.clientId,
-          redirectUri: FLEETS_DIMO_URL,
           apiKey: account.privateKey,
+          wallet: currentUser?.smartContractAddress,
+          redirectUri: RENTAL_OS_URL,
+          email: user.email,
+          ...(firstName && { first_name: firstName }),
+          ...(lastName && { last_name: lastName }),
+          ...(user.company?.name && { business_name: user.company.name }),
         }),
       });
       if (!response.ok)
-        throw new Error(`FleetOS registration failed: ${response.statusText}`);
+        throw new Error(`RentalOS registration failed: ${response.statusText}`);
 
-      saveFleetOSSigner(fragment.clientId, account.address);
-      setFleetOSSigner(account.address);
+      saveRentalOSSigner(fragment.clientId, account.address);
+      setRentalOSSigner(account.address);
 
       clearLoadingStatus();
       setApiKey(account.privateKey);
@@ -182,7 +195,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       ]);
       refetch().then(() => setOptimisticAdditions([]));
 
-      trackEvent('FleetOS Tenant Generated', {
+      trackEvent('RentalOS Tenant Generated', {
         distinct_id: fragment.owner,
         tokenId: fragment.tokenId,
         signerAddress: account.address,
@@ -195,7 +208,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
             ? handleDisableSigner(enabledSignerAddress)
             : Promise.resolve(),
           addedRedirectUri
-            ? setFleetRedirectUri(FLEETS_DIMO_URL, false)
+            ? setFleetRedirectUri(RENTAL_OS_URL, false)
             : Promise.resolve(),
         ]);
       }
@@ -287,10 +300,10 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           <div className="flex gap-2">
             <Button
               className="dark with-icon px-4"
-              onClick={() => setShowFleetOSConfirm(true)}
+              onClick={() => setShowRentalOSConfirm(true)}
             >
               <TruckIcon className="w-4 h-4" />
-              Register FleetOS
+              Register RentalOS
             </Button>
             <Button className="dark with-icon px-4" onClick={handleGenerateSigner}>
               <KeyIcon className="w-4 h-4" />
@@ -311,9 +324,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                   render: (item: SignerNode) => (
                     <div className="flex items-center gap-2">
                       <span>{item.address}</span>
-                      {item.address === fleetOSSigner && (
+                      {item.address === rentalOSSigner && (
                         <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-cta-default text-white whitespace-nowrap">
-                          FleetOS
+                          RentalOS
                         </span>
                       )}
                     </div>
@@ -342,17 +355,17 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         apiKey={String(apiKey)?.replace('0x', '') ?? ''}
         onClose={() => setApiKey(undefined)}
       />
-      <Modal isOpen={showFleetOSConfirm} setIsOpen={setShowFleetOSConfirm}>
+      <Modal isOpen={showRentalOSConfirm} setIsOpen={setShowRentalOSConfirm}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <h2 className="text-xl font-semibold">Register FleetOS</h2>
+            <h2 className="text-xl font-semibold">Register RentalOS</h2>
             <p className="text-text-secondary text-sm">
               Clicking <strong>Proceed</strong> will:
             </p>
             <ul className="text-text-secondary text-sm list-disc pl-5 flex flex-col gap-1">
-              <li>Add FleetOS as an authorized redirect URI</li>
+              <li>Add RentalOS as an authorized redirect URI</li>
               <li>Generate and register a new API key</li>
-              <li>Register your tenant with FleetOS</li>
+              <li>Register your tenant with RentalOS</li>
             </ul>
             <p className="text-text-secondary text-sm">
               You&apos;ll need to approve transactions. Don&apos;t close this window once
@@ -363,15 +376,15 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
             <Button
               className="primary flex-1"
               onClick={() => {
-                setShowFleetOSConfirm(false);
-                void handleGenerateFleetOSTenant();
+                setShowRentalOSConfirm(false);
+                void handleGenerateRentalOSTenant();
               }}
             >
               Proceed
             </Button>
             <Button
               className="primary-outline flex-1"
-              onClick={() => setShowFleetOSConfirm(false)}
+              onClick={() => setShowRentalOSConfirm(false)}
             >
               Cancel
             </Button>
