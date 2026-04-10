@@ -127,6 +127,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const handleGenerateRentalOSTenant = async () => {
     let addedRedirectUri = false;
     let enabledSignerAddress: string | undefined;
+    let lastError: unknown;
 
     try {
       const hasFleetUri = fragment.redirectURIs.nodes.some(
@@ -149,12 +150,41 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       await handleEnableSigner(account.address);
       enabledSignerAddress = account.address;
 
-      setLoadingStatus({ status: 'loading', label: 'Generating developer JWT...' });
-      const jwtSuccess = await getGlobalAccountDeveloperJwt({
-        clientId: fragment.clientId,
-        domain: RENTAL_OS_URL,
+      // Wait for on-chain state to propagate to the auth servers before
+      // requesting a JWT — without this delay the server rejects the request
+      // because it hasn't indexed the new signer / redirect URI yet.
+      setLoadingStatus({
+        status: 'loading',
+        label: 'Waiting for on-chain confirmation...',
       });
-      if (!jwtSuccess) throw new Error('Failed to generate developer JWT');
+      await new Promise((resolve) => setTimeout(resolve, 8000));
+
+      // Retry JWT generation up to 3 times with 5 s between attempts.
+      const JWT_RETRIES = 3;
+      const JWT_RETRY_DELAY_MS = 5000;
+      let jwtSuccess = false;
+      for (let attempt = 1; attempt <= JWT_RETRIES; attempt++) {
+        setLoadingStatus({
+          status: 'loading',
+          label:
+            attempt === 1
+              ? 'Generating developer JWT...'
+              : `Generating developer JWT (attempt ${attempt}/${JWT_RETRIES})...`,
+        });
+        try {
+          jwtSuccess = await getGlobalAccountDeveloperJwt({
+            clientId: fragment.clientId,
+            domain: RENTAL_OS_URL,
+          });
+          if (jwtSuccess) break;
+        } catch (err) {
+          lastError = err;
+        }
+        if (attempt < JWT_RETRIES) {
+          await new Promise((resolve) => setTimeout(resolve, JWT_RETRY_DELAY_MS));
+        }
+      }
+      if (!jwtSuccess) throw lastError ?? new Error('Failed to generate developer JWT');
 
       const devJwt = getDevJwt(fragment.clientId);
       if (!devJwt) throw new Error('Failed to retrieve developer JWT');
@@ -165,25 +195,45 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       const nameParts = (user.name ?? '').trim().split(/\s+/);
       const firstName = nameParts[0] ?? '';
       const lastName = nameParts.slice(1).join(' ');
-      const response = await fetch(RENTAL_OS_REGISTER_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${devJwt}`,
-        },
-        body: JSON.stringify({
-          clientId: fragment.clientId,
-          apiKey: account.privateKey,
-          wallet: currentUser?.smartContractAddress,
-          redirectUri: RENTAL_OS_URL,
-          email: user.email,
-          ...(firstName && { first_name: firstName }),
-          ...(lastName && { last_name: lastName }),
-          ...(user.company?.name && { business_name: user.company.name }),
-        }),
-      });
-      if (!response.ok)
-        throw new Error(`RentalOS registration failed: ${response.statusText}`);
+
+      // Retry the registration call up to 3 times in case the auth server is
+      // still catching up.
+      const REG_RETRIES = 3;
+      const REG_RETRY_DELAY_MS = 5000;
+      let response: Response | undefined;
+      for (let attempt = 1; attempt <= REG_RETRIES; attempt++) {
+        if (attempt > 1) {
+          setLoadingStatus({
+            status: 'loading',
+            label: `Registering RentalOS tenant (attempt ${attempt}/${REG_RETRIES})...`,
+          });
+          await new Promise((resolve) => setTimeout(resolve, REG_RETRY_DELAY_MS));
+        }
+        try {
+          response = await fetch(RENTAL_OS_REGISTER_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${devJwt}`,
+            },
+            body: JSON.stringify({
+              clientId: fragment.clientId,
+              apiKey: account.privateKey,
+              wallet: currentUser?.smartContractAddress,
+              redirectUri: RENTAL_OS_URL,
+              email: user.email,
+              ...(firstName && { first_name: firstName }),
+              ...(lastName && { last_name: lastName }),
+              ...(user.company?.name && { business_name: user.company.name }),
+            }),
+          });
+          if (response.ok) break;
+          lastError = new Error(`RentalOS registration failed: ${response.statusText}`);
+        } catch (err) {
+          lastError = err;
+        }
+      }
+      if (!response?.ok) throw lastError ?? new Error('RentalOS registration failed');
 
       saveRentalOSSigner(fragment.clientId, account.address);
       setRentalOSSigner(account.address);
