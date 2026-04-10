@@ -124,6 +124,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   const handleGenerateFleetOSTenant = async () => {
+    let addedRedirectUri = false;
     let enabledSignerAddress: string | undefined;
 
     try {
@@ -136,6 +137,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           label: 'Adding FleetOS as an authorized redirect URI...',
         });
         await setFleetRedirectUri(FLEETS_DIMO_URL, true);
+        addedRedirectUri = true;
       }
 
       setLoadingStatus({ status: 'loading', label: 'Generating API key for FleetOS...' });
@@ -186,8 +188,16 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         signerAddress: account.address,
       });
     } catch (error: unknown) {
-      if (enabledSignerAddress) {
-        await handleDisableSigner(enabledSignerAddress).catch(() => {});
+      if (enabledSignerAddress || addedRedirectUri) {
+        setLoadingStatus({ status: 'loading', label: 'Rolling back changes...' });
+        await Promise.allSettled([
+          enabledSignerAddress
+            ? handleDisableSigner(enabledSignerAddress)
+            : Promise.resolve(),
+          addedRedirectUri
+            ? setFleetRedirectUri(FLEETS_DIMO_URL, false)
+            : Promise.resolve(),
+        ]);
       }
       handleError(error);
     }
