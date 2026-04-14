@@ -216,7 +216,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         email: user.email,
         ...(firstName && { first_name: firstName }),
         ...(lastName && { last_name: lastName }),
-        ...(user.company?.name && { business_name: user.company.name }),
+        ...(user.company?.name && { business_name: user.company.name.trim() }),
       };
       console.log('[RentalOS] Registration body (key redacted):', {
         ...registrationBody,
