@@ -179,11 +179,19 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
             domain: RENTAL_OS_URL,
             private_key: account.privateKey,
           });
+          console.log('[RentalOS] getDeveloperJwt attempt', attempt, 'result:', result);
           if (result?.headers?.Authorization) {
             devJwt = result.headers.Authorization.split(' ')[1];
             break;
+          } else {
+            console.warn(
+              '[RentalOS] getDeveloperJwt attempt',
+              attempt,
+              '— no Authorization header in response',
+            );
           }
         } catch (err) {
+          console.error('[RentalOS] getDeveloperJwt attempt', attempt, 'threw:', err);
           lastError = err;
         }
         if (attempt < JWT_RETRIES) {
@@ -191,6 +199,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         }
       }
       if (!devJwt) throw lastError ?? new Error('Failed to generate developer JWT');
+      console.log('[RentalOS] Developer JWT obtained, length:', devJwt.length);
 
       setLoadingStatus({ status: 'loading', label: 'Registering RentalOS tenant...' });
       const user = await getUser();
@@ -198,6 +207,21 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       const nameParts = (user.name ?? '').trim().split(/\s+/);
       const firstName = nameParts[0] ?? '';
       const lastName = nameParts.slice(1).join(' ');
+
+      const registrationBody = {
+        clientId: fragment.clientId,
+        apiKey: account.privateKey,
+        wallet: currentUser?.smartContractAddress,
+        redirectUri: RENTAL_OS_URL,
+        email: user.email,
+        ...(firstName && { first_name: firstName }),
+        ...(lastName && { last_name: lastName }),
+        ...(user.company?.name && { business_name: user.company.name }),
+      };
+      console.log('[RentalOS] Registration body (key redacted):', {
+        ...registrationBody,
+        apiKey: '[redacted]',
+      });
 
       // Retry the registration call up to 3 times in case the auth server is
       // still catching up.
@@ -219,20 +243,18 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${devJwt}`,
             },
-            body: JSON.stringify({
-              clientId: fragment.clientId,
-              apiKey: account.privateKey,
-              wallet: currentUser?.smartContractAddress,
-              redirectUri: RENTAL_OS_URL,
-              email: user.email,
-              ...(firstName && { first_name: firstName }),
-              ...(lastName && { last_name: lastName }),
-              ...(user.company?.name && { business_name: user.company.name }),
-            }),
+            body: JSON.stringify(registrationBody),
           });
+          const responseText = await response.text();
+          console.log(
+            `[RentalOS] /tenant/register attempt ${attempt} — status: ${response.status}, body: ${responseText}`,
+          );
           if (response.ok) break;
-          lastError = new Error(`RentalOS registration failed: ${response.statusText}`);
+          lastError = new Error(
+            `RentalOS registration failed (${response.status}): ${responseText}`,
+          );
         } catch (err) {
+          console.error('[RentalOS] /tenant/register attempt', attempt, 'threw:', err);
           lastError = err;
         }
       }
