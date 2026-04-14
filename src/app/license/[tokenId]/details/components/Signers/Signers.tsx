@@ -17,8 +17,8 @@ import {
   useMixPanel,
   useSetRedirectUri,
 } from '@/hooks';
-import { getDevJwt } from '@/utils/devJwt';
 import { getFromLocalStorage, saveToLocalStorage } from '@/utils/localStorage';
+import { getDeveloperJwt } from '@/services/dimoDev';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/[tokenId]/details/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
@@ -85,7 +85,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     'generate-my-developer-jwt',
   );
 
-  const { hasGlobalAccountPrivateKey, getGlobalAccountDeveloperJwt } = useDimoAuth();
+  const { hasGlobalAccountPrivateKey } = useDimoAuth();
   const setFleetRedirectUri = useSetRedirectUri(fragment.tokenId);
 
   const handleError = (error: unknown) => {
@@ -160,9 +160,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       await new Promise((resolve) => setTimeout(resolve, 8000));
 
       // Retry JWT generation up to 3 times with 5 s between attempts.
+      // Use the newly generated API key (signer private key) to sign the
+      // Developer JWT — not the Global Account key.
       const JWT_RETRIES = 3;
       const JWT_RETRY_DELAY_MS = 5000;
-      let jwtSuccess = false;
+      let devJwt: string | null = null;
       for (let attempt = 1; attempt <= JWT_RETRIES; attempt++) {
         setLoadingStatus({
           status: 'loading',
@@ -172,11 +174,15 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               : `Generating developer JWT (attempt ${attempt}/${JWT_RETRIES})...`,
         });
         try {
-          jwtSuccess = await getGlobalAccountDeveloperJwt({
-            clientId: fragment.clientId,
+          const result = await getDeveloperJwt({
+            client_id: fragment.clientId,
             domain: RENTAL_OS_URL,
+            private_key: account.privateKey,
           });
-          if (jwtSuccess) break;
+          if (result?.headers?.Authorization) {
+            devJwt = result.headers.Authorization.split(' ')[1];
+            break;
+          }
         } catch (err) {
           lastError = err;
         }
@@ -184,10 +190,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           await new Promise((resolve) => setTimeout(resolve, JWT_RETRY_DELAY_MS));
         }
       }
-      if (!jwtSuccess) throw lastError ?? new Error('Failed to generate developer JWT');
-
-      const devJwt = getDevJwt(fragment.clientId);
-      if (!devJwt) throw new Error('Failed to retrieve developer JWT');
+      if (!devJwt) throw lastError ?? new Error('Failed to generate developer JWT');
 
       setLoadingStatus({ status: 'loading', label: 'Registering RentalOS tenant...' });
       const user = await getUser();
