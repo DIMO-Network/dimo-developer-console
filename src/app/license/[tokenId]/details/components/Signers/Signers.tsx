@@ -210,7 +210,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
 
       const registrationBody = {
         clientId: fragment.clientId,
-        apiKey: account.privateKey,
+        apiKey: account.privateKey.replace('0x', ''),
         wallet: currentUser?.smartContractAddress,
         redirectUri: RENTAL_OS_URL,
         email: user.email,
