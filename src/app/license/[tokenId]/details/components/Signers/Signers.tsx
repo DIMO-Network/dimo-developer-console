@@ -177,7 +177,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           const result = await getDeveloperJwt({
             client_id: fragment.clientId,
             domain: RENTAL_OS_URL,
-            private_key: account.privateKey,
+            private_key: account.privateKey.replace('0x', ''),
           });
           console.log('[RentalOS] getDeveloperJwt attempt', attempt, 'result:', result);
           if (result?.headers?.Authorization) {
