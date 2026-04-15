@@ -8,7 +8,7 @@ import { useQuery } from '@apollo/client';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';
 import { GET_VEHICLE_COUNT_BY_CLIENT_ID } from '@/app/license/[tokenId]/details/components/Vehicles';
-import { getConfigurationByClientId } from '@/actions/configurations';
+import { getConfigurationsByClientId } from '@/actions/configurations';
 import { NotificationContext } from '@/context/notificationContext';
 
 import './LicenseCard.css';
@@ -46,7 +46,8 @@ export const LicenseCard = (props: {
 
   useEffect(() => {
     if (!license.clientId) return;
-    getConfigurationByClientId({ client_id: license.clientId }).then(({ id }) => {
+    getConfigurationsByClientId({ client_id: license.clientId }).then((configs) => {
+      const id = configs[0]?.id;
       setSharingLink(id ? `${DIMO_LOGIN_BASE}/?configurationId=${id}` : null);
       setSharingLinkLoading(false);
     });
