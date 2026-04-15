@@ -21,10 +21,10 @@ export const getConfigurationsByClientId = async ({
 }): Promise<IConfigurationListItem[]> => {
   try {
     const client = await dimoDevAPIClient();
-    const { data } = await client.get<IConfigurationListItem[]>(
+    const { data } = await client.get<IConfigurationListItem[] | IConfigurationListItem>(
       `/api/my/configurations?clientId=${client_id}`,
     );
-    return data;
+    return Array.isArray(data) ? data : data ? [data] : [];
   } catch {
     return [];
   }
