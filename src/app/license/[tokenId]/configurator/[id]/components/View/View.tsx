@@ -13,7 +13,7 @@ import {
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { getConfiguration, updateConfiguration } from '@/actions/configurations';
 import './View.css';
-import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/View/View';
+import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/ListView/ListView';
 import { NotificationContext } from '@/context/notificationContext';
 
 const parseArray = (val?: string) =>
