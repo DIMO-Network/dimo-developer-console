@@ -41,12 +41,14 @@ export const LicenseCard = (props: {
     },
   );
 
+  const [configCount, setConfigCount] = useState<number | null>(null);
   const [sharingLink, setSharingLink] = useState<string | null>(null);
   const [sharingLinkLoading, setSharingLinkLoading] = useState(true);
 
   useEffect(() => {
     if (!license.clientId) return;
     getConfigurationsByClientId({ client_id: license.clientId }).then((configs) => {
+      setConfigCount(configs.length);
       const id = configs[0]?.id;
       setSharingLink(id ? `${DIMO_LOGIN_BASE}/?configurationId=${id}` : null);
       setSharingLinkLoading(false);
@@ -95,6 +97,12 @@ export const LicenseCard = (props: {
         {/* Sharing link */}
         {sharingLinkLoading ? (
           <BubbleLoader isLoading isSmall />
+        ) : configCount !== null && configCount > 1 ? (
+          <Anchor href={`/license/${license.tokenId}/configurator`}>
+            <span className="text-xs text-primary hover:opacity-70 transition-opacity">
+              {configCount} configurations →
+            </span>
+          </Anchor>
         ) : sharingLink ? (
           <button
             onClick={() => {
