@@ -10,7 +10,7 @@ import {
   ComponentType,
   DynamicFormProps,
   PERMISSIONS,
-} from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/types';
+} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { getConfiguration, updateConfiguration } from '@/actions/configurations';
 import './View.css';
 import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/View/View';
