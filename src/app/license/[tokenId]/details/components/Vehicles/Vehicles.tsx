@@ -1,5 +1,5 @@
 'use client';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
@@ -10,7 +10,6 @@ import { Button } from '@/components/Button';
 import Link from 'next/link';
 import { TotalCount } from '@/components/TotalVehicleCount';
 import { useRouter } from 'next/navigation';
-import { getConfigurationByClientId } from '@/actions/configurations';
 import { VehicleSimulatorModal } from '@/app/app/list/components/VehicleSimulator/VehicleSimulatorModal';
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
@@ -38,22 +37,6 @@ export const Vehicles: FC<IProps> = ({ license }) => {
     variables: { clientId: fragment.clientId },
   });
   const router = useRouter();
-  const [configurationId, setConfigurationId] = useState<string>('');
-
-  useEffect(() => {
-    if (!fragment.clientId) return;
-
-    const getConfigurationId = async (clientId: string) => {
-      try {
-        const { id } = await getConfigurationByClientId({ client_id: clientId });
-        setConfigurationId(id);
-      } catch {
-        // configuration ID not found — "Configure Vehicle Sharing" button stays disabled
-      }
-    };
-
-    void getConfigurationId(fragment.clientId);
-  }, [fragment.clientId]);
 
   return (
     <div className={'w-full'}>
@@ -63,13 +46,7 @@ export const Vehicles: FC<IProps> = ({ license }) => {
             <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
             <Button
               className="dark with-icon px-4"
-              onClick={() => {
-                router.push(
-                  configurationId
-                    ? `/license/${fragment.tokenId}/configurator/${configurationId}`
-                    : `/license/${fragment.tokenId}/configurator`,
-                );
-              }}
+              onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
             >
               Configure Vehicle Sharing
             </Button>
