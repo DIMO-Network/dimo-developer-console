@@ -1,18 +1,14 @@
 'use client';
 
 import { getFromSession, removeFromSession, saveToSession } from '@/utils/sessionStorage';
+import { FOCUS_SESSION_KEY, FocusValue, isFocusValue } from '@/utils/focusConstants';
 
-export const FOCUS_QUERY_PARAM = 'focus';
-export const FOCUS_SESSION_KEY = 'dimoFocus';
-
-export const FOCUS_RENTALS_OS_SIGNUP = 'rentals_os_signup';
-
-export type FocusValue = typeof FOCUS_RENTALS_OS_SIGNUP;
-
-const KNOWN_FOCUS_VALUES: readonly FocusValue[] = [FOCUS_RENTALS_OS_SIGNUP];
-
-const isFocusValue = (value: string | null): value is FocusValue =>
-  !!value && (KNOWN_FOCUS_VALUES as readonly string[]).includes(value);
+export {
+  FOCUS_QUERY_PARAM,
+  FOCUS_SESSION_KEY,
+  FOCUS_RENTALS_OS_SIGNUP,
+  type FocusValue,
+} from '@/utils/focusConstants';
 
 export const saveFocus = (value: string): void => {
   if (isFocusValue(value)) {
