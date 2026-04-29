@@ -8,7 +8,7 @@ import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 import { JWTPayload } from 'jose/dist/types';
 import { cookieName, getCookie } from './services/dimoDevAPI';
-import { FOCUS_QUERY_PARAM } from '@/utils/focus';
+import { FOCUS_QUERY_PARAM } from '@/utils/focusConstants';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
