@@ -8,8 +8,18 @@ import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 import { JWTPayload } from 'jose/dist/types';
 import { cookieName, getCookie } from './services/dimoDevAPI';
+import { FOCUS_QUERY_PARAM } from '@/utils/focus';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
+
+const buildRedirectUrl = (path: string, request: NextRequest) => {
+  const url = new URL(path, request.url);
+  const focus = request.nextUrl.searchParams.get(FOCUS_QUERY_PARAM);
+  if (focus && !url.searchParams.has(FOCUS_QUERY_PARAM)) {
+    url.searchParams.set(FOCUS_QUERY_PARAM, focus);
+  }
+  return url;
+};
 
 const getToken = async () => {
   const token = await getCookie(cookieName);
@@ -73,15 +83,18 @@ const validatePrivateSession = async (request: NextRequest) => {
 
   //TODO: check how isLoginPage affects on safari
   if (isLoginPage && isCompliant) {
-    return NextResponse.redirect(new URL('/app', request.url), {
+    return NextResponse.redirect(buildRedirectUrl('/app', request), {
       status: 307,
     });
   }
 
   if (!isCompliant && !flow) {
-    return NextResponse.redirect(new URL(`/sign-up?flow=${missingFlow}`, request.url), {
-      status: 307,
-    });
+    return NextResponse.redirect(
+      buildRedirectUrl(`/sign-up?flow=${missingFlow}`, request),
+      {
+        status: 307,
+      },
+    );
   }
 
   return NextResponse.next();
@@ -104,7 +117,7 @@ const validatePublicSession = async (request: NextRequest) => {
   }
 
   if (!isLoginPage) {
-    return NextResponse.redirect(new URL('/sign-in', request.url), {
+    return NextResponse.redirect(buildRedirectUrl('/sign-in', request), {
       status: 307,
     });
   }

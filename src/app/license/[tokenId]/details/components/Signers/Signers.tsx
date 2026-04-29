@@ -29,6 +29,7 @@ import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { getUser } from '@/actions/user';
+import { FOCUS_RENTALS_OS_SIGNUP, clearFocus, getFocus } from '@/utils/focus';
 
 const RENTAL_OS_URL = 'https://fleets.dimo.co/';
 const RENTAL_OS_REGISTER_ENDPOINT = 'https://fleets.dimo.co/tenant/register';
@@ -355,6 +356,13 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     if (!currentUser) return;
     void handleOwnerSigner();
   }, [currentUser]);
+
+  useEffect(() => {
+    if (!isLicenseOwner) return;
+    if (getFocus() !== FOCUS_RENTALS_OS_SIGNUP) return;
+    clearFocus();
+    setShowRentalOSConfirm(true);
+  }, [isLicenseOwner]);
 
   const onConfirmDelete = () => {
     if (!signerToDelete) {
