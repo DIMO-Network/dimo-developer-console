@@ -32,6 +32,39 @@
          font-mono;
 }
 
+/* ─── Region cards ──────────────────────────────────────────────────── */
+
+.vehicle-sim-region-card {
+  @apply flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-lg
+         border-2 border-transparent bg-cta-default
+         transition-all duration-150 cursor-pointer select-none
+         hover:border-white;
+
+  &:disabled {
+    @apply opacity-40 cursor-not-allowed hover:border-transparent;
+  }
+
+  &.selected {
+    @apply bg-white border-white;
+
+    .vehicle-sim-region-label {
+      @apply text-black;
+    }
+
+    .vehicle-sim-region-sub {
+      @apply text-neutral-500;
+    }
+  }
+
+  .vehicle-sim-region-label {
+    @apply text-sm font-semibold text-white leading-none;
+  }
+
+  .vehicle-sim-region-sub {
+    @apply text-[10px] font-mono text-text-secondary leading-none tracking-wide;
+  }
+}
+
 /* ─── Make cards ────────────────────────────────────────────────────── */
 
 .vehicle-sim-make-grid {

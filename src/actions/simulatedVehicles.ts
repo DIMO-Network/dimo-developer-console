@@ -131,24 +131,28 @@ export const registerVehicleWithSimulator = async ({
   make,
   model,
   year,
+  routeFile,
 }: {
   tokenId: number;
   ownerWalletAddress: string;
   make: string;
   model: string;
   year: number;
+  routeFile?: string;
 }): Promise<{ token_id: number; status: string }> => {
   try {
+    const body: Record<string, unknown> = {
+      token_id: tokenId,
+      owner_wallet_address: ownerWalletAddress,
+      device_definition: { make, model, year },
+    };
+    if (routeFile) body.route_file = routeFile;
     const response = await fetch(
       `${configuration.VEHICLE_SIMULATOR_URL}/api/vehicles/register`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token_id: tokenId,
-          owner_wallet_address: ownerWalletAddress,
-          device_definition: { make, model, year },
-        }),
+        body: JSON.stringify(body),
       },
     );
 

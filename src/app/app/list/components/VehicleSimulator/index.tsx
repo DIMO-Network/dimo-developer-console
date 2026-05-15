@@ -39,6 +39,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   const { currentUser } = useGlobalAccount();
   const queryClient = useQueryClient();
 
+  const [selectedRegion, setSelectedRegion] = useState<'usa' | 'japan' | ''>('');
   const [selectedMakeSlug, setSelectedMakeSlug] = useState('');
   const [selectedModelSlug, setSelectedModelSlug] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
@@ -79,7 +80,15 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   );
   const selectedModel = selectedMake?.models.find((m) => m.slug === selectedModelSlug);
   const availableYears = selectedModel?.years ?? [];
-  const canMint = !!selectedMakeSlug && !!selectedModelSlug && !!selectedYear && !atLimit;
+  const routeFile =
+    selectedRegion === 'japan' ? 'src/routes/japan_honshu_circuit.json' : undefined;
+
+  const canMint =
+    !!selectedRegion &&
+    !!selectedMakeSlug &&
+    !!selectedModelSlug &&
+    !!selectedYear &&
+    !atLimit;
 
   const handleMakeChange = (makeSlug: string) => {
     setSelectedMakeSlug(makeSlug);
@@ -88,12 +97,14 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   };
 
   const selectionPreview = (() => {
-    if (!selectedMakeSlug) return 'No vehicle configured';
+    if (!selectedRegion) return 'No vehicle configured';
+    const regionLabel = selectedRegion === 'japan' ? 'Japan' : 'USA';
+    if (!selectedMakeSlug) return regionLabel;
     const makeName = selectedMake?.label ?? selectedMakeSlug;
     const modelLabel =
       selectedMake?.models.find((m) => m.slug === selectedModelSlug)?.label ??
       selectedModelSlug;
-    const parts = [selectedYear, makeName, modelLabel].filter(Boolean);
+    const parts = [regionLabel, selectedYear, makeName, modelLabel].filter(Boolean);
     return parts.join(' · ');
   })();
 
@@ -240,6 +251,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         make: selectedMake.label,
         model: modelLabel,
         year: Number(selectedYear),
+        routeFile,
       });
 
       console.log('[VehicleSimulator] Simulator registration result', registration);
@@ -282,9 +294,35 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       {/* Step-by-step configurator */}
       <div className="vehicle-sim-steps">
-        {/* Step 01 — Make */}
+        {/* Step 01 — Region */}
         <div className="vehicle-sim-step">
-          <span className="vehicle-sim-step-label">01 — Make</span>
+          <span className="vehicle-sim-step-label">01 — Region</span>
+          <div className="vehicle-sim-pill-group" role="group" aria-label="Select region">
+            {(
+              [
+                { value: 'usa', label: 'USA', sub: 'New York routes' },
+                { value: 'japan', label: 'Japan', sub: 'Honshu circuit' },
+              ] as const
+            ).map((region) => (
+              <button
+                key={region.value}
+                type="button"
+                aria-pressed={selectedRegion === region.value}
+                aria-label={region.label}
+                disabled={isLoading}
+                onClick={() => setSelectedRegion(region.value)}
+                className={`vehicle-sim-region-card${selectedRegion === region.value ? ' selected' : ''}`}
+              >
+                <span className="vehicle-sim-region-label">{region.label}</span>
+                <span className="vehicle-sim-region-sub">{region.sub}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Step 02 — Make */}
+        <div className={`vehicle-sim-step${!selectedRegion ? ' locked' : ''}`}>
+          <span className="vehicle-sim-step-label">02 — Make</span>
           <div className="vehicle-sim-make-grid" role="group" aria-label="Select make">
             {MAKES.map((make) => (
               <button
@@ -292,7 +330,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
                 type="button"
                 aria-pressed={selectedMakeSlug === make.slug}
                 aria-label={make.label}
-                disabled={isLoading}
+                disabled={!selectedRegion || isLoading}
                 onClick={() => handleMakeChange(make.slug)}
                 className={`vehicle-sim-make-card${selectedMakeSlug === make.slug ? ' selected' : ''}`}
               >
@@ -303,9 +341,9 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           </div>
         </div>
 
-        {/* Step 02 — Model */}
+        {/* Step 03 — Model */}
         <div className={`vehicle-sim-step${!selectedMakeSlug ? ' locked' : ''}`}>
-          <span className="vehicle-sim-step-label">02 — Model</span>
+          <span className="vehicle-sim-step-label">03 — Model</span>
           <div className="vehicle-sim-pill-group" role="group" aria-label="Select model">
             {(selectedMake?.models ?? []).map((model) => (
               <button
@@ -331,9 +369,9 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           </div>
         </div>
 
-        {/* Step 03 — Year */}
+        {/* Step 04 — Year */}
         <div className={`vehicle-sim-step${!selectedModelSlug ? ' locked' : ''}`}>
-          <span className="vehicle-sim-step-label">03 — Year</span>
+          <span className="vehicle-sim-step-label">04 — Year</span>
           <div className="vehicle-sim-pill-group" role="group" aria-label="Select year">
             {availableYears.map((year) => (
               <button
