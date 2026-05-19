@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, Suspense } from 'react';
 import { Metadata } from 'next';
 
 import configuration from '@/config';
@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   title: `Home | ${configuration.appName}`,
 };
 
-const HomePage: FC = AppListPage;
+const HomePage: FC = () => (
+  <Suspense>
+    <AppListPage />
+  </Suspense>
+);
 
 export default HomePage;

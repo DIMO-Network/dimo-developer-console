@@ -1,19 +1,21 @@
 'use client';
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { PaginatedTableIdentityAPI } from '@/components/Table';
 import { useQuery } from '@apollo/client';
 import { gql } from '@/gql';
 import { Loader } from '@/components/Loader';
 import {
-  columns,
+  buildColumns,
   PAGE_SIZE,
 } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable/constants';
+import { getSimulatedVehicles } from '@/actions/simulatedVehicles';
+import { useRouter } from 'next/navigation';
 
 interface IProps {
   clientId: string;
 }
 
-const VEHICLES_BY_CLIENT_ID = gql(`
+export const VEHICLES_BY_CLIENT_ID = gql(`
   query GetVehiclesByClientId($clientId: Address!, $first: Int, $last: Int, $before: String, $after: String) {
     vehicles(filterBy:{ privileged: $clientId }, first: $first, last: $last, before:$before, after:$after) {
       totalCount
@@ -37,9 +39,18 @@ const VEHICLES_BY_CLIENT_ID = gql(`
 `);
 
 export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
+  const router = useRouter();
   const { data, refetch, loading, error } = useQuery(VEHICLES_BY_CLIENT_ID, {
     variables: { clientId, first: PAGE_SIZE },
   });
+  const [simulatedTokenIds, setSimulatedTokenIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    getSimulatedVehicles({ clientId }).then((vehicles) => {
+      setSimulatedTokenIds(new Set(vehicles.map((v) => v.token_id)));
+    });
+  }, [clientId]);
+
   if (error) {
     return <p>Error: {error.message}</p>;
   }
@@ -52,11 +63,12 @@ export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
   return (
     <PaginatedTableIdentityAPI
       data={data.vehicles.nodes}
-      columns={columns}
+      columns={buildColumns(simulatedTokenIds)}
       onPaginationChange={refetch}
       rowCount={data.vehicles.totalCount}
       pageInfo={data.vehicles.pageInfo}
       pageSize={PAGE_SIZE}
+      onRowClick={(row) => router.push(`/explorer/${row.tokenId}`)}
     />
   );
 };

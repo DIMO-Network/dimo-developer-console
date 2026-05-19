@@ -38,12 +38,20 @@ export const inviteCollaborator = async (invitation: IInvitation) => {
 export const deleteCollaborator = async (id: string) => {
   try {
     const { data } = await deleteMyTeamCollaborator(id);
-    return data;
+    return { success: true, data };
   } catch (error: unknown) {
     Sentry.captureException(error);
     if (error instanceof AxiosError) {
       console.error({ error });
-      throw new Error(error?.response?.data?.message || error?.message);
+      return {
+        success: false,
+        message: error?.response?.data?.message || error?.message,
+      };
     }
+
+    return {
+      success: false,
+      message: 'Something went wrong',
+    };
   }
 };

@@ -12,7 +12,11 @@ import { cookies } from 'next/headers';
 import { cookieName } from '@/services/dimoDevAPI';
 
 export const getUser = async () => {
-  return getUserByToken();
+  try {
+    return getUserByToken();
+  } catch {
+    return null;
+  }
 };
 
 export const existUserEmailOrAddress = async (address: string | null) => {

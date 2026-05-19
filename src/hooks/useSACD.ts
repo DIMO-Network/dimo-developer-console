@@ -1,4 +1,4 @@
-import { PaymentSACD } from '@/types/wallet';
+import { PaymentSACD, VehiclePermissionSACD } from '@/types/wallet';
 import config from '@/config';
 import useGlobalAccount from '@/hooks/useGlobalAccount';
 import { getSessionTurnkeyClient } from '@/services/turnkey';
@@ -137,9 +137,103 @@ export const useSACD = () => {
     return sacd;
   };
 
+  const ALL_PERMISSION_NAMES = [
+    'GetNonLocationHistory',
+    'ExecuteCommands',
+    'GetCurrentLocation',
+    'GetLocationHistory',
+    'GetVINCredential',
+    'GetLiveData',
+    'GetRawData',
+    'GetApproximateLocation',
+  ] as const;
+
+  const generateVehiclePermissionSACD = ({
+    grantee,
+    grantor,
+    asset,
+    expiration,
+  }: {
+    grantee: `0x${string}`;
+    grantor: `0x${string}`;
+    asset: string;
+    expiration: bigint;
+  }): VehiclePermissionSACD => {
+    const now = new Date();
+    return {
+      specVersion: '1.0',
+      time: now.toISOString(),
+      type: 'dimo.sacd',
+      dataversion: 'sacd/v1.0',
+      data: {
+        grantor: { address: grantor },
+        grantee: { address: grantee },
+        effectiveAt: now.toISOString(),
+        expiresAt: new Date(Number(expiration) * 1000).toISOString(),
+        additionalDates: {},
+        agreements: [
+          {
+            type: 'permission',
+            asset,
+            permissions: ALL_PERMISSION_NAMES.map((name) => ({
+              name: `privilege:${name}`,
+            })),
+            attachments: [],
+            extensions: {},
+          },
+        ],
+      },
+      signature: '0x',
+    };
+  };
+
+  const signAndUploadPermissionSACD = async ({
+    grantee,
+    grantor,
+    asset,
+    expiration,
+  }: {
+    grantee: `0x${string}`;
+    grantor: `0x${string}`;
+    asset: string;
+    expiration: bigint;
+  }): Promise<string> => {
+    const sacd = generateVehiclePermissionSACD({ grantee, grantor, asset, expiration });
+
+    const currentUser = await validateCurrentSession();
+    if (!currentUser) throw new Error('No active session for SACD signing');
+
+    const { subOrganizationId, walletAddress } = currentUser;
+    const turnkeyClient = getSessionTurnkeyClient();
+    if (!turnkeyClient) throw new Error('No Turnkey client for SACD signing');
+
+    const kernelClient = await getKernelClient({
+      subOrganizationId,
+      walletAddress,
+      client: turnkeyClient,
+    });
+    if (!kernelClient) throw new Error('No kernel client for SACD signing');
+
+    // Sign with the placeholder signature in place, matching dimo-login behavior
+    sacd.signature = await kernelClient.account.signMessage({
+      message: JSON.stringify(sacd),
+    });
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_IPFS_URL}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sacd),
+    });
+    if (!response.ok) throw new Error('Failed to upload vehicle permission SACD to IPFS');
+
+    const { cid } = await response.json();
+    return `ipfs://${cid}`;
+  };
+
   return {
     generateSACDTemplate,
     uploadSACD,
     signSACD,
+    signAndUploadPermissionSACD,
   };
 };

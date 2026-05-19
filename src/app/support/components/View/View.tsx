@@ -27,7 +27,7 @@ const View: FC = () => {
           />
           <p className="status-action">
             Known issues and outages can be found on our{' '}
-            <Anchor href={'#'} className="primary">
+            <Anchor href={'https://status.dimo.org/'} className="primary">
               status page
               <ArrowTopRightOnSquareIcon className="h-4 w-4" />
             </Anchor>

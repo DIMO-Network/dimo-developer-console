@@ -13,22 +13,8 @@ import {
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { saveConfiguration } from '@/actions/configurations';
 import { useRouter } from 'next/navigation';
-import './View.css';
-import { gql } from '@/gql';
+import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/ListView/ListView';
 import { NotificationContext } from '@/context/notificationContext';
-
-export const DEVELOPER_LICENSE_INFO = gql(`
-  query DeveloperLicenseInfo($tokenId: Int!) {
-    developerLicense(by: {tokenId: $tokenId}) {
-      ...DeveloperLicenseSummaryFragment   
-      ...SignerFragment
-      ...RedirectUriFragment
-      ...DeveloperLicenseVehiclesFragment
-      ...DeveloperJwtsFragment
-      ...UserConfigurationFragment
-    }
-  }
-`);
 
 const parseArray = (val?: string) =>
   val
@@ -77,8 +63,6 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
     }
   };
 
-  // Shared
-  //add('clientId', values.client_id);
   add('redirectUri', values.redirectUri);
   add('entryState', formatComponent(values.component));
   add('utm', values.utm);
@@ -149,11 +133,12 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
         configuration: buildJson(data),
       };
 
-      const { id } = await saveConfiguration(body);
+      await saveConfiguration(body);
 
       setNotification('Configuration successfully created', '', 'success');
 
-      router.replace(`/license/${tokenId}/configurator/${id}`);
+      // Redirect to list, not edit page
+      router.replace(`/license/${tokenId}/configurator`);
     } catch (error) {
       console.log(error);
       setNotification('Failed to create Configuration. Please try again.', '', 'error');

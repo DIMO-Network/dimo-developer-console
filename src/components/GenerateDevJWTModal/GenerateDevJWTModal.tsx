@@ -1,4 +1,4 @@
-import { FC, useCallback, useContext, useMemo, useState, useEffect } from 'react';
+import { FC, useCallback, useContext, useMemo, useState, useEffect, useRef } from 'react';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
@@ -29,11 +29,23 @@ export const GenerateDevJWTModal: FC<IProps> = ({
   const [generatedKey, setGeneratedKey] = useState('');
   const { setNotification } = useContext(NotificationContext);
 
+  // Ref updated synchronously so backdrop clicks are blocked immediately on generate,
+  // without waiting for a React re-render cycle.
+  const lockedRef = useRef(false);
+
+  const safeSetIsOpen = useCallback(
+    (value: boolean) => {
+      if (!lockedRef.current) setIsOpen(value);
+    },
+    [setIsOpen],
+  );
+
   useEffect(() => {
     if (!isOpen) {
       setText('');
       setGeneratedKey('');
       setIsLoading(false);
+      lockedRef.current = false;
     }
   }, [isOpen]);
 
@@ -41,6 +53,8 @@ export const GenerateDevJWTModal: FC<IProps> = ({
     if (!text) {
       return setNotification('Please enter a valid API key', '', 'error');
     }
+    // Lock synchronously before the async work and before React re-renders.
+    lockedRef.current = true;
     try {
       setIsLoading(true);
       const devJwt = await getDeveloperJwt({
@@ -48,6 +62,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
         domain: tokenParams.domain,
         private_key: text,
       });
+      if (!devJwt) throw new Error('Failed to get developer JWT');
       const authHeader = devJwt.headers.Authorization;
       const token = authHeader?.split(' ')[1] ?? '';
       setGeneratedKey(token);
@@ -56,6 +71,8 @@ export const GenerateDevJWTModal: FC<IProps> = ({
     } catch (err) {
       captureException(err);
       setNotification('Failed to generate developer JWT', '', 'error');
+      // Unlock on failure so the user can cancel or try again.
+      lockedRef.current = false;
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +85,6 @@ export const GenerateDevJWTModal: FC<IProps> = ({
 
   const subtitle = useMemo(() => {
     if (generatedKey) return '';
-
     return 'This will generate a new Developer JWT using your Client ID and the first available Redirect URI. Enter one of your saved API Keys to get started.';
   }, [generatedKey]);
 
@@ -108,15 +124,21 @@ export const GenerateDevJWTModal: FC<IProps> = ({
         <Button loading={isLoading} onClick={handleGenerate}>
           Generate
         </Button>
-        <Button className={'primary-outline'} onClick={() => setIsOpen(false)}>
+        <Button
+          className={'primary-outline'}
+          onClick={() => setIsOpen(false)}
+          disabled={isLoading}
+        >
           Cancel
         </Button>
       </>
     );
   }, [generatedKey, handleGenerate, isLoading, setIsOpen]);
 
+  const isDismissible = !isLoading && !generatedKey;
+
   return (
-    <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
+    <Modal isOpen={isOpen} setIsOpen={safeSetIsOpen} showClose={isDismissible}>
       <div className={'flex flex-col flex-1 w-full'}>
         <div className={'pb-6'}>
           <Title component={'h2'} className={'text-2xl !leading-8'}>

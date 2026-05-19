@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vehicle Simulator — Preview</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: #0a0508;
+        color: #fff;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        font-size: 14px;
+        font-weight: 300;
+        min-height: 100vh;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 48px 24px;
+      }
+
+      .page-shell {
+        width: 100%;
+        max-width: 640px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .page-label {
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        color: #bababa;
+        margin-bottom: 12px;
+        opacity: 0.6;
+      }
+
+      /* ─── license-list-content ─────────────────────────────────────────── */
+      .license-list-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      /* description row — matches LicenseList.css */
+      .description {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: -0.01em;
+      }
+      .subtitle {
+        font-size: 13px;
+        color: #bababa;
+        margin-top: 4px;
+      }
+
+      /* ─── Configurator ──────────────────────────────────────────────────── */
+      .configurator {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        max-width: 384px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: opacity 0.2s;
+      }
+      .field.dimmed {
+        opacity: 0.4;
+        pointer-events: none;
+      }
+      .field-label {
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .btn-group {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* option button — mirrors the app's .button.dark / .button.white pattern */
+      .option-btn {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 500;
+        background: #322d2f;
+        color: #fff;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: border-color 0.15s;
+        user-select: none;
+      }
+      .option-btn:hover {
+        border-color: #fff;
+      }
+      .option-btn.selected {
+        background: #fff;
+        color: #000;
+        border-color: #fff;
+      }
+      .option-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+      }
+
+      .placeholder-text {
+        font-size: 13px;
+        color: #bababa;
+        align-self: center;
+      }
+
+      /* ─── Mint button — mirrors .button.white ────────────────────────────── */
+      .mint-btn {
+        height: 40px;
+        padding: 0 16px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 500;
+        background: #fff;
+        color: #000;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: border-color 0.15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .mint-btn:hover {
+        border-color: #fff;
+        background: #fff;
+      }
+      .mint-btn:disabled {
+        background: #818181;
+        color: #4d4d4d;
+        cursor: not-allowed;
+        border-color: transparent;
+      }
+
+      /* spinner */
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid #0a0508;
+        border-top-color: transparent;
+        animation: spin 0.7s linear infinite;
+        display: inline-block;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ─── Fleet ───────────────────────────────────────────────────────────── */
+      .fleet {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .fleet-label {
+        font-size: 13px;
+        font-weight: 900;
+      }
+      .fleet-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .fleet-card {
+        background: #201c1e;
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        animation: slideIn 0.2s ease-out both;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fleet-card-name {
+        font-size: 15px;
+        font-weight: 900;
+      }
+      .fleet-card-token {
+        font-size: 13px;
+        color: #bababa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <p class="page-label">dimo developer console — vehicle simulator preview</p>
+
+      <div class="license-list-content">
+        <!-- Header -->
+        <div class="description">
+          <div>
+            <p class="title">Vehicle Simulator</p>
+            <p class="subtitle">
+              Mint a simulated test vehicle on Polygon Amoy for development and testing.
+            </p>
+          </div>
+        </div>
+
+        <!-- Configurator -->
+        <div class="configurator">
+          <!-- Make -->
+          <div class="field" id="field-make">
+            <p class="field-label">Make</p>
+            <div class="btn-group">
+              <button class="option-btn" onclick="selectMake(this,'toyota','Toyota')">
+                Toyota
+              </button>
+              <button class="option-btn" onclick="selectMake(this,'ford','Ford')">
+                Ford
+              </button>
+              <button class="option-btn" onclick="selectMake(this,'tesla','Tesla')">
+                Tesla
+              </button>
+              <button class="option-btn" onclick="selectMake(this,'bmw','BMW')">
+                BMW
+              </button>
+              <button class="option-btn" onclick="selectMake(this,'honda','Honda')">
+                Honda
+              </button>
+            </div>
+          </div>
+
+          <!-- Model -->
+          <div class="field dimmed" id="field-model">
+            <p class="field-label">Model</p>
+            <div class="btn-group" id="model-group">
+              <span class="placeholder-text">Select a make first</span>
+            </div>
+          </div>
+
+          <!-- Year -->
+          <div class="field dimmed" id="field-year">
+            <p class="field-label">Year</p>
+            <div class="btn-group">
+              <button class="option-btn" onclick="selectYear(this)">2022</button>
+              <button class="option-btn" onclick="selectYear(this)">2023</button>
+              <button class="option-btn" onclick="selectYear(this)">2024</button>
+              <button class="option-btn" onclick="selectYear(this)">2025</button>
+              <button class="option-btn" onclick="selectYear(this)">2026</button>
+            </div>
+          </div>
+
+          <!-- Mint -->
+          <button class="mint-btn" id="mint-btn" disabled onclick="mint()">
+            Create a simulated vehicle
+          </button>
+        </div>
+
+        <!-- Fleet -->
+        <div class="fleet" id="fleet" style="display: none">
+          <p class="fleet-label">Simulated Vehicles</p>
+          <div class="fleet-list" id="fleet-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const MODELS = {
+        toyota: ['Camry', 'RAV4'],
+        ford: ['F-150', 'Mustang'],
+        tesla: ['Model 3', 'Model Y'],
+        bmw: ['3 Series', 'X5'],
+        honda: ['Civic', 'CR-V'],
+      };
+
+      let make = null,
+        model = null,
+        year = null;
+
+      function checkMint() {
+        document.getElementById('mint-btn').disabled = !(make && model && year);
+      }
+
+      function selectMake(btn, slug, label) {
+        document
+          .querySelectorAll('#field-make .option-btn')
+          .forEach((b) => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        make = { slug, label };
+        model = null;
+        year = null;
+
+        // Reset model group
+        const g = document.getElementById('model-group');
+        g.innerHTML = '';
+        MODELS[slug].forEach((m) => {
+          const b = document.createElement('button');
+          b.className = 'option-btn';
+          b.textContent = m;
+          b.onclick = () => selectModel(b, m);
+          g.appendChild(b);
+        });
+
+        document.getElementById('field-model').classList.remove('dimmed');
+        document.getElementById('field-year').classList.add('dimmed');
+        document
+          .querySelectorAll('#field-year .option-btn')
+          .forEach((b) => b.classList.remove('selected'));
+        checkMint();
+      }
+
+      function selectModel(btn, label) {
+        document
+          .querySelectorAll('#model-group .option-btn')
+          .forEach((b) => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        model = label;
+        document.getElementById('field-year').classList.remove('dimmed');
+        checkMint();
+      }
+
+      function selectYear(btn) {
+        document
+          .querySelectorAll('#field-year .option-btn')
+          .forEach((b) => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        year = btn.textContent;
+        checkMint();
+      }
+
+      function mint() {
+        const btn = document.getElementById('mint-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Minting…';
+
+        setTimeout(() => {
+          const tokenId = Math.floor(Math.random() * 90000) + 10000;
+          const fleet = document.getElementById('fleet');
+          fleet.style.display = '';
+
+          const card = document.createElement('div');
+          card.className = 'fleet-card';
+          card.innerHTML = `
+        <p class="fleet-card-name">${year} ${make.label} ${model}</p>
+        <p class="fleet-card-token">Token #${tokenId}</p>
+      `;
+          document.getElementById('fleet-list').prepend(card);
+
+          btn.innerHTML = 'Create a simulated vehicle';
+          btn.disabled = false;
+        }, 1600);
+      }
+    </script>
+  </body>
+</html>

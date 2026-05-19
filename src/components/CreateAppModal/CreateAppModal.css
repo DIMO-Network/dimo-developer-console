@@ -7,7 +7,7 @@
     @apply flex flex-col flex-1;
 
     .create-app-header {
-      @apply flex flex-col gap-2 relative pb-6 font-bold;
+      @apply flex flex-col gap-2 relative pb-6 font-bold items-center text-center;
     }
   }
 }

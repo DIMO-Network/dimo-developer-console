@@ -15,7 +15,7 @@ import {
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { DatePicker } from '@/components/DatePicker';
 import { Toggle } from '@/components/Toggle';
-import { ATTESTATION_TAGS } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/types';
+import { ATTESTATION_TAGS } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;

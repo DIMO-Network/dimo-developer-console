@@ -1,10 +1,10 @@
 'use client';
 import config from '@/config';
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/client';
 import React, { ComponentType } from 'react';
 
 const apolloClient = new ApolloClient({
-  uri: config.identityApiUrl,
+  link: new HttpLink({ uri: config.identityApiUrl }),
   cache: new InMemoryCache(),
 });
 

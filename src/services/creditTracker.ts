@@ -15,20 +15,31 @@ export const getCreditConsumptionByLicense = async ({
 }): Promise<ICreditUsage> => {
   const dimoApiClient = axios.create({
     baseURL: process.env.CREDIT_TRACKER_URL!,
-    timeout: 5 * 60 * 1000,
+    timeout: 10_000,
     headers: {
       Authorization: `Bearer ${devJwt}`,
     },
   });
 
-  const { data } = await dimoApiClient.get<ICreditUsage>(
-    `/v1/credits/${licenseId}/usage`,
-    {
-      params: {
-        fromDate,
-        toDate,
+  try {
+    const { data } = await dimoApiClient.get<ICreditUsage>(
+      `/v1/credits/${licenseId}/usage`,
+      {
+        params: {
+          fromDate,
+          toDate,
+        },
       },
-    },
-  );
-  return data;
+    );
+    return data;
+  } catch {
+    return {
+      fromDate,
+      toDate: toDate ?? '',
+      licenseId,
+      numOfAssets: 0,
+      numOfCreditsGrantsPurchased: 0,
+      numOfCreditsUsed: 0,
+    };
+  }
 };

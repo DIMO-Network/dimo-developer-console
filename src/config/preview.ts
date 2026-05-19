@@ -11,3 +11,14 @@ export enum CONTRACT_METHODS {
 export const identityApiUrl = 'https://identity-api.dev.dimo.zone/query';
 
 export const DCC_ADDRESS = '0x41799E9Dc893722844E771a1C1cAf3BBc2876132'; // Connections
+
+// DIMO REGISTRY AMOY
+export const DIMO_REGISTRY_ADDRESS: `0x${string}` =
+  '0x5eAA326fB2fc97fAcCe6A79A304876daD0F2e96c';
+
+// VEHICLE NFT AMOY
+export const VEHICLE_NFT_ADDRESS: `0x${string}` =
+  '0x45fbCD3ef7361d156e8b16F5538AE36DEdf61Da8';
+
+export const VEHICLE_SIMULATOR_URL =
+  'https://dimo-vehicle-simulator-git-dev-dimo-network.vercel.app';

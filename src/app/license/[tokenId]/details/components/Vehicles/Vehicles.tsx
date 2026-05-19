@@ -1,4 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
+'use client';
+import React, { FC } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
@@ -9,8 +10,7 @@ import { Button } from '@/components/Button';
 import Link from 'next/link';
 import { TotalCount } from '@/components/TotalVehicleCount';
 import { useRouter } from 'next/navigation';
-import { AxiosError } from 'axios';
-import { getConfigurationByClientId } from '@/actions/configurations';
+import { VehicleSimulatorModal } from '@/app/app/list/components/VehicleSimulator/VehicleSimulatorModal';
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -37,45 +37,20 @@ export const Vehicles: FC<IProps> = ({ license }) => {
     variables: { clientId: fragment.clientId },
   });
   const router = useRouter();
-  const [configurationId, setConfigurationId] = useState<string>('');
-  const [ready, setReady] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!fragment.clientId) return;
-
-    const getConfigurationId = async (clientId: string) => {
-      try {
-        const { id } = await getConfigurationByClientId({ client_id: clientId });
-        setConfigurationId(id);
-      } catch (error: unknown) {
-        if (error instanceof AxiosError) {
-          return;
-        }
-        console.error(error);
-      } finally {
-        setReady(true);
-      }
-    };
-
-    void getConfigurationId(fragment.clientId);
-  }, [fragment.clientId]);
 
   return (
     <div className={'w-full'}>
       <Section>
         <SectionHeader title={'Vehicles'}>
-          {ready && (
+          <div className={'flex flex-row gap-2'}>
+            <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
             <Button
               className="dark with-icon px-4"
-              onClick={() => {
-                router.push(
-                  `/license/${fragment.tokenId}/configurator/${configurationId}`,
-                );
-              }}
+              onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
             >
               Configure Vehicle Sharing
             </Button>
-          )}
+          </div>
         </SectionHeader>
         <div className={'flex flex-col flex-1'}>
           {!!error && <p>We had trouble fetching the connected vehicles</p>}
@@ -101,7 +76,12 @@ const VehiclesTotalCount = ({
 }) => {
   return (
     <div className={'vehicle-count-container'}>
-      <TotalCount totalCount={totalCount} countedThings="Connected Vehicles" />
+      <Link
+        href={`/license/vehicles/${clientId}`}
+        className="hover:opacity-80 transition-opacity cursor-pointer"
+      >
+        <TotalCount totalCount={totalCount} countedThings="Connected Vehicles" />
+      </Link>
       <Link href={`/license/vehicles/${clientId}`}>
         <Button className={'table-action-button'}>Vehicle Details</Button>
       </Link>

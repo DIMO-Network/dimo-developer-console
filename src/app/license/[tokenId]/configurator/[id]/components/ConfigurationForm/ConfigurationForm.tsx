@@ -3,13 +3,13 @@ import { FragmentType, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
 import { Control, UseFormRegister, useFormContext } from 'react-hook-form';
-import { LoginWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/LoginWithDimoConfiguration';
-import { ShareVehiclesWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
-import { ExecuteAdvanceTransactionWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/ExecuteAdvanceTransactionWithDimoConfiguration';
+import { LoginWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/LoginWithDimoConfiguration';
+import { ShareVehiclesWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
+import { ExecuteAdvanceTransactionWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ExecuteAdvanceTransactionWithDimoConfiguration';
 import {
   DynamicFormProps,
   ComponentType,
-} from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/types';
+} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
 import { USER_CONFIG_FRAGMENT } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';

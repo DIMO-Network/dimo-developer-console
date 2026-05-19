@@ -30,12 +30,13 @@ export const useContractGA = () => {
   ) => {
     try {
       const currentSession = await validateCurrentSession();
-      if (!currentSession) return {} as IKernelOperationStatus;
+      if (!currentSession) throw new Error('No active session — please sign in again');
       const { subOrganizationId, walletAddress } = currentSession;
 
       const turnkeyClient = getSessionTurnkeyClient();
 
-      if (!turnkeyClient) return {} as IKernelOperationStatus;
+      if (!turnkeyClient)
+        throw new Error('Turnkey client unavailable — please sign in again');
 
       const kernelClient = await getKernelClient({
         subOrganizationId,
@@ -43,7 +44,7 @@ export const useContractGA = () => {
         client: turnkeyClient,
       });
 
-      if (!kernelClient) return {} as IKernelOperationStatus;
+      if (!kernelClient) throw new Error('Failed to initialize kernel client');
 
       const operation = await kernelClient.account.encodeCalls(transactions);
       const dcxExchangeOpHash = await kernelClient.sendUserOperation({
@@ -56,10 +57,14 @@ export const useContractGA = () => {
 
       if (receipt.reason) throw new Error(receipt.reason);
 
+      // Prefer receipt.receipt.logs (raw Ethereum tx receipt) over receipt.logs
+      // (bundler-filtered UserOperation logs), as some bundlers return incomplete logs.
+      const logs = receipt.receipt?.logs?.length ? receipt.receipt.logs : receipt.logs;
+
       return {
         success: receipt.success,
         reason: receipt.reason,
-        logs: receipt.logs.map((log) => ({ topics: log.topics })),
+        logs: logs.map((log) => ({ topics: log.topics })),
       } as IKernelOperationStatus;
     } catch (e: unknown) {
       Sentry.captureException(e);

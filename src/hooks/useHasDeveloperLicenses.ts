@@ -15,18 +15,19 @@ const CHECK_HAS_DEVELOPER_LICENSES = gql(`
 
 export const useHasDeveloperLicenses = () => {
   const { currentUser } = useGlobalAccount();
+  const hasAddress = !!currentUser?.smartContractAddress;
 
   const { data, loading, error } = useQuery(
     CHECK_HAS_DEVELOPER_LICENSES as DocumentNode,
     {
       variables: { owner: currentUser?.smartContractAddress ?? '' },
-      skip: !currentUser?.smartContractAddress,
+      skip: !hasAddress,
     },
   );
 
   return {
     hasDeveloperLicenses: (data?.developerLicenses?.totalCount ?? 0) > 0,
-    loading,
+    loading: !hasAddress || loading,
     error,
   };
 };

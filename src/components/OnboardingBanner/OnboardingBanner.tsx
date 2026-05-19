@@ -14,13 +14,18 @@ export const GET_TOTAL_LICENSE_COUNT = gql(`
 
 interface Props {
   balance: number;
+  isLoading: boolean;
   licenseConnection: FragmentType<typeof GET_TOTAL_LICENSE_COUNT>;
 }
 
-export const OnboardingBanner: FC<Props> = ({ balance, licenseConnection }) => {
+export const OnboardingBanner: FC<Props> = ({
+  balance,
+  isLoading,
+  licenseConnection,
+}) => {
   const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
 
-  if (balance > 0) return <></>;
+  if (isLoading || balance > 0) return <></>;
 
   return (
     <div className="banner-content">

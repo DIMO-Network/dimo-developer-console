@@ -23,7 +23,7 @@ export const Menu: FC = withLoadingStatus(() => {
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const pathname = usePathname();
   const router = useRouter();
-  const { hasDeveloperLicenses } = useHasDeveloperLicenses();
+  const { hasDeveloperLicenses, loading: licensesLoading } = useHasDeveloperLicenses();
 
   const onSignOut = async () => {
     try {
@@ -54,7 +54,7 @@ export const Menu: FC = withLoadingStatus(() => {
     disabled: false,
   };
 
-  const menuItems = getMainMenu(hasDeveloperLicenses);
+  const menuItems = getMainMenu(licensesLoading || hasDeveloperLicenses);
 
   return (
     <div className={'main-menu'}>
@@ -70,11 +70,17 @@ export const Menu: FC = withLoadingStatus(() => {
           <MenuCloseButton />
         </div>
 
-        {menuItems.map((item) => {
-          return (
-            <MenuItem key={item.link} {...item} isHighlighted={getIsHighlighted(item)} />
-          );
-        })}
+        {menuItems
+          .filter((item) => !('hidden' in item && item.hidden))
+          .map((item) => {
+            return (
+              <MenuItem
+                key={item.link}
+                {...item}
+                isHighlighted={getIsHighlighted(item)}
+              />
+            );
+          })}
       </ul>
       <ul className="bottom-menu">
         {[logoutButtonConfig, ...bottomMenu].map((item) => (

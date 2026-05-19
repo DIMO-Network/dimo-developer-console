@@ -14,7 +14,7 @@ export const withLoadingStatus = <P extends object>(
         <WrappedComponent {...props} />
         <LoadingModal
           isOpen={!!loadingStatus}
-          setIsOpen={clearLoadingStatus}
+          setIsOpen={loadingStatus?.status === 'loading' ? () => {} : clearLoadingStatus}
           {...loadingStatus}
         />
       </LoadingStatusContext.Provider>

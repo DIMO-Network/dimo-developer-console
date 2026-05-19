@@ -26,6 +26,7 @@ interface PaginatedTableProps<TData> {
   loading?: boolean;
   pageInfo: { startCursor?: string | null; endCursor?: string | null };
   pageSize: number;
+  onRowClick?: (row: TData) => void;
 }
 
 /**
@@ -40,6 +41,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
   loading,
   pageInfo,
   pageSize,
+  onRowClick,
 }: PaginatedTableProps<TData>) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -93,7 +95,11 @@ export const PaginatedTableIdentityAPI = <TData,>({
           </thead>
           <tbody className="table-body">
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className={'border-t border-t-cta-default'}>
+              <tr
+                key={row.id}
+                className={`border-t border-t-cta-default${onRowClick ? ' cursor-pointer hover:bg-surface-raised' : ''}`}
+                onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <Cell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

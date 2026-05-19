@@ -1,6 +1,7 @@
 interface SharedProps {
   client_id: string;
   configuration_name: string;
+  configuration_id: string;
   redirectUri: string;
   mode: 'popup' | 'redirect';
   utm: string | null;
