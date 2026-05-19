@@ -158,6 +158,8 @@ export const Brand: FC<Props> = ({ license }) => {
                 Display name
                 <TextField
                   {...register('name', {
+                    required:
+                      'Display name is required — SDK + popup skip loading the brand when name is empty.',
                     maxLength: { value: 100, message: 'Max 100 characters' },
                   })}
                   id="brand-name"
