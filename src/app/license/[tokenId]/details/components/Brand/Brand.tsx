@@ -35,7 +35,11 @@ interface Props {
 
 interface FormInputs {
   name: string;
+  primaryColor: string;
 }
+
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+const DEFAULT_PRIMARY_COLOR = '#000000';
 
 export const Brand: FC<Props> = ({ license }) => {
   const fragment = useFragment(BRAND_FRAGMENT, license);
@@ -55,11 +59,13 @@ export const Brand: FC<Props> = ({ license }) => {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isDirty },
   } = useForm<FormInputs>({
     mode: 'onChange',
-    defaultValues: { name: '' },
+    defaultValues: { name: '', primaryColor: '' },
   });
+  const watchedColor = watch('primaryColor');
 
   /** Initial load: workspace id + current brand. */
   useEffect(() => {
@@ -75,7 +81,10 @@ export const Brand: FC<Props> = ({ license }) => {
         setBrand(b);
         setLogoCid(b?.logoCid ?? null);
         setIconCid(b?.iconCid ?? null);
-        reset({ name: b?.name ?? '' });
+        reset({
+          name: b?.name ?? '',
+          primaryColor: b?.primaryColor ?? '',
+        });
       } catch (error) {
         Sentry.captureException(error);
       } finally {
@@ -88,7 +97,7 @@ export const Brand: FC<Props> = ({ license }) => {
     };
   }, [reset]);
 
-  const onSubmit = async ({ name }: FormInputs) => {
+  const onSubmit = async ({ name, primaryColor }: FormInputs) => {
     if (!workspaceId) return;
     setSaving(true);
     try {
@@ -106,13 +115,18 @@ export const Brand: FC<Props> = ({ license }) => {
         name: name || null,
         logoCid: nextLogoCid,
         iconCid: nextIconCid,
+        primaryColor:
+          primaryColor && HEX_COLOR_RE.test(primaryColor) ? primaryColor : null,
       });
       setBrand(updated);
       setLogoCid(updated.logoCid);
       setIconCid(updated.iconCid);
       setLogoFile(null);
       setIconFile(null);
-      reset({ name: updated.name ?? '' });
+      reset({
+        name: updated.name ?? '',
+        primaryColor: updated.primaryColor ?? '',
+      });
       setNotification('Brand updated', 'Saved', 'success');
     } catch (error) {
       Sentry.captureException(error);
@@ -184,6 +198,57 @@ export const Brand: FC<Props> = ({ license }) => {
               aspect="square"
               disabled={!isOwner || saving}
             />
+
+            <div className="field">
+              <Label className="text-sm font-medium">
+                Primary color
+                <p className="text-text-secondary font-normal">
+                  Used as the auth button background + popup CTA. 7-char hex, e.g.{' '}
+                  <code>#C8A84B</code>. Leave blank for DIMO defaults.
+                </p>
+                <div className="flex flex-row items-center gap-3 mt-2">
+                  <input
+                    type="color"
+                    aria-label="Pick primary color"
+                    value={
+                      watchedColor && HEX_COLOR_RE.test(watchedColor)
+                        ? watchedColor
+                        : DEFAULT_PRIMARY_COLOR
+                    }
+                    onChange={(e) =>
+                      reset(
+                        {
+                          name: watch('name'),
+                          primaryColor: e.target.value,
+                        },
+                        { keepDirty: true },
+                      )
+                    }
+                    className="h-10 w-12 rounded border border-border bg-transparent p-0 cursor-pointer disabled:cursor-not-allowed"
+                    disabled={!isOwner || saving}
+                  />
+                  <TextField
+                    {...register('primaryColor', {
+                      validate: (v) =>
+                        !v || HEX_COLOR_RE.test(v) || 'Must be #RRGGBB hex',
+                    })}
+                    placeholder="#C8A84B"
+                    disabled={!isOwner || saving}
+                    className="font-mono w-32"
+                  />
+                  {watchedColor && HEX_COLOR_RE.test(watchedColor) && (
+                    <span
+                      className="inline-block h-8 w-8 rounded border border-border"
+                      style={{ backgroundColor: watchedColor }}
+                      aria-hidden
+                    />
+                  )}
+                </div>
+                {errors.primaryColor && (
+                  <TextError errorMessage={errors.primaryColor.message!} />
+                )}
+              </Label>
+            </div>
 
             {isOwner && (
               <div className="flex flex-row gap-3 pt-2">

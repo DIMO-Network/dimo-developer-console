@@ -6,6 +6,8 @@ export interface BrandView {
   iconCid: string | null;
   logoUrl: string | null;
   iconUrl: string | null;
+  /** 7-char hex (#RRGGBB) or null. Drives SDK button + popup CTA color. */
+  primaryColor: string | null;
   updatedAt: string | null;
 }
 
@@ -13,6 +15,7 @@ export interface BrandPatch {
   name?: string | null;
   logoCid?: string | null;
   iconCid?: string | null;
+  primaryColor?: string | null;
 }
 
 /**
