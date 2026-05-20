@@ -20,19 +20,20 @@ export interface BrandPatch {
 }
 
 /**
- * Authenticated read of the current user's workspace brand. Returns an empty
- * object if no brand has been set yet (the API responds with `{}` rather than
- * 404 on the workspace-scoped read so the UI can render a blank edit form).
+ * Authenticated read of the current user's workspace brand.
+ * Returns null when no brand has been set yet (API returns 404).
  */
 export const getMyBrand = async (workspaceId: string): Promise<BrandView | null> => {
   const client = await dimoDevAPIClient();
-  const { data } = await client.get<BrandView | Record<string, never>>(
-    `/api/my/workspace/${workspaceId}/brand`,
-  );
-  if (!data || typeof data !== 'object' || !('name' in data)) {
-    return null;
+  try {
+    const { data } = await client.get<BrandView>(
+      `/api/my/workspace/${workspaceId}/brand`,
+    );
+    return data;
+  } catch (err) {
+    if (isAxiosError(err) && err.response?.status === 404) return null;
+    throw err;
   }
-  return data as BrandView;
 };
 
 /**
