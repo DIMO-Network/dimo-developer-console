@@ -60,6 +60,7 @@ export const Brand: FC<Props> = ({ license }) => {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<FormInputs>({
     mode: 'onChange',
@@ -218,13 +219,7 @@ export const Brand: FC<Props> = ({ license }) => {
                         : DEFAULT_PRIMARY_COLOR
                     }
                     onChange={(e) =>
-                      reset(
-                        {
-                          name: watch('name'),
-                          primaryColor: e.target.value,
-                        },
-                        { keepDirty: true },
-                      )
+                      setValue('primaryColor', e.target.value, { shouldDirty: true })
                     }
                     className="h-10 w-12 rounded border border-border bg-transparent p-0 cursor-pointer disabled:cursor-not-allowed"
                     disabled={!isOwner || saving}
