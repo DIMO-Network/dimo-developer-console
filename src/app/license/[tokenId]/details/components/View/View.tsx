@@ -11,6 +11,7 @@ import { RedirectUris } from '@/app/license/[tokenId]/details/components/Redirec
 import { Loader } from '@/components/Loader';
 import { Vehicles } from '@/app/license/[tokenId]/details/components/Vehicles';
 import { DeveloperJwts } from '@/app/license/[tokenId]/details/components/DeveloperJwts';
+import { Brand } from '@/app/license/[tokenId]/details/components/Brand';
 import { useRouter } from 'next/navigation';
 import { Usage } from '@/app/license/[tokenId]/details/components/Usage/Usage';
 
@@ -19,11 +20,12 @@ const IDENTITY_API_UPDATE_DELAY = 6000;
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
     developerLicense(by: {tokenId: $tokenId}) {
-      ...DeveloperLicenseSummaryFragment   
+      ...DeveloperLicenseSummaryFragment
       ...SignerFragment
       ...RedirectUriFragment
       ...DeveloperLicenseVehiclesFragment
       ...DeveloperJwtsFragment
+      ...BrandFragment
     }
   }
 `);
@@ -90,6 +92,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
             <DeveloperJwts license={data.developerLicense} />
             <Signers license={data.developerLicense} refetch={handleRefetch} />
             <RedirectUris license={data.developerLicense} refetch={handleRefetch} />
+            <Brand license={data.developerLicense} />
           </div>
         </>
       )}

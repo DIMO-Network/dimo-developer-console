@@ -6,10 +6,10 @@ const cspHeader = `
     style-src 'self' 'unsafe-inline';
     object-src 'none';
     base-uri 'self';
-    connect-src 'self' https://*.dimo.org https://*.dimo.zone https://fleets.dimo.co https://crypto-js.stripe.com https://js.stripe.com  https://r.stripe.com https://api.stripe.com https://api.turnkey.com https://explorer-api.walletconnect.com https://*.sentry.io https://polygon-mainnet.g.alchemy.com https://polygon-amoy.g.alchemy.com https://pulse.walletconnect.org https://rpc.zerodev.app https://*.vercel.app https://vercel.live https://api-js.mixpanel.com;
+    connect-src 'self' https://*.dimo.org https://*.dimo.zone https://fleets.dimo.co https://crypto-js.stripe.com https://js.stripe.com  https://r.stripe.com https://api.stripe.com https://api.turnkey.com https://*.sentry.io https://polygon-mainnet.g.alchemy.com https://polygon-amoy.g.alchemy.com https://rpc.zerodev.app https://*.vercel.app https://vercel.live https://api-js.mixpanel.com;
     font-src 'self';
     frame-src 'self' https://auth.turnkey.com https://crypto-js.stripe.com https://js.stripe.com https://vercel.live https://r.stripe.com;
-    img-src 'self' https://explorer-api.walletconnect.com;
+    img-src 'self' blob: https://assets.dimo.org;
     manifest-src 'self';
     media-src 'self';
     worker-src blob:;`;
