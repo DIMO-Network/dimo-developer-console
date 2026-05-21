@@ -12,7 +12,7 @@ import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import { FragmentType, gql, useFragment } from '@/gql';
 
 import { fetchMyBrand, saveMyBrand, uploadMyBrandAsset } from '@/actions/brand';
-import { getWorkspace } from '@/actions/workspace';
+import { getWorkspace, getWorkspaceByTokenId } from '@/actions/workspace';
 import { ImagePicker } from './components/ImagePicker';
 import type { BrandView } from '@/services/brand';
 
@@ -75,17 +75,25 @@ export const Brand: FC<Props> = ({ license }) => {
   setNotificationRef.current = setNotification;
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  /** Initial load: workspace id + current brand. Runs exactly once. */
+  /** Initial load: workspace id + current brand. Runs exactly once.
+   *
+   * Strategy: prefer the tokenId-scoped lookup because the Brand panel is
+   * always per-license — the URL pins the right workspace. The company-
+   * scoped fallback exists for symmetry with the rest of the console but
+   * misses on accounts where workspace.company_id is stale.
+   */
+  const licenseTokenId = fragment.tokenId;
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        const ws = await getWorkspace();
+        const ws =
+          (await getWorkspaceByTokenId(licenseTokenId)) ?? (await getWorkspace());
         if (cancelled) return;
         if (!ws?.id) {
           Sentry.captureMessage(
-            '[Brand] getWorkspace returned no workspace id',
-            { extra: { workspace: ws } },
+            '[Brand] no workspace resolved for license',
+            { extra: { tokenId: licenseTokenId, workspace: ws } },
           );
           setLoadError(
             'Could not load your workspace. Re-login and try again.',
@@ -117,7 +125,7 @@ export const Brand: FC<Props> = ({ license }) => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [licenseTokenId]);
 
   // Toast the load error exactly once, decoupled from the load effect so the
   // unstable setNotification reference can't retrigger the fetch.
