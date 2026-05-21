@@ -1,4 +1,4 @@
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as Sentry from '@sentry/nextjs';
 
@@ -68,7 +68,14 @@ export const Brand: FC<Props> = ({ license }) => {
   });
   const watchedColor = watch('primaryColor');
 
-  /** Initial load: workspace id + current brand. */
+  // Mount-only ref so re-renders triggered by the error toast don't re-fire
+  // the load effect (NotificationContext's setNotification reference is not
+  // stable across renders, so adding it to deps causes an infinite loop).
+  const setNotificationRef = useRef(setNotification);
+  setNotificationRef.current = setNotification;
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  /** Initial load: workspace id + current brand. Runs exactly once. */
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
@@ -76,17 +83,12 @@ export const Brand: FC<Props> = ({ license }) => {
         const ws = await getWorkspace();
         if (cancelled) return;
         if (!ws?.id) {
-          // Surface the failure: until we set workspaceId the Save button
-          // silently no-ops. Most likely cause is an expired session or the
-          // user's company has no workspace record yet.
           Sentry.captureMessage(
             '[Brand] getWorkspace returned no workspace id',
             { extra: { workspace: ws } },
           );
-          setNotification(
+          setLoadError(
             'Could not load your workspace. Re-login and try again.',
-            'Workspace not found',
-            'error',
           );
           return;
         }
@@ -103,10 +105,8 @@ export const Brand: FC<Props> = ({ license }) => {
         });
       } catch (error) {
         Sentry.captureException(error);
-        setNotification(
+        setLoadError(
           'Failed to load brand. Check your connection and reload.',
-          'Brand load error',
-          'error',
         );
       } finally {
         if (!cancelled) setLoading(false);
@@ -116,7 +116,15 @@ export const Brand: FC<Props> = ({ license }) => {
     return () => {
       cancelled = true;
     };
-  }, [reset, setNotification]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Toast the load error exactly once, decoupled from the load effect so the
+  // unstable setNotification reference can't retrigger the fetch.
+  useEffect(() => {
+    if (!loadError) return;
+    setNotificationRef.current(loadError, 'Brand load error', 'error');
+  }, [loadError]);
 
   const onSubmit = async ({ name, primaryColor }: FormInputs) => {
     if (!workspaceId) {
