@@ -74,7 +74,22 @@ export const Brand: FC<Props> = ({ license }) => {
     const load = async () => {
       try {
         const ws = await getWorkspace();
-        if (cancelled || !ws?.id) return;
+        if (cancelled) return;
+        if (!ws?.id) {
+          // Surface the failure: until we set workspaceId the Save button
+          // silently no-ops. Most likely cause is an expired session or the
+          // user's company has no workspace record yet.
+          Sentry.captureMessage(
+            '[Brand] getWorkspace returned no workspace id',
+            { extra: { workspace: ws } },
+          );
+          setNotification(
+            'Could not load your workspace. Re-login and try again.',
+            'Workspace not found',
+            'error',
+          );
+          return;
+        }
         setWorkspaceId(ws.id);
 
         const b = await fetchMyBrand(ws.id);
@@ -88,6 +103,11 @@ export const Brand: FC<Props> = ({ license }) => {
         });
       } catch (error) {
         Sentry.captureException(error);
+        setNotification(
+          'Failed to load brand. Check your connection and reload.',
+          'Brand load error',
+          'error',
+        );
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -96,10 +116,19 @@ export const Brand: FC<Props> = ({ license }) => {
     return () => {
       cancelled = true;
     };
-  }, [reset]);
+  }, [reset, setNotification]);
 
   const onSubmit = async ({ name, primaryColor }: FormInputs) => {
-    if (!workspaceId) return;
+    if (!workspaceId) {
+      // Defensive — the load() guard above should have already notified, but
+      // never silently swallow a Save click.
+      setNotification(
+        'Workspace not loaded — re-login and try again.',
+        'Cannot save',
+        'error',
+      );
+      return;
+    }
     setSaving(true);
     try {
       let nextLogoCid = logoCid;
