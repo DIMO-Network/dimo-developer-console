@@ -91,13 +91,10 @@ export const Brand: FC<Props> = ({ license }) => {
           (await getWorkspaceByTokenId(licenseTokenId)) ?? (await getWorkspace());
         if (cancelled) return;
         if (!ws?.id) {
-          Sentry.captureMessage(
-            '[Brand] no workspace resolved for license',
-            { extra: { tokenId: licenseTokenId, workspace: ws } },
-          );
-          setLoadError(
-            'Could not load your workspace. Re-login and try again.',
-          );
+          Sentry.captureMessage('[Brand] no workspace resolved for license', {
+            extra: { tokenId: licenseTokenId, workspace: ws },
+          });
+          setLoadError('Could not load your workspace. Re-login and try again.');
           return;
         }
         setWorkspaceId(ws.id);
@@ -113,9 +110,7 @@ export const Brand: FC<Props> = ({ license }) => {
         });
       } catch (error) {
         Sentry.captureException(error);
-        setLoadError(
-          'Failed to load brand. Check your connection and reload.',
-        );
+        setLoadError('Failed to load brand. Check your connection and reload.');
       } finally {
         if (!cancelled) setLoading(false);
       }

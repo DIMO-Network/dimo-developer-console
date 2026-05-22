@@ -17,6 +17,13 @@ const cspHeader = `
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  serverActions: {
+    // Next.js 15 validates Origin against Host. Vercel's edge can rewrite Host
+    // to the internal deployment URL while the browser sends the custom domain
+    // as Origin — causing a 403 on all server action POSTs. Allowlist both
+    // domains so the check passes regardless of which Host the lambda sees.
+    allowedOrigins: ['console.dimo.org', 'console-staging.dimo.org'],
+  },
   transpilePackages: ['@dimo-network/data-sdk'],
   eslint: {
     ignoreDuringBuilds: true,
