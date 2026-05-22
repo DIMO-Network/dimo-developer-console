@@ -60,13 +60,14 @@ export const uploadBrandAsset = async (
   workspaceId: string,
   file: File,
 ): Promise<{ cid: string; gatewayUrl: string }> => {
-  const client = await dimoDevAPIClient();
+  // 60 s — IPFS pinning can take well over the default 5 s
+  const client = await dimoDevAPIClient(60_000);
   const form = new FormData();
   form.append('file', file);
+  // Do NOT set Content-Type manually: Axios must auto-add the multipart boundary
   const { data } = await client.post<{ cid: string; gatewayUrl: string }>(
     `/api/my/workspace/${workspaceId}/brand/upload`,
     form,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
   );
   return data;
 };
