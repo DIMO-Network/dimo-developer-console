@@ -9,7 +9,7 @@ import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
 import { LoadingModal } from '@/components/LoadingModal';
 import { TextError } from '@/components/TextError';
-import { useMintConnection } from '@/hooks/useTransactions';
+import { useMintConnection, type MintConnectionStep } from '@/hooks/useTransactions';
 import { generateConnectionWallets } from '@/services/connectionWallets';
 import { createConnection } from '@/actions/connections';
 import { invalidateMyConnectionsQuery } from '@/hooks/queries/useMyConnections';
@@ -23,8 +23,20 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   const [connectionName, setConnectionName] = useState(initialConnectionName);
   const [isPendingPurchase, setIsPendingPurchase] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState('Creating connection, please wait...');
   const [error, setError] = useState<string | null>(null);
   const [nameValidationError, setNameValidationError] = useState<string | null>(null);
+
+  const stepLabel = (step: MintConnectionStep): string => {
+    switch (step) {
+      case 'minting':
+        return 'Approve the mint to create your connection on-chain. This costs ~$100 of $DIMO.';
+      case 'signing-agreements':
+        return 'Signing permission agreements for the Device Issuance Key (mint synthetic devices) and the Connection License Key (generate certificates).';
+      case 'granting-permissions':
+        return 'Approve the on-chain transaction granting both keys their permissions on this connection.';
+    }
+  };
 
   const mintConnection = useMintConnection();
 
@@ -65,8 +77,17 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     setIsProcessingPayment(true);
     setError(null);
     try {
-      // Step 1: Mint the connection license on-chain
-      const result = await mintConnection(connectionName);
+      // Generate connection wallets first so we can grant the keys' EOA
+      // addresses the right SACD permissions in the same mint+permission flow.
+      setLoadingLabel('Generating your connection keys…');
+      const wallets = await generateConnectionWallets();
+
+      const result = await mintConnection({
+        connectionName,
+        licenseGrantee: wallets.connectionLicense.publicKey,
+        deviceIssuanceGrantee: wallets.deviceIssuance.publicKey,
+        onStep: (step) => setLoadingLabel(stepLabel(step)),
+      });
 
       if (result.success === false) {
         console.error('Connection minting failed', result.reason);
@@ -74,10 +95,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         return;
       }
 
-      // Step 2: Generate connection wallets and credentials
-      const wallets = await generateConnectionWallets();
-
-      // Step 3: Save connection data to database
+      setLoadingLabel('Saving your connection…');
       await createConnection({
         name: connectionName,
         connection_license_public_key: wallets.connectionLicense.publicKey,
@@ -146,7 +164,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       <LoadingModal
         isOpen={isProcessingPayment}
         setIsOpen={() => {}}
-        label="Creating connection, please wait..."
+        label={loadingLabel}
         status="loading"
       />
 
