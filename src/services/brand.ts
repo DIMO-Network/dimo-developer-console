@@ -2,6 +2,7 @@ import { isAxiosError } from 'axios';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
 export interface BrandView {
+  id: string;
   name: string | null;
   logoCid: string | null;
   iconCid: string | null;
@@ -9,6 +10,7 @@ export interface BrandView {
   iconUrl: string | null;
   /** 7-char hex (#RRGGBB) or null. Drives SDK button + popup CTA color. */
   primaryColor: string | null;
+  isDefault: boolean;
   updatedAt: string | null;
 }
 
@@ -48,6 +50,58 @@ export const updateMyBrand = async (
   const { data } = await client.put<BrandView>(
     `/api/my/workspace/${workspaceId}/brand`,
     patch,
+  );
+  return data;
+};
+
+export const listMyBrands = async (workspaceId: string): Promise<BrandView[]> => {
+  const client = await dimoDevAPIClient();
+  const { data } = await client.get<BrandView[]>(
+    `/api/my/workspace/${workspaceId}/brands`,
+  );
+  return data;
+};
+
+export const createMyBrand = async (
+  workspaceId: string,
+  patch: BrandPatch,
+): Promise<BrandView> => {
+  const client = await dimoDevAPIClient();
+  const { data } = await client.post<BrandView>(
+    `/api/my/workspace/${workspaceId}/brands`,
+    patch,
+  );
+  return data;
+};
+
+export const updateMyBrandById = async (
+  workspaceId: string,
+  brandId: string,
+  patch: BrandPatch,
+): Promise<BrandView> => {
+  const client = await dimoDevAPIClient();
+  const { data } = await client.put<BrandView>(
+    `/api/my/workspace/${workspaceId}/brands/${brandId}`,
+    patch,
+  );
+  return data;
+};
+
+export const deleteMyBrandById = async (
+  workspaceId: string,
+  brandId: string,
+): Promise<void> => {
+  const client = await dimoDevAPIClient();
+  await client.delete(`/api/my/workspace/${workspaceId}/brands/${brandId}`);
+};
+
+export const setDefaultMyBrand = async (
+  workspaceId: string,
+  brandId: string,
+): Promise<BrandView> => {
+  const client = await dimoDevAPIClient();
+  const { data } = await client.post<BrandView>(
+    `/api/my/workspace/${workspaceId}/brands/${brandId}/default`,
   );
   return data;
 };
