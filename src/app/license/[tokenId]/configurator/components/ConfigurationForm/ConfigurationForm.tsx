@@ -58,7 +58,13 @@ const Configuration: FC<IFormProps> = ({
         />
       );
     case 'ShareVehiclesWithDimo':
-      return <ShareVehiclesWithDimoConfiguration control={control} register={register} />;
+      return (
+        <ShareVehiclesWithDimoConfiguration
+          control={control}
+          register={register}
+          brandNames={brandNames}
+        />
+      );
     case 'ExecuteAdvancedTransactionWithDimo':
       return (
         <ExecuteAdvanceTransactionWithDimoConfiguration

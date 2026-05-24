@@ -32,6 +32,8 @@ interface ShareVehiclesWithDimoProps extends SharedProps {
   permissions: string[];
   requireAttestation: boolean;
   attestation: AttestationsProps;
+  /** Brand name to pass as `brandName` to the SDK. Empty = use workspace default. */
+  brandName?: string;
 }
 
 interface ExecuteAdvanceTransactionWithDimoProps extends SharedProps {

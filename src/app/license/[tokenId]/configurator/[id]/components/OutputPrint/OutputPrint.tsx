@@ -131,6 +131,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
     }
 
     if (values.component === 'ShareVehiclesWithDimo') {
+      add('brandName', values.brandName);
       if (values.permissionsMode === 'template') {
         add('permissionTemplateId', values.permissionTemplateId);
       } else if (values.permissionsMode === 'custom') {
@@ -194,6 +195,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
               )
             : undefined,
       };
+      props.brandName = values.brandName || undefined;
       codeSnippet = `<ShareVehiclesWithDimo\n${formatProps(props)}\n/>`;
     }
 

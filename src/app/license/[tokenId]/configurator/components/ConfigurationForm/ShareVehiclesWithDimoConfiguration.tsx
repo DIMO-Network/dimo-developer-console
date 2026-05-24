@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
+import { SelectField } from '@/components/SelectField';
 import {
   Control,
   Controller,
@@ -21,6 +22,7 @@ interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<DynamicFormProps, any>;
+  brandNames?: string[];
 }
 
 type PermissionCardProps = {
@@ -52,6 +54,7 @@ const PermissionCard = ({
 export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
   register,
   control,
+  brandNames = [],
 }: IFormProps) => {
   const permissionsMode = useWatch({
     control,
@@ -159,6 +162,27 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           )}
         />
       </div>
+      {brandNames.length > 1 && (
+        <div className={'flex flex-row gap-4 w-full'}>
+          <Label htmlFor="brandName" className="text-xs text-medium w-full">
+            Brand
+            <p className="text-text-secondary font-normal text-xs mb-1">
+              Which brand to show on the Login with DIMO button. Leave as
+              &quot;Default&quot; to use your workspace default brand.
+            </p>
+            <SelectField
+              {...register('brandName', { required: false })}
+              options={[
+                { value: '', text: 'Default' },
+                ...brandNames.map((name) => ({ value: name, text: name })),
+              ]}
+              control={control}
+              placeholder="Default"
+              role="brandName-select"
+            />
+          </Label>
+        </div>
+      )}
       <div className={'flex flex-row gap-4 w-full'}>
         {requireAttestation && (
           <Controller
