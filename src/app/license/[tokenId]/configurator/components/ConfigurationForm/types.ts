@@ -15,6 +15,8 @@ interface LoginWithDimoProps extends SharedProps {
   vehicles?: string;
   vehicleMakes?: string;
   powerTrainTypes?: string;
+  /** Brand name to pass as `brandName` to the SDK. Empty = use workspace default. */
+  brandName?: string;
 }
 
 interface AttestationsProps {

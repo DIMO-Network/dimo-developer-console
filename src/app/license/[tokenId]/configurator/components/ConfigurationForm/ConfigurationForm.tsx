@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
@@ -13,6 +13,8 @@ import {
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
+import { fetchMyBrands } from '@/actions/brand';
+import { getWorkspace, getWorkspaceByTokenId } from '@/actions/workspace';
 
 export const USER_CONFIG_FRAGMENT = gql(`
   fragment UserConfigurationFragment on DeveloperLicense {
@@ -37,12 +39,24 @@ interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<DynamicFormProps, any>;
+  brandNames?: string[];
 }
 
-const Configuration: FC<IFormProps> = ({ component, control, register }: IFormProps) => {
+const Configuration: FC<IFormProps> = ({
+  component,
+  control,
+  register,
+  brandNames,
+}: IFormProps) => {
   switch (component) {
     case 'LoginWithDimo':
-      return <LoginWithDimoConfiguration control={control} register={register} />;
+      return (
+        <LoginWithDimoConfiguration
+          control={control}
+          register={register}
+          brandNames={brandNames}
+        />
+      );
     case 'ShareVehiclesWithDimo':
       return <ShareVehiclesWithDimoConfiguration control={control} register={register} />;
     case 'ExecuteAdvancedTransactionWithDimo':
@@ -59,6 +73,22 @@ const Configuration: FC<IFormProps> = ({ component, control, register }: IFormPr
 
 export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
   const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
+  const [brandNames, setBrandNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const ws =
+          (await getWorkspaceByTokenId(fragment.tokenId)) ?? (await getWorkspace());
+        if (!ws?.id) return;
+        const brands = await fetchMyBrands(ws.id);
+        setBrandNames(brands.map((b) => b.name).filter((n): n is string => !!n));
+      } catch {
+        // brand names are optional — silently ignore
+      }
+    };
+    void load();
+  }, [fragment.tokenId]);
 
   const { register, control, watch, handleSubmit } = useFormContext<DynamicFormProps>();
   const component = watch('component', 'ShareVehiclesWithDimo');
@@ -137,7 +167,12 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
             />
           </Label>
         </div>
-        <Configuration component={component} control={control} register={register} />
+        <Configuration
+          component={component}
+          control={control}
+          register={register}
+          brandNames={brandNames}
+        />
 
         <Button type="submit" className="primary">
           Save
