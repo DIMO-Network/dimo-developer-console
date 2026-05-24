@@ -13,7 +13,9 @@ interface Props {
 }
 
 export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDelete }) => {
-  const canDelete = !brand.isDefault || !isMultiple;
+  // Can delete if: not the default, OR there are no other brands to promote.
+  // (API will reject the last-brand case too, but disable early for UX.)
+  const canDelete = isMultiple && !brand.isDefault;
 
   return (
     <div className="flex flex-row items-center justify-between py-3 border-b border-border last:border-0">
