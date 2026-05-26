@@ -137,7 +137,7 @@ export const useSACD = () => {
     return sacd;
   };
 
-  const ALL_PERMISSION_NAMES = [
+  const ALL_VEHICLE_PERMISSION_NAMES = [
     'GetNonLocationHistory',
     'ExecuteCommands',
     'GetCurrentLocation',
@@ -148,16 +148,18 @@ export const useSACD = () => {
     'GetApproximateLocation',
   ] as const;
 
-  const generateVehiclePermissionSACD = ({
+  const generatePermissionSACD = ({
     grantee,
     grantor,
     asset,
     expiration,
+    permissionNames,
   }: {
     grantee: `0x${string}`;
     grantor: `0x${string}`;
     asset: string;
     expiration: bigint;
+    permissionNames: readonly string[];
   }): VehiclePermissionSACD => {
     const now = new Date();
     return {
@@ -175,7 +177,7 @@ export const useSACD = () => {
           {
             type: 'permission',
             asset,
-            permissions: ALL_PERMISSION_NAMES.map((name) => ({
+            permissions: permissionNames.map((name) => ({
               name: `privilege:${name}`,
             })),
             attachments: [],
@@ -192,13 +194,21 @@ export const useSACD = () => {
     grantor,
     asset,
     expiration,
+    permissionNames = ALL_VEHICLE_PERMISSION_NAMES,
   }: {
     grantee: `0x${string}`;
     grantor: `0x${string}`;
     asset: string;
     expiration: bigint;
+    permissionNames?: readonly string[];
   }): Promise<string> => {
-    const sacd = generateVehiclePermissionSACD({ grantee, grantor, asset, expiration });
+    const sacd = generatePermissionSACD({
+      grantee,
+      grantor,
+      asset,
+      expiration,
+      permissionNames,
+    });
 
     const currentUser = await validateCurrentSession();
     if (!currentUser) throw new Error('No active session for SACD signing');

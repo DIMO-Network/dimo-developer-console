@@ -1,6 +1,7 @@
 'use client';
 
-import React, { use } from 'react';
+import React, { use, useMemo } from 'react';
+import { privateKeyToAddress } from 'viem/accounts';
 import { Title } from '@/components/Title';
 import { CopyButton } from '@/components/CopyButton';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
@@ -18,6 +19,11 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
   const maskKey = () => {
     return '*'.repeat(20);
   };
+
+  const deviceIssuanceAddress = useMemo(() => {
+    if (!connection?.device_issuance_key) return null;
+    return privateKeyToAddress(connection.device_issuance_key as `0x${string}`);
+  }, [connection?.device_issuance_key]);
 
   if (!connection) return null;
 
@@ -55,6 +61,16 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
               <CopyButton value={connection.connection_license_private_key} />
             </div>
           </div>
+
+          {deviceIssuanceAddress && (
+            <div className="field-row">
+              <label className="field-label">Device Issuance Address</label>
+              <div className="field-value-container">
+                <span className="field-value">{deviceIssuanceAddress}</span>
+                <CopyButton value={deviceIssuanceAddress} />
+              </div>
+            </div>
+          )}
 
           <div className="field-row">
             <label className="field-label">Device Issuance Key</label>
