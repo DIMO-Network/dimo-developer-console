@@ -30,7 +30,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   const stepLabel = (step: MintConnectionStep): string => {
     switch (step) {
       case 'minting':
-        return 'Approve the mint to create your connection on-chain. This costs ~$100 of $DIMO.';
+        return 'Approve the mint to create your connection on-chain. This costs ~$1 of $DIMO.';
       case 'signing-agreements':
         return 'Signing permission agreements for the Device Issuance Key (mint synthetic devices) and the Connection License Key (generate certificates).';
       case 'granting-permissions':

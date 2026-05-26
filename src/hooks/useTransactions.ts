@@ -249,13 +249,13 @@ export const useMintConnection = () => {
       const currentSession = await validateCurrentSession();
       const enoughBalance = await checkEnoughBalance();
 
-      // Get current DIMO price and calculate required tokens for $100 USD
+      // Get current DIMO price and calculate required tokens for $1 USD
       const dimoPrice = await getCurrentDimoPrice();
-      const targetUsdAmount = 100;
+      const targetUsdAmount = 1;
       // handle price fluctuations
       const bufferPercentage = 0.05;
 
-      // Calculate required DIMO tokens: $100 / DIMO price + 5% buffer for price flux.
+      // Calculate required DIMO tokens: $1 / DIMO price + 5% buffer for price flux.
       const baseDimoAmount = targetUsdAmount / dimoPrice;
       const requiredDIMO = baseDimoAmount * (1 + bufferPercentage);
       const requiredDIMOInWei = BigInt(utils.toWei(requiredDIMO.toString(), 'ether'));
@@ -270,7 +270,7 @@ export const useMintConnection = () => {
       }
 
       const transactions = [
-        // Transaction 1: approve use of required $DIMO tokens ($100 USD worth + 5% buffer).
+        // Transaction 1: approve use of required $DIMO tokens ($1 USD worth + 5% buffer).
         {
           to: configuration.DC_ADDRESS,
           value: BigInt(0),
