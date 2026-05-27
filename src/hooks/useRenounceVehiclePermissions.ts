@@ -23,6 +23,9 @@ export const useRenounceVehiclePermissions = () => {
             }),
           },
         ]);
+        if (!result.success) {
+          throw new Error(result.reason ?? 'Transaction failed');
+        }
         return result;
       } finally {
         setIsLoading(false);

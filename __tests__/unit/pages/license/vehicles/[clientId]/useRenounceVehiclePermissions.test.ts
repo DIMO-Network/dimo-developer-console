@@ -61,6 +61,28 @@ describe('useRenounceVehiclePermissions', () => {
     );
   });
 
+  it('throws when processTransactions returns success: false with a reason', async () => {
+    mockProcessTransactions.mockResolvedValue({ success: false, reason: 'reverted' });
+    const { result } = renderHook(() => useRenounceVehiclePermissions());
+
+    await expect(
+      act(async () => {
+        await result.current.renounce(42);
+      }),
+    ).rejects.toThrow('reverted');
+  });
+
+  it('throws with fallback message when success: false and no reason', async () => {
+    mockProcessTransactions.mockResolvedValue({ success: false, reason: undefined });
+    const { result } = renderHook(() => useRenounceVehiclePermissions());
+
+    await expect(
+      act(async () => {
+        await result.current.renounce(42);
+      }),
+    ).rejects.toThrow('Transaction failed');
+  });
+
   it('isLoading is false initially', () => {
     const { result } = renderHook(() => useRenounceVehiclePermissions());
     expect(result.current.isLoading).toBe(false);
