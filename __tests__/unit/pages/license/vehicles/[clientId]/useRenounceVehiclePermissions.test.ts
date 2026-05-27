@@ -12,12 +12,6 @@ jest.mock('@/hooks/useContractGA', () => ({
   useContractGA: () => ({ processTransactions: mockProcessTransactions }),
 }));
 
-const mockUseGlobalAccount = jest.fn();
-jest.mock('@/hooks/useGlobalAccount', () => ({
-  __esModule: true,
-  default: () => mockUseGlobalAccount(),
-}));
-
 jest.mock('@/config', () => ({
   __esModule: true,
   default: {
@@ -29,16 +23,11 @@ jest.mock('@/config', () => ({
 import { useRenounceVehiclePermissions } from '@/hooks/useRenounceVehiclePermissions';
 import { encodeFunctionData } from 'viem';
 
-const SMART_CONTRACT_ADDRESS = '0xDEAD000000000000000000000000000000000001';
-
 describe('useRenounceVehiclePermissions', () => {
   beforeEach(() => {
     mockProcessTransactions.mockReset();
     (encodeFunctionData as jest.Mock).mockReset();
     (encodeFunctionData as jest.Mock).mockReturnValue('0xencoded');
-    mockUseGlobalAccount.mockReturnValue({
-      currentUser: { smartContractAddress: SMART_CONTRACT_ADDRESS },
-    });
   });
 
   it('calls processTransactions targeting the SACD contract', async () => {
@@ -56,7 +45,7 @@ describe('useRenounceVehiclePermissions', () => {
     expect(txs[0].data).toBe('0xencoded');
   });
 
-  it('encodes setPermissions with permissions=0 and expiration=0', async () => {
+  it('encodes renouncePermissions with asset and tokenId', async () => {
     mockProcessTransactions.mockResolvedValue({ success: true });
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
@@ -66,28 +55,10 @@ describe('useRenounceVehiclePermissions', () => {
 
     expect(encodeFunctionData).toHaveBeenCalledWith(
       expect.objectContaining({
-        functionName: 'setPermissions',
-        args: expect.arrayContaining([
-          '0xBEEF000000000000000000000000000000000001', // asset
-          BigInt(42), // tokenId
-          SMART_CONTRACT_ADDRESS, // grantee
-          BigInt(0), // permissions
-          BigInt(0), // expiration
-          '', // source
-        ]),
+        functionName: 'renouncePermissions',
+        args: ['0xBEEF000000000000000000000000000000000001', BigInt(42)],
       }),
     );
-  });
-
-  it('throws when currentUser is null', async () => {
-    mockUseGlobalAccount.mockReturnValue({ currentUser: null });
-    const { result } = renderHook(() => useRenounceVehiclePermissions());
-
-    await expect(
-      act(async () => {
-        await result.current.renounce(1);
-      }),
-    ).rejects.toThrow('User session is invalid');
   });
 
   it('isLoading is false initially', () => {
