@@ -1,15 +1,26 @@
 import { useCallback, useState } from 'react';
 import { Abi, encodeFunctionData } from 'viem';
 import { useContractGA } from '@/hooks/useContractGA';
+import useGlobalAccount from '@/hooks/useGlobalAccount';
 import configuration from '@/config';
 import SacdABI from '@/contracts/Sacd.json';
 
 export const useRenounceVehiclePermissions = () => {
   const { processTransactions } = useContractGA();
+  const { currentUser } = useGlobalAccount();
   const [isLoading, setIsLoading] = useState(false);
 
   const renounce = useCallback(
-    async (tokenId: number) => {
+    async (tokenId: number, clientId: string) => {
+      const smartContractAddress = currentUser?.smartContractAddress;
+
+      console.log('[renounce] clientId:', clientId);
+      console.log('[renounce] smartContractAddress:', smartContractAddress);
+      console.log(
+        '[renounce] match:',
+        clientId?.toLowerCase() === smartContractAddress?.toLowerCase(),
+      );
+
       setIsLoading(true);
       try {
         const result = await processTransactions([
@@ -23,6 +34,9 @@ export const useRenounceVehiclePermissions = () => {
             }),
           },
         ]);
+
+        console.log('[renounce] result:', result);
+
         if (!result.success) {
           throw new Error(result.reason ?? 'Transaction failed');
         }
@@ -31,7 +45,7 @@ export const useRenounceVehiclePermissions = () => {
         setIsLoading(false);
       }
     },
-    [processTransactions],
+    [currentUser, processTransactions],
   );
 
   return { renounce, isLoading };
