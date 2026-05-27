@@ -40,7 +40,7 @@ export const VEHICLES_BY_CLIENT_ID = gql(`
           model
           year
         }
-      }
+      }  
     }
   }
 `);
