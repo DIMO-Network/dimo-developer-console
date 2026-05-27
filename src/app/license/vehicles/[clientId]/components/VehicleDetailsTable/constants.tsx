@@ -1,11 +1,62 @@
 import { ColumnDef, createColumnHelper } from '@tanstack/table-core';
+import { useState } from 'react';
 import { GetVehiclesByClientIdQuery } from '@/gql/graphql';
 
 type VehicleNode = GetVehiclesByClientIdQuery['vehicles']['nodes'][0];
 const columnHelper = createColumnHelper<VehicleNode>();
 
+function ActionsCell({
+  tokenId,
+  onRenounce,
+}: {
+  tokenId: number;
+  onRenounce: (tokenId: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative flex justify-end" onClick={(e) => e.stopPropagation()}>
+      <button
+        className="px-2 py-1 rounded hover:bg-surface-raised text-text-secondary text-lg leading-none"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        aria-label="Row actions"
+      >
+        ⋯
+      </button>
+      {open && (
+        <>
+          {/* backdrop to close on outside click */}
+          <div
+            className="fixed inset-0 z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen(false);
+            }}
+          />
+          <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded border border-[#322D2F] bg-surface-raised shadow-lg">
+            <button
+              className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-surface-overlay"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(false);
+                onRenounce(tokenId);
+              }}
+            >
+              Renounce access
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export const buildColumns = (
   simulatedTokenIds: Set<number>,
+  onRenounce: (tokenId: number) => void,
 ): ColumnDef<VehicleNode>[] => [
   // @ts-expect-error multiple properties are improperly typed, but not sure how to fix it
   columnHelper.accessor('tokenId', {
@@ -34,6 +85,13 @@ export const buildColumns = (
         </span>
       );
     },
+  }),
+  columnHelper.display({
+    id: 'actions',
+    header: '',
+    cell: (info) => (
+      <ActionsCell tokenId={info.row.original.tokenId} onRenounce={onRenounce} />
+    ),
   }),
 ];
 
