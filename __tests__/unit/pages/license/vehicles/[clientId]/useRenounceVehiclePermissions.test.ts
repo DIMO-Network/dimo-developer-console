@@ -35,7 +35,7 @@ describe('useRenounceVehiclePermissions', () => {
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
     await act(async () => {
-      await result.current.renounce(42);
+      await result.current.renounce(42, '0xCLIENT');
     });
 
     expect(mockProcessTransactions).toHaveBeenCalledTimes(1);
@@ -50,7 +50,7 @@ describe('useRenounceVehiclePermissions', () => {
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
     await act(async () => {
-      await result.current.renounce(42);
+      await result.current.renounce(42, '0xCLIENT');
     });
 
     expect(encodeFunctionData).toHaveBeenCalledWith(
@@ -67,7 +67,7 @@ describe('useRenounceVehiclePermissions', () => {
 
     await expect(
       act(async () => {
-        await result.current.renounce(42);
+        await result.current.renounce(42, '0xCLIENT');
       }),
     ).rejects.toThrow('reverted');
   });
@@ -78,7 +78,7 @@ describe('useRenounceVehiclePermissions', () => {
 
     await expect(
       act(async () => {
-        await result.current.renounce(42);
+        await result.current.renounce(42, '0xCLIENT');
       }),
     ).rejects.toThrow('Transaction failed');
   });
@@ -93,7 +93,7 @@ describe('useRenounceVehiclePermissions', () => {
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
     await act(async () => {
-      await result.current.renounce(7);
+      await result.current.renounce(42, '0xCLIENT');
     });
 
     expect(result.current.isLoading).toBe(false);
@@ -105,7 +105,7 @@ describe('useRenounceVehiclePermissions', () => {
 
     await act(async () => {
       try {
-        await result.current.renounce(7);
+        await result.current.renounce(42, '0xCLIENT');
       } catch {
         // expected
       }
