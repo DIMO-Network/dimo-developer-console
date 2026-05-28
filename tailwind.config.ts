@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
+  darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,31 +9,59 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-      },
       colors: {
+        'background': 'hsl(var(--background))',
+        'foreground': 'hsl(var(--foreground))',
+        'card': {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        'sidebar': 'hsl(var(--sidebar))',
+        'popover': {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        'primary': {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        'secondary': {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        'muted': {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        'accent': {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        'destructive': {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        'border': 'hsl(var(--border))',
+        'input': 'hsl(var(--input))',
+        'ring': 'hsl(var(--ring))',
+        /* Legacy aliases — keep so existing classnames don't break during migration */
         'surface': {
-          default: '#141012',
-          sunken: '#0A0508',
-          raised: '#201C1E',
+          default: 'hsl(var(--card))',
+          sunken: 'hsl(var(--background))',
+          raised: 'hsl(var(--accent))',
         },
         'cta': {
-          default: '#322D2F',
-          disabled: '#818181',
-        },
-        'border': {
-          disabled: '#BABABA',
-        },
-        'text': {
-          secondary: '#BABABA',
+          default: 'hsl(var(--accent))',
+          disabled: 'hsl(var(--muted))',
         },
         'feedback': {
           success: '#0D7038',
-          error: '#8E3231',
+          error: 'hsl(var(--destructive))',
         },
+        'text': {
+          secondary: 'hsl(var(--muted-foreground))',
+        },
+        /* Existing palette scales — keep for gradual cleanup */
         'grey': {
           '50': '#f5f6f6',
           '100': '#e4e8e9',
@@ -46,34 +75,7 @@ const config: Config = {
           '900': '#393e40',
           '950': '#232729',
         },
-        'dark-grey': {
-          '50': '#f4f6f7',
-          '100': '#e3e8ea',
-          '200': '#c9d2d8',
-          '300': '#a4b3bc',
-          '400': '#778c99',
-          '500': '#5c707e',
-          '600': '#4f5f6b',
-          '700': '#444f5a',
-          '800': '#3d454d',
-          '900': '#363c43',
-          '950': '#24292f',
-        },
-        'dark': {
-          '50': '#f7f8f8',
-          '100': '#edeef1',
-          '200': '#d8dbdf',
-          '300': '#b5bac4',
-          '400': '#8d94a3',
-          '500': '#6f7788',
-          '600': '#596070',
-          '700': '#494f5b',
-          '800': '#3f434d',
-          '900': '#373b43',
-          '950': '#131417',
-        },
-
-        'primary': {
+        'primary-scale': {
           '50': '#f1fcfa',
           '100': '#d0f7f2',
           '200': '#b7f2eb',
@@ -99,6 +101,11 @@ const config: Config = {
           '900': '#841818',
           '950': '#480707',
         },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
     },
   },
