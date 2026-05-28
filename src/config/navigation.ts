@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   HomeIcon,
   IntegrationIcon,
@@ -116,5 +117,86 @@ export const bottomMenu = [
     link: '/settings',
     external: false,
     disabled: false,
+  },
+];
+
+export type NavItem = {
+  label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: React.FC<any>;
+  iconClassName: string;
+  link: string | (() => void);
+  external: boolean;
+  disabled: boolean;
+  hidden?: boolean;
+};
+
+export type NavSection = {
+  label: string;
+  items: NavItem[];
+};
+
+export const getNavSections = (includeConnections: boolean = true): NavSection[] => [
+  {
+    label: 'Workspace',
+    items: [
+      {
+        label: 'Home',
+        icon: HomeIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/app',
+        external: false,
+        disabled: false,
+      },
+      {
+        label: 'Webhooks',
+        icon: IntegrationIcon,
+        iconClassName: 'h-4 w-4 fill-current stroke-current stroke-1',
+        link: '/webhooks',
+        external: false,
+        disabled: false,
+      },
+      ...(includeConnections
+        ? [
+            {
+              label: 'Connections',
+              icon: ConnectionsIcon,
+              iconClassName: 'h-4 w-4',
+              link: '/connections',
+              external: false,
+              disabled: false,
+            },
+          ]
+        : []),
+    ],
+  },
+  {
+    label: 'Resources',
+    items: [
+      {
+        label: 'Data Explorer',
+        icon: ChipIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/explorer',
+        external: false,
+        disabled: false,
+      },
+      {
+        label: 'Documentation',
+        icon: SummarizeIcon,
+        iconClassName: 'h-4 w-4',
+        link: 'https://dimo.org/docs',
+        external: true,
+        disabled: false,
+      },
+      {
+        label: 'API Status',
+        icon: MonitorHeartIcon,
+        iconClassName: 'h-4 w-4',
+        link: 'https://stats.uptimerobot.com/snU0rkEEah',
+        external: true,
+        disabled: false,
+      },
+    ],
   },
 ];

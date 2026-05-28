@@ -1,10 +1,7 @@
 import { type FC, PropsWithChildren, useContext } from 'react';
-
-import classNames from 'classnames';
 import Link from 'next/link';
-
-import './MenuItem.css';
 import { LayoutContext } from '@/context/LayoutContext';
+import { cn } from '@/lib/utils';
 
 interface IProps {
   link: string | (() => void);
@@ -15,6 +12,7 @@ interface IProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: FC<any>;
   isHighlighted?: boolean;
+  isCollapsed?: boolean;
 }
 
 export const MenuItem: FC<IProps> = ({
@@ -25,13 +23,12 @@ export const MenuItem: FC<IProps> = ({
   iconClassName,
   label,
   isHighlighted,
+  isCollapsed,
 }) => {
   const { isFullScreenMenuOpen, setIsFullScreenMenuOpen } = useContext(LayoutContext);
 
   const closeFullScreenMenu = () => {
-    if (isFullScreenMenuOpen) {
-      setIsFullScreenMenuOpen(false);
-    }
+    if (isFullScreenMenuOpen) setIsFullScreenMenuOpen(false);
   };
 
   const handleFunctionClick = () => {
@@ -55,15 +52,25 @@ export const MenuItem: FC<IProps> = ({
       </Link>
     );
   };
+
   return (
     <li
-      className={classNames({
-        '!text-grey-200/50': disabled,
-        'bg-red-900': isHighlighted,
-      })}
+      title={isCollapsed ? label : undefined}
+      className={cn(
+        'flex flex-row items-center gap-2.5 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors',
+        'text-muted-foreground hover:text-foreground hover:bg-accent',
+        isHighlighted && 'text-muted-foreground bg-primary/10 hover:bg-primary/15',
+        disabled && 'opacity-40 pointer-events-none',
+        isCollapsed && 'justify-center px-0',
+      )}
     >
-      <Icon className={iconClassName} />
-      <Wrapper>{label}</Wrapper>
+      <Icon className={cn(iconClassName, isHighlighted && 'text-primary')} />
+      {!isCollapsed && <Wrapper>{label}</Wrapper>}
+      {isCollapsed && (
+        <Wrapper>
+          <span className="sr-only">{label}</span>
+        </Wrapper>
+      )}
     </li>
   );
 };
