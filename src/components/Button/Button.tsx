@@ -4,10 +4,10 @@ import React, {
   type ButtonHTMLAttributes,
   type MouseEvent,
 } from 'react';
-import classnames from 'classnames';
-
-import './Button.css';
+import { Button as ShadcnButton } from '@/components/ui/button';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { cn } from '@/lib/utils';
+import './Button.css';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
@@ -16,22 +16,30 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button: FC<ButtonProps> = ({
   children,
-  className: inputClassName,
+  className,
   loading = false,
   onClick = () => {},
+  disabled,
   ...props
 }) => {
-  const className = classnames('button', inputClassName);
-
   const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (!loading) onClick(e);
   };
 
   return (
-    <button {...props} onClick={handleClick} className={className}>
-      {loading && <BubbleLoader isSmall isLoading />}
-      {!loading && <span className="content">{children}</span>}
-    </button>
+    <ShadcnButton
+      {...props}
+      variant="default"
+      disabled={disabled || loading}
+      onClick={handleClick}
+      className={cn('button', className)}
+    >
+      {loading ? (
+        <BubbleLoader isSmall isLoading />
+      ) : (
+        <span className="content">{children}</span>
+      )}
+    </ShadcnButton>
   );
 };
 

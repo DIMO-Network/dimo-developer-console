@@ -1,16 +1,18 @@
 .button {
-  @apply rounded-full h-10 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex-row gap-2 disabled:bg-cta-disabled disabled:cursor-not-allowed disabled:text-[#4D4D4D] hover:border-white border-transparent border-2;
+  @apply rounded-full h-10 font-medium inline-flex justify-center items-center px-4 gap-2
+         border-2 border-transparent transition-colors
+         disabled:opacity-50 disabled:cursor-not-allowed;
 
   span.content {
     @apply flex flex-row gap-1 items-center justify-center;
   }
 
   &.primary {
-    @apply bg-white;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
   }
 
   &.primary-solid {
-    @apply bg-primary-300;
+    @apply bg-primary text-primary-foreground;
   }
 
   &.rounded-sm {
@@ -18,37 +20,37 @@
   }
 
   &.primary-outline {
-    @apply border-2 bg-transparent border-cta-default text-white hover:border-white;
+    @apply bg-transparent border-2 border-border text-foreground hover:border-primary;
   }
 
   &.secondary-border-color {
-    @apply border-[#322D2F];
+    @apply border-border;
   }
 
   &.white {
-    @apply bg-white;
+    @apply bg-card text-foreground;
     &-outline {
-      @apply bg-transparent border border-white text-white;
+      @apply bg-transparent border border-border text-foreground;
     }
   }
 
   &.dark {
-    @apply bg-cta-default text-white hover:border-white border-transparent border-2;
+    @apply bg-accent text-foreground hover:border-border;
   }
 
   &.table-action-button {
-    @apply bg-transparent text-white border border-surface-raised hover:border-white;
+    @apply bg-transparent text-foreground border border-border hover:border-primary;
   }
 
   &.error {
-    @apply bg-feedback-error text-white;
+    @apply bg-destructive text-destructive-foreground;
 
     &-outline {
-      @apply bg-transparent border border-red-500 text-red-500;
+      @apply bg-transparent border border-destructive text-destructive;
     }
 
     &-simple {
-      @apply bg-transparent text-red-500;
+      @apply bg-transparent text-destructive;
     }
   }
 
