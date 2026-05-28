@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes, type FC } from 'react';
+import { forwardRef, type InputHTMLAttributes, type FC, type ChangeEvent } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
@@ -19,7 +19,7 @@ export const CheckboxField: FC<InputHTMLAttributes<HTMLInputElement>> = forwardR
         if (onChange) {
           const event = {
             target: { checked: val === true },
-          } as React.ChangeEvent<HTMLInputElement>;
+          } as ChangeEvent<HTMLInputElement>;
           onChange(event);
         }
       }}
