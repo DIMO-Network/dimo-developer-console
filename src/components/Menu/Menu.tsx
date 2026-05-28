@@ -82,6 +82,7 @@ export const Menu: FC = withLoadingStatus(() => {
         )}
         {isFullScreenMenuOpen && (
           <button
+            type="button"
             onClick={() => setIsFullScreenMenuOpen(false)}
             className="md:hidden ml-auto"
           >
@@ -104,7 +105,7 @@ export const Menu: FC = withLoadingStatus(() => {
                 .filter((item) => !('hidden' in item && item.hidden))
                 .map((item) => (
                   <MenuItem
-                    key={String(item.link)}
+                    key={item.label}
                     {...item}
                     isHighlighted={isHighlighted(item.link)}
                     isCollapsed={isSidebarCollapsed}
@@ -120,7 +121,7 @@ export const Menu: FC = withLoadingStatus(() => {
         <ul className="flex flex-col gap-0.5">
           {bottomMenu.map((item) => (
             <MenuItem
-              key={String(item.link)}
+              key={item.label}
               {...item}
               isHighlighted={isHighlighted(item.link)}
               isCollapsed={isSidebarCollapsed}
@@ -136,6 +137,7 @@ export const Menu: FC = withLoadingStatus(() => {
 
       {/* Collapse toggle button — desktop only */}
       <button
+        type="button"
         onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
         aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         className="collapse-btn hidden md:flex"

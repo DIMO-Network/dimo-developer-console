@@ -1,4 +1,4 @@
-import { type FC, PropsWithChildren, useContext } from 'react';
+import { type FC, useContext } from 'react';
 import Link from 'next/link';
 import { LayoutContext } from '@/context/LayoutContext';
 import { cn } from '@/lib/utils';
@@ -31,27 +31,7 @@ export const MenuItem: FC<IProps> = ({
     if (isFullScreenMenuOpen) setIsFullScreenMenuOpen(false);
   };
 
-  const handleFunctionClick = () => {
-    if (typeof link === 'function') {
-      link();
-      closeFullScreenMenu();
-    }
-  };
-
-  const Wrapper: FC<PropsWithChildren> = ({ children }) => {
-    if (typeof link === 'function') {
-      return <button onClick={handleFunctionClick}>{children}</button>;
-    }
-    return (
-      <Link
-        href={disabled ? '#' : link}
-        target={external ? '_blank' : '_self'}
-        onClick={closeFullScreenMenu}
-      >
-        {children}
-      </Link>
-    );
-  };
+  const inner = isCollapsed ? <span className="sr-only">{label}</span> : <>{label}</>;
 
   return (
     <li
@@ -65,11 +45,24 @@ export const MenuItem: FC<IProps> = ({
       )}
     >
       <Icon className={cn(iconClassName, isHighlighted && 'text-primary')} />
-      {!isCollapsed && <Wrapper>{label}</Wrapper>}
-      {isCollapsed && (
-        <Wrapper>
-          <span className="sr-only">{label}</span>
-        </Wrapper>
+      {typeof link === 'function' ? (
+        <button
+          type="button"
+          onClick={() => {
+            link();
+            closeFullScreenMenu();
+          }}
+        >
+          {inner}
+        </button>
+      ) : (
+        <Link
+          href={disabled ? '#' : link}
+          target={external ? '_blank' : '_self'}
+          onClick={closeFullScreenMenu}
+        >
+          {inner}
+        </Link>
       )}
     </li>
   );

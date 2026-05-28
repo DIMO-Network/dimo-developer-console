@@ -106,20 +106,6 @@ export const getMainMenu = (includeConnections: boolean = true) => {
   return items;
 };
 
-// Keep the old export for backward compatibility for now, always includes Connections
-export const mainMenu = getMainMenu(true);
-
-export const bottomMenu = [
-  {
-    label: 'Settings',
-    icon: SettingsIcon,
-    iconClassName: 'h-5 w-5 fill-grey-200',
-    link: '/settings',
-    external: false,
-    disabled: false,
-  },
-];
-
 export type NavItem = {
   label: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -135,6 +121,20 @@ export type NavSection = {
   label: string;
   items: NavItem[];
 };
+
+// Keep the old export for backward compatibility for now, always includes Connections
+export const mainMenu = getMainMenu(true);
+
+export const bottomMenu: NavItem[] = [
+  {
+    label: 'Settings',
+    icon: SettingsIcon,
+    iconClassName: 'h-5 w-5 fill-grey-200',
+    link: '/settings',
+    external: false,
+    disabled: false,
+  },
+];
 
 export const getNavSections = (includeConnections: boolean = true): NavSection[] => [
   {
