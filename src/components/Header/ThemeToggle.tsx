@@ -14,14 +14,15 @@ export const ThemeToggle = () => {
 
   if (!mounted) {
     return (
-      <div className="w-[52px] h-[26px] rounded-full bg-card border border-border" />
+      <div className="w-[54px] h-[22px] rounded-full bg-card border border-border" />
     );
   }
 
   const isDark = theme === 'dark';
 
   return (
-    <div
+    <button
+      type="button"
       role="switch"
       aria-checked={isDark}
       aria-label="Toggle dark mode"
@@ -44,6 +45,6 @@ export const ThemeToggle = () => {
       >
         ☾
       </span>
-    </div>
+    </button>
   );
 };
