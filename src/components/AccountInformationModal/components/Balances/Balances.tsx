@@ -5,7 +5,7 @@ import { useGlobalAccount, useLoading } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { useContext, useEffect, useState } from 'react';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { CreditsContext } from '@/context/creditsContext';
 
@@ -29,7 +29,6 @@ export const Balances = ({ shouldFetchBalances }: IProps) => {
   });
   const { getCurrentDcxBalance, getCurrentDimoBalance } = useGlobalAccount();
   const { getDimoPrice } = useCryptoPricing();
-  const { setNotification } = useContext(NotificationContext);
   const { setIsOpen } = useContext(CreditsContext);
   const { setShowAccountInformation } = useContext(AccountInformationContext);
 
@@ -49,7 +48,7 @@ export const Balances = ({ shouldFetchBalances }: IProps) => {
     } catch (error: unknown) {
       Sentry.captureException(error);
       console.error('Error while loading balances', error);
-      setNotification('Error while loading balances', 'Error', 'error');
+      toast.error('Error while loading balances');
     }
   };
 

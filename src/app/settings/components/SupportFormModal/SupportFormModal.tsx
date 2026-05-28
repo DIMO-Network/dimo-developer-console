@@ -1,4 +1,4 @@
-import { type FC, useContext } from 'react';
+import { type FC } from 'react';
 
 import * as Sentry from '@sentry/nextjs';
 
@@ -7,7 +7,7 @@ import { handleSupportRequest } from '@/app/settings/actions';
 import { IDevSupportForm, ISupportRequest } from '@/types/support';
 
 import { Modal } from '@/components/Modal';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { Title } from '@/components/Title';
 
 import './SupportFormModal.css';
@@ -19,7 +19,6 @@ interface SupportFormModalProps {
 }
 
 export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen }) => {
-  const { setNotification } = useContext(NotificationContext);
   const { currentUser } = useGlobalAccount();
 
   const handleSubmit = async (data: IDevSupportForm) => {
@@ -35,15 +34,11 @@ export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen 
       };
       await handleSupportRequest(supportRequest);
       setIsOpen(false);
-      setNotification(
-        'Support request submitted successfully. We will be in touch soon.',
-        'Success',
-        'success',
-      );
+      toast.success('Support request submitted successfully. We will be in touch soon.');
     } catch (error) {
       console.error('Failed to submit support request:', error);
       Sentry.captureException(error);
-      setNotification('Failed to submit support request', 'Oops...', 'error');
+      toast.error('Failed to submit support request');
     }
   };
 

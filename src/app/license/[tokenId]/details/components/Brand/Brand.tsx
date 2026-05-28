@@ -1,10 +1,10 @@
 'use client';
-import React, { FC, useContext, useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { Button } from '@/components/Button';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import { FragmentType, gql, useFragment } from '@/gql';
 
@@ -29,8 +29,6 @@ interface Props {
 export const Brand: FC<Props> = ({ license }) => {
   const fragment = useFragment(BRAND_FRAGMENT, license);
   const isOwner = useIsLicenseOwner(fragment);
-  const { setNotification } = useContext(NotificationContext);
-
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [brands, setBrands] = useState<BrandView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +36,6 @@ export const Brand: FC<Props> = ({ license }) => {
   /** null = list view; 'new' = create form; BrandView = edit form */
   const [editing, setEditing] = useState<BrandView | 'new' | null>(null);
 
-  const setNotificationRef = useRef(setNotification);
-  setNotificationRef.current = setNotification;
   const licenseTokenId = fragment.tokenId;
 
   useEffect(() => {
@@ -76,7 +72,7 @@ export const Brand: FC<Props> = ({ license }) => {
 
   useEffect(() => {
     if (!loadError) return;
-    setNotificationRef.current(loadError, 'Brand load error', 'error');
+    toast.error(loadError);
   }, [loadError]);
 
   const handleSave = (saved: BrandView) => {
@@ -97,7 +93,7 @@ export const Brand: FC<Props> = ({ license }) => {
       setBrands((prev) => prev.filter((b) => b.id !== brandId));
     } catch (error) {
       Sentry.captureException(error);
-      setNotification('Failed to delete brand. Try again.', 'Oops…', 'error');
+      toast.error('Failed to delete brand. Try again.');
     }
   };
 

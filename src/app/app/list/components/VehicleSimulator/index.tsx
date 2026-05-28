@@ -1,9 +1,9 @@
 'use client';
-import { FC, useContext, useState } from 'react';
+import { FC, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Abi } from 'viem';
 import { Button } from '@/components/Button';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { useMintVehicle, useBurnVehicle, useGlobalAccount } from '@/hooks';
 import {
   getSimulatedVehicles,
@@ -33,7 +33,6 @@ const MakeIcon: FC<{ path: string }> = ({ path }) => (
 );
 
 export const VehicleSimulator: FC<Props> = ({ clientId }) => {
-  const { setNotification } = useContext(NotificationContext);
   const mintVehicle = useMintVehicle();
   const burnVehicle = useBurnVehicle();
   const { currentUser } = useGlobalAccount();
@@ -134,11 +133,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           status: deleteResult.status,
           message: deleteResult.message,
         });
-        setNotification(
-          deleteResult.message ?? 'Failed to remove vehicle record',
-          'Error',
-          'error',
-        );
+        toast.error(deleteResult.message ?? 'Failed to remove vehicle record');
         return;
       }
       if (deleteResult.status === 404) {
@@ -150,14 +145,10 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
       console.log('[VehicleSimulator] Vehicle removed', { vehicleId, tokenId });
-      setNotification('Vehicle removed successfully', 'Success', 'success');
+      toast.success('Vehicle removed successfully');
     } catch (e) {
       console.error('[VehicleSimulator] Delete error', e);
-      setNotification(
-        e instanceof Error ? e.message : 'Failed to remove vehicle',
-        'Error',
-        'error',
-      );
+      toast.error(e instanceof Error ? e.message : 'Failed to remove vehicle');
     } finally {
       setDeletingId(null);
     }
@@ -201,7 +192,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       if (!result.success) {
         console.warn('[VehicleSimulator] Mint failed', { reason: result.reason });
-        setNotification(result.reason ?? 'Minting failed', 'Error', 'error');
+        toast.error(result.reason ?? 'Minting failed');
         return;
       }
 
@@ -212,10 +203,8 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
             logs: result.logs,
           },
         );
-        setNotification(
+        toast.error(
           'Mint succeeded but vehicle token ID could not be read. Please try again.',
-          'Error',
-          'error',
         );
         return;
       }
@@ -259,13 +248,11 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
 
       console.log('[VehicleSimulator] Mint complete — tokenId', result.tokenId);
-      setNotification('Vehicle minted successfully!', 'Success', 'success');
+      toast.success('Vehicle minted successfully!');
     } catch (e) {
       console.error('[VehicleSimulator] Mint error', e);
-      setNotification(
+      toast.error(
         e instanceof Error ? e.message : 'Something went wrong while minting the vehicle',
-        'Oops...',
-        'error',
       );
     } finally {
       setIsLoading(false);

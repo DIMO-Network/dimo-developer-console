@@ -1,10 +1,10 @@
-import { FC, useCallback, useContext, useMemo, useState, useEffect, useRef } from 'react';
+import { FC, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { Button } from '@/components/Button';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { CopyableRow } from '@/components/CopyableRow';
 import { saveDevJwt } from '@/utils/devJwt';
@@ -27,7 +27,6 @@ export const GenerateDevJWTModal: FC<IProps> = ({
   const [text, setText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [generatedKey, setGeneratedKey] = useState('');
-  const { setNotification } = useContext(NotificationContext);
 
   // Ref updated synchronously so backdrop clicks are blocked immediately on generate,
   // without waiting for a React re-render cycle.
@@ -51,7 +50,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
 
   const handleGenerate = useCallback(async () => {
     if (!text) {
-      return setNotification('Please enter a valid API key', '', 'error');
+      return toast.error('Please enter a valid API key');
     }
     // Lock synchronously before the async work and before React re-renders.
     lockedRef.current = true;
@@ -70,13 +69,13 @@ export const GenerateDevJWTModal: FC<IProps> = ({
       onSuccess?.();
     } catch (err) {
       captureException(err);
-      setNotification('Failed to generate developer JWT', '', 'error');
+      toast.error('Failed to generate developer JWT');
       // Unlock on failure so the user can cancel or try again.
       lockedRef.current = false;
     } finally {
       setIsLoading(false);
     }
-  }, [onSuccess, setNotification, text, tokenParams.client_id, tokenParams.domain]);
+  }, [onSuccess, text, tokenParams.client_id, tokenParams.domain]);
 
   const title = useMemo(() => {
     if (generatedKey) return 'JWT generated';

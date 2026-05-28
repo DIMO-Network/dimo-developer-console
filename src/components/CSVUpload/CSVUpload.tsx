@@ -1,9 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import Papa from 'papaparse';
 import { ArrowUpTrayIcon } from '@heroicons/react/20/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { Title } from '@/components/Title';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 
 interface CSVUploadProps {
   vehicleTokenIds: string[];
@@ -25,15 +25,14 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const { setNotification } = useContext(NotificationContext);
 
   const handleFile = (file: File) => {
     if (fileInfo.length > 0) {
-      return setNotification('Only one file can be uploaded at a time', '', 'error');
+      return toast.error('Only one file can be uploaded at a time');
     }
 
     if (fileInfo.some((f) => f.name === file.name)) {
-      return setNotification('Duplicate file upload', '', 'error');
+      return toast.error('Duplicate file upload');
     }
 
     if (file.size > 50 * 1024 * 1024) {

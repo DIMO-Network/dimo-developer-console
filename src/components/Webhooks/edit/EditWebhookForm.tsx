@@ -1,9 +1,9 @@
 import { Button } from '@/components/Button';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
 import { useFormContext } from 'react-hook-form';
 import { useEditWebhookContext } from '@/hoc/EditWebhookProvider';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { getDevJwt } from '@/utils/devJwt';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 import { captureException } from '@sentry/nextjs';
@@ -30,17 +30,16 @@ export const EditWebhookForm = ({
     formState: { isDirty, isValid, isSubmitting },
   } = useFormContext<WebhookFormInput>();
   const { onCancel, submitForm } = useEditWebhookContext();
-  const { setNotification } = useContext(NotificationContext);
 
   const onSubmit = async (formData: WebhookFormInput) => {
     try {
       await submitForm(formData, webhook, getDevJwt(clientId) ?? '');
-      setNotification('Webhook updated successfully', '', 'success');
+      toast.success('Webhook updated successfully');
       invalidateQuery(clientId);
       reset(formData);
     } catch (err) {
       captureException(err);
-      setNotification('Error updating webhook', '', 'error');
+      toast.error('Error updating webhook');
     }
   };
 

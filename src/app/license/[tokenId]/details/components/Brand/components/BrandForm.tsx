@@ -1,5 +1,5 @@
 'use client';
-import React, { FC, useContext, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as Sentry from '@sentry/nextjs';
 import { isAxiosError } from 'axios';
@@ -8,7 +8,7 @@ import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 
 import {
   createMyBrand,
@@ -46,7 +46,6 @@ export const BrandForm: FC<Props> = ({
   onCancel,
   onSetDefault,
 }) => {
-  const { setNotification } = useContext(NotificationContext);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [logoCid, setLogoCid] = useState<string | null>(brand?.logoCid ?? null);
@@ -104,17 +103,13 @@ export const BrandForm: FC<Props> = ({
       setIconCid(updated.iconCid);
       setLogoFile(null);
       setIconFile(null);
-      setNotification('Brand saved', 'Saved', 'success');
+      toast.success('Brand saved');
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 409) {
-        setNotification(
-          'A brand with this name already exists',
-          'Name conflict',
-          'error',
-        );
+        toast.error('A brand with this name already exists');
       } else {
         Sentry.captureException(error);
-        setNotification('Failed to save brand', 'Oops…', 'error');
+        toast.error('Failed to save brand');
       }
     } finally {
       setSaving(false);
@@ -127,10 +122,10 @@ export const BrandForm: FC<Props> = ({
     try {
       await setDefaultBrand(workspaceId, brand.id);
       onSetDefault();
-      setNotification('Default brand updated', 'Updated', 'success');
+      toast.success('Default brand updated');
     } catch (error) {
       Sentry.captureException(error);
-      setNotification('Failed to set default brand', 'Oops…', 'error');
+      toast.error('Failed to set default brand');
     } finally {
       setSettingDefault(false);
     }

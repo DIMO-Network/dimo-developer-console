@@ -1,4 +1,4 @@
-import { FC, useContext, useState } from 'react';
+import { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import * as Sentry from '@sentry/nextjs';
@@ -9,7 +9,7 @@ import { IAppWithWorkspace } from '@/types/app';
 import { IWorkspace } from '@/types/workspace';
 import { Label } from '@/components/Label';
 import { LoadingProps } from '@/components/LoadingModal';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { useGlobalAccount, usePayLicenseFee, useMintLicense, useMixPanel } from '@/hooks';
@@ -26,7 +26,6 @@ interface IProps {
 
 export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { setNotification } = useContext(NotificationContext);
   const { trackEvent } = useMixPanel();
   const { currentUser } = useGlobalAccount();
   const {
@@ -52,15 +51,11 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
       });
       const { reason } = await payLicenseFee();
       if (reason) {
-        return setNotification(reason, 'Oops...', 'error');
+        return toast.error(reason);
       }
       const { workspace } = getValues();
       await createDeveloperLicense(workspace);
-      setNotification(
-        'Developer license created! Refresh the page to see your changes.',
-        'Success',
-        'success',
-      );
+      toast.success('Developer license created! Refresh the page to see your changes.');
 
       trackEvent('Developer License Created', {
         distinct_id: currentUser!.smartContractAddress!,
@@ -78,11 +73,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
         }
       }
       Sentry.captureException(error);
-      setNotification(
-        'Something went wrong while confirming the transaction',
-        'Oops...',
-        'error',
-      );
+      toast.error('Something went wrong while confirming the transaction');
     } finally {
       setIsLoading(false);
     }

@@ -3,7 +3,6 @@ import React, { useContext } from 'react';
 import { MenuButton } from '@/components/Menu/MenuButton';
 import {
   withCredits,
-  withNotifications,
   withGlobalAccounts,
   withApollo,
   withAccountInformation,
@@ -16,15 +15,13 @@ import { LayoutContext } from '@/context/LayoutContext';
 import { cn } from '@/lib/utils';
 import './AuthorizedLayout.css';
 
-const Providers = withNotifications(
-  withGlobalAccounts(
-    withLayout(
-      withCredits(
-        withApollo(
-          withAccountInformation(({ children }: { children: React.ReactNode }) => (
-            <>{children}</>
-          )),
-        ),
+const Providers = withGlobalAccounts(
+  withLayout(
+    withCredits(
+      withApollo(
+        withAccountInformation(({ children }: { children: React.ReactNode }) => (
+          <>{children}</>
+        )),
       ),
     ),
   ),

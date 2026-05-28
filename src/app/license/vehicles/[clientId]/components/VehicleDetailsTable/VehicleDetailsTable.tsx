@@ -1,5 +1,5 @@
 'use client';
-import { FC, useContext, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { PaginatedTableIdentityAPI } from '@/components/Table';
 import { useQuery } from '@apollo/client';
@@ -12,7 +12,7 @@ import {
 import { RenounceVehicleModal } from '@/app/license/vehicles/[clientId]/components/RenounceVehicleModal';
 import { getSimulatedVehicles } from '@/actions/simulatedVehicles';
 import { useRenounceVehiclePermissions } from '@/hooks/useRenounceVehiclePermissions';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { GetVehiclesByClientIdQuery } from '@/gql/graphql';
 
@@ -54,7 +54,6 @@ export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
   const [renouncingVehicle, setRenouncingVehicle] = useState<VehicleNode | null>(null);
   const [removedTokenIds, setRemovedTokenIds] = useState<Set<number>>(new Set());
   const { renounce } = useRenounceVehiclePermissions();
-  const { setNotification } = useContext(NotificationContext);
 
   useEffect(() => {
     getSimulatedVehicles({ clientId }).then((vehicles) => {
@@ -70,12 +69,12 @@ export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
       // Optimistic removal
       setRemovedTokenIds((prev) => new Set([...prev, tokenId]));
       setRenouncingVehicle(null);
-      setNotification('Access renounced', 'Success', 'success');
+      toast.success('Access renounced');
       // Background sync
       refetch();
     } catch (e: unknown) {
       Sentry.captureException(e);
-      setNotification('Failed to renounce access', 'Error', 'error');
+      toast.error('Failed to renounce access');
       throw e; // let modal display the inline error
     }
   };

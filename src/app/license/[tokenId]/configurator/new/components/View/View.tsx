@@ -2,7 +2,7 @@
 
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -14,7 +14,7 @@ import {
 import { saveConfiguration } from '@/actions/configurations';
 import { useRouter } from 'next/navigation';
 import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/ListView/ListView';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 
 const parseArray = (val?: string) =>
   val
@@ -107,7 +107,6 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
     skip: !tokenId,
   });
   const router = useRouter();
-  const { setNotification } = useContext(NotificationContext);
 
   useEffect(() => {
     const getTokenId = async () => {
@@ -135,13 +134,13 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
 
       await saveConfiguration(body);
 
-      setNotification('Configuration successfully created', '', 'success');
+      toast.success('Configuration successfully created');
 
       // Redirect to list, not edit page
       router.replace(`/license/${tokenId}/configurator`);
     } catch (error) {
       console.log(error);
-      setNotification('Failed to create Configuration. Please try again.', '', 'error');
+      toast.error('Failed to create Configuration. Please try again.');
     }
   };
 

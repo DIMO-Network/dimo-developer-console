@@ -1,14 +1,13 @@
 'use client';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as Sentry from '@sentry/nextjs';
 
 import { BuildForForm, CompanyInfoForm, WalletCreation } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
 import { IAuth } from '@/types/auth';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { useErrorHandler } from '@/hooks';
-import { withNotifications } from '@/hoc';
 import { getUser } from '@/actions/user';
 import { Anchor } from '@/components/Anchor';
 
@@ -34,7 +33,6 @@ const signUpFlows = {
 
 const View = () => {
   useErrorHandler();
-  const { setNotification } = useContext(NotificationContext);
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentFlow = searchParams.get('flow') ?? 'wallet-creation';
@@ -86,7 +84,7 @@ const View = () => {
     } catch (error) {
       console.error('Something went wrong while the completing user information', error);
       Sentry.captureException(error);
-      setNotification('Something went wrong', 'Oops...', 'error');
+      toast.error('Something went wrong');
     } finally {
       setIsLoading(false);
     }
@@ -126,4 +124,4 @@ const View = () => {
   );
 };
 
-export default withNotifications(View);
+export default View;

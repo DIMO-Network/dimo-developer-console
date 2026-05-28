@@ -1,5 +1,4 @@
 'use client';
-import { withNotifications } from '@/hoc';
 import './View.css';
 import { useErrorHandler } from '@/hooks';
 import {
@@ -72,4 +71,4 @@ export const View = () => {
   );
 };
 
-export default withNotifications(View);
+export default View;

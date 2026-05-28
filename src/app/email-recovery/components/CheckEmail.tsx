@@ -1,12 +1,12 @@
 'use client';
-import { FC, useContext, useState } from 'react';
+import { FC, useState } from 'react';
 import { gtSuper } from '@/utils/font';
 import { Button } from '@/components/Button';
 import { IPasskeyRecoveryState } from '@/types/auth';
 import { emailRecovery } from '@/actions/user';
 import { saveToLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 import { generateP256KeyPair } from '@turnkey/crypto';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { captureException } from '@sentry/nextjs';
 
 interface IProps {
@@ -14,7 +14,6 @@ interface IProps {
 }
 
 export const CheckEmail: FC<IProps> = ({ state }) => {
-  const { setNotification } = useContext(NotificationContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleResendCode = async () => {
@@ -27,14 +26,10 @@ export const CheckEmail: FC<IProps> = ({ state }) => {
       saveToLocalStorage(EmbeddedKey, key.privateKey);
       const success = await emailRecovery(email, targetPublicKey);
       if (success) {
-        setNotification('Recovery code successfully resent.', 'Success', 'success');
+        toast.success('Recovery code successfully resent.');
       }
     } catch (error) {
-      setNotification(
-        'Something went wrong while sending the recovery code.',
-        'Oops...',
-        'error',
-      );
+      toast.error('Something went wrong while sending the recovery code.');
       captureException(error);
     } finally {
       setIsLoading(false);

@@ -1,8 +1,8 @@
 'use client';
 import { IAuth } from '@/types/auth';
-import { FC, ReactNode, useContext, useEffect, useState } from 'react';
+import { FC, ReactNode, useEffect, useState } from 'react';
 import { useAuth, useMixPanel, usePasskey } from '@/hooks';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 
 import { createUserGlobalAccount } from '@/actions/user';
@@ -49,7 +49,6 @@ const WalletCreationForm = ({
 };
 
 export const WalletCreation: FC<IProps> = ({ onNext }) => {
-  const { setNotification } = useContext(NotificationContext);
   const searchParams = useSearchParams();
   const { trackEvent } = useMixPanel();
   const [email, setEmail] = useState<string>('');
@@ -101,11 +100,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
 
       const userInformation = await getUserSubOrganization(email);
       if (!userInformation) {
-        setNotification(
-          'Something went wrong while creating the user wallet',
-          'Oops...',
-          'error',
-        );
+        toast.error('Something went wrong while creating the user wallet');
         return;
       }
       const { subOrganizationId, hasPasskey } = userInformation;
@@ -125,11 +120,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     } catch (error) {
       Sentry.captureException(error);
       console.error('Something went wrong while creating the user wallet', error);
-      setNotification(
-        'Something went wrong while creating the user wallet',
-        'Oops...',
-        'error',
-      );
+      toast.error('Something went wrong while creating the user wallet');
     }
   };
 
@@ -166,11 +157,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     } catch (error: unknown) {
       Sentry.captureException(error);
       console.error('Something went wrong while creating the user wallet', error);
-      setNotification(
-        'Something went wrong while creating the user wallet',
-        'Oops...',
-        'error',
-      );
+      toast.error('Something went wrong while creating the user wallet');
     }
   };
 
@@ -185,11 +172,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     });
 
     if (!success) {
-      setNotification(
-        'Something went wrong while creating the user wallet',
-        'Oops...',
-        'error',
-      );
+      toast.error('Something went wrong while creating the user wallet');
       return;
     }
 

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Card } from '@/components/Card';
 import classNames from 'classnames';
@@ -9,7 +9,7 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';
 import { GET_VEHICLE_COUNT_BY_CLIENT_ID } from '@/app/license/[tokenId]/details/components/Vehicles';
 import { getConfigurationsByClientId } from '@/actions/configurations';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 
 import './LicenseCard.css';
 
@@ -32,8 +32,6 @@ export const LicenseCard = (props: {
   className?: string;
 }) => {
   const license = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, props.license);
-  const { setNotification } = useContext(NotificationContext);
-
   const { data: vehicleData, loading: vehicleLoading } = useQuery(
     GET_VEHICLE_COUNT_BY_CLIENT_ID,
     {
@@ -70,7 +68,7 @@ export const LicenseCard = (props: {
         </div>
 
         {/* Stats */}
-        <div className="flex flex-row items-center gap-4 py-2 border-y border-[#322D2F]">
+        <div className="flex flex-row items-center gap-4 py-2 border-y border-border">
           <div className="flex flex-col gap-0.5">
             <span className="text-[10px] uppercase tracking-wider text-text-secondary">
               Vehicles Connected
@@ -107,7 +105,7 @@ export const LicenseCard = (props: {
           <button
             onClick={() => {
               navigator.clipboard.writeText(sharingLink);
-              setNotification('Sharing link copied', '', 'success');
+              toast.success('Sharing link copied');
             }}
             className="flex items-center gap-2 w-fit text-xs text-primary hover:opacity-70 transition-opacity"
             title={sharingLink}

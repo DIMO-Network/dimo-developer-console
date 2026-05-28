@@ -3,9 +3,9 @@ import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
 import { Button } from '@/components/Button';
-import { useState, useRef, useEffect, FC, useContext } from 'react';
+import { useState, useRef, useEffect, FC } from 'react';
 import { captureException } from '@sentry/nextjs';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 
 interface IProps {
   email: string;
@@ -13,7 +13,6 @@ interface IProps {
 }
 
 export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
-  const { setNotification } = useContext(NotificationContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRequestingNewOtp, setIsRequestingNewOtp] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
@@ -89,13 +88,13 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
       });
 
       if (!success) {
-        setNotification('Invalid OTP code', 'Error', 'error');
+        toast.error('Invalid OTP code');
         return;
       }
 
       handleSignupComplete(newWalletAddress!);
     } catch (error: unknown) {
-      setNotification('Something went wrong', 'Error', 'error');
+      toast.error('Something went wrong');
       captureException(error);
     } finally {
       setIsLoading(false);
@@ -124,10 +123,10 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
       const newOtpId = await beginOtpLogin();
       setOtpId(newOtpId);
       setOtp(Array(6).fill(''));
-      setNotification('New OTP code sent to your email', 'Success', 'success');
+      toast.success('New OTP code sent to your email');
     } catch (error) {
       captureException(error);
-      setNotification('Failed to resend OTP code', 'Oops...', 'error');
+      toast.error('Failed to resend OTP code');
     } finally {
       setIsRequestingNewOtp(false);
     }
