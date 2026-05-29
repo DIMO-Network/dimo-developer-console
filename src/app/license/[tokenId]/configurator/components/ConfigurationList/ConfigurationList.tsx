@@ -71,7 +71,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
     <div className="w-full">
       <table className="w-full text-sm border-collapse">
         <thead>
-          <tr className="border-b border-surface-default text-left text-text-secondary">
+          <tr className="border-b border-border text-left text-text-secondary">
             <th className="py-2 pr-4 font-medium">Name</th>
             <th className="py-2 pr-4 font-medium">Component</th>
             <th className="py-2 font-medium">Actions</th>
@@ -79,7 +79,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
         </thead>
         <tbody>
           {configs.map((config) => (
-            <tr key={config.id} className="border-b border-surface-default">
+            <tr key={config.id} className="border-b border-border">
               <td className="py-3 pr-4">{config.configuration_name || '(untitled)'}</td>
               <td className="py-3 pr-4 text-text-secondary">
                 {entryStateLabel(config.entry_state)}

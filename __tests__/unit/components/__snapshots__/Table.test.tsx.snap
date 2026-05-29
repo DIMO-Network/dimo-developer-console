@@ -3,7 +3,7 @@
 exports[`Table renders a table with actions 1`] = `
 <div>
   <div
-    class="min-w-full bg-surface-default rounded-xl p-4"
+    class="min-w-full bg-card rounded-xl p-4"
   >
     <table
       class="table"
@@ -57,7 +57,7 @@ exports[`Table renders a table with actions 1`] = `
 exports[`Table renders a table with custom render 1`] = `
 <div>
   <div
-    class="min-w-full bg-surface-default rounded-xl p-4"
+    class="min-w-full bg-card rounded-xl p-4"
   >
     <table
       class="table"

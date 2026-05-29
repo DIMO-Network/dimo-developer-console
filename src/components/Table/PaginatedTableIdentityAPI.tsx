@@ -78,7 +78,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
 
   return (
     <div className={'min-w-full'}>
-      <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
+      <div className={'min-w-full bg-card rounded-xl p-4'}>
         <table className="table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -97,7 +97,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className={`border-t border-t-cta-default${onRowClick ? ' cursor-pointer hover:bg-surface-raised' : ''}`}
+                className={`border-t border-t-cta-default${onRowClick ? ' cursor-pointer hover:bg-accent' : ''}`}
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (

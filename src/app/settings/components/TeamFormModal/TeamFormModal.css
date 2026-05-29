@@ -5,11 +5,11 @@
     @apply flex flex-col gap-2 w-full;
 
     .title {
-      @apply text-2xl font-bold text-white;
+      @apply text-2xl font-bold text-foreground;
     }
 
     .description {
-      @apply text-white/50 w-full h-full;
+      @apply text-muted-foreground w-full h-full;
     }
   }
 

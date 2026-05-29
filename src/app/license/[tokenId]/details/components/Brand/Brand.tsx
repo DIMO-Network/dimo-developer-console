@@ -154,7 +154,7 @@ export const Brand: FC<Props> = ({ license }) => {
               </div>
             )}
             {brands.length > 0 && (
-              <div className="mt-6 p-4 bg-surface-raised rounded-lg">
+              <div className="mt-6 p-4 bg-accent rounded-lg">
                 <p className="text-sm font-medium text-text-primary mb-2">
                   Using multiple brands with Login with DIMO
                 </p>

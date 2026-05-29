@@ -240,7 +240,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
             {renderSnippet()}
           </SyntaxHighlighter>
         ) : (
-          <pre className="bg-surface-raised p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
+          <pre className="bg-accent p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
             {buildUrl()}
           </pre>
         )}

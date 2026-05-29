@@ -146,7 +146,7 @@ const DropZone: FC<{
         if (files.length) onFiles(files);
       }}
       className={`flex-1 min-h-[80px] border border-dashed rounded-xl px-4 py-3 text-sm transition-colors
-        ${dragOver ? 'border-text-primary bg-surface-raised' : 'border-border'}
+        ${dragOver ? 'border-text-primary bg-accent' : 'border-border'}
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-text-primary cursor-pointer'}`}
     >
       <span className="text-text-primary font-medium">
@@ -174,7 +174,7 @@ const PreviewBox: FC<{
   if (!needsCrop) {
     return (
       <div
-        className={`bg-surface-raised border border-border rounded-lg overflow-hidden
+        className={`bg-accent border border-border rounded-lg overflow-hidden
           ${aspect === 'square' ? 'w-24 h-24' : 'w-32 h-16'}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -215,7 +215,7 @@ const SquareCropper: FC<{
 
   return (
     <div className="flex flex-col gap-2 w-72">
-      <div className="relative w-72 h-72 bg-surface-raised rounded-lg overflow-hidden">
+      <div className="relative w-72 h-72 bg-accent rounded-lg overflow-hidden">
         <Cropper
           image={src}
           crop={crop}

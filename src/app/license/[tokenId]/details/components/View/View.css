@@ -10,7 +10,7 @@
   }
 
   .signers-content {
-    @apply p-4 bg-surface-raised rounded-2xl flex flex-col gap-4 justify-between;
+    @apply p-4 bg-accent rounded-2xl flex flex-col gap-4 justify-between;
 
     .title {
       @apply col-span-10;

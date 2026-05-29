@@ -41,9 +41,7 @@ const PermissionCard = ({
   <div
     onClick={onToggle}
     className={`cursor-pointer border rounded-lg p-4 transition ${
-      selected
-        ? 'border-red-900 bg-surface-raised'
-        : 'border-surface-default bg-surface-raised'
+      selected ? 'border-red-900 bg-accent' : 'border-border bg-accent'
     }`}
   >
     <h4 className="font-semibold">{title}</h4>

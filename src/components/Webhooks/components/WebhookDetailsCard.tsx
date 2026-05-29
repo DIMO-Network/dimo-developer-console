@@ -8,7 +8,7 @@ interface IProps {
 }
 export const WebhookDetailsCard: FC<IProps> = ({ webhook }) => {
   return (
-    <div className="p-4 bg-surface-default rounded-2xl grid grid-cols-[max-content_1fr] gap-y-2 gap-x-4">
+    <div className="p-4 bg-card rounded-2xl grid grid-cols-[max-content_1fr] gap-y-2 gap-x-4">
       <WebhookDetailRow label="Description" value={webhook.description} />
       {webhook.displayName && (
         <WebhookDetailRow label="Display Name" value={webhook.displayName} />

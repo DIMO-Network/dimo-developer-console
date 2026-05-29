@@ -1,5 +1,5 @@
 .subtitle-content {
-  @apply border-b border-[#322D2F];
+  @apply border-b border-border;
 
   .subtitle {
     @apply text-3xl font-medium text-[#BABABA] pb-2;

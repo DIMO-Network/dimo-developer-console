@@ -89,7 +89,7 @@ export const VehicleList: FC<Props> = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-surface-default rounded-xl p-4 h-full">
+    <div className="flex flex-col gap-3 bg-card rounded-xl p-4 h-full">
       {/* Search */}
       <div className="relative">
         <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
@@ -98,7 +98,7 @@ export const VehicleList: FC<Props> = ({
           placeholder="Search vehicles…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-surface-raised text-text-primary placeholder-text-secondary rounded-lg pl-9 pr-3 py-2 text-sm outline-none border border-transparent focus:border-cta-default"
+          className="w-full bg-accent text-text-primary placeholder-text-secondary rounded-lg pl-9 pr-3 py-2 text-sm outline-none border border-transparent focus:border-cta-default"
         />
       </div>
 
@@ -131,7 +131,7 @@ export const VehicleList: FC<Props> = ({
                 className={`flex flex-col items-start w-full text-left px-3 py-3 rounded-lg border-b border-b-cta-default last:border-b-0 transition-colors ${
                   isSelected
                     ? 'bg-cta-default text-white'
-                    : 'hover:bg-surface-raised text-text-primary'
+                    : 'hover:bg-accent text-text-primary'
                 }`}
               >
                 <span className="text-sm font-medium">{mmy || 'Unknown vehicle'}</span>

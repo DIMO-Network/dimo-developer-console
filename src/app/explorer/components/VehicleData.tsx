@@ -64,14 +64,14 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
 
   if (tokenId === null) {
     return (
-      <div className="flex items-center justify-center h-full bg-surface-default rounded-xl p-8 text-text-secondary text-sm">
+      <div className="flex items-center justify-center h-full bg-card rounded-xl p-8 text-text-secondary text-sm">
         Select a vehicle to view its data.
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4 bg-surface-default rounded-xl p-6 h-full overflow-y-auto">
+    <div className="flex flex-col gap-4 bg-card rounded-xl p-6 h-full overflow-y-auto">
       <p className="text-sm text-text-secondary font-medium uppercase tracking-wider">
         Vehicle Data — Token #{tokenId}
       </p>
@@ -100,7 +100,7 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
             {availableSignals.map((signal) => (
               <span
                 key={signal}
-                className="text-xs font-mono px-2 py-1 rounded bg-surface-raised text-text-primary border border-[#322D2F]"
+                className="text-xs font-mono px-2 py-1 rounded bg-accent text-text-primary border border-border"
               >
                 {signal}
               </span>
@@ -126,7 +126,7 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
           <p className="text-xs text-text-secondary">
             Latest Signals ({latestSignals.length})
           </p>
-          <pre className="text-xs font-mono bg-surface-raised border border-[#322D2F] rounded-lg p-4 overflow-auto h-96 whitespace-pre leading-relaxed">
+          <pre className="text-xs font-mono bg-accent border border-border rounded-lg p-4 overflow-auto h-96 whitespace-pre leading-relaxed">
             <ColoredJson
               data={Object.fromEntries(
                 latestSignals.map(({ signal, timestamp, value }) => [

@@ -23,7 +23,7 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
   };
   // TODO: check that conditional actions access.
   return (
-    <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
+    <div className={'min-w-full bg-card rounded-xl p-4'}>
       <table className="table">
         <thead className="table-header">
           <tr>
