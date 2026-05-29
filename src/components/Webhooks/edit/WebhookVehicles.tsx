@@ -1,11 +1,11 @@
 import { Label } from '@/components/Label';
-import React, { FC, useContext } from 'react';
+import React, { FC } from 'react';
 import { useWebhookVehiclesById } from '@/hooks/queries/useWebhookVehiclesById';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { EditIcon } from '@/components/Icons';
 import { useFormContext } from 'react-hook-form';
 import { EditWebhookFormState, WebhookFormInput } from '@/types/webhook';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { useEditWebhookContext } from '@/hoc/EditWebhookProvider';
 
 interface Props {
@@ -17,7 +17,6 @@ export const WebhookVehicles: FC<Props> = ({ clientId, webhookId }) => {
   const {
     formState: { isDirty },
   } = useFormContext<WebhookFormInput>();
-  const { setNotification } = useContext(NotificationContext);
   const { setFormState } = useEditWebhookContext();
   const { data, isLoading, error } = useWebhookVehiclesById({
     clientId,
@@ -26,11 +25,7 @@ export const WebhookVehicles: FC<Props> = ({ clientId, webhookId }) => {
 
   const goToSubscribedVehicles = () => {
     if (isDirty) {
-      return setNotification(
-        'Please save or discard your changes before proceeding',
-        '',
-        'error',
-      );
+      return toast.error('Please save or discard your changes before proceeding');
     }
     setFormState(EditWebhookFormState.SUBSCRIBE_VEHICLES);
   };

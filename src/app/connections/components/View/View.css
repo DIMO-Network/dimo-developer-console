@@ -20,7 +20,7 @@
 }
 
 .connection-card {
-  @apply bg-black rounded-2xl p-4 flex flex-col gap-3;
+  @apply bg-card rounded-2xl p-4 flex flex-col gap-3;
 }
 
 .connection-card-header {
@@ -28,7 +28,7 @@
 }
 
 .connection-name {
-  @apply text-white text-lg font-semibold m-0;
+  @apply text-foreground text-lg font-semibold m-0;
 }
 
 .connection-icon {

@@ -1,10 +1,10 @@
 'use client';
 import type { FC } from 'react';
 
-import React, { useContext } from 'react';
+import React from 'react';
 
 import { GitHubIcon, GoogleIcon } from '@/components/Icons';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { SignInButton } from '@/components/SignInButton';
 import AppleIcon from '../Icons/AppleIcon';
 
@@ -14,15 +14,8 @@ interface SignInButtonProps {
 }
 
 export const SignInButtons: FC<SignInButtonProps> = ({ disabled, onCTA }) => {
-  const { setNotification } = useContext(NotificationContext);
-
   const handlerLogin = (app: string) => {
-    if (disabled)
-      setNotification(
-        'You must accept terms of service and privacy policy',
-        'Terms of service',
-        'error',
-      );
+    if (disabled) toast.error('You must accept terms of service and privacy policy');
     else onCTA(app);
   };
 

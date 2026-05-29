@@ -1,7 +1,5 @@
-import { TextareaHTMLAttributes, forwardRef, ReactNode } from 'react';
-
-import classnames from 'classnames';
-
+import { forwardRef, type TextareaHTMLAttributes, type ReactNode } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import './TextArea.css';
 
 interface IProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -12,11 +10,10 @@ interface IProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 export type Ref = HTMLTextAreaElement;
 
 export const TextArea = forwardRef<Ref, IProps>(
-  ({ className: inputClassName = '', action, ...props }, ref) => {
-    const className = classnames(inputClassName);
+  ({ className = '', action, ...props }, ref) => {
     return (
       <div className="text-area">
-        <textarea className={className} {...props} ref={ref} />
+        <Textarea className={className} {...props} ref={ref} />
         {action}
       </div>
     );
@@ -24,5 +21,4 @@ export const TextArea = forwardRef<Ref, IProps>(
 );
 
 TextArea.displayName = 'TextArea';
-
 export default TextArea;

@@ -149,6 +149,35 @@ export interface PaymentSACD {
   signature: `0x${string}`;
 }
 
+export interface VehiclePermissionSACD {
+  specVersion: '1.0';
+  time: string;
+  type: 'dimo.sacd';
+  dataversion: string;
+  data: {
+    grantor: { address: `0x${string}` };
+    grantee: { address: `0x${string}` };
+    effectiveAt: string;
+    expiresAt: string;
+    additionalDates: Record<string, unknown>;
+    agreements: [
+      {
+        type: 'permission';
+        asset: string;
+        permissions: { name: string }[];
+        attachments: {
+          name: string;
+          description: string;
+          contentType: string;
+          url: string;
+        }[];
+        extensions: Record<string, unknown>;
+      },
+    ];
+  };
+  signature: `0x${string}`;
+}
+
 export interface ICreditUsage {
   fromDate: string;
   toDate: string;

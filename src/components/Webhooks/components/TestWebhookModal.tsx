@@ -1,11 +1,11 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { Webhook } from '@/types/webhook';
 import Button from '@/components/Button/Button';
 import Title from '@/components/Title/Title';
 import { Modal } from '@/components/Modal';
 import { WebhookDetailsCard } from '@/components/Webhooks/components/WebhookDetailsCard';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { extractAxiosMessage } from '@/utils/api';
 import { captureException } from '@sentry/nextjs';
@@ -22,7 +22,6 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
   webhook,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { setNotification } = useContext(NotificationContext);
 
   const handleRunWebhookTest = async () => {
     try {
@@ -30,11 +29,11 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
       await axios.post(webhook.targetURL, fakeData, {
         headers: { 'Content-Type': 'application/json' },
       });
-      setNotification('Webhook triggered successfully.', '', 'success');
+      toast.success('Webhook triggered successfully.');
     } catch (err: unknown) {
       captureException(err);
       const message = extractAxiosMessage(err, 'An error occurred testing the webhook');
-      setNotification(message, '', 'error');
+      toast.error(message);
     }
   };
 
@@ -47,7 +46,7 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
       if (err instanceof Error) {
         errorMessage = err.message ?? errorMessage;
       }
-      setNotification(errorMessage, '', 'error');
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -10,11 +10,11 @@ import {
   ComponentType,
   DynamicFormProps,
   PERMISSIONS,
-} from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/types';
+} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { getConfiguration, updateConfiguration } from '@/actions/configurations';
 import './View.css';
-import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/View/View';
-import { NotificationContext } from '@/context/notificationContext';
+import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/ListView/ListView';
+import { toast } from 'sonner';
 
 const parseArray = (val?: string) =>
   val
@@ -148,7 +148,6 @@ export const View = ({
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
   });
-  const { setNotification } = useContext(NotificationContext);
 
   useEffect(() => {
     const getTokenId = async () => {
@@ -211,10 +210,10 @@ export const View = ({
 
       await updateConfiguration(body);
 
-      setNotification('Configuration successfully updated', '', 'success');
+      toast.success('Configuration successfully updated');
     } catch (error) {
       console.error(error);
-      setNotification('Failed to update Configuration. Please try again.', '', 'error');
+      toast.error('Failed to update Configuration. Please try again.');
     }
   };
 

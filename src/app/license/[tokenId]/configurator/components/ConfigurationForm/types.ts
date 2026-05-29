@@ -1,6 +1,7 @@
 interface SharedProps {
   client_id: string;
   configuration_name: string;
+  configuration_id: string;
   redirectUri: string;
   mode: 'popup' | 'redirect';
   utm: string | null;
@@ -14,6 +15,8 @@ interface LoginWithDimoProps extends SharedProps {
   vehicles?: string;
   vehicleMakes?: string;
   powerTrainTypes?: string;
+  /** Brand name to pass as `brandName` to the SDK. Empty = use workspace default. */
+  brandName?: string;
 }
 
 interface AttestationsProps {
@@ -29,6 +32,8 @@ interface ShareVehiclesWithDimoProps extends SharedProps {
   permissions: string[];
   requireAttestation: boolean;
   attestation: AttestationsProps;
+  /** Brand name to pass as `brandName` to the SDK. Empty = use workspace default. */
+  brandName?: string;
 }
 
 interface ExecuteAdvanceTransactionWithDimoProps extends SharedProps {

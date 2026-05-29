@@ -1,11 +1,10 @@
 import { Metadata } from 'next';
-
-import { View } from './components/View';
+import { ListView } from './components/ListView';
 import configuration from '@/config';
 
 export const metadata: Metadata = {
   title: `Settings | ${configuration.appName}`,
 };
 
-const LIWDConfiguratorPage = View;
-export default LIWDConfiguratorPage;
+const ConfiguratorListPage = ListView;
+export default ConfiguratorListPage;

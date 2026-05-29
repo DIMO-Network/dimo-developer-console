@@ -2,12 +2,12 @@
 
 import { get } from 'lodash';
 
-import { useState, useContext, type FC } from 'react';
+import { useState, type FC } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/Button';
 import { Modal } from '@/components/Modal';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { Title } from '@/components/Title';
 import { TokenInput } from '@/components/TokenInput';
 import { useContractGA } from '@/hooks';
@@ -35,7 +35,6 @@ export const SpendingLimitModal: FC<IProps> = ({
   addressToAllow = configuration.DLC_ADDRESS,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { setNotification } = useContext(NotificationContext);
   const { approveNewSpendingLimit } = useContractGA();
   const { control, handleSubmit, getValues } = useForm<IForm>({
     mode: 'onChange',
@@ -55,14 +54,8 @@ export const SpendingLimitModal: FC<IProps> = ({
     } catch (error: unknown) {
       Sentry.captureException(error);
       const code = get(error, 'code', null);
-      if (code === 4001)
-        setNotification('The transaction was denied', 'Oops...', 'error');
-      else
-        setNotification(
-          'Something went wrong while confirming the transaction',
-          'Oops...',
-          'error',
-        );
+      if (code === 4001) toast.error('The transaction was denied');
+      else toast.error('Something went wrong while confirming the transaction');
     } finally {
       setIsLoading(false);
     }

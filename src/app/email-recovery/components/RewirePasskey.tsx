@@ -1,8 +1,8 @@
-import { FC, useContext, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { usePasskey } from '@/hooks';
 import { useSearchParams } from 'next/navigation';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 import { EmbeddedKey, getFromLocalStorage } from '@/utils/localStorage';
 import { getUserInformation, saveNewPasskey } from '@/actions/user';
@@ -15,7 +15,6 @@ interface IProps {
 }
 
 export const RewirePasskey: FC<IProps> = ({ onNext }) => {
-  const { setNotification } = useContext(NotificationContext);
   const params = useSearchParams();
   const { getNewUserPasskey } = usePasskey();
 
@@ -84,11 +83,11 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
   }) => {
     try {
       await registerNewPasskey({ recoveryKey, email });
-      setNotification('Passkey rewired successfully', 'Success', 'success');
+      toast.success('Passkey rewired successfully');
       onNext('rewire-passkey');
     } catch (error) {
       console.error('Error while rewiring passkey', error);
-      setNotification('Something went wrong', 'Oops...', 'error');
+      toast.error('Something went wrong');
       Sentry.captureException(error);
     }
   };

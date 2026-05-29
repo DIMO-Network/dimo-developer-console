@@ -1,6 +1,8 @@
 'use client';
 import { FC, useState } from 'react';
 import { Modal } from '@/components/Modal';
+import { Button } from '@/components/Button';
+import { BeakerIcon } from '@heroicons/react/24/outline';
 import { VehicleSimulator } from './index';
 
 interface Props {
@@ -12,13 +14,14 @@ export const VehicleSimulatorModal: FC<Props> = ({ clientId }) => {
 
   return (
     <>
-      <button
+      <Button
         type="button"
+        className="table-action-button with-icon px-4"
         onClick={() => setIsOpen(true)}
-        className="text-sm text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
       >
-        ・
-      </button>
+        <BeakerIcon className="h-4 w-4" />
+        Vehicle Simulator
+      </Button>
       <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
         <VehicleSimulator clientId={clientId} />
       </Modal>

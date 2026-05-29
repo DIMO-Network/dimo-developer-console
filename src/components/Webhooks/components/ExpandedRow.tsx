@@ -22,7 +22,7 @@ export const ExpandedRow = ({
   const handleDeletePress = useHandleDeletePress();
 
   return (
-    <tr className="expanded-row bg-surface-sunken border-t-0">
+    <tr className="expanded-row bg-background border-t-0">
       <td colSpan={colSpan} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
         <div className="expanded-content space-y-4">
           <WebhookUrlDisplay url={webhook.targetURL} />

@@ -1,5 +1,5 @@
 .anchor {
-  @apply text-white py-1 cursor-pointer;
+  @apply text-foreground py-1 cursor-pointer;
 
   &.primary {
     @apply text-primary-200;

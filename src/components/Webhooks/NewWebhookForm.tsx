@@ -1,9 +1,9 @@
 'use client';
 
 import { FormProvider, useForm } from 'react-hook-form';
-import React, { useContext } from 'react';
+import React from 'react';
 import { WebhookFormInput, WebhookFormStepName } from '@/types/webhook';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { captureException } from '@sentry/nextjs';
 import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/create/SubscribeVehicles';
 import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
@@ -44,8 +44,6 @@ export const NewWebhookForm = ({
     onSubmit,
     canGoToPrevious,
   } = useWebhookCreateFormContext();
-  const { setNotification } = useContext(NotificationContext);
-
   const methods = useForm<WebhookFormInput>({
     mode: 'onChange',
     defaultValues: {
@@ -64,7 +62,7 @@ export const NewWebhookForm = ({
       const response = await onSubmit(data, token);
 
       if (response?.message) {
-        setNotification(response.message, '', 'success');
+        toast.success(response.message);
       }
       if (isLastStep) {
         return onComplete();
@@ -76,7 +74,7 @@ export const NewWebhookForm = ({
       if (err instanceof Error) {
         msg = err.message || msg;
       }
-      setNotification(msg, '', 'error');
+      toast.error(msg);
     }
   });
 

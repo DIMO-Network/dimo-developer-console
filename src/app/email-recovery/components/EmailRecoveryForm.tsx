@@ -1,12 +1,12 @@
 'use client';
-import { FC, useState, useContext } from 'react';
+import { FC, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { Button } from '@/components/Button';
 import { TextError } from '@/components/TextError';
 import { captureException } from '@sentry/nextjs';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { EmbeddedKey, saveToLocalStorage } from '@/utils/localStorage';
 import { emailRecovery } from '@/actions/user';
@@ -24,7 +24,6 @@ interface IProps {
 }
 
 export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
-  const { setNotification } = useContext(NotificationContext);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
@@ -50,7 +49,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
         });
       }
     } catch (error) {
-      setNotification('Something went wrong while sending the email', 'Oops...', 'error');
+      toast.error('Something went wrong while sending the email');
       captureException(error);
     } finally {
       setIsLoading(false);

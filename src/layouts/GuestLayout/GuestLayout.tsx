@@ -1,13 +1,11 @@
 'use client';
 import React, { type ReactNode } from 'react';
 
-import { withAuth, withNotifications } from '@/hoc';
+import { withAuth } from '@/hoc';
 
 import './GuestLayout.css';
 
-const Providers = withNotifications(
-  withAuth(({ children }: { children: ReactNode }) => <>{children}</>),
-);
+const Providers = withAuth(({ children }: { children: ReactNode }) => <>{children}</>);
 
 const Layout = ({ children }: { children: ReactNode }) => {
   return (

@@ -1,8 +1,5 @@
 import { useState, type FC } from 'react';
-import { Switch } from '@headlessui/react';
-import classNames from 'classnames';
-
-import './Toggle.css';
+import { Switch } from '@/components/ui/switch';
 
 interface IProps {
   checked?: boolean;
@@ -16,25 +13,8 @@ export const Toggle: FC<IProps> = ({ checked = false, onToggle = () => {} }) => 
     setEnabled(value);
     onToggle(value);
   };
-  return (
-    <Switch
-      checked={enabled}
-      onChange={handleToggle}
-      className="custom-toggle group"
-      aria-label="toggle"
-    >
-      <span className="sr-only">Use setting</span>
-      <span aria-hidden="true" className="base" />
-      <span
-        aria-hidden="true"
-        className={classNames({ active: enabled, inactive: !enabled }, 'bar')}
-      />
-      <span
-        aria-hidden="true"
-        className={classNames({ active: enabled, inactive: !enabled }, 'dot')}
-      />
-    </Switch>
-  );
+
+  return <Switch checked={enabled} onCheckedChange={handleToggle} aria-label="toggle" />;
 };
 
 export default Toggle;

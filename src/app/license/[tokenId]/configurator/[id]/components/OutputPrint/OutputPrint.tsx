@@ -127,9 +127,11 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
       add('vehicles', parseArray(values.vehicles));
       add('vehicleMakes', parseArray(values.vehicleMakes));
       add('powerTrainTypes', parseArray(values.powerTrainTypes));
+      add('brandName', values.brandName);
     }
 
     if (values.component === 'ShareVehiclesWithDimo') {
+      add('brandName', values.brandName);
       if (values.permissionsMode === 'template') {
         add('permissionTemplateId', values.permissionTemplateId);
       } else if (values.permissionsMode === 'custom') {
@@ -176,6 +178,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
         vehicles: parseArray(values.vehicles),
         vehicleMakes: parseArray(values.vehicleMakes),
         powerTrainTypes: parseArray(values.powerTrainTypes),
+        brandName: values.brandName || undefined,
       };
       codeSnippet = `<LoginWithDimo\n${formatProps(props)}\n/>`;
     }
@@ -192,6 +195,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
               )
             : undefined,
       };
+      props.brandName = values.brandName || undefined;
       codeSnippet = `<ShareVehiclesWithDimo\n${formatProps(props)}\n/>`;
     }
 
@@ -236,7 +240,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
             {renderSnippet()}
           </SyntaxHighlighter>
         ) : (
-          <pre className="bg-surface-raised p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
+          <pre className="bg-accent p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
             {buildUrl()}
           </pre>
         )}

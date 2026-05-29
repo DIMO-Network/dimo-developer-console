@@ -1,5 +1,5 @@
 .segmented-control {
-  @apply flex flex-row w-fit gap-2 bg-surface-raised rounded-lg;
+  @apply flex flex-row w-fit gap-2 bg-accent rounded-lg;
 
   .segment {
     @apply flex flex-col gap-2 p-2 px-5 rounded-lg cursor-pointer;

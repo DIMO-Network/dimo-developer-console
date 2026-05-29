@@ -2,32 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 214, 219, 220;
-    --background-end-rgb: 255, 255, 255;
+    --background: 180 33% 96%;
+    --foreground: 180 71% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 180 71% 13%;
+
+    --sidebar: 0 0% 100%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 180 71% 13%;
+
+    --primary: 178 66% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 180 33% 93%;
+    --secondary-foreground: 180 71% 13%;
+
+    --muted: 180 33% 93%;
+    --muted-foreground: 178 78% 23%;
+
+    --accent: 180 33% 93%;
+    --accent-foreground: 180 71% 13%;
+
+    --destructive: 0 78% 42%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 177 51% 80%;
+    --input: 177 51% 80%;
+    --ring: 178 66% 40%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 180 32% 3%;
+    --foreground: 177 65% 88%;
+
+    --card: 180 30% 9%;
+    --card-foreground: 177 65% 88%;
+
+    --sidebar: 180 35% 6%;
+
+    --popover: 180 30% 9%;
+    --popover-foreground: 177 65% 88%;
+
+    --primary: 178 66% 40%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 180 30% 12%;
+    --secondary-foreground: 177 60% 64%;
+
+    --muted: 180 22% 30%;
+    --muted-foreground: 177 60% 64%;
+
+    --accent: 180 30% 12%;
+    --accent-foreground: 177 65% 88%;
+
+    --destructive: 0 99% 71%;
+    --destructive-foreground: 0 0% 0%;
+
+    --border: 180 28% 14%;
+    --input: 180 28% 14%;
+    --ring: 178 66% 40%;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  @apply bg-black;
-}
-
-.content {
-  @apply flex flex-row;
-}
-
 @layer base {
+  * {
+    @apply border-border;
+  }
   body {
-    @apply text-sm font-light not-italic;
+    @apply bg-background text-foreground text-sm font-light not-italic;
   }
 }
 

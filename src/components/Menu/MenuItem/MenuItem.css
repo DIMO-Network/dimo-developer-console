@@ -1,5 +1,1 @@
-.main-menu {
-  ul li {
-    @apply flex flex-row gap-3 items-center text-grey-200 h-10 text-base rounded-full p-2;
-  }
-}
+/* styles moved to Tailwind classes in MenuItem.tsx */

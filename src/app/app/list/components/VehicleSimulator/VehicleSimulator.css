@@ -9,7 +9,7 @@
 
   .vehicle-sim-testnet-badge {
     @apply text-[10px] font-mono tracking-[0.15em] uppercase text-text-secondary
-           border border-[#322D2F] bg-surface-raised px-2 py-1 rounded self-start;
+           border border-border bg-accent px-2 py-1 rounded self-start;
   }
 }
 
@@ -30,6 +30,39 @@
 .vehicle-sim-step-label {
   @apply text-[10px] tracking-[0.2em] uppercase font-semibold text-text-secondary
          font-mono;
+}
+
+/* ─── Region cards ──────────────────────────────────────────────────── */
+
+.vehicle-sim-region-card {
+  @apply flex flex-col items-start gap-0.5 px-4 py-2.5 rounded-lg
+         border-2 border-transparent bg-cta-default
+         transition-all duration-150 cursor-pointer select-none
+         hover:border-white;
+
+  &:disabled {
+    @apply opacity-40 cursor-not-allowed hover:border-transparent;
+  }
+
+  &.selected {
+    @apply bg-white border-white;
+
+    .vehicle-sim-region-label {
+      @apply text-black;
+    }
+
+    .vehicle-sim-region-sub {
+      @apply text-neutral-500;
+    }
+  }
+
+  .vehicle-sim-region-label {
+    @apply text-sm font-semibold text-white leading-none;
+  }
+
+  .vehicle-sim-region-sub {
+    @apply text-[10px] font-mono text-text-secondary leading-none tracking-wide;
+  }
 }
 
 /* ─── Make cards ────────────────────────────────────────────────────── */
@@ -93,7 +126,7 @@
 /* ─── Divider + mint row ────────────────────────────────────────────── */
 
 .vehicle-sim-divider {
-  @apply h-px bg-[#322D2F] my-1;
+  @apply h-px bg-border my-1;
 }
 
 .vehicle-sim-mint-row {
@@ -107,7 +140,7 @@
 /* ─── Fleet cards ───────────────────────────────────────────────────── */
 
 .vehicle-sim-fleet {
-  @apply flex flex-col gap-3 pt-5 mt-1 border-t border-[#322D2F];
+  @apply flex flex-col gap-3 pt-5 mt-1 border-t border-border;
 }
 
 .vehicle-sim-fleet-header {
@@ -124,9 +157,13 @@
 
 .vehicle-sim-card {
   @apply flex flex-row items-center justify-between
-         rounded-lg border border-[#322D2F] bg-surface-raised
+         rounded-lg border border-border bg-accent
          px-4 py-3 gap-4;
   animation: vehicle-sim-slide-in 0.25s ease-out both;
+
+  &.vehicle-sim-card--stale {
+    @apply border-amber-800/60 bg-amber-950/20;
+  }
 }
 
 @keyframes vehicle-sim-slide-in {
@@ -145,11 +182,16 @@
 }
 
 .vehicle-sim-card-vehicle {
-  @apply text-sm font-medium text-white leading-tight;
+  @apply text-sm font-medium text-foreground leading-tight;
 }
 
 .vehicle-sim-card-network {
   @apply text-[10px] text-text-secondary font-mono tracking-wide;
+}
+
+.vehicle-sim-card-stale-badge {
+  @apply flex flex-row items-center gap-1
+         text-[10px] text-amber-500 font-mono tracking-wide;
 }
 
 .vehicle-sim-card-right {
@@ -165,5 +207,16 @@
 }
 
 .vehicle-sim-card-token-id {
-  @apply text-sm font-mono text-white leading-tight;
+  @apply text-sm font-mono text-foreground leading-tight;
+}
+
+/* ─── Busy overlay ──────────────────────────────────────────────────── */
+
+.vehicle-sim-overlay {
+  @apply absolute inset-0 z-10 flex flex-col items-center justify-center gap-3
+         rounded-lg bg-black/60 backdrop-blur-[2px];
+}
+
+.vehicle-sim-overlay-label {
+  @apply text-xs font-mono tracking-[0.15em] uppercase text-text-secondary;
 }

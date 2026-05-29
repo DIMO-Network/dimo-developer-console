@@ -1,14 +1,32 @@
 import configuration from '@/config';
-import { Abi, encodeFunctionData } from 'viem';
+import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import { useCallback } from 'react';
 import { useContractGA, useGlobalAccount } from '@/hooks';
+import { useSACD } from '@/hooks/useSACD';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoConnectionABI from '@/contracts/DimoConnectionABI.json';
+import SacdABI from '@/contracts/Sacd.json';
 import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
 import { utils } from 'web3';
 import { getCurrentDimoPrice } from '@/services/pricing';
+import { decodeHex } from '@/utils/formatHex';
+
+// keccak256("ConnectionMinted(address,uint256,address,string,bytes32,uint256)")
+const CONNECTION_MINTED_TOPIC = keccak256(
+  toBytes('ConnectionMinted(address,uint256,address,string,bytes32,uint256)'),
+);
+
+// Bitmask for permission 1 (mint synthetic devices). Each uint permission takes
+// two bit slots, so permission 1 lives in bits 2–3: 0b1100 = 12.
+const CONNECTION_PERMS_MINT_SYNTHETIC_DEVICES = BigInt(12);
+
+// Bitmask for permission 2 (get certificates for data ingest). Bits 4–5: 0b110000 = 48.
+const CONNECTION_PERMS_GET_CERTIFICATES = BigInt(48);
+
+// ~75 years — effectively permanent for the connection's lifetime.
+const CONNECTION_SACD_EXPIRATION = BigInt(4102444800);
 
 const { CONTRACT_METHODS } = configuration;
 
@@ -196,11 +214,29 @@ export const useMintLicense = () => {
   );
 };
 
+export type MintConnectionStep =
+  | 'minting'
+  | 'signing-agreements'
+  | 'granting-permissions';
+
+export interface MintConnectionParams {
+  connectionName: string;
+  licenseGrantee: `0x${string}`;
+  deviceIssuanceGrantee: `0x${string}`;
+  onStep?: (step: MintConnectionStep) => void;
+}
+
 export const useMintConnection = () => {
   const { validateCurrentSession, currentUser } = useGlobalAccount();
   const { checkEnoughBalance, processTransactions } = useContractGA();
+  const { signAndUploadPermissionSACD } = useSACD();
   return useCallback(
-    async (connectionName: string) => {
+    async ({
+      connectionName,
+      licenseGrantee,
+      deviceIssuanceGrantee,
+      onStep,
+    }: MintConnectionParams) => {
       const nameBytes = new TextEncoder().encode(connectionName).length;
       if (nameBytes > 32) {
         return {
@@ -213,13 +249,13 @@ export const useMintConnection = () => {
       const currentSession = await validateCurrentSession();
       const enoughBalance = await checkEnoughBalance();
 
-      // Get current DIMO price and calculate required tokens for $100 USD
+      // Get current DIMO price and calculate required tokens for $1 USD
       const dimoPrice = await getCurrentDimoPrice();
-      const targetUsdAmount = 100;
+      const targetUsdAmount = 1;
       // handle price fluctuations
       const bufferPercentage = 0.05;
 
-      // Calculate required DIMO tokens: $100 / DIMO price + 5% buffer for price flux.
+      // Calculate required DIMO tokens: $1 / DIMO price + 5% buffer for price flux.
       const baseDimoAmount = targetUsdAmount / dimoPrice;
       const requiredDIMO = baseDimoAmount * (1 + bufferPercentage);
       const requiredDIMOInWei = BigInt(utils.toWei(requiredDIMO.toString(), 'ether'));
@@ -234,7 +270,7 @@ export const useMintConnection = () => {
       }
 
       const transactions = [
-        // Transaction 1: approve use of required $DIMO tokens ($100 USD worth + 5% buffer).
+        // Transaction 1: approve use of required $DIMO tokens ($1 USD worth + 5% buffer).
         {
           to: configuration.DC_ADDRESS,
           value: BigInt(0),
@@ -267,11 +303,93 @@ export const useMintConnection = () => {
       ];
 
       try {
+        onStep?.('minting');
         const result = await processTransactions(transactions, {
           abi: DimoConnectionABI as Abi,
         });
 
-        return result;
+        // Pull connectionId out of the ConnectionMinted event so we can grant
+        // permissions to the generated keys. Token IDs are full uint256 — keep
+        // them as bigint to avoid precision loss.
+        const mintedLog = result.logs?.find(
+          ({ topics: [topic = '0x'] = [] }) => topic === CONNECTION_MINTED_TOPIC,
+        );
+        const rawConnectionId = mintedLog?.topics?.[2] ?? '0x';
+        if (rawConnectionId === '0x') {
+          console.warn(
+            '[useMintConnection] ConnectionMinted event not found in transaction logs',
+            { expectedTopic: CONNECTION_MINTED_TOPIC, logs: result.logs },
+          );
+          throw new Error(
+            'Connection minted but connectionId could not be read from logs; cannot grant key permissions.',
+          );
+        }
+        const connectionId = decodeHex(
+          rawConnectionId as `0x${string}`,
+          'uint256',
+        ) as bigint;
+
+        const asset = configuration.DCC_ADDRESS;
+        const grantor = currentUser.smartContractAddress;
+
+        onStep?.('signing-agreements');
+        const [deviceIssuanceSource, licenseSource] = await Promise.all([
+          signAndUploadPermissionSACD({
+            grantee: deviceIssuanceGrantee,
+            grantor,
+            asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
+            expiration: CONNECTION_SACD_EXPIRATION,
+            permissionNames: ['MintSD'],
+          }),
+          signAndUploadPermissionSACD({
+            grantee: licenseGrantee,
+            grantor,
+            asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
+            expiration: CONNECTION_SACD_EXPIRATION,
+            permissionNames: ['GenerateCertificate'],
+          }),
+        ]);
+
+        onStep?.('granting-permissions');
+        await processTransactions(
+          [
+            {
+              to: configuration.DIMO_SACD_ADDRESS,
+              value: BigInt(0),
+              data: encodeFunctionData({
+                abi: SacdABI as Abi,
+                functionName: 'setPermissions',
+                args: [
+                  asset,
+                  connectionId,
+                  deviceIssuanceGrantee,
+                  CONNECTION_PERMS_MINT_SYNTHETIC_DEVICES,
+                  CONNECTION_SACD_EXPIRATION,
+                  deviceIssuanceSource,
+                ],
+              }),
+            },
+            {
+              to: configuration.DIMO_SACD_ADDRESS,
+              value: BigInt(0),
+              data: encodeFunctionData({
+                abi: SacdABI as Abi,
+                functionName: 'setPermissions',
+                args: [
+                  asset,
+                  connectionId,
+                  licenseGrantee,
+                  CONNECTION_PERMS_GET_CERTIFICATES,
+                  CONNECTION_SACD_EXPIRATION,
+                  licenseSource,
+                ],
+              }),
+            },
+          ],
+          { abi: SacdABI as Abi },
+        );
+
+        return { ...result, connectionId };
       } catch (error: unknown) {
         const errorMessage =
           (error as Error)?.message || (error as Error)?.toString() || 'Unknown error';
@@ -309,6 +427,12 @@ export const useMintConnection = () => {
         throw error;
       }
     },
-    [checkEnoughBalance, currentUser, processTransactions, validateCurrentSession],
+    [
+      checkEnoughBalance,
+      currentUser,
+      processTransactions,
+      signAndUploadPermissionSACD,
+      validateCurrentSession,
+    ],
   );
 };

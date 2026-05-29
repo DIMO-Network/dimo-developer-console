@@ -5,8 +5,8 @@ import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
-import { FC, useContext, useEffect, useRef, useState } from 'react';
-import { NotificationContext } from '@/context/notificationContext';
+import { FC, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { captureException } from '@sentry/nextjs';
 import { useRouter } from 'next/navigation';
 
@@ -23,7 +23,6 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
   const inputRefs = useRef<HTMLInputElement[]>([]);
   const { beginOtpLogin, completeOtpLogin } = useAuth();
   const [otpId, setOtpId] = useState<string>('');
-  const { setNotification } = useContext(NotificationContext);
 
   // Ensure we have 6 references for 6 inputs
   useEffect(() => {
@@ -93,14 +92,14 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
       });
 
       if (!success) {
-        setNotification('Invalid OTP code', 'Oops...', 'error');
+        toast.error('Invalid OTP code');
         return;
       }
 
       router.replace('/app');
     } catch (error) {
       captureException(error);
-      setNotification('Failed to login with OTP', 'Oops...', 'error');
+      toast.error('Failed to login with OTP');
     } finally {
       setIsLoading(false);
     }
@@ -128,10 +127,10 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
       const newOtpId = await beginOtpLogin();
       setOtpId(newOtpId);
       setOtp(Array(6).fill(''));
-      setNotification('New OTP code sent to your email', 'Success', 'success');
+      toast.success('New OTP code sent to your email');
     } catch (error) {
       captureException(error);
-      setNotification('Failed to resend OTP code', 'Oops...', 'error');
+      toast.error('Failed to resend OTP code');
     } finally {
       setIsRequestingNewOtp(false);
     }

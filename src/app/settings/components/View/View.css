@@ -16,6 +16,6 @@
   }
 
   .settings-card-title {
-    @apply text-2xl font-black text-white;
+    @apply text-2xl font-black text-foreground;
   }
 }

@@ -16,9 +16,9 @@ export const CTARow: FC<CTARowProps> = ({ text, subtitle, CTA, isComplete }) => 
   return (
     <div className={'flex flex-col md:flex-row justify-between w-full'}>
       <div className={'flex flex-row gap-2 items-center'}>
-        <PlusCircleIcon className="size-4 text-white" />
+        <PlusCircleIcon className="size-4 text-foreground" />
         <div>
-          <p className={'text-base text-white'}>{text}</p>
+          <p className={'text-base text-foreground'}>{text}</p>
           {!!subtitle && <p className={'text-sm text-text-secondary'}>{subtitle}</p>}
         </div>
       </div>

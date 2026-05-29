@@ -1,6 +1,6 @@
 'use client';
 
-import { type FC, useEffect, useState, useContext } from 'react';
+import { type FC, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Abi, encodeFunctionData } from 'viem';
 import * as Sentry from '@sentry/nextjs';
@@ -8,7 +8,7 @@ import * as Sentry from '@sentry/nextjs';
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { Modal } from '@/components/Modal';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { Title } from '@/components/Title';
@@ -38,7 +38,6 @@ export const WorkspaceNameModal: FC<IProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { processTransactions } = useContractGA();
-  const { setNotification } = useContext(NotificationContext);
   const {
     register,
     handleSubmit,
@@ -77,10 +76,8 @@ export const WorkspaceNameModal: FC<IProps> = ({
     setIsLoading(true);
     try {
       await setLicenseAlias(data);
-      setNotification(
+      toast.success(
         'Developer license name updated successfully. Refresh to see your changes.',
-        'Success',
-        'success',
       );
       if (onSuccess) {
         await onSuccess();
@@ -98,7 +95,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
           });
         }
       }
-      setNotification('Failed to update developer license name', 'Oops...', 'error');
+      toast.error('Failed to update developer license name');
       Sentry.captureException(error);
     }
   };

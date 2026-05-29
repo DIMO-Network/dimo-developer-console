@@ -1,15 +1,15 @@
 'use client';
-import { ReactNode, useContext, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Anchor } from '@/components/Anchor';
 import { useAuth, useErrorHandler, useMixPanel, usePasskey } from '@/hooks';
-import { withNotifications } from '@/hoc';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 import { OtpInputForm, PasskeyLogin, SignInMethodForm } from '@/app/sign-in/components';
 import { getUserInformation } from '@/actions/user';
 import { isCollaborator } from '@/utils/user';
 import { isEmpty, isNull } from 'lodash';
+import { FOCUS_QUERY_PARAM, saveFocus } from '@/utils/focus';
 
 import './View.css';
 
@@ -49,7 +49,6 @@ const SignInForm = ({
 
 export const View = () => {
   useErrorHandler();
-  const { setNotification } = useContext(NotificationContext);
   const { setUser, completeExternalAuth } = useAuth();
   const { trackEvent } = useMixPanel();
   const { isPasskeyAvailable } = usePasskey();
@@ -117,7 +116,7 @@ export const View = () => {
       }
     } catch (error) {
       Sentry.captureException(error);
-      setNotification('Something went wrong please try again', 'Oops', 'error');
+      toast.error('Something went wrong please try again');
     }
   };
 
@@ -132,14 +131,14 @@ export const View = () => {
     try {
       const { success, email } = await completeExternalAuth(provider);
       if (!success) {
-        setNotification('Failed to login with external provider', 'Oops...', 'error');
+        toast.error('Failed to login with external provider');
         return;
       }
 
       await handleLogin(email);
     } catch (error) {
       Sentry.captureException(error);
-      setNotification('Failed to login with external provider', 'Oops...', 'error');
+      toast.error('Failed to login with external provider');
     }
   };
 
@@ -147,6 +146,16 @@ export const View = () => {
     if (!router) return;
     router.prefetch('/app');
   }, [router]);
+
+  useEffect(() => {
+    const focus = searchParams.get(FOCUS_QUERY_PARAM);
+    if (!focus) return;
+    saveFocus(focus);
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete(FOCUS_QUERY_PARAM);
+    const query = next.toString();
+    router.replace(query ? `/sign-in?${query}` : '/sign-in', { scroll: false });
+  }, [searchParams, router]);
 
   useEffect(() => {
     if (isNull(isPasskeyAvailable)) return;
@@ -191,4 +200,4 @@ export const View = () => {
   );
 };
 
-export default withNotifications(View);
+export default View;

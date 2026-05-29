@@ -1,14 +1,16 @@
+import React from 'react';
 import {
   HomeIcon,
   IntegrationIcon,
   MonitorHeartIcon,
   SettingsIcon,
   SummarizeIcon,
-  SupportAgentIcon,
   ConnectionsIcon,
+  ChipIcon,
 } from '@/components/Icons';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
+const EXPLORER_VEHICLE_REGEX = /^\/explorer\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
 const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create\/[^/]+$/;
@@ -20,6 +22,7 @@ export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
   if (APP_DETAILS_REGEX.test(path)) return 'App Details';
+  if (EXPLORER_VEHICLE_REGEX.test(path)) return 'Data Explorer';
   if (LICENSE_DETAILS_REGEX.test(path)) return 'License Details';
   if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed Vehicles';
   if (CREATE_WEBHOOK_REGEX.test(path)) return 'Create a webhook';
@@ -35,6 +38,17 @@ const pageTitles: Record<string, string> = {
   '/api-status': 'API Status',
   '/connections': 'Connections',
   '/settings': 'Settings',
+  '/explorer': 'Data Explorer',
+};
+
+const dataExplorerMenuItem = {
+  label: 'Data Explorer',
+  icon: ChipIcon,
+  iconClassName: 'h-5 w-5',
+  link: '/explorer',
+  external: false,
+  disabled: false,
+  hidden: false,
 };
 
 const baseMainMenu = [
@@ -52,14 +66,6 @@ const baseMainMenu = [
     iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
     link: '/webhooks',
     external: false,
-    disabled: false,
-  },
-  {
-    label: 'Support',
-    icon: SupportAgentIcon,
-    iconClassName: 'h-5 w-5',
-    link: 'https://discord.com/channels/892438668453740634/940719111971946546',
-    external: true,
     disabled: false,
   },
   {
@@ -94,16 +100,32 @@ const connectionsMenuItem = {
  * @param includeConnections - Whether to include the Connections tab (requires developer license)
  */
 export const getMainMenu = (includeConnections: boolean = true) => {
-  if (includeConnections) {
-    return [...baseMainMenu, connectionsMenuItem];
-  }
-  return baseMainMenu;
+  const items = includeConnections
+    ? [...baseMainMenu, connectionsMenuItem, dataExplorerMenuItem]
+    : [...baseMainMenu, dataExplorerMenuItem];
+  return items;
+};
+
+export type NavItem = {
+  label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: React.FC<any>;
+  iconClassName: string;
+  link: string | (() => void);
+  external: boolean;
+  disabled: boolean;
+  hidden?: boolean;
+};
+
+export type NavSection = {
+  label: string;
+  items: NavItem[];
 };
 
 // Keep the old export for backward compatibility for now, always includes Connections
 export const mainMenu = getMainMenu(true);
 
-export const bottomMenu = [
+export const bottomMenu: NavItem[] = [
   {
     label: 'Settings',
     icon: SettingsIcon,
@@ -111,5 +133,70 @@ export const bottomMenu = [
     link: '/settings',
     external: false,
     disabled: false,
+  },
+];
+
+export const getNavSections = (includeConnections: boolean = true): NavSection[] => [
+  {
+    label: 'Workspace',
+    items: [
+      {
+        label: 'Home',
+        icon: HomeIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/app',
+        external: false,
+        disabled: false,
+      },
+      {
+        label: 'Webhooks',
+        icon: IntegrationIcon,
+        iconClassName: 'h-4 w-4 fill-current stroke-current stroke-1',
+        link: '/webhooks',
+        external: false,
+        disabled: false,
+      },
+      ...(includeConnections
+        ? [
+            {
+              label: 'Connections',
+              icon: ConnectionsIcon,
+              iconClassName: 'h-4 w-4',
+              link: '/connections',
+              external: false,
+              disabled: false,
+            },
+          ]
+        : []),
+    ],
+  },
+  {
+    label: 'Resources',
+    items: [
+      {
+        label: 'Data Explorer',
+        icon: ChipIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/explorer',
+        external: false,
+        disabled: false,
+      },
+      {
+        label: 'Documentation',
+        icon: SummarizeIcon,
+        iconClassName: 'h-4 w-4',
+        link: 'https://dimo.org/docs',
+        external: true,
+        disabled: false,
+      },
+      {
+        label: 'API Status',
+        icon: MonitorHeartIcon,
+        iconClassName: 'h-4 w-4',
+        link: 'https://stats.uptimerobot.com/snU0rkEEah',
+        external: true,
+        disabled: false,
+      },
+    ],
   },
 ];

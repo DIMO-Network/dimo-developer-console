@@ -1,8 +1,9 @@
 'use client';
-import { FC, useContext, useState } from 'react';
+import { FC, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Abi } from 'viem';
 import { Button } from '@/components/Button';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { useMintVehicle, useBurnVehicle, useGlobalAccount } from '@/hooks';
 import {
   getSimulatedVehicles,
@@ -11,8 +12,12 @@ import {
   deleteSimulatedVehicle,
   deregisterVehicleFromSimulator,
 } from '@/actions/simulatedVehicles';
-import { TrashIcon } from '@heroicons/react/24/outline';
-import { MAKES, YEARS, VehicleMake, buildDeviceDefinitionId } from './constants';
+import { TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { BubbleLoader } from '@/components/BubbleLoader';
+import { getPublicClient } from '@/services/zerodev';
+import DimoVehicleIdABI from '@/contracts/DimoVehicleIdABI.json';
+import configuration from '@/config';
+import { MAKES, VehicleMake, buildDeviceDefinitionId } from './constants';
 import './VehicleSimulator.css';
 
 const MAX_TEST_VEHICLES = 1;
@@ -28,12 +33,12 @@ const MakeIcon: FC<{ path: string }> = ({ path }) => (
 );
 
 export const VehicleSimulator: FC<Props> = ({ clientId }) => {
-  const { setNotification } = useContext(NotificationContext);
   const mintVehicle = useMintVehicle();
   const burnVehicle = useBurnVehicle();
   const { currentUser } = useGlobalAccount();
   const queryClient = useQueryClient();
 
+  const [selectedRegion, setSelectedRegion] = useState<'usa' | 'japan' | ''>('');
   const [selectedMakeSlug, setSelectedMakeSlug] = useState('');
   const [selectedModelSlug, setSelectedModelSlug] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
@@ -45,25 +50,60 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
     queryFn: () => getSimulatedVehicles({ clientId }),
   });
 
+  const { data: removedOnChain = new Set<number>() } = useQuery({
+    queryKey: ['vehicle-on-chain-status', storedVehicles.map((v) => v.token_id)],
+    enabled: storedVehicles.length > 0,
+    queryFn: async () => {
+      const publicClient = getPublicClient();
+      const results = await Promise.all(
+        storedVehicles.map((v) =>
+          publicClient
+            .readContract({
+              address: configuration.VEHICLE_NFT_ADDRESS,
+              abi: DimoVehicleIdABI as Abi,
+              functionName: 'exists',
+              args: [BigInt(v.token_id)],
+            })
+            .then((exists) => ({ tokenId: v.token_id, exists: exists as boolean }))
+            .catch(() => ({ tokenId: v.token_id, exists: false })),
+        ),
+      );
+      return new Set(results.filter((r) => !r.exists).map((r) => r.tokenId));
+    },
+  });
+
   const atLimit = storedVehicles.length >= MAX_TEST_VEHICLES;
 
   const selectedMake: VehicleMake | undefined = MAKES.find(
     (m) => m.slug === selectedMakeSlug,
   );
-  const canMint = !!selectedMakeSlug && !!selectedModelSlug && !!selectedYear && !atLimit;
+  const selectedModel = selectedMake?.models.find((m) => m.slug === selectedModelSlug);
+  const availableYears = selectedModel?.years ?? [];
+  const routeFile =
+    selectedRegion === 'japan' ? 'src/routes/japan_honshu_circuit.json' : undefined;
+
+  const canMint =
+    !!selectedRegion &&
+    !!selectedMakeSlug &&
+    !!selectedModelSlug &&
+    !!selectedYear &&
+    !atLimit;
 
   const handleMakeChange = (makeSlug: string) => {
     setSelectedMakeSlug(makeSlug);
     setSelectedModelSlug('');
+    setSelectedYear('');
   };
 
   const selectionPreview = (() => {
-    if (!selectedMakeSlug) return 'No vehicle configured';
+    if (!selectedRegion) return 'No vehicle configured';
+    const regionLabel = selectedRegion === 'japan' ? 'Japan' : 'USA';
+    if (!selectedMakeSlug) return regionLabel;
     const makeName = selectedMake?.label ?? selectedMakeSlug;
     const modelLabel =
       selectedMake?.models.find((m) => m.slug === selectedModelSlug)?.label ??
       selectedModelSlug;
-    const parts = [selectedYear, makeName, modelLabel].filter(Boolean);
+    const parts = [regionLabel, selectedYear, makeName, modelLabel].filter(Boolean);
     return parts.join(' · ');
   })();
 
@@ -87,25 +127,28 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       console.log('[VehicleSimulator] Deleting simulated vehicle record', { vehicleId });
       const deleteResult = await deleteSimulatedVehicle({ vehicleId });
-      if (!deleteResult.success) {
-        console.warn('[VehicleSimulator] Delete record failed', deleteResult);
-        setNotification(
-          deleteResult.message ?? 'Failed to remove vehicle record',
-          'Error',
-          'error',
-        );
+      if (!deleteResult.success && deleteResult.status !== 404) {
+        console.warn('[VehicleSimulator] Delete record failed', {
+          vehicleId,
+          status: deleteResult.status,
+          message: deleteResult.message,
+        });
+        toast.error(deleteResult.message ?? 'Failed to remove vehicle record');
         return;
+      }
+      if (deleteResult.status === 404) {
+        console.warn(
+          '[VehicleSimulator] Delete record returned 404 — treating as already removed',
+          { vehicleId },
+        );
       }
 
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
       console.log('[VehicleSimulator] Vehicle removed', { vehicleId, tokenId });
+      toast.success('Vehicle removed successfully');
     } catch (e) {
       console.error('[VehicleSimulator] Delete error', e);
-      setNotification(
-        e instanceof Error ? e.message : 'Failed to remove vehicle',
-        'Error',
-        'error',
-      );
+      toast.error(e instanceof Error ? e.message : 'Failed to remove vehicle');
     } finally {
       setDeletingId(null);
     }
@@ -138,13 +181,18 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       const result = await mintVehicle({
         manufacturerNodeId: selectedMake.nodeId,
         deviceDefinitionId,
+        make: selectedMake.label,
+        model: modelLabel,
+        year: Number(selectedYear),
+        powertrainType: selectedModel!.powertrainType,
+        sacdGrantee: '0x299671D2b32ED62Cc61ce65D8f2b9e4f78486B37',
       });
 
       console.log('[VehicleSimulator] mintVehicle result', result);
 
       if (!result.success) {
         console.warn('[VehicleSimulator] Mint failed', { reason: result.reason });
-        setNotification(result.reason ?? 'Minting failed', 'Error', 'error');
+        toast.error(result.reason ?? 'Minting failed');
         return;
       }
 
@@ -155,10 +203,8 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
             logs: result.logs,
           },
         );
-        setNotification(
+        toast.error(
           'Mint succeeded but vehicle token ID could not be read. Please try again.',
-          'Error',
-          'error',
         );
         return;
       }
@@ -191,6 +237,10 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       const registration = await registerVehicleWithSimulator({
         tokenId: result.tokenId ?? 0,
         ownerWalletAddress: currentUser!.smartContractAddress,
+        make: selectedMake.label,
+        model: modelLabel,
+        year: Number(selectedYear),
+        routeFile,
       });
 
       console.log('[VehicleSimulator] Simulator registration result', registration);
@@ -198,21 +248,29 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
 
       console.log('[VehicleSimulator] Mint complete — tokenId', result.tokenId);
-      setNotification('Vehicle minted successfully!', 'Success', 'success');
+      toast.success('Vehicle minted successfully!');
     } catch (e) {
       console.error('[VehicleSimulator] Mint error', e);
-      setNotification(
+      toast.error(
         e instanceof Error ? e.message : 'Something went wrong while minting the vehicle',
-        'Oops...',
-        'error',
       );
     } finally {
       setIsLoading(false);
     }
   };
 
+  const isBusy = isLoading || deletingId !== null;
+  const busyLabel = isLoading ? 'Minting vehicle...' : 'Removing vehicle...';
+
   return (
-    <div className="license-list-content w-full">
+    <div className="license-list-content w-full relative">
+      {isBusy && (
+        <div className="vehicle-sim-overlay" aria-live="polite" aria-label={busyLabel}>
+          <BubbleLoader isLoading />
+          <span className="vehicle-sim-overlay-label">{busyLabel}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="vehicle-sim-header">
         <div className="vehicle-sim-header-text">
@@ -223,9 +281,35 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       {/* Step-by-step configurator */}
       <div className="vehicle-sim-steps">
-        {/* Step 01 — Make */}
+        {/* Step 01 — Region */}
         <div className="vehicle-sim-step">
-          <span className="vehicle-sim-step-label">01 — Make</span>
+          <span className="vehicle-sim-step-label">01 — Region</span>
+          <div className="vehicle-sim-pill-group" role="group" aria-label="Select region">
+            {(
+              [
+                { value: 'usa', label: 'USA', sub: 'New York routes' },
+                { value: 'japan', label: 'Japan', sub: 'Honshu circuit' },
+              ] as const
+            ).map((region) => (
+              <button
+                key={region.value}
+                type="button"
+                aria-pressed={selectedRegion === region.value}
+                aria-label={region.label}
+                disabled={isLoading}
+                onClick={() => setSelectedRegion(region.value)}
+                className={`vehicle-sim-region-card${selectedRegion === region.value ? ' selected' : ''}`}
+              >
+                <span className="vehicle-sim-region-label">{region.label}</span>
+                <span className="vehicle-sim-region-sub">{region.sub}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Step 02 — Make */}
+        <div className={`vehicle-sim-step${!selectedRegion ? ' locked' : ''}`}>
+          <span className="vehicle-sim-step-label">02 — Make</span>
           <div className="vehicle-sim-make-grid" role="group" aria-label="Select make">
             {MAKES.map((make) => (
               <button
@@ -233,7 +317,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
                 type="button"
                 aria-pressed={selectedMakeSlug === make.slug}
                 aria-label={make.label}
-                disabled={isLoading}
+                disabled={!selectedRegion || isLoading}
                 onClick={() => handleMakeChange(make.slug)}
                 className={`vehicle-sim-make-card${selectedMakeSlug === make.slug ? ' selected' : ''}`}
               >
@@ -244,9 +328,9 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           </div>
         </div>
 
-        {/* Step 02 — Model */}
+        {/* Step 03 — Model */}
         <div className={`vehicle-sim-step${!selectedMakeSlug ? ' locked' : ''}`}>
-          <span className="vehicle-sim-step-label">02 — Model</span>
+          <span className="vehicle-sim-step-label">03 — Model</span>
           <div className="vehicle-sim-pill-group" role="group" aria-label="Select model">
             {(selectedMake?.models ?? []).map((model) => (
               <button
@@ -272,11 +356,11 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           </div>
         </div>
 
-        {/* Step 03 — Year */}
+        {/* Step 04 — Year */}
         <div className={`vehicle-sim-step${!selectedModelSlug ? ' locked' : ''}`}>
-          <span className="vehicle-sim-step-label">03 — Year</span>
+          <span className="vehicle-sim-step-label">04 — Year</span>
           <div className="vehicle-sim-pill-group" role="group" aria-label="Select year">
-            {YEARS.map((year) => (
+            {availableYears.map((year) => (
               <button
                 key={year}
                 type="button"
@@ -298,7 +382,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       <div className="vehicle-sim-mint-row">
         <span className="vehicle-sim-selection-preview" aria-live="polite">
           {atLimit
-            ? `Limit reached — only ${MAX_TEST_VEHICLES} test vehicle per account`
+            ? `Limit reached — only ${MAX_TEST_VEHICLES} per account`
             : selectionPreview}
         </span>
         <Button
@@ -321,29 +405,42 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
             </span>
           </div>
           <div className="vehicle-sim-fleet-list">
-            {storedVehicles.map((vehicle) => (
-              <div key={vehicle.id} className="vehicle-sim-card">
-                <div className="vehicle-sim-card-left">
-                  <span className="vehicle-sim-card-vehicle">
-                    {vehicle.year} {vehicle.make} {vehicle.model}
-                  </span>
-                  <span className="vehicle-sim-card-network">Polygon</span>
+            {storedVehicles.map((vehicle) => {
+              const isRemovedOnChain = removedOnChain.has(vehicle.token_id);
+              return (
+                <div
+                  key={vehicle.id}
+                  className={`vehicle-sim-card${isRemovedOnChain ? ' vehicle-sim-card--stale' : ''}`}
+                >
+                  <div className="vehicle-sim-card-left">
+                    <span className="vehicle-sim-card-vehicle">
+                      {vehicle.year} {vehicle.make} {vehicle.model}
+                    </span>
+                    {isRemovedOnChain ? (
+                      <span className="vehicle-sim-card-stale-badge">
+                        <ExclamationTriangleIcon className="h-3 w-3" />
+                        Removed on-chain
+                      </span>
+                    ) : (
+                      <span className="vehicle-sim-card-network">Polygon</span>
+                    )}
+                  </div>
+                  <div className="vehicle-sim-card-right">
+                    <span className="vehicle-sim-card-token-label">Token ID</span>
+                    <span className="vehicle-sim-card-token-id">#{vehicle.token_id}</span>
+                    <button
+                      type="button"
+                      aria-label="Remove vehicle"
+                      disabled={deletingId === vehicle.id}
+                      onClick={() => handleDelete(vehicle.id, vehicle.token_id)}
+                      className="vehicle-sim-delete-btn"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="vehicle-sim-card-right">
-                  <span className="vehicle-sim-card-token-label">Token ID</span>
-                  <span className="vehicle-sim-card-token-id">#{vehicle.token_id}</span>
-                  <button
-                    type="button"
-                    aria-label="Remove vehicle"
-                    disabled={deletingId === vehicle.id}
-                    onClick={() => handleDelete(vehicle.id, vehicle.token_id)}
-                    className="vehicle-sim-delete-btn"
-                  >
-                    <TrashIcon className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

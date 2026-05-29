@@ -1,21 +1,23 @@
-import { FC, useContext } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { FragmentType, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
 import { Control, UseFormRegister, useFormContext } from 'react-hook-form';
-import { LoginWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/LoginWithDimoConfiguration';
-import { ShareVehiclesWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
-import { ExecuteAdvanceTransactionWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/ExecuteAdvanceTransactionWithDimoConfiguration';
+import { LoginWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/LoginWithDimoConfiguration';
+import { ShareVehiclesWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
+import { ExecuteAdvanceTransactionWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ExecuteAdvanceTransactionWithDimoConfiguration';
 import {
   DynamicFormProps,
   ComponentType,
-} from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/types';
+} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
 import { USER_CONFIG_FRAGMENT } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 import { Button } from '@/components/Button';
 import configuration from '@/config';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
+import { fetchMyBrands } from '@/actions/brand';
+import { getWorkspace, getWorkspaceByTokenId } from '@/actions/workspace';
 
 interface Props {
   license: FragmentType<typeof USER_CONFIG_FRAGMENT>;
@@ -27,14 +29,32 @@ interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<DynamicFormProps, any>;
+  brandNames?: string[];
 }
 
-const Configuration: FC<IFormProps> = ({ component, control, register }: IFormProps) => {
+const Configuration: FC<IFormProps> = ({
+  component,
+  control,
+  register,
+  brandNames,
+}: IFormProps) => {
   switch (component) {
     case 'LoginWithDimo':
-      return <LoginWithDimoConfiguration control={control} register={register} />;
+      return (
+        <LoginWithDimoConfiguration
+          control={control}
+          register={register}
+          brandNames={brandNames}
+        />
+      );
     case 'ShareVehiclesWithDimo':
-      return <ShareVehiclesWithDimoConfiguration control={control} register={register} />;
+      return (
+        <ShareVehiclesWithDimoConfiguration
+          control={control}
+          register={register}
+          brandNames={brandNames}
+        />
+      );
     case 'ExecuteAdvancedTransactionWithDimo':
       return (
         <ExecuteAdvanceTransactionWithDimoConfiguration
@@ -49,7 +69,22 @@ const Configuration: FC<IFormProps> = ({ component, control, register }: IFormPr
 
 export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
   const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
-  const { setNotification } = useContext(NotificationContext);
+  const [brandNames, setBrandNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const ws =
+          (await getWorkspaceByTokenId(fragment.tokenId)) ?? (await getWorkspace());
+        if (!ws?.id) return;
+        const brands = await fetchMyBrands(ws.id);
+        setBrandNames(brands.map((b) => b.name).filter((n): n is string => !!n));
+      } catch {
+        // brand names are optional — silently ignore
+      }
+    };
+    void load();
+  }, [fragment.tokenId]);
 
   const { register, control, watch, handleSubmit } = useFormContext<DynamicFormProps>();
   const component = watch('component', 'ShareVehiclesWithDimo');
@@ -64,12 +99,12 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
 
   const handleCopyConfigurationLink = () => {
     if (!configurationId) {
-      setNotification('Configuration ID is not available', '', 'error');
+      toast.error('Configuration ID is not available');
       return;
     }
     const url = `${getBaseUrl()}/?configurationId=${configurationId}`;
     navigator.clipboard.writeText(url);
-    setNotification('Configuration link copied to clipboard', '', 'success');
+    toast.success('Configuration link copied to clipboard');
   };
 
   return (
@@ -171,7 +206,12 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
             />
           </Label>
         </div>
-        <Configuration component={component} control={control} register={register} />
+        <Configuration
+          component={component}
+          control={control}
+          register={register}
+          brandNames={brandNames}
+        />
         <Button type="submit" className="primary">
           Update
         </Button>

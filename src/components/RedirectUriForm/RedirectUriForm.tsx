@@ -1,14 +1,14 @@
 import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
-import { useContext, useState, type FC } from 'react';
+import { useState, type FC } from 'react';
 import { isURL } from 'validator';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
 
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { useMixPanel, useSetRedirectUri } from '@/hooks';
@@ -24,6 +24,7 @@ interface IProps {
   redirectUris: IRedirectUri[] | undefined;
   tokenId: number;
   owner: string;
+  onAdded?: (uri: string) => void;
 }
 
 export const RedirectUriForm: FC<IProps> = ({
@@ -31,9 +32,9 @@ export const RedirectUriForm: FC<IProps> = ({
   redirectUris,
   tokenId,
   owner,
+  onAdded,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { setNotification } = useContext(NotificationContext);
   const { trackEvent } = useMixPanel();
   const {
     formState: { errors },
@@ -52,12 +53,9 @@ export const RedirectUriForm: FC<IProps> = ({
       setIsLoading(true);
       const { uri } = getValues();
       await setRedirectUri(uri, true);
-      await refreshData();
-      setNotification(
-        'Successfully added the redirect URI. Refresh the page to view your changes.',
-        'Success!',
-        'success',
-      );
+      if (onAdded) onAdded(uri);
+      else void refreshData();
+      toast.success('Successfully added the redirect URI.');
 
       trackEvent('Redirect URI added', {
         distinct_id: owner,
@@ -68,14 +66,8 @@ export const RedirectUriForm: FC<IProps> = ({
     } catch (error: unknown) {
       Sentry.captureException(error);
       const code = get(error, 'code', null);
-      if (code === 4001)
-        setNotification('The transaction was denied', 'Oops...', 'error');
-      else
-        setNotification(
-          'Something went wrong while creating the redirect URI',
-          'Oops...',
-          'error',
-        );
+      if (code === 4001) toast.error('The transaction was denied');
+      else toast.error('Something went wrong while creating the redirect URI');
     } finally {
       setIsLoading(false);
     }

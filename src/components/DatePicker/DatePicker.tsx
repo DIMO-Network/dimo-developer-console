@@ -63,7 +63,7 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
       </div>
 
       {show && (
-        <div className="absolute mt-2 w-64 bg-surface-raised shadow-lg rounded-md z-10">
+        <div className="absolute mt-2 w-64 bg-accent shadow-lg rounded-md z-10">
           <div className="flex justify-between items-center p-2">
             <div
               onClick={() => {

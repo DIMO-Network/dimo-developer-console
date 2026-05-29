@@ -101,14 +101,14 @@ const TableRowBasic = ({
       onClick={onClick}
       className={clsx(
         'border-t border-t-cta-default transition-colors cursor-pointer',
-        isExpanded && 'bg-surface-sunken',
+        isExpanded && 'bg-background',
       )}
     >
       <td className="pl-4 pr-2">
         {isExpanded ? (
-          <ChevronUpIcon className="h-4 w-4 text-white" />
+          <ChevronUpIcon className="h-4 w-4 text-foreground" />
         ) : (
-          <ChevronDownIcon className="h-4 w-4 text-white" />
+          <ChevronDownIcon className="h-4 w-4 text-foreground" />
         )}
       </td>
       {row.getVisibleCells().map((cell) => (

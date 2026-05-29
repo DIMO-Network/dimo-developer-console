@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { deleteWebhook } from '@/services/webhook';
 import { Webhook } from '@/types/webhook';
@@ -6,7 +6,7 @@ import Button from '@/components/Button/Button';
 import Title from '@/components/Title/Title';
 import { Modal } from '@/components/Modal';
 import { WebhookDetailsCard } from '@/components/Webhooks/components/WebhookDetailsCard';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { getDevJwt } from '@/utils/devJwt';
 import { captureException } from '@sentry/nextjs';
@@ -28,7 +28,6 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
   clientId,
 }) => {
   const [isDeleted, setIsDeleted] = useState(false);
-  const { setNotification } = useContext(NotificationContext);
   const hasSubscribedVehicles = useHasSubscribedVehicles(webhook.id, clientId);
 
   const onDelete = () => {
@@ -48,7 +47,7 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
   const { mutate, isPending } = useMutation({
     mutationFn: onDelete,
     onSuccess: () => {
-      setNotification('Successfully deleted webhook', '', 'success');
+      toast.success('Successfully deleted webhook');
       setIsDeleted(true);
       onSuccess?.();
     },
@@ -58,7 +57,7 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
         errorMessage = err.message ?? errorMessage;
       }
       captureException(err);
-      setNotification(errorMessage, '', 'error');
+      toast.error(errorMessage);
     },
   });
 

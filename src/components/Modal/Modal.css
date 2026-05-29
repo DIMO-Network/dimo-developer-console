@@ -1,31 +1,15 @@
-.modal-container {
-  @apply fixed inset-0 z-10 w-screen overflow-y-auto flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0;
+.dialog-panel {
+  @apply bg-card border border-border rounded-xl shadow-xl p-6;
 
-  .dialog-panel {
-    @apply relative transform overflow-hidden rounded-2xl bg-surface-raised text-left shadow-xl transition-all sm:my-8 sm:w-full md:w-screen sm:max-w-sm min-w-[95vw] min-h-[95vh] ml-auto mr-auto my-auto md:m-auto md:h-auto md:min-w-[480px] md:min-h-0 p-6;
+  .dialog-close-content {
+    @apply absolute right-0 top-0 pr-4 pt-4 cursor-pointer z-10;
 
-    .dialog-close-content {
-      @apply absolute right-0 top-0 pr-4 pt-4 cursor-pointer z-10;
-
-      .close-btn {
-        @apply text-white hover:text-gray-500 focus:outline-none;
-      }
+    .close-btn {
+      @apply text-muted-foreground hover:text-foreground focus:outline-none transition-colors;
     }
+  }
 
-    .dialog-content {
-      @apply sm:flex sm:items-start sm:flex-col;
-    }
-
-    .dialog-action-content {
-      @apply mt-5 sm:mt-4 sm:flex sm:flex-row-reverse;
-
-      button {
-        @apply inline-flex w-full justify-center rounded-md  bg-white px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto;
-      }
-
-      button.danger {
-        @apply mt-3 bg-white px-3 py-2 text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0;
-      }
-    }
+  .dialog-content {
+    @apply flex flex-col;
   }
 }

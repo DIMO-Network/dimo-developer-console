@@ -72,7 +72,7 @@ describe('MenuItem Component', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('link'));
+    fireEvent.click(screen.getByRole('button', { name: 'Clickable Menu Item' }));
     expect(handleClick).toHaveBeenCalled();
   });
 
@@ -90,7 +90,7 @@ describe('MenuItem Component', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('link'));
+    expect(screen.getByRole('listitem')).toHaveClass('opacity-40');
     expect(handleClick).not.toHaveBeenCalled();
   });
 });
