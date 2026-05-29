@@ -9,7 +9,6 @@ import './AppCard.css';
 interface IProps extends Partial<IApp> {
   className?: string;
   description?: string;
-  onClick?: () => void;
 }
 
 export const AppCard: FC<IProps> = ({ name, description = '', className = '', id }) => {

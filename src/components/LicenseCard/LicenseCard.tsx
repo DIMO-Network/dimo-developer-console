@@ -115,7 +115,7 @@ export const LicenseCard = (props: {
           </button>
         ) : (
           <Anchor href={`/license/${license.tokenId}/configurator`}>
-            <span className="text-xs text-text-secondary hover:text-text-primary transition-colors">
+            <span className="text-xs text-text-secondary hover:text-foreground transition-colors">
               Not configured — set up vehicle sharing →
             </span>
           </Anchor>

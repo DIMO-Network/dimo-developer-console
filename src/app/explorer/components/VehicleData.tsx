@@ -100,7 +100,7 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
             {availableSignals.map((signal) => (
               <span
                 key={signal}
-                className="text-xs font-mono px-2 py-1 rounded bg-accent text-text-primary border border-border"
+                className="text-xs font-mono px-2 py-1 rounded bg-accent text-foreground border border-border"
               >
                 {signal}
               </span>

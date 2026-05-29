@@ -88,7 +88,7 @@ export const ImagePicker: FC<Props> = ({
                   onClear();
                   if (inputRef.current) inputRef.current.value = '';
                 }}
-                className="text-xs text-text-secondary hover:text-text-primary underline"
+                className="text-xs text-text-secondary hover:text-foreground underline"
               >
                 Remove
               </button>
@@ -146,10 +146,10 @@ const DropZone: FC<{
         if (files.length) onFiles(files);
       }}
       className={`flex-1 min-h-[80px] border border-dashed rounded-xl px-4 py-3 text-sm transition-colors
-        ${dragOver ? 'border-text-primary bg-accent' : 'border-border'}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-text-primary cursor-pointer'}`}
+        ${dragOver ? 'border-foreground bg-accent' : 'border-border'}
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-foreground cursor-pointer'}`}
     >
-      <span className="text-text-primary font-medium">
+      <span className="text-foreground font-medium">
         {hasExisting ? 'Replace image' : 'Choose image'}
       </span>
       <span className="text-text-secondary ml-2">or drop here</span>
