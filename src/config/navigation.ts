@@ -7,6 +7,7 @@ import {
   SummarizeIcon,
   ConnectionsIcon,
   ChipIcon,
+  DeveloperBoardIcon,
 } from '@/components/Icons';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
@@ -34,6 +35,7 @@ export const getPageTitle = (path: string) => {
 const pageTitles: Record<string, string> = {
   '/': 'Home',
   '/app': 'Home',
+  '/licenses': 'Licenses',
   '/webhooks': 'Webhooks',
   '/api-status': 'API Status',
   '/connections': 'Connections',
@@ -57,6 +59,14 @@ const baseMainMenu = [
     icon: HomeIcon,
     iconClassName: 'h-5 w-5',
     link: '/app',
+    external: false,
+    disabled: false,
+  },
+  {
+    label: 'Licenses',
+    icon: DeveloperBoardIcon,
+    iconClassName: 'h-5 w-5',
+    link: '/licenses',
     external: false,
     disabled: false,
   },
@@ -145,6 +155,14 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
         icon: HomeIcon,
         iconClassName: 'h-4 w-4',
         link: '/app',
+        external: false,
+        disabled: false,
+      },
+      {
+        label: 'Licenses',
+        icon: DeveloperBoardIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/licenses',
         external: false,
         disabled: false,
       },

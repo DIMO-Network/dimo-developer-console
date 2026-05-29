@@ -1,34 +1,18 @@
 'use client';
-import { type FC, useEffect, useRef } from 'react';
+import { type FC, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-
-import { Loader } from '@/components/Loader';
-import { OnboardingBanner } from '@/components/OnboardingBanner';
-import { useGlobalAccount, useOnboarding, useUser } from '@/hooks';
+import { useUser } from '@/hooks';
 import Image from 'next/image';
-import { LicenseList, GET_LICENSE_SUMMARIES } from '@/app/license/list';
-import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard/LicenseCard';
+import Link from 'next/link';
 import './View.css';
-import { gql, useFragment } from '@/gql';
-import { useQuery } from '@apollo/client';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { FOCUS_QUERY_PARAM, saveFocus } from '@/utils/focus';
 import {
-  FOCUS_QUERY_PARAM,
-  FOCUS_RENTALS_OS_SIGNUP,
-  clearFocus,
-  getFocus,
-  saveFocus,
-} from '@/utils/focus';
-// import { AppListRightPanel } from '@/app/app/list/components/RightPanel';
-
-const GET_DEVELOPER_LICENSES_BY_OWNER = gql(`
-  query GetDeveloperLicensesByOwner($owner: Address!) {
-    developerLicenses(first: 100, filterBy: { owner: $owner }) {
-      ...TotalDeveloperLicenseCountFragment
-      ...DeveloperLicenseSummariesOnConnection      
-    }
-  }
-`);
+  DeveloperBoardIcon,
+  ConnectionsIcon,
+  IntegrationIcon,
+  ChipIcon,
+} from '@/components/Icons';
 
 function getFirstName(name: string) {
   const trimmed = name.trim();
@@ -36,21 +20,38 @@ function getFirstName(name: string) {
   return firstName || '';
 }
 
+const shortcuts = [
+  {
+    label: 'Licenses',
+    description: 'View and manage your developer licenses',
+    icon: DeveloperBoardIcon,
+    href: '/licenses',
+  },
+  {
+    label: 'Connections',
+    description: 'Configure app connections and redirect URIs',
+    icon: ConnectionsIcon,
+    href: '/connections',
+  },
+  {
+    label: 'Webhooks',
+    description: 'Create and manage webhook event subscriptions',
+    icon: IntegrationIcon,
+    href: '/webhooks',
+  },
+  {
+    label: 'Vehicle Explorer',
+    description: 'Browse and query live vehicle telemetry data',
+    icon: ChipIcon,
+    href: '/explorer',
+  },
+];
+
 export const View: FC = () => {
-  const { balance, isLoading: loadingBalance } = useOnboarding();
   const { data: user, isLoading: loadingUser } = useUser();
-  const { currentUser } = useGlobalAccount();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const {
-    data,
-    error,
-    loading: loadingDevLicenses,
-  } = useQuery(GET_DEVELOPER_LICENSES_BY_OWNER, {
-    variables: { owner: currentUser?.smartContractAddress ?? '' },
-    skip: !currentUser?.smartContractAddress,
-  });
   const userFirstName = getFirstName(user?.name ?? '');
 
   useEffect(() => {
@@ -62,25 +63,6 @@ export const View: FC = () => {
     const query = next.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }, [searchParams, router, pathname]);
-
-  const summaries = useFragment(GET_LICENSE_SUMMARIES, data?.developerLicenses);
-  const firstLicense = useFragment(
-    DEVELOPER_LICENSE_SUMMARY_FRAGMENT,
-    summaries?.nodes[0],
-  );
-  const focusHandled = useRef(false);
-  useEffect(() => {
-    if (focusHandled.current) return;
-    if (loadingDevLicenses) return;
-    if (!data?.developerLicenses) return;
-    if (getFocus() !== FOCUS_RENTALS_OS_SIGNUP) return;
-    focusHandled.current = true;
-    if (!firstLicense) {
-      clearFocus();
-      return;
-    }
-    router.push(`/license/${firstLicense.tokenId}/details`);
-  }, [data?.developerLicenses, loadingDevLicenses, firstLicense, router]);
 
   return (
     <div className={'flex flex-1 flex-row'}>
@@ -101,20 +83,20 @@ export const View: FC = () => {
           )}
         </div>
 
-        {loadingBalance && loadingDevLicenses && <Loader isLoading={true} />}
-        {!!error && <p>There was an error fetching your developer licenses</p>}
-        {!!data?.developerLicenses && (
-          <>
-            <OnboardingBanner
-              balance={balance}
-              isLoading={loadingBalance}
-              licenseConnection={data.developerLicenses}
-            />
-            <LicenseList licenseConnection={data.developerLicenses} />
-          </>
-        )}
+        <div className="shortcuts-grid">
+          {shortcuts.map(({ label, description, icon: Icon, href }) => (
+            <Link key={href} href={href} className="shortcut-card">
+              <div className="shortcut-card__icon">
+                <Icon className="h-5 w-5" />
+              </div>
+              <div className="shortcut-card__body">
+                <p className="shortcut-card__title">{label}</p>
+                <p className="shortcut-card__desc">{description}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
-      {/* <AppListRightPanel /> */}
     </div>
   );
 };

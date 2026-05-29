@@ -1,11 +1,36 @@
 .app-list-page {
-  @apply flex flex-1 flex-col gap-4;
+  @apply flex flex-1 flex-col gap-6;
 
   .welcome-message {
     @apply flex flex-row gap-1 pb-2 border-b-cta-default border-b;
 
     .title {
       @apply text-base text-text-secondary font-medium;
+    }
+  }
+
+  .shortcuts-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+  }
+
+  .shortcut-card {
+    @apply flex flex-row gap-4 items-start p-4 rounded-xl border border-border bg-card
+           hover:bg-accent transition-colors cursor-pointer;
+
+    .shortcut-card__icon {
+      @apply flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary;
+    }
+
+    .shortcut-card__body {
+      @apply flex flex-col gap-0.5;
+    }
+
+    .shortcut-card__title {
+      @apply text-sm font-medium text-foreground;
+    }
+
+    .shortcut-card__desc {
+      @apply text-xs text-muted-foreground leading-4;
     }
   }
 }
