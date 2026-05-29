@@ -1,5 +1,5 @@
 .guest-layout {
-  @apply flex flex-row justify-center h-screen gap-4;
+  @apply flex flex-row justify-center h-screen gap-4 bg-background;
 
   .sign-in-up-container {
     @apply flex flex-col mx-6 w-full lg:mx-0 lg:w-1/2 items-center justify-center h-screen;
