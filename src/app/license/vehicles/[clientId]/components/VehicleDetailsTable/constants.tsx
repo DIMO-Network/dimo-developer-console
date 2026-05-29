@@ -38,7 +38,7 @@ function ActionsCell({
           />
           <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded border border-border bg-accent shadow-lg">
             <button
-              className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-surface-overlay"
+              className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-accent"
               onClick={(e) => {
                 e.stopPropagation();
                 setOpen(false);
