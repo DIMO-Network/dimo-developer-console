@@ -3,16 +3,16 @@
 }
 
 .sidebar-container {
-  @apply hidden md:block md:flex-shrink-0;
+  @apply hidden md:block md:flex-shrink-0 md:self-stretch;
   transition: width 200ms ease;
 }
 
 .sidebar-container.expanded {
-  @apply md:w-[168px];
+  @apply md:w-[240px];
 }
 
 .sidebar-container.collapsed {
-  @apply md:w-[50px];
+  @apply md:w-16;
 }
 
 .header-container {

@@ -1,6 +1,10 @@
 .main-menu {
-  @apply relative w-full px-3 py-5 flex flex-col gap-2 bg-sidebar;
+  @apply relative w-full min-h-screen h-full px-4 py-6 flex flex-col gap-2 bg-sidebar;
   transition: width 200ms ease;
+}
+
+.main-menu.collapsed {
+  @apply px-2;
 }
 
 .logo-row {
