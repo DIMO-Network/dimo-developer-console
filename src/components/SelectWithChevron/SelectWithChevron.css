@@ -1,3 +1,1 @@
-.select-field-input {
-  @apply min-w-[160px] rounded-md border border-input bg-background px-3 py-2 outline-0 text-foreground font-normal text-sm appearance-none cursor-pointer;
-}
+/* SelectWithChevron reuses .select-field, .custom-menu, .custom-item from SelectField.css */

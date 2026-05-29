@@ -1,34 +1,29 @@
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import { useFindTriggerConfig } from '@/components/Webhooks/hooks/useFindTriggerConfig';
-import { SelectWithChevron } from '@/components/SelectWithChevron';
+import { SelectField } from '@/components/SelectField';
 import React from 'react';
 import { InputType } from '@/utils/webhook';
 
 const numberOperatorOptions = [
-  { label: 'is equal to', value: '==' },
-  { label: 'is greater than', value: '>' },
-  { label: 'is less than', value: '<' },
+  { text: 'is equal to', value: '==' },
+  { text: 'is greater than', value: '>' },
+  { text: 'is less than', value: '<' },
 ];
-const booleanOperatorOptions = [{ label: 'is equal to', value: '==' }];
+const booleanOperatorOptions = [{ text: 'is equal to', value: '==' }];
 
-const getOperatorOptions = (inputType: InputType) => {
-  return [
-    { value: '', label: 'Select operator', isPlaceholder: true },
-    ...(inputType === 'number' ? numberOperatorOptions : booleanOperatorOptions),
-  ];
-};
+const getOperatorOptions = (inputType: InputType) =>
+  inputType === 'number' ? numberOperatorOptions : booleanOperatorOptions;
 
 export const OperatorSelector = ({ index }: { index: number }) => {
-  const { register } = useFormContext<WebhookFormInput>();
+  const { control } = useFormContext<WebhookFormInput>();
   const config = useFindTriggerConfig(index);
   return (
-    <SelectWithChevron
-      {...register(`cel.conditions.${index}.operator`, {
-        required: 'Operator is required',
-      })}
-      defaultValue=""
+    <SelectField
+      name={`cel.conditions.${index}.operator`}
+      control={control}
       options={getOperatorOptions(config.inputType)}
+      placeholder="Select operator"
     />
   );
 };

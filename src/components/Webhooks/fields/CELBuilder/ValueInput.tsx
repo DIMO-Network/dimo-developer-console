@@ -1,17 +1,16 @@
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import { useFindTriggerConfig } from '@/components/Webhooks/hooks/useFindTriggerConfig';
-import { SelectWithChevron } from '@/components/SelectWithChevron';
+import { SelectField } from '@/components/SelectField';
 import React from 'react';
 
 const booleanValueOptions = [
-  { value: '', label: 'Select value', isPlaceholder: true },
-  { value: 1, label: 'True' },
-  { value: 0, label: 'False' },
+  { value: '1', text: 'True' },
+  { value: '0', text: 'False' },
 ];
 
 export const ValueInput = ({ index }: { index: number }) => {
-  const { register } = useFormContext<WebhookFormInput>();
+  const { register, control } = useFormContext<WebhookFormInput>();
   const config = useFindTriggerConfig(index);
   // @ts-expect-error validation type isn't strict enough
   const registerReturn = register(`cel.conditions.${index}.value`, config.validation);
@@ -24,10 +23,11 @@ export const ValueInput = ({ index }: { index: number }) => {
     );
   }
   return (
-    <SelectWithChevron
-      {...registerReturn}
-      defaultValue=""
+    <SelectField
+      name={`cel.conditions.${index}.value`}
+      control={control}
       options={booleanValueOptions}
+      placeholder="Select value"
     />
   );
 };
