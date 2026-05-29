@@ -9,7 +9,7 @@ const Providers = withAuth(({ children }: { children: ReactNode }) => <>{childre
 
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
-    <main className="guest-layout">
+    <main className="guest-layout dark">
       <div className="sign-in-up-container">
         <img src={'/images/dimo-dev.svg'} alt="DIMO Developer Console Logo" />
         {children}
