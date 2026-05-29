@@ -1,0 +1,713 @@
+<h2>Layout Architecture</h2>
+<p class="subtitle">
+  Full layout mockup — balances shown in $. Both dark and light mode, expanded and
+  collapsed sidebar.
+</p>
+
+<style>
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .layout-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .mode-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #3d6060;
+    margin-bottom: 4px;
+  }
+
+  .dm {
+    --bg: #060b0b;
+    --card: #0f1c1c;
+    --sb: #0a1212;
+    --border: #1a2e2e;
+    --fg: #d0f0ee;
+    --muted: #3d6060;
+    --accent: #6addd5;
+    --primary: #22aaa5;
+    --header-bg: #0a1212;
+    --header-border: #132020;
+  }
+
+  .lm {
+    --bg: #f0fafa;
+    --card: #ffffff;
+    --sb: #ffffff;
+    --border: #b2e8e4;
+    --fg: #0c3535;
+    --muted: #7ab8b4;
+    --accent: #0e6b67;
+    --primary: #22aaa5;
+    --header-bg: #ffffff;
+    --header-border: #b2e8e4;
+  }
+
+  .app-shell {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: 340px;
+    background: var(--bg);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .app-header {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    flex-shrink: 0;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+  }
+  .hdr-logo {
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .hdr-spacer {
+    flex: 1;
+  }
+  .hdr-credits {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--accent);
+    background: rgba(34, 170, 165, 0.1);
+    border: 1px solid rgba(34, 170, 165, 0.2);
+    border-radius: 99px;
+    padding: 3px 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .hdr-credits::before {
+    content: '$';
+    font-size: 8px;
+    opacity: 0.7;
+  }
+  .theme-pill {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 2px;
+  }
+  .theme-pip {
+    width: 24px;
+    height: 18px;
+    border-radius: 99px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+  }
+  .dm .theme-pip.moon {
+    background: var(--primary);
+    color: #000;
+  }
+  .dm .theme-pip.sun {
+    color: var(--muted);
+  }
+  .lm .theme-pip.sun {
+    background: var(--primary);
+    color: #fff;
+  }
+  .lm .theme-pip.moon {
+    color: var(--muted);
+  }
+  .hdr-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 99px;
+    background: rgba(34, 170, 165, 0.15);
+    border: 1.5px solid var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .app-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .sb-exp {
+    width: 168px;
+    flex-shrink: 0;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--sb);
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .sb-section-label {
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 6px 8px 3px;
+  }
+  .sb-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .sb-item.active {
+    color: var(--accent);
+    background: rgba(34, 170, 165, 0.1);
+  }
+  .sb-icon {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: currentColor;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+  .sb-item.active .sb-icon {
+    opacity: 1;
+  }
+  .sb-spacer {
+    flex: 1;
+  }
+  .sb-bottom {
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+  .sb-collapse-btn {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 99px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--accent);
+    z-index: 10;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .sb-col {
+    width: 50px;
+    flex-shrink: 0;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    background: var(--sb);
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .sb-col .icon-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+  }
+  .sb-col .icon-btn.active {
+    background: rgba(34, 170, 165, 0.1);
+    color: var(--accent);
+  }
+  .sb-col .icon-inner {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: currentColor;
+    opacity: 0.7;
+  }
+  .sb-col .icon-btn.active .icon-inner {
+    opacity: 1;
+  }
+  .sb-col .spacer {
+    flex: 1;
+  }
+  .sb-col .divider {
+    width: 24px;
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+  .sb-col-collapse-btn {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 99px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--accent);
+    z-index: 10;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .app-main {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+  }
+  .page-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--fg);
+  }
+  .page-subtitle {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .stat-num {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--fg);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 8px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .stat-badge {
+    display: inline-block;
+    font-size: 7px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 99px;
+    margin-top: 5px;
+    background: rgba(34, 170, 165, 0.12);
+    color: var(--accent);
+  }
+
+  .app-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .app-row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .app-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 99px;
+    background: var(--primary);
+    flex-shrink: 0;
+  }
+  .app-name {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--fg);
+    flex: 1;
+  }
+  .app-env {
+    font-size: 8px;
+    color: var(--muted);
+  }
+  .app-chevron {
+    font-size: 9px;
+    color: var(--muted);
+  }
+  .section-label-small {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+</style>
+
+<div class="layout-grid">
+  <div class="layout-col">
+    <div class="mode-label">Dark — Expanded</div>
+    <div class="app-shell dm">
+      <div class="app-header">
+        <div class="hdr-logo">DIMO Dev</div>
+        <div class="hdr-spacer"></div>
+        <div class="hdr-credits">12.40</div>
+        <div class="theme-pill">
+          <div class="theme-pip sun">☀</div>
+          <div class="theme-pip moon">☾</div>
+        </div>
+        <div class="hdr-avatar">JL</div>
+      </div>
+      <div class="app-body">
+        <div class="sb-exp">
+          <div class="sb-section-label">Workspace</div>
+          <div class="sb-item active">
+            <div class="sb-icon"></div>
+            Home
+          </div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Apps
+          </div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Licenses
+          </div>
+          <div class="sb-section-label">Data</div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Vehicles
+          </div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Connections
+          </div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Webhooks
+          </div>
+          <div class="sb-spacer"></div>
+          <div class="sb-bottom">
+            <div class="sb-item">
+              <div class="sb-icon"></div>
+              Settings
+            </div>
+            <div class="sb-item">
+              <div class="sb-icon"></div>
+              Logout
+            </div>
+          </div>
+          <div class="sb-collapse-btn">‹</div>
+        </div>
+        <div class="app-main">
+          <div>
+            <div class="page-title">Welcome, James 👋</div>
+            <div class="page-subtitle">DIMO Developer Console</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="stat-num">3</div>
+              <div class="stat-label">Licenses</div>
+              <div class="stat-badge">Active</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">12</div>
+              <div class="stat-label">Vehicles</div>
+              <div class="stat-badge">Connected</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">$12.40</div>
+              <div class="stat-label">Credits</div>
+              <div class="stat-badge">Balance</div>
+            </div>
+          </div>
+          <div class="section-label-small">Your Apps</div>
+          <div class="app-list">
+            <div class="app-row">
+              <div class="app-dot"></div>
+              <div class="app-name">Fleet Manager</div>
+              <div class="app-env">Production</div>
+              <div class="app-chevron">›</div>
+            </div>
+            <div class="app-row">
+              <div class="app-dot" style="background: #3d6060"></div>
+              <div class="app-name">Telemetry API</div>
+              <div class="app-env">Sandbox</div>
+              <div class="app-chevron">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mode-label">Dark — Collapsed</div>
+    <div class="app-shell dm">
+      <div class="app-header">
+        <div class="hdr-logo">DIMO Dev</div>
+        <div class="hdr-spacer"></div>
+        <div class="hdr-credits">12.40</div>
+        <div class="theme-pill">
+          <div class="theme-pip sun">☀</div>
+          <div class="theme-pip moon">☾</div>
+        </div>
+        <div class="hdr-avatar">JL</div>
+      </div>
+      <div class="app-body">
+        <div class="sb-col">
+          <div class="icon-btn active"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="spacer"></div>
+          <div class="divider"></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="sb-col-collapse-btn">›</div>
+        </div>
+        <div class="app-main">
+          <div>
+            <div class="page-title">Welcome, James 👋</div>
+            <div class="page-subtitle">DIMO Developer Console</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="stat-num">3</div>
+              <div class="stat-label">Licenses</div>
+              <div class="stat-badge">Active</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">12</div>
+              <div class="stat-label">Vehicles</div>
+              <div class="stat-badge">Connected</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">$12.40</div>
+              <div class="stat-label">Credits</div>
+              <div class="stat-badge">Balance</div>
+            </div>
+          </div>
+          <div class="section-label-small">Your Apps</div>
+          <div class="app-list">
+            <div class="app-row">
+              <div class="app-dot"></div>
+              <div class="app-name">Fleet Manager</div>
+              <div class="app-env">Production</div>
+              <div class="app-chevron">›</div>
+            </div>
+            <div class="app-row">
+              <div class="app-dot" style="background: #3d6060"></div>
+              <div class="app-name">Telemetry API</div>
+              <div class="app-env">Sandbox</div>
+              <div class="app-chevron">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout-col">
+    <div class="mode-label">Light — Expanded</div>
+    <div class="app-shell lm">
+      <div class="app-header">
+        <div class="hdr-logo">DIMO Dev</div>
+        <div class="hdr-spacer"></div>
+        <div class="hdr-credits">12.40</div>
+        <div class="theme-pill">
+          <div class="theme-pip sun">☀</div>
+          <div class="theme-pip moon">☾</div>
+        </div>
+        <div class="hdr-avatar">JL</div>
+      </div>
+      <div class="app-body">
+        <div class="sb-exp">
+          <div class="sb-section-label">Workspace</div>
+          <div class="sb-item active">
+            <div class="sb-icon"></div>
+            Home
+          </div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Apps
+          </div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Licenses
+          </div>
+          <div class="sb-section-label">Data</div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Vehicles
+          </div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Connections
+          </div>
+          <div class="sb-item">
+            <div class="sb-icon"></div>
+            Webhooks
+          </div>
+          <div class="sb-spacer"></div>
+          <div class="sb-bottom">
+            <div class="sb-item">
+              <div class="sb-icon"></div>
+              Settings
+            </div>
+            <div class="sb-item">
+              <div class="sb-icon"></div>
+              Logout
+            </div>
+          </div>
+          <div class="sb-collapse-btn">‹</div>
+        </div>
+        <div class="app-main">
+          <div>
+            <div class="page-title">Welcome, James 👋</div>
+            <div class="page-subtitle">DIMO Developer Console</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="stat-num">3</div>
+              <div class="stat-label">Licenses</div>
+              <div class="stat-badge">Active</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">12</div>
+              <div class="stat-label">Vehicles</div>
+              <div class="stat-badge">Connected</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">$12.40</div>
+              <div class="stat-label">Credits</div>
+              <div class="stat-badge">Balance</div>
+            </div>
+          </div>
+          <div class="section-label-small">Your Apps</div>
+          <div class="app-list">
+            <div class="app-row">
+              <div class="app-dot"></div>
+              <div class="app-name">Fleet Manager</div>
+              <div class="app-env">Production</div>
+              <div class="app-chevron">›</div>
+            </div>
+            <div class="app-row">
+              <div class="app-dot" style="background: #7ab8b4"></div>
+              <div class="app-name">Telemetry API</div>
+              <div class="app-env">Sandbox</div>
+              <div class="app-chevron">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mode-label">Light — Collapsed</div>
+    <div class="app-shell lm">
+      <div class="app-header">
+        <div class="hdr-logo">DIMO Dev</div>
+        <div class="hdr-spacer"></div>
+        <div class="hdr-credits">12.40</div>
+        <div class="theme-pill">
+          <div class="theme-pip sun">☀</div>
+          <div class="theme-pip moon">☾</div>
+        </div>
+        <div class="hdr-avatar">JL</div>
+      </div>
+      <div class="app-body">
+        <div class="sb-col">
+          <div class="icon-btn active"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="spacer"></div>
+          <div class="divider"></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="icon-btn"><div class="icon-inner"></div></div>
+          <div class="sb-col-collapse-btn">›</div>
+        </div>
+        <div class="app-main">
+          <div>
+            <div class="page-title">Welcome, James 👋</div>
+            <div class="page-subtitle">DIMO Developer Console</div>
+          </div>
+          <div class="stat-row">
+            <div class="stat-card">
+              <div class="stat-num">3</div>
+              <div class="stat-label">Licenses</div>
+              <div class="stat-badge">Active</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">12</div>
+              <div class="stat-label">Vehicles</div>
+              <div class="stat-badge">Connected</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">$12.40</div>
+              <div class="stat-label">Credits</div>
+              <div class="stat-badge">Balance</div>
+            </div>
+          </div>
+          <div class="section-label-small">Your Apps</div>
+          <div class="app-list">
+            <div class="app-row">
+              <div class="app-dot"></div>
+              <div class="app-name">Fleet Manager</div>
+              <div class="app-env">Production</div>
+              <div class="app-chevron">›</div>
+            </div>
+            <div class="app-row">
+              <div class="app-dot" style="background: #7ab8b4"></div>
+              <div class="app-name">Telemetry API</div>
+              <div class="app-env">Sandbox</div>
+              <div class="app-chevron">›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p style="text-align: center; margin-top: 20px; font-size: 12px; color: #3d6060">
+  Let me know if this looks good — then we'll cover Section 3 (component migration)
+</p>

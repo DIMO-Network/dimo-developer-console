@@ -1,0 +1,633 @@
+<h2>Sidebar Collapse Behavior</h2>
+<p class="subtitle">
+  How should the sidebar tuck away? Three mechanics — each showing expanded → collapsed
+  state.
+</p>
+
+<style>
+  .cmp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .cmp-card {
+    border: 2px solid #1a2e2e;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+    background: #060b0b;
+  }
+  .cmp-card:hover {
+    border-color: #6addd5;
+    box-shadow: 0 0 0 4px rgba(106, 221, 213, 0.08);
+  }
+  .cmp-card.selected {
+    border-color: #22aaa5;
+    box-shadow: 0 0 0 4px rgba(34, 170, 165, 0.15);
+  }
+
+  .cmp-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #d0f0ee;
+    padding: 12px 12px 2px;
+  }
+  .cmp-desc {
+    font-size: 11px;
+    color: #3d6060;
+    padding: 0 12px 10px;
+    line-height: 1.5;
+  }
+
+  /* shared mini app shell */
+  .mini-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .mini-half {
+    display: flex;
+    flex-direction: column;
+  }
+  .half-label {
+    font-size: 8px;
+    font-weight: 700;
+    text-align: center;
+    padding: 4px;
+    color: #254040;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .mini-app {
+    display: flex;
+    height: 180px;
+    background: #060b0b;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Expanded sidebar (shared) */
+  .sb-exp {
+    width: 100%;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: #0a1212;
+    border-right: 1px solid #132020;
+    flex-shrink: 0;
+  }
+  .sb-exp .logo {
+    font-size: 8px;
+    font-weight: 900;
+    color: #6addd5;
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .sb-exp .sec-lbl {
+    font-size: 6px;
+    font-weight: 700;
+    color: #254040;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 4px 6px 2px;
+  }
+  .sb-exp .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 8px;
+    font-weight: 600;
+    color: #3d6060;
+  }
+  .sb-exp .nav-item.active {
+    color: #6addd5;
+    background: rgba(106, 221, 213, 0.1);
+  }
+  .sb-exp .nav-item .icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.8;
+    flex-shrink: 0;
+  }
+  .sb-exp .spacer {
+    flex: 1;
+  }
+  .sb-exp .toggle-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 99px;
+    background: #1a2e2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-end;
+    margin-bottom: 4px;
+    cursor: default;
+  }
+  .sb-exp .toggle-btn::after {
+    content: '‹';
+    font-size: 10px;
+    color: #6addd5;
+    line-height: 1;
+  }
+
+  /* Icon-only collapsed sidebar */
+  .sb-col {
+    width: 36px;
+    flex-shrink: 0;
+    padding: 10px 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    background: #0a1212;
+    border-right: 1px solid #132020;
+  }
+  .sb-col .logo-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: #22aaa5;
+    margin-bottom: 10px;
+  }
+  .sb-col .icon-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3d6060;
+  }
+  .sb-col .icon-btn.active {
+    background: rgba(106, 221, 213, 0.12);
+    color: #6addd5;
+  }
+  .sb-col .icon-inner {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+  .sb-col .spacer {
+    flex: 1;
+  }
+  .sb-col .toggle-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 99px;
+    background: #1a2e2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+  }
+  .sb-col .toggle-btn::after {
+    content: '›';
+    font-size: 10px;
+    color: #6addd5;
+    line-height: 1;
+  }
+
+  /* Hidden sidebar (Option B) */
+  .sb-hidden {
+    width: 0;
+    overflow: hidden;
+    background: #0a1212;
+    border-right: none;
+  }
+  .floating-toggle {
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: #1a2e2e;
+    border: 1px solid #2a4040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    cursor: default;
+  }
+  .floating-toggle::after {
+    content: '☰';
+    font-size: 9px;
+    color: #6addd5;
+  }
+
+  /* Hover-expand (Option C) */
+  .sb-hover-col {
+    width: 36px;
+    flex-shrink: 0;
+    padding: 10px 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    background: #0a1212;
+    border-right: 1px solid #132020;
+    position: relative;
+  }
+  .sb-hover-col .logo-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: #22aaa5;
+    margin-bottom: 10px;
+  }
+  .sb-hover-col .icon-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3d6060;
+  }
+  .sb-hover-col .icon-btn.active {
+    background: rgba(106, 221, 213, 0.12);
+    color: #6addd5;
+  }
+  .sb-hover-col .icon-inner {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+  .sb-hover-col .spacer {
+    flex: 1;
+  }
+  /* hover panel overlay */
+  .sb-hover-expanded {
+    position: absolute;
+    left: 36px;
+    top: 0;
+    bottom: 0;
+    width: 110px;
+    background: #0c1616;
+    border-right: 1px solid #1a2e2e;
+    border-left: 1px solid #132020;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.4);
+    z-index: 5;
+  }
+  .sb-hover-expanded .sec-lbl {
+    font-size: 6px;
+    font-weight: 700;
+    color: #254040;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 4px 4px 2px;
+  }
+  .sb-hover-expanded .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px;
+    border-radius: 5px;
+    font-size: 8px;
+    font-weight: 600;
+    color: #3d6060;
+  }
+  .sb-hover-expanded .nav-item.active {
+    color: #6addd5;
+    background: rgba(106, 221, 213, 0.1);
+  }
+  .sb-hover-expanded .icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.8;
+    flex-shrink: 0;
+  }
+
+  /* main stub */
+  .mini-main-stub {
+    flex: 1;
+    background: #060b0b;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stub-header {
+    font-size: 9px;
+    font-weight: 700;
+    color: #d0f0ee;
+  }
+  .stub-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+  .stub-card {
+    background: #0f1c1c;
+    border: 1px solid #1a2e2e;
+    border-radius: 5px;
+    padding: 6px;
+  }
+  .stub-num {
+    font-size: 12px;
+    font-weight: 800;
+    color: #6addd5;
+  }
+  .stub-lbl {
+    font-size: 6px;
+    color: #3d6060;
+  }
+  .stub-row {
+    height: 6px;
+    background: #1a2e2e;
+    border-radius: 3px;
+  }
+  .stub-row.short {
+    width: 55%;
+  }
+
+  .arrow {
+    text-align: center;
+    font-size: 16px;
+    color: #254040;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mini-half-divider {
+    border-top: 1px dashed #1a2e2e;
+  }
+</style>
+
+<div class="cmp-grid">
+  <!-- A: Toggle button collapses to icon-only -->
+  <div class="cmp-card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="mini-pair">
+      <div class="mini-half">
+        <div class="half-label">Expanded</div>
+        <div class="mini-app">
+          <div class="sb-exp" style="width: 110px">
+            <div class="logo">DIMO</div>
+            <div class="sec-lbl">Workspace</div>
+            <div class="nav-item active">
+              <div class="icon"></div>
+              Home
+            </div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Apps
+            </div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Licenses
+            </div>
+            <div class="sec-lbl" style="margin-top: 4px">Data</div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Vehicles
+            </div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Connections
+            </div>
+            <div class="spacer"></div>
+            <div class="toggle-btn"></div>
+          </div>
+          <div class="mini-main-stub">
+            <div class="stub-header">Welcome</div>
+            <div class="stub-cards">
+              <div class="stub-card">
+                <div class="stub-num">3</div>
+                <div class="stub-lbl">Licenses</div>
+              </div>
+              <div class="stub-card">
+                <div class="stub-num">12</div>
+                <div class="stub-lbl">Vehicles</div>
+              </div>
+            </div>
+            <div class="stub-row"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mini-half">
+        <div class="half-label">Collapsed →</div>
+        <div class="mini-app">
+          <div class="sb-col">
+            <div class="logo-dot"></div>
+            <div class="icon-btn active"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="spacer"></div>
+            <div class="toggle-btn"></div>
+          </div>
+          <div class="mini-main-stub">
+            <div class="stub-header">Welcome</div>
+            <div class="stub-cards">
+              <div class="stub-card">
+                <div class="stub-num">3</div>
+                <div class="stub-lbl">Licenses</div>
+              </div>
+              <div class="stub-card">
+                <div class="stub-num">12</div>
+                <div class="stub-lbl">Vehicles</div>
+              </div>
+            </div>
+            <div class="stub-row"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cmp-title">A — Toggle to icon-only</div>
+    <div class="cmp-desc">
+      A chevron button collapses the sidebar to icon-only (~40px). Click again to expand.
+      Like VS Code, Linear, Vercel.
+    </div>
+  </div>
+
+  <!-- B: Fully hideable -->
+  <div class="cmp-card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="mini-pair">
+      <div class="mini-half">
+        <div class="half-label">Expanded</div>
+        <div class="mini-app">
+          <div class="sb-exp" style="width: 110px">
+            <div class="logo">DIMO</div>
+            <div class="sec-lbl">Workspace</div>
+            <div class="nav-item active">
+              <div class="icon"></div>
+              Home
+            </div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Apps
+            </div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Licenses
+            </div>
+            <div class="sec-lbl" style="margin-top: 4px">Data</div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Vehicles
+            </div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Connections
+            </div>
+            <div class="spacer"></div>
+            <div class="toggle-btn"></div>
+          </div>
+          <div class="mini-main-stub">
+            <div class="stub-header">Welcome</div>
+            <div class="stub-cards">
+              <div class="stub-card">
+                <div class="stub-num">3</div>
+                <div class="stub-lbl">Licenses</div>
+              </div>
+              <div class="stub-card">
+                <div class="stub-num">12</div>
+                <div class="stub-lbl">Vehicles</div>
+              </div>
+            </div>
+            <div class="stub-row"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mini-half">
+        <div class="half-label">Hidden →</div>
+        <div class="mini-app">
+          <div class="floating-toggle"></div>
+          <div class="mini-main-stub" style="padding-left: 34px">
+            <div class="stub-header">Welcome</div>
+            <div class="stub-cards">
+              <div class="stub-card">
+                <div class="stub-num">3</div>
+                <div class="stub-lbl">Licenses</div>
+              </div>
+              <div class="stub-card">
+                <div class="stub-num">12</div>
+                <div class="stub-lbl">Vehicles</div>
+              </div>
+            </div>
+            <div class="stub-row"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cmp-title">B — Fully hideable</div>
+    <div class="cmp-desc">
+      Sidebar disappears completely. A floating hamburger/toggle button brings it back.
+      Maximum focus mode for content-heavy pages.
+    </div>
+  </div>
+
+  <!-- C: Hover to expand -->
+  <div class="cmp-card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="mini-pair">
+      <div class="mini-half">
+        <div class="half-label">Default (icon)</div>
+        <div class="mini-app">
+          <div class="sb-hover-col">
+            <div class="logo-dot"></div>
+            <div class="icon-btn active"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="spacer"></div>
+          </div>
+          <div class="mini-main-stub">
+            <div class="stub-header">Welcome</div>
+            <div class="stub-cards">
+              <div class="stub-card">
+                <div class="stub-num">3</div>
+                <div class="stub-lbl">Licenses</div>
+              </div>
+              <div class="stub-card">
+                <div class="stub-num">12</div>
+                <div class="stub-lbl">Vehicles</div>
+              </div>
+            </div>
+            <div class="stub-row"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mini-half">
+        <div class="half-label">On hover →</div>
+        <div class="mini-app" style="position: relative">
+          <div class="sb-hover-col">
+            <div class="logo-dot"></div>
+            <div class="icon-btn active"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="icon-btn"><div class="icon-inner"></div></div>
+            <div class="spacer"></div>
+          </div>
+          <div class="sb-hover-expanded">
+            <div class="sec-lbl">Workspace</div>
+            <div class="nav-item active">
+              <div class="icon"></div>
+              Home
+            </div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Apps
+            </div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Licenses
+            </div>
+            <div class="sec-lbl" style="margin-top: 4px">Data</div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Vehicles
+            </div>
+            <div class="nav-item">
+              <div class="icon"></div>
+              Connections
+            </div>
+          </div>
+          <div class="mini-main-stub" style="opacity: 0.5">
+            <div class="stub-header">Welcome</div>
+            <div class="stub-cards">
+              <div class="stub-card">
+                <div class="stub-num">3</div>
+                <div class="stub-lbl">Licenses</div>
+              </div>
+              <div class="stub-card">
+                <div class="stub-num">12</div>
+                <div class="stub-lbl">Vehicles</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cmp-title">C — Hover to expand</div>
+    <div class="cmp-desc">
+      Icon-only by default. Hovering slides out the full labeled panel as an overlay
+      (doesn't shift content). No click needed.
+    </div>
+  </div>
+</div>
+<p style="text-align: center; margin-top: 16px; font-size: 12px; color: #3d6060">
+  Click to select, then reply in the terminal
+</p>

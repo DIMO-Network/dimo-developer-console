@@ -1,7 +1,7 @@
 'use client';
 
 import { type FC, type ReactNode } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import './Modal.css';
@@ -24,6 +24,7 @@ export const Modal: FC<IProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className={cn('dialog-panel', className)}>
+        <DialogTitle className="sr-only">Dialog</DialogTitle>
         {showClose && (
           <div className="dialog-close-content">
             <button
