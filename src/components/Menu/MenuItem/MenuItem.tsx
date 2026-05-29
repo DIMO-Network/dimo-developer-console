@@ -31,7 +31,11 @@ export const MenuItem: FC<IProps> = ({
     if (isFullScreenMenuOpen) setIsFullScreenMenuOpen(false);
   };
 
-  const inner = isCollapsed ? <span className="sr-only">{label}</span> : <>{label}</>;
+  const inner = isCollapsed ? (
+    <span className="sr-only">{label}</span>
+  ) : (
+    <span className="min-w-0 truncate">{label}</span>
+  );
 
   return (
     <li
@@ -44,10 +48,15 @@ export const MenuItem: FC<IProps> = ({
         isCollapsed && 'justify-center px-0',
       )}
     >
-      <Icon className={cn(iconClassName, isHighlighted && 'text-primary')} />
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+        <Icon
+          className={cn(iconClassName, 'shrink-0', isHighlighted && 'text-primary')}
+        />
+      </span>
       {typeof link === 'function' ? (
         <button
           type="button"
+          className="min-w-0 text-left"
           onClick={() => {
             link();
             closeFullScreenMenu();
@@ -60,6 +69,7 @@ export const MenuItem: FC<IProps> = ({
           href={disabled ? '#' : link}
           target={external ? '_blank' : '_self'}
           onClick={closeFullScreenMenu}
+          className="min-w-0"
         >
           {inner}
         </Link>

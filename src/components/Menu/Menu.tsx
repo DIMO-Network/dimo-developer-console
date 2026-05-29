@@ -67,13 +67,22 @@ export const Menu: FC = withLoadingStatus(() => {
       {/* Logo */}
       <div className={cn('logo-row', isSidebarCollapsed && 'justify-center')}>
         {!isSidebarCollapsed && (
-          <Image
-            src={'/images/dimo-dev.svg'}
-            alt="DIMO Logo"
-            width={140}
-            height={20}
-            className="mb-8"
-          />
+          <>
+            <Image
+              src={'/images/dimo-dev-light.svg'}
+              alt="DIMO Logo"
+              width={140}
+              height={20}
+              className="mb-8 block dark:hidden"
+            />
+            <Image
+              src={'/images/dimo-dev.svg'}
+              alt="DIMO Logo"
+              width={140}
+              height={20}
+              className="mb-8 hidden dark:block"
+            />
+          </>
         )}
         {isSidebarCollapsed && (
           <div className="mb-8 w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
