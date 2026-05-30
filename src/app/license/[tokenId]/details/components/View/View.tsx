@@ -111,7 +111,9 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
       <div className="license-header">
         <div className="license-header__top">
           <div className="license-header__identity">
-            <span className="license-header__name">{licenseFragment.alias}</span>
+            <span className="license-header__name">
+              {licenseFragment.alias ?? `License #${licenseFragment.tokenId}`}
+            </span>
             <span className="license-header__token-id">#{licenseFragment.tokenId}</span>
             {isLicenseOwner && (
               <button
@@ -130,10 +132,12 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
             onCopySuccessMessage="Client ID copied!"
           />
         </div>
-        <nav className="license-tabs">
+        <nav className="license-tabs" role="tablist">
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
               className={`license-tab${activeTab === tab.id ? ' license-tab--active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
