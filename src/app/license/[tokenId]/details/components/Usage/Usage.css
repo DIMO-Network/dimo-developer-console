@@ -1,6 +1,19 @@
-.consumed-credits-container {
-  @apply flex flex-col md:flex-row flex-1 w-full rounded-xl bg-card p-4 md:items-center justify-between;
-  p {
-    @apply text-text-secondary font-medium text-xl;
-  }
+.overview-stat-card {
+  @apply bg-accent rounded-xl p-5 flex flex-col gap-1;
+}
+
+.overview-stat-card__number {
+  @apply text-4xl font-bold text-foreground tabular-nums leading-none;
+}
+
+.overview-stat-card__label {
+  @apply text-xs uppercase tracking-wide text-text-secondary mt-1;
+}
+
+.overview-stat-card__hint {
+  @apply text-xs text-text-secondary;
+}
+
+.overview-stat-card__link {
+  @apply text-xs text-text-secondary hover:text-foreground transition-colors mt-2 self-start;
 }

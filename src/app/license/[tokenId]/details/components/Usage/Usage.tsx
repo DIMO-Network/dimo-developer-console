@@ -1,26 +1,21 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useCreditTracker, useEventEmitter } from '@/hooks';
-import { Section, SectionHeader } from '@/components/Section';
 import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
-import { TotalCount } from '@/components/TotalVehicleCount';
-import './Usage.css';
-import { Button } from '@/components/Button';
 import Link from 'next/link';
 import { AxiosError } from 'axios';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import './Usage.css';
 
 interface Props {
   license: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
-  cluster?: boolean;
 }
 
-export const Usage: FC<Props> = ({ license, cluster = false }) => {
+export const Usage: FC<Props> = ({ license }) => {
   const { getUsageByLicense } = useCreditTracker();
   const [credits, setCredits] = useState(0);
   const fragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
   const { eventData } = useEventEmitter<unknown>('developer-jwt-updated');
-
   const { isAuthenticatedAsDev, devJwts, refetch } = useGetDevJwts(fragment?.clientId);
 
   useEffect(() => {
@@ -43,46 +38,20 @@ export const Usage: FC<Props> = ({ license, cluster = false }) => {
     void fetchUsage();
   }, [fragment, isAuthenticatedAsDev, eventData]);
 
-  if (cluster) {
-    return (
-      <div className="gauge-display">
-        <div className="gauge-ring">
-          {isAuthenticatedAsDev ? (
-            <>
-              <span className="gauge-number">{credits}</span>
-              <span className="gauge-label">Credits Used</span>
-            </>
-          ) : (
-            <span className="gauge-hint">Generate a JWT first</span>
-          )}
-        </div>
-        <Link
-          href="https://docs.dimo.org/developer-platform/developer-guide/dimo-credits"
-          target="_blank"
-        >
-          <Button className="table-action-button">Learn More</Button>
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div className={'w-full'}>
-      <Section>
-        <SectionHeader title={'Usage'} />
-        <div className={'consumed-credits-container'}>
-          {isAuthenticatedAsDev && (
-            <TotalCount totalCount={credits} countedThings="Credits Consumed" />
-          )}
-          {!isAuthenticatedAsDev && <p>Please generate a Developer JWT First</p>}
-          <Link
-            href={`https://docs.dimo.org/developer-platform/developer-guide/dimo-credits`}
-            target="_blank"
-          >
-            <Button className={'table-action-button'}>Learn More</Button>
-          </Link>
-        </div>
-      </Section>
+    <div className="overview-stat-card">
+      <p className="overview-stat-card__number">{isAuthenticatedAsDev ? credits : '—'}</p>
+      <p className="overview-stat-card__label">Credits Used</p>
+      {!isAuthenticatedAsDev && (
+        <p className="overview-stat-card__hint">Generate a JWT to see usage</p>
+      )}
+      <Link
+        href="https://docs.dimo.org/developer-platform/developer-guide/dimo-credits"
+        target="_blank"
+        className="overview-stat-card__link"
+      >
+        Learn about credits →
+      </Link>
     </div>
   );
 };
