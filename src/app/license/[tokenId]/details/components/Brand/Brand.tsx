@@ -2,7 +2,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 
-import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { Button } from '@/components/Button';
 import { toast } from 'sonner';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
@@ -109,15 +108,16 @@ export const Brand: FC<Props> = ({ license }) => {
   };
 
   return (
-    <CollapsibleSection>
-      <CollapsibleSection.Title title="Brand">
+    <div className="p-4 bg-accent border border-border rounded-2xl flex flex-col gap-4 text-foreground">
+      <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
+        <h2 className="text-xl font-semibold text-foreground">Brand</h2>
         {isOwner && !editing && (
           <Button type="button" className="dark" onClick={() => setEditing('new')}>
             Add Brand
           </Button>
         )}
-      </CollapsibleSection.Title>
-      <CollapsibleSection.Content>
+      </div>
+      <div>
         {loading ? (
           <div className="text-text-secondary">Loading brands…</div>
         ) : editing ? (
@@ -158,8 +158,8 @@ export const Brand: FC<Props> = ({ license }) => {
             )}
           </div>
         )}
-      </CollapsibleSection.Content>
-    </CollapsibleSection>
+      </div>
+    </div>
   );
 };
 

@@ -1,23 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Brand } from '@/app/license/[tokenId]/details/components/Brand/Brand';
 
-jest.mock('@/components/CollapsibleSection', () => ({
-  CollapsibleSection: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-}));
-
-// Attach sub-components so Brand can use CollapsibleSection.Title and .Content
-const { CollapsibleSection } = jest.requireMock('@/components/CollapsibleSection');
-/* eslint-disable react/display-name */
-CollapsibleSection.Title = ({ children }: { children: React.ReactNode }) => (
-  <div>{children}</div>
-);
-CollapsibleSection.Content = ({ children }: { children: React.ReactNode }) => (
-  <div>{children}</div>
-);
-/* eslint-enable react/display-name */
-
 jest.mock('@/gql', () => ({
   gql: (s: TemplateStringsArray) => s,
   useFragment: (_def: unknown, data: unknown) => data,
