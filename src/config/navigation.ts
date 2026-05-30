@@ -73,7 +73,7 @@ const baseMainMenu = [
   {
     label: 'Webhooks',
     icon: IntegrationIcon,
-    iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
+    iconClassName: 'h-5 w-5',
     link: '/webhooks',
     external: false,
     disabled: false,
@@ -169,7 +169,7 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
       {
         label: 'Webhooks',
         icon: IntegrationIcon,
-        iconClassName: 'h-4 w-4 fill-current stroke-current stroke-1',
+        iconClassName: 'h-4 w-4',
         link: '/webhooks',
         external: false,
         disabled: false,

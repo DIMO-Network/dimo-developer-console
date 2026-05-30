@@ -24,7 +24,12 @@
 }
 
 .cluster-grid {
-  @apply grid grid-cols-1 md:grid-cols-3 mt-4;
+  @apply grid grid-cols-1 mt-4;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 2fr 1fr;
+  }
 }
 
 .cluster-cell {
@@ -76,5 +81,5 @@
 /* ── Control panels grid ────────────────────────────────── */
 
 .dashboard-panels {
-  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  @apply flex flex-col gap-4;
 }
