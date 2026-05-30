@@ -80,18 +80,29 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
     <div className="license-details-page">
       {data?.developerLicense && (
         <>
-          <div className="summary">
+          {/* Instrument cluster */}
+          <div className="dashboard-cluster dark">
             <BackButton onBack={goBack} />
-            <Summary licenseSummary={data.developerLicense} refetch={handleRefetch} />
-          </div>
-          <div className={'flex flex-col gap-6 pt-6'}>
-            <div className={'flex w-full flex-row gap-4'}>
-              <Usage license={data.developerLicense} />
-              <Vehicles license={data.developerLicense} />
+            <div className="cluster-grid">
+              <div className="cluster-cell">
+                <p className="cluster-cell__label">Usage</p>
+                <Usage license={data.developerLicense} cluster />
+              </div>
+              <div className="cluster-cell cluster-cell--center">
+                <Summary licenseSummary={data.developerLicense} refetch={handleRefetch} />
+              </div>
+              <div className="cluster-cell">
+                <p className="cluster-cell__label">Vehicles</p>
+                <Vehicles license={data.developerLicense} cluster />
+              </div>
             </div>
-            <DeveloperJwts license={data.developerLicense} />
+          </div>
+
+          {/* Control panels */}
+          <div className="dashboard-panels">
             <Signers license={data.developerLicense} refetch={handleRefetch} />
             <RedirectUris license={data.developerLicense} refetch={handleRefetch} />
+            <DeveloperJwts license={data.developerLicense} />
             <Brand license={data.developerLicense} />
           </div>
         </>

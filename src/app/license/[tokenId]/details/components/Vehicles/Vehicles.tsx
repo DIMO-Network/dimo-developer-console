@@ -29,14 +29,46 @@ export const GET_VEHICLE_COUNT_BY_CLIENT_ID = gql(`
 
 interface IProps {
   license: FragmentType<typeof DEVELOPER_LICENSE_VEHICLES_FRAGMENT>;
+  cluster?: boolean;
 }
 
-export const Vehicles: FC<IProps> = ({ license }) => {
+export const Vehicles: FC<IProps> = ({ license, cluster = false }) => {
   const fragment = useFragment(DEVELOPER_LICENSE_VEHICLES_FRAGMENT, license);
   const { data, loading, error } = useQuery(GET_VEHICLE_COUNT_BY_CLIENT_ID, {
     variables: { clientId: fragment.clientId },
   });
   const router = useRouter();
+
+  if (cluster) {
+    return (
+      <div className="gauge-display">
+        <Link href={`/license/vehicles/${fragment.clientId}`}>
+          <div className="gauge-ring hover:opacity-80 transition-opacity">
+            {loading && <span className="gauge-hint">…</span>}
+            {!!error && <span className="gauge-hint">Error</span>}
+            {!!data && (
+              <>
+                <span className="gauge-number">{data.vehicles.totalCount}</span>
+                <span className="gauge-label">Connected</span>
+              </>
+            )}
+          </div>
+        </Link>
+        <div className="flex flex-row gap-2">
+          <Link href={`/license/vehicles/${fragment.clientId}`}>
+            <Button className="table-action-button">Details</Button>
+          </Link>
+          <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
+          <Button
+            className="table-action-button"
+            onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
+          >
+            Configure
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={'w-full'}>

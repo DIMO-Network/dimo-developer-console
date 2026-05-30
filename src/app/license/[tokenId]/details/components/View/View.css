@@ -1,12 +1,8 @@
 .license-details-page {
-  @apply flex flex-col;
+  @apply flex flex-col gap-0;
 
   .subtitle {
     @apply capitalize text-text-secondary text-sm;
-  }
-
-  .summary {
-    @apply pb-6 border-b border-b-cta-default;
   }
 
   .signers-content {
@@ -16,4 +12,69 @@
       @apply col-span-10;
     }
   }
+}
+
+/* ── Instrument cluster ─────────────────────────────────── */
+
+.dashboard-cluster {
+  @apply rounded-b-3xl px-6 pt-4 pb-10 mb-6;
+  background:
+    radial-gradient(ellipse at 50% -10%, hsl(178 66% 40% / 0.18) 0%, transparent 65%),
+    hsl(var(--card));
+}
+
+.cluster-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 mt-4;
+}
+
+.cluster-cell {
+  @apply flex flex-col items-center justify-center gap-5 py-6 px-4;
+
+  &:first-child {
+    @apply md:border-r md:border-r-white/10;
+  }
+
+  &:last-child {
+    @apply md:border-l md:border-l-white/10;
+  }
+
+  .cluster-cell__label {
+    @apply text-[10px] font-semibold uppercase tracking-widest text-muted-foreground;
+  }
+}
+
+.cluster-cell--center {
+  @apply gap-3 border-y border-y-white/10 md:border-y-0;
+}
+
+/* ── Gauge (Usage + Vehicles cluster variant) ───────────── */
+
+.gauge-display {
+  @apply flex flex-col items-center gap-4;
+}
+
+.gauge-ring {
+  @apply flex flex-col items-center justify-center w-32 h-32 rounded-full gap-1;
+  border: 2px solid hsl(178 66% 40% / 0.5);
+  box-shadow:
+    0 0 24px hsl(178 66% 40% / 0.12),
+    inset 0 0 16px hsl(178 66% 40% / 0.06);
+}
+
+.gauge-number {
+  @apply text-4xl font-bold text-foreground tabular-nums;
+}
+
+.gauge-label {
+  @apply text-[11px] text-muted-foreground uppercase tracking-wide;
+}
+
+.gauge-hint {
+  @apply text-xs text-muted-foreground text-center px-3 leading-4;
+}
+
+/* ── Control panels grid ────────────────────────────────── */
+
+.dashboard-panels {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
 }

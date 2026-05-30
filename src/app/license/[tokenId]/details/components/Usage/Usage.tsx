@@ -12,9 +12,10 @@ import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 
 interface Props {
   license: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
+  cluster?: boolean;
 }
 
-export const Usage: FC<Props> = ({ license }) => {
+export const Usage: FC<Props> = ({ license, cluster = false }) => {
   const { getUsageByLicense } = useCreditTracker();
   const [credits, setCredits] = useState(0);
   const fragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
@@ -41,6 +42,29 @@ export const Usage: FC<Props> = ({ license }) => {
     if (!isAuthenticatedAsDev) return;
     void fetchUsage();
   }, [fragment, isAuthenticatedAsDev, eventData]);
+
+  if (cluster) {
+    return (
+      <div className="gauge-display">
+        <div className="gauge-ring">
+          {isAuthenticatedAsDev ? (
+            <>
+              <span className="gauge-number">{credits}</span>
+              <span className="gauge-label">Credits Used</span>
+            </>
+          ) : (
+            <span className="gauge-hint">Generate a JWT first</span>
+          )}
+        </div>
+        <Link
+          href="https://docs.dimo.org/developer-platform/developer-guide/dimo-credits"
+          target="_blank"
+        >
+          <Button className="table-action-button">Learn More</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className={'w-full'}>
