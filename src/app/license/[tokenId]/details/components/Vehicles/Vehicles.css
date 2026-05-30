@@ -1,6 +1,15 @@
-.vehicle-count-container {
-  @apply flex flex-col md:flex-row flex-1 w-full rounded-xl bg-card p-4 md:items-center justify-between;
-  p {
-    @apply text-text-secondary font-medium text-xl;
-  }
+.vehicles-stat {
+  @apply bg-accent rounded-xl p-8 flex flex-col items-center gap-1 text-center;
+}
+
+.vehicles-stat__number {
+  @apply text-5xl font-bold text-foreground tabular-nums leading-none;
+}
+
+.vehicles-stat__label {
+  @apply text-xs uppercase tracking-wide text-text-secondary mt-1;
+}
+
+.vehicles-stat__link {
+  @apply text-xs text-text-secondary hover:text-foreground transition-colors mt-2;
 }

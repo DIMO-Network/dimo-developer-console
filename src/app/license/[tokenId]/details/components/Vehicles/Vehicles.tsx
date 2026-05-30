@@ -3,14 +3,11 @@ import React, { FC } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
-
-import './Vehicles.css';
-import { Section, SectionHeader } from '@/components/Section';
-import { Button } from '@/components/Button';
 import Link from 'next/link';
-import { TotalCount } from '@/components/TotalVehicleCount';
+import { Button } from '@/components/Button';
 import { useRouter } from 'next/navigation';
 import { VehicleSimulatorModal } from '@/app/app/list/components/VehicleSimulator/VehicleSimulatorModal';
+import './Vehicles.css';
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -29,94 +26,52 @@ export const GET_VEHICLE_COUNT_BY_CLIENT_ID = gql(`
 
 interface IProps {
   license: FragmentType<typeof DEVELOPER_LICENSE_VEHICLES_FRAGMENT>;
-  cluster?: boolean;
 }
 
-export const Vehicles: FC<IProps> = ({ license, cluster = false }) => {
+export const Vehicles: FC<IProps> = ({ license }) => {
   const fragment = useFragment(DEVELOPER_LICENSE_VEHICLES_FRAGMENT, license);
   const { data, loading, error } = useQuery(GET_VEHICLE_COUNT_BY_CLIENT_ID, {
     variables: { clientId: fragment.clientId },
   });
   const router = useRouter();
 
-  if (cluster) {
-    return (
-      <div className="gauge-display">
-        <Link href={`/license/vehicles/${fragment.clientId}`}>
-          <div className="gauge-ring hover:opacity-80 transition-opacity">
-            {loading && <span className="gauge-hint">…</span>}
-            {!!error && <span className="gauge-hint">Error</span>}
-            {!!data && (
-              <>
-                <span className="gauge-number">{data.vehicles.totalCount}</span>
-                <span className="gauge-label">Connected</span>
-              </>
-            )}
-          </div>
-        </Link>
-        <div className="flex flex-row gap-2">
-          <Link href={`/license/vehicles/${fragment.clientId}`}>
-            <Button className="table-action-button">Details</Button>
-          </Link>
-          <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
-          <Button
-            className="table-action-button"
-            onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
-          >
-            Configure
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className={'w-full'}>
-      <Section>
-        <SectionHeader title={'Vehicles'}>
-          <div className={'flex flex-row gap-2'}>
-            <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
-            <Button
-              className="dark with-icon px-4"
-              onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
+    <div className="flex flex-col gap-4">
+      <div className="vehicles-stat">
+        {loading && <Loader isLoading />}
+        {!!error && <p className="text-sm text-text-secondary">Error loading vehicles</p>}
+        {!!data && (
+          <>
+            <Link
+              href={`/license/vehicles/${fragment.clientId}`}
+              className="hover:opacity-80 transition-opacity"
             >
-              Configure Vehicle Sharing
-            </Button>
-          </div>
-        </SectionHeader>
-        <div className={'flex flex-col flex-1'}>
-          {!!error && <p>We had trouble fetching the connected vehicles</p>}
-          {loading && <Loader isLoading={true} />}
-          {!!data && (
-            <VehiclesTotalCount
-              totalCount={data.vehicles.totalCount}
-              clientId={fragment.clientId}
-            />
-          )}
+              <p className="vehicles-stat__number">{data.vehicles.totalCount}</p>
+            </Link>
+            <p className="vehicles-stat__label">Connected Vehicles</p>
+            <Link
+              href={`/license/vehicles/${fragment.clientId}`}
+              className="vehicles-stat__link"
+            >
+              View vehicle list →
+            </Link>
+          </>
+        )}
+      </div>
+      <div className="flex flex-row gap-3">
+        <Link href={`/license/vehicles/${fragment.clientId}`} className="flex-1">
+          <Button className="dark w-full">Vehicle List</Button>
+        </Link>
+        <div className="flex-1">
+          <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
         </div>
-      </Section>
-    </div>
-  );
-};
-
-const VehiclesTotalCount = ({
-  totalCount,
-  clientId,
-}: {
-  totalCount: number;
-  clientId: string;
-}) => {
-  return (
-    <div className={'vehicle-count-container'}>
-      <Link
-        href={`/license/vehicles/${clientId}`}
-        className="hover:opacity-80 transition-opacity cursor-pointer"
-      >
-        <TotalCount totalCount={totalCount} countedThings="Connected Vehicles" />
-      </Link>
-      <Link href={`/license/vehicles/${clientId}`}>
-        <Button className={'table-action-button'}>Vehicle Details</Button>
-      </Link>
+        <Button
+          className="dark flex-1"
+          onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
+        >
+          Configure Sharing
+        </Button>
+      </div>
     </div>
   );
 };
