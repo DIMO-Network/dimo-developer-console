@@ -111,11 +111,10 @@ export const Brand: FC<Props> = ({ license }) => {
   return (
     <CollapsibleSection>
       <CollapsibleSection.Title title="Brand">
-        {isOwner && (
-          <span className="text-text-secondary text-xs">
-            Visible on the Login-with-DIMO button when consumers initialise with your
-            <code className="ml-1">clientId</code>.
-          </span>
+        {isOwner && !editing && (
+          <Button type="button" className="dark" onClick={() => setEditing('new')}>
+            Add Brand
+          </Button>
         )}
       </CollapsibleSection.Title>
       <CollapsibleSection.Content>
@@ -145,13 +144,6 @@ export const Brand: FC<Props> = ({ license }) => {
                   onDelete={() => void handleDelete(brand.id)}
                 />
               ))
-            )}
-            {isOwner && (
-              <div className="pt-4">
-                <Button type="button" className="light" onClick={() => setEditing('new')}>
-                  Add Brand
-                </Button>
-              </div>
             )}
             {brands.length > 0 && (
               <div className="mt-6 p-4 bg-accent rounded-lg">
