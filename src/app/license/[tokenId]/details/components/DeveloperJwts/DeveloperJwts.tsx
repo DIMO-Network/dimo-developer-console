@@ -11,7 +11,6 @@ import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { CopyButton } from '@/components/CopyButton';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useEventEmitter, useIsLicenseOwner, useDimoAuth } from '@/hooks';
-import { CollapsibleSection } from '@/components/CollapsibleSection';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
   fragment DeveloperJwtsFragment on DeveloperLicense {
@@ -135,16 +134,17 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
   }
 
   return (
-    <CollapsibleSection>
-      <CollapsibleSection.Title title="Developer JWTs">
+    <div className="p-4 bg-accent border border-border rounded-2xl flex flex-col gap-4 text-foreground">
+      <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
+        <h2 className="text-xl font-semibold text-foreground">Developer JWTs</h2>
         <GenerateDevJWT
           clientId={fragment.clientId}
           domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
           buttonText="Generate new JWT"
           onSuccess={handleGenerateSuccess}
         />
-      </CollapsibleSection.Title>
-      <CollapsibleSection.Content>
+      </div>
+      <div>
         {devJwts.length > 0 ? (
           <Table
             columns={columns}
@@ -167,7 +167,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
           onCancel={() => setJwtToDelete(undefined)}
           confirmButtonClassName="error"
         />
-      </CollapsibleSection.Content>
-    </CollapsibleSection>
+      </div>
+    </div>
   );
 };
