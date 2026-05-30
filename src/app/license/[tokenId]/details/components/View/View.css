@@ -1,85 +1,77 @@
 .license-details-page {
-  @apply flex flex-col gap-0;
-
-  .subtitle {
-    @apply capitalize text-text-secondary text-sm;
-  }
-
-  .signers-content {
-    @apply p-4 bg-accent rounded-2xl flex flex-col gap-4 justify-between;
-
-    .title {
-      @apply col-span-10;
-    }
-  }
+  @apply flex flex-col;
 }
 
-/* ── Instrument cluster ─────────────────────────────────── */
+/* ── Header ──────────────────────────────────────────────── */
 
-.dashboard-cluster {
-  @apply rounded-b-3xl px-6 pt-4 pb-10 mb-6;
-  background:
-    radial-gradient(ellipse at 50% -10%, hsl(178 66% 40% / 0.18) 0%, transparent 65%),
-    hsl(var(--card));
+.license-header {
+  @apply bg-card border-b border-border px-6 pt-5 pb-0;
 }
 
-.cluster-grid {
-  @apply grid grid-cols-1 mt-4;
-  grid-template-columns: 1fr;
-
-  @media (min-width: 768px) {
-    grid-template-columns: 1fr 2fr 1fr;
-  }
+.license-header__top {
+  @apply flex items-start justify-between mb-3;
 }
 
-.cluster-cell {
-  @apply flex flex-col items-center justify-center gap-5 py-6 px-4;
-
-  &:first-child {
-    @apply md:border-r md:border-r-white/10;
-  }
-
-  &:last-child {
-    @apply md:border-l md:border-l-white/10;
-  }
-
-  .cluster-cell__label {
-    @apply text-[10px] font-semibold uppercase tracking-widest text-muted-foreground;
-  }
+.license-header__identity {
+  @apply flex items-center gap-2 flex-wrap;
 }
 
-.cluster-cell--center {
-  @apply gap-3 border-y border-y-white/10 md:border-y-0;
+.license-header__name {
+  @apply text-xl font-bold text-foreground;
 }
 
-/* ── Gauge (Usage + Vehicles cluster variant) ───────────── */
-
-.gauge-display {
-  @apply flex flex-col items-center gap-4;
+.license-header__token-id {
+  @apply text-xs font-medium text-text-secondary bg-accent px-2 py-0.5 rounded-full;
 }
 
-.gauge-ring {
-  @apply flex flex-col items-center justify-center w-32 h-32 rounded-full gap-1;
-  border: 2px solid hsl(178 66% 40% / 0.5);
-  box-shadow:
-    0 0 24px hsl(178 66% 40% / 0.12),
-    inset 0 0 16px hsl(178 66% 40% / 0.06);
+.license-header__rename-btn {
+  @apply text-text-secondary hover:text-foreground transition-colors cursor-pointer p-0.5;
 }
 
-.gauge-number {
-  @apply text-4xl font-bold text-foreground tabular-nums;
+.license-header__client-id {
+  @apply mb-4;
 }
 
-.gauge-label {
-  @apply text-[11px] text-muted-foreground uppercase tracking-wide;
+/* ── Tabs ────────────────────────────────────────────────── */
+
+.license-tabs {
+  @apply flex -mb-px;
 }
 
-.gauge-hint {
-  @apply text-xs text-muted-foreground text-center px-3 leading-4;
+.license-tab {
+  @apply px-4 py-2.5 text-sm font-medium text-text-secondary border-b-2 border-transparent
+         cursor-pointer transition-colors hover:text-foreground select-none;
 }
 
-/* ── Control panels grid ────────────────────────────────── */
+.license-tab--active {
+  @apply text-foreground border-b-foreground;
+}
 
-.dashboard-panels {
-  @apply flex flex-col gap-4;
+/* ── Tab content ─────────────────────────────────────────── */
+
+.license-tab-content {
+  @apply p-6 flex flex-col gap-4;
+}
+
+/* ── Overview ────────────────────────────────────────────── */
+
+.overview-stats {
+  @apply grid grid-cols-2 gap-4;
+}
+
+.overview-quick-actions {
+  @apply flex flex-col gap-2;
+}
+
+.overview-quick-actions__label {
+  @apply text-xs uppercase tracking-wide text-text-secondary font-medium;
+}
+
+.overview-quick-actions__grid {
+  @apply flex flex-wrap gap-3;
+}
+
+.overview-quick-action {
+  @apply bg-accent border border-border rounded-lg px-4 py-2.5 text-sm text-foreground
+         hover:border-foreground/30 transition-colors cursor-pointer flex items-center gap-2;
 }
