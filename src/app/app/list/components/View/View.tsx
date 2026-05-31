@@ -29,7 +29,7 @@ const shortcuts = [
   },
   {
     label: 'Connections',
-    description: 'Configure app connections and redirect URIs',
+    description: 'Configure connections to bring your own data',
     icon: ConnectionsIcon,
     href: '/connections',
   },
@@ -40,7 +40,7 @@ const shortcuts = [
     href: '/webhooks',
   },
   {
-    label: 'Vehicle Explorer',
+    label: 'Data Explorer',
     description: 'Browse and query live vehicle telemetry data',
     icon: ChipIcon,
     href: '/explorer',
