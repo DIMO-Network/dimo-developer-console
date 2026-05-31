@@ -173,9 +173,9 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
                 </button>
                 <button
                   className="overview-quick-action"
-                  onClick={() => setActiveTab('config')}
+                  onClick={() => setActiveTab('brand')}
                 >
-                  🪪 Generate JWT
+                  🪪 Configure Branding
                 </button>
                 <button
                   className="overview-quick-action"
