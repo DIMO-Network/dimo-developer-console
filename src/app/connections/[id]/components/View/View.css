@@ -51,7 +51,7 @@
 }
 
 .field-value {
-  @apply text-foreground text-lg flex-1 break-all;
+  @apply text-foreground text-sm font-mono flex-1 break-all;
 }
 
 .field-value-container button {
