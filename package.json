@@ -39,7 +39,7 @@
     "@turnkey/viem": "^0.6.18",
     "@zerodev/ecdsa-validator": "^5.4.9",
     "@zerodev/sdk": "^5.5.10",
-    "axios": "^1.13.2",
+    "axios": "^1.16.1",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
