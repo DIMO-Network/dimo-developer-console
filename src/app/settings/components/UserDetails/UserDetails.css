@@ -1,15 +1,15 @@
-.user-detail {
-  @apply flex flex-col gap-4 font-medium text-foreground;
+.user-detail-fields {
+  @apply flex flex-col gap-4;
+}
 
-  .user-detail-content {
-    @apply grid grid-cols-[80px_1fr] auto-cols-min gap-4;
-  }
+.user-field {
+  @apply flex flex-col gap-1;
+}
 
-  .user-title {
-    @apply font-medium;
-  }
+.user-field-label {
+  @apply text-text-secondary text-sm font-medium;
+}
 
-  .user-description {
-    @apply font-normal text-muted-foreground;
-  }
+.user-field-value {
+  @apply text-foreground text-sm;
 }

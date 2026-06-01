@@ -1,17 +1,16 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { Card } from '@/components/Card';
 import { Loader } from '@/components/Loader';
-import { PageSubtitle } from '@/components/PageSubtitle';
+import { Section } from '@/components/Section';
+import { SectionHeader } from '@/components/Section/Header';
 import { TeamFormModal } from '../TeamFormModal';
 import { TeamManagement } from '@/app/settings/components/TeamManagement';
-import { Title } from '@/components/Title';
 import { UserDetails } from '@/app/settings/components/UserDetails';
 import { useMixPanel, useTeamCollaborators } from '@/hooks';
+import { DeveloperSupportButton } from '@/components/DeveloperSupportButton';
 
 import './View.css';
-import { DeveloperSupportButton } from '@/components/DeveloperSupportButton';
 
 const View: FC = () => {
   const { isLoading, teamCollaborators, refreshData } = useTeamCollaborators();
@@ -23,19 +22,14 @@ const View: FC = () => {
       {isLoading && <Loader isLoading={true} />}
       {!isLoading && (
         <>
-          <PageSubtitle subtitle="Organization Settings" />
           <UserDetails />
-          <Card className="primary team-information">
-            <div className="team-header">
-              <Title component="h2" className="settings-card-title">
-                Team Management
-              </Title>
-            </div>
+          <Section>
+            <SectionHeader title="Team Management" />
             <TeamManagement
               teamCollaborators={teamCollaborators.filter(({ deleted }) => !deleted)}
               refreshData={refreshData}
             />
-          </Card>
+          </Section>
           <DeveloperSupportButton variant={'large'} />
         </>
       )}

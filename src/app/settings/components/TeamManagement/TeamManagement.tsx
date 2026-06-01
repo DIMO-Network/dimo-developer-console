@@ -16,7 +16,6 @@ import { deleteCollaborator } from '@/actions/team';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { Card } from '@/components/Card';
 import { useGlobalAccount } from '@/hooks';
 
 interface IProps {
@@ -91,23 +90,21 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   return (
     <>
       <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
-      <Card className="secondary team-information">
-        <Table
-          columns={[
-            {
-              label: 'User',
-              name: 'User.name',
-              render: renderUserName,
-            },
-            {
-              name: 'role',
-              render: renderRole,
-            },
-          ]}
-          data={teamCollaborators}
-          actions={[renderDeleteRemoveCollaborator]}
-        />
-      </Card>
+      <Table
+        columns={[
+          {
+            label: 'User',
+            name: 'User.name',
+            render: renderUserName,
+          },
+          {
+            name: 'role',
+            render: renderRole,
+          },
+        ]}
+        data={teamCollaborators}
+        actions={[renderDeleteRemoveCollaborator]}
+      />
     </>
   );
 };
