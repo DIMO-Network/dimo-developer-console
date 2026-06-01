@@ -38,7 +38,7 @@ export const CopyButton: FC<ICopyButtonProps> = ({
       {copied ? (
         <CheckIcon className={'w-5 h-5 transition'} />
       ) : (
-        <ContentCopyIcon className="w-5 h-5 fill-white/50 cursor-pointer transition" />
+        <ContentCopyIcon className="w-5 h-5 fill-foreground/50 cursor-pointer transition" />
       )}
     </button>
   );

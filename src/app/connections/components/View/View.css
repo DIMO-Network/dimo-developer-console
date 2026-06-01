@@ -40,5 +40,5 @@
 }
 
 .connection-details-btn {
-  @apply bg-cta-default text-white border-0 py-2.5 px-4 rounded-full text-sm font-medium cursor-pointer transition-colors duration-200 hover:border-white border-2 border-transparent;
+  @apply bg-primary text-white border-0 py-2.5 px-4 rounded-full text-sm font-medium cursor-pointer transition-colors duration-200 hover:opacity-90 border-2 border-transparent;
 }

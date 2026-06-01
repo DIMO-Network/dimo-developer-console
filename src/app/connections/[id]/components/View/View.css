@@ -55,5 +55,5 @@
 }
 
 .field-value-container button {
-  @apply bg-cta-default text-white border-0 p-2 rounded-full hover:bg-opacity-80 transition-all duration-200;
+  @apply bg-primary text-white border-0 p-2 rounded-full hover:opacity-80 transition-all duration-200;
 }

@@ -52,7 +52,7 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className={'border-t border-t-cta-default'}>
+              <tr key={row.id} className={'border-t border-t-border'}>
                 {row.getVisibleCells().map((cell) => (
                   <Cell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

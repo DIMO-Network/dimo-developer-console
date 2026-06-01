@@ -408,7 +408,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                   <div className="flex items-center gap-2">
                     <span>{item.address}</span>
                     {item.address.toLowerCase() === rentalOSSigner && (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-cta-default text-white whitespace-nowrap">
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary text-white whitespace-nowrap">
                         RentalOS
                       </span>
                     )}

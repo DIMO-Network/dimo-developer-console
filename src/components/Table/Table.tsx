@@ -37,7 +37,7 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
         </thead>
         <tbody className="table-body">
           {data.map((item, index) => (
-            <tr key={`row-${index}`} className={'border-t border-t-cta-default'}>
+            <tr key={`row-${index}`} className={'border-t border-t-border'}>
               {columns.map(({ name, render }) => {
                 const textNode = _.get(item, name, '');
                 const renderNode = render ? render(item) : null;
