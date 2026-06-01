@@ -7,6 +7,7 @@ import '@/app/globals.css';
 import QueryProvider from '@/hoc/QueryProvider';
 import { useMixPanel } from '@/hooks';
 import { Toaster } from '@/components/ui/sonner';
+import { Analytics } from '@vercel/analytics/next';
 
 export const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   const { initMixPanel } = useMixPanel();
@@ -21,6 +22,7 @@ export const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>
           <QueryProvider>{children}</QueryProvider>
           <Toaster position="bottom-right" />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
