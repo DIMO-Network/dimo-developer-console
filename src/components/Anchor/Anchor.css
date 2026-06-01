@@ -2,7 +2,7 @@
   @apply text-foreground py-1 cursor-pointer;
 
   &.primary {
-    @apply text-primary-200;
+    @apply text-primary;
   }
 
   &.grey {

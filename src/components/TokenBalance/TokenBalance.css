@@ -12,7 +12,7 @@
   .token-balance__balance {
     @apply flex flex-col h-full gap-1;
     .token-balance__balance-container {
-      @apply rounded-lg outline-0 text-grey-50 flex flex-col;
+      @apply rounded-lg outline-0 text-foreground flex flex-col;
     }
 
     .token-balance__buy-button {

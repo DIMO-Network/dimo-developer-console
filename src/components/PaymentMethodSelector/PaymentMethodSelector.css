@@ -6,6 +6,6 @@
   }
 
   .selected {
-    @apply bg-dark-grey-950 border-solid border-primary-500;
+    @apply bg-accent border-solid border-primary;
   }
 }
