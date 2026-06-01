@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { TokenBalance } from '@/components/TokenBalance';
 import config from '@/config';
@@ -80,8 +81,9 @@ export const Balances = ({ shouldFetchBalances }: IProps) => {
             token={'dcx'}
             balance={balance.dcxBalance}
             basePrice={0.001}
-            canBuy={balance.dcxBalance < config.MINIMUM_CREDITS}
-            openBuyModal={handleOpenBuyCreditsModal}
+            canBuy={false}
+            // canBuy={balance.dcxBalance < config.MINIMUM_CREDITS}
+            // openBuyModal={handleOpenBuyCreditsModal}
             iconClassName={'border border-[#E80303]'}
           />
         </>

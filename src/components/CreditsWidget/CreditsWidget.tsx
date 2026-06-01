@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useContext, useEffect, useState } from 'react';
 import { useGlobalAccount } from '@/hooks';
-import { CreditsContext } from '@/context/creditsContext';
 import { isCollaborator, isOwner } from '@/utils/user';
 import { formatToCurrency } from '@/utils/formatBalance';
 import * as Sentry from '@sentry/nextjs';
 import { PlusIcon, WalletIcon } from '@/components/Icons';
 import { Button } from '@/components/Button';
 import { AccountInfoButton } from '@/components/AccountInfoButton';
+import { CreditsContext } from '@/context/creditsContext';
 import { cn } from '@/lib/utils';
 import './CreditsWidget.css';
 
@@ -19,7 +20,7 @@ const DCX_IN_USD = 0.001;
 export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) => {
   const [dcxBalance, setDcxBalance] = useState<string>('$0.00');
   const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
-  const { setIsOpen } = useContext(CreditsContext);
+  const { setIsOpen: _setIsOpen } = useContext(CreditsContext);
 
   const loadAndFormatDcxBalance = async () => {
     try {
@@ -32,16 +33,16 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
     }
   };
 
+  // const handleBuyCredits = () => {
+  //   if (isOwner(currentUser?.role ?? '')) {
+  //     setIsOpen(true);
+  //   }
+  // };
+
   useEffect(() => {
     if (!currentUser) return;
     void loadAndFormatDcxBalance();
   }, [currentUser]);
-
-  const handleBuyCredits = () => {
-    if (isOwner(currentUser?.role ?? '')) {
-      setIsOpen(true);
-    }
-  };
 
   if (variant === 'large') {
     return (
@@ -57,9 +58,9 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
             </div>
           </div>
           <div className="flex flex-1 flex-col w-full gap-2">
-            <Button className="dark w-full" onClick={handleBuyCredits}>
+            {/* <Button className="dark w-full" onClick={handleBuyCredits}>
               Buy Credits
-            </Button>
+            </Button> */}
             <AccountInfoButton variant="button" />
           </div>
         </div>
@@ -77,7 +78,7 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
     >
       <span className="text-primary text-xs">$</span>
       <span className="text-muted-foreground">{dcxBalance.replace('$', '')}</span>
-      {isOwner(currentUser?.role ?? '') && (
+      {/* {isOwner(currentUser?.role ?? '') && (
         <button
           type="button"
           title="Add Credits"
@@ -88,7 +89,7 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
         >
           <PlusIcon className="h-3 w-3 text-primary" />
         </button>
-      )}
+      )} */}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { FC } from 'react';
 import './OnboardingBanner.css';
 import CreateAppButton from '@/app/app/list/components/CreateAppButton';
@@ -27,12 +28,21 @@ export const OnboardingBanner: FC<Props> = ({
 
   if (isLoading || balance > 0) return <></>;
 
+  // Buy DCX disabled — re-enable by restoring the AddCreditsButton CTARow below:
+  // {fragment.totalCount > 0 && (
+  //   <CTARow
+  //     isComplete={balance > 0}
+  //     text={'Add credits'}
+  //     CTA={<AddCreditsButton className={'white-with-icon'} />}
+  //   />
+  // )}
+
   return (
     <div className="banner-content">
       <div>
         <p className="font-black text-xl">Getting Started</p>
         <p className="text-text-secondary text-sm mt-1">
-          You’re on the way to building with DIMO!
+          You&apos;re on the way to building with DIMO!
         </p>
       </div>
       <div className={'flex flex-col flex-1 gap-4 w-full'}>
@@ -41,18 +51,9 @@ export const OnboardingBanner: FC<Props> = ({
         <CTARow
           isComplete={fragment.totalCount > 0}
           text={'Create your first license'}
-          subtitle={
-            'Now that your account is set up, it’s time to create your first license.'
-          }
+          subtitle="Now that your account is set up, it's time to create your first license."
           CTA={<CreateAppButton className={'white-with-icon'} />}
         />
-        {fragment.totalCount > 0 && (
-          <CTARow
-            isComplete={balance > 0}
-            text={'Add credits'}
-            CTA={<AddCreditsButton className={'white-with-icon'} />}
-          />
-        )}
       </div>
     </div>
   );
