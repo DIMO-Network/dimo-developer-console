@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { TokenBalance } from '@/components/TokenBalance';
 import config from '@/config';
@@ -5,7 +6,7 @@ import { useGlobalAccount, useLoading } from '@/hooks';
 import * as Sentry from '@sentry/nextjs';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { useContext, useEffect, useState } from 'react';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { CreditsContext } from '@/context/creditsContext';
 
@@ -29,7 +30,6 @@ export const Balances = ({ shouldFetchBalances }: IProps) => {
   });
   const { getCurrentDcxBalance, getCurrentDimoBalance } = useGlobalAccount();
   const { getDimoPrice } = useCryptoPricing();
-  const { setNotification } = useContext(NotificationContext);
   const { setIsOpen } = useContext(CreditsContext);
   const { setShowAccountInformation } = useContext(AccountInformationContext);
 
@@ -49,7 +49,7 @@ export const Balances = ({ shouldFetchBalances }: IProps) => {
     } catch (error: unknown) {
       Sentry.captureException(error);
       console.error('Error while loading balances', error);
-      setNotification('Error while loading balances', 'Error', 'error');
+      toast.error('Error while loading balances');
     }
   };
 
@@ -81,8 +81,9 @@ export const Balances = ({ shouldFetchBalances }: IProps) => {
             token={'dcx'}
             balance={balance.dcxBalance}
             basePrice={0.001}
-            canBuy={balance.dcxBalance < config.MINIMUM_CREDITS}
-            openBuyModal={handleOpenBuyCreditsModal}
+            canBuy={false}
+            // canBuy={balance.dcxBalance < config.MINIMUM_CREDITS}
+            // openBuyModal={handleOpenBuyCreditsModal}
             iconClassName={'border border-[#E80303]'}
           />
         </>

@@ -31,7 +31,7 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
 
   return (
     <WebhookTableContextProvider clientId={clientId}>
-      <div className="min-w-full bg-surface-default rounded-xl py-4">
+      <div className="min-w-full bg-card rounded-xl py-4">
         <ActionModals clientId={clientId} />
         <WebhooksTable webhooks={data ?? []} clientId={clientId} />
       </div>

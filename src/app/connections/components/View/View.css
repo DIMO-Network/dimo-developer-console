@@ -20,7 +20,7 @@
 }
 
 .connection-card {
-  @apply bg-black rounded-2xl p-4 flex flex-col gap-3;
+  @apply bg-card rounded-2xl p-4 flex flex-col gap-3;
 }
 
 .connection-card-header {
@@ -28,7 +28,7 @@
 }
 
 .connection-name {
-  @apply text-white text-lg font-semibold m-0;
+  @apply text-foreground text-lg font-semibold m-0;
 }
 
 .connection-icon {
@@ -36,9 +36,9 @@
 }
 
 .connection-public-key {
-  @apply text-text-secondary text-lg break-all;
+  @apply text-text-secondary text-sm font-mono break-all;
 }
 
 .connection-details-btn {
-  @apply bg-cta-default text-white border-0 py-2.5 px-4 rounded-full text-sm font-medium cursor-pointer transition-colors duration-200 hover:border-white border-2 border-transparent;
+  @apply bg-primary text-white border-0 py-2.5 px-4 rounded-full text-sm font-medium cursor-pointer transition-colors duration-200 hover:opacity-90 border-2 border-transparent;
 }

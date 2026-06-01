@@ -1,7 +1,6 @@
 'use client';
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PageSubtitle } from '@/components/PageSubtitle';
 import { Section } from '@/components/Section';
 import { SectionHeader } from '@/components/Section/Header';
 import { Button } from '@/components/Button';
@@ -10,14 +9,13 @@ import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { useGlobalAccount } from '@/hooks';
 import { useMyConnections } from '@/hooks/queries/useMyConnections';
 import { ChipIcon } from '@/components/Icons';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 
 import './View.css';
 
 const MainComponent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setNotification } = useContext(NotificationContext);
   const { currentUser } = useGlobalAccount();
   const owner = currentUser?.walletAddress;
   const { data: connections, isLoading } = useMyConnections();
@@ -26,13 +24,13 @@ const MainComponent: React.FC = () => {
   useEffect(() => {
     const success = searchParams.get('success');
     if (success === 'connection-created' && !hasShownNotification.current) {
-      setNotification('Connection successfully created', 'Success', 'success', 5000);
+      toast.success('Connection successfully created');
       hasShownNotification.current = true;
       const url = new URL(window.location.href);
       url.searchParams.delete('success');
       window.history.replaceState({}, '', url.toString());
     }
-  }, [searchParams, setNotification]);
+  }, [searchParams]);
 
   const handleCreateConnection = () => {
     router.push(`/connections/create/${owner}`);
@@ -80,8 +78,6 @@ const MainComponent: React.FC = () => {
 
   return (
     <div className="connections-page">
-      <PageSubtitle subtitle="Connection Oracle is an application that performs data streaming from your data source to a DIMO Node." />
-
       <Section>
         <SectionHeader title="Connections">
           {(!connections || connections.length === 0) && (

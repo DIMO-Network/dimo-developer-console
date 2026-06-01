@@ -1,15 +1,15 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Card } from '@/components/Card';
 import classNames from 'classnames';
 import { Anchor } from '@/components/Anchor';
-import { Button } from '@/components/Button';
 import { useQuery } from '@apollo/client';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';
 import { GET_VEHICLE_COUNT_BY_CLIENT_ID } from '@/app/license/[tokenId]/details/components/Vehicles';
 import { getConfigurationsByClientId } from '@/actions/configurations';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 import './LicenseCard.css';
 
@@ -32,8 +32,7 @@ export const LicenseCard = (props: {
   className?: string;
 }) => {
   const license = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, props.license);
-  const { setNotification } = useContext(NotificationContext);
-
+  const router = useRouter();
   const { data: vehicleData, loading: vehicleLoading } = useQuery(
     GET_VEHICLE_COUNT_BY_CLIENT_ID,
     {
@@ -59,7 +58,10 @@ export const LicenseCard = (props: {
   const hasVehicles = vehicleCount > 0;
 
   return (
-    <Card className={classNames('license-card', props.className)}>
+    <Card
+      className={classNames('license-card cursor-pointer', props.className)}
+      onClick={() => router.push(`/license/${license.tokenId}/details`)}
+    >
       <div className="content">
         {/* Header */}
         <div className="flex w-full flex-row justify-between items-start">
@@ -70,7 +72,7 @@ export const LicenseCard = (props: {
         </div>
 
         {/* Stats */}
-        <div className="flex flex-row items-center gap-4 py-2 border-y border-[#322D2F]">
+        <div className="flex flex-row items-center gap-4 py-2 border-y border-border">
           <div className="flex flex-col gap-0.5">
             <span className="text-[10px] uppercase tracking-wider text-text-secondary">
               Vehicles Connected
@@ -78,7 +80,10 @@ export const LicenseCard = (props: {
             {vehicleLoading ? (
               <BubbleLoader isLoading isSmall />
             ) : (
-              <Anchor href={`/license/vehicles/${license.clientId}`}>
+              <Anchor
+                href={`/license/vehicles/${license.clientId}`}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <span className="text-sm font-semibold hover:underline">
                   {vehicleCount.toLocaleString()}
                 </span>
@@ -98,16 +103,20 @@ export const LicenseCard = (props: {
         {sharingLinkLoading ? (
           <BubbleLoader isLoading isSmall />
         ) : configCount !== null && configCount > 1 ? (
-          <Anchor href={`/license/${license.tokenId}/configurator`}>
+          <Anchor
+            href={`/license/${license.tokenId}/configurator`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <span className="text-xs text-primary hover:opacity-70 transition-opacity">
               {configCount} configurations →
             </span>
           </Anchor>
         ) : sharingLink ? (
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               navigator.clipboard.writeText(sharingLink);
-              setNotification('Sharing link copied', '', 'success');
+              toast.success('Sharing link copied');
             }}
             className="flex items-center gap-2 w-fit text-xs text-primary hover:opacity-70 transition-opacity"
             title={sharingLink}
@@ -116,17 +125,15 @@ export const LicenseCard = (props: {
             Vehicle Sharing Link
           </button>
         ) : (
-          <Anchor href={`/license/${license.tokenId}/configurator`}>
-            <span className="text-xs text-text-secondary hover:text-text-primary transition-colors">
+          <Anchor
+            href={`/license/${license.tokenId}/configurator`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-xs text-text-secondary hover:text-foreground transition-colors">
               Not configured — set up vehicle sharing →
             </span>
           </Anchor>
         )}
-
-        {/* CTA */}
-        <Anchor href={`/license/${license.tokenId}/details`}>
-          <Button className={'dark w-full !h-10'}>License Details</Button>
-        </Anchor>
       </div>
     </Card>
   );

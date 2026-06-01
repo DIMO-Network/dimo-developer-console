@@ -1,4 +1,4 @@
-import { FC, useContext, useState } from 'react';
+import { FC, useState } from 'react';
 import {
   invalidateQuery,
   useWebhookVehiclesById,
@@ -14,7 +14,7 @@ import { UnsubscribeVehiclesModal } from '@/components/Webhooks/edit/Unsubscribe
 import { UnsubscribeAllModal } from '@/components/Webhooks/edit/UnsubscribeAllModal';
 import { subscribeAllVehicles, unsubscribeAllVehicles } from '@/services/webhook';
 import { getDevJwt } from '@/utils/devJwt';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { CSV_UPLOAD_ROW_TITLE } from '@/components/CSVUpload';
 import { saveAs } from 'file-saver';
 import { captureException } from '@sentry/nextjs';
@@ -38,8 +38,6 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
   const [isUnsubscribeAll, setIsUnsubscribeAll] = useState(false);
   const [unsubscribingAll, setUnsubscribingAll] = useState(false);
   const [subscribingAll, setSubscribingAll] = useState(false);
-  const { setNotification } = useContext(NotificationContext);
-
   const { data, isLoading, error } = useWebhookVehiclesById({ webhookId, clientId });
   if (isLoading) {
     return <Loader isLoading />;
@@ -55,15 +53,11 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
     try {
       setSubscribingAll(true);
       const response = await subscribeAllVehicles(webhookId, getDevJwt(clientId) ?? '');
-      setNotification(
-        response?.message ?? 'Successfully subscribed all vehicles',
-        '',
-        'success',
-      );
+      toast.success(response?.message ?? 'Successfully subscribed all vehicles');
       invalidateQuery({ webhookId, clientId });
     } catch (err) {
       captureException(err);
-      setNotification('Failed to subscribe all vehicles', '', 'error');
+      toast.error('Failed to subscribe all vehicles');
     } finally {
       setSubscribingAll(false);
     }
@@ -73,11 +67,11 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
     try {
       setUnsubscribingAll(true);
       await unsubscribeAllVehicles({ webhookId, token: getDevJwt(clientId) ?? '' });
-      setNotification('Successfully unsubscribed all vehicles', '', 'success');
+      toast.success('Successfully unsubscribed all vehicles');
       invalidateQuery({ webhookId, clientId });
     } catch (err) {
       captureException(err);
-      setNotification('Failed to unsubscribe all vehicles', '', 'error');
+      toast.error('Failed to unsubscribe all vehicles');
     } finally {
       setUnsubscribingAll(false);
     }

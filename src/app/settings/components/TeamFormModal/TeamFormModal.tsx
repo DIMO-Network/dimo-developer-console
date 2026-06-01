@@ -3,12 +3,12 @@
 import _ from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
-import { useContext, useState, type FC } from 'react';
+import { useState, type FC } from 'react';
 
 import { IInvitation } from '@/types/team';
 import { inviteCollaborator } from '@/actions/team';
 import { Modal } from '@/components/Modal';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { TeamForm } from '@/app/settings/components/TeamForm/TeamForm';
 import { Title } from '@/components/Title';
 
@@ -21,7 +21,6 @@ interface IProps {
 
 export const TeamFormModal: FC<IProps> = ({ isOpen, setIsOpen }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { setNotification } = useContext(NotificationContext);
 
   const onSubmit = async (invitation: IInvitation) => {
     setIsLoading(true);
@@ -30,14 +29,10 @@ export const TeamFormModal: FC<IProps> = ({ isOpen, setIsOpen }) => {
       invitation.role = invitation.role.toUpperCase();
       const { success, message } = await inviteCollaborator(invitation);
       if (!success) throw new Error(message);
-      setNotification('The invitation was sent', 'Success', 'info');
+      toast('The invitation was sent');
     } catch (error: unknown) {
       Sentry.captureException(error);
-      setNotification(
-        _.get(error, 'message', 'Something went wrong'),
-        'Oops...',
-        'error',
-      );
+      toast.error(_.get(error, 'message', 'Something went wrong'));
     } finally {
       setIsLoading(false);
     }

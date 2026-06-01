@@ -1,7 +1,5 @@
-import { InputHTMLAttributes, forwardRef, ReactNode } from 'react';
-
-import classnames from 'classnames';
-
+import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
+import { Input } from '@/components/ui/input';
 import './TextField.css';
 
 interface IProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -12,11 +10,10 @@ interface IProps extends InputHTMLAttributes<HTMLInputElement> {
 export type Ref = HTMLInputElement;
 
 export const TextField = forwardRef<Ref, IProps>(
-  ({ className: inputClassName = '', action, ...props }, ref) => {
-    const className = classnames(inputClassName);
+  ({ className = '', action, ...props }, ref) => {
     return (
       <div className="text-field">
-        <input className={className} {...props} ref={ref} />
+        <Input className={className} {...props} ref={ref} />
         {action}
       </div>
     );
@@ -24,5 +21,4 @@ export const TextField = forwardRef<Ref, IProps>(
 );
 
 TextField.displayName = 'TextField';
-
 export default TextField;

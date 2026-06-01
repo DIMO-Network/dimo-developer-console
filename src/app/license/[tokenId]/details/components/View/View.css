@@ -1,19 +1,77 @@
 .license-details-page {
   @apply flex flex-col;
+}
 
-  .subtitle {
-    @apply capitalize text-text-secondary text-sm;
-  }
+/* ── Header ──────────────────────────────────────────────── */
 
-  .summary {
-    @apply pb-6 border-b border-b-cta-default;
-  }
+.license-header {
+  @apply bg-card border-b border-border px-6 pt-5 pb-0;
+}
 
-  .signers-content {
-    @apply p-4 bg-surface-raised rounded-2xl flex flex-col gap-4 justify-between;
+.license-header__top {
+  @apply flex items-start justify-between mb-3;
+}
 
-    .title {
-      @apply col-span-10;
-    }
-  }
+.license-header__identity {
+  @apply flex items-center gap-2 flex-wrap;
+}
+
+.license-header__name {
+  @apply text-xl font-bold text-foreground;
+}
+
+.license-header__token-id {
+  @apply text-xs font-medium text-text-secondary bg-accent px-2 py-0.5 rounded-full;
+}
+
+.license-header__rename-btn {
+  @apply text-text-secondary hover:text-foreground transition-colors cursor-pointer p-0.5;
+}
+
+.license-header__client-id {
+  @apply mb-4;
+}
+
+/* ── Tabs ────────────────────────────────────────────────── */
+
+.license-tabs {
+  @apply flex -mb-px;
+}
+
+.license-tab {
+  @apply px-4 py-2.5 text-sm font-medium text-text-secondary border-b-2 border-transparent
+         cursor-pointer transition-colors hover:text-foreground select-none;
+}
+
+.license-tab--active {
+  @apply text-foreground border-b-foreground;
+}
+
+/* ── Tab content ─────────────────────────────────────────── */
+
+.license-tab-content {
+  @apply p-6 flex flex-col gap-4;
+}
+
+/* ── Overview ────────────────────────────────────────────── */
+
+.overview-stats {
+  @apply grid grid-cols-2 gap-4;
+}
+
+.overview-quick-actions {
+  @apply flex flex-col gap-2;
+}
+
+.overview-quick-actions__label {
+  @apply text-xs uppercase tracking-wide text-text-secondary font-medium;
+}
+
+.overview-quick-actions__grid {
+  @apply flex flex-wrap gap-3;
+}
+
+.overview-quick-action {
+  @apply bg-accent border border-border rounded-lg px-4 py-2.5 text-sm text-foreground
+         hover:border-foreground/30 transition-colors cursor-pointer flex items-center gap-2;
 }

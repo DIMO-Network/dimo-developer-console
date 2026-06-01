@@ -1,6 +1,6 @@
-import { FC, useContext, useState } from 'react';
+import { FC, useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { subscribeVehicles } from '@/services/webhook';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
@@ -20,7 +20,6 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [inputError, setInputError] = useState<string>('');
   const devJwt = getDevJwt(clientId);
-  const { setNotification } = useContext(NotificationContext);
 
   const handleSubmit = async () => {
     if (assetDIDs.length === 0) {
@@ -38,11 +37,9 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
         token: devJwt ?? '',
       });
 
-      setNotification(
+      toast.success(
         response?.message ??
           `Successfully subscribed ${assetDIDs.length} vehicle${assetDIDs.length !== 1 ? 's' : ''}`,
-        '',
-        'success',
       );
       onSuccess?.();
       setIsOpen(false);
@@ -50,7 +47,7 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
     } catch (err) {
       captureException(err);
       console.error('Vehicle subscription error:', err);
-      setNotification('Failed to subscribe vehicles. Please try again.', '', 'error');
+      toast.error('Failed to subscribe vehicles. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import './TokenBalance.css';
 import {
   formatSimpleBalance,
@@ -19,12 +20,19 @@ export const TokenBalance = ({
   token,
   balance,
   basePrice,
-  canBuy,
-  openBuyModal,
+  canBuy: _canBuy,
+  openBuyModal: _openBuyModal,
   iconClassName,
 }: IProps) => {
   return (
     <div className="token-balance">
+      {/* Buy DCX disabled
+      {canBuy && (
+        <Button title="Buy DCX" className="dark" onClick={openBuyModal}>
+          Buy DCX
+        </Button>
+      )}
+      */}
       <div className={'flex flex-row gap-4 items-center'}>
         <div className={classNames('token-balance__icon', iconClassName)}>
           <img alt={token} src={`/images/${token}_token_icon.svg`} />
@@ -40,11 +48,6 @@ export const TokenBalance = ({
           />
         </div>
       </div>
-      {canBuy && (
-        <Button title="Buy DCX" className="dark" onClick={openBuyModal}>
-          Buy DCX
-        </Button>
-      )}
     </div>
   );
 };

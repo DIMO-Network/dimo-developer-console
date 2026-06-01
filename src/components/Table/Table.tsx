@@ -23,7 +23,7 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
   };
   // TODO: check that conditional actions access.
   return (
-    <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
+    <div className={'min-w-full bg-card rounded-xl p-4'}>
       <table className="table">
         <thead className="table-header">
           <tr>
@@ -37,7 +37,7 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
         </thead>
         <tbody className="table-body">
           {data.map((item, index) => (
-            <tr key={`row-${index}`} className={'border-t border-t-cta-default'}>
+            <tr key={`row-${index}`} className={'border-t border-t-border'}>
               {columns.map(({ name, render }) => {
                 const textNode = _.get(item, name, '');
                 const renderNode = render ? render(item) : null;

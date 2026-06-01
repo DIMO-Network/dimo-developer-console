@@ -1,6 +1,6 @@
-import React, { FC, useContext, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
@@ -17,18 +17,17 @@ export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const devJwt = getDevJwt(clientId);
-  const { setNotification } = useContext(NotificationContext);
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
       await unsubscribeAllVehicles({ webhookId, token: devJwt ?? '' });
-      setNotification('Successfully unsubscribed all vehicles.', '', 'success');
+      toast.success('Successfully unsubscribed all vehicles.');
       onSuccess?.();
       setIsOpen(false);
     } catch (err) {
       captureException(err);
-      setNotification('An error occurred while unsubscribing all vehicles.', '', 'error');
+      toast.error('An error occurred while unsubscribing all vehicles.');
     } finally {
       setLoading(false);
     }

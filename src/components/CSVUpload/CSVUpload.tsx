@@ -1,9 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import Papa from 'papaparse';
 import { ArrowUpTrayIcon } from '@heroicons/react/20/solid';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { Title } from '@/components/Title';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 
 interface CSVUploadProps {
   vehicleTokenIds: string[];
@@ -25,15 +25,14 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const { setNotification } = useContext(NotificationContext);
 
   const handleFile = (file: File) => {
     if (fileInfo.length > 0) {
-      return setNotification('Only one file can be uploaded at a time', '', 'error');
+      return toast.error('Only one file can be uploaded at a time');
     }
 
     if (fileInfo.some((f) => f.name === file.name)) {
-      return setNotification('Duplicate file upload', '', 'error');
+      return toast.error('Duplicate file upload');
     }
 
     if (file.size > 50 * 1024 * 1024) {
@@ -138,10 +137,10 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
         <p className="font-black">
           Drag and drop or upload CSV with a list of vehicle IDs
         </p>
-        <p className="text-sm text-white mt-4">
+        <p className="text-sm text-foreground mt-4">
           Please format your CSV with a single column and the header <code>tokenId</code>.
         </p>
-        <p className="text-sm text-white mt-4">
+        <p className="text-sm text-foreground mt-4">
           Accepts .csv file types
           <br />
           Maximum file size 50 MB.

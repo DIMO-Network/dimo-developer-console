@@ -27,7 +27,6 @@ import { withLoadingStatus } from '@/hoc';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
-import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { getUser } from '@/actions/user';
 import { FOCUS_RENTALS_OS_SIGNUP, clearFocus, getFocus } from '@/utils/focus';
 
@@ -378,8 +377,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   return (
-    <CollapsibleSection>
-      <CollapsibleSection.Title title={'API Keys'}>
+    <div className="p-4 bg-accent border border-border rounded-2xl flex flex-col gap-4 text-foreground">
+      <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
+        <h2 className="text-xl font-semibold text-foreground">API Keys</h2>
         {isLicenseOwner && (
           <div className="flex gap-2">
             <Button
@@ -395,45 +395,43 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
             </Button>
           </div>
         )}
-      </CollapsibleSection.Title>
-      <CollapsibleSection.Content>
-        <div>
-          {!!displaySigners.length && (
-            <Table
-              columns={[
-                {
-                  name: 'address',
-                  label: 'Signer address',
-                  CustomHeader: <SignerAddressHeader key="header-addr" />,
-                  render: (item: SignerNode) => (
-                    <div className="flex items-center gap-2">
-                      <span>{item.address}</span>
-                      {item.address.toLowerCase() === rentalOSSigner && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-cta-default text-white whitespace-nowrap">
-                          RentalOS
-                        </span>
-                      )}
-                    </div>
-                  ),
-                },
-                { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
-              ]}
-              data={displaySigners}
-              actions={[renderDeleteSignerAction]}
-            />
-          )}
-        </div>
-        <DeleteConfirmationModal
-          isOpen={!!signerToDelete}
-          title={'Are you sure you want to delete this API key?'}
-          subtitle={'You will no longer be able to use this key in your app.'}
-          onConfirm={onConfirmDelete}
-          onCancel={() => {
-            setSignerToDelete(undefined);
-          }}
-          confirmButtonClassName={'error'}
-        />
-      </CollapsibleSection.Content>
+      </div>
+      <div>
+        {!!displaySigners.length && (
+          <Table
+            columns={[
+              {
+                name: 'address',
+                label: 'Signer address',
+                CustomHeader: <SignerAddressHeader key="header-addr" />,
+                render: (item: SignerNode) => (
+                  <div className="flex items-center gap-2">
+                    <span>{item.address}</span>
+                    {item.address.toLowerCase() === rentalOSSigner && (
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary text-white whitespace-nowrap">
+                        RentalOS
+                      </span>
+                    )}
+                  </div>
+                ),
+              },
+              { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
+            ]}
+            data={displaySigners}
+            actions={[renderDeleteSignerAction]}
+          />
+        )}
+      </div>
+      <DeleteConfirmationModal
+        isOpen={!!signerToDelete}
+        title={'Are you sure you want to delete this API key?'}
+        subtitle={'You will no longer be able to use this key in your app.'}
+        onConfirm={onConfirmDelete}
+        onCancel={() => {
+          setSignerToDelete(undefined);
+        }}
+        confirmButtonClassName={'error'}
+      />
       <APIKeyModal
         isOpen={!!apiKey}
         apiKey={String(apiKey)?.replace('0x', '') ?? ''}
@@ -475,7 +473,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           </div>
         </div>
       </Modal>
-    </CollapsibleSection>
+    </div>
   );
 };
 

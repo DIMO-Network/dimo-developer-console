@@ -1,9 +1,8 @@
 'use client';
-import React from 'react';
+import React, { useContext } from 'react';
 import { MenuButton } from '@/components/Menu/MenuButton';
 import {
   withCredits,
-  withNotifications,
   withGlobalAccounts,
   withApollo,
   withAccountInformation,
@@ -11,18 +10,18 @@ import {
 } from '@/hoc';
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
-import './AuthorizedLayout.css';
 import { FullScreenMenu } from '@/components/Menu/FullScreenMenu';
+import { LayoutContext } from '@/context/LayoutContext';
+import { cn } from '@/lib/utils';
+import './AuthorizedLayout.css';
 
-const Providers = withNotifications(
-  withGlobalAccounts(
-    withLayout(
-      withCredits(
-        withApollo(
-          withAccountInformation(({ children }: { children: React.ReactNode }) => (
-            <>{children}</>
-          )),
-        ),
+const Providers = withGlobalAccounts(
+  withLayout(
+    withCredits(
+      withApollo(
+        withAccountInformation(({ children }: { children: React.ReactNode }) => (
+          <>{children}</>
+        )),
       ),
     ),
   ),
@@ -30,9 +29,7 @@ const Providers = withNotifications(
 
 export const AuthorizedLayout = ({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) => {
+}: Readonly<{ children: React.ReactNode }>) => {
   return (
     <Providers>
       <Layout>{children}</Layout>
@@ -41,9 +38,13 @@ export const AuthorizedLayout = ({
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
+  const { isSidebarCollapsed } = useContext(LayoutContext);
+
   return (
     <div className="main">
-      <div className="sidebar-container">
+      <div
+        className={cn('sidebar-container', isSidebarCollapsed ? 'collapsed' : 'expanded')}
+      >
         <Menu />
       </div>
       <div className="app-content">

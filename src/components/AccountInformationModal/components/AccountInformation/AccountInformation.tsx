@@ -9,7 +9,7 @@ export const AccountInformation = () => {
   const { currentUser } = useGlobalAccount();
 
   return (
-    <div className={'flex flex-col gap-4 p-4 bg-surface-default rounded-2xl'}>
+    <div className={'flex flex-col gap-4 p-4 bg-card rounded-2xl'}>
       <div className="account-information-row">
         <Label htmlFor="email" className="text-xs text-medium">
           Owner Email

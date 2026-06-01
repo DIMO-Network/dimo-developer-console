@@ -1,10 +1,9 @@
 'use client';
-import React, { FC, useContext, useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 
-import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { Button } from '@/components/Button';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import { FragmentType, gql, useFragment } from '@/gql';
 
@@ -29,8 +28,6 @@ interface Props {
 export const Brand: FC<Props> = ({ license }) => {
   const fragment = useFragment(BRAND_FRAGMENT, license);
   const isOwner = useIsLicenseOwner(fragment);
-  const { setNotification } = useContext(NotificationContext);
-
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [brands, setBrands] = useState<BrandView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,8 +35,6 @@ export const Brand: FC<Props> = ({ license }) => {
   /** null = list view; 'new' = create form; BrandView = edit form */
   const [editing, setEditing] = useState<BrandView | 'new' | null>(null);
 
-  const setNotificationRef = useRef(setNotification);
-  setNotificationRef.current = setNotification;
   const licenseTokenId = fragment.tokenId;
 
   useEffect(() => {
@@ -76,7 +71,7 @@ export const Brand: FC<Props> = ({ license }) => {
 
   useEffect(() => {
     if (!loadError) return;
-    setNotificationRef.current(loadError, 'Brand load error', 'error');
+    toast.error(loadError);
   }, [loadError]);
 
   const handleSave = (saved: BrandView) => {
@@ -97,7 +92,7 @@ export const Brand: FC<Props> = ({ license }) => {
       setBrands((prev) => prev.filter((b) => b.id !== brandId));
     } catch (error) {
       Sentry.captureException(error);
-      setNotification('Failed to delete brand. Try again.', 'Oops…', 'error');
+      toast.error('Failed to delete brand. Try again.');
     }
   };
 
@@ -113,16 +108,16 @@ export const Brand: FC<Props> = ({ license }) => {
   };
 
   return (
-    <CollapsibleSection>
-      <CollapsibleSection.Title title="Brand">
-        {isOwner && (
-          <span className="text-text-secondary text-xs">
-            Visible on the Login-with-DIMO button when consumers initialise with your
-            <code className="ml-1">clientId</code>.
-          </span>
+    <div className="p-4 bg-accent border border-border rounded-2xl flex flex-col gap-4 text-foreground">
+      <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
+        <h2 className="text-xl font-semibold text-foreground">Brand</h2>
+        {isOwner && !editing && (
+          <Button type="button" className="dark" onClick={() => setEditing('new')}>
+            Add Brand
+          </Button>
         )}
-      </CollapsibleSection.Title>
-      <CollapsibleSection.Content>
+      </div>
+      <div>
         {loading ? (
           <div className="text-text-secondary">Loading brands…</div>
         ) : editing ? (
@@ -150,16 +145,9 @@ export const Brand: FC<Props> = ({ license }) => {
                 />
               ))
             )}
-            {isOwner && (
-              <div className="pt-4">
-                <Button type="button" className="light" onClick={() => setEditing('new')}>
-                  Add Brand
-                </Button>
-              </div>
-            )}
             {brands.length > 0 && (
-              <div className="mt-6 p-4 bg-surface-raised rounded-lg">
-                <p className="text-sm font-medium text-text-primary mb-2">
+              <div className="mt-6 p-4 bg-accent rounded-lg">
+                <p className="text-sm font-medium text-foreground mb-2">
                   Using multiple brands with Login with DIMO
                 </p>
                 <pre className="text-xs font-mono text-text-secondary overflow-x-auto">{`dimo.login({ clientId: '${fragment.clientId}', brandName: 'Fleet App' })`}</pre>
@@ -170,8 +158,8 @@ export const Brand: FC<Props> = ({ license }) => {
             )}
           </div>
         )}
-      </CollapsibleSection.Content>
-    </CollapsibleSection>
+      </div>
+    </div>
   );
 };
 

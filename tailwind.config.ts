@@ -1,6 +1,21 @@
 import type { Config } from 'tailwindcss';
 
+const primaryScale = {
+  '50': '#f1fcfa',
+  '100': '#d0f7f2',
+  '200': '#b7f2eb',
+  '300': '#6aded5',
+  '400': '#3bc6be',
+  '500': '#22aaa5',
+  '600': '#198886',
+  '700': '#186d6d',
+  '800': '#185657',
+  '900': '#184849',
+  '950': '#08292b',
+};
+
 const config: Config = {
+  darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,31 +23,60 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-      },
       colors: {
+        'background': 'hsl(var(--background))',
+        'foreground': 'hsl(var(--foreground))',
+        'card': {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        'sidebar': 'hsl(var(--sidebar))',
+        'popover': {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        'primary': {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+          ...primaryScale,
+        },
+        'secondary': {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        'muted': {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        'accent': {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        'destructive': {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        'border': 'hsl(var(--border))',
+        'input': 'hsl(var(--input))',
+        'ring': 'hsl(var(--ring))',
+        /* Legacy aliases — keep so existing classnames don't break during migration */
         'surface': {
-          default: '#141012',
-          sunken: '#0A0508',
-          raised: '#201C1E',
+          default: 'hsl(var(--card))',
+          sunken: 'hsl(var(--background))',
+          raised: 'hsl(var(--accent))',
         },
         'cta': {
-          default: '#322D2F',
-          disabled: '#818181',
-        },
-        'border': {
-          disabled: '#BABABA',
-        },
-        'text': {
-          secondary: '#BABABA',
+          default: 'hsl(var(--accent))',
+          disabled: 'hsl(var(--muted))',
         },
         'feedback': {
           success: '#0D7038',
-          error: '#8E3231',
+          error: 'hsl(var(--destructive))',
         },
+        'text': {
+          secondary: 'hsl(var(--muted-foreground))',
+        },
+        /* Existing palette scales — keep for gradual cleanup */
         'grey': {
           '50': '#f5f6f6',
           '100': '#e4e8e9',
@@ -72,19 +116,8 @@ const config: Config = {
           '900': '#373b43',
           '950': '#131417',
         },
-
-        'primary': {
-          '50': '#f1fcfa',
-          '100': '#d0f7f2',
-          '200': '#b7f2eb',
-          '300': '#6aded5',
-          '400': '#3bc6be',
-          '500': '#22aaa5',
-          '600': '#198886',
-          '700': '#186d6d',
-          '800': '#185657',
-          '900': '#184849',
-          '950': '#08292b',
+        'primary-scale': {
+          ...primaryScale,
         },
         'red': {
           '50': '#fff1f1',
@@ -99,6 +132,11 @@ const config: Config = {
           '900': '#841818',
           '950': '#480707',
         },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
     },
   },

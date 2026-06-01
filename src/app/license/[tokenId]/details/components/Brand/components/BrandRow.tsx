@@ -22,7 +22,7 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
       <div className="flex flex-row items-center gap-2">
         <span className="font-medium">{brand.name}</span>
         {brand.isDefault && (
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-cta-default text-white whitespace-nowrap">
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary text-white whitespace-nowrap">
             Default
           </span>
         )}

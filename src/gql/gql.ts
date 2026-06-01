@@ -14,7 +14,6 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-    "\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection      \n    }\n  }\n": typeof types.GetDeveloperLicensesByOwnerDocument,
     "\n  query GetVehiclesForExplorer($clientId: Address!, $first: Int, $last: Int, $before: String, $after: String) {\n    vehicles(filterBy: { privileged: $clientId }, first: $first, last: $last, before: $before, after: $after) {\n      totalCount\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n      nodes {\n        tokenId\n        definition {\n          make\n          model\n          year\n        }\n      }\n    }\n  }\n": typeof types.GetVehiclesForExplorerDocument,
     "\n  fragment UserConfigurationFragment on DeveloperLicense {\n    tokenId\n    clientId\n    owner\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.UserConfigurationFragmentFragmentDoc,
     "\n  query DeveloperLicenseInfo($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment\n      ...SignerFragment\n      ...RedirectUriFragment\n      ...DeveloperLicenseVehiclesFragment\n      ...DeveloperJwtsFragment\n      ...UserConfigurationFragment\n    }\n  }\n": typeof types.DeveloperLicenseInfoDocument,
@@ -29,13 +28,13 @@ type Documents = {
     "\n  query GetVehiclesByClientId($clientId: Address!, $first: Int, $last: Int, $before: String, $after: String) {\n    vehicles(filterBy:{ privileged: $clientId }, first: $first, last: $last, before:$before, after:$after) {\n      totalCount\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n      nodes {\n        tokenId\n        tokenDID\n        definition {\n          make\n          model\n          year\n        }\n      }  \n    }\n  }\n": typeof types.GetVehiclesByClientIdDocument,
     "\n  query DeveloperLicenseVehiclesQuery($clientId: Address!) {\n    vehicles(first: 0, filterBy: { privileged: $clientId }) {\n      totalCount\n    }\n  }\n": typeof types.DeveloperLicenseVehiclesQueryDocument,
     "\n  query DeveloperLicenseByClientIdSummary($clientId: Address!) {\n    developerLicense(by: {clientId: $clientId}) {\n      tokenId\n      alias\n      clientId\n    }\n  }\n": typeof types.DeveloperLicenseByClientIdSummaryDocument,
+    "\n  query GetFirstLicenseForRedirect($owner: Address!) {\n    developerLicenses(first: 1, filterBy: { owner: $owner }) {\n      nodes {\n        tokenId\n      }\n    }\n  }\n": typeof types.GetFirstLicenseForRedirectDocument,
     "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n  }\n": typeof types.DeveloperLicenseSummaryFragmentFragmentDoc,
     "\n  fragment TotalDeveloperLicenseCountFragment on DeveloperLicenseConnection {\n    totalCount\n  }\n": typeof types.TotalDeveloperLicenseCountFragmentFragmentDoc,
     "\n  query GetDeveloperLicensesForWebhooks($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      nodes {\n        alias\n        clientId\n        redirectURIs(first:100) {\n          nodes {\n            uri\n          }\n        }\n      }\n    }\n  }\n": typeof types.GetDeveloperLicensesForWebhooksDocument,
     "\n  query CheckHasDeveloperLicenses($owner: Address!) {\n    developerLicenses(first: 1, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n    }\n  }\n": typeof types.CheckHasDeveloperLicensesDocument,
 };
 const documents: Documents = {
-    "\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection      \n    }\n  }\n": types.GetDeveloperLicensesByOwnerDocument,
     "\n  query GetVehiclesForExplorer($clientId: Address!, $first: Int, $last: Int, $before: String, $after: String) {\n    vehicles(filterBy: { privileged: $clientId }, first: $first, last: $last, before: $before, after: $after) {\n      totalCount\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n      nodes {\n        tokenId\n        definition {\n          make\n          model\n          year\n        }\n      }\n    }\n  }\n": types.GetVehiclesForExplorerDocument,
     "\n  fragment UserConfigurationFragment on DeveloperLicense {\n    tokenId\n    clientId\n    owner\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.UserConfigurationFragmentFragmentDoc,
     "\n  query DeveloperLicenseInfo($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment\n      ...SignerFragment\n      ...RedirectUriFragment\n      ...DeveloperLicenseVehiclesFragment\n      ...DeveloperJwtsFragment\n      ...UserConfigurationFragment\n    }\n  }\n": types.DeveloperLicenseInfoDocument,
@@ -50,6 +49,7 @@ const documents: Documents = {
     "\n  query GetVehiclesByClientId($clientId: Address!, $first: Int, $last: Int, $before: String, $after: String) {\n    vehicles(filterBy:{ privileged: $clientId }, first: $first, last: $last, before:$before, after:$after) {\n      totalCount\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n      nodes {\n        tokenId\n        tokenDID\n        definition {\n          make\n          model\n          year\n        }\n      }  \n    }\n  }\n": types.GetVehiclesByClientIdDocument,
     "\n  query DeveloperLicenseVehiclesQuery($clientId: Address!) {\n    vehicles(first: 0, filterBy: { privileged: $clientId }) {\n      totalCount\n    }\n  }\n": types.DeveloperLicenseVehiclesQueryDocument,
     "\n  query DeveloperLicenseByClientIdSummary($clientId: Address!) {\n    developerLicense(by: {clientId: $clientId}) {\n      tokenId\n      alias\n      clientId\n    }\n  }\n": types.DeveloperLicenseByClientIdSummaryDocument,
+    "\n  query GetFirstLicenseForRedirect($owner: Address!) {\n    developerLicenses(first: 1, filterBy: { owner: $owner }) {\n      nodes {\n        tokenId\n      }\n    }\n  }\n": types.GetFirstLicenseForRedirectDocument,
     "\n  fragment DeveloperLicenseSummaryFragment on DeveloperLicense {\n    alias\n    tokenId\n    clientId\n    owner\n  }\n": types.DeveloperLicenseSummaryFragmentFragmentDoc,
     "\n  fragment TotalDeveloperLicenseCountFragment on DeveloperLicenseConnection {\n    totalCount\n  }\n": types.TotalDeveloperLicenseCountFragmentFragmentDoc,
     "\n  query GetDeveloperLicensesForWebhooks($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      nodes {\n        alias\n        clientId\n        redirectURIs(first:100) {\n          nodes {\n            uri\n          }\n        }\n      }\n    }\n  }\n": types.GetDeveloperLicensesForWebhooksDocument,
@@ -70,10 +70,6 @@ const documents: Documents = {
  */
 export function gql(source: string): unknown;
 
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(source: "\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection      \n    }\n  }\n"): (typeof documents)["\n  query GetDeveloperLicensesByOwner($owner: Address!) {\n    developerLicenses(first: 100, filterBy: { owner: $owner }) {\n      ...TotalDeveloperLicenseCountFragment\n      ...DeveloperLicenseSummariesOnConnection      \n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -130,6 +126,10 @@ export function gql(source: "\n  query DeveloperLicenseVehiclesQuery($clientId: 
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  query DeveloperLicenseByClientIdSummary($clientId: Address!) {\n    developerLicense(by: {clientId: $clientId}) {\n      tokenId\n      alias\n      clientId\n    }\n  }\n"): (typeof documents)["\n  query DeveloperLicenseByClientIdSummary($clientId: Address!) {\n    developerLicense(by: {clientId: $clientId}) {\n      tokenId\n      alias\n      clientId\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetFirstLicenseForRedirect($owner: Address!) {\n    developerLicenses(first: 1, filterBy: { owner: $owner }) {\n      nodes {\n        tokenId\n      }\n    }\n  }\n"): (typeof documents)["\n  query GetFirstLicenseForRedirect($owner: Address!) {\n    developerLicenses(first: 1, filterBy: { owner: $owner }) {\n      nodes {\n        tokenId\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

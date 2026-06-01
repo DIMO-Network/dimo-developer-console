@@ -1,7 +1,7 @@
 .text-area {
-  @apply rounded-lg py-2 px-4 outline-0 bg-[#322D2F] text-grey-50 flex flex-row font-normal;
+  @apply rounded-md border border-input bg-background px-3 py-2 outline-0 text-foreground flex flex-row font-normal text-sm;
 
   textarea {
-    @apply w-full bg-transparent outline-0 resize-none;
+    @apply w-full bg-transparent outline-0 resize-none text-foreground placeholder:text-muted-foreground;
   }
 }

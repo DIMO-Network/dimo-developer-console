@@ -1,11 +1,23 @@
 .main-menu {
-  @apply w-full px-4 py-6 flex flex-col gap-4 justify-between md:rounded-xl;
+  @apply relative w-full min-h-screen h-full px-4 py-6 flex flex-col gap-2 bg-sidebar;
+  transition: width 200ms ease;
+}
 
-  ul {
-    @apply flex flex-col gap-4 justify-center;
+.main-menu.collapsed {
+  @apply px-2;
+}
 
-    li {
-      @apply flex flex-row gap-3 items-center text-grey-200;
-    }
-  }
+.logo-row {
+  @apply flex flex-row items-start;
+}
+
+.bottom-section {
+  @apply border-t border-border pt-3 mt-2;
+}
+
+.collapse-btn {
+  @apply absolute -right-2.5 top-1/2 -translate-y-1/2 z-10
+         w-5 h-5 rounded-full bg-card border border-border
+         items-center justify-center shadow-sm
+         hover:bg-accent transition-colors;
 }

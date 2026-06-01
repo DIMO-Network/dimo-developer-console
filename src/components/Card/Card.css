@@ -2,18 +2,18 @@
   @apply p-4 rounded-lg;
 
   .dark {
-    @apply bg-dark-grey-950;
+    @apply bg-card;
   }
 
   &.card-border {
-    @apply border border-grey-950;
+    @apply border border-border;
   }
 
   &.primary {
-    @apply bg-[#201C1E] rounded-2xl;
+    @apply bg-card rounded-2xl;
   }
 
   &.secondary {
-    @apply bg-[#141012] rounded-xl;
+    @apply bg-accent rounded-xl;
   }
 }

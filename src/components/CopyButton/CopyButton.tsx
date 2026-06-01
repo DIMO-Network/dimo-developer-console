@@ -1,7 +1,7 @@
 import { CheckIcon } from '@heroicons/react/16/solid';
 import { ContentCopyIcon } from '@/components/Icons';
-import { FC, useContext, useState } from 'react';
-import { NotificationContext } from '@/context/notificationContext';
+import { FC, useState } from 'react';
+import { toast } from 'sonner';
 import classnames from 'classnames';
 
 export interface ICopyButtonProps {
@@ -15,7 +15,6 @@ export const CopyButton: FC<ICopyButtonProps> = ({
   onCopySuccessMessage,
   className = '',
 }) => {
-  const { setNotification } = useContext(NotificationContext);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -23,14 +22,9 @@ export const CopyButton: FC<ICopyButtonProps> = ({
       void navigator.clipboard.writeText(value);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      setNotification(
-        onCopySuccessMessage ?? 'Value copied to clipboard',
-        'Success',
-        'success',
-        1000,
-      );
+      toast.success(onCopySuccessMessage ?? 'Value copied to clipboard');
     } catch (err) {
-      setNotification('Failed to copy value', 'Error', 'error', 1000);
+      toast.error('Failed to copy value');
       console.error('failed to copy', err);
     }
   };
@@ -44,7 +38,7 @@ export const CopyButton: FC<ICopyButtonProps> = ({
       {copied ? (
         <CheckIcon className={'w-5 h-5 transition'} />
       ) : (
-        <ContentCopyIcon className="w-5 h-5 fill-white/50 cursor-pointer transition" />
+        <ContentCopyIcon className="w-5 h-5 fill-foreground/50 cursor-pointer transition" />
       )}
     </button>
   );

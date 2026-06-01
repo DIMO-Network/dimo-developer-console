@@ -1,7 +1,6 @@
 import React, { type FC } from 'react';
-
-import { Card } from '@/components/Card';
-import { Title } from '@/components/Title';
+import { Section } from '@/components/Section';
+import { SectionHeader } from '@/components/Section/Header';
 import { useUser } from '@/hooks';
 
 import './UserDetails.css';
@@ -14,21 +13,19 @@ export const UserDetails: FC = () => {
   }
 
   return (
-    <Card className="primary user-detail">
-      <Title component="h4" className="settings-card-title">
-        User Details
-      </Title>
-      <Card className="secondary user-detail-content">
-        <Title component="h4" className="user-title">
-          Name
-        </Title>
-        <p className="user-description">{user.name}</p>
-        <Title component="h4" className="user-title">
-          Email
-        </Title>
-        <p className="user-description">{user.email}</p>
-      </Card>
-    </Card>
+    <Section>
+      <SectionHeader title="User Details" />
+      <div className="user-detail-fields">
+        <div className="user-field">
+          <span className="user-field-label">Name</span>
+          <span className="user-field-value">{user.name}</span>
+        </div>
+        <div className="user-field">
+          <span className="user-field-label">Email</span>
+          <span className="user-field-value">{user.email}</span>
+        </div>
+      </div>
+    </Section>
   );
 };
 

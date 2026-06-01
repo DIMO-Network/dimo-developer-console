@@ -2,10 +2,10 @@
 
 import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
-import { FC, useContext, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { useRouter } from 'next/navigation';
 
@@ -17,7 +17,6 @@ interface IProps {
 export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet }) => {
   const router = useRouter();
   const { loginWithPasskey } = useAuth();
-  const { setNotification } = useContext(NotificationContext);
 
   const handleLoginWithPasskey = async () => {
     try {
@@ -27,7 +26,7 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
       });
 
       if (!success) {
-        setNotification('Failed to login with passkey', 'Oops...', 'error');
+        toast.error('Failed to login with passkey');
         return;
       }
 
@@ -41,7 +40,7 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
       }
       handlePasskeyRejected(false);
       captureException(error);
-      setNotification('Failed to login with passkey', 'Oops...', 'error');
+      toast.error('Failed to login with passkey');
     }
   };
 

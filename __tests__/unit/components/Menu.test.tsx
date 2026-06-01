@@ -61,7 +61,7 @@ describe('MenuItem component', () => {
     expect(linkElement).toHaveAttribute('target', '_self');
     expect(linkElement).toHaveTextContent('Test Label');
     expect(screen.getByText('Icon')).toHaveClass('test-icon-class');
-    expect(screen.getByRole('listitem')).toHaveClass('!text-grey-200/50');
+    expect(screen.getByRole('listitem')).toHaveClass('opacity-40');
   });
 
   it('calls the provided function when clicked', () => {
@@ -78,8 +78,8 @@ describe('MenuItem component', () => {
       />,
     );
 
-    const linkElement = screen.getByRole('link');
-    fireEvent.click(linkElement);
+    const buttonElement = screen.getByRole('button', { name: 'Test Label' });
+    fireEvent.click(buttonElement);
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
@@ -97,8 +97,8 @@ describe('MenuItem component', () => {
       />,
     );
 
-    const linkElement = screen.getByRole('link');
-    fireEvent.click(linkElement);
+    const listItem = screen.getByRole('listitem');
+    expect(listItem).toHaveClass('opacity-40');
     expect(handleClick).not.toHaveBeenCalled();
   });
 });

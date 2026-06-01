@@ -35,7 +35,7 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
 
   return (
     <>
-      <div className="overflow-x-auto min-w-full bg-surface-default rounded-xl p-4">
+      <div className="overflow-x-auto min-w-full bg-card rounded-xl p-4">
         <table className="table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -52,7 +52,7 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className={'border-t border-t-cta-default'}>
+              <tr key={row.id} className={'border-t border-t-border'}>
                 {row.getVisibleCells().map((cell) => (
                   <Cell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

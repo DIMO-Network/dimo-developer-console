@@ -1,23 +1,22 @@
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
-import { SelectWithChevron } from '@/components/SelectWithChevron';
+import { SelectField } from '@/components/SelectField';
 import React from 'react';
 import { conditionsConfig } from '@/utils/webhook';
 
-const dataAttributeOptions = [
-  { value: '', label: 'Select attribute', isPlaceholder: true },
-  ...conditionsConfig.map((c) => ({ value: c.field, label: c.label })),
-];
+const dataAttributeOptions = conditionsConfig.map((c) => ({
+  value: c.field,
+  text: c.label,
+}));
 
 export const DataAttributeSelector = ({ index }: { index: number }) => {
-  const { register } = useFormContext<WebhookFormInput>();
+  const { control } = useFormContext<WebhookFormInput>();
   return (
-    <SelectWithChevron
-      {...register(`cel.conditions.${index}.field`, {
-        required: 'Field is required',
-      })}
-      defaultValue=""
+    <SelectField
+      name={`cel.conditions.${index}.field`}
+      control={control}
       options={dataAttributeOptions}
+      placeholder="Select attribute"
     />
   );
 };

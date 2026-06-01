@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   getConfigurationsByClientId,
@@ -8,7 +8,7 @@ import {
   IConfigurationListItem,
 } from '@/actions/configurations';
 import { Button } from '@/components/Button';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 
 const DIMO_LOGIN_BASE =
   process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
@@ -35,7 +35,6 @@ const entryStateLabel = (entryState: string): string => {
 
 export const ConfigurationList = ({ clientId, tokenId }: Props) => {
   const router = useRouter();
-  const { setNotification } = useContext(NotificationContext);
   const [configs, setConfigs] = useState<IConfigurationListItem[]>([]);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
@@ -72,7 +71,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
     <div className="w-full">
       <table className="w-full text-sm border-collapse">
         <thead>
-          <tr className="border-b border-surface-default text-left text-text-secondary">
+          <tr className="border-b border-border text-left text-text-secondary">
             <th className="py-2 pr-4 font-medium">Name</th>
             <th className="py-2 pr-4 font-medium">Component</th>
             <th className="py-2 font-medium">Actions</th>
@@ -80,7 +79,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
         </thead>
         <tbody>
           {configs.map((config) => (
-            <tr key={config.id} className="border-b border-surface-default">
+            <tr key={config.id} className="border-b border-border">
               <td className="py-3 pr-4">{config.configuration_name || '(untitled)'}</td>
               <td className="py-3 pr-4 text-text-secondary">
                 {entryStateLabel(config.entry_state)}
@@ -116,7 +115,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
                       onClick={() => {
                         const url = `${DIMO_LOGIN_BASE}/?configurationId=${config.id}`;
                         navigator.clipboard.writeText(url);
-                        setNotification('Sharing link copied', '', 'success');
+                        toast.success('Sharing link copied');
                       }}
                     >
                       Copy Link

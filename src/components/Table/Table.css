@@ -2,7 +2,7 @@
   @apply min-w-full;
 
   .table-header {
-    @apply border-b border-[#322D2F];
+    @apply border-b border-border;
   }
 
   .table-body {

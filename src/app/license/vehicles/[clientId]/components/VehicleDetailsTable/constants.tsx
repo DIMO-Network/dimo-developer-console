@@ -17,7 +17,7 @@ function ActionsCell({
   return (
     <div className="relative flex justify-end" onClick={(e) => e.stopPropagation()}>
       <button
-        className="px-2 py-1 rounded hover:bg-surface-raised text-text-secondary text-lg leading-none"
+        className="px-2 py-1 rounded hover:bg-accent text-text-secondary text-lg leading-none"
         onClick={(e) => {
           e.stopPropagation();
           setOpen((v) => !v);
@@ -36,9 +36,9 @@ function ActionsCell({
               setOpen(false);
             }}
           />
-          <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded border border-[#322D2F] bg-surface-raised shadow-lg">
+          <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded border border-border bg-accent shadow-lg">
             <button
-              className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-surface-overlay"
+              className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-accent"
               onClick={(e) => {
                 e.stopPropagation();
                 setOpen(false);
@@ -78,7 +78,7 @@ export const buildColumns = (
             {definition?.make} {definition?.model} {definition?.year}
           </span>
           {isSimulated && (
-            <span className="text-[10px] font-mono tracking-[0.15em] uppercase px-1.5 py-0.5 rounded border border-[#322D2F] text-text-secondary bg-surface-raised leading-none">
+            <span className="text-[10px] font-mono tracking-[0.15em] uppercase px-1.5 py-0.5 rounded border border-border text-text-secondary bg-accent leading-none">
               Simulated
             </span>
           )}

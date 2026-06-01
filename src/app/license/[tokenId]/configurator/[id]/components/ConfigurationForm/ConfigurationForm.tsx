@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { FragmentType, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
@@ -15,7 +15,7 @@ import { TextField } from '@/components/TextField';
 import { USER_CONFIG_FRAGMENT } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 import { Button } from '@/components/Button';
 import configuration from '@/config';
-import { NotificationContext } from '@/context/notificationContext';
+import { toast } from 'sonner';
 import { fetchMyBrands } from '@/actions/brand';
 import { getWorkspace, getWorkspaceByTokenId } from '@/actions/workspace';
 
@@ -69,7 +69,6 @@ const Configuration: FC<IFormProps> = ({
 
 export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
   const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
-  const { setNotification } = useContext(NotificationContext);
   const [brandNames, setBrandNames] = useState<string[]>([]);
 
   useEffect(() => {
@@ -100,12 +99,12 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
 
   const handleCopyConfigurationLink = () => {
     if (!configurationId) {
-      setNotification('Configuration ID is not available', '', 'error');
+      toast.error('Configuration ID is not available');
       return;
     }
     const url = `${getBaseUrl()}/?configurationId=${configurationId}`;
     navigator.clipboard.writeText(url);
-    setNotification('Configuration link copied to clipboard', '', 'success');
+    toast.success('Configuration link copied to clipboard');
   };
 
   return (

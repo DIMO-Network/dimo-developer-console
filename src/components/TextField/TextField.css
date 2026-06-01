@@ -1,7 +1,7 @@
 .text-field {
-  @apply rounded-lg py-2 px-4 outline-0 bg-cta-default text-white flex flex-row font-normal;
+  @apply rounded-md border border-input bg-background px-3 py-2 outline-0 text-foreground flex flex-row font-normal text-sm;
 
   input {
-    @apply w-full bg-transparent outline-0 font-normal text-sm;
+    @apply w-full bg-transparent outline-0 font-normal text-sm text-foreground placeholder:text-muted-foreground;
   }
 }

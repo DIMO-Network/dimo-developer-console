@@ -10,9 +10,7 @@ export const MenuButton: FC = () => {
 
   return (
     <button
-      className={
-        'bg-surface-default rounded-2xl size-12 flex items-center justify-center'
-      }
+      className={'bg-card rounded-2xl size-12 flex items-center justify-center'}
       onClick={onPress}
     >
       <Bars3Icon className={'size-6'} />

@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   HomeIcon,
   IntegrationIcon,
@@ -6,6 +7,7 @@ import {
   SummarizeIcon,
   ConnectionsIcon,
   ChipIcon,
+  DeveloperBoardIcon,
 } from '@/components/Icons';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
@@ -33,6 +35,7 @@ export const getPageTitle = (path: string) => {
 const pageTitles: Record<string, string> = {
   '/': 'Home',
   '/app': 'Home',
+  '/licenses': 'Licenses',
   '/webhooks': 'Webhooks',
   '/api-status': 'API Status',
   '/connections': 'Connections',
@@ -60,9 +63,17 @@ const baseMainMenu = [
     disabled: false,
   },
   {
+    label: 'Licenses',
+    icon: DeveloperBoardIcon,
+    iconClassName: 'h-5 w-5',
+    link: '/licenses',
+    external: false,
+    disabled: false,
+  },
+  {
     label: 'Webhooks',
     icon: IntegrationIcon,
-    iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
+    iconClassName: 'h-5 w-5',
     link: '/webhooks',
     external: false,
     disabled: false,
@@ -105,10 +116,26 @@ export const getMainMenu = (includeConnections: boolean = true) => {
   return items;
 };
 
+export type NavItem = {
+  label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  icon: React.FC<any>;
+  iconClassName: string;
+  link: string | (() => void);
+  external: boolean;
+  disabled: boolean;
+  hidden?: boolean;
+};
+
+export type NavSection = {
+  label: string;
+  items: NavItem[];
+};
+
 // Keep the old export for backward compatibility for now, always includes Connections
 export const mainMenu = getMainMenu(true);
 
-export const bottomMenu = [
+export const bottomMenu: NavItem[] = [
   {
     label: 'Settings',
     icon: SettingsIcon,
@@ -116,5 +143,78 @@ export const bottomMenu = [
     link: '/settings',
     external: false,
     disabled: false,
+  },
+];
+
+export const getNavSections = (includeConnections: boolean = true): NavSection[] => [
+  {
+    label: 'Workspace',
+    items: [
+      {
+        label: 'Home',
+        icon: HomeIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/app',
+        external: false,
+        disabled: false,
+      },
+      {
+        label: 'Licenses',
+        icon: DeveloperBoardIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/licenses',
+        external: false,
+        disabled: false,
+      },
+      {
+        label: 'Webhooks',
+        icon: IntegrationIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/webhooks',
+        external: false,
+        disabled: false,
+      },
+      ...(includeConnections
+        ? [
+            {
+              label: 'Connections',
+              icon: ConnectionsIcon,
+              iconClassName: 'h-4 w-4',
+              link: '/connections',
+              external: false,
+              disabled: false,
+            },
+          ]
+        : []),
+    ],
+  },
+  {
+    label: 'Resources',
+    items: [
+      {
+        label: 'Data Explorer',
+        icon: ChipIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/explorer',
+        external: false,
+        disabled: false,
+      },
+      {
+        label: 'Documentation',
+        icon: SummarizeIcon,
+        iconClassName: 'h-4 w-4',
+        link: 'https://dimo.org/docs',
+        external: true,
+        disabled: false,
+      },
+      {
+        label: 'API Status',
+        icon: MonitorHeartIcon,
+        iconClassName: 'h-4 w-4',
+        link: 'https://stats.uptimerobot.com/snU0rkEEah',
+        external: true,
+        disabled: false,
+      },
+    ],
   },
 ];

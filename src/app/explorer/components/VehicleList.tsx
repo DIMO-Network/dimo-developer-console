@@ -89,7 +89,7 @@ export const VehicleList: FC<Props> = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-surface-default rounded-xl p-4 h-full">
+    <div className="flex flex-col gap-3 bg-card rounded-xl p-4 h-full">
       {/* Search */}
       <div className="relative">
         <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
@@ -98,7 +98,7 @@ export const VehicleList: FC<Props> = ({
           placeholder="Search vehicles…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-surface-raised text-text-primary placeholder-text-secondary rounded-lg pl-9 pr-3 py-2 text-sm outline-none border border-transparent focus:border-cta-default"
+          className="w-full bg-accent text-foreground placeholder-text-secondary rounded-lg pl-9 pr-3 py-2 text-sm outline-none border border-transparent focus:border-cta-default"
         />
       </div>
 
@@ -128,10 +128,8 @@ export const VehicleList: FC<Props> = ({
                   onSelectVehicle(vehicle.tokenId);
                   router.push(`/explorer/${vehicle.tokenId}`);
                 }}
-                className={`flex flex-col items-start w-full text-left px-3 py-3 rounded-lg border-b border-b-cta-default last:border-b-0 transition-colors ${
-                  isSelected
-                    ? 'bg-cta-default text-white'
-                    : 'hover:bg-surface-raised text-text-primary'
+                className={`flex flex-col items-start w-full text-left px-3 py-3 rounded-lg border-b border-b-border last:border-b-0 transition-colors ${
+                  isSelected ? 'bg-primary text-white' : 'hover:bg-accent text-foreground'
                 }`}
               >
                 <span className="text-sm font-medium">{mmy || 'Unknown vehicle'}</span>
@@ -146,7 +144,7 @@ export const VehicleList: FC<Props> = ({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between text-xs text-text-secondary pt-2 border-t border-t-cta-default">
+      <div className="flex items-center justify-between text-xs text-text-secondary pt-2 border-t border-t-border">
         <span>
           {totalCount === 0
             ? '0 vehicles'

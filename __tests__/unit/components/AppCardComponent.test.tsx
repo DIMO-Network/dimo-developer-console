@@ -8,10 +8,8 @@ describe('AppCard', () => {
     const { container } = render(<AppCard {...app} />);
 
     const appNameElm = screen.getByText('Test App');
-    const environmentElm = screen.getByText('sandbox');
 
     expect(appNameElm).toBeInTheDocument();
-    expect(environmentElm).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
 });

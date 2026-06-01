@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { VehicleSimulator } from '../index';
-import { NotificationContext } from '@/context/notificationContext';
 
 jest.mock('@/hooks', () => ({
   useMintVehicle: jest.fn(() => jest.fn()),
@@ -15,7 +14,6 @@ jest.mock('@/actions/simulatedVehicles', () => ({
 
 const { getSimulatedVehicles } = jest.requireMock('@/actions/simulatedVehicles');
 
-const mockSetNotification = jest.fn();
 const mockClientId = '0x1234567890123456789012345678901234567890' as `0x${string}`;
 
 const makeStoredVehicle = (overrides = {}) => ({
@@ -37,11 +35,7 @@ const renderComponent = () => {
   });
   return render(
     <QueryClientProvider client={queryClient}>
-      <NotificationContext.Provider
-        value={{ setNotification: mockSetNotification, notifications: [] }}
-      >
-        <VehicleSimulator clientId={mockClientId} />
-      </NotificationContext.Provider>
+      <VehicleSimulator clientId={mockClientId} />
     </QueryClientProvider>,
   );
 };
