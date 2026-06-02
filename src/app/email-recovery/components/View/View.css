@@ -68,9 +68,6 @@
 
     button {
       @apply h-11 mt-1;
-      &:disabled {
-        @apply bg-grey-400;
-      }
     }
 
     .email-recovery__divider {
