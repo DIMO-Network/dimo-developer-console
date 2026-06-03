@@ -177,7 +177,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
             Sign In
           </Button>
           <Button
-            className="border invert border-white !mt-3"
+            className="primary-outline !mt-3"
             role="continue-button"
             onClick={handleResendCode}
             loading={isRequestingNewOtp}

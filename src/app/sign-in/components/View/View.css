@@ -16,11 +16,11 @@
       @apply flex justify-center gap-x-4;
 
       .text-field {
-        @apply w-12 h-12 text-center rounded-md text-2xl;
+        @apply w-12 h-12 rounded-md bg-muted p-0 justify-center items-center;
       }
 
       .otp-input {
-        @apply text-center;
+        @apply text-center text-2xl text-foreground h-full;
       }
     }
     .sign-in__input {
