@@ -85,7 +85,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
         </Button>
         <Button
           type="button"
-          className="border invert border-white"
+          className="primary-outline"
           role="cancel-button"
           onClick={() => router.back()}
         >
