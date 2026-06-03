@@ -5,6 +5,7 @@ import { EditWebhook } from '@/components/Webhooks/EditWebhook';
 import { useWebhookById } from '@/hooks/queries/useWebhookById';
 import { Loader } from '@/components/Loader';
 import { EditWebhookContextProvider } from '@/hoc/EditWebhookProvider';
+import Link from 'next/link';
 
 export const View = ({
   params,
@@ -25,8 +26,17 @@ export const View = ({
   }
 
   return (
-    <EditWebhookContextProvider>
-      <EditWebhook webhook={data} clientId={clientId} />
-    </EditWebhookContextProvider>
+    <>
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+        <Link href="/webhooks" className="hover:text-foreground transition-colors">
+          Webhooks
+        </Link>
+        <span>/</span>
+        <span className="text-foreground">Edit Webhook</span>
+      </nav>
+      <EditWebhookContextProvider>
+        <EditWebhook webhook={data} clientId={clientId} />
+      </EditWebhookContextProvider>
+    </>
   );
 };

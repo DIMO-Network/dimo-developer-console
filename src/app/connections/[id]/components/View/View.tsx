@@ -7,6 +7,7 @@ import { CopyButton } from '@/components/CopyButton';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { useQuery } from '@tanstack/react-query';
 import { getConnectionById } from '@/actions/connections';
+import Link from 'next/link';
 
 import './View.css';
 
@@ -94,12 +95,21 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
   });
 
   return (
-    <QueryPageWrapper
-      loading={isLoading}
-      error={error || undefined}
-      customErrorMessage={'There was a problem loading the connection details'}
-    >
-      <MainComponent connectionId={id} />
-    </QueryPageWrapper>
+    <>
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+        <Link href="/connections" className="hover:text-foreground transition-colors">
+          Connections
+        </Link>
+        <span>/</span>
+        <span className="text-foreground">Connection Details</span>
+      </nav>
+      <QueryPageWrapper
+        loading={isLoading}
+        error={error || undefined}
+        customErrorMessage={'There was a problem loading the connection details'}
+      >
+        <MainComponent connectionId={id} />
+      </QueryPageWrapper>
+    </>
   );
 };

@@ -2,6 +2,7 @@
 
 import React, { use, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
@@ -124,6 +125,13 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
   return (
     <>
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+        <Link href="/connections" className="hover:text-foreground transition-colors">
+          Connections
+        </Link>
+        <span>/</span>
+        <span className="text-foreground">New Connection</span>
+      </nav>
       <div className="flex flex-col gap-8">
         <div className="max-w-2xl">
           <Title component="h2" className="text-xl mb-6">

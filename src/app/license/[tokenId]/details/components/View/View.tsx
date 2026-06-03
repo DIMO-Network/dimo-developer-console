@@ -107,6 +107,13 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
 
   return (
     <div className="license-details-page">
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+        <Link href="/licenses" className="hover:text-foreground transition-colors">
+          Licenses
+        </Link>
+        <span>/</span>
+        <span className="text-foreground">License Details</span>
+      </nav>
       {/* Persistent header */}
       <div className="license-header">
         <div className="license-header__top">

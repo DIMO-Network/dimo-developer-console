@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { getDevJwt } from '@/utils/devJwt';
 import { FormStepContextProvider } from '@/hoc';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
+import Link from 'next/link';
 
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const { clientId } = use(params);
@@ -39,6 +40,13 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
 
   return (
     <FormStepContextProvider>
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+        <Link href="/webhooks" className="hover:text-foreground transition-colors">
+          Webhooks
+        </Link>
+        <span>/</span>
+        <span className="text-foreground">New Webhook</span>
+      </nav>
       <div className={'flex flex-1 flex-row'}>
         <div className={'flex flex-col flex-1'}>
           <NewWebhookForm onComplete={onComplete} getToken={getToken} onExit={goBack} />
