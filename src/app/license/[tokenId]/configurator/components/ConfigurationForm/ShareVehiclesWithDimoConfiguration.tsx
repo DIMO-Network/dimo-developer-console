@@ -40,12 +40,14 @@ const PermissionCard = ({
 }: PermissionCardProps) => (
   <div
     onClick={onToggle}
-    className={`cursor-pointer border rounded-lg p-4 transition ${
-      selected ? 'border-red-900 bg-accent' : 'border-border bg-accent'
+    className={`cursor-pointer border rounded-lg p-4 transition-colors ${
+      selected
+        ? 'border-primary bg-primary/10 ring-1 ring-primary'
+        : 'border-border bg-accent hover:border-primary/50'
     }`}
   >
-    <h4 className="font-semibold">{title}</h4>
-    <p className="text-sm text-gray-600">{description}</p>
+    <h4 className="font-semibold text-sm">{title}</h4>
+    <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
   </div>
 );
 
@@ -138,27 +140,51 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           />
         )}
       </div>
-      <div className={'flex flex-row gap-4 w-full'}>
+      <div className="flex flex-col gap-3 w-full">
         <Controller
           name="requireAttestation"
           control={control}
           render={({ field }) => (
-            <>
-              <div className="flex flex-row gap-2 items-center w-4/12">
-                <Toggle
-                  checked={field.value}
-                  onToggle={(checked) => {
-                    field.onChange(checked);
-                    if (!checked) {
-                      setValue('attestation.tags', []);
-                    }
-                  }}
-                />
-                <label className="text-xs text-medium ml-2">Attestations</label>
-              </div>
-            </>
+            <div className="flex flex-row gap-2 items-center">
+              <Toggle
+                checked={field.value}
+                onToggle={(checked) => {
+                  field.onChange(checked);
+                  if (!checked) {
+                    setValue('attestation.tags', []);
+                  }
+                }}
+              />
+              <label className="text-sm font-medium">Attestations</label>
+            </div>
           )}
         />
+        {requireAttestation && (
+          <Controller
+            name="attestation.tags"
+            control={control}
+            defaultValue={[]}
+            render={({ field }) => (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+                {ATTESTATION_TAGS.map((p) => (
+                  <PermissionCard
+                    key={p.value}
+                    title={p.title}
+                    description={p.description}
+                    selected={field.value?.includes(p.value)}
+                    onToggle={() => {
+                      if (field.value?.includes(p.value)) {
+                        field.onChange(field.value.filter((v: string) => v !== p.value));
+                      } else {
+                        field.onChange([...(field.value || []), p.value]);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          />
+        )}
       </div>
       {brandNames.length > 1 && (
         <div className={'flex flex-row gap-4 w-full'}>
@@ -181,34 +207,6 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           </Label>
         </div>
       )}
-      <div className={'flex flex-row gap-4 w-full'}>
-        {requireAttestation && (
-          <Controller
-            name="attestation.tags"
-            control={control}
-            defaultValue={[]}
-            render={({ field }) => (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-                {ATTESTATION_TAGS.map((p) => (
-                  <PermissionCard
-                    key={p.value}
-                    title={p.title}
-                    description={p.description}
-                    selected={field.value?.includes(p.value)}
-                    onToggle={() => {
-                      if (field.value?.includes(p.value)) {
-                        field.onChange(field.value.filter((v: string) => v !== p.value));
-                      } else {
-                        field.onChange([...(field.value || []), p.value]);
-                      }
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          />
-        )}
-      </div>
     </>
   );
 };
