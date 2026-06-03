@@ -2,7 +2,6 @@
 
 import { Anchor } from '@/components/Anchor';
 import { Button } from '@/components/Button';
-import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
 import { gtSuper } from '@/utils/font';
 import { FC, useEffect, useRef, useState } from 'react';
@@ -151,7 +150,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
           {Array(6)
             .fill('')
             .map((_, i) => (
-              <TextField
+              <input
                 key={i}
                 className="otp-input"
                 maxLength={1}
@@ -161,9 +160,13 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
                 }}
                 readOnly={false}
                 value={otp[i]}
-                onChange={(e) => handleChange(e.target.value, i)}
-                onKeyDown={(e) => handleKeyDown(e, i)}
-                onPaste={(e) => handlePaste(e)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleChange(e.target.value, i)
+                }
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  handleKeyDown(e, i)
+                }
+                onPaste={(e: React.ClipboardEvent<HTMLInputElement>) => handlePaste(e)}
               />
             ))}
         </div>
