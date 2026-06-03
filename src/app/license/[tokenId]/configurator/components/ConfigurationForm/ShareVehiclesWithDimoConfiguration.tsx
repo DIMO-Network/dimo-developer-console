@@ -12,11 +12,10 @@ import {
 import {
   DynamicFormProps,
   PERMISSIONS,
+  ATTESTATION_TAGS,
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { DatePicker } from '@/components/DatePicker';
 import { Toggle } from '@/components/Toggle';
-import { ATTESTATION_TAGS } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
@@ -63,40 +62,16 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
     name: 'permissionsMode',
     defaultValue: 'template',
   });
-  const requireAttestation = useWatch({
-    control,
-    name: 'requireAttestation',
-  });
-
-  const {
-    setValue,
-    formState: { errors },
-  } = useFormContext<DynamicFormProps>();
+  const requireAttestation = useWatch({ control, name: 'requireAttestation' });
+  const { setValue } = useFormContext<DynamicFormProps>();
 
   return (
     <>
-      <div className={'flex flex-row gap-4 w-full'}>
-        <Label htmlFor="website" className="text-xs text-medium w-full">
-          Expiration Date
-          <Controller
-            control={control}
-            name="expirationDate"
-            rules={{ required: 'Expiration date is required' }}
-            render={({ field }) => (
-              <div className={'w-full'}>
-                <DatePicker
-                  value={field.value ? new Date(field.value) : undefined}
-                  onChange={(value) => field.onChange(value ?? '')}
-                />
-              </div>
-            )}
-          />
-          {errors.expirationDate && (
-            <p className="text-xs text-red-500 mt-1">{errors.expirationDate.message}</p>
-          )}
-        </Label>
-      </div>
-      <div className={'flex flex-row gap-4 w-full'}>
+      {/* Vehicle Permissions */}
+      <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
+          Vehicle Permissions
+        </p>
         <SegmentedControl
           options={[
             { value: 'template', label: 'Use Permission Template' },
@@ -106,18 +81,13 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           name="permissionsMode"
           role="permission-segmented"
         />
-      </div>
-      <div className="flex flex-row gap-4 w-full">
         {permissionsMode === 'template' && (
-          <Label htmlFor="website" className="text-xs text-medium w-full">
-            Permissions Template Id
+          <Label className="text-xs font-medium flex flex-col gap-1">
+            Permissions Template ID
             <TextField
               type="text"
               placeholder="1"
-              {...register('permissionTemplateId', {
-                required: false,
-                validate: {},
-              })}
+              {...register('permissionTemplateId', { required: false, validate: {} })}
               role="company-website-input"
             />
           </Label>
@@ -148,60 +118,58 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             )}
           />
         )}
-      </div>
-      <div className="flex flex-col gap-3 w-full">
-        <Controller
-          name="requireAttestation"
-          control={control}
-          render={({ field }) => (
-            <div className="flex flex-row gap-2 items-center">
-              <Toggle
-                checked={field.value}
-                onToggle={(checked) => {
-                  field.onChange(checked);
-                  if (!checked) {
-                    setValue('attestation.tags', []);
-                  }
-                }}
-              />
-              <label className="text-sm font-medium">Attestations</label>
-            </div>
-          )}
-        />
-        {requireAttestation && (
+        <div className="flex flex-col gap-3">
           <Controller
-            name="attestation.tags"
+            name="requireAttestation"
             control={control}
-            defaultValue={[]}
             render={({ field }) => (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
-                {ATTESTATION_TAGS.map((p) => (
-                  <PermissionCard
-                    key={p.value}
-                    title={p.title}
-                    description={p.description}
-                    selected={field.value?.includes(p.value)}
-                    onToggle={() => {
-                      if (field.value?.includes(p.value)) {
-                        field.onChange(field.value.filter((v: string) => v !== p.value));
-                      } else {
-                        field.onChange([...(field.value || []), p.value]);
-                      }
-                    }}
-                  />
-                ))}
+              <div className="flex flex-row gap-2 items-center">
+                <Toggle
+                  checked={field.value}
+                  onToggle={(checked) => {
+                    field.onChange(checked);
+                    if (!checked) setValue('attestation.tags', []);
+                  }}
+                />
+                <label className="text-sm font-medium">Attestations</label>
               </div>
             )}
           />
-        )}
-      </div>
-      {brandNames.length > 1 && (
-        <div className={'flex flex-row gap-4 w-full'}>
-          <Label htmlFor="brandName" className="text-xs text-medium w-full">
+          {requireAttestation && (
+            <Controller
+              name="attestation.tags"
+              control={control}
+              defaultValue={[]}
+              render={({ field }) => (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
+                  {ATTESTATION_TAGS.map((p) => (
+                    <PermissionCard
+                      key={p.value}
+                      title={p.title}
+                      description={p.description}
+                      selected={field.value?.includes(p.value)}
+                      onToggle={() => {
+                        if (field.value?.includes(p.value)) {
+                          field.onChange(
+                            field.value.filter((v: string) => v !== p.value),
+                          );
+                        } else {
+                          field.onChange([...(field.value || []), p.value]);
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            />
+          )}
+        </div>
+        {brandNames.length > 1 && (
+          <Label className="text-xs font-medium w-full flex flex-col gap-1">
             Brand
-            <p className="text-text-secondary font-normal text-xs mb-1">
-              Which brand to show on the Login with DIMO button. Leave as
-              &quot;Default&quot; to use your workspace default brand.
+            <p className="text-muted-foreground font-normal text-[11px]">
+              Which brand to show on the DIMO button. Leave as &quot;Default&quot; to use
+              your workspace default brand.
             </p>
             <SelectField
               {...register('brandName', { required: false })}
@@ -214,8 +182,28 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
               role="brandName-select"
             />
           </Label>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Terms of Service */}
+      <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
+          Terms of Service
+        </p>
+        <Label className="text-xs font-medium flex flex-col gap-1">
+          ToS URL
+          <TextField
+            type="url"
+            placeholder="https://yourapp.com/terms"
+            {...register('tosUrl', { required: false })}
+            role="tos-url-input"
+          />
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            Displayed to vehicle owners before they grant permissions. Leave blank to
+            skip.
+          </p>
+        </Label>
+      </div>
     </>
   );
 };
