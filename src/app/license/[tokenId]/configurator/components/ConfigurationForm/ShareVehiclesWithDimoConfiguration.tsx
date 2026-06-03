@@ -40,14 +40,16 @@ const PermissionCard = ({
 }: PermissionCardProps) => (
   <div
     onClick={onToggle}
-    className={`cursor-pointer border rounded-lg p-4 transition-colors ${
+    className={`cursor-pointer border rounded-md px-3 py-2 transition-colors ${
       selected
         ? 'border-primary bg-primary/10 ring-1 ring-primary'
         : 'border-border bg-accent hover:border-primary/50'
     }`}
   >
-    <h4 className="font-semibold text-sm">{title}</h4>
-    <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+    <h4 className="font-medium text-xs">{title}</h4>
+    <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+      {description}
+    </p>
   </div>
 );
 
@@ -119,7 +121,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             control={control}
             defaultValue={[]}
             render={({ field }) => (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
                 {PERMISSIONS.map((p) => (
                   <PermissionCard
                     key={p.key}
