@@ -9,6 +9,7 @@ interface SharedProps {
   authenticatedLabel: string;
   unAuthenticatedLabel: string;
   expirationDate: string;
+  tosUrl?: string | null;
 }
 
 interface LoginWithDimoProps extends SharedProps {
