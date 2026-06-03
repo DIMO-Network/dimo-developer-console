@@ -207,6 +207,7 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
               <TextField
                 type="text"
                 placeholder="utm_source=myapp"
+                wrapperClassName="light-placeholder"
                 {...register('utm', { required: false, validate: {} })}
                 role="company-website-input"
               />

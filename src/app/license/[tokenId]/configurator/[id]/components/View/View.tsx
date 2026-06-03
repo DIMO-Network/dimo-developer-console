@@ -111,6 +111,7 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
 
   if (values.component === 'ShareVehiclesWithDimo') {
     add('brandName', values.brandName);
+    add('permissionsMode', values.permissionsMode ?? 'template');
     if (values.permissionsMode === 'template') {
       add('permissionTemplateId', values.permissionTemplateId);
     } else if (values.permissionsMode === 'custom') {
@@ -201,9 +202,9 @@ export const View = ({
         configuration_name: response.configuration_name,
         configuration_id: response.id,
         expirationDate,
-        permissionsMode: savedConfiguration['permissionTemplateId']
-          ? 'template'
-          : 'custom',
+        permissionsMode:
+          (savedConfiguration['permissionsMode'] as string) ||
+          (savedConfiguration['permissionTemplateId'] ? 'template' : 'custom'),
         permissions: savedConfiguration['permissionTemplateId']
           ? undefined
           : inverseFormatPermissions((savedConfiguration['permissions'] as string) ?? ''),

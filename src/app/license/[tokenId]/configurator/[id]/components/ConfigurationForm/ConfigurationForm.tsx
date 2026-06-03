@@ -121,12 +121,14 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
           <Label className="text-xs font-medium w-full flex flex-col gap-1">
             Configuration ID
             <div className="flex gap-2 items-center">
-              <TextField
-                type="text"
-                readOnly
-                {...register('configuration_id', { required: false })}
-                role="company-website-input"
-              />
+              <div className="flex-1 min-w-0">
+                <TextField
+                  type="text"
+                  readOnly
+                  {...register('configuration_id', { required: false })}
+                  role="company-website-input"
+                />
+              </div>
               <button
                 type="button"
                 onClick={handleCopyConfigurationLink}
@@ -229,6 +231,7 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
               <TextField
                 type="text"
                 placeholder="utm_source=myapp"
+                wrapperClassName="light-placeholder"
                 {...register('utm', { required: false, validate: {} })}
                 role="company-website-input"
               />

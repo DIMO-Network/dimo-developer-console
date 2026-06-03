@@ -5,3 +5,15 @@
     @apply w-full bg-transparent outline-0 font-normal text-sm text-foreground placeholder:text-muted-foreground;
   }
 }
+
+.text-field:has(input[readonly]) {
+  @apply bg-muted/50 border-border/60 cursor-default;
+
+  input {
+    @apply cursor-default text-muted-foreground;
+  }
+}
+
+.text-field.light-placeholder input {
+  @apply placeholder:text-muted-foreground/50;
+}

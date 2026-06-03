@@ -82,6 +82,7 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
 
   if (values.component === 'ShareVehiclesWithDimo') {
     add('brandName', values.brandName);
+    add('permissionsMode', values.permissionsMode ?? 'template');
     if (values.permissionsMode === 'template') {
       add('permissionTemplateId', values.permissionTemplateId);
     } else if (values.permissionsMode === 'custom') {
