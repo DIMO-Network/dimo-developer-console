@@ -187,7 +187,10 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
             Connection
           </p>
-          <Label className="text-xs font-medium flex flex-col gap-1">
+          <Label
+            htmlFor="redirectUri"
+            className="text-xs font-medium flex flex-col gap-1"
+          >
             Redirect URI
             <SelectField
               {...register('redirectUri', { required: 'Redirect URI is required' })}

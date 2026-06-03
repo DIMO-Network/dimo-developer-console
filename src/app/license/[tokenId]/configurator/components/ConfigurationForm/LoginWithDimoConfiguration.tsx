@@ -54,7 +54,10 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
         </Label>
       </div>
       {brandNames.length > 1 && (
-        <Label className="text-xs font-medium w-full flex flex-col gap-1">
+        <Label
+          htmlFor="brandName"
+          className="text-xs font-medium w-full flex flex-col gap-1"
+        >
           Brand
           <p className="text-muted-foreground font-normal text-[11px]">
             Which brand to show on the Login with DIMO button. Leave as

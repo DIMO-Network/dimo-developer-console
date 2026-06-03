@@ -165,7 +165,10 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           )}
         </div>
         {brandNames.length > 1 && (
-          <Label className="text-xs font-medium w-full flex flex-col gap-1">
+          <Label
+            htmlFor="brandName"
+            className="text-xs font-medium w-full flex flex-col gap-1"
+          >
             Brand
             <p className="text-muted-foreground font-normal text-[11px]">
               Which brand to show on the DIMO button. Leave as &quot;Default&quot; to use
