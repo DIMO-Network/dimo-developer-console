@@ -11,17 +11,11 @@ export const useRenounceVehiclePermissions = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const renounce = useCallback(
-    async (tokenId: number, clientId: string) => {
+    async (tokenId: number) => {
       const smartContractAddress = currentUser?.smartContractAddress;
 
       if (!smartContractAddress) {
         throw new Error('No wallet connected — please sign in again');
-      }
-
-      if (clientId.toLowerCase() !== smartContractAddress.toLowerCase()) {
-        throw new Error(
-          'Your wallet does not match this license. The license may have been created with a different account.',
-        );
       }
 
       setIsLoading(true);

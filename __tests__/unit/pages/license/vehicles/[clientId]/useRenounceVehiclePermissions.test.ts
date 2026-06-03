@@ -7,14 +7,13 @@ jest.mock('viem', () => ({
 }));
 
 const mockProcessTransactions = jest.fn();
-const MOCK_SMART_CONTRACT_ADDRESS = '0xCLIENT';
 
 jest.mock('@/hooks/useContractGA', () => ({
   useContractGA: () => ({ processTransactions: mockProcessTransactions }),
 }));
 
 jest.mock('@/hooks/useGlobalAccount', () => () => ({
-  currentUser: { smartContractAddress: MOCK_SMART_CONTRACT_ADDRESS },
+  currentUser: { smartContractAddress: '0xUSER' },
 }));
 
 jest.mock('@/config', () => ({
@@ -40,7 +39,7 @@ describe('useRenounceVehiclePermissions', () => {
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
     await act(async () => {
-      await result.current.renounce(42, '0xCLIENT');
+      await result.current.renounce(42);
     });
 
     expect(mockProcessTransactions).toHaveBeenCalledTimes(1);
@@ -55,7 +54,7 @@ describe('useRenounceVehiclePermissions', () => {
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
     await act(async () => {
-      await result.current.renounce(42, '0xCLIENT');
+      await result.current.renounce(42);
     });
 
     expect(encodeFunctionData).toHaveBeenCalledWith(
@@ -72,7 +71,7 @@ describe('useRenounceVehiclePermissions', () => {
 
     await expect(
       act(async () => {
-        await result.current.renounce(42, '0xCLIENT');
+        await result.current.renounce(42);
       }),
     ).rejects.toThrow('reverted');
   });
@@ -83,7 +82,7 @@ describe('useRenounceVehiclePermissions', () => {
 
     await expect(
       act(async () => {
-        await result.current.renounce(42, '0xCLIENT');
+        await result.current.renounce(42);
       }),
     ).rejects.toThrow('Transaction failed');
   });
@@ -98,7 +97,7 @@ describe('useRenounceVehiclePermissions', () => {
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
     await act(async () => {
-      await result.current.renounce(42, '0xCLIENT');
+      await result.current.renounce(42);
     });
 
     expect(result.current.isLoading).toBe(false);
@@ -110,7 +109,7 @@ describe('useRenounceVehiclePermissions', () => {
 
     await act(async () => {
       try {
-        await result.current.renounce(42, '0xCLIENT');
+        await result.current.renounce(42);
       } catch {
         // expected
       }
