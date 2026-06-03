@@ -65,7 +65,7 @@ export const VehicleDetailsTable: FC<IProps> = ({ clientId }) => {
     if (!renouncingVehicle) return;
     const { tokenId } = renouncingVehicle;
     try {
-      await renounce(tokenId);
+      await renounce(tokenId, clientId);
       // Optimistic removal
       setRemovedTokenIds((prev) => new Set([...prev, tokenId]));
       setRenouncingVehicle(null);

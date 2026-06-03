@@ -7,6 +7,7 @@ jest.mock('viem', () => ({
 }));
 
 const mockProcessTransactions = jest.fn();
+const MOCK_CLIENT_ID = '0xLICENSE';
 
 jest.mock('@/hooks/useContractGA', () => ({
   useContractGA: () => ({ processTransactions: mockProcessTransactions }),
@@ -34,33 +35,44 @@ describe('useRenounceVehiclePermissions', () => {
     (encodeFunctionData as jest.Mock).mockReturnValue('0xencoded');
   });
 
-  it('calls processTransactions targeting the SACD contract', async () => {
+  it('calls execute on the license beacon (clientId), not SACD directly', async () => {
     mockProcessTransactions.mockResolvedValue({ success: true });
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
     await act(async () => {
-      await result.current.renounce(42);
+      await result.current.renounce(42, MOCK_CLIENT_ID);
     });
 
     expect(mockProcessTransactions).toHaveBeenCalledTimes(1);
     const [txs] = mockProcessTransactions.mock.calls[0];
-    expect(txs[0].to).toBe('0x5ACD000000000000000000000000000000000001');
+    expect(txs[0].to).toBe(MOCK_CLIENT_ID);
     expect(txs[0].value).toBe(BigInt(0));
     expect(txs[0].data).toBe('0xencoded');
   });
 
-  it('encodes renouncePermissions with asset and tokenId', async () => {
+  it('encodes execute with SACD address and renouncePermissions calldata', async () => {
     mockProcessTransactions.mockResolvedValue({ success: true });
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
     await act(async () => {
-      await result.current.renounce(42);
+      await result.current.renounce(42, MOCK_CLIENT_ID);
     });
 
-    expect(encodeFunctionData).toHaveBeenCalledWith(
+    // First call: encode renouncePermissions calldata
+    expect(encodeFunctionData).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
         functionName: 'renouncePermissions',
         args: ['0xBEEF000000000000000000000000000000000001', BigInt(42)],
+      }),
+    );
+
+    // Second call: encode execute(sacdAddress, 0, renounceCalldata)
+    expect(encodeFunctionData).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        functionName: 'execute',
+        args: ['0x5ACD000000000000000000000000000000000001', BigInt(0), '0xencoded'],
       }),
     );
   });
@@ -71,7 +83,7 @@ describe('useRenounceVehiclePermissions', () => {
 
     await expect(
       act(async () => {
-        await result.current.renounce(42);
+        await result.current.renounce(42, MOCK_CLIENT_ID);
       }),
     ).rejects.toThrow('reverted');
   });
@@ -82,7 +94,7 @@ describe('useRenounceVehiclePermissions', () => {
 
     await expect(
       act(async () => {
-        await result.current.renounce(42);
+        await result.current.renounce(42, MOCK_CLIENT_ID);
       }),
     ).rejects.toThrow('Transaction failed');
   });
@@ -97,7 +109,7 @@ describe('useRenounceVehiclePermissions', () => {
     const { result } = renderHook(() => useRenounceVehiclePermissions());
 
     await act(async () => {
-      await result.current.renounce(42);
+      await result.current.renounce(42, MOCK_CLIENT_ID);
     });
 
     expect(result.current.isLoading).toBe(false);
@@ -109,7 +121,7 @@ describe('useRenounceVehiclePermissions', () => {
 
     await act(async () => {
       try {
-        await result.current.renounce(42);
+        await result.current.renounce(42, MOCK_CLIENT_ID);
       } catch {
         // expected
       }
