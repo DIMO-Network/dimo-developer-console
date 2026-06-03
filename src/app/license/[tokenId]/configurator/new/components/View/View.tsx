@@ -136,12 +136,11 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
         configuration: buildJson(data),
       };
 
-      await saveConfiguration(body);
+      const { id } = await saveConfiguration(body);
 
       toast.success('Configuration successfully created');
 
-      // Redirect to list, not edit page
-      router.replace(`/license/${tokenId}/configurator`);
+      router.replace(`/license/${tokenId}/configurator/${id}`);
     } catch (error) {
       console.log(error);
       toast.error('Failed to create Configuration. Please try again.');

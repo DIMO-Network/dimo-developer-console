@@ -118,7 +118,7 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
             Basics
           </p>
-          <Label className="text-xs font-medium flex flex-col gap-1">
+          <Label className="text-xs font-medium w-full flex flex-col gap-1">
             Configuration ID
             <div className="flex gap-2 items-center">
               <TextField

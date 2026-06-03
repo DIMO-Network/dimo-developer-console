@@ -178,18 +178,35 @@ export const View = ({
     if (!configurationId) return;
     const populateConfiguration = async () => {
       const response = await getConfiguration({ id: configurationId });
-      const savedConfiguration = response.configuration;
+      const raw = response.configuration;
+      const savedConfiguration: Record<string, unknown> =
+        typeof raw === 'string' ? JSON.parse(raw) : raw;
+
+      // Convert stored MM-DD-YYYY back to YYYY-MM-DD so new Date() parses it correctly
+      const rawDate = savedConfiguration['expirationDate'] as string | undefined;
+      const expirationDate = rawDate
+        ? (() => {
+            const parts = rawDate.split('-');
+            if (parts.length === 3 && parts[2].length === 4) {
+              // MM-DD-YYYY → YYYY-MM-DD
+              return `${parts[2]}-${parts[0]}-${parts[1]}`;
+            }
+            return rawDate;
+          })()
+        : '';
+
       const formatted = {
         ...savedConfiguration,
         component: InverseFormatComponent(savedConfiguration['entryState'] as string),
         configuration_name: response.configuration_name,
         configuration_id: response.id,
+        expirationDate,
         permissionsMode: savedConfiguration['permissionTemplateId']
           ? 'template'
           : 'custom',
         permissions: savedConfiguration['permissionTemplateId']
           ? undefined
-          : inverseFormatPermissions(savedConfiguration['permissions'] as string),
+          : inverseFormatPermissions((savedConfiguration['permissions'] as string) ?? ''),
         requireAttestation: !!savedConfiguration['cloudEvent'],
         attestation: savedConfiguration['cloudEvent']
           ? JSON.parse(savedConfiguration['cloudEvent'] as string)

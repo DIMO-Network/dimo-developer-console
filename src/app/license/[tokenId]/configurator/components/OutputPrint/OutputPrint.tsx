@@ -22,7 +22,7 @@ const raw = (code: string): RawCode => ({ __raw: code });
 
 export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
   const fragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
-  const [viewMode, setViewMode] = useState<'code' | 'url'>('code');
+  const [viewMode, setViewMode] = useState<'code' | 'url'>('url');
   const { watch } = useFormContext<DynamicFormProps>();
   const values = watch();
   const configurationId = (values as { configuration_id?: string }).configuration_id;
