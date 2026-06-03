@@ -68,7 +68,10 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
     name: 'requireAttestation',
   });
 
-  const { setValue } = useFormContext<DynamicFormProps>();
+  const {
+    setValue,
+    formState: { errors },
+  } = useFormContext<DynamicFormProps>();
 
   return (
     <>
@@ -78,6 +81,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           <Controller
             control={control}
             name="expirationDate"
+            rules={{ required: 'Expiration date is required' }}
             render={({ field }) => (
               <div className={'w-full'}>
                 <DatePicker
@@ -87,6 +91,9 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
               </div>
             )}
           />
+          {errors.expirationDate && (
+            <p className="text-xs text-red-500 mt-1">{errors.expirationDate.message}</p>
+          )}
         </Label>
       </div>
       <div className={'flex flex-row gap-4 w-full'}>

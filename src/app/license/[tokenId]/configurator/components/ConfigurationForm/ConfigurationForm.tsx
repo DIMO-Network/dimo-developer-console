@@ -96,7 +96,13 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
     void load();
   }, [fragment.tokenId]);
 
-  const { register, control, watch, handleSubmit } = useFormContext<DynamicFormProps>();
+  const {
+    register,
+    control,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useFormContext<DynamicFormProps>();
   const component = watch('component', 'ShareVehiclesWithDimo');
 
   return (
@@ -109,11 +115,15 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
               type="text"
               placeholder=""
               {...register('configuration_name', {
-                required: false,
-                validate: {},
+                required: 'Configuration name is required',
               })}
               role="company-website-input"
             />
+            {errors.configuration_name && (
+              <p className="text-xs text-red-500 mt-1">
+                {errors.configuration_name.message}
+              </p>
+            )}
           </Label>
           <Label htmlFor="website" className="text-xs text-medium w-full">
             Client Id
@@ -149,7 +159,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
             Redirect URI
             <SelectField
               {...register('redirectUri', {
-                required: 'This field is required',
+                required: 'Redirect URI is required',
               })}
               options={fragment.redirectURIs.nodes.map((node) => ({
                 value: node.uri,
@@ -159,6 +169,9 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
               placeholder="Select"
               role="redirectUri-select"
             />
+            {errors.redirectUri && (
+              <p className="text-xs text-red-500 mt-1">{errors.redirectUri.message}</p>
+            )}
           </Label>
           <Label htmlFor="website" className="text-xs text-medium w-full">
             UTM

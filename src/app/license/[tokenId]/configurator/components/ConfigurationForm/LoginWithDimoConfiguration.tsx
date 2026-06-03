@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
-import { Control, Controller, UseFormRegister } from 'react-hook-form';
+import { Control, Controller, UseFormRegister, useFormContext } from 'react-hook-form';
 import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 
 import { DatePicker } from '@/components/DatePicker';
@@ -20,6 +20,9 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
   control,
   brandNames = [],
 }: IFormProps) => {
+  const {
+    formState: { errors },
+  } = useFormContext<DynamicFormProps>();
   return (
     <>
       <div className={'flex flex-row gap-4 w-full'}>
@@ -66,6 +69,7 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
           <Controller
             control={control}
             name="expirationDate"
+            rules={{ required: 'Expiration date is required' }}
             render={({ field }) => (
               <DatePicker
                 value={field.value ? new Date(field.value) : undefined}
@@ -73,6 +77,9 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
               />
             )}
           />
+          {errors.expirationDate && (
+            <p className="text-xs text-red-500 mt-1">{errors.expirationDate.message}</p>
+          )}
         </Label>
       </div>
       {brandNames.length > 1 && (
