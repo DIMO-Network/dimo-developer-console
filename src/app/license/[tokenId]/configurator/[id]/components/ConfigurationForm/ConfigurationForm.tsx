@@ -261,14 +261,6 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
             <OutputPrint license={licenseSummary} />
           </div>
         </div>
-        <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground leading-relaxed">
-          <strong className="text-primary block mb-1">How to use this output</strong>
-          Copy the{' '}
-          <code className="bg-primary/10 px-1 rounded text-[10px]">
-            configurationId
-          </code>{' '}
-          or the generated snippet to use in your app.
-        </div>
       </div>
     </div>
   );

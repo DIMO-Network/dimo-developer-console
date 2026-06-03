@@ -10,6 +10,7 @@ import { gql } from '@/gql';
 import { USER_CONFIG_FRAGMENT } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 import { Button } from '@/components/Button';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export const DEVELOPER_LICENSE_INFO = gql(`
   query DeveloperLicenseInfo($tokenId: Int!) {
@@ -61,6 +62,16 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
 
   return (
     <div className="liwd-configurator-page">
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+        <Link
+          href={`/license/${tokenId}/details`}
+          className="hover:text-foreground transition-colors"
+        >
+          License Details
+        </Link>
+        <span>/</span>
+        <span className="text-foreground">SDK Configurator</span>
+      </nav>
       <div className="flex items-center justify-between mb-4">
         <PageSubtitle subtitle="Login With DIMO Configurator" />
         <Button

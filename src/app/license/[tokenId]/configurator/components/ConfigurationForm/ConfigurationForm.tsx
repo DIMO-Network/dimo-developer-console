@@ -103,6 +103,7 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
     formState: { errors },
   } = useFormContext<DynamicFormProps>();
   const component = watch('component', 'ShareVehiclesWithDimo');
+  const configurationId = watch('configuration_id');
 
   return (
     <div className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-6 lg:items-start">
@@ -228,24 +229,27 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
 
       {/* RIGHT: sticky preview */}
       <div className="sticky top-6 hidden lg:block">
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-border">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Generated Output
+        {configurationId ? (
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-border">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Generated Output
+              </p>
+            </div>
+            <div className="p-4">
+              <OutputPrint license={licenseSummary} />
+            </div>
+          </div>
+        ) : (
+          <div className="bg-card border border-border rounded-xl p-6 flex flex-col items-center justify-center text-center gap-3">
+            <p className="text-sm font-medium">Save to generate your link</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              After saving, you&apos;ll get a short{' '}
+              <code className="bg-muted px-1 rounded">configurationId</code> link you can
+              share directly with users.
             </p>
           </div>
-          <div className="p-4">
-            <OutputPrint license={licenseSummary} />
-          </div>
-        </div>
-        <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground leading-relaxed">
-          <strong className="text-primary block mb-1">How to use this output</strong>
-          Save the configuration to get a{' '}
-          <code className="bg-primary/10 px-1 rounded text-[10px]">
-            configurationId
-          </code>{' '}
-          you can pass directly to the SDK, or copy the generated snippet into your app.
-        </div>
+        )}
       </div>
     </div>
   );

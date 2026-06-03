@@ -15,6 +15,7 @@ import { saveConfiguration } from '@/actions/configurations';
 import { useRouter } from 'next/navigation';
 import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/ListView/ListView';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 const parseArray = (val?: string) =>
   val
@@ -165,19 +166,24 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
 
   return (
     <div className="liwd-configurator-page">
-      <PageSubtitle subtitle="Login With DIMO Configurator" />
-      <p className="text-sm text-text-secondary mb-4">
-        A vehicle sharing link is required for vehicle owners to grant data permissions to
-        your application.{' '}
-        <a
-          href="https://www.dimo.org/docs/build/building-with-tools/client-sdk-dimo-connect"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary hover:underline"
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+        <Link
+          href={`/license/${tokenId}/details`}
+          className="hover:text-foreground transition-colors"
         >
-          Learn how to use the configurationId with LIWD
-        </a>
-      </p>
+          License Details
+        </Link>
+        <span>/</span>
+        <Link
+          href={`/license/${tokenId}/configurator`}
+          className="hover:text-foreground transition-colors"
+        >
+          SDK Configurator
+        </Link>
+        <span>/</span>
+        <span className="text-foreground">New Configuration</span>
+      </nav>
+      <PageSubtitle subtitle="New Configuration" />
       {data?.developerLicense && (
         <FormProvider {...methods}>
           <ConfigurationForm

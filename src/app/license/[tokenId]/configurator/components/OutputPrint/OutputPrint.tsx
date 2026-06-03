@@ -25,6 +25,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
   const [viewMode, setViewMode] = useState<'code' | 'url'>('code');
   const { watch } = useFormContext<DynamicFormProps>();
   const values = watch();
+  const configurationId = (values as { configuration_id?: string }).configuration_id;
 
   const getBaseUrl = (): string => {
     if (configuration.environment === 'production') {
@@ -99,6 +100,12 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
   }
 
   const buildUrl = (): string => {
+    const baseUrl = getBaseUrl();
+
+    if (configurationId) {
+      return `${baseUrl}/?configurationId=${configurationId}`;
+    }
+
     const params = new URLSearchParams();
 
     const add = (key: string, val: unknown) => {
@@ -113,7 +120,6 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
       }
     };
 
-    // Shared
     add('clientId', fragment?.clientId);
     add('redirectUri', values.redirectUri);
     add('entryState', formatComponent(values.component));
@@ -150,8 +156,6 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
       add('functionName', values.functionName);
       add('args', parseArray(values.args as string));
     }
-
-    const baseUrl = getBaseUrl();
 
     return `${baseUrl}/?${params.toString()}`;
   };
