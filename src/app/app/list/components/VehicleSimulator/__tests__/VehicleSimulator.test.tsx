@@ -3,8 +3,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { VehicleSimulator } from '../index';
 
+jest.mock('@/services/zerodev', () => ({
+  getPublicClient: jest.fn(),
+}));
+
 jest.mock('@/hooks', () => ({
   useMintVehicle: jest.fn(() => jest.fn()),
+  useBurnVehicle: jest.fn(() => jest.fn()),
+  useGlobalAccount: jest.fn(() => ({ currentUser: null })),
 }));
 
 jest.mock('@/actions/simulatedVehicles', () => ({
@@ -21,7 +27,7 @@ const makeStoredVehicle = (overrides = {}) => ({
   user_id: 'user-1',
   token_id: 42,
   make: 'Toyota',
-  model: 'Camry',
+  model: 'RAV4',
   year: 2022,
   client_id: mockClientId,
   created_at: '2026-01-01T00:00:00Z',
@@ -51,11 +57,17 @@ describe('VehicleSimulator', () => {
     expect(screen.getByText('Vehicle Simulator')).toBeInTheDocument();
   });
 
+  it('renders region selector buttons', () => {
+    renderComponent();
+    expect(screen.getByRole('button', { name: 'USA' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Japan' })).toBeInTheDocument();
+  });
+
   it('renders make selector buttons', () => {
     renderComponent();
     expect(screen.getByRole('button', { name: 'Toyota' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ford' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tesla' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Chevrolet' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'BMW' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Honda' })).toBeInTheDocument();
   });
@@ -65,18 +77,20 @@ describe('VehicleSimulator', () => {
     expect(screen.getByRole('button', { name: /mint vehicle/i })).toBeDisabled();
   });
 
-  it('enables the mint button when make, model, and year are all selected', () => {
+  it('enables the mint button when region, make, model, and year are all selected', () => {
     renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: 'USA' }));
     fireEvent.click(screen.getByRole('button', { name: 'Toyota' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Camry' }));
+    fireEvent.click(screen.getByRole('button', { name: 'RAV4' }));
     fireEvent.click(screen.getByRole('button', { name: '2022' }));
     expect(screen.getByRole('button', { name: /mint vehicle/i })).not.toBeDisabled();
   });
 
   it('resets selected model when make changes', () => {
     renderComponent();
+    fireEvent.click(screen.getByRole('button', { name: 'USA' }));
     fireEvent.click(screen.getByRole('button', { name: 'Toyota' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Camry' }));
+    fireEvent.click(screen.getByRole('button', { name: 'RAV4' }));
     fireEvent.click(screen.getByRole('button', { name: 'Ford' }));
     expect(screen.getByRole('button', { name: /mint vehicle/i })).toBeDisabled();
   });
@@ -87,8 +101,9 @@ describe('VehicleSimulator', () => {
     await waitFor(() => {
       expect(screen.getByText(/limit reached/i)).toBeInTheDocument();
     });
+    fireEvent.click(screen.getByRole('button', { name: 'USA' }));
     fireEvent.click(screen.getByRole('button', { name: 'Toyota' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Camry' }));
+    fireEvent.click(screen.getByRole('button', { name: 'RAV4' }));
     fireEvent.click(screen.getByRole('button', { name: '2022' }));
     expect(screen.getByRole('button', { name: /mint vehicle/i })).toBeDisabled();
   });
