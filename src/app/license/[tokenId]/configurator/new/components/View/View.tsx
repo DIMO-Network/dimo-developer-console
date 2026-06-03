@@ -66,6 +66,7 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
   add('redirectUri', values.redirectUri);
   add('entryState', formatComponent(values.component));
   add('utm', values.utm);
+  add('tosUrl', values.tosUrl);
   add(
     'expirationDate',
     values.expirationDate ? formatDate(new Date(values.expirationDate)) : undefined,
@@ -179,7 +180,11 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       </p>
       {data?.developerLicense && (
         <FormProvider {...methods}>
-          <ConfigurationForm license={data?.developerLicense} submit={submit} />
+          <ConfigurationForm
+            license={data?.developerLicense}
+            licenseSummary={data?.developerLicense}
+            submit={submit}
+          />
         </FormProvider>
       )}
     </div>
