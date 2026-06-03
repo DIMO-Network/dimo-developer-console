@@ -7,9 +7,14 @@ jest.mock('viem', () => ({
 }));
 
 const mockProcessTransactions = jest.fn();
+const MOCK_SMART_CONTRACT_ADDRESS = '0xCLIENT';
 
 jest.mock('@/hooks/useContractGA', () => ({
   useContractGA: () => ({ processTransactions: mockProcessTransactions }),
+}));
+
+jest.mock('@/hooks/useGlobalAccount', () => () => ({
+  currentUser: { smartContractAddress: MOCK_SMART_CONTRACT_ADDRESS },
 }));
 
 jest.mock('@/config', () => ({
