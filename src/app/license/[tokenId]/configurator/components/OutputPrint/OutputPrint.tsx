@@ -128,6 +128,8 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
       'expirationDate',
       values.expirationDate ? formatDate(new Date(values.expirationDate)) : undefined,
     );
+    add('privacyPolicyUrl', values.privacyPolicyUrl);
+    add('tosUrl', values.tosUrl);
 
     if (values.component === 'LoginWithDimo') {
       add('vehicles', parseArray(values.vehicles));
@@ -170,6 +172,8 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
       expirationDate: values.expirationDate
         ? formatDate(new Date(values.expirationDate))
         : undefined,
+      privacyPolicyUrl: values.privacyPolicyUrl || undefined,
+      tosUrl: values.tosUrl || undefined,
       onSuccess: raw('(authData) => console.log("Success:", authData)'),
       onError: raw('(error) => console.error("Error:", error)'),
     };

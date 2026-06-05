@@ -9,6 +9,7 @@ interface SharedProps {
   authenticatedLabel: string;
   unAuthenticatedLabel: string;
   expirationDate: string;
+  privacyPolicyUrl?: string | null;
   tosUrl?: string | null;
 }
 

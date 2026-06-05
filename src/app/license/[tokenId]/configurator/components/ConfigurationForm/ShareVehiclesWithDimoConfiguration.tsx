@@ -188,13 +188,26 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
         )}
       </div>
 
-      {/* Terms of Service */}
+      {/* Privacy Policy & Terms of Service */}
       <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
-          Terms of Service
+          Privacy Policy &amp; Terms of Service
         </p>
         <Label className="text-xs font-medium flex flex-col gap-1">
-          ToS URL
+          Privacy Policy URL
+          <TextField
+            type="url"
+            placeholder="https://yourapp.com/privacy"
+            {...register('privacyPolicyUrl', { required: false })}
+            role="privacy-policy-url-input"
+          />
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            Displayed to vehicle owners before they grant permissions. Leave blank to
+            skip.
+          </p>
+        </Label>
+        <Label className="text-xs font-medium flex flex-col gap-1">
+          Terms of Service URL
           <TextField
             type="url"
             placeholder="https://yourapp.com/terms"
