@@ -67,6 +67,7 @@ const buildJson = (values: DynamicFormProps): Record<string, unknown> => {
   add('redirectUri', values.redirectUri);
   add('entryState', formatComponent(values.component));
   add('utm', values.utm);
+  add('privacyPolicyUrl', values.privacyPolicyUrl);
   add('tosUrl', values.tosUrl);
   add(
     'expirationDate',
