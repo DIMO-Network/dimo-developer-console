@@ -30,8 +30,8 @@ import Column from '@/components/Table/Column';
 import { getUser } from '@/actions/user';
 import { FOCUS_RENTALS_OS_SIGNUP, clearFocus, getFocus } from '@/utils/focus';
 
-const RENTAL_OS_URL = 'https://fleets.dimo.co/';
-const RENTAL_OS_REGISTER_ENDPOINT = 'https://fleets.dimo.co/tenant/register';
+const RENTAL_OS_URL = 'https://rentals.dimo.co/';
+const RENTAL_OS_REGISTER_ENDPOINT = 'https://rentals.dimo.co/tenant/register';
 
 const rentalOSSignerKey = (clientId: string) => `rentalOS_signer_${clientId}`;
 const getRentalOSSigner = (clientId: string) =>
