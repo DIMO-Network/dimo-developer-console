@@ -6,14 +6,19 @@ import { CreateAppModal } from '@/components/CreateAppModal';
 
 interface Props {
   className?: string;
+  disabled?: boolean;
 }
 
-const CreateAppButton: React.FC<Props> = ({ className = 'dark with-icon' }) => {
+const CreateAppButton: React.FC<Props> = ({ className = 'dark with-icon', disabled }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   return (
     <>
       <CreateAppModal isOpen={isModalOpen} handleIsOpen={setIsModalOpen} />
-      <Button className={clsx(className, '!h-10')} onClick={() => setIsModalOpen(true)}>
+      <Button
+        className={clsx(className, '!h-10')}
+        onClick={() => setIsModalOpen(true)}
+        disabled={disabled}
+      >
         <PlusIcon className="w-4 h-4" />
         Create a license
       </Button>
