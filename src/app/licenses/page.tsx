@@ -1,6 +1,7 @@
 'use client';
 import { Suspense } from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
+import { gql } from '@/gql';
 import { useGlobalAccount } from '@/hooks';
 import { Loader } from '@/components/Loader';
 import { LicenseList } from '@/app/license/list';
