@@ -140,6 +140,18 @@ export const conditionsConfig: ConditionConfig[] = [
     inputType: 'number',
     validation: numericValidation,
   },
+  {
+    field: 'vss.powertrainCombustionEngineSpeed',
+    label: 'Engine Speed',
+    inputType: 'number',
+    validation: numericValidation,
+  },
+  {
+    field: 'vss.obdThrottlePosition',
+    label: 'Throttle Position',
+    inputType: 'number',
+    validation: numericValidation,
+  },
 ];
 
 export const formatWebhookFormData = (
