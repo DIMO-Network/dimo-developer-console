@@ -1,5 +1,5 @@
-import camry from './fixtures/toyota_camry_2020.json';
-import { vehicleVocab } from './fixtures/vehicleVocab';
+import camry from '../__fixtures__/toyota_camry_2020.json';
+import { vehicleVocab } from '../__fixtures__/vehicleVocab';
 import {
   buildGrid,
   setShared,
