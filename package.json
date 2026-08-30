@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "npm run lint",
+    "prebuild": "npm run lint && npm run check:template-types",
     "build": "next build",
     "predev": "npm run compile",
     "dev": "next dev",
@@ -16,6 +16,7 @@
     "test:watch": "jest --watch",
     "compile": "graphql-codegen --config src/codegen.ts",
     "gen:template-types": "node scripts/gen-template-types.mjs",
+    "check:template-types": "node scripts/gen-template-types.mjs --check",
     "prepare": "husky"
   },
   "dependencies": {
