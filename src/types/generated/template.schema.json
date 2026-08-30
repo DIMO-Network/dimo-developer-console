@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://definitions.dimo.org/schema/template.schema.json",
+  "title": "Template",
+  "description": "A vehicle trim-configuration template: one model-year, plus the trims it shipped in. This is the object Console edits and R2 serves. Attributes true of every trim live on `attributes`; anything that differs between trims lives on that trim. A VIN decode narrows this template to exactly one trim and emits a Resolved document.",
+  "type": "object",
+  "required": [
+    "id",
+    "deviceType",
+    "manufacturer",
+    "model",
+    "year",
+    "attributes",
+    "trims",
+    "version",
+    "createdAt",
+    "updatedAt"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._&+-]*_[a-z0-9._&+-]+_[0-9]{4}$",
+      "description": "manufacturer-slug _ model-slug _ year. The only identifier. There is no ksuid, no legacy id, and no on-chain table backing this."
+    },
+    "deviceType": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "DeviceType id whose vocabulary this template is validated against."
+    },
+    "manufacturer": {
+      "type": "object",
+      "title": "TemplateManufacturer",
+      "description": "Denormalised into the template on purpose. Reading a template must not require a second lookup, and creating one must not require the brand to have on-chain storage provisioned first.",
+      "required": ["slug", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._&+-]*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "tokenId": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Manufacturer NFT, when one exists. Optional: it grants direct-edit rights, it is not a precondition for the template to exist."
+        }
+      }
+    },
+    "model": { "type": "string", "minLength": 1 },
+    "year": { "type": "integer", "minimum": 1885, "maximum": 2100 },
+    "imageURI": { "type": "string", "format": "uri" },
+    "hardwareTemplateId": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "default": "130",
+      "description": "Which DIMO hardware configuration this vehicle takes. NOT a vehicle attribute: it describes what our gear does with the car, not what the car is, so it sits outside `attributes` and is never validated against the DeviceType vocabulary. Template-level value is the default for every trim; a trim may override it. Today `common/utils.go:202` stamps \"130\" on every definition and exactly 3 style rows override it. Contribution-gated: an open contributor must not be able to change what hardware we ship."
+    },
+    "attributes": { "$ref": "#/$defs/attributeMap" },
+    "trims": {
+      "type": "array",
+      "minItems": 1,
+      "description": "At least one. A model-year sold in a single configuration has exactly one trim; that is still a trim, not a special case.",
+      "items": { "$ref": "#/$defs/trim" }
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Increments on every published edit. Immutable once written: t/<id>/v/<version>.json is the permanent record."
+    },
+    "author": {
+      "type": "string",
+      "pattern": "^0x[0-9a-fA-F]{40}$",
+      "description": "Address that published this version. Every edit is attributed."
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "trim": {
+      "type": "object",
+      "title": "Trim",
+      "required": ["name", "attributes"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "As the manufacturer markets it: \"XSE V6\", \"Hybrid LE\", \"Long Range AWD\"."
+        },
+        "selectors": {
+          "$ref": "#/$defs/selectors",
+          "description": "How a decoded VIN is matched to this trim. Omit on a single-trim template."
+        },
+        "hardwareTemplateId": {
+          "type": "string",
+          "pattern": "^[0-9]+$",
+          "description": "Overrides the template's value for this trim only. Omit unless this trim genuinely takes different hardware."
+        },
+        "attributes": { "$ref": "#/$defs/attributeMap" }
+      }
+    },
+    "selectors": {
+      "type": "object",
+      "title": "TrimSelectors",
+      "description": "Signals from the VIN decoder. A trim matches when every selector present matches. Most specific match wins; ties are a template defect and must be reported, not silently broken.",
+      "additionalProperties": false,
+      "properties": {
+        "manufacturerCode": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "OEM model/option code. Already present in today's data as manufacturer_code, where it sits on the model-year record doing nothing — it is a trim key that was flattened."
+        },
+        "styleName": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Style string as the upstream decoder reports it. Matched case-insensitively."
+        },
+        "vinPattern": {
+          "type": "string",
+          "format": "regex",
+          "description": "Anchored regex over the 17-character VIN for OEMs that encode trim positionally."
+        }
+      }
+    },
+    "attributeMap": {
+      "type": "object",
+      "title": "AttributeMap",
+      "description": "name -> value. On the template these are the attributes shared by every trim; on a trim they are that trim's own. An attribute is either on the template or on a trim, never both. Names must exist in the DeviceType; enum values must appear in that attribute's options. An attribute that is unknown is ABSENT — never \"\" and never \"<nil>\". 6% of today's attribute rows are one of those two placeholders; this schema makes them unrepresentable.",
+      "propertyNames": { "pattern": "^[a-z0-9_]+$" },
+      "additionalProperties": {
+        "type": ["string", "number", "integer", "boolean"],
+        "description": "Typed, not stringified. fuel_tank_capacity_gal is 15.8, not \"15.800000\"."
+      }
+    }
+  }
+}

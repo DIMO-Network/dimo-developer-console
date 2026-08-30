@@ -30,6 +30,7 @@ type Configuration = {
   ISSUED_TOPIC: `0x${string}`;
   CONTRACT_METHODS: Record<keyof typeof CONTRACT_METHODS, string>;
   identityApiUrl: string;
+  definitionsWorkerUrl: string;
   DIMO_ESCROW_ADDRESS: `0x${string}`;
   DIMO_SACD_ADDRESS: `0x${string}`;
   DIMO_REGISTRY_ADDRESS: `0x${string}`;
