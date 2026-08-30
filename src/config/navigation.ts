@@ -1,4 +1,5 @@
 import {
+  CarRentalIcon,
   HomeIcon,
   IntegrationIcon,
   MonitorHeartIcon,
@@ -12,6 +13,7 @@ const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const EXPLORER_VEHICLE_REGEX = /^\/explorer\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
+const TEMPLATE_EDIT_REGEX = /^\/templates\/[^/]+$/;
 const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create\/[^/]+$/;
 const EDIT_WEBHOOK_REGEX = /^\/webhooks\/edit\/[^/]+\/[^/]+$/;
 const CREATE_CONNECTION_REGEX = /^\/connections\/create\/[^/]+$/;
@@ -28,12 +30,17 @@ export const getPageTitle = (path: string) => {
   if (EDIT_WEBHOOK_REGEX.test(path)) return 'Edit webhook';
   if (CREATE_CONNECTION_REGEX.test(path)) return 'Create a Connection';
   if (CONNECTION_DETAILS_REGEX.test(path)) return 'Connection Details';
+  // Ordered before TEMPLATE_EDIT_REGEX, which would otherwise match
+  // /templates/new and title the create page "Edit template".
+  if (path === '/templates/new') return 'New template';
+  if (TEMPLATE_EDIT_REGEX.test(path)) return 'Edit template';
 };
 
 const pageTitles: Record<string, string> = {
   '/': 'Home',
   '/app': 'Home',
   '/webhooks': 'Webhooks',
+  '/templates': 'Vehicle templates',
   '/api-status': 'API Status',
   '/connections': 'Connections',
   '/settings': 'Settings',
@@ -64,6 +71,14 @@ const baseMainMenu = [
     icon: IntegrationIcon,
     iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
     link: '/webhooks',
+    external: false,
+    disabled: false,
+  },
+  {
+    label: 'Templates',
+    icon: CarRentalIcon,
+    iconClassName: 'h-5 w-5',
+    link: '/templates',
     external: false,
     disabled: false,
   },
