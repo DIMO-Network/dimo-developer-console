@@ -8,15 +8,26 @@ export type EntitlementKind =
   | 'author'
   | 'manufacturer'
   | 'curator'
-  | 'proposal-required';
+  | 'proposal-required'
+  /** identity-api could not answer something the decision needs, so nothing is decided. */
+  | 'unavailable';
 
 export interface Entitlement {
   kind: EntitlementKind;
   canPublish: boolean;
   /** DIMO only, at every tier. It decides what hardware ships. */
   canSetHardwareTemplateId: boolean;
-  mintedVehicles: number;
+  /** null when identity-api did not answer: an unknown count is not zero. */
+  mintedVehicles: number | null;
   reason: string;
+}
+
+/** identity-api did not give a usable answer: transport, GraphQL or an empty body. */
+export class IdentityError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'IdentityError';
+  }
 }
 
 const eq = (a?: string | null, b?: string | null) =>
@@ -50,30 +61,50 @@ export async function resolveCaller(): Promise<{
   }
 }
 
+/**
+ * A GraphQL failure arrives as HTTP 200 with `errors` set and `data` null.
+ * Every way identity can fail to answer is thrown here, never returned: a
+ * caller reading `data` as an answer would turn "unknown" into a value, and
+ * for the vehicle count that value would be zero -- the open tier.
+ */
 async function identity<T>(
   query: string,
   variables: Record<string, unknown>,
-): Promise<T | null> {
+): Promise<T> {
   const resp = await fetch(config.identityApiUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, variables }),
     cache: 'no-store',
   });
-  if (!resp.ok) throw new Error(`identity-api returned ${resp.status}`);
-  const json = (await resp.json()) as { data?: T };
-  return json.data ?? null;
+  if (!resp.ok) throw new IdentityError(`identity-api returned ${resp.status}`);
+  const json = (await resp.json()) as {
+    data?: T | null;
+    errors?: { message?: string }[];
+  };
+  if (Array.isArray(json.errors) && json.errors.length > 0) {
+    const messages = json.errors.map((e) => e.message ?? 'unknown error');
+    throw new IdentityError(`identity-api: ${messages.join('; ')}`);
+  }
+  if (json.data === null || json.data === undefined) {
+    throw new IdentityError('identity-api returned no data');
+  }
+  return json.data;
 }
 
 /** How many vehicles point at this template. This is the number that decides risk. */
 export async function countMintedVehicles(id: string): Promise<number> {
-  const data = await identity<{ vehicles: { totalCount: number } }>(
+  const data = await identity<{ vehicles: { totalCount: number } | null }>(
     `query TemplateVehicles($id: String!) {
        vehicles(filterBy: { deviceDefinitionId: $id }, first: 1) { totalCount }
      }`,
     { id },
   );
-  return data?.vehicles.totalCount ?? 0;
+  const count = data.vehicles?.totalCount;
+  if (typeof count !== 'number') {
+    throw new IdentityError('identity-api returned no vehicle count');
+  }
+  return count;
 }
 
 export async function manufacturerOwner(
@@ -87,7 +118,7 @@ export async function manufacturerOwner(
      }`,
     { slug },
   );
-  return data?.manufacturer ?? null;
+  return data.manufacturer ?? null;
 }
 
 /**
@@ -151,17 +182,32 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
     };
   }
 
+  // The count is what the rest of this function decides on. When it cannot
+  // be read the answer is "not now", for everyone: a count that fell back to
+  // zero would open an unauthored template to whoever was editing it during
+  // the blip, and a decision made on a guess is not one anybody granted.
+  let mintedVehicles: number;
+  try {
+    mintedVehicles = await args.countMintedVehicles(template.id);
+  } catch {
+    return {
+      kind: 'unavailable',
+      canPublish: false,
+      canSetHardwareTemplateId: false,
+      mintedVehicles: null,
+      reason: 'Could not verify the vehicle count for this template. Try again.',
+    };
+  }
+
   if (isCurator) {
     return {
       kind: 'curator',
       canPublish: true,
       canSetHardwareTemplateId: true,
-      mintedVehicles: await args.countMintedVehicles(template.id),
+      mintedVehicles,
       reason: 'You are a DIMO curator.',
     };
   }
-
-  const mintedVehicles = await args.countMintedVehicles(template.id);
 
   if (mintedVehicles === 0) {
     // An absent author is a backfill-created template, which nobody has claimed.
@@ -184,7 +230,23 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
     };
   }
 
-  const owner = await args.manufacturerOwner(template.manufacturer.slug);
+  // Same rule as the count. The holder lookup throws on the same identity
+  // failures, and uncaught that turned the editor's GET into a 502 during an
+  // outage. "Could not check" is also not "somebody else holds it": a
+  // manufacturer told proposal-required would read it as a denial.
+  let owner: Awaited<ReturnType<EntitlementArgs['manufacturerOwner']>>;
+  try {
+    owner = await args.manufacturerOwner(template.manufacturer.slug);
+  } catch {
+    return {
+      kind: 'unavailable',
+      canPublish: false,
+      canSetHardwareTemplateId: false,
+      mintedVehicles,
+      reason:
+        'Could not verify who holds the Manufacturer NFT for this template. Try again.',
+    };
+  }
   if (owner && eq(owner.owner, caller)) {
     return {
       kind: 'manufacturer',

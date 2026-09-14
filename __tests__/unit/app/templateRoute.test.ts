@@ -109,6 +109,20 @@ describe('PUT /api/templates/[id]', () => {
     expect(publishTemplate).not.toHaveBeenCalled();
   });
 
+  it('503s, publishing nothing, when the vehicle count cannot be verified', async () => {
+    // Not a 403: nobody was refused, identity did not answer. A client should
+    // retry, not re-request access.
+    (countMintedVehicles as jest.Mock).mockRejectedValueOnce(
+      new Error('identity-api returned 500'),
+    );
+    const resp = await PUT(put(body(), { 'if-match': '"3"' }), params);
+    expect(resp.status).toBe(503);
+    const json = await resp.json();
+    expect(json.entitlement).toMatchObject({ kind: 'unavailable', canPublish: false });
+    expect(json.error).toMatch(/try again/i);
+    expect(publishTemplate).not.toHaveBeenCalled();
+  });
+
   it('403s a hardwareTemplateId change from a non-curator, at every tier', async () => {
     const resp = await PUT(
       put(body({ hardwareTemplateId: '999' }), { 'if-match': '"3"' }),
@@ -247,5 +261,26 @@ describe('GET /api/templates/[id]', () => {
     expect(json.template.version).toBe(3);
     expect(json.vocabulary.id).toBe('vehicle');
     expect(json.entitlement.kind).toBe('author');
+  });
+
+  it('still loads the template, read only, when the vehicle count cannot be verified', async () => {
+    (resolveCaller as jest.Mock).mockResolvedValue({ address: CALLER, email: 'a@b.c' });
+    (fetchTemplate as jest.Mock).mockResolvedValue(stored);
+    (fetchVocabulary as jest.Mock).mockResolvedValue({
+      id: 'vehicle',
+      name: 'Vehicle',
+      attributes: [],
+    });
+    (countMintedVehicles as jest.Mock).mockRejectedValueOnce(
+      new Error('identity-api returned 500'),
+    );
+    const resp = await GET(
+      new NextRequest('https://console.test/api/templates/toyota_camry_2020'),
+      params,
+    );
+    expect(resp.status).toBe(200);
+    const json = await resp.json();
+    expect(json.template.version).toBe(3);
+    expect(json.entitlement).toMatchObject({ kind: 'unavailable', canPublish: false });
   });
 });

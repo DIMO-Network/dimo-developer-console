@@ -33,6 +33,11 @@ async function entitlementFor(caller: string, id: string) {
     manufacturerOwner,
     curators: curatorAddresses(),
   });
+  // A count that could not be read is a state, not a throw, so it would pass
+  // the captureException below. An identity outage still has to be seen.
+  if (entitlement.kind === 'unavailable') {
+    Sentry.captureMessage(`identity-api unavailable resolving entitlement for ${id}`);
+  }
   return { template, entitlement };
 }
 
@@ -89,9 +94,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const { template, entitlement } = await entitlementFor(caller.address, id);
 
     if (!entitlement.canPublish) {
+      // 'unavailable' is not a refusal: identity did not answer, so nothing
+      // was decided. 503 tells the client to retry rather than ask for access.
       return NextResponse.json(
         { error: entitlement.reason, entitlement },
-        { status: 403 },
+        { status: entitlement.kind === 'unavailable' ? 503 : 403 },
       );
     }
 

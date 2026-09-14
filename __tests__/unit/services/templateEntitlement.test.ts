@@ -2,6 +2,8 @@
  * @jest-environment node
  */
 import {
+  IdentityError,
+  countMintedVehicles,
   hardwareTemplateIdChanged,
   resolveEntitlement,
 } from '@/services/templateEntitlement';
@@ -107,6 +109,71 @@ describe('resolveEntitlement', () => {
       canPublish: true,
       canSetHardwareTemplateId: true,
     });
+  });
+
+  it('fails closed when the vehicle count cannot be verified', async () => {
+    // Identity answering 200 with `errors` and `data: null` used to read as
+    // zero vehicles, and an unauthored template with zero vehicles is open to
+    // anyone. An unknown count is not a count.
+    const e = await resolveEntitlement({
+      caller: CALLER,
+      template: template(),
+      ...deps(0, OTHER),
+      countMintedVehicles: jest
+        .fn()
+        .mockRejectedValue(new IdentityError('identity-api: upstream timeout')),
+    });
+    expect(e).toMatchObject({
+      kind: 'unavailable',
+      canPublish: false,
+      canSetHardwareTemplateId: false,
+      mintedVehicles: null,
+    });
+    expect(e.reason).toMatch(/try again/i);
+  });
+
+  it('fails closed for a curator too: nobody publishes on an unknown count', async () => {
+    const e = await resolveEntitlement({
+      caller: CURATOR,
+      template: template({ author: OTHER }),
+      ...deps(0, OTHER),
+      countMintedVehicles: jest
+        .fn()
+        .mockRejectedValue(new Error('identity-api returned 500')),
+    });
+    expect(e).toMatchObject({ kind: 'unavailable', canPublish: false });
+  });
+
+  it('fails closed when the Manufacturer NFT holder cannot be looked up', async () => {
+    // The holder lookup throws on the same identity failures the count does.
+    // Uncaught, it turned the editor's GET into a 502 during an outage.
+    const e = await resolveEntitlement({
+      caller: CALLER,
+      template: template({ author: OTHER }),
+      ...deps(4212, CALLER),
+      manufacturerOwner: jest
+        .fn()
+        .mockRejectedValue(new IdentityError('identity-api: upstream timeout')),
+    });
+    expect(e).toMatchObject({
+      kind: 'unavailable',
+      canPublish: false,
+      canSetHardwareTemplateId: false,
+      mintedVehicles: 4212,
+    });
+    expect(e.reason).toMatch(/try again/i);
+  });
+
+  it('still lets a create through: nothing points at a template that does not exist', async () => {
+    const e = await resolveEntitlement({
+      caller: CALLER,
+      template: null,
+      ...deps(0, OTHER),
+      countMintedVehicles: jest
+        .fn()
+        .mockRejectedValue(new Error('identity-api returned 500')),
+    });
+    expect(e).toMatchObject({ kind: 'create', canPublish: true });
   });
 
   it('never grants hardwareTemplateId rights to a non-curator, at any tier', async () => {
@@ -226,5 +293,46 @@ describe('hardwareTemplateIdChanged', () => {
     expect(hardwareTemplateIdChanged({ trims: [null, 'LE', 7] }, bare)).toBe(false);
     // ...unless a stored value would silently vanish behind it.
     expect(hardwareTemplateIdChanged({ trims: 'nope' }, stored)).toBe(true);
+  });
+});
+
+describe('countMintedVehicles', () => {
+  const reply = (status: number, body: unknown) => {
+    const impl = jest.fn().mockResolvedValue({
+      ok: status < 400,
+      status,
+      json: async () => body,
+    });
+    global.fetch = impl as unknown as typeof fetch;
+  };
+
+  it('returns the count identity reports', async () => {
+    reply(200, { data: { vehicles: { totalCount: 4212 } } });
+    expect(await countMintedVehicles('toyota_camry_2020')).toBe(4212);
+  });
+
+  it('throws on a GraphQL error rather than reading it as zero vehicles', async () => {
+    reply(200, { errors: [{ message: 'upstream timeout' }], data: null });
+    await expect(countMintedVehicles('toyota_camry_2020')).rejects.toThrow(IdentityError);
+    await expect(countMintedVehicles('toyota_camry_2020')).rejects.toThrow(
+      'upstream timeout',
+    );
+  });
+
+  it('throws when the response is not ok', async () => {
+    reply(500, {});
+    await expect(countMintedVehicles('toyota_camry_2020')).rejects.toThrow(IdentityError);
+  });
+
+  it('throws when data is missing, with or without errors', async () => {
+    reply(200, { data: null });
+    await expect(countMintedVehicles('toyota_camry_2020')).rejects.toThrow(IdentityError);
+    reply(200, {});
+    await expect(countMintedVehicles('toyota_camry_2020')).rejects.toThrow(IdentityError);
+  });
+
+  it('throws when the count is not a number', async () => {
+    reply(200, { data: { vehicles: null } });
+    await expect(countMintedVehicles('toyota_camry_2020')).rejects.toThrow(IdentityError);
   });
 });

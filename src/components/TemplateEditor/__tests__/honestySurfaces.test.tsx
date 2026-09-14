@@ -98,6 +98,23 @@ describe('EntitlementBanner', () => {
     expect(screen.getByRole('status')).toHaveTextContent('read only');
   });
 
+  it('reads as read only, and says why, when the vehicle count could not be verified', () => {
+    render(
+      <EntitlementBanner
+        entitlement={{
+          kind: 'unavailable',
+          canPublish: false,
+          canSetHardwareTemplateId: false,
+          mintedVehicles: null,
+          reason: 'Could not verify the vehicle count for this template. Try again.',
+        }}
+      />,
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('Access could not be verified');
+    expect(screen.getByRole('status')).toHaveTextContent('read only');
+    expect(screen.getByRole('status')).toHaveTextContent('Try again');
+  });
+
   it('says nothing loud when the caller may publish', () => {
     render(
       <EntitlementBanner

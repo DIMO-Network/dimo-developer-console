@@ -11,6 +11,7 @@ const TITLES: Record<Entitlement['kind'], string> = {
   'manufacturer': 'You hold this Manufacturer NFT',
   'curator': 'Curator',
   'proposal-required': 'Read only',
+  'unavailable': 'Access could not be verified',
 };
 
 export const EntitlementBanner: FC<{ entitlement: Entitlement }> = ({ entitlement }) => (
