@@ -1,7 +1,10 @@
 /**
  * @jest-environment node
  */
-import { resolveEntitlement } from '@/services/templateEntitlement';
+import {
+  hardwareTemplateIdChanged,
+  resolveEntitlement,
+} from '@/services/templateEntitlement';
 import type { Template } from '@/types/template';
 
 const CALLER = '0x1111111111111111111111111111111111111111';
@@ -115,5 +118,113 @@ describe('resolveEntitlement', () => {
       });
       expect(e.canSetHardwareTemplateId).toBe(false);
     }
+  });
+});
+
+describe('hardwareTemplateIdChanged', () => {
+  const trim = (name: string, hardwareTemplateId?: string) => ({
+    name,
+    ...(hardwareTemplateId ? { hardwareTemplateId } : {}),
+    attributes: {},
+  });
+  const stored = template({
+    hardwareTemplateId: '130',
+    trims: [trim('LE', '130'), trim('XLE')],
+  });
+  const submit = (over: Record<string, unknown> = {}): Record<string, unknown> => ({
+    hardwareTemplateId: '130',
+    trims: [trim('LE', '130'), trim('XLE')],
+    ...over,
+  });
+
+  it('is quiet when nothing moved', () => {
+    expect(hardwareTemplateIdChanged(submit(), stored)).toBe(false);
+  });
+
+  it('sees a top-level change', () => {
+    expect(hardwareTemplateIdChanged(submit({ hardwareTemplateId: '999' }), stored)).toBe(
+      true,
+    );
+    expect(
+      hardwareTemplateIdChanged(submit({ hardwareTemplateId: undefined }), stored),
+    ).toBe(true);
+  });
+
+  it('sees a per-trim change under an unchanged top-level value', () => {
+    expect(
+      hardwareTemplateIdChanged(
+        submit({ trims: [trim('LE', '999'), trim('XLE')] }),
+        stored,
+      ),
+    ).toBe(true);
+  });
+
+  it('sees a value arriving on a trim the stored template does not carry one for', () => {
+    expect(
+      hardwareTemplateIdChanged(
+        submit({ trims: [trim('LE', '130'), trim('XLE', '130')] }),
+        stored,
+      ),
+    ).toBe(true);
+    expect(
+      hardwareTemplateIdChanged(
+        submit({ trims: [trim('LE', '130'), trim('XLE'), trim('SE', '130')] }),
+        stored,
+      ),
+    ).toBe(true);
+  });
+
+  it('sees a stored per-trim value going away, whether the field or the whole trim goes', () => {
+    expect(
+      hardwareTemplateIdChanged(submit({ trims: [trim('LE'), trim('XLE')] }), stored),
+    ).toBe(true);
+    expect(hardwareTemplateIdChanged(submit({ trims: [trim('XLE')] }), stored)).toBe(
+      true,
+    );
+    // A rename is a removal plus an arrival: the value now sits on a trim the
+    // stored template never had.
+    expect(
+      hardwareTemplateIdChanged(
+        submit({ trims: [trim('LE Hybrid', '130'), trim('XLE')] }),
+        stored,
+      ),
+    ).toBe(true);
+  });
+
+  it('ignores trims that come, go or are renamed without one', () => {
+    expect(
+      hardwareTemplateIdChanged(
+        submit({ trims: [trim('LE', '130'), trim('SE'), trim('TRD')] }),
+        stored,
+      ),
+    ).toBe(false);
+    expect(
+      hardwareTemplateIdChanged(submit({ trims: [trim('LE', '130')] }), stored),
+    ).toBe(false);
+  });
+
+  it('does not let a duplicated trim name hide a change', () => {
+    expect(
+      hardwareTemplateIdChanged(
+        submit({ trims: [trim('LE', '999'), trim('LE', '130'), trim('XLE')] }),
+        stored,
+      ),
+    ).toBe(true);
+  });
+
+  it('treats any value as a change against a template that does not exist yet', () => {
+    expect(hardwareTemplateIdChanged({ trims: [trim('LE')] }, null)).toBe(false);
+    expect(
+      hardwareTemplateIdChanged({ hardwareTemplateId: '130', trims: [trim('LE')] }, null),
+    ).toBe(true);
+    expect(hardwareTemplateIdChanged({ trims: [trim('LE', '130')] }, null)).toBe(true);
+  });
+
+  it('leaves a malformed trims field to the worker rather than crashing on it', () => {
+    const bare = template({ trims: [trim('LE')] });
+    expect(hardwareTemplateIdChanged({ trims: 'nope' }, bare)).toBe(false);
+    expect(hardwareTemplateIdChanged({ trims: [null, 'LE', 7] }, bare)).toBe(false);
+    // ...unless a stored value would silently vanish behind it.
+    expect(hardwareTemplateIdChanged({ trims: 'nope' }, stored)).toBe(true);
   });
 });

@@ -90,6 +90,40 @@ export async function manufacturerOwner(
   return data?.manufacturer ?? null;
 }
 
+/**
+ * Every (trim name, hardwareTemplateId) pair a template carries, as a sorted
+ * multiset. Trims without one do not appear: adding, removing or renaming
+ * those is vehicle description, not a hardware decision. A pair is kept per
+ * occurrence, so a duplicated trim name cannot hide one value behind another.
+ */
+const trimHardware = (trims: unknown): string[] => {
+  if (!Array.isArray(trims)) return [];
+  return trims
+    .filter((t): t is Record<string, unknown> => typeof t === 'object' && t !== null)
+    .filter((t) => t.hardwareTemplateId !== undefined)
+    .map((t) => JSON.stringify([t.name, t.hardwareTemplateId]))
+    .sort();
+};
+
+/**
+ * Whether `submitted` would change a hardwareTemplateId anywhere on the
+ * template: the top-level default or any trim override. The worker accepts the
+ * field on both, so a gate that reads only the top-level one is open on every
+ * trim. A stored template of `null` is a create, against which any value at
+ * all is a change. The body is raw JSON and is not trusted to be well-formed:
+ * anything that is not a trim object is skipped and left to the worker's
+ * validator.
+ */
+export function hardwareTemplateIdChanged(
+  submitted: Record<string, unknown>,
+  stored: Pick<Template, 'hardwareTemplateId' | 'trims'> | null,
+): boolean {
+  if (submitted.hardwareTemplateId !== stored?.hardwareTemplateId) return true;
+  const before = trimHardware(stored?.trims);
+  const after = trimHardware(submitted.trims);
+  return before.length !== after.length || before.some((pair, i) => pair !== after[i]);
+}
+
 export interface EntitlementArgs {
   caller: string;
   template: Template | null;

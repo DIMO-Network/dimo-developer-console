@@ -128,6 +128,83 @@ describe('PUT /api/templates/[id]', () => {
     expect(resp.status).toBe(200);
   });
 
+  describe('per-trim hardwareTemplateId', () => {
+    // The worker's TRIM_KEYS carry hardwareTemplateId too, so a body whose
+    // top-level value is untouched can still change what hardware a trim ships.
+    const trim = (name: string, hardwareTemplateId?: string) => ({
+      name,
+      ...(hardwareTemplateId ? { hardwareTemplateId } : {}),
+      attributes: {},
+    });
+    const storedWithTrimHw = { ...stored, trims: [trim('LE', '130')] };
+
+    it('403s a non-curator who changes a trim hardwareTemplateId under an unchanged top-level one', async () => {
+      (fetchTemplate as jest.Mock).mockResolvedValue(storedWithTrimHw);
+      const resp = await PUT(
+        put(body({ trims: [trim('LE', '999')] }), { 'if-match': '"3"' }),
+        params,
+      );
+      expect(resp.status).toBe(403);
+      expect((await resp.json()).error).toContain('hardwareTemplateId');
+      expect(publishTemplate).not.toHaveBeenCalled();
+    });
+
+    it('lets a non-curator resubmit a trim hardwareTemplateId unchanged', async () => {
+      (fetchTemplate as jest.Mock).mockResolvedValue(storedWithTrimHw);
+      const resp = await PUT(
+        put(body({ trims: [trim('LE', '130')] }), { 'if-match': '"3"' }),
+        params,
+      );
+      expect(resp.status).toBe(200);
+    });
+
+    it('lets a curator change a trim hardwareTemplateId', async () => {
+      (curatorAddresses as jest.Mock).mockReturnValue([CALLER.toLowerCase()]);
+      (fetchTemplate as jest.Mock).mockResolvedValue(storedWithTrimHw);
+      const resp = await PUT(
+        put(body({ trims: [trim('LE', '999')] }), { 'if-match': '"3"' }),
+        params,
+      );
+      expect(resp.status).toBe(200);
+    });
+
+    it('403s a non-curator who adds a trim carrying a hardwareTemplateId', async () => {
+      const resp = await PUT(
+        put(body({ trims: [trim('LE'), trim('XLE', '999')] }), { 'if-match': '"3"' }),
+        params,
+      );
+      expect(resp.status).toBe(403);
+      expect(publishTemplate).not.toHaveBeenCalled();
+    });
+
+    it('lets a non-curator add a trim without one', async () => {
+      const resp = await PUT(
+        put(body({ trims: [trim('LE'), trim('XLE')] }), { 'if-match': '"3"' }),
+        params,
+      );
+      expect(resp.status).toBe(200);
+    });
+
+    it('403s a non-curator who drops a trim hardwareTemplateId the stored template has', async () => {
+      (fetchTemplate as jest.Mock).mockResolvedValue(storedWithTrimHw);
+      const resp = await PUT(
+        put(body({ trims: [trim('LE')] }), { 'if-match': '"3"' }),
+        params,
+      );
+      expect(resp.status).toBe(403);
+      expect(publishTemplate).not.toHaveBeenCalled();
+    });
+
+    it('403s a non-curator creating a template whose trim carries a hardwareTemplateId', async () => {
+      // There is no stored template to compare against on a create, so any
+      // per-trim value from a non-curator is a change.
+      (fetchTemplate as jest.Mock).mockResolvedValue(null);
+      const resp = await PUT(put(body({ trims: [trim('LE', '130')] })), params);
+      expect(resp.status).toBe(403);
+      expect(publishTemplate).not.toHaveBeenCalled();
+    });
+  });
+
   it('passes the worker validation errors through unchanged', async () => {
     (publishTemplate as jest.Mock).mockResolvedValue({
       ok: false,

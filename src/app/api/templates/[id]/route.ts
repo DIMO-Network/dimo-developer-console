@@ -9,6 +9,7 @@ import {
 import {
   countMintedVehicles,
   curatorAddresses,
+  hardwareTemplateIdChanged,
   manufacturerOwner,
   resolveCaller,
   resolveEntitlement,
@@ -95,11 +96,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
     }
 
     // hardwareTemplateId decides what hardware ships. It is not a vehicle
-    // attribute and it is never open, at any tier.
-    const submittedHw = submitted.hardwareTemplateId as string | undefined;
+    // attribute and it is never open, at any tier -- and the worker takes it
+    // on every trim as well as on the template, so the check has to too.
     if (
-      submittedHw !== template?.hardwareTemplateId &&
-      !entitlement.canSetHardwareTemplateId
+      !entitlement.canSetHardwareTemplateId &&
+      hardwareTemplateIdChanged(submitted, template)
     ) {
       return NextResponse.json(
         {
