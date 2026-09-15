@@ -20,6 +20,7 @@ export interface GridRow {
   distinct: number;
   absentCount: number;
   canLift: boolean;
+  canSplit: boolean;
 }
 
 export interface Grid {
@@ -60,6 +61,10 @@ export function buildGrid(template: Template, vocab: DeviceType): Grid {
         distinct === 1 &&
         present.length === cells.length &&
         cells.length > 1,
+      // The inverse move, under the same rule. On a single-trim template
+      // "shared" and "per trim" say exactly the same thing, so the offer would
+      // be noise; a row already scoped to the trims has nothing to split.
+      canSplit: scope !== 'trim' && cells.length > 1,
     };
   });
   return { trims: template.trims, rows };

@@ -123,6 +123,32 @@ describe('TemplateEditorView', () => {
     expect(screen.getByText(/stored as the number 16/)).toBeInTheDocument();
   });
 
+  it('gives one trim its own value for a shared attribute, and publishes the divergence', async () => {
+    // The capability the migration exists to add, end to end: a curator takes
+    // an attribute stated once for the whole model-year, gives a single trim a
+    // different answer, and the payload that reaches the worker carries it.
+    render(<TemplateEditorView id={t.id} />);
+    fireEvent.click(
+      within(screen.getByTestId('rail-number_of_doors')).getByRole('button', {
+        name: /set per trim/i,
+      }),
+    );
+    const cell = within(screen.getByTestId('cell-number_of_doors-0')).getByRole(
+      'textbox',
+    );
+    fireEvent.change(cell, { target: { value: '2' } });
+    fireEvent.blur(cell);
+
+    fireEvent.click(screen.getByRole('button', { name: /^publish/i }));
+    await waitFor(() => expect(publish).toHaveBeenCalled());
+    const { payload } = publish.mock.calls[0][0];
+    // On the trims, and nowhere else: the worker refuses an attribute that
+    // lives on the template and a trim at once.
+    expect(payload.attributes.number_of_doors).toBeUndefined();
+    expect(payload.trims[0].attributes.number_of_doors).toBe(2);
+    expect(payload.trims[1].attributes.number_of_doors).toBe(4);
+  });
+
   it('is read only, with no publish button, when a proposal is required', () => {
     bundle = {
       ...authorBundle(),

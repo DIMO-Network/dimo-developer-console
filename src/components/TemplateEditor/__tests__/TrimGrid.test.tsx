@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import camry from '@/utils/__fixtures__/toyota_camry_2020.json';
 import { vehicleVocab } from '@/utils/__fixtures__/vehicleVocab';
@@ -88,6 +89,102 @@ describe('TrimGrid', () => {
         attributes: expect.objectContaining({ number_of_doors: 4 }),
       }),
     );
+  });
+
+  describe('authoring a per-trim value', () => {
+    // A controlled host: the grid is a pure view over the template, so the
+    // round trip through onChange is the thing under test, not the view alone.
+    const Host = ({ initial }: { initial: Template }) => {
+      const [tpl, setTpl] = React.useState(initial);
+      return (
+        <TrimGrid
+          template={tpl}
+          vocab={vehicleVocab}
+          onChange={setTpl}
+          onNormalise={noop}
+        />
+      );
+    };
+
+    it('brings a shared value down onto the trims and lets one of them disagree', () => {
+      render(<Host initial={t} />);
+      // Shared to begin with: one spanning cell, no per-trim cell to type in.
+      expect(screen.getByTestId('shared-number_of_doors')).toBeInTheDocument();
+      expect(screen.queryByTestId('cell-number_of_doors-0')).toBeNull();
+
+      fireEvent.click(
+        within(screen.getByTestId('rail-number_of_doors')).getByRole('button', {
+          name: /set per trim/i,
+        }),
+      );
+
+      // Every trim now carries the value that was shared, and the row is
+      // editable trim by trim.
+      expect(screen.queryByTestId('shared-number_of_doors')).toBeNull();
+      const cells = t.trims.map((_, i) =>
+        within(screen.getByTestId(`cell-number_of_doors-${i}`)).getByRole('textbox'),
+      );
+      cells.forEach((cell) => expect(cell).toHaveValue('4'));
+
+      fireEvent.change(cells[0], { target: { value: '2' } });
+      fireEvent.blur(cells[0]);
+      expect(
+        within(screen.getByTestId('cell-number_of_doors-0')).getByRole('textbox'),
+      ).toHaveValue('2');
+      expect(
+        within(screen.getByTestId('cell-number_of_doors-1')).getByRole('textbox'),
+      ).toHaveValue('4');
+      expect(screen.getByTestId('rail-number_of_doors')).toHaveTextContent('2');
+    });
+
+    it('opens a row nothing sets yet, and gives one trim a value the others do not have', () => {
+      render(<Host initial={t} />);
+      expect(screen.getByTestId('rail-emissions_standard')).toHaveTextContent('·');
+
+      fireEvent.click(
+        within(screen.getByTestId('rail-emissions_standard')).getByRole('button', {
+          name: /set per trim/i,
+        }),
+      );
+
+      const select = within(screen.getByTestId('cell-emissions_standard-0')).getByRole(
+        'combobox',
+      );
+      fireEvent.change(select, { target: { value: 'tier_3' } });
+      expect(
+        within(screen.getByTestId('cell-emissions_standard-0')).getByRole('combobox'),
+      ).toHaveValue('tier_3');
+      expect(
+        within(screen.getByTestId('cell-emissions_standard-1')).getByRole('combobox'),
+      ).toHaveValue('');
+    });
+
+    it('stops offering the split once the row is per trim', () => {
+      render(<Host initial={t} />);
+      fireEvent.click(
+        within(screen.getByTestId('rail-number_of_doors')).getByRole('button', {
+          name: /set per trim/i,
+        }),
+      );
+      expect(
+        within(screen.getByTestId('rail-number_of_doors')).queryByRole('button', {
+          name: /set per trim/i,
+        }),
+      ).toBeNull();
+      // An attribute the extraction already scoped to the trims never had it.
+      expect(
+        within(screen.getByTestId('rail-powertrain_type')).queryByRole('button', {
+          name: /set per trim/i,
+        }),
+      ).toBeNull();
+    });
+
+    it('offers nothing to a reader', () => {
+      renderGrid({ readOnly: true });
+      expect(
+        within(screen.getByTestId('rail-number_of_doors')).queryByRole('button'),
+      ).toBeNull();
+    });
   });
 
   it('marks a trim with no effective selector, which is gate 4', () => {

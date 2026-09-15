@@ -45,6 +45,21 @@ describe('buildGrid', () => {
     expect(doors.canLift).toBe(false);
   });
 
+  it('offers the split on a shared or empty row, and never on one already per trim', () => {
+    // The move the whole trim model exists for. Scope can otherwise only ever
+    // travel trim -> shared, so a curator could preserve a divergence the
+    // extraction found but never author or correct one.
+    expect(row(t, 'number_of_doors').canSplit).toBe(true);
+    expect(row(t, 'emissions_standard').canSplit).toBe(true);
+    expect(row(t, 'powertrain_type').canSplit).toBe(false);
+  });
+
+  it('does not offer the split on a single-trim template, where the two scopes mean the same thing', () => {
+    const single = { ...t, trims: [t.trims[0]] } as Template;
+    expect(row(single, 'number_of_doors').scope).toBe('shared');
+    expect(row(single, 'number_of_doors').canSplit).toBe(false);
+  });
+
   it('offers a lift only when every trim agrees and none is absent', () => {
     let all = t;
     all.trims.forEach((_, i) => {
