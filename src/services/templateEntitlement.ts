@@ -157,6 +157,8 @@ export function hardwareTemplateIdChanged(
 
 export interface EntitlementArgs {
   caller: string;
+  /** The definition id, which exists whether or not a template document does. */
+  id: string;
   template: Template | null;
   countMintedVehicles: (id: string) => Promise<number>;
   manufacturerOwner: (slug: string) => Promise<{ owner: string; tokenId: number } | null>;
@@ -164,23 +166,26 @@ export interface EntitlementArgs {
 }
 
 /**
- * The split falls where risk falls. Creating ineos_grenadier_2024 harms nobody.
- * Editing toyota_camry_2020 silently re-describes every vehicle pointing at it.
+ * The make segment of a definition id. definitions-worker/src/template.ts
+ * refuses any template whose manufacturer.slug differs from it, so on an
+ * absent template the id is exactly as authoritative a source for the slug as
+ * the stored document would have been.
+ */
+const makeSlug = (id: string): string => id.split('_')[0] ?? '';
+
+/**
+ * The split falls where risk falls, and risk is the vehicle count -- never the
+ * presence of a template document. Creating ineos_grenadier_2024 harms nobody.
+ * Writing toyota_camry_2020 silently re-describes every vehicle pointing at it,
+ * and that is just as true when no template has been imported for it yet: the
+ * production extraction has never been run, so Console's own search renders
+ * those rows as 'missing' while identity serves the definition to hundreds of
+ * thousands of vehicles. The count is asked about the DEFINITION, so an absent
+ * template goes through exactly the same tiers as a stored one.
  */
 export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitlement> {
-  const { caller, template, curators } = args;
+  const { caller, id, template, curators } = args;
   const isCurator = curators.some((c) => eq(c, caller));
-
-  if (template === null) {
-    return {
-      kind: isCurator ? 'curator' : 'create',
-      canPublish: true,
-      canSetHardwareTemplateId: isCurator,
-      mintedVehicles: 0,
-      reason:
-        'This template does not exist yet, so creating it cannot re-describe anything.',
-    };
-  }
 
   // The count is what the rest of this function decides on. When it cannot
   // be read the answer is "not now", for everyone: a count that fell back to
@@ -188,7 +193,7 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
   // the blip, and a decision made on a guess is not one anybody granted.
   let mintedVehicles: number;
   try {
-    mintedVehicles = await args.countMintedVehicles(template.id);
+    mintedVehicles = await args.countMintedVehicles(id);
   } catch {
     return {
       kind: 'unavailable',
@@ -210,6 +215,16 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
   }
 
   if (mintedVehicles === 0) {
+    if (template === null) {
+      return {
+        kind: 'create',
+        canPublish: true,
+        canSetHardwareTemplateId: false,
+        mintedVehicles: 0,
+        reason:
+          'This template does not exist yet and no vehicle resolves to the definition, so creating it cannot re-describe anything.',
+      };
+    }
     // An absent author is a backfill-created template, which nobody has claimed.
     // Treating it as unowned is what keeps the open tier from being empty.
     if (!template.author || eq(template.author, caller)) {
@@ -234,9 +249,10 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
   // failures, and uncaught that turned the editor's GET into a 502 during an
   // outage. "Could not check" is also not "somebody else holds it": a
   // manufacturer told proposal-required would read it as a denial.
+  const slug = template?.manufacturer.slug ?? makeSlug(id);
   let owner: Awaited<ReturnType<EntitlementArgs['manufacturerOwner']>>;
   try {
-    owner = await args.manufacturerOwner(template.manufacturer.slug);
+    owner = await args.manufacturerOwner(slug);
   } catch {
     return {
       kind: 'unavailable',
@@ -253,10 +269,11 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
       canPublish: true,
       canSetHardwareTemplateId: false,
       mintedVehicles,
-      reason: `You hold the ${template.manufacturer.name} Manufacturer NFT (token ${owner.tokenId}).`,
+      reason: `You hold the ${template?.manufacturer.name ?? slug} Manufacturer NFT (token ${owner.tokenId}).`,
     };
   }
 
+  const what = template === null ? 'definition' : 'template';
   return {
     kind: 'proposal-required',
     canPublish: false,
@@ -264,6 +281,6 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
     mintedVehicles,
     reason:
       `${mintedVehicles.toLocaleString()} minted vehicle${mintedVehicles === 1 ? '' : 's'} resolve to this ` +
-      'template. Editing it needs a proposal a curator merges, which is not built yet.',
+      `${what}. Editing it needs a proposal a curator merges, which is not built yet.`,
   };
 }

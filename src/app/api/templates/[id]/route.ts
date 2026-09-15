@@ -28,6 +28,10 @@ async function entitlementFor(caller: string, id: string) {
   const template = await fetchTemplate(id);
   const entitlement = await resolveEntitlement({
     caller,
+    // Passed rather than read off the template: the vehicle count is a question
+    // about the definition, which exists whether or not a template document
+    // does.
+    id,
     template,
     countMintedVehicles,
     manufacturerOwner,

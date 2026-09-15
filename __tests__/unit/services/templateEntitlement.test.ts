@@ -29,6 +29,7 @@ const template = (over: Partial<Template> = {}) =>
   }) as Template;
 
 const deps = (minted: number, owner: string | null) => ({
+  id: 'toyota_camry_2020',
   countMintedVehicles: jest.fn().mockResolvedValue(minted),
   manufacturerOwner: jest.fn().mockResolvedValue(owner ? { owner, tokenId: 131 } : null),
   curators: [CURATOR],
@@ -164,7 +165,10 @@ describe('resolveEntitlement', () => {
     expect(e.reason).toMatch(/try again/i);
   });
 
-  it('still lets a create through: nothing points at a template that does not exist', async () => {
+  it('fails closed on an absent template too: an uncounted definition is not an empty one', async () => {
+    // Template absence is not definition absence. Identity knows definitions
+    // whose templates have not been imported, so an unreadable count here is
+    // the same unknown it is everywhere else in this function.
     const e = await resolveEntitlement({
       caller: CALLER,
       template: null,
@@ -173,7 +177,77 @@ describe('resolveEntitlement', () => {
         .fn()
         .mockRejectedValue(new Error('identity-api returned 500')),
     });
-    expect(e).toMatchObject({ kind: 'create', canPublish: true });
+    expect(e).toMatchObject({
+      kind: 'unavailable',
+      canPublish: false,
+      mintedVehicles: null,
+    });
+  });
+
+  describe('a definition whose template has not been imported', () => {
+    // The production extraction has never been run, so Console's own search
+    // renders these rows as status 'missing' -- including toyota_camry_2020
+    // with its ~300k minted vehicles. Granting publish on template absence
+    // alone lets any signed-in account write what all of those resolve to.
+    it('counts the vehicles rather than reporting zero as fact', async () => {
+      const d = deps(300_000, OTHER);
+      const e = await resolveEntitlement({ caller: CALLER, template: null, ...d });
+      expect(d.countMintedVehicles).toHaveBeenCalledWith('toyota_camry_2020');
+      expect(e).toMatchObject({
+        kind: 'proposal-required',
+        canPublish: false,
+        mintedVehicles: 300_000,
+      });
+      expect(e.reason).toContain('300,000');
+    });
+
+    it('lets the Manufacturer NFT holder write it, off the make in the id', async () => {
+      // There is no stored manufacturer to read the slug from, and the worker
+      // requires manufacturer.slug to equal the make segment of the id, so the
+      // id is as authoritative a source as the document would have been.
+      const d = deps(300_000, CALLER);
+      const e = await resolveEntitlement({ caller: CALLER, template: null, ...d });
+      expect(d.manufacturerOwner).toHaveBeenCalledWith('toyota');
+      expect(e).toMatchObject({ kind: 'manufacturer', canPublish: true });
+    });
+
+    it('fails closed when the NFT holder cannot be looked up', async () => {
+      const e = await resolveEntitlement({
+        caller: CALLER,
+        template: null,
+        ...deps(300_000, CALLER),
+        manufacturerOwner: jest.fn().mockRejectedValue(new IdentityError('timeout')),
+      });
+      expect(e).toMatchObject({ kind: 'unavailable', canPublish: false });
+    });
+
+    it('still lets a curator through, and still says how many vehicles', async () => {
+      const e = await resolveEntitlement({
+        caller: CURATOR,
+        template: null,
+        ...deps(300_000, OTHER),
+      });
+      expect(e).toMatchObject({
+        kind: 'curator',
+        canPublish: true,
+        mintedVehicles: 300_000,
+      });
+    });
+
+    it('creates a genuinely new definition that nothing references', async () => {
+      const e = await resolveEntitlement({
+        caller: CALLER,
+        template: null,
+        ...deps(0, OTHER),
+        id: 'ineos_grenadier_2024',
+      });
+      expect(e).toMatchObject({
+        kind: 'create',
+        canPublish: true,
+        canSetHardwareTemplateId: false,
+        mintedVehicles: 0,
+      });
+    });
   });
 
   it('never grants hardwareTemplateId rights to a non-curator, at any tier', async () => {
