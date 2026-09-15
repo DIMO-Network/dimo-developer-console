@@ -95,10 +95,31 @@ describe('PUT /api/templates/[id]', () => {
     });
   });
 
-  it('sends If-None-Match on a create', async () => {
+  it('sends If-None-Match only for a client that sent no If-Match at all', async () => {
     (fetchTemplate as jest.Mock).mockResolvedValue(null);
     await PUT(put(body()), params);
     expect((publishTemplate as jest.Mock).mock.calls[0][2]).toEqual({ kind: 'create' });
+  });
+
+  it('forwards the client If-Match even when the stored template reads as null', async () => {
+    // Someone deleted the template under an open editor. Swapping the client's
+    // If-Match for a create-only precondition would commit the stale draft and
+    // answer 200 -- resurrecting a deleted template, which is exactly the lost
+    // update the worker's CAS exists to make impossible. Forwarded, the worker
+    // answers 412 and the editor learns the template is gone.
+    (fetchTemplate as jest.Mock).mockResolvedValue(null);
+    await PUT(put(body(), { 'if-match': '"5"' }), params);
+    expect((publishTemplate as jest.Mock).mock.calls[0][2]).toEqual({
+      kind: 'update',
+      version: 5,
+    });
+  });
+
+  it('refuses an If-Match it cannot read as a version, on a create as much as an edit', async () => {
+    (fetchTemplate as jest.Mock).mockResolvedValue(null);
+    const resp = await PUT(put(body(), { 'if-match': '"not-a-version"' }), params);
+    expect(resp.status).toBe(428);
+    expect(publishTemplate).not.toHaveBeenCalled();
   });
 
   it('403s a caller who needs a proposal, and names the count', async () => {

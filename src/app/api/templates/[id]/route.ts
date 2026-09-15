@@ -122,18 +122,29 @@ export async function PUT(req: NextRequest, { params }: Params) {
     // The precondition comes from the CLIENT, never from the template we just
     // read. Using the fresh version would rebase a stale editor onto whatever
     // landed while it was open -- a lost update with a 200 on it, which is the
-    // exact failure the worker's CAS exists to make impossible.
+    // exact failure the worker's CAS exists to make impossible. That holds when
+    // the read comes back null as well: a template someone deleted under an
+    // open editor must answer 412, not commit the stale draft as a create and
+    // resurrect it. Only a client that sent no If-Match at all is creating.
+    const ifMatch = req.headers.get('if-match');
     let precondition: Precondition;
-    if (template === null) {
-      precondition = { kind: 'create' };
-    } else {
-      const ifMatch = req.headers.get('if-match');
-      const version = Number((ifMatch ?? '').replace(/^W\//, '').replace(/"/g, ''));
-      if (!Number.isInteger(version) || version < 1) {
+    if (ifMatch === null || ifMatch.trim().length === 0) {
+      if (template !== null) {
         return NextResponse.json(
           {
             error:
               'If-Match is required when editing an existing template: send the version you loaded',
+          },
+          { status: 428 },
+        );
+      }
+      precondition = { kind: 'create' };
+    } else {
+      const version = Number(ifMatch.replace(/^W\//, '').replace(/"/g, ''));
+      if (!Number.isInteger(version) || version < 1) {
+        return NextResponse.json(
+          {
+            error: `If-Match must be the version you loaded, as in If-Match: "5" — got ${ifMatch}`,
           },
           { status: 428 },
         );
