@@ -141,11 +141,57 @@ export async function PUT(req: NextRequest, { params }: Params) {
       precondition = { kind: 'update', version };
     }
 
+    // manufacturer.tokenId is required on every template and must be a positive
+    // integer. It is the Manufacturer NFT id: identity owns it, the create form
+    // has no input for it and must not have one, so it is stamped here beside
+    // `author`. A body carrying one is overruled rather than refused -- the
+    // editor round-trips the manufacturer object it loaded, so the field is not
+    // a claim the client is making, and identity is the only authority on it.
+    const submittedManufacturer =
+      typeof submitted.manufacturer === 'object' && submitted.manufacturer !== null
+        ? (submitted.manufacturer as Record<string, unknown>)
+        : null;
+    const slug =
+      typeof submittedManufacturer?.slug === 'string' ? submittedManufacturer.slug : '';
+    if (slug === '') {
+      return NextResponse.json(
+        { errors: ['manufacturer.slug is required'] },
+        { status: 422 },
+      );
+    }
+
+    let held: Awaited<ReturnType<typeof manufacturerOwner>>;
+    try {
+      held = await manufacturerOwner(slug);
+    } catch {
+      // Same shape as the entitlement's unavailable tier: identity did not
+      // answer, so nothing was decided and the client should retry rather than
+      // read a stamped guess as fact.
+      return NextResponse.json(
+        { error: `Could not look up the Manufacturer NFT for "${slug}". Try again.` },
+        { status: 503 },
+      );
+    }
+    if (!held) {
+      // Said here, naming the slug, rather than left to the worker's
+      // `manufacturer.tokenId is required and must be a positive integer` --
+      // which names a field the form does not have and cannot be acted on.
+      return NextResponse.json(
+        {
+          errors: [
+            `No manufacturer is registered under the slug "${slug}". A template is keyed to a Manufacturer NFT, so the make slug has to be one identity-api knows — check the slug, or have the manufacturer minted first.`,
+          ],
+        },
+        { status: 422 },
+      );
+    }
+
     // TemplatePayload deliberately excludes `author` -- it is not client input.
     // The wire body does carry it, stamped here, which is the one place the two
     // shapes differ.
     const payload = {
       ...submitted,
+      manufacturer: { ...submittedManufacturer, tokenId: held.tokenId },
       author: caller.address,
     } as unknown as TemplatePayload;
     const result = await publishTemplate(id, payload, precondition);

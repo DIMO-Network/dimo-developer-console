@@ -41,15 +41,15 @@ export interface Template {
   updatedAt: string;
 }
 /**
- * Denormalised into the template on purpose. Reading a template must not require a second lookup, and creating one must not require the brand to have on-chain storage provisioned first.
+ * Denormalised into the template on purpose: reading a template must not require a second lookup. The brand does not need on-chain STORAGE provisioned to have a template, but it does need a Manufacturer NFT -- see tokenId.
  */
 export interface TemplateManufacturer {
   slug: string;
   name: string;
   /**
-   * Manufacturer NFT, when one exists. Optional: it grants direct-edit rights, it is not a precondition for the template to exist.
+   * Manufacturer NFT. Required: identity-api keys every template it serves on this token (manufacturer.deviceDefinitions, and the chain check that decides whether a catalog is adopted at all), so a template without one is unservable there and, past a small fraction of the catalog, refuses the whole build. Every one of the 17,993 definitions in the production catalog carries one, so the producer can always supply it: a definition whose manufacturer cannot be resolved to a token id is dropped by the extraction, not emitted without it.
    */
-  tokenId?: number;
+  tokenId: number;
 }
 /**
  * name -> value. On the template these are the attributes shared by every trim; on a trim they are that trim's own. An attribute is either on the template or on a trim, never both. Names must exist in the DeviceType; enum values must appear in that attribute's options. An attribute that is unknown is ABSENT — never "" and never "<nil>". 6% of today's attribute rows are one of those two placeholders; this schema makes them unrepresentable.
@@ -85,7 +85,7 @@ export interface TrimSelectors {
    */
   styleName?: string[];
   /**
-   * Anchored regex over the 17-character VIN for OEMs that encode trim positionally.
+   * Anchored regex over the 17-character VIN for OEMs that encode trim positionally. The consumer compiles it with Go's RE2 as ^(?:<pattern>)$ and fails safe to "no match" if it does not compile, so a pattern RE2 cannot take is indistinguishable from one that matches no VIN. Writes are validated against that: the wrapped form must compile, and lookarounds ((?=, (?!, (?<=, (?<!) and backreferences (\1, \k<name>) are refused outright -- JavaScript accepts all of them and RE2 supports none.
    */
   vinPattern?: string;
 }

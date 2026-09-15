@@ -18,9 +18,11 @@ import {
   resolveCaller,
   countMintedVehicles,
   curatorAddresses,
+  manufacturerOwner,
 } from '@/services/templateEntitlement';
 
 const CALLER = '0x1111111111111111111111111111111111111111';
+const OTHER = '0x2222222222222222222222222222222222222222';
 const params = { params: Promise.resolve({ id: 'toyota_camry_2020' }) };
 
 const body = (over: Record<string, unknown> = {}) => ({
@@ -52,6 +54,7 @@ describe('PUT /api/templates/[id]', () => {
       template: { ...stored, version: 4 },
     });
     (countMintedVehicles as jest.Mock).mockResolvedValue(0);
+    (manufacturerOwner as jest.Mock).mockResolvedValue({ owner: OTHER, tokenId: 131 });
     (curatorAddresses as jest.Mock).mockReturnValue([]);
   });
 
@@ -215,6 +218,55 @@ describe('PUT /api/templates/[id]', () => {
       (fetchTemplate as jest.Mock).mockResolvedValue(null);
       const resp = await PUT(put(body({ trims: [trim('LE', '130')] })), params);
       expect(resp.status).toBe(403);
+      expect(publishTemplate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('manufacturer token id', () => {
+    // The worker requires a positive integer manufacturer.tokenId on every
+    // template. The create form has no input for it and must not have one --
+    // it is the Manufacturer NFT id, which identity owns -- so without this
+    // stamping every create is a guaranteed 422 on a field nobody can fill in.
+    it('stamps the token id identity reports, beside the author', async () => {
+      (fetchTemplate as jest.Mock).mockResolvedValue(null);
+      await PUT(put(body()), params);
+      const payload = (publishTemplate as jest.Mock).mock.calls[0][1];
+      expect(payload.manufacturer).toEqual({
+        slug: 'toyota',
+        name: 'Toyota',
+        tokenId: 131,
+      });
+      expect(manufacturerOwner).toHaveBeenCalledWith('toyota');
+    });
+
+    it('overrules a token id the body carries rather than trusting it', async () => {
+      await PUT(
+        put(body({ manufacturer: { slug: 'toyota', name: 'Toyota', tokenId: 9999 } }), {
+          'if-match': '"3"',
+        }),
+        params,
+      );
+      expect((publishTemplate as jest.Mock).mock.calls[0][1].manufacturer.tokenId).toBe(
+        131,
+      );
+    });
+
+    it('names the unresolvable manufacturer instead of letting the worker 422 a field the form has no input for', async () => {
+      (fetchTemplate as jest.Mock).mockResolvedValue(null);
+      (manufacturerOwner as jest.Mock).mockResolvedValue(null);
+      const resp = await PUT(put(body()), params);
+      expect(resp.status).toBe(422);
+      expect((await resp.json()).errors[0]).toContain('toyota');
+      expect(publishTemplate).not.toHaveBeenCalled();
+    });
+
+    it('503s rather than deciding when identity cannot answer', async () => {
+      (manufacturerOwner as jest.Mock).mockRejectedValue(
+        new Error('identity-api returned 500'),
+      );
+      const resp = await PUT(put(body(), { 'if-match': '"3"' }), params);
+      expect(resp.status).toBe(503);
+      expect((await resp.json()).error).toMatch(/try again/i);
       expect(publishTemplate).not.toHaveBeenCalled();
     });
   });
