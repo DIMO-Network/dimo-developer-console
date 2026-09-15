@@ -69,13 +69,73 @@ describe('TrimSelectorEditor', () => {
   it('splits a comma separated list into manufacturer codes and drops the blanks', () => {
     const onChange = jest.fn();
     render(<TrimSelectorEditor template={t} trimIndex={0} onChange={onChange} />);
-    fireEvent.change(screen.getByLabelText(/manufacturer code/i), {
-      target: { value: '2532, , 2533 ' },
-    });
+    const field = screen.getByLabelText(/manufacturer code/i);
+    fireEvent.change(field, { target: { value: '2532, , 2533 ' } });
+    fireEvent.blur(field);
     expect(onChange.mock.calls.at(-1)![0].trims[0].selectors.manufacturerCode).toEqual([
       '2532',
       '2533',
     ]);
+  });
+
+  it('keeps the separator, so a second value can actually be typed', () => {
+    // The field was controlled by the joined list while the change handler
+    // re-parsed every keystroke, so the comma was deleted the instant it was
+    // typed and the placeholder the component shows -- "2532, 2546" -- named a
+    // value the control could not produce.
+    const onChange = jest.fn();
+    render(<TrimSelectorEditor template={t} trimIndex={0} onChange={onChange} />);
+    const field = screen.getByLabelText(/manufacturer code/i);
+    expect(field).toHaveValue('2532');
+
+    fireEvent.change(field, { target: { value: '2532,' } });
+    expect(field).toHaveValue('2532,');
+    fireEvent.change(field, { target: { value: '2532, 2546' } });
+    expect(field).toHaveValue('2532, 2546');
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.blur(field);
+    expect(onChange.mock.calls.at(-1)![0].trims[0].selectors.manufacturerCode).toEqual([
+      '2532',
+      '2546',
+    ]);
+  });
+
+  it('lets the field be cleared and retyped without emptying the selector mid-edit', () => {
+    // Clearing first was the only workaround for the eaten separator, and it
+    // stored manufacturerCode: [] on the way -- which trips the multi-trim
+    // selector-less trim error on a template that is perfectly fine.
+    const onChange = jest.fn();
+    render(<TrimSelectorEditor template={t} trimIndex={0} onChange={onChange} />);
+    const field = screen.getByLabelText(/manufacturer code/i);
+    fireEvent.change(field, { target: { value: '' } });
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.change(field, { target: { value: '2546' } });
+    fireEvent.blur(field);
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0][0].trims[0].selectors.manufacturerCode).toEqual([
+      '2546',
+    ]);
+  });
+
+  it('leaves a stored value containing a comma alone through a focus and a blur', () => {
+    // The same round trip split an existing styleName on its comma the moment
+    // the field was touched, changing which VINs the trim claims.
+    const onChange = jest.fn();
+    const withComma = {
+      ...t,
+      trims: [
+        { ...t.trims[0], selectors: { styleName: ['LE, Convenience Package'] } },
+        ...t.trims.slice(1),
+      ],
+    } as Template;
+    render(<TrimSelectorEditor template={withComma} trimIndex={0} onChange={onChange} />);
+    const field = screen.getByLabelText(/style name/i);
+    expect(field).toHaveValue('LE, Convenience Package');
+    fireEvent.focus(field);
+    fireEvent.blur(field);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(field).toHaveValue('LE, Convenience Package');
   });
 });
 
