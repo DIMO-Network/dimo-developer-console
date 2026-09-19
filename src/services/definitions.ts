@@ -26,13 +26,54 @@ export type PublishResult =
   | { ok: false; kind: 'too-large'; bytes: number; limit: number }
   | { ok: false; kind: 'upstream'; status: number; message: string };
 
-export async function fetchTemplate(id: string): Promise<Template | null> {
+// The query parameter that makes a read miss the Cloudflare edge cache.
+// definitions-worker routes on url.pathname alone (its templateMatch regex), so
+// it never reads this and the request reaches exactly the same handler a cached
+// read would; Cloudflare's cache key is the whole URL, so a value it has not
+// seen cannot be served from cache.
+//
+// A request header cannot do this job. `cache: 'no-store'` bypasses Next's own
+// Data Cache and nothing else, and Cloudflare does not honour a client's
+// Cache-Control on a cached response -- dd-api established both against this
+// exact host (fetchTemplateDocFresh) before settling on the same parameter.
+const FRESH_PARAM = 'fresh';
+
+// Disambiguates two fresh reads minted inside one clock tick. The value only
+// has to be unique, never unguessable.
+let freshSeq = 0;
+const freshValue = () => `${Date.now().toString(36)}-${(freshSeq++).toString(36)}`;
+
+export interface FetchTemplateOptions {
+  /**
+   * Whether the Cloudflare edge may answer this read. Defaults to false, so a
+   * caller has to say out loud that a day-old document is acceptable.
+   *
+   * It is acceptable for a browse or search listing, which renders a version
+   * and a trim count and writes nothing back. It is never acceptable for a read
+   * that feeds a write or a precondition decision: the worker serves templates
+   * `public, max-age=86400, stale-while-revalidate=604800`, so a cached read
+   * hands the editor a stale `version`, the next Publish sends it as If-Match,
+   * and the worker answers 412 -- rendered as "this template changed while you
+   * were editing it" on a template nobody else touched.
+   */
+  allowEdgeCache?: boolean;
+}
+
+export async function fetchTemplate(
+  id: string,
+  { allowEdgeCache = false }: FetchTemplateOptions = {},
+): Promise<Template | null> {
   assertServer();
-  const resp = await fetch(`${config.definitionsWorkerUrl}/t/${encodeURIComponent(id)}`, {
-    // A template's ETag is its version, and the editor's whole conflict story
-    // depends on holding the current one. Never serve this from a cache.
-    cache: 'no-store',
-  });
+  const url = `${config.definitionsWorkerUrl}/t/${encodeURIComponent(id)}`;
+  const resp = await fetch(
+    allowEdgeCache ? url : `${url}?${FRESH_PARAM}=${freshValue()}`,
+    {
+      // A template's ETag is its version, and the editor's whole conflict story
+      // depends on holding the current one. Never serve this from a cache --
+      // this covers Next's Data Cache, the cache key above covers the edge.
+      cache: 'no-store',
+    },
+  );
   if (resp.status === 404) return null;
   if (!resp.ok)
     throw new Error(`definitions-worker GET /t/${id} returned ${resp.status}`);

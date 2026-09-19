@@ -57,6 +57,12 @@ describe('GET /api/templates', () => {
       },
       { id: 'toyota_supra_2020', model: 'Supra', year: 2020, status: 'missing' },
     ]);
+    // This listing is the one place a cached template is fine, and it has to
+    // say so: fetchTemplate misses the edge by default because every other
+    // caller's read feeds a write.
+    expect(fetchTemplate).toHaveBeenCalledWith('toyota_camry_2020', {
+      allowEdgeCache: true,
+    });
   });
 
   it('marks an id the schema cannot accept, without asking the worker about it', async () => {

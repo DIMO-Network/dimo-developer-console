@@ -86,7 +86,14 @@ export async function GET(req: NextRequest) {
         // answer would be a misleading 404.
         if (!ID_RE.test(node.deviceDefinitionId))
           return { ...base, status: 'invalid-id' };
-        const template = await fetchTemplate(node.deviceDefinitionId);
+        // The one read that may be answered by the edge: this is a browse
+        // listing of up to 25 definitions whose result is rendered and thrown
+        // away. Nothing here feeds a write or a precondition, so a day-old
+        // version and trim count cost nothing, while 25 origin round trips per
+        // search would.
+        const template = await fetchTemplate(node.deviceDefinitionId, {
+          allowEdgeCache: true,
+        });
         // A missing template is a real state: the import has not run in
         // production, and 5,152 of the emitted set carry no attributes.
         if (!template) return { ...base, status: 'missing' };
