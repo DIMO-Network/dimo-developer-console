@@ -342,10 +342,11 @@ describe('PUT /api/templates/[id]', () => {
     });
 
     it('503s, not 422, when identity answers the same lookup with an error', async () => {
-      // The failure that used to make the 422 above unreachable: identity
-      // reported a missing manufacturer as a GraphQL error, and any error entry
-      // is "identity did not answer". It must stay a retry, never a denial
-      // naming the curator's make.
+      // The other half of identity's contract. A real failure carries an errors
+      // entry reading exactly "Internal error" -- identity ca4c4c3 logs the
+      // driver string and never serves it -- so the two cases are told apart by
+      // whether there is an errors entry, never by its text. An outage must
+      // stay a retry, never a denial naming the curator's make.
       (fetchTemplate as jest.Mock).mockResolvedValue(null);
       (manufacturerOwner as jest.Mock).mockImplementation(actual.manufacturerOwner);
       global.fetch = jest.fn().mockResolvedValue({
@@ -353,7 +354,7 @@ describe('PUT /api/templates/[id]', () => {
         status: 200,
         json: async () => ({
           data: null,
-          errors: [{ message: 'sql: no rows in result set' }],
+          errors: [{ message: 'Internal error' }],
         }),
       }) as unknown as typeof fetch;
 

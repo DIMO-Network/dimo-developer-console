@@ -70,14 +70,47 @@ export function validateDraft(template: Template, vocab: DeviceType): string[] {
       }
     }
 
-    for (const code of trim.selectors?.manufacturerCode ?? []) {
-      const prev = seenCodes.get(code);
-      if (prev !== undefined) {
-        errs.push(`manufacturerCode ${code} is claimed by both "${prev}" and "${name}"`);
-      } else seenCodes.set(code, name);
+    // A blank entry is a defect wherever it sits, including beside a usable
+    // one: dd-api's selectorsMatch compares verbatim, so it matches no signal
+    // that will ever exist, and when it is the only entry the worker's
+    // hasSelector reads the trim as having no selector at all -- so the two
+    // gates disagree about the same document. definitions-worker fed99cd made
+    // it a schema violation ("pattern": "\S" on both selector item types);
+    // named here so the editor does not hand the curator a 422 it could have
+    // prevented, and named as the blank it is rather than as a missing field.
+    let blankSelector = false;
+    for (const key of ['manufacturerCode', 'styleName'] as const) {
+      const values = trim.selectors?.[key];
+      if (values === undefined) continue;
+      const blanks = values.filter((x) => x.trim().length === 0);
+      if (blanks.length === 0) continue;
+      blankSelector = true;
+      errs.push(
+        `trim ${name || '?'}: selectors.${key} has ${blanks.length} blank ` +
+          `${blanks.length === 1 ? 'entry' : 'entries'} — an empty or whitespace-only ` +
+          'value selects nothing, and a trim whose only selectors are blank matches no ' +
+          'signal at all. Remove it, or give the value it should have had',
+      );
     }
 
-    if (multiTrim && !hasEffectiveSelector(trim.selectors)) {
+    // Skipped when the list carries a blank, as the worker skips it: it never
+    // reaches the duplicate check there, and two blanks reported as one
+    // duplicated code would name a code nobody typed.
+    const codes = trim.selectors?.manufacturerCode ?? [];
+    if (!codes.some((c) => c.trim().length === 0)) {
+      for (const code of codes) {
+        const prev = seenCodes.get(code);
+        if (prev !== undefined) {
+          errs.push(
+            `manufacturerCode ${code} is claimed by both "${prev}" and "${name}"`,
+          );
+        } else seenCodes.set(code, name);
+      }
+    }
+
+    // Suppressed once the blank has been named: "this trim has no selectors"
+    // sends whoever reads it looking for a field that is in fact there.
+    if (multiTrim && !blankSelector && !hasEffectiveSelector(trim.selectors)) {
       errs.push(
         `trim ${name || '?'}: selectors are required — a template with more than one trim cannot ` +
           'have a selector-less trim, which would match every signal and make every decode ambiguous',

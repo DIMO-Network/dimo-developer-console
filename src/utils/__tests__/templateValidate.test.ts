@@ -19,7 +19,7 @@ describe('validateDraft', () => {
     );
   });
 
-  it.each([[{}], [{ manufacturerCode: [''] }], [{ vinPattern: '   ' }]])(
+  it.each([[{}], [{ vinPattern: '   ' }]])(
     'treats the degenerate selector %p as no selector at all',
     (selectors) => {
       const withNew = setSelectors(
@@ -34,6 +34,56 @@ describe('validateDraft', () => {
       ).toBe(true);
     },
   );
+
+  describe('a blank selector entry', () => {
+    // definitions-worker fed99cd made this a schema violation in its own right:
+    // the items of manufacturerCode and styleName carry "pattern": "\\S". A
+    // blank is compared verbatim by dd-api's containsExact so it matches no
+    // signal that will ever exist, while the worker's hasSelector reads a trim
+    // whose only entries are blank as having no selector at all -- so the two
+    // gates disagree about one document. Named here rather than left to a 422.
+    const withSelectors = (selectors: unknown) =>
+      setSelectors(addTrim(t, 'XLE V6'), t.trims.length, selectors as never);
+
+    it('is named, in the worker words, rather than reported as a missing field', () => {
+      expect(
+        validateDraft(withSelectors({ manufacturerCode: [' '] }), vehicleVocab),
+      ).toContain(
+        'trim XLE V6: selectors.manufacturerCode has 1 blank entry — an empty or ' +
+          'whitespace-only value selects nothing, and a trim whose only selectors are blank ' +
+          'matches no signal at all. Remove it, or give the value it should have had',
+      );
+    });
+
+    it('is a defect beside a usable entry too, and counts them', () => {
+      const errs = validateDraft(
+        withSelectors({ styleName: ['Hybrid LE', '', '  '] }),
+        vehicleVocab,
+      );
+      expect(errs).toContain(
+        'trim XLE V6: selectors.styleName has 2 blank entries — an empty or ' +
+          'whitespace-only value selects nothing, and a trim whose only selectors are blank ' +
+          'matches no signal at all. Remove it, or give the value it should have had',
+      );
+    });
+
+    it('replaces the selector-less message rather than piling on top of it', () => {
+      // The worker suppresses "selectors are required" once it has named the
+      // blank, because that message sends whoever reads it looking for a field
+      // that is in fact there.
+      const errs = validateDraft(withSelectors({ manufacturerCode: [''] }), vehicleVocab);
+      expect(errs.some((e) => e.includes('has 1 blank entry'))).toBe(true);
+      expect(errs.some((e) => e.includes('selectors are required'))).toBe(false);
+    });
+
+    it('does not read two blanks as one duplicated manufacturer code', () => {
+      const errs = validateDraft(
+        withSelectors({ manufacturerCode: ['', ''] }),
+        vehicleVocab,
+      );
+      expect(errs.some((e) => e.includes('is claimed by both'))).toBe(false);
+    });
+  });
 
   it('accepts a selector-less trim when it is the only trim', () => {
     const single = { ...t, trims: [{ name: 'LE', attributes: {} }] } as Template;

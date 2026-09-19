@@ -426,12 +426,14 @@ describe('manufacturerOwner', () => {
     global.fetch = impl as unknown as typeof fetch;
   };
 
-  // The contract this relies on, from identity-r2's graph/schema/manufacturer.graphqls:
-  // `manufacturer(by: ManufacturerBy!): Manufacturer` is NULLABLE, so a make
-  // nobody has minted is a normal answer -- HTTP 200, no `errors` entry, and the
-  // `manufacturer` key present and null. Only that shape is "no such
-  // manufacturer". Everything else is "identity did not answer", which must
-  // fail closed: an absent key is a partial answer, not a denial.
+  // The contract this relies on, from identity-r2 ca4c4c3 and its
+  // graph/schema/manufacturer.graphqls: `manufacturer(by: ManufacturerBy!):
+  // Manufacturer` is NULLABLE, so a make nobody has minted is a normal answer --
+  // HTTP 200, NO `errors` entry, and the `manufacturer` key present and null,
+  // for every selector. A real failure carries an errors entry, whose message is
+  // "Internal error" and never a driver string. So the two are told apart by the
+  // PRESENCE of an errors entry, never by its text. Everything that is not the
+  // absent shape fails closed: an absent key is a partial answer, not a denial.
   it('reads an explicit null manufacturer as "no such manufacturer"', async () => {
     reply(200, { data: { manufacturer: null } });
     expect(await manufacturerOwner('nosuchmake')).toEqual({ kind: 'absent' });
@@ -449,7 +451,7 @@ describe('manufacturerOwner', () => {
   it('throws rather than reading a GraphQL error as an absent manufacturer', async () => {
     // A real outage reports errors. Treating that as absent would tell a
     // manufacturer their own make is not registered.
-    reply(200, { errors: [{ message: 'upstream timeout' }], data: null });
+    reply(200, { errors: [{ message: 'Internal error' }], data: null });
     await expect(manufacturerOwner('toyota')).rejects.toThrow(IdentityError);
   });
 
