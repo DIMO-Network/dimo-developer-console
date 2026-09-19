@@ -10,6 +10,8 @@ export enum CONTRACT_METHODS {
 
 export const identityApiUrl = 'https://identity-api.dev.dimo.zone/query';
 
+export const definitionsWorkerUrl = 'https://definitions.dev.dimo.org';
+
 export const DCC_ADDRESS = '0x41799E9Dc893722844E771a1C1cAf3BBc2876132'; // Connections
 
 // DIMO REGISTRY AMOY
