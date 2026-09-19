@@ -131,10 +131,30 @@ export async function PUT(req: NextRequest, { params }: Params) {
     // the read comes back null as well: a template someone deleted under an
     // open editor must answer 412, not commit the stale draft as a create and
     // resurrect it. Only a client that sent no If-Match at all is creating.
+    //
+    // Which of the two a client means is the client's to say, and it says it in
+    // the header it sends. If-None-Match: * is "create this, and fail if it is
+    // already there" -- forwarded whatever the read found, so the worker's
+    // create-only CAS refuses a taken id with a 412 that becomes the 409 the
+    // create page renders. Deciding that from the read instead would answer 428
+    // to a create, naming a version the client never had.
     const ifMatch = req.headers.get('if-match');
+    const ifNoneMatch = req.headers.get('if-none-match');
     let precondition: Precondition;
     if (ifMatch === null || ifMatch.trim().length === 0) {
-      if (template !== null) {
+      if (ifNoneMatch !== null && ifNoneMatch.trim().length > 0) {
+        if (ifNoneMatch.trim() !== '*') {
+          return NextResponse.json(
+            {
+              error: `If-None-Match must be "*", which means create only — got ${ifNoneMatch}`,
+            },
+            { status: 428 },
+          );
+        }
+        precondition = { kind: 'create' };
+      } else if (template !== null) {
+        // No precondition at all, over a template that exists: an edit that
+        // forgot its If-Match, which is what 428 is for.
         return NextResponse.json(
           {
             error:
@@ -142,8 +162,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
           },
           { status: 428 },
         );
+      } else {
+        precondition = { kind: 'create' };
       }
-      precondition = { kind: 'create' };
     } else {
       const version = Number(ifMatch.replace(/^W\//, '').replace(/"/g, ''));
       if (!Number.isInteger(version) || version < 1) {

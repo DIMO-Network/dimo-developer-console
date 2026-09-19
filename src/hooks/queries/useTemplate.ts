@@ -43,7 +43,15 @@ export const usePublishTemplate = (id: string) =>
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...(version === null ? {} : { 'If-Match': `"${version}"` }),
+          // The client states which it means. A null version is a create, and a
+          // create says so with If-None-Match: * -- sending no precondition at
+          // all is an edit that forgot one, which the route is right to answer
+          // 428 to. Forwarded, the worker refuses an id that is taken with a
+          // 412, which the route maps to the 409 the create page renders as
+          // "a template with this id already exists".
+          ...(version === null
+            ? { 'If-None-Match': '*' }
+            : { 'If-Match': `"${version}"` }),
         },
         body: JSON.stringify(payload),
       });

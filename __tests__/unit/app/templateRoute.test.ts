@@ -107,6 +107,49 @@ describe('PUT /api/templates/[id]', () => {
     expect((publishTemplate as jest.Mock).mock.calls[0][2]).toEqual({ kind: 'create' });
   });
 
+  it('forwards an explicit create-only precondition over a template that exists', async () => {
+    // The create page means create, and says so. Answering 428 to it -- "send
+    // the version you loaded" -- names a version it never had and hides the
+    // already-exists state it has a dedicated panel for. Forwarded, the worker
+    // answers 412 and the route turns that into the 409 the page handles.
+    await PUT(put(body(), { 'if-none-match': '*' }), params);
+    expect((publishTemplate as jest.Mock).mock.calls[0][2]).toEqual({ kind: 'create' });
+  });
+
+  it('answers 409, not 428, when a create lands on an id that is taken', async () => {
+    (publishTemplate as jest.Mock).mockResolvedValue({
+      ok: false,
+      kind: 'conflict',
+      expected: null,
+      actual: 4,
+    });
+    const resp = await PUT(put(body(), { 'if-none-match': '*' }), params);
+    expect(resp.status).toBe(409);
+    expect(await resp.json()).toMatchObject({ conflict: { expected: null, actual: 4 } });
+  });
+
+  it('keeps 428 for a genuine update that sent no precondition at all', async () => {
+    const resp = await PUT(put(body()), params);
+    expect(resp.status).toBe(428);
+    expect(publishTemplate).not.toHaveBeenCalled();
+  });
+
+  it('refuses an If-None-Match that is not "*", rather than guessing at the intent', async () => {
+    const resp = await PUT(put(body(), { 'if-none-match': '"3"' }), params);
+    expect(resp.status).toBe(428);
+    expect(publishTemplate).not.toHaveBeenCalled();
+  });
+
+  it('lets If-Match win when a client sends both', async () => {
+    // Both is a contradiction. The one that names a version is the one that
+    // cannot silently overwrite anything.
+    await PUT(put(body(), { 'if-match': '"3"', 'if-none-match': '*' }), params);
+    expect((publishTemplate as jest.Mock).mock.calls[0][2]).toEqual({
+      kind: 'update',
+      version: 3,
+    });
+  });
+
   it('forwards the client If-Match even when the stored template reads as null', async () => {
     // Someone deleted the template under an open editor. Swapping the client's
     // If-Match for a create-only precondition would commit the stale draft and
