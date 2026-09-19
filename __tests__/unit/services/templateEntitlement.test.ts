@@ -5,6 +5,7 @@ import {
   IdentityError,
   countMintedVehicles,
   hardwareTemplateIdChanged,
+  manufacturerOwner,
   resolveEntitlement,
 } from '@/services/templateEntitlement';
 import type { Template } from '@/types/template';
@@ -31,7 +32,11 @@ const template = (over: Partial<Template> = {}) =>
 const deps = (minted: number, owner: string | null) => ({
   id: 'toyota_camry_2020',
   countMintedVehicles: jest.fn().mockResolvedValue(minted),
-  manufacturerOwner: jest.fn().mockResolvedValue(owner ? { owner, tokenId: 131 } : null),
+  manufacturerOwner: jest
+    .fn()
+    .mockResolvedValue(
+      owner ? { kind: 'found', owner, tokenId: 131 } : { kind: 'absent' },
+    ),
   curators: [CURATOR],
 });
 
@@ -408,5 +413,61 @@ describe('countMintedVehicles', () => {
   it('throws when the count is not a number', async () => {
     reply(200, { data: { vehicles: null } });
     await expect(countMintedVehicles('toyota_camry_2020')).rejects.toThrow(IdentityError);
+  });
+});
+
+describe('manufacturerOwner', () => {
+  const reply = (status: number, body: unknown) => {
+    const impl = jest.fn().mockResolvedValue({
+      ok: status < 400,
+      status,
+      json: async () => body,
+    });
+    global.fetch = impl as unknown as typeof fetch;
+  };
+
+  // The contract this relies on, from identity-r2's graph/schema/manufacturer.graphqls:
+  // `manufacturer(by: ManufacturerBy!): Manufacturer` is NULLABLE, so a make
+  // nobody has minted is a normal answer -- HTTP 200, no `errors` entry, and the
+  // `manufacturer` key present and null. Only that shape is "no such
+  // manufacturer". Everything else is "identity did not answer", which must
+  // fail closed: an absent key is a partial answer, not a denial.
+  it('reads an explicit null manufacturer as "no such manufacturer"', async () => {
+    reply(200, { data: { manufacturer: null } });
+    expect(await manufacturerOwner('nosuchmake')).toEqual({ kind: 'absent' });
+  });
+
+  it('reads a manufacturer as the holder and the token id', async () => {
+    reply(200, { data: { manufacturer: { owner: CALLER, tokenId: 131 } } });
+    expect(await manufacturerOwner('toyota')).toEqual({
+      kind: 'found',
+      owner: CALLER,
+      tokenId: 131,
+    });
+  });
+
+  it('throws rather than reading a GraphQL error as an absent manufacturer', async () => {
+    // A real outage reports errors. Treating that as absent would tell a
+    // manufacturer their own make is not registered.
+    reply(200, { errors: [{ message: 'upstream timeout' }], data: null });
+    await expect(manufacturerOwner('toyota')).rejects.toThrow(IdentityError);
+  });
+
+  it('throws when the answer carries no manufacturer key at all', async () => {
+    // `data.manufacturer ?? null` cannot tell this from an explicit null, and
+    // the difference is a 422 naming the curator's make against a 503 telling
+    // them to retry.
+    reply(200, { data: {} });
+    await expect(manufacturerOwner('toyota')).rejects.toThrow(IdentityError);
+  });
+
+  it('throws when the manufacturer it gets back is not one it can use', async () => {
+    reply(200, { data: { manufacturer: { owner: CALLER } } });
+    await expect(manufacturerOwner('toyota')).rejects.toThrow(IdentityError);
+  });
+
+  it('throws when the response is not ok', async () => {
+    reply(503, {});
+    await expect(manufacturerOwner('toyota')).rejects.toThrow(IdentityError);
   });
 });

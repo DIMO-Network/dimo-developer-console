@@ -13,6 +13,7 @@ import {
   manufacturerOwner,
   resolveCaller,
   resolveEntitlement,
+  type ManufacturerLookup,
 } from '@/services/templateEntitlement';
 import type { TemplatePayload } from '@/types/template';
 
@@ -175,7 +176,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       );
     }
 
-    let held: Awaited<ReturnType<typeof manufacturerOwner>>;
+    let held: ManufacturerLookup;
     try {
       held = await manufacturerOwner(slug);
     } catch {
@@ -187,7 +188,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
         { status: 503 },
       );
     }
-    if (!held) {
+    if (held.kind === 'absent') {
+      // identity answered, and the answer is that nothing is minted under this
+      // slug -- a fact the curator can act on, told apart from the 503 above by
+      // manufacturerOwner rather than by a null that meant both.
+      //
       // Said here, naming the slug, rather than left to the worker's
       // `manufacturer.tokenId is required and must be a positive integer` --
       // which names a field the form does not have and cannot be acted on.

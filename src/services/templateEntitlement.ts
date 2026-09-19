@@ -107,18 +107,52 @@ export async function countMintedVehicles(id: string): Promise<number> {
   return count;
 }
 
-export async function manufacturerOwner(
-  slug: string,
-): Promise<{ owner: string; tokenId: number } | null> {
+/**
+ * Whether identity knows a manufacturer under this slug, stated so that "there
+ * is no such manufacturer" cannot be confused with "identity did not answer".
+ * The first is a fact the curator can act on -- their make has not been minted,
+ * which is a 422 naming the slug. The second is a 503 and a retry. Conflating
+ * them either tells a manufacturer their own make does not exist during an
+ * outage, or hides a real unregistered slug behind "try again" forever.
+ */
+export type ManufacturerLookup =
+  | { kind: 'found'; owner: string; tokenId: number }
+  | { kind: 'absent' };
+
+/**
+ * identity's contract, from graph/schema/manufacturer.graphqls:
+ *
+ *   manufacturer(by: ManufacturerBy!): Manufacturer
+ *
+ * The field is NULLABLE, so a slug nobody has minted is a normal answer and
+ * not a failure: HTTP 200, no `errors` entry, and `data.manufacturer` present
+ * and null. That, and only that, is "absent".
+ *
+ * Everything else fails closed and throws. `data.manufacturer ?? null` did not:
+ * it read an absent key -- a partial or unrecognised answer -- as a denial, and
+ * it is the key being absent rather than null that a degraded identity
+ * produces. The errors-first check in identity() covers the rest.
+ */
+export async function manufacturerOwner(slug: string): Promise<ManufacturerLookup> {
   const data = await identity<{
-    manufacturer: { owner: string; tokenId: number } | null;
+    manufacturer?: { owner?: unknown; tokenId?: unknown } | null;
   }>(
     `query TemplateManufacturer($slug: String!) {
        manufacturer(by: { slug: $slug }) { owner tokenId }
      }`,
     { slug },
   );
-  return data.manufacturer ?? null;
+  if (!('manufacturer' in data)) {
+    throw new IdentityError('identity-api returned no manufacturer field');
+  }
+  const held = data.manufacturer;
+  if (held === null || held === undefined) return { kind: 'absent' };
+  if (typeof held.owner !== 'string' || typeof held.tokenId !== 'number') {
+    throw new IdentityError(
+      'identity-api returned a manufacturer with no owner or token id',
+    );
+  }
+  return { kind: 'found', owner: held.owner, tokenId: held.tokenId };
 }
 
 /**
@@ -161,7 +195,7 @@ export interface EntitlementArgs {
   id: string;
   template: Template | null;
   countMintedVehicles: (id: string) => Promise<number>;
-  manufacturerOwner: (slug: string) => Promise<{ owner: string; tokenId: number } | null>;
+  manufacturerOwner: (slug: string) => Promise<ManufacturerLookup>;
   curators: string[];
 }
 
@@ -250,9 +284,9 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
   // outage. "Could not check" is also not "somebody else holds it": a
   // manufacturer told proposal-required would read it as a denial.
   const slug = template?.manufacturer.slug ?? makeSlug(id);
-  let owner: Awaited<ReturnType<EntitlementArgs['manufacturerOwner']>>;
+  let held: ManufacturerLookup;
   try {
-    owner = await args.manufacturerOwner(slug);
+    held = await args.manufacturerOwner(slug);
   } catch {
     return {
       kind: 'unavailable',
@@ -263,13 +297,13 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
         'Could not verify who holds the Manufacturer NFT for this template. Try again.',
     };
   }
-  if (owner && eq(owner.owner, caller)) {
+  if (held.kind === 'found' && eq(held.owner, caller)) {
     return {
       kind: 'manufacturer',
       canPublish: true,
       canSetHardwareTemplateId: false,
       mintedVehicles,
-      reason: `You hold the ${template?.manufacturer.name ?? slug} Manufacturer NFT (token ${owner.tokenId}).`,
+      reason: `You hold the ${template?.manufacturer.name ?? slug} Manufacturer NFT (token ${held.tokenId}).`,
     };
   }
 

@@ -21,6 +21,8 @@ import {
   manufacturerOwner,
 } from '@/services/templateEntitlement';
 
+const actual = jest.requireActual('@/services/templateEntitlement');
+
 const CALLER = '0x1111111111111111111111111111111111111111';
 const OTHER = '0x2222222222222222222222222222222222222222';
 const params = { params: Promise.resolve({ id: 'toyota_camry_2020' }) };
@@ -54,7 +56,11 @@ describe('PUT /api/templates/[id]', () => {
       template: { ...stored, version: 4 },
     });
     (countMintedVehicles as jest.Mock).mockResolvedValue(0);
-    (manufacturerOwner as jest.Mock).mockResolvedValue({ owner: OTHER, tokenId: 131 });
+    (manufacturerOwner as jest.Mock).mockResolvedValue({
+      kind: 'found',
+      owner: OTHER,
+      tokenId: 131,
+    });
     (curatorAddresses as jest.Mock).mockReturnValue([]);
   });
 
@@ -273,11 +279,43 @@ describe('PUT /api/templates/[id]', () => {
     });
 
     it('names the unresolvable manufacturer instead of letting the worker 422 a field the form has no input for', async () => {
+      // Driven through the real lookup over identity's own wire shape, not a
+      // mock resolving null. `manufacturer(by:)` is nullable in identity's
+      // schema, so an unregistered make is HTTP 200 with the key present and
+      // null and no `errors` entry -- and this 422 is only reachable if the
+      // Console reads exactly that as "there is no such manufacturer".
       (fetchTemplate as jest.Mock).mockResolvedValue(null);
-      (manufacturerOwner as jest.Mock).mockResolvedValue(null);
+      (manufacturerOwner as jest.Mock).mockImplementation(actual.manufacturerOwner);
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: { manufacturer: null } }),
+      }) as unknown as typeof fetch;
+
       const resp = await PUT(put(body()), params);
       expect(resp.status).toBe(422);
       expect((await resp.json()).errors[0]).toContain('toyota');
+      expect(publishTemplate).not.toHaveBeenCalled();
+    });
+
+    it('503s, not 422, when identity answers the same lookup with an error', async () => {
+      // The failure that used to make the 422 above unreachable: identity
+      // reported a missing manufacturer as a GraphQL error, and any error entry
+      // is "identity did not answer". It must stay a retry, never a denial
+      // naming the curator's make.
+      (fetchTemplate as jest.Mock).mockResolvedValue(null);
+      (manufacturerOwner as jest.Mock).mockImplementation(actual.manufacturerOwner);
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: null,
+          errors: [{ message: 'sql: no rows in result set' }],
+        }),
+      }) as unknown as typeof fetch;
+
+      const resp = await PUT(put(body()), params);
+      expect(resp.status).toBe(503);
       expect(publishTemplate).not.toHaveBeenCalled();
     });
 
