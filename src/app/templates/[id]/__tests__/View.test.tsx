@@ -201,6 +201,53 @@ describe('TemplateEditorView', () => {
     expect(payload.trims[1].attributes.number_of_doors).toBe(4);
   });
 
+  describe('editing a trim name', () => {
+    // The trim rows used to be keyed by the trim name, which the name input
+    // rewrites on every keystroke: React found no matching key, unmounted the
+    // whole subtree and mounted a fresh one, so the <input> DOM node and its
+    // focus were destroyed after one character and every in-flight draft in
+    // that column went with it.
+    it('keeps focus while a multi-character name is typed', () => {
+      render(<TemplateEditorView id={t.id} />);
+      const name = screen.getAllByLabelText('Trim name')[0];
+      name.focus();
+
+      fireEvent.change(name, { target: { value: 'L' } });
+      expect(document.activeElement).toBe(name);
+      fireEvent.change(name, { target: { value: 'LE' } });
+      expect(document.activeElement).toBe(name);
+      fireEvent.change(name, { target: { value: 'LE Hybrid' } });
+
+      expect(document.activeElement).toBe(name);
+      expect(screen.getAllByLabelText('Trim name')[0]).toHaveValue('LE Hybrid');
+    });
+
+    it('does not discard a selector being typed in the same trim', () => {
+      // SelectorField holds the raw text locally and commits on blur, so a
+      // remount mid-typing loses the text without ever committing it.
+      render(<TemplateEditorView id={t.id} />);
+      const style = screen.getAllByLabelText('Style name')[0];
+      fireEvent.change(style, { target: { value: 'Hybrid LE' } });
+
+      const name = screen.getAllByLabelText('Trim name')[0];
+      fireEvent.change(name, { target: { value: 'LE Hybrid' } });
+
+      expect(screen.getAllByLabelText('Style name')[0]).toHaveValue('Hybrid LE');
+    });
+
+    it('renames only the trim that was renamed', () => {
+      render(<TemplateEditorView id={t.id} />);
+      fireEvent.change(screen.getAllByLabelText('Trim name')[0], {
+        target: { value: 'LE Hybrid' },
+      });
+      const names = screen
+        .getAllByLabelText('Trim name')
+        .map((n) => n.getAttribute('value'));
+      expect(names[0]).toBe('LE Hybrid');
+      expect(names.slice(1)).toEqual(t.trims.slice(1).map((trim) => trim.name));
+    });
+  });
+
   it('is read only, with no publish button, when a proposal is required', () => {
     bundle = {
       ...authorBundle(),

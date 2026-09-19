@@ -64,7 +64,11 @@ export const TrimGrid: FC<TrimGridProps> = ({
             </th>
             {template.trims.map((trim, i) => (
               <th
-                key={`${trim.name}-${i}`}
+                // Position, not name. See the key on TrimSelectorEditor: the
+                // name is rewritten per keystroke while it is being edited, so
+                // keying on it remounts this column and throws away the draft
+                // held in every cell of it.
+                key={i}
                 scope="col"
                 className="border-l border-cta-default align-top"
               >
@@ -97,10 +101,7 @@ export const TrimGrid: FC<TrimGridProps> = ({
                 </td>
                 {byTrim ? (
                   template.trims.map((trim, i) => (
-                    <td
-                      key={`${trim.name}-${i}`}
-                      className="border-l border-cta-default align-top"
-                    >
+                    <td key={i} className="border-l border-cta-default align-top">
                       <TemplateCell
                         def={row.def}
                         value={row.cells[i]}

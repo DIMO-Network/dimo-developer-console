@@ -187,7 +187,13 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
           <div className="flex flex-col gap-3">
             {draft.trims.map((trim, i) => (
               <TrimSelectorEditor
-                key={`${trim.name}-${i}`}
+                // Keyed on the position, never on the name: the name input
+                // below rewrites trim.name on every keystroke, so a name key
+                // changes per character, React remounts the subtree, and the
+                // input loses focus after one character while every local draft
+                // in the trim is discarded mid-edit. Position is what is stable
+                // here -- trims are appended and removed, never reordered.
+                key={i}
                 template={draft}
                 trimIndex={i}
                 readOnly={readOnly}
