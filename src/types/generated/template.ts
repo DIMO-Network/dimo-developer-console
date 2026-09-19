@@ -77,11 +77,11 @@ export interface Trim {
  */
 export interface TrimSelectors {
   /**
-   * OEM model/option code. Already present in today's data as manufacturer_code, where it sits on the model-year record doing nothing — it is a trim key that was flattened.
+   * OEM model/option code. Already present in today's data as manufacturer_code, where it sits on the model-year record doing nothing — it is a trim key that was flattened. Every entry must carry a non-whitespace character: the consumer compares it verbatim (dd-api's containsExact), so a blank entry matches no VIN that will ever exist, while the worker's own selector check reads a trim whose only entries are blank as having no selector at all — the two disagree, and the template is either refused with a message about the wrong thing or stored and silently unmatched. `minLength` is not the rule: the value that reached production was a single space.
    */
   manufacturerCode?: string[];
   /**
-   * Style string as the upstream decoder reports it. Matched case-insensitively.
+   * Style string as the upstream decoder reports it. Matched case-insensitively. Every entry must carry a non-whitespace character, for the reason given on manufacturerCode.
    */
   styleName?: string[];
   /**
