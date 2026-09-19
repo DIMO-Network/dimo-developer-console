@@ -110,6 +110,58 @@ describe('TemplateEditorView', () => {
     expect(publish).toHaveBeenCalledTimes(1);
   });
 
+  it('reloads onto the version it reloaded, body and all, before letting the draft re-seed', async () => {
+    // The conflict panel exists to stop a lost update, so its Reload must not
+    // cause one. Clearing the draft and firing refetch() without awaiting it
+    // lets the seeding effect run first: the draft is re-seeded from the stale
+    // cached template while loadedVersion advances to the fresh one, and the
+    // next Publish sends the new version with the old body -- the worker's CAS
+    // passes and curator B's edits are gone.
+    //
+    // The refetch here resolves to genuinely newer data, a tick later, the way
+    // a real one does. A bare jest.fn() cannot tell the two orderings apart.
+    const newer = {
+      ...t,
+      version: t.version + 2,
+      trims: t.trims.map((trim, i) =>
+        i === 0 ? { ...trim, attributes: { ...trim.attributes, mpg_highway: 41 } } : trim,
+      ),
+    } as Template;
+    refetch.mockImplementation(async () => {
+      await Promise.resolve();
+      bundle = { ...authorBundle(), template: newer };
+      return { data: bundle };
+    });
+    publish.mockRejectedValueOnce({
+      status: 409,
+      conflict: { expected: t.version, actual: t.version + 2 },
+    });
+
+    render(<TemplateEditorView id={t.id} />);
+    edit();
+    fireEvent.click(screen.getByRole('button', { name: /^publish/i }));
+    await screen.findByRole('alert');
+    fireEvent.click(screen.getByRole('button', { name: /reload/i }));
+
+    // The version on the page and the body under it are the same document.
+    await waitFor(() =>
+      expect(screen.getByText(new RegExp(`v${t.version + 2}`))).toBeInTheDocument(),
+    );
+    expect(
+      within(screen.getByTestId('cell-mpg_highway-0')).getByRole('textbox'),
+    ).toHaveValue('41');
+
+    // And what a further edit publishes carries the other curator's change
+    // rather than overwriting it under their version number.
+    publish.mockResolvedValue({ ...newer, version: newer.version + 1 });
+    edit();
+    fireEvent.click(screen.getByRole('button', { name: /^publish/i }));
+    await waitFor(() => expect(publish).toHaveBeenCalledTimes(2));
+    const { payload, version } = publish.mock.calls[1][0];
+    expect(version).toBe(t.version + 2);
+    expect(payload.trims[0].attributes.mpg_highway).toBe(41);
+  });
+
   it('reports the normalisation when a typed value is not what gets stored', () => {
     render(<TemplateEditorView id={t.id} />);
     const input = within(screen.getByTestId('cell-fuel_tank_capacity_gal-0')).getByRole(

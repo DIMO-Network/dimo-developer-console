@@ -33,6 +33,7 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
     actual: number;
   } | null>(null);
   const [published, setPublished] = useState<number | null>(null);
+  const [reloading, setReloading] = useState(false);
 
   // The version loaded, held apart from the draft: it is what If-Match sends,
   // and it must not move when the draft does.
@@ -61,6 +62,26 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
     () => (draft && data ? validateDraft(draft, data.vocabulary) : []),
     [draft, data],
   );
+
+  // The fresh document has to be in hand BEFORE the draft is cleared. Clearing
+  // first and letting the refetch land later hands the seeding effect the stale
+  // template it already has: the draft is re-seeded from it, the effect then
+  // no-ops because the draft is no longer null, and loadedVersion advances over
+  // a body nobody reloaded. The next Publish sends the new version with the old
+  // body, the worker's compare-and-swap passes, and the other curator's edits
+  // are gone -- the lost update this whole panel exists to prevent. Same
+  // ordering as onPublish, for the same reason.
+  const onReload = async () => {
+    setReloading(true);
+    try {
+      await refetch();
+      setDraft(null);
+      setConflict(null);
+      setServerErrors([]);
+    } finally {
+      setReloading(false);
+    }
+  };
 
   const onPublish = async () => {
     if (!draft || loadedVersion === null) return;
@@ -136,14 +157,7 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
                 the current version, then re-apply your changes.
               </span>
               <div>
-                <Button
-                  className="dark"
-                  onClick={() => {
-                    setDraft(null);
-                    setConflict(null);
-                    refetch();
-                  }}
-                >
+                <Button className="dark" loading={reloading} onClick={onReload}>
                   Reload
                 </Button>
               </div>
