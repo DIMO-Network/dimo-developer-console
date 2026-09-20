@@ -178,7 +178,7 @@ export const View = () => {
             <p className="terms-caption">
               By signing in, you are agreeing to our{' '}
               <Anchor
-                href="https://docs.dimo.zone/dinc/developer-terms-of-service"
+                href="https://dimo.org/terms"
                 className="grey underline"
                 target="_blank"
               >
@@ -186,7 +186,7 @@ export const View = () => {
               </Anchor>{' '}
               and{' '}
               <Anchor
-                href="https://dimo.zone/legal/privacy-policy"
+                href="https://dimo.org/privacy"
                 className="grey underline"
                 target="_blank"
               >
