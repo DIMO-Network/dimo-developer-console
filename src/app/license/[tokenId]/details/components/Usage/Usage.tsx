@@ -46,7 +46,7 @@ export const Usage: FC<Props> = ({ license }) => {
         <p className="overview-stat-card__hint">Generate a JWT to see usage</p>
       )}
       <Link
-        href="https://docs.dimo.org/developer-platform/developer-guide/dimo-credits"
+        href="https://dimo.org/pricing"
         target="_blank"
         className="overview-stat-card__link"
       >

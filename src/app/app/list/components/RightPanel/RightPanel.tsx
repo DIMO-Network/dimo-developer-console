@@ -19,11 +19,7 @@ const WhatsDCX = () => {
         DCX is an abbreviation for DIMO Credits. DIMO Credits cost $0.001 per credit and
         API calls and other DIMO fees are priced in DCX.
       </p>
-      <a
-        target="_blank"
-        href={'https://docs.dimo.org/developer-platform/developer-guide/dimo-credits'}
-        className={'underline'}
-      >
+      <a target="_blank" href={'https://dimo.org/pricing'} className={'underline'}>
         Learn more.
       </a>
     </div>
