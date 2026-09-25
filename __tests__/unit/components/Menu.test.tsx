@@ -61,7 +61,7 @@ describe('MenuItem component', () => {
     expect(linkElement).toHaveAttribute('target', '_self');
     expect(linkElement).toHaveTextContent('Test Label');
     expect(screen.getByText('Icon')).toHaveClass('test-icon-class');
-    expect(screen.getByRole('listitem')).toHaveClass('!text-grey-200/50');
+    expect(screen.getByRole('listitem')).toHaveClass('is-disabled');
   });
 
   it('calls the provided function when clicked', () => {

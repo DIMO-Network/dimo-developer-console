@@ -52,7 +52,7 @@ describe('MenuItem Component', () => {
     );
 
     waitFor(() => {
-      expect(screen.getByText('Disabled Menu Item')).toHaveClass('!text-grey-200/50');
+      expect(screen.getByText('Disabled Menu Item')).toHaveClass('is-disabled');
     });
     expect(screen.getByRole('link')).toHaveAttribute('href', '#');
     fireEvent.click(screen.getByRole('link'));

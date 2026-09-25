@@ -5,7 +5,8 @@ import { getMainMenu, bottomMenu } from '@/config/navigation';
 import { useHasDeveloperLicenses } from '@/hooks';
 
 import './Menu.css';
-import Image from 'next/image';
+import { BrandLockup } from '@/components/BrandLockup';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { usePathname, useRouter } from 'next/navigation';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { LayoutContext } from '@/context/LayoutContext';
@@ -48,7 +49,7 @@ export const Menu: FC = withLoadingStatus(() => {
   const logoutButtonConfig = {
     label: 'Logout',
     icon: LogoutIcon,
-    iconClassName: 'h-5 w-5 fill-grey-200',
+    iconClassName: 'h-5 w-5',
     link: onSignOut,
     external: false,
     disabled: false,
@@ -59,14 +60,8 @@ export const Menu: FC = withLoadingStatus(() => {
   return (
     <div className={'main-menu'}>
       <ul className="top-menu">
-        <div className={'flex flex-row justify-between'}>
-          <Image
-            src={'/images/dimo-dev.svg'}
-            alt="DIMO Logo"
-            width={176}
-            height={24}
-            className={'mb-10'}
-          />
+        <div className="menu-brand">
+          <BrandLockup product="Developer Console" />
           <MenuCloseButton />
         </div>
 
@@ -83,6 +78,9 @@ export const Menu: FC = withLoadingStatus(() => {
           })}
       </ul>
       <ul className="bottom-menu">
+        <li className="theme-toggle-item">
+          <ThemeToggle variant="menu" />
+        </li>
         {[logoutButtonConfig, ...bottomMenu].map((item) => (
           <MenuItem key={item.label} {...item} isHighlighted={getIsHighlighted(item)} />
         ))}
@@ -97,7 +95,7 @@ const MenuCloseButton = () => {
   return (
     <div className={'md:hidden'}>
       <button onClick={() => setIsFullScreenMenuOpen(false)}>
-        <XMarkIcon className={'size-6 text-white'} />
+        <XMarkIcon className={'size-6 text-muted'} />
       </button>
     </div>
   );

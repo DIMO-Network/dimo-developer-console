@@ -22,14 +22,14 @@ const CONNECTION_DETAILS_REGEX = /^\/connections\/[^/]+$/;
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
-  if (APP_DETAILS_REGEX.test(path)) return 'App Details';
-  if (EXPLORER_VEHICLE_REGEX.test(path)) return 'Data Explorer';
-  if (LICENSE_DETAILS_REGEX.test(path)) return 'License Details';
-  if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed Vehicles';
+  if (APP_DETAILS_REGEX.test(path)) return 'App details';
+  if (EXPLORER_VEHICLE_REGEX.test(path)) return 'Data explorer';
+  if (LICENSE_DETAILS_REGEX.test(path)) return 'License details';
+  if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed vehicles';
   if (CREATE_WEBHOOK_REGEX.test(path)) return 'Create a webhook';
   if (EDIT_WEBHOOK_REGEX.test(path)) return 'Edit webhook';
-  if (CREATE_CONNECTION_REGEX.test(path)) return 'Create a Connection';
-  if (CONNECTION_DETAILS_REGEX.test(path)) return 'Connection Details';
+  if (CREATE_CONNECTION_REGEX.test(path)) return 'Create a connection';
+  if (CONNECTION_DETAILS_REGEX.test(path)) return 'Connection details';
   // Ordered before TEMPLATE_EDIT_REGEX, which would otherwise match
   // /templates/new and title the create page "Edit template".
   if (path === '/templates/new') return 'New template';
@@ -41,14 +41,14 @@ const pageTitles: Record<string, string> = {
   '/app': 'Home',
   '/webhooks': 'Webhooks',
   '/templates': 'Vehicle templates',
-  '/api-status': 'API Status',
+  '/api-status': 'API status',
   '/connections': 'Connections',
   '/settings': 'Settings',
-  '/explorer': 'Data Explorer',
+  '/explorer': 'Data explorer',
 };
 
 const dataExplorerMenuItem = {
-  label: 'Data Explorer',
+  label: 'Data explorer',
   icon: ChipIcon,
   iconClassName: 'h-5 w-5',
   link: '/explorer',
@@ -91,7 +91,7 @@ const baseMainMenu = [
     disabled: false,
   },
   {
-    label: 'API Status',
+    label: 'API status',
     icon: MonitorHeartIcon,
     iconClassName: 'h-5 w-5',
     link: 'https://stats.uptimerobot.com/snU0rkEEah',

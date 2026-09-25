@@ -11,7 +11,7 @@ export const MenuButton: FC = () => {
   return (
     <button
       className={
-        'bg-surface-default rounded-2xl size-12 flex items-center justify-center'
+        'flex size-10 items-center justify-center rounded-full text-muted hover:bg-control hover:text-ink'
       }
       aria-label="Open menu"
       onClick={onPress}

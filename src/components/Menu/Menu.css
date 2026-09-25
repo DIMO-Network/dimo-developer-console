@@ -1,11 +1,15 @@
 .main-menu {
-  @apply w-full px-4 py-6 flex flex-col gap-4 justify-between md:rounded-xl;
+  @apply flex h-full w-full flex-col justify-between px-3 py-5;
+
+  .menu-brand {
+    @apply mb-7 flex flex-row items-center justify-between;
+  }
 
   ul {
-    @apply flex flex-col gap-4 justify-center;
+    @apply flex flex-col gap-0.5;
+  }
 
-    li {
-      @apply flex flex-row gap-3 items-center text-grey-200;
-    }
+  .theme-toggle-item {
+    @apply list-none;
   }
 }

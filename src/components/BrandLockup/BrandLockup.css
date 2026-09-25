@@ -1,0 +1,17 @@
+.brand-lockup {
+  @apply flex h-8 items-center gap-2.5 px-2.5;
+
+  .wordmark {
+    @apply h-[18px] w-auto;
+  }
+
+  .product {
+    @apply whitespace-nowrap border-l border-outline pl-2.5 text-[17px] font-medium leading-none text-fg;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* The gradient wordmark is drawn for dark backgrounds; on light render it as ink. */
+:root[data-theme='light'] .brand-lockup .wordmark {
+  filter: brightness(0) opacity(0.88);
+}
