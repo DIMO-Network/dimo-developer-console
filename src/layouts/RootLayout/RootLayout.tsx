@@ -8,6 +8,8 @@ import configuration from '@/config';
 import '@/app/globals.css';
 import QueryProvider from '@/hoc/QueryProvider';
 import { useMixPanel } from '@/hooks';
+import { THEME_INIT_SCRIPT } from '@/utils/theme';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 export const metadata: Metadata = {
   title: configuration.appName,
@@ -26,9 +28,14 @@ export const RootLayout = ({
   }, []);
 
   return (
-    <html lang="en">
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className={dimoFont.className}>
-        <QueryProvider>{children}</QueryProvider>
+        <ThemeProvider>
+          <QueryProvider>{children}</QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

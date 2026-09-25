@@ -2,33 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+/*
+ * Design tokens. Values match fleet-lite-app web/src/global-styles.ts.
+ * Colors are RGB channels so Tailwind opacity modifiers work (bg-card/60).
+ * Every variable must exist in both themes (tokens.test.ts enforces it).
+ */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --canvas: 14 15 17; /* #0E0F11 */
+  --sheet: 22 24 27; /* #16181B */
+  --card: 28 31 34; /* #1C1F22 */
+  --control: 39 42 46; /* #272A2E */
+  --highest: 48 52 56; /* #303438 */
+  --bright: 58 62 66; /* #3A3E42 */
+  --overlay: 28 31 34; /* #1C1F22 */
+  --outline: 42 46 50; /* #2A2E32 */
+  --outline-strong: 92 96 99; /* #5C6063 */
+  --ink: 246 247 247; /* #F6F7F7 */
+  --fg: 237 238 238; /* #EDEEEE */
+  --muted: 160 163 162; /* #A0A3A2 */
+  --accent: 70 241 228; /* #46F1E4 */
+  --accent-ink: 70 241 228; /* #46F1E4 */
+  --on-accent: 6 32 30; /* #06201E */
+  --sky: 140 208 255; /* #8CD0FF */
+  --positive: 54 223 113; /* #36DF71 */
+  --warning: 255 172 96; /* #FFAC60 */
+  --negative: 255 96 96; /* #FF6060 */
+  --negative-soft: 64 35 33; /* #402321 */
+  --favorite: 255 205 41; /* #FFCD29 */
+  --nav-active: 36 39 43; /* #24272B */
+
+  --accent-soft: rgba(70, 241, 228, 0.12);
+  --accent-soft-strong: rgba(70, 241, 228, 0.28);
+  --nav-hover: #16181b;
+  --sheet-border: rgba(255, 255, 255, 0.06);
+  --scrim: rgba(8, 9, 10, 0.62);
+  --brand-gradient: linear-gradient(105deg, #8cd0ff 0%, #46f1e4 100%);
+  --brand-glow:
+    radial-gradient(60% 50% at 35% 40%, rgba(140, 208, 255, 0.12), transparent 70%),
+    radial-gradient(55% 50% at 65% 60%, rgba(70, 241, 228, 0.1), transparent 70%);
+  --shadow-float:
+    0 16px 48px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 214, 219, 220;
-    --background-end-rgb: 255, 255, 255;
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --canvas: 231 233 233; /* #E7E9E9 */
+  --sheet: 255 255 255; /* #FFFFFF */
+  --card: 246 247 247; /* #F6F7F7 */
+  --control: 233 235 235; /* #E9EBEB */
+  --highest: 223 226 226; /* #DFE2E2 */
+  --bright: 255 255 255; /* #FFFFFF */
+  --overlay: 255 255 255; /* #FFFFFF */
+  --outline: 225 228 228; /* #E1E4E4 */
+  --outline-strong: 160 163 162; /* #A0A3A2 */
+  --ink: 19 20 23; /* #131417 */
+  --fg: 19 20 23; /* #131417 */
+  --muted: 94 97 99; /* #5E6163 */
+  --accent: 34 199 186; /* #22C7BA */
+  --accent-ink: 11 122 114; /* #0B7A72 */
+  --on-accent: 6 32 30; /* #06201E */
+  --sky: 43 130 213; /* #2B82D5 */
+  --positive: 27 136 66; /* #1B8842 */
+  --warning: 183 91 10; /* #B75B0A */
+  --negative: 199 0 0; /* #C70000 */
+  --negative-soft: 255 240 240; /* #FFF0F0 */
+  --favorite: 201 154 0; /* #C99A00 */
+  --nav-active: 255 255 255; /* #FFFFFF */
+
+  --accent-soft: rgba(34, 199, 186, 0.14);
+  --accent-soft-strong: rgba(34, 199, 186, 0.3);
+  --nav-hover: rgba(255, 255, 255, 0.55);
+  --sheet-border: rgba(19, 20, 23, 0.06);
+  --scrim: rgba(19, 20, 23, 0.32);
+  --brand-gradient: linear-gradient(105deg, #8cd0ff 0%, #46f1e4 100%);
+  --brand-glow:
+    radial-gradient(60% 50% at 35% 40%, rgba(140, 208, 255, 0.28), transparent 70%),
+    radial-gradient(55% 50% at 65% 60%, rgba(70, 241, 228, 0.22), transparent 70%);
+  --shadow-float:
+    0 16px 40px -14px rgba(19, 20, 23, 0.22), 0 0 0 1px rgba(19, 20, 23, 0.06);
+  --shadow-sm: 0 1px 2px rgba(19, 20, 23, 0.12);
+}
+
+@layer base {
+  html,
+  body {
+    @apply bg-canvas text-fg;
   }
-}
 
-body {
-  color: rgb(var(--foreground-rgb));
-  @apply bg-black;
+  body {
+    @apply text-body-sm antialiased;
+    font-feature-settings: 'tnum';
+  }
 }
 
 .content {
   @apply flex flex-row;
-}
-
-@layer base {
-  body {
-    @apply text-sm font-light not-italic;
-  }
 }
 
 @layer utilities {
