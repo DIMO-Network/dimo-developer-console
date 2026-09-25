@@ -10,7 +10,7 @@ interface SupportAgentIconProps extends IconProps {
 
 export const SupportAgentIcon: FC<SupportAgentIconProps> = ({
   className = '',
-  color = '#BBBDBC',
+  color = '#BBBDBC', // token-check:allow
 }) => {
   return (
     <svg

@@ -12,7 +12,7 @@ check() {
   local name=$1 pattern=$2 hits
   hits=$(grep -rnE --include='*.css' --include='*.ts' --include='*.tsx' \
     --exclude-dir=gql --exclude-dir=generated --exclude-dir=__fixtures__ --exclude-dir=__tests__ \
-    --exclude=globals.css --exclude=GoogleIcon.tsx --exclude=GitHubIcon.tsx \
+    --exclude=globals.css --exclude=GoogleIcon.tsx `# multi-color brand logo` \
     "$pattern" "${paths[@]}" | grep -v 'token-check:allow')
   if [ -n "$hits" ]; then
     echo "✗ $name ($(echo "$hits" | wc -l | tr -d ' '))"

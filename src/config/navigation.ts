@@ -69,7 +69,7 @@ const baseMainMenu = [
   {
     label: 'Webhooks',
     icon: IntegrationIcon,
-    iconClassName: 'h-5 w-5 fill-white stroke-white stroke-1',
+    iconClassName: 'h-5 w-5',
     link: '/webhooks',
     external: false,
     disabled: false,
@@ -127,7 +127,7 @@ export const bottomMenu = [
   {
     label: 'Settings',
     icon: SettingsIcon,
-    iconClassName: 'h-5 w-5 fill-grey-200',
+    iconClassName: 'h-5 w-5',
     link: '/settings',
     external: false,
     disabled: false,
