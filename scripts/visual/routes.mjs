@@ -1,0 +1,107 @@
+// ready: text that only appears once the main content has rendered (checked
+// first). fill {selector: value} then click (selector or list) set up a state;
+// after: text awaited once they are done. viewports limits a state to one size.
+// noLicenses: identity returns no developer licenses (the empty /app state).
+import { LICENSE, CONNECTIONS, WEBHOOKS } from './fixtures.mjs';
+
+const t = LICENSE.tokenId;
+const c = LICENSE.clientId;
+
+export const ROUTES = [
+  { name: 'app', path: '/app', ready: LICENSE.alias },
+  {
+    name: 'app-create-modal',
+    path: '/app',
+    ready: 'Create a license',
+    noLicenses: true,
+    click: 'text=Create a license',
+  },
+  {
+    name: 'app-mobile-menu',
+    path: '/app',
+    ready: LICENSE.alias,
+    click: '[aria-label="Open menu"]',
+    viewports: ['mobile'],
+  },
+  {
+    name: 'license-details',
+    path: `/license/${t}/details`,
+    ready: LICENSE.alias,
+    // Open every collapsible section so signers, JWTs, URIs and brands show.
+    click: [
+      'text="Developer JWTs"',
+      'text="API Keys"',
+      'text="Authorized Redirect URIs"',
+      'text="Brand"',
+    ],
+  },
+  {
+    name: 'license-configurator',
+    path: `/license/${t}/configurator`,
+    ready: 'Fleet onboarding',
+  },
+  {
+    name: 'license-configurator-new',
+    path: `/license/${t}/configurator/new`,
+    ready: 'Which component?',
+  },
+  {
+    name: 'license-configurator-edit',
+    path: `/license/${t}/configurator/cfg-1`,
+    ready: 'Use Permission Template',
+  },
+  { name: 'license-vehicles', path: `/license/vehicles/${c}`, ready: 'Model 3' },
+  { name: 'connections', path: '/connections', ready: CONNECTIONS[0].name },
+  {
+    name: 'connection-details',
+    path: `/connections/${CONNECTIONS[0].id}`,
+    ready: CONNECTIONS[0].name,
+  },
+  {
+    name: 'connection-create',
+    path: '/connections/create/0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6',
+    ready: 'Purchase Connection License',
+  },
+  { name: 'webhooks', path: '/webhooks', ready: WEBHOOKS[0].displayName },
+  {
+    name: 'webhook-create',
+    path: `/webhooks/create/${c}`,
+    ready: 'Build the conditions',
+  },
+  {
+    name: 'webhook-edit',
+    path: `/webhooks/edit/${c}/${WEBHOOKS[0].id}`,
+    ready: 'valueNumber > 120',
+  },
+  {
+    name: 'templates',
+    path: '/templates',
+    ready: 'Search',
+    fill: {
+      'input[placeholder="Toyota"]': 'Toyota',
+      'input[placeholder="Camry"]': 'Camry',
+    },
+    click: 'button:has-text("Search")',
+    after: 'toyota_camry_2021',
+  },
+  { name: 'template-edit', path: '/templates/toyota_camry_2020', ready: 'Camry' },
+  { name: 'template-new', path: '/templates/new', ready: 'Create template' },
+  { name: 'explorer', path: '/explorer', ready: 'Model 3' },
+  { name: 'explorer-vehicle', path: '/explorer/190231', ready: 'Available Signals' },
+  { name: 'settings', path: '/settings', ready: 'sam@harness.dev' },
+  { name: 'support', path: '/support', ready: 'Report an issue' },
+  { name: 'sign-in', path: '/sign-in', ready: 'Build with car data', guest: true },
+  { name: 'sign-up', path: '/sign-up', ready: 'Creating account with', guest: true },
+  {
+    name: 'sign-up-build-for',
+    path: '/sign-up?flow=build-for',
+    ready: 'What are you building?',
+    guest: true,
+  },
+  {
+    name: 'email-recovery',
+    path: '/email-recovery',
+    ready: 'Reset Passkeys',
+    guest: true,
+  },
+];

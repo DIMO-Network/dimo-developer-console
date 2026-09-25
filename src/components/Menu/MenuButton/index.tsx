@@ -13,6 +13,7 @@ export const MenuButton: FC = () => {
       className={
         'bg-surface-default rounded-2xl size-12 flex items-center justify-center'
       }
+      aria-label="Open menu"
       onClick={onPress}
     >
       <Bars3Icon className={'size-6'} />
