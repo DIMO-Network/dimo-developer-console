@@ -1,6 +1,5 @@
 import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { gtSuper } from '@/utils/font';
 import { FC } from 'react';
 
 export const AccountFoundSignup: FC = () => {
@@ -8,7 +7,7 @@ export const AccountFoundSignup: FC = () => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className={gtSuper.className}>DIMO Account Found</p>
+          <p className="text-title text-ink">DIMO Account Found</p>
         </div>
         <div className="otp-login-text">
           <p>

@@ -32,7 +32,7 @@ export const RootLayout = ({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className={dimoFont.className}>
+      <body className={`${dimoFont.variable} ${dimoFont.className}`}>
         <ThemeProvider>
           <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>

@@ -1,7 +1,6 @@
 import { Anchor } from '@/components/Anchor';
 import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
-import { gtSuper } from '@/utils/font';
 import { Button } from '@/components/Button';
 import { useState, useRef, useEffect, FC, useContext } from 'react';
 import { captureException } from '@sentry/nextjs';
@@ -137,7 +136,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className={gtSuper.className}>Welcome back!</p>
+          <p className="text-title text-ink">Welcome back!</p>
         </div>
         <div className="otp-login-text">
           <p>

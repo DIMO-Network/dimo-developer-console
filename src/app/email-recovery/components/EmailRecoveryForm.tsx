@@ -10,7 +10,6 @@ import { NotificationContext } from '@/context/notificationContext';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { EmbeddedKey, saveToLocalStorage } from '@/utils/localStorage';
 import { emailRecovery } from '@/actions/user';
-import { gtSuper } from '@/utils/font';
 import { isEmpty } from 'lodash';
 import { useRouter } from 'next/navigation';
 import { IPasskeyRecoveryState } from '@/types/auth';
@@ -60,7 +59,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
   return (
     <div className="email-recovery__form">
       <div className="email-recovery__header">
-        <p className={gtSuper.className}>Reset Passkeys</p>
+        <p className="text-title text-ink">Reset Passkeys</p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="email-recovery__input">
         <p>Your old passkeys will not longer work after the reset is complete</p>
