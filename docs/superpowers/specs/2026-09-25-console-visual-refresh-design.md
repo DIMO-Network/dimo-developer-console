@@ -35,30 +35,30 @@ Source of truth for every value in this spec: fleet-lite-app `docs/DESIGN.md` an
 
 All colors become CSS custom properties in `src/app/globals.css`, declared as space-separated RGB channels (`--canvas: 14 15 17;`) so Tailwind opacity modifiers work. Values are fleet's:
 
-| Role                               | Variable / Tailwind name            | Dark                  | Light                   |
-| ---------------------------------- | ----------------------------------- | --------------------- | ----------------------- |
-| App canvas (behind sheet, sidebar) | `canvas`                            | `#0E0F11`             | `#E7E9E9`               |
-| Page sheet                         | `sheet`                             | `#16181B`             | `#FFFFFF`               |
-| Card                               | `card`                              | `#1C1F22`             | `#F6F7F7`               |
-| Control fill, hover                | `control`                           | `#272A2E`             | `#E9EBEB`               |
-| Bright surface (active segment)    | `bright`                            | `#3A3E42`             | `#FFFFFF`               |
-| Highest surface (chips)            | `highest`                           | `#303438`             | `#DFE2E2`               |
-| Floating panel, modal, menu        | `overlay`                           | `#1C1F22`             | `#FFFFFF`               |
-| Hairline                           | `outline`                           | `#2A2E32`             | `#E1E4E4`               |
-| Title ink                          | `ink`                               | `#F6F7F7`             | `#131417`               |
-| Body text                          | `body`                              | `#EDEEEE`             | `#131417`               |
-| Secondary text                     | `muted`                             | `#A0A3A2`             | `#5E6163`               |
-| Accent fill                        | `accent`                            | `#46F1E4`             | `#22C7BA`               |
-| Accent as text or icon             | `accent-ink`                        | `#46F1E4`             | `#0B7A72`               |
-| Text on accent                     | `on-accent`                         | `#06201E`             | `#06201E`               |
-| Selected tint                      | `accent-soft`, `accent-soft-strong` | mint 12% / 28%        | 14% / 30%               |
-| Positive                           | `positive`                          | `#36DF71`             | `#1B8842`               |
-| Warning                            | `warning`                           | `#FFAC60`             | `#B75B0A`               |
-| Negative / error                   | `negative`                          | `#FF6060`             | `#C70000`               |
-| Error container                    | `negative-soft`                     | `#402321`             | `#FFF0F0`               |
-| Favorite                           | `favorite`                          | `#FFCD29`             | `#C99A00`               |
-| Nav hover / active                 | `nav-hover`, `nav-active`           | `#16181B`, `#24272B`  | white 55%, `#FFFFFF`    |
-| Scrim                              | `scrim`                             | `rgba(8, 9, 10, .62)` | `rgba(19, 20, 23, .32)` |
+| Role                                                           | Variable / Tailwind name            | Dark                  | Light                   |
+| -------------------------------------------------------------- | ----------------------------------- | --------------------- | ----------------------- |
+| App canvas (behind sheet, sidebar)                             | `canvas`                            | `#0E0F11`             | `#E7E9E9`               |
+| Page sheet                                                     | `sheet`                             | `#16181B`             | `#FFFFFF`               |
+| Card                                                           | `card`                              | `#1C1F22`             | `#F6F7F7`               |
+| Control fill, hover                                            | `control`                           | `#272A2E`             | `#E9EBEB`               |
+| Bright surface (active segment)                                | `bright`                            | `#3A3E42`             | `#FFFFFF`               |
+| Highest surface (chips)                                        | `highest`                           | `#303438`             | `#DFE2E2`               |
+| Floating panel, modal, menu                                    | `overlay`                           | `#1C1F22`             | `#FFFFFF`               |
+| Hairline                                                       | `outline`                           | `#2A2E32`             | `#E1E4E4`               |
+| Title ink                                                      | `ink`                               | `#F6F7F7`             | `#131417`               |
+| Body text (`fg`; `body` would clash with the `text-body` size) | `fg`                                | `#EDEEEE`             | `#131417`               |
+| Secondary text                                                 | `muted`                             | `#A0A3A2`             | `#5E6163`               |
+| Accent fill                                                    | `accent`                            | `#46F1E4`             | `#22C7BA`               |
+| Accent as text or icon                                         | `accent-ink`                        | `#46F1E4`             | `#0B7A72`               |
+| Text on accent                                                 | `on-accent`                         | `#06201E`             | `#06201E`               |
+| Selected tint                                                  | `accent-soft`, `accent-soft-strong` | mint 12% / 28%        | 14% / 30%               |
+| Positive                                                       | `positive`                          | `#36DF71`             | `#1B8842`               |
+| Warning                                                        | `warning`                           | `#FFAC60`             | `#B75B0A`               |
+| Negative / error                                               | `negative`                          | `#FF6060`             | `#C70000`               |
+| Error container                                                | `negative-soft`                     | `#402321`             | `#FFF0F0`               |
+| Favorite                                                       | `favorite`                          | `#FFCD29`             | `#C99A00`               |
+| Nav hover / active                                             | `nav-hover`, `nav-active`           | `#16181B`, `#24272B`  | white 55%, `#FFFFFF`    |
+| Scrim                                                          | `scrim`                             | `rgba(8, 9, 10, .62)` | `rgba(19, 20, 23, .32)` |
 
 Non-color tokens:
 
@@ -70,17 +70,17 @@ Any color a component needs that is not in this table is added here (and to `doc
 
 ### Tailwind mapping
 
-`tailwind.config.ts` `theme.extend.colors` maps each name to `rgb(var(--name) / <alpha-value>)`. The old names are **deleted, not aliased**: `surface`, `cta`, `border`, `text`, `feedback`, `grey`, `dark-grey`, `dark`, `red`. The `primary` ramp is removed too; its uses move to `accent` / `accent-ink`. A leftover class then fails the build (`@apply` of an unknown class is a Tailwind error), which is how the sweep is checked for completeness.
+`tailwind.config.ts` `theme.extend.colors` maps each name to `rgb(var(--name) / <alpha-value>)`. The old names (`surface`, `cta`, `border`, `text`, `feedback`, `grey`, `dark-grey`, `dark`, `primary`, `red`) are first kept as **temporary aliases** that resolve to the nearest new token, so the whole app re-themes on day one and every intermediate commit builds. When all passes are done, the aliases are deleted and `theme.colors` is replaced outright (not extended) with only the tokens plus `transparent`, `current` and `inherit`, so Tailwind's default palettes (`gray`, `indigo`, `white`, `black` …) disappear too. A leftover `@apply` then fails the build, and a grep check (`scripts/visual/check-tokens.sh`) catches leftovers in TSX class strings, which Tailwind silently ignores.
 
 Tailwind's built-in `white` / `black` stay available but are banned for surfaces and text in components. The sweep replaces the 62 files using `text-white` / `bg-white` / `bg-black` with role tokens.
 
 ### Theme mechanism
 
 - The theme is an attribute on `<html>`: `data-theme="dark" | "light"`. Tokens are declared under `:root[data-theme="dark"]` and `:root[data-theme="light"]`; dark is also the `:root` default.
-- An inline script in the root layout `<head>` runs before paint. It reads `localStorage['dimo-theme']`, falls back to `prefers-color-scheme`, and sets the attribute, so there is no flash of the wrong theme. `<html>` gets `suppressHydrationWarning`.
+- An inline script in the root layout `<head>` runs before paint. It reads `localStorage['dimo-theme']`, defaults to dark (as fleet does, not the OS preference), and sets the attribute, so there is no flash of the wrong theme. `<html>` gets `suppressHydrationWarning`.
 - `src/context/ThemeContext.tsx` provides `theme` and `setTheme(theme)`. `setTheme` writes the attribute and localStorage. No new dependency (not `next-themes`).
-- The toggle is a "Light mode" / "Dark mode" item in the account menu (`AccountInfoButton`), and also on guest pages (sign-in, sign-up) as a small icon button in the corner.
-- Third-party surfaces that can't read CSS variables (Turnkey/auth iframes, Stripe elements, date picker, any canvas) get their colors from one exported constant, `THEME_COLORS` in `src/utils/theme.ts`, keyed by theme. That file mirrors the token values; it is the only place hex is allowed outside `globals.css`.
+- The toggle is a "Light mode" / "Dark mode" item at the bottom of the sidebar above Logout, as in fleet's side nav, and also on guest pages (sign-in, sign-up) as a small icon button in the corner.
+- No third-party widget in the console renders its own themed UI (no Turnkey iframe or Stripe elements; the date picker is Tailwind), so no JS-side color mirror is needed. Hex is allowed only in `globals.css`, the two brand-logo icons, and stored data values.
 
 ## 2. Typography
 
@@ -99,7 +99,7 @@ Tailwind's built-in `white` / `black` stay available but are banned for surfaces
 | `text-label`       | Label, table header, meta           | 500 12/16, `muted`        |
 
 - Base body text becomes `text-body-sm` in `body` colour; the current `font-light` base is dropped.
-- **Sentence case everywhere.** Remove `uppercase` and `tracking-*` from all labels, buttons, nav, table headers.
+- **Sentence case everywhere.** Remove `uppercase` and `tracking-*` from all labels, buttons, nav, table headers. Title-case strings in nav labels, page titles, buttons and table headers are re-cased ("Connection Details" → "Connection details"); casing is the only text edit allowed, and tests that match those strings are updated with them.
 - **Monospace** stays only where the content is code or a key a developer copies: API keys, client IDs, JWTs, CEL expressions, webhook payloads, template editor code views. It uses the system mono stack (`ui-monospace, SFMono-Regular, Menlo, monospace`) at 13/20. Token ids, VINs and counts use Euclid with tabular figures, not mono.
 
 ## 3. App shell
@@ -107,7 +107,7 @@ Tailwind's built-in `white` / `black` stay available but are banned for surfaces
 Changes to `src/layouts/AuthorizedLayout`, `src/components/Menu`, `src/components/Header`:
 
 - **Frame:** `body` and `.main` are `bg-canvas`. The sidebar sits directly on the canvas (no card). The content column becomes an inset sheet: `bg-sheet`, 8px margin on top/right/bottom, `rounded-panel`, 1px `outline` border at 60%. The page scrolls inside the sheet.
-- **Sidebar:** 244px. Top: DIMO gradient wordmark + "Developer Console" in `text-card-title` `ink` (dark); in light the wordmark renders as solid ink (fleet's rule: the gradient only survives on dark). Items: 40px tall, `rounded-control`, 14px/500 `muted` labels, icon 20px; hover `nav-hover`; active `nav-active` with `ink` label and icon in `accent-ink`. Credits widget and account button pinned to the bottom.
+- **Sidebar:** 244px. Top: DIMO gradient wordmark + "Developer Console" in `text-card-title` `ink` (dark); in light the wordmark renders as solid ink (fleet's rule: the gradient only survives on dark). Items: 40px tall, `rounded-control`, 14px/500 `muted` labels, icon 20px; hover `nav-hover`; active `nav-active` with `ink` label and icon in `accent-ink`. Bottom group: theme toggle, Logout, then the existing bottom menu. Credits widget, support and account avatar stay in the header, right side.
 - **Header:** 72px, transparent, no bottom border, horizontal padding matches the sheet gutter (24px). Page title (`text-title`) left; page actions right.
 - **Mobile:** `FullScreenMenu` uses `bg-canvas` with the same item styling; the menu button stays in the header.
 - **Guest layout** (sign-in, sign-up, email recovery): full-bleed `canvas`, centred `sheet` card with `rounded-panel`, the wordmark above it, theme toggle top-right.
@@ -133,7 +133,7 @@ Restyled before any page, in `src/components`. Each keeps its props and class AP
 | `CopyButton`, `CopyableRow`                                                                           | Value in mono (keys) or tabular Euclid (ids); copy icon `muted` → `accent-ink` on success.                                                                                                                                                                                                                                                                                                                                                              |
 | `Anchor`                                                                                              | `accent-ink`, underline on hover only.                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `CreditsWidget`, `TokenBalance`, `TotalVehicleCount`                                                  | Numbers in `text-metric` or `text-card-title` with tabular figures; label `text-label`.                                                                                                                                                                                                                                                                                                                                                                 |
-| `UserAvatar`, `AccountInfoButton`                                                                     | Avatar `bg-control` with `ink` initials; menu hosts the theme toggle.                                                                                                                                                                                                                                                                                                                                                                                   |
+| `UserAvatar`, `AccountInfoButton`                                                                     | Avatar `bg-control` with `ink` initials. `AccountInfoButton` `button` variant uses `secondary`.                                                                                                                                                                                                                                                                                                                                                         |
 | `Icons` (36 files)                                                                                    | Hardcoded fills become `currentColor`, so icons follow the text token. Brand logos (Google `#EA4335`, `#FBBC05` etc.) keep their fixed colours.                                                                                                                                                                                                                                                                                                         |
 | `AppCard`, `LicenseCard`                                                                              | Tonal `card`, `rounded-card`, hover step; license id in tabular Euclid; status dot rule below.                                                                                                                                                                                                                                                                                                                                                          |
 
@@ -187,19 +187,18 @@ For each pass and before the PR:
 
 ## 8. Execution and ship
 
-1. Branch `console-visual-refresh` off `template-editor`. Harness + baseline screenshots.
+1. Branch `console-visual-refresh` off `template-editor`. Harness + baseline screenshots. Record the pre-existing Jest failures (19 suites / 20 tests fail on `template-editor` as of 2026-09-25) so later runs are judged on "no new failures".
 2. Foundation, one agent: tokens, Tailwind mapping, theme mechanism and toggle, fonts, shell, logo assets, icon `currentColor` sweep.
 3. Shared components (section 4), one agent.
 4. Reference screen (section 5), then `docs/DESIGN.md`.
-5. Five parallel passes (section 6) on disjoint files. Each uses its own dev server port (3000 + n) so hot reloads don't collide; the mock API is shared and read-only.
-6. Integration: add the tokens passes asked for, full harness run, all checks.
+5. Five parallel passes (section 6) on disjoint files, sharing one dev server and the mock API. Two `next dev` processes cannot share a `.next` directory, so the harness retries a shot once when another pass hot-reloads the server.
+6. Integration: add the tokens passes asked for, delete the legacy aliases and lock `theme.colors`, full harness run, all checks.
 7. One PR into `template-editor`, or into `master` if `template-editor` has merged by then. Verified on the Vercel preview with a real login in both themes. Rollback is a Vercel instant rollback to the previous production deployment.
 
 ## Risks
 
 - **Euclid web licence** is unconfirmed (same state as fleet). Swapping the face later is one file (`src/utils/font.ts`).
 - **Branch base:** `template-editor` is 25 commits ahead of `master` and unmerged. Continued work on it will conflict with this branch in `src/components/TemplateEditor` and shared components; rebase this branch onto it before pass C.
-- **Third-party UI** (Turnkey auth, Stripe, date picker) may only partially theme; `THEME_COLORS` covers what their APIs accept, and the rest is accepted as-is and noted in the PR.
 - **Snapshot tests** will churn; each update is reviewed, not bulk-accepted.
 
 ## Open questions
