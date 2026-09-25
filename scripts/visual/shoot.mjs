@@ -150,6 +150,7 @@ async function shootOnce(route, theme, vp, file) {
     if (consoleErrors.length)
       throw new Error(`hydration error: ${consoleErrors[0].slice(0, 160)}`);
     await page.screenshot({ path: file, fullPage: true });
+    await fs.rm(file.replace(/\.png$/, '.FAILED.png'), { force: true });
   } catch (e) {
     await page
       .screenshot({ path: file.replace(/\.png$/, '.FAILED.png'), fullPage: true })
