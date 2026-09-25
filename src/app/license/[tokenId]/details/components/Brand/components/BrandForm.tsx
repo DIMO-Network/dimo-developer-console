@@ -235,13 +235,13 @@ export const BrandForm: FC<Props> = ({
 
       {isOwner && (
         <div className="flex flex-row gap-3 pt-2">
-          <Button type="submit" className="light" disabled={!dirty} loading={saving}>
+          <Button type="submit" disabled={!dirty} loading={saving}>
             Save Brand
           </Button>
           {isExisting && !brand.isDefault && (
             <Button
               type="button"
-              className="light"
+              variant="secondary"
               onClick={handleSetDefault}
               loading={settingDefault}
             >
@@ -250,7 +250,7 @@ export const BrandForm: FC<Props> = ({
           )}
           <Button
             type="button"
-            className="light"
+            variant="secondary"
             onClick={onCancel}
             disabled={saving || settingDefault}
           >

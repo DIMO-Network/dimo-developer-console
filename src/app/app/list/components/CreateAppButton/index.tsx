@@ -14,7 +14,7 @@ const CreateAppButton: React.FC<Props> = ({ className = 'with-icon' }) => {
     <>
       <CreateAppModal isOpen={isModalOpen} handleIsOpen={setIsModalOpen} />
       <Button
-        variant="secondary"
+        variant="primary"
         className={clsx(className, '!h-10')}
         onClick={() => setIsModalOpen(true)}
       >

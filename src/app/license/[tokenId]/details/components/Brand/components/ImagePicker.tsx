@@ -236,13 +236,7 @@ const SquareCropper: FC<{
           onChange={(e) => setZoom(Number(e.target.value))}
           className="flex-1"
         />
-        <Button
-          type="button"
-          className="light"
-          onClick={confirm}
-          disabled={!pixels}
-          loading={pending}
-        >
+        <Button type="button" onClick={confirm} disabled={!pixels} loading={pending}>
           Crop
         </Button>
       </div>

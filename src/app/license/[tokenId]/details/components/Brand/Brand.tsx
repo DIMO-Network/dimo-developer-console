@@ -152,7 +152,11 @@ export const Brand: FC<Props> = ({ license }) => {
             )}
             {isOwner && (
               <div className="pt-4">
-                <Button type="button" className="light" onClick={() => setEditing('new')}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setEditing('new')}
+                >
                   Add Brand
                 </Button>
               </div>
