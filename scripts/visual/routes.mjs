@@ -2,19 +2,33 @@
 // first). fill {selector: value} then click (selector or list) set up a state;
 // after: text awaited once they are done. viewports limits a state to one size.
 // noLicenses: identity returns no developer licenses (the empty /app state).
+// knownHydrationError: a mismatch already present on the untouched baseline;
+// it (and the dev badge's issue count) is logged instead of failing the shot.
 import { LICENSE, CONNECTIONS, WEBHOOKS } from './fixtures.mjs';
+
+// Both pages wrap their view in <Suspense>, which can hydrate after the header's
+// useUser() query has resolved; the view then renders user data the server
+// rendered without. Intermittent, and present before any styling work.
+const APP_HYDRATION = 'welcome row: BubbleLoader on server, waving-hand img on client';
+const SETTINGS_HYDRATION = 'UserDetails: null on server, user card on client';
 
 const t = LICENSE.tokenId;
 const c = LICENSE.clientId;
 
 export const ROUTES = [
-  { name: 'app', path: '/app', ready: LICENSE.alias },
+  {
+    name: 'app',
+    path: '/app',
+    ready: LICENSE.alias,
+    knownHydrationError: APP_HYDRATION,
+  },
   {
     name: 'app-create-modal',
     path: '/app',
     ready: 'Create a license',
     noLicenses: true,
     click: 'text=Create a license',
+    knownHydrationError: APP_HYDRATION,
   },
   {
     name: 'app-mobile-menu',
@@ -22,6 +36,7 @@ export const ROUTES = [
     ready: LICENSE.alias,
     click: '[aria-label="Open menu"]',
     viewports: ['mobile'],
+    knownHydrationError: APP_HYDRATION,
   },
   {
     name: 'license-details',
@@ -88,7 +103,12 @@ export const ROUTES = [
   { name: 'template-new', path: '/templates/new', ready: 'Create template' },
   { name: 'explorer', path: '/explorer', ready: 'Model 3' },
   { name: 'explorer-vehicle', path: '/explorer/190231', ready: 'Available Signals' },
-  { name: 'settings', path: '/settings', ready: 'sam@harness.dev' },
+  {
+    name: 'settings',
+    path: '/settings',
+    ready: 'sam@harness.dev',
+    knownHydrationError: SETTINGS_HYDRATION,
+  },
   { name: 'support', path: '/support', ready: 'Report an issue' },
   { name: 'sign-in', path: '/sign-in', ready: 'Build with car data', guest: true },
   { name: 'sign-up', path: '/sign-up', ready: 'Creating account with', guest: true },

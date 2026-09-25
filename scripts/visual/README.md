@@ -10,7 +10,13 @@ screenshots of styling work. Dev-only; nothing here ships.
     npm run visual:shoot -- --label=dbg --only='^settings$' --debug  # browser errors
 
 Output: scripts/visual/out/<label>/<route>--<theme>--<viewport>.png. A failed
-shot is saved as \*.FAILED.png and the run exits 1.
+shot is saved as \*.FAILED.png and the run exits 1. Every browser page error is
+written to out/<label>/errors.json, for diffing against the baseline.
+
+A shot fails (without a retry) on a hydration mismatch or when Next's dev
+overlay shows an error dialog or issue count. Routes whose mismatch already
+exists on the baseline carry `knownHydrationError` in `routes.mjs`; theirs is
+logged instead.
 
 Routes and the states they open (clicks, fills, the text each waits for) are
 in `routes.mjs`; fixture data is in `fixtures.mjs` (restart `visual:dev` after
