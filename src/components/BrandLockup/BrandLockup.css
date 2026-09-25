@@ -1,12 +1,12 @@
 .brand-lockup {
-  @apply flex h-8 items-center gap-2.5 px-2.5;
+  @apply flex h-8 items-center gap-2 px-2.5;
 
   .wordmark {
     @apply h-[18px] w-auto;
   }
 
   .product {
-    @apply whitespace-nowrap border-l border-outline pl-2.5 text-[17px] font-medium leading-none text-fg;
+    @apply whitespace-nowrap border-l border-outline pl-2 text-[15px] font-medium leading-none text-fg;
     letter-spacing: -0.01em;
   }
 }

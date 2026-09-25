@@ -1,15 +1,23 @@
 .header {
-  @apply flex h-[72px] w-full items-center justify-between;
+  @apply flex h-[72px] w-full min-w-0 items-center justify-between gap-2;
 
   .page-title {
-    @apply text-title text-ink;
+    @apply min-w-0 truncate text-title text-ink;
   }
 
   .user-information {
-    @apply flex flex-row items-center gap-3;
+    @apply flex flex-shrink-0 flex-row items-center gap-2 md:gap-3;
 
     .account-information {
       @apply items-center rounded-control bg-control p-3;
     }
+  }
+
+  /* CreditsWidget sets its own min widths for desktop breathing room; below
+     md they leave no room for the title/avatar at 390px, so relax them here
+     rather than in CreditsWidget's own files. */
+  .credits,
+  .credits .credits-info {
+    @apply max-md:min-w-0;
   }
 }
