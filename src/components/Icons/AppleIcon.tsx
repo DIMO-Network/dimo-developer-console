@@ -21,12 +21,7 @@ export const AppleIcon: FC<IconProps> = ({ className = '' }) => {
       </g>
       <defs>
         <clipPath id="clip0_5347_4117">
-          <rect
-            width="12.5674"
-            height="14.1667"
-            fill="currentColor"
-            transform="translate(3.71631 3.41602)"
-          />
+          <rect width="12.5674" height="14.1667" transform="translate(3.71631 3.41602)" />
         </clipPath>
       </defs>
     </svg>
