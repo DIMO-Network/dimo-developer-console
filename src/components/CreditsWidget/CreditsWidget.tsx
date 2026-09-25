@@ -56,7 +56,7 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
             </div>
           </div>
           <div className={'flex flex-1 flex-col w-full gap-2'}>
-            <Button className={'dark w-full'} onClick={handleBuyCredits}>
+            <Button variant="secondary" className={'w-full'} onClick={handleBuyCredits}>
               Buy DCX
             </Button>
             <AccountInfoButton variant={'button'} />

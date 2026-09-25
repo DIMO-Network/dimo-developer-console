@@ -125,7 +125,9 @@ export const LicenseCard = (props: {
 
         {/* CTA */}
         <Anchor href={`/license/${license.tokenId}/details`}>
-          <Button className={'dark w-full !h-10'}>License Details</Button>
+          <Button variant="secondary" className={'w-full !h-10'}>
+            License Details
+          </Button>
         </Anchor>
       </div>
     </Card>

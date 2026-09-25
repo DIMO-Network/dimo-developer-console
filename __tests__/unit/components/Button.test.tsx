@@ -43,4 +43,33 @@ describe('Button', () => {
       expect(handleClick).not.toHaveBeenCalled();
     });
   });
+
+  it('is a primary button by default', () => {
+    render(<Button>Save</Button>);
+    expect(screen.getByRole('button')).toHaveClass('button', 'primary');
+  });
+
+  it.each(['secondary', 'ghost', 'destructive', 'destructive-ghost'] as const)(
+    'renders the %s variant',
+    (variant) => {
+      render(<Button variant={variant}>Go</Button>);
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass('button', variant);
+      expect(button).not.toHaveClass('primary');
+    },
+  );
+
+  it('keeps extra classes alongside the variant', () => {
+    render(
+      <Button variant="secondary" className="with-icon w-full">
+        Go
+      </Button>,
+    );
+    expect(screen.getByRole('button')).toHaveClass(
+      'button',
+      'secondary',
+      'with-icon',
+      'w-full',
+    );
+  });
 });

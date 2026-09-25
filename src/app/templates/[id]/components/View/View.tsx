@@ -123,7 +123,7 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
             </div>
             {!readOnly && (
               <div className="flex items-center gap-2">
-                <Button className="dark" onClick={() => setDraft(addTrim(draft, ''))}>
+                <Button variant="secondary" onClick={() => setDraft(addTrim(draft, ''))}>
                   Add trim
                 </Button>
                 <Button
@@ -157,7 +157,7 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
                 the current version, then re-apply your changes.
               </span>
               <div>
-                <Button className="dark" loading={reloading} onClick={onReload}>
+                <Button variant="secondary" loading={reloading} onClick={onReload}>
                   Reload
                 </Button>
               </div>

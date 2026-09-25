@@ -48,7 +48,7 @@ export const APIKeyModal: FC<Props> = ({ isOpen, apiKey, onClose }) => {
           />
         </div>
         <div className={'mt-4 flex flex-col flex-1 gap-4'}>
-          <Button className={'w-full primary-outline'} onClick={onClose}>
+          <Button variant="secondary" className={'w-full'} onClick={onClose}>
             Done
           </Button>
         </div>

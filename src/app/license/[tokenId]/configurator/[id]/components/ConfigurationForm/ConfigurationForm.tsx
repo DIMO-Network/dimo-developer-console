@@ -213,9 +213,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
           register={register}
           brandNames={brandNames}
         />
-        <Button type="submit" className="primary">
-          Update
-        </Button>
+        <Button type="submit">Update</Button>
       </form>
     </>
   );

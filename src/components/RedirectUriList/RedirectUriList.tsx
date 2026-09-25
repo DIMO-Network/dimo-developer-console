@@ -85,7 +85,7 @@ const RedirectUriListComponent: FC<IProps> = ({
     return (
       isOwner && (
         <Button
-          className={'table-action-button'}
+          variant="secondary"
           title="Delete redirect URI"
           type="button"
           onClick={() => setUriToDelete(uri)}

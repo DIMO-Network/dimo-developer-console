@@ -8,12 +8,16 @@ interface Props {
   className?: string;
 }
 
-const CreateAppButton: React.FC<Props> = ({ className = 'dark with-icon' }) => {
+const CreateAppButton: React.FC<Props> = ({ className = 'with-icon' }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   return (
     <>
       <CreateAppModal isOpen={isModalOpen} handleIsOpen={setIsModalOpen} />
-      <Button className={clsx(className, '!h-10')} onClick={() => setIsModalOpen(true)}>
+      <Button
+        variant="secondary"
+        className={clsx(className, '!h-10')}
+        onClick={() => setIsModalOpen(true)}
+      >
         <PlusIcon className="w-4 h-4" />
         Create a license
       </Button>

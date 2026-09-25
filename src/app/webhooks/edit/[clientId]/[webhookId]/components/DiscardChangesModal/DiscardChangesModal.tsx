@@ -20,10 +20,10 @@ export const DiscardChangesModal: FC<Props> = ({ isOpen, onClose, onConfirm }) =
           </p>
         </div>
         <div className="flex flex-col gap-4">
-          <Button onClick={onConfirm} className="error">
+          <Button onClick={onConfirm} variant="destructive">
             Confirm
           </Button>
-          <Button className="primary-outline" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
         </div>

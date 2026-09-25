@@ -65,7 +65,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
   const renderDeleteButton = (item: { token: string }) => (
     <Button
       key={`item_${item.token}_delete_button`}
-      className="table-action-button"
+      variant="secondary"
       title="Delete JWT"
       type="button"
       onClick={() => setJwtToDelete(item.token)}

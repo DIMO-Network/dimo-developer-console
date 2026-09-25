@@ -35,7 +35,8 @@ export const WebhookTriggerPreview = ({ cel }: { cel: WebhookFormInput['cel'] })
         <Button
           type="button"
           onClick={handleGenerate}
-          className="self-start primary-outline"
+          variant="secondary"
+          className="self-start"
         >
           Generate CEL
         </Button>

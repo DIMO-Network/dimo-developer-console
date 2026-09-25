@@ -1,55 +1,28 @@
 .button {
-  @apply rounded-full h-10 bg-white text-black font-medium inline-flex justify-center items-center px-4 flex-row gap-2 disabled:bg-cta-disabled disabled:cursor-not-allowed disabled:text-[#4D4D4D] hover:border-white border-transparent border-2;
+  @apply inline-flex h-10 min-h-10 flex-row items-center justify-center gap-2 rounded-full px-4 text-body-sm font-semibold transition-[filter,background-color,color] duration-150 disabled:cursor-not-allowed disabled:opacity-40;
 
   span.content {
-    @apply flex flex-row gap-1 items-center justify-center;
+    @apply flex flex-row items-center justify-center gap-1;
   }
 
   &.primary {
-    @apply bg-white;
+    @apply bg-brand-gradient text-on-accent enabled:hover:brightness-105;
   }
 
-  &.primary-solid {
-    @apply bg-primary-300;
+  &.secondary {
+    @apply border border-outline bg-control text-ink enabled:hover:bg-highest;
   }
 
-  &.rounded-sm {
-    @apply rounded-xl;
+  &.ghost {
+    @apply bg-transparent text-muted enabled:hover:bg-control enabled:hover:text-ink;
   }
 
-  &.primary-outline {
-    @apply border-2 bg-transparent border-cta-default text-white hover:border-white;
+  &.destructive {
+    @apply bg-negative-soft text-negative enabled:hover:brightness-110;
   }
 
-  &.secondary-border-color {
-    @apply border-[#322D2F];
-  }
-
-  &.white {
-    @apply bg-white;
-    &-outline {
-      @apply bg-transparent border border-white text-white;
-    }
-  }
-
-  &.dark {
-    @apply bg-cta-default text-white hover:border-white border-transparent border-2;
-  }
-
-  &.table-action-button {
-    @apply bg-transparent text-white border border-surface-raised hover:border-white;
-  }
-
-  &.error {
-    @apply bg-feedback-error text-white;
-
-    &-outline {
-      @apply bg-transparent border border-red-500 text-red-500;
-    }
-
-    &-simple {
-      @apply bg-transparent text-red-500;
-    }
+  &.destructive-ghost {
+    @apply bg-transparent text-negative enabled:hover:bg-negative-soft;
   }
 
   &.with-icon {

@@ -144,7 +144,8 @@ export const WorkspaceNameModal: FC<IProps> = ({
           </Button>
           <Button
             type="reset"
-            className="primary-outline save-button"
+            variant="secondary"
+            className="save-button"
             disabled={isLoading}
             onClick={() => setIsOpen(false)}
           >

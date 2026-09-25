@@ -45,7 +45,8 @@ export const Vehicles: FC<IProps> = ({ license }) => {
           <div className={'flex flex-row gap-2'}>
             <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
             <Button
-              className="dark with-icon px-4"
+              variant="secondary"
+              className="with-icon px-4"
               onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
             >
               Configure Vehicle Sharing
@@ -83,7 +84,7 @@ const VehiclesTotalCount = ({
         <TotalCount totalCount={totalCount} countedThings="Connected Vehicles" />
       </Link>
       <Link href={`/license/vehicles/${clientId}`}>
-        <Button className={'table-action-button'}>Vehicle Details</Button>
+        <Button variant="secondary">Vehicle Details</Button>
       </Link>
     </div>
   );

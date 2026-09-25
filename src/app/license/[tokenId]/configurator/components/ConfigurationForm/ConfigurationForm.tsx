@@ -180,9 +180,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
           brandNames={brandNames}
         />
 
-        <Button type="submit" className="primary">
-          Save
-        </Button>
+        <Button type="submit">Save</Button>
       </form>
     </>
   );

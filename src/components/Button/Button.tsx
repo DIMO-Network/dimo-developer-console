@@ -9,19 +9,28 @@ import classnames from 'classnames';
 import './Button.css';
 import { BubbleLoader } from '@/components/BubbleLoader';
 
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'ghost'
+  | 'destructive'
+  | 'destructive-ghost';
+
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   loading?: boolean;
+  variant?: ButtonVariant;
 }
 
 export const Button: FC<ButtonProps> = ({
   children,
   className: inputClassName,
   loading = false,
+  variant = 'primary',
   onClick = () => {},
   ...props
 }) => {
-  const className = classnames('button', inputClassName);
+  const className = classnames('button', variant, inputClassName);
 
   const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (!loading) onClick(e);

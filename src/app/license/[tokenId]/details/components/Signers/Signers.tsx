@@ -319,7 +319,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     if (isLicenseOwner) {
       return (
         <Button
-          className={'table-action-button'}
+          variant="secondary"
           title="Delete API key"
           type="button"
           onClick={() => {
@@ -383,13 +383,18 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         {isLicenseOwner && (
           <div className="flex gap-2">
             <Button
-              className="dark with-icon px-4"
+              variant="secondary"
+              className="with-icon px-4"
               onClick={() => setShowRentalOSConfirm(true)}
             >
               <TruckIcon className="w-4 h-4" />
               Register RentalOS
             </Button>
-            <Button className="dark with-icon px-4" onClick={handleGenerateSigner}>
+            <Button
+              variant="secondary"
+              className="with-icon px-4"
+              onClick={handleGenerateSigner}
+            >
               <KeyIcon className="w-4 h-4" />
               Generate Key
             </Button>
@@ -458,7 +463,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           </div>
           <div className="flex gap-3">
             <Button
-              className="primary flex-1"
+              className="flex-1"
               onClick={() => {
                 setShowRentalOSConfirm(false);
                 void handleGenerateRentalOSTenant();
@@ -467,7 +472,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               Proceed
             </Button>
             <Button
-              className="primary-outline flex-1"
+              variant="secondary"
+              className="flex-1"
               onClick={() => setShowRentalOSConfirm(false)}
             >
               Cancel

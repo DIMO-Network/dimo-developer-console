@@ -40,16 +40,22 @@ export const DeleteConfirmationModal: FC<Props> = ({
       className={'confirmation-modal'}
     >
       <div className={'flex flex-col gap-4'}>
-        <Title component={'h2'} className={'text-2xl !leading-8'}>
+        <Title component={'h2'} className={'text-panel-title text-ink'}>
           {title}
         </Title>
         {!!subtitle && <p className={'text-text-secondary'}>{subtitle}</p>}
         <div className={'mt-4 flex flex-col flex-1 gap-4'}>
-          <Button className={'error w-full'} loading={isLoading} onClick={handleConfirm}>
+          <Button
+            variant="destructive"
+            className={'w-full'}
+            loading={isLoading}
+            onClick={handleConfirm}
+          >
             Confirm
           </Button>
           <Button
-            className={'w-full primary-outline'}
+            variant="secondary"
+            className={'w-full'}
             disabled={isLoading}
             onClick={onCancel}
           >

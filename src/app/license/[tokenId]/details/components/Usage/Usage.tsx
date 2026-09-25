@@ -55,7 +55,7 @@ export const Usage: FC<Props> = ({ license }) => {
             href={`https://docs.dimo.org/developer-platform/developer-guide/dimo-credits`}
             target="_blank"
           >
-            <Button className={'table-action-button'}>Learn More</Button>
+            <Button variant="secondary">Learn More</Button>
           </Link>
         </div>
       </Section>

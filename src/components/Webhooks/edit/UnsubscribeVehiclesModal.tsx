@@ -81,7 +81,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
             ? 'Removing...'
             : `Remove ${assetDIDs.length} Vehicle${assetDIDs.length !== 1 ? 's' : ''}`}
         </Button>
-        <Button onClick={handleClose} className="dark">
+        <Button onClick={handleClose} variant="secondary">
           Cancel
         </Button>
       </div>

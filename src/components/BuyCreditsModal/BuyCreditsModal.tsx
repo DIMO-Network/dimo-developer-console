@@ -198,7 +198,7 @@ export const BuyCreditsModal: FC = () => {
             )}
           </div>
           <div className="credits-action w-full mt-4">
-            <Button type="submit" className="primary !h-9 w-full" loading={isLoading}>
+            <Button type="submit" className="!h-9 w-full" loading={isLoading}>
               Proceed to Payment
             </Button>
           </div>

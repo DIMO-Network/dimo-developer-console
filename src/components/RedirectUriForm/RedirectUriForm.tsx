@@ -118,11 +118,7 @@ export const RedirectUriForm: FC<IProps> = ({
           </Label>
         </div>
         <div className="cta flex-[0.2]">
-          <Button
-            className="white with-icon px-4"
-            loading={isLoading}
-            disabled={!!errors.uri}
-          >
+          <Button className="with-icon px-4" loading={isLoading} disabled={!!errors.uri}>
             <PlusIcon className="w-5 h-5" />
             Add URI
           </Button>

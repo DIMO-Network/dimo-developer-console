@@ -121,10 +121,14 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
           Manually subscribe or unsubscribe all vehicles linked to this webhook.
         </p>
         <div className="flex gap-2">
-          <Button className="dark" onClick={subscribeAll} disabled={subscribingAll}>
+          <Button variant="secondary" onClick={subscribeAll} disabled={subscribingAll}>
             {subscribingAll ? 'Subscribing...' : 'Subscribe all vehicles'}
           </Button>
-          <Button className="dark" onClick={unsubscribeAll} disabled={unsubscribingAll}>
+          <Button
+            variant="secondary"
+            onClick={unsubscribeAll}
+            disabled={unsubscribingAll}
+          >
             {unsubscribingAll ? 'Unsubscribing...' : 'Unsubscribe all vehicles'}
           </Button>
         </div>
@@ -134,13 +138,13 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
           <Title className={'text-xl'}>{data.length}</Title>
         </SectionHeader>
         <div className="flex gap-2 pb-4">
-          <Button className="dark" onClick={downloadCsv}>
+          <Button variant="secondary" onClick={downloadCsv}>
             Download CSV
           </Button>
-          <Button className="dark" onClick={() => setIsAdding(true)}>
+          <Button variant="secondary" onClick={() => setIsAdding(true)}>
             Add vehicles
           </Button>
-          <Button className="dark" onClick={() => setIsUnsubscribing(true)}>
+          <Button variant="secondary" onClick={() => setIsUnsubscribing(true)}>
             Unsubscribe vehicles
           </Button>
         </div>

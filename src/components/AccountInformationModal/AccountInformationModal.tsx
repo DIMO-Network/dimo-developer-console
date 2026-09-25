@@ -30,10 +30,7 @@ export const AccountInformationModal: FC = () => {
           <AccountInformation />
           <Balances shouldFetchBalances={showAccountInformation} />
         </div>
-        <Button
-          className={'primary-outline'}
-          onClick={() => setShowAccountInformation(false)}
-        >
+        <Button variant="secondary" onClick={() => setShowAccountInformation(false)}>
           Close
         </Button>
       </div>

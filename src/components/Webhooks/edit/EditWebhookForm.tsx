@@ -78,7 +78,8 @@ const Footer = ({
     <div className="flex w-full gap-4">
       <Button
         type="button"
-        className="primary-outline flex-1"
+        variant="secondary"
+        className="flex-1"
         onClick={onCancel}
         disabled={!isDirty}
       >

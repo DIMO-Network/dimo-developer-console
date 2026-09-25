@@ -64,7 +64,8 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
       <div className="flex items-center justify-between mb-4">
         <PageSubtitle subtitle="Login With DIMO Configurator" />
         <Button
-          className="dark with-icon px-4"
+          variant="secondary"
+          className="with-icon px-4"
           onClick={() => router.push(`/license/${tokenId}/configurator/new`)}
         >
           New Configuration

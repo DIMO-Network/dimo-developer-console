@@ -219,12 +219,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
           )}
 
           <div className="flex flex-col pt-4">
-            <Button
-              type="submit"
-              className="primary"
-              role="finish-button"
-              loading={isLoading}
-            >
+            <Button type="submit" role="finish-button" loading={isLoading}>
               Finish sign up
             </Button>
           </div>
