@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FC } from 'react';
+import classNames from 'classnames';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
 import * as Sentry from '@sentry/nextjs';
@@ -35,7 +36,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
     const isPending = teamCollaborator.status === InvitationStatuses.PENDING;
 
     return (
-      <div className="flex flex-row items-center gap-3">
+      <div className="flex flex-row items-center gap-3 whitespace-nowrap">
         <p>
           {name ?? email ?? ''} {isPending && `(${InvitationStatusLabels.PENDING})`}
         </p>
@@ -44,8 +45,25 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   };
 
   const renderRole = ({ ...teamCollaborator }: ITeamCollaborator) => (
-    <>{TeamRolesLabels[teamCollaborator.role as TeamRoles]}</>
+    <span className="text-muted whitespace-nowrap">
+      {TeamRolesLabels[teamCollaborator.role as TeamRoles]}
+    </span>
   );
+
+  const renderStatus = ({ ...teamCollaborator }: ITeamCollaborator) => {
+    const isAccepted = teamCollaborator.status === InvitationStatuses.ACCEPTED;
+
+    return (
+      <span
+        className={classNames('rounded-chip px-2 py-0.5 text-label whitespace-nowrap', {
+          'bg-selected text-accent-ink': isAccepted,
+          'bg-control text-muted': !isAccepted,
+        })}
+      >
+        {InvitationStatusLabels[teamCollaborator.status as InvitationStatuses]}
+      </span>
+    );
+  };
 
   const renderDeleteRemoveCollaborator = ({
     id,
@@ -55,7 +73,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
       isOwner(currentUser!.role) &&
       invitationRole !== TeamRoles.OWNER && (
         <div
-          className="flex flex-row items-center w-full h-full cursor-pointer"
+          className="flex flex-row items-center w-full h-full cursor-pointer text-muted hover:text-negative"
           onClick={() => handleDelete(id as string)}
           key={`delete-collaborator-action-${id}`}
         >
@@ -91,7 +109,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   return (
     <>
       <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
-      <Card className="secondary team-information">
+      <Card className="secondary team-information overflow-x-auto">
         <Table
           columns={[
             {
@@ -100,8 +118,14 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
               render: renderUserName,
             },
             {
+              label: 'Role',
               name: 'role',
               render: renderRole,
+            },
+            {
+              label: 'Status',
+              name: 'status',
+              render: renderStatus,
             },
           ]}
           data={teamCollaborators}

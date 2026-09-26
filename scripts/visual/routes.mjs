@@ -46,6 +46,22 @@ export const ROUTES = [
     knownHydrationError: APP_HYDRATION,
   },
   {
+    name: 'app-add-credits-modal',
+    path: '/app',
+    ready: LICENSE.alias,
+    click: '[role="add-credits"]',
+    after: 'Buy DCX',
+    knownHydrationError: APP_HYDRATION,
+  },
+  {
+    name: 'app-account-info-modal',
+    path: '/app',
+    ready: LICENSE.alias,
+    click: '[title="Account Information"]',
+    after: 'Account information',
+    knownHydrationError: APP_HYDRATION,
+  },
+  {
     name: 'license-details',
     path: `/license/${t}/details`,
     ready: LICENSE.alias,
@@ -65,6 +81,15 @@ export const ROUTES = [
     // primary color) renders.
     click: ['text="Brand"', 'text="Add brand"'],
     after: 'Display name',
+  },
+  {
+    name: 'license-workspace-name-modal',
+    path: `/license/${t}/details`,
+    ready: LICENSE.alias,
+    // The pencil icon next to the license alias opens WorkspaceNameModal; Brand
+    // isn't expanded here so its own edit pencil isn't in the DOM to collide.
+    click: 'svg.cursor-pointer',
+    after: 'Edit developer license name',
   },
   {
     name: 'license-configurator',
@@ -137,6 +162,14 @@ export const ROUTES = [
     name: 'settings',
     path: '/settings',
     ready: 'sam@harness.dev',
+    knownHydrationError: SETTINGS_HYDRATION,
+  },
+  {
+    name: 'settings-support-modal',
+    path: '/settings',
+    ready: 'sam@harness.dev',
+    click: 'text=Developer support',
+    after: 'Contact developer support',
     knownHydrationError: SETTINGS_HYDRATION,
   },
   { name: 'support', path: '/support', ready: 'Report an issue' },

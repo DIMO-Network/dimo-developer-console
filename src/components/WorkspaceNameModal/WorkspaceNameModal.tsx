@@ -107,14 +107,14 @@ export const WorkspaceNameModal: FC<IProps> = ({
     <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="workspace-name-modal">
       <form className="workspace-name-content" onSubmit={handleSubmit(onSubmit)}>
         <div className="workspace-name-header">
-          <Title className="text-2xl" component="h3">
-            Edit Developer License Name
+          <Title className="text-panel-title" component="h3">
+            Edit developer license name
           </Title>
         </div>
         <div className="fields-container">
           <div className="field">
-            <Label htmlFor="workspaceName" className="text-sm font-medium">
-              Developer License Name
+            <Label htmlFor="workspaceName">
+              Developer license name
               <TextField
                 {...register('workspaceName', {
                   required: 'Developer license name is required',
@@ -128,7 +128,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
                 defaultValue={license.alias ?? ''}
                 className="field"
               />
-              <p className={'text-text-secondary font-normal'}>
+              <p className={'text-body-sm text-muted'}>
                 This is the namespace used across all your apps. It is a public name
                 visible to other developers and users in the ecosystem.
               </p>
@@ -140,7 +140,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
         </div>
         <div className={'flex flex-col gap-4 pt-6'}>
           <Button type="submit" className="save-button" loading={isLoading}>
-            Save Changes
+            Save changes
           </Button>
           <Button
             type="reset"

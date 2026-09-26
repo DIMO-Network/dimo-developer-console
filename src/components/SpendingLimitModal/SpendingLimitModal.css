@@ -2,10 +2,10 @@
   @apply flex flex-col items-center gap-2 w-full;
 
   .buy-credits-header {
-    @apply flex flex-col gap-2 text-center relative pt-8 pb-4 px-2 font-bold;
+    @apply flex flex-col gap-2 relative text-left;
 
     .description {
-      @apply text-xs text-white/50 w-full h-full py-4;
+      @apply text-body-sm text-muted w-full h-full py-2;
     }
   }
 
@@ -14,14 +14,14 @@
   }
 
   .credit-total-content {
-    @apply w-full flex flex-row justify-between font-bold px-2 py-4;
+    @apply w-full flex flex-row justify-between font-semibold px-2 py-4 text-fg;
   }
 
   .payment-method-container {
     @apply flex flex-col w-full px-2 gap-2;
 
     .payment-descriptor {
-      @apply font-bold;
+      @apply font-semibold text-fg;
     }
   }
 

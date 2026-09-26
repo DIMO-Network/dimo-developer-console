@@ -72,7 +72,7 @@ export const SpendingLimitModal: FC<IProps> = ({
     <Modal isOpen={isOpen} setIsOpen={setIsOpen} className="buy-credits-modal">
       <form className="buy-credits-content" onSubmit={handleSubmit(setSpendingLimit)}>
         <div className="buy-credits-header">
-          <Title className="text-2xl" component="h3">
+          <Title className="text-panel-title" component="h3">
             Set spending limit
           </Title>
           <p className="description">

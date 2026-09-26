@@ -10,12 +10,4 @@
   .team-header {
     @apply flex flex-row justify-between items-center;
   }
-
-  .subtitle {
-    @apply text-sm;
-  }
-
-  .settings-card-title {
-    @apply text-2xl font-black text-white;
-  }
 }

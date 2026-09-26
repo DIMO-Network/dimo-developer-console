@@ -51,7 +51,7 @@ export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam, onCancel }) => {
     <form className="form-team-invitation" onSubmit={handleSubmit(onSubmit)}>
       <div className="fields">
         <div className="field">
-          <Label htmlFor="email" className="text-xs text-medium">
+          <Label htmlFor="email">
             Email
             <TextField
               type="text"
@@ -74,7 +74,7 @@ export const TeamForm: FC<IProps> = ({ isLoading, inviteToTeam, onCancel }) => {
           </Label>
         </div>
         <div className="field">
-          <Label htmlFor="role" className="text-xs text-medium">
+          <Label htmlFor="role">
             Role
             <SelectField
               {...register('role', {

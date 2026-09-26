@@ -24,7 +24,7 @@ export const PaymentMethod: FC<IProps> = ({
   return (
     <Card
       className={classNames('payment-method card-border !p-2', className, {
-        'border !border-primary-500': selected,
+        'bg-selected text-accent-ink border-transparent': selected,
       })}
       onClick={onClick}
     >

@@ -1,15 +1,15 @@
 .user-detail {
-  @apply flex flex-col gap-4 font-medium text-white;
+  @apply flex flex-col gap-4;
 
   .user-detail-content {
     @apply grid grid-cols-[80px_1fr] auto-cols-min gap-4;
   }
 
-  .user-title {
-    @apply font-medium;
+  .user-label {
+    @apply text-label text-muted;
   }
 
-  .user-description {
-    @apply font-normal text-white/50;
+  .user-value {
+    @apply text-body-sm text-fg;
   }
 }

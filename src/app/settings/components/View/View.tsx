@@ -23,12 +23,12 @@ const View: FC = () => {
       {isLoading && <Loader isLoading={true} />}
       {!isLoading && (
         <>
-          <PageSubtitle subtitle="Organization Settings" />
+          <PageSubtitle subtitle="Organization settings" />
           <UserDetails />
           <Card className="primary team-information">
             <div className="team-header">
-              <Title component="h2" className="settings-card-title">
-                Team Management
+              <Title component="h2" className="text-card-title">
+                Team management
               </Title>
             </div>
             <TeamManagement
