@@ -156,6 +156,7 @@ describe('EntitlementBanner', () => {
       '4,212 minted vehicles resolve to this template.',
     );
     expect(screen.getByRole('status')).toHaveTextContent('read only');
+    expect(screen.getByRole('warning-amber-icon')).toBeInTheDocument();
   });
 
   it('reads as read only, and says why, when the vehicle count could not be verified', () => {
@@ -190,6 +191,6 @@ describe('EntitlementBanner', () => {
     expect(screen.getByRole('status')).toHaveTextContent(
       'No vehicle references this template yet.',
     );
-    expect(screen.getByRole('status').className).not.toContain('red');
+    expect(screen.queryByRole('warning-amber-icon')).not.toBeInTheDocument();
   });
 });
