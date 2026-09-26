@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
 import { dimoFont } from '@/utils/font';
-import { THEME_INIT_SCRIPT } from '@/utils/theme';
+import { applyTheme, readStoredTheme, THEME_INIT_SCRIPT } from '@/utils/theme';
 
 import '@/app/globals.css';
 
@@ -14,6 +14,12 @@ interface IProps {
 }
 
 const ErrorPage: FC<IProps> = ({ error, reset }) => {
+  // This <html> replaces the root layout's on the client, where the inline
+  // script doesn't run: apply the stored theme so a light user isn't stuck dark.
+  useEffect(() => {
+    applyTheme(readStoredTheme());
+  }, []);
+
   useEffect(() => {
     Sentry.captureException(error);
     console.error({ error });

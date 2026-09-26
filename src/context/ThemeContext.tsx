@@ -25,9 +25,13 @@ export const ThemeContext = createContext<ThemeContextValue>({
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setThemeState] = useState<Theme>('dark');
 
-  // The pre-paint script already set <html data-theme>; this syncs React to it.
+  // The pre-paint script sets <html data-theme> on a full page load, but a
+  // client-rendered tree (hydration mismatch recovery, error boundaries) can
+  // leave the SSR default in place. Apply the stored theme, don't just read it.
   useEffect(() => {
-    setThemeState(readStoredTheme());
+    const stored = readStoredTheme();
+    applyTheme(stored);
+    setThemeState(stored);
   }, []);
 
   const setTheme = useCallback((next: Theme) => {
