@@ -1,3 +1,8 @@
 .option-card {
-  @apply flex flex-row justify-between cursor-pointer items-center;
+  @apply flex cursor-pointer flex-row items-center justify-between rounded-card bg-card p-4 transition-colors hover:bg-control;
+
+  &.selected,
+  &[aria-checked='true'] {
+    @apply bg-accent-soft-strong text-accent-ink;
+  }
 }

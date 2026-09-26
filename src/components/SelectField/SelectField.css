@@ -1,23 +1,23 @@
 .select-field {
-  @apply rounded-lg py-2 px-4 outline-0 bg-cta-default text-white relative flex flex-row justify-between align-middle font-normal text-sm;
+  @apply relative flex min-h-10 flex-row items-center justify-between rounded-control border border-outline bg-control px-3 text-body-sm font-normal text-fg outline-0;
 
   .selected {
-    @apply text-grey-50;
+    @apply text-fg;
   }
 
   select {
     @apply hidden;
   }
+
   .custom-menu {
-    @apply hidden absolute bg-[#322D2F] w-full left-0 rounded-lg p-4 mt-7 leading-5
-            flex flex-col gap-2 max-h-48 overflow-y-auto text-grey-50 z-10;
+    @apply absolute left-0 top-full z-10 mt-1 hidden max-h-48 w-full flex-col gap-0.5 overflow-y-auto rounded-control bg-overlay p-1 text-fg shadow-float;
 
     &.show {
       @apply flex;
     }
 
     .custom-item {
-      @apply cursor-pointer;
+      @apply cursor-pointer rounded-chip px-2.5 py-2 hover:bg-control;
     }
   }
 }
