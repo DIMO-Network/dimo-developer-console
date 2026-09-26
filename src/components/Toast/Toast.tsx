@@ -3,13 +3,27 @@
 import { FC, Fragment, useState } from 'react';
 import { Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/20/solid';
-import { INotification } from '@/hooks';
+import {
+  CheckCircleIcon,
+  InformationCircleIcon,
+  XCircleIcon,
+} from '@heroicons/react/24/outline';
+import { INotification, TMessageType } from '@/hooks';
 import classnames from 'classnames';
 
 import './Toast.css';
 
+// The icon carries the type visually; the sr-only prefix carries it to a
+// screen reader, so color is never the only cue.
+const TYPE_CUE: Record<TMessageType, { Icon: typeof CheckCircleIcon; label: string }> = {
+  success: { Icon: CheckCircleIcon, label: 'Success:' },
+  error: { Icon: XCircleIcon, label: 'Error:' },
+  info: { Icon: InformationCircleIcon, label: 'Info:' },
+};
+
 export const Toast: FC<INotification> = ({ message, type }) => {
   const [show, setShow] = useState(true);
+  const { Icon, label } = TYPE_CUE[type] ?? TYPE_CUE.info;
 
   return (
     <>
@@ -23,11 +37,17 @@ export const Toast: FC<INotification> = ({ message, type }) => {
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
       >
-        <div className={classnames('toast', type)}>
+        <div
+          className={classnames('toast', type)}
+          role={type === 'error' ? 'alert' : 'status'}
+        >
           <div className="toast-content">
-            <span className="toast-status-dot" aria-hidden="true" />
+            <Icon className="toast-icon" aria-hidden="true" />
             <div className="toast-content-content">
-              <p className="toast-description">{message}</p>
+              <p className="toast-description">
+                <span className="sr-only">{label} </span>
+                {message}
+              </p>
             </div>
             <div className="toast-close-content">
               <button

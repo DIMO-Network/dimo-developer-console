@@ -4,20 +4,39 @@ exports[`Toast renders a success notification 1`] = `
 <div>
   <div
     class="toast success"
+    role="status"
   >
     <div
       class="toast-content"
     >
-      <span
+      <svg
         aria-hidden="true"
-        class="toast-status-dot"
-      />
+        class="toast-icon"
+        data-slot="icon"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
       <div
         class="toast-content-content"
       >
         <p
           class="toast-description"
         >
+          <span
+            class="sr-only"
+          >
+            Success:
+             
+          </span>
           Success information
         </p>
       </div>
@@ -57,20 +76,39 @@ exports[`Toast renders an error notification 1`] = `
 <div>
   <div
     class="toast error"
+    role="alert"
   >
     <div
       class="toast-content"
     >
-      <span
+      <svg
         aria-hidden="true"
-        class="toast-status-dot"
-      />
+        class="toast-icon"
+        data-slot="icon"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
       <div
         class="toast-content-content"
       >
         <p
           class="toast-description"
         >
+          <span
+            class="sr-only"
+          >
+            Error:
+             
+          </span>
           Error information
         </p>
       </div>

@@ -1,16 +1,17 @@
 .toast {
   @apply pointer-events-auto z-30 w-full max-w-sm overflow-hidden rounded-card bg-overlay text-fg shadow-float;
 
-  &.success .toast-status-dot {
-    @apply bg-positive;
+  /* A leading outline status icon; >=3:1 on overlay (tokens.test.ts). */
+  .toast-icon {
+    @apply size-5 flex-shrink-0 text-muted;
   }
 
-  &.error .toast-status-dot {
-    @apply bg-negative;
+  &.success .toast-icon {
+    @apply text-positive;
   }
 
-  &.info .toast-status-dot {
-    @apply bg-accent;
+  &.error .toast-icon {
+    @apply text-negative;
   }
 
   &-content {
@@ -21,16 +22,13 @@
     }
   }
 
-  &-icon-content {
-    @apply flex-shrink-0;
-  }
-
   &-title {
     @apply text-body-sm font-medium text-ink;
   }
 
+  /* The message is the toast's content: primary emphasis, not muted. */
   &-description {
-    @apply text-body-sm text-muted;
+    @apply text-body-sm text-fg;
   }
 
   &-close-content {
@@ -40,8 +38,4 @@
       @apply inline-flex rounded-full p-1 text-muted hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-overlay;
     }
   }
-}
-
-.toast-status-dot {
-  @apply mt-1.5 inline-block size-1.5 flex-shrink-0 rounded-full;
 }

@@ -30,4 +30,18 @@ describe('Toast', () => {
       expect(closeElm).not.toBeInTheDocument();
     });
   });
+
+  // Color is never the only cue: an sr-only type prefix and a live-region role.
+  it.each([
+    ['success', 'status', 'Success:'],
+    ['error', 'alert', 'Error:'],
+    ['info', 'status', 'Info:'],
+  ] as const)('announces a %s toast as %s with a type prefix', (type, role, prefix) => {
+    render(<Toast id={1} message="Saved the thing" type={type} title="" />);
+    expect(screen.getByRole(role)).toHaveTextContent(`${prefix} Saved the thing`);
+    expect(screen.getByRole(role).querySelector('svg.toast-icon')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+  });
 });
