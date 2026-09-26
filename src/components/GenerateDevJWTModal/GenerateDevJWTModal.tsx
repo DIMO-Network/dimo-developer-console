@@ -93,7 +93,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
       return (
         <div className={'flex flex-col items-center'}>
           <BubbleLoader isLoading />
-          <p className={'pt-3.5 text-xl'}>Generating JWT...</p>
+          <p className={'pt-3.5 text-card-title text-ink'}>Generating JWT...</p>
         </div>
       );
     }
@@ -102,7 +102,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
     }
     return (
       <>
-        <Label className={'text-sm font-medium mb-2'}>API key</Label>
+        <Label className={'mb-2'}>API key</Label>
         <TextField
           onChange={(e) => setText(e.target.value)}
           placeholder={'Enter your API key here'}
@@ -137,10 +137,10 @@ export const GenerateDevJWTModal: FC<IProps> = ({
     <Modal isOpen={isOpen} setIsOpen={safeSetIsOpen} showClose={isDismissible}>
       <div className={'flex flex-col flex-1 w-full'}>
         <div className={'pb-6'}>
-          <Title component={'h2'} className={'text-2xl !leading-8'}>
+          <Title component={'h2'} className={'text-panel-title text-ink'}>
             {title}
           </Title>
-          <p className={'text-text-secondary mt-2'}>{subtitle}</p>
+          <p className={'text-muted mt-2'}>{subtitle}</p>
         </div>
         <div className={'py-6'}>{MainComponent}</div>
         <div className={'pt-6 flex flex-1 flex-col w-full gap-4'}>{Buttons}</div>
@@ -154,12 +154,8 @@ const SuccessRow = ({ token }: { token: string }) => {
   const maskedPart = '*'.repeat(32);
   const displayText = `${visiblePart}${maskedPart}`;
   return (
-    <div
-      className={
-        'bg-feedback-success bg-opacity-50 py-3 px-4 rounded-xl flex flex-col gap-2'
-      }
-    >
-      <p className={'text-sm'}>Expires in 14 days.</p>
+    <div className={'bg-positive/10 py-3 px-4 rounded-card flex flex-col gap-2'}>
+      <p className={'text-body-sm text-fg'}>Expires in 14 days.</p>
       <CopyableRow
         value={token}
         displayText={displayText}

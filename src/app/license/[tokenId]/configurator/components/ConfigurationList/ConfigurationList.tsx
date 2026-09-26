@@ -23,11 +23,11 @@ interface Props {
 const entryStateLabel = (entryState: string): string => {
   switch (entryState) {
     case 'EMAIL_INPUT':
-      return 'Login With DIMO';
+      return 'Login with DIMO';
     case 'VEHICLE_MANAGER':
-      return 'Share Vehicles With DIMO';
+      return 'Share vehicles with DIMO';
     case 'ADVANCED_TRANSACTION':
-      return 'Execute Advanced Transaction';
+      return 'Execute advanced transaction';
     default:
       return entryState;
   }
@@ -56,7 +56,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
 
   if (configs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-text-secondary">
+      <div className="flex flex-col items-center justify-center py-12 text-muted">
         <p className="mb-4">No configurations yet.</p>
         <Button onClick={() => router.push(`/license/${tokenId}/configurator/new`)}>
           Create your first configuration
@@ -66,20 +66,22 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
   }
 
   return (
-    <div className="w-full">
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="border-b border-surface-default text-left text-text-secondary">
-            <th className="py-2 pr-4 font-medium">Name</th>
-            <th className="py-2 pr-4 font-medium">Component</th>
-            <th className="py-2 font-medium">Actions</th>
+    <div className="w-full overflow-x-auto rounded-card bg-card p-4">
+      <table className="w-full table">
+        <thead className="table-header">
+          <tr className="text-left">
+            <th className="py-2 pr-4 text-label text-muted font-medium">Name</th>
+            <th className="py-2 pr-4 text-label text-muted font-medium">Component</th>
+            <th className="py-2 text-label text-muted font-medium">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="table-body">
           {configs.map((config) => (
-            <tr key={config.id} className="border-b border-surface-default">
-              <td className="py-3 pr-4">{config.configuration_name || '(untitled)'}</td>
-              <td className="py-3 pr-4 text-text-secondary">
+            <tr key={config.id} className="border-t border-outline">
+              <td className="py-3 pr-4 text-body-sm text-fg">
+                {config.configuration_name || '(untitled)'}
+              </td>
+              <td className="py-3 pr-4 text-body-sm text-fg">
                 {entryStateLabel(config.entry_state)}
               </td>
               <td className="py-3">
@@ -113,7 +115,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
                         setNotification('Sharing link copied', '', 'success');
                       }}
                     >
-                      Copy Link
+                      Copy link
                     </Button>
                     <Button
                       variant="secondary"

@@ -52,10 +52,19 @@ export const ROUTES = [
     // Open every collapsible section so signers, JWTs, URIs and brands show.
     click: [
       'text="Developer JWTs"',
-      'text="API Keys"',
-      'text="Authorized Redirect URIs"',
+      'text="API keys"',
+      'text="Authorized redirect URIs"',
       'text="Brand"',
     ],
+  },
+  {
+    name: 'license-details-brand-form',
+    path: `/license/${t}/details`,
+    ready: LICENSE.alias,
+    // Open Brand then start a new brand so the create form (name, image pickers,
+    // primary color) renders.
+    click: ['text="Brand"', 'text="Add brand"'],
+    after: 'Display name',
   },
   {
     name: 'license-configurator',

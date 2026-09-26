@@ -20,7 +20,8 @@ import { ImagePicker } from './ImagePicker';
 import type { BrandView } from '@/services/brand';
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
-const DEFAULT_PRIMARY_COLOR = '#000000';
+const DEFAULT_PRIMARY_COLOR = '#000000'; // token-check:allow — color-input fallback, not styling
+const EXAMPLE_HEX_COLOR = '#C8A84B'; // token-check:allow — illustrative hex in help copy
 
 interface FormInputs {
   name: string;
@@ -141,7 +142,7 @@ export const BrandForm: FC<Props> = ({
   return (
     <form className="flex flex-col gap-6 pt-4 pb-2" onSubmit={handleSubmit(onSubmit)}>
       <div className="field">
-        <Label htmlFor="brand-name" className="text-sm font-medium">
+        <Label htmlFor="brand-name">
           Display name
           <TextField
             {...register('name', {
@@ -153,7 +154,7 @@ export const BrandForm: FC<Props> = ({
             disabled={!isOwner || saving}
           />
           {showRenameWarning && (
-            <p className="text-xs text-warning mt-1">
+            <p className="text-label text-warning mt-1">
               Renaming breaks existing Login with DIMO calls using this name
             </p>
           )}
@@ -190,11 +191,12 @@ export const BrandForm: FC<Props> = ({
       />
 
       <div className="field">
-        <Label className="text-sm font-medium">
+        <Label>
           Primary color
-          <p className="text-text-secondary font-normal">
+          <p className="text-muted text-body-sm font-normal">
             Used as the auth button background + popup CTA. 7-char hex, e.g.{' '}
-            <code>#C8A84B</code>. Leave blank for DIMO defaults.
+            <code className="font-mono text-code">{EXAMPLE_HEX_COLOR}</code>. Leave blank
+            for DIMO defaults.
           </p>
           <div className="flex flex-row items-center gap-3 mt-2">
             <input
@@ -208,20 +210,20 @@ export const BrandForm: FC<Props> = ({
               onChange={(e) =>
                 setValue('primaryColor', e.target.value, { shouldDirty: true })
               }
-              className="h-10 w-12 rounded border border-border bg-transparent p-0 cursor-pointer disabled:cursor-not-allowed"
+              className="h-10 w-12 rounded-control border border-outline bg-transparent p-0 cursor-pointer disabled:cursor-not-allowed"
               disabled={!isOwner || saving}
             />
             <TextField
               {...register('primaryColor', {
                 validate: (v) => !v || HEX_COLOR_RE.test(v) || 'Must be #RRGGBB hex',
               })}
-              placeholder="#C8A84B"
+              placeholder={EXAMPLE_HEX_COLOR}
               disabled={!isOwner || saving}
-              className="font-mono w-32"
+              className="font-mono text-code w-32"
             />
             {watchedColor && HEX_COLOR_RE.test(watchedColor) && (
               <span
-                className="inline-block h-8 w-8 rounded border border-border"
+                className="inline-block h-8 w-8 rounded-control border border-outline"
                 style={{ backgroundColor: watchedColor }}
                 aria-hidden
               />
@@ -236,7 +238,7 @@ export const BrandForm: FC<Props> = ({
       {isOwner && (
         <div className="flex flex-row gap-3 pt-2">
           <Button type="submit" disabled={!dirty} loading={saving}>
-            Save Brand
+            Save brand
           </Button>
           {isExisting && !brand.isDefault && (
             <Button
@@ -245,7 +247,7 @@ export const BrandForm: FC<Props> = ({
               onClick={handleSetDefault}
               loading={settingDefault}
             >
-              Set as Default
+              Set as default
             </Button>
           )}
           <Button

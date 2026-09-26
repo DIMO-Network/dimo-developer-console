@@ -108,16 +108,19 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
     <>
       {fileInfo.length > 0 && (
         <div className="space-y-2 text-left mb-6">
-          <Title className="text-sm font-medium">List of vehicles</Title>
+          <Title className="text-card-title">List of vehicles</Title>
           {fileInfo.map((f, idx) => (
             <div
               key={idx}
-              className="flex items-center justify-between bg-[#2A2A2A] px-4 py-3 rounded-lg text-white"
+              className="flex items-center justify-between bg-control px-4 py-3 rounded-control text-fg"
             >
-              <span className="text-sm">{f.name}</span>
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-gray-400">{f.count} vehicles</span>
-                <button onClick={() => handleDelete(idx)} className="hover:text-red-400">
+              <span className="text-body-sm">{f.name}</span>
+              <div className="flex items-center gap-4 text-body-sm">
+                <span className="text-muted">{f.count} vehicles</span>
+                <button
+                  onClick={() => handleDelete(idx)}
+                  className="text-muted transition-colors hover:text-negative"
+                >
                   <TrashIcon className="w-5 h-5" />
                 </button>
               </div>
@@ -125,32 +128,33 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           ))}
         </div>
       )}
-      {showTitle && <Title className="text-sm font-medium">Add vehicles</Title>}
+      {showTitle && <Title className="text-card-title">Add vehicles</Title>}
       <div
         onDragOver={(e) => e.preventDefault()}
         onDragEnter={() => setIsDragging(true)}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`border border-dashed rounded-md p-10 text-center mt-2 transition-colors ${
-          isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+        className={`rounded-card border border-dashed p-10 text-center mt-2 transition-colors ${
+          isDragging ? 'border-outline-strong bg-highest' : 'border-outline'
         }`}
       >
-        <p className="font-black">
+        <p className="text-body font-medium text-ink">
           Drag and drop or upload CSV with a list of vehicle IDs
         </p>
-        <p className="text-sm text-white mt-4">
-          Please format your CSV with a single column and the header <code>tokenId</code>.
+        <p className="text-body-sm text-muted mt-4">
+          Please format your CSV with a single column and the header{' '}
+          <code className="font-mono text-code">tokenId</code>.
         </p>
-        <p className="text-sm text-white mt-4">
+        <p className="text-body-sm text-muted mt-4">
           Accepts .csv file types
           <br />
           Maximum file size 50 MB.
         </p>
 
-        <label className="mt-4 inline-flex items-center justify-center px-4 py-2 text-sm font-medium bg-white text-black border border-gray-300 hover:bg-gray-50 cursor-pointer rounded-[50px]">
-          <span className="mr-2">
+        <label className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-full bg-brand-gradient px-4 text-body-sm font-semibold text-on-accent transition-[filter] duration-150 hover:brightness-105 cursor-pointer">
+          <span>
             <ArrowUpTrayIcon className={'w-5 h-5'} />
-          </span>{' '}
+          </span>
           Upload
           <input
             type="file"
@@ -160,7 +164,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           />
         </label>
 
-        {error && <p className="text-red-500 text-sm mt-6">{error}</p>}
+        {error && <p className="text-negative text-body-sm mt-6">{error}</p>}
       </div>
     </>
   );

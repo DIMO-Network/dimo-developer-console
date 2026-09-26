@@ -116,15 +116,15 @@ export const Brand: FC<Props> = ({ license }) => {
     <CollapsibleSection>
       <CollapsibleSection.Title title="Brand">
         {isOwner && (
-          <span className="text-text-secondary text-xs">
+          <span className="text-label text-muted">
             Visible on the Login-with-DIMO button when consumers initialise with your
-            <code className="ml-1">clientId</code>.
+            <code className="ml-1 font-mono text-code">clientId</code>.
           </span>
         )}
       </CollapsibleSection.Title>
       <CollapsibleSection.Content>
         {loading ? (
-          <div className="text-text-secondary">Loading brands…</div>
+          <div className="text-muted">Loading brands…</div>
         ) : editing ? (
           <BrandForm
             brand={editing === 'new' ? null : editing}
@@ -137,7 +137,7 @@ export const Brand: FC<Props> = ({ license }) => {
         ) : (
           <div className="flex flex-col">
             {brands.length === 0 ? (
-              <p className="text-text-secondary text-sm">No brand set.</p>
+              <p className="text-muted text-body-sm">No brand set.</p>
             ) : (
               brands.map((brand) => (
                 <BrandRow
@@ -157,18 +157,19 @@ export const Brand: FC<Props> = ({ license }) => {
                   variant="secondary"
                   onClick={() => setEditing('new')}
                 >
-                  Add Brand
+                  Add brand
                 </Button>
               </div>
             )}
             {brands.length > 0 && (
-              <div className="mt-6 p-4 bg-surface-raised rounded-lg">
-                <p className="text-sm font-medium text-text-primary mb-2">
+              <div className="mt-6 p-4 bg-control rounded-control">
+                <p className="text-body-sm font-medium text-ink mb-2">
                   Using multiple brands with Login with DIMO
                 </p>
-                <pre className="text-xs font-mono text-text-secondary overflow-x-auto">{`dimo.login({ clientId: '${fragment.clientId}', brandName: 'Fleet App' })`}</pre>
-                <p className="text-xs text-text-secondary mt-1">
-                  Omit <code>brandName</code> to use your default brand.
+                <pre className="font-mono text-code text-muted overflow-x-auto">{`dimo.login({ clientId: '${fragment.clientId}', brandName: 'Fleet App' })`}</pre>
+                <p className="text-label text-muted mt-1">
+                  Omit <code className="font-mono text-code">brandName</code> to use your
+                  default brand.
                 </p>
               </div>
             )}

@@ -42,19 +42,19 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     <div className={'flex flex-col gap-6'}>
       <Section>
         <div className={'flex flex-row items-center gap-2.5 pb-4 md:pb-0'}>
-          <Title className={'text-4xl'}>{totalCount}</Title>
-          <p className={'text-text-secondary text-xl'}>
-            Connected Vehicles
+          <Title className={'text-metric text-ink'}>{totalCount}</Title>
+          <p className={'text-muted text-xl'}>
+            Connected vehicles
             {testVehicleCount > 0 && (
               <span className={'text-sm ml-1.5'}>
-                ({testVehicleCount} Test Vehicle{testVehicleCount !== 1 ? 's' : ''})
+                ({testVehicleCount} test vehicle{testVehicleCount !== 1 ? 's' : ''})
               </span>
             )}
           </p>
         </div>
       </Section>
       <Section>
-        <SectionHeader title={'Vehicle Details'} />
+        <SectionHeader title={'Vehicle details'} />
         <VehicleDetailsTable clientId={clientId} />
       </Section>
     </div>

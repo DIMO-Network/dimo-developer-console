@@ -49,7 +49,7 @@ export const Vehicles: FC<IProps> = ({ license }) => {
               className="with-icon px-4"
               onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
             >
-              Configure Vehicle Sharing
+              Configure vehicle sharing
             </Button>
           </div>
         </SectionHeader>
@@ -81,10 +81,10 @@ const VehiclesTotalCount = ({
         href={`/license/vehicles/${clientId}`}
         className="hover:opacity-80 transition-opacity cursor-pointer"
       >
-        <TotalCount totalCount={totalCount} countedThings="Connected Vehicles" />
+        <TotalCount totalCount={totalCount} countedThings="Connected vehicles" />
       </Link>
       <Link href={`/license/vehicles/${clientId}`}>
-        <Button variant="secondary">Vehicle Details</Button>
+        <Button variant="secondary">Vehicle details</Button>
       </Link>
     </div>
   );

@@ -90,11 +90,11 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
         placeholder={placeholder}
         disabled={disabled}
         rows={6}
-        className={displayError ? 'border-feedback-error' : ''}
+        className={displayError ? 'border-negative' : ''}
       />
 
       {stats.total > 0 && (
-        <div className="text-sm text-text-secondary">
+        <div className="text-body-sm text-muted">
           {stats.total} asset DID{stats.total !== 1 ? 's' : ''} entered
           {stats.unique !== stats.total && ` (${stats.unique} unique)`}
         </div>
@@ -102,12 +102,12 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
 
       {displayError && <TextError errorMessage={displayError} />}
 
-      <div className="text-sm text-text-secondary">
+      <div className="text-body-sm text-muted">
         <p>You can enter vehicle DIDs in the following ways:</p>
         <ul className="list-disc mt-1 space-y-1">
           <li>
             <div>One per line:</div>
-            <div className="font-mono text-xs p-2 mt-1 rounded">
+            <div className="rounded-control bg-control px-3 py-2 mt-1 font-mono text-code text-fg">
               did:erc721:137:0x123:123
               <br />
               did:erc721:137:0x456:456
@@ -117,7 +117,7 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
           </li>
           <li>
             <div>Comma-separated:</div>
-            <div className="font-mono text-xs p-2 mt-1 rounded">
+            <div className="rounded-control bg-control px-3 py-2 mt-1 font-mono text-code text-fg">
               did:erc721:137:0x123:123, did:erc721:137:0x456:456, did:erc721:137:0x789:789
             </div>
           </li>

@@ -319,7 +319,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     if (isLicenseOwner) {
       return (
         <Button
-          variant="secondary"
+          variant="ghost"
+          className="table-page-button"
           title="Delete API key"
           type="button"
           onClick={() => {
@@ -379,7 +380,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
 
   return (
     <CollapsibleSection>
-      <CollapsibleSection.Title title={'API Keys'}>
+      <CollapsibleSection.Title title={'API keys'}>
         {isLicenseOwner && (
           <div className="flex gap-2">
             <Button
@@ -396,7 +397,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               onClick={handleGenerateSigner}
             >
               <KeyIcon className="w-4 h-4" />
-              Generate Key
+              Generate key
             </Button>
           </div>
         )}
@@ -414,7 +415,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                     <div className="flex items-center gap-2">
                       <span>{item.address}</span>
                       {item.address.toLowerCase() === rentalOSSigner && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-cta-default text-white whitespace-nowrap">
+                        <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted whitespace-nowrap">
                           RentalOS
                         </span>
                       )}
@@ -447,16 +448,16 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       <Modal isOpen={showRentalOSConfirm} setIsOpen={setShowRentalOSConfirm}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <h2 className="text-xl font-semibold">Register RentalOS</h2>
-            <p className="text-text-secondary text-sm">
+            <h2 className="text-panel-title text-ink">Register RentalOS</h2>
+            <p className="text-muted text-body-sm">
               Clicking <strong>Proceed</strong> will:
             </p>
-            <ul className="text-text-secondary text-sm list-disc pl-5 flex flex-col gap-1">
+            <ul className="text-muted text-body-sm list-disc pl-5 flex flex-col gap-1">
               <li>Add RentalOS as an authorized redirect URI</li>
               <li>Generate and register a new API key</li>
               <li>Register your tenant with RentalOS</li>
             </ul>
-            <p className="text-text-secondary text-sm">
+            <p className="text-muted text-body-sm">
               You&apos;ll need to approve transactions. Don&apos;t close this window once
               started.
             </p>
@@ -488,7 +489,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
 const SignerAddressHeader = () => (
   <Column key={'signer-address-header'}>
     <div>Signer address</div>
-    <p className={'max-w-[360px] text-text-secondary text-sm !normal-case'}>
+    <p className={'max-w-[360px] text-muted text-body-sm !normal-case'}>
       *This is not your API key. If you have lost your API key, you will need to generate
       a new one.
     </p>

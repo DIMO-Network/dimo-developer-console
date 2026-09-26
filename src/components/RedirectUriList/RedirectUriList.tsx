@@ -76,6 +76,7 @@ const RedirectUriListComponent: FC<IProps> = ({
         key={`copy-action-${index}`}
         value={uri}
         onCopySuccessMessage={'Redirect URI copied!'}
+        className="table-page-button hover:bg-control"
       />
     );
   };
@@ -84,7 +85,8 @@ const RedirectUriListComponent: FC<IProps> = ({
     return (
       isOwner && (
         <Button
-          variant="secondary"
+          variant="ghost"
+          className="table-page-button"
           title="Delete redirect URI"
           type="button"
           onClick={() => setUriToDelete(uri)}
