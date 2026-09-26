@@ -56,6 +56,9 @@ describe('design tokens', () => {
         ['ink', 'canvas'],
         ['muted', 'sheet'],
         ['muted', 'card'],
+        // Toast message text and info icon sit on the overlay.
+        ['fg', 'overlay'],
+        ['muted', 'overlay'],
         ['accent-ink', 'sheet'],
         ['accent-ink', 'card'],
         ['negative', 'sheet'],
@@ -155,8 +158,10 @@ describe('design tokens', () => {
         ['accent', 'sheet'],
         ['accent', 'card'],
         ['accent', 'overlay'],
-        // The toggle knob sits on the accent track.
+        // The toggle knob sits on the accent track when on, and the ink knob
+        // on the control-border track when off.
         ['on-accent', 'accent'],
+        ['ink', 'control-border'],
       ];
       for (const [fg, bg] of pairs) {
         expect({ pair: `${fg} on ${bg}`, ratio: contrast(t[fg], t[bg]) >= 3 }).toEqual({

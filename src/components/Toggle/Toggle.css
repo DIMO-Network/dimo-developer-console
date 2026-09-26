@@ -12,8 +12,9 @@
       @apply bg-accent;
     }
 
+    /* Off: the control edge color, >=3:1 on sheet, card and overlay. */
     &.inactive {
-      @apply bg-highest;
+      @apply bg-control-border;
     }
   }
 
@@ -24,6 +25,7 @@
       @apply translate-x-5 bg-on-accent;
     }
 
+    /* Ink knob on the control-border track: >=3:1 in both themes. */
     &.inactive {
       @apply translate-x-0 bg-ink;
     }
