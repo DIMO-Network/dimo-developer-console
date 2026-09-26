@@ -17,7 +17,9 @@ const TITLES: Record<Entitlement['kind'], string> = {
 export const EntitlementBanner: FC<{ entitlement: Entitlement }> = ({ entitlement }) => (
   <div role="status" className="flex items-start gap-3 rounded-card bg-card p-4">
     {!entitlement.canPublish && (
-      <WarningAmberIcon className="mt-0.5 size-4 flex-shrink-0 text-warning" />
+      <span data-testid="read-only-warning" className="mt-0.5 flex flex-shrink-0">
+        <WarningAmberIcon className="size-4 text-warning" />
+      </span>
     )}
     <div className="flex flex-col gap-1">
       <span className="text-body-sm font-medium text-ink">

@@ -2,11 +2,15 @@ import { render, screen } from '@testing-library/react';
 import { WarningAmberIcon } from '@/components/Icons';
 
 describe('WarningAmberIcon', () => {
-  it('renders a warning amber icon', () => {
-    render(<WarningAmberIcon className="w-5 h-6" />);
+  // Decorative: the text next to it carries the meaning.
+  it('renders a decorative warning icon hidden from assistive tech', () => {
+    const { container } = render(<WarningAmberIcon className="w-5 h-6" />);
 
-    const supportIcon = screen.getByRole('warning-amber-icon');
+    const icon = container.querySelector('svg');
 
-    expect(supportIcon).toBeInTheDocument();
+    expect(icon).toHaveClass('w-5', 'h-6');
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+    expect(icon).not.toHaveAttribute('role');
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 });
