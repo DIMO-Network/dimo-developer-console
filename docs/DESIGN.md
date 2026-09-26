@@ -201,8 +201,7 @@ text-metric text-ink` — it's a link, but stays ink, not mint), with a
 `text-label text-muted` caption underneath.
 
 **Status dot**: `inline-block size-1.5 flex-shrink-0 rounded-full` (6px),
-colored by state. In a toast (`Toast.css` `.toast-status-dot`, plus `mt-1.5`)
-`success` → `bg-positive`, `error` → `bg-negative`, `info` → `bg-accent`.
+colored by state. (Toasts use a status icon instead — see "Toast".)
 
 **Status chip** (`src/components/StatusChip/StatusChip.tsx`) — the one status
 idiom for a record's state in a list or table: the status dot inside a
@@ -216,11 +215,15 @@ tone=…>`; don't hand-roll it. Tones:
 | `on`      | `bg-accent` (no glow)                                  | done / in place ("Active") | invitation accepted, template exists                    |
 | `pending` | `bg-warning`                                           | waiting on someone         | invitation sent / pending                               |
 | `off`     | `bg-muted`                                             | off, or nothing there yet  | webhook Disabled, "No template yet"                     |
-| `error`   | `bg-negative`                                          | broken                     | webhook Failed, "Id cannot be a template"               |
+| `error`   | `bg-negative`                                          | broken                     | webhook Failed, "Id cannot be a template", Errors count |
 
-The label is always `text-fg`. Never use `bg-selected-bg` (that is
-selection, not status) or a status-tinted chip. A bare count with a state
-(webhooks "Errors") is the status dot + the number in `text-fg`, no chip.
+The label is always `text-fg`, and a chip always has a label: map the value
+to its label and fall back to the capitalized raw value, never an empty chip
+(`TeamManagement`: `InvitationStatusLabels[status] ?? capitalize(status)`). A
+row with no state gets no chip (the workspace owner has no invitation). Never
+use `bg-selected-bg` (that is selection, not status) or a status-tinted chip.
+A count with a state (webhooks "Errors" > 0) is `<StatusChip tone="error">`
+with the number as the label; zero is plain text.
 
 **Status color** (enforced by `tokens.test.ts`): status colors are for dots
 and icons. Light-mode `positive` (`#11672F`) and `warning` (`#8F4500`) are
@@ -229,7 +232,10 @@ tint — but the console's rule stays: on any card, control or tinted surface
 the meaning goes on a dot or icon
 (`WarningAmberIcon` / `CheckIcon` / `CheckCircleIcon` in the status color,
 ≥ 3:1 non-text contrast on `card`, `control` and `overlay`) and the words are
-`text-fg` (or `text-muted` for secondary detail). A status tint
+`text-fg` (or `text-muted` for secondary detail). The icon is decorative —
+the words carry the meaning — so it is `aria-hidden` with no role
+(`WarningAmberIcon` sets `aria-hidden="true"` itself); tests assert the words
+or a `data-testid` on the icon's wrapper, never a made-up role. A status tint
 (`bg-warning/10 border-warning/40`) takes `text-fg` title + `text-muted` body,
 never the status color at reduced opacity. Examples: `EntitlementBanner`,
 the brand-rename warning in `BrandForm`, the explorer's missing-JWT notice
@@ -255,6 +261,12 @@ and Signers, settings' Team management) — never inside a `Card.secondary`
 or another card, which stacks three tonal levels. On a phone, hide a
 low-priority column rather than scrolling the row's action off-screen
 (settings hides Status below `md` and shows the status chip under the name).
+A column's optional `className` (`IColumn`) lands on its header `<th>` and
+every body `<td>`: `className: 'hidden md:table-cell'` drops a column on
+phones (TeamManagement's Status). `.table-cell` breaks anywhere
+(`break-all`, for long ids and URIs); a column of words wraps them at word
+boundaries with a `break-normal` span in its `render` and adds a `pr-4`
+gutter via `className` (`ConfigurationList`).
 Header row `.table-header` = `border-b border-outline`; header cell
 `.custom-table-column` = `pb-3 text-left text-label text-muted` (no
 background fill, sentence case). Body `.table-body` = `divide-y
@@ -264,20 +276,27 @@ divide-outline` (each `<tr>` also carries `border-t border-outline`). Cell
 **Pagination** (`src/components/Table/PaginatedTable.tsx`, `Table.css`, and
 the explorer's `VehicleList.tsx`): the meta-and-controls row = `flex
 items-center justify-between text-sm text-muted`. Round page buttons:
-`<Button variant="secondary" className="table-page-button">` —
-`variant="secondary"` supplies the border/fill/text/hover/disabled colors,
-`.table-page-button` (`src/components/Button/Button.css` — it's a `Button`
-size modifier, used outside tables too: `BrandRow`, `Signers`,
-`DeveloperJwts`, `RedirectUriList`) only overrides size/shape (`flex !h-8
-!min-h-0 !w-8 items-center justify-center rounded-full !px-0`) to make a
-32×32 circle, so there is no double-styling.
+`<Button variant="secondary" size="icon">` (see "Buttons" — the icon size).
+Row icon actions use the same size with `variant="ghost"` (`BrandRow`,
+`Signers`, `DeveloperJwts`, `RedirectUriList`).
 
 **Buttons** (`src/components/Button/Button.css`, `Button.tsx`): base
 `.button` = `inline-flex h-10 min-h-10 flex-row items-center justify-center
 gap-2 rounded-full px-4 text-body-sm font-semibold transition-[filter,
 background-color,color] duration-150 disabled:cursor-not-allowed
 disabled:opacity-40`. A loading button's `BubbleLoader` dots are
-`bg-current` (the button's own text colour). `variant` (default `primary`):
+`bg-current` (the button's own text colour). `size` (default `md`): `md` is
+the 40px pill above, defined on `.button` itself so a plain
+`className="button primary"` on a `<label>` or `<a>` gets it too; `icon` adds
+`.button.icon` = `size-8 min-h-0 flex-shrink-0 px-0` — a 32×32 round
+icon-only button that outranks the base by specificity (no `!important`).
+Give an icon button a `title` or `aria-label`. `CopyButton` is not a
+`Button`: its `size="icon"` is styled in its own `CopyButton.css`
+(`.copy-button.icon` = `inline-flex size-8 items-center justify-center
+rounded-full enabled:hover:bg-control`), so it never relies on another
+component having loaded `Button.css`; its default (`inline`) is a bare icon.
+There is no `.with-icon` modifier — `.button` already lays out icon + label
+with `gap-2`. `variant` (default `primary`):
 
 | Variant             | Classes                                                                     | Use for                                                                                       |
 | ------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
@@ -288,8 +307,12 @@ disabled:opacity-40`. A loading button's `BubbleLoader` dots are
 | `destructive`       | `bg-negative-soft text-negative enabled:hover:brightness-110`               | Destructive confirm inside a modal                                                            |
 | `destructive-ghost` | `bg-transparent text-negative enabled:hover:bg-negative-soft`               | Destructive inline/cancel-adjacent action                                                     |
 
-A hand-rolled primary action (the header credits "+" `.btn-add-credits`,
-`CSVUpload`'s "Upload CSV" label, a plain `<a className="button primary">`)
+A primary action that can't be a `<Button>` takes the recipe by class, with
+an explicit `import '@/components/Button/Button.css'` in its own file:
+`CSVUpload`'s "Upload" `<label className="button primary">` (the file input
+inside is `sr-only`, not `hidden`, so Tab reaches it, and the label shows the
+focus outline via `has-[:focus-visible]:outline…`) and `global-error`'s
+`<a className="button primary">`. The header credits "+" `.btn-add-credits`
 uses the same ink tokens — `bg-btn-primary text-btn-primary-fg
 hover:bg-btn-primary-hover` — never the gradient. Keep one `primary` per
 surface — never two ink pills in the same row/card (e.g. `CreateAppButton`
@@ -313,12 +336,21 @@ muted alone is under 3:1. Meta links on a card (`LicenseCard`
   `DatePicker` selected day.
 - **Selected card / row** (option cards, list rows): a neutral fill plus an
   ink edge, `bg-control text-ink shadow-selected` (`shadow-selected` =
-  `inset 3px 0 0 rgb(var(--ink))`); secondary text stays `text-muted`. Where
-  the unselected card is already `bg-control` (the configurator's permission
-  cards), the selected fill steps up to `bg-highest`. Used by the sign-up "What are you building?" cards (`BuildForForm`), the
-  configurator's permission cards (`ShareVehiclesWithDimoConfiguration`), the
-  explorer's vehicle list rows (`VehicleList`), `MultiCardOption`'s
-  `.option-card` and `PaymentMethod`.
+  `inset 3px 0 0 rgb(var(--ink))`); secondary text stays `text-muted`. The
+  selected card carries no hover class — it never changes under the pointer.
+  An unselected card's hover is a lighter step, the midpoint between its
+  resting fill and `control`, so hover never reads as selected: a row
+  resting transparent on a card → `hover:bg-control/50`; an option card
+  resting `bg-card` on the sheet → `hover:bg-control/70`; a row resting
+  transparent on the sheet → `hover:bg-card`. Expose the state: `aria-current`
+  on the selected item of a list you navigate (explorer rows),
+  `role="radio" aria-checked` inside a `role="radiogroup"` for a single
+  choice (build-for cards, `PaymentMethod`, `MultiCardOption`),
+  `aria-pressed` for a multi-select toggle (permission cards; `Card` passes
+  `role`/`aria-*` through). Used by the sign-up "What are you building?"
+  cards (`BuildForForm`), the configurator's permission cards
+  (`ShareVehiclesWithDimoConfiguration`), the explorer's vehicle list rows
+  (`VehicleList`), `MultiCardOption`'s `.option-card` and `PaymentMethod`.
 
 Never a white slab and never a mint tint. This is distinct from the segmented
 control below, which uses a raised neutral step.
@@ -331,9 +363,10 @@ transition-colors hover:text-fg`; the active segment `.selected` = `bg-bright
 text-ink shadow-sm` — a raised neutral step, not mint.
 
 **Toggle** (`src/components/Toggle/Toggle.css`): track `.bar` (40×20 pill) —
-`active` → `bg-accent`, `inactive` → `bg-highest`. Knob `.dot` (16px circle)
-— `active` → `translate-x-5 bg-on-accent`, `inactive` → `translate-x-0
-bg-ink`. Teal here means "on" — a live state, like a status dot. The same
+`active` → `bg-accent`, `inactive` → `bg-control-border` (≥ 3:1 on sheet,
+card and overlay). Knob `.dot` (16px circle) — `active` → `translate-x-5
+bg-on-accent`, `inactive` → `translate-x-0 bg-ink` (≥ 3:1 on the
+control-border track in both themes; `tokens.test.ts`). Teal here means "on" — a live state, like a status dot. The same
 goes for `CheckboxField` (`accent-color: rgb(var(--accent))`).
 
 **Form controls** — `TextField`, `TextArea`, `SelectField`,
@@ -382,9 +415,14 @@ sm:justify-end`. Panel title uses `<Title className="text-panel-title"
 component="h3">` (see `CreateAppModal`).
 
 **Toast** (`src/components/Toast/Toast.css`): `.toast` = `rounded-card
-bg-overlay text-fg shadow-float`; status dot as above; title `.toast-title`
-= `text-body-sm font-medium text-ink`; description `.toast-description` =
-`text-body-sm text-muted`; close button `.toast-close-btn` = `inline-flex
+bg-overlay text-fg shadow-float`, `role="alert"` for `error` and
+`role="status"` otherwise. A leading heroicons outline status icon
+`.toast-icon` (`size-5`, `aria-hidden`): `CheckCircleIcon` `text-positive`
+(success), `XCircleIcon` `text-negative` (error), `InformationCircleIcon`
+`text-muted` (info) — color is never the only cue: the message starts with an
+`sr-only` "Success:" / "Error:" / "Info:". Title `.toast-title` =
+`text-body-sm font-medium text-ink`; the message `.toast-description` =
+`text-body-sm text-fg` (the content, not muted); close button `.toast-close-btn` = `inline-flex
 rounded-full p-1 text-muted hover:bg-control hover:text-ink` + the icon-button ring (see "Focus ring"
 below).
 
@@ -430,8 +468,11 @@ before first paint — a light page never flashes dark. Storage key:
 string `"dark"`).
 
 `useTheme()` (`src/context/ThemeContext.tsx`) exposes `{ theme, setTheme,
-toggleTheme }`; on mount it syncs its state from `readStoredTheme()` since
-the pre-paint script already applied the theme to the DOM. `ThemeToggle`
+toggleTheme }`; on mount it applies `readStoredTheme()` to the DOM and its
+state — the pre-paint script covers a full page load, but a client-rendered
+tree can keep the SSR default. `global-error.tsx` renders its own `<html>` on
+the client, where the inline script never runs, so it applies the stored
+theme in a mount effect too. `ThemeToggle`
 (`variant="menu" | "icon"`) calls `toggleTheme()`; its label is the mode
 you'd switch _to_ ("Light mode" in dark, "Dark mode" in light).
 
@@ -512,7 +553,11 @@ The three `*-selected` routes (`sign-up-build-for-selected`,
 `license-configurator-new-selected`, `license-vehicle-simulator-selected`)
 click through to a selected option card, a selected permission card plus the
 date picker's chosen day, and the simulator's chosen region/make/model —
-shoot them whenever you touch the selection idiom.
+shoot them whenever you touch the selection idiom. The `*-hover` routes
+(`sign-up-build-for-hover`, `license-configurator-new-hover`,
+`explorer-vehicle-hover`) rest the pointer (a route's `hover` selector) on an
+unselected card or row next to a selected one, and
+`license-configurator-toast` shows a success toast.
 
 What "logs instead of failing" means, precisely (`shoot.mjs`): a console
 error matching the hydration/dev-overlay pattern is only ever printed to the
