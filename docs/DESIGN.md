@@ -1,41 +1,57 @@
 # DIMO Developer Console — visual design system
 
 The console shares its visual language with DIMO Fleet and the DIMO Driver app:
-Euclid Circular A, cool blue-black surfaces, the sky→mint DIMO gradient, and
-generous radii, in dark and light. Tokens live in `src/app/globals.css` and are
-exposed as Tailwind classes by `tailwind.config.ts`; this doc is how to use
-them.
+Euclid Circular A, cool blue-black surfaces, solid ink actions, the sky→mint
+DIMO gradient for brand moments, and generous radii, in dark and light. Tokens
+live in `src/app/globals.css` and are exposed as Tailwind classes by
+`tailwind.config.ts`; this doc is how to use them.
 
 ![Reference screen, dark](design/reference-dark.png)
 ![Reference screen, light](design/reference-light.png)
 
 ## Principles
 
-1. **Mint means live or actionable.** `bg-brand-gradient` and `text-accent-ink`
-   are reserved for primary actions, the selected/active state
-   (`bg-selected`), and "on"/live status (`bg-accent` dots, `Toggle`). It never
-   decorates. If everything is mint, nothing is.
-2. **Ink, not white; `fg`, not white.** `text-ink` is the high-emphasis text
-   color (titles, key values, metrics) — it is not a button fill. `text-fg` is
-   body text. Primary buttons use `bg-brand-gradient`, never a white or ink
-   fill.
-3. **Sentence case, one typeface.** Labels are `text-label` (12px/500),
+1. **Ink acts, teal means live.** Primary actions are solid ink
+   (`Button` `variant="primary"` = `bg-btn-primary text-btn-primary-fg`, the
+   inverse of the surface). The accent (`bg-accent`) is a _status_ colour only:
+   live/online dots, the "on" status chip, `Toggle` and checkbox "on". It is
+   never an action, a link, a hover or a selection. If everything is teal,
+   nothing is live.
+2. **The gradient is a brand moment.** `bg-brand-gradient` is for the main
+   submit on sign-in, sign-up and email recovery (`variant="brand"`) and for
+   progress fills (`bg-progress-fill`, which deepens in light mode so it stays
+   visible). Not for everyday buttons.
+3. **Selection is inverse ink.** A toggled control (chip, pill, day cell,
+   region/make tile) uses `bg-selected-bg text-selected-fg`. A selected card
+   or row gets a neutral fill and an ink edge
+   (`bg-control text-ink shadow-selected`), not a tint. Hover never takes the
+   selection away.
+4. **Sentence case, one typeface.** Labels are `text-label` (12px/500),
    sentence case, no letter-spacing. No uppercase or tracked mono "terminal"
    labels. Identifiers (VIN, token id, plate, counts) stay in Euclid — tabular
    figures are on globally (`font-feature-settings: 'tnum'`), so digits still
    align without `font-mono`.
-4. **Surfaces separate by tone, not lines.** Prefer a tonal step
+5. **Surfaces separate by tone, not lines.** Prefer a tonal step
    (`bg-card` → `bg-control` → `bg-highest`) or whitespace over a 1px border.
-   Keep `border-outline` for inputs, table row dividers and the few places a
-   hairline carries meaning.
-5. **Radius follows hierarchy.** `rounded-chip` (6px) for badges and menu
+   `border-outline` is the hairline for table row dividers, cards that need
+   an edge and the few places a line carries meaning; lines drawn on the
+   canvas use `border-canvas-divider`; form controls use
+   `border-control-border` (never the hairline).
+6. **Radius follows hierarchy.** `rounded-chip` (6px) for badges and menu
    items · `rounded-control` (10px) for inputs, buttons-in-rows and dropdown
    menus (`SelectField` `.custom-menu`, `DatePicker`) · `rounded-card` (16px)
    for cards and toasts · `rounded-panel` (20px) for modals, the guest card
    and the app shell · `rounded-full` for pills and primary buttons.
-6. **Status color marks, it doesn't write.** `positive` / `warning` /
+7. **Contrast is measured, in both themes.** Text ≥ 4.5:1 on the surface it
+   sits on; control edges, the focus ring, status dots and progress fills
+   ≥ 3:1. `tokens.test.ts` checks every pair below — add a pair before adding
+   a colour.
+8. **Status color marks, it doesn't write.** `positive` / `warning` /
    `negative` color the 6px dot or the icon; the words beside them are
    `text-fg` or `text-muted`. See "Status color" below.
+9. **Don't hide a control until hover.** Touch screens have no hover: a
+   control is visible at rest (if it must recede on desktop, gate the hiding
+   with `[@media(hover:hover)]:`).
 
 ## Tokens
 
@@ -43,43 +59,49 @@ All values are RGB channels in `globals.css` so Tailwind opacity modifiers
 work (`bg-card/60`); every token is defined for both themes
 (`tokens.test.ts` fails otherwise).
 
-| Role                                            | Tailwind class                  | Dark                           | Light                   |
-| ----------------------------------------------- | ------------------------------- | ------------------------------ | ----------------------- |
-| App canvas (behind sheet, sidebar)              | `bg-canvas`                     | `#0E0F11`                      | `#E7E9E9`               |
-| App shell / page background                     | `bg-sheet`                      | `#16181B`                      | `#FFFFFF`               |
-| Card                                            | `bg-card`                       | `#1C1F22`                      | `#F6F7F7`               |
-| Control fill, input, hover step                 | `bg-control`                    | `#272A2E`                      | `#E9EBEB`               |
-| Elevated hover step (skeletons, hover-on-hover) | `bg-highest`                    | `#303438`                      | `#DFE2E2`               |
-| Brightest surface (active segmented tab)        | `bg-bright`                     | `#3A3E42`                      | `#FFFFFF`               |
-| Overlay (modal panel, dropdown menu, toast)     | `bg-overlay`                    | `#1C1F22`                      | `#FFFFFF`               |
-| Hairline                                        | `border-outline`                | `#2A2E32`                      | `#E1E4E4`               |
-| Stronger hairline                               | `border-outline-strong`         | `#5C6063`                      | `#A0A3A2`               |
-| App shell border                                | `border-sheet-border`           | `rgba(255,255,255,.06)`        | `rgba(19,20,23,.06)`    |
-| Title / high-emphasis text                      | `text-ink`                      | `#F6F7F7`                      | `#131417`               |
-| Body text                                       | `text-fg`                       | `#EDEEEE`                      | `#131417`               |
-| Secondary / meta text                           | `text-muted`                    | `#A0A3A2`                      | `#5E6163`               |
-| Accent fill                                     | `bg-accent` / `text-accent`     | `#46F1E4`                      | `#22C7BA`               |
-| Accent as text/icon                             | `text-accent-ink`               | `#46F1E4`                      | `#0B7A72`               |
-| Text on an accent fill                          | `text-on-accent`                | `#06201E`                      | `#06201E`               |
-| Accent tint (soft, non-text-bearing hovers)     | `bg-accent-soft`                | mint 12%                       | mint 14%                |
-| Accent tint, strong (rare; not selection)       | `bg-accent-soft-strong`         | mint 28%                       | mint 30%                |
-| **Selected / toggled fill**                     | `bg-selected`                   | mint 28% (`#46F1E4`)           | mint 14% (`#46F1E4`)    |
-| Sky (gradient's second stop; decorative only)   | `text-sky` / `bg-sky`           | `#8CD0FF`                      | `#2B82D5`               |
-| Positive / success                              | `text-positive` / `bg-positive` | `#36DF71`                      | `#1B8842`               |
-| Warning                                         | `text-warning` / `bg-warning`   | `#FFAC60`                      | `#B75B0A`               |
-| Negative / error                                | `text-negative` / `bg-negative` | `#FF6060`                      | `#C70000`               |
-| Negative, soft background                       | `bg-negative-soft`              | `#402321`                      | `#FFF0F0`               |
-| Favorite                                        | `text-favorite` / `bg-favorite` | `#FFCD29`                      | `#C99A00`               |
-| Nav hover                                       | `bg-nav-hover`                  | `#16181B`                      | `rgba(255,255,255,.55)` |
-| Nav active                                      | `bg-nav-active`                 | `#24272B`                      | `#FFFFFF`               |
-| Scrim (modal backdrop)                          | `bg-scrim`                      | `rgba(8,9,10,.62)`             | `rgba(19,20,23,.32)`    |
-| Primary button / accent fill                    | `bg-brand-gradient`             | sky `#8CD0FF` → mint `#46F1E4` | same                    |
+| Role                                               | Tailwind class                                                | Dark                              | Light                             |
+| -------------------------------------------------- | ------------------------------------------------------------- | --------------------------------- | --------------------------------- |
+| App canvas (behind sheet, sidebar)                 | `bg-canvas`                                                   | `#0E0F11`                         | `#E7E9E9`                         |
+| App shell / page background                        | `bg-sheet`                                                    | `#16181B`                         | `#FFFFFF`                         |
+| Card                                               | `bg-card`                                                     | `#1C1F22`                         | `#F6F7F7`                         |
+| Control fill, input, hover step, selected card     | `bg-control`                                                  | `#272A2E`                         | `#E9EBEB`                         |
+| Elevated hover step (skeletons, hover-on-hover)    | `bg-highest`                                                  | `#303438`                         | `#DFE2E2`                         |
+| Brightest surface (active segmented tab)           | `bg-bright`                                                   | `#3A3E42`                         | `#FFFFFF`                         |
+| Overlay (modal panel, dropdown menu, toast)        | `bg-overlay`                                                  | `#1C1F22`                         | `#FFFFFF`                         |
+| Hairline (dividers, table rows, card edges)        | `border-outline`                                              | `#373B40`                         | `#D2D6D7`                         |
+| Line drawn on the canvas (sidebar lockup divider)  | `border-canvas-divider`                                       | `#45494E`                         | `#A0A3A2`                         |
+| Stronger hairline (dashed dropzone while dragging) | `border-outline-strong`                                       | `#5C6063`                         | `#A0A3A2`                         |
+| Form control edge / hover                          | `border-control-border` / `-hover`                            | `#747A7F` / `#A0A3A2`             | `#7C8082` / `#5E6163`             |
+| Keyboard focus ring                                | `border-focus-ring` / `ring-focus-ring`                       | `#46F1E4`                         | `#0B7A72`                         |
+| App shell border                                   | `border-sheet-border`                                         | `rgba(255,255,255,.06)`           | `rgba(19,20,23,.06)`              |
+| Title / high-emphasis text, links                  | `text-ink`                                                    | `#F6F7F7`                         | `#131417`                         |
+| Body text                                          | `text-fg`                                                     | `#EDEEEE`                         | `#131417`                         |
+| Secondary / meta text                              | `text-muted`                                                  | `#A0A3A2`                         | `#5E6163`                         |
+| **Primary action** (bg / text / hover)             | `bg-btn-primary` `text-btn-primary-fg` `bg-btn-primary-hover` | `#F6F7F7` / `#111214` / `#FFFFFF` | `#131417` / `#FFFFFF` / `#2E3236` |
+| **Toggled / selected control**                     | `bg-selected-bg` / `text-selected-fg`                         | `#EDEEEE` / `#16181B`             | `#16181B` / `#EDEEEE`             |
+| Selected card / row ink edge                       | `shadow-selected`                                             | `inset 3px 0 0` ink               | same                              |
+| Live status (dots, toggle, checkbox)               | `bg-accent`                                                   | `#46F1E4`                         | `#0B8F85`                         |
+| Accent as text/icon (reserved; currently unused)   | `text-accent-ink`                                             | `#46F1E4`                         | `#07635C`                         |
+| Text on the brand gradient / toggle knob           | `text-on-accent` / `bg-on-accent`                             | `#06201E`                         | `#06201E`                         |
+| Accent tint (input focus halo)                     | `ring-accent-soft`                                            | mint 12%                          | mint 14%                          |
+| Accent tint, strong (live-dot glow)                | `accent-soft-strong`                                          | mint 28%                          | mint 30%                          |
+| Sky (gradient's first stop; decorative only)       | `text-sky` / `bg-sky`                                         | `#8CD0FF`                         | `#2B82D5`                         |
+| Positive / success                                 | `text-positive` / `bg-positive`                               | `#36DF71`                         | `#11672F`                         |
+| Warning                                            | `text-warning` / `bg-warning`                                 | `#FFAC60`                         | `#8F4500`                         |
+| Negative / error                                   | `text-negative` / `bg-negative`                               | `#FF6060`                         | `#C70000`                         |
+| Negative, soft background                          | `bg-negative-soft`                                            | `#402321`                         | `#FFF0F0`                         |
+| Favorite                                           | `text-favorite` / `bg-favorite`                               | `#FFCD29`                         | `#C99A00`                         |
+| Nav hover                                          | `bg-nav-hover`                                                | `#1C1F22`                         | `rgba(255,255,255,.55)`           |
+| Nav active                                         | `bg-nav-active`                                               | `#24272B`                         | `#FFFFFF`                         |
+| Scrim (modal backdrop)                             | `bg-scrim`                                                    | `rgba(8,9,10,.62)`                | `rgba(19,20,23,.32)`              |
+| Brand gradient (brand moments only)                | `bg-brand-gradient`                                           | sky `#8CD0FF` → mint `#46F1E4`    | same                              |
+| Progress fill                                      | `bg-progress-fill`                                            | brand gradient                    | `#1E6FBF` → `#0A7069`             |
 
-`selected` is its own token, not `accent-soft-strong`: at 30% light-mode
-tint, `accent-ink` text drops below AA, so `selected` uses a 14% tint in
-light (28% in dark) tuned so `accent-ink` on it stays AA over `sheet`,
-`card` and `overlay`. Never use `bg-accent-soft-strong text-accent-ink` for a
-selected/checked state — use `bg-selected text-accent-ink`.
+There is no tinted "selected" token any more: selection is inverse ink
+(`selected-bg` / `selected-fg`, the inverse surface and its text) or, for a
+card or row, `bg-control shadow-selected`. The light `positive` / `warning`
+values are Fleet's corrected ones: ≥ 4.5:1 as text on `sheet` and `card` and
+on their own 14% tint.
 
 ## Type scale
 
@@ -126,16 +148,27 @@ override, `.header .credits, .header .credits .credits-info { max-md:min-w-0
 `md:w-[244px]` fixed, hidden below `md`. Inside, `.main-menu` = `flex h-full
 w-full flex-col justify-between px-3 py-5`; brand row `.menu-brand` = `mb-7
 flex flex-row items-center justify-between`; nav list `ul` = `flex flex-col
-gap-0.5`. Brand lockup (`BrandLockup.css`): `flex h-8 items-center gap-2
-px-2.5`, wordmark image + `.product` = `border-l border-outline pl-2
-text-[15px] font-medium leading-none text-fg` (`-0.01em`); the wordmark PNG is
-drawn for dark and gets `filter: brightness(0) opacity(.88)` in light mode.
+gap-0.5`. Brand lockup (`BrandLockup.css`): `flex h-8 items-center gap-1.5
+px-2.5`, wordmark image + `.product` = `border-l border-canvas-divider pl-1.5
+text-[14px] font-medium leading-none text-fg` (`-0.01em`; on the guest panel,
+which is the sheet, the divider is `border-outline`). The spacing is tight on
+purpose: the 80px wordmark plus "Developer Console" must end inside the 244px
+sidebar.
+
+**Logo**: the wordmark is Fleet's current DIMO logo,
+`public/images/dimo-wordmark.svg` (white fill, viewBox 138×31,
+`role="img" aria-label="DIMO"`), rendered by `BrandLockup` with
+`next/image` at 80×18 and `alt="DIMO"`. It is drawn for dark backgrounds; in
+light mode it gets `filter: brightness(0) opacity(.88)` so it reads as ink.
+The favicon (`src/app/icon.png`) is Fleet's red circle "D" mark. Don't use
+the old mint mark or a gradient wordmark.
 
 **Nav item** (`src/components/Menu/MenuItem/MenuItem.css`): `.menu-item` =
 `flex h-10 flex-row items-center gap-3 rounded-control px-3 text-body-sm
 font-medium text-muted transition-colors`; hover → `bg-nav-hover text-fg`;
-active (`.is-active`) → `bg-nav-active text-ink` with its icon at
-`text-accent-ink`; disabled → `pointer-events-none opacity-50`.
+active (`.is-active`) → `bg-nav-active text-ink`, icon `text-ink` too — the
+raised pill carries the selection, not a colour; disabled →
+`pointer-events-none opacity-50`.
 
 **Page intro** (`src/app/webhooks/webhooksPage/Header/Header.tsx`,
 `src/app/templates/templatesPage/Header/Header.tsx`,
@@ -177,22 +210,23 @@ neutral chip, `inline-flex w-fit items-center gap-1.5 whitespace-nowrap
 rounded-chip bg-control px-2 py-0.5 text-label text-fg`. Use `<StatusChip
 tone=…>`; don't hand-roll it. Tones:
 
-| `tone`    | Dot                                                    | Means                     | Used for                                                |
-| --------- | ------------------------------------------------------ | ------------------------- | ------------------------------------------------------- |
-| `live`    | `bg-accent shadow-[0_0_8px_var(--accent-soft-strong)]` | running right now         | webhook Enabled (`Webhooks/components/StatusBadge.tsx`) |
-| `on`      | `bg-accent`                                            | done / in place           | invitation accepted, template exists                    |
-| `pending` | `bg-warning`                                           | waiting on someone        | invitation sent / pending                               |
-| `off`     | `bg-muted`                                             | off, or nothing there yet | webhook Disabled, "No template yet"                     |
-| `error`   | `bg-negative`                                          | broken                    | webhook Failed, "Id cannot be a template"               |
+| `tone`    | Dot                                                    | Means                      | Used for                                                |
+| --------- | ------------------------------------------------------ | -------------------------- | ------------------------------------------------------- |
+| `live`    | `bg-accent shadow-[0_0_8px_var(--accent-soft-strong)]` | running right now          | webhook Enabled (`Webhooks/components/StatusBadge.tsx`) |
+| `on`      | `bg-accent` (no glow)                                  | done / in place ("Active") | invitation accepted, template exists                    |
+| `pending` | `bg-warning`                                           | waiting on someone         | invitation sent / pending                               |
+| `off`     | `bg-muted`                                             | off, or nothing there yet  | webhook Disabled, "No template yet"                     |
+| `error`   | `bg-negative`                                          | broken                     | webhook Failed, "Id cannot be a template"               |
 
-The label is always `text-fg`. Never use `bg-selected` (that is selection,
-not status) or a status-tinted chip. A bare count with a state (webhooks
-"Errors") is the status dot + the number in `text-fg`, no chip.
+The label is always `text-fg`. Never use `bg-selected-bg` (that is
+selection, not status) or a status-tinted chip. A bare count with a state
+(webhooks "Errors") is the status dot + the number in `text-fg`, no chip.
 
 **Status color** (enforced by `tokens.test.ts`): status colors are for dots
-and icons. As _text_, light-mode `positive`/`warning` are only AA on `sheet`
-and drop to 3.8–4.3:1 on `card`, `control` and status tints. So on any card,
-control or tinted surface the meaning goes on a dot or icon
+and icons. Light-mode `positive` (`#11672F`) and `warning` (`#8F4500`) are
+Fleet's corrected values — AA as text on `sheet`, `card` and their own 14%
+tint — but the console's rule stays: on any card, control or tinted surface
+the meaning goes on a dot or icon
 (`WarningAmberIcon` / `CheckIcon` / `CheckCircleIcon` in the status color,
 ≥ 3:1 non-text contrast on `card`, `control` and `overlay`) and the words are
 `text-fg` (or `text-muted` for secondary detail). A status tint
@@ -242,25 +276,52 @@ size modifier, used outside tables too: `BrandRow`, `Signers`,
 `.button` = `inline-flex h-10 min-h-10 flex-row items-center justify-center
 gap-2 rounded-full px-4 text-body-sm font-semibold transition-[filter,
 background-color,color] duration-150 disabled:cursor-not-allowed
-disabled:opacity-40`. `variant` (default `primary`):
+disabled:opacity-40`. A loading button's `BubbleLoader` dots are
+`bg-current` (the button's own text colour). `variant` (default `primary`):
 
-| Variant             | Classes                                                                     | Use for                                                              |
-| ------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `primary`           | `bg-brand-gradient text-on-accent enabled:hover:brightness-105`             | The one gradient action on a surface (Add credits, Create a license) |
-| `secondary`         | `border border-outline bg-control text-ink enabled:hover:bg-highest`        | Cancel/auxiliary actions, secondary CTAs (License details)           |
-| `ghost`             | `bg-transparent text-muted enabled:hover:bg-control enabled:hover:text-ink` | Low-emphasis inline actions                                          |
-| `destructive`       | `bg-negative-soft text-negative enabled:hover:brightness-110`               | Destructive confirm inside a modal                                   |
-| `destructive-ghost` | `bg-transparent text-negative enabled:hover:bg-negative-soft`               | Destructive inline/cancel-adjacent action                            |
+| Variant             | Classes                                                                     | Use for                                                                                       |
+| ------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `primary`           | `bg-btn-primary text-btn-primary-fg enabled:hover:bg-btn-primary-hover`     | The main action on a surface: Create a license, modal confirms, Generate new JWT, Add credits |
+| `brand`             | `bg-brand-gradient text-on-accent enabled:hover:brightness-105`             | Brand moments only: the main submit on sign-in, each sign-up step and email recovery          |
+| `secondary`         | `border border-outline bg-control text-ink enabled:hover:bg-highest`        | Cancel/auxiliary actions, secondary CTAs (License details)                                    |
+| `ghost`             | `bg-transparent text-muted enabled:hover:bg-control enabled:hover:text-ink` | Low-emphasis inline actions                                                                   |
+| `destructive`       | `bg-negative-soft text-negative enabled:hover:brightness-110`               | Destructive confirm inside a modal                                                            |
+| `destructive-ghost` | `bg-transparent text-negative enabled:hover:bg-negative-soft`               | Destructive inline/cancel-adjacent action                                                     |
 
-Keep one `primary` per surface — never two gradient buttons in the same
-row/card (e.g. `CreateAppButton` accepts a `variant` prop so it can be
-demoted to `secondary` inside the onboarding banner).
+A hand-rolled primary action (the header credits "+" `.btn-add-credits`,
+`CSVUpload`'s "Upload CSV" label, a plain `<a className="button primary">`)
+uses the same ink tokens — `bg-btn-primary text-btn-primary-fg
+hover:bg-btn-primary-hover` — never the gradient. Keep one `primary` per
+surface — never two ink pills in the same row/card (e.g. `CreateAppButton`
+accepts a `variant` prop so it can be demoted to `secondary` inside the
+onboarding banner).
 
-**Selected / toggled state** (list/chip/card selection —
-`VehicleSimulator.css` `.selected` on region/make/model/year pickers):
-`bg-selected text-accent-ink`, `border-transparent`. Never a white slab,
-never `bg-accent-soft-strong text-accent-ink`. This is distinct from the
-segmented control below, which uses a neutral elevation instead of mint.
+**Links** (`src/components/Anchor/Anchor.css`, inline "Learn more" links):
+links are ink, not teal. A standalone link (`Anchor`) = `text-ink
+underline-offset-2 hover:underline`; a link inside a sentence of muted text is
+always underlined (`text-ink underline underline-offset-2`), because ink vs
+muted alone is under 3:1. Meta links on a card (`LicenseCard`
+`.license-card-link`) are `text-muted hover:text-ink`.
+
+**Selected / toggled state** — pick by what the element is:
+
+- **Toggled control** (chips, pills, day cells, compact option tiles):
+  `bg-selected-bg text-selected-fg` with `hover:bg-selected-bg` so hover never
+  flickers back to the unselected fill; secondary text on it
+  `text-selected-fg/75`. Used by the vehicle simulator's region tiles, make
+  tiles and model/year pills (`VehicleSimulator.css` `.selected`) and the
+  `DatePicker` selected day.
+- **Selected card / row** (option cards, list rows): a neutral fill plus an
+  ink edge, `bg-control text-ink shadow-selected` (`shadow-selected` =
+  `inset 3px 0 0 rgb(var(--ink))`); secondary text stays `text-muted`. Where
+  the unselected card is already `bg-control` (the configurator's permission
+  cards), the selected fill steps up to `bg-highest`. Used by the sign-up "What are you building?" cards (`BuildForForm`), the
+  configurator's permission cards (`ShareVehiclesWithDimoConfiguration`), the
+  explorer's vehicle list rows (`VehicleList`), `MultiCardOption`'s
+  `.option-card` and `PaymentMethod`.
+
+Never a white slab and never a mint tint. This is distinct from the segmented
+control below, which uses a raised neutral step.
 
 **Segmented control** (`src/components/SegmentedControl/SegmentedControl.css`):
 track `.segmented-control` = `flex w-fit flex-row gap-0.5 rounded-full
@@ -272,36 +333,50 @@ text-ink shadow-sm` — a raised neutral step, not mint.
 **Toggle** (`src/components/Toggle/Toggle.css`): track `.bar` (40×20 pill) —
 `active` → `bg-accent`, `inactive` → `bg-highest`. Knob `.dot` (16px circle)
 — `active` → `translate-x-5 bg-on-accent`, `inactive` → `translate-x-0
-bg-ink`. Mint here means "on", matching the live/actionable principle.
+bg-ink`. Teal here means "on" — a live state, like a status dot. The same
+goes for `CheckboxField` (`accent-color: rgb(var(--accent))`).
+
+**Form controls** — `TextField`, `TextArea`, `SelectField`,
+`SelectWithChevron`, `MoneyField`, `TokenInput`'s `.dcx-container`, the
+`DatePicker` trigger and the explorer search (both reuse `.text-field`) and
+the template editor's `TemplateCell`: `bg-control` fill, `border
+border-control-border`, hover `border-control-border-hover`, focus
+`border-focus-ring` with a `ring-[3px] ring-accent-soft` halo — one ring, on
+the control, never on a wrapper too. `border-outline` is a hairline and fails
+3:1 as a control edge; don't draw a control with it.
 
 **Text input + focus** (`src/components/TextField/TextField.css`):
 `.text-field` = `flex min-h-10 flex-row items-center rounded-control border
-border-outline bg-control px-3 text-fg transition-[border-color,box-shadow]
-focus-within:border-accent focus-within:ring-[3px]
-focus-within:ring-accent-soft`; inner `<input>` = `w-full bg-transparent
-text-body-sm font-normal outline-0 placeholder:text-muted`. **This is the
-only one of the two with a focus ring** — the ring lives on the container
-(`focus-within`) so it fires when the real `<input>` inside it is focused.
+border-control-border bg-control px-3 text-fg transition-[border-color,
+box-shadow] focus-within:border-focus-ring focus-within:ring-[3px]
+focus-within:ring-accent-soft`, plus `&:hover:not(:focus-within) {
+border-control-border-hover }` (Tailwind orders `hover:` after
+`focus-within:`, so a plain `hover:` would repaint the focused edge). Inner
+`<input>` = `w-full bg-transparent text-body-sm font-normal outline-0
+placeholder:text-muted`. The ring lives on the container (`focus-within`) so
+it fires when the real `<input>` inside it is focused. `TextArea`, `MoneyField`
+(`.input-focused`) and `TokenInput` use the same recipe;
+`SelectWithChevron` and `TemplateCell` are the real `<select>`/`<input>`, so
+they use `hover:` + `focus:` directly.
 
-**Select field** (`src/components/SelectField/SelectField.css`): this is a
-click-to-open custom menu, not a text input, and has **no
-focus-within/transition/ring** — do not copy the text-field's focus classes
-onto it. Container `.select-field` = `relative flex min-h-10 flex-row
-items-center justify-between rounded-control border border-outline
-bg-control px-3 text-body-sm font-normal text-fg outline-0` (the real
-`<select>` inside is `hidden`; the visible value is a `<p>`, styled
-`text-fg` once a value is chosen). Its dropdown `.custom-menu` = `absolute
-left-0 top-full z-10 mt-1 hidden max-h-48 w-full flex-col gap-0.5
-overflow-y-auto rounded-control bg-overlay p-1 text-fg shadow-float`, shown
-via a `.show` modifier (`flex`); each `.custom-item` = `cursor-pointer
-rounded-chip px-2.5 py-2 hover:bg-control`.
+**Select field** (`src/components/SelectField/SelectField.css`): a
+click-to-open custom menu, not a text input. Container `.select-field` =
+`relative flex min-h-10 flex-row items-center justify-between rounded-control
+border border-control-border bg-control px-3 text-body-sm font-normal text-fg
+outline-0 transition-colors hover:border-control-border-hover` (the real
+`<select>` inside is `hidden`; the visible value is a `<p>`, styled `text-fg`
+once a value is chosen). Its dropdown `.custom-menu` = `absolute left-0
+top-full z-10 mt-1 hidden max-h-48 w-full flex-col gap-0.5 overflow-y-auto
+rounded-control bg-overlay p-1 text-fg shadow-float`, shown via a `.show`
+modifier (`flex`); each `.custom-item` = `cursor-pointer rounded-chip px-2.5
+py-2 hover:bg-control`.
 
 **Modal** (`src/components/Modal/Modal.css`, `Modal.tsx`): backdrop = `bg-scrim
 backdrop-blur-[6px]`. Panel `.dialog-panel` = `rounded-panel bg-overlay p-6
 text-fg shadow-float` (a near-fullscreen inset sheet on mobile,
 `min-h-[95vh]`; content-sized `md:min-w-[480px] md:max-w-[560px]` on
 desktop). Close button `.close-btn` = `rounded-full p-1 text-muted
-hover:bg-control hover:text-ink` + the icon-button focus ring below. Actions
+hover:bg-control hover:text-ink` + the icon-button ring (see "Focus ring" below). Actions
 row `.dialog-action-content` = `mt-6 flex flex-col-reverse gap-2 sm:flex-row
 sm:justify-end`. Panel title uses `<Title className="text-panel-title"
 component="h3">` (see `CreateAppModal`).
@@ -310,18 +385,20 @@ component="h3">` (see `CreateAppModal`).
 bg-overlay text-fg shadow-float`; status dot as above; title `.toast-title`
 = `text-body-sm font-medium text-ink`; description `.toast-description` =
 `text-body-sm text-muted`; close button `.toast-close-btn` = `inline-flex
-rounded-full p-1 text-muted hover:bg-control hover:text-ink` + the icon-button
-focus ring below.
+rounded-full p-1 text-muted hover:bg-control hover:text-ink` + the icon-button ring (see "Focus ring"
+below).
 
-**Icon-button focus ring** (`Toast.css` `.toast-close-btn`, `Modal.css`
-`.close-btn`): `focus-visible:outline-none focus-visible:ring-2
-focus-visible:ring-accent-ink focus-visible:ring-offset-2
+**Focus ring**: `globals.css` gives every element one keyboard outline,
+`:focus-visible { outline: 2px solid rgb(var(--focus-ring)); outline-offset:
+2px }` (a `[role='dialog']:focus` panel is exempt — the ring belongs on the
+controls inside it). Icon buttons that draw their own ring (`Toast.css`
+`.toast-close-btn`, `Modal.css` `.close-btn`): `focus-visible:outline-none
+focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2
 focus-visible:ring-offset-{surface}`, where `{surface}` is the token the
-button sits on (`overlay` for toasts and modals; `ring-offset-*` takes any
-color token). `accent-ink` holds ≥ 3:1 against every surface; `accent-soft`
-does not, so never use it as a focus ring on its own. Buttons, nav links and
-`ThemeToggle` keep the browser's focus ring — don't strip it without adding
-this one.
+button sits on (`overlay` for toasts and modals). `focus-ring` holds ≥ 3:1 on
+`sheet`, `card`, `overlay` and `canvas` (light mode deepens it to `#0B7A72`);
+`accent-soft` does not, so it is only ever the halo, never the ring. Don't
+strip the outline without adding a ring.
 
 **Empty state** (`src/app/app/list/components/EmptyList/index.tsx`): `flex
 w-full flex-1 flex-col items-center justify-center rounded-card bg-card p-10
@@ -362,10 +439,14 @@ Every CSS variable in `globals.css` must exist under both
 `:root[data-theme='dark']` and `:root[data-theme='light']` —
 `__tests__/unit/utils/tokens.test.ts` fails otherwise. The same suite checks
 WCAG AA for `fg`/`ink`/`muted`/`accent-ink` over their surfaces, status text
-on `sheet`, `negative` error text on `card`/`control`/`overlay`, `fg`/`muted`
-on each `status/10` tint over `card`, 3:1 non-text contrast for the status
-colors (dots and icons) on `card`/`control`/`overlay`, and `accent-ink` on the
-`selected` tint over `sheet`, `card` and `overlay`.
+on `sheet` and `card` and on its own 14% tint, `negative` error text on
+`card`/`control`/`overlay`, `fg`/`muted` on each `status/10` tint over
+`card`, `btn-primary-fg` on `btn-primary` (and its hover), `selected-fg` on
+`selected-bg`, `on-accent` on both brand-gradient stops; and 3:1 non-text
+contrast for the status colors on `card`/`control`/`overlay`,
+`control-border` on `sheet`/`card`/`control`/`overlay`, `focus-ring` on
+`sheet`/`card`/`overlay`/`canvas`, `accent` dots on `sheet`/`card`/`overlay`,
+and the toggle knob (`on-accent`) on `accent`.
 
 ## Don'ts
 
@@ -386,17 +467,23 @@ visual:check`.
   fail the check.
 - No white/black slabs: no `text-white`, `bg-white`, `bg-black`,
   `bg-black/50` (see `class-map.md` for replacements).
-- Selected/toggled state is never a white slab and never
-  `bg-accent-soft-strong text-accent-ink` — always `bg-selected
-text-accent-ink`.
-- Don't use mint (`accent`, `accent-ink`, `bg-brand-gradient`, `bg-selected`)
-  for decoration — only primary actions, selected/active state, and
-  live/online status.
+- No teal for actions, links, hovers or selection — `accent` is the
+  live-status colour (dots, `Toggle`, checkboxes, the `on` chip).
+- No `bg-brand-gradient` on everyday buttons — only `variant="brand"` on the
+  sign-in / sign-up / email-recovery submit, and `bg-progress-fill` for
+  progress.
+- Selection is inverse ink (`bg-selected-bg text-selected-fg`) or, for a
+  card/row, `bg-control text-ink shadow-selected` — never a white slab or a
+  mint tint, and hover must not drop it.
+- Don't draw form controls with `border-outline`; use
+  `border-control-border`.
+- Don't hide a control until hover (`opacity-0 group-hover:opacity-100`) —
+  touch screens have no hover.
 - Don't stack two `variant="primary"` buttons on one surface.
 - Don't write status in color on a card or tint (`text-positive`,
   `text-warning`, `text-warning/70` …): dot or icon in the status color, words
   in `text-fg`/`text-muted`. Only `text-negative` error text is exempt.
-- Don't use `bg-selected` for status — it means "selected".
+- Don't use `bg-selected-bg` for status — it means "selected".
 - Icons paint with `currentColor` (`fill="currentColor"`, or inherit from an
   SVG library that already does); color them with a text class. `GoogleIcon`
   is the one exception — it keeps its fixed brand colors.
@@ -421,6 +508,11 @@ other route is real and fails the shot — that one is yours to fix.
 **`app-empty`** is also the `/app` route with `noLicenses: true`, i.e. the
 zero-license empty state (`EmptyList`) — shoot it whenever a pattern you're
 touching appears there.
+The three `*-selected` routes (`sign-up-build-for-selected`,
+`license-configurator-new-selected`, `license-vehicle-simulator-selected`)
+click through to a selected option card, a selected permission card plus the
+date picker's chosen day, and the simulator's chosen region/make/model —
+shoot them whenever you touch the selection idiom.
 
 What "logs instead of failing" means, precisely (`shoot.mjs`): a console
 error matching the hydration/dev-overlay pattern is only ever printed to the
@@ -448,15 +540,15 @@ add this to silence a hydration error your own change introduced).
 
 ## Legacy → token class map
 
-Every restyle pass applies this map to the files it owns. `selected` state
-uses the `bg-selected` token (a ruling that supersedes older guidance to use
-`bg-accent-soft-strong`).
+Every restyle pass applies this map to the files it owns. Selected state is
+inverse ink (see "Selected / toggled state"); the old mint `bg-selected` tint
+is gone.
 
 | Legacy                                                                                                                                   | Replace with                                                                              |
 | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | `text-white`                                                                                                                             | `text-ink` for titles, values and emphasis; `text-fg` for body text                       |
-| `text-black` (on white buttons/selected)                                                                                                 | handled by `Button` `variant` or `text-accent-ink` on selected                            |
-| `bg-white` as button / selected fill                                                                                                     | `Button` `variant="primary"`; selected = `bg-selected text-accent-ink`                    |
+| `text-black` (on white buttons/selected)                                                                                                 | handled by `Button` `variant`, or `text-selected-fg` on a toggled control                 |
+| `bg-white` as button / selected fill                                                                                                     | `Button` `variant="primary"`; selected = `bg-selected-bg text-selected-fg`                |
 | `bg-black`                                                                                                                               | `bg-canvas`                                                                               |
 | `bg-black/50`, `bg-black bg-opacity-50`, `bg-black/60`                                                                                   | `bg-scrim`                                                                                |
 | `text-text-secondary`, `text-grey-200…500`, `text-gray-400/500`, `text-white/50`, `text-[#BABABA]`, `text-neutral-500`, `text-[#6B6E6E]` | `text-muted`                                                                              |
@@ -467,12 +559,12 @@ uses the `bg-selected` token (a ruling that supersedes older guidance to use
 | `bg-cta-default`, `bg-[#322D2F]`, `bg-dark-grey-950`, `bg-dark-grey-800`                                                                 | `bg-control`                                                                              |
 | `border-[#322D2F]`, `border-cta-default`, `border-t-cta-default`, `border-grey-950`, `border-surface-raised`, `divide-dark-grey-950`     | `border-outline` / `border-t-outline` / `divide-outline`                                  |
 | `hover:border-white`, `hover:bg-gray-50`                                                                                                 | `hover:bg-highest` (tonal step, not a bright border)                                      |
-| `bg-red-900` as highlight / selected                                                                                                     | `bg-selected text-accent-ink` (not `bg-accent-soft-strong`)                               |
+| `bg-red-900` as highlight / selected                                                                                                     | `bg-selected-bg text-selected-fg`, or `bg-control shadow-selected` for a card/row         |
 | `hover:bg-red-900`                                                                                                                       | `hover:bg-control`                                                                        |
 | `text-red-400/500`, `text-feedback-error`, `ring-red-500`                                                                                | `text-negative` / `ring-negative`                                                         |
 | `bg-feedback-error`                                                                                                                      | `bg-negative-soft text-negative`                                                          |
 | `bg-feedback-success`, `text-green-400`                                                                                                  | `bg-positive` / `text-positive`                                                           |
-| `text-primary-200/300`, `bg-primary-300`, `bg-primary-200/20`                                                                            | `text-accent-ink` / `bg-accent` / `bg-highest` (skeletons)                                |
+| `text-primary-200/300`, `bg-primary-300`, `bg-primary-200/20`                                                                            | `text-ink` (links, emphasis) / `bg-accent` (live dots) / `bg-highest` (skeletons)         |
 | `text-amber-500`, `border-amber-800/60`, `bg-amber-950/20`                                                                               | `text-warning`, `border-warning/40`, `bg-warning/10`                                      |
 | `bg-[#124BDB]`, `bg-[#243647]`                                                                                                           | `bg-control`                                                                              |
 | `fill-white`, `stroke-white`, `fill-grey-200`, `fill-white/50`                                                                           | `fill-current` / `stroke-current` plus a text color class (`text-muted`, `text-ink`)      |
@@ -487,4 +579,5 @@ uses the `bg-selected` token (a ruling that supersedes older guidance to use
 | modal / floating panel radius                                                                                                            | `rounded-panel` for modals; `rounded-control` for dropdown menus                          |
 | small badges `rounded`                                                                                                                   | `rounded-chip`                                                                            |
 | `shadow`, `shadow-lg`, `shadow-xl`                                                                                                       | `shadow-float` for floating things; none for cards                                        |
-| focus `ring-indigo-500`, focus borders `border-white`                                                                                    | inputs: the text-input `focus-within` recipe; icon buttons: the icon-button focus ring    |
+| focus `ring-indigo-500`, focus borders `border-white`                                                                                    | inputs: the form-control focus recipe; icon buttons: `ring-focus-ring`                    |
+| input / select border `border-outline`                                                                                                   | `border-control-border hover:border-control-border-hover`                                 |

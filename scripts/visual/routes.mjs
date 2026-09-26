@@ -102,6 +102,34 @@ export const ROUTES = [
     ready: 'Which component?',
   },
   {
+    // Selection states: a permission card toggled on (selected card: ink edge)
+    // and the date picker reopened on a chosen day (toggled control: inverse ink).
+    name: 'license-configurator-new-selected',
+    path: `/license/${t}/configurator/new`,
+    ready: 'Which component?',
+    click: [
+      'text="Custom permissions"',
+      'text="Commands"',
+      '.date-picker .text-field',
+      '.date-picker .grid >> text="15"',
+      '.date-picker .text-field',
+    ],
+    viewports: ['desktop'],
+  },
+  {
+    // Vehicle simulator with a region and a make chosen (toggled tiles).
+    name: 'license-vehicle-simulator-selected',
+    path: `/license/${t}/details`,
+    ready: LICENSE.alias,
+    click: [
+      'text="Vehicle simulator"',
+      '.vehicle-sim-region-card',
+      '.vehicle-sim-make-card',
+      '.vehicle-sim-pill',
+    ],
+    viewports: ['desktop'],
+  },
+  {
     name: 'license-configurator-edit',
     path: `/license/${t}/configurator/cfg-1`,
     ready: 'Use Permission Template',
@@ -179,6 +207,14 @@ export const ROUTES = [
     name: 'sign-up-build-for',
     path: '/sign-up?flow=build-for',
     ready: 'What are you building?',
+    guest: true,
+  },
+  {
+    // An option card selected (selected card: neutral fill + ink edge).
+    name: 'sign-up-build-for-selected',
+    path: '/sign-up?flow=build-for',
+    ready: 'What are you building?',
+    click: 'text="Web application"',
     guest: true,
   },
   {
