@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FC } from 'react';
+import { capitalize } from 'lodash';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
 import * as Sentry from '@sentry/nextjs';
@@ -16,11 +17,8 @@ import { deleteCollaborator } from '@/actions/team';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { Column } from '@/components/Table/Column';
 import { StatusChip, type StatusTone } from '@/components/StatusChip';
 import { useGlobalAccount } from '@/hooks';
-
-import './TeamManagement.css';
 
 const STATUS_TONE: Record<string, StatusTone> = {
   [InvitationStatuses.ACCEPTED]: 'on',
@@ -28,11 +26,14 @@ const STATUS_TONE: Record<string, StatusTone> = {
   [InvitationStatuses.PENDING]: 'pending',
 };
 
-const renderStatusChip = ({ status }: ITeamCollaborator) => (
-  <StatusChip tone={STATUS_TONE[status] ?? 'off'}>
-    {InvitationStatusLabels[status as InvitationStatuses]}
-  </StatusChip>
-);
+// The workspace owner has no invitation, so no chip; a status without a label
+// still reads (capitalized) instead of rendering an empty chip.
+const renderStatusChip = ({ status, role }: ITeamCollaborator) =>
+  role === TeamRoles.OWNER ? null : (
+    <StatusChip tone={STATUS_TONE[status] ?? 'off'}>
+      {InvitationStatusLabels[status as InvitationStatuses] ?? capitalize(status)}
+    </StatusChip>
+  );
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
@@ -52,7 +53,9 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
       <div className="flex flex-col items-start gap-1 md:whitespace-nowrap">
         <p>{name ?? email ?? ''}</p>
         {/* Phones have no Status column; the chip rides under the name instead. */}
-        <span className="md:hidden">{renderStatusChip(teamCollaborator)}</span>
+        {teamCollaborator.role !== TeamRoles.OWNER && (
+          <span className="md:hidden">{renderStatusChip(teamCollaborator)}</span>
+        )}
       </div>
     );
   };
@@ -63,8 +66,10 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
     </span>
   );
 
+  // A Cell falls back to String(value) for a falsy render, so the owner row
+  // renders an empty span rather than the raw status.
   const renderStatus = (teamCollaborator: ITeamCollaborator) => (
-    <span className="team-status-cell">{renderStatusChip(teamCollaborator)}</span>
+    <span>{renderStatusChip(teamCollaborator)}</span>
   );
 
   const renderDeleteRemoveCollaborator = ({
@@ -111,7 +116,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   return (
     <>
       <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
-      <div className="team-table overflow-x-auto">
+      <div className="overflow-x-auto">
         <Table
           columns={[
             {
@@ -128,11 +133,8 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
               label: 'Status',
               name: 'status',
               render: renderStatus,
-              CustomHeader: (
-                <Column key="th-Status" className="hidden md:table-cell">
-                  Status
-                </Column>
-              ),
+              // Phones drop the column; the chip rides under the name instead.
+              className: 'hidden md:table-cell',
             },
           ]}
           data={teamCollaborators}

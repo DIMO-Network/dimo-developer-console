@@ -15,11 +15,15 @@ interface IProps {
 }
 
 export const Table: FC<IProps> = ({ columns, data, actions }) => {
-  const renderColumn = ({ name, label, CustomHeader }: IColumn) => {
+  const renderColumn = ({ name, label, CustomHeader, className }: IColumn) => {
     if (CustomHeader) {
       return CustomHeader;
     }
-    return <Column key={`th-${label ?? name}`}>{label ?? name}</Column>;
+    return (
+      <Column key={`th-${label ?? name}`} className={className}>
+        {label ?? name}
+      </Column>
+    );
   };
   // TODO: check that conditional actions access.
   return (
@@ -38,10 +42,14 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
         <tbody className="table-body">
           {data.map((item, index) => (
             <tr key={`row-${index}`} className={'border-t border-outline'}>
-              {columns.map(({ name, render }) => {
+              {columns.map(({ name, render, className }) => {
                 const textNode = _.get(item, name, '');
                 const renderNode = render ? render(item) : null;
-                return <Cell key={name}>{renderNode || String(textNode)}</Cell>;
+                return (
+                  <Cell key={name} className={className}>
+                    {renderNode || String(textNode)}
+                  </Cell>
+                );
               })}
               {actions && (
                 <td className="table-action-cell" key={`row-action-cell-${index}`}>
