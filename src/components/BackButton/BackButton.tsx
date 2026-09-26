@@ -19,9 +19,9 @@ export const BackButton: FC<Props> = ({ onBack }) => {
   };
 
   return (
-    <div className="back-button" onClick={handleBack}>
+    <button type="button" className="back-button" onClick={handleBack} aria-label="Back">
       <ChevronLeftIcon className="w-4 h-4" />
-    </div>
+    </button>
   );
 };
 

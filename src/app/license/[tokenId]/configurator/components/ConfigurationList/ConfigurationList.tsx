@@ -10,6 +10,9 @@ import {
 import { Button } from '@/components/Button';
 import { NotificationContext } from '@/context/notificationContext';
 
+// For `.table`/`.table-header`/`.table-body` on the hand-rolled table below.
+import '@/components/Table/Table.css';
+
 const DIMO_LOGIN_BASE =
   process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
     ? 'https://login.dimo.org'
@@ -77,7 +80,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
         </thead>
         <tbody className="table-body">
           {configs.map((config) => (
-            <tr key={config.id} className="border-t border-outline">
+            <tr key={config.id}>
               <td className="py-3 pr-4 text-body-sm text-fg">
                 {config.configuration_name || '(untitled)'}
               </td>

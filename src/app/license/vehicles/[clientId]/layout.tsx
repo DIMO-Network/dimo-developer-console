@@ -4,11 +4,9 @@ import { ReactNode, use } from 'react';
 import { gql } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { Header } from '@/app/license/vehicles/[clientId]/components/Header';
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { Loader } from '@/components/Loader';
 import { useRouter } from 'next/navigation';
-
-import '@/components/BackButton/BackButton.css';
+import { BackButton } from '@/components/BackButton';
 
 const DEVELOPER_LICENSE_BY_CLIENT_ID_SUMMARY = gql(`
   query DeveloperLicenseByClientIdSummary($clientId: Address!) {
@@ -44,9 +42,7 @@ export default function DeveloperLicenseDetailsPageLayout({
       {data?.developerLicense && (
         <div className={'flex flex-col'}>
           <div className={'self-start'}>
-            <button type="button" className="back-button" onClick={onBack}>
-              <ChevronLeftIcon className="w-4 h-4" />
-            </button>
+            <BackButton onBack={onBack} />
           </div>
           <Header
             tokenId={data?.developerLicense.tokenId ?? 0}

@@ -9,8 +9,8 @@ import { Button } from '@/components/Button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-// For .table-page-button, the shared round pager button.
-import '@/components/Table/Table.css';
+// For .text-field, the shared search/input recipe.
+import '@/components/TextField/TextField.css';
 
 const GET_VEHICLES_FOR_EXPLORER = gql(`
   query GetVehiclesForExplorer($clientId: Address!, $first: Int, $last: Int, $before: String, $after: String) {
@@ -95,7 +95,7 @@ export const VehicleList: FC<Props> = ({
   return (
     <div className="flex h-full flex-col gap-3 rounded-card bg-card p-4">
       {/* Search */}
-      <div className="relative flex min-h-10 flex-row items-center rounded-control border border-outline bg-control px-3 transition-[border-color,box-shadow] focus-within:border-accent focus-within:ring-[3px] focus-within:ring-accent-soft">
+      <div className="text-field">
         <MagnifyingGlassIcon className="h-4 w-4 flex-shrink-0 text-muted" />
         <input
           type="search"

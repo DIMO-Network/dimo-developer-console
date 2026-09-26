@@ -228,13 +228,15 @@ divide-outline` (each `<tr>` also carries `border-t border-outline`). Cell
 `.table-cell` = `h-[52px] max-w-[300px] break-all py-3 text-body-sm text-fg`.
 
 **Pagination** (`src/components/Table/PaginatedTable.tsx`, `Table.css`, and
-the explorer's `VehicleList.tsx`, which imports `Table.css` for it): the
-meta-and-controls row = `flex items-center justify-between text-sm
-text-muted`. Round page buttons: `<Button variant="secondary"
-className="table-page-button">` — `variant="secondary"` supplies the
-border/fill/text/hover/disabled colors, `.table-page-button` only overrides
-size/shape (`flex !h-8 !min-h-0 !w-8 items-center justify-center rounded-full
-!px-0`) to make a 32×32 circle, so there is no double-styling.
+the explorer's `VehicleList.tsx`): the meta-and-controls row = `flex
+items-center justify-between text-sm text-muted`. Round page buttons:
+`<Button variant="secondary" className="table-page-button">` —
+`variant="secondary"` supplies the border/fill/text/hover/disabled colors,
+`.table-page-button` (`src/components/Button/Button.css` — it's a `Button`
+size modifier, used outside tables too: `BrandRow`, `Signers`,
+`DeveloperJwts`, `RedirectUriList`) only overrides size/shape (`flex !h-8
+!min-h-0 !w-8 items-center justify-center rounded-full !px-0`) to make a
+32×32 circle, so there is no double-styling.
 
 **Buttons** (`src/components/Button/Button.css`, `Button.tsx`): base
 `.button` = `inline-flex h-10 min-h-10 flex-row items-center justify-center
