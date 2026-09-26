@@ -18,7 +18,11 @@
   --highest: 48 52 56; /* #303438 */
   --bright: 58 62 66; /* #3A3E42 */
   --overlay: 28 31 34; /* #1C1F22 */
-  --outline: 42 46 50; /* #2A2E32 */
+  --outline: 55 59 64; /* #373B40 */
+  --canvas-divider: 69 73 78; /* #45494E */
+  --control-border: 116 122 127; /* #747A7F */
+  --control-border-hover: 160 163 162; /* #A0A3A2 */
+  --focus-ring: 70 241 228; /* #46F1E4 */
   --outline-strong: 92 96 99; /* #5C6063 */
   --ink: 246 247 247; /* #F6F7F7 */
   --fg: 237 238 238; /* #EDEEEE */
@@ -33,15 +37,23 @@
   --negative-soft: 64 35 33; /* #402321 */
   --favorite: 255 205 41; /* #FFCD29 */
   --nav-active: 36 39 43; /* #24272B */
+  --btn-primary: 246 247 247; /* #F6F7F7 */
+  --btn-primary-fg: 17 18 20; /* #111214 */
+  --btn-primary-hover: 255 255 255; /* #FFFFFF */
+  /* Toggled / selected control: inverse ink (inverse surface / inverse text). */
+  --selected-bg: 237 238 238; /* #EDEEEE */
+  --selected-fg: 22 24 27; /* #16181B */
 
   --accent-soft: rgba(70, 241, 228, 0.12);
   --accent-soft-strong: rgba(70, 241, 228, 0.28);
   /* Selected / toggled fill; text on it is accent-ink (AA over sheet, card, overlay). */
   --selected: rgba(70, 241, 228, 0.28);
-  --nav-hover: #16181b;
+  --nav-hover: #1c1f22;
   --sheet-border: rgba(255, 255, 255, 0.06);
   --scrim: rgba(8, 9, 10, 0.62);
   --brand-gradient: linear-gradient(105deg, #8cd0ff 0%, #46f1e4 100%);
+  /* Progress fills are a brand moment. */
+  --progress-fill: var(--brand-gradient);
   --brand-glow:
     radial-gradient(60% 50% at 35% 40%, rgba(140, 208, 255, 0.12), transparent 70%),
     radial-gradient(55% 50% at 65% 60%, rgba(70, 241, 228, 0.1), transparent 70%);
@@ -60,31 +72,42 @@
   --highest: 223 226 226; /* #DFE2E2 */
   --bright: 255 255 255; /* #FFFFFF */
   --overlay: 255 255 255; /* #FFFFFF */
-  --outline: 225 228 228; /* #E1E4E4 */
+  --outline: 210 214 215; /* #D2D6D7 */
+  --canvas-divider: 160 163 162; /* #A0A3A2 */
+  --control-border: 124 128 130; /* #7C8082 */
+  --control-border-hover: 94 97 99; /* #5E6163 */
+  --focus-ring: 11 122 114; /* #0B7A72 */
   --outline-strong: 160 163 162; /* #A0A3A2 */
   --ink: 19 20 23; /* #131417 */
   --fg: 19 20 23; /* #131417 */
   --muted: 94 97 99; /* #5E6163 */
-  --accent: 34 199 186; /* #22C7BA */
-  --accent-ink: 11 122 114; /* #0B7A72 */
+  --accent: 11 143 133; /* #0B8F85 */
+  --accent-ink: 7 99 92; /* #07635C */
   --on-accent: 6 32 30; /* #06201E */
   --sky: 43 130 213; /* #2B82D5 */
-  --positive: 27 136 66; /* #1B8842 */
-  --warning: 183 91 10; /* #B75B0A */
+  --positive: 17 103 47; /* #11672F */
+  --warning: 143 69 0; /* #8F4500 */
   --negative: 199 0 0; /* #C70000 */
   --negative-soft: 255 240 240; /* #FFF0F0 */
   --favorite: 201 154 0; /* #C99A00 */
   --nav-active: 255 255 255; /* #FFFFFF */
+  --btn-primary: 19 20 23; /* #131417 */
+  --btn-primary-fg: 255 255 255; /* #FFFFFF */
+  --btn-primary-hover: 46 50 54; /* #2E3236 */
+  /* Toggled / selected control: inverse ink (inverse surface / inverse text). */
+  --selected-bg: 22 24 27; /* #16181B */
+  --selected-fg: 237 238 238; /* #EDEEEE */
 
   --accent-soft: rgba(34, 199, 186, 0.14);
   --accent-soft-strong: rgba(34, 199, 186, 0.3);
-  /* Brand mint (not #22C7BA) at 14%: accent-ink on it keeps AA over sheet,
-     card and overlay; a #22C7BA tint at 14% drops to 4.37:1 over card. */
+  /* Brand mint at 14%: accent-ink on it keeps AA over sheet, card and overlay. */
   --selected: rgba(70, 241, 228, 0.14);
   --nav-hover: rgba(255, 255, 255, 0.55);
   --sheet-border: rgba(19, 20, 23, 0.06);
   --scrim: rgba(19, 20, 23, 0.32);
   --brand-gradient: linear-gradient(105deg, #8cd0ff 0%, #46f1e4 100%);
+  /* The sky-to-mint gradient vanishes on a light track; deepened, >=3.9:1. */
+  --progress-fill: linear-gradient(105deg, #1e6fbf 0%, #0a7069 100%);
   --brand-glow:
     radial-gradient(60% 50% at 35% 40%, rgba(140, 208, 255, 0.28), transparent 70%),
     radial-gradient(55% 50% at 65% 60%, rgba(70, 241, 228, 0.22), transparent 70%);
@@ -102,6 +125,18 @@
   body {
     @apply text-body-sm antialiased;
     font-feature-settings: 'tnum';
+  }
+
+  /* One keyboard focus outline, >=3:1 on every surface (tokens.test.ts). */
+  :focus-visible {
+    outline: 2px solid rgb(var(--focus-ring));
+    outline-offset: 2px;
+  }
+
+  /* A dialog takes focus when it opens so a screen reader announces it; the
+     ring belongs on the controls inside it. */
+  [role='dialog']:focus {
+    outline: none;
   }
 }
 

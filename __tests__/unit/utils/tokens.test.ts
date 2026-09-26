@@ -17,13 +17,6 @@ const channels = (body: string) =>
       [Number(m[2]), Number(m[3]), Number(m[4])] as const,
     ]),
   );
-// rgba() tokens (tints, scrims) as [r, g, b, alpha].
-const rgbaTokens = (body: string) =>
-  Object.fromEntries(
-    [...body.matchAll(/--([\w-]+):\s*rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\);/g)].map(
-      (m) => [m[1], [Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5])] as const],
-    ),
-  );
 // Alpha-blend a translucent token over an opaque surface.
 const over = (
   [r, g, b, a]: readonly number[],
@@ -35,10 +28,6 @@ const allVars = (body: string) =>
 const dark = block('dark');
 const light = block('light');
 const themes = { dark: channels(dark), light: channels(light) };
-const tints = { dark: rgbaTokens(dark), light: rgbaTokens(light) };
-
-// The selected / toggled state: accent-ink text on this tint.
-const SELECTED = 'selected';
 
 const luminance = ([r, g, b]: readonly number[]) => {
   const lin = (c: number) => {
@@ -69,11 +58,12 @@ describe('design tokens', () => {
         ['muted', 'card'],
         ['accent-ink', 'sheet'],
         ['accent-ink', 'card'],
-        ['on-accent', 'accent'],
         ['negative', 'sheet'],
         ['negative', 'negative-soft'],
         ['positive', 'sheet'],
+        ['positive', 'card'],
         ['warning', 'sheet'],
+        ['warning', 'card'],
       ];
       for (const [fg, bg] of pairs) {
         expect({ pair: `${fg} on ${bg}`, ratio: contrast(t[fg], t[bg]) >= 4.5 }).toEqual({
@@ -126,18 +116,93 @@ describe('design tokens', () => {
     },
   );
 
+  // Ink acts: the primary button is solid ink with inverse text.
+  // Selection is inverse ink: a toggled control is selected-fg on selected-bg.
   it.each(['dark', 'light'] as const)(
-    '%s selected state (accent-ink on the selection tint) meets WCAG AA',
+    '%s primary button and selected control text meet WCAG AA',
     (theme) => {
       const t = themes[theme];
-      const tint = tints[theme][SELECTED];
-      expect(tint).toBeDefined();
-      for (const surface of ['sheet', 'card', 'overlay']) {
-        const ratio = contrast(t['accent-ink'], over(tint, t[surface]));
-        expect({
-          pair: `accent-ink on ${SELECTED} over ${surface}`,
-          ratio: ratio >= 4.5,
-        }).toEqual({ pair: `accent-ink on ${SELECTED} over ${surface}`, ratio: true });
+      const pairs: [string, string][] = [
+        ['btn-primary-fg', 'btn-primary'],
+        ['btn-primary-fg', 'btn-primary-hover'],
+        ['selected-fg', 'selected-bg'],
+      ];
+      for (const [fg, bg] of pairs) {
+        expect({ pair: `${fg} on ${bg}`, ratio: contrast(t[fg], t[bg]) >= 4.5 }).toEqual({
+          pair: `${fg} on ${bg}`,
+          ratio: true,
+        });
+      }
+    },
+  );
+
+  // Non-text contrast (WCAG 1.4.11): a control's edge, the keyboard focus ring,
+  // live-status dots and the progress fill must read at 3:1 where they land.
+  it.each(['dark', 'light'] as const)(
+    '%s control edges, focus ring and live dots meet 3:1',
+    (theme) => {
+      const t = themes[theme];
+      const pairs: [string, string][] = [
+        ['control-border', 'sheet'],
+        ['control-border', 'card'],
+        ['control-border', 'control'],
+        ['control-border', 'overlay'],
+        ['control-border-hover', 'control'],
+        ['focus-ring', 'sheet'],
+        ['focus-ring', 'card'],
+        ['focus-ring', 'overlay'],
+        ['focus-ring', 'canvas'],
+        ['accent', 'sheet'],
+        ['accent', 'card'],
+        ['accent', 'overlay'],
+        // The toggle knob sits on the accent track.
+        ['on-accent', 'accent'],
+      ];
+      for (const [fg, bg] of pairs) {
+        expect({ pair: `${fg} on ${bg}`, ratio: contrast(t[fg], t[bg]) >= 3 }).toEqual({
+          pair: `${fg} on ${bg}`,
+          ratio: true,
+        });
+      }
+    },
+  );
+
+  // Fleet's rule: a status colour used as text reads at AA on the surfaces it
+  // lands on, including its own 14% badge tint over the sheet.
+  it.each(['dark', 'light'] as const)(
+    '%s status text meets WCAG AA on its own tint',
+    (theme) => {
+      const t = themes[theme];
+      for (const status of ['positive', 'warning', 'negative']) {
+        const tint = over([...t[status], 0.14], t.sheet);
+        const pair = `${status} on ${status}/14 over sheet`;
+        expect({ pair, ratio: contrast(t[status], tint) >= 4.5 }).toEqual({
+          pair,
+          ratio: true,
+        });
+      }
+    },
+  );
+
+  // The brand variant (sign-in / sign-up submit) is on-accent over the
+  // sky -> mint gradient; both stops must hold AA.
+  it.each(['dark', 'light'] as const)(
+    '%s brand button text meets WCAG AA on both gradient stops',
+    (theme) => {
+      const t = themes[theme];
+      const stops: Record<string, readonly number[]> = {
+        sky: [140, 208, 255],
+        mint: [70, 241, 228],
+      };
+      const gradient =
+        /--brand-gradient:\s*linear-gradient\(105deg, #8cd0ff 0%, #46f1e4 100%\)/;
+      expect(theme === 'dark' ? dark : light).toMatch(gradient);
+      for (const [name, stop] of Object.entries(stops)) {
+        const pair = `on-accent on ${name}`;
+        expect({ pair, ratio: contrast(t['on-accent'], stop) >= 4.5 }).toEqual({
+          pair,
+          ratio: true,
+        });
       }
     },
   );

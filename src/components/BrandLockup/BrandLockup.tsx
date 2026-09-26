@@ -10,9 +10,9 @@ interface IProps {
 export const BrandLockup: FC<IProps> = ({ product }) => (
   <div className="brand-lockup">
     <Image
-      src="/images/dimo-wordmark.png"
+      src="/images/dimo-wordmark.svg"
       alt="DIMO"
-      width={69}
+      width={80}
       height={18}
       className="wordmark"
       priority
