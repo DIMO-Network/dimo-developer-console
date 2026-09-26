@@ -8,7 +8,7 @@ interface Props {
   className?: string;
 }
 
-const AddCreditsButton: React.FC<Props> = ({ className = 'with-icon' }) => {
+const AddCreditsButton: React.FC<Props> = ({ className = '' }) => {
   const { handleOpenBuyCreditsModal } = useOnboarding();
   return (
     <Button

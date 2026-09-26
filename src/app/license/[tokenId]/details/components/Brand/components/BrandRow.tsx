@@ -32,7 +32,7 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
           <Button
             type="button"
             variant="ghost"
-            className="table-page-button"
+            size="icon"
             title="Edit brand"
             onClick={onEdit}
           >
@@ -41,7 +41,7 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
           <Button
             type="button"
             variant="ghost"
-            className="table-page-button"
+            size="icon"
             title={
               canDelete
                 ? 'Delete brand'

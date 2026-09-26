@@ -58,7 +58,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       key={`item_${item.token}_copy_button`}
       value={item.token}
       onCopySuccessMessage="JWT copied!"
-      className="table-page-button hover:bg-control"
+      size="icon"
     />
   );
 
@@ -66,7 +66,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
     <Button
       key={`item_${item.token}_delete_button`}
       variant="ghost"
-      className="table-page-button"
+      size="icon"
       title="Delete JWT"
       type="button"
       onClick={() => setJwtToDelete(item.token)}

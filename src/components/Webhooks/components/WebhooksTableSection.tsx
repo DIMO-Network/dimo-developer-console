@@ -9,9 +9,7 @@ export const WebhooksTableSection = ({ clientId }: { clientId: string }) => {
     <Section>
       <SectionHeader title={'Webhooks'}>
         <Link href={`/webhooks/create/${clientId}`}>
-          <Button variant="secondary" className="with-icon">
-            + Create a webhook
-          </Button>
+          <Button variant="secondary">+ Create a webhook</Button>
         </Link>
       </SectionHeader>
       <WebhookTable clientId={clientId} />

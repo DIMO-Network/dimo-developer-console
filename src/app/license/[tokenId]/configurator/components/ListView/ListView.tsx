@@ -65,7 +65,7 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
         <PageSubtitle subtitle="Login with DIMO configurator" />
         <Button
           variant="secondary"
-          className="with-icon px-4"
+          className="px-4"
           onClick={() => router.push(`/license/${tokenId}/configurator/new`)}
         >
           New configuration

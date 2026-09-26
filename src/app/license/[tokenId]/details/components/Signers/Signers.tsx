@@ -320,7 +320,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       return (
         <Button
           variant="ghost"
-          className="table-page-button"
+          size="icon"
           title="Delete API key"
           type="button"
           onClick={() => {
@@ -385,17 +385,13 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           <div className="flex gap-2">
             <Button
               variant="secondary"
-              className="with-icon px-4"
+              className="px-4"
               onClick={() => setShowRentalOSConfirm(true)}
             >
               <TruckIcon className="w-4 h-4" />
               Register RentalOS
             </Button>
-            <Button
-              variant="secondary"
-              className="with-icon px-4"
-              onClick={handleGenerateSigner}
-            >
+            <Button variant="secondary" className="px-4" onClick={handleGenerateSigner}>
               <KeyIcon className="w-4 h-4" />
               Generate key
             </Button>

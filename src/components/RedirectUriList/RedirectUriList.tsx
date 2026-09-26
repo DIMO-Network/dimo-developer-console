@@ -10,8 +10,6 @@ import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { withLoadingStatus } from '@/hoc';
 import { CopyButton } from '@/components/CopyButton';
 
-import '@/components/Button/Button.css';
-
 interface RedirectUri {
   uri: string;
 }
@@ -76,7 +74,7 @@ const RedirectUriListComponent: FC<IProps> = ({
         key={`copy-action-${index}`}
         value={uri}
         onCopySuccessMessage={'Redirect URI copied!'}
-        className="table-page-button hover:bg-control"
+        size="icon"
       />
     );
   };
@@ -86,7 +84,7 @@ const RedirectUriListComponent: FC<IProps> = ({
       isOwner && (
         <Button
           variant="ghost"
-          className="table-page-button"
+          size="icon"
           title="Delete redirect URI"
           type="button"
           onClick={() => setUriToDelete(uri)}

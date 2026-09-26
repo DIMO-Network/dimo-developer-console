@@ -17,10 +17,15 @@ export type ButtonVariant =
   | 'destructive'
   | 'destructive-ghost';
 
+// md: the 40px pill. icon: a 32px round icon-only button (pagers, row actions);
+// give it a title or aria-label.
+export type ButtonSize = 'md' | 'icon';
+
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   loading?: boolean;
   variant?: ButtonVariant;
+  size?: ButtonSize;
 }
 
 export const Button: FC<ButtonProps> = ({
@@ -28,10 +33,16 @@ export const Button: FC<ButtonProps> = ({
   className: inputClassName,
   loading = false,
   variant = 'primary',
+  size = 'md',
   onClick = () => {},
   ...props
 }) => {
-  const className = classnames('button', variant, inputClassName);
+  const className = classnames(
+    'button',
+    variant,
+    size === 'icon' && 'icon',
+    inputClassName,
+  );
 
   const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
     if (!loading) onClick(e);

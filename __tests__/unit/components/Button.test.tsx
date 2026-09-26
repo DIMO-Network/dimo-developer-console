@@ -61,15 +61,26 @@ describe('Button', () => {
 
   it('keeps extra classes alongside the variant', () => {
     render(
-      <Button variant="secondary" className="with-icon w-full">
+      <Button variant="secondary" className="w-full">
         Go
       </Button>,
     );
-    expect(screen.getByRole('button')).toHaveClass(
-      'button',
-      'secondary',
-      'with-icon',
-      'w-full',
+    expect(screen.getByRole('button')).toHaveClass('button', 'secondary', 'w-full');
+  });
+
+  it('is the md size by default (no size class)', () => {
+    render(<Button>Save</Button>);
+    expect(screen.getByRole('button')).not.toHaveClass('icon');
+  });
+
+  it('renders the round icon size alongside any variant', () => {
+    render(
+      <Button variant="ghost" size="icon" title="Delete">
+        <svg aria-hidden="true" />
+      </Button>,
     );
+    const button = screen.getByRole('button', { name: 'Delete' });
+    expect(button).toHaveClass('button', 'ghost', 'icon');
+    expect(button).not.toHaveClass('primary');
   });
 });

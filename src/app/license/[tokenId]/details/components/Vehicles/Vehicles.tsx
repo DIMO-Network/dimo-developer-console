@@ -46,7 +46,7 @@ export const Vehicles: FC<IProps> = ({ license }) => {
             <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
             <Button
               variant="secondary"
-              className="with-icon px-4"
+              className="px-4"
               onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
             >
               Configure vehicle sharing

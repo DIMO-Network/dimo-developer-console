@@ -1,0 +1,7 @@
+/* size="icon": a 32px round icon button, matching <Button size="icon"> (row
+   actions next to it). Styled here so CopyButton never depends on another
+   component having loaded Button.css. Focus uses the global :focus-visible
+   outline. The default (inline) copy button stays a bare icon. */
+.copy-button.icon {
+  @apply inline-flex size-8 flex-shrink-0 items-center justify-center rounded-full enabled:hover:bg-control;
+}

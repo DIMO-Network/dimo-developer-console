@@ -9,10 +9,7 @@ interface Props {
   variant?: ButtonVariant;
 }
 
-const CreateAppButton: React.FC<Props> = ({
-  className = 'with-icon',
-  variant = 'primary',
-}) => {
+const CreateAppButton: React.FC<Props> = ({ className = '', variant = 'primary' }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   return (
     <>
