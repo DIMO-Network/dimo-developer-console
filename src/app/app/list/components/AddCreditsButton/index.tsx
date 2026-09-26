@@ -12,7 +12,7 @@ const AddCreditsButton: React.FC<Props> = ({ className = 'with-icon' }) => {
   const { handleOpenBuyCreditsModal } = useOnboarding();
   return (
     <Button
-      variant="secondary"
+      variant="primary"
       className={clsx(className, '!h-10')}
       onClick={handleOpenBuyCreditsModal}
     >

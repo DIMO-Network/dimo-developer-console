@@ -21,7 +21,7 @@ export const VehicleSimulatorModal: FC<Props> = ({ clientId }) => {
         onClick={() => setIsOpen(true)}
       >
         <BeakerIcon className="h-4 w-4" />
-        Vehicle Simulator
+        Vehicle simulator
       </Button>
       <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
         <VehicleSimulator clientId={clientId} />

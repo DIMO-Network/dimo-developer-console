@@ -16,8 +16,8 @@ interface IProps extends Partial<IApp> {
 }
 
 const AppIcon = {
-  production: <DeveloperBoardIcon className="w-5 h-5" />,
-  sandbox: <BeachAccessIcon className="w-5 h-5" />,
+  production: <DeveloperBoardIcon className="h-5 w-5 text-muted" />,
+  sandbox: <BeachAccessIcon className="h-5 w-5 text-muted" />,
 };
 
 export const AppCard: FC<IProps> = ({
@@ -39,7 +39,7 @@ export const AppCard: FC<IProps> = ({
         </p>
         <Anchor href={`/app/details/${id}`}>
           <Button variant="secondary" className={'w-full !h-10'}>
-            App Details
+            App details
           </Button>
         </Anchor>
       </div>

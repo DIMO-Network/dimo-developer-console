@@ -22,7 +22,7 @@ export const LicenseList: FC<Props> = ({ licenseConnection }) => {
   return (
     <div className="license-list-content">
       <div className="description">
-        <p className="title">Your Developer Licenses</p>
+        <p className="title">Your developer licenses</p>
       </div>
       {fragment.nodes.length ? (
         <div className="license-list">

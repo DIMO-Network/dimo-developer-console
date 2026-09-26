@@ -54,7 +54,7 @@ beforeEach(() => {
 describe('VehicleSimulator', () => {
   it('renders the section heading', () => {
     renderComponent();
-    expect(screen.getByText('Vehicle Simulator')).toBeInTheDocument();
+    expect(screen.getByText('Vehicle simulator')).toBeInTheDocument();
   });
 
   it('renders make selector buttons', () => {

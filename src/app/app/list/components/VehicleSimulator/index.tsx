@@ -287,8 +287,8 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       {/* Header */}
       <div className="vehicle-sim-header">
         <div className="vehicle-sim-header-text">
-          <p className="title">Vehicle Simulator</p>
-          <p className="text-sm text-text-secondary">Mint simulated test vehicles.</p>
+          <p className="title">Vehicle simulator</p>
+          <p className="text-body-sm text-muted">Mint simulated test vehicles.</p>
         </div>
       </div>
 
@@ -404,7 +404,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           loading={isLoading}
           onClick={handleMint}
         >
-          Mint Vehicle
+          Mint vehicle
         </Button>
       </div>
 
@@ -412,7 +412,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       {storedVehicles.length > 0 && (
         <div className="vehicle-sim-fleet">
           <div className="vehicle-sim-fleet-header">
-            <span className="vehicle-sim-step-label">Simulated Fleet</span>
+            <span className="vehicle-sim-step-label">Simulated fleet</span>
             <span className="vehicle-sim-fleet-count">
               {storedVehicles.length} vehicle{storedVehicles.length !== 1 ? 's' : ''}
             </span>

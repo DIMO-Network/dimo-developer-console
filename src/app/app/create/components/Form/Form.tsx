@@ -106,7 +106,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
     return (
       <div className={'flex flex-col flex-1 items-center gap-2'}>
         <BubbleLoader isLoading={true} />
-        <p className={'text-base font-bold text-center'}>
+        <p className={'text-center text-body font-medium text-ink'}>
           {loadingStatus?.label ?? 'Loading'}
         </p>
       </div>
@@ -114,8 +114,8 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
   }
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Label htmlFor="namespace" className="text-sm font-medium">
-        Developer License Name
+      <Label htmlFor="namespace">
+        Developer license name
         <TextField
           type="text"
           placeholder="My project"
@@ -131,12 +131,12 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
         {errors?.workspace?.name && (
           <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
         )}
-        <p className="text-sm text-text-secondary font-normal">
+        <p className="text-body-sm font-normal text-muted">
           This is the namespace used across all your apps. It is a public name visible to
           other developers and users in the ecosystem.
         </p>
       </Label>
-      <div className="flex flex-col pt-4 gap-4">
+      <div className="flex flex-col gap-2 pt-4">
         <Button type="submit" role="continue-button" loading={isLoading}>
           Create
         </Button>
