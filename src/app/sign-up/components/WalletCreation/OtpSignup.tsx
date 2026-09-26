@@ -165,6 +165,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
         </div>
         <div className="flex w-full flex-col pt-4">
           <Button
+            variant="brand"
             role="continue-button"
             onClick={handleVerify}
             loading={isLoading}

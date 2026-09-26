@@ -14,7 +14,7 @@
   }
 
   .btn-add-credits {
-    @apply flex h-8 w-8 items-center justify-center rounded-full bg-brand-gradient text-on-accent;
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-btn-primary text-btn-primary-fg transition-colors hover:bg-btn-primary-hover;
   }
 }
 

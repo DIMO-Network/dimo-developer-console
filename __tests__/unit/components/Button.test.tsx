@@ -49,7 +49,7 @@ describe('Button', () => {
     expect(screen.getByRole('button')).toHaveClass('button', 'primary');
   });
 
-  it.each(['secondary', 'ghost', 'destructive', 'destructive-ghost'] as const)(
+  it.each(['brand', 'secondary', 'ghost', 'destructive', 'destructive-ghost'] as const)(
     'renders the %s variant',
     (variant) => {
       render(<Button variant={variant}>Go</Button>);

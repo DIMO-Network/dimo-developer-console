@@ -5,7 +5,19 @@
     @apply flex flex-row items-center justify-center gap-1;
   }
 
+  /* A loading button's dots take the button's own text color: teal dots on
+     the ink pill would vanish (and teal is for live status, not actions). */
+  .bubble-loader .bubble {
+    @apply bg-current;
+  }
+
+  /* Ink acts: the primary action is a solid ink pill (the inverse of the surface). */
   &.primary {
+    @apply bg-btn-primary text-btn-primary-fg enabled:hover:bg-btn-primary-hover;
+  }
+
+  /* Brand moment only: the main submit on sign-in, sign-up and email recovery. */
+  &.brand {
     @apply bg-brand-gradient text-on-accent enabled:hover:brightness-105;
   }
 

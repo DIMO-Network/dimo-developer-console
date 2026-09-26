@@ -151,7 +151,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           Maximum file size 50 MB.
         </p>
 
-        <label className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-full bg-brand-gradient px-4 text-body-sm font-semibold text-on-accent transition-[filter] duration-150 hover:brightness-105 cursor-pointer">
+        <label className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-full bg-btn-primary px-4 text-body-sm font-semibold text-btn-primary-fg transition-colors duration-150 hover:bg-btn-primary-hover cursor-pointer">
           <span>
             <ArrowUpTrayIcon className={'w-5 h-5'} />
           </span>

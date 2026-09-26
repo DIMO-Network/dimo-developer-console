@@ -157,7 +157,12 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
             )}
           </div>
           <div className="flex flex-col pt-4">
-            <Button type="submit" loading={isLoading} role="continue-button">
+            <Button
+              type="submit"
+              variant="brand"
+              loading={isLoading}
+              role="continue-button"
+            >
               Continue
             </Button>
           </div>

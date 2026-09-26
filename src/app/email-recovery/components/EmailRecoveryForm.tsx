@@ -79,6 +79,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
         {errors.email && <TextError errorMessage="This field is required" />}
         <Button
           type="submit"
+          variant="brand"
           disabled={isEmpty(email)}
           loading={isLoading}
           role="continue-button"

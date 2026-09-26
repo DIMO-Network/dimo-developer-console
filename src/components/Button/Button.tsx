@@ -11,6 +11,7 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 
 export type ButtonVariant =
   | 'primary'
+  | 'brand'
   | 'secondary'
   | 'ghost'
   | 'destructive'
