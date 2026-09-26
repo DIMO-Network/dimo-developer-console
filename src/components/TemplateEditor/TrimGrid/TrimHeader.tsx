@@ -21,11 +21,11 @@ export const TrimHeader: FC<Props> = ({ trim, multiTrim }) => {
 
   return (
     <div className="flex min-w-[9rem] flex-col gap-0.5 px-3 py-2 text-left">
-      <span className="text-white">{trim.name}</span>
+      <span className="text-body-sm font-medium text-ink">{trim.name}</span>
       {missing ? (
-        <span className="font-mono text-xs text-red-400">no selector</span>
+        <span className="text-label text-negative">no selector</span>
       ) : (
-        <span className="font-mono text-xs text-white/50">
+        <span className="break-all font-mono text-code text-muted">
           {code ?? style ?? trim.selectors?.vinPattern}
         </span>
       )}

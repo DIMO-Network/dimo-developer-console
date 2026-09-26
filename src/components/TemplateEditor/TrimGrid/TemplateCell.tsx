@@ -17,6 +17,12 @@ interface Props {
 
 const NOT_SET = '—';
 
+// The input pattern at grid density: bordered control with a focus ring, like
+// TextField, but 32px tall instead of 40px so a dense multi-trim grid stays
+// scannable.
+const CELL_FIELD =
+  'h-8 w-full rounded-control border border-outline bg-control px-2 text-body-sm outline-0 placeholder:text-muted focus:border-accent focus:ring-[3px] focus:ring-accent-soft';
+
 export const TemplateCell: FC<Props> = ({
   def,
   value,
@@ -34,7 +40,7 @@ export const TemplateCell: FC<Props> = ({
   // Agreement recedes, difference advances. There is no light font weight in
   // this design system, so emphasis rides entirely on opacity.
   const tone =
-    value === undefined ? 'text-white/25' : emphasised ? 'text-white' : 'text-white/40';
+    value === undefined ? 'text-muted/60' : emphasised ? 'text-ink' : 'text-muted';
 
   const commit = (raw: string) => {
     const result = coerce(def, raw, where);
@@ -55,7 +61,7 @@ export const TemplateCell: FC<Props> = ({
 
   if (readOnly) {
     return (
-      <div data-testid={testId} className={classnames('px-3 py-2', tone)}>
+      <div data-testid={testId} className={classnames('px-3 py-2 text-body-sm', tone)}>
         {value === undefined ? NOT_SET : String(value)}
       </div>
     );
@@ -71,7 +77,7 @@ export const TemplateCell: FC<Props> = ({
             setDraft(e.target.value);
             commit(e.target.value);
           }}
-          className={classnames('w-full rounded-md bg-dark-grey-950 px-2 py-1', tone)}
+          className={classnames(CELL_FIELD, tone)}
         >
           <option value="">{NOT_SET}</option>
           {(def.type === 'boolean' ? ['true', 'false'] : (def.options ?? [])).map((o) => (
@@ -89,10 +95,10 @@ export const TemplateCell: FC<Props> = ({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={(e) => commit(e.target.value)}
-          className={classnames('w-full rounded-md bg-dark-grey-950 px-2 py-1', tone)}
+          className={classnames(CELL_FIELD, tone)}
         />
       )}
-      {error && <p className="pt-1 text-xs text-red-400">{error}</p>}
+      {error && <p className="pt-1 text-label text-negative">{error}</p>}
     </div>
   );
 };
