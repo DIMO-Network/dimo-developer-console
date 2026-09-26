@@ -334,20 +334,27 @@ npm run visual:shoot -- --label=<name> --only=<regex>  # screenshot routes, dark
 npm run visual:check -- <paths…>                       # fail on legacy colors/hex/uppercase/tracking/legacy variants
 ```
 
-Routes live in `scripts/visual/routes.mjs`. Four of them —
-**`app`, `app-create-modal`, `app-mobile-menu`, `settings`** — carry
-`knownHydrationError`: a pre-existing hydration race (present on the
-untouched baseline, unrelated to styling) that the harness logs instead of
-failing the shot. `npm run visual:shoot` prints these as `known (...): ...`
-and also records them in that label's `errors.json`; a hydration error on
-any other route is real and fails the shot — that one is yours to fix.
-**`app-empty`** is the `/app` route with `noLicenses: true`, i.e. the
+Routes live in `scripts/visual/routes.mjs`. Every route whose entry sets
+`knownHydrationError` — currently five: **`app`, `app-create-modal`,
+`app-empty`, `app-mobile-menu`, `settings`** — carries a pre-existing
+hydration race (present on the untouched baseline, unrelated to styling)
+that the harness logs instead of failing the shot; a hydration error on any
+other route is real and fails the shot — that one is yours to fix.
+**`app-empty`** is also the `/app` route with `noLicenses: true`, i.e. the
 zero-license empty state (`EmptyList`) — shoot it whenever a pattern you're
 touching appears there.
 
-Each `--label=<name>` run writes PNGs and one `scripts/visual/out/<name>/errors.json`
-(every page error from that run, keyed by route/theme/viewport) — read it
-alongside the PNGs, don't just check exit codes.
+What "logs instead of failing" means, precisely (`shoot.mjs`): a console
+error matching the hydration/dev-overlay pattern is only ever printed to the
+shoot's own console output, as `known (<reason>): <message>`, for a route
+with `knownHydrationError` — it is never written to `errors.json`. Only an
+uncaught page exception (`page.on('pageerror')`) is written to
+`errors.json`, and `knownHydrationError` does not suppress those. Each
+`--label=<name>` run writes PNGs and one
+`scripts/visual/out/<name>/errors.json` (every uncaught page exception from
+that run, keyed by route/theme/viewport) — read both the console output (for
+known-hydration lines) and `errors.json` (for real exceptions), don't just
+check exit codes.
 
 To see a state that isn't already a route (e.g. a modal open, a menu
 expanded, a form filled), add an entry to `ROUTES` in `routes.mjs`. Fields:
