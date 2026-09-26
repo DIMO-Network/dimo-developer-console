@@ -47,13 +47,10 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   const renderUserName = ({ ...teamCollaborator }: ITeamCollaborator) => {
     const { User: me, email = '' } = teamCollaborator ?? {};
     const { name } = me ?? {};
-    const isPending = teamCollaborator.status === InvitationStatuses.PENDING;
 
     return (
       <div className="flex flex-col items-start gap-1 md:whitespace-nowrap">
-        <p>
-          {name ?? email ?? ''} {isPending && `(${InvitationStatusLabels.PENDING})`}
-        </p>
+        <p>{name ?? email ?? ''}</p>
         {/* Phones have no Status column; the chip rides under the name instead. */}
         <span className="md:hidden">{renderStatusChip(teamCollaborator)}</span>
       </div>

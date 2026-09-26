@@ -27,13 +27,16 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
       <body className={`${dimoFont.variable} ${dimoFont.className} h-full`}>
         <main className="grid min-h-full place-items-center px-6 py-24 sm:py-32 lg:px-8">
           <div className="text-center">
-            <p className="text-label text-muted">404</p>
-            <h1 className="mt-4 text-title text-ink">Page not found</h1>
+            <p className="text-label text-muted">500</p>
+            <h1 className="mt-4 text-title text-ink">Something went wrong</h1>
             <p className="mt-6 text-body text-muted">
-              Sorry, we couldn’t find the page you’re looking for.
+              An unexpected error occurred. Please try again.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-4">
-              <a href="#" className="button secondary">
+              {/* The root layout (and so the router) may not be mounted here: a
+                  plain anchor does a full navigation. */}
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              <a href="/" className="button primary">
                 Go back home
               </a>
               <Button variant="secondary" onClick={reset}>
