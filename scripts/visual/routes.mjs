@@ -31,6 +31,13 @@ export const ROUTES = [
     knownHydrationError: APP_HYDRATION,
   },
   {
+    name: 'app-empty',
+    path: '/app',
+    ready: 'Use your developer license credentials',
+    noLicenses: true,
+    knownHydrationError: APP_HYDRATION,
+  },
+  {
     name: 'app-mobile-menu',
     path: '/app',
     ready: LICENSE.alias,

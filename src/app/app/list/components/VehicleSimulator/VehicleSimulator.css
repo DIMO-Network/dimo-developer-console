@@ -44,7 +44,7 @@
   }
 
   &.selected {
-    @apply border-transparent bg-accent-soft-strong hover:bg-accent-soft-strong;
+    @apply border-transparent bg-selected hover:bg-selected;
 
     .vehicle-sim-region-label {
       @apply text-accent-ink;
@@ -78,7 +78,7 @@
   }
 
   &.selected {
-    @apply border-transparent bg-accent-soft-strong hover:bg-accent-soft-strong;
+    @apply border-transparent bg-selected hover:bg-selected;
 
     .vehicle-sim-make-icon {
       @apply text-accent-ink;
@@ -112,7 +112,7 @@
   }
 
   &.selected {
-    @apply border-transparent bg-accent-soft-strong text-accent-ink hover:bg-accent-soft-strong;
+    @apply border-transparent bg-selected text-accent-ink hover:bg-selected;
   }
 }
 

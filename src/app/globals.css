@@ -36,6 +36,8 @@
 
   --accent-soft: rgba(70, 241, 228, 0.12);
   --accent-soft-strong: rgba(70, 241, 228, 0.28);
+  /* Selected / toggled fill; text on it is accent-ink (AA over sheet, card, overlay). */
+  --selected: rgba(70, 241, 228, 0.28);
   --nav-hover: #16181b;
   --sheet-border: rgba(255, 255, 255, 0.06);
   --scrim: rgba(8, 9, 10, 0.62);
@@ -76,6 +78,9 @@
 
   --accent-soft: rgba(34, 199, 186, 0.14);
   --accent-soft-strong: rgba(34, 199, 186, 0.3);
+  /* Brand mint (not #22C7BA) at 14%: accent-ink on it keeps AA over sheet,
+     card and overlay; a #22C7BA tint at 14% drops to 4.37:1 over card. */
+  --selected: rgba(70, 241, 228, 0.14);
   --nav-hover: rgba(255, 255, 255, 0.55);
   --sheet-border: rgba(19, 20, 23, 0.06);
   --scrim: rgba(19, 20, 23, 0.32);

@@ -17,12 +17,28 @@ const channels = (body: string) =>
       [Number(m[2]), Number(m[3]), Number(m[4])] as const,
     ]),
   );
+// rgba() tokens (tints, scrims) as [r, g, b, alpha].
+const rgbaTokens = (body: string) =>
+  Object.fromEntries(
+    [...body.matchAll(/--([\w-]+):\s*rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\);/g)].map(
+      (m) => [m[1], [Number(m[2]), Number(m[3]), Number(m[4]), Number(m[5])] as const],
+    ),
+  );
+// Alpha-blend a translucent token over an opaque surface.
+const over = (
+  [r, g, b, a]: readonly number[],
+  base: readonly number[],
+): readonly number[] => [r, g, b].map((c, i) => a * c + (1 - a) * base[i]);
 const allVars = (body: string) =>
   [...body.matchAll(/--([\w-]+):/g)].map((m) => m[1]).sort();
 
 const dark = block('dark');
 const light = block('light');
 const themes = { dark: channels(dark), light: channels(light) };
+const tints = { dark: rgbaTokens(dark), light: rgbaTokens(light) };
+
+// The selected / toggled state: accent-ink text on this tint.
+const SELECTED = 'selected';
 
 const luminance = ([r, g, b]: readonly number[]) => {
   const lin = (c: number) => {
@@ -64,6 +80,22 @@ describe('design tokens', () => {
           pair: `${fg} on ${bg}`,
           ratio: true,
         });
+      }
+    },
+  );
+
+  it.each(['dark', 'light'] as const)(
+    '%s selected state (accent-ink on the selection tint) meets WCAG AA',
+    (theme) => {
+      const t = themes[theme];
+      const tint = tints[theme][SELECTED];
+      expect(tint).toBeDefined();
+      for (const surface of ['sheet', 'card', 'overlay']) {
+        const ratio = contrast(t['accent-ink'], over(tint, t[surface]));
+        expect({
+          pair: `accent-ink on ${SELECTED} over ${surface}`,
+          ratio: ratio >= 4.5,
+        }).toEqual({ pair: `accent-ink on ${SELECTED} over ${surface}`, ratio: true });
       }
     },
   );

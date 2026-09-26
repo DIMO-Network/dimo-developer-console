@@ -1,20 +1,24 @@
 import React from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { Button } from '@/components/Button';
+import { Button, type ButtonVariant } from '@/components/Button';
 import clsx from 'classnames';
 import { CreateAppModal } from '@/components/CreateAppModal';
 
 interface Props {
   className?: string;
+  variant?: ButtonVariant;
 }
 
-const CreateAppButton: React.FC<Props> = ({ className = 'with-icon' }) => {
+const CreateAppButton: React.FC<Props> = ({
+  className = 'with-icon',
+  variant = 'primary',
+}) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   return (
     <>
       <CreateAppModal isOpen={isModalOpen} handleIsOpen={setIsModalOpen} />
       <Button
-        variant="primary"
+        variant={variant}
         className={clsx(className, '!h-10')}
         onClick={() => setIsModalOpen(true)}
       >

@@ -44,7 +44,7 @@ export const OnboardingBanner: FC<Props> = ({
           subtitle={
             'Now that your account is set up, it’s time to create your first license.'
           }
-          CTA={<CreateAppButton className={'with-icon'} />}
+          CTA={<CreateAppButton className={'with-icon'} variant="secondary" />}
         />
         {fragment.totalCount > 0 && (
           <CTARow

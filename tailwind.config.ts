@@ -75,6 +75,7 @@ export const tokenColors = {
   'on-accent': token('on-accent'),
   'accent-soft': 'var(--accent-soft)',
   'accent-soft-strong': 'var(--accent-soft-strong)',
+  'selected': 'var(--selected)',
   'sky': token('sky'),
   'positive': token('positive'),
   'warning': token('warning'),
