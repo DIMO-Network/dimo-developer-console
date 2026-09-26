@@ -90,10 +90,23 @@ selected/checked state — use `bg-selected text-accent-ink`.
 | `text-label`       | 500 12/16                    | Table headers, chips/badges, meta captions, step labels                                                                                         |
 | `text-code`        | 400 13/20 (with `font-mono`) | Monospace only — keys, ids, JWTs, code                                                                                                          |
 
+`<Title>`'s own class (`.title` in `Title.css`) carries no size —
+`font-semibold text-ink` only. Size always comes from the type-scale class
+you pass in `className` (default `text-title`); see the `<Title>` pattern
+below.
+
 ## Patterns
 
 Every recipe below is copied from the restyled source, not paraphrased —
 file paths are noted so a pass can diff its own work against them.
+
+**`<Title>` component** (`src/components/Title/Title.tsx`,
+`Title.css`): `.title` = `font-semibold text-ink` and nothing else — it
+carries no size. Size always comes from `className` (default `text-title`
+if none is passed): pass a type-scale class such as `text-panel-title` or
+`text-card-title` to size it for the context. Never pass a raw size utility
+(`text-2xl`, `text-3xl`, `text-4xl`) — those aren't tokens and won't track
+the type scale.
 
 **Page header** (`src/components/Header/Header.css`): `.header` = `flex
 h-[72px] w-full min-w-0 items-center justify-between gap-2`; no border, sits
@@ -203,16 +216,27 @@ text-ink shadow-sm` — a raised neutral step, not mint.
 — `active` → `translate-x-5 bg-on-accent`, `inactive` → `translate-x-0
 bg-ink`. Mint here means "on", matching the live/actionable principle.
 
-**Inputs + focus** (`src/components/TextField/TextField.css`,
-`src/components/SelectField/SelectField.css`): `.text-field` = `flex
-min-h-10 flex-row items-center rounded-control border border-outline
-bg-control px-3 text-fg transition-[border-color,box-shadow]
-focus-within:border-accent focus-within:ring-[3px] focus-within:ring-accent-soft`;
-inner `<input>` = `w-full bg-transparent text-body-sm font-normal outline-0
-placeholder:text-muted`. `.select-field` mirrors the same container classes;
-its dropdown `.custom-menu` = `absolute ... rounded-control bg-overlay p-1
-text-fg shadow-float`, each `.custom-item` = `cursor-pointer rounded-chip
-px-2.5 py-2 hover:bg-control`.
+**Text input + focus** (`src/components/TextField/TextField.css`):
+`.text-field` = `flex min-h-10 flex-row items-center rounded-control border
+border-outline bg-control px-3 text-fg transition-[border-color,box-shadow]
+focus-within:border-accent focus-within:ring-[3px]
+focus-within:ring-accent-soft`; inner `<input>` = `w-full bg-transparent
+text-body-sm font-normal outline-0 placeholder:text-muted`. **This is the
+only one of the two with a focus ring** — the ring lives on the container
+(`focus-within`) so it fires when the real `<input>` inside it is focused.
+
+**Select field** (`src/components/SelectField/SelectField.css`): this is a
+click-to-open custom menu, not a text input, and has **no
+focus-within/transition/ring** — do not copy the text-field's focus classes
+onto it. Container `.select-field` = `relative flex min-h-10 flex-row
+items-center justify-between rounded-control border border-outline
+bg-control px-3 text-body-sm font-normal text-fg outline-0` (the real
+`<select>` inside is `hidden`; the visible value is a `<p>`, styled
+`text-fg` once a value is chosen). Its dropdown `.custom-menu` = `absolute
+left-0 top-full z-10 mt-1 hidden max-h-48 w-full flex-col gap-0.5
+overflow-y-auto rounded-control bg-overlay p-1 text-fg shadow-float`, shown
+via a `.show` modifier (`flex`); each `.custom-item` = `cursor-pointer
+rounded-chip px-2.5 py-2 hover:bg-control`.
 
 **Modal** (`src/components/Modal/Modal.css`, `Modal.tsx`): backdrop = `bg-scrim
 backdrop-blur-[6px]`. Panel `.dialog-panel` = `rounded-panel bg-overlay p-6
@@ -275,12 +299,20 @@ surfaces, and specifically checks `accent-ink` on the `selected` tint over
 ## Don'ts
 
 - No hex colors in components — only in `src/app/globals.css`,
-  `GoogleIcon.tsx`/`GitHubIcon.tsx`, and stored data values marked
-  `// token-check:allow`. Checked by `npm run visual:check`.
+  `GoogleIcon.tsx` (the one multi-color brand logo `check-tokens.sh`
+  excludes by name), and stored data values marked `// token-check:allow`.
+  `GitHubIcon.tsx` is not exempt and doesn't need to be — it already paints
+  with `fill="currentColor"`, no hex literals. Checked by `npm run
+visual:check`.
 - No `uppercase`, no positive tracking (`tracking-wide*`,
   `tracking-[0.1em+]`); negative tracking comes only from the type scale.
   `font-mono` only on keys/ids/code (`text-code`), never on labels, badges,
   dates, counts or token ids.
+- `npm run visual:check` (`scripts/visual/check-tokens.sh`) also flags every
+  default Tailwind color ramp (`gray`, `slate`, `zinc`, `neutral`, `stone`,
+  `blue`, `indigo`, `green`, `amber`, and the rest), not just the ones named
+  in the class map below — if a class isn't a token class, assume it will
+  fail the check.
 - No white/black slabs: no `text-white`, `bg-white`, `bg-black`,
   `bg-black/50` (see `class-map.md` for replacements).
 - Selected/toggled state is never a white slab and never
@@ -301,6 +333,33 @@ npm run visual:dev                                    # start/attach the harness
 npm run visual:shoot -- --label=<name> --only=<regex>  # screenshot routes, dark+light, desktop+mobile
 npm run visual:check -- <paths…>                       # fail on legacy colors/hex/uppercase/tracking/legacy variants
 ```
+
+Routes live in `scripts/visual/routes.mjs`. Four of them —
+**`app`, `app-create-modal`, `app-mobile-menu`, `settings`** — carry
+`knownHydrationError`: a pre-existing hydration race (present on the
+untouched baseline, unrelated to styling) that the harness logs instead of
+failing the shot. `npm run visual:shoot` prints these as `known (...): ...`
+and also records them in that label's `errors.json`; a hydration error on
+any other route is real and fails the shot — that one is yours to fix.
+**`app-empty`** is the `/app` route with `noLicenses: true`, i.e. the
+zero-license empty state (`EmptyList`) — shoot it whenever a pattern you're
+touching appears there.
+
+Each `--label=<name>` run writes PNGs and one `scripts/visual/out/<name>/errors.json`
+(every page error from that run, keyed by route/theme/viewport) — read it
+alongside the PNGs, don't just check exit codes.
+
+To see a state that isn't already a route (e.g. a modal open, a menu
+expanded, a form filled), add an entry to `ROUTES` in `routes.mjs`. Fields:
+`name` (label for the PNG filename), `path`, `ready` (text to wait for
+before shooting), `click` (selector, or array of selectors, to click after
+load — e.g. to open a modal or menu), `fill` (`{selector: value}` map, filled
+before any `click`), `after` (text to wait for once `click`/`fill` are done),
+`viewports` (restrict to `['desktop']` or `['mobile']`), `guest` (skip the
+authenticated-session cookies/storage for signed-out routes), `noLicenses`
+(mock identity with zero developer licenses), and `knownHydrationError`
+(only for a pre-existing race, with a one-line reason as the value — don't
+add this to silence a hydration error your own change introduced).
 
 ## Legacy → token class map
 
