@@ -124,7 +124,7 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
                 <div
                   key={day.toDateString()}
                   className={`p-2 rounded-full cursor-pointer hover:bg-control ${
-                    isSelected ? 'bg-accent-soft-strong text-accent-ink' : ''
+                    isSelected ? 'bg-selected text-accent-ink' : ''
                   }`}
                   onClick={() => {
                     onChange(day);

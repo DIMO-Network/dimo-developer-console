@@ -31,8 +31,8 @@ export const LoadingModal: FC<IProps> = ({
     >
       <div className="container">
         {status === 'loading' && <BubbleLoader isLoading />}
-        {status === 'success' && <CheckIcon className="h-8 w-8 text-green-400" />}
-        {status === 'error' && <XMarkIcon className="h-8 w-8 text-red-400" />}
+        {status === 'success' && <CheckIcon className="h-8 w-8 text-positive" />}
+        {status === 'error' && <XMarkIcon className="h-8 w-8 text-negative" />}
         <p className="description">{label}</p>
       </div>
     </Modal>

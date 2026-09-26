@@ -3,6 +3,6 @@
 
   &.selected,
   &[aria-checked='true'] {
-    @apply bg-accent-soft-strong text-accent-ink;
+    @apply bg-selected text-accent-ink;
   }
 }

@@ -17,7 +17,7 @@ export const CollapsibleHeader: FC<PropsWithChildren<IProps>> = ({ children, tit
       }
     >
       {!!title && (
-        <Title component="h2" className={'text-xl'}>
+        <Title component="h2" className={'text-card-title'}>
           {title}
         </Title>
       )}

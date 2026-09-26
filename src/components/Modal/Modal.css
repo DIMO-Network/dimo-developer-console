@@ -2,7 +2,7 @@
   @apply fixed inset-0 z-10 flex min-h-full w-screen items-end justify-center overflow-y-auto p-4 text-left sm:items-center;
 
   .dialog-panel {
-    @apply relative my-auto w-full min-h-[95vh] max-w-[calc(100vw-2rem)] transform overflow-hidden rounded-panel bg-overlay p-6 text-fg shadow-float transition-all md:h-auto md:min-h-0 md:w-auto md:min-w-[480px];
+    @apply relative my-auto w-full min-h-[95vh] max-w-[calc(100vw-2rem)] transform overflow-hidden rounded-panel bg-overlay p-6 text-fg shadow-float transition-all md:h-auto md:min-h-0 md:w-auto md:min-w-[480px] md:max-w-[560px];
 
     .dialog-close-content {
       @apply absolute right-0 top-0 z-10 cursor-pointer pr-4 pt-4;

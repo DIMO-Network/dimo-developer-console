@@ -43,7 +43,7 @@ export const DeleteConfirmationModal: FC<Props> = ({
         <Title component={'h2'} className={'text-panel-title text-ink'}>
           {title}
         </Title>
-        {!!subtitle && <p className={'text-text-secondary'}>{subtitle}</p>}
+        {!!subtitle && <p className={'text-muted'}>{subtitle}</p>}
         <div className={'mt-4 flex flex-col flex-1 gap-4'}>
           <Button
             variant="destructive"
