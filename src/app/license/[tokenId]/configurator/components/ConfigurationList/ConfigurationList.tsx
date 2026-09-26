@@ -8,10 +8,8 @@ import {
   IConfigurationListItem,
 } from '@/actions/configurations';
 import { Button } from '@/components/Button';
+import { Table } from '@/components/Table';
 import { NotificationContext } from '@/context/notificationContext';
-
-// For `.table`/`.table-header`/`.table-body` on the hand-rolled table below.
-import '@/components/Table/Table.css';
 
 const DIMO_LOGIN_BASE =
   process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
@@ -68,71 +66,74 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
     );
   }
 
+  // The actions column re-renders with pendingDeleteId, so the inline delete
+  // confirm swaps in per row. break-normal/nowrap undo the cell's break-all so
+  // a squeezed row scrolls instead of breaking button labels mid-word.
+  const renderActions = (config: IConfigurationListItem) => (
+    <div className="flex gap-2 whitespace-nowrap break-normal">
+      {pendingDeleteId === config.id ? (
+        <>
+          <Button variant="destructive" onClick={() => void handleDelete(config.id)}>
+            Confirm
+          </Button>
+          <Button variant="secondary" onClick={() => setPendingDeleteId(null)}>
+            Cancel
+          </Button>
+        </>
+      ) : (
+        <>
+          <Button
+            variant="secondary"
+            onClick={() => router.push(`/license/${tokenId}/configurator/${config.id}`)}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              const url = `${DIMO_LOGIN_BASE}/?configurationId=${config.id}`;
+              navigator.clipboard.writeText(url);
+              setNotification('Sharing link copied', '', 'success');
+            }}
+          >
+            Copy link
+          </Button>
+          <Button variant="secondary" onClick={() => setPendingDeleteId(config.id)}>
+            Delete
+          </Button>
+        </>
+      )}
+    </div>
+  );
+
   return (
-    <div className="w-full overflow-x-auto rounded-card bg-card p-4">
-      <table className="w-full table">
-        <thead className="table-header">
-          <tr className="text-left">
-            <th className="py-2 pr-4 text-label text-muted font-medium">Name</th>
-            <th className="py-2 pr-4 text-label text-muted font-medium">Component</th>
-            <th className="py-2 text-label text-muted font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="table-body">
-          {configs.map((config) => (
-            <tr key={config.id}>
-              <td className="py-3 pr-4 text-body-sm text-fg">
+    <div className="w-full overflow-x-auto">
+      <Table
+        // The shared cell breaks anywhere (break-all, for long ids); names and
+        // component labels wrap at words, with a gutter before the next column.
+        columns={[
+          {
+            label: 'Name',
+            name: 'configuration_name',
+            className: 'pr-4',
+            render: (config: IConfigurationListItem) => (
+              <span className="break-normal">
                 {config.configuration_name || '(untitled)'}
-              </td>
-              <td className="py-3 pr-4 text-body-sm text-fg">
-                {entryStateLabel(config.entry_state)}
-              </td>
-              <td className="py-3">
-                {pendingDeleteId === config.id ? (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="destructive"
-                      onClick={() => void handleDelete(config.id)}
-                    >
-                      Confirm
-                    </Button>
-                    <Button variant="secondary" onClick={() => setPendingDeleteId(null)}>
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="secondary"
-                      onClick={() =>
-                        router.push(`/license/${tokenId}/configurator/${config.id}`)
-                      }
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        const url = `${DIMO_LOGIN_BASE}/?configurationId=${config.id}`;
-                        navigator.clipboard.writeText(url);
-                        setNotification('Sharing link copied', '', 'success');
-                      }}
-                    >
-                      Copy link
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => setPendingDeleteId(config.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </span>
+            ),
+          },
+          {
+            label: 'Component',
+            name: 'entry_state',
+            className: 'pr-4',
+            render: (config: IConfigurationListItem) => (
+              <span className="break-normal">{entryStateLabel(config.entry_state)}</span>
+            ),
+          },
+          { label: 'Actions', name: 'id', render: renderActions },
+        ]}
+        data={configs}
+      />
     </div>
   );
 };

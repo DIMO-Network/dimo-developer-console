@@ -5,6 +5,10 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { Title } from '@/components/Title';
 import { NotificationContext } from '@/context/notificationContext';
 
+// The upload control is a <label> styled as the primary button (it has to be a
+// label to open the file input), so it takes Button's recipe explicitly.
+import '@/components/Button/Button.css';
+
 interface CSVUploadProps {
   vehicleTokenIds: string[];
   onChange: (ids: string[]) => void;
@@ -151,7 +155,9 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           Maximum file size 50 MB.
         </p>
 
-        <label className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-full bg-btn-primary px-4 text-body-sm font-semibold text-btn-primary-fg transition-colors duration-150 hover:bg-btn-primary-hover cursor-pointer">
+        {/* sr-only (not display:none) keeps the file input in the tab order;
+            the label shows the focus ring while the input has keyboard focus. */}
+        <label className="button primary mt-4 cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus-ring">
           <span>
             <ArrowUpTrayIcon className={'w-5 h-5'} />
           </span>
@@ -160,7 +166,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
             type="file"
             accept=".csv"
             onChange={handleInputChange}
-            className="hidden"
+            className="sr-only"
           />
         </label>
 

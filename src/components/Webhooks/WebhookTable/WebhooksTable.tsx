@@ -15,6 +15,7 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
 import Cell from '@/components/Table/Cell';
 import { VehicleCount } from '@/components/Webhooks/components/VehicleCount';
 import { StatusBadge } from '@/components/Webhooks/components/StatusBadge';
+import { StatusChip } from '@/components/StatusChip';
 
 const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
   return [
@@ -37,14 +38,7 @@ const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
       accessorKey: 'failure_count',
       cell: ({ row }) => {
         const count = row.original.failure_count;
-        return count > 0 ? (
-          <span className="inline-flex items-center gap-2">
-            <span className="inline-block size-1.5 flex-shrink-0 rounded-full bg-warning" />
-            {count}
-          </span>
-        ) : (
-          count
-        );
+        return count > 0 ? <StatusChip tone="error">{count}</StatusChip> : count;
       },
     },
     {
