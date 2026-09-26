@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, type FC } from 'react';
-import classNames from 'classnames';
 import { TrashIcon } from '@heroicons/react/24/outline';
 
 import * as Sentry from '@sentry/nextjs';
@@ -17,8 +16,23 @@ import { deleteCollaborator } from '@/actions/team';
 import { isOwner } from '@/utils/user';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { Card } from '@/components/Card';
+import { Column } from '@/components/Table/Column';
+import { StatusChip, type StatusTone } from '@/components/StatusChip';
 import { useGlobalAccount } from '@/hooks';
+
+import './TeamManagement.css';
+
+const STATUS_TONE: Record<string, StatusTone> = {
+  [InvitationStatuses.ACCEPTED]: 'on',
+  [InvitationStatuses.SENT]: 'pending',
+  [InvitationStatuses.PENDING]: 'pending',
+};
+
+const renderStatusChip = ({ status }: ITeamCollaborator) => (
+  <StatusChip tone={STATUS_TONE[status] ?? 'off'}>
+    {InvitationStatusLabels[status as InvitationStatuses]}
+  </StatusChip>
+);
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
@@ -36,10 +50,12 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
     const isPending = teamCollaborator.status === InvitationStatuses.PENDING;
 
     return (
-      <div className="flex flex-row items-center gap-3 whitespace-nowrap">
+      <div className="flex flex-col items-start gap-1 md:whitespace-nowrap">
         <p>
           {name ?? email ?? ''} {isPending && `(${InvitationStatusLabels.PENDING})`}
         </p>
+        {/* Phones have no Status column; the chip rides under the name instead. */}
+        <span className="md:hidden">{renderStatusChip(teamCollaborator)}</span>
       </div>
     );
   };
@@ -50,20 +66,9 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
     </span>
   );
 
-  const renderStatus = ({ ...teamCollaborator }: ITeamCollaborator) => {
-    const isAccepted = teamCollaborator.status === InvitationStatuses.ACCEPTED;
-
-    return (
-      <span
-        className={classNames('rounded-chip px-2 py-0.5 text-label whitespace-nowrap', {
-          'bg-selected text-accent-ink': isAccepted,
-          'bg-control text-muted': !isAccepted,
-        })}
-      >
-        {InvitationStatusLabels[teamCollaborator.status as InvitationStatuses]}
-      </span>
-    );
-  };
+  const renderStatus = (teamCollaborator: ITeamCollaborator) => (
+    <span className="team-status-cell">{renderStatusChip(teamCollaborator)}</span>
+  );
 
   const renderDeleteRemoveCollaborator = ({
     id,
@@ -109,7 +114,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   return (
     <>
       <LoadingModal isOpen={isOpened} setIsOpen={setIsOpened} {...loadingStatus} />
-      <Card className="secondary team-information overflow-x-auto">
+      <div className="team-table overflow-x-auto">
         <Table
           columns={[
             {
@@ -126,12 +131,17 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
               label: 'Status',
               name: 'status',
               render: renderStatus,
+              CustomHeader: (
+                <Column key="th-Status" className="hidden md:table-cell">
+                  Status
+                </Column>
+              ),
             },
           ]}
           data={teamCollaborators}
           actions={[renderDeleteRemoveCollaborator]}
         />
-      </Card>
+      </div>
     </>
   );
 };

@@ -1,0 +1,5 @@
+/* Below md the Status column is hidden (its header via the Column className) and
+   the status chip renders under the user's name, so the delete action fits. */
+.team-table td:has(> .team-status-cell) {
+  @apply hidden md:table-cell;
+}
