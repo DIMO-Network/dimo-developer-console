@@ -146,7 +146,7 @@ const DropZone: FC<{
         if (files.length) onFiles(files);
       }}
       className={`flex-1 min-h-[80px] rounded-control border border-dashed px-4 py-3 text-body-sm transition-colors
-        ${dragOver ? 'border-outline-strong bg-highest' : 'border-outline'}
+        ${dragOver ? 'border-control-border-hover bg-highest' : 'border-control-border'}
         ${disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-highest cursor-pointer'}`}
     >
       <span className="text-ink font-medium">

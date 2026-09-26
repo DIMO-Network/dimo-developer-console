@@ -1,3 +1,3 @@
 .select-field-input {
-  @apply relative flex min-h-10 min-w-[160px] appearance-none flex-row items-center justify-between rounded-control border border-outline bg-control px-3 text-body-sm font-normal text-fg outline-0 focus:border-accent focus:ring-[3px] focus:ring-accent-soft;
+  @apply relative flex min-h-10 min-w-[160px] appearance-none flex-row items-center justify-between rounded-control border border-control-border bg-control px-3 text-body-sm font-normal text-fg outline-0 transition-[border-color,box-shadow] hover:border-control-border-hover focus:border-focus-ring focus:ring-[3px] focus:ring-accent-soft;
 }

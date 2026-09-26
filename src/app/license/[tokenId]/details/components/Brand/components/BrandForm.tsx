@@ -212,7 +212,7 @@ export const BrandForm: FC<Props> = ({
               onChange={(e) =>
                 setValue('primaryColor', e.target.value, { shouldDirty: true })
               }
-              className="h-10 w-12 rounded-control border border-outline bg-transparent p-0 cursor-pointer disabled:cursor-not-allowed"
+              className="h-10 w-12 rounded-control border border-control-border bg-transparent p-0 cursor-pointer enabled:hover:border-control-border-hover disabled:cursor-not-allowed"
               disabled={!isOwner || saving}
             />
             <TextField

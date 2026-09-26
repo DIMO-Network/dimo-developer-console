@@ -1,11 +1,15 @@
 .money-field {
-  @apply flex flex-row rounded-control border border-outline bg-control px-4 py-2 text-metric text-ink outline-0;
+  @apply flex flex-row rounded-control border border-control-border bg-control px-4 py-2 text-metric text-ink outline-0 transition-[border-color,box-shadow];
+
+  &:hover:not(.input-focused) {
+    @apply border-control-border-hover;
+  }
 
   input {
     @apply w-full bg-transparent font-semibold outline-0 !text-metric placeholder:text-muted;
   }
 
   &.input-focused {
-    @apply border-accent ring-[3px] ring-accent-soft;
+    @apply border-focus-ring ring-[3px] ring-accent-soft;
   }
 }

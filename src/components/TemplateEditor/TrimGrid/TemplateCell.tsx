@@ -21,7 +21,7 @@ const NOT_SET = '—';
 // TextField, but 32px tall instead of 40px so a dense multi-trim grid stays
 // scannable.
 const CELL_FIELD =
-  'h-8 w-full rounded-control border border-outline bg-control px-2 text-body-sm outline-0 placeholder:text-muted focus:border-accent focus:ring-[3px] focus:ring-accent-soft';
+  'h-8 w-full rounded-control border border-control-border bg-control px-2 text-body-sm outline-0 placeholder:text-muted hover:border-control-border-hover focus:border-focus-ring focus:ring-[3px] focus:ring-accent-soft';
 
 export const TemplateCell: FC<Props> = ({
   def,

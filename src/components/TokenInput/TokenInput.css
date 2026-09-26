@@ -2,7 +2,11 @@
   @apply flex w-full flex-col items-center gap-2;
 
   .dcx-container {
-    @apply relative flex h-14 w-3/4 flex-row items-center justify-center gap-2 rounded-control bg-control px-2;
+    @apply relative flex h-14 w-3/4 flex-row items-center justify-center gap-2 rounded-control border border-control-border bg-control px-2 transition-[border-color,box-shadow] focus-within:border-focus-ring focus-within:ring-[3px] focus-within:ring-accent-soft;
+
+    &:hover:not(:focus-within) {
+      @apply border-control-border-hover;
+    }
 
     .action-icons {
       @apply flex h-10 w-10 items-center justify-center rounded-control bg-highest p-2 text-ink;
