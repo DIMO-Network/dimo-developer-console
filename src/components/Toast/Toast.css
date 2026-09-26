@@ -37,7 +37,7 @@
     @apply ml-4 flex flex-shrink-0;
 
     .toast-close-btn {
-      @apply inline-flex rounded-full p-1 text-muted hover:bg-control hover:text-ink focus:outline-none focus:ring-[3px] focus:ring-accent-soft;
+      @apply inline-flex rounded-full p-1 text-muted hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-overlay;
     }
   }
 }

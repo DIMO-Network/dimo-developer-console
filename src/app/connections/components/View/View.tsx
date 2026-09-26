@@ -1,7 +1,6 @@
 'use client';
 import React, { useContext, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PageSubtitle } from '@/components/PageSubtitle';
 import { Section } from '@/components/Section';
 import { SectionHeader } from '@/components/Section/Header';
 import { Button } from '@/components/Button';
@@ -81,7 +80,10 @@ const MainComponent: React.FC = () => {
 
   return (
     <div className="connections-page">
-      <PageSubtitle subtitle="Connection Oracle is an application that performs data streaming from your data source to a DIMO Node." />
+      <p className="text-body-sm text-muted">
+        Connection Oracle is an application that performs data streaming from your data
+        source to a DIMO Node.
+      </p>
 
       <Section>
         <SectionHeader title="Connections">

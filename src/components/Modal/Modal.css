@@ -8,7 +8,7 @@
       @apply absolute right-0 top-0 z-10 cursor-pointer pr-4 pt-4;
 
       .close-btn {
-        @apply rounded-full p-1 text-muted hover:bg-control hover:text-ink focus:outline-none;
+        @apply rounded-full p-1 text-muted hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-ink focus-visible:ring-offset-2 focus-visible:ring-offset-overlay;
       }
     }
 

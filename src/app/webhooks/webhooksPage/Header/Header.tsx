@@ -1,6 +1,5 @@
 import React from 'react';
-import { PageSubtitle } from '@/components/PageSubtitle';
 
 export const Header = () => {
-  return <PageSubtitle subtitle="Receive real-time updates from events" />;
+  return <p className="text-body-sm text-muted">Receive real-time updates from events</p>;
 };

@@ -9,6 +9,9 @@ import { Button } from '@/components/Button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
+// For .table-page-button, the shared round pager button.
+import '@/components/Table/Table.css';
+
 const GET_VEHICLES_FOR_EXPLORER = gql(`
   query GetVehiclesForExplorer($clientId: Address!, $first: Int, $last: Int, $before: String, $after: String) {
     vehicles(filterBy: { privileged: $clientId }, first: $first, last: $last, before: $before, after: $after) {
@@ -162,6 +165,7 @@ export const VehicleList: FC<Props> = ({
         <div className="flex gap-1">
           <Button
             variant="secondary"
+            className="table-page-button"
             disabled={pageIndex === 0 || loading}
             onClick={handlePrev}
           >
@@ -169,6 +173,7 @@ export const VehicleList: FC<Props> = ({
           </Button>
           <Button
             variant="secondary"
+            className="table-page-button"
             disabled={!pageInfo?.hasNextPage || loading}
             onClick={handleNext}
           >

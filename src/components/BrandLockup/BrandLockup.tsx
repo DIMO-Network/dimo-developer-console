@@ -8,10 +8,10 @@ interface IProps {
 
 // "Developer Console" is a product name: shown as-is, never re-cased.
 export const BrandLockup: FC<IProps> = ({ product }) => (
-  <div className="brand-lockup" aria-label={`DIMO ${product}`}>
+  <div className="brand-lockup">
     <Image
       src="/images/dimo-wordmark.png"
-      alt=""
+      alt="DIMO"
       width={69}
       height={18}
       className="wordmark"
