@@ -1,15 +1,19 @@
 .contact-card {
-  @apply flex flex-row gap-2 cursor-pointer;
+  @apply flex flex-row items-center justify-between gap-2 cursor-pointer transition-colors hover:bg-control;
 
   .content {
-    @apply flex flex-col gap-2 leading-5;
+    @apply flex flex-col gap-1;
 
     .title {
-      @apply text-xs font-medium;
+      @apply text-body font-medium text-ink;
     }
 
     .description {
-      @apply text-xs;
+      @apply text-body-sm text-muted;
     }
+  }
+
+  .icon {
+    @apply flex-shrink-0 text-muted;
   }
 }

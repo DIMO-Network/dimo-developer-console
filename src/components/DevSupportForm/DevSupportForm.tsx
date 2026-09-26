@@ -52,8 +52,8 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
     <form className="form-dev-support w-full" onSubmit={handleSubmit(handleFormSubmit)}>
       <div className="fields">
         <div className="field">
-          <Label htmlFor="userName" className="text-xs text-medium">
-            User Name
+          <Label htmlFor="userName">
+            User name
             <TextField
               type="text"
               value={currentUser?.email}
@@ -63,8 +63,8 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
           </Label>
         </div>
         <div className="field">
-          <Label htmlFor="inquiryType" className="text-xs text-medium">
-            Inquiry Type
+          <Label htmlFor="inquiryType">
+            Inquiry type
             <SelectField
               {...register('inquiryType', {
                 required: 'This field is required',
@@ -80,7 +80,7 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
           </Label>
         </div>
         <div className="field">
-          <Label htmlFor="message" className="text-xs text-medium">
+          <Label htmlFor="message">
             Message
             <TextArea
               placeholder="Let us know how we can help..."
@@ -93,7 +93,6 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
                 },
               })}
               role="message-input"
-              className="textarea-class w-full"
             />
             {errors.message && <TextError errorMessage={errors.message.message ?? ''} />}
           </Label>

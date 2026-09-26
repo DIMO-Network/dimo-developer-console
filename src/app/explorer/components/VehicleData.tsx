@@ -22,18 +22,9 @@ function colorizeJson(json: string): React.ReactNode[] {
       parts.push(json.slice(last, match.index));
     }
     const token = match[0];
-    let cls: string;
-    if (token.endsWith(':')) {
-      cls = 'text-blue-400'; // object key
-    } else if (token.startsWith('"')) {
-      cls = 'text-green-400'; // string value
-    } else if (token === 'true' || token === 'false') {
-      cls = 'text-yellow-400';
-    } else if (token === 'null') {
-      cls = 'text-text-secondary';
-    } else {
-      cls = 'text-orange-400'; // number
-    }
+    // Object keys are dimmed against the value they label; every value stays
+    // in the code block's own text color (no default Tailwind hues per value type).
+    const cls = token.endsWith(':') ? 'text-muted' : 'text-fg';
     parts.push(
       <span key={match.index} className={cls}>
         {token}
@@ -64,43 +55,41 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
 
   if (tokenId === null) {
     return (
-      <div className="flex items-center justify-center h-full bg-surface-default rounded-xl p-8 text-text-secondary text-sm">
+      <div className="flex h-full items-center justify-center rounded-card bg-card p-8 text-body-sm text-muted">
         Select a vehicle to view its data.
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4 bg-surface-default rounded-xl p-6 h-full overflow-y-auto">
-      <p className="text-sm text-text-secondary font-medium uppercase tracking-wider">
-        Vehicle Data — Token #{tokenId}
-      </p>
+    <div className="flex h-full flex-col gap-4 overflow-y-auto rounded-card bg-card p-6">
+      <p className="text-card-title text-ink">Vehicle data — Token #{tokenId}</p>
 
       {loading && (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-1 items-center justify-center">
           <Loader isLoading />
         </div>
       )}
 
       {missingDevJwt && (
-        <p className="text-sm text-yellow-400">
+        <p className="text-body-sm text-warning">
           No developer JWT found for this license. Generate one in the Developer License
           details.
         </p>
       )}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-body-sm text-negative">{error}</p>}
 
       {!loading && !error && !missingDevJwt && availableSignals.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-text-secondary">
-            Available Signals ({availableSignals.length})
+          <p className="text-label text-muted">
+            Available signals ({availableSignals.length})
           </p>
           <div className="flex flex-wrap gap-2">
             {availableSignals.map((signal) => (
               <span
                 key={signal}
-                className="text-xs font-mono px-2 py-1 rounded bg-surface-raised text-text-primary border border-[#322D2F]"
+                className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted"
               >
                 {signal}
               </span>
@@ -110,23 +99,21 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
       )}
 
       {!loading && !error && !missingDevJwt && latestSignalsError && (
-        <div className="flex items-start gap-2 rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-3 py-2">
-          <span className="text-yellow-400 text-sm leading-none mt-px">⚠</span>
+        <div className="flex items-start gap-2 rounded-control border border-warning/40 bg-warning/10 px-3 py-2">
+          <span className="mt-px text-body-sm leading-none text-warning">⚠</span>
           <div className="flex flex-col gap-0.5">
-            <p className="text-xs font-medium text-yellow-400">
+            <p className="text-label font-medium text-warning">
               Latest signals unavailable
             </p>
-            <p className="text-xs text-yellow-400/70">{latestSignalsError}</p>
+            <p className="text-label text-warning/70">{latestSignalsError}</p>
           </div>
         </div>
       )}
 
       {!loading && !error && !missingDevJwt && latestSignals.length > 0 && (
-        <div className="flex flex-col gap-2 min-h-0">
-          <p className="text-xs text-text-secondary">
-            Latest Signals ({latestSignals.length})
-          </p>
-          <pre className="text-xs font-mono bg-surface-raised border border-[#322D2F] rounded-lg p-4 overflow-auto h-96 whitespace-pre leading-relaxed">
+        <div className="flex min-h-0 flex-col gap-2">
+          <p className="text-label text-muted">Latest signals ({latestSignals.length})</p>
+          <pre className="h-96 overflow-auto whitespace-pre rounded-control bg-control p-4 font-mono text-code leading-relaxed text-fg">
             <ColoredJson
               data={Object.fromEntries(
                 latestSignals.map(({ signal, timestamp, value }) => [
@@ -140,7 +127,7 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
       )}
 
       {!loading && !error && !missingDevJwt && availableSignals.length === 0 && (
-        <div className="flex-1 flex items-center justify-center text-text-secondary text-sm">
+        <div className="flex flex-1 items-center justify-center text-body-sm text-muted">
           No signals available for this vehicle.
         </div>
       )}

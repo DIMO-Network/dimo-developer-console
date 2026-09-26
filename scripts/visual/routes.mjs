@@ -157,7 +157,7 @@ export const ROUTES = [
   { name: 'template-edit', path: '/templates/toyota_camry_2020', ready: 'Camry' },
   { name: 'template-new', path: '/templates/new', ready: 'Create template' },
   { name: 'explorer', path: '/explorer', ready: 'Model 3' },
-  { name: 'explorer-vehicle', path: '/explorer/190231', ready: 'Available Signals' },
+  { name: 'explorer-vehicle', path: '/explorer/190231', ready: 'Available signals' },
   {
     name: 'settings',
     path: '/settings',
@@ -184,7 +184,23 @@ export const ROUTES = [
   {
     name: 'email-recovery',
     path: '/email-recovery',
-    ready: 'Reset Passkeys',
+    ready: 'Reset passkeys',
     guest: true,
+  },
+  {
+    name: 'sign-up-company-information',
+    path: '/sign-up?flow=company-information',
+    ready: 'Final stretch',
+    guest: true,
+  },
+  {
+    // Confirms an unmatched authenticated path doesn't redirect-loop. Next.js
+    // serves its own built-in 404 here (not src/app/_not-found.tsx, which
+    // isn't wired up: the App Router only recognizes a file literally named
+    // not-found.tsx, and this one keeps its leading underscore) — see the
+    // pass-15 report for detail. Nothing here reflects this repo's styling.
+    name: 'not-found',
+    path: '/this-does-not-exist',
+    ready: 'This page could not be found',
   },
 ];

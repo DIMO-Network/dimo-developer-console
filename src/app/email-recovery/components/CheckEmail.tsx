@@ -45,7 +45,9 @@ export const CheckEmail: FC<IProps> = ({ state }) => {
         <p className="text-title text-ink">Click the link in your email</p>
       </div>
       <div className="email-recovery__input">
-        <p>Not seeing an email? Check your spam folder or resend code.</p>
+        <p className="text-body-sm text-muted">
+          Not seeing an email? Check your spam folder or resend code.
+        </p>
         <Button
           type="button"
           onClick={handleResendCode}

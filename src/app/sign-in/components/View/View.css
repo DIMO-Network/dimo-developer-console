@@ -5,49 +5,42 @@
     @apply flex flex-col mx-6 w-full lg:mx-0 items-center justify-center;
 
     .sign-in__form {
-      @apply flex flex-col w-full max-w-sm gap-4 px-4 py-4 bg-surface-default rounded-3xl;
+      @apply flex flex-col w-full max-w-sm gap-4 px-4 py-4;
     }
 
     .otp-login-text {
-      @apply text-center;
+      @apply text-center text-body-sm text-muted;
     }
 
     .otp-inputs {
       @apply flex justify-center gap-x-4;
 
       .text-field {
-        @apply w-12 h-12 text-center rounded-md text-2xl;
+        @apply h-14 w-12 text-center rounded-control;
       }
 
       .otp-input {
-        @apply text-center;
+        @apply text-center text-metric text-ink;
       }
     }
     .sign-in__input {
       @apply flex flex-col w-full gap-4 pb-4 px-2;
     }
 
-    button {
-      @apply h-11 mt-1;
-      &:disabled {
-        @apply bg-grey-400;
-      }
-    }
-
     .sign-in__divider {
       @apply flex flex-row items-center gap-4;
       .divider {
-        @apply w-1/2 h-0.5 bg-grey-400 opacity-30;
+        @apply w-1/2 h-0.5 bg-outline;
       }
       .divider-caption {
-        @apply text-grey-400 text-xs;
+        @apply text-label text-muted;
       }
     }
 
     .sign-in__header {
       @apply flex flex-col w-full items-center gap-4 my-4;
       p {
-        @apply text-3xl text-center leading-9 italic;
+        @apply text-center;
       }
     }
 
@@ -55,7 +48,7 @@
       @apply flex flex-col items-center gap-4;
 
       .terms-caption {
-        @apply text-grey-400 text-xs text-center leading-4;
+        @apply text-label text-muted text-center leading-4;
       }
     }
 
