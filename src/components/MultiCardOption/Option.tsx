@@ -24,7 +24,12 @@ export const Option: FC<OptionItem & Interaction> = ({
   selected,
 }) => {
   return (
-    <div onClick={() => onChange(value)} key={value}>
+    <div
+      role="radio"
+      aria-checked={!!selected}
+      onClick={() => onChange(value)}
+      key={value}
+    >
       {render({ value, selected })}
     </div>
   );

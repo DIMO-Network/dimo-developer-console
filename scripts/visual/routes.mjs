@@ -2,6 +2,7 @@
 // first). fill {selector: value} then click (selector or list) set up a state;
 // after: text awaited once they are done. viewports limits a state to one size.
 // noLicenses: identity returns no developer licenses (the empty /app state).
+// hover: a selector the pointer rests on for the shot (hover states).
 // knownHydrationError: a mismatch already present on the untouched baseline;
 // it (and the dev badge's issue count) is logged instead of failing the shot.
 import { LICENSE, CONNECTIONS, WEBHOOKS } from './fixtures.mjs';
@@ -117,6 +118,25 @@ export const ROUTES = [
     viewports: ['desktop'],
   },
   {
+    // Permission cards: one selected (control + ink edge), the pointer on an
+    // unselected one (a lighter half step; never the selected fill).
+    name: 'license-configurator-new-hover',
+    path: `/license/${t}/configurator/new`,
+    ready: 'Which component?',
+    click: ['text="Custom permissions"', 'text="Commands"'],
+    hover: '[role="button"][aria-pressed="false"]',
+    viewports: ['desktop'],
+  },
+  {
+    // A success toast (icon + message) from the configuration list's Copy link.
+    name: 'license-configurator-toast',
+    path: `/license/${t}/configurator`,
+    ready: 'Fleet onboarding',
+    click: 'text="Copy link"',
+    after: 'Sharing link copied',
+    viewports: ['desktop'],
+  },
+  {
     // Vehicle simulator with a region and a make chosen (toggled tiles).
     name: 'license-vehicle-simulator-selected',
     path: `/license/${t}/details`,
@@ -187,6 +207,14 @@ export const ROUTES = [
   { name: 'explorer', path: '/explorer', ready: 'Model 3' },
   { name: 'explorer-vehicle', path: '/explorer/190231', ready: 'Available signals' },
   {
+    // The selected vehicle row (control + ink edge) with the pointer on another.
+    name: 'explorer-vehicle-hover',
+    path: '/explorer/190231',
+    ready: 'Available signals',
+    hover: 'button:has-text("Token #"):not([aria-current])',
+    viewports: ['desktop'],
+  },
+  {
     name: 'settings',
     path: '/settings',
     ready: 'sam@harness.dev',
@@ -215,6 +243,15 @@ export const ROUTES = [
     path: '/sign-up?flow=build-for',
     ready: 'What are you building?',
     click: 'text="Web application"',
+    guest: true,
+  },
+  {
+    // One card selected, the pointer on another (hover is a lighter step).
+    name: 'sign-up-build-for-hover',
+    path: '/sign-up?flow=build-for',
+    ready: 'What are you building?',
+    click: 'text="Web application"',
+    hover: '[role="radio"][aria-checked="false"]',
     guest: true,
   },
   {

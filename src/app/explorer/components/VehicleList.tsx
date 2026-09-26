@@ -130,6 +130,7 @@ export const VehicleList: FC<Props> = ({
             return (
               <button
                 key={vehicle.tokenId}
+                aria-current={isSelected ? 'true' : undefined}
                 onClick={() => {
                   onSelectVehicle(vehicle.tokenId);
                   router.push(`/explorer/${vehicle.tokenId}`);
@@ -138,7 +139,7 @@ export const VehicleList: FC<Props> = ({
                   'flex w-full flex-col items-start rounded-control border-b border-outline px-3 py-3 text-left transition-colors last:border-b-0',
                   isSelected
                     ? 'bg-control text-ink shadow-selected'
-                    : 'text-fg hover:bg-control',
+                    : 'text-fg hover:bg-control/50',
                 )}
               >
                 <span className="text-body-sm font-medium">

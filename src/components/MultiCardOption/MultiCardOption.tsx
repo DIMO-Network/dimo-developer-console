@@ -18,7 +18,7 @@ export const MultiCardOption: FC<IProps & Interaction> = ({
   className = '',
 }) => {
   return (
-    <div className={classnames('multi-card-options', className)}>
+    <div className={classnames('multi-card-options', className)} role="radiogroup">
       {options.map((optionProps) => {
         return (
           <Option

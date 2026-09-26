@@ -41,6 +41,11 @@ const pageErrors = [];
 const shotKey = (e) => `${e.route} ${e.theme} ${e.viewport}`;
 
 async function prepare(context, route, theme) {
+  // Copy buttons write to the clipboard; without the grant headless Chromium
+  // rejects and the success toast never shows.
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], {
+    origin: BASE,
+  });
   await context.route('https://identity-api.dev.dimo.zone/query', (r) =>
     identityHandler(r, { noLicenses: route.noLicenses }),
   );
@@ -191,6 +196,11 @@ async function shootOnce(route, theme, vp, file, errors) {
     }
     await page.addStyleTag({ content: HIDE_DEV_OVERLAY });
     await growToContent(page, SIZES[vp]);
+    // hover: a selector to rest the pointer on for the shot (hover states).
+    if (route.hover) {
+      await page.locator(route.hover).first().hover();
+      await page.waitForTimeout(300);
+    }
     await page.screenshot({ path: file, fullPage: true });
     await fs.rm(file.replace(/\.png$/, '.FAILED.png'), { force: true });
   } catch (e) {

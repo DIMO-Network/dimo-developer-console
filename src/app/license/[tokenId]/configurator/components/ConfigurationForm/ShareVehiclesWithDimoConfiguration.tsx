@@ -32,6 +32,8 @@ type PermissionCardProps = {
   onToggle: () => void;
 };
 
+// Multi-select toggle on the sheet: resting card, hover a half step toward the
+// selected fill, selected = control + ink edge (never changes on hover).
 const PermissionCard = ({
   selected,
   title,
@@ -39,9 +41,11 @@ const PermissionCard = ({
   onToggle,
 }: PermissionCardProps) => (
   <div
+    role="button"
+    aria-pressed={!!selected}
     onClick={onToggle}
     className={`cursor-pointer rounded-control border-2 border-transparent p-4 transition-colors duration-150 ${
-      selected ? 'bg-highest shadow-selected' : 'bg-control hover:bg-highest'
+      selected ? 'bg-control shadow-selected' : 'bg-card hover:bg-control/70'
     }`}
   >
     <h4 className="font-semibold text-ink">{title}</h4>

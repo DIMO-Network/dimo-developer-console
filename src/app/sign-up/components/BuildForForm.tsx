@@ -104,37 +104,47 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 w-full max-w-sm pt-4"
         >
-          <div className="ml-1 text-body-sm text-muted">
+          <div id="build-for-prompt" className="ml-1 text-body-sm text-muted">
             What you are looking to launch with DIMO?
           </div>
-          {buildForList.map(({ title, description, value, Icon, iconClassName }) => {
-            const isSelected = buildFor === value;
-            return (
-              <Card
-                className={classnames(
-                  'flex cursor-pointer flex-row items-center justify-between transition-colors',
-                  isSelected
-                    ? '!bg-control text-ink shadow-selected'
-                    : 'text-ink hover:bg-control',
-                )}
-                onClick={() => handleSelection(value)}
-                key={value}
-              >
-                <div>
-                  <p className="text-body font-medium">{title}</p>
-                  <p className="text-body-sm text-muted">{description}</p>
-                </div>
-                <Icon className={iconClassName} />
-              </Card>
-            );
-          })}
+          {/* Resting card on the sheet; hover is a half step toward the selected
+              fill (control/70 over the sheet), selected = control + ink edge. */}
+          <div
+            role="radiogroup"
+            aria-labelledby="build-for-prompt"
+            className="flex flex-col gap-4"
+          >
+            {buildForList.map(({ title, description, value, Icon, iconClassName }) => {
+              const isSelected = buildFor === value;
+              return (
+                <Card
+                  role="radio"
+                  aria-checked={isSelected}
+                  className={classnames(
+                    'flex cursor-pointer flex-row items-center justify-between transition-colors',
+                    isSelected
+                      ? '!bg-control text-ink shadow-selected'
+                      : 'text-ink hover:bg-control/70',
+                  )}
+                  onClick={() => handleSelection(value)}
+                  key={value}
+                >
+                  <div>
+                    <p className="text-body font-medium">{title}</p>
+                    <p className="text-body-sm text-muted">{description}</p>
+                  </div>
+                  <Icon className={iconClassName} />
+                </Card>
+              );
+            })}
+          </div>
           <Card
             className={classnames(
               'flex cursor-pointer flex-col gap-4 transition-colors',
               {
                 '!bg-control text-ink shadow-selected':
                   buildFor === buildForValues.somethingElse,
-                'text-ink hover:bg-control': buildFor !== buildForValues.somethingElse,
+                'text-ink hover:bg-control/70': buildFor !== buildForValues.somethingElse,
               },
             )}
             onClick={() => handleSelection(buildForValues.somethingElse)}
