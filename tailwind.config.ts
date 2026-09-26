@@ -25,7 +25,6 @@ export const tokenColors = {
   'on-accent': token('on-accent'),
   'accent-soft': 'var(--accent-soft)',
   'accent-soft-strong': 'var(--accent-soft-strong)',
-  'selected': 'var(--selected)',
   'selected-bg': token('selected-bg'),
   'selected-fg': token('selected-fg'),
   'btn-primary': token('btn-primary'),

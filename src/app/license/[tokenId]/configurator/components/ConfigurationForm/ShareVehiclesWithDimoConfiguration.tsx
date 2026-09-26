@@ -41,15 +41,11 @@ const PermissionCard = ({
   <div
     onClick={onToggle}
     className={`cursor-pointer rounded-control border-2 border-transparent p-4 transition-colors duration-150 ${
-      selected ? 'bg-selected' : 'bg-control hover:bg-highest'
+      selected ? 'bg-highest shadow-selected' : 'bg-control hover:bg-highest'
     }`}
   >
-    <h4 className={`font-semibold ${selected ? 'text-accent-ink' : 'text-ink'}`}>
-      {title}
-    </h4>
-    <p className={`text-body-sm ${selected ? 'text-accent-ink' : 'text-muted'}`}>
-      {description}
-    </p>
+    <h4 className="font-semibold text-ink">{title}</h4>
+    <p className="text-body-sm text-muted">{description}</p>
   </div>
 );
 

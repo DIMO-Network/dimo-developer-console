@@ -43,15 +43,16 @@
     @apply cursor-not-allowed opacity-40 hover:bg-control;
   }
 
+  /* Toggled control: inverse ink, and hover keeps the selected fill. */
   &.selected {
-    @apply border-transparent bg-selected hover:bg-selected;
+    @apply border-transparent bg-selected-bg hover:bg-selected-bg;
 
     .vehicle-sim-region-label {
-      @apply text-accent-ink;
+      @apply text-selected-fg;
     }
 
     .vehicle-sim-region-sub {
-      @apply text-accent-ink;
+      @apply text-selected-fg/75;
     }
   }
 
@@ -77,15 +78,16 @@
     @apply cursor-not-allowed opacity-40 hover:bg-control;
   }
 
+  /* Toggled control: inverse ink, and hover keeps the selected fill. */
   &.selected {
-    @apply border-transparent bg-selected hover:bg-selected;
+    @apply border-transparent bg-selected-bg hover:bg-selected-bg;
 
     .vehicle-sim-make-icon {
-      @apply text-accent-ink;
+      @apply text-selected-fg;
     }
 
     .vehicle-sim-make-name {
-      @apply text-accent-ink;
+      @apply text-selected-fg;
     }
   }
 
@@ -112,7 +114,7 @@
   }
 
   &.selected {
-    @apply border-transparent bg-selected text-accent-ink hover:bg-selected;
+    @apply border-transparent bg-selected-bg text-selected-fg hover:bg-selected-bg;
   }
 }
 

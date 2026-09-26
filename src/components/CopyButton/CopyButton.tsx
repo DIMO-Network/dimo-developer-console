@@ -42,7 +42,7 @@ export const CopyButton: FC<ICopyButtonProps> = ({
       disabled={copied}
     >
       {copied ? (
-        <CheckIcon className={'w-5 h-5 transition text-accent-ink'} />
+        <CheckIcon className={'w-5 h-5 transition text-positive'} />
       ) : (
         <ContentCopyIcon className="w-5 h-5 cursor-pointer transition text-muted hover:text-ink" />
       )}

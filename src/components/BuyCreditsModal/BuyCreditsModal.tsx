@@ -140,7 +140,7 @@ export const BuyCreditsModal: FC = () => {
               The base price to accessing one vehicle is $1.25 per month.
             </p>
             <a
-              className="text-accent-ink"
+              className="text-ink underline underline-offset-2"
               href="https://docs.dimo.org/developer-platform/developer-guide/dimo-credits"
               target="_blank"
             >

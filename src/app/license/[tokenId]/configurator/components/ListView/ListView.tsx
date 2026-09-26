@@ -78,7 +78,7 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
           href="https://www.dimo.org/docs/build/building-with-tools/client-sdk-dimo-connect"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-accent-ink hover:underline"
+          className="text-ink underline underline-offset-2"
         >
           Learn how to use the configurationId with LIWD
         </a>

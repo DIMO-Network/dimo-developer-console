@@ -22,7 +22,7 @@ const WhatsDCX = () => {
       <a
         target="_blank"
         href={'https://docs.dimo.org/developer-platform/developer-guide/dimo-credits'}
-        className={'text-body-sm text-accent-ink underline'}
+        className={'text-body-sm text-ink underline underline-offset-2'}
       >
         Learn more.
       </a>

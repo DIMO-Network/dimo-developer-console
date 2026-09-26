@@ -114,7 +114,7 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
                 className={classnames(
                   'flex cursor-pointer flex-row items-center justify-between transition-colors',
                   isSelected
-                    ? '!bg-selected text-accent-ink'
+                    ? '!bg-control text-ink shadow-selected'
                     : 'text-ink hover:bg-control',
                 )}
                 onClick={() => handleSelection(value)}
@@ -132,7 +132,8 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
             className={classnames(
               'flex cursor-pointer flex-col gap-4 transition-colors',
               {
-                '!bg-selected text-accent-ink': buildFor === buildForValues.somethingElse,
+                '!bg-control text-ink shadow-selected':
+                  buildFor === buildForValues.somethingElse,
                 'text-ink hover:bg-control': buildFor !== buildForValues.somethingElse,
               },
             )}

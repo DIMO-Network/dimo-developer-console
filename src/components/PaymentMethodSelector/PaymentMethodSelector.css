@@ -6,6 +6,6 @@
   }
 
   .selected {
-    @apply bg-selected text-accent-ink border-solid border-transparent;
+    @apply border-solid border-transparent bg-control text-ink shadow-selected;
   }
 }

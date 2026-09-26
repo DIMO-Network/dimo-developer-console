@@ -136,18 +136,15 @@ export const VehicleList: FC<Props> = ({
                 }}
                 className={classnames(
                   'flex w-full flex-col items-start rounded-control border-b border-outline px-3 py-3 text-left transition-colors last:border-b-0',
-                  isSelected ? 'bg-selected text-accent-ink' : 'text-fg hover:bg-control',
+                  isSelected
+                    ? 'bg-control text-ink shadow-selected'
+                    : 'text-fg hover:bg-control',
                 )}
               >
                 <span className="text-body-sm font-medium">
                   {mmy || 'Unknown vehicle'}
                 </span>
-                <span
-                  className={classnames(
-                    'mt-0.5 text-label',
-                    isSelected ? 'text-accent-ink' : 'text-muted',
-                  )}
-                >
+                <span className="mt-0.5 text-label text-muted">
                   Token #{vehicle.tokenId}
                 </span>
               </button>

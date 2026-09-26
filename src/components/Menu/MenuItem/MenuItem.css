@@ -14,7 +14,7 @@
     @apply bg-nav-active text-ink;
 
     .menu-item-icon {
-      @apply text-accent-ink;
+      @apply text-ink;
     }
   }
 
