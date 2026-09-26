@@ -34,9 +34,17 @@ const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
     },
     {
       header: 'Errors',
+      accessorKey: 'failure_count',
       cell: ({ row }) => {
         const count = row.original.failure_count;
-        return <span className={count > 0 ? 'text-warning' : undefined}>{count}</span>;
+        return count > 0 ? (
+          <span className="inline-flex items-center gap-2">
+            <span className="inline-block size-1.5 flex-shrink-0 rounded-full bg-warning" />
+            {count}
+          </span>
+        ) : (
+          count
+        );
       },
     },
     {

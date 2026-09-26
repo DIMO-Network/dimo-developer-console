@@ -1,33 +1,24 @@
 import { FC } from 'react';
 import { capitalize } from 'lodash';
-import classNames from 'classnames';
+
+import { StatusChip, type StatusTone } from '@/components/StatusChip';
 
 interface Props {
   status: string;
 }
 
 export const StatusBadge: FC<Props> = ({ status }) => {
-  const getDotClass = () => {
+  const getTone = (): StatusTone => {
     switch (status.toLowerCase()) {
       case 'enabled':
-        return 'bg-accent shadow-[0_0_8px_var(--accent-soft-strong)]';
+        return 'live';
       case 'failed':
-        return 'bg-negative';
+        return 'error';
       case 'disabled':
       default:
-        return 'bg-muted';
+        return 'off';
     }
   };
 
-  return (
-    <div className={'flex w-fit flex-row items-center gap-2 text-body-sm text-fg'}>
-      <span
-        className={classNames(
-          'inline-block size-1.5 flex-shrink-0 rounded-full',
-          getDotClass(),
-        )}
-      />
-      {capitalize(status)}
-    </div>
-  );
+  return <StatusChip tone={getTone()}>{capitalize(status)}</StatusChip>;
 };

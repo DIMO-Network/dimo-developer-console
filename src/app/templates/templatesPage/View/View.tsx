@@ -3,24 +3,24 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { capitalize } from 'lodash';
-import classnames from 'classnames';
 import { Header } from '@/app/templates/templatesPage/Header';
 import { useTemplateSearch } from '@/hooks/queries/useTemplateSearch';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
+import { StatusChip, type StatusTone } from '@/components/StatusChip';
 
-const STATUS_COPY: Record<string, { label: string; dot: string; hint: string }> = {
-  'ok': { label: 'Template', dot: 'bg-positive', hint: '' },
+const STATUS_COPY: Record<string, { label: string; tone: StatusTone; hint: string }> = {
+  'ok': { label: 'Template', tone: 'on', hint: '' },
   'missing': {
     label: 'No template yet',
-    dot: 'bg-muted',
+    tone: 'off',
     hint: 'This model-year exists but no template has been imported for it.',
   },
   'invalid-id': {
     label: 'Id cannot be a template',
-    dot: 'bg-negative',
+    tone: 'error',
     hint: 'This device definition id does not match the template id pattern, so it cannot be edited until the id is corrected.',
   },
 };
@@ -75,15 +75,9 @@ export const TemplatesPage = () => {
               <div className="flex min-w-0 flex-col gap-1.5">
                 <span className="truncate font-mono text-code text-fg">{r.id}</span>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex w-fit items-center gap-1.5 rounded-chip bg-control px-2 py-0.5 text-label text-muted">
-                    <span
-                      className={classnames(
-                        'size-1.5 flex-shrink-0 rounded-full',
-                        STATUS_COPY[r.status].dot,
-                      )}
-                    />
+                  <StatusChip tone={STATUS_COPY[r.status].tone}>
                     {STATUS_COPY[r.status].label}
-                  </span>
+                  </StatusChip>
                   {r.status === 'ok' && (
                     <span className="text-label text-muted">
                       v{r.version} · {r.trims} trim{r.trims === 1 ? '' : 's'}

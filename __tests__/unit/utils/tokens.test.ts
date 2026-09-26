@@ -84,6 +84,48 @@ describe('design tokens', () => {
     },
   );
 
+  // Status colors carry meaning as dots and icons on cards and tinted surfaces;
+  // the text next to them is fg/muted. Non-text contrast (WCAG 1.4.11) is 3:1.
+  it.each(['dark', 'light'] as const)(
+    '%s status dots and icons meet 3:1 on card surfaces',
+    (theme) => {
+      const t = themes[theme];
+      for (const status of ['positive', 'warning', 'negative']) {
+        for (const surface of ['card', 'control', 'overlay']) {
+          expect({
+            pair: `${status} on ${surface}`,
+            ratio: contrast(t[status], t[surface]) >= 3,
+          }).toEqual({ pair: `${status} on ${surface}`, ratio: true });
+        }
+      }
+    },
+  );
+
+  // Error text stays negative (forms, alerts) and must read at AA wherever it sits.
+  // Text on a status tint (status/10 over card) is fg or muted.
+  it.each(['dark', 'light'] as const)(
+    '%s error text and text on status tints meet WCAG AA',
+    (theme) => {
+      const t = themes[theme];
+      const pairs: [string, readonly number[], string][] = [
+        ['negative', t.card, 'negative on card'],
+        ['negative', t.control, 'negative on control'],
+        ['negative', t.overlay, 'negative on overlay'],
+      ];
+      for (const status of ['positive', 'warning', 'negative']) {
+        const tint = over([...t[status], 0.1], t.card);
+        pairs.push(['fg', tint, `fg on ${status}/10 over card`]);
+        pairs.push(['muted', tint, `muted on ${status}/10 over card`]);
+      }
+      for (const [fg, bg, pair] of pairs) {
+        expect({ pair, ratio: contrast(t[fg], bg) >= 4.5 }).toEqual({
+          pair,
+          ratio: true,
+        });
+      }
+    },
+  );
+
   it.each(['dark', 'light'] as const)(
     '%s selected state (accent-ink on the selection tint) meets WCAG AA',
     (theme) => {

@@ -181,7 +181,11 @@
 }
 
 .vehicle-sim-card-stale-badge {
-  @apply flex flex-row items-center gap-1 text-label text-warning;
+  @apply flex flex-row items-center gap-1 text-label text-fg;
+
+  svg {
+    @apply text-warning;
+  }
 }
 
 .vehicle-sim-card-right {

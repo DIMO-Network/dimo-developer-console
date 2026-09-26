@@ -3,6 +3,7 @@
 import React, { FC } from 'react';
 import { useVehicleData } from '@/hooks/useVehicleData';
 import { Loader } from '@/components/Loader';
+import { WarningAmberIcon } from '@/components/Icons';
 
 interface Props {
   clientId: string;
@@ -72,7 +73,8 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
       )}
 
       {missingDevJwt && (
-        <p className="text-body-sm text-warning">
+        <p className="flex items-start gap-2 text-body-sm text-fg">
+          <WarningAmberIcon className="mt-0.5 size-4 flex-shrink-0 text-warning" />
           No developer JWT found for this license. Generate one in the Developer License
           details.
         </p>
@@ -102,10 +104,8 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
         <div className="flex items-start gap-2 rounded-control border border-warning/40 bg-warning/10 px-3 py-2">
           <span className="mt-px text-body-sm leading-none text-warning">⚠</span>
           <div className="flex flex-col gap-0.5">
-            <p className="text-label font-medium text-warning">
-              Latest signals unavailable
-            </p>
-            <p className="text-label text-warning/70">{latestSignalsError}</p>
+            <p className="text-label font-medium text-fg">Latest signals unavailable</p>
+            <p className="text-label text-muted">{latestSignalsError}</p>
           </div>
         </div>
       )}

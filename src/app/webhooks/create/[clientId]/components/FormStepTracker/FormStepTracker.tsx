@@ -34,7 +34,7 @@ const FormStepTrackerRow = ({
     <li
       className={clsx(
         'list-item list-decimal list-inside',
-        isComplete ? 'text-positive' : isActive ? 'text-ink' : 'text-muted',
+        isComplete ? 'text-fg' : isActive ? 'text-ink' : 'text-muted',
       )}
     >
       <div className={'flex flex-row gap-2 items-center'}>

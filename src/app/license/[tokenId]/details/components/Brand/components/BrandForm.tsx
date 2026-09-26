@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/nextjs';
 import { isAxiosError } from 'axios';
 
 import { Button } from '@/components/Button';
+import { WarningAmberIcon } from '@/components/Icons';
 import { Label } from '@/components/Label';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
@@ -154,7 +155,8 @@ export const BrandForm: FC<Props> = ({
             disabled={!isOwner || saving}
           />
           {showRenameWarning && (
-            <p className="text-label text-warning mt-1">
+            <p className="mt-1 flex items-center gap-1.5 text-label text-fg">
+              <WarningAmberIcon className="size-3.5 flex-shrink-0 text-warning" />
               Renaming breaks existing Login with DIMO calls using this name
             </p>
           )}
