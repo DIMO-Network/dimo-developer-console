@@ -1,6 +1,6 @@
 'use client';
 import { FC, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
@@ -11,8 +11,6 @@ interface IProps {
 }
 
 const ErrorPage: FC<IProps> = ({ error, reset }) => {
-  const router = useRouter();
-
   useEffect(() => {
     Sentry.captureException(error);
     console.error({ error });
@@ -27,7 +25,9 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
           An unexpected error occurred. Please try again.
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-4">
-          <Button onClick={() => router.push('/')}>Go back home</Button>
+          <Link href="/" className="button primary">
+            Go back home
+          </Link>
           <Button variant="secondary" onClick={reset}>
             Retry
           </Button>

@@ -20,7 +20,7 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
   }, [error]);
 
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning>
+    <html lang="en" className="h-full" data-theme="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
