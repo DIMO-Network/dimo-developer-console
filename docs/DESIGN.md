@@ -28,10 +28,14 @@ them.
    (`bg-card` → `bg-control` → `bg-highest`) or whitespace over a 1px border.
    Keep `border-outline` for inputs, table row dividers and the few places a
    hairline carries meaning.
-5. **Radius follows hierarchy.** `rounded-chip` (6px) for badges ·
-   `rounded-control` (10px) for inputs/buttons-in-rows · `rounded-card` (16px)
-   for cards · `rounded-panel` (20px) for modals, dropdown menus and the app
-   shell · `rounded-full` for pills and primary buttons.
+5. **Radius follows hierarchy.** `rounded-chip` (6px) for badges and menu
+   items · `rounded-control` (10px) for inputs, buttons-in-rows and dropdown
+   menus (`SelectField` `.custom-menu`, `DatePicker`) · `rounded-card` (16px)
+   for cards and toasts · `rounded-panel` (20px) for modals, the guest card
+   and the app shell · `rounded-full` for pills and primary buttons.
+6. **Status color marks, it doesn't write.** `positive` / `warning` /
+   `negative` color the 6px dot or the icon; the words beside them are
+   `text-fg` or `text-muted`. See "Status color" below.
 
 ## Tokens
 
@@ -133,6 +137,19 @@ font-medium text-muted transition-colors`; hover → `bg-nav-hover text-fg`;
 active (`.is-active`) → `bg-nav-active text-ink` with its icon at
 `text-accent-ink`; disabled → `pointer-events-none opacity-50`.
 
+**Page intro** (`src/app/webhooks/webhooksPage/Header/Header.tsx`,
+`src/app/templates/templatesPage/Header/Header.tsx`,
+`src/app/connections/components/View/View.tsx`): a one-sentence description
+of the page, directly under the page header, is `<p className="text-body-sm
+text-muted">` — no rule under it, no heading element, no weight. A full
+sentence is an intro, never a heading.
+
+**Page section title** (`<PageSubtitle>`, `src/components/PageSubtitle`):
+`text-title text-muted` `h2` over a `border-outline` rule. Only for a short
+label that names a block of the page ("Organization settings" on /settings,
+"Login with DIMO configurator" on the configurator pages). If it reads as a
+sentence, use the page intro instead.
+
 **Section title**: `text-card-title text-ink`, e.g. `LicenseList.css
 .description .title` ("Your developer licenses") and `OnboardingBanner`'s
 "Getting started"; an optional line under it is `text-body-sm text-muted`.
@@ -150,13 +167,46 @@ large variant, `LicenseCard`'s `.anchor.license-card-metric` = `w-fit py-0
 text-metric text-ink` — it's a link, but stays ink, not mint), with a
 `text-label text-muted` caption underneath.
 
-**Status dot** (`src/components/Toast/Toast.css`): `.toast-status-dot` = `mt-1.5
-inline-block size-1.5 flex-shrink-0 rounded-full`; color follows state —
-`success` → `bg-positive`, `error` → `bg-negative`, `info` → `bg-accent`. Use
-the same recipe (a small rounded dot colored by state token) for any
-online/live indicator.
+**Status dot**: `inline-block size-1.5 flex-shrink-0 rounded-full` (6px),
+colored by state. In a toast (`Toast.css` `.toast-status-dot`, plus `mt-1.5`)
+`success` → `bg-positive`, `error` → `bg-negative`, `info` → `bg-accent`.
 
-**Chip / badge**: `rounded-chip ... text-label text-muted`, tone set by what
+**Status chip** (`src/components/StatusChip/StatusChip.tsx`) — the one status
+idiom for a record's state in a list or table: the status dot inside a
+neutral chip, `inline-flex w-fit items-center gap-1.5 whitespace-nowrap
+rounded-chip bg-control px-2 py-0.5 text-label text-fg`. Use `<StatusChip
+tone=…>`; don't hand-roll it. Tones:
+
+| `tone`    | Dot                                                    | Means                     | Used for                                                |
+| --------- | ------------------------------------------------------ | ------------------------- | ------------------------------------------------------- |
+| `live`    | `bg-accent shadow-[0_0_8px_var(--accent-soft-strong)]` | running right now         | webhook Enabled (`Webhooks/components/StatusBadge.tsx`) |
+| `on`      | `bg-accent`                                            | done / in place           | invitation accepted, template exists                    |
+| `pending` | `bg-warning`                                           | waiting on someone        | invitation sent / pending                               |
+| `off`     | `bg-muted`                                             | off, or nothing there yet | webhook Disabled, "No template yet"                     |
+| `error`   | `bg-negative`                                          | broken                    | webhook Failed, "Id cannot be a template"               |
+
+The label is always `text-fg`. Never use `bg-selected` (that is selection,
+not status) or a status-tinted chip. A bare count with a state (webhooks
+"Errors") is the status dot + the number in `text-fg`, no chip.
+
+**Status color** (enforced by `tokens.test.ts`): status colors are for dots
+and icons. As _text_, light-mode `positive`/`warning` are only AA on `sheet`
+and drop to 3.8–4.3:1 on `card`, `control` and status tints. So on any card,
+control or tinted surface the meaning goes on a dot or icon
+(`WarningAmberIcon` / `CheckIcon` / `CheckCircleIcon` in the status color,
+≥ 3:1 non-text contrast on `card`, `control` and `overlay`) and the words are
+`text-fg` (or `text-muted` for secondary detail). A status tint
+(`bg-warning/10 border-warning/40`) takes `text-fg` title + `text-muted` body,
+never the status color at reduced opacity. Examples: `EntitlementBanner`,
+the brand-rename warning in `BrandForm`, the explorer's missing-JWT notice
+and "Latest signals unavailable" panel, completed steps in
+`FormStepTracker`, the vehicle simulator's "Removed on-chain" badge. The one
+exception is error text (`text-negative`: form errors, `TextError`,
+`role="alert"` lines), which the test holds at AA on `sheet`, `card`,
+`control`, `overlay` and `negative-soft`.
+
+**Chip / badge** (neutral metadata, not status — for status use the status
+chip above): `rounded-chip ... text-label text-muted`, tone set by what
 it sits on — on a card, step up to `bg-highest` (`LicenseCard.css`
 `.license-card-token-id` = `shrink-0 rounded-chip bg-highest px-2 py-0.5
 text-label text-muted`); on a control-toned surface, `bg-control`
@@ -166,13 +216,19 @@ tracked.
 
 **Table** (`src/components/Table/Table.css`, `Column.css`, `Cell.css`):
 outer wrapper = `rounded-card bg-card p-4` around `<table className="table">`.
+Put `<Table>` straight into its section card (license details' Developer JWTs
+and Signers, settings' Team management) — never inside a `Card.secondary`
+or another card, which stacks three tonal levels. On a phone, hide a
+low-priority column rather than scrolling the row's action off-screen
+(settings hides Status below `md` and shows the status chip under the name).
 Header row `.table-header` = `border-b border-outline`; header cell
 `.custom-table-column` = `pb-3 text-left text-label text-muted` (no
 background fill, sentence case). Body `.table-body` = `divide-y
 divide-outline` (each `<tr>` also carries `border-t border-outline`). Cell
 `.table-cell` = `h-[52px] max-w-[300px] break-all py-3 text-body-sm text-fg`.
 
-**Pagination** (`src/components/Table/PaginatedTable.tsx`, `Table.css`): the
+**Pagination** (`src/components/Table/PaginatedTable.tsx`, `Table.css`, and
+the explorer's `VehicleList.tsx`, which imports `Table.css` for it): the
 meta-and-controls row = `flex items-center justify-between text-sm
 text-muted`. Round page buttons: `<Button variant="secondary"
 className="table-page-button">` — `variant="secondary"` supplies the
@@ -240,10 +296,11 @@ rounded-chip px-2.5 py-2 hover:bg-control`.
 
 **Modal** (`src/components/Modal/Modal.css`, `Modal.tsx`): backdrop = `bg-scrim
 backdrop-blur-[6px]`. Panel `.dialog-panel` = `rounded-panel bg-overlay p-6
-text-fg shadow-float` (`min-w-[480px]` on desktop; a near-fullscreen inset
-sheet on mobile, `min-h-[95vh]`). Close button `.close-btn` = `rounded-full
-p-1 text-muted hover:bg-control hover:text-ink`. Actions row
-`.dialog-action-content` = `mt-6 flex flex-col-reverse gap-2 sm:flex-row
+text-fg shadow-float` (a near-fullscreen inset sheet on mobile,
+`min-h-[95vh]`; content-sized `md:min-w-[480px] md:max-w-[560px]` on
+desktop). Close button `.close-btn` = `rounded-full p-1 text-muted
+hover:bg-control hover:text-ink` + the icon-button focus ring below. Actions
+row `.dialog-action-content` = `mt-6 flex flex-col-reverse gap-2 sm:flex-row
 sm:justify-end`. Panel title uses `<Title className="text-panel-title"
 component="h3">` (see `CreateAppModal`).
 
@@ -251,8 +308,18 @@ component="h3">` (see `CreateAppModal`).
 bg-overlay text-fg shadow-float`; status dot as above; title `.toast-title`
 = `text-body-sm font-medium text-ink`; description `.toast-description` =
 `text-body-sm text-muted`; close button `.toast-close-btn` = `inline-flex
-rounded-full p-1 text-muted hover:bg-control hover:text-ink focus:ring-[3px]
-focus:ring-accent-soft`.
+rounded-full p-1 text-muted hover:bg-control hover:text-ink` + the icon-button
+focus ring below.
+
+**Icon-button focus ring** (`Toast.css` `.toast-close-btn`, `Modal.css`
+`.close-btn`): `focus-visible:outline-none focus-visible:ring-2
+focus-visible:ring-accent-ink focus-visible:ring-offset-2
+focus-visible:ring-offset-{surface}`, where `{surface}` is the token the
+button sits on (`overlay` for toasts and modals; `ring-offset-*` takes any
+color token). `accent-ink` holds ≥ 3:1 against every surface; `accent-soft`
+does not, so never use it as a focus ring on its own. Buttons, nav links and
+`ThemeToggle` keep the browser's focus ring — don't strip it without adding
+this one.
 
 **Empty state** (`src/app/app/list/components/EmptyList/index.tsx`): `flex
 w-full flex-1 flex-col items-center justify-center rounded-card bg-card p-10
@@ -292,9 +359,11 @@ you'd switch _to_ ("Light mode" in dark, "Dark mode" in light).
 Every CSS variable in `globals.css` must exist under both
 `:root[data-theme='dark']` and `:root[data-theme='light']` —
 `__tests__/unit/utils/tokens.test.ts` fails otherwise. The same suite checks
-WCAG AA for `fg`/`ink`/`muted`/`accent-ink`/status colors over their
-surfaces, and specifically checks `accent-ink` on the `selected` tint over
-`sheet`, `card` and `overlay`.
+WCAG AA for `fg`/`ink`/`muted`/`accent-ink` over their surfaces, status text
+on `sheet`, `negative` error text on `card`/`control`/`overlay`, `fg`/`muted`
+on each `status/10` tint over `card`, 3:1 non-text contrast for the status
+colors (dots and icons) on `card`/`control`/`overlay`, and `accent-ink` on the
+`selected` tint over `sheet`, `card` and `overlay`.
 
 ## Don'ts
 
@@ -322,6 +391,10 @@ text-accent-ink`.
   for decoration — only primary actions, selected/active state, and
   live/online status.
 - Don't stack two `variant="primary"` buttons on one surface.
+- Don't write status in color on a card or tint (`text-positive`,
+  `text-warning`, `text-warning/70` …): dot or icon in the status color, words
+  in `text-fg`/`text-muted`. Only `text-negative` error text is exempt.
+- Don't use `bg-selected` for status — it means "selected".
 - Icons paint with `currentColor` (`fill="currentColor"`, or inherit from an
   SVG library that already does); color them with a text class. `GoogleIcon`
   is the one exception — it keeps its fixed brand colors.
@@ -334,11 +407,14 @@ npm run visual:shoot -- --label=<name> --only=<regex>  # screenshot routes, dark
 npm run visual:check -- <paths…>                       # fail on legacy colors/hex/uppercase/tracking/legacy variants
 ```
 
-Routes live in `scripts/visual/routes.mjs`. Every route whose entry sets
-`knownHydrationError` — currently five: **`app`, `app-create-modal`,
-`app-empty`, `app-mobile-menu`, `settings`** — carries a pre-existing
-hydration race (present on the untouched baseline, unrelated to styling)
-that the harness logs instead of failing the shot; a hydration error on any
+Routes live in `scripts/visual/routes.mjs`. A route whose entry sets
+`knownHydrationError` carries a pre-existing hydration race (present on the
+untouched baseline, unrelated to styling: the `useUser` SSR/CSR race on the
+`/app` and `/settings` pages and their modals) that the harness logs instead
+of failing the shot. `routes.mjs` is the source of truth; at the time of
+writing it flags eight: `app`, `app-create-modal`, `app-empty`,
+`app-mobile-menu`, `app-add-credits-modal`, `app-account-info-modal`,
+`settings` and `settings-support-modal`; a hydration error on any
 other route is real and fails the shot — that one is yours to fix.
 **`app-empty`** is also the `/app` route with `noLicenses: true`, i.e. the
 zero-license empty state (`EmptyList`) — shoot it whenever a pattern you're
@@ -406,7 +482,7 @@ uses the `bg-selected` token (a ruling that supersedes older guidance to use
 | `font-mono` on labels, badges, dates, counts, token ids                                                                                  | remove (keep only on keys/code, as `font-mono text-code`)                                 |
 | `rounded-lg`/`rounded-md` on controls                                                                                                    | `rounded-control`                                                                         |
 | `rounded-xl`/`rounded-2xl` on cards and panels                                                                                           | `rounded-card`                                                                            |
-| modal / floating panel radius                                                                                                            | `rounded-panel`                                                                           |
+| modal / floating panel radius                                                                                                            | `rounded-panel` for modals; `rounded-control` for dropdown menus                          |
 | small badges `rounded`                                                                                                                   | `rounded-chip`                                                                            |
 | `shadow`, `shadow-lg`, `shadow-xl`                                                                                                       | `shadow-float` for floating things; none for cards                                        |
-| focus `ring-indigo-500`, focus borders `border-white`                                                                                    | `focus:ring-[3px] focus:ring-accent-soft focus:border-accent`                             |
+| focus `ring-indigo-500`, focus borders `border-white`                                                                                    | inputs: the text-input `focus-within` recipe; icon buttons: the icon-button focus ring    |
