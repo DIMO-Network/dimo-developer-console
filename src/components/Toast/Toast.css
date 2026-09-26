@@ -1,22 +1,23 @@
 .toast {
-  @apply pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-30;
+  @apply pointer-events-auto z-30 w-full max-w-sm overflow-hidden rounded-card bg-overlay text-fg shadow-float;
 
-  &.success {
-    @apply bg-feedback-success;
+  &.success .toast-status-dot {
+    @apply bg-positive;
   }
 
-  &.error {
-    @apply bg-feedback-error;
+  &.error .toast-status-dot {
+    @apply bg-negative;
   }
 
-  &.info {
+  &.info .toast-status-dot {
+    @apply bg-accent;
   }
 
   &-content {
-    @apply flex items-start p-4;
+    @apply flex items-start gap-3 p-4;
 
     &-content {
-      @apply ml-3 w-0 flex-1 pt-0.5;
+      @apply w-0 flex-1;
     }
   }
 
@@ -25,18 +26,22 @@
   }
 
   &-title {
-    @apply text-sm font-medium text-gray-900;
+    @apply text-body-sm font-medium text-ink;
   }
 
   &-description {
-    @apply text-sm text-white;
+    @apply text-body-sm text-muted;
   }
 
   &-close-content {
     @apply ml-4 flex flex-shrink-0;
 
     .toast-close-btn {
-      @apply inline-flex focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
+      @apply inline-flex rounded-full p-1 text-muted hover:bg-control hover:text-ink focus:outline-none focus:ring-[3px] focus:ring-accent-soft;
     }
   }
+}
+
+.toast-status-dot {
+  @apply mt-1.5 inline-block size-1.5 flex-shrink-0 rounded-full;
 }

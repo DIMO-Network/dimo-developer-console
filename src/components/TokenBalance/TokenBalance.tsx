@@ -57,8 +57,8 @@ const BalanceDisplay = ({
   unitsDisplay: string;
 }) => (
   <div className={'flex flex-row items-center gap-2'}>
-    <p className={'text-3xl font-medium'}>{balance}</p>
-    <p className={'text-base font-medium text-text-secondary'}>{unitsDisplay}</p>
+    <p className={'text-card-title'}>{balance}</p>
+    <p className={'text-card-title text-muted'}>{unitsDisplay}</p>
   </div>
 );
 

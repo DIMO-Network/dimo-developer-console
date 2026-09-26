@@ -28,7 +28,7 @@ export const DeveloperSupportButton: FC<IProps> = ({ variant = 'small' }) => {
 const SupportAgentWithTextButton: FC<{ onClick: () => void }> = ({ onClick }) => {
   return (
     <Button variant="secondary" onClick={onClick}>
-      <SupportAgentIcon className="fill-primary h-5 w-5" color="currentColor" />
+      <SupportAgentIcon className="h-5 w-5" color="currentColor" />
       Developer support
     </Button>
   );
@@ -37,7 +37,7 @@ const SupportAgentWithTextButton: FC<{ onClick: () => void }> = ({ onClick }) =>
 const QuestionMarkButton: FC<{ onClick: () => void }> = ({ onClick }) => {
   return (
     <button onClick={onClick} className={'question-mark-button'}>
-      <p className={'font-black text-base'}>?</p>
+      <p className={'font-semibold text-body-sm'}>?</p>
     </button>
   );
 };

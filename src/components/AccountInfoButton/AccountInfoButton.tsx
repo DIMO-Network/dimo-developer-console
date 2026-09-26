@@ -24,7 +24,7 @@ export const AccountInfoButton: FC<IAccountInfoButtonProps> = ({
   if (variant === 'button') {
     return (
       <Button variant="secondary" onClick={handleOpenAccountInformationModal}>
-        Account Info
+        Account info
       </Button>
     );
   }

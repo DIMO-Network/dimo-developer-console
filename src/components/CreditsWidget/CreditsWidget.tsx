@@ -50,9 +50,9 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
             <WalletIcon className="w-4 h-4" />
             <div className={'flex flex-col'}>
               <div className={'flex flex-row gap-2.5 items-center'}>
-                <p className="text-4xl font-medium">{dcxBalance}</p>
+                <p className="text-metric text-ink">{dcxBalance}</p>
               </div>
-              <p className={'text-text-secondary text-xs font-normal'}>Current Balance</p>
+              <p className={'text-label text-muted'}>Current Balance</p>
             </div>
           </div>
           <div className={'flex flex-1 flex-col w-full gap-2'}>

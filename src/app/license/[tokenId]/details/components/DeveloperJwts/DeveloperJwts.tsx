@@ -58,7 +58,6 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       key={`item_${item.token}_copy_button`}
       value={item.token}
       onCopySuccessMessage="JWT copied!"
-      className="button table-action-button"
     />
   );
 

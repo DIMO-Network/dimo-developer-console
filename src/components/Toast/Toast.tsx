@@ -25,15 +25,9 @@ export const Toast: FC<INotification> = ({ message, type }) => {
       >
         <div className={classnames('toast', type)}>
           <div className="toast-content">
+            <span className="toast-status-dot" aria-hidden="true" />
             <div className="toast-content-content">
-              <p
-                className={classnames(
-                  'toast-description',
-                  type === 'info' && '!text-black',
-                )}
-              >
-                {message}
-              </p>
+              <p className="toast-description">{message}</p>
             </div>
             <div className="toast-close-content">
               <button
@@ -45,13 +39,7 @@ export const Toast: FC<INotification> = ({ message, type }) => {
                 }}
               >
                 <span className="sr-only">Close</span>
-                <XMarkIcon
-                  className={classnames(
-                    'h-5 w-5 text-white hover:text-gray-500',
-                    type === 'info' && '!text-black',
-                  )}
-                  aria-hidden="true"
-                />
+                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
           </div>
