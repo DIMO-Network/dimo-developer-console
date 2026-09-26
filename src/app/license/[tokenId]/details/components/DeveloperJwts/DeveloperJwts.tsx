@@ -83,7 +83,9 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
         const visibleStart = item.token.slice(0, 16);
         const visibleEnd = item.token.slice(-4);
         const maskedPart = '*'.repeat(28);
-        return <span>{`${visibleStart}${maskedPart}${visibleEnd}`}</span>;
+        return (
+          <span className="font-mono text-code break-all">{`${visibleStart}${maskedPart}${visibleEnd}`}</span>
+        );
       },
     },
     {

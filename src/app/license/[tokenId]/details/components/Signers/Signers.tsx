@@ -413,7 +413,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                   CustomHeader: <SignerAddressHeader key="header-addr" />,
                   render: (item: SignerNode) => (
                     <div className="flex items-center gap-2">
-                      <span>{item.address}</span>
+                      <span className="font-mono text-code break-all">
+                        {item.address}
+                      </span>
                       {item.address.toLowerCase() === rentalOSSigner && (
                         <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted whitespace-nowrap">
                           RentalOS

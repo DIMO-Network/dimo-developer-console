@@ -127,6 +127,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
                 validate: {},
               })}
               role="company-website-input"
+              className="font-mono text-code"
             />
           </Label>
         </div>

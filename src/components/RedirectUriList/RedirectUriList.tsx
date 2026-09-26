@@ -101,7 +101,15 @@ const RedirectUriListComponent: FC<IProps> = ({
   return (
     <>
       <Table
-        columns={[{ name: 'uri', label: 'Authorized URIs' }]}
+        columns={[
+          {
+            name: 'uri',
+            label: 'Authorized URIs',
+            render: ({ uri }: RedirectUri) => (
+              <span className="font-mono text-code break-all">{uri}</span>
+            ),
+          },
+        ]}
         data={redirectUris}
         actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
       />
