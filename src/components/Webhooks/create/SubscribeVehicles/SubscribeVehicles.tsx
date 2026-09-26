@@ -24,10 +24,10 @@ export const WebhookSubscribeVehiclesStep = () => {
         defaultValue={true}
         render={({ field }) => (
           <>
-            <Title className={'text-xl font-black'}>Who do you want to subscribe?</Title>
+            <Title className={'text-card-title'}>Who do you want to subscribe?</Title>
             <div className={'flex flex-row gap-2.5 items-center'}>
               <Toggle checked={field.value} onToggle={field.onChange} />
-              <p className={'text-sm'}>Subscribe all existing vehicles</p>
+              <p className={'text-body-sm text-fg'}>Subscribe all existing vehicles</p>
             </div>
           </>
         )}

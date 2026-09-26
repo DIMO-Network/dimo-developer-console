@@ -13,14 +13,15 @@ export const WebhookVerificationTokenField = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      <Label>Verification Token</Label>
+      <Label>Verification token</Label>
       <TextField
+        className="font-mono text-code"
         {...register('verificationToken', {
           required: 'Please enter a valid string',
         })}
         placeholder="Enter a verification token"
       />
-      <p className="text-[#868888]">
+      <p className="text-body-sm text-muted">
         Choose any unique string to verify ownership of your webhook URL. When we send a
         verification request, your server must respond with this exact string in plain
         text. This ensures you control the destination URL.

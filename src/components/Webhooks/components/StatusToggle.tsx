@@ -10,7 +10,7 @@ export const StatusToggle = ({
 }) => {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm font-medium">Status</span>
+      <span className="text-body-sm font-medium text-fg">Status</span>
       <Toggle checked={isActive} onToggle={onToggleStatus} />
     </div>
   );

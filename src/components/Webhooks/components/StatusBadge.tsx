@@ -7,24 +7,26 @@ interface Props {
 }
 
 export const StatusBadge: FC<Props> = ({ status }) => {
-  const getBackgroundColor = () => {
+  const getDotClass = () => {
     switch (status.toLowerCase()) {
       case 'enabled':
-        return 'bg-feedback-success';
+        return 'bg-accent shadow-[0_0_8px_var(--accent-soft-strong)]';
       case 'failed':
-        return 'bg-feedback-error';
+        return 'bg-negative';
       case 'disabled':
       default:
-        return 'bg-cta-default';
+        return 'bg-muted';
     }
   };
+
   return (
-    <div
-      className={classNames(
-        'w-fit py-0.5 px-2 rounded-full text-white',
-        getBackgroundColor(),
-      )}
-    >
+    <div className={'flex w-fit flex-row items-center gap-2 text-body-sm text-fg'}>
+      <span
+        className={classNames(
+          'inline-block size-1.5 flex-shrink-0 rounded-full',
+          getDotClass(),
+        )}
+      />
       {capitalize(status)}
     </div>
   );

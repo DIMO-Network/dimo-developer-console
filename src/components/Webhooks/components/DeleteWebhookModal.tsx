@@ -67,13 +67,13 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
   const titleMap = {
     loading: 'Deleting webhook...',
     success: 'Success',
-    confirm: 'Delete Webhook',
+    confirm: 'Delete webhook',
   };
 
   return (
     <Modal isOpen={isOpen} setIsOpen={onClose}>
       <div className="flex w-full flex-col gap-12">
-        <Title>{titleMap[modalState]}</Title>
+        <Title className={'text-panel-title'}>{titleMap[modalState]}</Title>
         <DeleteWebhookBody modalState={modalState} webhook={webhook} />
         <DeleteWebhookFooter
           modalState={modalState}
@@ -123,7 +123,7 @@ const DeleteWebhookFooter: React.FC<{
   return (
     <div className="flex flex-col gap-4">
       <Button onClick={onDelete} variant="destructive">
-        Delete Webhook
+        Delete webhook
       </Button>
       <Button variant="secondary" onClick={onClose}>
         Cancel

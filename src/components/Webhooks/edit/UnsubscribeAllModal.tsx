@@ -37,7 +37,7 @@ export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <div className="flex w-full flex-col gap-12">
-        <Title>Unsubscribe all vehicles</Title>
+        <Title className={'text-panel-title'}>Unsubscribe all vehicles</Title>
         <div className="flex flex-col gap-4">
           <p>
             Are you sure you want to unsubscribe all the subscribed vehicles? This action

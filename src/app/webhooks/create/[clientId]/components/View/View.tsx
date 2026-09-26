@@ -40,7 +40,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   return (
     <FormStepContextProvider>
       <div className={'flex flex-1 flex-row'}>
-        <div className={'flex flex-col flex-1'}>
+        <div className={'flex min-w-0 flex-1 flex-col'}>
           <NewWebhookForm onComplete={onComplete} getToken={getToken} onExit={goBack} />
         </div>
         <RightPanel>

@@ -6,7 +6,7 @@ import { useWebhookCreateFormContext } from '@/hoc';
 export const FormStepTracker = () => {
   const { steps, stepIndex } = useWebhookCreateFormContext();
   return (
-    <div className={'flex flex-col gap-4 p-4 bg-surface-default rounded-2xl'}>
+    <div className={'flex flex-col gap-4 p-4 bg-card rounded-card'}>
       <ol className={'list-decimal space-y-4'}>
         {steps.map((step, index) => (
           <FormStepTrackerRow
@@ -34,7 +34,7 @@ const FormStepTrackerRow = ({
     <li
       className={clsx(
         'list-item list-decimal list-inside',
-        isActive ? 'text-white' : 'text-text-secondary',
+        isComplete ? 'text-positive' : isActive ? 'text-ink' : 'text-muted',
       )}
     >
       <div className={'flex flex-row gap-2 items-center'}>
@@ -46,7 +46,7 @@ const FormStepTrackerRow = ({
           <div
             className={clsx(
               'w-4 h-4 bg-transparent border rounded-full',
-              isActive ? 'border-white' : 'border-text-secondary',
+              isActive ? 'border-ink' : 'border-muted',
             )}
           />
         )}

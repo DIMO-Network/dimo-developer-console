@@ -33,13 +33,13 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
       <div className="connection-license-section">
         <div className="section-header">
           <Title component="h2" className="section-title">
-            Connection License
+            Connection license
           </Title>
         </div>
 
         <div className="license-fields">
           <div className="field-row">
-            <label className="field-label">Connection License Public Key</label>
+            <label className="field-label">Connection license public key</label>
             <div className="field-value-container">
               <span className="field-value">
                 {connection.connection_license_public_key}
@@ -49,7 +49,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
           </div>
 
           <div className="field-row">
-            <label className="field-label">Connection License Private Key</label>
+            <label className="field-label">Connection license private key</label>
             <div className="field-value-container">
               <span className="field-value">{maskKey()}</span>
               <CopyButton value={connection.connection_license_private_key} />
@@ -57,7 +57,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
           </div>
 
           <div className="field-row">
-            <label className="field-label">Device Issuance Key</label>
+            <label className="field-label">Device issuance key</label>
             <div className="field-value-container">
               <span className="field-value">{maskKey()}</span>
               <CopyButton value={connection.device_issuance_key} />

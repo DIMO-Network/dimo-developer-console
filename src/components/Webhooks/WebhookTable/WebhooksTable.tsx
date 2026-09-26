@@ -20,7 +20,7 @@ const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
   return [
     { header: 'Description', accessorKey: 'description' },
     {
-      header: 'Display Name',
+      header: 'Display name',
       cell: ({ row }) => row.original.displayName || '-',
     },
     { header: 'Service', accessorKey: 'service' },
@@ -32,7 +32,13 @@ const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
       header: 'Vehicles',
       cell: ({ row }) => <VehicleCount webhookId={row.original.id} clientId={clientId} />,
     },
-    { header: 'Errors', accessorKey: 'failure_count' },
+    {
+      header: 'Errors',
+      cell: ({ row }) => {
+        const count = row.original.failure_count;
+        return <span className={count > 0 ? 'text-warning' : undefined}>{count}</span>;
+      },
+    },
     {
       header: 'Status',
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
@@ -100,15 +106,15 @@ const TableRowBasic = ({
     <tr
       onClick={onClick}
       className={clsx(
-        'border-t border-t-cta-default transition-colors cursor-pointer',
-        isExpanded && 'bg-surface-sunken',
+        'border-t border-t-outline transition-colors cursor-pointer',
+        isExpanded && 'bg-sheet',
       )}
     >
       <td className="pl-4 pr-2">
         {isExpanded ? (
-          <ChevronUpIcon className="h-4 w-4 text-white" />
+          <ChevronUpIcon className="h-4 w-4 text-muted" />
         ) : (
-          <ChevronDownIcon className="h-4 w-4 text-white" />
+          <ChevronDownIcon className="h-4 w-4 text-muted" />
         )}
       </td>
       {row.getVisibleCells().map((cell) => (

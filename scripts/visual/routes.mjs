@@ -91,7 +91,14 @@ export const ROUTES = [
   {
     name: 'connection-create',
     path: '/connections/create/0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6',
-    ready: 'Purchase Connection License',
+    ready: 'Purchase connection license',
+  },
+  {
+    name: 'connection-create-confirm',
+    path: '/connections/create/0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6',
+    ready: 'Purchase connection license',
+    click: 'text="Purchase connection license"',
+    after: 'Continue with payment',
   },
   { name: 'webhooks', path: '/webhooks', ready: WEBHOOKS[0].displayName },
   {
@@ -103,6 +110,13 @@ export const ROUTES = [
     name: 'webhook-edit',
     path: `/webhooks/edit/${c}/${WEBHOOKS[0].id}`,
     ready: 'valueNumber > 120',
+  },
+  {
+    name: 'webhook-delete-modal',
+    path: '/webhooks',
+    ready: WEBHOOKS[0].displayName,
+    click: ['text="Speeding alert"', 'text="Delete"'],
+    after: 'Are you sure you want to delete this webhook?',
   },
   {
     name: 'templates',
