@@ -33,7 +33,9 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
               Sorry, we couldn’t find the page you’re looking for.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-4">
-              <Button onClick={() => (window.location.href = '/')}>Go back home</Button>
+              <a href="#" className="button secondary">
+                Go back home
+              </a>
               <Button variant="secondary" onClick={reset}>
                 Retry
               </Button>
