@@ -50,7 +50,7 @@ interface IFormProps {
 const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
   return (
     <>
-      <Label htmlFor="name" className="text-xs text-medium">
+      <Label htmlFor="name">
         Company name *
         <TextField
           type="text"
@@ -66,7 +66,7 @@ const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
         />
       </Label>
       {errors.name && <TextError errorMessage={errors?.name?.message ?? ''} />}
-      <Label htmlFor="website" className="text-xs text-medium">
+      <Label htmlFor="website">
         Company website
         <TextField
           type="text"
@@ -87,8 +87,8 @@ const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
       {errors.website && (
         <TextError errorMessage="This field must be a valid URL with maximum 120 characters" />
       )}
-      <Label htmlFor="region" className="text-xs text-medium">
-        Main Operating Region *
+      <Label htmlFor="region">
+        Main operating region *
         <SelectField
           {...register('region', {
             required: 'This field is required',
@@ -106,7 +106,7 @@ const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
 const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNode => {
   return (
     <>
-      <Label htmlFor="name" className="text-xs text-medium">
+      <Label htmlFor="name">
         Name *
         <TextField
           type="text"
@@ -122,7 +122,7 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
         />
       </Label>
       {errors.name && <TextError errorMessage={errors?.name?.message ?? ''} />}
-      <Label htmlFor="website" className="text-xs text-medium">
+      <Label htmlFor="website">
         Social URL
         <TextField
           type="text"
@@ -143,7 +143,7 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
       {errors.website && (
         <TextError errorMessage="This field must be a valid URL with maximum 120 characters" />
       )}
-      <Label htmlFor="region" className="text-xs text-medium">
+      <Label htmlFor="region">
         Region *
         <SelectField
           {...register('region', {
@@ -192,14 +192,14 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className="text-title text-ink">Final Stretch</p>
+          <p className="text-title text-ink">Final stretch</p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 w-full max-w-sm pt-4"
         >
-          <Label htmlFor="type" className="text-xs text-medium">
-            Business/Developer Type *
+          <Label htmlFor="type">
+            Business/developer type *
             <SelectField
               {...register('type', {
                 required: 'This field is required',
@@ -220,8 +220,8 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
 
           <div className="flex flex-col pt-4">
             <Button
-              variant="brand"
               type="submit"
+              variant="brand"
               role="finish-button"
               loading={isLoading}
             >

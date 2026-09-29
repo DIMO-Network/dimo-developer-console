@@ -25,21 +25,21 @@ enum buildForValues {
 
 const buildForList = [
   {
-    title: 'Mobile App ',
+    title: 'Mobile app',
     description: 'App on the Apple App Store or Google Play Store',
     Icon: PhoneIcon,
     iconClassName: 'w-4 h-5',
     value: buildForValues.mobileApp,
   },
   {
-    title: 'Web Application',
+    title: 'Web application',
     description: 'Web app with user management',
     Icon: ComputerIcon,
     iconClassName: 'w-5 h-5',
     value: buildForValues.webApp,
   },
   {
-    title: 'Personal Project',
+    title: 'Personal project',
     description: 'Personal project to access vehicle data',
     Icon: UserIcon,
     iconClassName: 'w-4 h-5',
@@ -104,32 +104,52 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 w-full max-w-sm pt-4"
         >
-          <div className="text-sm ml-1">What you are looking to launch with DIMO?</div>
-          {buildForList.map(({ title, description, value, Icon, iconClassName }) => {
-            return (
-              <Card
-                className={classnames(
-                  'flex flex-row card-border !rounded-2xl justify-between items-center align-middle cursor-pointer',
-                  {
-                    '!border-white': buildFor === value,
-                  },
-                )}
-                onClick={() => handleSelection(value)}
-                key={value}
-              >
-                <div>
-                  <p className="text-sm font-medium">{title}</p>
-                  <p className="text-xs text-[#BABABA]">{description}</p>
-                </div>
-                <Icon className={iconClassName} />
-              </Card>
-            );
-          })}
+          <div id="build-for-prompt" className="ml-1 text-body-sm text-muted">
+            What you are looking to launch with DIMO?
+          </div>
+          {/* Resting card on the sheet; hover is a half step toward the selected
+              fill (control/70 over the sheet), selected = control + ink edge. */}
+          <div
+            role="radiogroup"
+            aria-labelledby="build-for-prompt"
+            className="flex flex-col gap-4"
+          >
+            {buildForList.map(({ title, description, value, Icon, iconClassName }) => {
+              const isSelected = buildFor === value;
+              return (
+                <Card
+                  role="radio"
+                  aria-checked={isSelected}
+                  className={classnames(
+                    'flex cursor-pointer flex-row items-center justify-between transition-colors',
+                    isSelected
+                      ? '!bg-control text-ink shadow-selected'
+                      : 'text-ink hover:bg-control/70',
+                  )}
+                  onClick={() => handleSelection(value)}
+                  key={value}
+                >
+                  <div>
+                    <p className="text-body font-medium">{title}</p>
+                    <p className="text-body-sm text-muted">{description}</p>
+                  </div>
+                  <Icon className={iconClassName} />
+                </Card>
+              );
+            })}
+          </div>
           <Card
-            className="flex flex-col gap-4 card-border !rounded-2xl "
+            className={classnames(
+              'flex cursor-pointer flex-col gap-4 transition-colors',
+              {
+                '!bg-control text-ink shadow-selected':
+                  buildFor === buildForValues.somethingElse,
+                'text-ink hover:bg-control/70': buildFor !== buildForValues.somethingElse,
+              },
+            )}
             onClick={() => handleSelection(buildForValues.somethingElse)}
           >
-            <Label htmlFor="buildForText" className="text-sm text-medium">
+            <Label htmlFor="buildForText">
               Something else
               <TextField
                 type="text"
@@ -149,8 +169,8 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
           </div>
           <div className="flex flex-col pt-4">
             <Button
-              variant="brand"
               type="submit"
+              variant="brand"
               loading={isLoading}
               role="continue-button"
             >

@@ -7,7 +7,7 @@ export const AccountFoundSignup: FC = () => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className="text-title text-ink">DIMO Account Found</p>
+          <p className="text-title text-ink">DIMO account found</p>
         </div>
         <div className="otp-login-text">
           <p>

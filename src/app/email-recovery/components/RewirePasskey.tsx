@@ -105,9 +105,11 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
         <p className="text-title text-ink">Let&apos;s get you back in</p>
       </div>
       <div className="email-recovery__input">
-        <p>A passkey is the fastest and most secure way to sign in to DIMO.</p>
+        <div className="otp-login-text">
+          <p>A passkey is the fastest and most secure way to sign in to DIMO.</p>
+        </div>
         <BubbleLoader isLoading={true} />
-        <p className="text-center text-xl">Rewriting your passkey...</p>
+        <p className="text-center text-body-sm text-muted">Rewriting your passkey...</p>
       </div>
     </div>
   );
