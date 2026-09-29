@@ -34,15 +34,15 @@ const ExplorerContent = ({ initialTokenId }: { initialTokenId?: number }) => {
         selectedLicense={selectedLicense}
       />
       {selectedLicense && (
-        <div className="flex flex-row gap-4" style={{ minHeight: '600px' }}>
-          <div className="w-72 flex-shrink-0 flex flex-col">
+        <div className="flex flex-col gap-4 md:flex-row" style={{ minHeight: '600px' }}>
+          <div className="flex w-full flex-col md:w-72 md:flex-shrink-0">
             <VehicleList
               clientId={selectedLicense.clientId}
               selectedTokenId={selectedTokenId}
               onSelectVehicle={setSelectedTokenId}
             />
           </div>
-          <div className="flex-1 flex flex-col">
+          <div className="flex min-w-0 flex-1 flex-col">
             <VehicleData clientId={selectedLicense.clientId} tokenId={selectedTokenId} />
           </div>
         </div>

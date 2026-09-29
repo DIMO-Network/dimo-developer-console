@@ -5,7 +5,7 @@
     @apply flex flex-col gap-2;
   }
   .subtitle {
-    @apply text-sm;
+    @apply text-body-sm text-muted;
   }
   .contact-cards {
     @apply flex flex-col gap-4 max-w-md;
@@ -16,12 +16,12 @@
   }
 
   .status-action {
-    @apply text-xs;
+    @apply text-label text-muted;
 
-    @apply flex flex-row items-center gap-1;
-
+    /* Inline flow so the sentence wraps as text on a phone; a flex row split
+       the link off from its sentence at 390px. */
     a {
-      @apply flex flex-row items-center gap-1;
+      @apply inline-flex flex-row items-center gap-1 align-middle;
     }
   }
 }
