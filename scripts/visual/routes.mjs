@@ -82,7 +82,7 @@ export const ROUTES = [
     after: 'Create a license',
   },
   {
-    // A success toast (Sonner) from the license card's Vehicle Sharing Link copy.
+    // A success toast (Sonner) from the license card's vehicle sharing link copy.
     name: 'licenses-toast',
     path: '/licenses',
     ready: LICENSE.alias,
@@ -129,7 +129,7 @@ export const ROUTES = [
     after: 'Edit developer license name',
   },
   {
-    // Vehicles tab, then the Vehicle Simulator modal.
+    // Vehicles tab, then the vehicle simulator modal.
     name: 'license-vehicle-simulator',
     path: `/license/${t}/details`,
     ready: LICENSE.alias,

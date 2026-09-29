@@ -3,7 +3,7 @@ import { FragmentType, gql, useFragment } from '@/gql';
 import { Card } from '@/components/Card';
 import classNames from 'classnames';
 import { Anchor } from '@/components/Anchor';
-import { Button } from '@/components/Button';
+import Link from 'next/link';
 import { useQuery } from '@apollo/client';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';
@@ -12,6 +12,7 @@ import { getConfigurationsByClientId } from '@/actions/configurations';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
+import '@/components/Button/Button.css';
 import './LicenseCard.css';
 
 export const DEVELOPER_LICENSE_SUMMARY_FRAGMENT = gql(`
@@ -130,15 +131,13 @@ export const LicenseCard = (props: {
         )}
 
         {/* CTA */}
-        <Anchor
+        <Link
           href={`/license/${license.tokenId}/details`}
-          className="!py-0"
+          className="button secondary w-full"
           onClick={(e) => e.stopPropagation()}
         >
-          <Button variant="secondary" className="w-full">
-            License details
-          </Button>
-        </Anchor>
+          <span className="content">License details</span>
+        </Link>
       </div>
     </Card>
   );

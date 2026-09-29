@@ -146,8 +146,10 @@ the type scale.
 h-[72px] w-full min-w-0 items-center justify-between gap-2`; no border, sits
 on the transparent `.app-content` sheet. Title: `.page-title` = `min-w-0
 truncate text-title text-ink` (truncates so it never pushes widgets off at
-390px). Right side: `.user-information` = `flex flex-shrink-0 flex-row
-items-center gap-2 md:gap-3`. `Header.css` also carries a header-scoped
+390px), sentence case (see the note on `getPageTitle` under "Adoption
+status"). The mobile menu button lives in `.menu-header-button`
+(`md:hidden`). Right side: `.user-information` = `flex flex-shrink-0 flex-row
+items-center gap-2 md:gap-3` (credits, help, account). `Header.css` also carries a header-scoped
 override, `.header .credits, .header .credits .credits-info { max-md:min-w-0
 }`, so `CreditsWidget`'s own min-widths don't blow out the header on a phone.
 
@@ -209,14 +211,6 @@ border-canvas-divider pl-1.5 text-[14px] font-medium leading-none text-fg`
 `border-outline`). "Developer Console" is a product name and is never
 re-cased. The spacing is tight on purpose: the 80px wordmark plus the name
 must end inside the 244px sidebar.
-
-**Page header** (`src/components/Header/Header.css`): `.header` = `flex
-h-[72px] w-full min-w-0 items-center justify-between gap-2`; no border.
-Title `.page-title` = `min-w-0 truncate text-title text-ink` (truncates so it
-never pushes widgets off at 390px), sentence case (see the note on
-`getPageTitle` under "Adoption status"). Right side `.user-information` =
-`flex flex-shrink-0 flex-row items-center gap-2 md:gap-3`: credits, help,
-account. The mobile menu button lives in `.menu-header-button` (`md:hidden`).
 
 **Nav item** (`src/components/Menu/MenuItem/MenuItem.tsx`; its `.css` is an
 empty stub, the styling is Tailwind classes there): `li` = `flex h-10
