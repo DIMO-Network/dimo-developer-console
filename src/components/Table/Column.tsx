@@ -1,7 +1,7 @@
 import { type FC, type ReactNode } from 'react';
 
 import './Column.css';
-import classNames from 'classnames';
+import { cn } from '@/lib/utils';
 
 export interface IColumn {
   label?: string;
@@ -21,7 +21,7 @@ interface IProps {
 
 export const Column: FC<IProps> = ({ children, className }) => {
   return (
-    <th scope="col" className={classNames('custom-table-column', className)}>
+    <th scope="col" className={cn('custom-table-column text-left', className)}>
       {children}
     </th>
   );

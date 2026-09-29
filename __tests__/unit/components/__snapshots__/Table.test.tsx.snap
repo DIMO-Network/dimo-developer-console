@@ -3,7 +3,7 @@
 exports[`Table renders a table with actions 1`] = `
 <div>
   <div
-    class="min-w-full bg-card rounded-xl p-4"
+    class="min-w-full rounded-card bg-card p-4"
   >
     <table
       class="table"
@@ -13,7 +13,7 @@ exports[`Table renders a table with actions 1`] = `
       >
         <tr>
           <th
-            class="custom-table-column"
+            class="custom-table-column text-left"
             scope="col"
           >
             name
@@ -24,7 +24,7 @@ exports[`Table renders a table with actions 1`] = `
         class="table-body"
       >
         <tr
-          class="border-t border-t-cta-default"
+          class="border-t border-outline"
         >
           <td
             class="table-cell"
@@ -57,7 +57,7 @@ exports[`Table renders a table with actions 1`] = `
 exports[`Table renders a table with custom render 1`] = `
 <div>
   <div
-    class="min-w-full bg-card rounded-xl p-4"
+    class="min-w-full rounded-card bg-card p-4"
   >
     <table
       class="table"
@@ -67,13 +67,13 @@ exports[`Table renders a table with custom render 1`] = `
       >
         <tr>
           <th
-            class="custom-table-column"
+            class="custom-table-column text-left"
             scope="col"
           >
             name
           </th>
           <th
-            class="custom-table-column"
+            class="custom-table-column text-left"
             scope="col"
           >
             names
@@ -84,7 +84,7 @@ exports[`Table renders a table with custom render 1`] = `
         class="table-body"
       >
         <tr
-          class="border-t border-t-cta-default"
+          class="border-t border-outline"
         >
           <td
             class="table-cell"

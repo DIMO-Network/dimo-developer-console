@@ -88,4 +88,18 @@ describe('Table', () => {
     const scopeCells = document.querySelectorAll('td.table-cell.hidden');
     expect(scopeCells).toHaveLength(appListMock.length);
   });
+
+  it('lets a column className override header alignment and sentence-cases names', () => {
+    render(
+      <Table
+        columns={[{ name: 'name' }, { name: 'scope', className: 'text-right' }]}
+        data={appListMock.map(({ name, scope }) => ({ name, scope }))}
+      />,
+    );
+
+    const header = screen.getByRole('columnheader', { name: 'scope' });
+    expect(header).toHaveClass('text-right');
+    expect(header).not.toHaveClass('text-left');
+    expect(screen.getByRole('columnheader', { name: 'name' })).toHaveClass('text-left');
+  });
 });

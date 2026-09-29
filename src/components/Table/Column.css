@@ -1,3 +1,4 @@
+/* Alignment (text-left) is composed in Column.tsx so a per-column class can override it. */
 .custom-table-column {
-  @apply pb-3 text-left text-label text-muted;
+  @apply pb-3 text-label text-muted first-letter:uppercase;
 }
