@@ -52,7 +52,7 @@ const pageTitles: Record<string, string> = {
 };
 
 const dataExplorerMenuItem = {
-  label: 'Data Explorer',
+  label: 'Data explorer',
   icon: ChipIcon,
   iconClassName: 'h-5 w-5',
   link: '/explorer',
@@ -103,7 +103,7 @@ const baseMainMenu = [
     disabled: false,
   },
   {
-    label: 'API Status',
+    label: 'API status',
     icon: MonitorHeartIcon,
     iconClassName: 'h-5 w-5',
     link: 'https://stats.uptimerobot.com/snU0rkEEah',
@@ -216,7 +216,7 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
     label: 'Resources',
     items: [
       {
-        label: 'Data Explorer',
+        label: 'Data explorer',
         icon: ChipIcon,
         iconClassName: 'h-4 w-4',
         link: '/explorer',
@@ -232,7 +232,7 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
         disabled: false,
       },
       {
-        label: 'API Status',
+        label: 'API status',
         icon: MonitorHeartIcon,
         iconClassName: 'h-4 w-4',
         link: 'https://stats.uptimerobot.com/snU0rkEEah',

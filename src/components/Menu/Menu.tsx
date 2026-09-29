@@ -16,6 +16,7 @@ import { turnkeyClient } from '@/config/turnkey';
 import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage';
 import { EmbeddedKey, removeFromLocalStorage } from '@/utils/localStorage';
 import { queryClient } from '@/hoc/QueryProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { LogoutIcon } from '@/components/Icons/LogoutIcon';
 import { cn } from '@/lib/utils';
 
@@ -68,7 +69,7 @@ export const Menu: FC = withLoadingStatus(() => {
       {/* Logo */}
       <div className={cn('logo-row', isSidebarCollapsed && 'justify-center')}>
         {!isSidebarCollapsed && (
-          <div className="mb-8">
+          <div className="mb-7">
             <BrandLockup product="Developer Console" />
           </div>
         )}
@@ -78,7 +79,7 @@ export const Menu: FC = withLoadingStatus(() => {
             alt="DIMO"
             width={28}
             height={28}
-            className="mb-8 h-7 w-7 rounded-lg"
+            className="mb-7 h-7 w-7 rounded-lg"
           />
         )}
         {isFullScreenMenuOpen && (
@@ -87,7 +88,7 @@ export const Menu: FC = withLoadingStatus(() => {
             onClick={() => setIsFullScreenMenuOpen(false)}
             className="md:hidden ml-auto"
           >
-            <XMarkIcon className="h-5 w-5 text-muted-foreground" />
+            <XMarkIcon className="h-5 w-5 text-muted" />
           </button>
         )}
       </div>
@@ -97,9 +98,7 @@ export const Menu: FC = withLoadingStatus(() => {
         {sections.map((section) => (
           <div key={section.label}>
             {!isSidebarCollapsed && (
-              <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
-                {section.label}
-              </p>
+              <p className="mb-1 px-3 text-label text-muted">{section.label}</p>
             )}
             <ul className="flex flex-col gap-0.5">
               {section.items
@@ -128,6 +127,9 @@ export const Menu: FC = withLoadingStatus(() => {
               isCollapsed={isSidebarCollapsed}
             />
           ))}
+          <li>
+            <ThemeToggle variant="menu" collapsed={isSidebarCollapsed} />
+          </li>
           <MenuItem
             {...logoutItem}
             isHighlighted={false}
@@ -144,9 +146,9 @@ export const Menu: FC = withLoadingStatus(() => {
         className="collapse-btn hidden md:flex"
       >
         {isSidebarCollapsed ? (
-          <ChevronRightIcon className="h-3 w-3 text-primary" />
+          <ChevronRightIcon className="h-4 w-4" />
         ) : (
-          <ChevronLeftIcon className="h-3 w-3 text-primary" />
+          <ChevronLeftIcon className="h-4 w-4" />
         )}
       </button>
     </div>

@@ -44,9 +44,17 @@ export const ROUTES = [
     name: 'app-mobile-menu',
     path: '/app',
     ready: 'Welcome',
-    // The MenuButton has no aria-label on master; match its size class.
-    click: 'button.size-12',
+    click: '[aria-label="Open menu"]',
     viewports: ['mobile'],
+    knownConsoleWarning: APP_HYDRATION,
+  },
+  // Collapsed sidebar: click the collapse button (persists to localStorage).
+  {
+    name: 'app-collapsed',
+    path: '/app',
+    ready: 'Welcome',
+    click: '[aria-label="Collapse sidebar"]',
+    viewports: ['desktop'],
     knownConsoleWarning: APP_HYDRATION,
   },
   // No add-credits state: master has that button commented out.

@@ -1,19 +1,11 @@
 .guest-layout {
-  @apply flex flex-row justify-center h-screen gap-4 bg-background;
+  @apply relative flex min-h-screen flex-col items-center justify-center bg-canvas bg-brand-glow px-4 py-12;
 
-  .sign-in-up-container {
-    @apply flex flex-col mx-6 w-full lg:mx-0 lg:w-1/2 items-center justify-center h-screen;
-
-    img {
-      @apply mb-12;
-    }
+  .guest-theme-toggle {
+    @apply absolute right-4 top-4;
   }
 
-  .background-side-image {
-    @apply hidden lg:flex w-1/2 h-screen;
-
-    img {
-      @apply object-cover w-full h-full;
-    }
+  .guest-panel {
+    @apply flex w-full max-w-[480px] flex-col items-center gap-8 rounded-panel bg-sheet p-6 shadow-float md:p-10;
   }
 }
