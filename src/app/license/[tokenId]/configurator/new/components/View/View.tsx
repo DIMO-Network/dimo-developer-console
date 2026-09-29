@@ -145,7 +145,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       router.replace(`/license/${tokenId}/configurator/${id}`);
     } catch (error) {
       console.log(error);
-      toast.error('Failed to create Configuration. Please try again.');
+      toast.error('Failed to create configuration. Please try again.');
     }
   };
 
@@ -167,24 +167,24 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
 
   return (
     <div className="liwd-configurator-page">
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+      <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link
           href={`/license/${tokenId}/details`}
-          className="hover:text-foreground transition-colors"
+          className="transition-colors hover:text-ink"
         >
-          License Details
+          License details
         </Link>
         <span>/</span>
         <Link
           href={`/license/${tokenId}/configurator`}
-          className="hover:text-foreground transition-colors"
+          className="transition-colors hover:text-ink"
         >
-          SDK Configurator
+          SDK configurator
         </Link>
         <span>/</span>
-        <span className="text-foreground">New Configuration</span>
+        <span className="text-ink">New configuration</span>
       </nav>
-      <PageSubtitle subtitle="New Configuration" />
+      <PageSubtitle subtitle="New configuration" />
       {data?.developerLicense && (
         <FormProvider {...methods}>
           <ConfigurationForm

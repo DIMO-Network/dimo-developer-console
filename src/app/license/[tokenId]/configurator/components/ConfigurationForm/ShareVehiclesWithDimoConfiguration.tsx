@@ -38,17 +38,15 @@ const PermissionCard = ({
   onToggle,
 }: PermissionCardProps) => (
   <div
+    role="button"
+    aria-pressed={!!selected}
     onClick={onToggle}
-    className={`cursor-pointer border rounded-md px-3 py-2 transition-colors ${
-      selected
-        ? 'border-primary bg-primary/10 ring-1 ring-primary'
-        : 'border-border bg-control hover:border-primary/50'
+    className={`cursor-pointer rounded-control px-3 py-2 transition-colors duration-150 ${
+      selected ? 'bg-control shadow-selected' : 'bg-sheet hover:bg-control/70'
     }`}
   >
-    <h4 className="font-medium text-xs">{title}</h4>
-    <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-      {description}
-    </p>
+    <h4 className="text-body-sm font-medium text-ink">{title}</h4>
+    <p className="text-label font-normal text-muted">{description}</p>
   </div>
 );
 
@@ -67,23 +65,21 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
 
   return (
     <>
-      {/* Vehicle Permissions */}
-      <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
-          Vehicle Permissions
-        </p>
+      {/* Vehicle permissions */}
+      <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+        <h3 className="text-card-title text-ink">Vehicle permissions</h3>
         <SegmentedControl
           options={[
-            { value: 'template', label: 'Use Permission Template' },
-            { value: 'custom', label: 'Custom Permissions' },
+            { value: 'template', label: 'Use permission template' },
+            { value: 'custom', label: 'Custom permissions' },
           ]}
           control={control}
           name="permissionsMode"
           role="permission-segmented"
         />
         {permissionsMode === 'template' && (
-          <Label className="text-xs font-medium flex flex-col gap-1">
-            Permissions Template ID
+          <Label>
+            Permissions template ID
             <TextField
               type="text"
               placeholder="1"
@@ -131,7 +127,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
                     if (!checked) setValue('attestation.tags', []);
                   }}
                 />
-                <label className="text-sm font-medium">Attestations</label>
+                <label className="text-body-sm font-medium text-ink">Attestations</label>
               </div>
             )}
           />
@@ -165,12 +161,9 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           )}
         </div>
         {brandNames.length > 1 && (
-          <Label
-            htmlFor="brandName"
-            className="text-xs font-medium w-full flex flex-col gap-1"
-          >
+          <Label htmlFor="brandName" className="w-full">
             Brand
-            <p className="text-muted-foreground font-normal text-[11px]">
+            <p className="text-label font-normal text-muted">
               Which brand to show on the DIMO button. Leave as &quot;Default&quot; to use
               your workspace default brand.
             </p>
@@ -189,32 +182,32 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
       </div>
 
       {/* Privacy Policy & Terms of Service */}
-      <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
-          Privacy Policy &amp; Terms of Service
-        </p>
-        <Label className="text-xs font-medium flex flex-col gap-1">
-          Privacy Policy URL
+      <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+        <h3 className="text-card-title text-ink">
+          Privacy policy &amp; terms of service
+        </h3>
+        <Label>
+          Privacy policy URL
           <TextField
             type="url"
             placeholder="https://yourapp.com/privacy"
             {...register('privacyPolicyUrl', { required: false })}
             role="privacy-policy-url-input"
           />
-          <p className="text-[10px] text-muted-foreground mt-0.5">
+          <p className="text-label font-normal text-muted">
             Displayed to vehicle owners before they grant permissions. Leave blank to
             skip.
           </p>
         </Label>
-        <Label className="text-xs font-medium flex flex-col gap-1">
-          Terms of Service URL
+        <Label>
+          Terms of service URL
           <TextField
             type="url"
             placeholder="https://yourapp.com/terms"
             {...register('tosUrl', { required: false })}
             role="tos-url-input"
           />
-          <p className="text-[10px] text-muted-foreground mt-0.5">
+          <p className="text-label font-normal text-muted">
             Displayed to vehicle owners before they grant permissions. Leave blank to
             skip.
           </p>

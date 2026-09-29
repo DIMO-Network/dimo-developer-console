@@ -154,8 +154,8 @@ export const ROUTES = [
   {
     name: 'license-configurator',
     path: `/license/${t}/configurator`,
-    ready: 'Login With DIMO Configurator',
-    after: 'Copy Link',
+    ready: 'Login with DIMO configurator',
+    after: 'Copy link',
   },
   {
     name: 'license-configurator-new',
@@ -168,7 +168,7 @@ export const ROUTES = [
     path: `/license/${t}/configurator/new`,
     ready: 'Basics',
     click: [
-      'text="Custom Permissions"',
+      'text="Custom permissions"',
       'text="Commands"',
       '.date-picker .text-field',
       '.date-picker .grid >> text="15"',
@@ -181,17 +181,17 @@ export const ROUTES = [
     name: 'license-configurator-new-hover',
     path: `/license/${t}/configurator/new`,
     ready: 'Basics',
-    click: ['text="Custom Permissions"', 'text="Commands"'],
-    hover: 'div.cursor-pointer.rounded-md.border:not(.ring-1)',
+    click: ['text="Custom permissions"', 'text="Commands"'],
+    hover: 'div[role="button"][aria-pressed="false"]',
     viewports: ['desktop'],
   },
   {
     // A success toast (Sonner) from the configuration list's Copy Link.
     name: 'license-configurator-toast',
     path: `/license/${t}/configurator`,
-    ready: 'Login With DIMO Configurator',
-    after: 'Copy Link',
-    click: 'text="Copy Link"',
+    ready: 'Login with DIMO configurator',
+    after: 'Copy link',
+    click: 'text="Copy link"',
     viewports: ['desktop'],
   },
   {

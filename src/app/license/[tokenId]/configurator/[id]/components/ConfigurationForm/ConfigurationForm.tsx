@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { FragmentType, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
+import { TextError } from '@/components/TextError';
 import { SelectField } from '@/components/SelectField';
 import { Control, Controller, UseFormRegister, useFormContext } from 'react-hook-form';
 import { LoginWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/LoginWithDimoConfiguration';
@@ -114,11 +115,9 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
       {/* LEFT: form */}
       <form className="flex flex-col gap-4" onSubmit={handleSubmit(submit)}>
         {/* Basics */}
-        <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
-            Basics
-          </p>
-          <Label className="text-xs font-medium w-full flex flex-col gap-1">
+        <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+          <h3 className="text-card-title text-ink">Basics</h3>
+          <Label className="w-full">
             Configuration ID
             <div className="flex gap-2 items-center">
               <div className="flex-1 min-w-0">
@@ -127,19 +126,21 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
                   readOnly
                   {...register('configuration_id', { required: false })}
                   role="company-website-input"
+                  className="font-mono text-code"
                 />
               </div>
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                className="shrink-0"
                 onClick={handleCopyConfigurationLink}
-                className="shrink-0 px-3 py-2 text-xs border border-border rounded-md hover:border-primary/50 hover:text-primary transition-colors whitespace-nowrap"
               >
-                Copy Link
-              </button>
+                Copy link
+              </Button>
             </div>
           </Label>
-          <div className="grid grid-cols-2 gap-3">
-            <Label className="text-xs font-medium flex flex-col gap-1">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Label>
               Configuration name
               <TextField
                 type="text"
@@ -150,12 +151,10 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
                 role="company-website-input"
               />
               {errors.configuration_name && (
-                <p className="text-xs text-red-500">
-                  {errors.configuration_name.message}
-                </p>
+                <TextError errorMessage={errors.configuration_name.message!} />
               )}
             </Label>
-            <Label className="text-xs font-medium flex flex-col gap-1">
+            <Label>
               Client ID
               <TextField
                 type="text"
@@ -163,21 +162,20 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
                 value={fragment?.clientId}
                 {...register('client_id', { required: false })}
                 role="company-website-input"
+                className="font-mono text-code"
               />
             </Label>
           </div>
         </div>
 
         {/* Component */}
-        <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
-            Component
-          </p>
+        <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+          <h3 className="text-card-title text-ink">Component</h3>
           <SegmentedControl
             name="component"
             options={[
-              { value: 'LoginWithDimo', label: '🔑  Login With DIMO' },
-              { value: 'ShareVehiclesWithDimo', label: '🚗  Share Vehicles with DIMO' },
+              { value: 'LoginWithDimo', label: '🔑  Login with DIMO' },
+              { value: 'ShareVehiclesWithDimo', label: '🚗  Share vehicles with DIMO' },
             ]}
             role="component-segmented"
             control={control}
@@ -185,14 +183,9 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
         </div>
 
         {/* Connection */}
-        <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
-            Connection
-          </p>
-          <Label
-            htmlFor="redirectUri"
-            className="text-xs font-medium flex flex-col gap-1"
-          >
+        <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+          <h3 className="text-card-title text-ink">Connection</h3>
+          <Label htmlFor="redirectUri">
             Redirect URI
             <SelectField
               {...register('redirectUri', { required: 'Redirect URI is required' })}
@@ -205,11 +198,11 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
               role="redirectUri-select"
             />
             {errors.redirectUri && (
-              <p className="text-xs text-red-500">{errors.redirectUri.message}</p>
+              <TextError errorMessage={errors.redirectUri.message!} />
             )}
           </Label>
-          <div className="grid grid-cols-2 gap-3">
-            <Label className="text-xs font-medium flex flex-col gap-1">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Label>
               Expiration date
               <Controller
                 control={control}
@@ -223,10 +216,10 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
                 )}
               />
               {errors.expirationDate && (
-                <p className="text-xs text-red-500">{errors.expirationDate.message}</p>
+                <TextError errorMessage={errors.expirationDate.message!} />
               )}
             </Label>
-            <Label className="text-xs font-medium flex flex-col gap-1">
+            <Label>
               UTM
               <TextField
                 type="text"
@@ -254,11 +247,9 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
 
       {/* RIGHT: sticky preview */}
       <div className="sticky top-6 hidden lg:block">
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-border">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Generated Output
-            </p>
+        <div className="overflow-hidden rounded-card bg-card">
+          <div className="px-4 pt-3">
+            <p className="text-label text-muted">Generated output</p>
           </div>
           <div className="p-4">
             <OutputPrint license={licenseSummary} />

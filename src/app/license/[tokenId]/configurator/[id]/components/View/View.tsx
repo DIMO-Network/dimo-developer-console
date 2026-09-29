@@ -234,7 +234,7 @@ export const View = ({
       toast.success('Configuration successfully updated');
     } catch (error) {
       console.error(error);
-      toast.error('Failed to update Configuration. Please try again.');
+      toast.error('Failed to update configuration. Please try again.');
     }
   };
 
@@ -256,24 +256,24 @@ export const View = ({
 
   return (
     <div className="liwd-configurator-page">
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+      <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link
           href={`/license/${tokenId}/details`}
-          className="hover:text-foreground transition-colors"
+          className="transition-colors hover:text-ink"
         >
-          License Details
+          License details
         </Link>
         <span>/</span>
         <Link
           href={`/license/${tokenId}/configurator`}
-          className="hover:text-foreground transition-colors"
+          className="transition-colors hover:text-ink"
         >
-          SDK Configurator
+          SDK configurator
         </Link>
         <span>/</span>
-        <span className="text-foreground">Edit Configuration</span>
+        <span className="text-ink">Edit configuration</span>
       </nav>
-      <PageSubtitle subtitle="Edit Configuration" />
+      <PageSubtitle subtitle="Edit configuration" />
       {data?.developerLicense && (
         <FormProvider {...methods}>
           <ConfigurationForm

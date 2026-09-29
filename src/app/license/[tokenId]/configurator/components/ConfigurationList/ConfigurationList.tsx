@@ -8,6 +8,7 @@ import {
   IConfigurationListItem,
 } from '@/actions/configurations';
 import { Button } from '@/components/Button';
+import { Table } from '@/components/Table';
 import { toast } from 'sonner';
 
 const DIMO_LOGIN_BASE =
@@ -23,11 +24,11 @@ interface Props {
 const entryStateLabel = (entryState: string): string => {
   switch (entryState) {
     case 'EMAIL_INPUT':
-      return 'Login With DIMO';
+      return 'Login with DIMO';
     case 'VEHICLE_MANAGER':
-      return 'Share Vehicles With DIMO';
+      return 'Share vehicles with DIMO';
     case 'ADVANCED_TRANSACTION':
-      return 'Execute Advanced Transaction';
+      return 'Execute advanced transaction';
     default:
       return entryState;
   }
@@ -55,7 +56,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
 
   if (configs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-text-secondary">
+      <div className="flex flex-col items-center justify-center py-12 text-muted">
         <p className="mb-4">No configurations yet.</p>
         <Button onClick={() => router.push(`/license/${tokenId}/configurator/new`)}>
           Create your first configuration
@@ -64,69 +65,77 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
     );
   }
 
+  // The actions column re-renders with pendingDeleteId, so the inline delete
+  // confirm swaps in per row. break-normal/nowrap undo the cell's break-all so
+  // a squeezed row scrolls instead of breaking button labels mid-word.
+  const renderActions = (config: IConfigurationListItem) => (
+    <div className="flex flex-wrap gap-2 break-normal">
+      {pendingDeleteId === config.id ? (
+        <>
+          <Button variant="destructive" onClick={() => void handleDelete(config.id)}>
+            Confirm
+          </Button>
+          <Button variant="secondary" onClick={() => setPendingDeleteId(null)}>
+            Cancel
+          </Button>
+        </>
+      ) : (
+        <>
+          <Button
+            variant="secondary"
+            onClick={() => router.push(`/license/${tokenId}/configurator/${config.id}`)}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              const url = `${DIMO_LOGIN_BASE}/?configurationId=${config.id}`;
+              navigator.clipboard.writeText(url);
+              toast.success('Sharing link copied');
+            }}
+          >
+            Copy link
+          </Button>
+          <Button
+            variant="destructive-ghost"
+            onClick={() => setPendingDeleteId(config.id)}
+          >
+            Delete
+          </Button>
+        </>
+      )}
+    </div>
+  );
+
   return (
-    <div className="w-full">
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="border-b border-border text-left text-text-secondary">
-            <th className="py-2 pr-4 font-medium">Name</th>
-            <th className="py-2 pr-4 font-medium">Component</th>
-            <th className="py-2 font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {configs.map((config) => (
-            <tr key={config.id} className="border-b border-border">
-              <td className="py-3 pr-4">{config.configuration_name || '(untitled)'}</td>
-              <td className="py-3 pr-4 text-text-secondary">
-                {entryStateLabel(config.entry_state)}
-              </td>
-              <td className="py-3">
-                {pendingDeleteId === config.id ? (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="destructive"
-                      onClick={() => void handleDelete(config.id)}
-                    >
-                      Confirm
-                    </Button>
-                    <Button variant="secondary" onClick={() => setPendingDeleteId(null)}>
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="secondary"
-                      onClick={() =>
-                        router.push(`/license/${tokenId}/configurator/${config.id}`)
-                      }
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        const url = `${DIMO_LOGIN_BASE}/?configurationId=${config.id}`;
-                        navigator.clipboard.writeText(url);
-                        toast.success('Sharing link copied');
-                      }}
-                    >
-                      Copy Link
-                    </Button>
-                    <Button
-                      variant="destructive-ghost"
-                      onClick={() => setPendingDeleteId(config.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="w-full overflow-x-auto">
+      <Table
+        // The shared cell breaks anywhere (break-all, for long ids); names and
+        // component labels wrap at words, with a gutter before the next column.
+        columns={[
+          {
+            label: 'Name',
+            name: 'configuration_name',
+            className: 'pr-4',
+            render: (config: IConfigurationListItem) => (
+              <span className="break-normal">
+                {config.configuration_name || '(untitled)'}
+              </span>
+            ),
+          },
+          {
+            label: 'Component',
+            name: 'entry_state',
+            className: 'pr-4 text-muted',
+            render: (config: IConfigurationListItem) => (
+              <span className="break-normal">{entryStateLabel(config.entry_state)}</span>
+            ),
+          },
+          { label: 'Actions', name: 'id', render: renderActions },
+        ]}
+        data={configs}
+      />
     </div>
   );
 };
