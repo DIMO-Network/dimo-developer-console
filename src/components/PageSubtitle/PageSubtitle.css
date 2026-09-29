@@ -2,6 +2,6 @@
   @apply border-b border-outline;
 
   .subtitle {
-    @apply pb-2 text-title text-muted;
+    @apply pb-2 text-title text-ink;
   }
 }

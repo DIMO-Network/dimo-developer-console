@@ -92,7 +92,7 @@ const baseMainMenu = [
     iconClassName: 'h-5 w-5',
     link: '/templates',
     external: false,
-    disabled: false,
+    disabled: !TEMPLATE_EDITOR_ENABLED,
   },
   {
     label: 'Documentation',

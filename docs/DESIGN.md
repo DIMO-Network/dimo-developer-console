@@ -262,8 +262,9 @@ waving-hand image. A full sentence is an intro, never a heading.
 
 **Page section title** (`<PageSubtitle>`, `src/components/PageSubtitle`):
 `.subtitle-content` = `border-b border-outline` around a `text-title
-text-muted` `h2` (`pb-2`). Only for a short label that names a block of the
-page (the configurator pages). If it reads as a sentence, use the page intro.
+text-ink` `h2` (`pb-2`). Only for a short label that names a block of the
+page (the configurator pages, where it is the page's only visible heading, so
+it is ink, not muted). If it reads as a sentence, use the page intro.
 
 **Section title**: `text-card-title text-ink`, e.g. `LicenseList.css
 .description .title` ("Your developer licenses"), which shares a row
