@@ -802,17 +802,23 @@ The shadcn names in `tailwind.config.ts` (`background`, `foreground`, `card`,
 `sidebar`) are aliases onto these tokens with the same meaning, so primitives
 under `src/components/ui` inherit the theme. `accent` means the Fleet mint
 (live status only) and `muted` means secondary text — not shadcn's
-accent-surface and muted-surface. Legacy names (`primary`, `secondary`,
-`surface`, `cta`, `feedback`, `text`, `grey`, `dark-grey`, `red`,
-`text-secondary`) are temporary aliases that later passes delete; don't write
-new code with them.
+accent-surface and muted-surface.
+
+The palette is locked: `tailwind.config.ts` puts the Fleet tokens, the aliases
+above, `transparent`, `current` and `inherit` in `theme.colors` (not
+`theme.extend.colors`), so Tailwind's default palette (`white`, `black`,
+`gray-*`, `red-*`, `blue-*` …) and the legacy names (`primary`, `secondary`,
+`surface`, `cta`, `feedback`, `text`, `grey`, `dark-grey`, `dark`, `red`,
+`text-secondary`) no longer exist. Tailwind does not fail on an unknown class
+in `className`, it just emits nothing, so such a class renders unstyled;
+`npm run visual:check` flags them. An `@apply` of one fails the build.
 
 ## Adoption status
 
 Master's structure is kept (collapsible sectioned sidebar, Home shortcut grid,
 `/licenses`, license-details tabs, configurator split panel with sticky
 preview, hand-built breadcrumbs); only the look changes, page by page.
-Done and reflected above as code: tokens, the shell and sidebar, header
+The port is done. Done and reflected above as code: tokens, the shell and sidebar, header
 widgets, `Button`, `Card`, `Modal` (Radix), Sonner, form controls, `Table`,
 `Title`, `StatusChip`, `CopyButton`, and the reference screens (Home,
 `/licenses`, the license card, the empty state, the Create license modal, the
@@ -825,7 +831,10 @@ new, edit, trim grid, banners), settings (user details, team management, the
 invite and support modals) and the account information, buy DCX and support
 form modals are done, as are the guest pages (sign-in, sign-up, email
 recovery), support, the explorer and the error pages, which apply the
-selected-card recipe. No recipe is marked **target** any more. Settings keeps master's table
+selected-card recipe. No recipe is marked **target** any more. The palette is
+locked (no temporary aliases remain). Not restyled, by design: the orphaned
+components listed under "Don'ts" (only a mechanical token swap where a removed
+color name would otherwise stop compiling). Settings keeps master's table
 (no Status column, a pending invite still reads "(Pending)" after the name); the recipe itself is what the
 shared component implements. Reported, not fixed: `getPageTitle` in
 `src/config/navigation.ts` still title-cases some titles ("Data Explorer",
@@ -925,7 +934,8 @@ add this to silence a hydration error your own change introduced).
 
 ## Legacy → token class map
 
-Every restyle pass applies this map to the files it owns. Selected state is
+These legacy names no longer exist in the palette (a class that uses one emits
+nothing). Every restyle pass applies this map to the files it owns. Selected state is
 inverse ink (see "Selected / toggled state"); the old mint `bg-selected` tint
 is gone.
 

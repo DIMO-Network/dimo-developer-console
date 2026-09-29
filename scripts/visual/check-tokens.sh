@@ -27,6 +27,7 @@ check() {
 }
 
 check 'hex color literals' '#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?([0-9A-Fa-f]{2})?\b'
+# Locked palette: these names no longer exist, so in className they silently emit nothing.
 check 'legacy palette classes' '\b(bg|text|border|border-t|border-b|border-l|border-r|divide|ring|fill|stroke|from|via|to|placeholder|decoration|outline|shadow|accent|caret)-(surface|cta|feedback|text|text-secondary|secondary|grey|dark-grey|dark|primary|primary-[0-9]+|red|gray|slate|zinc|neutral|stone|amber|green|blue|indigo|yellow|orange|emerald|teal|cyan|sky-[0-9]|violet|purple|pink|rose|lime|fuchsia|white|black)\b'
 check 'hsl(var(...)) color usages' 'hsl\(var\(--'
 check 'forced dark class' '(className|class)=[^>]*[" ]dark[" ]|[" ]dark with-icon|\bdark:'

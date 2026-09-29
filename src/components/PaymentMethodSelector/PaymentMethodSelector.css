@@ -6,6 +6,6 @@
   }
 
   .selected {
-    @apply bg-control border-solid border-primary;
+    @apply bg-control border-solid border-ink;
   }
 }

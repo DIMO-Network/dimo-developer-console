@@ -41,84 +41,19 @@ export const tokenColors = {
   'scrim': 'var(--scrim)',
 };
 
-const primaryScale = {
-  '50': 'rgb(var(--accent) / <alpha-value>)',
-  '100': 'rgb(var(--accent) / <alpha-value>)',
-  '200': 'rgb(var(--accent) / <alpha-value>)',
-  '300': 'rgb(var(--accent) / <alpha-value>)',
-  '400': 'rgb(var(--accent) / <alpha-value>)',
-  '500': 'rgb(var(--accent-ink) / <alpha-value>)',
-  '600': 'rgb(var(--accent-ink) / <alpha-value>)',
-  '700': 'rgb(var(--accent-ink) / <alpha-value>)',
-  '800': 'rgb(var(--accent-ink) / <alpha-value>)',
-  '900': 'rgb(var(--accent-ink) / <alpha-value>)',
-  '950': 'rgb(var(--accent-ink) / <alpha-value>)',
-};
-
-// Ramp aliases: 50-100 fg, 200-700 muted, 800-950 outline.
-const neutralRamp = {
-  '50': token('fg'),
-  '100': token('fg'),
-  '200': token('muted'),
-  '300': token('muted'),
-  '400': token('muted'),
-  '500': token('muted'),
-  '600': token('muted'),
-  '700': token('muted'),
-  '800': token('outline'),
-  '900': token('outline'),
-  '950': token('outline'),
-};
-
-const redRamp = {
-  '50': token('negative'),
-  '100': token('negative'),
-  '200': token('negative'),
-  '300': token('negative'),
-  '400': token('negative'),
-  '500': token('negative'),
-  '600': token('negative'),
-  '700': token('negative'),
-  '800': token('negative-soft'),
-  '900': token('negative-soft'),
-  '950': token('negative-soft'),
-};
-
 /*
- * Ruling 2 aliases. shadcn names whose meaning matches a Fleet token stay;
- * the legacy names are TEMPORARY and map onto the nearest Fleet token so
- * unmigrated pages keep compiling. The final task deletes them.
+ * Ruling 2 aliases (permanent). shadcn names whose meaning matches a Fleet
+ * token stay so primitives under src/components/ui inherit the theme.
  */
 const aliasColors = {
-  // shadcn aliases (permanent)
-  'background': token('sheet'),
-  'foreground': token('fg'),
-  'popover': { DEFAULT: token('overlay'), foreground: token('fg') },
-  'sidebar': token('canvas'),
-  'border': token('outline'),
-  'input': token('control-border'),
-  'ring': token('focus-ring'),
-  'destructive': { DEFAULT: token('negative'), foreground: token('fg') },
-  // legacy (temporary)
-  'primary': {
-    DEFAULT: token('accent'),
-    foreground: token('on-accent'),
-    ...primaryScale,
-  },
-  'primary-scale': primaryScale,
-  'secondary': { DEFAULT: token('control'), foreground: token('fg') },
-  'surface': {
-    default: token('sheet'),
-    sunken: token('canvas'),
-    raised: token('card'),
-  },
-  'cta': { default: token('control'), disabled: token('muted') },
-  'feedback': { success: token('positive'), error: token('negative') },
-  'text': { secondary: token('muted') },
-  'grey': neutralRamp,
-  'dark-grey': neutralRamp,
-  'dark': neutralRamp,
-  'red': redRamp,
+  background: token('sheet'),
+  foreground: token('fg'),
+  popover: { DEFAULT: token('overlay'), foreground: token('fg') },
+  sidebar: token('canvas'),
+  border: token('outline'),
+  input: token('control-border'),
+  ring: token('focus-ring'),
+  destructive: { DEFAULT: token('negative'), foreground: token('fg') },
 };
 
 const config: Config = {
@@ -129,20 +64,24 @@ const config: Config = {
     './src/layouts/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
-    extend: {
-      colors: {
-        ...tokenColors,
-        ...aliasColors,
-        card: { DEFAULT: token('card'), foreground: token('fg') },
-        muted: { DEFAULT: token('muted'), foreground: token('muted') },
-        accent: {
-          'DEFAULT': token('accent'),
-          'foreground': token('on-accent'),
-          'ink': token('accent-ink'),
-          'soft': 'var(--accent-soft)',
-          'soft-strong': 'var(--accent-soft-strong)',
-        },
+    // Locked palette: Tailwind's default colors are gone on purpose.
+    colors: {
+      transparent: 'transparent',
+      current: 'currentColor',
+      inherit: 'inherit',
+      ...tokenColors,
+      ...aliasColors,
+      card: { DEFAULT: token('card'), foreground: token('fg') },
+      muted: { DEFAULT: token('muted'), foreground: token('muted') },
+      accent: {
+        'DEFAULT': token('accent'),
+        'foreground': token('on-accent'),
+        'ink': token('accent-ink'),
+        'soft': 'var(--accent-soft)',
+        'soft-strong': 'var(--accent-soft-strong)',
       },
+    },
+    extend: {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':

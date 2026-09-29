@@ -7,7 +7,7 @@ interface Props {
 export const ActionCompletedRow: FC<Props> = ({ text }) => {
   return (
     <div className={'flex flex-row items-center gap-2'}>
-      <CheckCircleIcon className="size-4 text-feedback-success" />
+      <CheckCircleIcon className="size-4 text-positive" />
       <p className={'text-base text-foreground'}>{text}</p>
     </div>
   );
