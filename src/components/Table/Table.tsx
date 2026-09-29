@@ -53,7 +53,9 @@ export const Table: FC<IProps> = ({ columns, data, actions }) => {
               })}
               {actions && (
                 <td className="table-action-cell" key={`row-action-cell-${index}`}>
-                  {actions?.map((action, index) => action(item, index))}
+                  <div className="flex items-center justify-end gap-2.5">
+                    {actions?.map((action, index) => action(item, index))}
+                  </div>
                 </td>
               )}
             </tr>

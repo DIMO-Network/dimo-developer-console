@@ -14,6 +14,6 @@
   }
 
   .table-action-cell {
-    @apply relative flex items-center justify-end gap-2.5 whitespace-nowrap px-3 py-3 text-right text-label;
+    @apply relative table-cell whitespace-nowrap px-3 py-3 text-right align-middle text-label;
   }
 }

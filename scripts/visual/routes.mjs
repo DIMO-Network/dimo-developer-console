@@ -63,7 +63,7 @@ export const ROUTES = [
     path: '/app',
     ready: 'Welcome',
     click: '[title="Account Information"]',
-    after: 'Account Information',
+    after: 'Account information',
     knownConsoleWarning: APP_HYDRATION,
   },
   { name: 'licenses', path: '/licenses', ready: LICENSE.alias },

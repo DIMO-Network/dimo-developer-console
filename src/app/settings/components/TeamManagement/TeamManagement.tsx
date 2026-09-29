@@ -56,7 +56,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
       isOwner(currentUser!.role) &&
       invitationRole !== TeamRoles.OWNER && (
         <div
-          className="flex flex-row items-center w-full h-full cursor-pointer text-muted hover:text-negative"
+          className="flex flex-row items-center justify-end cursor-pointer text-muted hover:text-negative"
           onClick={() => handleDelete(id as string)}
           key={`delete-collaborator-action-${id}`}
         >
