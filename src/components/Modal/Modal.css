@@ -1,15 +1,17 @@
 .dialog-panel {
-  @apply bg-card border border-border rounded-xl shadow-xl p-6;
-
   .dialog-close-content {
-    @apply absolute right-0 top-0 pr-4 pt-4 cursor-pointer z-10;
+    @apply absolute right-0 top-0 z-10 pr-4 pt-4;
 
     .close-btn {
-      @apply text-muted-foreground hover:text-foreground focus:outline-none transition-colors;
+      @apply cursor-pointer rounded-full p-1 text-muted transition-colors hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-overlay;
     }
   }
 
   .dialog-content {
     @apply flex flex-col;
+  }
+
+  .dialog-action-content {
+    @apply mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end;
   }
 }
