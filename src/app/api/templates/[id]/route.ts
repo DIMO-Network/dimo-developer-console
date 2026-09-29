@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { TEMPLATE_EDITOR_ENABLED } from '@/utils/featureFlags';
 import * as Sentry from '@sentry/nextjs';
 import {
   fetchTemplate,
@@ -47,6 +48,8 @@ async function entitlementFor(caller: string, id: string) {
 }
 
 export async function GET(_req: NextRequest, { params }: Params) {
+  if (!TEMPLATE_EDITOR_ENABLED)
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const { id } = await params;
   const caller = await resolveCaller();
   if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -67,6 +70,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function PUT(req: NextRequest, { params }: Params) {
+  if (!TEMPLATE_EDITOR_ENABLED)
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const { id } = await params;
   const caller = await resolveCaller();
   if (!caller) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

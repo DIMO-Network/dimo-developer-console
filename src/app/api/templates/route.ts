@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { TEMPLATE_EDITOR_ENABLED } from '@/utils/featureFlags';
 import config from '@/config';
 import { fetchTemplate } from '@/services/definitions';
 
@@ -57,6 +58,8 @@ async function queryIdentity(
 }
 
 export async function GET(req: NextRequest) {
+  if (!TEMPLATE_EDITOR_ENABLED)
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const make = req.nextUrl.searchParams.get('make');
   const model = req.nextUrl.searchParams.get('model');
   const yearParam = req.nextUrl.searchParams.get('year');

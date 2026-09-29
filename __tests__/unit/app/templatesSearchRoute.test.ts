@@ -7,6 +7,8 @@
 import { GET } from '@/app/api/templates/route';
 import { NextRequest } from 'next/server';
 
+// These tests cover the editor as it behaves once switched on.
+jest.mock('@/utils/featureFlags', () => ({ TEMPLATE_EDITOR_ENABLED: true }));
 jest.mock('@/services/definitions', () => ({
   fetchTemplate: jest.fn(),
 }));

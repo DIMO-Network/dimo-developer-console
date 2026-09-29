@@ -10,6 +10,7 @@ import {
   ChipIcon,
   DeveloperBoardIcon,
 } from '@/components/Icons';
+import { TEMPLATE_EDITOR_ENABLED } from '@/utils/featureFlags';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const EXPLORER_VEHICLE_REGEX = /^\/explorer\/[^/]+$/;
@@ -188,6 +189,14 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
         link: '/webhooks',
         external: false,
         disabled: false,
+      },
+      {
+        label: 'Templates',
+        icon: CarRentalIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/templates',
+        external: false,
+        disabled: !TEMPLATE_EDITOR_ENABLED,
       },
       ...(includeConnections
         ? [
