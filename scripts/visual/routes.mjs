@@ -105,7 +105,7 @@ export const ROUTES = [
     path: `/license/${t}/details`,
     ready: LICENSE.alias,
     click: 'role=tab[name="Vehicles"]',
-    after: 'Connected Vehicles',
+    after: 'Connected vehicles',
   },
   {
     name: 'license-details-brand',
@@ -118,7 +118,7 @@ export const ROUTES = [
     name: 'license-details-brand-form',
     path: `/license/${t}/details`,
     ready: LICENSE.alias,
-    click: ['role=tab[name="Brand"]', 'text="Add Brand"'],
+    click: ['role=tab[name="Brand"]', 'text="Add brand"'],
     after: 'Display name',
   },
   {

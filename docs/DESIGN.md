@@ -233,7 +233,7 @@ matches.
 **Page intro**: the line directly under the page header, no rule under it,
 no heading element, no weight. A one-sentence description is
 `<p className="text-body-sm text-muted">`; the Home greeting
-(`View.css` `.welcome-message .title`) is `text-body text-muted` next to the
+(`View.css` `.welcome-message .title`) is `text-body font-normal text-muted` (`font-normal` beats the global `.title` weight) next to the
 waving-hand image. A full sentence is an intro, never a heading.
 
 **Page section title** (`<PageSubtitle>`, `src/components/PageSubtitle`):
@@ -247,17 +247,16 @@ page (the configurator pages). If it reads as a sentence, use the page intro.
 page's one primary action. An optional line under it is
 `text-body-sm text-muted`.
 
-**Breadcrumbs** (hand-built, not a component; **target**, applied by the
-license / configurator / connections / webhooks page passes): a `<nav>` above
-the page content, `flex items-center gap-1.5 text-label text-muted mb-2`. Each
-ancestor is a `Link` with `transition-colors hover:text-ink`; the separator
-is a bare `<span>/</span>` inheriting `text-muted`; the current page is the
-last item, `text-ink`, not a link. Sentence case labels ("License details",
-"SDK configurator"). On master these still read `text-xs
-text-muted-foreground` with `hover:text-foreground` (aliases that resolve to
-the same tokens) until those pages are restyled. If a page needs
-back-navigation without a trail, use `BackButton` (a real button with
-`aria-label="Back"`).
+**Breadcrumbs** (hand-built, not a component; in `license/[tokenId]/details`
+`View.tsx` and `license/vehicles/[clientId]` `View.tsx`; the configurator and
+connections pages still to adopt): a `<nav>` above the page content,
+`mb-2 flex items-center gap-1.5 text-label text-muted`. Each ancestor is a
+`Link` with `transition-colors hover:text-ink`; the separator is a bare
+`<span>/</span>` inheriting `text-muted`; the current page is the last item,
+`text-ink`, not a link. Sentence case labels ("License details", "Vehicles").
+If a page needs back-navigation without a trail, use `BackButton` (a real
+button with `aria-label="Back"`); the licensed-vehicles layout's bare chevron
+is a `text-muted hover:text-ink` `<button aria-label="Back">`.
 
 **Card** (`src/components/Card/Card.css`): base `.card` = `rounded-card
 bg-card p-4`. `.card-border` adds `border border-outline`; `.secondary`
@@ -320,7 +319,7 @@ text-metric text-ink` — it's a link, but stays ink, not mint), with a
 colored by state. (Toasts use a status icon instead — see "Toast".)
 
 **Status chip** (`src/components/StatusChip/StatusChip.tsx`; the component exists,
-but no page imports it yet: the webhooks, templates, settings and details
+but no page imports it yet: the webhooks, templates and settings
 passes swap their hand-rolled badges to it) — the one status
 idiom for a record's state in a list or table: the status dot inside a
 neutral chip, `inline-flex w-fit items-center gap-1.5 whitespace-nowrap
@@ -485,16 +484,40 @@ text-ink shadow-sm`: a raised neutral step, not mint.
 
 **Tabs** (license details: `role="tablist"` `nav.license-tabs` with
 `role="tab"` buttons and `aria-selected`; `src/app/license/[tokenId]/details/
-components/View/View.tsx`, `.css`): Fleet has no underlined tabs, so the
-recipe is the segmented control above. **Target**: the tab row is a
-`.segmented-control` (or the `SegmentedControl` component) holding the tabs,
-active = `bg-bright text-ink shadow-sm`, inactive `text-muted hover:text-fg`;
-keep `role="tablist"` / `role="tab"` / `aria-selected` (and the visible
-focus ring from the global `:focus-visible`), and keep the panel below on the
-sheet with no rule between the row and the content. On master the tabs are
-still the underlined `.license-tab` / `.license-tab--active` (border-b-2
-recipe) until the license-details pass restyles them; do not copy that
-recipe.
+components/View/View.tsx`, `.css`): Fleet has no underlined tabs, so the row
+is the segmented control above, written as its own classes in `View.css`
+(the tab state, keys and `aria-selected` are master's): `.license-tabs` =
+`flex w-fit max-w-full flex-row gap-0.5 overflow-x-auto rounded-full
+bg-control p-[3px]`; `.license-tab` = `flex-shrink-0 rounded-full px-3.5
+py-1.5 text-[13px] font-medium leading-[18px] text-muted transition-colors
+hover:text-fg`; `.license-tab--active` = `bg-bright text-ink shadow-sm`. The
+visible focus ring is the global `:focus-visible`. The panel below sits on the
+sheet with no rule between the row and the content (`.license-tab-content` =
+`flex flex-col gap-4 pt-4`).
+
+**License details page** (`View.tsx`, `View.css`): no frame around the header.
+Breadcrumbs, then the name `text-title text-ink` with the token chip
+(`rounded-chip bg-control px-2 py-0.5 text-label text-muted`) and a ghost
+round rename button (`size-8 rounded-full text-muted hover:bg-control
+hover:text-ink`, only for the owner), the client id in a `CopyableRow` (wraps
+on a phone), then the tabs. Every tab body is a stack of tonal section cards:
+`flex flex-col gap-4 rounded-card bg-card p-4` with an `h2` `text-card-title
+text-ink` and the section's actions on the right (`Section` /
+`SectionHeader` and the API keys, Developer JWTs, Redirect URIs and Brand
+cards use the same recipe). A `<Table>` inside one is wrapped in `-mx-4 -mb-4`
+so its own `p-4` lines it up with the card's title instead of doubling the
+inset. Stat cards on Overview / Vehicles are `rounded-card bg-card p-5` with a
+`text-metric text-ink` number, a `text-label text-muted` caption and a
+`text-label text-muted hover:text-ink` link. Quick actions are `rounded-control
+bg-card px-4 py-2.5 text-body-sm text-ink hover:bg-control` buttons (their
+emoji glyphs are master's copy and were kept). Small labels that sit beside a
+record (the "RentalOS" and "Default" tags, the vehicle table's "Simulated") are
+neutral chips `rounded-chip bg-highest px-2 py-0.5 text-label text-muted`, not
+`StatusChip`: they name a thing, not a state. Keys, ids, JWTs and signer
+addresses are `font-mono text-code`. A destructive row action in a menu
+(`VehicleDetailsTable` `constants.tsx`, the row-actions popover) is
+`rounded-chip px-3 py-2 text-body-sm text-negative hover:bg-negative-soft` in an
+`bg-overlay` menu (`rounded-control border border-outline p-1 shadow-float`).
 
 **Split panel with sticky preview** (configurator: `ConfigurationForm.tsx`
 for new and edit): the form on the left, a live preview on the right. Layout
@@ -703,8 +726,9 @@ Done and reflected above as code: tokens, the shell and sidebar, header
 widgets, `Button`, `Card`, `Modal` (Radix), Sonner, form controls, `Table`,
 `Title`, `StatusChip`, `CopyButton`, and the reference screens (Home,
 `/licenses`, the license card, the empty state, the Create license modal, the
-vehicle simulator). Marked **target** above and still to be applied by their
-page passes: breadcrumbs, license-details tabs, the configurator preview
+vehicle simulator). License details (tabs, breadcrumbs, every tab body), the
+licensed-vehicles page and the renounce modal are done. Marked **target**
+above and still to be applied by their page passes: the configurator preview
 panel, selected-card states on sign-up, the configurator and the explorer.
 Where a recipe below names a page as its user (status chips on webhooks and
 settings, the explorer's rows, the template editor), that page is the intended
