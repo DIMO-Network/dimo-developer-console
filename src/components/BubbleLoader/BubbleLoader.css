@@ -2,7 +2,7 @@
   @apply flex items-center justify-center h-12;
 
   .bubble {
-    @apply w-4 h-4 bg-gray-500 rounded-full;
+    @apply h-3 w-3 rounded-full bg-accent;
     margin: 0 0.2rem;
     animation: pulse 1.1s infinite ease-in-out;
   }

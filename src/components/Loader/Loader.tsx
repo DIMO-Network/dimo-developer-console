@@ -11,12 +11,12 @@ export const Loader: FC<IProps> = ({ isLoading }) => {
         <div className="loader p-4 max-w-md w-full">
           <div className="animate-pulse flex space-x-4">
             <div className="flex-1 space-y-3 py-1">
-              <div className="h-8 bg-primary-200/20 rounded"></div>
+              <div className="h-8 bg-highest rounded-chip"></div>
               <div className="space-y-3">
-                <div className="h-2 bg-primary-200/20 rounded w-16"></div>
+                <div className="h-2 bg-highest rounded-chip w-16"></div>
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="h-2 bg-primary-200/20 rounded col-span-1"></div>
-                  <div className="h-2 bg-primary-200/20 rounded col-span-2"></div>
+                  <div className="h-2 bg-highest rounded-chip col-span-1"></div>
+                  <div className="h-2 bg-highest rounded-chip col-span-2"></div>
                 </div>
               </div>
             </div>
