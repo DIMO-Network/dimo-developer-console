@@ -248,8 +248,8 @@ page's one primary action. An optional line under it is
 `text-body-sm text-muted`.
 
 **Breadcrumbs** (hand-built, not a component; in `license/[tokenId]/details`
-`View.tsx` and `license/vehicles/[clientId]` `View.tsx`; the configurator and
-connections pages still to adopt): a `<nav>` above the page content,
+`View.tsx`, `license/vehicles/[clientId]` `View.tsx` and the configurator
+list/new/edit views; the connections pages still to adopt): a `<nav>` above the page content,
 `mb-2 flex items-center gap-1.5 text-label text-muted`. Each ancestor is a
 `Link` with `transition-colors hover:text-ink`; the separator is a bare
 `<span>/</span>` inheriting `text-muted`; the current page is the last item,
@@ -466,9 +466,13 @@ button or sits in a card).
   on the selected item of a list you navigate (explorer rows),
   `role="radio" aria-checked` inside a `role="radiogroup"` for a single
   choice (build-for cards, `PaymentMethod`, `MultiCardOption`),
-  `aria-pressed` for a multi-select toggle (permission cards). **Target** for the sign-up "What are you
-  building?" cards (`BuildForForm`), the configurator's permission cards
-  (`ShareVehiclesWithDimoConfiguration`) and the explorer's vehicle list rows
+  `aria-pressed` for a multi-select toggle (permission cards). Current on the
+  configurator's permission cards (`ShareVehiclesWithDimoConfiguration`
+  `PermissionCard`: `role="button" aria-pressed`, `rounded-control px-3 py-2`;
+  these sit inside a `bg-card` section, so an unselected card rests on
+  `bg-sheet` and hovers to `bg-control/70`; selected = `bg-control
+shadow-selected`). **Target** for the sign-up "What are you
+  building?" cards (`BuildForForm`) and the explorer's vehicle list rows
   (`VehicleList`); those pages adopt it in their own passes. (`MultiCardOption`
   and `PaymentMethodSelector` are orphaned and not restyled.)
 
@@ -524,13 +528,20 @@ for new and edit): the form on the left, a live preview on the right. Layout
 (this exists as written): `lg:grid lg:grid-cols-[1fr_360px] lg:gap-6
 lg:items-start`; the preview is `sticky top-6 hidden lg:block`, i.e. it
 appears only from `lg` up and stays pinned while the form scrolls. Below
-`lg` it is absent and the form takes the full width. **Target** for the
-preview panel's surface (applied by the configurator pass): `rounded-card
-bg-card overflow-hidden` with no border, a header `px-4 py-3` carrying a
-`text-label text-muted` sentence-case caption ("Generated output"), and a
-`p-4` body; code inside follows the monospace rule. On master the panel is
-still `bg-card border border-border rounded-xl` with an uppercase, tracked
-caption, which the pass removes. The form's ToS / Privacy URL fields use the
+`lg` it is absent and the form takes the full width. The preview panel
+is `overflow-hidden rounded-card bg-card` with no border, a header `px-4 pt-3`
+carrying a `text-label text-muted` sentence-case caption ("Generated output"),
+and a `p-4` body; before the first save it is a `rounded-card bg-card p-6`
+centred note ("Save to generate your link", `configurationId` in a
+`rounded-chip bg-control font-mono text-code` chip). Form sections are
+`rounded-card bg-card p-4` cards, each headed by an `h3` `text-card-title
+text-ink` (no rule under it); labels are the shared `Label`, hints
+`text-label font-normal text-muted`, errors `TextError`. Code and URLs follow
+the monospace rule: the URL view is `rounded-control bg-control p-4 font-mono
+text-code text-fg`; the code view keeps the `oneDark` Prism theme (its token
+colours need a dark ground, so it stays dark in light mode). The copy button is
+`Button` `variant="secondary"`. Below `lg` the two-column field rows stack.
+The form's ToS / Privacy URL fields use the
 standard `TextField`.
 
 **Toggle** (`src/components/Toggle/Toggle.tsx` over the Radix `Switch` in
@@ -727,9 +738,9 @@ widgets, `Button`, `Card`, `Modal` (Radix), Sonner, form controls, `Table`,
 `Title`, `StatusChip`, `CopyButton`, and the reference screens (Home,
 `/licenses`, the license card, the empty state, the Create license modal, the
 vehicle simulator). License details (tabs, breadcrumbs, every tab body), the
-licensed-vehicles page and the renounce modal are done. Marked **target**
-above and still to be applied by their page passes: the configurator preview
-panel, selected-card states on sign-up, the configurator and the explorer.
+licensed-vehicles page, the renounce modal and the configurator (list, new,
+edit, preview panel, permission cards) are done. Marked **target**
+above and still to be applied by their page passes: the selected-card states on sign-up and the explorer.
 Where a recipe below names a page as its user (status chips on webhooks and
 settings, the explorer's rows, the template editor), that page is the intended
 adopter, not necessarily restyled yet; the recipe itself is what the
