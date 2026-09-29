@@ -9,20 +9,20 @@ export const AccountInformation = () => {
   const { currentUser } = useGlobalAccount();
 
   return (
-    <div className={'flex flex-col gap-4 p-4 bg-card rounded-2xl'}>
+    <div className={'flex flex-col gap-4 rounded-card bg-card p-4'}>
       <div className="account-information-row">
-        <Label htmlFor="email" className="text-xs text-medium">
-          Owner Email
-        </Label>
-        <p className={'text-text-secondary text-base'}>{currentUser?.email ?? ''}</p>
+        <Label htmlFor="email">Owner email</Label>
+        <p className={'text-body-sm text-fg'}>{currentUser?.email ?? ''}</p>
       </div>
       <div className="account-information-row">
-        <Label htmlFor="email" className="text-xs text-medium">
-          Organization Wallet Address
-          <CopyableRow
-            value={get(currentUser, 'smartContractAddress', '')}
-            onCopySuccessMessage={'Wallet address copied to clipboard'}
-          />
+        <Label htmlFor="email">
+          Organization wallet address
+          <div className="w-full min-w-0 [&_.copyable-row]:min-w-0 [&_.copyable-row_p]:min-w-0 [&_.copyable-row_p]:break-all">
+            <CopyableRow
+              value={get(currentUser, 'smartContractAddress', '')}
+              onCopySuccessMessage={'Wallet address copied to clipboard'}
+            />
+          </div>
         </Label>
       </div>
     </div>

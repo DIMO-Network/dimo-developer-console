@@ -320,7 +320,7 @@ text-metric text-ink` — it's a link, but stays ink, not mint), with a
 colored by state. (Toasts use a status icon instead — see "Toast".)
 
 **Status chip** (`src/components/StatusChip/StatusChip.tsx`; used by the webhooks table and
-details card; the settings and templates passes adopt it) — the one status
+details card and the template search list) — the one status
 idiom for a record's state in a list or table: the status dot inside a
 neutral chip, `inline-flex w-fit items-center gap-1.5 whitespace-nowrap
 rounded-chip bg-control px-2 py-0.5 text-label text-fg`. Use `<StatusChip
@@ -329,14 +329,14 @@ tone=…>`; don't hand-roll it. Tones:
 | `tone`    | Dot                                                    | Means                      | Used for                                                |
 | --------- | ------------------------------------------------------ | -------------------------- | ------------------------------------------------------- |
 | `live`    | `bg-accent shadow-[0_0_8px_var(--accent-soft-strong)]` | running right now          | webhook Enabled (`Webhooks/components/StatusBadge.tsx`) |
-| `on`      | `bg-accent` (no glow)                                  | done / in place ("Active") | invitation accepted, template exists                    |
-| `pending` | `bg-warning`                                           | waiting on someone         | invitation sent / pending                               |
+| `on`      | `bg-accent` (no glow)                                  | done / in place ("Active") | template exists                                         |
+| `pending` | `bg-warning`                                           | waiting on someone         | (unused)                                                |
 | `off`     | `bg-muted`                                             | off, or nothing there yet  | webhook Disabled, "No template yet"                     |
 | `error`   | `bg-negative`                                          | broken                     | webhook Failed, "Id cannot be a template", Errors count |
 
 The label is always `text-fg`, and a chip always has a label: map the value
 to its label and fall back to the capitalized raw value, never an empty chip
-(`TeamManagement`: `InvitationStatusLabels[status] ?? capitalize(status)`). A
+(the rule used by the webhooks and template lists). A
 row with no state gets no chip (the workspace owner has no invitation). Never
 use `bg-selected-bg` (that is selection, not status) or a status-tinted chip.
 A count with a state (webhooks "Errors" > 0) is `<StatusChip tone="error">`
@@ -377,10 +377,10 @@ Put `<Table>` straight into its section card (license details' Developer JWTs
 and Signers, settings' Team management) — never inside a `Card.secondary`
 or another card, which stacks three tonal levels. On a phone, hide a
 low-priority column rather than scrolling the row's action off-screen
-(settings hides Status below `md` and shows the status chip under the name).
+(webhooks hide Display name, Service and Cooldown below `md` and repeat them in the expanded row).
 A column's optional `className` (`IColumn`) lands on its header `<th>` and
 every body `<td>`: `className: 'hidden md:table-cell'` drops a column on
-phones (TeamManagement's Status). `.table-cell` breaks anywhere
+phones (the webhooks table). `.table-cell` breaks anywhere
 (`break-all`, for long ids and URIs); a column of words wraps them at word
 boundaries with a `break-normal` span in its `render` and adds a `pr-4`
 gutter via `className` (`ConfigurationList`).
@@ -495,6 +495,23 @@ Delete/Remove confirm over a `secondary` Cancel, and a
 `rounded-card bg-control` details card (`text-label text-muted` labels,
 `text-body-sm text-fg` values). Only keys, ids, the verification token and
 the generated CEL block are `font-mono text-code`.
+
+**Template editor** (`src/app/templates/**`, `src/components/TemplateEditor/**`;
+gated behind `NEXT_PUBLIC_TEMPLATE_EDITOR_ENABLED`): the page intro is
+`text-body-sm text-muted`. The search form is `Label` + `TextField` per field
+and one primary; results are a `rounded-card bg-card` list with `divide-outline`
+rows, the id in `font-mono text-code`, a `StatusChip` (`on` Template, `off` No
+template yet, `error` Id cannot be a template) and a `secondary` Open / Create.
+The grid is a `rounded-card bg-card p-4` table (`min-w-[640px]` inside an
+`overflow-x-auto` wrapper, header `border-b border-outline`, sticky first
+column on `bg-card`); a cell is a 32px control (`h-8 rounded-control border
+border-control-border bg-control`, the input recipe at grid density), agreement
+recedes (`text-muted`) and difference advances (`text-ink`), unset is
+`text-muted/60`. Rail actions are `rounded-full border border-outline text-label
+text-muted` pills. Banners (entitlement, normalisation notes) are `rounded-card
+bg-card` with a `text-ink` title and `text-muted` body; a read-only entitlement
+carries the `WarningAmberIcon` in `text-warning`. Errors and the version
+conflict are `rounded-card bg-negative-soft` with `text-negative` lines.
 
 **Step tracker** (`FormStepTracker`, webhook create): a `rounded-card bg-card
 p-4` card holding an `ol` of rows, `flex items-center gap-2 text-body-sm`. A
@@ -773,11 +790,14 @@ vehicle simulator). License details (tabs, breadcrumbs, every tab body), the
 licensed-vehicles page, the renounce modal and the configurator (list, new,
 edit, preview panel, permission cards), connections (list, details, create and
 the purchase modal) and webhooks (list, create, edit, modals, CSV upload,
-asset DID input, the generate-JWT modal) are done. Marked **target**
-above and still to be applied by their page passes: the selected-card states on
-sign-up and the explorer. Where a recipe below names a page as its user (status
-chips on settings, the explorer's rows, the template editor), that page is the
-intended adopter, not necessarily restyled yet; the recipe itself is what the
+asset DID input, the generate-JWT modal), the template editor (gated; search,
+new, edit, trim grid, banners), settings (user details, team management, the
+invite and support modals) and the account information, buy DCX and support
+form modals are done. Marked **target** above and still to be applied by their
+page passes: the selected-card states on sign-up and the explorer. Where a
+recipe below names a page as its user (the explorer's rows), that page is the
+intended adopter, not necessarily restyled yet; settings keeps master's table
+(no Status column, a pending invite still reads "(Pending)" after the name); the recipe itself is what the
 shared component implements. Reported, not fixed: `getPageTitle` in
 `src/config/navigation.ts` still title-cases some titles ("Data Explorer",
 "License Details") and its `/license/details/...` regexes no longer match the

@@ -4,22 +4,22 @@
   }
 
   .account-information-content {
-    @apply flex flex-col justify-center gap-12 flex-1;
+    @apply flex flex-col justify-center gap-12 flex-1 min-w-0;
 
     .account-information-header {
-      @apply flex flex-col gap-2 relative font-bold;
+      @apply flex flex-col gap-2 relative;
     }
 
     .account-information-body {
-      @apply w-full flex flex-col gap-6;
+      @apply w-full min-w-0 flex flex-col gap-6;
       .account-information-row {
-        @apply w-full flex flex-col gap-2;
+        @apply w-full min-w-0 flex flex-col gap-2;
       }
 
       .balances {
         @apply flex flex-col gap-y-4;
         .loading-text {
-          @apply text-center;
+          @apply text-center text-body-sm text-muted;
         }
       }
     }

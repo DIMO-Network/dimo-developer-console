@@ -14,7 +14,7 @@ export const UserDetails: FC = () => {
 
   return (
     <Section>
-      <SectionHeader title="User Details" />
+      <SectionHeader title="User details" />
       <div className="user-detail-fields">
         <div className="user-field">
           <span className="user-field-label">Name</span>
