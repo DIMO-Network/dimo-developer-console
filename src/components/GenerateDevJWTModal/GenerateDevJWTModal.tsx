@@ -113,7 +113,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
   const Buttons = useMemo(() => {
     if (generatedKey) {
       return (
-        <Button className={'primary-outline'} onClick={() => setIsOpen(false)}>
+        <Button variant="secondary" onClick={() => setIsOpen(false)}>
           Done
         </Button>
       );
@@ -123,11 +123,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
         <Button loading={isLoading} onClick={handleGenerate}>
           Generate
         </Button>
-        <Button
-          className={'primary-outline'}
-          onClick={() => setIsOpen(false)}
-          disabled={isLoading}
-        >
+        <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isLoading}>
           Cancel
         </Button>
       </>

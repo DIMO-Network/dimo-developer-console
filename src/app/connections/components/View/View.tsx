@@ -82,7 +82,7 @@ const MainComponent: React.FC = () => {
         <SectionHeader title="Connections">
           {(!connections || connections.length === 0) && (
             <Button
-              className="dark with-icon"
+              variant="secondary"
               onClick={handleCreateConnection}
               disabled={isLoading}
             >

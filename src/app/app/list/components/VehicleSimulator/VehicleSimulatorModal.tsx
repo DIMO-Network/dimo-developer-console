@@ -16,7 +16,8 @@ export const VehicleSimulatorModal: FC<Props> = ({ clientId }) => {
     <>
       <Button
         type="button"
-        className="table-action-button with-icon px-4"
+        variant="secondary"
+        className="px-4"
         onClick={() => setIsOpen(true)}
       >
         <BeakerIcon className="h-4 w-4" />

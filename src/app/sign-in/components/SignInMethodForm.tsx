@@ -69,6 +69,7 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
           />
           {errors.email && <TextError errorMessage={errors.email?.message ?? ''} />}
           <Button
+            variant="brand"
             type="submit"
             disabled={isEmpty(email) || !!errors.email}
             role="continue-button"

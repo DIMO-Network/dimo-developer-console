@@ -119,7 +119,8 @@ export const PaginatedTableIdentityAPI = <TData,>({
         </p>
         <div className={'flex flex-row items-center'}>
           <Button
-            className={'table-action-button'}
+            variant="secondary"
+            size="icon"
             disabled={!table.getCanPreviousPage() || loading}
             onClick={() => table.previousPage()}
           >
@@ -127,7 +128,8 @@ export const PaginatedTableIdentityAPI = <TData,>({
           </Button>
           <p>{pagination.pageIndex + 1}</p>
           <Button
-            className={'table-action-button'}
+            variant="secondary"
+            size="icon"
             disabled={!table.getCanNextPage() || loading}
             onClick={() => table.nextPage()}
           >

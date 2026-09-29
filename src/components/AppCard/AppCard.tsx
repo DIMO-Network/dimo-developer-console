@@ -21,7 +21,9 @@ export const AppCard: FC<IProps> = ({ name, description = '', className = '', id
         </div>
         {description && <p className="app-card-description">{description}</p>}
         <Anchor href={`/app/details/${id}`}>
-          <Button className="dark w-full !h-9">App Details</Button>
+          <Button variant="secondary" className="w-full !h-9">
+            App Details
+          </Button>
         </Anchor>
       </div>
     </div>

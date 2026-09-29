@@ -209,6 +209,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
           <div className="purchase-buttons pt-6 flex gap-4">
             <Button
+              variant="secondary"
               className="w-48"
               onClick={handleCancelPayment}
               disabled={isProcessingPayment}

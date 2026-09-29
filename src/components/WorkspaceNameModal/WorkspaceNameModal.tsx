@@ -136,12 +136,18 @@ export const WorkspaceNameModal: FC<IProps> = ({
           </div>
         </div>
         <div className={'flex flex-col gap-4 pt-6'}>
-          <Button type="submit" className="light save-button" loading={isLoading}>
+          <Button
+            type="submit"
+            variant="secondary"
+            className="save-button"
+            loading={isLoading}
+          >
             Save Changes
           </Button>
           <Button
             type="reset"
-            className="primary-outline save-button"
+            variant="secondary"
+            className="save-button"
             disabled={isLoading}
             onClick={() => setIsOpen(false)}
           >

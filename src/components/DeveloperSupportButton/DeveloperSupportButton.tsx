@@ -27,7 +27,7 @@ export const DeveloperSupportButton: FC<IProps> = ({ variant = 'small' }) => {
 
 const SupportAgentWithTextButton: FC<{ onClick: () => void }> = ({ onClick }) => {
   return (
-    <Button className="primary-outline" onClick={onClick}>
+    <Button variant="secondary" onClick={onClick}>
       <SupportAgentIcon className="fill-primary h-5 w-5" color="currentColor" />
       Developer support
     </Button>

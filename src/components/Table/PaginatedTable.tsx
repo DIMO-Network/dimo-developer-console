@@ -74,7 +74,8 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
         </p>
         <div className="flex items-center gap-2">
           <Button
-            className={'table-action-button'}
+            variant="secondary"
+            size="icon"
             disabled={!table.getCanPreviousPage()}
             onClick={() => table.previousPage()}
           >
@@ -82,7 +83,8 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
           </Button>
           <p>{pagination.pageIndex + 1}</p>
           <Button
-            className={'table-action-button'}
+            variant="secondary"
+            size="icon"
             disabled={!table.getCanNextPage()}
             onClick={() => table.nextPage()}
           >

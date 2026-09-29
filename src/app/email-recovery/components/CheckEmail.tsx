@@ -46,7 +46,7 @@ export const CheckEmail: FC<IProps> = ({ state }) => {
           onClick={handleResendCode}
           loading={isLoading}
           disabled={isLoading}
-          className="primary-outline"
+          variant="secondary"
           role="cancel-button"
         >
           Resend code

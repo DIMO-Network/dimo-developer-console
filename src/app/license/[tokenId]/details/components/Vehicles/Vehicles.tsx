@@ -60,13 +60,16 @@ export const Vehicles: FC<IProps> = ({ license }) => {
       </div>
       <div className="flex flex-row gap-3">
         <Link href={`/license/vehicles/${fragment.clientId}`} className="flex-1">
-          <Button className="dark w-full">Vehicle List</Button>
+          <Button variant="secondary" className="w-full">
+            Vehicle List
+          </Button>
         </Link>
         <div className="flex-1">
           <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
         </div>
         <Button
-          className="dark flex-1"
+          variant="secondary"
+          className="flex-1"
           onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
         >
           Configure Sharing

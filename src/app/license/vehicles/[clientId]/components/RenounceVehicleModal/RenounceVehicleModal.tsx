@@ -72,11 +72,17 @@ export const RenounceVehicleModal: FC<Props> = ({ vehicle, onConfirm, onClose })
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <div className="mt-2 flex flex-col gap-3">
-          <Button className="error w-full" loading={isLoading} onClick={handleConfirm}>
+          <Button
+            variant="destructive"
+            className="w-full"
+            loading={isLoading}
+            onClick={handleConfirm}
+          >
             Renounce access
           </Button>
           <Button
-            className="w-full primary-outline"
+            variant="secondary"
+            className="w-full"
             disabled={isLoading}
             onClick={onClose}
           >

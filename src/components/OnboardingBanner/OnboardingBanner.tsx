@@ -33,7 +33,7 @@ export const OnboardingBanner: FC<Props> = ({
   //   <CTARow
   //     isComplete={balance > 0}
   //     text={'Add credits'}
-  //     CTA={<AddCreditsButton className={'white-with-icon'} />}
+  //     CTA={<AddCreditsButton />}
   //   />
   // )}
 
@@ -52,7 +52,7 @@ export const OnboardingBanner: FC<Props> = ({
           isComplete={fragment.totalCount > 0}
           text={'Create your first license'}
           subtitle="Now that your account is set up, it's time to create your first license."
-          CTA={<CreateAppButton className={'white-with-icon'} />}
+          CTA={<CreateAppButton />}
         />
       </div>
     </div>

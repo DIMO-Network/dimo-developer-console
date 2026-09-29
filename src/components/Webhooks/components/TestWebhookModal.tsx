@@ -100,7 +100,7 @@ const TestWebhookFooter: React.FC<{
   return (
     <div className="flex flex-col gap-4">
       <Button onClick={onTest}>Send a test</Button>
-      <Button className="primary-outline" onClick={onCancel}>
+      <Button variant="secondary" onClick={onCancel}>
         Close
       </Button>
     </div>

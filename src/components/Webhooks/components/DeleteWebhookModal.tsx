@@ -114,17 +114,17 @@ const DeleteWebhookFooter: React.FC<{
   if (modalState === 'loading') return null;
   if (modalState === 'success') {
     return (
-      <Button onClick={onClose} className="primary-outline">
+      <Button onClick={onClose} variant="secondary">
         Done
       </Button>
     );
   }
   return (
     <div className="flex flex-col gap-4">
-      <Button onClick={onDelete} className="error">
+      <Button onClick={onDelete} variant="destructive">
         Delete Webhook
       </Button>
-      <Button className="primary-outline" onClick={onClose}>
+      <Button variant="secondary" onClick={onClose}>
         Cancel
       </Button>
     </div>

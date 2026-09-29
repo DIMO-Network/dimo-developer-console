@@ -78,7 +78,7 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
             ? 'Adding...'
             : `Add ${assetDIDs.length} Vehicle${assetDIDs.length !== 1 ? 's' : ''}`}
         </Button>
-        <Button onClick={handleClose} className="dark">
+        <Button onClick={handleClose} variant="secondary">
           Cancel
         </Button>
       </div>

@@ -57,14 +57,15 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       key={`item_${item.token}_copy_button`}
       value={item.token}
       onCopySuccessMessage="JWT copied!"
-      className="button table-action-button"
+      className="button secondary icon"
     />
   );
 
   const renderDeleteButton = (item: { token: string }) => (
     <Button
       key={`item_${item.token}_delete_button`}
-      className="table-action-button"
+      variant="secondary"
+      size="icon"
       title="Delete JWT"
       type="button"
       onClick={() => setJwtToDelete(item.token)}

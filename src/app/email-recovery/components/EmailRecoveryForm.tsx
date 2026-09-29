@@ -75,6 +75,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
         </Label>
         {errors.email && <TextError errorMessage="This field is required" />}
         <Button
+          variant="brand"
           type="submit"
           disabled={isEmpty(email)}
           loading={isLoading}
@@ -84,7 +85,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
         </Button>
         <Button
           type="button"
-          className="primary-outline"
+          variant="secondary"
           role="cancel-button"
           onClick={() => router.back()}
         >

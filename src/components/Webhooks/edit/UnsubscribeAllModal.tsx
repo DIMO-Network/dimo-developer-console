@@ -44,10 +44,10 @@ export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
           </p>
         </div>
         <div className="flex flex-col w-full gap-4 pt-4">
-          <Button onClick={handleSubmit} className="error" disabled={loading}>
+          <Button onClick={handleSubmit} variant="destructive" disabled={loading}>
             {loading ? 'Unsubscribing...' : 'Unsubscribe all'}
           </Button>
-          <Button onClick={() => setIsOpen(false)} className="primary-outline">
+          <Button onClick={() => setIsOpen(false)} variant="secondary">
             Cancel
           </Button>
         </div>

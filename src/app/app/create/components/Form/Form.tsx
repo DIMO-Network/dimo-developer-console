@@ -128,17 +128,12 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
         </p>
       </Label>
       <div className="flex flex-col pt-4 gap-4">
-        <Button
-          type="submit"
-          className="white"
-          role="continue-button"
-          loading={isLoading}
-        >
+        <Button type="submit" role="continue-button" loading={isLoading}>
           Create
         </Button>
         <Button
           type="reset"
-          className="dark"
+          variant="secondary"
           role="cancel-button"
           loading={isLoading}
           onClick={onClose}

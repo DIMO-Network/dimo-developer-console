@@ -31,7 +31,8 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
         <div className="flex flex-row gap-2">
           <Button
             type="button"
-            className="table-action-button"
+            variant="secondary"
+            size="icon"
             title="Edit brand"
             onClick={onEdit}
           >
@@ -39,7 +40,8 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
           </Button>
           <Button
             type="button"
-            className="table-action-button"
+            variant="secondary"
+            size="icon"
             title={
               canDelete
                 ? 'Delete brand'

@@ -238,7 +238,7 @@ const SquareCropper: FC<{
         />
         <Button
           type="button"
-          className="light"
+          variant="secondary"
           onClick={confirm}
           disabled={!pixels}
           loading={pending}

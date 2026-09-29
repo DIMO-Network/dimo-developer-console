@@ -100,13 +100,10 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
         </div>
       </div>
       <div className="actions">
-        <Button className="primary w-full" loading={isLoading}>
+        <Button className="w-full" loading={isLoading}>
           Submit
         </Button>
-        <Button
-          className="primary-outline secondary-border-color w-full"
-          onClick={handleCancel}
-        >
+        <Button variant="secondary" className="w-full" onClick={handleCancel}>
           Cancel
         </Button>
       </div>

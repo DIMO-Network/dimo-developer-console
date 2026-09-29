@@ -57,10 +57,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-text-secondary">
         <p className="mb-4">No configurations yet.</p>
-        <Button
-          className="primary"
-          onClick={() => router.push(`/license/${tokenId}/configurator/new`)}
-        >
+        <Button onClick={() => router.push(`/license/${tokenId}/configurator/new`)}>
           Create your first configuration
         </Button>
       </div>
@@ -88,22 +85,19 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
                 {pendingDeleteId === config.id ? (
                   <div className="flex gap-2">
                     <Button
-                      className="table-action-button"
+                      variant="secondary"
                       onClick={() => void handleDelete(config.id)}
                     >
                       Confirm
                     </Button>
-                    <Button
-                      className="table-action-button"
-                      onClick={() => setPendingDeleteId(null)}
-                    >
+                    <Button variant="secondary" onClick={() => setPendingDeleteId(null)}>
                       Cancel
                     </Button>
                   </div>
                 ) : (
                   <div className="flex gap-2">
                     <Button
-                      className="table-action-button"
+                      variant="secondary"
                       onClick={() =>
                         router.push(`/license/${tokenId}/configurator/${config.id}`)
                       }
@@ -111,7 +105,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
                       Edit
                     </Button>
                     <Button
-                      className="table-action-button"
+                      variant="secondary"
                       onClick={() => {
                         const url = `${DIMO_LOGIN_BASE}/?configurationId=${config.id}`;
                         navigator.clipboard.writeText(url);
@@ -121,7 +115,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
                       Copy Link
                     </Button>
                     <Button
-                      className="table-action-button"
+                      variant="secondary"
                       onClick={() => setPendingDeleteId(config.id)}
                     >
                       Delete

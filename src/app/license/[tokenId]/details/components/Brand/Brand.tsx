@@ -112,7 +112,7 @@ export const Brand: FC<Props> = ({ license }) => {
       <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
         <h2 className="text-xl font-semibold text-foreground">Brand</h2>
         {isOwner && !editing && (
-          <Button type="button" className="dark" onClick={() => setEditing('new')}>
+          <Button type="button" variant="secondary" onClick={() => setEditing('new')}>
             Add Brand
           </Button>
         )}

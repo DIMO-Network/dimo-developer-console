@@ -168,6 +168,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
         </div>
         <div className="flex w-full flex-col pt-4">
           <Button
+            variant="brand"
             role="continue-button"
             onClick={handleVerify}
             disabled={otp.some((digit) => !digit)}
@@ -176,7 +177,8 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
             Sign In
           </Button>
           <Button
-            className="primary-outline !mt-3"
+            variant="secondary"
+            className="!mt-3"
             role="continue-button"
             onClick={handleResendCode}
             loading={isRequestingNewOtp}

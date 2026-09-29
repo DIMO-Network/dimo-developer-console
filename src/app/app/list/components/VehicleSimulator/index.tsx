@@ -386,7 +386,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
             : selectionPreview}
         </span>
         <Button
-          className="white !h-9 shrink-0"
+          className="!h-9 shrink-0"
           disabled={!canMint}
           loading={isLoading}
           onClick={handleMint}

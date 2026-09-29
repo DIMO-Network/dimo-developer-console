@@ -154,14 +154,16 @@ export const VehicleList: FC<Props> = ({
         </span>
         <div className="flex gap-1">
           <Button
-            className="table-action-button"
+            variant="secondary"
+            size="icon"
             disabled={pageIndex === 0 || loading}
             onClick={handlePrev}
           >
             <ChevronLeftIcon className="w-4 h-4" />
           </Button>
           <Button
-            className="table-action-button"
+            variant="secondary"
+            size="icon"
             disabled={!pageInfo?.hasNextPage || loading}
             onClick={handleNext}
           >
