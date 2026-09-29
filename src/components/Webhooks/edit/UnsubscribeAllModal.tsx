@@ -36,7 +36,7 @@ export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <div className="flex w-full flex-col gap-12">
-        <Title>Unsubscribe all vehicles</Title>
+        <Title className={'text-panel-title'}>Unsubscribe all vehicles</Title>
         <div className="flex flex-col gap-4">
           <p>
             Are you sure you want to unsubscribe all the subscribed vehicles? This action
@@ -44,10 +44,10 @@ export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
           </p>
         </div>
         <div className="flex flex-col w-full gap-4 pt-4">
-          <Button onClick={handleSubmit} className="error" disabled={loading}>
+          <Button onClick={handleSubmit} variant="destructive" disabled={loading}>
             {loading ? 'Unsubscribing...' : 'Unsubscribe all'}
           </Button>
-          <Button onClick={() => setIsOpen(false)} className="primary-outline">
+          <Button onClick={() => setIsOpen(false)} variant="secondary">
             Cancel
           </Button>
         </div>

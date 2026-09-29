@@ -71,7 +71,9 @@ export const SelectField = forwardRef<Ref, IProps>(
               <div className={classnames('custom-menu', { show: show })}>
                 {options.map(({ value, text }) => (
                   <div
-                    className="custom-item"
+                    className={classnames('custom-item', {
+                      'selected-item': value === selectedOption,
+                    })}
                     key={value}
                     onClick={() => {
                       onChange(value);

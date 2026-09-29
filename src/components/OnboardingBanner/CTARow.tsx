@@ -19,7 +19,7 @@ export const CTARow: FC<CTARowProps> = ({ text, subtitle, CTA, isComplete }) => 
         <PlusCircleIcon className="size-4 text-foreground" />
         <div>
           <p className={'text-base text-foreground'}>{text}</p>
-          {!!subtitle && <p className={'text-sm text-text-secondary'}>{subtitle}</p>}
+          {!!subtitle && <p className={'text-sm text-muted'}>{subtitle}</p>}
         </div>
       </div>
       <div className={'mt-4 md:mt-0'}>{CTA}</div>

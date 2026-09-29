@@ -23,9 +23,7 @@ const NotFound: FC = () => {
           Sorry, we couldn’t find the page you’re looking for.
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-6">
-          <Button onClick={() => router.replace('/app')} className="primary">
-            Go back home
-          </Button>
+          <Button onClick={() => router.replace('/app')}>Go back home</Button>
         </div>
       </div>
     </main>

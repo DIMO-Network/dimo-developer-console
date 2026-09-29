@@ -23,7 +23,8 @@ export const SignInButton: FC<SignInButtonProps> = ({
   return (
     <Button
       type="button"
-      className="sign-in-button dark"
+      variant="secondary"
+      className="sign-in-button"
       role={'sign-in-button'}
       onClick={onClick}
     >

@@ -1,12 +1,11 @@
 .header {
-  @apply flex h-12 md:h-14 items-center justify-between px-4 md:px-6
-         bg-sidebar border-b border-border w-full;
+  @apply flex h-[72px] w-full min-w-0 items-center justify-between gap-2;
 
   .page-title {
-    @apply text-lg font-bold text-foreground;
+    @apply min-w-0 truncate text-title text-ink;
   }
 
   .user-information {
-    @apply flex flex-row gap-3 items-center;
+    @apply flex flex-shrink-0 flex-row items-center gap-2 md:gap-3;
   }
 }

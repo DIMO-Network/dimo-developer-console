@@ -34,14 +34,17 @@ export const WebhookTriggerPreview = ({ cel }: { cel: WebhookFormInput['cel'] })
         <Button
           type="button"
           onClick={handleGenerate}
-          className="self-start primary-outline"
+          variant="secondary"
+          className="self-start"
         >
           Generate CEL
         </Button>
       </div>
       {!!generatedCEL && (
-        <div className={'bg-card py-2 px-3 rounded-xl'}>
-          <p className={'text-text-secondary font-mono'}>{generatedCEL}</p>
+        <div className={'bg-sheet py-2 px-3 rounded-control'}>
+          <p className={'whitespace-pre-wrap break-all font-mono text-code text-fg'}>
+            {generatedCEL}
+          </p>
         </div>
       )}
     </>

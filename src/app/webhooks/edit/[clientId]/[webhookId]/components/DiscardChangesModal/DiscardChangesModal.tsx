@@ -13,17 +13,17 @@ export const DiscardChangesModal: FC<Props> = ({ isOpen, onClose, onConfirm }) =
   return (
     <Modal isOpen={isOpen} setIsOpen={onClose}>
       <div className="flex w-full flex-col gap-12">
-        <Title>Discard changes</Title>
+        <Title className={'text-panel-title'}>Discard changes</Title>
         <div className="flex flex-col gap-4">
           <p>
             Are you sure you want to discard your changes? This action cannot be undone.
           </p>
         </div>
         <div className="flex flex-col gap-4">
-          <Button onClick={onConfirm} className="error">
+          <Button onClick={onConfirm} variant="destructive">
             Confirm
           </Button>
-          <Button className="primary-outline" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
             Cancel
           </Button>
         </div>

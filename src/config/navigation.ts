@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  CarRentalIcon,
   HomeIcon,
   IntegrationIcon,
   MonitorHeartIcon,
@@ -9,11 +10,13 @@ import {
   ChipIcon,
   DeveloperBoardIcon,
 } from '@/components/Icons';
+import { TEMPLATE_EDITOR_ENABLED } from '@/utils/featureFlags';
 
 const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const EXPLORER_VEHICLE_REGEX = /^\/explorer\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
+const TEMPLATE_EDIT_REGEX = /^\/templates\/[^/]+$/;
 const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create\/[^/]+$/;
 const EDIT_WEBHOOK_REGEX = /^\/webhooks\/edit\/[^/]+\/[^/]+$/;
 const CREATE_CONNECTION_REGEX = /^\/connections\/create\/[^/]+$/;
@@ -30,6 +33,10 @@ export const getPageTitle = (path: string) => {
   if (EDIT_WEBHOOK_REGEX.test(path)) return 'Edit webhook';
   if (CREATE_CONNECTION_REGEX.test(path)) return 'Create a Connection';
   if (CONNECTION_DETAILS_REGEX.test(path)) return 'Connection Details';
+  // Ordered before TEMPLATE_EDIT_REGEX, which would otherwise match
+  // /templates/new and title the create page "Edit template".
+  if (path === '/templates/new') return 'New template';
+  if (TEMPLATE_EDIT_REGEX.test(path)) return 'Edit template';
 };
 
 const pageTitles: Record<string, string> = {
@@ -37,6 +44,7 @@ const pageTitles: Record<string, string> = {
   '/app': 'Home',
   '/licenses': 'Licenses',
   '/webhooks': 'Webhooks',
+  '/templates': 'Vehicle templates',
   '/api-status': 'API Status',
   '/connections': 'Connections',
   '/settings': 'Settings',
@@ -44,7 +52,7 @@ const pageTitles: Record<string, string> = {
 };
 
 const dataExplorerMenuItem = {
-  label: 'Data Explorer',
+  label: 'Data explorer',
   icon: ChipIcon,
   iconClassName: 'h-5 w-5',
   link: '/explorer',
@@ -79,6 +87,14 @@ const baseMainMenu = [
     disabled: false,
   },
   {
+    label: 'Templates',
+    icon: CarRentalIcon,
+    iconClassName: 'h-5 w-5',
+    link: '/templates',
+    external: false,
+    disabled: !TEMPLATE_EDITOR_ENABLED,
+  },
+  {
     label: 'Documentation',
     icon: SummarizeIcon,
     iconClassName: 'h-5 w-5',
@@ -87,7 +103,7 @@ const baseMainMenu = [
     disabled: false,
   },
   {
-    label: 'API Status',
+    label: 'API status',
     icon: MonitorHeartIcon,
     iconClassName: 'h-5 w-5',
     link: 'https://stats.uptimerobot.com/snU0rkEEah',
@@ -139,7 +155,7 @@ export const bottomMenu: NavItem[] = [
   {
     label: 'Settings',
     icon: SettingsIcon,
-    iconClassName: 'h-5 w-5 fill-grey-200',
+    iconClassName: 'h-5 w-5',
     link: '/settings',
     external: false,
     disabled: false,
@@ -174,6 +190,14 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
         external: false,
         disabled: false,
       },
+      {
+        label: 'Templates',
+        icon: CarRentalIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/templates',
+        external: false,
+        disabled: !TEMPLATE_EDITOR_ENABLED,
+      },
       ...(includeConnections
         ? [
             {
@@ -192,7 +216,7 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
     label: 'Resources',
     items: [
       {
-        label: 'Data Explorer',
+        label: 'Data explorer',
         icon: ChipIcon,
         iconClassName: 'h-4 w-4',
         link: '/explorer',
@@ -208,7 +232,7 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
         disabled: false,
       },
       {
-        label: 'API Status',
+        label: 'API status',
         icon: MonitorHeartIcon,
         iconClassName: 'h-4 w-4',
         link: 'https://stats.uptimerobot.com/snU0rkEEah',

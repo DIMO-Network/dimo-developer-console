@@ -61,16 +61,16 @@ describe('Brand', () => {
     expect(screen.getByText('Consumer App')).toBeInTheDocument();
   });
 
-  it('shows Add Brand button for owner', async () => {
+  it('shows Add brand button for owner', async () => {
     (fetchMyBrands as jest.Mock).mockResolvedValue([]);
     render(<Brand license={mockLicense as never} />);
-    await waitFor(() => expect(screen.getByText('Add Brand')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Add brand')).toBeInTheDocument());
   });
 
-  it('shows BrandForm when Add Brand is clicked', async () => {
+  it('shows BrandForm when Add brand is clicked', async () => {
     (fetchMyBrands as jest.Mock).mockResolvedValue([]);
     render(<Brand license={mockLicense as never} />);
-    await waitFor(() => fireEvent.click(screen.getByText('Add Brand')));
+    await waitFor(() => fireEvent.click(screen.getByText('Add brand')));
     expect(screen.getByPlaceholderText('e.g. Fleet App')).toBeInTheDocument();
   });
 

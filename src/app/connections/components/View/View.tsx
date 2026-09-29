@@ -54,12 +54,13 @@ const MainComponent: React.FC = () => {
                 <div className="connection-public-key">
                   {connection.connection_license_public_key}
                 </div>
-                <button
-                  className="connection-details-btn"
+                <Button
+                  variant="secondary"
+                  className="w-full"
                   onClick={() => router.push(`/connections/${connection.id}`)}
                 >
-                  Connection Details
-                </button>
+                  Connection details
+                </Button>
               </div>
             ))}
           </div>
@@ -82,7 +83,7 @@ const MainComponent: React.FC = () => {
         <SectionHeader title="Connections">
           {(!connections || connections.length === 0) && (
             <Button
-              className="dark with-icon"
+              variant="primary"
               onClick={handleCreateConnection}
               disabled={isLoading}
             >

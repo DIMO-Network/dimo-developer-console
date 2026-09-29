@@ -1,19 +1,29 @@
 .text-field {
-  @apply rounded-md border border-input bg-background px-3 py-2 outline-0 text-foreground flex flex-row font-normal text-sm;
+  @apply flex min-h-10 flex-row items-center rounded-control border border-control-border bg-control px-3 text-fg transition-[border-color,box-shadow] focus-within:border-focus-ring focus-within:ring-[3px] focus-within:ring-accent-soft;
+
+  /* Hover firms the edge, but never over the focus ring. */
+  &:hover:not(:focus-within) {
+    @apply border-control-border-hover;
+  }
 
   input {
-    @apply w-full bg-transparent outline-0 font-normal text-sm text-foreground placeholder:text-muted-foreground;
+    @apply w-full bg-transparent text-body-sm font-normal text-fg outline-0 placeholder:text-muted;
   }
 }
 
+/* Read-only: same edge, muted ink, no hover firming. */
 .text-field:has(input[readonly]) {
-  @apply bg-muted/50 border-border/60 cursor-default;
+  @apply cursor-default;
+
+  &:hover:not(:focus-within) {
+    @apply border-control-border;
+  }
 
   input {
-    @apply cursor-default text-muted-foreground;
+    @apply cursor-default text-muted;
   }
 }
 
 .text-field.light-placeholder input {
-  @apply placeholder:text-muted-foreground/50;
+  @apply placeholder:text-muted/50;
 }

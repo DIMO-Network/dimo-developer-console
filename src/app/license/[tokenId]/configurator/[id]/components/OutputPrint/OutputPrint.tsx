@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import { Button } from '@/components/Button';
 import {
   DynamicFormProps,
   ComponentType,
@@ -221,12 +222,12 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
     <>
       {/* Toggle */}
       <div className="pt-4">
-        <label className="block font-semibold mb-1">View as:</label>
+        <label className="mb-1 block text-label text-muted">View as:</label>
         <SegmentedControl
           value={viewMode}
           options={[
             { value: 'code', label: 'Code' },
-            { value: 'url', label: 'Url' },
+            { value: 'url', label: 'URL' },
           ]}
           onChange={(value) => setViewMode(value)}
         />
@@ -234,23 +235,30 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
 
       {/* Output */}
       <div className="pt-4 relative">
-        <h3 className="font-semibold mb-2">Generated Code</h3>
+        <h3 className="mb-2 text-card-title text-ink">Generated code</h3>
         {viewMode === 'code' ? (
           <SyntaxHighlighter
             language="tsx"
             style={oneDark}
-            customStyle={{ borderRadius: '0.5rem', padding: '1rem' }}
+            customStyle={{
+              borderRadius: '10px',
+              padding: '1rem',
+              margin: 0,
+              fontSize: '13px',
+              lineHeight: '20px',
+            }}
           >
             {renderSnippet()}
           </SyntaxHighlighter>
         ) : (
-          <pre className="bg-accent p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
+          <pre className="overflow-x-auto whitespace-pre-wrap break-all rounded-control bg-control p-4 font-mono text-code text-fg">
             {buildUrl()}
           </pre>
         )}
 
-        <button
-          className="absolute top-2 right-2 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 shadow-md"
+        <Button
+          variant="secondary"
+          className="absolute right-2 top-2"
           onClick={() =>
             navigator.clipboard.writeText(
               viewMode === 'code' ? renderSnippet() : buildUrl(),
@@ -258,7 +266,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
           }
         >
           Copy
-        </button>
+        </Button>
       </div>
     </>
   );

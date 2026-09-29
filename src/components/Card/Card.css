@@ -1,19 +1,15 @@
 .card {
-  @apply p-4 rounded-lg;
-
-  .dark {
-    @apply bg-card;
-  }
+  @apply rounded-card bg-card p-4;
 
   &.card-border {
-    @apply border border-border;
+    @apply border border-outline;
   }
 
   &.primary {
-    @apply bg-card rounded-2xl;
+    @apply bg-card;
   }
 
   &.secondary {
-    @apply bg-accent rounded-xl;
+    @apply bg-sheet;
   }
 }

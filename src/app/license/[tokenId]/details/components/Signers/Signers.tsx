@@ -318,7 +318,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     if (isLicenseOwner) {
       return (
         <Button
-          className={'table-action-button'}
+          variant="secondary"
+          size="icon"
           title="Delete API key"
           type="button"
           onClick={() => {
@@ -326,7 +327,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           }}
           key={`delete-action-${index}`}
         >
-          <TrashIcon className="w-5 h-5" />
+          <TrashIcon className="h-5 w-5" />
         </Button>
       );
     }
@@ -377,49 +378,54 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   return (
-    <div className="p-4 bg-accent border border-border rounded-2xl flex flex-col gap-4 text-foreground">
-      <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
-        <h2 className="text-xl font-semibold text-foreground">API Keys</h2>
+    <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
+      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
+        <h2 className="text-card-title text-ink">API keys</h2>
         {isLicenseOwner && (
           <div className="flex gap-2">
             <Button
-              className="dark with-icon px-4"
+              variant="secondary"
+              className="px-4"
               onClick={() => setShowRentalOSConfirm(true)}
             >
-              <TruckIcon className="w-4 h-4" />
+              <TruckIcon className="h-4 w-4" />
               Register RentalOS
             </Button>
-            <Button className="dark with-icon px-4" onClick={handleGenerateSigner}>
-              <KeyIcon className="w-4 h-4" />
-              Generate Key
+            <Button variant="secondary" className="px-4" onClick={handleGenerateSigner}>
+              <KeyIcon className="h-4 w-4" />
+              Generate key
             </Button>
           </div>
         )}
       </div>
       <div>
         {!!displaySigners.length && (
-          <Table
-            columns={[
-              {
-                name: 'address',
-                label: 'Signer address',
-                CustomHeader: <SignerAddressHeader key="header-addr" />,
-                render: (item: SignerNode) => (
-                  <div className="flex items-center gap-2">
-                    <span>{item.address}</span>
-                    {item.address.toLowerCase() === rentalOSSigner && (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary text-white whitespace-nowrap">
-                        RentalOS
+          <div className="-mx-4 -mb-4">
+            <Table
+              columns={[
+                {
+                  name: 'address',
+                  label: 'Signer address',
+                  CustomHeader: <SignerAddressHeader key="header-addr" />,
+                  render: (item: SignerNode) => (
+                    <div className="flex items-center gap-2">
+                      <span className="break-all font-mono text-code">
+                        {item.address}
                       </span>
-                    )}
-                  </div>
-                ),
-              },
-              { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
-            ]}
-            data={displaySigners}
-            actions={[renderDeleteSignerAction]}
-          />
+                      {item.address.toLowerCase() === rentalOSSigner && (
+                        <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted whitespace-nowrap">
+                          RentalOS
+                        </span>
+                      )}
+                    </div>
+                  ),
+                },
+                { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
+              ]}
+              data={displaySigners}
+              actions={[renderDeleteSignerAction]}
+            />
+          </div>
         )}
       </div>
       <DeleteConfirmationModal
@@ -440,23 +446,23 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       <Modal isOpen={showRentalOSConfirm} setIsOpen={setShowRentalOSConfirm}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <h2 className="text-xl font-semibold">Register RentalOS</h2>
-            <p className="text-text-secondary text-sm">
+            <h2 className="text-panel-title text-ink">Register RentalOS</h2>
+            <p className="text-body-sm text-muted">
               Clicking <strong>Proceed</strong> will:
             </p>
-            <ul className="text-text-secondary text-sm list-disc pl-5 flex flex-col gap-1">
+            <ul className="flex list-disc flex-col gap-1 pl-5 text-body-sm text-muted">
               <li>Add RentalOS as an authorized redirect URI</li>
               <li>Generate and register a new API key</li>
               <li>Register your tenant with RentalOS</li>
             </ul>
-            <p className="text-text-secondary text-sm">
+            <p className="text-body-sm text-muted">
               You&apos;ll need to approve transactions. Don&apos;t close this window once
               started.
             </p>
           </div>
           <div className="flex gap-3">
             <Button
-              className="primary flex-1"
+              className="flex-1"
               onClick={() => {
                 setShowRentalOSConfirm(false);
                 void handleGenerateRentalOSTenant();
@@ -465,7 +471,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               Proceed
             </Button>
             <Button
-              className="primary-outline flex-1"
+              variant="secondary"
+              className="flex-1"
               onClick={() => setShowRentalOSConfirm(false)}
             >
               Cancel
@@ -480,7 +487,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
 const SignerAddressHeader = () => (
   <Column key={'signer-address-header'}>
     <div>Signer address</div>
-    <p className={'max-w-[360px] text-text-secondary text-sm !normal-case'}>
+    <p className={'max-w-[360px] text-label font-normal text-muted'}>
       *This is not your API key. If you have lost your API key, you will need to generate
       a new one.
     </p>

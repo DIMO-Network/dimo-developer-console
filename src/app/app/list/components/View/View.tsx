@@ -40,7 +40,7 @@ const shortcuts = [
     href: '/webhooks',
   },
   {
-    label: 'Data Explorer',
+    label: 'Data explorer',
     description: 'Browse and query live vehicle telemetry data',
     icon: ChipIcon,
     href: '/explorer',

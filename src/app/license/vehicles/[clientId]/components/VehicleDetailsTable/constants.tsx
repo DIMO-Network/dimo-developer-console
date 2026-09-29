@@ -17,7 +17,7 @@ function ActionsCell({
   return (
     <div className="relative flex justify-end" onClick={(e) => e.stopPropagation()}>
       <button
-        className="px-2 py-1 rounded hover:bg-accent text-text-secondary text-lg leading-none"
+        className="flex size-8 items-center justify-center rounded-full text-body leading-none text-muted transition-colors hover:bg-control hover:text-ink"
         onClick={(e) => {
           e.stopPropagation();
           setOpen((v) => !v);
@@ -36,9 +36,9 @@ function ActionsCell({
               setOpen(false);
             }}
           />
-          <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded border border-border bg-accent shadow-lg">
+          <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded-control border border-outline bg-overlay p-1 shadow-float">
             <button
-              className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-accent"
+              className="w-full rounded-chip px-3 py-2 text-left text-body-sm text-negative transition-colors hover:bg-negative-soft"
               onClick={(e) => {
                 e.stopPropagation();
                 setOpen(false);
@@ -73,12 +73,12 @@ export const buildColumns = (
       const { tokenId, definition } = info.row.original;
       const isSimulated = simulatedTokenIds.has(tokenId);
       return (
-        <span className="flex items-center gap-2">
+        <span className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2">
           <span>
             {definition?.make} {definition?.model} {definition?.year}
           </span>
           {isSimulated && (
-            <span className="text-[10px] font-mono tracking-[0.15em] uppercase px-1.5 py-0.5 rounded border border-border text-text-secondary bg-accent leading-none">
+            <span className="shrink-0 whitespace-nowrap rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
               Simulated
             </span>
           )}

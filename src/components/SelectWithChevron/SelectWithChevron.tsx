@@ -54,7 +54,9 @@ export const SelectWithChevron: React.FC<SelectWithChevronProps> = ({
         {selectableOptions.map(({ value: v, label }) => (
           <div
             key={v}
-            className="custom-item"
+            className={classnames('custom-item', {
+              'selected-item': v === value,
+            })}
             onClick={(e) => {
               e.stopPropagation();
               handleSelect(v);

@@ -7,9 +7,9 @@
 }
 
 .user-field-label {
-  @apply text-text-secondary text-sm font-medium;
+  @apply text-label text-muted;
 }
 
 .user-field-value {
-  @apply text-foreground text-sm;
+  @apply text-body-sm text-fg;
 }

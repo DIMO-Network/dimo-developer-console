@@ -22,18 +22,15 @@ export const AccountInformationModal: FC = () => {
     >
       <div className="account-information-content">
         <div className="account-information-header">
-          <Title className="text-2xl" component="h3">
-            Account Information
+          <Title className="text-panel-title" component="h3">
+            Account information
           </Title>
         </div>
         <div className="account-information-body">
           <AccountInformation />
           <Balances shouldFetchBalances={showAccountInformation} />
         </div>
-        <Button
-          className={'primary-outline'}
-          onClick={() => setShowAccountInformation(false)}
-        >
+        <Button variant="secondary" onClick={() => setShowAccountInformation(false)}>
           Close
         </Button>
       </div>

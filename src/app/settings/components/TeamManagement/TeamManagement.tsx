@@ -43,7 +43,9 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
   };
 
   const renderRole = ({ ...teamCollaborator }: ITeamCollaborator) => (
-    <>{TeamRolesLabels[teamCollaborator.role as TeamRoles]}</>
+    <span className="whitespace-nowrap text-muted">
+      {TeamRolesLabels[teamCollaborator.role as TeamRoles]}
+    </span>
   );
 
   const renderDeleteRemoveCollaborator = ({
@@ -54,7 +56,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
       isOwner(currentUser!.role) &&
       invitationRole !== TeamRoles.OWNER && (
         <div
-          className="flex flex-row items-center w-full h-full cursor-pointer"
+          className="flex flex-row items-center justify-end cursor-pointer text-muted hover:text-negative"
           onClick={() => handleDelete(id as string)}
           key={`delete-collaborator-action-${id}`}
         >

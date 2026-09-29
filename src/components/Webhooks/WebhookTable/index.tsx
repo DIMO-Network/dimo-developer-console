@@ -23,15 +23,15 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
 
   if (!data || data.length === 0) {
     return (
-      <p className="text-text-secondary text-center pb-4">
-        You haven’t created any webhooks yet.
-      </p>
+      <p className="text-muted text-center pb-4">You haven’t created any webhooks yet.</p>
     );
   }
 
   return (
     <WebhookTableContextProvider clientId={clientId}>
-      <div className="min-w-full bg-card rounded-xl py-4">
+      {/* Section already supplies the card; overflow-x-auto keeps the table from
+          blowing out the page at phone width. */}
+      <div className="min-w-full overflow-x-auto">
         <ActionModals clientId={clientId} />
         <WebhooksTable webhooks={data ?? []} clientId={clientId} />
       </div>

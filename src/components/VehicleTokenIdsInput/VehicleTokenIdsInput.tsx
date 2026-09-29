@@ -86,11 +86,11 @@ export const VehicleTokenIdsInput: React.FC<VehicleTokenIdsInputProps> = ({
         placeholder={placeholder}
         disabled={disabled}
         rows={6}
-        className={displayError ? 'border-feedback-error' : ''}
+        className={displayError ? 'border-negative' : ''}
       />
 
       {stats.total > 0 && (
-        <div className="text-sm text-text-secondary">
+        <div className="text-sm text-muted">
           {stats.total} token ID{stats.total !== 1 ? 's' : ''} entered
           {stats.unique !== stats.total && ` (${stats.unique} unique)`}
         </div>
@@ -98,7 +98,7 @@ export const VehicleTokenIdsInput: React.FC<VehicleTokenIdsInputProps> = ({
 
       {displayError && <TextError errorMessage={displayError} />}
 
-      <div className="text-sm text-text-secondary">
+      <div className="text-sm text-muted">
         <p>You can enter vehicle token IDs in the following ways:</p>
         <ul className="list-disc list-inside mt-1 space-y-1">
           <li>One per line: 12345, 67890, 11111</li>

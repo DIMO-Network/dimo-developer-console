@@ -43,4 +43,64 @@ describe('Button', () => {
       expect(handleClick).not.toHaveBeenCalled();
     });
   });
+
+  it('is a primary button by default', () => {
+    render(<Button>Save</Button>);
+    expect(screen.getByRole('button')).toHaveClass('button', 'primary');
+  });
+
+  it.each(['brand', 'secondary', 'ghost', 'destructive', 'destructive-ghost'] as const)(
+    'renders the %s variant',
+    (variant) => {
+      render(<Button variant={variant}>Go</Button>);
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass('button', variant);
+      expect(button).not.toHaveClass('primary');
+    },
+  );
+
+  it('keeps extra classes alongside the variant', () => {
+    render(
+      <Button variant="secondary" className="w-full">
+        Go
+      </Button>,
+    );
+    expect(screen.getByRole('button')).toHaveClass('button', 'secondary', 'w-full');
+  });
+
+  it('is the md size by default (no size class)', () => {
+    render(<Button>Save</Button>);
+    expect(screen.getByRole('button')).not.toHaveClass('icon');
+  });
+
+  it('renders the round icon size alongside any variant', () => {
+    render(
+      <Button variant="ghost" size="icon" title="Delete">
+        <svg aria-hidden="true" />
+      </Button>,
+    );
+    const button = screen.getByRole('button', { name: 'Delete' });
+    expect(button).toHaveClass('button', 'ghost', 'icon');
+    expect(button).not.toHaveClass('primary');
+  });
+});
+
+describe('Button loading', () => {
+  it('is disabled while loading and does not call onClick', () => {
+    const handleClick = jest.fn();
+    render(
+      <Button type="submit" loading onClick={handleClick}>
+        Save
+      </Button>,
+    );
+    const button = screen.getByRole('button');
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('honors disabled when not loading', () => {
+    render(<Button disabled>Save</Button>);
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
 });

@@ -108,18 +108,18 @@ export const Brand: FC<Props> = ({ license }) => {
   };
 
   return (
-    <div className="p-4 bg-accent border border-border rounded-2xl flex flex-col gap-4 text-foreground">
-      <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
-        <h2 className="text-xl font-semibold text-foreground">Brand</h2>
+    <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
+      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
+        <h2 className="text-card-title text-ink">Brand</h2>
         {isOwner && !editing && (
-          <Button type="button" className="dark" onClick={() => setEditing('new')}>
-            Add Brand
+          <Button type="button" variant="secondary" onClick={() => setEditing('new')}>
+            Add brand
           </Button>
         )}
       </div>
       <div>
         {loading ? (
-          <div className="text-text-secondary">Loading brands…</div>
+          <div className="text-muted">Loading brands…</div>
         ) : editing ? (
           <BrandForm
             brand={editing === 'new' ? null : editing}
@@ -132,7 +132,7 @@ export const Brand: FC<Props> = ({ license }) => {
         ) : (
           <div className="flex flex-col">
             {brands.length === 0 ? (
-              <p className="text-text-secondary text-sm">No brand set.</p>
+              <p className="text-body-sm text-muted">No brand set.</p>
             ) : (
               brands.map((brand) => (
                 <BrandRow
@@ -146,12 +146,12 @@ export const Brand: FC<Props> = ({ license }) => {
               ))
             )}
             {brands.length > 0 && (
-              <div className="mt-6 p-4 bg-accent rounded-lg">
-                <p className="text-sm font-medium text-foreground mb-2">
+              <div className="mt-6 rounded-control bg-control p-4">
+                <p className="mb-2 text-body-sm font-medium text-ink">
                   Using multiple brands with Login with DIMO
                 </p>
-                <pre className="text-xs font-mono text-text-secondary overflow-x-auto">{`dimo.login({ clientId: '${fragment.clientId}', brandName: 'Fleet App' })`}</pre>
-                <p className="text-xs text-text-secondary mt-1">
+                <pre className="overflow-x-auto font-mono text-code text-muted">{`dimo.login({ clientId: '${fragment.clientId}', brandName: 'Fleet App' })`}</pre>
+                <p className="mt-1 text-label text-muted">
                   Omit <code>brandName</code> to use your default brand.
                 </p>
               </div>

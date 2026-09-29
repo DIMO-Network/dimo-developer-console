@@ -3,10 +3,14 @@
 import { FC, useState, useMemo } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import { useRouter } from 'next/navigation';
+import classnames from 'classnames';
 import { Loader } from '@/components/Loader';
 import { Button } from '@/components/Button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+
+// For .text-field, the shared search/input recipe.
+import '@/components/TextField/TextField.css';
 
 const GET_VEHICLES_FOR_EXPLORER = gql(`
   query GetVehiclesForExplorer($clientId: Address!, $first: Int, $last: Int, $before: String, $after: String) {
@@ -89,27 +93,29 @@ export const VehicleList: FC<Props> = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-card rounded-xl p-4 h-full">
+    <div className="flex h-full flex-col gap-3 rounded-card bg-card p-4">
       {/* Search */}
-      <div className="relative">
-        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
+      <div className="text-field">
+        <MagnifyingGlassIcon className="h-4 w-4 flex-shrink-0 text-muted" />
         <input
           type="search"
           placeholder="Search vehicles…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-accent text-foreground placeholder-text-secondary rounded-lg pl-9 pr-3 py-2 text-sm outline-none border border-transparent focus:border-cta-default"
+          className="w-full bg-transparent px-2 text-body-sm text-fg outline-0 placeholder:text-muted"
         />
       </div>
 
       {/* List */}
-      <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {loading && <Loader isLoading />}
-        {error && <p className="text-sm text-red-400">Failed to load vehicles.</p>}
-        {!loading && !error && filtered.length === 0 && (
-          <p className="text-sm text-text-secondary text-center mt-4">
-            No vehicles found.
+        {error && (
+          <p className="mt-4 text-center text-body-sm text-negative">
+            Failed to load vehicles.
           </p>
+        )}
+        {!loading && !error && filtered.length === 0 && (
+          <p className="mt-4 text-center text-body-sm text-muted">No vehicles found.</p>
         )}
         {!loading &&
           filtered.map((vehicle) => {
@@ -124,18 +130,22 @@ export const VehicleList: FC<Props> = ({
             return (
               <button
                 key={vehicle.tokenId}
+                aria-current={isSelected ? 'true' : undefined}
                 onClick={() => {
                   onSelectVehicle(vehicle.tokenId);
                   router.push(`/explorer/${vehicle.tokenId}`);
                 }}
-                className={`flex flex-col items-start w-full text-left px-3 py-3 rounded-lg border-b border-b-border last:border-b-0 transition-colors ${
-                  isSelected ? 'bg-primary text-white' : 'hover:bg-accent text-foreground'
-                }`}
+                className={classnames(
+                  'flex w-full flex-col items-start rounded-control border-b border-outline px-3 py-3 text-left transition-colors last:border-b-0',
+                  isSelected
+                    ? 'bg-control text-ink shadow-selected'
+                    : 'text-fg hover:bg-control/50',
+                )}
               >
-                <span className="text-sm font-medium">{mmy || 'Unknown vehicle'}</span>
-                <span
-                  className={`text-xs mt-0.5 ${isSelected ? 'text-white/70' : 'text-text-secondary'}`}
-                >
+                <span className="text-body-sm font-medium">
+                  {mmy || 'Unknown vehicle'}
+                </span>
+                <span className="mt-0.5 text-label text-muted">
                   Token #{vehicle.tokenId}
                 </span>
               </button>
@@ -144,7 +154,7 @@ export const VehicleList: FC<Props> = ({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between text-xs text-text-secondary pt-2 border-t border-t-border">
+      <div className="flex items-center justify-between border-t border-outline pt-2 text-label text-muted">
         <span>
           {totalCount === 0
             ? '0 vehicles'
@@ -152,14 +162,16 @@ export const VehicleList: FC<Props> = ({
         </span>
         <div className="flex gap-1">
           <Button
-            className="table-action-button"
+            variant="secondary"
+            size="icon"
             disabled={pageIndex === 0 || loading}
             onClick={handlePrev}
           >
             <ChevronLeftIcon className="w-4 h-4" />
           </Button>
           <Button
-            className="table-action-button"
+            variant="secondary"
+            size="icon"
             disabled={!pageInfo?.hasNextPage || loading}
             onClick={handleNext}
           >

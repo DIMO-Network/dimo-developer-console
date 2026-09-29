@@ -30,15 +30,11 @@ export const APIKeyModal: FC<Props> = ({ isOpen, apiKey, onClose }) => {
       className={'signer-generated-modal'}
     >
       <div className={'flex flex-col gap-12 flex-1'}>
-        <Title component={'h2'} className={'text-2xl !leading-8'}>
+        <Title component={'h2'} className={'text-panel-title'}>
           API key generated
         </Title>
-        <div
-          className={
-            'bg-feedback-success bg-opacity-50 py-3 px-4 rounded-xl flex flex-col gap-2'
-          }
-        >
-          <p className={'text-sm'}>
+        <div className={'flex flex-col gap-2 rounded-control bg-control px-4 py-3'}>
+          <p className={'text-body-sm text-fg'}>
             Make sure to copy your API key now as you will not be able to see this again.
           </p>
           <CopyableRow
@@ -48,7 +44,7 @@ export const APIKeyModal: FC<Props> = ({ isOpen, apiKey, onClose }) => {
           />
         </div>
         <div className={'mt-4 flex flex-col flex-1 gap-4'}>
-          <Button className={'w-full primary-outline'} onClick={onClose}>
+          <Button variant="primary" className="w-full" onClick={onClose}>
             Done
           </Button>
         </div>

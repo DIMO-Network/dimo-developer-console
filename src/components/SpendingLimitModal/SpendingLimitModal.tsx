@@ -75,7 +75,7 @@ export const SpendingLimitModal: FC<IProps> = ({
         </div>
         <TokenInput control={control} name="credits" description="$DIMO" />
         <div className="credit-action">
-          <Button className="primary !h-9" loading={isLoading}>
+          <Button className="!h-9" loading={isLoading}>
             Confirm
           </Button>
         </div>

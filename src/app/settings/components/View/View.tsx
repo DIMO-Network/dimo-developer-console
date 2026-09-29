@@ -24,7 +24,7 @@ const View: FC = () => {
         <>
           <UserDetails />
           <Section>
-            <SectionHeader title="Team Management" />
+            <SectionHeader title="Team management" />
             <TeamManagement
               teamCollaborators={teamCollaborators.filter(({ deleted }) => !deleted)}
               refreshData={refreshData}

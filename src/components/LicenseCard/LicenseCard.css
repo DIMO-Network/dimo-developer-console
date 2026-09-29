@@ -1,11 +1,33 @@
 .license-card {
-  @apply flex flex-row justify-between items-start bg-card border border-border rounded-2xl !p-0;
+  @apply flex flex-row items-start justify-between rounded-card bg-card !p-0 transition-colors hover:bg-control;
 
   .content {
-    @apply flex flex-col gap-4 flex-1 p-6;
+    @apply flex min-w-0 flex-1 flex-col gap-5 p-6;
 
     .title {
-      @apply text-lg font-black text-foreground;
+      @apply text-card-title text-ink;
     }
   }
+
+  /* Token id: a quiet chip in the body face (tabular figures), not mono. It is
+     one tone above the card's hover tone so it survives the hover step. */
+  .license-card-token-id {
+    @apply shrink-0 rounded-chip bg-highest px-2 py-0.5 text-label text-muted;
+  }
+
+  /* The headline number of the card; a link, but ink, not mint. */
+  .anchor.license-card-metric {
+    @apply w-fit py-0 text-metric text-ink;
+  }
+
+  /* Secondary links on the card read as meta until hovered. */
+  .license-card-link {
+    @apply flex w-fit flex-row items-center gap-2 py-0 text-body-sm text-muted transition-colors hover:text-ink;
+  }
+}
+
+/* The card steps up to the control tone on hover; step the secondary button
+   up with it so it keeps its edge instead of melting into the card. */
+.license-card:hover .button.secondary {
+  @apply bg-highest;
 }

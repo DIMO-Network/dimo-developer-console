@@ -10,7 +10,7 @@ const getOption = (license: LocalDeveloperLicense): SelectOption => ({
 
 const getOptions = (licenses: LocalDeveloperLicense[]) => {
   return [
-    { value: '', label: 'Select Developer License', isPlaceholder: true },
+    { value: '', label: 'Select developer license', isPlaceholder: true },
     ...licenses.map(getOption),
   ];
 };
@@ -35,7 +35,7 @@ export const DevLicenseSelector = ({
 
   return (
     <div className={'flex flex-col gap-2.5'}>
-      <Label>Select a Developer License</Label>
+      <Label>Select a developer license</Label>
       <SelectWithChevron
         options={getOptions(developerLicenses)}
         onChange={handleChange}

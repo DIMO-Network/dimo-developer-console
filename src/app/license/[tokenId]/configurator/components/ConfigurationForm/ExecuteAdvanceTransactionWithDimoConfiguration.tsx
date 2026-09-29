@@ -15,7 +15,7 @@ export const ExecuteAdvanceTransactionWithDimoConfiguration: FC<IFormProps> = ({
 }: IFormProps) => {
   return (
     <div>
-      <Label htmlFor="vehicles" className="text-xs text-medium">
+      <Label htmlFor="vehicles">
         Vehicles
         <TextField
           type="text"

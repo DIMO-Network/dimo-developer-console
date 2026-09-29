@@ -19,12 +19,10 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
 }: IFormProps) => {
   return (
     <>
-      <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
-          Login Settings
-        </p>
-        <div className="flex flex-row gap-3 w-full">
-          <Label className="text-xs font-medium w-full flex flex-col gap-1">
+      <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+        <h3 className="text-card-title text-ink">Login settings</h3>
+        <div className="flex w-full flex-col gap-4 sm:flex-row">
+          <Label className="w-full">
             Vehicles
             <TextField
               type="text"
@@ -33,8 +31,8 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
               role="company-website-input"
             />
           </Label>
-          <Label className="text-xs font-medium w-full flex flex-col gap-1">
-            Vehicle Makes
+          <Label className="w-full">
+            Vehicle makes
             <TextField
               type="text"
               placeholder="toyota, mazda..."
@@ -43,9 +41,9 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
             />
           </Label>
         </div>
-        <div className="flex flex-row gap-3 w-full">
-          <Label className="text-xs font-medium w-full flex flex-col gap-1">
-            Powertrain Types
+        <div className="flex w-full flex-col gap-4 sm:flex-row">
+          <Label className="w-full">
+            Powertrain types
             <TextField
               type="text"
               placeholder="ICE, HEV..."
@@ -55,12 +53,9 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
           </Label>
         </div>
         {brandNames.length > 1 && (
-          <Label
-            htmlFor="brandName"
-            className="text-xs font-medium w-full flex flex-col gap-1"
-          >
+          <Label htmlFor="brandName" className="w-full">
             Brand
-            <p className="text-muted-foreground font-normal text-[11px]">
+            <p className="text-label font-normal text-muted">
               Which brand to show on the Login with DIMO button. Leave as
               &quot;Default&quot; to use your workspace default brand.
             </p>
@@ -79,31 +74,31 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
       </div>
 
       {/* Privacy Policy & Terms of Service */}
-      <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground pb-2 border-b border-border">
-          Privacy Policy &amp; Terms of Service
-        </p>
-        <Label className="text-xs font-medium flex flex-col gap-1">
-          Privacy Policy URL
+      <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+        <h3 className="text-card-title text-ink">
+          Privacy policy &amp; terms of service
+        </h3>
+        <Label>
+          Privacy policy URL
           <TextField
             type="url"
             placeholder="https://yourapp.com/privacy"
             {...register('privacyPolicyUrl', { required: false })}
             role="privacy-policy-url-input"
           />
-          <p className="text-[10px] text-muted-foreground mt-0.5">
+          <p className="text-label font-normal text-muted">
             Displayed to users before they log in. Leave blank to skip.
           </p>
         </Label>
-        <Label className="text-xs font-medium flex flex-col gap-1">
-          Terms of Service URL
+        <Label>
+          Terms of service URL
           <TextField
             type="url"
             placeholder="https://yourapp.com/terms"
             {...register('tosUrl', { required: false })}
             role="tos-url-input"
           />
-          <p className="text-[10px] text-muted-foreground mt-0.5">
+          <p className="text-label font-normal text-muted">
             Displayed to users before they log in. Leave blank to skip.
           </p>
         </Label>

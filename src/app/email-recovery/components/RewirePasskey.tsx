@@ -8,7 +8,6 @@ import { EmbeddedKey, getFromLocalStorage } from '@/utils/localStorage';
 import { getUserInformation, saveNewPasskey } from '@/actions/user';
 
 import { getTurnkeyClient } from '@/services/turnkey';
-import { gtSuper } from '@/utils/font';
 
 interface IProps {
   onNext: (flow: string) => void;
@@ -103,12 +102,14 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
   return (
     <div className="email-recovery__form">
       <div className="email-recovery__header">
-        <p className={gtSuper.className}>Let&apos;s get you back in</p>
+        <p className="text-title text-ink">Let&apos;s get you back in</p>
       </div>
       <div className="email-recovery__input">
-        <p>A passkey is the fastest and most secure way to sign in to DIMO.</p>
+        <div className="otp-login-text">
+          <p>A passkey is the fastest and most secure way to sign in to DIMO.</p>
+        </div>
         <BubbleLoader isLoading={true} />
-        <p className="text-center text-xl">Rewriting your passkey...</p>
+        <p className="text-center text-body-sm text-muted">Rewriting your passkey...</p>
       </div>
     </div>
   );

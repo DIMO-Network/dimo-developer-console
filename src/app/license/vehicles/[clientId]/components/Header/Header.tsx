@@ -1,12 +1,14 @@
 export const Header = (props: { tokenId: number; alias: string }) => {
   return (
-    <div
-      className={'flex flex-row gap-2 items-center pb-6 border-b border-b-cta-default'}
-    >
-      <div className={'w-6 h-6 rounded-full bg-accent flex justify-center items-center'}>
-        <p className={'text-sm font-medium'}>{props.tokenId}</p>
+    <div className={'flex flex-row items-center gap-2 pb-4'}>
+      <div
+        className={
+          'flex h-6 min-w-6 items-center justify-center rounded-chip bg-control px-1.5'
+        }
+      >
+        <p className={'text-label text-muted'}>{props.tokenId}</p>
       </div>
-      <p className="text-base text-text-secondary">{props.alias}</p>
+      <p className="text-body text-ink">{props.alias}</p>
     </div>
   );
 };

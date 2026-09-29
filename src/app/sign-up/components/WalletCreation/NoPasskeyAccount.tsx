@@ -1,6 +1,5 @@
 import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { gtSuper } from '@/utils/font';
 import { FC } from 'react';
 
 export const NoPasskeySignup: FC = () => {
@@ -8,7 +7,7 @@ export const NoPasskeySignup: FC = () => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className={gtSuper.className}>Creating account without passkey</p>
+          <p className="text-title text-ink">Creating account without passkey</p>
         </div>
         <div className="otp-login-text">
           <p>

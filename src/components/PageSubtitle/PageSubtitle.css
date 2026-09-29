@@ -1,7 +1,7 @@
 .subtitle-content {
-  @apply border-b border-border;
+  @apply border-b border-outline;
 
   .subtitle {
-    @apply text-3xl font-medium text-muted-foreground pb-2;
+    @apply pb-2 text-title text-ink;
   }
 }

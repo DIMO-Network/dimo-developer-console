@@ -2,7 +2,6 @@ import { Anchor } from '@/components/Anchor';
 import { SignInButtons } from '@/components/SignInButton';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { gtSuper } from '@/utils/font';
 import { Button } from '@/components/Button';
 import { isEmpty } from 'lodash';
 import { FC, useState } from 'react';
@@ -47,7 +46,7 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
     <>
       <div className="sign-in__form">
         <div className="sign-in__header">
-          <p className={gtSuper.className}>Build with car data</p>
+          <p className="text-title text-ink">Build with car data</p>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="sign-in__input">
           <TextField
@@ -70,6 +69,7 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
           />
           {errors.email && <TextError errorMessage={errors.email?.message ?? ''} />}
           <Button
+            variant="brand"
             type="submit"
             disabled={isEmpty(email) || !!errors.email}
             role="continue-button"

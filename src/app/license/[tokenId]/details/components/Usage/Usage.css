@@ -1,19 +1,20 @@
+/* Tonal stat card: number in ink, caption muted, link reads as meta. */
 .overview-stat-card {
-  @apply bg-accent rounded-xl p-5 flex flex-col gap-1;
+  @apply flex flex-col gap-1 rounded-card bg-card p-5;
 }
 
 .overview-stat-card__number {
-  @apply text-4xl font-bold text-foreground tabular-nums leading-none;
+  @apply text-metric text-ink;
 }
 
 .overview-stat-card__label {
-  @apply text-xs uppercase tracking-wide text-text-secondary mt-1;
+  @apply mt-1 text-label text-muted;
 }
 
 .overview-stat-card__hint {
-  @apply text-xs text-text-secondary;
+  @apply text-label text-muted;
 }
 
 .overview-stat-card__link {
-  @apply text-xs text-text-secondary hover:text-foreground transition-colors mt-2 self-start;
+  @apply mt-2 self-start text-label text-muted transition-colors hover:text-ink;
 }

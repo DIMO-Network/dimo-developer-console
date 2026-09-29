@@ -1,15 +1,15 @@
 .vehicles-stat {
-  @apply bg-accent rounded-xl p-8 flex flex-col items-center gap-1 text-center;
+  @apply flex flex-col items-center gap-1 rounded-card bg-card p-8 text-center;
 }
 
 .vehicles-stat__number {
-  @apply text-5xl font-bold text-foreground tabular-nums leading-none;
+  @apply text-metric text-ink;
 }
 
 .vehicles-stat__label {
-  @apply text-xs uppercase tracking-wide text-text-secondary mt-1;
+  @apply mt-1 text-label text-muted;
 }
 
 .vehicles-stat__link {
-  @apply text-xs text-text-secondary hover:text-foreground transition-colors mt-2;
+  @apply mt-2 text-label text-muted transition-colors hover:text-ink;
 }

@@ -41,7 +41,7 @@ export const Usage: FC<Props> = ({ license }) => {
   return (
     <div className="overview-stat-card">
       <p className="overview-stat-card__number">{isAuthenticatedAsDev ? credits : '—'}</p>
-      <p className="overview-stat-card__label">Credits Used</p>
+      <p className="overview-stat-card__label">Credits used</p>
       {!isAuthenticatedAsDev && (
         <p className="overview-stat-card__hint">Generate a JWT to see usage</p>
       )}

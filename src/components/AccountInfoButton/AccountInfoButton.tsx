@@ -23,8 +23,8 @@ export const AccountInfoButton: FC<IAccountInfoButtonProps> = ({
 
   if (variant === 'button') {
     return (
-      <Button className={'primary-outline'} onClick={handleOpenAccountInformationModal}>
-        Account Info
+      <Button variant="secondary" onClick={handleOpenAccountInformationModal}>
+        Account info
       </Button>
     );
   }

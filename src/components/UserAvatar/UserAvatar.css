@@ -1,3 +1,3 @@
 .user-avatar-default {
-  @apply rounded-full w-10 h-10 uppercase flex items-center justify-center text-white font-medium text-base bg-[#124BDB];
+  @apply flex h-10 w-10 items-center justify-center rounded-full bg-control text-body-sm font-medium text-ink;
 }

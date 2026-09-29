@@ -7,7 +7,7 @@ export enum TeamRoles {
 
 export enum TeamRolesLabels {
   OWNER = 'Owner',
-  COLLABORATOR = 'Read Only',
+  COLLABORATOR = 'Read only',
 }
 
 export enum InvitationStatuses {

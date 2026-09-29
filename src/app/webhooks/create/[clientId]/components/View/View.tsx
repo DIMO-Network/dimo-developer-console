@@ -40,15 +40,15 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
 
   return (
     <FormStepContextProvider>
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-        <Link href="/webhooks" className="hover:text-foreground transition-colors">
+      <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
+        <Link href="/webhooks" className="transition-colors hover:text-ink">
           Webhooks
         </Link>
         <span>/</span>
-        <span className="text-foreground">New Webhook</span>
+        <span className="text-ink">New webhook</span>
       </nav>
       <div className={'flex flex-1 flex-row'}>
-        <div className={'flex flex-col flex-1'}>
+        <div className={'mt-2 flex min-w-0 flex-1 flex-col'}>
           <NewWebhookForm onComplete={onComplete} getToken={getToken} onExit={goBack} />
         </div>
         <RightPanel>

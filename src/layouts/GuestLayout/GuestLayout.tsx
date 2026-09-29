@@ -2,6 +2,8 @@
 import React, { type ReactNode } from 'react';
 
 import { withAuth } from '@/hoc';
+import { BrandLockup } from '@/components/BrandLockup';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 import './GuestLayout.css';
 
@@ -9,13 +11,13 @@ const Providers = withAuth(({ children }: { children: ReactNode }) => <>{childre
 
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
-    <main className="guest-layout dark">
-      <div className="sign-in-up-container">
-        <img src={'/images/dimo-dev.svg'} alt="DIMO Developer Console Logo" />
-        {children}
+    <main className="guest-layout">
+      <div className="guest-theme-toggle">
+        <ThemeToggle variant="icon" />
       </div>
-      <div className="background-side-image">
-        <img src={'/images/car_segment.svg'} alt="DIMO Background" />
+      <div className="guest-panel">
+        <BrandLockup product="Developer Console" />
+        {children}
       </div>
     </main>
   );

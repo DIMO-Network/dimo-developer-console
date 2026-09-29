@@ -2,43 +2,37 @@
   @apply flex flex-col gap-8;
 }
 
-.connections-page .subtitle {
-  @apply text-lg;
-}
-
 .connections-page .empty-state {
   @apply flex items-center justify-center py-16;
 }
 
 .connections-page .empty-state-message {
-  @apply text-center text-text-secondary;
+  @apply text-center text-muted;
 }
 
 .connections-grid {
-  @apply grid gap-6 mt-6;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  @apply mt-4 grid gap-4;
+  /* min(400px, 100%) so a single column never forces the grid wider than its
+     container at phone widths. */
+  grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
 }
 
 .connection-card {
-  @apply bg-card rounded-2xl p-4 flex flex-col gap-3;
+  @apply flex min-w-0 flex-col gap-3 rounded-card bg-sheet p-4;
 }
 
 .connection-card-header {
-  @apply flex justify-between items-center;
+  @apply flex items-center justify-between gap-2;
 }
 
 .connection-name {
-  @apply text-foreground text-lg font-semibold m-0;
+  @apply m-0 min-w-0 truncate text-card-title text-ink;
 }
 
 .connection-icon {
-  @apply text-text-secondary flex items-center justify-center w-6 h-6;
+  @apply flex h-6 w-6 flex-shrink-0 items-center justify-center text-muted;
 }
 
 .connection-public-key {
-  @apply text-text-secondary text-sm font-mono break-all;
-}
-
-.connection-details-btn {
-  @apply bg-primary text-white border-0 py-2.5 px-4 rounded-full text-sm font-medium cursor-pointer transition-colors duration-200 hover:opacity-90 border-2 border-transparent;
+  @apply break-all font-mono text-code text-muted;
 }

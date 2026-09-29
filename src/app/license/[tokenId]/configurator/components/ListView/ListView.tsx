@@ -62,33 +62,34 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
 
   return (
     <div className="liwd-configurator-page">
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+      <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link
           href={`/license/${tokenId}/details`}
-          className="hover:text-foreground transition-colors"
+          className="transition-colors hover:text-ink"
         >
-          License Details
+          License details
         </Link>
         <span>/</span>
-        <span className="text-foreground">SDK Configurator</span>
+        <span className="text-ink">SDK configurator</span>
       </nav>
-      <div className="flex items-center justify-between mb-4">
-        <PageSubtitle subtitle="Login With DIMO Configurator" />
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <PageSubtitle subtitle="Login with DIMO configurator" />
         <Button
-          className="dark with-icon px-4"
+          variant="primary"
+          className="shrink-0 whitespace-nowrap px-4"
           onClick={() => router.push(`/license/${tokenId}/configurator/new`)}
         >
-          New Configuration
+          New configuration
         </Button>
       </div>
-      <p className="text-sm text-text-secondary mb-4">
+      <p className="mb-4 text-body-sm text-muted">
         A vehicle sharing link is required for vehicle owners to grant data permissions to
         your application.{' '}
         <a
           href="https://www.dimo.org/docs/build/building-with-tools/client-sdk-dimo-connect"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary hover:underline"
+          className="text-ink underline underline-offset-2"
         >
           Learn how to use the configurationId with LIWD
         </a>

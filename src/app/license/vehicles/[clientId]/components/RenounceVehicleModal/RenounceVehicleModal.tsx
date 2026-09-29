@@ -3,6 +3,7 @@ import { FC, useState } from 'react';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
+import { WarningAmberIcon } from '@/components/Icons';
 
 interface Vehicle {
   tokenId: number;
@@ -51,32 +52,38 @@ export const RenounceVehicleModal: FC<Props> = ({ vehicle, onConfirm, onClose })
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">⚠️</span>
-          <Title component="h2" className="text-2xl !leading-8">
+          <WarningAmberIcon className="h-6 w-6 flex-shrink-0 text-warning" />
+          <Title component="h2" className="text-panel-title">
             Renounce vehicle access?
           </Title>
         </div>
 
         {vehicle && (
           <div className="flex flex-col gap-1">
-            <p className="font-medium">{vehicleName(vehicle)}</p>
-            <p className="text-sm text-text-secondary">Token ID: {vehicle.tokenId}</p>
+            <p className="font-medium text-ink">{vehicleName(vehicle)}</p>
+            <p className="text-body-sm text-muted">Token ID: {vehicle.tokenId}</p>
           </div>
         )}
 
-        <p className="text-text-secondary">
+        <p className="text-muted">
           You will lose all data access to this vehicle. The vehicle owner would need to
           re-grant access.
         </p>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-body-sm text-negative">{error}</p>}
 
         <div className="mt-2 flex flex-col gap-3">
-          <Button className="error w-full" loading={isLoading} onClick={handleConfirm}>
+          <Button
+            variant="destructive"
+            className="w-full"
+            loading={isLoading}
+            onClick={handleConfirm}
+          >
             Renounce access
           </Button>
           <Button
-            className="w-full primary-outline"
+            variant="secondary"
+            className="w-full"
             disabled={isLoading}
             onClick={onClose}
           >

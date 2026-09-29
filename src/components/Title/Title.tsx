@@ -11,7 +11,7 @@ interface IProps {
 
 export const Title: FC<IProps> = ({
   children,
-  className = 'text-2xl',
+  className = 'text-title',
   component: Component = 'h1',
 }) => {
   return (

@@ -39,16 +39,16 @@ export const Vehicles: FC<IProps> = ({ license }) => {
     <div className="flex flex-col gap-4">
       <div className="vehicles-stat">
         {loading && <Loader isLoading />}
-        {!!error && <p className="text-sm text-text-secondary">Error loading vehicles</p>}
+        {!!error && <p className="text-body-sm text-muted">Error loading vehicles</p>}
         {!!data && (
           <>
             <Link
               href={`/license/vehicles/${fragment.clientId}`}
-              className="hover:opacity-80 transition-opacity"
+              className="transition-opacity hover:opacity-80"
             >
               <p className="vehicles-stat__number">{data.vehicles.totalCount}</p>
             </Link>
-            <p className="vehicles-stat__label">Connected Vehicles</p>
+            <p className="vehicles-stat__label">Connected vehicles</p>
             <Link
               href={`/license/vehicles/${fragment.clientId}`}
               className="vehicles-stat__link"
@@ -58,18 +58,21 @@ export const Vehicles: FC<IProps> = ({ license }) => {
           </>
         )}
       </div>
-      <div className="flex flex-row gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <Link href={`/license/vehicles/${fragment.clientId}`} className="flex-1">
-          <Button className="dark w-full">Vehicle List</Button>
+          <Button variant="secondary" className="w-full">
+            Vehicle list
+          </Button>
         </Link>
-        <div className="flex-1">
+        <div className="flex-1 [&>button]:w-full">
           <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
         </div>
         <Button
-          className="dark flex-1"
+          variant="secondary"
+          className="flex-1"
           onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
         >
-          Configure Sharing
+          Configure sharing
         </Button>
       </div>
     </div>

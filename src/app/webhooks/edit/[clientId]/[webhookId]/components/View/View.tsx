@@ -27,15 +27,17 @@ export const View = ({
 
   return (
     <>
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-        <Link href="/webhooks" className="hover:text-foreground transition-colors">
+      <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
+        <Link href="/webhooks" className="transition-colors hover:text-ink">
           Webhooks
         </Link>
         <span>/</span>
-        <span className="text-foreground">Edit Webhook</span>
+        <span className="text-ink">Edit webhook</span>
       </nav>
       <EditWebhookContextProvider>
-        <EditWebhook webhook={data} clientId={clientId} />
+        <div className="mt-2">
+          <EditWebhook webhook={data} clientId={clientId} />
+        </div>
       </EditWebhookContextProvider>
     </>
   );

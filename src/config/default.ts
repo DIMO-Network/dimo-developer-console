@@ -44,6 +44,10 @@ export const frontendUrl = 'http://localhost:3000/';
 
 export const identityApiUrl = 'https://identity-api.dev.dimo.zone/query';
 
+// definitions-worker: canonical template documents on R2, plus the schema
+// documents the editor form is driven by. See definitions-worker/wrangler.toml.
+export const definitionsWorkerUrl = 'https://definitions.dev.dimo.org';
+
 export const RAINBOW_PROJECT = {
   ID: '528803928611a7781fb6b23eaf232224',
   NAME: 'Dimo Developer Console',

@@ -41,17 +41,15 @@ export const MenuItem: FC<IProps> = ({
     <li
       title={isCollapsed ? label : undefined}
       className={cn(
-        'flex flex-row items-center gap-2.5 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors',
-        'text-muted-foreground hover:text-foreground hover:bg-accent',
-        isHighlighted && 'text-muted-foreground bg-primary/10 hover:bg-primary/15',
+        'flex h-10 flex-row items-center gap-2.5 rounded-control px-3 text-body-sm font-medium transition-colors',
+        'text-muted hover:bg-nav-hover hover:text-fg',
+        isHighlighted && 'bg-nav-active text-ink hover:bg-nav-active hover:text-ink',
         disabled && 'opacity-40 pointer-events-none',
-        isCollapsed && 'justify-center px-0',
+        isCollapsed && 'justify-center gap-0 px-0',
       )}
     >
       <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-        <Icon
-          className={cn(iconClassName, 'shrink-0', isHighlighted && 'text-primary')}
-        />
+        <Icon className={cn(iconClassName, 'shrink-0', isHighlighted && 'text-ink')} />
       </span>
       {typeof link === 'function' ? (
         <button

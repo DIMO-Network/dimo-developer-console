@@ -1,37 +1,39 @@
 .dcx-input {
-  @apply flex flex-col items-center w-full gap-2;
+  @apply flex w-full flex-col items-center gap-2;
 
   .dcx-container {
-    @apply flex flex-row gap-2 w-3/4 justify-center items-center bg-accent relative rounded-lg h-14 px-2;
+    @apply relative flex h-14 w-3/4 flex-row items-center justify-center gap-2 rounded-control border border-control-border bg-control px-2 transition-[border-color,box-shadow] focus-within:border-focus-ring focus-within:ring-[3px] focus-within:ring-accent-soft;
+
+    &:hover:not(:focus-within) {
+      @apply border-control-border-hover;
+    }
 
     .action-icons {
-      @apply p-4 bg-card h-10 w-10 rounded-lg flex items-center justify-center text-foreground fill-foreground stroke-foreground;
+      @apply flex h-10 w-10 items-center justify-center rounded-control bg-highest p-2 text-ink;
     }
 
     .dcx-value {
-      @apply bg-transparent focus:outline-none text-foreground
-        [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none
-        w-full h-8 text-center text-3xl font-bold;
+      @apply h-8 w-full bg-transparent text-center text-metric text-ink focus:outline-none [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none;
     }
 
     .amount-container {
       @apply flex flex-col items-center;
 
       .description {
-        @apply text-xs text-muted-foreground;
+        @apply text-label text-muted;
       }
     }
   }
 
   .suggest-values {
-    @apply grid grid-cols-4 w-3/4 gap-2 justify-center font-bold;
+    @apply grid w-3/4 grid-cols-4 justify-center gap-2 font-semibold;
 
     .suggestion {
-      @apply rounded bg-accent p-2 text-foreground;
+      @apply rounded-control bg-control p-2 text-ink hover:bg-highest;
     }
   }
 
   .dcx-description {
-    @apply text-xs text-muted-foreground;
+    @apply text-label text-muted;
   }
 }

@@ -125,28 +125,26 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
   return (
     <>
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-        <Link href="/connections" className="hover:text-foreground transition-colors">
+      <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
+        <Link href="/connections" className="transition-colors hover:text-ink">
           Connections
         </Link>
         <span>/</span>
-        <span className="text-foreground">New Connection</span>
+        <span className="text-ink">New connection</span>
       </nav>
       <div className="flex flex-col gap-8">
         <div className="max-w-2xl">
-          <Title component="h2" className="text-xl mb-6">
+          <Title component="h2" className="mb-6 text-title">
             New connection
           </Title>
 
           <div className="space-y-6">
             <div>
-              <Label htmlFor="connectionName" className="text-sm font-medium">
-                Connection Name
-              </Label>
+              <Label htmlFor="connectionName">Connection name</Label>
               <TextField
                 id="connectionName"
                 type="text"
-                placeholder="Connection Name"
+                placeholder="Connection name"
                 className="mt-1"
                 value={connectionName}
                 onChange={handleConnectionNameChange}
@@ -163,7 +161,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
               onClick={handlePurchaseAlert}
               disabled={!!nameValidationError}
             >
-              Purchase Connection License
+              Purchase connection license
             </Button>
           </div>
         </div>
@@ -182,14 +180,14 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         className="purchase-confirmation"
       >
         <div>
-          <Title className="text-2xl" component="h3">
-            Purchase Connection License
+          <Title className="pr-8 text-panel-title" component="h3">
+            Purchase connection license
           </Title>
-          <div className="pt-4 text-sm text-text-secondary font-normal text-justify leading-relaxed">
+          <div className="pt-4 text-body-sm font-normal leading-relaxed text-muted">
             <p className="mb-4">
-              <span className="text-red-600 font-bold">Warning!</span> By proceeding, you
+              <span className="font-semibold text-ink">Warning!</span> By proceeding, you
               are agreeing to approve payment of{' '}
-              <span className="text-red-600 font-bold">$1 in</span> credits for your DIMO
+              <span className="font-semibold text-ink">$1 in</span> credits for your DIMO
               Connection License. If you do not have enough credits in your account, you
               will be unable to create a Connection License.
             </p>
@@ -201,26 +199,22 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
           {error && (
             <div className="pt-4">
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="rounded-control bg-negative-soft p-3 text-body-sm text-negative">
                 {error}
               </p>
             </div>
           )}
 
-          <div className="purchase-buttons pt-6 flex gap-4">
+          <div className="purchase-buttons mt-2 flex flex-col-reverse gap-2 pt-4 sm:flex-row sm:justify-end">
             <Button
-              className="w-48"
+              variant="secondary"
               onClick={handleCancelPayment}
               disabled={isProcessingPayment}
             >
               Cancel
             </Button>
-            <Button
-              className="w-48"
-              onClick={handleContinuePayment}
-              disabled={isProcessingPayment}
-            >
-              Continue with Payment
+            <Button onClick={handleContinuePayment} disabled={isProcessingPayment}>
+              Continue with payment
             </Button>
           </div>
         </div>

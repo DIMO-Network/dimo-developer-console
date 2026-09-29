@@ -10,7 +10,6 @@ import { toast } from 'sonner';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { EmbeddedKey, saveToLocalStorage } from '@/utils/localStorage';
 import { emailRecovery } from '@/actions/user';
-import { gtSuper } from '@/utils/font';
 import { isEmpty } from 'lodash';
 import { useRouter } from 'next/navigation';
 import { IPasskeyRecoveryState } from '@/types/auth';
@@ -59,11 +58,13 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
   return (
     <div className="email-recovery__form">
       <div className="email-recovery__header">
-        <p className={gtSuper.className}>Reset Passkeys</p>
+        <p className="text-title text-ink">Reset passkeys</p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="email-recovery__input">
-        <p>Your old passkeys will not longer work after the reset is complete</p>
-        <Label htmlFor="email" className="text-xs text-medium">
+        <p className="text-body-sm text-muted">
+          Your old passkeys will not longer work after the reset is complete
+        </p>
+        <Label htmlFor="email">
           Email
           <TextField
             type="text"
@@ -76,6 +77,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
         </Label>
         {errors.email && <TextError errorMessage="This field is required" />}
         <Button
+          variant="brand"
           type="submit"
           disabled={isEmpty(email)}
           loading={isLoading}
@@ -85,7 +87,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
         </Button>
         <Button
           type="button"
-          className="primary-outline"
+          variant="secondary"
           role="cancel-button"
           onClick={() => router.back()}
         >

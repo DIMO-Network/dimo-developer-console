@@ -41,28 +41,28 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
 
   return (
     <div className={'flex flex-col gap-6'}>
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-        <Link href="/licenses" className="hover:text-foreground transition-colors">
+      <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
+        <Link href="/licenses" className="transition-colors hover:text-ink">
           Licenses
         </Link>
         <span>/</span>
-        <span className="text-foreground">Vehicles</span>
+        <span className="text-ink">Vehicles</span>
       </nav>
       <Section>
         <div className={'flex flex-row items-center gap-2.5 pb-4 md:pb-0'}>
-          <Title className={'text-4xl'}>{totalCount}</Title>
-          <p className={'text-text-secondary text-xl'}>
-            Connected Vehicles
+          <Title className={'text-metric'}>{totalCount}</Title>
+          <p className={'text-card-title font-normal text-muted'}>
+            Connected vehicles
             {testVehicleCount > 0 && (
-              <span className={'text-sm ml-1.5'}>
-                ({testVehicleCount} Test Vehicle{testVehicleCount !== 1 ? 's' : ''})
+              <span className={'ml-1.5 text-body-sm'}>
+                ({testVehicleCount} test vehicle{testVehicleCount !== 1 ? 's' : ''})
               </span>
             )}
           </p>
         </div>
       </Section>
       <Section>
-        <SectionHeader title={'Vehicle Details'} />
+        <SectionHeader title={'Vehicle details'} />
         <VehicleDetailsTable clientId={clientId} />
       </Section>
     </div>

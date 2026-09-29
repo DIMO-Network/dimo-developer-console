@@ -1,10 +1,11 @@
 .segmented-control {
-  @apply flex flex-row w-fit gap-2 bg-accent rounded-lg;
+  @apply flex w-fit flex-row gap-0.5 rounded-full bg-control p-[3px];
 
   .segment {
-    @apply flex flex-col gap-2 p-2 px-5 rounded-lg cursor-pointer;
+    @apply flex cursor-pointer flex-col rounded-full px-3.5 py-1.5 text-[13px] font-medium leading-[18px] text-muted transition-colors hover:text-fg;
   }
+
   .selected {
-    @apply bg-primary text-white border-primary;
+    @apply bg-bright text-ink shadow-sm;
   }
 }

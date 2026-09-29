@@ -1,142 +1,135 @@
 import type { Config } from 'tailwindcss';
 
-const primaryScale = {
-  '50': '#f1fcfa',
-  '100': '#d0f7f2',
-  '200': '#b7f2eb',
-  '300': '#6aded5',
-  '400': '#3bc6be',
-  '500': '#22aaa5',
-  '600': '#198886',
-  '700': '#186d6d',
-  '800': '#185657',
-  '900': '#184849',
-  '950': '#08292b',
+const token = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
+export const tokenColors = {
+  'canvas': token('canvas'),
+  'sheet': token('sheet'),
+  'card': token('card'),
+  'control': token('control'),
+  'highest': token('highest'),
+  'bright': token('bright'),
+  'overlay': token('overlay'),
+  'outline': token('outline'),
+  'outline-strong': token('outline-strong'),
+  'canvas-divider': token('canvas-divider'),
+  'control-border': token('control-border'),
+  'control-border-hover': token('control-border-hover'),
+  'focus-ring': token('focus-ring'),
+  'sheet-border': 'var(--sheet-border)',
+  'ink': token('ink'),
+  'fg': token('fg'),
+  'muted': token('muted'),
+  'accent': token('accent'),
+  'accent-ink': token('accent-ink'),
+  'on-accent': token('on-accent'),
+  'accent-soft': 'var(--accent-soft)',
+  'accent-soft-strong': 'var(--accent-soft-strong)',
+  'selected-bg': token('selected-bg'),
+  'selected-fg': token('selected-fg'),
+  'btn-primary': token('btn-primary'),
+  'btn-primary-fg': token('btn-primary-fg'),
+  'btn-primary-hover': token('btn-primary-hover'),
+  'sky': token('sky'),
+  'positive': token('positive'),
+  'warning': token('warning'),
+  'negative': token('negative'),
+  'negative-soft': token('negative-soft'),
+  'favorite': token('favorite'),
+  'nav-hover': 'var(--nav-hover)',
+  'nav-active': token('nav-active'),
+  'scrim': 'var(--scrim)',
+};
+
+/*
+ * Ruling 2 aliases (permanent). shadcn names whose meaning matches a Fleet
+ * token stay so primitives under src/components/ui inherit the theme.
+ */
+const aliasColors = {
+  background: token('sheet'),
+  foreground: token('fg'),
+  popover: { DEFAULT: token('overlay'), foreground: token('fg') },
+  sidebar: token('canvas'),
+  border: token('outline'),
+  input: token('control-border'),
+  ring: token('focus-ring'),
+  destructive: { DEFAULT: token('negative'), foreground: token('fg') },
 };
 
 const config: Config = {
-  darkMode: ['class'],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/layouts/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    // Locked palette: Tailwind's default colors are gone on purpose.
+    colors: {
+      transparent: 'transparent',
+      current: 'currentColor',
+      inherit: 'inherit',
+      ...tokenColors,
+      ...aliasColors,
+      card: { DEFAULT: token('card'), foreground: token('fg') },
+      muted: { DEFAULT: token('muted'), foreground: token('muted') },
+      accent: {
+        'DEFAULT': token('accent'),
+        'foreground': token('on-accent'),
+        'ink': token('accent-ink'),
+        'soft': 'var(--accent-soft)',
+        'soft-strong': 'var(--accent-soft-strong)',
+      },
+    },
     extend: {
-      colors: {
-        'background': 'hsl(var(--background))',
-        'foreground': 'hsl(var(--foreground))',
-        'card': {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
-        },
-        'sidebar': 'hsl(var(--sidebar))',
-        'popover': {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
-        },
-        'primary': {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
-          ...primaryScale,
-        },
-        'secondary': {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
-        'muted': {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
-        'accent': {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        'destructive': {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
-        'border': 'hsl(var(--border))',
-        'input': 'hsl(var(--input))',
-        'ring': 'hsl(var(--ring))',
-        /* Legacy aliases — keep so existing classnames don't break during migration */
-        'surface': {
-          default: 'hsl(var(--card))',
-          sunken: 'hsl(var(--background))',
-          raised: 'hsl(var(--accent))',
-        },
-        'cta': {
-          default: 'hsl(var(--accent))',
-          disabled: 'hsl(var(--muted))',
-        },
-        'feedback': {
-          success: '#0D7038',
-          error: 'hsl(var(--destructive))',
-        },
-        'text': {
-          secondary: 'hsl(var(--muted-foreground))',
-        },
-        /* Existing palette scales — keep for gradual cleanup */
-        'grey': {
-          '50': '#f5f6f6',
-          '100': '#e4e8e9',
-          '200': '#ccd4d5',
-          '300': '#a9b5b7',
-          '400': '#7e8f92',
-          '500': '#637377',
-          '600': '#556166',
-          '700': '#495256',
-          '800': '#40484a',
-          '900': '#393e40',
-          '950': '#232729',
-        },
-        'dark-grey': {
-          '50': '#f4f6f7',
-          '100': '#e3e8ea',
-          '200': '#c9d2d8',
-          '300': '#a4b3bc',
-          '400': '#778c99',
-          '500': '#5c707e',
-          '600': '#4f5f6b',
-          '700': '#444f5a',
-          '800': '#3d454d',
-          '900': '#363c43',
-          '950': '#24292f',
-        },
-        'dark': {
-          '50': '#f7f8f8',
-          '100': '#edeef1',
-          '200': '#d8dbdf',
-          '300': '#b5bac4',
-          '400': '#8d94a3',
-          '500': '#6f7788',
-          '600': '#596070',
-          '700': '#494f5b',
-          '800': '#3f434d',
-          '900': '#373b43',
-          '950': '#131417',
-        },
-        'primary-scale': {
-          ...primaryScale,
-        },
-        'red': {
-          '50': '#fff1f1',
-          '100': '#ffe1e1',
-          '200': '#ffc8c8',
-          '300': '#ffa1a1',
-          '400': '#fe6b6b',
-          '500': '#f85454',
-          '600': '#e51d1d',
-          '700': '#c01515',
-          '800': '#9f1515',
-          '900': '#841818',
-          '950': '#480707',
-        },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-conic':
+          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'brand-gradient': 'var(--brand-gradient)',
+        'brand-glow': 'var(--brand-glow)',
+        'progress-fill': 'var(--progress-fill)',
+      },
+      boxShadow: {
+        float: 'var(--shadow-float)',
+        sm: 'var(--shadow-sm)',
+        // Selected card / row: an ink edge on a neutral fill (never a tint).
+        selected: 'inset 3px 0 0 rgb(var(--ink))',
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        chip: '6px',
+        control: '10px',
+        card: '16px',
+        panel: '20px',
+      },
+      fontSize: {
+        'title': [
+          '20px',
+          { lineHeight: '28px', letterSpacing: '-0.01em', fontWeight: '600' },
+        ],
+        'card-title': ['15px', { lineHeight: '22px', fontWeight: '600' }],
+        'panel-title': ['17px', { lineHeight: '24px', fontWeight: '600' }],
+        'metric': [
+          '40px',
+          { lineHeight: '44px', letterSpacing: '-0.03em', fontWeight: '600' },
+        ],
+        'body': ['15px', { lineHeight: '22px' }],
+        'body-sm': ['14px', { lineHeight: '20px' }],
+        'label': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+        'code': ['13px', { lineHeight: '20px' }],
+      },
+      fontFamily: {
+        sans: [
+          'var(--font-dimo)',
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'sans-serif',
+        ],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
     },
   },

@@ -2,81 +2,148 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 180 33% 96%;
-    --foreground: 180 71% 13%;
+/*
+ * Design tokens. Values match fleet-lite-app web/src/global-styles.ts.
+ * Colors are RGB channels so Tailwind opacity modifiers work (bg-card/60).
+ * Every variable must exist in both themes (tokens.test.ts enforces it).
+ */
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
 
-    --card: 0 0% 100%;
-    --card-foreground: 180 71% 13%;
+  --canvas: 14 15 17; /* #0E0F11 */
+  --sheet: 22 24 27; /* #16181B */
+  --card: 28 31 34; /* #1C1F22 */
+  --control: 39 42 46; /* #272A2E */
+  --highest: 48 52 56; /* #303438 */
+  --bright: 58 62 66; /* #3A3E42 */
+  --overlay: 28 31 34; /* #1C1F22 */
+  --outline: 55 59 64; /* #373B40 */
+  --canvas-divider: 69 73 78; /* #45494E */
+  --control-border: 116 122 127; /* #747A7F */
+  --control-border-hover: 160 163 162; /* #A0A3A2 */
+  --focus-ring: 70 241 228; /* #46F1E4 */
+  --outline-strong: 92 96 99; /* #5C6063 */
+  --ink: 246 247 247; /* #F6F7F7 */
+  --fg: 237 238 238; /* #EDEEEE */
+  --muted: 160 163 162; /* #A0A3A2 */
+  --accent: 70 241 228; /* #46F1E4 */
+  --accent-ink: 70 241 228; /* #46F1E4 */
+  --on-accent: 6 32 30; /* #06201E */
+  --sky: 140 208 255; /* #8CD0FF */
+  --positive: 54 223 113; /* #36DF71 */
+  --warning: 255 172 96; /* #FFAC60 */
+  --negative: 255 96 96; /* #FF6060 */
+  --negative-soft: 64 35 33; /* #402321 */
+  --favorite: 255 205 41; /* #FFCD29 */
+  --nav-active: 36 39 43; /* #24272B */
+  --btn-primary: 246 247 247; /* #F6F7F7 */
+  --btn-primary-fg: 17 18 20; /* #111214 */
+  --btn-primary-hover: 255 255 255; /* #FFFFFF */
+  /* Toggled / selected control: inverse ink (inverse surface / inverse text). */
+  --selected-bg: 237 238 238; /* #EDEEEE */
+  --selected-fg: 22 24 27; /* #16181B */
 
-    --sidebar: 0 0% 100%;
+  --accent-soft: rgba(70, 241, 228, 0.12);
+  --accent-soft-strong: rgba(70, 241, 228, 0.28);
+  --nav-hover: #1c1f22;
+  --sheet-border: rgba(255, 255, 255, 0.06);
+  --scrim: rgba(8, 9, 10, 0.62);
+  --brand-gradient: linear-gradient(105deg, #8cd0ff 0%, #46f1e4 100%);
+  /* Progress fills are a brand moment. */
+  --progress-fill: var(--brand-gradient);
+  --brand-glow:
+    radial-gradient(60% 50% at 35% 40%, rgba(140, 208, 255, 0.12), transparent 70%),
+    radial-gradient(55% 50% at 65% 60%, rgba(70, 241, 228, 0.1), transparent 70%);
+  --shadow-float:
+    0 16px 48px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --radius: 0.625rem;
+}
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 180 71% 13%;
+:root[data-theme='light'] {
+  color-scheme: light;
 
-    --primary: 178 66% 40%;
-    --primary-foreground: 0 0% 100%;
+  --canvas: 231 233 233; /* #E7E9E9 */
+  --sheet: 255 255 255; /* #FFFFFF */
+  --card: 246 247 247; /* #F6F7F7 */
+  --control: 233 235 235; /* #E9EBEB */
+  --highest: 223 226 226; /* #DFE2E2 */
+  --bright: 255 255 255; /* #FFFFFF */
+  --overlay: 255 255 255; /* #FFFFFF */
+  --outline: 210 214 215; /* #D2D6D7 */
+  --canvas-divider: 160 163 162; /* #A0A3A2 */
+  --control-border: 124 128 130; /* #7C8082 */
+  --control-border-hover: 94 97 99; /* #5E6163 */
+  --focus-ring: 11 122 114; /* #0B7A72 */
+  --outline-strong: 160 163 162; /* #A0A3A2 */
+  --ink: 19 20 23; /* #131417 */
+  --fg: 19 20 23; /* #131417 */
+  --muted: 94 97 99; /* #5E6163 */
+  --accent: 11 143 133; /* #0B8F85 */
+  --accent-ink: 7 99 92; /* #07635C */
+  --on-accent: 6 32 30; /* #06201E */
+  --sky: 43 130 213; /* #2B82D5 */
+  --positive: 17 103 47; /* #11672F */
+  --warning: 143 69 0; /* #8F4500 */
+  --negative: 199 0 0; /* #C70000 */
+  --negative-soft: 255 240 240; /* #FFF0F0 */
+  --favorite: 201 154 0; /* #C99A00 */
+  --nav-active: 255 255 255; /* #FFFFFF */
+  --btn-primary: 19 20 23; /* #131417 */
+  --btn-primary-fg: 255 255 255; /* #FFFFFF */
+  --btn-primary-hover: 46 50 54; /* #2E3236 */
+  /* Toggled / selected control: inverse ink (inverse surface / inverse text). */
+  --selected-bg: 22 24 27; /* #16181B */
+  --selected-fg: 237 238 238; /* #EDEEEE */
 
-    --secondary: 180 33% 93%;
-    --secondary-foreground: 180 71% 13%;
-
-    --muted: 180 33% 93%;
-    --muted-foreground: 178 78% 23%;
-
-    --accent: 180 33% 93%;
-    --accent-foreground: 180 71% 13%;
-
-    --destructive: 0 78% 42%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 177 51% 80%;
-    --input: 177 51% 80%;
-    --ring: 178 66% 40%;
-
-    --radius: 0.625rem;
-  }
-
-  .dark {
-    --background: 180 32% 3%;
-    --foreground: 177 65% 88%;
-
-    --card: 180 30% 9%;
-    --card-foreground: 177 65% 88%;
-
-    --sidebar: 180 35% 6%;
-
-    --popover: 180 30% 9%;
-    --popover-foreground: 177 65% 88%;
-
-    --primary: 178 66% 40%;
-    --primary-foreground: 0 0% 0%;
-
-    --secondary: 180 30% 12%;
-    --secondary-foreground: 177 60% 64%;
-
-    --muted: 180 22% 30%;
-    --muted-foreground: 177 60% 64%;
-
-    --accent: 180 30% 12%;
-    --accent-foreground: 177 65% 88%;
-
-    --destructive: 0 99% 71%;
-    --destructive-foreground: 0 0% 0%;
-
-    --border: 180 28% 14%;
-    --input: 180 28% 14%;
-    --ring: 178 66% 40%;
-  }
+  --accent-soft: rgba(34, 199, 186, 0.14);
+  --accent-soft-strong: rgba(34, 199, 186, 0.3);
+  --nav-hover: rgba(255, 255, 255, 0.55);
+  --sheet-border: rgba(19, 20, 23, 0.06);
+  --scrim: rgba(19, 20, 23, 0.32);
+  --brand-gradient: linear-gradient(105deg, #8cd0ff 0%, #46f1e4 100%);
+  /* The sky-to-mint gradient vanishes on a light track; deepened, >=3.9:1. */
+  --progress-fill: linear-gradient(105deg, #1e6fbf 0%, #0a7069 100%);
+  --brand-glow:
+    radial-gradient(60% 50% at 35% 40%, rgba(140, 208, 255, 0.28), transparent 70%),
+    radial-gradient(55% 50% at 65% 60%, rgba(70, 241, 228, 0.22), transparent 70%);
+  --shadow-float:
+    0 16px 40px -14px rgba(19, 20, 23, 0.22), 0 0 0 1px rgba(19, 20, 23, 0.06);
+  --shadow-sm: 0 1px 2px rgba(19, 20, 23, 0.12);
+  --radius: 0.625rem;
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-outline;
   }
+
+  html,
   body {
-    @apply bg-background text-foreground text-sm font-light not-italic;
+    @apply bg-canvas text-fg;
   }
+
+  body {
+    @apply text-body-sm antialiased;
+    font-feature-settings: 'tnum';
+  }
+
+  /* One keyboard focus outline, >=3:1 on every surface (tokens.test.ts). */
+  :focus-visible {
+    outline: 2px solid rgb(var(--focus-ring));
+    outline-offset: 2px;
+  }
+
+  /* A dialog takes focus when it opens so a screen reader announces it; the
+     ring belongs on the controls inside it. */
+  [role='dialog']:focus {
+    outline: none;
+  }
+}
+
+.content {
+  @apply flex flex-row;
 }
 
 @layer utilities {

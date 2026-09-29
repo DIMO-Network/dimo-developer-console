@@ -22,9 +22,14 @@ export const ExpandedRow = ({
   const handleDeletePress = useHandleDeletePress();
 
   return (
-    <tr className="expanded-row bg-background border-t-0">
+    <tr className="expanded-row bg-sheet border-t-0">
       <td colSpan={colSpan} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
         <div className="expanded-content space-y-4">
+          <dl className="grid grid-cols-3 gap-3 md:hidden">
+            <MetaItem label="Display name" value={webhook.displayName || '-'} />
+            <MetaItem label="Service" value={webhook.service} />
+            <MetaItem label="Cooldown" value={`${webhook.coolDownPeriod}s`} />
+          </dl>
           <WebhookUrlDisplay url={webhook.targetURL} />
           <Actions
             onDelete={handleDeletePress}
@@ -59,3 +64,10 @@ const Actions = ({
     </div>
   );
 };
+
+const MetaItem = ({ label, value }: { label: string; value: React.ReactNode }) => (
+  <div className="flex min-w-0 flex-col gap-0.5">
+    <dt className="text-label text-muted">{label}</dt>
+    <dd className="break-words text-body-sm text-fg">{value}</dd>
+  </div>
+);

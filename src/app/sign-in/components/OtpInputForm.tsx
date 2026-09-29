@@ -4,7 +4,6 @@ import { Anchor } from '@/components/Anchor';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
-import { gtSuper } from '@/utils/font';
 import { FC, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { captureException } from '@sentry/nextjs';
@@ -140,7 +139,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     <>
       <div className="sign-in__form">
         <div className="sign-in__header">
-          <p className={gtSuper.className}>Welcome back!</p>
+          <p className="text-title text-ink">Welcome back!</p>
         </div>
         <div className="otp-login-text">
           <p>
@@ -169,6 +168,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
         </div>
         <div className="flex w-full flex-col pt-4">
           <Button
+            variant="brand"
             role="continue-button"
             onClick={handleVerify}
             disabled={otp.some((digit) => !digit)}
@@ -177,7 +177,8 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
             Sign In
           </Button>
           <Button
-            className="primary-outline !mt-3"
+            variant="secondary"
+            className="!mt-3"
             role="continue-button"
             onClick={handleResendCode}
             loading={isRequestingNewOtp}
