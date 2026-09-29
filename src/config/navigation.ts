@@ -155,7 +155,7 @@ export const bottomMenu: NavItem[] = [
   {
     label: 'Settings',
     icon: SettingsIcon,
-    iconClassName: 'h-5 w-5 fill-grey-200',
+    iconClassName: 'h-5 w-5',
     link: '/settings',
     external: false,
     disabled: false,
