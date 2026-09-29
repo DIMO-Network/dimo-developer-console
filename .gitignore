@@ -40,3 +40,7 @@ next-env.d.ts
 certificates
 
 .superpowers/
+
+# visual harness
+scripts/visual/out/
+scripts/visual/.keys.json
