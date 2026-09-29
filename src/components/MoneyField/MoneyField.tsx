@@ -35,7 +35,7 @@ export const MoneyField = forwardRef<Ref, IProps>(
 
     return (
       <div className="money-field">
-        <span className="text-white mr-2">$</span>
+        <span className="text-ink mr-2">$</span>
         <input
           className={className}
           {...props}

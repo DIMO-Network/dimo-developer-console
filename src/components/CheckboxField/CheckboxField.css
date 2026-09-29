@@ -1,9 +1,6 @@
+/* Checked/unchecked colors live on ui/checkbox (accent fill, on-accent check). */
 .checkbox {
-  @apply h-4 w-4 rounded border-gray-300 text-white;
-
-  accent-color: rgb(183 242 235 / 1);
-
   &.required {
-    @apply ring-red-500 ring-2;
+    @apply ring-2 ring-negative;
   }
 }
