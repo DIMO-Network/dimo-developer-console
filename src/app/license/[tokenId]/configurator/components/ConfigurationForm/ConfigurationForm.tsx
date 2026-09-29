@@ -246,8 +246,8 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
             <p className="text-sm font-medium">Save to generate your link</p>
             <p className="text-xs text-muted-foreground leading-relaxed">
               After saving, you&apos;ll get a short{' '}
-              <code className="bg-muted px-1 rounded">configurationId</code> link you can
-              share directly with users.
+              <code className="bg-control px-1 rounded">configurationId</code> link you
+              can share directly with users.
             </p>
           </div>
         )}

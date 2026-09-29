@@ -14,6 +14,6 @@
   }
 
   &.secondary {
-    @apply bg-accent rounded-xl;
+    @apply bg-control rounded-xl;
   }
 }

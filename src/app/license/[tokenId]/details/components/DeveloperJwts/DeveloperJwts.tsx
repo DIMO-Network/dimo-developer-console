@@ -134,7 +134,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
   }
 
   return (
-    <div className="p-4 bg-accent border border-border rounded-2xl flex flex-col gap-4 text-foreground">
+    <div className="p-4 bg-control border border-border rounded-2xl flex flex-col gap-4 text-foreground">
       <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
         <h2 className="text-xl font-semibold text-foreground">Developer JWTs</h2>
         <GenerateDevJWT

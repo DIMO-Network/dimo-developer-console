@@ -16,7 +16,7 @@
       @apply flex justify-center gap-x-4;
 
       .text-field {
-        @apply w-12 h-12 rounded-md bg-muted p-0 justify-center items-center;
+        @apply w-12 h-12 rounded-md bg-control p-0 justify-center items-center;
       }
 
       .otp-input {

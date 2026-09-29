@@ -19,5 +19,5 @@
   @apply absolute -right-2.5 top-1/2 -translate-y-1/2 z-10
          w-5 h-5 rounded-full bg-card border border-border
          items-center justify-center shadow-sm
-         hover:bg-accent transition-colors;
+         hover:bg-control transition-colors;
 }

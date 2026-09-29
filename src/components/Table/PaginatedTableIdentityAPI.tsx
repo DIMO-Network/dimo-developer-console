@@ -97,7 +97,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className={`border-t border-t-border${onRowClick ? ' cursor-pointer hover:bg-accent' : ''}`}
+                className={`border-t border-t-border${onRowClick ? ' cursor-pointer hover:bg-control' : ''}`}
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (

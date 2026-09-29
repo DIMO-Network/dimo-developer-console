@@ -15,7 +15,7 @@
 
   .shortcut-card {
     @apply flex flex-row gap-4 items-start p-4 rounded-xl border border-border bg-card
-           hover:bg-accent transition-colors cursor-pointer;
+           hover:bg-control transition-colors cursor-pointer;
 
     .shortcut-card__icon {
       @apply flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary;

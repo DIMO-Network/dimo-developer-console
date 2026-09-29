@@ -9,7 +9,7 @@
 
   .vehicle-sim-testnet-badge {
     @apply text-[10px] font-mono tracking-[0.15em] uppercase text-text-secondary
-           border border-border bg-accent px-2 py-1 rounded self-start;
+           border border-border bg-control px-2 py-1 rounded self-start;
   }
 }
 
@@ -157,7 +157,7 @@
 
 .vehicle-sim-card {
   @apply flex flex-row items-center justify-between
-         rounded-lg border border-border bg-accent
+         rounded-lg border border-border bg-control
          px-4 py-3 gap-4;
   animation: vehicle-sim-slide-in 0.25s ease-out both;
 

@@ -1,5 +1,5 @@
 .vehicles-stat {
-  @apply bg-accent rounded-xl p-8 flex flex-col items-center gap-1 text-center;
+  @apply bg-control rounded-xl p-8 flex flex-col items-center gap-1 text-center;
 }
 
 .vehicles-stat__number {

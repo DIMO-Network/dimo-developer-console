@@ -42,7 +42,7 @@ export const MenuItem: FC<IProps> = ({
       title={isCollapsed ? label : undefined}
       className={cn(
         'flex flex-row items-center gap-2.5 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors',
-        'text-muted-foreground hover:text-foreground hover:bg-accent',
+        'text-muted-foreground hover:text-foreground hover:bg-control',
         isHighlighted && 'text-muted-foreground bg-primary/10 hover:bg-primary/15',
         disabled && 'opacity-40 pointer-events-none',
         isCollapsed && 'justify-center px-0',

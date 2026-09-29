@@ -19,7 +19,7 @@
 }
 
 .connection-license-section {
-  @apply bg-accent border border-border rounded-2xl p-6;
+  @apply bg-control border border-border rounded-2xl p-6;
 }
 
 .section-header {

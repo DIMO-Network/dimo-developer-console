@@ -21,7 +21,7 @@
 }
 
 .license-header__token-id {
-  @apply text-xs font-medium text-text-secondary bg-accent px-2 py-0.5 rounded-full;
+  @apply text-xs font-medium text-text-secondary bg-control px-2 py-0.5 rounded-full;
 }
 
 .license-header__rename-btn {
@@ -72,6 +72,6 @@
 }
 
 .overview-quick-action {
-  @apply bg-accent border border-border rounded-lg px-4 py-2.5 text-sm text-foreground
+  @apply bg-control border border-border rounded-lg px-4 py-2.5 text-sm text-foreground
          hover:border-foreground/30 transition-colors cursor-pointer flex items-center gap-2;
 }

@@ -42,7 +42,7 @@ const PermissionCard = ({
     className={`cursor-pointer border rounded-md px-3 py-2 transition-colors ${
       selected
         ? 'border-primary bg-primary/10 ring-1 ring-primary'
-        : 'border-border bg-accent hover:border-primary/50'
+        : 'border-border bg-control hover:border-primary/50'
     }`}
   >
     <h4 className="font-medium text-xs">{title}</h4>

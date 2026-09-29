@@ -1,5 +1,5 @@
 .select-field {
-  @apply rounded-lg py-2 px-4 outline-0 bg-cta-default text-accent-foreground relative flex flex-row justify-between align-middle font-normal text-sm;
+  @apply rounded-lg py-2 px-4 outline-0 bg-cta-default text-fg relative flex flex-row justify-between align-middle font-normal text-sm;
 
   .selected {
     @apply text-foreground;

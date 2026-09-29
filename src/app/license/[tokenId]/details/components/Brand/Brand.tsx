@@ -108,7 +108,7 @@ export const Brand: FC<Props> = ({ license }) => {
   };
 
   return (
-    <div className="p-4 bg-accent border border-border rounded-2xl flex flex-col gap-4 text-foreground">
+    <div className="p-4 bg-control border border-border rounded-2xl flex flex-col gap-4 text-foreground">
       <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
         <h2 className="text-xl font-semibold text-foreground">Brand</h2>
         {isOwner && !editing && (
@@ -146,7 +146,7 @@ export const Brand: FC<Props> = ({ license }) => {
               ))
             )}
             {brands.length > 0 && (
-              <div className="mt-6 p-4 bg-accent rounded-lg">
+              <div className="mt-6 p-4 bg-control rounded-lg">
                 <p className="text-sm font-medium text-foreground mb-2">
                   Using multiple brands with Login with DIMO
                 </p>

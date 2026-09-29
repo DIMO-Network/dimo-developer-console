@@ -35,7 +35,7 @@
   }
 
   &.dark {
-    @apply bg-accent text-foreground hover:border-border;
+    @apply bg-control text-foreground hover:border-border;
   }
 
   &.table-action-button {

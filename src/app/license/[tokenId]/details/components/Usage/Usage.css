@@ -1,5 +1,5 @@
 .overview-stat-card {
-  @apply bg-accent rounded-xl p-5 flex flex-col gap-1;
+  @apply bg-control rounded-xl p-5 flex flex-col gap-1;
 }
 
 .overview-stat-card__number {

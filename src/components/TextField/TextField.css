@@ -7,7 +7,7 @@
 }
 
 .text-field:has(input[readonly]) {
-  @apply bg-muted/50 border-border/60 cursor-default;
+  @apply bg-control/50 border-border/60 cursor-default;
 
   input {
     @apply cursor-default text-muted-foreground;

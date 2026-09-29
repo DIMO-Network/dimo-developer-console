@@ -100,7 +100,7 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
             {availableSignals.map((signal) => (
               <span
                 key={signal}
-                className="text-xs font-mono px-2 py-1 rounded bg-accent text-foreground border border-border"
+                className="text-xs font-mono px-2 py-1 rounded bg-control text-foreground border border-border"
               >
                 {signal}
               </span>
@@ -126,7 +126,7 @@ export const VehicleData: FC<Props> = ({ clientId, tokenId }) => {
           <p className="text-xs text-text-secondary">
             Latest Signals ({latestSignals.length})
           </p>
-          <pre className="text-xs font-mono bg-accent border border-border rounded-lg p-4 overflow-auto h-96 whitespace-pre leading-relaxed">
+          <pre className="text-xs font-mono bg-control border border-border rounded-lg p-4 overflow-auto h-96 whitespace-pre leading-relaxed">
             <ColoredJson
               data={Object.fromEntries(
                 latestSignals.map(({ signal, timestamp, value }) => [
