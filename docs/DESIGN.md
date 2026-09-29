@@ -249,9 +249,9 @@ page's one primary action. An optional line under it is
 
 **Breadcrumbs** (hand-built, not a component; in `license/[tokenId]/details`
 `View.tsx`, `license/vehicles/[clientId]` `View.tsx` and the configurator
-list/new/edit views; the connections pages still to adopt): a `<nav>` above the page content,
-`mb-2 flex items-center gap-1.5 text-label text-muted`. Each ancestor is a
-`Link` with `transition-colors hover:text-ink`; the separator is a bare
+list/new/edit views; the connections pages still to adopt): a `<nav>` above
+the page content, `mb-2 flex items-center gap-1.5 text-label text-muted`.
+Each ancestor is a `Link` with `transition-colors hover:text-ink`; the separator is a bare
 `<span>/</span>` inheriting `text-muted`; the current page is the last item,
 `text-ink`, not a link. Sentence case labels ("License details", "Vehicles").
 If a page needs back-navigation without a trail, use `BackButton` (a real
@@ -470,8 +470,8 @@ button or sits in a card).
   configurator's permission cards (`ShareVehiclesWithDimoConfiguration`
   `PermissionCard`: `role="button" aria-pressed`, `rounded-control px-3 py-2`;
   these sit inside a `bg-card` section, so an unselected card rests on
-  `bg-sheet` and hovers to `bg-control/70`; selected = `bg-control
-shadow-selected`). **Target** for the sign-up "What are you
+  `bg-sheet` and hovers to `bg-control/70`; selected =
+  `bg-control shadow-selected`). **Target** for the sign-up "What are you
   building?" cards (`BuildForForm`) and the explorer's vehicle list rows
   (`VehicleList`); those pages adopt it in their own passes. (`MultiCardOption`
   and `PaymentMethodSelector` are orphaned and not restyled.)

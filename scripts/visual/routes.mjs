@@ -186,7 +186,7 @@ export const ROUTES = [
     viewports: ['desktop'],
   },
   {
-    // A success toast (Sonner) from the configuration list's Copy Link.
+    // A success toast (Sonner) from the configuration list's Copy link.
     name: 'license-configurator-toast',
     path: `/license/${t}/configurator`,
     ready: 'Login with DIMO configurator',
