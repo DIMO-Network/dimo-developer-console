@@ -149,7 +149,7 @@ export const BrandForm: FC<Props> = ({
             disabled={!isOwner || saving}
           />
           {showRenameWarning && (
-            <p className="mt-1 text-label text-muted">
+            <p className="mt-1 text-label text-warning">
               Renaming breaks existing Login with DIMO calls using this name
             </p>
           )}
