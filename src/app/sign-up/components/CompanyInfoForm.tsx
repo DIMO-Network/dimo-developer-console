@@ -16,7 +16,6 @@ import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { gtSuper } from '@/utils/font';
 
 interface CompanyInfoInputs {
   name: string;
@@ -193,7 +192,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className={gtSuper.className}>Final Stretch</p>
+          <p className="text-title text-ink">Final Stretch</p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}

@@ -4,7 +4,6 @@ import { Anchor } from '@/components/Anchor';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { useAuth } from '@/hooks';
-import { gtSuper } from '@/utils/font';
 import { FC, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { captureException } from '@sentry/nextjs';
@@ -140,7 +139,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     <>
       <div className="sign-in__form">
         <div className="sign-in__header">
-          <p className={gtSuper.className}>Welcome back!</p>
+          <p className="text-title text-ink">Welcome back!</p>
         </div>
         <div className="otp-login-text">
           <p>

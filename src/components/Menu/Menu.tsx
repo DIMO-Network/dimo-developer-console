@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import * as Sentry from '@sentry/nextjs';
 
+import { BrandLockup } from '@/components/BrandLockup';
 import { MenuItem } from '@/components/Menu/MenuItem';
 import { getNavSections, bottomMenu } from '@/config/navigation';
 import { useHasDeveloperLicenses } from '@/hooks';
@@ -67,27 +68,18 @@ export const Menu: FC = withLoadingStatus(() => {
       {/* Logo */}
       <div className={cn('logo-row', isSidebarCollapsed && 'justify-center')}>
         {!isSidebarCollapsed && (
-          <>
-            <Image
-              src={'/images/dimo-dev-light.svg'}
-              alt="DIMO Logo"
-              width={140}
-              height={20}
-              className="mb-8 block dark:hidden"
-            />
-            <Image
-              src={'/images/dimo-dev.svg'}
-              alt="DIMO Logo"
-              width={140}
-              height={20}
-              className="mb-8 hidden dark:block"
-            />
-          </>
+          <div className="mb-8">
+            <BrandLockup product="Developer Console" />
+          </div>
         )}
         {isSidebarCollapsed && (
-          <div className="mb-8 w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground text-xs font-black">D</span>
-          </div>
+          <Image
+            src="/images/dimo-mark.png"
+            alt="DIMO"
+            width={28}
+            height={28}
+            className="mb-8 h-7 w-7 rounded-lg"
+          />
         )}
         {isFullScreenMenuOpen && (
           <button

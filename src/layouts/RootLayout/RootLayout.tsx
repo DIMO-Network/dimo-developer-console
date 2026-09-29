@@ -16,8 +16,8 @@ export const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={dimoFont.className}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <body className={`${dimoFont.variable} ${dimoFont.className}`}>
+        <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
           <QueryProvider>{children}</QueryProvider>
           <Toaster position="bottom-right" />
         </ThemeProvider>

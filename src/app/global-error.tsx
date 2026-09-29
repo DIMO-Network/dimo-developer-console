@@ -1,53 +1,9 @@
 'use client';
 import { FC, useEffect } from 'react';
-import localFont from 'next/font/local';
 import classNames from 'classnames';
 import * as Sentry from '@sentry/nextjs';
 
-const euclid = localFont({
-  src: [
-    {
-      path: './../assets/fonts/GT-Super-Text-Bold-Italic.ttf',
-      weight: 'bold',
-      style: 'Bold Italic',
-    },
-    {
-      path: './../assets/fonts/GT-Super-Text-Bold.ttf',
-      weight: 'bold',
-      style: 'Bold',
-    },
-    {
-      path: './../assets/fonts/GT-Super-Text-Book-Italic.ttf',
-      weight: 'normal',
-      style: 'Italic',
-    },
-    {
-      path: './../assets/fonts/GT-Super-Text-Book.ttf',
-      weight: 'normal',
-      style: 'Book',
-    },
-    {
-      path: './../assets/fonts/Universal-Sans-Display-525.ttf',
-      weight: 'normal',
-      style: 'regular',
-    },
-    {
-      path: './../assets/fonts/Universal-Sans-Display-525Italic.ttf',
-      weight: 'normal',
-      style: 'italic',
-    },
-    {
-      path: './../assets/fonts/Universal-Sans-Display-900.ttf',
-      weight: 'bold',
-      style: 'bold',
-    },
-    {
-      path: './../assets/fonts/Universal-Sans-Display-900Italic.ttf',
-      weight: 'bold',
-      style: 'bold italic',
-    },
-  ],
-});
+import { dimoFont } from '@/utils/font';
 
 interface IProps {
   error: Error & { digest?: string };
@@ -62,7 +18,7 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
 
   return (
     <html lang="en" className="h-full">
-      <body className={classNames(euclid.className, 'h-full')}>
+      <body className={classNames(dimoFont.className, 'h-full')}>
         <main className="grid min-h-full place-items-center bg-white px-6 py-24 sm:py-32 lg:px-8">
           <div className="text-center">
             <p className="text-base font-semibold text-indigo-600">404</p>

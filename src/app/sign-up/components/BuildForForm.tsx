@@ -10,7 +10,6 @@ import { IAuth } from '@/types/auth';
 import { Label } from '@/components/Label';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { gtSuper } from '@/utils/font';
 
 interface BuildForFormInputs {
   buildFor: string;
@@ -99,7 +98,7 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className={gtSuper.className}>What are you building?</p>
+          <p className="text-title text-ink">What are you building?</p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}

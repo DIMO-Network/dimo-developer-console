@@ -1,51 +1,30 @@
 import localFont from 'next/font/local';
 
+// Euclid Circular A, as in the DIMO Driver app and DIMO Fleet.
 export const dimoFont = localFont({
   src: [
     {
-      path: './../assets/fonts/Universal-Sans-Display-525.ttf',
-      weight: 'normal',
+      path: './../assets/fonts/EuclidCircularA-Regular.woff2',
+      weight: '400',
       style: 'normal',
     },
     {
-      path: './../assets/fonts/Universal-Sans-Display-525Italic.ttf',
-      weight: 'normal',
-      style: 'italic',
-    },
-    {
-      path: './../assets/fonts/Universal-Sans-Display-900.ttf',
-      weight: 'bold',
+      path: './../assets/fonts/EuclidCircularA-Medium.woff2',
+      weight: '500',
       style: 'normal',
     },
     {
-      path: './../assets/fonts/Universal-Sans-Display-900Italic.ttf',
-      weight: 'bold',
-      style: 'italic',
-    },
-  ],
-});
-
-export const gtSuper = localFont({
-  src: [
-    {
-      path: './../assets/fonts/GT-Super-Text-Bold-Italic.ttf',
-      weight: 'bold',
-      style: 'italic',
-    },
-    {
-      path: './../assets/fonts/GT-Super-Text-Bold.ttf',
-      weight: 'bold',
+      path: './../assets/fonts/EuclidCircularA-Semibold.woff2',
+      weight: '600',
       style: 'normal',
     },
     {
-      path: './../assets/fonts/GT-Super-Text-Book-Italic.ttf',
-      weight: 'normal',
-      style: 'italic',
-    },
-    {
-      path: './../assets/fonts/GT-Super-Text-Book.ttf',
-      weight: 'normal',
+      path: './../assets/fonts/EuclidCircularA-Bold.woff2',
+      weight: '700',
       style: 'normal',
     },
   ],
+  display: 'swap',
+  variable: '--font-dimo',
+  fallback: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
 });
