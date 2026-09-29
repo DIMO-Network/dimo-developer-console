@@ -91,9 +91,21 @@ RPC_URL=<YOUR_RPC>
 NEXT_PUBLIC_TURNKEY_API_BASE_URL="https://api.turnkey.com"
 NEXT_PUBLIC_RPID="localhost"
 NEXT_PUBLIC_GA_API=<YOUR_ACCOUNTS_API_URL>
+
+# Vehicle templates. Both are server-only -- no NEXT_PUBLIC_ prefix, ever.
+DEFINITIONS_WRITE_TOKEN=<WRITE_TOKEN_FOR_DEFINITIONS_WORKER>
+DIMO_CURATOR_ADDRESSES=<COMMA_SEPARATED_0X_ADDRESSES>
 ```
 
 Make sure that the `NEXT_PUBLIC_GA_API` maps to your [Accounts API](https://github.com/DIMO-Network/accounts/tree/main) deployment URL.
+
+`DEFINITIONS_WRITE_TOKEN` is the bearer token for `PUT /t/:id` on
+[definitions-worker](https://github.com/DIMO-Network/definitions-worker). It is
+read only by `src/services/definitions.ts`, which throws if it is ever evaluated
+in a browser — the token must never reach a client bundle.
+`DIMO_CURATOR_ADDRESSES` lists the addresses allowed to set
+`hardwareTemplateId`, which decides what hardware ships and is never open to
+contributors.
 
 3. Install the dependencies:
 
