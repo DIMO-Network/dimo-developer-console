@@ -38,19 +38,22 @@ describe('TrimGrid', () => {
     renderGrid();
     // powertrain_type differs across the Camry's ten trims: full contrast.
     const diverging = screen.getByTestId('cell-powertrain_type-0');
-    expect(diverging.className).toContain('text-white');
-    expect(diverging.className).not.toContain('text-white/');
-    // number_of_doors is shared by every trim: muted.
-    expect(screen.getByTestId('shared-number_of_doors').className).toContain(
-      'text-white/40',
-    );
+    expect(diverging.className).toContain('text-ink');
+    expect(diverging.className).not.toContain('text-muted');
+    // number_of_doors is shared by every trim: muted, but set — not the lighter
+    // "unset" tone (text-muted/60), which "toContain" would also match.
+    const sharedClasses = screen
+      .getByTestId('shared-number_of_doors')
+      .className.split(' ');
+    expect(sharedClasses).toContain('text-muted');
+    expect(sharedClasses).not.toContain('text-muted/60');
   });
 
   it('shows an em dash, not an empty cell, where nothing is set', () => {
     renderGrid({ readOnly: true });
     const cell = screen.getByTestId('shared-emissions_standard');
     expect(cell).toHaveTextContent('—');
-    expect(cell.className).toContain('text-white/25');
+    expect(cell.className).toContain('text-muted/60');
   });
 
   it('reads the divergence count off the rail, and offers no lift while trims disagree', () => {
@@ -205,7 +208,7 @@ describe('TrimGrid', () => {
     );
     const header = screen.getByRole('columnheader', { name: /XLE V6/ });
     expect(header).toHaveTextContent('no selector');
-    expect(within(header).getByText('no selector').className).toContain('text-red-400');
+    expect(within(header).getByText('no selector').className).toContain('text-negative');
   });
 
   it('offers exactly the vocabulary options for an enum, plus not set', () => {

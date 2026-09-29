@@ -1,5 +1,7 @@
 import React, { useState, type FC } from 'react';
 import type { Template, TrimSelectors } from '@/types/template';
+import { Label } from '@/components/Label';
+import { TextField } from '@/components/TextField';
 import {
   hasEffectiveSelector,
   removeTrim,
@@ -54,9 +56,9 @@ const SelectorField: FC<FieldProps> = ({
   const [draft, setDraft] = useState<string | null>(null);
 
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-xs uppercase tracking-wide text-white/50">{label}</span>
-      <input
+    <Label>
+      {label}
+      <TextField
         aria-label={label}
         value={draft ?? stored}
         readOnly={readOnly}
@@ -67,9 +69,8 @@ const SelectorField: FC<FieldProps> = ({
           onCommit(draft);
           setDraft(null);
         }}
-        className="h-10 rounded-md bg-dark-grey-950 px-3 text-white placeholder:text-white/25"
       />
-    </label>
+    </Label>
   );
 };
 
@@ -87,20 +88,21 @@ export const TrimSelectorEditor: FC<Props> = ({
     onChange(setSelectors(template, trimIndex, { ...trim.selectors, ...patch }));
 
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-cta-default bg-surface-default p-4">
+    <section className="flex flex-col gap-3 rounded-card bg-card p-4">
       <div className="flex items-center justify-between gap-4">
-        <input
-          aria-label="Trim name"
-          value={trim.name}
-          readOnly={readOnly}
-          onChange={(e) => onChange(renameTrim(template, trimIndex, e.target.value))}
-          className="h-10 flex-1 rounded-md bg-dark-grey-950 px-3 text-white"
-        />
+        <div className="flex-1">
+          <TextField
+            aria-label="Trim name"
+            value={trim.name}
+            readOnly={readOnly}
+            onChange={(e) => onChange(renameTrim(template, trimIndex, e.target.value))}
+          />
+        </div>
         {!readOnly && multiTrim && (
           <button
             type="button"
             onClick={() => onChange(removeTrim(template, trimIndex))}
-            className="rounded-full border border-cta-default px-3 py-1 text-xs text-white/70 hover:border-white hover:text-white"
+            className="rounded-full border border-outline px-3 py-1 text-label text-muted hover:border-outline-strong hover:text-fg"
           >
             Remove trim
           </button>
@@ -132,7 +134,7 @@ export const TrimSelectorEditor: FC<Props> = ({
       </div>
 
       {missing && (
-        <p role="alert" className="text-red-400">
+        <p role="alert" className="text-body-sm text-negative">
           A template with more than one trim cannot have a selector-less trim: it would
           match every signal and make every decode for this model-year ambiguous. Give
           this trim a manufacturer code, a style name or a VIN pattern.

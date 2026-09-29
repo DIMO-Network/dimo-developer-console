@@ -49,17 +49,17 @@ export const TrimGrid: FC<TrimGridProps> = ({
   };
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-cta-default bg-surface-default">
-      <table className="w-full border-collapse text-sm">
+    <div className="overflow-x-auto rounded-card bg-card p-4">
+      <table className="w-full min-w-[640px] border-collapse text-body-sm">
         <thead>
-          <tr className="bg-surface-sunken">
+          <tr className="border-b border-outline">
             <th
               scope="col"
-              className="sticky left-0 z-10 bg-surface-sunken px-3 py-2 text-left text-white/50"
+              className="sticky left-0 z-10 bg-card px-3 pb-3 text-left text-label text-muted"
             >
               Attribute
             </th>
-            <th scope="col" className="px-3 py-2 text-left text-white/50">
+            <th scope="col" className="px-3 pb-3 text-left text-label text-muted">
               Values
             </th>
             {template.trims.map((trim, i) => (
@@ -70,7 +70,7 @@ export const TrimGrid: FC<TrimGridProps> = ({
                 // held in every cell of it.
                 key={i}
                 scope="col"
-                className="border-l border-cta-default align-top"
+                className="border-l border-outline align-top"
               >
                 <TrimHeader trim={trim} multiTrim={multiTrim} />
               </th>
@@ -81,14 +81,14 @@ export const TrimGrid: FC<TrimGridProps> = ({
           {grid.rows.map((row) => {
             const byTrim = row.scope === 'trim' || opened.has(row.def.name);
             return (
-              <tr key={row.def.name} className="border-t border-cta-default">
+              <tr key={row.def.name} className="border-t border-outline">
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 bg-surface-default px-3 py-2 text-left font-normal text-white/70"
+                  className="sticky left-0 z-10 bg-card px-3 py-2 text-left font-normal text-fg"
                 >
                   {row.def.label}
                   {row.def.unit && (
-                    <span className="pl-1 text-white/40">({row.def.unit})</span>
+                    <span className="pl-1 text-muted">({row.def.unit})</span>
                   )}
                 </th>
                 <td data-testid={`rail-${row.def.name}`} className="px-3 py-2">
@@ -101,7 +101,7 @@ export const TrimGrid: FC<TrimGridProps> = ({
                 </td>
                 {byTrim ? (
                   template.trims.map((trim, i) => (
-                    <td key={i} className="border-l border-cta-default align-top">
+                    <td key={i} className="border-l border-outline align-top">
                       <TemplateCell
                         def={row.def}
                         value={row.cells[i]}
@@ -124,7 +124,7 @@ export const TrimGrid: FC<TrimGridProps> = ({
                   // of "this is true of the whole model-year".
                   <td
                     colSpan={template.trims.length}
-                    className="border-l border-cta-default align-top"
+                    className="border-l border-outline align-top"
                   >
                     <TemplateCell
                       def={row.def}
