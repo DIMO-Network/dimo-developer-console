@@ -76,7 +76,7 @@ const RedirectUriListComponent: FC<IProps> = ({
         key={`copy-action-${index}`}
         value={uri}
         onCopySuccessMessage={'Redirect URI copied!'}
-        className={'button secondary icon'}
+        size="icon"
       />
     );
   };
