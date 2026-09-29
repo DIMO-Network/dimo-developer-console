@@ -49,7 +49,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
                   type="button"
                   onClick={() => onChange(handleChange(currentValue - 1))}
                 >
-                  <MinusIcon className="h-3 w-3 text-white" color="white" />
+                  <MinusIcon className="h-3 w-3 text-ink" color="white" />
                 </button>
               )}
               <div className="amount-container">
@@ -73,7 +73,7 @@ export const TokenInput: FC<IProps> = forwardRef<Ref, IProps>(
                   type="button"
                   onClick={() => onChange(handleChange(currentValue + 1))}
                 >
-                  <PlusIcon className="h-3 w-3 text-white" color="white" />
+                  <PlusIcon className="h-3 w-3 text-ink" color="white" />
                 </button>
               )}
             </div>

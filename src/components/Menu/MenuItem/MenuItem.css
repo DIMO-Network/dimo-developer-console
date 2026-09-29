@@ -1,5 +1,24 @@
-.main-menu {
-  ul li {
-    @apply flex flex-row gap-3 items-center text-grey-200 h-10 text-base rounded-full p-2;
+.main-menu .menu-item {
+  @apply flex h-10 flex-row items-center gap-3 rounded-control px-3 text-body-sm font-medium text-muted transition-colors;
+
+  a,
+  button {
+    @apply flex-1 text-left;
+  }
+
+  &:hover {
+    @apply bg-nav-hover text-fg;
+  }
+
+  &.is-active {
+    @apply bg-nav-active text-ink;
+
+    .menu-item-icon {
+      @apply text-ink;
+    }
+  }
+
+  &.is-disabled {
+    @apply pointer-events-none opacity-50;
   }
 }

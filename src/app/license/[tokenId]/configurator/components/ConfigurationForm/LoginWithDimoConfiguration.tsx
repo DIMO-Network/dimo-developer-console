@@ -23,7 +23,7 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
   return (
     <>
       <div className={'flex flex-row gap-4 w-full'}>
-        <Label htmlFor="website" className="text-xs text-medium w-full">
+        <Label htmlFor="website" className="w-full">
           Vehicles
           <TextField
             type="text"
@@ -35,8 +35,8 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
             role="company-website-input"
           />
         </Label>
-        <Label htmlFor="website" className="text-xs text-medium w-full">
-          Vehicle Makes
+        <Label htmlFor="website" className="w-full">
+          Vehicle makes
           <TextField
             type="text"
             placeholder="toyota, mazda..."
@@ -49,8 +49,8 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
         </Label>
       </div>
       <div className={'flex flex-row gap-4 w-full'}>
-        <Label htmlFor="website" className="text-xs text-medium w-full">
-          Powertrain Types
+        <Label htmlFor="website" className="w-full">
+          Powertrain types
           <TextField
             type="text"
             placeholder="ICE, HEV..."
@@ -61,8 +61,8 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
             role="company-website-input"
           />
         </Label>
-        <Label htmlFor="website" className="text-xs text-medium w-full">
-          Expiration Date
+        <Label htmlFor="website" className="w-full">
+          Expiration date
           <Controller
             control={control}
             name="expirationDate"
@@ -77,9 +77,9 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
       </div>
       {brandNames.length > 1 && (
         <div className={'flex flex-row gap-4 w-full'}>
-          <Label htmlFor="brandName" className="text-xs text-medium w-full">
+          <Label htmlFor="brandName" className="w-full">
             Brand
-            <p className="text-text-secondary font-normal text-xs mb-1">
+            <p className="text-muted font-normal text-label mb-1">
               Which brand to show on the Login with DIMO button. Leave as
               &quot;Default&quot; to use your workspace default brand.
             </p>

@@ -39,3 +39,7 @@ next-env.d.ts
 
 certificates
 
+
+# visual harness
+scripts/visual/out/
+scripts/visual/.keys.json

@@ -4,6 +4,9 @@ import React, { useMemo, useState, type FC } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/Button';
+import { Title } from '@/components/Title';
+import { Label } from '@/components/Label';
+import { TextField } from '@/components/TextField';
 import { usePublishTemplate, type PublishFailure } from '@/hooks/queries/useTemplate';
 import { validateDraft } from '@/utils/templateValidate';
 import { toPayload } from '@/utils/templateGrid';
@@ -55,16 +58,15 @@ export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
   );
 
   const field = (key: keyof typeof form, label: string, placeholder: string) => (
-    <label key={key} className="flex flex-col gap-1">
-      <span className="text-xs uppercase tracking-wide text-white/50">{label}</span>
-      <input
+    <Label key={key}>
+      {label}
+      <TextField
         aria-label={label}
         value={form[key]}
         placeholder={placeholder}
         onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-        className="h-10 rounded-md bg-dark-grey-950 px-3 text-white placeholder:text-white/25"
       />
-    </label>
+    </Label>
   );
 
   const onCreate = async () => {
@@ -92,8 +94,8 @@ export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-white">New template</h1>
-      <p className="text-white/50">
+      <Title>New template</Title>
+      <p className="text-body-sm text-muted">
         A model-year and the trims it shipped in. Creating one publishes immediately and
         is attributed to you — nothing points at it yet, so nothing can be re-described.
       </p>
@@ -107,14 +109,14 @@ export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
         {field('trimName', 'First trim', 'Trialmaster')}
       </div>
 
-      <p className="font-mono text-white/70" data-testid="derived-id">
+      <p className="break-all font-mono text-code text-muted" data-testid="derived-id">
         {id}
       </p>
 
       {errors.length > 0 && (
-        <ul className="flex flex-col gap-1 rounded-xl border border-red-400/40 bg-surface-raised p-4">
+        <ul className="flex flex-col gap-1 rounded-card bg-negative-soft p-4">
           {errors.map((e) => (
-            <li key={e} className="text-red-400">
+            <li key={e} className="text-body-sm text-negative">
               {e}
             </li>
           ))}
@@ -124,10 +126,12 @@ export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
       {exists && (
         <div
           role="alert"
-          className="flex items-center gap-3 rounded-xl border border-red-400/40 bg-surface-raised p-4"
+          className="flex flex-wrap items-center gap-3 rounded-card bg-negative-soft p-4"
         >
-          <span className="text-red-400">A template with this id already exists.</span>
-          <Link href={`/templates/${id}`} className="button">
+          <span className="text-body-sm text-negative">
+            A template with this id already exists.
+          </span>
+          <Link href={`/templates/${id}`} className="button secondary">
             Open it
           </Link>
         </div>

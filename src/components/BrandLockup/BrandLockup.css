@@ -1,0 +1,25 @@
+.brand-lockup {
+  /* Fleet's 18px wordmark is wider than the old one; with "Developer Console"
+     the lockup must still end inside the 244px sidebar. */
+  @apply flex h-8 items-center gap-1.5 px-2.5;
+
+  .wordmark {
+    @apply h-[18px] w-auto;
+  }
+
+  .product {
+    @apply whitespace-nowrap border-l border-canvas-divider pl-1.5 text-[14px] font-medium leading-none text-fg;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* The lockup's divider sits on the canvas in the sidebar; on the guest panel
+   it sits on the sheet, where the hairline is the right weight. */
+.guest-panel .brand-lockup .product {
+  @apply border-outline;
+}
+
+/* The wordmark is white, drawn for dark backgrounds; on light render it as ink. */
+:root[data-theme='light'] .brand-lockup .wordmark {
+  filter: brightness(0) opacity(0.88);
+}

@@ -48,14 +48,14 @@ export const Usage: FC<Props> = ({ license }) => {
         <SectionHeader title={'Usage'} />
         <div className={'consumed-credits-container'}>
           {isAuthenticatedAsDev && (
-            <TotalCount totalCount={credits} countedThings="Credits Consumed" />
+            <TotalCount totalCount={credits} countedThings="Credits consumed" />
           )}
           {!isAuthenticatedAsDev && <p>Please generate a Developer JWT First</p>}
           <Link
             href={`https://docs.dimo.org/developer-platform/developer-guide/dimo-credits`}
             target="_blank"
           >
-            <Button className={'table-action-button'}>Learn More</Button>
+            <Button variant="secondary">Learn more</Button>
           </Link>
         </div>
       </Section>

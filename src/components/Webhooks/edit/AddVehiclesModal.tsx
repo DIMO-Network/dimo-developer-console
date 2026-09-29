@@ -64,12 +64,12 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
-      <Title>Add vehicles</Title>
+      <Title className={'text-panel-title'}>Add vehicles</Title>
       <div className={'py-6'}>
         <AssetDIDsInput
           assetDIDs={assetDIDs}
           onChange={setAssetDIDs}
-          label="Asset DIDs to Subscribe"
+          label="Asset DIDs to subscribe"
           error={inputError}
           placeholder="Enter asset DIDs to subscribe to this webhook"
           disabled={loading}
@@ -79,9 +79,9 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
         <Button onClick={handleSubmit} disabled={assetDIDs.length === 0 || loading}>
           {loading
             ? 'Adding...'
-            : `Add ${assetDIDs.length} Vehicle${assetDIDs.length !== 1 ? 's' : ''}`}
+            : `Add ${assetDIDs.length} vehicle${assetDIDs.length !== 1 ? 's' : ''}`}
         </Button>
-        <Button onClick={handleClose} className="dark">
+        <Button onClick={handleClose} variant="secondary">
           Cancel
         </Button>
       </div>

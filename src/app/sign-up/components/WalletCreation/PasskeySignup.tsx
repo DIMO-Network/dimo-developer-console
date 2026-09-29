@@ -1,6 +1,5 @@
 import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { gtSuper } from '@/utils/font';
 import { FC } from 'react';
 
 export const PasskeySignup: FC = () => {
@@ -8,7 +7,7 @@ export const PasskeySignup: FC = () => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className={gtSuper.className}>Creating account with passkey</p>
+          <p className="text-title text-ink">Creating account with passkey</p>
         </div>
         <div className="otp-login-text">
           <p>Your DIMO account is being created. This may take a few seconds.</p>

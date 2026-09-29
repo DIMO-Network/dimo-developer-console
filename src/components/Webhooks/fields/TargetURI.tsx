@@ -27,13 +27,14 @@ export const WebhookTargetUriField = () => {
     <div className="flex flex-col gap-2">
       <Label>Webhook URL</Label>
       <TextField
+        className="font-mono text-code"
         {...register('targetURL', {
           required: 'Please enter a valid URL',
           validate: validateUrl,
         })}
         placeholder="Enter the URL where you want to receive events"
       />
-      <p className="text-[#868888]">
+      <p className="text-body-sm text-muted">
         Enter a public, SSL-enabled URL where you will receive events
       </p>
       {errors.targetURL && (

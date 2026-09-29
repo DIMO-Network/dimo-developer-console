@@ -59,11 +59,11 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
           value={value ? formatDate(value) : ''}
           placeholder={placeholder}
         />
-        <Calendar className="w-5 h-5 text-gray-400 absolute right-3 pointer-events-none" />
+        <Calendar className="w-5 h-5 text-muted absolute right-3 pointer-events-none" />
       </div>
 
       {show && (
-        <div className="absolute mt-2 w-64 bg-surface-raised shadow-lg rounded-md z-10">
+        <div className="absolute mt-2 w-64 bg-overlay shadow-float rounded-control z-10">
           <div className="flex justify-between items-center p-2">
             <div
               onClick={() => {
@@ -99,7 +99,7 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-7 text-center text-sm text-gray-500 border-t pt-2">
+          <div className="grid grid-cols-7 text-center text-sm text-muted border-t border-outline pt-2">
             {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
               <div key={day} className="font-semibold">
                 {day}
@@ -123,8 +123,10 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
               return (
                 <div
                   key={day.toDateString()}
-                  className={`p-2 rounded-full cursor-pointer hover:bg-red-900 ${
-                    isSelected ? 'bg-red-900 text-white' : ''
+                  className={`p-2 rounded-full cursor-pointer ${
+                    isSelected
+                      ? 'bg-selected-bg text-selected-fg hover:bg-selected-bg'
+                      : 'hover:bg-control'
                   }`}
                   onClick={() => {
                     onChange(day);

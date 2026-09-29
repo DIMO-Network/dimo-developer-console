@@ -95,7 +95,6 @@ const View = () => {
   return (
     <div className="sign-up">
       <div className="sign-up__content">
-        <img src={'/images/dimo-dev.svg'} alt="DIMO Logo" />
         {SignUpFlow && (
           <SignUpFlow onNext={handleNext} auth={authData} isLoading={isLoading} />
         )}

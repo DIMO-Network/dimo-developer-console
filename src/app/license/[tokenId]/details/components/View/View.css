@@ -2,15 +2,15 @@
   @apply flex flex-col;
 
   .subtitle {
-    @apply capitalize text-text-secondary text-sm;
+    @apply text-body-sm text-muted;
   }
 
   .summary {
-    @apply pb-6 border-b border-b-cta-default;
+    @apply pb-6 border-b border-outline;
   }
 
   .signers-content {
-    @apply p-4 bg-surface-raised rounded-2xl flex flex-col gap-4 justify-between;
+    @apply p-4 bg-card rounded-card flex flex-col gap-4 justify-between;
 
     .title {
       @apply col-span-10;

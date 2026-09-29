@@ -23,8 +23,11 @@ export const PaymentMethod: FC<IProps> = ({
 }) => {
   return (
     <Card
+      role="radio"
+      aria-checked={selected}
       className={classNames('payment-method card-border !p-2', className, {
-        'border !border-primary-500': selected,
+        'border-transparent bg-control text-ink shadow-selected': selected,
+        'hover:bg-control/70': !selected,
       })}
       onClick={onClick}
     >

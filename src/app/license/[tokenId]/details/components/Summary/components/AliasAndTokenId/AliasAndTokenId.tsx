@@ -9,17 +9,13 @@ export const AliasAndTokenId = (props: {
 }) => {
   return (
     <div className="flex flex-row gap-2 items-center">
-      <div
-        className={
-          'w-6 h-6 rounded-full bg-surface-raised flex justify-center items-center'
-        }
-      >
-        <p className={'text-sm font-medium'}>{props.tokenId}</p>
+      <div className={'w-6 h-6 rounded-full bg-card flex justify-center items-center'}>
+        <p className={'text-body-sm font-medium text-ink'}>{props.tokenId}</p>
       </div>
-      <Title className="text-xl">{props.alias}</Title>
+      <Title className="text-title">{props.alias}</Title>
       {props.canEdit && (
         <PencilIcon
-          className="w-4 h-4 cursor-pointer text-text-secondary"
+          className="w-4 h-4 cursor-pointer text-muted"
           onClick={props.onEdit}
         />
       )}

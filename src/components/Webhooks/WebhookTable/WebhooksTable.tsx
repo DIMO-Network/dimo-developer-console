@@ -15,12 +15,13 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
 import Cell from '@/components/Table/Cell';
 import { VehicleCount } from '@/components/Webhooks/components/VehicleCount';
 import { StatusBadge } from '@/components/Webhooks/components/StatusBadge';
+import { StatusChip } from '@/components/StatusChip';
 
 const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
   return [
     { header: 'Description', accessorKey: 'description' },
     {
-      header: 'Display Name',
+      header: 'Display name',
       cell: ({ row }) => row.original.displayName || '-',
     },
     { header: 'Service', accessorKey: 'service' },
@@ -32,7 +33,14 @@ const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
       header: 'Vehicles',
       cell: ({ row }) => <VehicleCount webhookId={row.original.id} clientId={clientId} />,
     },
-    { header: 'Errors', accessorKey: 'failure_count' },
+    {
+      header: 'Errors',
+      accessorKey: 'failure_count',
+      cell: ({ row }) => {
+        const count = row.original.failure_count;
+        return count > 0 ? <StatusChip tone="error">{count}</StatusChip> : count;
+      },
+    },
     {
       header: 'Status',
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
@@ -100,15 +108,15 @@ const TableRowBasic = ({
     <tr
       onClick={onClick}
       className={clsx(
-        'border-t border-t-cta-default transition-colors cursor-pointer',
-        isExpanded && 'bg-surface-sunken',
+        'border-t border-t-outline transition-colors cursor-pointer',
+        isExpanded && 'bg-sheet',
       )}
     >
       <td className="pl-4 pr-2">
         {isExpanded ? (
-          <ChevronUpIcon className="h-4 w-4 text-white" />
+          <ChevronUpIcon className="h-4 w-4 text-muted" />
         ) : (
-          <ChevronDownIcon className="h-4 w-4 text-white" />
+          <ChevronDownIcon className="h-4 w-4 text-muted" />
         )}
       </td>
       {row.getVisibleCells().map((cell) => (

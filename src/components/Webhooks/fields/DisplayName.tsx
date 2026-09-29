@@ -13,7 +13,7 @@ export const WebhookDisplayNameField = () => {
 
   return (
     <div className={'flex flex-col gap-2.5'}>
-      <Label>Display Name</Label>
+      <Label>Display name</Label>
       <TextField
         {...register('displayName')}
         placeholder="Enter a display name for your webhook (optional)"

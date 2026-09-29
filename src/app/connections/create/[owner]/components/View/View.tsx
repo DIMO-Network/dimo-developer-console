@@ -108,19 +108,17 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     <>
       <div className="flex flex-col gap-8">
         <div className="max-w-2xl">
-          <Title component="h2" className="text-xl mb-6">
+          <Title component="h2" className="text-card-title mb-6">
             New connection
           </Title>
 
           <div className="space-y-6">
             <div>
-              <Label htmlFor="connectionName" className="text-sm font-medium">
-                Connection Name
-              </Label>
+              <Label htmlFor="connectionName">Connection name</Label>
               <TextField
                 id="connectionName"
                 type="text"
-                placeholder="Connection Name"
+                placeholder="Connection name"
                 className="mt-1"
                 value={connectionName}
                 onChange={handleConnectionNameChange}
@@ -137,7 +135,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
               onClick={handlePurchaseAlert}
               disabled={!!nameValidationError}
             >
-              Purchase Connection License
+              Purchase connection license
             </Button>
           </div>
         </div>
@@ -156,14 +154,14 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         className="purchase-confirmation"
       >
         <div>
-          <Title className="text-2xl" component="h3">
-            Purchase Connection License
+          <Title className="text-panel-title" component="h3">
+            Purchase connection license
           </Title>
-          <div className="pt-4 text-sm text-text-secondary font-normal text-justify leading-relaxed">
+          <div className="pt-4 text-body-sm text-muted font-normal text-justify leading-relaxed">
             <p className="mb-4">
-              <span className="text-red-600 font-bold">Warning!</span> By proceeding, you
+              <span className="text-negative font-bold">Warning!</span> By proceeding, you
               are agreeing to approve payment of{' '}
-              <span className="text-red-600 font-bold">$1 in</span> credits for your DIMO
+              <span className="text-negative font-bold">$1 in</span> credits for your DIMO
               Connection License. If you do not have enough credits in your account, you
               will be unable to create a Connection License.
             </p>
@@ -175,7 +173,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
           {error && (
             <div className="pt-4">
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="text-body-sm text-negative bg-negative-soft rounded-control p-3">
                 {error}
               </p>
             </div>
@@ -183,6 +181,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
           <div className="purchase-buttons pt-6 flex gap-4">
             <Button
+              variant="secondary"
               className="w-48"
               onClick={handleCancelPayment}
               disabled={isProcessingPayment}
@@ -194,7 +193,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
               onClick={handleContinuePayment}
               disabled={isProcessingPayment}
             >
-              Continue with Payment
+              Continue with payment
             </Button>
           </div>
         </div>

@@ -18,11 +18,11 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
   const canDelete = isMultiple && !brand.isDefault;
 
   return (
-    <div className="flex flex-row items-center justify-between py-3 border-b border-border last:border-0">
+    <div className="flex flex-row items-center justify-between py-3 border-b border-outline last:border-0">
       <div className="flex flex-row items-center gap-2">
-        <span className="font-medium">{brand.name}</span>
+        <span className="font-medium text-ink">{brand.name}</span>
         {brand.isDefault && (
-          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-cta-default text-white whitespace-nowrap">
+          <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted whitespace-nowrap">
             Default
           </span>
         )}
@@ -31,7 +31,8 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
         <div className="flex flex-row gap-2">
           <Button
             type="button"
-            className="table-action-button"
+            variant="ghost"
+            size="icon"
             title="Edit brand"
             onClick={onEdit}
           >
@@ -39,7 +40,8 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
           </Button>
           <Button
             type="button"
-            className="table-action-button"
+            variant="ghost"
+            size="icon"
             title={
               canDelete
                 ? 'Delete brand'

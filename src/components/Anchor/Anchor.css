@@ -1,11 +1,11 @@
 .anchor {
-  @apply text-white py-1 cursor-pointer;
+  @apply cursor-pointer py-1 text-ink underline-offset-2 hover:underline;
 
   &.primary {
-    @apply text-primary-200;
+    @apply text-ink;
   }
 
   &.grey {
-    @apply text-grey-400;
+    @apply text-muted;
   }
 }

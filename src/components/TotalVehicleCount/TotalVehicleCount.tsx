@@ -9,7 +9,7 @@ export const TotalCount = ({
   countedThings: string;
 }) => (
   <div className={'flex flex-row items-center gap-2.5 pb-4 md:pb-0'}>
-    <Title className={'text-4xl'}>{totalCount}</Title>
-    <p className={'text-text-secondary text-xl'}>{countedThings}</p>
+    <Title className={'text-metric text-ink'}>{totalCount}</Title>
+    <p className={'text-muted text-xl'}>{countedThings}</p>
   </div>
 );

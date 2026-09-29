@@ -1,7 +1,6 @@
 'use client';
 import React, { useContext, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PageSubtitle } from '@/components/PageSubtitle';
 import { Section } from '@/components/Section';
 import { SectionHeader } from '@/components/Section/Header';
 import { Button } from '@/components/Button';
@@ -56,12 +55,13 @@ const MainComponent: React.FC = () => {
                 <div className="connection-public-key">
                   {connection.connection_license_public_key}
                 </div>
-                <button
-                  className="connection-details-btn"
+                <Button
+                  variant="secondary"
+                  className="w-full"
                   onClick={() => router.push(`/connections/${connection.id}`)}
                 >
-                  Connection Details
-                </button>
+                  Connection details
+                </Button>
               </div>
             ))}
           </div>
@@ -80,13 +80,16 @@ const MainComponent: React.FC = () => {
 
   return (
     <div className="connections-page">
-      <PageSubtitle subtitle="Connection Oracle is an application that performs data streaming from your data source to a DIMO Node." />
+      <p className="text-body-sm text-muted">
+        Connection Oracle is an application that performs data streaming from your data
+        source to a DIMO Node.
+      </p>
 
       <Section>
         <SectionHeader title="Connections">
           {(!connections || connections.length === 0) && (
             <Button
-              className="dark with-icon"
+              variant="secondary"
               onClick={handleCreateConnection}
               disabled={isLoading}
             >

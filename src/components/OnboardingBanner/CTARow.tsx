@@ -14,15 +14,17 @@ export const CTARow: FC<CTARowProps> = ({ text, subtitle, CTA, isComplete }) => 
     return <ActionCompletedRow text={text} />;
   }
   return (
-    <div className={'flex flex-col md:flex-row justify-between w-full'}>
-      <div className={'flex flex-row gap-2 items-center'}>
-        <PlusCircleIcon className="size-4 text-white" />
-        <div>
-          <p className={'text-base text-white'}>{text}</p>
-          {!!subtitle && <p className={'text-sm text-text-secondary'}>{subtitle}</p>}
+    <div
+      className={'flex w-full flex-col justify-between gap-4 md:flex-row md:items-center'}
+    >
+      <div className={'flex flex-row items-start gap-2.5'}>
+        <PlusCircleIcon className="mt-[3px] size-4 shrink-0 text-muted" />
+        <div className={'flex flex-col gap-0.5'}>
+          <p className={'text-body font-medium text-ink'}>{text}</p>
+          {!!subtitle && <p className={'text-body-sm text-muted'}>{subtitle}</p>}
         </div>
       </div>
-      <div className={'mt-4 md:mt-0'}>{CTA}</div>
+      <div className={'shrink-0 pl-[26px] md:pl-0'}>{CTA}</div>
     </div>
   );
 };

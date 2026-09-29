@@ -29,13 +29,13 @@ export const OnboardingBanner: FC<Props> = ({
 
   return (
     <div className="banner-content">
-      <div>
-        <p className="font-black text-xl">Getting Started</p>
-        <p className="text-text-secondary text-sm mt-1">
+      <div className="flex flex-col gap-1">
+        <p className="text-card-title text-ink">Getting started</p>
+        <p className="text-body-sm text-muted">
           You’re on the way to building with DIMO!
         </p>
       </div>
-      <div className={'flex flex-col flex-1 gap-4 w-full'}>
+      <div className={'flex w-full flex-1 flex-col gap-3'}>
         <ActionCompletedRow text={'Create account'} />
         <ActionCompletedRow text={'Confirm your details'} />
         <CTARow
@@ -44,13 +44,13 @@ export const OnboardingBanner: FC<Props> = ({
           subtitle={
             'Now that your account is set up, it’s time to create your first license.'
           }
-          CTA={<CreateAppButton className={'white-with-icon'} />}
+          CTA={<CreateAppButton variant="secondary" />}
         />
         {fragment.totalCount > 0 && (
           <CTARow
             isComplete={balance > 0}
             text={'Add credits'}
-            CTA={<AddCreditsButton className={'white-with-icon'} />}
+            CTA={<AddCreditsButton />}
           />
         )}
       </div>

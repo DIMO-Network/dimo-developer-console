@@ -1,5 +1,6 @@
 import { FC, useState } from 'react';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import { Button } from '@/components/Button';
 import {
   DynamicFormProps,
   ComponentType,
@@ -217,12 +218,12 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
     <>
       {/* Toggle */}
       <div className="pt-4">
-        <label className="block font-semibold mb-1">View as:</label>
+        <label className="block text-label text-muted mb-1">View as:</label>
         <SegmentedControl
           value={viewMode}
           options={[
             { value: 'code', label: 'Code' },
-            { value: 'url', label: 'Url' },
+            { value: 'url', label: 'URL' },
           ]}
           onChange={(value) => setViewMode(value)}
         />
@@ -230,7 +231,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
 
       {/* Output */}
       <div className="pt-4 relative">
-        <h3 className="font-semibold mb-2">Generated Code</h3>
+        <h3 className="text-card-title text-ink mb-2">Generated code</h3>
         {viewMode === 'code' ? (
           <SyntaxHighlighter
             language="tsx"
@@ -240,13 +241,14 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
             {renderSnippet()}
           </SyntaxHighlighter>
         ) : (
-          <pre className="bg-surface-raised p-4 rounded overflow-x-auto text-sm whitespace-pre-wrap">
+          <pre className="bg-control p-4 rounded-control overflow-x-auto font-mono text-code text-fg whitespace-pre-wrap">
             {buildUrl()}
           </pre>
         )}
 
-        <button
-          className="absolute top-2 right-2 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 shadow-md"
+        <Button
+          variant="secondary"
+          className="absolute top-2 right-2"
           onClick={() =>
             navigator.clipboard.writeText(
               viewMode === 'code' ? renderSnippet() : buildUrl(),
@@ -254,7 +256,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
           }
         >
           Copy
-        </button>
+        </Button>
       </div>
     </>
   );

@@ -48,7 +48,7 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
 
   return (
     <CollapsibleSection>
-      <CollapsibleSection.Title title={'Authorized Redirect URIs'} />
+      <CollapsibleSection.Title title={'Authorized redirect URIs'} />
       <CollapsibleSection.Content>
         {isLicenseOwner && (
           <div>

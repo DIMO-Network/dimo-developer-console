@@ -1,31 +1,23 @@
 .modal-container {
-  @apply fixed inset-0 z-10 w-screen overflow-y-auto flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0;
+  @apply fixed inset-0 z-10 flex min-h-full w-screen items-end justify-center overflow-y-auto p-4 text-left sm:items-center;
 
   .dialog-panel {
-    @apply relative transform overflow-hidden rounded-2xl bg-surface-raised text-left shadow-xl transition-all sm:my-8 sm:w-full md:w-screen sm:max-w-sm min-w-[95vw] min-h-[95vh] ml-auto mr-auto my-auto md:m-auto md:h-auto md:min-w-[480px] md:min-h-0 p-6;
+    @apply relative my-auto w-full min-h-[95vh] max-w-[calc(100vw-2rem)] transform overflow-hidden rounded-panel bg-overlay p-6 text-fg shadow-float transition-all md:h-auto md:min-h-0 md:w-auto md:min-w-[480px] md:max-w-[560px];
 
     .dialog-close-content {
-      @apply absolute right-0 top-0 pr-4 pt-4 cursor-pointer z-10;
+      @apply absolute right-0 top-0 z-10 cursor-pointer pr-4 pt-4;
 
       .close-btn {
-        @apply text-white hover:text-gray-500 focus:outline-none;
+        @apply rounded-full p-1 text-muted hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-overlay;
       }
     }
 
     .dialog-content {
-      @apply sm:flex sm:items-start sm:flex-col;
+      @apply sm:flex sm:flex-col sm:items-start;
     }
 
     .dialog-action-content {
-      @apply mt-5 sm:mt-4 sm:flex sm:flex-row-reverse;
-
-      button {
-        @apply inline-flex w-full justify-center rounded-md  bg-white px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto;
-      }
-
-      button.danger {
-        @apply mt-3 bg-white px-3 py-2 text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0;
-      }
+      @apply mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end;
     }
   }
 }

@@ -59,7 +59,7 @@ export const PERMISSIONS = [
   {
     key: 'NONLOCATION_TELEMETRY',
     enum: 'Permissions.GetNonLocationHistory',
-    title: 'Non Location Telemetry',
+    title: 'Non location telemetry',
     description: 'Access to non-location vehicle telemetry',
   },
   {
@@ -71,13 +71,13 @@ export const PERMISSIONS = [
   {
     key: 'CURRENT_LOCATION',
     enum: 'Permissions.GetCurrentLocation',
-    title: 'Current Location',
+    title: 'Current location',
     description: 'Access to current vehicle location',
   },
   {
     key: 'ALLTIME_LOCATION',
     enum: 'Permissions.GetLocationHistory',
-    title: 'All Time Location',
+    title: 'All time location',
     description: 'Access to historical location data',
   },
   {
@@ -95,13 +95,13 @@ export const PERMISSIONS = [
   {
     key: 'RAW_DATA',
     enum: 'Permissions.GetRawData',
-    title: 'Raw Data',
+    title: 'Raw data',
     description: 'Access to raw vehicle data',
   },
   {
     key: 'APPROXIMATE_LOCATION',
     enum: 'Permissions.GetApproximateLocation',
-    title: 'Approximate Location',
+    title: 'Approximate location',
     description: 'Access to approximate location data',
   },
 ];
@@ -109,8 +109,8 @@ export const PERMISSIONS = [
 export const ATTESTATION_TAGS = [
   {
     value: 'DriversLicense',
-    title: "Driver's License",
-    description: "Driver's License",
+    title: "Driver's license",
+    description: "Driver's license",
   },
   {
     value: 'Insurance',
@@ -119,7 +119,7 @@ export const ATTESTATION_TAGS = [
   },
   {
     value: 'ServiceRecords',
-    title: 'Service Records',
-    description: 'Service Records',
+    title: 'Service records',
+    description: 'Service records',
   },
 ];

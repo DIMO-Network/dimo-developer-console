@@ -62,33 +62,30 @@ export const LicenseCard = (props: {
     <Card className={classNames('license-card', props.className)}>
       <div className="content">
         {/* Header */}
-        <div className="flex w-full flex-row justify-between items-start">
-          <p className="title">{license.alias}</p>
-          <span className="text-[10px] font-mono text-text-secondary">
-            #{license.tokenId}
-          </span>
+        <div className="flex w-full flex-row items-start justify-between gap-3">
+          <p className="title min-w-0 break-words">{license.alias}</p>
+          <span className="license-card-token-id">#{license.tokenId}</span>
         </div>
 
         {/* Stats */}
-        <div className="flex flex-row items-center gap-4 py-2 border-y border-[#322D2F]">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[10px] uppercase tracking-wider text-text-secondary">
-              Vehicles Connected
-            </span>
+        <div className="flex flex-row flex-wrap items-end justify-between gap-x-4 gap-y-2">
+          <div className="flex flex-col gap-1">
+            <span className="text-label text-muted">Vehicles connected</span>
             {vehicleLoading ? (
               <BubbleLoader isLoading isSmall />
             ) : (
-              <Anchor href={`/license/vehicles/${license.clientId}`}>
-                <span className="text-sm font-semibold hover:underline">
-                  {vehicleCount.toLocaleString()}
-                </span>
+              <Anchor
+                href={`/license/vehicles/${license.clientId}`}
+                className="license-card-metric"
+              >
+                {vehicleCount.toLocaleString()}
               </Anchor>
             )}
           </div>
 
           {!vehicleLoading && !hasVehicles && (
-            <div className="flex flex-row items-center gap-1 text-xs text-text-secondary ml-auto">
-              <WarningAmberIcon className="w-4 h-4" />
+            <div className="flex flex-row items-center gap-1.5 pb-1 text-label text-muted">
+              <WarningAmberIcon className="h-4 w-4 text-warning" />
               No vehicles connected
             </div>
           )}
@@ -98,10 +95,11 @@ export const LicenseCard = (props: {
         {sharingLinkLoading ? (
           <BubbleLoader isLoading isSmall />
         ) : configCount !== null && configCount > 1 ? (
-          <Anchor href={`/license/${license.tokenId}/configurator`}>
-            <span className="text-xs text-primary hover:opacity-70 transition-opacity">
-              {configCount} configurations →
-            </span>
+          <Anchor
+            href={`/license/${license.tokenId}/configurator`}
+            className="license-card-link"
+          >
+            {configCount} configurations →
           </Anchor>
         ) : sharingLink ? (
           <button
@@ -109,23 +107,26 @@ export const LicenseCard = (props: {
               navigator.clipboard.writeText(sharingLink);
               setNotification('Sharing link copied', '', 'success');
             }}
-            className="flex items-center gap-2 w-fit text-xs text-primary hover:opacity-70 transition-opacity"
+            className="license-card-link"
             title={sharingLink}
           >
-            <ContentCopyIcon className="w-4 h-4 shrink-0" />
-            Vehicle Sharing Link
+            <ContentCopyIcon className="h-4 w-4 shrink-0" />
+            Vehicle sharing link
           </button>
         ) : (
-          <Anchor href={`/license/${license.tokenId}/configurator`}>
-            <span className="text-xs text-text-secondary hover:text-text-primary transition-colors">
-              Not configured — set up vehicle sharing →
-            </span>
+          <Anchor
+            href={`/license/${license.tokenId}/configurator`}
+            className="license-card-link"
+          >
+            Not configured — set up vehicle sharing →
           </Anchor>
         )}
 
         {/* CTA */}
-        <Anchor href={`/license/${license.tokenId}/details`}>
-          <Button className={'dark w-full !h-10'}>License Details</Button>
+        <Anchor href={`/license/${license.tokenId}/details`} className="!py-0">
+          <Button variant="secondary" className={'w-full !h-10'}>
+            License details
+          </Button>
         </Anchor>
       </div>
     </Card>

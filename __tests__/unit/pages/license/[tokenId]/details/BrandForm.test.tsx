@@ -115,7 +115,7 @@ describe('BrandForm', () => {
     expect(screen.queryByText(/Renaming breaks/)).not.toBeInTheDocument();
   });
 
-  it('shows Set as Default button for a non-default brand', () => {
+  it('shows Set as default button for a non-default brand', () => {
     render(
       <BrandForm
         brand={nonDefaultBrand}
@@ -126,10 +126,10 @@ describe('BrandForm', () => {
         onSetDefault={jest.fn()}
       />,
     );
-    expect(screen.getByText('Set as Default')).toBeInTheDocument();
+    expect(screen.getByText('Set as default')).toBeInTheDocument();
   });
 
-  it('does not show Set as Default button for the default brand', () => {
+  it('does not show Set as default button for the default brand', () => {
     render(
       <BrandForm
         brand={existingBrand}
@@ -140,7 +140,7 @@ describe('BrandForm', () => {
         onSetDefault={jest.fn()}
       />,
     );
-    expect(screen.queryByText('Set as Default')).not.toBeInTheDocument();
+    expect(screen.queryByText('Set as default')).not.toBeInTheDocument();
   });
 
   it('calls onCancel when Cancel is clicked', () => {

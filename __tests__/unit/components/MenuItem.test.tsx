@@ -39,7 +39,7 @@ describe('MenuItem Component', () => {
     expect(screen.getByRole('link')).toHaveAttribute('target', '_blank');
   });
 
-  it('renders the MenuItem component as disabled', () => {
+  it('renders the MenuItem component as disabled', async () => {
     render(
       <MenuItem
         link="https://example.com"
@@ -51,8 +51,8 @@ describe('MenuItem Component', () => {
       />,
     );
 
-    waitFor(() => {
-      expect(screen.getByText('Disabled Menu Item')).toHaveClass('!text-grey-200/50');
+    await waitFor(() => {
+      expect(screen.getByRole('listitem')).toHaveClass('is-disabled');
     });
     expect(screen.getByRole('link')).toHaveAttribute('href', '#');
     fireEvent.click(screen.getByRole('link'));

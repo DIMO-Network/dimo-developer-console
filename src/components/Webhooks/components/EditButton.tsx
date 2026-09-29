@@ -5,7 +5,7 @@ import React from 'react';
 export const EditButton = ({ editUrl }: { editUrl: string }) => {
   return (
     <Link href={editUrl}>
-      <Button className="primary-outline">Edit</Button>
+      <Button variant="secondary">Edit</Button>
     </Link>
   );
 };

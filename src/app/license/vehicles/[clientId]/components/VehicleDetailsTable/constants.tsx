@@ -27,7 +27,7 @@ export const buildColumns = (
             {definition?.make} {definition?.model} {definition?.year}
           </span>
           {isSimulated && (
-            <span className="text-[10px] font-mono tracking-[0.15em] uppercase px-1.5 py-0.5 rounded border border-[#322D2F] text-text-secondary bg-surface-raised leading-none">
+            <span className="rounded-chip border border-outline bg-highest px-1.5 py-0.5 text-label text-muted leading-none">
               Simulated
             </span>
           )}

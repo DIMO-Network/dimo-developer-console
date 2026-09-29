@@ -35,7 +35,7 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
 
   return (
     <>
-      <div className="overflow-x-auto min-w-full bg-surface-default rounded-xl p-4">
+      <div className="overflow-x-auto min-w-full rounded-card bg-card p-4">
         <table className="table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -52,7 +52,7 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className={'border-t border-t-cta-default'}>
+              <tr key={row.id} className={'border-t border-outline'}>
                 {row.getVisibleCells().map((cell) => (
                   <Cell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -63,7 +63,7 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between text-sm text-text-secondary">
+      <div className="flex items-center justify-between text-sm text-muted">
         <p>
           {data.length === 0
             ? 'Showing 0 of 0'
@@ -74,7 +74,8 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
         </p>
         <div className="flex items-center gap-2">
           <Button
-            className={'table-action-button'}
+            variant="secondary"
+            size="icon"
             disabled={!table.getCanPreviousPage()}
             onClick={() => table.previousPage()}
           >
@@ -82,7 +83,8 @@ export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
           </Button>
           <p>{pagination.pageIndex + 1}</p>
           <Button
-            className={'table-action-button'}
+            variant="secondary"
+            size="icon"
             disabled={!table.getCanNextPage()}
             onClick={() => table.nextPage()}
           >

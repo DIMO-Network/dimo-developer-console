@@ -103,7 +103,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
     <>
       <form className="flex flex-col gap-4 w-full" onSubmit={handleSubmit(submit)}>
         <div className="flex flex-row w-full gap-4">
-          <Label htmlFor="website" className="text-xs text-medium w-full">
+          <Label htmlFor="website" className="w-full">
             Configuration name
             <TextField
               type="text"
@@ -115,8 +115,8 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
               role="company-website-input"
             />
           </Label>
-          <Label htmlFor="website" className="text-xs text-medium w-full">
-            Client Id
+          <Label htmlFor="website" className="w-full">
+            Client ID
             <TextField
               type="text"
               placeholder=""
@@ -127,17 +127,18 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
                 validate: {},
               })}
               role="company-website-input"
+              className="font-mono text-code"
             />
           </Label>
         </div>
         <div>
-          <Label htmlFor="component" className="text-xs text-medium">
+          <Label htmlFor="component">
             Which component?
             <SegmentedControl
               name="component"
               options={[
-                { value: 'LoginWithDimo', label: 'Login With DIMO' },
-                { value: 'ShareVehiclesWithDimo', label: 'Share Vehicles with DIMO' },
+                { value: 'LoginWithDimo', label: 'Login with DIMO' },
+                { value: 'ShareVehiclesWithDimo', label: 'Share vehicles with DIMO' },
               ]}
               role="component-segmented"
               control={control}
@@ -145,7 +146,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
           </Label>
         </div>
         <div className="flex flex-row w-full gap-4">
-          <Label htmlFor="redirectUri" className="text-xs text-medium w-full">
+          <Label htmlFor="redirectUri" className="w-full">
             Redirect URI
             <SelectField
               {...register('redirectUri', {
@@ -160,7 +161,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
               role="redirectUri-select"
             />
           </Label>
-          <Label htmlFor="website" className="text-xs text-medium w-full">
+          <Label htmlFor="website" className="w-full">
             UTM
             <TextField
               type="text"
@@ -180,9 +181,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit }) => {
           brandNames={brandNames}
         />
 
-        <Button type="submit" className="primary">
-          Save
-        </Button>
+        <Button type="submit">Save</Button>
       </form>
     </>
   );

@@ -1,5 +1,5 @@
 .connection-details-page {
-  @apply flex flex-col gap-8 p-6;
+  @apply flex flex-col gap-8;
 }
 
 .connection-details-header {
@@ -7,31 +7,31 @@
 }
 
 .connection-title-section {
-  @apply flex flex-col gap-1 pb-4 border-b border-[#322D2F];
+  @apply flex flex-col gap-1 border-b border-outline pb-4;
 }
 
 .connection-title {
-  @apply text-2xl font-bold text-white m-0;
+  @apply m-0 text-title text-ink;
 }
 
 .environment-badge {
-  @apply text-text-secondary text-sm;
+  @apply text-body-sm text-muted;
 }
 
 .connection-license-section {
-  @apply bg-surface-raised border border-[#322D2F] rounded-2xl p-6;
+  @apply rounded-card bg-card p-6;
 }
 
 .section-header {
-  @apply flex items-center justify-between mb-6;
+  @apply mb-6 flex items-center justify-between;
 }
 
 .section-title {
-  @apply text-xl font-semibold text-white m-0;
+  @apply m-0 text-card-title text-ink;
 }
 
 .section-icon {
-  @apply text-text-secondary w-6 h-6;
+  @apply h-6 w-6 text-muted;
 }
 
 .license-fields {
@@ -43,17 +43,17 @@
 }
 
 .field-label {
-  @apply text-text-secondary text-sm font-medium;
+  @apply text-label text-muted;
 }
 
 .field-value-container {
-  @apply flex items-center justify-between;
+  @apply flex items-center justify-between gap-3;
 }
 
 .field-value {
-  @apply text-white text-lg flex-1 break-all;
+  @apply flex-1 break-all font-mono text-code text-fg;
 }
 
 .field-value-container button {
-  @apply bg-cta-default text-white border-0 p-2 rounded-full hover:bg-opacity-80 transition-all duration-200;
+  @apply rounded-full p-2 text-muted transition-colors hover:bg-control hover:text-ink;
 }

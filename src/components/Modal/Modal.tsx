@@ -33,7 +33,7 @@ export const Modal: FC<IProps> = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
+          <div className="fixed inset-0 bg-scrim backdrop-blur-[6px] transition-opacity" />
         </TransitionChild>
 
         <div className={classNames('modal-container', className)}>

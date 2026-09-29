@@ -1,7 +1,12 @@
 .text-field {
-  @apply rounded-lg py-2 px-4 outline-0 bg-cta-default text-white flex flex-row font-normal;
+  @apply flex min-h-10 flex-row items-center rounded-control border border-control-border bg-control px-3 text-fg transition-[border-color,box-shadow] focus-within:border-focus-ring focus-within:ring-[3px] focus-within:ring-accent-soft;
+
+  /* Hover firms the edge, but never over the focus ring. */
+  &:hover:not(:focus-within) {
+    @apply border-control-border-hover;
+  }
 
   input {
-    @apply w-full bg-transparent outline-0 font-normal text-sm;
+    @apply w-full bg-transparent text-body-sm font-normal outline-0 placeholder:text-muted;
   }
 }

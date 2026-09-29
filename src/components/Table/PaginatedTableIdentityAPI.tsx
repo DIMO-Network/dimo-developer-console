@@ -78,7 +78,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
 
   return (
     <div className={'min-w-full'}>
-      <div className={'min-w-full bg-surface-default rounded-xl p-4'}>
+      <div className={'min-w-full rounded-card bg-card p-4'}>
         <table className="table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -97,7 +97,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className={`border-t border-t-cta-default${onRowClick ? ' cursor-pointer hover:bg-surface-raised' : ''}`}
+                className={`border-t border-outline${onRowClick ? ' cursor-pointer hover:bg-control' : ''}`}
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
@@ -119,7 +119,8 @@ export const PaginatedTableIdentityAPI = <TData,>({
         </p>
         <div className={'flex flex-row items-center'}>
           <Button
-            className={'table-action-button'}
+            variant="secondary"
+            size="icon"
             disabled={!table.getCanPreviousPage() || loading}
             onClick={() => table.previousPage()}
           >
@@ -127,7 +128,8 @@ export const PaginatedTableIdentityAPI = <TData,>({
           </Button>
           <p>{pagination.pageIndex + 1}</p>
           <Button
-            className={'table-action-button'}
+            variant="secondary"
+            size="icon"
             disabled={!table.getCanNextPage() || loading}
             onClick={() => table.nextPage()}
           >

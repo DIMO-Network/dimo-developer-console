@@ -1,4 +1,5 @@
 import React, { type FC } from 'react';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import type { Normalisation } from '@/utils/templateCoerce';
 
 interface Props {
@@ -14,26 +15,31 @@ interface Props {
 export const NormalisationPanel: FC<Props> = ({ notes, onDismiss }) => {
   if (notes.length === 0) return null;
   return (
-    <section className="rounded-xl border border-cta-default bg-surface-raised p-4">
-      <div className="flex items-start justify-between gap-4">
-        <h2 className="text-white">What the editor changed that you did not type</h2>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="text-xs text-white/50 hover:text-white"
-        >
-          Dismiss
-        </button>
+    <section className="flex items-start gap-3 rounded-card bg-card p-4">
+      <InformationCircleIcon className="mt-0.5 size-4 flex-shrink-0 text-muted" />
+      <div className="flex flex-1 flex-col gap-2">
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="text-body-sm font-medium text-ink">
+            What the editor changed that you did not type
+          </h2>
+          <button
+            type="button"
+            onClick={onDismiss}
+            className="text-label text-muted hover:text-fg"
+          >
+            Dismiss
+          </button>
+        </div>
+        <ul className="flex flex-col gap-1">
+          {notes.map((n, i) => (
+            <li key={`${n.attribute}-${i}`} className="text-body-sm text-fg">
+              <span className="font-mono text-code text-muted">{n.attribute}</span>
+              <span className="px-2 text-muted">·</span>
+              {n.reason}
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul className="flex flex-col gap-1 pt-2">
-        {notes.map((n, i) => (
-          <li key={`${n.attribute}-${i}`} className="text-white/70">
-            <span className="font-mono text-white/50">{n.attribute}</span>
-            <span className="px-2 text-white/25">·</span>
-            {n.reason}
-          </li>
-        ))}
-      </ul>
     </section>
   );
 };

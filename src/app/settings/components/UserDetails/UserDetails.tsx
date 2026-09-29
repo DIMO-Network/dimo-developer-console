@@ -15,18 +15,14 @@ export const UserDetails: FC = () => {
 
   return (
     <Card className="primary user-detail">
-      <Title component="h4" className="settings-card-title">
-        User Details
+      <Title component="h4" className="text-card-title">
+        User details
       </Title>
       <Card className="secondary user-detail-content">
-        <Title component="h4" className="user-title">
-          Name
-        </Title>
-        <p className="user-description">{user.name}</p>
-        <Title component="h4" className="user-title">
-          Email
-        </Title>
-        <p className="user-description">{user.email}</p>
+        <p className="user-label">Name</p>
+        <p className="user-value">{user.name}</p>
+        <p className="user-label">Email</p>
+        <p className="user-value">{user.email}</p>
       </Card>
     </Card>
   );

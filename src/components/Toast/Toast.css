@@ -1,42 +1,41 @@
 .toast {
-  @apply pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-30;
+  @apply pointer-events-auto z-30 w-full max-w-sm overflow-hidden rounded-card bg-overlay text-fg shadow-float;
 
-  &.success {
-    @apply bg-feedback-success;
+  /* A leading outline status icon; >=3:1 on overlay (tokens.test.ts). */
+  .toast-icon {
+    @apply size-5 flex-shrink-0 text-muted;
   }
 
-  &.error {
-    @apply bg-feedback-error;
+  &.success .toast-icon {
+    @apply text-positive;
   }
 
-  &.info {
+  &.error .toast-icon {
+    @apply text-negative;
   }
 
   &-content {
-    @apply flex items-start p-4;
+    @apply flex items-start gap-3 p-4;
 
     &-content {
-      @apply ml-3 w-0 flex-1 pt-0.5;
+      @apply w-0 flex-1;
     }
   }
 
-  &-icon-content {
-    @apply flex-shrink-0;
-  }
-
   &-title {
-    @apply text-sm font-medium text-gray-900;
+    @apply text-body-sm font-medium text-ink;
   }
 
+  /* The message is the toast's content: primary emphasis, not muted. */
   &-description {
-    @apply text-sm text-white;
+    @apply text-body-sm text-fg;
   }
 
   &-close-content {
     @apply ml-4 flex flex-shrink-0;
 
     .toast-close-btn {
-      @apply inline-flex focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
+      @apply inline-flex rounded-full p-1 text-muted hover:bg-control hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-overlay;
     }
   }
 }

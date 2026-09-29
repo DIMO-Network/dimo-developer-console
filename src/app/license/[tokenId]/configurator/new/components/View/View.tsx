@@ -163,15 +163,15 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
 
   return (
     <div className="liwd-configurator-page">
-      <PageSubtitle subtitle="Login With DIMO Configurator" />
-      <p className="text-sm text-text-secondary mb-4">
+      <PageSubtitle subtitle="Login with DIMO configurator" />
+      <p className="text-body-sm text-muted mb-4">
         A vehicle sharing link is required for vehicle owners to grant data permissions to
         your application.{' '}
         <a
           href="https://www.dimo.org/docs/build/building-with-tools/client-sdk-dimo-connect"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary hover:underline"
+          className="text-ink underline underline-offset-2"
         >
           Learn how to use the configurationId with LIWD
         </a>

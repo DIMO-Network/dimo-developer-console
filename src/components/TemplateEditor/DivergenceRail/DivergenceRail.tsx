@@ -1,4 +1,5 @@
 import React, { type FC } from 'react';
+import classnames from 'classnames';
 import type { GridRow } from '@/utils/templateGrid';
 
 interface Props {
@@ -8,6 +9,9 @@ interface Props {
   /** Absent while the row already renders per-trim cells: the move is done. */
   onSplit?: (name: string) => void;
 }
+
+const RAIL_BUTTON =
+  'rounded-full border border-outline px-2 py-0.5 text-label text-muted hover:border-outline-strong hover:text-fg';
 
 /**
  * The rail is where scope is read and where scope is changed, in both
@@ -22,11 +26,7 @@ interface Props {
 export const DivergenceRail: FC<Props> = ({ row, readOnly, onLift, onSplit }) => {
   const split =
     onSplit && row.canSplit && !readOnly ? (
-      <button
-        type="button"
-        onClick={() => onSplit(row.def.name)}
-        className="rounded-full border border-cta-default px-2 py-0.5 text-xs text-white/70 hover:border-white hover:text-white"
-      >
+      <button type="button" onClick={() => onSplit(row.def.name)} className={RAIL_BUTTON}>
         Set per trim
       </button>
     ) : null;
@@ -34,7 +34,7 @@ export const DivergenceRail: FC<Props> = ({ row, readOnly, onLift, onSplit }) =>
   if (row.scope === 'absent') {
     return (
       <span className="flex items-center gap-2">
-        <span className="text-white/25">·</span>
+        <span className="text-muted/60">·</span>
         {split}
       </span>
     );
@@ -42,7 +42,7 @@ export const DivergenceRail: FC<Props> = ({ row, readOnly, onLift, onSplit }) =>
   if (row.scope === 'shared') {
     return (
       <span className="flex items-center gap-2">
-        <span className="text-white/40">shared</span>
+        <span className="text-label text-muted">shared</span>
         {split}
       </span>
     );
@@ -51,9 +51,10 @@ export const DivergenceRail: FC<Props> = ({ row, readOnly, onLift, onSplit }) =>
   return (
     <span className="flex items-center gap-2">
       <span
-        className={
-          row.distinct > 1 ? 'tabular-nums text-white' : 'tabular-nums text-white/50'
-        }
+        className={classnames(
+          'tabular-nums text-body-sm',
+          row.distinct > 1 ? 'text-ink' : 'text-muted',
+        )}
       >
         {row.distinct}
       </span>
@@ -61,7 +62,7 @@ export const DivergenceRail: FC<Props> = ({ row, readOnly, onLift, onSplit }) =>
         <button
           type="button"
           onClick={() => onLift(row.def.name)}
-          className="rounded-full border border-cta-default px-2 py-0.5 text-xs text-white/70 hover:border-white hover:text-white"
+          className={RAIL_BUTTON}
         >
           Move to shared
         </button>

@@ -64,12 +64,12 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
-      <Title>Remove vehicles</Title>
+      <Title className={'text-panel-title'}>Remove vehicles</Title>
       <div className={'py-6'}>
         <AssetDIDsInput
           assetDIDs={assetDIDs}
           onChange={setAssetDIDs}
-          label="Asset DIDs to Unsubscribe"
+          label="Asset DIDs to unsubscribe"
           error={inputError}
           placeholder="Enter asset DIDs to unsubscribe from this webhook"
           disabled={loading}
@@ -79,9 +79,9 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
         <Button onClick={handleSubmit} disabled={assetDIDs.length === 0 || loading}>
           {loading
             ? 'Removing...'
-            : `Remove ${assetDIDs.length} Vehicle${assetDIDs.length !== 1 ? 's' : ''}`}
+            : `Remove ${assetDIDs.length} vehicle${assetDIDs.length !== 1 ? 's' : ''}`}
         </Button>
-        <Button onClick={handleClose} className="dark">
+        <Button onClick={handleClose} variant="secondary">
           Cancel
         </Button>
       </div>

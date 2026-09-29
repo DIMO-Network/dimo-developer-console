@@ -27,7 +27,8 @@ const Footer: React.FC<FooterProps> = ({
   return (
     <div className={'flex flex-col-reverse md:flex-row pt-6 flex-1 gap-4'}>
       <Button
-        className={'flex-1 primary-outline'}
+        variant="secondary"
+        className={'flex-1'}
         onClick={onPrevious}
         type={'button'}
         disabled={previousDisabled}

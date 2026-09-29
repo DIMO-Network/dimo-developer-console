@@ -26,7 +26,7 @@ interface Props {
 
 const columns: ColumnDef<string>[] = [
   {
-    header: 'Vehicle Token ID',
+    header: 'Vehicle token ID',
     accessorFn: (row) => row,
     cell: (info) => info.getValue(),
   },
@@ -114,33 +114,37 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
         clientId={clientId}
         onSuccess={() => invalidateQuery({ webhookId, clientId })}
       />
-      <Title className={'text-xl'}>Who do you want to subscribe?</Title>
+      <Title className={'text-card-title'}>Who do you want to subscribe?</Title>
       <Section>
         <SectionHeader title="Manual controls" />
-        <p className={'text-text-secondary'}>
+        <p className={'text-body-sm text-muted'}>
           Manually subscribe or unsubscribe all vehicles linked to this webhook.
         </p>
         <div className="flex gap-2">
-          <Button className="dark" onClick={subscribeAll} disabled={subscribingAll}>
+          <Button variant="secondary" onClick={subscribeAll} disabled={subscribingAll}>
             {subscribingAll ? 'Subscribing...' : 'Subscribe all vehicles'}
           </Button>
-          <Button className="dark" onClick={unsubscribeAll} disabled={unsubscribingAll}>
+          <Button
+            variant="secondary"
+            onClick={unsubscribeAll}
+            disabled={unsubscribingAll}
+          >
             {unsubscribingAll ? 'Unsubscribing...' : 'Unsubscribe all vehicles'}
           </Button>
         </div>
       </Section>
       <Section>
         <SectionHeader title={'Subscribed vehicles'}>
-          <Title className={'text-xl'}>{data.length}</Title>
+          <Title className={'text-card-title'}>{data.length}</Title>
         </SectionHeader>
         <div className="flex gap-2 pb-4">
-          <Button className="dark" onClick={downloadCsv}>
+          <Button variant="secondary" onClick={downloadCsv}>
             Download CSV
           </Button>
-          <Button className="dark" onClick={() => setIsAdding(true)}>
+          <Button variant="secondary" onClick={() => setIsAdding(true)}>
             Add vehicles
           </Button>
-          <Button className="dark" onClick={() => setIsUnsubscribing(true)}>
+          <Button variant="secondary" onClick={() => setIsUnsubscribing(true)}>
             Unsubscribe vehicles
           </Button>
         </div>

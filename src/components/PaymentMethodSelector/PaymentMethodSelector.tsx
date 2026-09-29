@@ -26,7 +26,7 @@ export const PaymentMethodSelector: FC<IProps> = forwardRef<Ref, IProps>(
         control={control}
         render={({ field: { onChange, value: currentValue } }) => {
           return (
-            <div className="payment-method-selector">
+            <div className="payment-method-selector" role="radiogroup">
               <PaymentMethod
                 className={classNames('payment-method', {
                   selected: currentValue?.type === 'wallet',

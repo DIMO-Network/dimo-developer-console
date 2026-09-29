@@ -13,7 +13,7 @@ interface IProps {
 
 export const ContactCard: FC<IProps> = ({ title, description, Icon }) => {
   return (
-    <Card className="card-border contact-card">
+    <Card className="contact-card">
       <div className="content">
         <p className="title">{title}</p>
         <p className="description">{description}</p>

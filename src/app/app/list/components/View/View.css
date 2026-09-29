@@ -1,11 +1,11 @@
 .app-list-page {
-  @apply flex flex-1 flex-col gap-4;
+  @apply flex min-w-0 flex-1 flex-col gap-6;
 
   .welcome-message {
-    @apply flex flex-row gap-1 pb-2 border-b-cta-default border-b;
+    @apply flex flex-row items-center gap-2;
 
     .title {
-      @apply text-base text-text-secondary font-medium;
+      @apply text-body font-normal text-muted;
     }
   }
 }

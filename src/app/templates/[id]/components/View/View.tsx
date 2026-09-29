@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import { Button } from '@/components/Button';
+import { Title } from '@/components/Title';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { TrimGrid } from '@/components/TemplateEditor/TrimGrid';
 import { TrimSelectorEditor } from '@/components/TemplateEditor/TrimSelectorEditor';
@@ -112,18 +113,19 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
       {draft && data && (
         <div className="flex flex-col gap-6">
           <header className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-col">
-              <h1 className="text-white">
+            <div className="flex min-w-0 flex-col gap-1">
+              <Title>
                 {draft.manufacturer.name} {draft.model} {draft.year}
-              </h1>
-              <span className="font-mono text-xs text-white/50">
-                {draft.id} · v{loadedVersion}
+              </Title>
+              <span className="text-body-sm text-muted">
+                <span className="break-all font-mono text-code">{draft.id}</span> · v
+                {loadedVersion}
                 {data.template?.author && ` · last published by ${data.template.author}`}
               </span>
             </div>
             {!readOnly && (
               <div className="flex items-center gap-2">
-                <Button className="dark" onClick={() => setDraft(addTrim(draft, ''))}>
+                <Button variant="secondary" onClick={() => setDraft(addTrim(draft, ''))}>
                   Add trim
                 </Button>
                 <Button
@@ -140,24 +142,24 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
           <EntitlementBanner entitlement={data.entitlement} />
 
           {published !== null && (
-            <p className="text-primary-300">Published version {published}.</p>
+            <p className="text-body-sm text-positive">Published version {published}.</p>
           )}
 
           {conflict && (
             <div
               role="alert"
-              className="flex flex-col gap-2 rounded-xl border border-red-400/40 bg-surface-raised p-4"
+              className="flex flex-col gap-2 rounded-card bg-negative-soft p-4"
             >
-              <span className="text-red-400">
+              <span className="text-body-sm text-negative">
                 This template moved to version {conflict.actual} while you were editing
                 version {conflict.expected}.
               </span>
-              <span className="text-white/70">
+              <span className="text-body-sm text-fg">
                 Your draft has not been discarded and nothing was published. Reload to see
                 the current version, then re-apply your changes.
               </span>
               <div>
-                <Button className="dark" loading={reloading} onClick={onReload}>
+                <Button variant="secondary" loading={reloading} onClick={onReload}>
                   Reload
                 </Button>
               </div>
@@ -165,9 +167,9 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
           )}
 
           {(localErrors.length > 0 || serverErrors.length > 0) && (
-            <ul className="flex flex-col gap-1 rounded-xl border border-red-400/40 bg-surface-raised p-4">
+            <ul className="flex flex-col gap-1 rounded-card bg-negative-soft p-4">
               {[...serverErrors, ...localErrors].map((e) => (
-                <li key={e} className="text-red-400">
+                <li key={e} className="text-body-sm text-negative">
                   {e}
                 </li>
               ))}

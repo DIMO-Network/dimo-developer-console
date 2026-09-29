@@ -1,6 +1,5 @@
 'use client';
 import { FC, useContext, useState } from 'react';
-import { gtSuper } from '@/utils/font';
 import { Button } from '@/components/Button';
 import { IPasskeyRecoveryState } from '@/types/auth';
 import { emailRecovery } from '@/actions/user';
@@ -43,16 +42,18 @@ export const CheckEmail: FC<IProps> = ({ state }) => {
   return (
     <div className="email-recovery__form">
       <div className="email-recovery__header">
-        <p className={gtSuper.className}>Click the link in your email</p>
+        <p className="text-title text-ink">Click the link in your email</p>
       </div>
       <div className="email-recovery__input">
-        <p>Not seeing an email? Check your spam folder or resend code.</p>
+        <p className="text-body-sm text-muted">
+          Not seeing an email? Check your spam folder or resend code.
+        </p>
         <Button
           type="button"
           onClick={handleResendCode}
           loading={isLoading}
           disabled={isLoading}
-          className="border invert border-white"
+          variant="secondary"
           role="cancel-button"
         >
           Resend code

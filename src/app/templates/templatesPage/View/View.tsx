@@ -2,21 +2,25 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { capitalize } from 'lodash';
 import { Header } from '@/app/templates/templatesPage/Header';
 import { useTemplateSearch } from '@/hooks/queries/useTemplateSearch';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { Button } from '@/components/Button';
+import { Label } from '@/components/Label';
+import { TextField } from '@/components/TextField';
+import { StatusChip, type StatusTone } from '@/components/StatusChip';
 
-const STATUS_COPY: Record<string, { label: string; className: string; hint: string }> = {
-  'ok': { label: 'Template', className: 'text-white', hint: '' },
+const STATUS_COPY: Record<string, { label: string; tone: StatusTone; hint: string }> = {
+  'ok': { label: 'Template', tone: 'on', hint: '' },
   'missing': {
     label: 'No template yet',
-    className: 'text-white/50',
+    tone: 'off',
     hint: 'This model-year exists but no template has been imported for it.',
   },
   'invalid-id': {
     label: 'Id cannot be a template',
-    className: 'text-red-400',
+    tone: 'error',
     hint: 'This device definition id does not match the template id pattern, so it cannot be edited until the id is corrected.',
   },
 };
@@ -38,17 +42,16 @@ export const TemplatesPage = () => {
         }}
       >
         {(['make', 'model', 'year'] as const).map((field) => (
-          <label key={field} className="flex flex-col gap-1 text-white/50">
-            <span className="text-xs uppercase tracking-wide">{field}</span>
-            <input
+          <Label key={field}>
+            {capitalize(field)}
+            <TextField
               value={form[field]}
               onChange={(e) => setForm({ ...form, [field]: e.target.value })}
               placeholder={
                 field === 'make' ? 'Toyota' : field === 'model' ? 'Camry' : '2020'
               }
-              className="h-10 rounded-full bg-dark-grey-950 px-4 text-white placeholder:text-white/25"
             />
-          </label>
+          </Label>
         ))}
         <Button type="submit">Search</Button>
       </form>
@@ -59,20 +62,30 @@ export const TemplatesPage = () => {
         customErrorMessage="There was a problem searching device definitions"
       >
         {data && !data.manufacturer && (
-          <p className="text-white/50">No manufacturer matched that name or slug.</p>
+          <p className="text-body-sm text-muted">
+            No manufacturer matched that name or slug.
+          </p>
         )}
-        <ul className="flex flex-col divide-y divide-cta-default rounded-xl border border-cta-default bg-surface-default">
+        <ul className="flex flex-col divide-y divide-outline rounded-card bg-card">
           {(data?.results ?? []).map((r) => (
-            <li key={r.id} className="flex items-center justify-between gap-4 px-4 py-3">
-              <div className="flex flex-col">
-                <span className="font-mono text-white">{r.id}</span>
-                <span className={`text-xs ${STATUS_COPY[r.status].className}`}>
-                  {STATUS_COPY[r.status].label}
-                  {r.status === 'ok' &&
-                    ` · v${r.version} · ${r.trims} trim${r.trims === 1 ? '' : 's'}`}
-                </span>
+            <li
+              key={r.id}
+              className="flex flex-wrap items-center justify-between gap-4 px-4 py-3"
+            >
+              <div className="flex min-w-0 flex-col gap-1.5">
+                <span className="truncate font-mono text-code text-fg">{r.id}</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusChip tone={STATUS_COPY[r.status].tone}>
+                    {STATUS_COPY[r.status].label}
+                  </StatusChip>
+                  {r.status === 'ok' && (
+                    <span className="text-label text-muted">
+                      v{r.version} · {r.trims} trim{r.trims === 1 ? '' : 's'}
+                    </span>
+                  )}
+                </div>
                 {STATUS_COPY[r.status].hint && (
-                  <span className="pt-1 text-xs text-white/40">
+                  <span className="text-body-sm text-muted">
                     {STATUS_COPY[r.status].hint}
                   </span>
                 )}
@@ -84,7 +97,7 @@ export const TemplatesPage = () => {
                       ? `/templates/${r.id}`
                       : `/templates/new?id=${encodeURIComponent(r.id)}`
                   }
-                  className="button"
+                  className="button secondary"
                 >
                   {r.status === 'ok' ? 'Open' : 'Create'}
                 </Link>

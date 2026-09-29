@@ -12,7 +12,7 @@ export const GenerateDevJWTSection = ({
 }) => {
   return (
     <div>
-      <p className={'text-text-secondary'}>
+      <p className={'text-body-sm text-muted'}>
         Please generate a Developer JWT to view your webhook configurations.
       </p>
       <GenerateDevJWT

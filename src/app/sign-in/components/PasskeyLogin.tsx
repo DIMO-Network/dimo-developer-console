@@ -4,7 +4,6 @@ import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { NotificationContext } from '@/context/notificationContext';
 import { useAuth } from '@/hooks';
-import { gtSuper } from '@/utils/font';
 import { FC, useContext, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { useRouter } from 'next/navigation';
@@ -52,7 +51,7 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
     <>
       <div className="sign-in__form">
         <div className="sign-in__header">
-          <p className={gtSuper.className}>Continue with passkey</p>
+          <p className="text-title text-ink">Continue with passkey</p>
         </div>
         <BubbleLoader isLoading={true} />
         <div className="sign-in__extra-links">

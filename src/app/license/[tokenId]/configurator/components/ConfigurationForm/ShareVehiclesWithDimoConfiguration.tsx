@@ -32,6 +32,8 @@ type PermissionCardProps = {
   onToggle: () => void;
 };
 
+// Multi-select toggle on the sheet: resting card, hover a half step toward the
+// selected fill, selected = control + ink edge (never changes on hover).
 const PermissionCard = ({
   selected,
   title,
@@ -39,15 +41,15 @@ const PermissionCard = ({
   onToggle,
 }: PermissionCardProps) => (
   <div
+    role="button"
+    aria-pressed={!!selected}
     onClick={onToggle}
-    className={`cursor-pointer border rounded-lg p-4 transition ${
-      selected
-        ? 'border-red-900 bg-surface-raised'
-        : 'border-surface-default bg-surface-raised'
+    className={`cursor-pointer rounded-control border-2 border-transparent p-4 transition-colors duration-150 ${
+      selected ? 'bg-control shadow-selected' : 'bg-card hover:bg-control/70'
     }`}
   >
-    <h4 className="font-semibold">{title}</h4>
-    <p className="text-sm text-gray-600">{description}</p>
+    <h4 className="font-semibold text-ink">{title}</h4>
+    <p className="text-body-sm text-muted">{description}</p>
   </div>
 );
 
@@ -71,8 +73,8 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
   return (
     <>
       <div className={'flex flex-row gap-4 w-full'}>
-        <Label htmlFor="website" className="text-xs text-medium w-full">
-          Expiration Date
+        <Label htmlFor="website" className="w-full">
+          Expiration date
           <Controller
             control={control}
             name="expirationDate"
@@ -90,8 +92,8 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
       <div className={'flex flex-row gap-4 w-full'}>
         <SegmentedControl
           options={[
-            { value: 'template', label: 'Use Permission Template' },
-            { value: 'custom', label: 'Custom Permissions' },
+            { value: 'template', label: 'Use permission template' },
+            { value: 'custom', label: 'Custom permissions' },
           ]}
           control={control}
           name="permissionsMode"
@@ -100,8 +102,8 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
       </div>
       <div className="flex flex-row gap-4 w-full">
         {permissionsMode === 'template' && (
-          <Label htmlFor="website" className="text-xs text-medium w-full">
-            Permissions Template Id
+          <Label htmlFor="website" className="w-full">
+            Permissions template ID
             <TextField
               type="text"
               placeholder="1"
@@ -156,7 +158,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
                     }
                   }}
                 />
-                <label className="text-xs text-medium ml-2">Attestations</label>
+                <label className="text-body-sm text-fg ml-2">Attestations</label>
               </div>
             </>
           )}
@@ -164,9 +166,9 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
       </div>
       {brandNames.length > 1 && (
         <div className={'flex flex-row gap-4 w-full'}>
-          <Label htmlFor="brandName" className="text-xs text-medium w-full">
+          <Label htmlFor="brandName" className="w-full">
             Brand
-            <p className="text-text-secondary font-normal text-xs mb-1">
+            <p className="text-muted font-normal text-label mb-1">
               Which brand to show on the Login with DIMO button. Leave as
               &quot;Default&quot; to use your workspace default brand.
             </p>

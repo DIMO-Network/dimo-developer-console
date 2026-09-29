@@ -8,10 +8,14 @@ interface Props {
   className?: string;
 }
 
-const AddCreditsButton: React.FC<Props> = ({ className = 'dark with-icon' }) => {
+const AddCreditsButton: React.FC<Props> = ({ className = '' }) => {
   const { handleOpenBuyCreditsModal } = useOnboarding();
   return (
-    <Button className={clsx(className, '!h-10')} onClick={handleOpenBuyCreditsModal}>
+    <Button
+      variant="primary"
+      className={clsx(className, '!h-10')}
+      onClick={handleOpenBuyCreditsModal}
+    >
       <PlusIcon className="w-4 h-4" />
       Add credits
     </Button>

@@ -131,7 +131,7 @@ export const BuyCreditsModal: FC = () => {
       <div className="buy-credits-content">
         <form onSubmit={handleSubmit(handleProceedToPayment)}>
           <div className="buy-credits-header">
-            <Title className="text-2xl" component="h3">
+            <Title className="text-panel-title" component="h3">
               Buy DCX
             </Title>
           </div>
@@ -140,6 +140,7 @@ export const BuyCreditsModal: FC = () => {
               The base price to accessing one vehicle is $1.25 per month.
             </p>
             <a
+              className="text-ink underline underline-offset-2"
               href="https://docs.dimo.org/developer-platform/developer-guide/dimo-credits"
               target="_blank"
             >
@@ -147,8 +148,8 @@ export const BuyCreditsModal: FC = () => {
             </a>
           </div>
           <div className="w-full gap-y-4">
-            <label htmlFor="amount" className="text-xs text-medium">
-              Purchase Amount
+            <label htmlFor="amount" className="text-label text-muted">
+              Purchase amount
               <MoneyField
                 placeholder="0.00"
                 {...register('amount', {
@@ -169,14 +170,14 @@ export const BuyCreditsModal: FC = () => {
                 checked={isForAnotherAccount}
                 onToggle={(checked) => setIsForAnotherAccount(checked)}
               />
-              <label className="text-xs text-medium ml-2">
+              <label className="text-body-sm text-fg ml-2">
                 Purchase for another account
               </label>
             </div>
             {isForAnotherAccount ? (
               <>
-                <label>
-                  Account Address
+                <label className="text-label text-muted">
+                  Account address
                   <TextField
                     placeholder="0x123..."
                     {...register('externalTargetWallet', {
@@ -198,8 +199,8 @@ export const BuyCreditsModal: FC = () => {
             )}
           </div>
           <div className="credits-action w-full mt-4">
-            <Button type="submit" className="primary !h-9 w-full" loading={isLoading}>
-              Proceed to Payment
+            <Button type="submit" className="!h-9 w-full" loading={isLoading}>
+              Proceed to payment
             </Button>
           </div>
         </form>

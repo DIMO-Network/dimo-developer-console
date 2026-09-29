@@ -83,7 +83,6 @@ export const Balances = ({ shouldFetchBalances }: IProps) => {
             basePrice={0.001}
             canBuy={balance.dcxBalance < config.MINIMUM_CREDITS}
             openBuyModal={handleOpenBuyCreditsModal}
-            iconClassName={'border border-[#E80303]'}
           />
         </>
       )}

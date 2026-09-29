@@ -1,7 +1,12 @@
 .text-area {
-  @apply rounded-lg py-2 px-4 outline-0 bg-[#322D2F] text-grey-50 flex flex-row font-normal;
+  @apply flex flex-row rounded-control border border-control-border bg-control px-3 py-2 text-fg transition-[border-color,box-shadow] focus-within:border-focus-ring focus-within:ring-[3px] focus-within:ring-accent-soft;
+
+  /* Hover firms the edge, but never over the focus ring. */
+  &:hover:not(:focus-within) {
+    @apply border-control-border-hover;
+  }
 
   textarea {
-    @apply w-full bg-transparent outline-0 resize-none;
+    @apply w-full resize-none bg-transparent text-body-sm outline-0 placeholder:text-muted;
   }
 }

@@ -25,7 +25,7 @@ export const WebhookTriggerBuilderRow = ({ index }: ConditionRowProps) => {
   }, [selectedField, index, setValue, resetField, trigger]);
 
   return (
-    <div className="flex flex-row items-center gap-2.5 flex-1 w-full">
+    <div className="flex flex-col items-stretch gap-2.5 flex-1 w-full sm:flex-row sm:items-center">
       <DataAttributeSelector index={index} />
       <OperatorSelector index={index} />
       <ValueInput index={index} />

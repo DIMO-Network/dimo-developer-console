@@ -58,14 +58,15 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       key={`item_${item.token}_copy_button`}
       value={item.token}
       onCopySuccessMessage="JWT copied!"
-      className="button table-action-button"
+      size="icon"
     />
   );
 
   const renderDeleteButton = (item: { token: string }) => (
     <Button
       key={`item_${item.token}_delete_button`}
-      className="table-action-button"
+      variant="ghost"
+      size="icon"
       title="Delete JWT"
       type="button"
       onClick={() => setJwtToDelete(item.token)}
@@ -82,19 +83,21 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
         const visibleStart = item.token.slice(0, 16);
         const visibleEnd = item.token.slice(-4);
         const maskedPart = '*'.repeat(28);
-        return <span>{`${visibleStart}${maskedPart}${visibleEnd}`}</span>;
+        return (
+          <span className="font-mono text-code break-all">{`${visibleStart}${maskedPart}${visibleEnd}`}</span>
+        );
       },
     },
     {
       name: 'createdAt',
-      label: 'Created At',
+      label: 'Created at',
       render: (item: { createdAt: number }) => (
         <span>{new Date(item.createdAt).toLocaleString()}</span>
       ),
     },
     {
       name: 'expiresAt',
-      label: 'Expires At',
+      label: 'Expires at',
       render: (item: { token: string }) => {
         try {
           const { exp } = jwtDecode<{ exp?: number }>(item.token);
@@ -152,7 +155,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
             actions={[renderCopyButton, renderDeleteButton]}
           />
         ) : (
-          <p className="text-text-secondary">No developer JWTs found</p>
+          <p className="text-muted">No developer JWTs found</p>
         )}
         <DeleteConfirmationModal
           isOpen={!!jwtToDelete}

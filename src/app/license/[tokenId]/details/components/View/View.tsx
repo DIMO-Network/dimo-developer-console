@@ -85,7 +85,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
             <Summary licenseSummary={data.developerLicense} refetch={handleRefetch} />
           </div>
           <div className={'flex flex-col gap-6 pt-6'}>
-            <div className={'flex w-full flex-row gap-4'}>
+            <div className={'flex w-full flex-col md:flex-row gap-4'}>
               <Usage license={data.developerLicense} />
               <Vehicles license={data.developerLicense} />
             </div>

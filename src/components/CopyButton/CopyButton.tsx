@@ -4,16 +4,21 @@ import { FC, useContext, useState } from 'react';
 import { NotificationContext } from '@/context/notificationContext';
 import classnames from 'classnames';
 
+import './CopyButton.css';
+
 export interface ICopyButtonProps {
   value: string;
   onCopySuccessMessage?: string;
   className?: string;
+  // inline: a bare icon (default). icon: a 32px round icon button.
+  size?: 'inline' | 'icon';
 }
 
 export const CopyButton: FC<ICopyButtonProps> = ({
   value,
   onCopySuccessMessage,
   className = '',
+  size = 'inline',
 }) => {
   const { setNotification } = useContext(NotificationContext);
   const [copied, setCopied] = useState(false);
@@ -38,13 +43,18 @@ export const CopyButton: FC<ICopyButtonProps> = ({
   return (
     <button
       onClick={handleCopy}
-      className={classnames(className, 'transition')}
+      className={classnames(
+        'copy-button',
+        size === 'icon' && 'icon',
+        className,
+        'transition',
+      )}
       disabled={copied}
     >
       {copied ? (
-        <CheckIcon className={'w-5 h-5 transition'} />
+        <CheckIcon className={'w-5 h-5 transition text-positive'} />
       ) : (
-        <ContentCopyIcon className="w-5 h-5 fill-white/50 cursor-pointer transition" />
+        <ContentCopyIcon className="w-5 h-5 cursor-pointer transition text-muted hover:text-ink" />
       )}
     </button>
   );

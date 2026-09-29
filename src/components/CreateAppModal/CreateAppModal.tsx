@@ -20,11 +20,11 @@ export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
     <Modal isOpen={isOpen} setIsOpen={handleIsOpen} className="create-app-modal">
       <div className="create-app-content">
         <div className="create-app-header">
-          <Title className="text-2xl" component="h3">
+          <Title className="text-panel-title" component="h3">
             Create a new developer license
           </Title>
         </div>
-        <div className={'flex flex-1 w-full py-6'}>
+        <div className={'flex w-full flex-1 pt-6'}>
           <Form workspace={workspace} onSuccess={handleClose} onClose={handleClose} />
         </div>
       </div>

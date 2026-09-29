@@ -57,12 +57,12 @@ export const MenuItem: FC<IProps> = ({
   };
   return (
     <li
-      className={classNames({
-        '!text-grey-200/50': disabled,
-        'bg-red-900': isHighlighted,
+      className={classNames('menu-item', {
+        'is-disabled': disabled,
+        'is-active': isHighlighted,
       })}
     >
-      <Icon className={iconClassName} />
+      <Icon className={classNames(iconClassName, 'menu-item-icon')} />
       <Wrapper>{label}</Wrapper>
     </li>
   );

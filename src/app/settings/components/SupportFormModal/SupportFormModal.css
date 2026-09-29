@@ -8,12 +8,8 @@
     .support-form-header {
       @apply flex flex-col gap-2 w-full;
 
-      .title {
-        @apply text-2xl font-bold text-white;
-      }
-
       .description {
-        @apply text-white/50 w-full h-full;
+        @apply text-muted w-full h-full;
       }
     }
 
