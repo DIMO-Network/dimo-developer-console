@@ -41,7 +41,7 @@ export const WebhookCooldownField = () => {
         })}
         placeholder="Enter cooldown period in seconds (e.g., 30)"
       />
-      <p className="text-[#868888] text-sm">
+      <p className="text-body-sm text-muted">
         Minimum time between webhook calls for the same event (0 for realtime)
       </p>
       {errors.coolDownPeriod && (

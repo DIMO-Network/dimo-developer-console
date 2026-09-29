@@ -55,7 +55,9 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <div className="flex flex-col flex-1 w-full gap-12">
-        <Title>{isLoading ? 'Sending a test...' : 'Test Webhook'}</Title>
+        <Title className={'text-panel-title'}>
+          {isLoading ? 'Sending a test...' : 'Test webhook'}
+        </Title>
         <TestWebhookBody isLoading={isLoading} webhook={webhook} />
         <TestWebhookFooter
           isLoading={isLoading}

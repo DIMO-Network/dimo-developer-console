@@ -26,7 +26,7 @@ interface Props {
 
 const columns: ColumnDef<string>[] = [
   {
-    header: 'Vehicle Token ID',
+    header: 'Vehicle token ID',
     accessorFn: (row) => row,
     cell: (info) => info.getValue(),
   },
@@ -108,13 +108,13 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
         clientId={clientId}
         onSuccess={() => invalidateQuery({ webhookId, clientId })}
       />
-      <Title className={'text-xl'}>Who do you want to subscribe?</Title>
+      <Title className={'text-card-title'}>Who do you want to subscribe?</Title>
       <Section>
         <SectionHeader title="Manual controls" />
-        <p className={'text-text-secondary'}>
+        <p className={'text-body-sm text-muted'}>
           Manually subscribe or unsubscribe all vehicles linked to this webhook.
         </p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={subscribeAll} disabled={subscribingAll}>
             {subscribingAll ? 'Subscribing...' : 'Subscribe all vehicles'}
           </Button>
@@ -129,9 +129,9 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
       </Section>
       <Section>
         <SectionHeader title={'Subscribed vehicles'}>
-          <Title className={'text-xl'}>{data.length}</Title>
+          <Title className={'text-card-title'}>{data.length}</Title>
         </SectionHeader>
-        <div className="flex gap-2 pb-4">
+        <div className="flex flex-wrap gap-2 pb-4">
           <Button variant="secondary" onClick={downloadCsv}>
             Download CSV
           </Button>
@@ -142,7 +142,9 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
             Unsubscribe vehicles
           </Button>
         </div>
-        <PaginatedTable data={data} columns={columns} />
+        <div className="-mx-4 -mb-4">
+          <PaginatedTable data={data} columns={columns} />
+        </div>
       </Section>
     </div>
   );

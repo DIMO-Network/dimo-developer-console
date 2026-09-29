@@ -33,7 +33,7 @@ export const WebhookTargetUriField = () => {
         })}
         placeholder="Enter the URL where you want to receive events"
       />
-      <p className="text-[#868888]">
+      <p className="text-body-sm text-muted">
         Enter a public, SSL-enabled URL where you will receive events
       </p>
       {errors.targetURL && (

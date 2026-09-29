@@ -35,7 +35,7 @@ export const WebhookVehicles: FC<Props> = ({ clientId, webhookId }) => {
   return (
     <div className={'flex flex-col gap-2.5'}>
       <Label>Subscribed vehicles</Label>
-      <div className={'h-14 bg-cta-default flex items-center px-4 rounded-lg'}>
+      <div className={'h-14 bg-control flex items-center px-4 rounded-control'}>
         <WebhookVehiclesNumber
           isLoading={isLoading}
           error={errorMsg}
@@ -61,8 +61,8 @@ const WebhookVehiclesNumber: FC<{
   }
   return (
     <div className={'flex flex-1 justify-between'}>
-      <p className={'text-sm'}>{numVehicles} Vehicles</p>
-      <button onClick={onEdit} type={'button'}>
+      <p className={'text-body-sm text-fg'}>{numVehicles} vehicles</p>
+      <button onClick={onEdit} type={'button'} className={'text-muted hover:text-ink'}>
         <EditIcon />
       </button>
     </div>

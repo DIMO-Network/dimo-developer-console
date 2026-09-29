@@ -90,7 +90,7 @@ const Footer = ({
         disabled={!isDirty || !isValid}
         loading={isSubmitting}
       >
-        Save Changes
+        Save changes
       </Button>
     </div>
   );
