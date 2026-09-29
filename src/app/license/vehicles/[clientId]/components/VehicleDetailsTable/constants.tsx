@@ -73,7 +73,7 @@ export const buildColumns = (
       const { tokenId, definition } = info.row.original;
       const isSimulated = simulatedTokenIds.has(tokenId);
       return (
-        <span className="flex items-center gap-2">
+        <span className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2">
           <span>
             {definition?.make} {definition?.model} {definition?.year}
           </span>
