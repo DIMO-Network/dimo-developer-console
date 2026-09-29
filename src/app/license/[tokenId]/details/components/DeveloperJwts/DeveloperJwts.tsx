@@ -70,7 +70,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       type="button"
       onClick={() => setJwtToDelete(item.token)}
     >
-      <TrashIcon className="w-5 h-5" />
+      <TrashIcon className="h-5 w-5" />
     </Button>
   );
 
@@ -82,19 +82,21 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
         const visibleStart = item.token.slice(0, 16);
         const visibleEnd = item.token.slice(-4);
         const maskedPart = '*'.repeat(28);
-        return <span>{`${visibleStart}${maskedPart}${visibleEnd}`}</span>;
+        return (
+          <span className="font-mono text-code">{`${visibleStart}${maskedPart}${visibleEnd}`}</span>
+        );
       },
     },
     {
       name: 'createdAt',
-      label: 'Created At',
+      label: 'Created at',
       render: (item: { createdAt: number }) => (
         <span>{new Date(item.createdAt).toLocaleString()}</span>
       ),
     },
     {
       name: 'expiresAt',
-      label: 'Expires At',
+      label: 'Expires at',
       render: (item: { token: string }) => {
         try {
           const { exp } = jwtDecode<{ exp?: number }>(item.token);
@@ -135,9 +137,9 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
   }
 
   return (
-    <div className="p-4 bg-control border border-border rounded-2xl flex flex-col gap-4 text-foreground">
-      <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
-        <h2 className="text-xl font-semibold text-foreground">Developer JWTs</h2>
+    <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
+      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
+        <h2 className="text-card-title text-ink">Developer JWTs</h2>
         <GenerateDevJWT
           clientId={fragment.clientId}
           domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
@@ -147,13 +149,15 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       </div>
       <div>
         {devJwts.length > 0 ? (
-          <Table
-            columns={columns}
-            data={devJwts}
-            actions={[renderCopyButton, renderDeleteButton]}
-          />
+          <div className="-mx-4 -mb-4">
+            <Table
+              columns={columns}
+              data={devJwts}
+              actions={[renderCopyButton, renderDeleteButton]}
+            />
+          </div>
         ) : (
-          <p className="text-text-secondary">No developer JWTs found</p>
+          <p className="text-muted">No developer JWTs found</p>
         )}
         <DeleteConfirmationModal
           isOpen={!!jwtToDelete}

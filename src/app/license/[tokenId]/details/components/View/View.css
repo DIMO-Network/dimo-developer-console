@@ -5,58 +5,67 @@
 /* ── Header ──────────────────────────────────────────────── */
 
 .license-header {
-  @apply bg-card border-b border-border px-6 pt-5 pb-0;
+  @apply flex flex-col gap-3 pb-2;
 }
 
 .license-header__top {
-  @apply flex items-start justify-between mb-3;
+  @apply flex items-start justify-between;
 }
 
 .license-header__identity {
-  @apply flex items-center gap-2 flex-wrap;
+  @apply flex flex-wrap items-center gap-2;
 }
 
 .license-header__name {
-  @apply text-xl font-bold text-foreground;
+  @apply min-w-0 break-words text-title text-ink;
 }
 
+/* Token id: a quiet chip in the body face, like the license card's. */
 .license-header__token-id {
-  @apply text-xs font-medium text-text-secondary bg-control px-2 py-0.5 rounded-full;
+  @apply shrink-0 rounded-chip bg-control px-2 py-0.5 text-label text-muted;
 }
 
 .license-header__rename-btn {
-  @apply text-text-secondary hover:text-foreground transition-colors cursor-pointer p-0.5;
+  @apply flex size-8 cursor-pointer items-center justify-center rounded-full text-muted transition-colors hover:bg-control hover:text-ink;
 }
 
 .license-header__client-id {
-  @apply mb-4;
+  @apply mb-1;
+
+  /* A client id is one unbroken token; let it wrap on a phone. */
+  .copyable-row {
+    @apply min-w-0;
+
+    p {
+      @apply min-w-0 break-all;
+    }
+  }
 }
 
-/* ── Tabs ────────────────────────────────────────────────── */
+/* ── Tabs: the segmented control (DESIGN.md), selected = raised step ── */
 
 .license-tabs {
-  @apply flex -mb-px;
+  @apply flex w-fit max-w-full flex-row gap-0.5 overflow-x-auto rounded-full bg-control p-[3px];
 }
 
 .license-tab {
-  @apply px-4 py-2.5 text-sm font-medium text-text-secondary border-b-2 border-transparent
-         cursor-pointer transition-colors hover:text-foreground select-none;
+  @apply flex-shrink-0 cursor-pointer select-none whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-medium leading-[18px] text-muted transition-colors hover:text-fg;
 }
 
 .license-tab--active {
-  @apply text-foreground border-b-foreground;
+  @apply bg-bright text-ink shadow-sm hover:text-ink;
 }
 
 /* ── Tab content ─────────────────────────────────────────── */
 
 .license-tab-content {
-  @apply p-6 flex flex-col gap-4;
+  @apply flex flex-col gap-4 pt-4;
 }
 
 /* ── Overview ────────────────────────────────────────────── */
 
 .overview-stats {
-  @apply grid grid-cols-2 gap-4;
+  @apply grid grid-cols-1 gap-4 md:grid-cols-2;
 }
 
 .overview-quick-actions {
@@ -64,7 +73,7 @@
 }
 
 .overview-quick-actions__label {
-  @apply text-xs uppercase tracking-wide text-text-secondary font-medium;
+  @apply text-label text-muted;
 }
 
 .overview-quick-actions__grid {
@@ -72,6 +81,5 @@
 }
 
 .overview-quick-action {
-  @apply bg-control border border-border rounded-lg px-4 py-2.5 text-sm text-foreground
-         hover:border-foreground/30 transition-colors cursor-pointer flex items-center gap-2;
+  @apply flex cursor-pointer items-center gap-2 rounded-control bg-card px-4 py-2.5 text-body-sm text-ink transition-colors hover:bg-control;
 }

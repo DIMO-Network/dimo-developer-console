@@ -12,7 +12,7 @@ export const SectionHeader: FC<PropsWithChildren<IProps>> = ({ children, title }
       }
     >
       {!!title && (
-        <Title component="h2" className={'text-xl'}>
+        <Title component="h2" className={'text-card-title text-ink'}>
           {title}
         </Title>
       )}

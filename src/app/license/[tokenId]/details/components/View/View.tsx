@@ -107,12 +107,12 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
 
   return (
     <div className="license-details-page">
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-        <Link href="/licenses" className="hover:text-foreground transition-colors">
+      <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
+        <Link href="/licenses" className="transition-colors hover:text-ink">
           Licenses
         </Link>
         <span>/</span>
-        <span className="text-foreground">License Details</span>
+        <span className="text-ink">License details</span>
       </nav>
       {/* Persistent header */}
       <div className="license-header">
@@ -128,7 +128,7 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
                 onClick={() => setIsRenameOpen(true)}
                 title="Rename"
               >
-                <PencilIcon className="w-4 h-4" />
+                <PencilIcon className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -176,13 +176,13 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
                   className="overview-quick-action"
                   onClick={() => setActiveTab('config')}
                 >
-                  🔑 Generate API Key
+                  🔑 Generate API key
                 </button>
                 <button
                   className="overview-quick-action"
                   onClick={() => setActiveTab('brand')}
                 >
-                  🪪 Configure Branding
+                  🪪 Configure branding
                 </button>
                 <button
                   className="overview-quick-action"
@@ -190,7 +190,7 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
                     router.push(`/license/${licenseFragment.tokenId}/configurator`)
                   }
                 >
-                  ⚙️ Setup Vehicle Sharing
+                  ⚙️ Setup vehicle sharing
                 </button>
                 <Link
                   href="https://docs.dimo.org"
@@ -244,11 +244,11 @@ const VehicleCountStat = ({
     <>
       <button
         onClick={onViewVehicles}
-        className="overview-stat-card__number hover:opacity-80 transition-opacity text-left"
+        className="overview-stat-card__number text-left transition-opacity hover:opacity-80"
       >
         {data?.vehicles.totalCount ?? '—'}
       </button>
-      <p className="overview-stat-card__label">Vehicles Connected</p>
+      <p className="overview-stat-card__label">Vehicles connected</p>
       <button onClick={onViewVehicles} className="overview-stat-card__link">
         View vehicles →
       </button>

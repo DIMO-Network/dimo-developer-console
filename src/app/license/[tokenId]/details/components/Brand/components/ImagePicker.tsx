@@ -67,9 +67,9 @@ export const ImagePicker: FC<Props> = ({
 
   return (
     <div className="field">
-      <Label className="text-sm font-medium">
+      <Label>
         {label}
-        <p className="text-text-secondary font-normal">{hint}</p>
+        <p className="font-normal text-muted">{hint}</p>
       </Label>
 
       <div className="flex flex-row gap-4 items-start mt-2">
@@ -88,7 +88,7 @@ export const ImagePicker: FC<Props> = ({
                   onClear();
                   if (inputRef.current) inputRef.current.value = '';
                 }}
-                className="text-xs text-text-secondary hover:text-foreground underline"
+                className="text-label text-muted underline underline-offset-2 transition-colors hover:text-ink"
               >
                 Remove
               </button>
@@ -115,7 +115,7 @@ export const ImagePicker: FC<Props> = ({
         />
       </div>
 
-      {error && <p className="text-xs text-error mt-1">{error}</p>}
+      {error && <p className="mt-1 text-label text-negative">{error}</p>}
     </div>
   );
 };
@@ -145,14 +145,14 @@ const DropZone: FC<{
         const files = Array.from(e.dataTransfer.files);
         if (files.length) onFiles(files);
       }}
-      className={`flex-1 min-h-[80px] border border-dashed rounded-xl px-4 py-3 text-sm transition-colors
-        ${dragOver ? 'border-foreground bg-control' : 'border-border'}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-foreground cursor-pointer'}`}
+      className={`min-h-[80px] flex-1 rounded-card border border-dashed px-4 py-3 text-body-sm transition-colors
+        ${dragOver ? 'border-outline-strong bg-control' : 'border-control-border'}
+        ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-control-border-hover'}`}
     >
-      <span className="text-foreground font-medium">
+      <span className="font-medium text-ink">
         {hasExisting ? 'Replace image' : 'Choose image'}
       </span>
-      <span className="text-text-secondary ml-2">or drop here</span>
+      <span className="ml-2 text-muted">or drop here</span>
     </button>
   );
 };
@@ -174,8 +174,8 @@ const PreviewBox: FC<{
   if (!needsCrop) {
     return (
       <div
-        className={`bg-control border border-border rounded-lg overflow-hidden
-          ${aspect === 'square' ? 'w-24 h-24' : 'w-32 h-16'}`}
+        className={`overflow-hidden rounded-control border border-outline bg-control
+          ${aspect === 'square' ? 'h-24 w-24' : 'h-16 w-32'}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src} alt="brand preview" className="w-full h-full object-contain" />
@@ -215,7 +215,7 @@ const SquareCropper: FC<{
 
   return (
     <div className="flex flex-col gap-2 w-72">
-      <div className="relative w-72 h-72 bg-control rounded-lg overflow-hidden">
+      <div className="relative h-72 w-72 overflow-hidden rounded-control bg-control">
         <Cropper
           image={src}
           crop={crop}

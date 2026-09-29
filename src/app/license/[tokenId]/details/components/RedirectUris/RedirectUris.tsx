@@ -46,11 +46,9 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
   };
 
   return (
-    <div className="p-4 bg-control border border-border rounded-2xl flex flex-col gap-4 text-foreground">
-      <div className="flex flex-col gap-2 md:gap-0 md:flex-row justify-between md:items-center">
-        <h2 className="text-xl font-semibold text-foreground">
-          Authorized Redirect URIs
-        </h2>
+    <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
+      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
+        <h2 className="text-card-title text-ink">Authorized redirect URIs</h2>
       </div>
       <div className="flex flex-col gap-4">
         {isLicenseOwner && (
@@ -65,13 +63,15 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
           </div>
         )}
         {!!displayUris.length && (
-          <RedirectUriList
-            isOwner={isLicenseOwner}
-            redirectUris={displayUris}
-            refreshData={refetch}
-            tokenId={fragment.tokenId}
-            onRemoved={handleRemoved}
-          />
+          <div className="-mx-4 -mb-4">
+            <RedirectUriList
+              isOwner={isLicenseOwner}
+              redirectUris={displayUris}
+              refreshData={refetch}
+              tokenId={fragment.tokenId}
+              onRemoved={handleRemoved}
+            />
+          </div>
         )}
       </div>
     </div>
