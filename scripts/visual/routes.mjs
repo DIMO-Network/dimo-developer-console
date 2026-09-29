@@ -240,6 +240,14 @@ export const ROUTES = [
     knownConsoleWarning: WEBHOOK_FORM_WARNING,
   },
   {
+    name: 'webhooks-expanded',
+    path: '/webhooks',
+    ready: WEBHOOKS[0].displayName,
+    click: 'text="Speeding alert"',
+    after: 'Webhook URL',
+    viewports: ['mobile'],
+  },
+  {
     name: 'webhook-delete-modal',
     path: '/webhooks',
     ready: WEBHOOKS[0].displayName,

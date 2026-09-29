@@ -48,7 +48,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
         <span className="text-ink">New webhook</span>
       </nav>
       <div className={'flex flex-1 flex-row'}>
-        <div className={'flex min-w-0 flex-1 flex-col'}>
+        <div className={'mt-2 flex min-w-0 flex-1 flex-col'}>
           <NewWebhookForm onComplete={onComplete} getToken={getToken} onExit={goBack} />
         </div>
         <RightPanel>

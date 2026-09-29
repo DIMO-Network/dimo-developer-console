@@ -774,14 +774,14 @@ licensed-vehicles page, the renounce modal and the configurator (list, new,
 edit, preview panel, permission cards), connections (list, details, create and
 the purchase modal) and webhooks (list, create, edit, modals, CSV upload,
 asset DID input, the generate-JWT modal) are done. Marked **target**
-above and still to be applied by their page passes: the selected-card states on sign-up and the explorer.
-Where a recipe below names a page as its user (status chips on webhooks and
-settings, the explorer's rows, the template editor), that page is the intended
-adopter, not necessarily restyled yet; the recipe itself is what the
-shared component implements. Reported, not fixed: `getPageTitle` in `src/config/navigation.ts` still
-title-cases some titles ("Data Explorer", "License Details") and its
-`/license/details/...` regexes no longer match the real
-`/license/[tokenId]/details` route; casing is applied where the title is
+above and still to be applied by their page passes: the selected-card states on
+sign-up and the explorer. Where a recipe below names a page as its user (status
+chips on settings, the explorer's rows, the template editor), that page is the
+intended adopter, not necessarily restyled yet; the recipe itself is what the
+shared component implements. Reported, not fixed: `getPageTitle` in
+`src/config/navigation.ts` still title-cases some titles ("Data Explorer",
+"License Details") and its `/license/details/...` regexes no longer match the
+real `/license/[tokenId]/details` route; casing is applied where the title is
 matched statically.
 
 ## Don'ts

@@ -153,7 +153,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
 
         {/* sr-only (not display:none) keeps the file input in the tab order;
             the label shows the focus ring while the input has keyboard focus. */}
-        <label className="button secondary mt-4 cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus-ring">
+        <label className="button secondary relative mt-4 cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus-ring">
           <span>
             <ArrowUpTrayIcon className={'w-5 h-5'} />
           </span>

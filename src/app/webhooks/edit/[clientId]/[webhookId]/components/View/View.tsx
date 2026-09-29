@@ -35,7 +35,9 @@ export const View = ({
         <span className="text-ink">Edit webhook</span>
       </nav>
       <EditWebhookContextProvider>
-        <EditWebhook webhook={data} clientId={clientId} />
+        <div className="mt-2">
+          <EditWebhook webhook={data} clientId={clientId} />
+        </div>
       </EditWebhookContextProvider>
     </>
   );
