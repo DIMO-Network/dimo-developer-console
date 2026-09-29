@@ -223,7 +223,7 @@ export const ROUTES = [
     name: 'connection-create-confirm',
     path: '/connections/create/0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6',
     ready: 'Purchase connection license',
-    click: 'text="Purchase Connection License"',
+    click: 'text="Purchase connection license"',
     after: 'Continue with payment',
   },
   { name: 'webhooks', path: '/webhooks', ready: WEBHOOKS[0].displayName },

@@ -40,13 +40,13 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
       <div className="connection-license-section">
         <div className="section-header">
           <Title component="h2" className="section-title">
-            Connection License
+            Connection license
           </Title>
         </div>
 
         <div className="license-fields">
           <div className="field-row">
-            <label className="field-label">Connection License Public Key</label>
+            <label className="field-label">Connection license public key</label>
             <div className="field-value-container">
               <span className="field-value">
                 {connection.connection_license_public_key}
@@ -56,7 +56,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
           </div>
 
           <div className="field-row">
-            <label className="field-label">Connection License Private Key</label>
+            <label className="field-label">Connection license private key</label>
             <div className="field-value-container">
               <span className="field-value">{maskKey()}</span>
               <CopyButton value={connection.connection_license_private_key} />
@@ -65,7 +65,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
 
           {deviceIssuanceAddress && (
             <div className="field-row">
-              <label className="field-label">Device Issuance Address</label>
+              <label className="field-label">Device issuance address</label>
               <div className="field-value-container">
                 <span className="field-value">{deviceIssuanceAddress}</span>
                 <CopyButton value={deviceIssuanceAddress} />
@@ -74,7 +74,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
           )}
 
           <div className="field-row">
-            <label className="field-label">Device Issuance Key</label>
+            <label className="field-label">Device issuance key</label>
             <div className="field-value-container">
               <span className="field-value">{maskKey()}</span>
               <CopyButton value={connection.device_issuance_key} />
@@ -96,12 +96,12 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
 
   return (
     <>
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
-        <Link href="/connections" className="hover:text-foreground transition-colors">
+      <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
+        <Link href="/connections" className="transition-colors hover:text-ink">
           Connections
         </Link>
         <span>/</span>
-        <span className="text-foreground">Connection Details</span>
+        <span className="text-ink">Connection details</span>
       </nav>
       <QueryPageWrapper
         loading={isLoading}
