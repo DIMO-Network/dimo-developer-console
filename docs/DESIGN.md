@@ -230,6 +230,30 @@ names the mode you would switch _to_ ("Light mode" in dark, "Dark mode" in
 light). Until mounted it renders a same-sized placeholder so hydration
 matches.
 
+**Guest pages** (sign-in, sign-up, email recovery; `GuestLayout`): the
+layout supplies the panel (`.guest-panel`, `bg-sheet rounded-panel`, the
+Developer Console `BrandLockup`) and the icon theme toggle, so the page
+content adds no card, background or logo of its own: each form is a bare
+`flex flex-col max-w-sm gap-4` column (`sign-in__form`, `sign-up__form`,
+`email-recovery__form`). Heading `text-title text-ink` centred; one-line
+explanations `text-body-sm text-muted`; terms captions `text-label text-muted`;
+dividers `bg-outline`. The primary submit of each step is the one place
+`Button variant="brand"` is used; secondary choices (passkey, resend) stay
+`secondary`/`ghost`. OTP boxes are the shared `TextField` at `h-14 w-12`, digit
+in `text-metric text-ink`. The Google / GitHub buttons keep their brand logos
+(`GoogleIcon` is the one multi-colour icon). There is no extra logo inside a
+guest page.
+
+**Error pages** (`error.tsx`, `global-error.tsx`): a centred column on the
+page background: `500` in `text-label text-muted`, "Something went wrong" in
+`text-title text-ink`, one `text-body text-muted` sentence, then a primary
+`button primary` link "Go back home" (`/`) beside a `secondary` "Retry".
+`global-error.tsx` renders its own `<html>` outside every provider: it
+imports `globals.css`, starts on `data-theme="dark"`, and a mount effect
+applies `localStorage['theme']` (see Theming); it uses a plain `<a>` because
+the router may not be mounted. `src/app/_not-found.tsx` is dead code (Next
+only uses a file named `not-found.tsx`) and is not restyled.
+
 **Page intro**: the line directly under the page header, no rule under it,
 no heading element, no weight. A one-sentence description is
 `<p className="text-body-sm text-muted">`; the Home greeting
@@ -471,9 +495,15 @@ button or sits in a card).
   `PermissionCard`: `role="button" aria-pressed`, `rounded-control px-3 py-2`;
   these sit inside a `bg-card` section, so an unselected card rests on
   `bg-sheet` and hovers to `bg-control/70`; selected =
-  `bg-control shadow-selected`). **Target** for the sign-up "What are you
-  building?" cards (`BuildForForm`) and the explorer's vehicle list rows
-  (`VehicleList`); those pages adopt it in their own passes. (`MultiCardOption`
+  `bg-control shadow-selected`). Current on the sign-up "What are you
+  building?" cards (`BuildForForm`: `role="radiogroup"` labelled by the
+  prompt, each `Card` `role="radio" aria-checked`; resting `text-ink
+hover:bg-control/70`, selected `!bg-control text-ink shadow-selected`, the
+  `!` because `.card` sets `bg-card`; the "Something else" card follows the
+  same two states) and on the explorer's vehicle rows (`VehicleList`: a
+  `button` with `aria-current` on the selected one; resting `text-fg
+hover:bg-control/50`, selected `bg-control text-ink shadow-selected`). Neither
+  has keyboard handling beyond what the element already gives. (`MultiCardOption`
   and `PaymentMethodSelector` are orphaned and not restyled.)
 
 Never a white slab and never a mint tint. This is distinct from the segmented
@@ -793,10 +823,9 @@ the purchase modal) and webhooks (list, create, edit, modals, CSV upload,
 asset DID input, the generate-JWT modal), the template editor (gated; search,
 new, edit, trim grid, banners), settings (user details, team management, the
 invite and support modals) and the account information, buy DCX and support
-form modals are done. Marked **target** above and still to be applied by their
-page passes: the selected-card states on sign-up and the explorer. Where a
-recipe below names a page as its user (the explorer's rows), that page is the
-intended adopter, not necessarily restyled yet; settings keeps master's table
+form modals are done, as are the guest pages (sign-in, sign-up, email
+recovery), support, the explorer and the error pages, which apply the
+selected-card recipe. No recipe is marked **target** any more. Settings keeps master's table
 (no Status column, a pending invite still reads "(Pending)" after the name); the recipe itself is what the
 shared component implements. Reported, not fixed: `getPageTitle` in
 `src/config/navigation.ts` still title-cases some titles ("Data Explorer",

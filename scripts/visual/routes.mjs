@@ -268,13 +268,13 @@ export const ROUTES = [
   { name: 'template-edit', path: '/templates/toyota_camry_2020', ready: 'Camry' },
   { name: 'template-new', path: '/templates/new', ready: 'Create template' },
   { name: 'explorer', path: '/explorer', ready: 'Model 3' },
-  { name: 'explorer-vehicle', path: '/explorer/190231', ready: 'Available Signals' },
+  { name: 'explorer-vehicle', path: '/explorer/190231', ready: 'Available signals' },
   {
     // The selected vehicle row with the pointer on another.
     name: 'explorer-vehicle-hover',
     path: '/explorer/190231',
-    ready: 'Available Signals',
-    hover: 'button:has-text("Token #"):not(.bg-primary)',
+    ready: 'Available signals',
+    hover: 'button:has-text("Token #"):not([aria-current])',
     viewports: ['desktop'],
   },
   {
@@ -305,7 +305,7 @@ export const ROUTES = [
     name: 'sign-up-build-for-selected',
     path: '/sign-up?flow=build-for',
     ready: 'What are you building?',
-    click: 'text="Web Application"',
+    click: 'text="Web application"',
     guest: true,
   },
   {
@@ -313,8 +313,8 @@ export const ROUTES = [
     name: 'sign-up-build-for-hover',
     path: '/sign-up?flow=build-for',
     ready: 'What are you building?',
-    click: 'text="Web Application"',
-    hover: '.card-border.cursor-pointer:not([class~="!border-white"])',
+    click: 'text="Web application"',
+    hover: '[role="radio"][aria-checked="false"]',
     guest: true,
   },
   {
