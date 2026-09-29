@@ -17,7 +17,7 @@ function ActionsCell({
   return (
     <div className="relative flex justify-end" onClick={(e) => e.stopPropagation()}>
       <button
-        className="px-2 py-1 rounded hover:bg-control text-text-secondary text-lg leading-none"
+        className="flex size-8 items-center justify-center rounded-full text-body leading-none text-muted transition-colors hover:bg-control hover:text-ink"
         onClick={(e) => {
           e.stopPropagation();
           setOpen((v) => !v);
@@ -36,9 +36,9 @@ function ActionsCell({
               setOpen(false);
             }}
           />
-          <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded border border-border bg-control shadow-lg">
+          <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded-control border border-outline bg-overlay p-1 shadow-float">
             <button
-              className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-control"
+              className="w-full rounded-chip px-3 py-2 text-left text-body-sm text-negative transition-colors hover:bg-negative-soft"
               onClick={(e) => {
                 e.stopPropagation();
                 setOpen(false);
@@ -78,7 +78,7 @@ export const buildColumns = (
             {definition?.make} {definition?.model} {definition?.year}
           </span>
           {isSimulated && (
-            <span className="text-[10px] font-mono tracking-[0.15em] uppercase px-1.5 py-0.5 rounded border border-border text-text-secondary bg-control leading-none">
+            <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
               Simulated
             </span>
           )}

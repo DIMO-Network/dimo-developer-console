@@ -42,8 +42,12 @@ export default function DeveloperLicenseDetailsPageLayout({
       {data?.developerLicense && (
         <div className={'flex flex-col'}>
           <div className={'py-4 self-start'}>
-            <button onClick={onBack}>
-              <ChevronLeftIcon className={'w-4 h-4'} />
+            <button
+              aria-label="Back"
+              className="text-muted transition-colors hover:text-ink"
+              onClick={onBack}
+            >
+              <ChevronLeftIcon className={'h-4 w-4'} />
             </button>
           </div>
           <Header
