@@ -78,7 +78,7 @@ export const buildColumns = (
             {definition?.make} {definition?.model} {definition?.year}
           </span>
           {isSimulated && (
-            <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
+            <span className="shrink-0 whitespace-nowrap rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
               Simulated
             </span>
           )}
