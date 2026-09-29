@@ -87,7 +87,7 @@ export const ROUTES = [
     path: '/licenses',
     ready: LICENSE.alias,
     // Only the second license has a single configuration, hence a copy link.
-    click: 'text="Vehicle Sharing Link"',
+    click: 'text="Vehicle sharing link"',
     after: 'Sharing link copied',
     viewports: ['desktop'],
   },
@@ -133,7 +133,7 @@ export const ROUTES = [
     name: 'license-vehicle-simulator',
     path: `/license/${t}/details`,
     ready: LICENSE.alias,
-    click: ['role=tab[name="Vehicles"]', 'text="Vehicle Simulator"'],
+    click: ['role=tab[name="Vehicles"]', 'text="Vehicle simulator"'],
     viewports: ['desktop'],
   },
   {
@@ -143,7 +143,7 @@ export const ROUTES = [
     ready: LICENSE.alias,
     click: [
       'role=tab[name="Vehicles"]',
-      'text="Vehicle Simulator"',
+      'text="Vehicle simulator"',
       '.vehicle-sim-region-card',
       '.vehicle-sim-make-card',
       '.vehicle-sim-pill',

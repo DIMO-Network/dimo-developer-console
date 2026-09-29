@@ -1,13 +1,13 @@
 .create-app-modal {
   .dialog-panel {
-    @apply min-w-[95vw] min-h-[95vh] ml-auto mr-auto my-auto md:m-auto md:h-auto md:min-w-[480px] md:min-h-0 p-6;
+    @apply my-auto ml-auto mr-auto min-h-[95vh] min-w-[95vw] p-6 md:m-auto md:h-auto md:min-h-0 md:min-w-[480px] md:max-w-[480px];
   }
 
   .create-app-content {
-    @apply flex flex-col flex-1;
+    @apply flex w-full flex-1 flex-col;
 
     .create-app-header {
-      @apply flex flex-col gap-2 relative pb-6 font-bold items-center text-center;
+      @apply relative flex flex-col gap-2 pr-8 text-left;
     }
   }
 }

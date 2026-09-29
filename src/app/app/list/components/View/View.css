@@ -1,24 +1,26 @@
 .app-list-page {
   @apply flex flex-1 flex-col gap-6;
 
+  /* Page intro: one quiet line, no rule under it. */
   .welcome-message {
-    @apply flex flex-row gap-1 pb-2 border-b-cta-default border-b;
+    @apply flex flex-row items-center gap-2;
 
     .title {
-      @apply text-base text-text-secondary font-medium;
+      @apply text-body text-muted;
     }
   }
 
   .shortcuts-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+    @apply grid grid-cols-1 gap-3 sm:grid-cols-2;
   }
 
+  /* Tonal card that steps up one tone on hover; no border. */
   .shortcut-card {
-    @apply flex flex-row gap-4 items-start p-4 rounded-xl border border-border bg-card
-           hover:bg-control transition-colors cursor-pointer;
+    @apply flex cursor-pointer flex-row items-start gap-4 rounded-card bg-card p-5 transition-colors hover:bg-control;
 
+    /* The tile steps up with the card so it stays visible on hover. */
     .shortcut-card__icon {
-      @apply flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary;
+      @apply flex size-10 flex-shrink-0 items-center justify-center rounded-control bg-control text-ink transition-colors;
     }
 
     .shortcut-card__body {
@@ -26,11 +28,15 @@
     }
 
     .shortcut-card__title {
-      @apply text-sm font-medium text-foreground;
+      @apply text-card-title text-ink;
     }
 
     .shortcut-card__desc {
-      @apply text-xs text-muted-foreground leading-4;
+      @apply text-body-sm text-muted;
     }
+  }
+
+  .shortcut-card:hover .shortcut-card__icon {
+    @apply bg-highest;
   }
 }
