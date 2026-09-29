@@ -48,7 +48,7 @@ There is no add-credits state: master has that button commented out.
 
 A shot fails (without a retry) on a hydration mismatch or when Next's dev
 overlay shows an error dialog or issue count. Routes whose issue reproduces on
-untouched master carry `knownHydrationError` (the reason) in `routes.mjs`; theirs
+untouched master carry `knownConsoleWarning` (the reason) in `routes.mjs`; theirs
 is logged instead. On master: `/app` and `/settings` (Suspense hydrates after the
 user query resolves) and the webhook create/edit forms (a React "value without
 onChange" warning, not hydration).

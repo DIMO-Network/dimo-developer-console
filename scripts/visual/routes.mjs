@@ -3,21 +3,31 @@
 // after: text awaited once they are done. viewports limits a state to one size.
 // noLicenses: identity returns no developer licenses (the empty /licenses state).
 // hover: a selector the pointer rests on for the shot (hover states).
-// knownHydrationError: a dev-overlay issue reproducible on untouched master (the
-// value is the reason); it is logged instead of failing the shot. Re-evaluated on
-// master: /app and /settings still mismatch (3 of 3 runs, on the fourth shot of a
-// run: light mobile); /licenses, license pages and the rest did not reproduce.
+// knownConsoleWarning: { pattern, reason } for a console error reproducible on
+// untouched master. Matching messages are logged as "known warning" and excluded
+// (the dev badge's issue count is excused only up to the number matched);
+// hydration mismatches, other errors and overlay dialogs still fail the shot.
+// On master: /app and /settings mismatch on the Suspense hydration (3 of 3 runs,
+// light mobile); the webhook form logs a React controlled-input warning.
 import { LICENSE, CONNECTIONS, WEBHOOKS } from './fixtures.mjs';
 
 // Both pages wrap their view in <Suspense>, which can hydrate after the header's
 // useUser() query has resolved; the view then renders user data the server
-// rendered without. Timing-dependent; reproduced on untouched master.
-const APP_HYDRATION = 'welcome row: BubbleLoader on server, waving-hand img on client';
-const SETTINGS_HYDRATION = 'UserDetails: null on server, user card on client';
-
-// Not hydration: React logs "value prop without onChange" for a form field in the
-// webhook form (master markup), which puts 2 issues on Next's dev badge.
-const WEBHOOK_FORM_WARNING = 'console.error: form field with value but no onChange';
+// rendered without. Timing-dependent; reproduced on untouched master. The pattern
+// pins the known diff (the waving-hand img / the UserDetails card).
+const APP_HYDRATION = {
+  pattern: /Hydration failed[\s\S]*waving-hand/,
+  reason: 'welcome row: BubbleLoader on server, waving-hand img on client',
+};
+const SETTINGS_HYDRATION = {
+  pattern: /Hydration failed because the server rendered text didn't match/,
+  reason: 'UserDetails: null on server, user card on client',
+};
+// React warning for a form field with value but no onChange (webhook form).
+const WEBHOOK_FORM_WARNING = {
+  pattern: /You provided a `value` prop to a form field without an `onChange` handler/,
+  reason: 'form field with value but no onChange',
+};
 
 const t = LICENSE.tokenId;
 const c = LICENSE.clientId;
@@ -28,7 +38,7 @@ export const ROUTES = [
     name: 'app',
     path: '/app',
     ready: 'Welcome',
-    knownHydrationError: APP_HYDRATION,
+    knownConsoleWarning: APP_HYDRATION,
   },
   {
     name: 'app-mobile-menu',
@@ -37,7 +47,7 @@ export const ROUTES = [
     // The MenuButton has no aria-label on master; match its size class.
     click: 'button.size-12',
     viewports: ['mobile'],
-    knownHydrationError: APP_HYDRATION,
+    knownConsoleWarning: APP_HYDRATION,
   },
   // No add-credits state: master has that button commented out.
   {
@@ -46,7 +56,7 @@ export const ROUTES = [
     ready: 'Welcome',
     click: '[title="Account Information"]',
     after: 'Account Information',
-    knownHydrationError: APP_HYDRATION,
+    knownConsoleWarning: APP_HYDRATION,
   },
   { name: 'licenses', path: '/licenses', ready: LICENSE.alias },
   {
@@ -213,13 +223,13 @@ export const ROUTES = [
     name: 'webhook-create',
     path: `/webhooks/create/${c}`,
     ready: 'Build the conditions',
-    knownHydrationError: WEBHOOK_FORM_WARNING,
+    knownConsoleWarning: WEBHOOK_FORM_WARNING,
   },
   {
     name: 'webhook-edit',
     path: `/webhooks/edit/${c}/${WEBHOOKS[0].id}`,
     ready: 'valueNumber > 120',
-    knownHydrationError: WEBHOOK_FORM_WARNING,
+    knownConsoleWarning: WEBHOOK_FORM_WARNING,
   },
   {
     name: 'webhook-delete-modal',
@@ -255,7 +265,7 @@ export const ROUTES = [
     name: 'settings',
     path: '/settings',
     ready: 'jane@harness.dev',
-    knownHydrationError: SETTINGS_HYDRATION,
+    knownConsoleWarning: SETTINGS_HYDRATION,
   },
   {
     name: 'settings-support-modal',
@@ -263,7 +273,7 @@ export const ROUTES = [
     ready: 'jane@harness.dev',
     click: 'text=Developer support',
     after: 'Contact developer support',
-    knownHydrationError: SETTINGS_HYDRATION,
+    knownConsoleWarning: SETTINGS_HYDRATION,
   },
   { name: 'support', path: '/support', ready: 'Report an issue' },
   { name: 'sign-in', path: '/sign-in', ready: 'Build with car data', guest: true },

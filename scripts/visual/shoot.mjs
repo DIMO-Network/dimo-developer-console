@@ -123,10 +123,13 @@ function devOverlayProblem() {
   if (!root) return null;
   const clean = (t) => (t ?? '').replace(/\s+/g, ' ').trim().slice(0, 160);
   const dialog = root.querySelector('[data-nextjs-dialog]');
-  if (dialog) return `error overlay open: ${clean(dialog.textContent)}`;
+  if (dialog) return { text: `error overlay open: ${clean(dialog.textContent)}` };
   const count = root.querySelector('[data-issues-count]');
   if (count || root.querySelector('[data-next-badge][data-error="true"]'))
-    return `dev badge reports issues: ${clean(count?.textContent) || '?'}`;
+    return {
+      text: `dev badge reports issues: ${clean(count?.textContent) || '?'}`,
+      count: parseInt(clean(count?.textContent), 10) || null,
+    };
   return null;
 }
 
@@ -135,7 +138,10 @@ async function shootOnce(route, theme, vp, file, errors) {
   await prepare(context, route, theme);
   const page = await context.newPage();
   const hydrationErrors = [];
+  // Every console error / page error text, to match against knownConsoleWarning.
+  const allErrors = [];
   const record = (message) => {
+    allErrors.push(message);
     if (HYDRATION.test(message)) hydrationErrors.push(message);
   };
   page.on('pageerror', (e) => {
@@ -185,13 +191,26 @@ async function shootOnce(route, theme, vp, file, errors) {
       await page.getByText(route.after).first().waitFor({ timeout: 30_000 });
     await page.waitForTimeout(400);
     const overlay = await page.evaluate(devOverlayProblem);
-    const hydration = hydrationErrors[0]?.split('\n')[0].slice(0, 160);
-    if (route.knownHydrationError) {
-      for (const problem of [hydration, overlay].filter(Boolean))
-        console.log(`    known (${route.knownHydrationError}): ${problem}`);
-    } else if (hydration || overlay) {
+    // knownConsoleWarning {pattern, reason}: messages matching the pattern are
+    // logged and excluded; everything else still fails. The dev badge only
+    // exposes a count, so at most as many issues as matched messages are excused.
+    const known = route.knownConsoleWarning;
+    const matched = known ? allErrors.filter((m) => known.pattern.test(m)) : [];
+    const unknownHydration = hydrationErrors.filter(
+      (m) => !(known && known.pattern.test(m)),
+    );
+    const hydration = unknownHydration[0]?.split('\n')[0].slice(0, 160);
+    let overlayProblem = overlay?.text ?? null;
+    if (overlay && known && overlay.count !== undefined && overlay.count !== null) {
+      if (overlay.count <= matched.length) overlayProblem = null;
+    }
+    if (known && matched.length)
+      console.log(`    known warning (${known.reason}): ${matched.length} matched`);
+    if (hydration || overlayProblem) {
       // Not retried: these come from the app, and a warm retry usually hides them.
-      const error = new Error(hydration ? `hydration error: ${hydration}` : overlay);
+      const error = new Error(
+        hydration ? `hydration error: ${hydration}` : overlayProblem,
+      );
       error.final = true;
       throw error;
     }
