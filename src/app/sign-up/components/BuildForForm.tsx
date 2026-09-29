@@ -18,10 +18,10 @@ interface BuildForFormInputs {
 }
 
 enum buildForValues {
-  mobileApp = 'mobile-app',
-  webApp = 'web-app',
-  personalProject = 'personal-project',
-  somethingElse = 'something-else',
+  'mobileApp' = 'mobile-app',
+  'webApp' = 'web-app',
+  'personalProject' = 'personal-project',
+  'somethingElse' = 'something-else',
 }
 
 const buildForList = [

@@ -116,7 +116,8 @@ export async function countMintedVehicles(id: string): Promise<number> {
  * outage, or hides a real unregistered slug behind "try again" forever.
  */
 export type ManufacturerLookup =
-  { kind: 'found'; owner: string; tokenId: number } | { kind: 'absent' };
+  | { kind: 'found'; owner: string; tokenId: number }
+  | { kind: 'absent' };
 
 /**
  * identity's contract, from graph/schema/manufacturer.graphqls:
