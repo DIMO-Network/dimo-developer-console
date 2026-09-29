@@ -248,8 +248,9 @@ page's one primary action. An optional line under it is
 `text-body-sm text-muted`.
 
 **Breadcrumbs** (hand-built, not a component; in `license/[tokenId]/details`
-`View.tsx`, `license/vehicles/[clientId]` `View.tsx` and the configurator
-list/new/edit views; the connections pages still to adopt): a `<nav>` above
+`View.tsx`, `license/vehicles/[clientId]` `View.tsx`, the configurator
+list/new/edit views, the connections details and create pages and the webhooks
+create and edit pages): a `<nav>` above
 the page content, `mb-2 flex items-center gap-1.5 text-label text-muted`.
 Each ancestor is a `Link` with `transition-colors hover:text-ink`; the separator is a bare
 `<span>/</span>` inheriting `text-muted`; the current page is the last item,
@@ -318,9 +319,8 @@ text-metric text-ink` — it's a link, but stays ink, not mint), with a
 **Status dot**: `inline-block size-1.5 flex-shrink-0 rounded-full` (6px),
 colored by state. (Toasts use a status icon instead — see "Toast".)
 
-**Status chip** (`src/components/StatusChip/StatusChip.tsx`; the component exists,
-but no page imports it yet: the webhooks, templates and settings
-passes swap their hand-rolled badges to it) — the one status
+**Status chip** (`src/components/StatusChip/StatusChip.tsx`; used by the webhooks table and
+details card; the settings and templates passes adopt it) — the one status
 idiom for a record's state in a list or table: the status dot inside a
 neutral chip, `inline-flex w-fit items-center gap-1.5 whitespace-nowrap
 rounded-chip bg-control px-2 py-0.5 text-label text-fg`. Use `<StatusChip
@@ -478,6 +478,38 @@ button or sits in a card).
 
 Never a white slab and never a mint tint. This is distinct from the segmented
 control below, which uses a raised neutral step.
+
+**Webhooks** (`src/app/webhooks/**`, `src/components/Webhooks/**`): a tonal
+`Section` card holds the "Webhooks" header, the one primary ("+ Create a
+webhook") and the table. The table is a `min-w-full overflow-x-auto` wrapper (no
+second card) around the plain `table.table`; row dividers are `border-t
+border-t-outline`, the expanded row rests on `bg-sheet` (`ExpandedRow`), the
+row chevron is `text-muted`. Display name, Service and Cooldown are
+`hidden md:table-cell` (column `meta.className`), so Description, Vehicles,
+Errors and Status fit a 390px phone. Status is `StatusBadge` = `StatusChip`
+(Enabled `live`, Failed `error`, else `off`); an Errors count above zero is
+`<StatusChip tone="error">`. The status `Toggle` is the one teal control
+("on"). Read-only target URL is a plain `rounded-control bg-control` field: a
+URL is not code. Modals use `text-panel-title` titles, the `destructive`
+Delete/Remove confirm over a `secondary` Cancel, and a
+`rounded-card bg-control` details card (`text-label text-muted` labels,
+`text-body-sm text-fg` values). Only keys, ids, the verification token and
+the generated CEL block are `font-mono text-code`.
+
+**Step tracker** (`FormStepTracker`, webhook create): a `rounded-card bg-card
+p-4` card holding an `ol` of rows, `flex items-center gap-2 text-body-sm`. A
+20px marker: done = the green check icon (`CheckIcon`, status colour on an
+icon), current = `bg-selected-bg text-selected-fg` numbered disc with
+`font-semibold text-ink` title and `aria-current="step"`, upcoming =
+`border border-control-border text-muted` numbered ring with a `text-muted`
+title. No teal.
+
+**CEL builder** (`fields/CELBuilder`): a `Section` card, "Build the
+conditions", stacking one row per condition (`flex-col` on phones, `sm:flex-row`
+from 640px) of the standard `SelectField` / `text-field` controls, a
+`secondary` "Generate CEL" button, and the generated expression in a
+`rounded-control bg-sheet px-3 py-2` well (`whitespace-pre-wrap break-all
+font-mono text-code text-fg`) that sits one step below its card.
 
 **Segmented control** (`src/components/SegmentedControl/SegmentedControl.css`):
 track `.segmented-control` = `flex w-fit flex-row gap-0.5 rounded-full
@@ -739,7 +771,9 @@ widgets, `Button`, `Card`, `Modal` (Radix), Sonner, form controls, `Table`,
 `/licenses`, the license card, the empty state, the Create license modal, the
 vehicle simulator). License details (tabs, breadcrumbs, every tab body), the
 licensed-vehicles page, the renounce modal and the configurator (list, new,
-edit, preview panel, permission cards) are done. Marked **target**
+edit, preview panel, permission cards), connections (list, details, create and
+the purchase modal) and webhooks (list, create, edit, modals, CSV upload,
+asset DID input, the generate-JWT modal) are done. Marked **target**
 above and still to be applied by their page passes: the selected-card states on sign-up and the explorer.
 Where a recipe below names a page as its user (status chips on webhooks and
 settings, the explorer's rows, the template editor), that page is the intended
