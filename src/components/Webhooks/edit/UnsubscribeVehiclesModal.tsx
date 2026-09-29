@@ -73,7 +73,11 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
         />
       </div>
       <div className="flex flex-col w-full gap-4 pt-4">
-        <Button onClick={handleSubmit} disabled={assetDIDs.length === 0 || loading}>
+        <Button
+          variant="destructive"
+          onClick={handleSubmit}
+          disabled={assetDIDs.length === 0 || loading}
+        >
           {loading
             ? 'Removing...'
             : `Remove ${assetDIDs.length} Vehicle${assetDIDs.length !== 1 ? 's' : ''}`}

@@ -138,7 +138,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
         <div className={'flex flex-col gap-4 pt-6'}>
           <Button
             type="submit"
-            variant="secondary"
+            variant="primary"
             className="save-button"
             loading={isLoading}
           >

@@ -230,7 +230,7 @@ export const BrandForm: FC<Props> = ({
 
       {isOwner && (
         <div className="flex flex-row gap-3 pt-2">
-          <Button type="submit" variant="secondary" disabled={!dirty} loading={saving}>
+          <Button type="submit" variant="primary" disabled={!dirty} loading={saving}>
             Save Brand
           </Button>
           {isExisting && !brand.isDefault && (

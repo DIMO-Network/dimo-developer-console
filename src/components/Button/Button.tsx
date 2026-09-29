@@ -35,6 +35,7 @@ export const Button: FC<ButtonProps> = ({
   variant = 'primary',
   size = 'md',
   onClick = () => {},
+  disabled,
   ...props
 }) => {
   const className = classnames(
@@ -49,7 +50,12 @@ export const Button: FC<ButtonProps> = ({
   };
 
   return (
-    <button {...props} onClick={handleClick} className={className}>
+    <button
+      {...props}
+      disabled={disabled || loading}
+      onClick={handleClick}
+      className={className}
+    >
       {loading && <BubbleLoader isSmall isLoading />}
       {!loading && <span className="content">{children}</span>}
     </button>

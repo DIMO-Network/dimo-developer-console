@@ -85,7 +85,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
                 {pendingDeleteId === config.id ? (
                   <div className="flex gap-2">
                     <Button
-                      variant="secondary"
+                      variant="destructive"
                       onClick={() => void handleDelete(config.id)}
                     >
                       Confirm
@@ -115,7 +115,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
                       Copy Link
                     </Button>
                     <Button
-                      variant="secondary"
+                      variant="destructive-ghost"
                       onClick={() => setPendingDeleteId(config.id)}
                     >
                       Delete

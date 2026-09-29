@@ -84,3 +84,23 @@ describe('Button', () => {
     expect(button).not.toHaveClass('primary');
   });
 });
+
+describe('Button loading', () => {
+  it('is disabled while loading and does not call onClick', () => {
+    const handleClick = jest.fn();
+    render(
+      <Button type="submit" loading onClick={handleClick}>
+        Save
+      </Button>,
+    );
+    const button = screen.getByRole('button');
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('honors disabled when not loading', () => {
+    render(<Button disabled>Save</Button>);
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+});
