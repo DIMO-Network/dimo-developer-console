@@ -1,9 +1,6 @@
 .support-page {
   @apply flex flex-col gap-8;
 
-  .titles {
-    @apply flex flex-col gap-2;
-  }
   .subtitle {
     @apply text-body-sm text-muted;
   }
