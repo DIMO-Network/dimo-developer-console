@@ -5,8 +5,8 @@
 export type GqlRequest = { query: string; variables: Record<string, unknown> };
 
 export class InvalidSignalError extends Error {
-  constructor(name: string) {
-    super(`Unknown signal "${name}"`);
+  constructor(name: string, message = `Unknown signal "${name}"`) {
+    super(message);
     this.name = 'InvalidSignalError';
   }
 }
@@ -21,6 +21,20 @@ export const COMPLEX_VALUE_FIELDS: Record<string, string> = {
 
 export const isLocationSignal = (name: string) =>
   Object.hasOwn(COMPLEX_VALUE_FIELDS, name);
+
+// Signals typed String in telemetry-api's schema/signals-events_gen.graphqls:
+// in `signals` they take `(agg: StringAggregation!)`, not a FloatAggregation,
+// so they can't be charted. signalsLatest reads them like any other signal.
+export const STRING_SIGNALS: ReadonlySet<string> = new Set([
+  'obdDTCList',
+  'obdFuelTypeName',
+  'powertrainCombustionEngineEngineOilLevel',
+  'powertrainFuelSystemSupportedFuelTypes',
+  'powertrainTransmissionRetarderTorqueMode',
+  'powertrainType',
+]);
+
+export const isStringSignal = (name: string) => STRING_SIGNALS.has(name);
 
 const checkSignals = (signals: string[], available: string[]) => {
   if (!signals.length) throw new InvalidSignalError('');
@@ -103,6 +117,13 @@ export const signalsQuery = (input: {
   if (!AGGS.has(input.agg)) throw new Error(`Unknown aggregation "${input.agg}"`);
   const chosen = input.signals.filter((s) => !isLocationSignal(s));
   checkSignals(chosen, input.available);
+  const text = chosen.find(isStringSignal);
+  if (text) {
+    throw new InvalidSignalError(
+      text,
+      `"${text}" is a text signal and has no ${input.agg} aggregation`,
+    );
+  }
   const fields = chosen.map((s) => `    ${s}(agg: ${input.agg})`).join('\n');
   return {
     query: `query Signals($tokenId: Int!, $from: Time!, $to: Time!, $interval: String!, $filter: SignalFilter) {

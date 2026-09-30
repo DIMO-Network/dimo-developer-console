@@ -15,6 +15,8 @@ import {
   InvalidSignalError,
   SEGMENT_DEFAULTS,
   isLocationSignal,
+  isStringSignal,
+  STRING_SIGNALS,
 } from '@/services/subjects/queries';
 
 const DID = 'did:erc721:137:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:184223';
@@ -199,6 +201,37 @@ describe('hardening', () => {
         to: TO,
       }),
     ).toThrow('Unknown aggregation');
+  });
+
+  it('knows the string-typed signals, and not by prototype lookup', () => {
+    expect(isStringSignal('obdDTCList')).toBe(true);
+    expect(isStringSignal('powertrainType')).toBe(true);
+    expect(isStringSignal('speed')).toBe(false);
+    expect(isStringSignal('toString')).toBe(false);
+    expect(isStringSignal('constructor')).toBe(false);
+    expect([...STRING_SIGNALS].sort()).toEqual([
+      'obdDTCList',
+      'obdFuelTypeName',
+      'powertrainCombustionEngineEngineOilLevel',
+      'powertrainFuelSystemSupportedFuelTypes',
+      'powertrainTransmissionRetarderTorqueMode',
+      'powertrainType',
+    ]);
+  });
+
+  it('refuses a string signal in a float-aggregated signals query', () => {
+    const run = () =>
+      signalsQuery({
+        tokenId: 1,
+        signals: ['speed', 'obdDTCList'],
+        available: ['speed', 'obdDTCList'],
+        agg: 'AVG',
+        interval: '1h',
+        from: FROM,
+        to: TO,
+      });
+    expect(run).toThrow(InvalidSignalError);
+    expect(run).toThrow('obdDTCList');
   });
 
   it('refuses an empty freshness list', () => {

@@ -188,6 +188,51 @@ describe('SignalsTab', () => {
     expect(screen.getByText('telemetry down')).toBeInTheDocument();
   });
 
+  it('keeps text signals out of the chart picker but reads them in latest values', () => {
+    override('query AvailableSignals', {
+      data: { data: { availableSignals: ['speed', 'obdDTCList'] } },
+      isLoading: false,
+      error: null,
+    });
+    render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add signal' }));
+    expect(screen.getByLabelText('Speed')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Diagnostic codes')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Latest values' }));
+    const latest = (useSubjectQuery as jest.Mock).mock.calls
+      .filter((c) => c[0].request?.query.startsWith('query SignalsLatest'))
+      .at(-1)[0];
+    expect(latest.request.query).toContain('obdDTCList { timestamp value }');
+  });
+
+  it('says a device without a telemetry source charts the whole vehicle', () => {
+    const withDevice = buildVehicleGraph(
+      {
+        ...vehicle,
+        aftermarketDevice: {
+          tokenId: 48211,
+          tokenDID: 'did:erc721:80002:0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA:48211',
+          address: '0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA',
+          serial: 's',
+          pairedAt: null,
+          mintedAt: '2026-04-11T09:00:00Z',
+          manufacturer: { name: 'AutoPi' },
+        },
+      } as unknown as VehicleDetail,
+      80002,
+    );
+    const note =
+      'This device has no cloud events yet, so the signal breakdown covers the whole vehicle.';
+    const { rerender } = render(
+      <SignalsTab subject={withDevice.devices[0]} ctx={{ ...ctx, graph: withDevice }} />,
+    );
+    expect(screen.getByText(note)).toBeInTheDocument();
+    rerender(
+      <SignalsTab subject={withDevice.vehicle} ctx={{ ...ctx, graph: withDevice }} />,
+    );
+    expect(screen.queryByText(note)).not.toBeInTheDocument();
+  });
+
   it('shows a refused available-signals field instead of the no-signals copy', () => {
     override('query AvailableSignals', {
       data: {

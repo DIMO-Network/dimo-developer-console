@@ -2,7 +2,7 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import dynamic from 'next/dynamic';
-import type { Subject } from '@/services/subjects/graph';
+import { isDevice, type Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
 import { useTelemetrySource } from '@/hooks/subjects/useDataSummary';
@@ -12,6 +12,7 @@ import {
   signalsQuery,
   signalsLatestQuery,
   isLocationSignal,
+  isStringSignal,
   type FloatAggregation,
   type GqlRequest,
 } from '@/services/subjects/queries';
@@ -72,10 +73,13 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     clientId: ctx.clientId,
     request: availableSignalsQuery(tokenId, source),
   });
-  const available = useMemo(
+  // Latest values reads every non-location signal; the chart only takes the
+  // float ones (text signals have no float aggregation).
+  const readable = useMemo(
     () => (avail.data?.data?.availableSignals ?? []).filter((s) => !isLocationSignal(s)),
     [avail.data],
   );
+  const available = useMemo(() => readable.filter((s) => !isStringSignal(s)), [readable]);
   const availError =
     avail.error?.message ?? fieldError(avail.data?.errors, 'availableSignals');
 
@@ -144,6 +148,12 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
 
   return (
     <div className="flex flex-col gap-3">
+      {isDevice(subject) && !source && (
+        <p className="px-1 text-body-sm text-muted">
+          This device has no cloud events yet, so the signal breakdown covers the whole
+          vehicle.
+        </p>
+      )}
       <div className="flex flex-col gap-3.5 rounded-card bg-card p-4">
         <SignalPicker
           available={available}
@@ -188,10 +198,10 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             variant="ghost"
             onClick={() =>
               setLatestRequest(
-                available.length ? signalsLatestQuery(tokenId, available, source) : null,
+                readable.length ? signalsLatestQuery(tokenId, readable, source) : null,
               )
             }
-            disabled={!available.length}
+            disabled={!readable.length}
           >
             Latest values
           </Button>
