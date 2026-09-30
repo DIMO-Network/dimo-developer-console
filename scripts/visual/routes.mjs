@@ -395,11 +395,10 @@ export const ROUTES = [
     guest: true,
   },
   {
-    // Confirms an unmatched authenticated path doesn't redirect-loop. Next.js
-    // serves its own built-in 404 here (src/app/_not-found.tsx isn't wired up:
-    // the App Router only recognizes a file literally named not-found.tsx).
+    // An unmatched path renders src/app/not-found.tsx (and must not
+    // redirect-loop).
     name: 'not-found',
     path: '/this-does-not-exist',
-    ready: 'This page could not be found',
+    ready: 'Page not found',
   },
 ];

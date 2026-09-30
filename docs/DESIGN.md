@@ -146,8 +146,10 @@ the type scale.
 h-[72px] w-full min-w-0 items-center justify-between gap-2`; no border, sits
 on the transparent `.app-content` sheet. Title: `.page-title` = `min-w-0
 truncate text-title text-ink` (truncates so it never pushes widgets off at
-390px), sentence case (see the note on `getPageTitle` under "Adoption
-status"). The mobile menu button lives in `.menu-header-button`
+390px), sentence case. Titles come from `getPageTitle` in
+`src/config/navigation.ts` (static paths plus one regex per dynamic route;
+every authorized route has one, and `__tests__/unit/config/pageTitle.test.ts`
+lists them), so a page doesn't repeat its title as an `h1` in the body. The mobile menu button lives in `.menu-header-button`
 (`md:hidden`). Right side: `.user-information` = `flex flex-shrink-0 flex-row
 items-center gap-2 md:gap-3` (credits, help, account). `Header.css` also carries a header-scoped
 override, `.header .credits, .header .credits .credits-info { max-md:min-w-0
@@ -251,8 +253,14 @@ page background: `500` in `text-label text-muted`, "Something went wrong" in
 `global-error.tsx` renders its own `<html>` outside every provider: it
 imports `globals.css`, starts on `data-theme="dark"`, and a mount effect
 applies `localStorage['theme']` (see Theming); it uses a plain `<a>` because
-the router may not be mounted. `src/app/_not-found.tsx` is dead code (Next
-only uses a file named `not-found.tsx`) and is not restyled.
+the router may not be mounted.
+
+**404** (`src/app/not-found.tsx`): rendered with only the root layout around
+it, so it draws the guest look itself: canvas with `bg-brand-glow`, the
+top-right icon `ThemeToggle`, and a `rounded-panel bg-sheet shadow-float`
+panel with the `BrandLockup`, `404` / "Page not found" / one sentence (same
+type as the error pages) and a primary `button primary` link "Go back home"
+(`/`).
 
 **Page intro**: the line directly under the page header, no rule under it,
 no heading element, no weight. A one-sentence description is
@@ -869,10 +877,7 @@ locked (no temporary aliases remain). Not restyled, by design: the orphaned
 components listed under "Don'ts" (only a mechanical token swap where a removed
 color name would otherwise stop compiling). Settings keeps master's table
 (no Status column, a pending invite still reads "(Pending)" after the name); the recipe itself is what the
-shared component implements. Reported, not fixed: `getPageTitle` in
-`src/config/navigation.ts` still title-cases some titles ("License Details") and its `/license/details/...` regexes no longer match the
-real `/license/[tokenId]/details` route; casing is applied where the title is
-matched statically.
+shared component implements.
 
 ## Don'ts
 
