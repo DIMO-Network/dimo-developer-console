@@ -6,6 +6,7 @@ import type { LocalDeveloperLicense } from '@/types/webhook';
 import type { VehicleTab } from '../hooks/useVehicleUrlState';
 import { SummaryTab } from './tabs/SummaryTab';
 import { RawDataTab } from './tabs/RawDataTab';
+import { SignalsTab } from './tabs/SignalsTab';
 
 export type SubjectContext = {
   clientId: string;
@@ -27,7 +28,7 @@ export const SubjectView: FC<{
     case 'raw':
       return <RawDataTab key={subject.did} subject={subject} ctx={ctx} />;
     case 'signals':
-      return null; // Task 8: <SignalsTab subject={subject} ctx={ctx} />
+      return <SignalsTab key={subject.did} subject={subject} ctx={ctx} />;
     case 'trips':
       return null; // Task 9: <TripsTab subject={subject} ctx={ctx} />
     case 'documents':
