@@ -5,6 +5,7 @@ import type { LatestIndexHeader } from '@/hooks/subjects/useSubjectFreshness';
 import type { LocalDeveloperLicense } from '@/types/webhook';
 import type { VehicleTab } from '../hooks/useVehicleUrlState';
 import { SummaryTab } from './tabs/SummaryTab';
+import { RawDataTab } from './tabs/RawDataTab';
 
 export type SubjectContext = {
   clientId: string;
@@ -22,9 +23,9 @@ export const SubjectView: FC<{
 }> = ({ subject, tab, ctx }) => {
   switch (tab) {
     case 'summary':
-      return <SummaryTab subject={subject} ctx={ctx} />;
+      return <SummaryTab key={subject.did} subject={subject} ctx={ctx} />;
     case 'raw':
-      return null; // Task 7: <RawDataTab subject={subject} ctx={ctx} />
+      return <RawDataTab key={subject.did} subject={subject} ctx={ctx} />;
     case 'signals':
       return null; // Task 8: <SignalsTab subject={subject} ctx={ctx} />
     case 'trips':
