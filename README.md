@@ -169,6 +169,7 @@ This project is built with Next.js, which requires specific folder structures an
 A brief description of the main folders and files in the project:
 
 - `./src/app`: Contains all the application pages and API routes using the new App Router in Next.js.
+  - Vehicles (`/vehicles`): per-license vehicle list and a vehicle page with data health, signals, raw cloud events, trips, owner documents and sharing. Reads go through `/api/data/telemetry` and `/api/data/fetch`, which exchange the stored developer JWT for an asset-scoped token; no new env vars.
 - `./src/config`: Configuration files
   - `default` is mainly used for the development environment and default values in `staging` and `prod`
   - `preview` is mainly used for changing variable values in the staging environment.
