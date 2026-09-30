@@ -203,9 +203,9 @@ export const dailyActivityQuery = (input: {
   mechanism: DetectionMechanism;
   config?: SegmentConfig;
 }): GqlRequest => ({
-  query: `query DailyActivity($tokenId: Int!, $from: Time!, $to: Time!, $mechanism: DetectionMechanism!, $config: SegmentConfig) {
-  dailyActivity(tokenId: $tokenId, from: $from, to: $to, mechanism: $mechanism, config: $config) {
-    date segmentCount duration
+  query: `query DailyActivity($tokenId: Int!, $from: Time!, $to: Time!, $mechanism: DetectionMechanism!, $config: SegmentConfig, $timezone: String) {
+  dailyActivity(tokenId: $tokenId, from: $from, to: $to, mechanism: $mechanism, config: $config, timezone: $timezone) {
+    start { timestamp } end { timestamp } segmentCount duration
     signals { name agg value }
     eventCounts { name count }
   }
@@ -216,6 +216,7 @@ export const dailyActivityQuery = (input: {
     to: input.to,
     mechanism: input.mechanism,
     config: input.config ?? SEGMENT_DEFAULTS,
+    timezone: 'UTC',
   },
 });
 

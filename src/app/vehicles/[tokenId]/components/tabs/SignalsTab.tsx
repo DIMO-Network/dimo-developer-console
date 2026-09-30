@@ -44,7 +44,7 @@ const INTERVALS = [
   { value: '5m', label: '5 min' },
   { value: '15m', label: '15 min' },
   { value: '1h', label: '1 hour' },
-  { value: '1d', label: '1 day' },
+  { value: '24h', label: '1 day' },
 ];
 const selectClass =
   'h-10 appearance-none rounded-control border border-control-border bg-control px-3 pr-8 text-body-sm text-ink';

@@ -113,14 +113,17 @@ describe('telemetry builders', () => {
       after: null,
     });
     expect(seg.query).toContain('isOngoing');
-    expect(
-      dailyActivityQuery({
-        tokenId: 1,
-        from: FROM,
-        to: TO,
-        mechanism: 'frequencyAnalysis',
-      }).query,
-    ).toContain('segmentCount');
+    const day = dailyActivityQuery({
+      tokenId: 1,
+      from: FROM,
+      to: TO,
+      mechanism: 'frequencyAnalysis',
+    });
+    expect(day.query).toContain('segmentCount');
+    expect(day.query).toContain('start { timestamp }');
+    expect(day.query).not.toMatch(/\bdate\b/);
+    expect(day.query).toContain('timezone: $timezone');
+    expect(day.variables.timezone).toBe('UTC');
   });
 });
 

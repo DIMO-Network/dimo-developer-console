@@ -110,6 +110,19 @@ describe('SignalsTab', () => {
     ).toBeInTheDocument();
   });
 
+  it('sends the 1 day interval as 24h', () => {
+    render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add signal' }));
+    fireEvent.click(screen.getByLabelText('Speed'));
+    fireEvent.change(screen.getByLabelText('Interval'), { target: { value: '24h' } });
+    expect(screen.getByRole('option', { name: '1 day' })).toHaveValue('24h');
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    const call = (useSubjectQuery as jest.Mock).mock.calls
+      .filter((c) => c[0].request?.query.startsWith('query Signals('))
+      .at(-1)[0];
+    expect(call.request.variables.interval).toBe('24h');
+  });
+
   it('will not run without a signal', () => {
     render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
     expect(screen.getByRole('button', { name: 'Run query' })).toBeDisabled();
