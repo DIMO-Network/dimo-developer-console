@@ -117,6 +117,59 @@ describe('getSubjectJwt', () => {
     await expect(getSubjectJwt(DEV, ACCOUNT)).rejects.toMatchObject({ status: 502 });
   });
 
+  it('shares one exchange between concurrent calls for the same asset', async () => {
+    let release!: (r: Response) => void;
+    const gate = new Promise<Response>((resolve) => (release = resolve));
+    fetchMock.mockImplementationOnce(() => gate);
+    const a = getSubjectJwt(DEV, ACCOUNT);
+    const b = getSubjectJwt(DEV, ACCOUNT);
+    release(new Response(JSON.stringify({ token: 'shared-jwt' }), { status: 200 }));
+    await expect(Promise.all([a, b])).resolves.toEqual(['shared-jwt', 'shared-jwt']);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('shares the identity lookup and exchange for concurrent vehicle calls', async () => {
+    fetchMock
+      .mockImplementationOnce(() =>
+        json(200, { data: { vehicle: { sacd: { permissions: PERMS_HEX } } } }),
+      )
+      .mockImplementationOnce(() => json(200, { token: 'vehicle-jwt' }));
+    await expect(
+      Promise.all([getSubjectJwt(DEV, VEHICLE), getSubjectJwt(DEV, VEHICLE)]),
+    ).resolves.toEqual(['vehicle-jwt', 'vehicle-jwt']);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not keep a failed exchange: the next call tries again', async () => {
+    fetchMock
+      .mockImplementationOnce(() => json(500, {}))
+      .mockImplementationOnce(() => json(200, { token: 'second-try' }));
+    const [first, second] = await Promise.allSettled([
+      getSubjectJwt(DEV, ACCOUNT),
+      getSubjectJwt(DEV, ACCOUNT),
+    ]);
+    expect(first.status).toBe('rejected');
+    expect(second.status).toBe('rejected');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await expect(getSubjectJwt(DEV, ACCOUNT)).resolves.toBe('second-try');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    ['a vehicle on another chain', VEHICLE.replace(':80002:', ':137:')],
+    [
+      'an NFT from another contract',
+      'did:erc721:80002:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:190231',
+    ],
+    ['an account on another chain', ACCOUNT.replace(':80002:', ':137:')],
+  ])('refuses %s without calling out', async (_what, asset) => {
+    await expect(getSubjectJwt(DEV, asset)).rejects.toMatchObject({
+      status: 403,
+      code: 'NOT_SHARED',
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('rejects an asset that is neither an erc721 nor an ethr DID', async () => {
     await expect(getSubjectJwt(DEV, 'did:web:example.com')).rejects.toMatchObject({
       status: 403,

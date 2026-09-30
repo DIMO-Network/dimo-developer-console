@@ -12,6 +12,13 @@ export const parseErc721Did = (
   return { chainId: Number(m[1]), contract: m[2], tokenId: Number(m[3]) };
 };
 
+export const parseEthrDid = (
+  did: string,
+): { chainId: number; address: string } | null => {
+  const m = ETHR.exec(did);
+  return m ? { chainId: Number(m[1]), address: m[2] } : null;
+};
+
 export const isEthrDid = (did: string): boolean => ETHR.test(did);
 
 export const accountDid = (chainId: number, address: string) =>

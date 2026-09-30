@@ -4,7 +4,7 @@
 import { createHash } from 'node:crypto';
 import { jwtDecode } from 'jwt-decode';
 import configuration from '@/config';
-import { isEthrDid, parseErc721Did } from '@/services/subjects/did';
+import { parseErc721Did, parseEthrDid } from '@/services/subjects/did';
 import { decodeSacdPermissions, PERMISSION_NAMES } from '@/utils/sacdPermissions';
 
 export type SubjectJwtCode = 'DEV_JWT_INVALID' | 'NOT_SHARED' | 'UPSTREAM';
@@ -22,10 +22,31 @@ export class SubjectJwtError extends Error {
 
 type Cached = { token: string; expiresAt: number };
 const cache = new Map<string, Cached>();
+// Exchanges in flight, so concurrent requests for one key share a single
+// exchange. Removed when it settles: a failure is never cached.
+const pending = new Map<string, Promise<string>>();
 const EXPIRY_SKEW_MS = 30_000;
 const FALLBACK_TTL_MS = 9 * 60_000;
 
-export const clearSubjectJwtCache = () => cache.clear();
+export const clearSubjectJwtCache = () => {
+  cache.clear();
+  pending.clear();
+};
+
+// The assets this console exchanges for: vehicle NFTs of the configured
+// contract on the configured chain, and accounts on that chain.
+export type AssetKind = 'vehicle' | 'account';
+export const assetKind = (asset: string): AssetKind | null => {
+  const chainId = Number(configuration.CONTRACT_NETWORK);
+  const erc = parseErc721Did(asset);
+  if (erc) {
+    return erc.chainId === chainId &&
+      erc.contract.toLowerCase() === configuration.VEHICLE_NFT_ADDRESS.toLowerCase()
+      ? 'vehicle'
+      : null;
+  }
+  return parseEthrDid(asset)?.chainId === chainId ? 'account' : null;
+};
 
 const expiryOf = (token: string): number => {
   try {
@@ -93,9 +114,10 @@ const vehiclePermissions = async (
 };
 
 const permissionsFor = async (asset: string, clientId: string): Promise<string[]> => {
-  const erc = parseErc721Did(asset);
-  if (erc) return vehiclePermissions(erc.tokenId, clientId);
-  if (isEthrDid(asset)) return ['privilege:GetRawData'];
+  const kind = assetKind(asset);
+  if (kind === 'vehicle')
+    return vehiclePermissions(parseErc721Did(asset)!.tokenId, clientId);
+  if (kind === 'account') return ['privilege:GetRawData'];
   throw new SubjectJwtError(403, 'NOT_SHARED', 'Unsupported asset DID');
 };
 
@@ -105,6 +127,21 @@ export const getSubjectJwt = async (devJwt: string, asset: string): Promise<stri
   const hit = cache.get(key);
   if (hit && hit.expiresAt > Date.now() + EXPIRY_SKEW_MS) return hit.token;
 
+  const inFlight = pending.get(key);
+  if (inFlight) return inFlight;
+  const exchange = exchangeFor(devJwt, asset, clientId, key).finally(() =>
+    pending.delete(key),
+  );
+  pending.set(key, exchange);
+  return exchange;
+};
+
+const exchangeFor = async (
+  devJwt: string,
+  asset: string,
+  clientId: string,
+  key: string,
+): Promise<string> => {
   const permissions = await permissionsFor(asset, clientId);
   const res = await fetch(configuration.tokenExchangeApiUrl, {
     method: 'POST',

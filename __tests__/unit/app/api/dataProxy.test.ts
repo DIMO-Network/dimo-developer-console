@@ -84,6 +84,28 @@ describe('data proxy routes', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ['a vehicle on another chain', VEHICLE.replace(':80002:', ':137:')],
+    [
+      'an NFT from another contract',
+      'did:erc721:80002:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:190231',
+    ],
+    ['an account on another chain', ACCOUNT.replace(':80002:', ':137:')],
+  ])('answers 400 for %s', async (_what, asset) => {
+    const res = await fetchRoute(req({ asset, query: 'query { x }' }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toContain('asset');
+    expect(getSubjectJwt).not.toHaveBeenCalled();
+  });
+
+  it('matches the vehicle contract whatever its case', async () => {
+    fetchMock.mockResolvedValueOnce(new Response('{"data":{}}', { status: 200 }));
+    const lower = VEHICLE.toLowerCase();
+    const res = await telemetry(req({ asset: lower, query: 'query { x }' }));
+    expect(res.status).toBe(200);
+    expect(getSubjectJwt).toHaveBeenCalledWith('dev.jwt', lower);
+  });
+
   it('telemetry refuses an account asset', async () => {
     const res = await telemetry(req({ asset: ACCOUNT, query: 'query { x }' }));
     expect(res.status).toBe(400);

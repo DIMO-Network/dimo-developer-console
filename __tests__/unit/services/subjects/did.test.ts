@@ -1,6 +1,7 @@
 import {
   parseErc721Did,
   isEthrDid,
+  parseEthrDid,
   accountDid,
   sourceDid,
   shortDid,
@@ -10,6 +11,16 @@ import {
 const VEHICLE = 'did:erc721:137:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:184223';
 
 describe('did helpers', () => {
+  it('parses an ethr DID', () => {
+    expect(
+      parseEthrDid('did:ethr:80002:0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6'),
+    ).toEqual({
+      chainId: 80002,
+      address: '0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6',
+    });
+    expect(parseEthrDid('did:ethr:80002:0x9f1e')).toBeNull();
+  });
+
   it('parses an erc721 DID', () => {
     expect(parseErc721Did(VEHICLE)).toEqual({
       chainId: 137,

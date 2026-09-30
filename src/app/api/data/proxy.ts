@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import configuration from '@/config';
-import { getSubjectJwt, SubjectJwtError } from '@/services/subjectJwt';
-import { isEthrDid, parseErc721Did } from '@/services/subjects/did';
+import { assetKind, getSubjectJwt, SubjectJwtError } from '@/services/subjectJwt';
 
 export type DataApi = 'telemetry' | 'fetch';
 
@@ -40,10 +39,12 @@ const readBody = async (req: NextRequest): Promise<Body | NextResponse> => {
   return { asset: body.asset, query: body.query, variables: body.variables ?? {} };
 };
 
-const assetAllowed = (api: DataApi, asset: string) =>
-  api === 'telemetry'
-    ? !!parseErc721Did(asset)
-    : !!parseErc721Did(asset) || isEthrDid(asset);
+// Telemetry serves vehicles; Fetch serves vehicles and owner accounts. Either
+// way only this deployment's chain and vehicle NFT contract.
+const assetAllowed = (api: DataApi, asset: string) => {
+  const kind = assetKind(asset);
+  return api === 'telemetry' ? kind === 'vehicle' : kind !== null;
+};
 
 // One handler shape for both upstreams: exchange the developer JWT for a token
 // scoped to `asset`, forward the GraphQL request, pass the upstream answer back.
