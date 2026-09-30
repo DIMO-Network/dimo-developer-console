@@ -1,31 +1,58 @@
-import React, { FC, PropsWithChildren, useState } from 'react';
-import { CollapsibleHeader } from './Header';
-import { CollapsibleContent } from './Content';
-import { CollapsibleContext } from './CollapsibleContext';
+'use client';
+import React, { FC, PropsWithChildren, ReactNode, useState } from 'react';
+import classNames from 'classnames';
+import { ChevronRightIcon } from '@heroicons/react/16/solid';
 
-interface ITitleProps {
-  title?: string;
+interface Props {
+  title: string;
+  count?: number | string;
+  meta?: ReactNode;
+  actions?: ReactNode;
+  defaultOpen?: boolean;
+  className?: string;
 }
 
-type CollapsibleSectionType = FC<PropsWithChildren> & {
-  Title: FC<PropsWithChildren<ITitleProps>>;
-  Content: FC<PropsWithChildren>;
-};
-
-const CollapsibleSection: CollapsibleSectionType = ({ children }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggle = () => setIsOpen((prev) => !prev);
-
+// A section card whose header toggles the body. The chevron and title are the
+// button; count is a neutral chip; meta sits beside it; actions stay outside
+// the toggle so a click on them never collapses the panel.
+export const CollapsibleSection: FC<PropsWithChildren<Props>> = ({
+  title,
+  count,
+  meta,
+  actions,
+  defaultOpen = false,
+  className,
+  children,
+}) => {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <CollapsibleContext.Provider value={{ isOpen, toggle }}>
-      <div className="p-4 bg-control border border-border rounded-2xl flex flex-col gap-4 justify-between text-foreground">
-        {children}
+    <div className={classNames('flex flex-col rounded-card bg-card', className)}>
+      <div className="flex min-h-14 items-center justify-between gap-3 px-3 py-2.5">
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+          className="flex items-center gap-2.5 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-control"
+        >
+          <ChevronRightIcon
+            className={classNames(
+              'size-4 flex-shrink-0 text-muted transition-transform',
+              open && 'rotate-90',
+            )}
+          />
+          <span className="text-card-title text-ink">{title}</span>
+          {count !== undefined && (
+            <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
+              {count}
+            </span>
+          )}
+          {meta && <span className="text-body-sm text-muted">{meta}</span>}
+        </button>
+        {actions && (
+          <div className="flex flex-shrink-0 items-center gap-2">{actions}</div>
+        )}
       </div>
-    </CollapsibleContext.Provider>
+      {open && <div className="flex flex-col">{children}</div>}
+    </div>
   );
 };
-
-CollapsibleSection.Title = CollapsibleHeader;
-CollapsibleSection.Content = CollapsibleContent;
-export { CollapsibleSection };

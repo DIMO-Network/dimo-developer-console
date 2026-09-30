@@ -36,6 +36,8 @@ export const CopyButton: FC<ICopyButtonProps> = ({
 
   return (
     <button
+      type="button"
+      aria-label="Copy"
       onClick={handleCopy}
       className={classnames(
         'copy-button',

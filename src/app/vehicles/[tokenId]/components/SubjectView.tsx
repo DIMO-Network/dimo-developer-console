@@ -4,6 +4,7 @@ import type { Subject, SubjectGraph } from '@/services/subjects/graph';
 import type { LatestIndexHeader } from '@/hooks/subjects/useSubjectFreshness';
 import type { LocalDeveloperLicense } from '@/types/webhook';
 import type { VehicleTab } from '../hooks/useVehicleUrlState';
+import { SummaryTab } from './tabs/SummaryTab';
 
 export type SubjectContext = {
   clientId: string;
@@ -14,8 +15,6 @@ export type SubjectContext = {
   onBrowseRaw: (did: string) => void;
 };
 
-// Params are unused until Tasks 6-10 render tab components.
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export const SubjectView: FC<{
   subject: Subject;
   tab: VehicleTab;
@@ -23,7 +22,7 @@ export const SubjectView: FC<{
 }> = ({ subject, tab, ctx }) => {
   switch (tab) {
     case 'summary':
-      return null; // Task 6: <SummaryTab subject={subject} ctx={ctx} />
+      return <SummaryTab subject={subject} ctx={ctx} />;
     case 'raw':
       return null; // Task 7: <RawDataTab subject={subject} ctx={ctx} />
     case 'signals':
