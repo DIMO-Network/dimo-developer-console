@@ -12,9 +12,10 @@ import {
 } from '@/components/Icons';
 import { TEMPLATE_EDITOR_ENABLED } from '@/utils/featureFlags';
 
-const APP_DETAILS_REGEX = /^\/app\/details\/[^/]+$/;
 const EXPLORER_VEHICLE_REGEX = /^\/explorer\/[^/]+$/;
-const LICENSE_DETAILS_REGEX = /^\/license\/details\/[^/]+$/;
+const LICENSE_DETAILS_REGEX = /^\/license\/[^/]+\/details$/;
+// The list, /new and /[id]; each page names itself in its own subtitle.
+const LICENSE_CONFIGURATOR_REGEX = /^\/license\/[^/]+\/configurator(\/[^/]+)?$/;
 const LICENSED_VEHICLES_REGEX = /^\/license\/vehicles\/[^/]+$/;
 const TEMPLATE_EDIT_REGEX = /^\/templates\/[^/]+$/;
 const CREATE_WEBHOOK_REGEX = /^\/webhooks\/create\/[^/]+$/;
@@ -25,14 +26,14 @@ const CONNECTION_DETAILS_REGEX = /^\/connections\/[^/]+$/;
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
-  if (APP_DETAILS_REGEX.test(path)) return 'App Details';
-  if (EXPLORER_VEHICLE_REGEX.test(path)) return 'Data Explorer';
-  if (LICENSE_DETAILS_REGEX.test(path)) return 'License Details';
-  if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed Vehicles';
+  if (EXPLORER_VEHICLE_REGEX.test(path)) return 'Data explorer';
+  if (LICENSE_DETAILS_REGEX.test(path)) return 'License details';
+  if (LICENSE_CONFIGURATOR_REGEX.test(path)) return 'SDK configurator';
+  if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed vehicles';
   if (CREATE_WEBHOOK_REGEX.test(path)) return 'Create a webhook';
   if (EDIT_WEBHOOK_REGEX.test(path)) return 'Edit webhook';
-  if (CREATE_CONNECTION_REGEX.test(path)) return 'Create a Connection';
-  if (CONNECTION_DETAILS_REGEX.test(path)) return 'Connection Details';
+  if (CREATE_CONNECTION_REGEX.test(path)) return 'Create a connection';
+  if (CONNECTION_DETAILS_REGEX.test(path)) return 'Connection details';
   // Ordered before TEMPLATE_EDIT_REGEX, which would otherwise match
   // /templates/new and title the create page "Edit template".
   if (path === '/templates/new') return 'New template';
@@ -45,10 +46,10 @@ const pageTitles: Record<string, string> = {
   '/licenses': 'Licenses',
   '/webhooks': 'Webhooks',
   '/templates': 'Vehicle templates',
-  '/api-status': 'API Status',
   '/connections': 'Connections',
   '/settings': 'Settings',
-  '/explorer': 'Data Explorer',
+  '/explorer': 'Data explorer',
+  '/support': 'Support',
 };
 
 const dataExplorerMenuItem = {

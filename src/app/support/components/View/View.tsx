@@ -2,7 +2,6 @@
 import { FC } from 'react';
 
 import { ContactCard } from '@/app/support/components/ContactCard';
-import { Title } from '@/components/Title';
 import { LightBulb, MenuBook, WarningAmberIcon } from '@/components/Icons';
 
 import './View.css';
@@ -12,12 +11,9 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 const View: FC = () => {
   return (
     <div className="support-page">
-      <div className="titles">
-        <Title>Support</Title>
-        <p className="subtitle">
-          Please select an option below so our support team can address your issue.
-        </p>
-      </div>
+      <p className="subtitle">
+        Please select an option below so our support team can address your issue.
+      </p>
       <div className="contact-cards">
         <div className="report-issue">
           <ContactCard
