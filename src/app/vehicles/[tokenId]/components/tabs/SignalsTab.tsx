@@ -1,5 +1,5 @@
 'use client';
-import { FC, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import dynamic from 'next/dynamic';
 import type { Subject } from '@/services/subjects/graph';
@@ -77,6 +77,13 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   );
 
   const [selected, setSelected] = useState<string[]>([]);
+  useEffect(() => {
+    if (!avail.data) return;
+    setSelected((cur) => {
+      const next = cur.filter((s) => available.includes(s));
+      return next.length === cur.length ? cur : next;
+    });
+  }, [available, avail.data]);
   const [agg, setAgg] = useState<FloatAggregation>('AVG');
   const [interval, setInterval] = useState('1h');
   const [range, setRange] = useState<TimeRange>({ preset: '7d', ...resolveRange('7d') });
@@ -84,6 +91,7 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   const [request, setRequest] = useState<GqlRequest | null>(null);
   const [latestRequest, setLatestRequest] = useState<GqlRequest | null>(null);
 
+  const [ran, setRan] = useState<string[]>([]);
   const [runError, setRunError] = useState<string | null>(null);
   const run = () => {
     // Presets are relative to now: re-resolve so "Last 7 days" isn't stale.
@@ -92,11 +100,13 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         ? range
         : { preset: range.preset, ...resolveRange(range.preset) };
     if (r !== range) setRange(r);
+    setRunError(null);
+    const chosen = selected.filter((s) => !isLocationSignal(s));
     try {
       setRequest(
         signalsQuery({
           tokenId,
-          signals: selected,
+          signals: chosen,
           available,
           agg,
           interval,
@@ -105,9 +115,11 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           source,
         }),
       );
-      setRunError(null);
+      setRan(chosen);
     } catch (e) {
       if (!(e instanceof Error)) throw e;
+      setRequest(null);
+      setRan([]);
       setRunError(e.message);
     }
   };
@@ -125,16 +137,21 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     request: latestRequest,
     staleTime: 0,
   });
-  const ranSignals = useMemo(
-    () => (request ? selected.filter((s) => request.query.includes(`${s}(agg`)) : []),
-    [request, selected],
-  );
   const rows = series.data?.data?.signals ?? [];
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-3.5 rounded-card bg-card p-4">
-        <SignalPicker available={available} selected={selected} onChange={setSelected} />
+        <SignalPicker
+          available={available}
+          selected={selected}
+          onChange={setSelected}
+          loading={avail.isLoading}
+          empty={!avail.isLoading && !avail.error && available.length === 0}
+        />
+        {avail.error && (
+          <p className="text-body-sm text-negative">{avail.error.message}</p>
+        )}
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1.5 text-label text-muted">
             Aggregation
@@ -237,7 +254,10 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           ))}
           {view === 'chart' ? (
             <div className="flex flex-col gap-5 px-5 pb-5">
-              {ranSignals.map((name, i) => (
+              {!series.isLoading && !series.error && rows.length === 0 && (
+                <p className="text-body-sm text-muted">No data points in this range.</p>
+              )}
+              {ran.map((name, i) => (
                 <SignalChart
                   key={name}
                   name={name}
@@ -289,9 +309,11 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                   <span className="font-mono text-code text-muted">{k}</span>
                 </span>
                 <span className="font-mono text-code text-fg">
-                  {typeof (v as { value: unknown }).value === 'object'
-                    ? JSON.stringify((v as { value: unknown }).value)
-                    : String((v as { value: unknown }).value)}
+                  {(v as { value: unknown }).value == null
+                    ? '\u2014'
+                    : typeof (v as { value: unknown }).value === 'object'
+                      ? JSON.stringify((v as { value: unknown }).value)
+                      : String((v as { value: unknown }).value)}
                 </span>
                 <span className="text-muted">
                   {relativeTime((v as { timestamp: string }).timestamp)}

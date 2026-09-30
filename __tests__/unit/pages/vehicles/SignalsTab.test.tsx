@@ -140,4 +140,105 @@ describe('SignalsTab', () => {
     expect(call.request.variables.to).toBe('2026-09-30T20:00:00.000Z');
     now.mockRestore();
   });
+
+  // Wrap the default mock, overriding one query kind.
+  const override = (prefix: string, value: unknown) => {
+    const base = (useSubjectQuery as jest.Mock).getMockImplementation()!;
+    (useSubjectQuery as jest.Mock).mockImplementation(
+      (input: { request: { query: string } | null }) =>
+        input.request?.query.startsWith(prefix) ? value : base(input),
+    );
+  };
+  const pick = (...labels: string[]) => {
+    fireEvent.click(screen.getByRole('button', { name: 'Add signal' }));
+    labels.forEach((l) => fireEvent.click(screen.getByLabelText(l)));
+  };
+
+  it('keeps charts for the run after a chip is removed', async () => {
+    render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    pick('Speed', 'Engine speed');
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Speed' }));
+    expect(await screen.findByTestId('chart-speed')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('chart-powertrainCombustionEngineSpeed'),
+    ).toBeInTheDocument();
+  });
+
+  it('shows the available-signals error', () => {
+    override('query AvailableSignals', {
+      data: undefined,
+      isLoading: false,
+      error: new Error('telemetry down'),
+    });
+    render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    expect(screen.getByText('telemetry down')).toBeInTheDocument();
+  });
+
+  it('says so when the source reports no signals', () => {
+    override('query AvailableSignals', {
+      data: { data: { availableSignals: [] } },
+      isLoading: false,
+      error: null,
+    });
+    render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    expect(screen.getByText('This source reports no signals yet.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add signal' }));
+    expect(screen.getAllByText('This source reports no signals yet.')).toHaveLength(2);
+  });
+
+  it('says so when a run returns no rows', () => {
+    override('query Signals(', {
+      data: { data: { signals: [] } },
+      isLoading: false,
+      error: null,
+    });
+    render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    pick('Speed');
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    expect(screen.getByText('No data points in this range.')).toBeInTheDocument();
+  });
+
+  it('drops selected signals that are no longer available', () => {
+    const { rerender } = render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    pick('Speed', 'Engine speed');
+    expect(screen.getByRole('button', { name: 'Remove Speed' })).toBeInTheDocument();
+    override('query AvailableSignals', {
+      data: { data: { availableSignals: ['powertrainCombustionEngineSpeed'] } },
+      isLoading: false,
+      error: null,
+    });
+    rerender(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    expect(
+      screen.queryByRole('button', { name: 'Remove Speed' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Remove Engine speed' }),
+    ).toBeInTheDocument();
+  });
+
+  it('closes the picker on Escape and shows a dash for null latest values', () => {
+    override('query SignalsLatest', {
+      data: {
+        data: {
+          signalsLatest: {
+            lastSeen: null,
+            speed: { timestamp: '2026-09-29T20:47:00Z', value: null },
+          },
+        },
+      },
+      isLoading: false,
+      error: null,
+    });
+    render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add signal' }));
+    expect(screen.getByRole('button', { name: 'Add signal' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    fireEvent.keyDown(screen.getByLabelText('Find a signal'), { key: 'Escape' });
+    expect(screen.queryByLabelText('Find a signal')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Latest values' }));
+    expect(screen.getByText('\u2014')).toBeInTheDocument();
+  });
 });

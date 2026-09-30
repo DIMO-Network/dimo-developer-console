@@ -10,7 +10,9 @@ export const SignalPicker: FC<{
   available: string[];
   selected: string[];
   onChange: (next: string[]) => void;
-}> = ({ available, selected, onChange }) => {
+  loading?: boolean;
+  empty?: boolean;
+}> = ({ available, selected, onChange, loading, empty }) => {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState('');
   const shown = available.filter((s) => {
@@ -41,6 +43,7 @@ export const SignalPicker: FC<{
         ))}
         <button
           type="button"
+          aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
           className="flex h-8 items-center gap-1.5 rounded-full border border-dashed border-outline px-3 text-[13px] text-muted transition-colors hover:bg-control hover:text-ink"
         >
@@ -48,11 +51,18 @@ export const SignalPicker: FC<{
           Add signal
         </button>
         <span className="text-label text-muted">
-          From {available.length} signals on this source
+          {loading
+            ? 'Loading signals\u2026'
+            : empty
+              ? 'This source reports no signals yet.'
+              : `From ${available.length} signals on this source`}
         </span>
       </div>
       {open && (
-        <div className="flex max-h-72 w-full max-w-md flex-col gap-1 overflow-auto rounded-control border border-outline bg-overlay p-2 shadow-float">
+        <div
+          onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+          className="flex max-h-72 w-full max-w-md flex-col gap-1 overflow-auto rounded-control border border-outline bg-overlay p-2 shadow-float"
+        >
           <TextField
             placeholder="Find a signal"
             aria-label="Find a signal"
@@ -82,7 +92,9 @@ export const SignalPicker: FC<{
             </label>
           ))}
           {shown.length === 0 && (
-            <p className="px-2 py-1.5 text-body-sm text-muted">No signals match.</p>
+            <p className="px-2 py-1.5 text-body-sm text-muted">
+              {empty ? 'This source reports no signals yet.' : 'No signals match.'}
+            </p>
           )}
         </div>
       )}
