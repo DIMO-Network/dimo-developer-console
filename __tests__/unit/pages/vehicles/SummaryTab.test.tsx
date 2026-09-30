@@ -196,9 +196,7 @@ describe('SummaryTab', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Latest payload/ }));
     fireEvent.click(screen.getByRole('button', { name: /^Data types/ }));
     expect(screen.getByText('needs raw data access')).toBeInTheDocument();
-    expect(
-      screen.queryByText('No cloud event for this DID yet.'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('No cloud event on this DID yet.')).not.toBeInTheDocument();
     expect(screen.getByText('types refused')).toBeInTheDocument();
     expect(
       screen.queryByText('No cloud events on this DID yet.'),
@@ -221,6 +219,9 @@ describe('SummaryTab', () => {
       did: graph.vehicle.did,
       filter: { producer: graph.devices[0].did },
     });
+    expect(
+      screen.getByRole('button', { name: /Cloud event types from this device/ }),
+    ).toBeInTheDocument();
   });
 
   it('tells the reader when a device has no resolvable telemetry source', () => {

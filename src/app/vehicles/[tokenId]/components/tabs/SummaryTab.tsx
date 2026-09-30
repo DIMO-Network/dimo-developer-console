@@ -70,6 +70,8 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   const latestError =
     latest.error?.message ?? fieldError(latest.data?.errors, 'latestCloudEvent');
   const isVehicle = subject.kind === 'vehicle';
+  // A device is the vehicle DID narrowed to its producer, not a DID of its own.
+  const scope = subject.fetchFilter ? 'from this device' : 'on this DID';
 
   return (
     <div className="flex flex-col gap-3">
@@ -201,7 +203,7 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       <CollapsibleSection
         title="Data types"
         count={typeRows.length}
-        meta={typesError ? 'Unavailable' : 'Cloud event types on this DID'}
+        meta={typesError ? 'Unavailable' : `Cloud event types ${scope}`}
       >
         {typesError && <Problem message={typesError} />}
         <div className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
@@ -223,7 +225,7 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         ))}
         {typeRows.length === 0 && !typesError && (
           <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
-            No cloud events on this DID yet.
+            No cloud events {scope} yet.
           </p>
         )}
       </CollapsibleSection>
@@ -251,7 +253,7 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         ) : (
           !latestError && (
             <p className="px-5 py-3 text-body-sm text-muted">
-              No cloud event for this DID yet.
+              No cloud event {scope} yet.
             </p>
           )
         )}
