@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 
 jest.mock('@apollo/client', () => ({
   ...jest.requireActual('@apollo/client'),
@@ -30,6 +30,27 @@ const vehicle = {
         source: 'ipfs://bafy1',
       },
       {
+        grantee: '0x1111111111111111111111111111111111111111',
+        permissions: '0x0',
+        createdAt: '2026-09-01T00:00:00Z',
+        expiresAt: '2026-10-15T00:00:00Z',
+        source: '',
+      },
+      {
+        grantee: '0x2222222222222222222222222222222222222222',
+        permissions: '0x3',
+        createdAt: '2026-09-01T00:00:00Z',
+        expiresAt: '2026-10-01T06:00:00Z',
+        source: 'ipfs://bafy3',
+      },
+      {
+        grantee: '0x3333333333333333333333333333333333333333',
+        permissions: '0x3',
+        createdAt: '2026-09-01T00:00:00Z',
+        expiresAt: 'not-a-date',
+        source: 'ipfs://bafy4',
+      },
+      {
         grantee: '0x5b1e000000000000000000000000000000000a09c',
         permissions: '0x3',
         createdAt: '2026-05-02T00:00:00Z',
@@ -51,6 +72,8 @@ const vehicle = {
 } as unknown as VehicleDetail;
 
 beforeEach(() => {
+  jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+  jest.setSystemTime(new Date('2026-09-30T12:00:00Z'));
   (useQuery as jest.Mock).mockImplementation(
     (_doc: unknown, opts: { variables: { clientId: string } }) => ({
       data: {
@@ -63,6 +86,10 @@ beforeEach(() => {
     }),
   );
 });
+
+afterEach(() => jest.useRealTimers());
+
+const row = (text: string) => screen.getByText(text).closest('div.grid') as HTMLElement;
 
 describe('SharingPanel', () => {
   it('names apps, decodes permissions, links terms and marks the current license', () => {
@@ -79,11 +106,43 @@ describe('SharingPanel', () => {
     expect(screen.getByText('Non-location data')).toBeInTheDocument();
     expect(screen.getByText('All-time location')).toBeInTheDocument();
     expect(screen.getByText('0x5b1e…a09c')).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: 'View terms' })[0]).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: /View terms/ })[0]).toHaveAttribute(
       'href',
       'https://assets.dimo.org/ipfs/bafy1',
     );
-    expect(screen.getByText(/Expired/)).toBeInTheDocument();
+    expect(screen.getByText('Expired Aug 2, 2026')).toBeInTheDocument();
+  });
+  it('warns when a grant expires within 30 days, pluralizing and rounding up', () => {
+    render(
+      <SharingPanel
+        vehicle={vehicle}
+        clientId="0xaaa"
+        licenseLabel="Fleet Pulse"
+        accountState="shared"
+      />,
+    );
+    const warn = screen.getByText('Oct 15, 2026 · in 15 days');
+    expect(warn).toHaveClass('text-warning');
+    const one = screen.getByText('Oct 1, 2026 · in 1 day');
+    expect(one).toHaveClass('text-warning');
+  });
+  it('handles empty permissions, missing terms and unparseable dates', () => {
+    render(
+      <SharingPanel
+        vehicle={vehicle}
+        clientId="0xaaa"
+        licenseLabel="Fleet Pulse"
+        accountState="shared"
+      />,
+    );
+    const empty = row('0x1111…1111');
+    expect(within(empty).getByText('None')).toBeInTheDocument();
+    expect(within(empty).queryByRole('link', { name: /View terms/ })).toBeNull();
+    const bad = row('0x3333…3333');
+    expect(within(bad).getByText('—')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'View terms for Fleet Pulse' }),
+    ).toHaveAttribute('href', 'https://assets.dimo.org/ipfs/bafy1');
   });
   it('lists legacy privileges and the owner-account grant state', () => {
     render(

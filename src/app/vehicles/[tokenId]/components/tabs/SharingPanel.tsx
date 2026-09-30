@@ -14,24 +14,47 @@ const COLS =
   'grid-cols-[minmax(0,1.3fr)_minmax(0,2.2fr)_minmax(0,0.7fr)_minmax(0,0.9fr)_minmax(0,1.1fr)]';
 
 const Expiry: FC<{ iso: string }> = ({ iso }) => {
-  const ms = Date.parse(iso) - Date.now();
+  const at = Date.parse(iso);
+  if (!Number.isFinite(at)) return <span className="text-body-sm text-muted">—</span>;
+  const ms = at - Date.now();
   if (ms < 0)
     return <span className="text-body-sm text-muted">Expired {utcDate(iso)}</span>;
-  const days = Math.round(ms / 86_400_000);
+  const days = Math.max(1, Math.ceil(ms / 86_400_000));
+  const soon = days <= 30;
   return (
-    <span className={days <= 30 ? 'text-body-sm text-warning' : 'text-body-sm text-fg'}>
+    <span className={soon ? 'text-body-sm text-warning' : 'text-body-sm text-fg'}>
       {utcDate(iso)}
-      {days <= 30 ? ` · in ${days} days` : ''}
+      {soon ? ` · in ${days} ${days === 1 ? 'day' : 'days'}` : ''}
     </span>
   );
 };
 
-const AppName: FC<{ grantee: string; mine: boolean }> = ({ grantee, mine }) => {
+const useAlias = (grantee: string): string | undefined => {
   const { data } = useQuery(LICENSE_ALIAS, {
     variables: { clientId: grantee },
     errorPolicy: 'ignore',
   });
-  const alias = data?.developerLicense?.alias;
+  return data?.developerLicense?.alias ?? undefined;
+};
+
+const TermsLink: FC<{ grantee: string; source: string }> = ({ grantee, source }) => {
+  const alias = useAlias(grantee);
+  if (!source) return <span className="text-body-sm text-muted">—</span>;
+  return (
+    <a
+      href={termsUrl(source)}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={`View terms for ${alias ?? shortAddress(grantee)}`}
+      className="text-body-sm text-ink underline"
+    >
+      View terms
+    </a>
+  );
+};
+
+const AppName: FC<{ grantee: string; mine: boolean }> = ({ grantee, mine }) => {
+  const alias = useAlias(grantee);
   return (
     <span className="flex min-w-0 flex-col gap-0.5">
       <span className="flex flex-wrap items-center gap-2">
@@ -88,6 +111,9 @@ export const SharingPanel: FC<{
           >
             <AppName grantee={s.grantee} mine={s.grantee.toLowerCase() === mine} />
             <span className="flex flex-wrap gap-1">
+              {permissionLabels(s.permissions).length === 0 && (
+                <span className="text-body-sm text-muted">None</span>
+              )}
               {permissionLabels(s.permissions).map((p) => (
                 <span
                   key={p}
@@ -97,14 +123,7 @@ export const SharingPanel: FC<{
                 </span>
               ))}
             </span>
-            <a
-              href={termsUrl(s.source)}
-              target="_blank"
-              rel="noreferrer"
-              className="text-body-sm text-ink underline"
-            >
-              View terms
-            </a>
+            <TermsLink grantee={s.grantee} source={s.source} />
             <span className="text-body-sm text-fg">{utcDate(s.createdAt)}</span>
             <Expiry iso={s.expiresAt} />
           </div>

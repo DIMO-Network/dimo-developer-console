@@ -131,7 +131,7 @@ describe('VehiclePage', () => {
     });
     render(<VehiclePage tokenId={190231} />);
     expect(screen.getByRole('heading', { name: 'Sharing' })).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: 'View terms' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: /View terms/ }).length).toBeGreaterThan(0);
     expect(screen.getAllByText('No access').length).toBeGreaterThan(0);
   });
 

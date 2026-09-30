@@ -1,5 +1,4 @@
 'use client';
-import { safeHttpUrl } from '@/utils/safeHttpUrl';
 import { FC, useMemo, useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import classNames from 'classnames';
@@ -28,6 +27,7 @@ import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { shortDid } from '@/services/subjects/did';
 import { absoluteTime } from '@/utils/freshness';
+import { safeHttpUrl } from '@/utils/safeHttpUrl';
 
 type Mode = 'events' | 'latest' | 'index';
 type Header = {
@@ -359,6 +359,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         )}
         {rows.map((r, i) => {
           const open = expanded === undefined ? i === 0 : expanded === r.header.id;
+          const payloadUrl = safeHttpUrl(r.dataUrl);
           const [date, time] = [
             absoluteTime(r.header.time).split(',')[0],
             r.header.time.slice(11, 19),
@@ -394,9 +395,9 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               {open && (
                 <div className="flex flex-col gap-2 px-4 pb-4">
                   <JsonBlock value={r} maxHeight={260} />
-                  {safeHttpUrl(r.dataUrl) && (
+                  {payloadUrl && (
                     <a
-                      href={safeHttpUrl(r.dataUrl)!}
+                      href={payloadUrl}
                       className="w-fit text-body-sm font-semibold text-ink underline"
                       target="_blank"
                       rel="noreferrer"

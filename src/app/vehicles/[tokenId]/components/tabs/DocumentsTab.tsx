@@ -112,13 +112,14 @@ const SharingLinkCard: FC<{ ctx: SubjectContext; title: string; body: string }> 
     <Button
       variant="secondary"
       onClick={() => {
-        void navigator.clipboard.writeText(
-          documentSharingUrl({
-            clientId: ctx.clientId,
-            redirectUri: ctx.license.firstRedirectURI,
-          }),
-        );
-        toast.success('Sharing link copied');
+        const url = documentSharingUrl({
+          clientId: ctx.clientId,
+          redirectUri: ctx.license.firstRedirectURI,
+        });
+        navigator.clipboard
+          .writeText(url)
+          .then(() => toast.success('Sharing link copied'))
+          .catch(() => toast.error('Could not copy the link'));
       }}
     >
       Copy sharing link
