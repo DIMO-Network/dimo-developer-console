@@ -1,11 +1,12 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-jest.mock('@/hooks/subjects/useSubjectQuery', () => ({
-  ...jest.requireActual('@/hooks/subjects/useSubjectQuery'),
-  useSubjectQuery: jest.fn(),
+jest.mock('@/services/subjects/client', () => ({
+  ...jest.requireActual('@/services/subjects/client'),
+  postSubjectQuery: jest.fn(),
 }));
-import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
+import { postSubjectQuery } from '@/services/subjects/client';
 import {
   SubjectView,
   type SubjectContext,
@@ -48,17 +49,24 @@ const ctx: SubjectContext = {
 };
 
 describe('SubjectView', () => {
-  it('re-queries for the new subject when the subject changes', () => {
-    (useSubjectQuery as jest.Mock).mockReturnValue({
-      data: { data: { cloudEvents: [] } },
-      isLoading: false,
-      error: null,
+  it('re-queries for the new subject when the subject changes', async () => {
+    (postSubjectQuery as jest.Mock).mockResolvedValue({
+      data: { cloudEvents: [] },
     });
-    const { rerender } = render(
-      <SubjectView subject={graph.vehicle} tab="raw" ctx={ctx} />,
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const ui = (subject: typeof graph.vehicle) => (
+      <QueryClientProvider client={client}>
+        <SubjectView subject={subject} tab="raw" ctx={ctx} />
+      </QueryClientProvider>
     );
-    rerender(<SubjectView subject={graph.devices[0]} tab="raw" ctx={ctx} />);
-    const call = (useSubjectQuery as jest.Mock).mock.calls.at(-1)[0];
-    expect(call.request.variables.did).toBe(graph.devices[0].did);
+    const { rerender } = render(ui(graph.vehicle));
+    rerender(ui(graph.devices[0]));
+    await waitFor(() => {
+      const dids = (postSubjectQuery as jest.Mock).mock.calls
+        .map((c) => c[1].request)
+        .filter((r) => /query CloudEvents/.test(r.query))
+        .map((r) => r.variables.did);
+      expect(dids.at(-1)).toBe(graph.devices[0].did);
+    });
   });
 });

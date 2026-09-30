@@ -1,8 +1,12 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-jest.mock('@/hooks/subjects/useSubjectQuery', () => ({ useSubjectQuery: jest.fn() }));
-import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
+jest.mock('@/services/subjects/client', () => ({
+  ...jest.requireActual('@/services/subjects/client'),
+  postSubjectQuery: jest.fn(),
+}));
+import { postSubjectQuery } from '@/services/subjects/client';
 import { RawDataTab } from '@/app/vehicles/[tokenId]/components/tabs/RawDataTab';
 import { buildVehicleGraph, type VehicleDetail } from '@/services/subjects/graph';
 import type { SubjectContext } from '@/app/vehicles/[tokenId]/components/SubjectView';
@@ -54,72 +58,202 @@ const ev = (time: string, type: string, data: unknown) => ({
   data,
 });
 
-describe('RawDataTab', () => {
-  beforeEach(() => {
-    (useSubjectQuery as jest.Mock).mockReturnValue({
-      data: {
+const FIRST_PAGE = [
+  ev('2026-09-29T20:47:12Z', 'dimo.status', { signals: [] }),
+  ev('2026-09-29T20:46:42Z', 'dimo.fingerprint', 'base64=='),
+  ev('2026-09-29T20:46:12Z', 'dimo.status', null),
+];
+let olderPage: unknown[] = [];
+
+const opName = (q: string) => /query (\w+)/.exec(q)?.[1];
+// Answers by operation name; the older page is whatever `olderPage` holds.
+const answer = async (
+  _api: string,
+  input: { request: { query: string; variables: { filter: { before?: string } } } },
+) => {
+  const { query, variables } = input.request;
+  switch (opName(query)) {
+    case 'AvailableCloudEventTypes':
+      return {
         data: {
-          cloudEvents: [
-            ev('2026-09-29T20:47:12Z', 'dimo.status', { signals: [] }),
-            ev('2026-09-29T20:46:42Z', 'dimo.fingerprint', 'base64=='),
-            ev('2026-09-29T20:46:12Z', 'dimo.status', null),
+          availableCloudEventTypes: [
+            { type: 'dimo.status', count: 3, firstSeen: '', lastSeen: '' },
+            { type: 'dimo.custom', count: 1, firstSeen: '', lastSeen: '' },
           ],
         },
-      },
-      isLoading: false,
-      error: null,
-      refetch: jest.fn(),
-    });
+      };
+    case 'CloudEvents': {
+      const isOlder = variables.filter.before?.endsWith('.001Z') ?? false;
+      return { data: { cloudEvents: isOlder ? olderPage : FIRST_PAGE } };
+    }
+    case 'LatestCloudEvent':
+      return { data: { latestCloudEvent: FIRST_PAGE[0] } };
+    case 'Indexes':
+      return { data: { indexes: FIRST_PAGE } };
+  }
+  return { data: null };
+};
+const calls = (op: string) =>
+  (postSubjectQuery as jest.Mock).mock.calls
+    .map((c) => c[1].request)
+    .filter((r) => opName(r.query) === op);
+
+const renderTab = (subject = graph.vehicle) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const ui = (s: typeof subject) => (
+    <QueryClientProvider client={client}>
+      <RawDataTab subject={s} ctx={ctx} />
+    </QueryClientProvider>
+  );
+  const utils = render(ui(subject));
+  return { ...utils, rerenderWith: (s: typeof subject) => utils.rerender(ui(s)) };
+};
+
+describe('RawDataTab', () => {
+  beforeEach(() => {
+    olderPage = [];
+    (postSubjectQuery as jest.Mock).mockReset().mockImplementation(answer);
   });
 
-  it('queries cloud events for the subject DID and lists them with resolved producers', () => {
-    render(<RawDataTab subject={graph.devices[0]} ctx={ctx} />);
-    const call = (useSubjectQuery as jest.Mock).mock.calls.at(-1)[0];
-    expect(call.api).toBe('fetch');
-    expect(call.asset).toBe(graph.vehicle.did);
-    expect(call.request.variables.did).toBe(graph.devices[0].did);
-    expect(call.request.query).toContain('cloudEvents(');
-    expect(screen.getByText('3 cloud events')).toBeInTheDocument();
+  it('queries cloud events for the subject DID and lists them with resolved producers', async () => {
+    renderTab(graph.devices[0]);
+    expect(await screen.findByText('3 cloud events')).toBeInTheDocument();
+    const [api, input] = (postSubjectQuery as jest.Mock).mock.calls.find(
+      (c) => opName(c[1].request.query) === 'CloudEvents',
+    );
+    expect(api).toBe('fetch');
+    expect(input.asset).toBe(graph.vehicle.did);
+    expect(input.request.variables.did).toBe(graph.devices[0].did);
+    expect(input.request.query).toContain('cloudEvents(');
     expect(screen.getAllByText('AutoPi').length).toBeGreaterThan(0);
   });
 
-  it('expands a row to its JSON, including string and null data', () => {
-    render(<RawDataTab subject={graph.vehicle} ctx={ctx} />);
+  it('expands a row to its JSON, including string and null data', async () => {
+    renderTab();
+    await screen.findByText('3 cloud events');
     fireEvent.click(screen.getByRole('button', { name: /dimo.fingerprint/ }));
     expect(screen.getByText(/"base64=="/)).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: /dimo.status/ })[1]);
+    // The null-data row renders its own JSON (its id appears only in that block).
+    expect(screen.getByText(/id-2026-09-29T20:46:12Z/)).toBeInTheDocument();
     expect(screen.getAllByTestId('json-block').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('switches to the latest-event and index-only queries', () => {
-    render(<RawDataTab subject={graph.vehicle} ctx={ctx} />);
+  it('switches to the latest-event and index-only queries', async () => {
+    renderTab();
+    await screen.findByText('3 cloud events');
     fireEvent.click(screen.getByRole('radio', { name: 'Latest' }));
-    expect((useSubjectQuery as jest.Mock).mock.calls.at(-1)[0].request.query).toContain(
-      'latestCloudEvent(',
-    );
+    await waitFor(() => expect(calls('LatestCloudEvent').length).toBe(1));
+    expect(calls('LatestCloudEvent')[0].query).toContain('latestCloudEvent(');
     fireEvent.click(screen.getByRole('radio', { name: 'Index only' }));
-    expect((useSubjectQuery as jest.Mock).mock.calls.at(-1)[0].request.query).toContain(
-      'indexes(',
-    );
+    await waitFor(() => expect(calls('Indexes').length).toBe(1));
+    expect(calls('Indexes')[0].query).toContain('indexes(');
   });
 
-  it('applies type and limit filters and pages older with before', () => {
-    render(<RawDataTab subject={graph.vehicle} ctx={ctx} />);
+  it('applies type and limit filters', async () => {
+    renderTab();
+    await screen.findByText('3 cloud events');
     fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'dimo.status' } });
     fireEvent.change(screen.getByLabelText('Limit'), { target: { value: '5' } });
     fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
-    let vars = (useSubjectQuery as jest.Mock).mock.calls.at(-1)[0].request.variables;
+    await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+    const vars = calls('CloudEvents')[1].variables;
     expect(vars.filter).toMatchObject({ type: 'dimo.status' });
     expect(vars.limit).toBe(5);
-    fireEvent.click(screen.getByRole('button', { name: 'Load older' }));
-    vars = (useSubjectQuery as jest.Mock).mock.calls.at(-1)[0].request.variables;
-    expect(vars.filter.before).toBe('2026-09-29T20:46:12Z');
   });
 
-  it('shows the vehicle hint only on the vehicle', () => {
-    const { rerender } = render(<RawDataTab subject={graph.vehicle} ctx={ctx} />);
+  it('does not issue a request while typing until Run query', async () => {
+    renderTab();
+    await screen.findByText('3 cloud events');
+    const before = (postSubjectQuery as jest.Mock).mock.calls.length;
+    fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'dimo.st' } });
+    expect((postSubjectQuery as jest.Mock).mock.calls.length).toBe(before);
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+  });
+
+  it('suggests the subject own event types', async () => {
+    const { container } = renderTab();
+    await waitFor(() =>
+      expect(
+        container.querySelector('#cloud-event-types option[value="dimo.custom"]'),
+      ).not.toBeNull(),
+    );
+  });
+
+  it('loads older events by appending, without duplicating the boundary row', async () => {
+    olderPage = [FIRST_PAGE[2], ev('2026-09-29T20:45:42Z', 'dimo.event', 'older')];
+    renderTab();
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('button', { name: 'Load older' }));
+    expect(await screen.findByText('4 cloud events')).toBeInTheDocument();
+    const older = calls('CloudEvents')[1].variables;
+    expect(older.filter.before).toBe('2026-09-29T20:46:12.001Z');
+    expect(screen.getAllByRole('button', { name: /dimo.status/ })).toHaveLength(2);
+    expect(screen.getByRole('button', { name: /dimo.event/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /dimo.fingerprint/ })).toBeInTheDocument();
+  });
+
+  it('says there are no older events after an empty older page', async () => {
+    olderPage = [];
+    renderTab();
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('button', { name: 'Load older' }));
+    expect(await screen.findByText('No older events.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Load older' })).not.toBeInTheDocument();
+  });
+
+  it('re-resolves preset ranges to the current time on Run query', async () => {
+    jest.useFakeTimers({
+      now: Date.parse('2026-09-29T10:00:00Z'),
+      doNotFake: [
+        'setTimeout',
+        'clearTimeout',
+        'setInterval',
+        'clearInterval',
+        'setImmediate',
+        'clearImmediate',
+        'nextTick',
+        'queueMicrotask',
+        'requestAnimationFrame',
+        'cancelAnimationFrame',
+        'performance',
+      ],
+    });
+    try {
+      renderTab();
+      await screen.findByText('3 cloud events');
+      expect(calls('CloudEvents')[0].variables.filter.before).toBe(
+        '2026-09-29T10:00:00.000Z',
+      );
+      jest.setSystemTime(Date.parse('2026-09-29T12:00:00Z'));
+      fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+      await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+      expect(calls('CloudEvents')[1].variables.filter.before).toBe(
+        '2026-09-29T12:00:00.000Z',
+      );
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('disables Run query and Load older for an inverted custom range', async () => {
+    renderTab();
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('radio', { name: 'Custom' }));
+    fireEvent.change(screen.getByLabelText('From (UTC)'), {
+      target: { value: '2099-01-01T00:00' },
+    });
+    expect(screen.getByText('Start must be before end.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run query' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Load older' })).toBeDisabled();
+  });
+
+  it('shows the vehicle hint only on the vehicle', async () => {
+    const { rerenderWith } = renderTab(graph.vehicle);
     expect(screen.getByText(/from every device/)).toBeInTheDocument();
-    rerender(<RawDataTab subject={graph.devices[0]} ctx={ctx} />);
+    rerenderWith(graph.devices[0]);
     expect(screen.queryByText(/from every device/)).not.toBeInTheDocument();
+    await screen.findByText('3 cloud events');
   });
 });

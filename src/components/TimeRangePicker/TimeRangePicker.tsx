@@ -25,6 +25,12 @@ export const resolveRange = (
   to: new Date(now).toISOString(),
 });
 
+export const isRangeValid = (r: TimeRange) => {
+  const from = Date.parse(r.from);
+  const to = Date.parse(r.to);
+  return !Number.isNaN(from) && !Number.isNaN(to) && from < to;
+};
+
 // datetime-local wants "YYYY-MM-DDTHH:mm"; we keep everything UTC.
 const toLocalInput = (iso: string) => iso.slice(0, 16);
 const fromLocalInput = (v: string) => (v ? new Date(`${v}:00.000Z`).toISOString() : '');
@@ -97,6 +103,9 @@ export const TimeRangePicker: FC<Props> = ({ value, onChange, maxDays, now }) =>
             />
           </label>
         </>
+      )}
+      {value.preset === 'custom' && !isRangeValid(value) && (
+        <p className="w-full text-label text-negative">Start must be before end.</p>
       )}
     </div>
   );

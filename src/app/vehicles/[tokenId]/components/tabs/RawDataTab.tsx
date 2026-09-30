@@ -1,20 +1,24 @@
 'use client';
 import { FC, useMemo, useState } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { ChevronDownIcon } from '@heroicons/react/16/solid';
 import type { Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
-import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
+import { useSubjectQuery, subjectQueryKey } from '@/hooks/subjects/useSubjectQuery';
+import { postSubjectQuery } from '@/services/subjects/client';
 import {
   cloudEventsQuery,
   latestCloudEventQuery,
   indexesQuery,
+  availableCloudEventTypesQuery,
   type CloudEventFilter,
   type GqlRequest,
 } from '@/services/subjects/queries';
 import {
   TimeRangePicker,
   resolveRange,
+  isRangeValid,
   type TimeRange,
 } from '@/components/TimeRangePicker';
 import { QueryActions } from '@/components/QueryActions';
@@ -48,7 +52,6 @@ const MODES: { id: Mode; label: string }[] = [
   { id: 'latest', label: 'Latest' },
   { id: 'index', label: 'Index only' },
 ];
-const KNOWN_TYPES = ['dimo.status', 'dimo.fingerprint', 'dimo.attestation', 'dimo.event'];
 const inputClass =
   'h-10 rounded-control border border-control-border bg-control px-3 text-body-sm text-ink';
 
@@ -62,6 +65,20 @@ const build = (
   if (mode === 'latest') return latestCloudEventQuery(did, filter, withUrl);
   if (mode === 'index') return indexesQuery(did, filter, limit);
   return cloudEventsQuery(did, filter, limit, withUrl);
+};
+
+type Spec = {
+  mode: Mode;
+  filter: CloudEventFilter;
+  limit: number;
+  withUrl: boolean;
+};
+
+const pageRows = (mode: Mode, d: Result | null | undefined): Event[] => {
+  if (!d) return [];
+  if (mode === 'latest') return d.latestCloudEvent ? [d.latestCloudEvent] : [];
+  if (mode === 'index') return d.indexes ?? [];
+  return d.cloudEvents ?? [];
 };
 
 export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
@@ -80,48 +97,109 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     withUrl: false,
   });
   const [more, setMore] = useState(false);
-  const [before, setBefore] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<number>(0);
-  // The request only changes on Run query / Load older, so typing never refetches.
-  const [request, setRequest] = useState<GqlRequest>(() =>
-    build('events', subject.did, { after: range.from, before: range.to }, 25, false),
-  );
+  // The spec only changes on Run query / mode change, so typing never refetches.
+  const [spec, setSpec] = useState<Spec>(() => ({
+    mode: 'events',
+    filter: { after: range.from, before: range.to },
+    limit: 25,
+    withUrl: false,
+  }));
+  // Each Load older adds one `before` cursor; they reset whenever the spec changes.
+  const [olderBefores, setOlderBefores] = useState<string[]>([]);
+  // undefined = default (first row open), null = all closed, string = header.id
+  const [expanded, setExpanded] = useState<string | null | undefined>(undefined);
+  const valid = isRangeValid(range);
 
-  const run = (nextMode = mode, olderThan: string | null = null) => {
-    const filter: CloudEventFilter = {
-      type: form.type,
-      dataversion: form.dataversion,
-      id: form.id,
-      source: form.source,
-      producer: form.producer,
-      after: range.from,
-      before: olderThan ?? range.to,
-    };
-    setBefore(olderThan);
-    setExpanded(0);
-    setRequest(build(nextMode, subject.did, filter, form.limit, form.withUrl));
+  const run = (nextMode: Mode = mode) => {
+    let { from, to } = range;
+    if (range.preset !== 'custom') {
+      const r = resolveRange(range.preset);
+      from = r.from;
+      to = r.to;
+      setRange({ preset: range.preset, ...r });
+    }
+    setOlderBefores([]);
+    setExpanded(undefined);
+    setSpec({
+      mode: nextMode,
+      filter: {
+        type: form.type,
+        dataversion: form.dataversion,
+        id: form.id,
+        source: form.source,
+        producer: form.producer,
+        after: from,
+        before: to,
+      },
+      limit: form.limit,
+      withUrl: form.withUrl,
+    });
   };
 
-  const q = useSubjectQuery<Result>({
+  const requests = useMemo(
+    () =>
+      [null, ...olderBefores].map((before) =>
+        build(
+          spec.mode,
+          subject.did,
+          before ? { ...spec.filter, before } : spec.filter,
+          spec.limit,
+          spec.withUrl,
+        ),
+      ),
+    [spec, olderBefores, subject.did],
+  );
+  const pages = useQueries({
+    queries: requests.map((req) => ({
+      queryKey: [...subjectQueryKey('fetch', subject.asset, req), ctx.clientId],
+      queryFn: () =>
+        postSubjectQuery<Result>('fetch', {
+          asset: subject.asset,
+          clientId: ctx.clientId,
+          request: req,
+        }),
+      enabled: !!ctx.clientId,
+      staleTime: 0,
+      retry: false,
+    })),
+  });
+  const types = useSubjectQuery<{
+    availableCloudEventTypes: { type: string }[] | null;
+  }>({
     api: 'fetch',
     asset: subject.asset,
     clientId: ctx.clientId,
-    request,
-    staleTime: 0,
+    request: availableCloudEventTypesQuery(subject.did),
   });
-  const rows = useMemo<Event[]>(() => {
-    const d = q.data?.data;
-    if (!d) return [];
-    if (mode === 'latest') return d.latestCloudEvent ? [d.latestCloudEvent] : [];
-    if (mode === 'index') return d.indexes ?? [];
-    return d.cloudEvents ?? [];
-  }, [q.data, mode]);
+  const knownTypes = types.data?.data?.availableCloudEventTypes ?? [];
+
+  // Flatten pages in order; the first occurrence of an id wins.
+  const seen = new Set<string>();
+  const rows: Event[] = [];
+  let lastAdded = 0;
+  pages.forEach((p, i) => {
+    let added = 0;
+    for (const r of pageRows(spec.mode, p.data?.data)) {
+      if (seen.has(r.header.id)) continue;
+      seen.add(r.header.id);
+      rows.push(r);
+      added++;
+    }
+    if (i === pages.length - 1) lastAdded = added;
+  });
+
+  const base = pages[0];
+  const last = pages[pages.length - 1];
+  const olderPage = pages.length > 1 ? last : null;
   const producerLabel = (did: string) =>
     ctx.graph.all.find((s) => s.did === did)?.label ?? shortDid(did);
   const title =
-    mode === 'latest'
+    spec.mode === 'latest'
       ? 'Latest cloud event'
-      : `${rows.length} ${mode === 'index' ? 'index entries' : 'cloud events'}${before ? ' (older)' : ''}`;
+      : `${rows.length} ${spec.mode === 'index' ? 'index entries' : 'cloud events'}`;
+  const olderLoaded = !!olderPage && !olderPage.isLoading && !olderPage.error;
+  const exhausted = olderLoaded && lastAdded === 0;
+  const request = requests[0];
 
   return (
     <div className="flex flex-col gap-3">
@@ -166,8 +244,8 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               onChange={(e) => setForm({ ...form, type: e.target.value })}
             />
             <datalist id="cloud-event-types">
-              {KNOWN_TYPES.map((t) => (
-                <option key={t} value={t} />
+              {knownTypes.map((t) => (
+                <option key={t.type} value={t.type} />
               ))}
             </datalist>
           </label>
@@ -204,7 +282,9 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             Include data URL
           </label>
           <div className="flex-grow" />
-          <Button onClick={() => run()}>Run query</Button>
+          <Button disabled={!valid} onClick={() => run()}>
+            Run query
+          </Button>
         </div>
         {more && (
           <div className="flex flex-wrap items-end gap-3">
@@ -250,7 +330,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           </div>
           <QueryActions
             request={request}
-            result={q.data?.data}
+            result={base.data?.data}
             filename={`${subject.label.toLowerCase()}-cloud-events.json`}
           />
         </div>
@@ -261,23 +341,23 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           <span>Producer</span>
           <span />
         </div>
-        {q.isLoading && (
+        {base.isLoading && (
           <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
             Loading…
           </p>
         )}
-        {q.error && (
+        {base.error && (
           <p className="border-t border-outline px-5 py-3 text-body-sm text-negative">
-            {q.error.message}
+            {base.error.message}
           </p>
         )}
-        {!q.isLoading && !q.error && rows.length === 0 && (
+        {!base.isLoading && !base.error && rows.length === 0 && (
           <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
             No events match. Widen the range or clear a filter.
           </p>
         )}
         {rows.map((r, i) => {
-          const open = expanded === i;
+          const open = expanded === undefined ? i === 0 : expanded === r.header.id;
           const [date, time] = [
             absoluteTime(r.header.time).split(',')[0],
             r.header.time.slice(11, 19),
@@ -287,7 +367,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               <button
                 type="button"
                 aria-expanded={open}
-                onClick={() => setExpanded(open ? -1 : i)}
+                onClick={() => setExpanded(open ? null : r.header.id)}
                 className={classNames(
                   'grid grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px] items-center gap-4 px-5 py-2.5 text-left transition-colors hover:bg-control',
                   open && 'bg-control',
@@ -328,14 +408,30 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             </div>
           );
         })}
-        {mode !== 'latest' && rows.length > 0 && (
-          <div className="flex justify-center border-t border-outline p-3">
-            <Button
-              variant="secondary"
-              onClick={() => run(mode, rows[rows.length - 1].header.time)}
-            >
-              Load older
-            </Button>
+        {spec.mode !== 'latest' && rows.length > 0 && (
+          <div className="flex flex-col items-center gap-2 border-t border-outline p-3">
+            {olderPage?.isLoading && <p className="text-body-sm text-muted">Loading…</p>}
+            {olderPage?.error && (
+              <p className="text-body-sm text-negative">{olderPage.error.message}</p>
+            )}
+            {exhausted ? (
+              <p className="text-body-sm text-muted">No older events.</p>
+            ) : (
+              <Button
+                variant="secondary"
+                disabled={!valid || !!olderPage?.isLoading}
+                onClick={() =>
+                  setOlderBefores((b) => [
+                    ...b,
+                    new Date(
+                      Date.parse(rows[rows.length - 1].header.time) + 1,
+                    ).toISOString(),
+                  ])
+                }
+              >
+                Load older
+              </Button>
+            )}
           </div>
         )}
       </div>

@@ -18,8 +18,10 @@ export const QueryActions: FC<{
       disabled={!request}
       onClick={() => {
         if (!request) return;
-        void navigator.clipboard.writeText(formatGraphQL(request));
-        toast.success('Query copied');
+        navigator.clipboard
+          .writeText(formatGraphQL(request))
+          .then(() => toast.success('Query copied'))
+          .catch(() => toast.error('Could not copy the query'));
       }}
     >
       Copy query
