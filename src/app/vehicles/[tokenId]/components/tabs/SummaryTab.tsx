@@ -65,6 +65,10 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   const producer = latest.data?.data?.latestCloudEvent?.header?.producer;
   const producerLabel = ctx.graph.all.find((s) => s.did === producer)?.label;
   const typeRows = types.data?.data?.availableCloudEventTypes ?? [];
+  const typesError =
+    types.error?.message ?? fieldError(types.data?.errors, 'availableCloudEventTypes');
+  const latestError =
+    latest.error?.message ?? fieldError(latest.data?.errors, 'latestCloudEvent');
   const isVehicle = subject.kind === 'vehicle';
 
   return (
@@ -84,7 +88,9 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           caption={
             latestAt
               ? `${absoluteTime(latestAt)}${latestType ? ` · ${latestType}` : ''}${producerLabel ? ` from ${producerLabel}` : ''}`
-              : 'No payload yet'
+              : latestError
+                ? 'Unavailable'
+                : 'No payload yet'
           }
         />
         <StatCard
@@ -195,14 +201,9 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       <CollapsibleSection
         title="Data types"
         count={typeRows.length}
-        meta="Cloud event types on this DID"
+        meta={typesError ? 'Unavailable' : 'Cloud event types on this DID'}
       >
-        {fieldError(types.data?.errors, 'availableCloudEventTypes') && (
-          <Problem
-            message={fieldError(types.data?.errors, 'availableCloudEventTypes')!}
-          />
-        )}
-        {types.error && <Problem message={types.error.message} />}
+        {typesError && <Problem message={typesError} />}
         <div className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
           <span>Type</span>
           <span className="text-right">Count</span>
@@ -220,31 +221,35 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             <FreshnessDot at={t.lastSeen} />
           </div>
         ))}
-        {typeRows.length === 0 &&
-          !types.error &&
-          !fieldError(types.data?.errors, 'availableCloudEventTypes') && (
-            <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
-              No cloud events on this DID yet.
-            </p>
-          )}
+        {typeRows.length === 0 && !typesError && (
+          <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
+            No cloud events on this DID yet.
+          </p>
+        )}
       </CollapsibleSection>
 
       <CollapsibleSection
         title="Latest payload"
-        meta={latestType ? `${latestType} · ${relativeTime(latestAt)}` : undefined}
+        meta={
+          latestError
+            ? 'Unavailable'
+            : latestType
+              ? `${latestType} · ${relativeTime(latestAt)}`
+              : undefined
+        }
         actions={
           <Button variant="secondary" onClick={() => ctx.onBrowseRaw(subject.did)}>
             Browse cloud events
           </Button>
         }
       >
-        {latest.error && <Problem message={latest.error.message} />}
+        {latestError && <Problem message={latestError} />}
         {latest.data?.data?.latestCloudEvent ? (
           <div className="px-4 pb-4">
             <JsonBlock value={latest.data.data.latestCloudEvent} maxHeight={300} />
           </div>
         ) : (
-          !latest.error && (
+          !latestError && (
             <p className="px-5 py-3 text-body-sm text-muted">
               No cloud event for this DID yet.
             </p>

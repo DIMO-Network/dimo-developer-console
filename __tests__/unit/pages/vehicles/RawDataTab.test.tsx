@@ -294,6 +294,22 @@ describe('RawDataTab', () => {
     expect(screen.getByRole('button', { name: 'Load older' })).toBeDisabled();
   });
 
+  it('shows a refused field instead of the no-match copy', async () => {
+    (postSubjectQuery as jest.Mock).mockImplementation(async (api, input) =>
+      opName(input.request.query) === 'CloudEvents'
+        ? {
+            data: { cloudEvents: null },
+            errors: [{ message: 'needs raw data', path: ['cloudEvents'] }],
+          }
+        : answer(api, input),
+    );
+    renderTab();
+    expect(await screen.findByText('needs raw data')).toBeInTheDocument();
+    expect(
+      screen.queryByText('No events match. Widen the range or clear a filter.'),
+    ).not.toBeInTheDocument();
+  });
+
   it('shows the vehicle hint only on the vehicle', async () => {
     const { rerenderWith } = renderTab(graph.vehicle);
     expect(screen.getByText(/from every device/)).toBeInTheDocument();

@@ -84,6 +84,62 @@ describe('SourceRail', () => {
     expect(screen.getAllByText('No access')).toHaveLength(3);
   });
 
+  it('says Checking… while freshness loads', () => {
+    render(
+      <SourceRail
+        graph={graph}
+        freshness={{}}
+        freshnessLoading
+        selected={graph.vehicle.did}
+        onSelect={() => {}}
+        access="ok"
+        accountState="shared"
+        now={NOW}
+      />,
+    );
+    // The vehicle and the device; the account shows its own grant state.
+    expect(screen.getAllByText('Checking…')).toHaveLength(2);
+    expect(screen.queryByText('Never')).not.toBeInTheDocument();
+  });
+
+  it('says Unavailable, not Never, for a subject whose freshness failed', () => {
+    render(
+      <SourceRail
+        graph={graph}
+        freshness={freshness}
+        freshnessErrors={{
+          [graph.vehicle.did]: null,
+          [graph.devices[0].did]: 'needs privilege',
+        }}
+        selected={graph.vehicle.did}
+        onSelect={() => {}}
+        access="ok"
+        accountState="shared"
+        now={NOW}
+      />,
+    );
+    expect(screen.getByText('2 min ago')).toBeInTheDocument();
+    const unavailable = screen.getByText('Unavailable');
+    expect(unavailable).toHaveClass('text-muted');
+    expect(unavailable.closest('button')).toHaveTextContent('AutoPi');
+    expect(screen.queryByText('Never')).not.toBeInTheDocument();
+  });
+
+  it('asks for a new developer JWT when the stored one was refused', () => {
+    render(
+      <SourceRail
+        graph={graph}
+        freshness={{}}
+        selected={graph.vehicle.did}
+        onSelect={() => {}}
+        access="jwt-expired"
+        accountState="unknown"
+        now={NOW}
+      />,
+    );
+    expect(screen.getAllByText('Needs a new developer JWT')).toHaveLength(3);
+  });
+
   it('labels the account subject by its grant state', () => {
     const { rerender } = render(
       <SourceRail

@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 jest.mock('@/hooks/subjects/useSubjectQuery', () => ({ useSubjectQuery: jest.fn() }));
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
+import { DataApiError } from '@/services/subjects/client';
 import { TripsTab } from '@/app/vehicles/[tokenId]/components/tabs/TripsTab';
 import { buildVehicleGraph, type VehicleDetail } from '@/services/subjects/graph';
 import type { SubjectContext } from '@/app/vehicles/[tokenId]/components/SubjectView';
@@ -131,6 +132,59 @@ describe('TripsTab', () => {
     // Range starts 2026-09-22 (a Tuesday); records are labelled from that UTC day.
     expect(screen.getByText('Tue 22')).toBeInTheDocument();
     expect(screen.getByText('Wed 23')).toBeInTheDocument();
+  });
+
+  it('shows a refused privilege instead of the empty trips state', () => {
+    const refused = new DataApiError(
+      200,
+      'GRAPHQL',
+      'unauthorized: requires privilege VEHICLE_ALL_TIME_LOCATION',
+    );
+    (useSubjectQuery as jest.Mock).mockImplementation(
+      ({ request }: { request: { query: string } | null }) =>
+        request
+          ? { data: undefined, isLoading: false, error: refused }
+          : { data: undefined, isLoading: false, error: null },
+    );
+    render(<TripsTab subject={graph.vehicle} ctx={ctx} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    expect(
+      screen.getAllByText('unauthorized: requires privilege VEHICLE_ALL_TIME_LOCATION'),
+    ).toHaveLength(2);
+    expect(screen.queryByText('No trips in this range.')).not.toBeInTheDocument();
+    expect(screen.queryByText(/trips · .* driving/)).not.toBeInTheDocument();
+  });
+
+  it('shows field errors on segments and daily activity instead of empty rows', () => {
+    (useSubjectQuery as jest.Mock).mockImplementation(
+      ({ request }: { request: { query: string } | null }) => {
+        const q = request?.query ?? '';
+        if (q.startsWith('query Segments'))
+          return {
+            data: {
+              data: { segments: null },
+              errors: [{ message: 'segments refused', path: ['segments'] }],
+            },
+            isLoading: false,
+            error: null,
+          };
+        if (q.startsWith('query DailyActivity'))
+          return {
+            data: {
+              data: { dailyActivity: null },
+              errors: [{ message: 'daily refused', path: ['dailyActivity'] }],
+            },
+            isLoading: false,
+            error: null,
+          };
+        return { data: undefined, isLoading: false, error: null };
+      },
+    );
+    render(<TripsTab subject={graph.vehicle} ctx={ctx} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    expect(screen.getByText('segments refused')).toBeInTheDocument();
+    expect(screen.getByText('daily refused')).toBeInTheDocument();
+    expect(screen.queryByText('No trips in this range.')).not.toBeInTheDocument();
   });
 
   it('keeps daily activity off the mechanisms it does not support', () => {

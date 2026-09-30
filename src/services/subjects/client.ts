@@ -55,16 +55,18 @@ export const postSubjectQuery = async <T>(
     code?: DataApiCode;
   };
   if (body.code && body.error) throw new DataApiError(res.status, body.code, body.error);
+  // gqlgen answers a refused privilege with 200, data: null and the errors, so
+  // no data plus errors is a failure whatever the status. Partial data (data
+  // set, errors on some fields) is returned for the panels to show per field.
+  if (body.data == null && body.errors?.length) {
+    throw new DataApiError(res.status, 'GRAPHQL', body.errors[0].message, body.errors);
+  }
   if (!res.ok && !body.data) {
-    if (!body.errors?.length) {
-      throw new DataApiError(
-        res.status,
-        'UPSTREAM',
-        `The ${api} API answered ${res.status}`,
-      );
-    }
-    const message = body.errors?.[0]?.message ?? `The ${api} API answered ${res.status}`;
-    throw new DataApiError(res.status, 'GRAPHQL', message, body.errors ?? []);
+    throw new DataApiError(
+      res.status,
+      'UPSTREAM',
+      `The ${api} API answered ${res.status}`,
+    );
   }
   return { data: body.data ?? null, errors: body.errors };
 };

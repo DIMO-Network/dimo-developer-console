@@ -6,7 +6,7 @@ import { ChevronDownIcon } from '@heroicons/react/16/solid';
 import type { Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
 import { useSubjectQuery, subjectQueryKey } from '@/hooks/subjects/useSubjectQuery';
-import { postSubjectQuery } from '@/services/subjects/client';
+import { fieldError, postSubjectQuery } from '@/services/subjects/client';
 import {
   cloudEventsQuery,
   latestCloudEventQuery,
@@ -73,6 +73,12 @@ type Spec = {
   filter: CloudEventFilter;
   limit: number;
   withUrl: boolean;
+};
+
+const ROOT: Record<Mode, keyof Result> = {
+  events: 'cloudEvents',
+  latest: 'latestCloudEvent',
+  index: 'indexes',
 };
 
 const pageRows = (mode: Mode, d: Result | null | undefined): Event[] => {
@@ -204,7 +210,12 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     spec.mode === 'latest'
       ? 'Latest cloud event'
       : `${rows.length} ${spec.mode === 'index' ? 'index entries' : 'cloud events'}`;
-  const olderLoaded = !!olderPage && !olderPage.isLoading && !olderPage.error;
+  // A page fails whole (thrown) or on its root field (partial data).
+  const pageError = (p: (typeof pages)[number] | null) =>
+    p ? (p.error?.message ?? fieldError(p.data?.errors, ROOT[spec.mode])) : null;
+  const baseError = pageError(base);
+  const olderError = pageError(olderPage);
+  const olderLoaded = !!olderPage && !olderPage.isLoading && !olderError;
   const exhausted = olderLoaded && lastAdded === 0;
   const request = requests[0];
 
@@ -366,12 +377,12 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             Loading…
           </p>
         )}
-        {base.error && (
+        {baseError && (
           <p className="border-t border-outline px-5 py-3 text-body-sm text-negative">
-            {base.error.message}
+            {baseError}
           </p>
         )}
-        {!base.isLoading && !base.error && rows.length === 0 && (
+        {!base.isLoading && !baseError && rows.length === 0 && (
           <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
             No events match. Widen the range or clear a filter.
           </p>
@@ -432,9 +443,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         {spec.mode !== 'latest' && rows.length > 0 && (
           <div className="flex flex-col items-center gap-2 border-t border-outline p-3">
             {olderPage?.isLoading && <p className="text-body-sm text-muted">Loading…</p>}
-            {olderPage?.error && (
-              <p className="text-body-sm text-negative">{olderPage.error.message}</p>
-            )}
+            {olderError && <p className="text-body-sm text-negative">{olderError}</p>}
             {exhausted ? (
               <p className="text-body-sm text-muted">No older events.</p>
             ) : (

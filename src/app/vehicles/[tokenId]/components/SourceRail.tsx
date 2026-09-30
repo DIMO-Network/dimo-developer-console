@@ -6,12 +6,15 @@ import type { LatestIndexHeader } from '@/hooks/subjects/useSubjectFreshness';
 import { FreshnessDot } from '@/components/FreshnessDot';
 import { SelectWithChevron } from '@/components/SelectWithChevron';
 
-export type Access = 'ok' | 'not-shared' | 'no-jwt' | 'loading';
+export type Access = 'ok' | 'not-shared' | 'no-jwt' | 'jwt-expired' | 'loading';
 export type AccountState = 'unknown' | 'loading' | 'shared' | 'not-shared';
 
 interface Props {
   graph: SubjectGraph;
   freshness: Record<string, LatestIndexHeader>;
+  freshnessLoading?: boolean;
+  // Per subject DID: why its freshness couldn't be read, or null.
+  freshnessErrors?: Record<string, string | null>;
   selected: string; // a subject DID or 'sharing'
   onSelect: (key: string) => void;
   access: Access;
@@ -22,6 +25,7 @@ interface Props {
 const ACCESS_LABEL: Record<Exclude<Access, 'ok'>, string> = {
   'not-shared': 'No access',
   'no-jwt': 'Needs a developer JWT',
+  'jwt-expired': 'Needs a new developer JWT',
   'loading': 'Checking…',
 };
 const ACCOUNT_LABEL: Record<AccountState, string> = {
@@ -60,22 +64,33 @@ const Item: FC<{
 export const SourceRail: FC<Props> = ({
   graph,
   freshness,
+  freshnessLoading = false,
+  freshnessErrors = {},
   selected,
   onSelect,
   access,
   accountState,
   now,
 }) => {
-  const fresh = (s: Subject) =>
-    access === 'ok' ? (
+  const fresh = (s: Subject) => {
+    if (access !== 'ok')
+      return <span className="text-muted">{ACCESS_LABEL[access]}</span>;
+    if (freshnessLoading) return <span className="text-muted">Checking…</span>;
+    const failed = freshnessErrors[s.did];
+    if (failed)
+      return (
+        <span className="text-muted" title={failed}>
+          Unavailable
+        </span>
+      );
+    return (
       <FreshnessDot
         at={freshness[s.did]?.time ?? null}
         now={now}
         className="text-label"
       />
-    ) : (
-      <span className="text-muted">{ACCESS_LABEL[access]}</span>
     );
+  };
 
   const options = [
     ...graph.all.map((s) => ({ value: s.did, label: `${s.label} · ${s.sublabel}` })),

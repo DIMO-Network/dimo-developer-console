@@ -18,6 +18,7 @@ import {
   type TimeRange,
 } from '@/components/TimeRangePicker';
 import { QueryActions } from '@/components/QueryActions';
+import { fieldError } from '@/services/subjects/client';
 import { Button } from '@/components/Button';
 import { absoluteTime } from '@/utils/freshness';
 
@@ -126,6 +127,10 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   });
   const dayRows = days.data?.data?.dailyActivity ?? [];
   const segRows = segments.data?.data?.segments ?? [];
+  // A refused privilege arrives as a thrown GraphQL error or a field error.
+  const dayError = days.error?.message ?? fieldError(days.data?.errors, 'dailyActivity');
+  const segError =
+    segments.error?.message ?? fieldError(segments.data?.errors, 'segments');
   const maxCount = Math.max(1, ...dayRows.map((d) => d.segmentCount));
   const totalTrips = dayRows.reduce((n, d) => n + d.segmentCount, 0);
   const totalSeconds = dayRows.reduce((n, d) => n + d.duration, 0);
@@ -195,15 +200,15 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         <div className="flex flex-col gap-4 rounded-card bg-card p-5">
           <div className="flex items-baseline justify-between">
             <span className="text-card-title text-ink">Daily activity</span>
-            <span className="text-body-sm text-muted">
-              {days.isLoading
-                ? 'Running…'
-                : `${totalTrips} trips · ${fmtDuration(totalSeconds)} driving`}
-            </span>
+            {!dayError && (
+              <span className="text-body-sm text-muted">
+                {days.isLoading
+                  ? 'Running…'
+                  : `${totalTrips} trips · ${fmtDuration(totalSeconds)} driving`}
+              </span>
+            )}
           </div>
-          {days.error && (
-            <p className="text-body-sm text-negative">{days.error.message}</p>
-          )}
+          {dayError && <p className="text-body-sm text-negative">{dayError}</p>}
           <div
             className="overflow-x-auto"
             role="region"
@@ -265,9 +270,9 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                   Running…
                 </p>
               )}
-              {segments.error && (
+              {segError && (
                 <p className="border-t border-outline px-5 py-3 text-body-sm text-negative">
-                  {segments.error.message}
+                  {segError}
                 </p>
               )}
               {segRows.map((s, i) => (
@@ -294,7 +299,7 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                   </span>
                 </div>
               ))}
-              {!segments.isLoading && !segments.error && segRows.length === 0 && (
+              {!segments.isLoading && !segError && segRows.length === 0 && (
                 <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
                   No trips in this range.
                 </p>

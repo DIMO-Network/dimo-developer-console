@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import type { Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
+import { fieldError } from '@/services/subjects/client';
 import {
   availableCloudEventTypesQuery,
   latestCloudEventQuery,
@@ -57,6 +58,7 @@ const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> 
     ),
   });
   const doc = q.data?.data?.latestCloudEvent;
+  const error = q.error?.message ?? fieldError(q.data?.errors, 'latestCloudEvent');
   const scanUrl = safeHttpUrl(doc?.dataUrl);
   return (
     <div className="flex flex-col gap-3.5 rounded-card bg-card p-5">
@@ -73,7 +75,7 @@ const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> 
           </span>
         )}
       </div>
-      {q.error && <p className="text-body-sm text-negative">{q.error.message}</p>}
+      {error && <p className="text-body-sm text-negative">{error}</p>}
       {doc && (
         <div className="grid grid-cols-1 gap-x-5 gap-y-2.5 md:grid-cols-2">
           {fields(doc.data).map(([k, v]) => (
@@ -145,6 +147,8 @@ export const DocumentsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     .map((t) => t.type)
     .filter((t) => t.startsWith('dimo.document.'));
   const label = ctx.license.label;
+  const typesError =
+    types.error?.message ?? fieldError(types.data?.errors, 'availableCloudEventTypes');
 
   if (types.error?.code === 'NOT_SHARED') {
     return (
@@ -162,11 +166,9 @@ export const DocumentsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         event on the owner&apos;s account DID, with the extracted fields as data and the
         scan behind a signed link.
       </p>
-      {types.error && (
-        <p className="px-1 text-body-sm text-negative">{types.error.message}</p>
-      )}
+      {typesError && <p className="px-1 text-body-sm text-negative">{typesError}</p>}
       {types.isLoading && <p className="px-1 text-body-sm text-muted">Loading…</p>}
-      {!types.isLoading && !types.error && docTypes.length === 0 && (
+      {!types.isLoading && !typesError && docTypes.length === 0 && (
         <p className="px-1 text-body-sm text-muted">
           The owner hasn&apos;t uploaded any documents yet.
         </p>

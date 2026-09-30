@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@/hooks/subjects/useSubjectQuery', () => ({
@@ -109,8 +109,16 @@ const answers = (overrides: Record<string, unknown> = {}) =>
           overrides.DataSummary ?? { dataSummary: SUMMARY },
           overrides.DataSummaryErrors,
         ) ??
-        pick('AvailableCloudEventTypes', { availableCloudEventTypes: TYPES }) ??
-        pick('LatestCloudEvent', { latestCloudEvent: LATEST }) ?? {
+        pick(
+          'AvailableCloudEventTypes',
+          overrides.Types ?? { availableCloudEventTypes: TYPES },
+          overrides.TypesErrors,
+        ) ??
+        pick(
+          'LatestCloudEvent',
+          overrides.Latest ?? { latestCloudEvent: LATEST },
+          overrides.LatestErrors,
+        ) ?? {
           data: undefined,
           isLoading: false,
           error: null,
@@ -168,6 +176,33 @@ describe('SummaryTab', () => {
     renderWithClient(<SummaryTab subject={graph.vehicle} ctx={ctx} />);
     expect(screen.getByText('needs privilege 1')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Data types/ })).toBeInTheDocument();
+  });
+
+  it('shows latest payload and data type field errors instead of their empty states', () => {
+    answers({
+      Latest: { latestCloudEvent: null },
+      LatestErrors: [{ message: 'needs raw data access', path: ['latestCloudEvent'] }],
+      Types: { availableCloudEventTypes: null },
+      TypesErrors: [{ message: 'types refused', path: ['availableCloudEventTypes'] }],
+    });
+    renderWithClient(<SummaryTab subject={graph.vehicle} ctx={ctx} />);
+    // Collapsed, the headers already say so; open, the panels show why.
+    expect(
+      screen.getByRole('button', { name: /Latest payload.*Unavailable/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Data types.*Unavailable/ }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /^Latest payload/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Data types/ }));
+    expect(screen.getByText('needs raw data access')).toBeInTheDocument();
+    expect(
+      screen.queryByText('No cloud event for this DID yet.'),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('types refused')).toBeInTheDocument();
+    expect(
+      screen.queryByText('No cloud events on this DID yet.'),
+    ).not.toBeInTheDocument();
   });
 
   it('reads a device from Fetch through the vehicle DID, filtered by producer', () => {

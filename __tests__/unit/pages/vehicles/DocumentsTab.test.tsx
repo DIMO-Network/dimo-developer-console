@@ -148,6 +148,45 @@ describe('DocumentsTab', () => {
     expect(typesCall.request.variables).toEqual({ did: graph.account.did, filter: null });
   });
 
+  it('shows a refused type list instead of the no-documents copy', () => {
+    answer({
+      data: {
+        data: { availableCloudEventTypes: null },
+        errors: [{ message: 'types refused', path: ['availableCloudEventTypes'] }],
+      },
+      isLoading: false,
+      error: null,
+    });
+    render(<DocumentsTab subject={graph.account} ctx={ctx} />);
+    expect(screen.getByText('types refused')).toBeInTheDocument();
+    expect(
+      screen.queryByText("The owner hasn't uploaded any documents yet."),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows a refused document inside its card', () => {
+    (useSubjectQuery as jest.Mock).mockImplementation(
+      ({ request }: { request: { query: string } | null }) =>
+        request?.query.startsWith('query AvailableCloudEventTypes')
+          ? {
+              data: { data: { availableCloudEventTypes: [TYPES[0]] } },
+              isLoading: false,
+              error: null,
+            }
+          : {
+              data: {
+                data: { latestCloudEvent: null },
+                errors: [{ message: 'document refused', path: ['latestCloudEvent'] }],
+              },
+              isLoading: false,
+              error: null,
+            },
+    );
+    render(<DocumentsTab subject={graph.account} ctx={ctx} />);
+    expect(screen.getByText("Driver's license")).toBeInTheDocument();
+    expect(screen.getByText('document refused')).toBeInTheDocument();
+  });
+
   it('explains and offers the sharing link when the account is not shared', () => {
     answer({
       data: undefined,

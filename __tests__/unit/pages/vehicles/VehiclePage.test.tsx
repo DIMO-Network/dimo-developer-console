@@ -37,6 +37,7 @@ import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useSubjectFreshness } from '@/hooks/subjects/useSubjectFreshness';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
 import { LocalDeveloperLicense } from '@/types/webhook';
+import { DataApiError } from '@/services/subjects/client';
 import { VehiclePage } from '@/app/vehicles/[tokenId]/components/VehiclePage';
 
 const lic = (clientId: string, alias: string) =>
@@ -154,6 +155,59 @@ describe('VehiclePage', () => {
     expect(
       screen.getByRole('button', { name: 'Generate developer JWT' }),
     ).toBeInTheDocument();
+  });
+
+  it('treats a refused token exchange as not shared with the selected license', () => {
+    (useQuery as jest.Mock).mockReturnValue({
+      data: { vehicle: vehicle(['0xaaa']) },
+      loading: false,
+    });
+    (useSubjectFreshness as jest.Mock).mockReturnValue({
+      byDid: {},
+      errorByDid: {},
+      isLoading: false,
+      error: new DataApiError(403, 'NOT_SHARED', 'This asset is not shared'),
+      refetch: jest.fn(),
+    });
+    render(<VehiclePage tokenId={190231} />);
+    expect(
+      screen.getByRole('heading', { name: "This vehicle isn't shared with Fleet Pulse" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Summary' })).toBeDisabled();
+    expect(screen.getAllByText('No access').length).toBeGreaterThan(0);
+    // The request that found out stays enabled; the page doesn't flip it off.
+    expect(useSubjectFreshness).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: true }),
+    );
+  });
+
+  it('asks for a new developer JWT when the proxy refuses the stored one', () => {
+    (useQuery as jest.Mock).mockReturnValue({
+      data: { vehicle: vehicle(['0xaaa']) },
+      loading: false,
+    });
+    const refetch = jest.fn();
+    (useSubjectFreshness as jest.Mock).mockReturnValue({
+      byDid: {},
+      errorByDid: {},
+      isLoading: false,
+      error: new DataApiError(401, 'DEV_JWT_INVALID', 'Token exchange rejected'),
+      refetch,
+    });
+    render(<VehiclePage tokenId={190231} />);
+    expect(
+      screen.getByRole('heading', {
+        name: 'Your developer JWT for Fleet Pulse has expired',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Generate a new one to keep reading this vehicle.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Generate developer JWT' }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText('Needs a new developer JWT').length).toBeGreaterThan(0);
+    expect(screen.getByRole('tab', { name: 'Summary' })).toBeDisabled();
   });
 
   it('falls back to the first eligible license when the URL names an ineligible one', () => {

@@ -188,6 +188,22 @@ describe('SignalsTab', () => {
     expect(screen.getByText('telemetry down')).toBeInTheDocument();
   });
 
+  it('shows a refused available-signals field instead of the no-signals copy', () => {
+    override('query AvailableSignals', {
+      data: {
+        data: { availableSignals: null },
+        errors: [{ message: 'signals refused', path: ['availableSignals'] }],
+      },
+      isLoading: false,
+      error: null,
+    });
+    render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    expect(screen.getByText('signals refused')).toBeInTheDocument();
+    expect(
+      screen.queryByText('This source reports no signals yet.'),
+    ).not.toBeInTheDocument();
+  });
+
   it('says so when the source reports no signals', () => {
     override('query AvailableSignals', {
       data: { data: { availableSignals: [] } },

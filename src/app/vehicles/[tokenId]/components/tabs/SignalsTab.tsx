@@ -6,6 +6,7 @@ import type { Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
 import { useTelemetrySource } from '@/hooks/subjects/useDataSummary';
+import { fieldError } from '@/services/subjects/client';
 import {
   availableSignalsQuery,
   signalsQuery,
@@ -75,6 +76,8 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     () => (avail.data?.data?.availableSignals ?? []).filter((s) => !isLocationSignal(s)),
     [avail.data],
   );
+  const availError =
+    avail.error?.message ?? fieldError(avail.data?.errors, 'availableSignals');
 
   const [selected, setSelected] = useState<string[]>([]);
   useEffect(() => {
@@ -147,11 +150,9 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           selected={selected}
           onChange={setSelected}
           loading={avail.isLoading}
-          empty={!avail.isLoading && !avail.error && available.length === 0}
+          empty={!avail.isLoading && !availError && available.length === 0}
         />
-        {avail.error && (
-          <p className="text-body-sm text-negative">{avail.error.message}</p>
-        )}
+        {availError && <p className="text-body-sm text-negative">{availError}</p>}
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1.5 text-label text-muted">
             Aggregation
@@ -294,8 +295,10 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             />
           }
         >
-          {latest.error && (
-            <p className="px-5 py-3 text-body-sm text-negative">{latest.error.message}</p>
+          {(latest.error || fieldError(latest.data?.errors, 'signalsLatest')) && (
+            <p className="px-5 py-3 text-body-sm text-negative">
+              {latest.error?.message ?? fieldError(latest.data?.errors, 'signalsLatest')}
+            </p>
           )}
           {Object.entries(latest.data?.data?.signalsLatest ?? {})
             .filter(([k, v]) => k !== 'lastSeen' && v)

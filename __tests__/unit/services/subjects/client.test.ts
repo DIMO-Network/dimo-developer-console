@@ -48,6 +48,28 @@ describe('postSubjectQuery', () => {
     expect(res.data).toEqual({ x: null });
   });
 
+  it('throws the first GraphQL error when a 200 answer carries no data', async () => {
+    const errors = [
+      { message: 'unauthorized: requires privilege VEHICLE_ALL_TIME_LOCATION' },
+      { message: 'second' },
+    ];
+    answer(200, { data: null, errors });
+    await expect(
+      postSubjectQuery('telemetry', { asset: ASSET, clientId: '0xabc', request: req }),
+    ).rejects.toEqual(
+      expect.objectContaining({
+        status: 200,
+        code: 'GRAPHQL',
+        message: 'unauthorized: requires privilege VEHICLE_ALL_TIME_LOCATION',
+        graphqlErrors: errors,
+      }),
+    );
+    answer(200, { errors: [{ message: 'no data key' }] });
+    await expect(
+      postSubjectQuery('fetch', { asset: ASSET, clientId: '0xabc', request: req }),
+    ).rejects.toMatchObject({ code: 'GRAPHQL', message: 'no data key' });
+  });
+
   it('throws DEV_JWT_MISSING before calling the proxy when no JWT is stored', async () => {
     (getDevJwt as jest.Mock).mockReturnValue(null);
     await expect(

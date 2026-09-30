@@ -44,14 +44,23 @@ export const AccessNotice: FC<Props> = ({
       </div>
     );
   }
+  const expired = access === 'jwt-expired';
   return (
     <div className="flex flex-col items-start gap-3 rounded-card bg-card p-6">
       <h3 className="text-card-title text-ink">
-        Generate a developer JWT to read this vehicle
+        {expired
+          ? `Your developer JWT for ${licenseLabel} has expired`
+          : 'Generate a developer JWT to read this vehicle'}
       </h3>
       <p className="max-w-xl text-body-sm text-muted">
-        {licenseLabel} has no developer JWT in this browser yet. Generating one uses the
-        license&apos;s API key, and the token stays in this browser.
+        {expired ? (
+          'Generate a new one to keep reading this vehicle.'
+        ) : (
+          <>
+            {licenseLabel} has no developer JWT in this browser yet. Generating one uses
+            the license&apos;s API key, and the token stays in this browser.
+          </>
+        )}
       </p>
       {clientId && redirectUri && (
         <GenerateDevJWT

@@ -56,7 +56,8 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
   const { isAuthenticatedAsDev, refetch: refetchJwts } = useGetDevJwts(
     clientId || undefined,
   );
-  const access: Access =
+  // What Identity and this browser say; the data proxy can still refuse.
+  const granted: Access =
     licensesLoading || loading
       ? 'loading'
       : !license
@@ -65,7 +66,19 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
           ? 'no-jwt'
           : 'ok';
 
-  const freshness = useSubjectFreshness({ graph, clientId, enabled: access === 'ok' });
+  const freshness = useSubjectFreshness({ graph, clientId, enabled: granted === 'ok' });
+  // The rail's freshness request is the first exchange for the vehicle: a
+  // refused exchange or a rejected developer JWT closes the data tabs.
+  const exchangeCode = freshness.error?.code;
+  const access: Access =
+    granted !== 'ok'
+      ? granted
+      : exchangeCode === 'NOT_SHARED'
+        ? 'not-shared'
+        : // MISSING here means the stored JWT expired since the page read it.
+          exchangeCode === 'DEV_JWT_INVALID' || exchangeCode === 'DEV_JWT_MISSING'
+          ? 'jwt-expired'
+          : 'ok';
   const accountProbe = useSubjectQuery<{ latestIndex: unknown }>({
     api: 'fetch',
     asset: graph?.account.asset ?? '',
@@ -123,6 +136,8 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
         <SourceRail
           graph={graph}
           freshness={freshness.byDid}
+          freshnessLoading={freshness.isLoading}
+          freshnessErrors={freshness.errorByDid}
           selected={selectedKey}
           onSelect={(key) => url.set({ subject: key, tab: undefined })}
           access={access}
@@ -171,7 +186,10 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
                     licenseLabel={license?.label ?? ''}
                     clientId={license?.clientId}
                     redirectUri={license?.firstRedirectURI}
-                    onGenerated={refetchJwts}
+                    onGenerated={() => {
+                      refetchJwts();
+                      void freshness.refetch();
+                    }}
                     onViewSharing={() => url.set({ subject: 'sharing' })}
                   />
                 )}
