@@ -20,6 +20,7 @@ jest.mock('@/components/Webhooks/hooks/useValidDeveloperLicenses', () => ({
   useValidDeveloperLicenses: jest.fn(),
 }));
 jest.mock('@/hooks/useGetDevJwts', () => ({ useGetDevJwts: jest.fn() }));
+jest.mock('@/hooks/useGlobalAccount', () => ({ useGlobalAccount: jest.fn() }));
 jest.mock('@/hooks/subjects/useSubjectFreshness', () => ({
   useSubjectFreshness: jest.fn(),
 }));
@@ -34,6 +35,7 @@ jest.mock('@/components/GenerateDevJWT', () => ({
 import { useQuery } from '@apollo/client';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useSubjectFreshness } from '@/hooks/subjects/useSubjectFreshness';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
 import { LocalDeveloperLicense } from '@/types/webhook';
@@ -69,6 +71,9 @@ const vehicle = (grantees: string[]) => ({
 
 beforeEach(() => {
   params = new URLSearchParams('license=0xaaa');
+  (useGlobalAccount as jest.Mock).mockReturnValue({
+    currentUser: { smartContractAddress: '0xowner' },
+  });
   (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
     developerLicenses: [lic('0xaaa', 'Fleet Pulse'), lic('0xbbb', 'Other')],
     loading: false,
@@ -124,7 +129,33 @@ describe('VehiclePage', () => {
     expect(useSubjectFreshness).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: false }),
     );
+    // No data request may run for a vehicle no license can read.
+    const enabled = (m: jest.Mock) =>
+      m.mock.calls.filter(([input]) => input.enabled === true);
+    expect(enabled(useSubjectFreshness as jest.Mock)).toHaveLength(0);
+    expect(enabled(useSubjectQuery as jest.Mock)).toHaveLength(0);
+    expect((useSubjectQuery as jest.Mock).mock.calls.length).toBeGreaterThan(0);
     expect(screen.getAllByText('No access').length).toBeGreaterThan(0);
+  });
+
+  it('shows no negative state while the user is still loading', () => {
+    (useGlobalAccount as jest.Mock).mockReturnValue({ currentUser: null });
+    // useValidDeveloperLicenses skips its query without a user: not loading, empty.
+    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+      developerLicenses: [],
+      loading: false,
+    });
+    (useQuery as jest.Mock).mockReturnValue({
+      data: { vehicle: vehicle(['0xaaa']) },
+      loading: false,
+    });
+    render(<VehiclePage tokenId={190231} />);
+    expect(screen.queryByText(/isn't shared with any of your licenses/)).toBeNull();
+    expect(screen.queryByText('No access')).toBeNull();
+    expect(screen.getAllByText('Checking…').length).toBeGreaterThan(0);
+    expect(useSubjectFreshness).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false }),
+    );
   });
 
   it('shows the sharing panel for a vehicle no license can read', () => {

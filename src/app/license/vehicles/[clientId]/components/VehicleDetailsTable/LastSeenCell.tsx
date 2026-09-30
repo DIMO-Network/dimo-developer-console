@@ -18,7 +18,12 @@ export const LastSeenCell: FC<{ tokenId: number; asset: string; clientId: string
     request: lastSeenQuery(tokenId),
   });
   if (q.isLoading) return <span className="text-muted">…</span>;
-  if (q.error) return <span className="text-muted">Unavailable</span>;
+  if (q.error)
+    return (
+      <span className="whitespace-nowrap text-muted">
+        {q.error.code === 'DEV_JWT_MISSING' ? 'Needs a developer JWT' : 'Unavailable'}
+      </span>
+    );
   return (
     <FreshnessDot
       at={q.data?.data?.signalsLatest?.lastSeen ?? null}

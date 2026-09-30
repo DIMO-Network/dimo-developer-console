@@ -5,16 +5,16 @@ export const GenerateDevJWTSection = ({
   clientId,
   redirectUri,
   onSuccess,
+  message = 'Please generate a Developer JWT to view your webhook configurations.',
 }: {
   clientId: string;
   redirectUri: string;
   onSuccess: () => void;
+  message?: string;
 }) => {
   return (
     <div>
-      <p className={'text-body-sm text-muted'}>
-        Please generate a Developer JWT to view your webhook configurations.
-      </p>
+      <p className={'text-body-sm text-muted'}>{message}</p>
       <GenerateDevJWT
         clientId={clientId}
         domain={redirectUri}

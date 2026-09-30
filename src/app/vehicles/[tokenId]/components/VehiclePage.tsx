@@ -6,6 +6,7 @@ import { VEHICLE_DETAIL } from '../queries';
 import { buildVehicleGraph } from '@/services/subjects/graph';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useSubjectFreshness } from '@/hooks/subjects/useSubjectFreshness';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
 import { latestIndexQuery } from '@/services/subjects/queries';
@@ -25,7 +26,11 @@ const CHAIN_ID = Number(configuration.CONTRACT_NETWORK);
 
 export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
   const { data, loading, error } = useQuery(VEHICLE_DETAIL, { variables: { tokenId } });
-  const { developerLicenses, loading: licensesLoading } = useValidDeveloperLicenses();
+  const { currentUser } = useGlobalAccount();
+  const { developerLicenses, loading: licenseQueryLoading } = useValidDeveloperLicenses();
+  // The license query is skipped until the user's address is known, which
+  // reads as "no licenses": wait for the user rather than flash "not shared".
+  const licensesLoading = licenseQueryLoading || !currentUser?.smartContractAddress;
   const url = useVehicleUrlState();
 
   const vehicle = data?.vehicle ?? null;

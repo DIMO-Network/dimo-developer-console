@@ -16,7 +16,14 @@ jest.mock('@/app/license/vehicles/[clientId]/components/VehicleDetailsTable', ()
     <div data-testid="table">{JSON.stringify(props)}</div>
   ),
 }));
+jest.mock('@/hooks/useGlobalAccount', () => ({ useGlobalAccount: jest.fn() }));
+jest.mock('@/hooks/useGetDevJwts', () => ({ useGetDevJwts: jest.fn() }));
+jest.mock('@/components/GenerateDevJWT', () => ({
+  GenerateDevJWT: () => <button>Generate developer JWT</button>,
+}));
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
+import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { LocalDeveloperLicense } from '@/types/webhook';
 import { VehiclesView } from '@/app/vehicles/components/VehiclesView';
 
@@ -31,6 +38,13 @@ describe('VehiclesView', () => {
   beforeEach(() => {
     replace.mockClear();
     params = new URLSearchParams('');
+    (useGlobalAccount as jest.Mock).mockReturnValue({
+      currentUser: { smartContractAddress: '0xowner' },
+    });
+    (useGetDevJwts as jest.Mock).mockReturnValue({
+      isAuthenticatedAsDev: true,
+      refetch: jest.fn(),
+    });
   });
 
   it('auto-selects a single license and renders its table with the extra columns', () => {
@@ -94,6 +108,57 @@ describe('VehiclesView', () => {
     expect(
       screen.getByText('Enter a token ID or a full 0x address.'),
     ).toBeInTheDocument();
+  });
+
+  it('shows neither the empty state nor a table before the user has loaded', () => {
+    (useGlobalAccount as jest.Mock).mockReturnValue({ currentUser: null });
+    // Skipped until the user is known: not loading, and no licenses yet.
+    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+      developerLicenses: [],
+      loading: false,
+    });
+    render(<VehiclesView />);
+    expect(
+      screen.queryByText(
+        'Create a developer license to see the vehicles shared with it.',
+      ),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('table')).not.toBeInTheDocument();
+  });
+
+  it('prompts for a developer JWT above the table when the license has none', () => {
+    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+      developerLicenses: [lic('0xaaa', 'Fleet Pulse')],
+      loading: false,
+    });
+    (useGetDevJwts as jest.Mock).mockReturnValue({
+      isAuthenticatedAsDev: false,
+      refetch: jest.fn(),
+    });
+    render(<VehiclesView />);
+    expect(useGetDevJwts).toHaveBeenLastCalledWith('0xaaa');
+    expect(
+      screen.getByText(
+        'Generate a developer JWT to see when each vehicle was last seen.',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Generate developer JWT' }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('table')).toBeInTheDocument();
+  });
+
+  it('does not prompt when a developer JWT is stored', () => {
+    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+      developerLicenses: [lic('0xaaa', 'Fleet Pulse')],
+      loading: false,
+    });
+    render(<VehiclesView />);
+    expect(
+      screen.queryByText(
+        'Generate a developer JWT to see when each vehicle was last seen.',
+      ),
+    ).not.toBeInTheDocument();
   });
 
   it('explains the empty state when the user has no licenses', () => {

@@ -8,6 +8,9 @@ import { VehicleDetailsTable } from '@/app/license/vehicles/[clientId]/component
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { Section, SectionHeader } from '@/components/Section';
 import { TextField } from '@/components/TextField';
+import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
+import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { LocalDeveloperLicense } from '@/types/webhook';
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
@@ -24,8 +27,16 @@ const parseSearch = (raw: string): { owner?: string; tokenIdSearch: number | nul
   return { tokenIdSearch: null };
 };
 
+// The license query is skipped (not loading, no licenses) until the user's
+// smart contract address is known; count that time as loading.
+const useLicenses = () => {
+  const { currentUser } = useGlobalAccount();
+  const result = useValidDeveloperLicenses();
+  return { ...result, loading: result.loading || !currentUser?.smartContractAddress };
+};
+
 const Content = () => {
-  const { developerLicenses, loading } = useValidDeveloperLicenses();
+  const { developerLicenses, loading } = useLicenses();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -39,6 +50,10 @@ const Content = () => {
     if (byUrl) return byUrl;
     return developerLicenses.length === 1 ? developerLicenses[0] : undefined;
   }, [developerLicenses, fromUrl]);
+
+  const { isAuthenticatedAsDev, refetch: refetchJwts } = useGetDevJwts(
+    selected?.clientId,
+  );
 
   const select = (license: LocalDeveloperLicense) => {
     router.replace(`${pathname}?license=${license.clientId}`, { scroll: false });
@@ -94,9 +109,18 @@ const Content = () => {
               Enter a token ID or a full 0x address.
             </p>
           )}
+          {!isAuthenticatedAsDev && (
+            <GenerateDevJWTSection
+              clientId={selected.clientId}
+              redirectUri={selected.firstRedirectURI}
+              onSuccess={refetchJwts}
+              message="Generate a developer JWT to see when each vehicle was last seen."
+            />
+          )}
           <div className="-mx-4 -mb-4">
             <VehicleDetailsTable
-              key={`${selected.clientId}:${filters.owner ?? ''}:${filters.tokenIdSearch ?? ''}`}
+              // A new JWT remounts the rows so each Last seen cell asks again.
+              key={`${selected.clientId}:${filters.owner ?? ''}:${filters.tokenIdSearch ?? ''}:${isAuthenticatedAsDev}`}
               clientId={selected.clientId}
               owner={filters.owner}
               tokenIdSearch={filters.tokenIdSearch}
@@ -111,7 +135,7 @@ const Content = () => {
 };
 
 export const VehiclesView = () => {
-  const { loading, error } = useValidDeveloperLicenses();
+  const { loading, error } = useLicenses();
   return (
     <div className="flex flex-col gap-6">
       <QueryPageWrapper
