@@ -25,6 +25,7 @@ import {
 import { QueryActions } from '@/components/QueryActions';
 import { JsonBlock } from '@/components/JsonBlock';
 import { Button } from '@/components/Button';
+import { NativeSelect } from '@/components/NativeSelect';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { SignalPicker } from './SignalPicker';
 import { humanizeSignal } from '@/utils/humanizeSignal';
@@ -48,8 +49,6 @@ const INTERVALS = [
   { value: '1h', label: '1 hour' },
   { value: '24h', label: '1 day' },
 ];
-const selectClass =
-  'h-10 appearance-none rounded-control border border-control-border bg-control px-3 pr-8 text-body-sm text-ink';
 
 type Row = { timestamp: string } & Record<string, number | string | null>;
 type Latest = {
@@ -166,8 +165,7 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1.5 text-label text-muted">
             Aggregation
-            <select
-              className={selectClass}
+            <NativeSelect
               value={agg}
               onChange={(e) => setAgg(e.target.value as FloatAggregation)}
             >
@@ -176,21 +174,17 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                   {a.label}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           <label className="flex flex-col gap-1.5 text-label text-muted">
             Interval
-            <select
-              className={selectClass}
-              value={interval}
-              onChange={(e) => setInterval(e.target.value)}
-            >
+            <NativeSelect value={interval} onChange={(e) => setInterval(e.target.value)}>
               {INTERVALS.map((i) => (
                 <option key={i.value} value={i.value}>
                   {i.label}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           <TimeRangePicker value={range} onChange={setRange} />
           <div className="flex-grow" />

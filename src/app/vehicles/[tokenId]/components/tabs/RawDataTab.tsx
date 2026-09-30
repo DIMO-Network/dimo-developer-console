@@ -53,8 +53,6 @@ const MODES: { id: Mode; label: string }[] = [
   { id: 'latest', label: 'Latest' },
   { id: 'index', label: 'Index only' },
 ];
-const inputClass =
-  'h-10 rounded-control border border-control-border bg-control px-3 text-body-sm text-ink';
 
 const build = (
   mode: Mode,
@@ -254,9 +252,9 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1.5 text-label text-muted">
             Type
-            <input
+            <TextField
               list="cloud-event-types"
-              className={classNames(inputClass, 'w-44')}
+              wrapperClassName="w-44"
               value={form.type}
               placeholder="Any type"
               onChange={(e) => setForm({ ...form, type: e.target.value })}
@@ -269,8 +267,8 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           </label>
           <label className="flex flex-col gap-1.5 text-label text-muted">
             Data version
-            <input
-              className={classNames(inputClass, 'w-36')}
+            <TextField
+              wrapperClassName="w-36"
               value={form.dataversion}
               placeholder="Any version"
               onChange={(e) => setForm({ ...form, dataversion: e.target.value })}
@@ -278,11 +276,11 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           </label>
           <label className="flex flex-col gap-1.5 text-label text-muted">
             Limit
-            <input
+            <TextField
               type="number"
               min={1}
               max={100}
-              className={classNames(inputClass, 'w-20')}
+              wrapperClassName="w-20"
               value={form.limit}
               onChange={(e) => setForm({ ...form, limit: Number(e.target.value) })}
             />

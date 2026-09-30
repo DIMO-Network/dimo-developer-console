@@ -112,6 +112,12 @@ describe('SignalsTab', () => {
 
   it('sends the 1 day interval as 24h', () => {
     render(<SignalsTab subject={graph.vehicle} ctx={ctx} />);
+    for (const label of ['Aggregation', 'Interval']) {
+      expect(
+        screen.getByLabelText(label).parentElement!.querySelector('svg'),
+      ).not.toBeNull();
+      expect(screen.getByLabelText(label)).toHaveClass('bg-control', 'appearance-none');
+    }
     fireEvent.click(screen.getByRole('button', { name: 'Add signal' }));
     fireEvent.click(screen.getByLabelText('Speed'));
     fireEvent.change(screen.getByLabelText('Interval'), { target: { value: '24h' } });

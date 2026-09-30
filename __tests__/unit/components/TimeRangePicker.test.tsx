@@ -60,6 +60,11 @@ describe('TimeRangePicker', () => {
         now={NOW}
       />,
     );
+    for (const label of ['From (UTC)', 'To (UTC)']) {
+      const input = screen.getByLabelText(label);
+      expect(input).toHaveAttribute('type', 'datetime-local');
+      expect(input.closest('.text-field')).not.toBeNull();
+    }
     fireEvent.change(screen.getByLabelText('From (UTC)'), {
       target: { value: '2026-09-03T10:30' },
     });

@@ -207,6 +207,15 @@ describe('RawDataTab', () => {
     expect(vars.limit).toBe(5);
   });
 
+  it('draws its filters as Fleet text fields', async () => {
+    renderTab();
+    await screen.findByText('3 cloud events');
+    for (const label of ['Type', 'Data version', 'Limit']) {
+      expect(screen.getByLabelText(label).closest('.text-field')).not.toBeNull();
+    }
+    expect(screen.getByLabelText('Type')).toHaveAttribute('list', 'cloud-event-types');
+  });
+
   it('does not issue a request while typing until Run query', async () => {
     renderTab();
     await screen.findByText('3 cloud events');

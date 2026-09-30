@@ -651,6 +651,14 @@ border-control-border`, hover `border-control-border-hover`, focus
 the control, never on a wrapper too. `border-outline` is a hairline and fails
 3:1 as a control edge; don't draw a control with it.
 
+**Native select** (`src/components/NativeSelect/NativeSelect.tsx`): a real
+`<select>` drawn with that recipe on the element (`appearance-none`,
+`hover:`/`focus:` directly, a `pointer-events-none` `ChevronDownIcon` at the
+right), for short fixed lists in a labelled filter row such as the vehicle
+page's aggregation, interval and trip mechanism, where the native keyboard,
+screen-reader and OS picker behaviour matters; use `SelectWithChevron` or
+`SelectField` where the menu must be the custom Fleet dropdown.
+
 **Label** (`src/components/Label/Label.css`): `.label` = `flex flex-col gap-2
 text-label text-muted`; a field is `<Label>` text, the control, then an error
 (`TextError` = `text-label text-negative`) and help text (`text-body-sm

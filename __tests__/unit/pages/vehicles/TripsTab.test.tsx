@@ -204,7 +204,11 @@ describe('TripsTab', () => {
 
   it('exposes the advanced config and passes it through', () => {
     render(<TripsTab subject={graph.vehicle} ctx={ctx} />);
+    expect(screen.getByLabelText('Detect trips by')).toHaveClass('appearance-none');
     fireEvent.click(screen.getByRole('button', { name: 'Advanced settings' }));
+    expect(
+      screen.getByLabelText('Max gap (seconds)').closest('.text-field'),
+    ).not.toBeNull();
     fireEvent.change(screen.getByLabelText('Max gap (seconds)'), {
       target: { value: '600' },
     });

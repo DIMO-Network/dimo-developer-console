@@ -1,6 +1,7 @@
 'use client';
 import { FC } from 'react';
 import classNames from 'classnames';
+import { TextField } from '@/components/TextField';
 
 export type RangePreset = '24h' | '7d' | '30d' | 'custom';
 export type TimeRange = { preset: RangePreset; from: string; to: string };
@@ -84,22 +85,20 @@ export const TimeRangePicker: FC<Props> = ({ value, onChange, maxDays, now }) =>
         <>
           <label className="flex flex-col gap-1.5 text-label text-muted">
             From (UTC)
-            <input
+            <TextField
               type="datetime-local"
               value={toLocalInput(value.from)}
               onChange={(e) =>
                 onChange({ ...value, from: fromLocalInput(e.target.value) })
               }
-              className="h-10 rounded-control border border-control-border bg-control px-3 text-body-sm text-ink"
             />
           </label>
           <label className="flex flex-col gap-1.5 text-label text-muted">
             To (UTC)
-            <input
+            <TextField
               type="datetime-local"
               value={toLocalInput(value.to)}
               onChange={(e) => onChange({ ...value, to: fromLocalInput(e.target.value) })}
-              className="h-10 rounded-control border border-control-border bg-control px-3 text-body-sm text-ink"
             />
           </label>
         </>

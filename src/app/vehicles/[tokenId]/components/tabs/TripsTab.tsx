@@ -20,6 +20,8 @@ import {
 import { QueryActions } from '@/components/QueryActions';
 import { fieldError } from '@/services/subjects/client';
 import { Button } from '@/components/Button';
+import { NativeSelect } from '@/components/NativeSelect';
+import { TextField } from '@/components/TextField';
 import { absoluteTime } from '@/utils/freshness';
 
 const MECHANISMS: { value: DetectionMechanism; label: string; daily: boolean }[] = [
@@ -37,8 +39,6 @@ const CONFIG_FIELDS: { key: keyof SegmentConfig; label: string }[] = [
   { key: 'maxIdleRpm', label: 'Max idle rpm' },
   { key: 'minIncreasePercent', label: 'Min increase (%)' },
 ];
-const inputClass =
-  'h-10 rounded-control border border-control-border bg-control px-3 text-body-sm text-ink';
 
 type Segment = {
   start: {
@@ -141,8 +141,7 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1.5 text-label text-muted">
             Detect trips by
-            <select
-              className={`${inputClass} appearance-none pr-8`}
+            <NativeSelect
               value={mechanism}
               onChange={(e) => setMechanism(e.target.value as DetectionMechanism)}
             >
@@ -151,7 +150,7 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                   {m.label}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           <TimeRangePicker value={range} onChange={setRange} maxDays={31} />
           <Button variant="ghost" onClick={() => setAdvanced((a) => !a)}>
@@ -170,9 +169,9 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             {CONFIG_FIELDS.map((f) => (
               <label key={f.key} className="flex flex-col gap-1.5 text-label text-muted">
                 {f.label}
-                <input
+                <TextField
                   type="number"
-                  className={`${inputClass} w-40`}
+                  wrapperClassName="w-40"
                   value={config[f.key] ?? ''}
                   onChange={(e) =>
                     setConfig({
