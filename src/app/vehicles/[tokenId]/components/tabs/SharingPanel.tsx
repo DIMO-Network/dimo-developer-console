@@ -1,9 +1,8 @@
 'use client';
 import { FC } from 'react';
 import { useQuery } from '@apollo/client';
-import { LICENSE_ALIAS } from '../../queries';
+import { ACCOUNT_SACDS, LICENSE_ALIAS } from '../../queries';
 import type { VehicleDetail } from '@/services/subjects/graph';
-import type { AccountState } from '../SourceRail';
 import { permissionLabels } from '@/utils/sacdPermissions';
 import { utcDate } from '@/utils/freshness';
 import { shortAddress } from '@/services/subjects/did';
@@ -78,15 +77,89 @@ const AppName: FC<{ grantee: string; mine: boolean }> = ({ grantee, mine }) => {
   );
 };
 
+type Grant = {
+  grantee: string;
+  permissions: string;
+  createdAt: string;
+  expiresAt: string;
+  source: string;
+};
+
+// One SACD grant: app, decoded permissions, terms, granted, expires.
+const SacdRow: FC<{ grant: Grant; mine: boolean }> = ({ grant, mine }) => {
+  const labels = permissionLabels(grant.permissions);
+  return (
+    <div className={`grid ${COLS} items-start gap-4 border-t border-outline px-5 py-3.5`}>
+      <AppName grantee={grant.grantee} mine={mine} />
+      <span className="flex flex-wrap gap-1">
+        {labels.length === 0 && <span className="text-body-sm text-muted">None</span>}
+        {labels.map((p) => (
+          <span
+            key={p}
+            className="rounded-chip bg-highest px-2 py-0.5 text-label text-fg"
+          >
+            {p}
+          </span>
+        ))}
+      </span>
+      <TermsLink grantee={grant.grantee} source={grant.source} />
+      <span className="text-body-sm text-fg">{utcDate(grant.createdAt)}</span>
+      <Expiry iso={grant.expiresAt} />
+    </div>
+  );
+};
+
+// The vehicle's grants and the owner account's grants share this table.
+// `status` (loading or an error) replaces the rows and the empty line.
+const SacdTable: FC<{
+  grants: Grant[];
+  clientId: string;
+  empty: string;
+  status?: { message: string; error?: boolean } | null;
+}> = ({ grants, clientId, empty, status }) => {
+  const mine = clientId.toLowerCase();
+  const line = 'border-t border-outline px-5 py-3 text-body-sm';
+  return (
+    <div className="flex flex-col rounded-card bg-card">
+      <div className={`grid ${COLS} gap-4 px-5 pb-2 pt-3 text-label text-muted`}>
+        <span>App</span>
+        <span>Permissions</span>
+        <span>Terms</span>
+        <span>Granted</span>
+        <span>Expires</span>
+      </div>
+      {status ? (
+        <p className={`${line} ${status.error ? 'text-negative' : 'text-muted'}`}>
+          {status.message}
+        </p>
+      ) : (
+        <>
+          {grants.map((g, i) => (
+            <SacdRow
+              key={`${g.grantee}-${g.createdAt}-${i}`}
+              grant={g}
+              mine={!!mine && g.grantee.toLowerCase() === mine}
+            />
+          ))}
+          {grants.length === 0 && <p className={`${line} text-muted`}>{empty}</p>}
+        </>
+      )}
+    </div>
+  );
+};
+
 // Renders for every vehicle, shared with the license or not, so it takes the
-// license as plain strings rather than the SubjectContext.
+// license's client ID rather than the SubjectContext ('' marks no row).
 export const SharingPanel: FC<{
   vehicle: VehicleDetail;
   clientId: string;
-  licenseLabel: string;
-  accountState: AccountState;
-}> = ({ vehicle, clientId, licenseLabel, accountState }) => {
-  const mine = clientId.toLowerCase();
+}> = ({ vehicle, clientId }) => {
+  const account = useQuery(ACCOUNT_SACDS, { variables: { address: vehicle.owner } });
+  const accountStatus = account.loading
+    ? { message: 'Loading…' }
+    : account.error
+      ? { message: account.error.message, error: true }
+      : null;
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
@@ -96,70 +169,25 @@ export const SharingPanel: FC<{
           permission set recorded on-chain, with its own terms and expiry.
         </p>
       </div>
-      <div className="flex flex-col rounded-card bg-card">
-        <div className={`grid ${COLS} gap-4 px-5 pb-2 pt-3 text-label text-muted`}>
-          <span>App</span>
-          <span>Permissions</span>
-          <span>Terms</span>
-          <span>Granted</span>
-          <span>Expires</span>
-        </div>
-        {vehicle.sacds.nodes.map((s) => (
-          <div
-            key={`${s.grantee}-${s.createdAt}`}
-            className={`grid ${COLS} items-start gap-4 border-t border-outline px-5 py-3.5`}
-          >
-            <AppName grantee={s.grantee} mine={s.grantee.toLowerCase() === mine} />
-            <span className="flex flex-wrap gap-1">
-              {permissionLabels(s.permissions).length === 0 && (
-                <span className="text-body-sm text-muted">None</span>
-              )}
-              {permissionLabels(s.permissions).map((p) => (
-                <span
-                  key={p}
-                  className="rounded-chip bg-highest px-2 py-0.5 text-label text-fg"
-                >
-                  {p}
-                </span>
-              ))}
-            </span>
-            <TermsLink grantee={s.grantee} source={s.source} />
-            <span className="text-body-sm text-fg">{utcDate(s.createdAt)}</span>
-            <Expiry iso={s.expiresAt} />
-          </div>
-        ))}
-        {vehicle.sacds.nodes.length === 0 && (
-          <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
-            No apps have access to this vehicle.
-          </p>
-        )}
-      </div>
+      <SacdTable
+        grants={vehicle.sacds.nodes}
+        clientId={clientId}
+        empty="No apps have access to this vehicle."
+      />
 
       <div className="flex flex-col gap-1 pt-1">
-        <h2 className="text-card-title text-ink">Owner account</h2>
+        <h2 className="text-card-title text-ink">Owner account grants</h2>
         <p className="max-w-2xl text-body-sm text-muted">
-          Document access is a separate grant on the owner&apos;s account DID. Only{' '}
-          {licenseLabel}&apos;s own grant can be checked from here.
+          Grants on the owner&apos;s account DID, separate from the vehicle. They cover
+          documents the owner shares from the DIMO app.
         </p>
       </div>
-      <div className="flex items-center justify-between rounded-card bg-card px-5 py-3.5">
-        <span className="text-body-sm font-medium text-ink">
-          {licenseLabel} · documents
-        </span>
-        <span
-          className={
-            accountState === 'shared' ? 'text-body-sm text-fg' : 'text-body-sm text-muted'
-          }
-        >
-          {accountState === 'shared'
-            ? 'Shared'
-            : accountState === 'not-shared'
-              ? 'Not shared'
-              : accountState === 'loading'
-                ? 'Checking…'
-                : '—'}
-        </span>
-      </div>
+      <SacdTable
+        grants={account.data?.account?.sacds.nodes ?? []}
+        clientId={clientId}
+        empty="The owner hasn't granted any apps account access."
+        status={accountStatus}
+      />
 
       {vehicle.privileges.nodes.length > 0 && (
         <>

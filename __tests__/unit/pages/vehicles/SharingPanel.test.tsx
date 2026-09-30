@@ -71,19 +71,37 @@ const vehicle = {
   },
 } as unknown as VehicleDetail;
 
+// pair 7 → Raw data
+const RAW = '0x' + (3n << 14n).toString(16);
+let accountGrants: unknown[] = [];
+let accountResult: Record<string, unknown> | null = null;
+
 beforeEach(() => {
   jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
   jest.setSystemTime(new Date('2026-09-30T12:00:00Z'));
+  accountGrants = [];
+  accountResult = null;
   (useQuery as jest.Mock).mockImplementation(
-    (_doc: unknown, opts: { variables: { clientId: string } }) => ({
-      data: {
-        developerLicense:
-          opts.variables.clientId === '0xAAA'
-            ? { alias: 'Fleet Pulse', clientId: '0xAAA' }
-            : null,
-      },
-      loading: false,
-    }),
+    (_doc: unknown, opts: { variables: { clientId?: string; address?: string } }) =>
+      opts.variables.address
+        ? (accountResult ?? {
+            data: {
+              account: {
+                address: opts.variables.address,
+                sacds: { nodes: accountGrants },
+              },
+            },
+            loading: false,
+          })
+        : {
+            data: {
+              developerLicense:
+                opts.variables.clientId === '0xAAA'
+                  ? { alias: 'Fleet Pulse', clientId: '0xAAA' }
+                  : null,
+            },
+            loading: false,
+          },
   );
 });
 
@@ -93,14 +111,7 @@ const row = (text: string) => screen.getByText(text).closest('div.grid') as HTML
 
 describe('SharingPanel', () => {
   it('names apps, decodes permissions, links terms and marks the current license', () => {
-    render(
-      <SharingPanel
-        vehicle={vehicle}
-        clientId="0xaaa"
-        licenseLabel="Fleet Pulse"
-        accountState="shared"
-      />,
-    );
+    render(<SharingPanel vehicle={vehicle} clientId="0xaaa" />);
     expect(screen.getByText('Fleet Pulse')).toBeInTheDocument();
     expect(screen.getByText('This license')).toBeInTheDocument();
     expect(screen.getByText('Non-location data')).toBeInTheDocument();
@@ -113,28 +124,14 @@ describe('SharingPanel', () => {
     expect(screen.getByText('Expired Aug 2, 2026')).toBeInTheDocument();
   });
   it('warns when a grant expires within 30 days, pluralizing and rounding up', () => {
-    render(
-      <SharingPanel
-        vehicle={vehicle}
-        clientId="0xaaa"
-        licenseLabel="Fleet Pulse"
-        accountState="shared"
-      />,
-    );
+    render(<SharingPanel vehicle={vehicle} clientId="0xaaa" />);
     const warn = screen.getByText('Oct 15, 2026 · in 15 days');
     expect(warn).toHaveClass('text-warning');
     const one = screen.getByText('Oct 1, 2026 · in 1 day');
     expect(one).toHaveClass('text-warning');
   });
   it('handles empty permissions, missing terms and unparseable dates', () => {
-    render(
-      <SharingPanel
-        vehicle={vehicle}
-        clientId="0xaaa"
-        licenseLabel="Fleet Pulse"
-        accountState="shared"
-      />,
-    );
+    render(<SharingPanel vehicle={vehicle} clientId="0xaaa" />);
     const empty = row('0x1111…1111');
     expect(within(empty).getByText('None')).toBeInTheDocument();
     expect(within(empty).queryByRole('link', { name: /View terms/ })).toBeNull();
@@ -144,16 +141,76 @@ describe('SharingPanel', () => {
       screen.getByRole('link', { name: 'View terms for Fleet Pulse' }),
     ).toHaveAttribute('href', 'https://assets.dimo.org/ipfs/bafy1');
   });
-  it('lists legacy privileges and the owner-account grant state', () => {
-    render(
-      <SharingPanel
-        vehicle={vehicle}
-        clientId="0xaaa"
-        licenseLabel="Fleet Pulse"
-        accountState="not-shared"
-      />,
-    );
+  it('lists legacy privileges', () => {
+    render(<SharingPanel vehicle={vehicle} clientId="0xaaa" />);
     expect(screen.getByText('Legacy privileges')).toBeInTheDocument();
-    expect(screen.getByText('Not shared')).toBeInTheDocument();
+  });
+
+  it("lists the owner account's grants in the same row layout as the vehicle's", () => {
+    accountGrants = [
+      {
+        grantee: '0xAAA',
+        permissions: RAW,
+        createdAt: '2026-08-10T00:00:00Z',
+        expiresAt: '2027-08-10T00:00:00Z',
+        source: 'ipfs://acct1',
+      },
+      {
+        grantee: '0x4444444444444444444444444444444444444444',
+        permissions: RAW,
+        createdAt: '2026-09-01T00:00:00Z',
+        expiresAt: '2026-10-10T00:00:00Z',
+        source: '',
+      },
+    ];
+    render(<SharingPanel vehicle={vehicle} clientId="0xaaa" />);
+    expect(useQuery).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ variables: { address: vehicle.owner } }),
+    );
+    expect(
+      screen.getByRole('heading', { name: 'Owner account grants' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Grants on the owner's account DID, separate from the vehicle. They cover documents the owner shares from the DIMO app.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/can be checked from here/)).not.toBeInTheDocument();
+    // Our license is marked in both tables.
+    expect(screen.getAllByText('This license')).toHaveLength(2);
+    const other = row('0x4444…4444');
+    expect(within(other).getByText('Raw data')).toBeInTheDocument();
+    expect(within(other).getByText('Oct 10, 2026 · in 10 days')).toBeInTheDocument();
+    expect(within(other).queryByRole('link', { name: /View terms/ })).toBeNull();
+    expect(screen.getByText('Aug 10, 2026')).toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole('link', { name: 'View terms for Fleet Pulse' })
+        .map((a) => a.getAttribute('href')),
+    ).toEqual([
+      'https://assets.dimo.org/ipfs/bafy1',
+      'https://assets.dimo.org/ipfs/acct1',
+    ]);
+  });
+
+  it('says so when the owner has granted no account access', () => {
+    render(<SharingPanel vehicle={vehicle} clientId="0xaaa" />);
+    expect(
+      screen.getByText("The owner hasn't granted any apps account access."),
+    ).toBeInTheDocument();
+  });
+
+  it('says when the account grants cannot be loaded', () => {
+    accountResult = {
+      data: undefined,
+      loading: false,
+      error: new Error('identity down'),
+    };
+    render(<SharingPanel vehicle={vehicle} clientId="0xaaa" />);
+    expect(screen.getByText('identity down')).toBeInTheDocument();
+    expect(
+      screen.queryByText("The owner hasn't granted any apps account access."),
+    ).not.toBeInTheDocument();
   });
 });

@@ -43,3 +43,15 @@ export const LICENSE_ALIAS = gql(`
     }
   }
 `);
+
+// Account-level SACDs the owner granted on their account DID (documents).
+export const ACCOUNT_SACDS = gql(`
+  query GetAccountSacds($address: Address!) {
+    account(by: { address: $address }) {
+      address
+      sacds(first: 100) {
+        nodes { grantee permissions createdAt expiresAt source }
+      }
+    }
+  }
+`);

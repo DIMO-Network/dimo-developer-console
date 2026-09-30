@@ -145,12 +145,7 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
         />
         <section className="flex min-w-0 flex-col gap-4">
           {selectedKey === 'sharing' ? (
-            <SharingPanel
-              vehicle={vehicle}
-              clientId={license?.clientId ?? ''}
-              licenseLabel={license?.label ?? 'your license'}
-              accountState={accountState}
-            />
+            <SharingPanel vehicle={vehicle} clientId={license?.clientId ?? ''} />
           ) : (
             subject && (
               <>
