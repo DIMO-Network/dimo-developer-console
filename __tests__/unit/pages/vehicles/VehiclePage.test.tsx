@@ -1,5 +1,9 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const render = (ui: React.ReactElement) =>
+  rtlRender(<QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>);
 
 const replace = jest.fn();
 let params = new URLSearchParams('license=0xaaa');
@@ -19,7 +23,10 @@ jest.mock('@/hooks/useGetDevJwts', () => ({ useGetDevJwts: jest.fn() }));
 jest.mock('@/hooks/subjects/useSubjectFreshness', () => ({
   useSubjectFreshness: jest.fn(),
 }));
-jest.mock('@/hooks/subjects/useSubjectQuery', () => ({ useSubjectQuery: jest.fn() }));
+jest.mock('@/hooks/subjects/useSubjectQuery', () => ({
+  ...jest.requireActual('@/hooks/subjects/useSubjectQuery'),
+  useSubjectQuery: jest.fn(),
+}));
 jest.mock('@/components/GenerateDevJWT', () => ({
   GenerateDevJWT: () => <button>Generate developer JWT</button>,
 }));

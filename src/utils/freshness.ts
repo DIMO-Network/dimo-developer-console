@@ -61,3 +61,9 @@ export const FRESHNESS_TONE: Record<Freshness, StatusTone> = {
   inactive: 'error',
   none: 'off',
 };
+
+// "Mar 4, 2024" in UTC; an em dash for a missing or invalid timestamp.
+export const utcDate = (iso?: string | null): string => {
+  const t = parse(iso);
+  return t === null ? '—' : dateLabel(t);
+};

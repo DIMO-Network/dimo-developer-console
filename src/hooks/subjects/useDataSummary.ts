@@ -1,8 +1,8 @@
 'use client';
-import { useMemo } from 'react';
-import { useSubjectQuery } from './useSubjectQuery';
+import { useQueries } from '@tanstack/react-query';
+import { useSubjectQuery, subjectQueryKey } from './useSubjectQuery';
 import { dataSummaryQuery } from '@/services/subjects/queries';
-import { fieldError } from '@/services/subjects/client';
+import { fieldError, postSubjectQuery } from '@/services/subjects/client';
 import {
   isDevice,
   resolveTelemetrySource,
@@ -61,28 +61,37 @@ export const useDataSummary = (subject: Subject, ctx: SubjectContext) => {
       ),
     }))
     .filter((x): x is { d: Subject; source: string } => !!x.source);
-  const perDevice = deviceSources.map((x) =>
-    // The list length is fixed per vehicle graph, so the hook count is stable
-    // across renders; the rules-of-hooks disable is deliberate.
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useSubjectQuery<Data>({
-      api: 'telemetry',
-      asset: subject.asset,
-      clientId: ctx.clientId,
-      request: dataSummaryQuery(tokenId, x.source),
-      enabled: subject.kind === 'vehicle',
-    }),
-  );
-  const fromBySignal = useMemo(() => {
-    const out: Record<string, string[]> = {};
-    perDevice.forEach((pq, i) => {
-      for (const s of pq.data?.data?.dataSummary?.signalDataSummary ?? []) {
-        (out[s.name] ??= []).push(deviceSources[i].d.label);
-      }
-    });
-    return out;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [perDevice.map((p) => p.data).join('|')]);
+  // useQueries takes a list, so the count of per-device requests may change
+  // (freshness arrives async) without changing the hook count.
+  const perDevice = useQueries({
+    queries:
+      subject.kind === 'vehicle'
+        ? deviceSources.map((x) => {
+            const request = dataSummaryQuery(tokenId, x.source);
+            return {
+              queryKey: [
+                ...subjectQueryKey('telemetry', subject.asset, request),
+                ctx.clientId,
+              ],
+              queryFn: () =>
+                postSubjectQuery<Data>('telemetry', {
+                  asset: subject.asset,
+                  clientId: ctx.clientId,
+                  request,
+                }),
+              enabled: !!ctx.clientId,
+              staleTime: 60_000,
+              retry: false,
+            };
+          })
+        : [],
+  });
+  const fromBySignal: Record<string, string[]> = {};
+  perDevice.forEach((pq, i) => {
+    for (const s of pq.data?.data?.dataSummary?.signalDataSummary ?? []) {
+      (fromBySignal[s.name] ??= []).push(deviceSources[i].d.label);
+    }
+  });
 
   return {
     summary: q.data?.data?.dataSummary ?? null,

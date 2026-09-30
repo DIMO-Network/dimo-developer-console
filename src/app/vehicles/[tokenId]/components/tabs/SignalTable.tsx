@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { TextField } from '@/components/TextField';
 import { FreshnessDot } from '@/components/FreshnessDot';
 import { humanizeSignal } from '@/utils/humanizeSignal';
+import { utcDate } from '@/utils/freshness';
 
 export type SignalRow = {
   name: string;
@@ -13,14 +14,6 @@ export type SignalRow = {
   from?: string[];
 };
 type SortKey = 'name' | 'count' | 'firstSeen' | 'lastSeen';
-
-const date = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
 
 export const SignalTable: FC<{
   rows: SignalRow[];
@@ -93,7 +86,7 @@ export const SignalTable: FC<{
           <span className="text-right text-body-sm text-fg">
             {r.count.toLocaleString('en-US')}
           </span>
-          <span className="text-body-sm text-fg">{date(r.firstSeen)}</span>
+          <span className="text-body-sm text-fg">{utcDate(r.firstSeen)}</span>
           <FreshnessDot at={r.lastSeen} />
           {showFrom && (
             <span className="flex flex-wrap gap-1">

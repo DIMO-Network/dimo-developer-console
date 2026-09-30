@@ -1,7 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-jest.mock('@/hooks/subjects/useSubjectQuery', () => ({ useSubjectQuery: jest.fn() }));
+jest.mock('@/hooks/subjects/useSubjectQuery', () => ({
+  ...jest.requireActual('@/hooks/subjects/useSubjectQuery'),
+  useSubjectQuery: jest.fn(),
+}));
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
 import { SummaryTab } from '@/app/vehicles/[tokenId]/components/tabs/SummaryTab';
 import { buildVehicleGraph, type VehicleDetail } from '@/services/subjects/graph';
@@ -115,10 +119,13 @@ const answers = (overrides: Record<string, unknown> = {}) =>
     },
   );
 
+const renderWithClient = (ui: React.ReactElement) =>
+  render(<QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>);
+
 describe('SummaryTab', () => {
   it('shows KPIs, the signal breakdown with a From column, events and data types', () => {
     answers();
-    render(<SummaryTab subject={graph.vehicle} ctx={ctx} />);
+    renderWithClient(<SummaryTab subject={graph.vehicle} ctx={ctx} />);
     expect(screen.getAllByText('Latest payload').length).toBeGreaterThan(0);
     expect(screen.getByText('1.24M')).toBeInTheDocument();
     expect(screen.getAllByText('Mar 4, 2024').length).toBeGreaterThan(0);
@@ -133,7 +140,7 @@ describe('SummaryTab', () => {
 
   it('hands off to Raw data for the selected subject', () => {
     answers();
-    render(<SummaryTab subject={graph.vehicle} ctx={ctx} />);
+    renderWithClient(<SummaryTab subject={graph.vehicle} ctx={ctx} />);
     screen.getByRole('button', { name: 'Browse cloud events' }).click();
     expect(ctx.onBrowseRaw).toHaveBeenCalledWith(graph.vehicle.did);
   });
@@ -143,14 +150,14 @@ describe('SummaryTab', () => {
       DataSummary: { dataSummary: null },
       DataSummaryErrors: [{ message: 'needs privilege 1', path: ['dataSummary'] }],
     });
-    render(<SummaryTab subject={graph.vehicle} ctx={ctx} />);
+    renderWithClient(<SummaryTab subject={graph.vehicle} ctx={ctx} />);
     expect(screen.getByText('needs privilege 1')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Data types/ })).toBeInTheDocument();
   });
 
   it('tells the reader when a device has no resolvable telemetry source', () => {
     answers();
-    render(<SummaryTab subject={graph.devices[0]} ctx={ctx} />);
+    renderWithClient(<SummaryTab subject={graph.devices[0]} ctx={ctx} />);
     expect(
       screen.getByText(
         'This device has no cloud events yet, so the signal breakdown covers the whole vehicle.',

@@ -143,7 +143,11 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
                       <span className="font-mono text-code text-muted">
                         {shortDid(subject.did)}
                       </span>
-                      <CopyButton value={subject.did} onCopySuccessMessage="DID copied" />
+                      <CopyButton
+                        value={subject.did}
+                        onCopySuccessMessage="DID copied"
+                        ariaLabel="Copy DID"
+                      />
                     </div>
                   </div>
                   <SubjectTabs

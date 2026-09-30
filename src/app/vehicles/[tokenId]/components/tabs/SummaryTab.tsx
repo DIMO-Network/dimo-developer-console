@@ -16,7 +16,7 @@ import { JsonBlock } from '@/components/JsonBlock';
 import { Button } from '@/components/Button';
 import { SignalTable, SignalFilter } from './SignalTable';
 import { humanizeSignal } from '@/utils/humanizeSignal';
-import { relativeTime, absoluteTime } from '@/utils/freshness';
+import { relativeTime, absoluteTime, utcDate } from '@/utils/freshness';
 
 type Types = {
   availableCloudEventTypes:
@@ -27,17 +27,8 @@ type Latest = {
   latestCloudEvent: { header: Record<string, string>; data: unknown } | null;
 };
 
-const date = (iso?: string | null) =>
-  iso
-    ? new Date(iso).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        timeZone: 'UTC',
-      })
-    : '—';
 const daysBetween = (a: string, b: string) =>
-  Math.max(0, Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000));
+  Math.max(0, Math.floor((Date.parse(b) - Date.parse(a)) / 86_400_000));
 
 const Problem: FC<{ message: string }> = ({ message }) => (
   <p className="px-5 py-3 text-body-sm text-negative">{message}</p>
@@ -91,7 +82,7 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         />
         <StatCard
           label="First seen"
-          value={summary ? date(summary.firstSeen) : '—'}
+          value={summary ? utcDate(summary.firstSeen) : '—'}
           caption={
             summary
               ? `${daysBetween(summary.firstSeen, summary.lastSeen)} days of data`
@@ -148,23 +139,27 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         title="Events"
         count={summary?.eventDataSummary.length ?? '…'}
         meta={
-          summary?.eventDataSummary.length
-            ? `Last event ${relativeTime(
-                summary.eventDataSummary
-                  .map((e) => e.lastSeen)
-                  .sort()
-                  .at(-1),
-              )}`
-            : 'This source reports no events'
+          error
+            ? undefined
+            : summary?.eventDataSummary.length
+              ? `Last event ${relativeTime(
+                  summary.eventDataSummary
+                    .map((e) => e.lastSeen)
+                    .reduce((a, b) => (Date.parse(b) > Date.parse(a) ? b : a)),
+                )}`
+              : 'This source reports no events'
         }
       >
-        <div className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
-          <span>Event</span>
-          <span className="text-right">Count</span>
-          <span>First seen</span>
-          <span>Last seen</span>
-        </div>
-        {(summary?.eventDataSummary ?? []).map((e) => (
+        {error && <Problem message={error} />}
+        {!error && (
+          <div className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
+            <span>Event</span>
+            <span className="text-right">Count</span>
+            <span>First seen</span>
+            <span>Last seen</span>
+          </div>
+        )}
+        {(error ? [] : (summary?.eventDataSummary ?? [])).map((e) => (
           <div
             key={e.name}
             className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] items-center gap-4 border-t border-outline px-5 py-2 text-body-sm text-fg"
@@ -174,7 +169,7 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               <span className="font-mono text-code text-muted">{e.name}</span>
             </span>
             <span className="text-right">{e.numberOfEvents.toLocaleString('en-US')}</span>
-            <span>{date(e.firstSeen)}</span>
+            <span>{utcDate(e.firstSeen)}</span>
             <span>{relativeTime(e.lastSeen)}</span>
           </div>
         ))}
@@ -191,6 +186,12 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           />
         )}
         {types.error && <Problem message={types.error.message} />}
+        <div className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
+          <span>Type</span>
+          <span className="text-right">Count</span>
+          <span>First seen</span>
+          <span>Last seen</span>
+        </div>
         {typeRows.map((t) => (
           <div
             key={t.type}
@@ -198,10 +199,17 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           >
             <span className="font-mono text-code text-ink">{t.type}</span>
             <span className="text-right">{t.count.toLocaleString('en-US')}</span>
-            <span>{date(t.firstSeen)}</span>
+            <span>{utcDate(t.firstSeen)}</span>
             <FreshnessDot at={t.lastSeen} />
           </div>
         ))}
+        {typeRows.length === 0 &&
+          !types.error &&
+          !fieldError(types.data?.errors, 'availableCloudEventTypes') && (
+            <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
+              No cloud events on this DID yet.
+            </p>
+          )}
       </CollapsibleSection>
 
       <CollapsibleSection

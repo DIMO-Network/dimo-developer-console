@@ -17,9 +17,12 @@ export const StatCard: FC<{
   </div>
 );
 
-export const compact = (n: number) =>
-  n >= 1_000_000
-    ? `${(n / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}M`
-    : n >= 1_000
-      ? `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}K`
-      : String(n);
+export const compact = (n: number): string => {
+  const m = (v: number) => `${(v / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}M`;
+  if (n >= 1_000_000) return m(n);
+  if (n >= 1_000) {
+    const k = Number((n / 1_000).toFixed(1));
+    return k >= 1000 ? m(n) : `${String(k)}K`;
+  }
+  return String(n);
+};

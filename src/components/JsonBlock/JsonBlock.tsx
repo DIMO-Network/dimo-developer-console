@@ -45,7 +45,12 @@ export const JsonBlock: FC<Props> = ({ value, maxHeight = 320, filename, classNa
             Download JSON
           </Button>
         )}
-        <CopyButton value={text} onCopySuccessMessage="JSON copied" size="icon" />
+        <CopyButton
+          value={text}
+          onCopySuccessMessage="JSON copied"
+          size="icon"
+          ariaLabel="Copy JSON"
+        />
       </div>
       <div
         className="overflow-auto rounded-control bg-control px-4 py-3 font-mono text-code"

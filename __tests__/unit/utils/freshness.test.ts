@@ -1,4 +1,4 @@
-import { freshnessOf, relativeTime, FRESHNESS_TONE } from '@/utils/freshness';
+import { freshnessOf, relativeTime, utcDate, FRESHNESS_TONE } from '@/utils/freshness';
 
 const NOW = Date.parse('2026-09-29T20:49:00Z');
 const ago = (ms: number) => new Date(NOW - ms).toISOString();
@@ -44,4 +44,11 @@ it('maps freshness to StatusChip tones', () => {
     inactive: 'error',
     none: 'off',
   });
+});
+
+it('formats UTC dates and dashes missing or invalid input', () => {
+  expect(utcDate('2024-03-04T00:00:00Z')).toBe('Mar 4, 2024');
+  expect(utcDate(null)).toBe('—');
+  expect(utcDate(undefined)).toBe('—');
+  expect(utcDate('nope')).toBe('—');
 });
