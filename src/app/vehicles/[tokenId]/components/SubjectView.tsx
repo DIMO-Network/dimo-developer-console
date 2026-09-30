@@ -7,6 +7,7 @@ import type { VehicleTab } from '../hooks/useVehicleUrlState';
 import { SummaryTab } from './tabs/SummaryTab';
 import { RawDataTab } from './tabs/RawDataTab';
 import { SignalsTab } from './tabs/SignalsTab';
+import { TripsTab } from './tabs/TripsTab';
 
 export type SubjectContext = {
   clientId: string;
@@ -30,7 +31,7 @@ export const SubjectView: FC<{
     case 'signals':
       return <SignalsTab key={subject.did} subject={subject} ctx={ctx} />;
     case 'trips':
-      return null; // Task 9: <TripsTab subject={subject} ctx={ctx} />
+      return <TripsTab key={subject.did} subject={subject} ctx={ctx} />;
     case 'documents':
       return null; // Task 10: <DocumentsTab subject={subject} ctx={ctx} />
   }
