@@ -106,3 +106,10 @@ export const VEHICLE_NFT_ADDRESS: `0x${string}` =
 
 export const VEHICLE_SIMULATOR_URL =
   'https://dimo-vehicle-simulator-git-dev-dimo-network.vercel.app';
+
+// Vehicle data proxies (Task: Vehicles section). Dev endpoints; production.ts overrides.
+export const telemetryApiUrl = 'https://telemetry-api.dev.dimo.zone/query';
+export const fetchApiUrl = 'https://fetch-api.dev.dimo.zone/query';
+export const tokenExchangeApiUrl =
+  'https://token-exchange-api.dev.dimo.zone/v1/tokens/exchange';
+export const loginBaseUrl = 'https://login.dev.dimo.org';

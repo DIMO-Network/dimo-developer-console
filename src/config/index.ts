@@ -36,6 +36,10 @@ type Configuration = {
   DIMO_REGISTRY_ADDRESS: `0x${string}`;
   VEHICLE_NFT_ADDRESS: `0x${string}`;
   VEHICLE_SIMULATOR_URL: string;
+  telemetryApiUrl: string;
+  fetchApiUrl: string;
+  tokenExchangeApiUrl: string;
+  loginBaseUrl: string;
 };
 
 const getCurrentEnvironment = (): string => {
