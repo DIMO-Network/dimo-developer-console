@@ -16,7 +16,7 @@ const DEV = jwt({
 });
 const VEHICLE = 'did:erc721:80002:0x45fbCD3ef7361d156e8b16F5538AE36DEdf61Da8:190231';
 const ACCOUNT = 'did:ethr:80002:0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6';
-// bits 1..4 and 7 set as 0b11 pairs → 0x3 << 2 | ... : NonLocation, Commands, CurrentLoc, LocHistory, RawData
+// Permission pairs set (0b11): 1 NonLocation, 2 Commands, 3 CurrentLoc, 4 LocHistory, 7 RawData
 const PERMS_HEX =
   '0x' + ((3n << 2n) | (3n << 4n) | (3n << 6n) | (3n << 8n) | (3n << 14n)).toString(16);
 
@@ -64,12 +64,24 @@ describe('getSubjectJwt', () => {
     });
   });
 
-  it('caches per license and asset until close to expiry', async () => {
+  it('caches per developer JWT and asset until close to expiry', async () => {
     const soon = jwt({ exp: Math.floor(Date.now() / 1000) + 600 });
     fetchMock.mockImplementationOnce(() => json(200, { token: soon }));
     await getSubjectJwt(DEV, ACCOUNT);
     await getSubjectJwt(DEV, ACCOUNT);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not serve a cached token to a different JWT with the same address', async () => {
+    fetchMock.mockImplementationOnce(() => json(200, { token: 'victim-jwt' }));
+    await getSubjectJwt(DEV, ACCOUNT);
+    const forged = jwt({
+      ethereum_address: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
+      exp: future + 1,
+    });
+    fetchMock.mockImplementationOnce(() => json(401, {}));
+    await expect(getSubjectJwt(forged, ACCOUNT)).rejects.toMatchObject({ status: 401 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it('answers 403 NOT_SHARED when the vehicle has no SACD for the license', async () => {

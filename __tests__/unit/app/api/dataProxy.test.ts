@@ -76,6 +76,7 @@ describe('data proxy routes', () => {
     [{ asset: VEHICLE }, 'query'],
     [{ asset: VEHICLE, query: 'q'.repeat(20_001) }, 'query'],
     ['not json', 'body'],
+    ['null', 'body'],
   ])('answers 400 for %j', async (body, field) => {
     const res = await telemetry(req(body));
     expect(res.status).toBe(400);

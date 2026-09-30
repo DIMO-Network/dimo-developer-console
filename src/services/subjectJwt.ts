@@ -1,6 +1,7 @@
 // Server only: exchanges the developer JWT for an asset-scoped token.
 // The proxy adds no privilege: token exchange only grants what the license's
 // SACD already holds, and the token is bound to one asset DID.
+import { createHash } from 'node:crypto';
 import { jwtDecode } from 'jwt-decode';
 import configuration from '@/config';
 import { isEthrDid, parseErc721Did } from '@/services/subjects/did';
@@ -36,6 +37,8 @@ const expiryOf = (token: string): number => {
   return Date.now() + FALLBACK_TTL_MS;
 };
 
+// The payload is only base64-decoded here, not verified: token exchange is the
+// step that validates the JWT, so the cache must never be keyed on claims alone.
 const decodeDevJwt = (devJwt: string): { clientId: string } => {
   let payload: { ethereum_address?: string; exp?: number };
   try {
@@ -98,7 +101,7 @@ const permissionsFor = async (asset: string, clientId: string): Promise<string[]
 
 export const getSubjectJwt = async (devJwt: string, asset: string): Promise<string> => {
   const { clientId } = decodeDevJwt(devJwt);
-  const key = `${clientId.toLowerCase()}:${asset}`;
+  const key = `${createHash('sha256').update(devJwt).digest('hex')}:${asset}`;
   const hit = cache.get(key);
   if (hit && hit.expiresAt > Date.now() + EXPIRY_SKEW_MS) return hit.token;
 

@@ -22,6 +22,8 @@ const readBody = async (req: NextRequest): Promise<Body | NextResponse> => {
   } catch {
     return bad('Expected a JSON body');
   }
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw))
+    return bad('Expected a JSON object body');
   const body = raw as Partial<Body>;
   if (typeof body.query !== 'string' || !body.query.trim())
     return bad('query is required');
@@ -29,7 +31,9 @@ const readBody = async (req: NextRequest): Promise<Body | NextResponse> => {
   if (typeof body.asset !== 'string') return bad('asset is required');
   if (
     body.variables !== undefined &&
-    (typeof body.variables !== 'object' || body.variables === null)
+    (typeof body.variables !== 'object' ||
+      body.variables === null ||
+      Array.isArray(body.variables))
   ) {
     return bad('variables must be an object');
   }
