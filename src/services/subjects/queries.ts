@@ -353,9 +353,12 @@ export const freshnessQuery = (
 export const formatGraphQL = (req: GqlRequest): string =>
   `${req.query}\n\n# variables\n${JSON.stringify(req.variables, null, 2)}`;
 
-export const lastSeenQuery = (tokenId: number): GqlRequest => ({
-  query: `query LastSeen($tokenId: Int!) {
-  signalsLatest(tokenId: $tokenId) { lastSeen }
+// The vehicles list's "Last seen": the vehicle's latest status event from the
+// Fetch API. Fetch isn't metered in DCX credits (Telemetry is), and filtering to
+// dimo.status keeps periodic attestations from making an offline car look live.
+export const lastSeenQuery = (did: string): GqlRequest => ({
+  query: `query LastSeen($did: String!, $filter: CloudEventFilter) {
+  latestIndex(did: $did, filter: $filter) { header { time } }
 }`,
-  variables: { tokenId },
+  variables: { did, filter: { type: 'dimo.status' } },
 });

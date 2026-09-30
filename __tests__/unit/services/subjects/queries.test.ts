@@ -17,6 +17,7 @@ import {
   isLocationSignal,
   isStringSignal,
   STRING_SIGNALS,
+  lastSeenQuery,
 } from '@/services/subjects/queries';
 
 const DID = 'did:erc721:137:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:184223';
@@ -236,5 +237,18 @@ describe('hardening', () => {
 
   it('refuses an empty freshness list', () => {
     expect(() => freshnessQuery([])).toThrow('at least one DID');
+  });
+});
+
+describe('lastSeenQuery', () => {
+  it('reads the latest status event from Fetch (unmetered), time only', () => {
+    const did = 'did:erc721:137:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:184223';
+    const q = lastSeenQuery(did);
+    expect(q.query).toContain('query LastSeen($did: String!, $filter: CloudEventFilter)');
+    expect(q.query).toContain(
+      'latestIndex(did: $did, filter: $filter) { header { time } }',
+    );
+    expect(q.query).not.toContain('signalsLatest');
+    expect(q.variables).toEqual({ did, filter: { type: 'dimo.status' } });
   });
 });

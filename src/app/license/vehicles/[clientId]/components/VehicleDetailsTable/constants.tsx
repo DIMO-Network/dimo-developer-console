@@ -138,11 +138,7 @@ export const buildColumns = (
           id: 'lastSeen',
           header: 'Last seen',
           cell: (info) => (
-            <LastSeenCell
-              tokenId={info.row.original.tokenId}
-              asset={info.row.original.tokenDID}
-              clientId={opts.clientId}
-            />
+            <LastSeenCell asset={info.row.original.tokenDID} clientId={opts.clientId} />
           ),
         }),
       ]

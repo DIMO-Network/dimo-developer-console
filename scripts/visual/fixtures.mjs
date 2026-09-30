@@ -611,7 +611,7 @@ export const DATA_API = {
       obdDTCList: { timestamp: AT(14 * 1440), value: 'P0301' },
     },
   },
-  LastSeen: { signalsLatest: { lastSeen: AT(2) } },
+  LastSeen: { latestIndex: { header: { time: AT(2) } } },
   // Daytime driving hours have values, nights are gaps.
   Signals: {
     signals: Array.from({ length: 168 }, (_, i) => {
