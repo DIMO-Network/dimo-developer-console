@@ -15,6 +15,7 @@ import { VehicleHeader } from './VehicleHeader';
 import { SourceRail, type Access, type AccountState } from './SourceRail';
 import { SubjectTabs } from './SubjectTabs';
 import { AccessNotice } from './AccessNotice';
+import { SharingPanel } from './tabs/SharingPanel';
 import { SubjectView, type SubjectContext } from './SubjectView';
 import { shortDid } from '@/services/subjects/did';
 import { CopyButton } from '@/components/CopyButton';
@@ -128,48 +129,55 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
           accountState={accountState}
         />
         <section className="flex min-w-0 flex-col gap-4">
-          {selectedKey === 'sharing'
-            ? null /* Task 10: <SharingPanel vehicle={vehicle} ctx={ctx} accountState={accountState} /> */
-            : subject && (
-                <>
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2.5">
-                      <h2 className="text-card-title text-ink">{subject.label}</h2>
-                      <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
-                        {subject.sublabel}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono text-code text-muted">
-                        {shortDid(subject.did)}
-                      </span>
-                      <CopyButton
-                        value={subject.did}
-                        onCopySuccessMessage="DID copied"
-                        ariaLabel="Copy DID"
-                      />
-                    </div>
+          {selectedKey === 'sharing' ? (
+            <SharingPanel
+              vehicle={vehicle}
+              clientId={license?.clientId ?? ''}
+              licenseLabel={license?.label ?? 'your license'}
+              accountState={accountState}
+            />
+          ) : (
+            subject && (
+              <>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2.5">
+                    <h2 className="text-card-title text-ink">{subject.label}</h2>
+                    <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
+                      {subject.sublabel}
+                    </span>
                   </div>
-                  <SubjectTabs
-                    subject={subject}
-                    tab={tab}
-                    onChange={(t) => url.set({ tab: t })}
-                    disabled={access !== 'ok'}
-                  />
-                  {access === 'ok' ? (
-                    <SubjectView subject={subject} tab={tab} ctx={ctx} />
-                  ) : (
-                    <AccessNotice
-                      access={access}
-                      licenseLabel={license?.label ?? ''}
-                      clientId={license?.clientId}
-                      redirectUri={license?.firstRedirectURI}
-                      onGenerated={refetchJwts}
-                      onViewSharing={() => url.set({ subject: 'sharing' })}
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-code text-muted">
+                      {shortDid(subject.did)}
+                    </span>
+                    <CopyButton
+                      value={subject.did}
+                      onCopySuccessMessage="DID copied"
+                      ariaLabel="Copy DID"
                     />
-                  )}
-                </>
-              )}
+                  </div>
+                </div>
+                <SubjectTabs
+                  subject={subject}
+                  tab={tab}
+                  onChange={(t) => url.set({ tab: t })}
+                  disabled={access !== 'ok'}
+                />
+                {access === 'ok' ? (
+                  <SubjectView subject={subject} tab={tab} ctx={ctx} />
+                ) : (
+                  <AccessNotice
+                    access={access}
+                    licenseLabel={license?.label ?? ''}
+                    clientId={license?.clientId}
+                    redirectUri={license?.firstRedirectURI}
+                    onGenerated={refetchJwts}
+                    onViewSharing={() => url.set({ subject: 'sharing' })}
+                  />
+                )}
+              </>
+            )
+          )}
         </section>
       </div>
     </div>

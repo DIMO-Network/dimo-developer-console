@@ -1,4 +1,5 @@
 'use client';
+import { safeHttpUrl } from '@/utils/safeHttpUrl';
 import { FC, useMemo, useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import classNames from 'classnames';
@@ -393,9 +394,9 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               {open && (
                 <div className="flex flex-col gap-2 px-4 pb-4">
                   <JsonBlock value={r} maxHeight={260} />
-                  {r.dataUrl && (
+                  {safeHttpUrl(r.dataUrl) && (
                     <a
-                      href={r.dataUrl}
+                      href={safeHttpUrl(r.dataUrl)!}
                       className="w-fit text-body-sm font-semibold text-ink underline"
                       target="_blank"
                       rel="noreferrer"

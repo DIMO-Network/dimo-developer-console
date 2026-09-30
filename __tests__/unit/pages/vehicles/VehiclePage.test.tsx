@@ -123,6 +123,18 @@ describe('VehiclePage', () => {
     expect(screen.getAllByText('No access').length).toBeGreaterThan(0);
   });
 
+  it('shows the sharing panel for a vehicle no license can read', () => {
+    params = new URLSearchParams('license=0xaaa&subject=sharing');
+    (useQuery as jest.Mock).mockReturnValue({
+      data: { vehicle: vehicle(['0xccc']) },
+      loading: false,
+    });
+    render(<VehiclePage tokenId={190231} />);
+    expect(screen.getByRole('heading', { name: 'Sharing' })).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: 'View terms' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('No access').length).toBeGreaterThan(0);
+  });
+
   it('asks for a developer JWT when the license has none stored', () => {
     (useQuery as jest.Mock).mockReturnValue({
       data: { vehicle: vehicle(['0xaaa']) },

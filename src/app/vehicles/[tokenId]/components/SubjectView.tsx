@@ -8,6 +8,7 @@ import { SummaryTab } from './tabs/SummaryTab';
 import { RawDataTab } from './tabs/RawDataTab';
 import { SignalsTab } from './tabs/SignalsTab';
 import { TripsTab } from './tabs/TripsTab';
+import { DocumentsTab } from './tabs/DocumentsTab';
 
 export type SubjectContext = {
   clientId: string;
@@ -33,6 +34,6 @@ export const SubjectView: FC<{
     case 'trips':
       return <TripsTab key={subject.did} subject={subject} ctx={ctx} />;
     case 'documents':
-      return null; // Task 10: <DocumentsTab subject={subject} ctx={ctx} />
+      return <DocumentsTab key={subject.did} subject={subject} ctx={ctx} />;
   }
 };
