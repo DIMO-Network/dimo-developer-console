@@ -21,8 +21,8 @@ describe('getPageTitle', () => {
     ['/connections', 'Connections'],
     ['/connections/create/0xabc', 'Create a connection'],
     ['/connections/conn-1', 'Connection details'],
-    ['/explorer', 'Data explorer'],
-    ['/explorer/190231', 'Data explorer'],
+    ['/vehicles', 'Vehicles'],
+    ['/vehicles/190231', 'Vehicle'],
     ['/settings', 'Settings'],
     ['/support', 'Support'],
   ])('%s → %s', (path, title) => {

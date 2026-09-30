@@ -11,6 +11,7 @@ export interface ICopyButtonProps {
   onCopySuccessMessage?: string;
   // inline: a bare icon (default). icon: a 32px round icon button.
   size?: 'inline' | 'icon';
+  ariaLabel?: string;
   className?: string;
 }
 
@@ -19,6 +20,7 @@ export const CopyButton: FC<ICopyButtonProps> = ({
   onCopySuccessMessage,
   className = '',
   size = 'inline',
+  ariaLabel = 'Copy',
 }) => {
   const [copied, setCopied] = useState(false);
 
@@ -36,6 +38,8 @@ export const CopyButton: FC<ICopyButtonProps> = ({
 
   return (
     <button
+      type="button"
+      aria-label={ariaLabel}
       onClick={handleCopy}
       className={classnames(
         'copy-button',

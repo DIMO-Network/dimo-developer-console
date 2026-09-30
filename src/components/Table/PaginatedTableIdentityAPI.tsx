@@ -4,6 +4,7 @@ import {
   useReactTable,
   ColumnDef,
   PaginationState,
+  RowData,
   OnChangeFn,
 } from '@tanstack/react-table';
 import { Button } from '@/components/Button';
@@ -12,6 +13,18 @@ import { Column } from './Column';
 import { Cell } from './Cell';
 import './Table.css';
 import { useState } from 'react';
+
+declare module '@tanstack/react-table' {
+  // A column's className lands on its <th> and every <td>.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData extends RowData, TValue> {
+    className?: string;
+  }
+}
+
+// A column's meta.className lands on its <th> and every <td>, e.g.
+// 'hidden md:table-cell' to drop the column on phones.
+const columnClass = (def: { meta?: { className?: string } }) => def.meta?.className;
 
 interface PaginatedTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -27,6 +40,8 @@ interface PaginatedTableProps<TData> {
   pageInfo: { startCursor?: string | null; endCursor?: string | null };
   pageSize: number;
   onRowClick?: (row: TData) => void;
+  // Names the horizontal scroll region for keyboard and screen reader users.
+  label?: string;
 }
 
 /**
@@ -42,6 +57,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
   pageInfo,
   pageSize,
   onRowClick,
+  label = 'Table',
 }: PaginatedTableProps<TData>) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -78,13 +94,21 @@ export const PaginatedTableIdentityAPI = <TData,>({
 
   return (
     <div className={'min-w-full'}>
-      <div className={'min-w-full rounded-card bg-card p-4'}>
+      <div
+        className={'min-w-full overflow-x-auto rounded-card bg-card p-4'}
+        role="region"
+        aria-label={label}
+        tabIndex={0}
+      >
         <table className="table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <Column key={header.id}>
+                  <Column
+                    key={header.id}
+                    className={columnClass(header.column.columnDef)}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -101,7 +125,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <Cell key={cell.id}>
+                  <Cell key={cell.id} className={columnClass(cell.column.columnDef)}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Cell>
                 ))}

@@ -94,6 +94,24 @@ describe('design tokens', () => {
     },
   );
 
+  it.each(['dark', 'light'] as const)(
+    '%s chart series meet 3:1 on chart surfaces',
+    (theme) => {
+      const t = themes[theme];
+      for (let i = 1; i <= 6; i++) {
+        for (const surface of ['card', 'control']) {
+          expect({
+            pair: `chart-${i} on ${surface}`,
+            ratio: contrast(t[`chart-${i}`], t[surface]) >= 3,
+          }).toEqual({
+            pair: `chart-${i} on ${surface}`,
+            ratio: true,
+          });
+        }
+      }
+    },
+  );
+
   // Error text stays negative (forms, alerts) and must read at AA wherever it sits.
   // Text on a status tint (status/10 over card) is fg or muted.
   it.each(['dark', 'light'] as const)(

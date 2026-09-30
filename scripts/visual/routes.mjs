@@ -2,6 +2,10 @@
 // first). fill {selector: value} then click (selector or list) set up a state;
 // after: text awaited once they are done. viewports limits a state to one size.
 // noLicenses: identity returns no developer licenses (the empty /licenses state).
+// notShared: identity's vehicle has no SACD for a harness license, and /api/data/*
+// answers 403 NOT_SHARED (the vehicle page's not-shared state).
+// dataErrors: data API operation names answered 200 with data: null and a
+// privilege error (fixtures DATA_ERRORS), like gqlgen refusing a privilege.
 // hover: a selector the pointer rests on for the shot (hover states).
 // knownConsoleWarning: { pattern, reason } for a console error reproducible on
 // untouched master. Matching messages are logged as "known warning" and excluded
@@ -9,7 +13,7 @@
 // hydration mismatches, other errors and overlay dialogs still fail the shot.
 // On master: /app and /settings mismatch on the Suspense hydration (3 of 3 runs,
 // light mobile); the webhook form logs a React controlled-input warning.
-import { LICENSE, CONNECTIONS, WEBHOOKS } from './fixtures.mjs';
+import { LICENSE, CONNECTIONS, WEBHOOKS, WALLET } from './fixtures.mjs';
 
 // Both pages wrap their view in <Suspense>, which can hydrate after the header's
 // useUser() query has resolved; the view then renders user data the server
@@ -267,15 +271,76 @@ export const ROUTES = [
   },
   { name: 'template-edit', path: '/templates/toyota_camry_2020', ready: 'Camry' },
   { name: 'template-new', path: '/templates/new', ready: 'Create template' },
-  { name: 'explorer', path: '/explorer', ready: 'Model 3' },
-  { name: 'explorer-vehicle', path: '/explorer/190231', ready: 'Available signals' },
+  { name: 'vehicles', path: `/vehicles?license=${c}`, ready: 'Model 3' },
   {
-    // The selected vehicle row with the pointer on another.
-    name: 'explorer-vehicle-hover',
-    path: '/explorer/190231',
+    name: 'vehicle-summary',
+    path: `/vehicles/190231?license=${c}`,
     ready: 'Available signals',
-    hover: 'button:has-text("Token #"):not([aria-current])',
+  },
+  {
+    name: 'vehicle-device',
+    path: `/vehicles/190231?license=${c}&subject=did:erc721:80002:0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA:490231`,
+    ready: 'Latest payload',
+  },
+  {
+    name: 'vehicle-raw',
+    path: `/vehicles/190231?license=${c}&tab=raw`,
+    ready: 'cloud events',
+    click: 'button:has-text("dimo.fingerprint")',
+    after: 'JTMW1RFV8PD000000',
+  },
+  {
+    // A device is read through the vehicle DID with its producer locked.
+    name: 'vehicle-raw-device',
+    path: `/vehicles/190231?license=${c}&subject=did:erc721:80002:0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA:490231&tab=raw`,
+    ready: 'Producer: AutoPi',
+    after: 'cloud events',
+  },
+  {
+    name: 'vehicle-signals',
+    path: `/vehicles/190231?license=${c}&tab=signals`,
+    ready: 'Add signal',
+    click: [
+      'button:has-text("Add signal")',
+      'label:has-text("Speed") input',
+      'button:has-text("Add signal")',
+      'button:has-text("Run query")',
+    ],
+    after: 'points',
     viewports: ['desktop'],
+  },
+  {
+    name: 'vehicle-trips',
+    path: `/vehicles/190231?license=${c}&tab=trips`,
+    ready: 'Detect trips by',
+    click: 'button:has-text("Run query")',
+    after: 'In progress',
+  },
+  {
+    // Segments answers like a missing VEHICLE_ALL_TIME_LOCATION privilege.
+    name: 'vehicle-trips-no-privilege',
+    path: `/vehicles/190231?license=${c}&tab=trips`,
+    ready: 'Detect trips by',
+    click: 'button:has-text("Run query")',
+    after: 'requires privilege VEHICLE_ALL_TIME_LOCATION',
+    dataErrors: ['Segments'],
+  },
+  {
+    name: 'vehicle-documents',
+    path: `/vehicles/190231?license=${c}&subject=did:ethr:80002:${WALLET}`,
+    ready: "Driver's license",
+  },
+  {
+    name: 'vehicle-sharing',
+    path: `/vehicles/190231?license=${c}&subject=sharing`,
+    ready: 'View terms',
+  },
+  {
+    // Identity's SACDs name neither harness license: no license can read it.
+    name: 'vehicle-not-shared',
+    path: `/vehicles/190231?license=${c}`,
+    ready: "This vehicle isn't shared with any of your licenses",
+    notShared: true,
   },
   {
     name: 'settings',

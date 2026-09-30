@@ -7,12 +7,12 @@ import {
   SettingsIcon,
   SummarizeIcon,
   ConnectionsIcon,
-  ChipIcon,
+  CarIcon,
   DeveloperBoardIcon,
 } from '@/components/Icons';
 import { TEMPLATE_EDITOR_ENABLED } from '@/utils/featureFlags';
 
-const EXPLORER_VEHICLE_REGEX = /^\/explorer\/[^/]+$/;
+const VEHICLE_DETAIL_REGEX = /^\/vehicles\/[^/]+$/;
 const LICENSE_DETAILS_REGEX = /^\/license\/[^/]+\/details$/;
 // The list, /new and /[id]; each page names itself in its own subtitle.
 const LICENSE_CONFIGURATOR_REGEX = /^\/license\/[^/]+\/configurator(\/[^/]+)?$/;
@@ -26,7 +26,7 @@ const CONNECTION_DETAILS_REGEX = /^\/connections\/[^/]+$/;
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
-  if (EXPLORER_VEHICLE_REGEX.test(path)) return 'Data explorer';
+  if (VEHICLE_DETAIL_REGEX.test(path)) return 'Vehicle';
   if (LICENSE_DETAILS_REGEX.test(path)) return 'License details';
   if (LICENSE_CONFIGURATOR_REGEX.test(path)) return 'SDK configurator';
   if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed vehicles';
@@ -48,89 +48,8 @@ const pageTitles: Record<string, string> = {
   '/templates': 'Vehicle templates',
   '/connections': 'Connections',
   '/settings': 'Settings',
-  '/explorer': 'Data explorer',
+  '/vehicles': 'Vehicles',
   '/support': 'Support',
-};
-
-const dataExplorerMenuItem = {
-  label: 'Data explorer',
-  icon: ChipIcon,
-  iconClassName: 'h-5 w-5',
-  link: '/explorer',
-  external: false,
-  disabled: false,
-  hidden: false,
-};
-
-const baseMainMenu = [
-  {
-    label: 'Home',
-    icon: HomeIcon,
-    iconClassName: 'h-5 w-5',
-    link: '/app',
-    external: false,
-    disabled: false,
-  },
-  {
-    label: 'Licenses',
-    icon: DeveloperBoardIcon,
-    iconClassName: 'h-5 w-5',
-    link: '/licenses',
-    external: false,
-    disabled: false,
-  },
-  {
-    label: 'Webhooks',
-    icon: IntegrationIcon,
-    iconClassName: 'h-5 w-5',
-    link: '/webhooks',
-    external: false,
-    disabled: false,
-  },
-  {
-    label: 'Templates',
-    icon: CarRentalIcon,
-    iconClassName: 'h-5 w-5',
-    link: '/templates',
-    external: false,
-    disabled: !TEMPLATE_EDITOR_ENABLED,
-  },
-  {
-    label: 'Documentation',
-    icon: SummarizeIcon,
-    iconClassName: 'h-5 w-5',
-    link: 'https://dimo.org/docs',
-    external: true,
-    disabled: false,
-  },
-  {
-    label: 'API status',
-    icon: MonitorHeartIcon,
-    iconClassName: 'h-5 w-5',
-    link: 'https://stats.uptimerobot.com/snU0rkEEah',
-    external: true,
-    disabled: false,
-  },
-];
-
-const connectionsMenuItem = {
-  label: 'Connections',
-  icon: ConnectionsIcon,
-  iconClassName: 'h-5 w-5',
-  link: '/connections',
-  external: false,
-  disabled: false,
-};
-
-/**
- * Get main menu items, optionally including Connections tab
- * @param includeConnections - Whether to include the Connections tab (requires developer license)
- */
-export const getMainMenu = (includeConnections: boolean = true) => {
-  const items = includeConnections
-    ? [...baseMainMenu, connectionsMenuItem, dataExplorerMenuItem]
-    : [...baseMainMenu, dataExplorerMenuItem];
-  return items;
 };
 
 export type NavItem = {
@@ -148,9 +67,6 @@ export type NavSection = {
   label: string;
   items: NavItem[];
 };
-
-// Keep the old export for backward compatibility for now, always includes Connections
-export const mainMenu = getMainMenu(true);
 
 export const bottomMenu: NavItem[] = [
   {
@@ -180,6 +96,14 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
         icon: DeveloperBoardIcon,
         iconClassName: 'h-4 w-4',
         link: '/licenses',
+        external: false,
+        disabled: false,
+      },
+      {
+        label: 'Vehicles',
+        icon: CarIcon,
+        iconClassName: 'h-4 w-4',
+        link: '/vehicles',
         external: false,
         disabled: false,
       },
@@ -216,14 +140,6 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
   {
     label: 'Resources',
     items: [
-      {
-        label: 'Data explorer',
-        icon: ChipIcon,
-        iconClassName: 'h-4 w-4',
-        link: '/explorer',
-        external: false,
-        disabled: false,
-      },
       {
         label: 'Documentation',
         icon: SummarizeIcon,

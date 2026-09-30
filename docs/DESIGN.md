@@ -339,9 +339,9 @@ justify-center rounded-control bg-control text-ink transition-colors`
 (neutral, never teal), stepping to `bg-highest` when the card is hovered so it
 stays visible; title `.shortcut-card__title` = `text-card-title text-ink`;
 description `.shortcut-card__desc` = `text-body-sm text-muted`. Labels are
-sentence case ("Data explorer"). The grid holds Licenses, Connections,
-Webhooks and Data explorer; targets are `/licenses`, `/connections`,
-`/webhooks`, `/explorer`. New shortcuts follow the same card; keep the grid to
+sentence case ("Vehicles"). The grid holds Licenses, Connections,
+Webhooks and Vehicles; targets are `/licenses`, `/connections`,
+`/webhooks`, `/vehicles`. New shortcuts follow the same card; keep the grid to
 what a developer opens daily.
 
 **Metric**: `text-metric text-ink` for the big number (`CreditsWidget`'s
@@ -388,8 +388,8 @@ the words carry the meaning — so it is `aria-hidden` with no role
 or a `data-testid` on the icon's wrapper, never a made-up role. A status tint
 (`bg-warning/10 border-warning/40`) takes `text-fg` title + `text-muted` body,
 never the status color at reduced opacity. Examples: `EntitlementBanner`,
-the brand-rename warning in `BrandForm`, the explorer's missing-JWT notice
-and "Latest signals unavailable" panel, completed steps in
+the brand-rename warning in `BrandForm`, the vehicle page's `AccessNotice`
+(missing JWT, not shared), completed steps in
 `FormStepTracker`, the vehicle simulator's "Removed on-chain" badge. The one
 exception is error text (`text-negative`: form errors, `TextError`,
 `role="alert"` lines), which the test holds at AA on `sheet`, `card`,
@@ -426,8 +426,8 @@ fighting the base class. Body `.table-body` = `divide-y
 divide-outline` (each `<tr>` also carries `border-t border-outline`). Cell
 `.table-cell` = `h-[52px] max-w-[300px] break-all py-3 text-body-sm text-fg`.
 
-**Pagination** (`src/components/Table/PaginatedTable.tsx`, `Table.css`, and
-the explorer's `VehicleList.tsx`): the meta-and-controls row = `flex
+**Pagination** (`src/components/Table/PaginatedTable.tsx`,
+`PaginatedTableIdentityAPI.tsx`, `Table.css`): the meta-and-controls row = `flex
 items-center justify-between text-sm text-muted`. Round page buttons:
 `<Button variant="secondary" size="icon">` (see "Buttons" — the icon size).
 Row icon actions use the same size with `variant="ghost"` (`BrandRow`,
@@ -496,7 +496,7 @@ button or sits in a card).
   resting transparent on a card → `hover:bg-control/50`; an option card
   resting `bg-card` on the sheet → `hover:bg-control/70`; a row resting
   transparent on the sheet → `hover:bg-card`. Expose the state: `aria-current`
-  on the selected item of a list you navigate (explorer rows),
+  on the selected item of a list you navigate (the vehicle page's source rail),
   `role="radio" aria-checked` inside a `role="radiogroup"` for a single
   choice (build-for cards, `PaymentMethod`, `MultiCardOption`),
   `aria-pressed` for a multi-select toggle (permission cards). Current on the
@@ -509,9 +509,9 @@ button or sits in a card).
   prompt, each `Card` `role="radio" aria-checked`; resting `text-ink
 hover:bg-control/70`, selected `!bg-control text-ink shadow-selected`, the
   `!` because `.card` sets `bg-card`; the "Something else" card follows the
-  same two states) and on the explorer's vehicle rows (`VehicleList`: a
-  `button` with `aria-current` on the selected one; resting `text-fg
-hover:bg-control/50`, selected `bg-control text-ink shadow-selected`). Neither
+  same two states) and on the vehicle page's source rail items (`SourceRail`: a
+  `button` with `aria-current` on the selected one; resting `hover:bg-control`,
+  selected `bg-control shadow-selected`). Neither
   has keyboard handling beyond what the element already gives. (`MultiCardOption`
   and `PaymentMethodSelector` are orphaned and not restyled.)
 
@@ -651,13 +651,21 @@ for `CheckboxField` (Radix `Checkbox`, `src/components/ui/checkbox.tsx`): 16px,
 Fleet recipe; use the wrapper (`TextField`, `TextArea`, `SelectField`,
 `Toggle`, `CheckboxField`, `Modal`), not the primitive, in pages. That covers
 `TextField`, `TextArea`, `SelectField`, `SelectWithChevron`, `MoneyField`,
-`TokenInput`'s `.dcx-container`, the `DatePicker` trigger and the explorer
+`TokenInput`'s `.dcx-container`, the `DatePicker` trigger and the vehicles
 search (both reuse `.text-field`) and the template editor's `TemplateCell`:
 `bg-control` fill, `border
 border-control-border`, hover `border-control-border-hover`, focus
 `border-focus-ring` with a `ring-[3px] ring-accent-soft` halo — one ring, on
 the control, never on a wrapper too. `border-outline` is a hairline and fails
 3:1 as a control edge; don't draw a control with it.
+
+**Native select** (`src/components/NativeSelect/NativeSelect.tsx`): a real
+`<select>` drawn with that recipe on the element (`appearance-none`,
+`hover:`/`focus:` directly, a `pointer-events-none` `ChevronDownIcon` at the
+right), for short fixed lists in a labelled filter row such as the vehicle
+page's aggregation, interval and trip mechanism, where the native keyboard,
+screen-reader and OS picker behaviour matters; use `SelectWithChevron` or
+`SelectField` where the menu must be the custom Fleet dropdown.
 
 **Label** (`src/components/Label/Label.css`): `.label` = `flex flex-col gap-2
 text-label text-muted`; a field is `<Label>` text, the control, then an error
@@ -769,6 +777,30 @@ border-outline bg-card`, stale ones `border-warning/40 bg-warning/10` with
 the status colour only on the `ExclamationTriangleIcon`, and the busy overlay
 `bg-scrim backdrop-blur-[2px]`.
 
+**Vehicles** (`src/app/vehicles/**`, `src/components/{FreshnessDot,JsonBlock,
+CollapsibleSection}`):
+
+- **Source rail** (`SourceRail.tsx`): `rounded-card bg-card p-2`, group labels
+  `text-label text-muted`, items `rounded-control px-3 py-2.5
+hover:bg-control`, selected `bg-control shadow-selected` with
+  `aria-current="true"`, devices nested in `ml-4 border-l border-outline
+pl-2`. On a phone it is a `SelectWithChevron`.
+- **Freshness dot** (`FreshnessDot.tsx`): the StatusChip dot without the chip;
+  live glows (`shadow-[0_0_8px_var(--accent-soft-strong)]`), stale `bg-warning`,
+  older `bg-negative`, none `bg-muted`; thresholds 1 h / 24 h in
+  `utils/freshness.ts`.
+- **Collapsible section** (`CollapsibleSection.tsx`): section card whose header
+  button toggles the body; the chevron rotates 90°; the count is a neutral
+  chip; actions sit outside the button and wrap below it on a phone.
+- **Raw event row** (`RawDataTab.tsx`): a `button` grid row, expanded =
+  `bg-control`, the body is `JsonBlock` (`rounded-control bg-control font-mono
+text-code`, Prism tokens mapped to `sky`/`accent-ink`/`warning`/`muted`).
+  Phones show time and type only.
+- **Document card** (`DocumentsTab.tsx`): section card, title + type in mono,
+  field grid with hairline rows, `Open scan` as a secondary button anchor.
+- **Chart tokens**: `chart-1…6` are the only series colors; one series per
+  small-multiple chart; grid `outline`, axes `muted`, tooltip on `overlay`.
+
 **Monospace rule**: `font-mono text-code`, only for API keys, client ids,
 JWTs, keys, CEL expressions, payloads and code views —
 `src/components/CopyableRow/CopyableRow.css` = `rounded-control bg-control
@@ -839,7 +871,7 @@ asset DID input, the generate-JWT modal), the template editor (gated; search,
 new, edit, trim grid, banners), settings (user details, team management, the
 invite and support modals) and the account information, buy DCX and support
 form modals are done, as are the guest pages (sign-in, sign-up, email
-recovery), support, the explorer and the error pages, which apply the
+recovery), support, the Vehicles section and the error pages, which apply the
 selected-card recipe. No recipe is marked **target** any more. The palette is
 locked (no temporary aliases remain). Not restyled, by design: the orphaned
 components listed under "Don'ts" (only a mechanical token swap where a removed
@@ -905,7 +937,10 @@ npm run visual:check -- <paths…>                       # fail on legacy colors
 Routes live in `scripts/visual/routes.mjs`; `--only` is a regex on the route
 name. The ones for the reference screens: `app`, `app-mobile-menu`,
 `app-collapsed`, `licenses`, `licenses-empty` (`noLicenses: true`, the
-zero-license empty state), `licenses-create-modal`, `licenses-toast`; a
+zero-license empty state), `licenses-create-modal`, `licenses-toast`, the Vehicles routes (`vehicles`,
+`vehicle-summary`, `vehicle-device`, `vehicle-raw`, `vehicle-signals`,
+`vehicle-trips`, `vehicle-documents`, `vehicle-sharing`, `vehicle-not-shared`;
+`/api/data/*` is mocked by `scripts/visual/dataApi.mjs`); a
 state pass adds routes such as `license-vehicle-simulator-selected` (toggled
 tiles) or the `*-hover` routes (a `hover` selector rests the pointer on a
 card next to a selected one). A route whose entry sets `knownConsoleWarning`
@@ -933,7 +968,8 @@ load — e.g. to open a modal or menu), `fill` (`{selector: value}` map, filled
 before any `click`), `after` (text to wait for once `click`/`fill` are done),
 `viewports` (restrict to `['desktop']` or `['mobile']`), `guest` (skip the
 authenticated-session cookies/storage for signed-out routes), `noLicenses`
-(mock identity with zero developer licenses), and `knownHydrationError`
+(mock identity with zero developer licenses), `notShared` (identity's vehicle
+has no SACD for a harness license and `/api/data/*` answers 403), and `knownHydrationError`
 (only for a pre-existing race, with a one-line reason as the value — don't
 add this to silence a hydration error your own change introduced).
 

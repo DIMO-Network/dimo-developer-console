@@ -37,8 +37,14 @@ editing it, since the mock server reads it at startup). Groups:
   column), permission selection and hover, edit.
 - Licensed vehicles `/license/vehicles/[clientId]` and its Renounce modal (opened
   from the row's actions menu; confirming is not clicked).
+- Vehicles `/vehicles` and the vehicle page (summary, device, raw, raw on a
+  device, signals, trips, trips without the location privilege, documents,
+  sharing, not-shared); `/api/data/*` is mocked by `dataApi.mjs`. Device
+  queries arrive as the vehicle DID with `filter.producer`, and the fixtures
+  answer per producer; a route's `dataErrors` makes the named operations
+  answer 200 with `data: null` and a privilege error.
 - Connections, webhooks, templates (the harness sets
-  `NEXT_PUBLIC_TEMPLATE_EDITOR_ENABLED=true`; production has it off), explorer,
+  `NEXT_PUBLIC_TEMPLATE_EDITOR_ENABLED=true`; production has it off),
   settings, support, and the guest pages (sign-in, sign-up flows, email
   recovery). `not-found` is Next's built-in 404.
 

@@ -1,0 +1,12 @@
+.vehicle-tabs {
+  @apply flex w-fit max-w-full flex-row gap-0.5 overflow-x-auto rounded-full bg-control p-[3px];
+}
+.vehicle-tab {
+  @apply flex-shrink-0 cursor-pointer select-none whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-medium leading-[18px] text-muted transition-colors hover:text-fg disabled:cursor-not-allowed;
+}
+.vehicle-tab--active {
+  @apply bg-bright text-ink shadow-sm hover:text-ink;
+}
+.vehicle-page__body {
+  @apply grid grid-cols-1 items-start gap-6 md:grid-cols-[248px_minmax(0,1fr)];
+}

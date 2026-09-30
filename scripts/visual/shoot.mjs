@@ -9,6 +9,7 @@ import { loadKeys } from './keys.mjs';
 import { ROUTES } from './routes.mjs';
 import * as fx from './fixtures.mjs';
 import { identityHandler } from './identity.mjs';
+import { dataApiHandler } from './dataApi.mjs';
 
 const args = Object.fromEntries(
   process.argv.slice(2).map((a) => a.replace(/^--/, '').split('=')),
@@ -47,7 +48,7 @@ async function prepare(context, route, theme) {
     origin: BASE,
   });
   await context.route('https://identity-api.dev.dimo.zone/query', (r) =>
-    identityHandler(r, { noLicenses: route.noLicenses }),
+    identityHandler(r, { noLicenses: route.noLicenses, notShared: route.notShared }),
   );
   await context.route(/\/api\/templates\?/, (r) =>
     r.fulfill({ json: fx.TEMPLATE_SEARCH }),
@@ -55,8 +56,8 @@ async function prepare(context, route, theme) {
   await context.route(/\/api\/templates\/[^/?]+/, (r) =>
     r.fulfill({ json: fx.TEMPLATE_DETAIL }),
   );
-  await context.route(/\/api\/vehicle-signals/, (r) =>
-    r.fulfill({ json: fx.VEHICLE_SIGNALS }),
+  await context.route(/\/api\/data\/(telemetry|fetch)/, (r) =>
+    dataApiHandler(r, { notShared: route.notShared, dataErrors: route.dataErrors }),
   );
   await context.addInitScript((t) => {
     // next-themes: default storage key `theme`; master defaults to dark.

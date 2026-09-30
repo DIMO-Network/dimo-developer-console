@@ -11,7 +11,7 @@ import {
   DeveloperBoardIcon,
   ConnectionsIcon,
   IntegrationIcon,
-  ChipIcon,
+  CarIcon,
 } from '@/components/Icons';
 
 function getFirstName(name: string) {
@@ -40,10 +40,10 @@ const shortcuts = [
     href: '/webhooks',
   },
   {
-    label: 'Data explorer',
-    description: 'Browse and query live vehicle telemetry data',
-    icon: ChipIcon,
-    href: '/explorer',
+    label: 'Vehicles',
+    description: 'See what data each shared vehicle sends and browse its raw events',
+    icon: CarIcon,
+    href: '/vehicles',
   },
 ];
 

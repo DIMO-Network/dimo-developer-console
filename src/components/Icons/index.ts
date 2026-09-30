@@ -40,3 +40,4 @@ export * from './WarningAmberIcon';
 export * from './EditIcon';
 export * from './ConnectionsIcon';
 export * from './ChipIcon';
+export * from './CarIcon';

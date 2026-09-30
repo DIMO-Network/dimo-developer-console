@@ -36,6 +36,13 @@
   --negative: 255 96 96; /* #FF6060 */
   --negative-soft: 64 35 33; /* #402321 */
   --favorite: 255 205 41; /* #FFCD29 */
+  /* Chart series: distinct in hue and lightness, >=3:1 on card/control. */
+  --chart-1: 140 208 255; /* #8CD0FF */
+  --chart-2: 70 241 228; /* #46F1E4 */
+  --chart-3: 201 160 255; /* #C9A0FF */
+  --chart-4: 255 205 41; /* #FFCD29 */
+  --chart-5: 255 143 177; /* #FF8FB1 */
+  --chart-6: 155 227 138; /* #9BE38A */
   --nav-active: 36 39 43; /* #24272B */
   --btn-primary: 246 247 247; /* #F6F7F7 */
   --btn-primary-fg: 17 18 20; /* #111214 */
@@ -89,6 +96,13 @@
   --negative: 199 0 0; /* #C70000 */
   --negative-soft: 255 240 240; /* #FFF0F0 */
   --favorite: 201 154 0; /* #C99A00 */
+  /* Chart series: distinct in hue and lightness, >=3:1 on card/control. */
+  --chart-1: 30 111 191; /* #1E6FBF */
+  --chart-2: 11 143 133; /* #0B8F85 */
+  --chart-3: 122 63 209; /* #7A3FD1 */
+  --chart-4: 154 106 0; /* #9A6A00 */
+  --chart-5: 194 24 91; /* #C2185B */
+  --chart-6: 46 125 50; /* #2E7D32 */
   --nav-active: 255 255 255; /* #FFFFFF */
   --btn-primary: 19 20 23; /* #131417 */
   --btn-primary-fg: 255 255 255; /* #FFFFFF */
