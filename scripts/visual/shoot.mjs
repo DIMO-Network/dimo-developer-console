@@ -57,7 +57,7 @@ async function prepare(context, route, theme) {
     r.fulfill({ json: fx.TEMPLATE_DETAIL }),
   );
   await context.route(/\/api\/data\/(telemetry|fetch)/, (r) =>
-    dataApiHandler(r, { notShared: route.notShared }),
+    dataApiHandler(r, { notShared: route.notShared, dataErrors: route.dataErrors }),
   );
   await context.addInitScript((t) => {
     // next-themes: default storage key `theme`; master defaults to dark.

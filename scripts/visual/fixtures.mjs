@@ -410,6 +410,23 @@ const vehicle = (tokenId, make, model, year) => ({
   },
   privileges: { __typename: 'PrivilegesConnection', nodes: [] },
 });
+// pair 7 -> Raw data: what an account grant for documents carries.
+const ACCOUNT_SACDS = [
+  {
+    ...sacd(LICENSE.clientId, '2026-08-02T14:00:00Z', '2027-08-02T14:00:00Z'),
+    permissions: '0x' + (3n << 14n).toString(16),
+    source: 'ipfs://bafkreiaccountdocumentsgrantforfleetpulse',
+  },
+  {
+    ...sacd(
+      '0x299671D2b32ED62Cc61ce65D8f2b9e4f78486B37',
+      '2026-09-12T09:00:00Z',
+      '2026-10-20T09:00:00Z',
+    ),
+    permissions: '0x' + (3n << 14n).toString(16),
+    source: '',
+  },
+];
 const VEHICLES = [
   vehicle(190231, 'Tesla', 'Model 3', 2023),
   vehicle(190232, 'Ford', 'F-150', 2022),
@@ -442,6 +459,7 @@ export const identityData = (vars, { noLicenses = false, notShared = false } = {
         sacds: { ...found.sacds, nodes: strip(found.sacds.nodes) },
       }
     : found;
+  const accountGrants = notShared ? strip(ACCOUNT_SACDS) : ACCOUNT_SACDS;
   return {
     developerLicenses: {
       __typename: 'DeveloperLicenseConnection',
@@ -450,6 +468,12 @@ export const identityData = (vars, { noLicenses = false, notShared = false } = {
       nodes: licenses,
     },
     developerLicense: byVars ?? LICENSES[0],
+    // GetAccountSacds: grants on the owner's account DID (Sharing's second table).
+    account: {
+      __typename: 'Account',
+      address: vars.address ?? WALLET,
+      sacds: { __typename: 'SacdConnection', nodes: accountGrants },
+    },
     vehicle: vehicleNode,
     vehicles: {
       __typename: 'VehicleConnection',
@@ -465,9 +489,13 @@ export const identityData = (vars, { noLicenses = false, notShared = false } = {
 export const VEHICLE_DID = `did:erc721:80002:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:190231`;
 // Relative to the real clock, so freshness (1 h / 24 h) and the 7-day ranges hold.
 const AT = (minutesAgo) => new Date(Date.now() - minutesAgo * 60_000).toISOString();
-const header = (type, minutesAgo, producer) => ({
+const AUTOPI_SOURCE = '0xF26421509Efe92861a587482100c6d728aBf1CD0';
+const SMARTCAR_SOURCE = '0xcd445F4c6bDAD32b68a2939b912150Fe3C88803E';
+// Oracle events carry subject = vehicle DID, producer = device DID; the source
+// is the connection that signed them.
+const header = (type, minutesAgo, producer, source = AUTOPI_SOURCE) => ({
   id: `2mXq8rKf1T${minutesAgo}`,
-  source: '0xF26421509Efe92861a587482100c6d728aBf1CD0',
+  source,
   producer,
   subject: VEHICLE_DID,
   time: AT(minutesAgo),
@@ -477,8 +505,8 @@ const header = (type, minutesAgo, producer) => ({
   dataversion: 'default/v1.0',
   tags: [],
 });
-const status = (minutesAgo, producer) => ({
-  header: header('dimo.status', minutesAgo, producer),
+const status = (minutesAgo, producer, source) => ({
+  header: header('dimo.status', minutesAgo, producer, source),
   data: {
     signals: [
       { name: 'speed', timestamp: AT(minutesAgo), value: 42 },
@@ -487,6 +515,51 @@ const status = (minutesAgo, producer) => ({
   },
 });
 const AD_DID = DEVICE_AD(190231).tokenDID;
+const SD_DID = DEVICE_SD(190231).tokenDID;
+// Every cloud event on the vehicle DID, newest first; ids are unique by minute.
+const VEHICLE_EVENTS = [
+  status(2, AD_DID),
+  status(3, AD_DID),
+  {
+    header: header('dimo.fingerprint', 4, AD_DID),
+    data: { vin: 'JTMW1RFV8PD000000', protocol: '6' },
+  },
+  status(33, AD_DID),
+  status(63, AD_DID),
+  status(93, AD_DID),
+  status(180, SD_DID, SMARTCAR_SOURCE),
+  status(240, SD_DID, SMARTCAR_SOURCE),
+];
+// A device subject arrives as the vehicle DID with filter.producer set.
+const byProducer = (events, filter) =>
+  filter?.producer ? events.filter((e) => e.header.producer === filter.producer) : events;
+const typeSummary = (events) =>
+  Object.values(
+    events.reduce((acc, e) => {
+      const t = (acc[e.header.type] ??= {
+        type: e.header.type,
+        count: 0,
+        firstSeen: '2024-03-04T00:00:00Z',
+        lastSeen: e.header.time,
+      });
+      t.count += 1;
+      return acc;
+    }, {}),
+  );
+const DOCUMENT_TYPES = [
+  {
+    type: 'dimo.document.driver.license',
+    count: 2,
+    firstSeen: '2026-08-02T14:02:11Z',
+    lastSeen: '2026-08-02T14:02:11Z',
+  },
+  {
+    type: 'dimo.document.driver.insurance',
+    count: 1,
+    firstSeen: '2026-08-02T14:03:40Z',
+    lastSeen: '2026-08-02T14:03:40Z',
+  },
+];
 const SIGNAL_NAMES = [
   'speed',
   'powertrainCombustionEngineSpeed',
@@ -600,34 +673,15 @@ export const DATA_API = {
       eventCounts: [],
     })),
   },
-  AvailableCloudEventTypes: {
-    availableCloudEventTypes: [
-      {
-        type: 'dimo.status',
-        count: 900000,
-        firstSeen: '2024-03-04T00:00:00Z',
-        lastSeen: AT(2),
-      },
-      {
-        type: 'dimo.fingerprint',
-        count: 1200,
-        firstSeen: '2024-03-04T00:00:00Z',
-        lastSeen: AT(3),
-      },
-      {
-        type: 'dimo.document.driver.license',
-        count: 2,
-        firstSeen: '2026-08-02T14:02:11Z',
-        lastSeen: '2026-08-02T14:02:11Z',
-      },
-      {
-        type: 'dimo.document.driver.insurance',
-        count: 1,
-        firstSeen: '2026-08-02T14:03:40Z',
-        lastSeen: '2026-08-02T14:03:40Z',
-      },
-    ],
-  },
+  // The account DID holds the documents; the vehicle DID the device events,
+  // narrowed to one device by filter.producer.
+  AvailableCloudEventTypes: (vars) => ({
+    availableCloudEventTypes: String(vars.did).startsWith('did:ethr:')
+      ? DOCUMENT_TYPES
+      : typeSummary(byProducer(VEHICLE_EVENTS, vars.filter)).map((t) =>
+          t.type === 'dimo.status' ? { ...t, count: t.count * 150000 } : t,
+        ),
+  }),
   LatestCloudEvent: (vars) => ({
     latestCloudEvent:
       vars.filter?.type === 'dimo.document.driver.license'
@@ -657,53 +711,62 @@ export const DATA_API = {
               },
               dataUrl: 'https://example.invalid/card.pdf',
             }
-          : status(2, AD_DID),
+          : (byProducer(VEHICLE_EVENTS, vars.filter)[0] ?? null),
   }),
-  // Honours the filter's `before` and `type`, so RawDataTab's paging (before =
-  // last row's time + 1 ms, deduped by id) ends on the second page.
+  // Honours the filter's `before`, `type` and `producer`, so RawDataTab's paging
+  // (before = last row's time + 1 ms, deduped by id) ends on the second page.
   CloudEvents: (vars) => ({
-    cloudEvents: [
-      status(2, AD_DID),
-      status(3, AD_DID),
-      {
-        header: header('dimo.fingerprint', 4, AD_DID),
-        data: { vin: 'JTMW1RFV8PD000000', protocol: '6' },
-      },
-      status(33, AD_DID),
-      status(63, AD_DID),
-      status(93, AD_DID),
-    ].filter(
+    cloudEvents: byProducer(VEHICLE_EVENTS, vars.filter).filter(
       (e) =>
         (!vars.filter?.before || e.header.time < vars.filter.before) &&
         (!vars.filter?.type || e.header.type === vars.filter.type),
     ),
   }),
-  Indexes: {
-    indexes: [
-      {
-        header: header('dimo.status', 2, AD_DID),
-        indexKey: 'cloudevent/190231/dimo.status/1',
-      },
-    ],
-  },
+  Indexes: (vars) => ({
+    indexes: byProducer(VEHICLE_EVENTS, vars.filter)
+      .slice(0, 3)
+      .map((e, i) => ({
+        header: e.header,
+        indexKey: `cloudevent/190231/${e.header.type}/${i + 1}`,
+      })),
+  }),
   LatestIndex: {
     latestIndex: {
       header: header('dimo.status', 2, AD_DID),
       indexKey: 'cloudevent/190231/dimo.status/1',
     },
   },
+  // sN answers dN narrowed by fN (a device's producer); the Smartcar device's
+  // latest event is 3 h old, so its rail dot is stale.
   Freshness: (vars) =>
     Object.fromEntries(
-      Object.keys(vars).map((k, i) => [
-        `s${i}`,
-        {
-          header: {
-            time: AT(i < 2 ? 2 : 180),
-            type: 'dimo.status',
-            source: '0xF26421509Efe92861a587482100c6d728aBf1CD0',
-            producer: AD_DID,
-          },
-        },
-      ]),
+      Object.keys(vars)
+        .filter((k) => /^d\d+$/.test(k))
+        .map((k) => {
+          const i = k.slice(1);
+          const latest = byProducer(VEHICLE_EVENTS, vars[`f${i}`])[0];
+          return [
+            `s${i}`,
+            latest
+              ? {
+                  header: {
+                    time: latest.header.time,
+                    type: latest.header.type,
+                    source: latest.header.source,
+                    producer: latest.header.producer,
+                  },
+                }
+              : null,
+          ];
+        }),
     ),
+};
+
+// Operations answered like gqlgen answers a refused privilege: HTTP 200 with
+// data: null and the error (the route's `dataErrors` names them).
+export const DATA_ERRORS = {
+  Segments: {
+    data: null,
+    errors: [{ message: 'unauthorized: requires privilege VEHICLE_ALL_TIME_LOCATION' }],
+  },
 };

@@ -4,6 +4,8 @@
 // noLicenses: identity returns no developer licenses (the empty /licenses state).
 // notShared: identity's vehicle has no SACD for a harness license, and /api/data/*
 // answers 403 NOT_SHARED (the vehicle page's not-shared state).
+// dataErrors: data API operation names answered 200 with data: null and a
+// privilege error (fixtures DATA_ERRORS), like gqlgen refusing a privilege.
 // hover: a selector the pointer rests on for the shot (hover states).
 // knownConsoleWarning: { pattern, reason } for a console error reproducible on
 // untouched master. Matching messages are logged as "known warning" and excluded
@@ -288,6 +290,13 @@ export const ROUTES = [
     after: 'JTMW1RFV8PD000000',
   },
   {
+    // A device is read through the vehicle DID with its producer locked.
+    name: 'vehicle-raw-device',
+    path: `/vehicles/190231?license=${c}&subject=did:erc721:80002:0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA:490231&tab=raw`,
+    ready: 'Producer: AutoPi',
+    after: 'cloud events',
+  },
+  {
     name: 'vehicle-signals',
     path: `/vehicles/190231?license=${c}&tab=signals`,
     ready: 'Add signal',
@@ -306,6 +315,15 @@ export const ROUTES = [
     ready: 'Detect trips by',
     click: 'button:has-text("Run query")',
     after: 'In progress',
+  },
+  {
+    // Segments answers like a missing VEHICLE_ALL_TIME_LOCATION privilege.
+    name: 'vehicle-trips-no-privilege',
+    path: `/vehicles/190231?license=${c}&tab=trips`,
+    ready: 'Detect trips by',
+    click: 'button:has-text("Run query")',
+    after: 'requires privilege VEHICLE_ALL_TIME_LOCATION',
+    dataErrors: ['Segments'],
   },
   {
     name: 'vehicle-documents',
