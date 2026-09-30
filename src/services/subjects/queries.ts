@@ -19,7 +19,8 @@ export const COMPLEX_VALUE_FIELDS: Record<string, string> = {
   currentLocationApproximateCoordinates: '{ latitude longitude hdop }',
 };
 
-export const isLocationSignal = (name: string) => name in COMPLEX_VALUE_FIELDS;
+export const isLocationSignal = (name: string) =>
+  Object.hasOwn(COMPLEX_VALUE_FIELDS, name);
 
 const checkSignals = (signals: string[], available: string[]) => {
   if (!signals.length) throw new InvalidSignalError('');
@@ -62,7 +63,7 @@ export const signalsLatestQuery = (
   checkSignals(available, available);
   const fields = available
     .map((s) => {
-      const sub = COMPLEX_VALUE_FIELDS[s];
+      const sub = isLocationSignal(s) ? COMPLEX_VALUE_FIELDS[s] : undefined;
       return sub ? `    ${s} { timestamp value ${sub} }` : `    ${s} { timestamp value }`;
     })
     .join('\n');
@@ -79,6 +80,16 @@ ${fields}
 
 export type FloatAggregation = 'AVG' | 'MED' | 'MAX' | 'MIN' | 'RAND' | 'FIRST' | 'LAST';
 
+const AGGS = new Set<FloatAggregation>([
+  'AVG',
+  'MED',
+  'MAX',
+  'MIN',
+  'RAND',
+  'FIRST',
+  'LAST',
+]);
+
 export const signalsQuery = (input: {
   tokenId: number;
   signals: string[];
@@ -89,6 +100,7 @@ export const signalsQuery = (input: {
   to: string;
   source?: string;
 }): GqlRequest => {
+  if (!AGGS.has(input.agg)) throw new Error(`Unknown aggregation "${input.agg}"`);
   const chosen = input.signals.filter((s) => !isLocationSignal(s));
   checkSignals(chosen, input.available);
   const fields = chosen.map((s) => `    ${s}(agg: ${input.agg})`).join('\n');
@@ -288,6 +300,7 @@ export const indexesQuery = (
 
 // One request for every rail item's latest payload time: metadata only.
 export const freshnessQuery = (dids: string[]): GqlRequest => {
+  if (!dids.length) throw new Error('freshnessQuery needs at least one DID');
   const decl = dids.map((_, i) => `$d${i}: String!`).join(', ');
   const fields = dids
     .map(

@@ -71,4 +71,18 @@ describe('postSubjectQuery', () => {
       postSubjectQuery('telemetry', { asset: ASSET, clientId: '0xabc', request: req }),
     ).rejects.toBeInstanceOf(DataApiError);
   });
+
+  it('maps a network failure to an UPSTREAM error', async () => {
+    fetchMock.mockRejectedValueOnce(new TypeError('fetch failed'));
+    await expect(
+      postSubjectQuery('fetch', { asset: ASSET, clientId: '0xabc', request: req }),
+    ).rejects.toMatchObject({ status: 0, code: 'UPSTREAM' });
+  });
+
+  it('treats a non-OK response with no code, data or errors as UPSTREAM', async () => {
+    answer(502, {});
+    await expect(
+      postSubjectQuery('fetch', { asset: ASSET, clientId: '0xabc', request: req }),
+    ).rejects.toMatchObject({ status: 502, code: 'UPSTREAM' });
+  });
 });

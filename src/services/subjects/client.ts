@@ -35,11 +35,19 @@ export const postSubjectQuery = async <T>(
       'Generate a developer JWT to read this data',
     );
   }
-  const res = await fetch(`/api/data/${api}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${devJwt}` },
-    body: JSON.stringify({ asset: input.asset, ...input.request }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`/api/data/${api}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${devJwt}`,
+      },
+      body: JSON.stringify({ asset: input.asset, ...input.request }),
+    });
+  } catch {
+    throw new DataApiError(0, 'UPSTREAM', `The ${api} API could not be reached`);
+  }
   const body = (await res.json().catch(() => ({}))) as {
     data?: T | null;
     errors?: GqlError[];
@@ -48,6 +56,13 @@ export const postSubjectQuery = async <T>(
   };
   if (body.code && body.error) throw new DataApiError(res.status, body.code, body.error);
   if (!res.ok && !body.data) {
+    if (!body.errors?.length) {
+      throw new DataApiError(
+        res.status,
+        'UPSTREAM',
+        `The ${api} API answered ${res.status}`,
+      );
+    }
     const message = body.errors?.[0]?.message ?? `The ${api} API answered ${res.status}`;
     throw new DataApiError(res.status, 'GRAPHQL', message, body.errors ?? []);
   }

@@ -14,6 +14,7 @@ import {
   formatGraphQL,
   InvalidSignalError,
   SEGMENT_DEFAULTS,
+  isLocationSignal,
 } from '@/services/subjects/queries';
 
 const DID = 'did:erc721:137:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:184223';
@@ -161,4 +162,32 @@ it('formatGraphQL prints the query and variables for copying', () => {
   expect(text).toContain('availableCloudEventTypes');
   expect(text).toContain('# variables');
   expect(text).toContain(`"did": "${DID}"`);
+});
+
+describe('hardening', () => {
+  it('does not resolve prototype keys as location signals', () => {
+    expect(isLocationSignal('toString')).toBe(false);
+    const q = signalsLatestQuery(1, ['constructor']);
+    expect(q.query).toContain('constructor { timestamp value }');
+    expect(q.query).not.toContain('{ latitude');
+    expect(q.query).not.toContain('function');
+  });
+
+  it('refuses an unknown aggregation', () => {
+    expect(() =>
+      signalsQuery({
+        tokenId: 1,
+        signals: ['speed'],
+        available: ['speed'],
+        agg: 'AVG) { x }' as never,
+        interval: '1h',
+        from: FROM,
+        to: TO,
+      }),
+    ).toThrow('Unknown aggregation');
+  });
+
+  it('refuses an empty freshness list', () => {
+    expect(() => freshnessQuery([])).toThrow('at least one DID');
+  });
 });
