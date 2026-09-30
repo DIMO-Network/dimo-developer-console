@@ -5,14 +5,7 @@ import { shortAddress } from '@/services/subjects/did';
 import { SelectWithChevron } from '@/components/SelectWithChevron';
 import type { LocalDeveloperLicense } from '@/types/webhook';
 import type { VehicleDetail } from '@/services/subjects/graph';
-
-const date = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+import { utcDate } from '@/utils/freshness';
 
 export const VehicleHeader: FC<{
   vehicle: VehicleDetail;
@@ -51,7 +44,7 @@ export const VehicleHeader: FC<{
                 {shortAddress(vehicle.owner)}
               </span>
             </span>
-            <span>Minted {date(vehicle.mintedAt)}</span>
+            <span>Minted {utcDate(vehicle.mintedAt)}</span>
           </div>
         </div>
         {licenses.length > 0 && (

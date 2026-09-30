@@ -70,7 +70,7 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
     api: 'fetch',
     asset: graph?.account.asset ?? '',
     clientId,
-    request: graph ? latestIndexQuery(graph.account.did) : null,
+    request: graph ? latestIndexQuery(graph.account.fetchDid) : null,
     enabled: access === 'ok' && !!graph,
   });
   const accountState: AccountState = accountProbe.isLoading

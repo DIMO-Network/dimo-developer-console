@@ -50,7 +50,11 @@ const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> 
     api: 'fetch',
     asset: subject.asset,
     clientId: ctx.clientId,
-    request: latestCloudEventQuery(subject.did, { type }, true),
+    request: latestCloudEventQuery(
+      subject.fetchDid,
+      { ...subject.fetchFilter, type },
+      true,
+    ),
   });
   const doc = q.data?.data?.latestCloudEvent;
   const scanUrl = safeHttpUrl(doc?.dataUrl);
@@ -135,7 +139,7 @@ export const DocumentsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     api: 'fetch',
     asset: subject.asset,
     clientId: ctx.clientId,
-    request: availableCloudEventTypesQuery(subject.did),
+    request: availableCloudEventTypesQuery(subject.fetchDid, subject.fetchFilter),
   });
   const docTypes = (types.data?.data?.availableCloudEventTypes ?? [])
     .map((t) => t.type)

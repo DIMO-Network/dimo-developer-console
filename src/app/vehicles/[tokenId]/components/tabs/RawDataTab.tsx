@@ -110,6 +110,8 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   // undefined = default (first row open), null = all closed, string = header.id
   const [expanded, setExpanded] = useState<string | null | undefined>(undefined);
   const valid = isRangeValid(range);
+  // A device's producer comes from the subject and always wins over the form.
+  const lockedProducer = subject.fetchFilter?.producer;
 
   const run = (nextMode: Mode = mode) => {
     let { from, to } = range;
@@ -128,7 +130,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         dataversion: form.dataversion,
         id: form.id,
         source: form.source,
-        producer: form.producer,
+        producer: lockedProducer ? undefined : form.producer,
         after: from,
         before: to,
       },
@@ -142,13 +144,17 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       [null, ...olderBefores].map((before) =>
         build(
           spec.mode,
-          subject.did,
-          before ? { ...spec.filter, before } : spec.filter,
+          subject.fetchDid,
+          {
+            ...spec.filter,
+            ...(before ? { before } : {}),
+            ...subject.fetchFilter,
+          },
           spec.limit,
           spec.withUrl,
         ),
       ),
-    [spec, olderBefores, subject.did],
+    [spec, olderBefores, subject.fetchDid, subject.fetchFilter],
   );
   const pages = useQueries({
     queries: requests.map((req) => ({
@@ -170,7 +176,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     api: 'fetch',
     asset: subject.asset,
     clientId: ctx.clientId,
-    request: availableCloudEventTypesQuery(subject.did),
+    request: availableCloudEventTypesQuery(subject.fetchDid, subject.fetchFilter),
   });
   const knownTypes = types.data?.data?.availableCloudEventTypes ?? [];
 
@@ -270,6 +276,17 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               onChange={(e) => setForm({ ...form, limit: Number(e.target.value) })}
             />
           </label>
+          {lockedProducer && (
+            // The device's own filter: shown, never editable.
+            <span className="flex h-10 items-center">
+              <span
+                className="rounded-chip bg-highest px-2 py-0.5 text-label text-fg"
+                title={lockedProducer}
+              >
+                Producer: {producerLabel(lockedProducer)}
+              </span>
+            </span>
+          )}
           <Button variant="ghost" onClick={() => setMore((m) => !m)}>
             {more ? 'Fewer filters' : 'More filters'}
           </Button>
@@ -303,13 +320,15 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               onChange={(e) => setForm({ ...form, source: e.target.value })}
               wrapperClassName="w-72"
             />
-            <TextField
-              placeholder="Producer DID"
-              aria-label="Producer"
-              value={form.producer}
-              onChange={(e) => setForm({ ...form, producer: e.target.value })}
-              wrapperClassName="w-96"
-            />
+            {!lockedProducer && (
+              <TextField
+                placeholder="Producer DID"
+                aria-label="Producer"
+                value={form.producer}
+                onChange={(e) => setForm({ ...form, producer: e.target.value })}
+                wrapperClassName="w-96"
+              />
+            )}
           </div>
         )}
       </div>

@@ -45,6 +45,17 @@ describe('buildVehicleGraph', () => {
       sublabel: 'All sources combined',
       capabilities: ['summary', 'signals', 'raw', 'trips'],
     });
+    expect(g.vehicle.fetchDid).toBe(vehicle.tokenDID);
+    expect(g.vehicle.fetchFilter).toBeUndefined();
+  });
+
+  it('scopes each device to the vehicle DID filtered by the device as producer', () => {
+    // Oracle cloud events carry subject = vehicle DID and producer = device DID.
+    for (const d of g.devices) {
+      expect(d.fetchDid).toBe(vehicle.tokenDID);
+      expect(d.fetchFilter).toEqual({ producer: d.did });
+    }
+    expect(g.devices[0].did).toBe(vehicle.aftermarketDevice!.tokenDID);
   });
 
   it('breaks each device out under the vehicle, authorised by the vehicle DID', () => {
@@ -73,6 +84,8 @@ describe('buildVehicleGraph', () => {
       sublabel: 'Owner account',
       capabilities: ['documents', 'raw'],
     });
+    expect(g.account.fetchDid).toBe(g.account.did);
+    expect(g.account.fetchFilter).toBeUndefined();
     expect(g.all.map((s) => s.did)).toEqual([
       g.vehicle.did,
       ...g.devices.map((d) => d.did),

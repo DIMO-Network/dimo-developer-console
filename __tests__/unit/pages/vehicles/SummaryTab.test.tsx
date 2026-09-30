@@ -170,6 +170,24 @@ describe('SummaryTab', () => {
     expect(screen.getByRole('button', { name: /Data types/ })).toBeInTheDocument();
   });
 
+  it('reads a device from Fetch through the vehicle DID, filtered by producer', () => {
+    answers();
+    renderWithClient(<SummaryTab subject={graph.devices[0]} ctx={ctx} />);
+    const requests = (useSubjectQuery as jest.Mock).mock.calls
+      .map((c) => c[0].request)
+      .filter(Boolean);
+    const byOp = (op: string) =>
+      requests.find((r: { query: string }) => r.query.startsWith(`query ${op}`));
+    expect(byOp('LatestCloudEvent').variables).toEqual({
+      did: graph.vehicle.did,
+      filter: { producer: graph.devices[0].did },
+    });
+    expect(byOp('AvailableCloudEventTypes').variables).toEqual({
+      did: graph.vehicle.did,
+      filter: { producer: graph.devices[0].did },
+    });
+  });
+
   it('tells the reader when a device has no resolvable telemetry source', () => {
     answers();
     renderWithClient(<SummaryTab subject={graph.devices[0]} ctx={ctx} />);

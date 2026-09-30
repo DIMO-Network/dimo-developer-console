@@ -140,6 +140,12 @@ describe('DocumentsTab', () => {
     );
     fireEvent.click(screen.getAllByRole('button', { name: 'View raw event' })[0]);
     expect(ctx.onBrowseRaw).toHaveBeenCalledWith(graph.account.did);
+    // The account is its own Fetch subject: its DID, no producer filter.
+    const typesCall = (useSubjectQuery as jest.Mock).mock.calls.find((c) =>
+      c[0].request?.query.startsWith('query AvailableCloudEventTypes'),
+    )[0];
+    expect(typesCall.asset).toBe(graph.account.did);
+    expect(typesCall.request.variables).toEqual({ did: graph.account.did, filter: null });
   });
 
   it('explains and offers the sharing link when the account is not shared', () => {

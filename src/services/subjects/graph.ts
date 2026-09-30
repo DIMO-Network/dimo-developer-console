@@ -1,4 +1,5 @@
 import type { GetVehicleDetailQuery } from '@/gql/graphql';
+import { utcDate } from '@/utils/freshness';
 import { accountDid, sourceDid } from './did';
 
 export type VehicleDetail = NonNullable<GetVehicleDetailQuery['vehicle']>;
@@ -16,12 +17,18 @@ export type DetailRow = { label: string; value: string; mono?: boolean };
 // telemetry for vehicles and devices (by tokenId + optional source filter),
 // documents for the owner's account.
 export type Subject = {
+  // The subject's own DID: URL state, rail keys, display.
   did: string;
   kind: SubjectKind;
   label: string;
   sublabel: string;
   // The DID the token exchange is made for. Devices ride on the vehicle's token.
   asset: string;
+  // How Fetch finds this subject's cloud events. Oracle events carry
+  // subject = vehicle DID and producer = device DID, and Fetch filters on the
+  // subject, so a device is the vehicle DID narrowed to its producer.
+  fetchDid: string;
+  fetchFilter?: { producer: string };
   tokenId?: number;
   telemetrySource?: string;
   capabilities: SubjectCapability[];
@@ -36,16 +43,6 @@ export type SubjectGraph = {
   all: Subject[];
 };
 
-const date = (iso: string | null | undefined) =>
-  iso
-    ? new Date(iso).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        timeZone: 'UTC',
-      })
-    : '—';
-
 export const buildVehicleGraph = (v: VehicleDetail, chainId: number): SubjectGraph => {
   const mmy = [v.definition?.make, v.definition?.model, v.definition?.year]
     .filter(Boolean)
@@ -57,13 +54,14 @@ export const buildVehicleGraph = (v: VehicleDetail, chainId: number): SubjectGra
     label: 'Vehicle',
     sublabel: 'All sources combined',
     asset: v.tokenDID,
+    fetchDid: v.tokenDID,
     tokenId: v.tokenId,
     capabilities: ['summary', 'signals', 'raw', 'trips'],
     details: [
       { label: 'Make, model, year', value: mmy || 'Unknown' },
       { label: 'Definition ID', value: v.definition?.id ?? '—', mono: true },
       { label: 'Owner', value: v.owner, mono: true },
-      { label: 'Minted', value: date(v.mintedAt) },
+      { label: 'Minted', value: utcDate(v.mintedAt) },
       { label: 'Vehicle DID', value: v.tokenDID, mono: true },
     ],
   };
@@ -77,6 +75,8 @@ export const buildVehicleGraph = (v: VehicleDetail, chainId: number): SubjectGra
       label: ad.manufacturer?.name || 'Aftermarket device',
       sublabel: 'Aftermarket device',
       asset: v.tokenDID,
+      fetchDid: v.tokenDID,
+      fetchFilter: { producer: ad.tokenDID },
       tokenId: v.tokenId,
       capabilities: ['summary', 'signals', 'raw'],
       parent: v.tokenDID,
@@ -84,8 +84,8 @@ export const buildVehicleGraph = (v: VehicleDetail, chainId: number): SubjectGra
         { label: 'Manufacturer', value: ad.manufacturer?.name ?? '—' },
         { label: 'Serial', value: ad.serial ?? '—', mono: true },
         { label: 'Device address', value: ad.address, mono: true },
-        { label: 'Paired', value: date(ad.pairedAt) },
-        { label: 'Minted', value: date(ad.mintedAt) },
+        { label: 'Paired', value: utcDate(ad.pairedAt) },
+        { label: 'Minted', value: utcDate(ad.mintedAt) },
         { label: 'Device DID', value: ad.tokenDID, mono: true },
       ],
     });
@@ -98,6 +98,8 @@ export const buildVehicleGraph = (v: VehicleDetail, chainId: number): SubjectGra
       label: sd.connection?.name || 'Synthetic device',
       sublabel: 'Synthetic device',
       asset: v.tokenDID,
+      fetchDid: v.tokenDID,
+      fetchFilter: { producer: sd.tokenDID },
       tokenId: v.tokenId,
       telemetrySource: sd.connection?.address
         ? sourceDid(chainId, sd.connection.address)
@@ -108,22 +110,24 @@ export const buildVehicleGraph = (v: VehicleDetail, chainId: number): SubjectGra
         { label: 'Connection', value: sd.connection?.name ?? '—' },
         { label: 'Connection address', value: sd.connection?.address ?? '—', mono: true },
         { label: 'Device address', value: sd.address, mono: true },
-        { label: 'Minted', value: date(sd.mintedAt) },
+        { label: 'Minted', value: utcDate(sd.mintedAt) },
         { label: 'Device DID', value: sd.tokenDID, mono: true },
       ],
     });
   }
 
+  const ownerDid = accountDid(chainId, v.owner);
   const account: Subject = {
-    did: accountDid(chainId, v.owner),
+    did: ownerDid,
     kind: 'account',
     label: 'Documents',
     sublabel: 'Owner account',
-    asset: accountDid(chainId, v.owner),
+    asset: ownerDid,
+    fetchDid: ownerDid,
     capabilities: ['documents', 'raw'],
     details: [
       { label: 'Owner', value: v.owner, mono: true },
-      { label: 'Account DID', value: accountDid(chainId, v.owner), mono: true },
+      { label: 'Account DID', value: ownerDid, mono: true },
     ],
   };
 

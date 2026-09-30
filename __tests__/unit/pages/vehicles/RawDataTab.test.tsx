@@ -115,7 +115,7 @@ describe('RawDataTab', () => {
     (postSubjectQuery as jest.Mock).mockReset().mockImplementation(answer);
   });
 
-  it('queries cloud events for the subject DID and lists them with resolved producers', async () => {
+  it('queries a device through the vehicle DID filtered by producer and resolves producers', async () => {
     renderTab(graph.devices[0]);
     expect(await screen.findByText('3 cloud events')).toBeInTheDocument();
     const [api, input] = (postSubjectQuery as jest.Mock).mock.calls.find(
@@ -123,9 +123,54 @@ describe('RawDataTab', () => {
     );
     expect(api).toBe('fetch');
     expect(input.asset).toBe(graph.vehicle.did);
-    expect(input.request.variables.did).toBe(graph.devices[0].did);
+    expect(input.request.variables.did).toBe(graph.vehicle.did);
+    expect(input.request.variables.filter.producer).toBe(graph.devices[0].did);
     expect(input.request.query).toContain('cloudEvents(');
+    expect(calls('AvailableCloudEventTypes')[0].variables).toEqual({
+      did: graph.vehicle.did,
+      filter: { producer: graph.devices[0].did },
+    });
     expect(screen.getAllByText('AutoPi').length).toBeGreaterThan(0);
+  });
+
+  it('locks the producer filter on a device, whatever More filters says', async () => {
+    renderTab(graph.devices[0]);
+    await screen.findByText('3 cloud events');
+    expect(screen.getByText('Producer: AutoPi')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'More filters' }));
+    expect(screen.queryByLabelText('Producer')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('radio', { name: 'Latest' }));
+    await waitFor(() => expect(calls('LatestCloudEvent').length).toBe(1));
+    expect(calls('LatestCloudEvent')[0].variables).toMatchObject({
+      did: graph.vehicle.did,
+      filter: { producer: graph.devices[0].did },
+    });
+  });
+
+  it('leaves the producer open on the vehicle', async () => {
+    renderTab(graph.vehicle);
+    await screen.findByText('3 cloud events');
+    expect(screen.queryByText(/^Producer: /)).not.toBeInTheDocument();
+    expect(calls('CloudEvents')[0].variables.filter.producer).toBeUndefined();
+    fireEvent.click(screen.getByRole('button', { name: 'More filters' }));
+    fireEvent.change(screen.getByLabelText('Producer'), {
+      target: { value: graph.devices[0].did },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Run query' }));
+    await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+    expect(calls('CloudEvents')[1].variables.filter.producer).toBe(graph.devices[0].did);
+  });
+
+  it('pages older events on a device with the producer still applied', async () => {
+    olderPage = [ev('2026-09-29T20:45:42Z', 'dimo.event', 'older')];
+    renderTab(graph.devices[0]);
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('button', { name: 'Load older' }));
+    expect(await screen.findByText('4 cloud events')).toBeInTheDocument();
+    expect(calls('CloudEvents')[1].variables.filter).toMatchObject({
+      before: '2026-09-29T20:46:12.001Z',
+      producer: graph.devices[0].did,
+    });
   });
 
   it('expands a row to its JSON, including string and null data', async () => {

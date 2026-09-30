@@ -240,11 +240,14 @@ const clean = (f: CloudEventFilter): CloudEventFilter | null => {
 const HEADER =
   'header { id source producer subject time type datacontenttype dataschema dataversion tags }';
 
-export const availableCloudEventTypesQuery = (did: string): GqlRequest => ({
-  query: `query AvailableCloudEventTypes($did: String!) {
-  availableCloudEventTypes(did: $did) { type count firstSeen lastSeen }
+export const availableCloudEventTypesQuery = (
+  did: string,
+  filter: CloudEventFilter = {},
+): GqlRequest => ({
+  query: `query AvailableCloudEventTypes($did: String!, $filter: CloudEventFilter) {
+  availableCloudEventTypes(did: $did, filter: $filter) { type count firstSeen lastSeen }
 }`,
-  variables: { did },
+  variables: { did, filter: clean(filter) },
 });
 
 export const latestCloudEventQuery = (
@@ -299,19 +302,29 @@ export const indexesQuery = (
   },
 });
 
-// One request for every rail item's latest payload time: metadata only.
-export const freshnessQuery = (dids: string[]): GqlRequest => {
-  if (!dids.length) throw new Error('freshnessQuery needs at least one DID');
-  const decl = dids.map((_, i) => `$d${i}: String!`).join(', ');
-  const fields = dids
+// One request for every rail item's latest payload time: metadata only. Each
+// entry is a subject's Fetch scope (a device is the vehicle DID + producer).
+export const freshnessQuery = (
+  scopes: { did: string; producer?: string }[],
+): GqlRequest => {
+  if (!scopes.length) throw new Error('freshnessQuery needs at least one DID');
+  const decl = scopes
+    .map((_, i) => `$d${i}: String!, $f${i}: CloudEventFilter`)
+    .join(', ');
+  const fields = scopes
     .map(
       (_, i) =>
-        `  s${i}: latestIndex(did: $d${i}) { header { time type source producer } }`,
+        `  s${i}: latestIndex(did: $d${i}, filter: $f${i}) { header { time type source producer } }`,
     )
     .join('\n');
   return {
     query: `query Freshness(${decl}) {\n${fields}\n}`,
-    variables: Object.fromEntries(dids.map((d, i) => [`d${i}`, d])),
+    variables: Object.fromEntries(
+      scopes.flatMap((s, i) => [
+        [`d${i}`, s.did],
+        [`f${i}`, s.producer ? { producer: s.producer } : null],
+      ]),
+    ),
   };
 };
 

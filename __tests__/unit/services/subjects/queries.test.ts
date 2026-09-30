@@ -19,6 +19,7 @@ import {
 
 const DID = 'did:erc721:137:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:184223';
 const SRC = 'did:ethr:137:0xcd445F4c6bDAD32b68a2939b912150Fe3C88803E';
+const DEVICE = 'did:erc721:137:0x9c94C395cBcBDe662235E0A9d3bB87Ad708561BA:48211';
 const FROM = '2026-09-22T00:00:00Z';
 const TO = '2026-09-29T00:00:00Z';
 
@@ -129,7 +130,16 @@ describe('telemetry builders', () => {
 
 describe('fetch builders', () => {
   it('availableCloudEventTypes and latestCloudEvent take the DID as a variable', () => {
-    expect(availableCloudEventTypesQuery(DID).variables).toEqual({ did: DID });
+    expect(availableCloudEventTypesQuery(DID).variables).toEqual({
+      did: DID,
+      filter: null,
+    });
+    const byProducer = availableCloudEventTypesQuery(DID, { producer: DEVICE });
+    expect(byProducer.query).toContain('$filter: CloudEventFilter');
+    expect(byProducer.query).toContain(
+      'availableCloudEventTypes(did: $did, filter: $filter)',
+    );
+    expect(byProducer.variables).toEqual({ did: DID, filter: { producer: DEVICE } });
     const latest = latestCloudEventQuery(DID, { type: 'dimo.status' }, true);
     expect(latest.variables).toEqual({ did: DID, filter: { type: 'dimo.status' } });
     expect(latest.query).toContain('dataUrl');
@@ -150,12 +160,13 @@ describe('fetch builders', () => {
     });
   });
 
-  it('freshnessQuery aliases one latestIndex per DID', () => {
-    const q = freshnessQuery([DID, SRC]);
-    expect(q.query).toContain('s0: latestIndex(did: $d0)');
-    expect(q.query).toContain('s1: latestIndex(did: $d1)');
+  it('freshnessQuery aliases one latestIndex per scope, each with its own filter', () => {
+    const q = freshnessQuery([{ did: DID }, { did: DID, producer: DEVICE }]);
+    expect(q.query).toContain('s0: latestIndex(did: $d0, filter: $f0)');
+    expect(q.query).toContain('s1: latestIndex(did: $d1, filter: $f1)');
     expect(q.query).toContain('$d0: String!');
-    expect(q.variables).toEqual({ d0: DID, d1: SRC });
+    expect(q.query).toContain('$f1: CloudEventFilter');
+    expect(q.variables).toEqual({ d0: DID, f0: null, d1: DID, f1: { producer: DEVICE } });
     expect(latestIndexQuery(DID).query).toContain('indexKey');
   });
 });

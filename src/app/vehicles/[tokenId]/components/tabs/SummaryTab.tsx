@@ -47,13 +47,13 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     api: 'fetch',
     asset: subject.asset,
     clientId: ctx.clientId,
-    request: availableCloudEventTypesQuery(subject.did),
+    request: availableCloudEventTypesQuery(subject.fetchDid, subject.fetchFilter),
   });
   const latest = useSubjectQuery<Latest>({
     api: 'fetch',
     asset: subject.asset,
     clientId: ctx.clientId,
-    request: latestCloudEventQuery(subject.did, {}, false),
+    request: latestCloudEventQuery(subject.fetchDid, { ...subject.fetchFilter }, false),
   });
 
   const latestAt =

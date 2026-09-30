@@ -62,11 +62,13 @@ describe('SubjectView', () => {
     const { rerender } = render(ui(graph.vehicle));
     rerender(ui(graph.devices[0]));
     await waitFor(() => {
-      const dids = (postSubjectQuery as jest.Mock).mock.calls
+      const last = (postSubjectQuery as jest.Mock).mock.calls
         .map((c) => c[1].request)
         .filter((r) => /query CloudEvents/.test(r.query))
-        .map((r) => r.variables.did);
-      expect(dids.at(-1)).toBe(graph.devices[0].did);
+        .at(-1);
+      // A device is read through the vehicle DID, narrowed to it as producer.
+      expect(last.variables.did).toBe(graph.vehicle.did);
+      expect(last.variables.filter.producer).toBe(graph.devices[0].did);
     });
   });
 });
