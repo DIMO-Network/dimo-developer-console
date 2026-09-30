@@ -32,7 +32,7 @@ export const CollapsibleSection: FC<PropsWithChildren<Props>> = ({
           type="button"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className="flex min-w-0 items-center gap-2.5 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-control"
+          className="flex min-w-0 flex-wrap items-center gap-x-2.5 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-control"
         >
           <ChevronRightIcon
             className={classNames(
@@ -46,7 +46,11 @@ export const CollapsibleSection: FC<PropsWithChildren<Props>> = ({
               {count}
             </span>
           )}
-          {meta && <span className="text-body-sm text-muted">{meta}</span>}
+          {meta && (
+            <span className="w-full pl-[26px] text-body-sm text-muted md:w-auto md:pl-0">
+              {meta}
+            </span>
+          )}
         </button>
         {actions && (
           <div className="flex flex-shrink-0 items-center gap-2">{actions}</div>

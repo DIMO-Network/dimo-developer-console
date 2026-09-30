@@ -141,6 +141,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
     return (
       <>
         <PaginatedTableIdentityAPI
+          label="Shared vehicles"
           data={[v]}
           columns={buildColumns(simulatedTokenIds, () => setRenouncingVehicle(v), {
             showSources,
@@ -181,6 +182,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
   return (
     <>
       <PaginatedTableIdentityAPI
+        label="Shared vehicles"
         data={visibleNodes}
         columns={buildColumns(
           simulatedTokenIds,

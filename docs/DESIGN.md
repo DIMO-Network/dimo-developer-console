@@ -418,8 +418,8 @@ fighting the base class. Body `.table-body` = `divide-y
 divide-outline` (each `<tr>` also carries `border-t border-outline`). Cell
 `.table-cell` = `h-[52px] max-w-[300px] break-all py-3 text-body-sm text-fg`.
 
-**Pagination** (`src/components/Table/PaginatedTable.tsx`, `Table.css`, and
-the vehicle page's `SourceRail.tsx` items): the meta-and-controls row = `flex
+**Pagination** (`src/components/Table/PaginatedTable.tsx`,
+`PaginatedTableIdentityAPI.tsx`, `Table.css`): the meta-and-controls row = `flex
 items-center justify-between text-sm text-muted`. Round page buttons:
 `<Button variant="secondary" size="icon">` (see "Buttons" — the icon size).
 Row icon actions use the same size with `variant="ghost"` (`BrandRow`,

@@ -123,6 +123,21 @@ const renderWithClient = (ui: React.ReactElement) =>
   render(<QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>);
 
 describe('SummaryTab', () => {
+  it('pluralises the KPI captions for a single signal and event type', () => {
+    answers({
+      DataSummary: {
+        dataSummary: {
+          ...SUMMARY,
+          availableSignals: ['speed'],
+          signalDataSummary: SUMMARY.signalDataSummary.slice(0, 1),
+        },
+      },
+    });
+    renderWithClient(<SummaryTab subject={graph.vehicle} ctx={ctx} />);
+    expect(screen.getByText('Across 1 signal')).toBeInTheDocument();
+    expect(screen.getByText('1 event type')).toBeInTheDocument();
+  });
+
   it('shows KPIs, the signal breakdown with a From column, events and data types', () => {
     answers();
     renderWithClient(<SummaryTab subject={graph.vehicle} ctx={ctx} />);

@@ -100,13 +100,23 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           label="Data points"
           value={summary ? compact(summary.numberOfSignals) : '—'}
           caption={
-            summary ? `Across ${summary.availableSignals.length} signals` : undefined
+            summary
+              ? `Across ${summary.availableSignals.length} ${
+                  summary.availableSignals.length === 1 ? 'signal' : 'signals'
+                }`
+              : undefined
           }
         />
         <StatCard
           label="Signals"
           value={summary ? summary.availableSignals.length : '—'}
-          caption={summary ? `${summary.eventDataSummary.length} event types` : undefined}
+          caption={
+            summary
+              ? `${summary.eventDataSummary.length} event ${
+                  summary.eventDataSummary.length === 1 ? 'type' : 'types'
+                }`
+              : undefined
+          }
         />
       </div>
 

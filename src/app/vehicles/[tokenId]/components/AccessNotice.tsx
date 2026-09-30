@@ -32,8 +32,11 @@ export const AccessNotice: FC<Props> = ({
             : "This vehicle isn't shared with any of your licenses"}
         </h3>
         <p className="max-w-xl text-body-sm text-muted">
-          The owner hasn&apos;t granted this license access, so its data can&apos;t be
-          read here. You can still see which apps it is shared with.
+          {clientId
+            ? "The owner hasn't granted this license access"
+            : "The owner hasn't granted any of your licenses access"}
+          , so its data can&apos;t be read here. You can still see which apps it is shared
+          with.
         </p>
         <Button variant="secondary" onClick={onViewSharing}>
           View sharing

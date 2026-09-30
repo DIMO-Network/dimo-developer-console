@@ -4,6 +4,7 @@ import {
   useReactTable,
   ColumnDef,
   PaginationState,
+  RowData,
   OnChangeFn,
 } from '@tanstack/react-table';
 import { Button } from '@/components/Button';
@@ -13,10 +14,17 @@ import { Cell } from './Cell';
 import './Table.css';
 import { useState } from 'react';
 
+declare module '@tanstack/react-table' {
+  // A column's className lands on its <th> and every <td>.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData extends RowData, TValue> {
+    className?: string;
+  }
+}
+
 // A column's meta.className lands on its <th> and every <td>, e.g.
 // 'hidden md:table-cell' to drop the column on phones.
-const columnClass = (def: { meta?: unknown }) =>
-  (def.meta as { className?: string } | undefined)?.className;
+const columnClass = (def: { meta?: { className?: string } }) => def.meta?.className;
 
 interface PaginatedTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -32,6 +40,8 @@ interface PaginatedTableProps<TData> {
   pageInfo: { startCursor?: string | null; endCursor?: string | null };
   pageSize: number;
   onRowClick?: (row: TData) => void;
+  // Names the horizontal scroll region for keyboard and screen reader users.
+  label?: string;
 }
 
 /**
@@ -47,6 +57,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
   pageInfo,
   pageSize,
   onRowClick,
+  label = 'Table',
 }: PaginatedTableProps<TData>) => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -83,7 +94,12 @@ export const PaginatedTableIdentityAPI = <TData,>({
 
   return (
     <div className={'min-w-full'}>
-      <div className={'min-w-full overflow-x-auto rounded-card bg-card p-4'}>
+      <div
+        className={'min-w-full overflow-x-auto rounded-card bg-card p-4'}
+        role="region"
+        aria-label={label}
+        tabIndex={0}
+      >
         <table className="table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (

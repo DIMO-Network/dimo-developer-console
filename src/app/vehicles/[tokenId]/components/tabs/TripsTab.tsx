@@ -204,7 +204,12 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           {days.error && (
             <p className="text-body-sm text-negative">{days.error.message}</p>
           )}
-          <div className="overflow-x-auto">
+          <div
+            className="overflow-x-auto"
+            role="region"
+            aria-label="Daily activity"
+            tabIndex={0}
+          >
             <div
               className="grid min-w-[560px] gap-3 md:min-w-0"
               style={{
@@ -245,7 +250,7 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               filename="trips.json"
             />
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" role="region" aria-label="Trips" tabIndex={0}>
             <div className="min-w-[640px] md:min-w-0">
               <div className="grid grid-cols-6 gap-4 border-t border-outline px-5 py-2 text-label text-muted">
                 <span>Started ↓</span>

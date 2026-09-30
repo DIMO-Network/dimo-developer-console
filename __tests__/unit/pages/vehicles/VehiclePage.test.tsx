@@ -116,6 +116,9 @@ describe('VehiclePage', () => {
     expect(
       screen.getByText("This vehicle isn't shared with any of your licenses"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(/The owner hasn't granted any of your licenses access/),
+    ).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Summary' })).toBeDisabled();
     expect(useSubjectFreshness).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: false }),
