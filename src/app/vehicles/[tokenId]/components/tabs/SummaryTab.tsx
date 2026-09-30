@@ -73,7 +73,14 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         <StatCard
           label="Latest payload"
           className="col-span-2 md:col-span-1"
-          value={<FreshnessDot at={latestAt} label={false} className="gap-3" />}
+          value={
+            <span className="inline-flex items-center gap-3">
+              <span aria-hidden="true" className="inline-flex">
+                <FreshnessDot at={latestAt} label={false} />
+              </span>
+              {latestAt ? relativeTime(latestAt) : '—'}
+            </span>
+          }
           caption={
             latestAt
               ? `${absoluteTime(latestAt)}${latestType ? ` · ${latestType}` : ''}${producerLabel ? ` from ${producerLabel}` : ''}`

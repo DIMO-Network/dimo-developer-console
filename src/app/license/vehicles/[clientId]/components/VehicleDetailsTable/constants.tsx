@@ -76,10 +76,13 @@ export const buildColumns = (
 ): ColumnDef<VehicleRow, any>[] => [
   columnHelper.accessor('tokenId', {
     header: 'Vehicle token ID',
+    cell: (i) => <span className="whitespace-nowrap">{i.getValue()}</span>,
   }),
   columnHelper.accessor('tokenDID', {
     header: 'Vehicle token DID',
     cell: (i) => <span className="font-mono text-code">{i.getValue()}</span>,
+    // Phones keep the ID, vehicle and last seen; the DID is on the vehicle page.
+    meta: { className: 'hidden md:table-cell' },
   }),
   columnHelper.display({
     id: 'vehicleMMY',
@@ -118,7 +121,7 @@ export const buildColumns = (
                 {names.map((n) => (
                   <span
                     key={n}
-                    className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted"
+                    className="whitespace-nowrap rounded-chip bg-highest px-2 py-0.5 text-label text-muted"
                   >
                     {n}
                   </span>

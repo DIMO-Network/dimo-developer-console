@@ -13,6 +13,11 @@ import { Cell } from './Cell';
 import './Table.css';
 import { useState } from 'react';
 
+// A column's meta.className lands on its <th> and every <td>, e.g.
+// 'hidden md:table-cell' to drop the column on phones.
+const columnClass = (def: { meta?: unknown }) =>
+  (def.meta as { className?: string } | undefined)?.className;
+
 interface PaginatedTableProps<TData> {
   columns: ColumnDef<TData>[];
   data: TData[];
@@ -78,13 +83,16 @@ export const PaginatedTableIdentityAPI = <TData,>({
 
   return (
     <div className={'min-w-full'}>
-      <div className={'min-w-full rounded-card bg-card p-4'}>
+      <div className={'min-w-full overflow-x-auto rounded-card bg-card p-4'}>
         <table className="table">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <Column key={header.id}>
+                  <Column
+                    key={header.id}
+                    className={columnClass(header.column.columnDef)}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -101,7 +109,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
                 onClick={onRowClick ? () => onRowClick(row.original) : undefined}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <Cell key={cell.id}>
+                  <Cell key={cell.id} className={columnClass(cell.column.columnDef)}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Cell>
                 ))}

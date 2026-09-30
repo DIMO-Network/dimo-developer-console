@@ -204,31 +204,33 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           {days.error && (
             <p className="text-body-sm text-negative">{days.error.message}</p>
           )}
-          <div
-            className="grid gap-3"
-            style={{
-              gridTemplateColumns: `repeat(${Math.max(1, dayRows.length)}, minmax(0, 1fr))`,
-            }}
-          >
-            {dayRows.map((d, i) => (
-              <div key={i} className="flex flex-col gap-2">
-                <div className="flex h-24 items-end">
-                  <div
-                    className="w-full rounded-t-md bg-chart-1"
-                    style={{
-                      height: `${Math.max(4, Math.round((d.segmentCount / maxCount) * 96))}px`,
-                    }}
-                  />
+          <div className="overflow-x-auto">
+            <div
+              className="grid min-w-[560px] gap-3 md:min-w-0"
+              style={{
+                gridTemplateColumns: `repeat(${Math.max(1, dayRows.length)}, minmax(0, 1fr))`,
+              }}
+            >
+              {dayRows.map((d, i) => (
+                <div key={i} className="flex flex-col gap-2">
+                  <div className="flex h-24 items-end">
+                    <div
+                      className="w-full rounded-t-md bg-chart-1"
+                      style={{
+                        height: `${Math.max(4, Math.round((d.segmentCount / maxCount) * 96))}px`,
+                      }}
+                    />
+                  </div>
+                  <span className="text-body-sm font-medium text-ink">
+                    {dayLabel(dayFrom, i)}
+                  </span>
+                  <span className="text-label text-muted">
+                    {d.segmentCount} trip{d.segmentCount === 1 ? '' : 's'} ·{' '}
+                    {fmtDuration(d.duration)}
+                  </span>
                 </div>
-                <span className="text-body-sm font-medium text-ink">
-                  {dayLabel(dayFrom, i)}
-                </span>
-                <span className="text-label text-muted">
-                  {d.segmentCount} trip{d.segmentCount === 1 ? '' : 's'} ·{' '}
-                  {fmtDuration(d.duration)}
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -243,53 +245,57 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               filename="trips.json"
             />
           </div>
-          <div className="grid grid-cols-6 gap-4 border-t border-outline px-5 py-2 text-label text-muted">
-            <span>Started ↓</span>
-            <span>Ended</span>
-            <span className="text-right">Duration</span>
-            <span className="text-right">Distance</span>
-            <span className="text-right">Top speed</span>
-            <span />
-          </div>
-          {segments.isLoading && (
-            <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
-              Running…
-            </p>
-          )}
-          {segments.error && (
-            <p className="border-t border-outline px-5 py-3 text-body-sm text-negative">
-              {segments.error.message}
-            </p>
-          )}
-          {segRows.map((s, i) => (
-            <div
-              key={i}
-              className="grid grid-cols-6 items-center gap-4 border-t border-outline px-5 py-3 text-body-sm text-fg"
-            >
-              <span>{s.start ? short(s.start.timestamp) : '—'}</span>
-              <span>{s.isOngoing || !s.end ? 'Now' : short(s.end.timestamp)}</span>
-              <span className="text-right">{fmtDuration(s.duration)}</span>
-              <span className="text-right">{distance(s)}</span>
-              <span className="text-right">
-                {sig(s, 'speed', 'MAX') !== null
-                  ? `${Math.round(sig(s, 'speed', 'MAX')!)} km/h`
-                  : '—'}
-              </span>
-              <span className="flex justify-end">
-                {s.isOngoing && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-control px-2.5 py-0.5 text-label text-ink">
-                    <span className="size-1.5 rounded-full bg-accent shadow-[0_0_8px_var(--accent-soft-strong)]" />
-                    In progress
+          <div className="overflow-x-auto">
+            <div className="min-w-[640px] md:min-w-0">
+              <div className="grid grid-cols-6 gap-4 border-t border-outline px-5 py-2 text-label text-muted">
+                <span>Started ↓</span>
+                <span>Ended</span>
+                <span className="text-right">Duration</span>
+                <span className="text-right">Distance</span>
+                <span className="text-right">Top speed</span>
+                <span />
+              </div>
+              {segments.isLoading && (
+                <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
+                  Running…
+                </p>
+              )}
+              {segments.error && (
+                <p className="border-t border-outline px-5 py-3 text-body-sm text-negative">
+                  {segments.error.message}
+                </p>
+              )}
+              {segRows.map((s, i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-6 items-center gap-4 border-t border-outline px-5 py-3 text-body-sm text-fg"
+                >
+                  <span>{s.start ? short(s.start.timestamp) : '—'}</span>
+                  <span>{s.isOngoing || !s.end ? 'Now' : short(s.end.timestamp)}</span>
+                  <span className="text-right">{fmtDuration(s.duration)}</span>
+                  <span className="text-right">{distance(s)}</span>
+                  <span className="text-right">
+                    {sig(s, 'speed', 'MAX') !== null
+                      ? `${Math.round(sig(s, 'speed', 'MAX')!)} km/h`
+                      : '—'}
                   </span>
-                )}
-              </span>
+                  <span className="flex justify-end">
+                    {s.isOngoing && (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-control px-2.5 py-0.5 text-label text-ink">
+                        <span className="size-1.5 rounded-full bg-accent shadow-[0_0_8px_var(--accent-soft-strong)]" />
+                        In progress
+                      </span>
+                    )}
+                  </span>
+                </div>
+              ))}
+              {!segments.isLoading && !segments.error && segRows.length === 0 && (
+                <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
+                  No trips in this range.
+                </p>
+              )}
             </div>
-          ))}
-          {!segments.isLoading && !segments.error && segRows.length === 0 && (
-            <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
-              No trips in this range.
-            </p>
-          )}
+          </div>
         </div>
       )}
     </div>

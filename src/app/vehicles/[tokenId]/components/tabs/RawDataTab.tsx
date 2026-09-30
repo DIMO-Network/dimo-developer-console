@@ -322,7 +322,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       )}
 
       <div className="flex flex-col rounded-card bg-card">
-        <div className="flex items-center justify-between gap-3 px-5 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
           <div className="flex min-w-0 items-baseline gap-2.5">
             <span className="text-card-title text-ink">{title}</span>
             <span className="truncate font-mono text-code text-muted">
@@ -335,11 +335,11 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             filename={`${subject.label.toLowerCase()}-cloud-events.json`}
           />
         </div>
-        <div className="grid grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
+        <div className="grid grid-cols-[116px_minmax(0,1fr)_32px] md:grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
           <span>Time (UTC) ↓</span>
           <span>Type</span>
-          <span>Data version</span>
-          <span>Producer</span>
+          <span className="hidden md:block">Data version</span>
+          <span className="hidden md:block">Producer</span>
           <span />
         </div>
         {base.isLoading && (
@@ -371,7 +371,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                 aria-expanded={open}
                 onClick={() => setExpanded(open ? null : r.header.id)}
                 className={classNames(
-                  'grid grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px] items-center gap-4 px-5 py-2.5 text-left transition-colors hover:bg-control',
+                  'grid grid-cols-[116px_minmax(0,1fr)_32px] md:grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px] items-center gap-4 px-5 py-2.5 text-left transition-colors hover:bg-control',
                   open && 'bg-control',
                 )}
               >
@@ -379,10 +379,10 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                   <span className="text-muted">{date}</span> {time}
                 </span>
                 <span className="text-body-sm font-medium text-ink">{r.header.type}</span>
-                <span className="font-mono text-code text-fg">
+                <span className="hidden font-mono text-code text-fg md:block">
                   {r.header.dataversion ?? '—'}
                 </span>
-                <span className="text-body-sm text-fg">
+                <span className="hidden text-body-sm text-fg md:block">
                   {producerLabel(r.header.producer)}
                 </span>
                 <ChevronDownIcon

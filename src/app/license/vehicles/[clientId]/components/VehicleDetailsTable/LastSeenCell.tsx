@@ -19,5 +19,10 @@ export const LastSeenCell: FC<{ tokenId: number; asset: string; clientId: string
   });
   if (q.isLoading) return <span className="text-muted">…</span>;
   if (q.error) return <span className="text-muted">Unavailable</span>;
-  return <FreshnessDot at={q.data?.data?.signalsLatest?.lastSeen ?? null} />;
+  return (
+    <FreshnessDot
+      at={q.data?.data?.signalsLatest?.lastSeen ?? null}
+      className="whitespace-nowrap"
+    />
+  );
 };

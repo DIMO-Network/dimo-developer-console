@@ -27,12 +27,12 @@ export const CollapsibleSection: FC<PropsWithChildren<Props>> = ({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className={classNames('flex flex-col rounded-card bg-card', className)}>
-      <div className="flex min-h-14 items-center justify-between gap-3 px-3 py-2.5">
+      <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-3 py-2.5">
         <button
           type="button"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className="flex items-center gap-2.5 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-control"
+          className="flex min-w-0 items-center gap-2.5 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-control"
         >
           <ChevronRightIcon
             className={classNames(

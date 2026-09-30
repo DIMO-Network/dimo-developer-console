@@ -57,23 +57,29 @@ export const SignalTable: FC<{
       {sort.key === key ? (sort.dir === -1 ? ' ↓' : ' ↑') : ''}
     </button>
   );
+  // Phones drop First seen and From; the rest keep their room.
   const cols = showFrom
-    ? 'grid-cols-[minmax(0,2.2fr)_minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.1fr)]'
-    : 'grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]';
+    ? 'grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.2fr)] md:grid-cols-[minmax(0,2.2fr)_minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.1fr)]'
+    : 'grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.2fr)] md:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]';
   return (
     <div className="flex flex-col">
-      <div className={classNames('grid gap-4 border-t border-outline px-5 py-2', cols)}>
+      <div
+        className={classNames(
+          'grid gap-3 border-t border-outline px-4 py-2 md:gap-4 md:px-5',
+          cols,
+        )}
+      >
         {head('name', 'Signal')}
         {head('count', 'Data points', true)}
-        {head('firstSeen', 'First seen')}
+        <span className="hidden md:block">{head('firstSeen', 'First seen')}</span>
         {head('lastSeen', 'Last seen')}
-        {showFrom && <span className="text-label text-muted">From</span>}
+        {showFrom && <span className="hidden text-label text-muted md:block">From</span>}
       </div>
       {shown.map((r) => (
         <div
           key={r.name}
           className={classNames(
-            'grid items-center gap-4 border-t border-outline px-5 py-2',
+            'grid items-center gap-3 border-t border-outline px-4 py-2 md:gap-4 md:px-5',
             cols,
           )}
         >
@@ -86,10 +92,12 @@ export const SignalTable: FC<{
           <span className="text-right text-body-sm text-fg">
             {r.count.toLocaleString('en-US')}
           </span>
-          <span className="text-body-sm text-fg">{utcDate(r.firstSeen)}</span>
-          <FreshnessDot at={r.lastSeen} />
+          <span className="hidden text-body-sm text-fg md:block">
+            {utcDate(r.firstSeen)}
+          </span>
+          <FreshnessDot at={r.lastSeen} className="whitespace-nowrap" />
           {showFrom && (
-            <span className="flex flex-wrap gap-1">
+            <span className="hidden flex-wrap gap-1 md:flex">
               {(r.from ?? []).map((f) => (
                 <span
                   key={f}
