@@ -49,6 +49,16 @@ const nextConfig = {
       fullUrl: true,
     },
   },
+  async redirects() {
+    return [
+      { source: '/explorer', destination: '/vehicles', permanent: true },
+      {
+        source: '/explorer/:tokenId',
+        destination: '/vehicles/:tokenId',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     if (process.env.VERCEL_ENV === 'development') {
       return [];

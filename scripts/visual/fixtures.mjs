@@ -362,6 +362,8 @@ const vehicle = (tokenId, make, model, year) => ({
   tokenDID: `did:erc721:80002:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:${tokenId}`,
   owner: WALLET,
   mintedAt: '2026-04-11T09:00:00Z',
+  aftermarketDevice: null,
+  syntheticDevice: null,
   definition: {
     __typename: 'Definition',
     id: `${make}_${model}_${year}`.toLowerCase().replace(/\W+/g, '_'),

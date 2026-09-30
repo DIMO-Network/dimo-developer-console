@@ -1,9 +1,21 @@
 import { ColumnDef, createColumnHelper } from '@tanstack/table-core';
 import { useState } from 'react';
-import { GetVehiclesByClientIdQuery } from '@/gql/graphql';
+import { LastSeenCell } from './LastSeenCell';
 
-type VehicleNode = GetVehiclesByClientIdQuery['vehicles']['nodes'][0];
-const columnHelper = createColumnHelper<VehicleNode>();
+// Structural row type: satisfied by both GetVehiclesByClientId nodes and the
+// GetVehicleForLicense vehicle.
+export type VehicleRow = {
+  tokenId: number;
+  tokenDID: string;
+  definition?: {
+    make?: string | null;
+    model?: string | null;
+    year?: number | null;
+  } | null;
+  aftermarketDevice?: { manufacturer?: { name?: string | null } | null } | null;
+  syntheticDevice?: { connection?: { name?: string | null } | null } | null;
+};
+const columnHelper = createColumnHelper<VehicleRow>();
 
 function ActionsCell({
   tokenId,
@@ -57,14 +69,17 @@ function ActionsCell({
 export const buildColumns = (
   simulatedTokenIds: Set<number>,
   onRenounce: (tokenId: number) => void,
-): ColumnDef<VehicleNode>[] => [
-  // @ts-expect-error multiple properties are improperly typed, but not sure how to fix it
+  opts: { showSources?: boolean; showLastSeen?: boolean; clientId: string } = {
+    clientId: '',
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): ColumnDef<VehicleRow, any>[] => [
   columnHelper.accessor('tokenId', {
     header: 'Vehicle token ID',
   }),
-  // @ts-expect-error multiple properties are improperly typed, but not sure how to fix it
   columnHelper.accessor('tokenDID', {
     header: 'Vehicle token DID',
+    cell: (i) => <span className="font-mono text-code">{i.getValue()}</span>,
   }),
   columnHelper.display({
     id: 'vehicleMMY',
@@ -86,6 +101,49 @@ export const buildColumns = (
       );
     },
   }),
+  ...(opts.showSources
+    ? [
+        columnHelper.display({
+          id: 'sources',
+          header: 'Sources',
+          cell: (info) => {
+            const { aftermarketDevice, syntheticDevice } = info.row.original;
+            const names = [
+              aftermarketDevice?.manufacturer?.name,
+              syntheticDevice?.connection?.name,
+            ].filter((n): n is string => !!n);
+            if (!names.length) return <span className="text-muted">—</span>;
+            return (
+              <span className="flex flex-wrap gap-1">
+                {names.map((n) => (
+                  <span
+                    key={n}
+                    className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted"
+                  >
+                    {n}
+                  </span>
+                ))}
+              </span>
+            );
+          },
+        }),
+      ]
+    : []),
+  ...(opts.showLastSeen
+    ? [
+        columnHelper.display({
+          id: 'lastSeen',
+          header: 'Last seen',
+          cell: (info) => (
+            <LastSeenCell
+              tokenId={info.row.original.tokenId}
+              asset={info.row.original.tokenDID}
+              clientId={opts.clientId}
+            />
+          ),
+        }),
+      ]
+    : []),
   columnHelper.display({
     id: 'actions',
     header: '',

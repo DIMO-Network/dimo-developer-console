@@ -38,7 +38,7 @@ editing it, since the mock server reads it at startup). Groups:
 - Licensed vehicles `/license/vehicles/[clientId]` and its Renounce modal (opened
   from the row's actions menu; confirming is not clicked).
 - Connections, webhooks, templates (the harness sets
-  `NEXT_PUBLIC_TEMPLATE_EDITOR_ENABLED=true`; production has it off), explorer,
+  `NEXT_PUBLIC_TEMPLATE_EDITOR_ENABLED=true`; production has it off), vehicles,
   settings, support, and the guest pages (sign-in, sign-up flows, email
   recovery). `not-found` is Next's built-in 404.
 

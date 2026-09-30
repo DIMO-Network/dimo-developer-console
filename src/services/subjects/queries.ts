@@ -317,3 +317,10 @@ export const freshnessQuery = (dids: string[]): GqlRequest => {
 // What "Copy query" puts on the clipboard.
 export const formatGraphQL = (req: GqlRequest): string =>
   `${req.query}\n\n# variables\n${JSON.stringify(req.variables, null, 2)}`;
+
+export const lastSeenQuery = (tokenId: number): GqlRequest => ({
+  query: `query LastSeen($tokenId: Int!) {
+  signalsLatest(tokenId: $tokenId) { lastSeen }
+}`,
+  variables: { tokenId },
+});
