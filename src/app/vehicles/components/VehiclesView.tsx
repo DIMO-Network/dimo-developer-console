@@ -14,7 +14,12 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 
 const parseSearch = (raw: string): { owner?: string; tokenIdSearch: number | null } => {
   const s = raw.trim();
-  if (/^\d+$/.test(s)) return { tokenIdSearch: Number(s) };
+  if (/^\d+$/.test(s)) {
+    // GraphQL Int: anything larger cannot be a token ID.
+    return Number(s) <= 2147483647
+      ? { tokenIdSearch: Number(s) }
+      : { tokenIdSearch: null };
+  }
   if (ADDRESS.test(s)) return { owner: s, tokenIdSearch: null };
   return { tokenIdSearch: null };
 };
@@ -64,6 +69,8 @@ const Content = () => {
   }
 
   const filters = parseSearch(search);
+  const invalidSearch =
+    search.trim() !== '' && filters.owner === undefined && filters.tokenIdSearch === null;
   return (
     <>
       <DevLicenseSelector
@@ -82,8 +89,14 @@ const Content = () => {
               aria-label="Search vehicles"
             />
           </SectionHeader>
+          {invalidSearch && (
+            <p className="text-label text-muted">
+              Enter a token ID or a full 0x address.
+            </p>
+          )}
           <div className="-mx-4 -mb-4">
             <VehicleDetailsTable
+              key={`${selected.clientId}:${filters.owner ?? ''}:${filters.tokenIdSearch ?? ''}`}
               clientId={selected.clientId}
               owner={filters.owner}
               tokenIdSearch={filters.tokenIdSearch}

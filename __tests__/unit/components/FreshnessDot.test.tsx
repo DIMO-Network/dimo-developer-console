@@ -17,7 +17,7 @@ describe('FreshnessDot', () => {
   });
   it('can render the dot alone', () => {
     render(<FreshnessDot at="2026-09-28T00:00:00Z" now={NOW} label={false} />);
-    expect(screen.queryByText(/ago/)).not.toBeInTheDocument();
+    expect(screen.getByText(/ago/)).toHaveClass('sr-only');
     expect(screen.getByTestId('freshness-dot')).toHaveAttribute(
       'data-freshness',
       'inactive',

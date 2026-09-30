@@ -8,6 +8,7 @@ import { Loader } from '@/components/Loader';
 import {
   buildColumns,
   PAGE_SIZE,
+  type VehicleRow,
 } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable/constants';
 import { RenounceVehicleModal } from '@/app/license/vehicles/[clientId]/components/RenounceVehicleModal';
 import { getSimulatedVehicles } from '@/actions/simulatedVehicles';
@@ -83,7 +84,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
     skip: tokenIdSearch === null,
   });
   const [simulatedTokenIds, setSimulatedTokenIds] = useState<Set<number>>(new Set());
-  const [renouncingVehicle, setRenouncingVehicle] = useState<VehicleNode | null>(null);
+  const [renouncingVehicle, setRenouncingVehicle] = useState<VehicleRow | null>(null);
   const [removedTokenIds, setRemovedTokenIds] = useState<Set<number>>(new Set());
   const { renounce } = useRenounceVehiclePermissions();
 
@@ -103,7 +104,8 @@ export const VehicleDetailsTable: FC<IProps> = ({
       setRenouncingVehicle(null);
       toast.success('Access renounced');
       // Background sync
-      refetch();
+      if (tokenIdSearch !== null) single.refetch();
+      else refetch();
     } catch (e: unknown) {
       Sentry.captureException(e);
       toast.error('Failed to renounce access');
@@ -113,6 +115,13 @@ export const VehicleDetailsTable: FC<IProps> = ({
 
   if (tokenIdSearch !== null) {
     if (single.loading) return <Loader isLoading />;
+    if (single.error) {
+      return (
+        <p className="text-body-sm text-negative">
+          Couldn&apos;t look up vehicle {tokenIdSearch}: {single.error.message}
+        </p>
+      );
+    }
     const v = single.data?.vehicle;
     if (!v) {
       return (
@@ -130,19 +139,28 @@ export const VehicleDetailsTable: FC<IProps> = ({
       );
     }
     return (
-      <PaginatedTableIdentityAPI
-        data={[v]}
-        columns={buildColumns(simulatedTokenIds, () => {}, {
-          showSources,
-          showLastSeen,
-          clientId,
-        })}
-        onPaginationChange={() => {}}
-        rowCount={1}
-        pageInfo={{}}
-        pageSize={PAGE_SIZE}
-        onRowClick={(row) => router.push(`/vehicles/${row.tokenId}?license=${clientId}`)}
-      />
+      <>
+        <PaginatedTableIdentityAPI
+          data={[v]}
+          columns={buildColumns(simulatedTokenIds, () => setRenouncingVehicle(v), {
+            showSources,
+            showLastSeen,
+            clientId,
+          })}
+          onPaginationChange={() => {}}
+          rowCount={1}
+          pageInfo={{}}
+          pageSize={PAGE_SIZE}
+          onRowClick={(row) =>
+            router.push(`/vehicles/${row.tokenId}?license=${clientId}`)
+          }
+        />
+        <RenounceVehicleModal
+          vehicle={renouncingVehicle}
+          onConfirm={handleRenounce}
+          onClose={() => setRenouncingVehicle(null)}
+        />
+      </>
     );
   }
   if (error) {

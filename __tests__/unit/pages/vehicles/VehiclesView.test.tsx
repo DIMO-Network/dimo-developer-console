@@ -78,6 +78,24 @@ describe('VehiclesView', () => {
     });
   });
 
+  it('hints when the search is neither a token ID nor an address', () => {
+    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+      developerLicenses: [lic('0xaaa', 'A')],
+      loading: false,
+    });
+    render(<VehiclesView />);
+    const input = screen.getByPlaceholderText('Search by token ID or owner address');
+    expect(screen.queryByText('Enter a token ID or a full 0x address.')).toBeNull();
+    fireEvent.change(input, { target: { value: 'hello' } });
+    expect(
+      screen.getByText('Enter a token ID or a full 0x address.'),
+    ).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: '99999999999' } });
+    expect(
+      screen.getByText('Enter a token ID or a full 0x address.'),
+    ).toBeInTheDocument();
+  });
+
   it('explains the empty state when the user has no licenses', () => {
     (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
       developerLicenses: [],

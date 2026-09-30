@@ -38,7 +38,11 @@ export const FreshnessDot: FC<Props> = ({ at, now, label = true, className }) =>
           DOT[freshness],
         )}
       />
-      {label && <span>{relativeTime(at, now)}</span>}
+      {label ? (
+        <span>{relativeTime(at, now)}</span>
+      ) : (
+        <span className="sr-only">{relativeTime(at, now)}</span>
+      )}
     </span>
   );
 };
