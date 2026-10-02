@@ -53,7 +53,7 @@
 - **Metric** `signer_check_total{service, result}`:
   - `result` is one of `allowed`, `denied`, `error`, `skipped`;
   - `service` is one of `token-exchange-api`, `vehicle-triggers-api`, `tesla-oracle`, `credit-tracker`.
-  - **Alert:** `error` above 1% of non-skipped checks over 5 minutes.
+  - **Alert:** `error` above 1% of non-skipped checks (`allowed` + `denied` + `error`) over 5 minutes.
 - **vehicle-triggers-api columns:** `created_by_signer` and `updated_by_signer` (nullable text, lowercase hex).
 - **vehicle-triggers-api JSON:** fields `createdBySigner` and `updatedBySigner` (checksummed, omitted when null) on every `WebhookView` from `GET /v1/webhooks`.
 - **Deploy order (identical in every task):**
@@ -63,8 +63,10 @@
   4. Run the dev live pass: log mode, then enforce in dev.
   5. Release production token-exchange-api, then the three callers, all `log`.
   6. Bump production dex to `v2.30.101`.
-  7. Run a week in production `log` mode, then switch production to `enforce`.
-  8. Set `SIGNER_CLAIM_REQUIRED_AFTER` to 14 days after the production dex release.
+  7. Run a week in production `log` mode (Task 16).
+  8. Announce the behavior change to developers, naming the enforce date (Task 17 Step 1; index Rollout 2.6).
+  9. Switch production to `enforce` (Task 17 Step 2).
+  10. Set `SIGNER_CLAIM_REQUIRED_AFTER` (token-exchange-api only) to 14 days after the production dex release (Task 17 Step 4).
 - **Commits and PRs:**
   - no `Co-Authored-By` trailer and no tool attribution in commit messages or PR descriptions;
   - stage files by path. Never commit the local `.gitignore` edits in the `dex`, `token-exchange-api`, `tesla-oracle`, `credit-tracker` and `cluster-helm-charts` checkouts.
@@ -105,7 +107,8 @@ These conditions are implied by the spec but not exercised by a happy-path test.
 
 5. **Webhooks created or changed before the columns existed, or by claimless tokens,** show neither field, and a later claimless change doesn't erase a member's mark. Tests, all in Task 11:
    - `TestSetTriggerUpdatedBySigner` (a zero signer keeps the stored mark);
-   - `TestWebhookController_UpdateWebhookRecordsTheSigner` "a claimless target change keeps the existing mark";
+   - `TestWebhookController_UpdateWebhookRecordsTheSigner` "a claimless target change does not mark";
+   - `TestUpdateTriggerKeepsSignerColumns` (a stale whole-row update doesn't write an old mark back);
    - `TestWebhookChangesRecordTheSigner` "a claimless change records nothing";
    - the "omits them when unknown" list case.
 
@@ -160,24 +163,31 @@ git -C ~/workspace/cluster-helm-charts worktree add ~/workspace/cluster-helm-cha
 cd ~/workspace/cluster-helm-charts-dex-pin
 ```
 
-In each of the four files, change the `image` block's two values:
+In each of the four files, pin the `dex.image` block. Each file has exactly one `pullPolicy:` line and one `tag:` line (today `pullPolicy: Always` and `tag: "latest"`), so replace the whole lines, whatever their quoting:
 
-```yaml
-pullPolicy: IfNotPresent
+```bash
+sed -E -i '' -e 's/^( +pullPolicy:).*/\1 IfNotPresent/' -e 's/^( +tag:).*/\1 v2.30.100/' \
+  charts/dimo-dex/values.yaml charts/dimo-dex/values-prod.yaml charts/dimo-dex/values-roles-rights.yaml charts/dimo-dex/values-roles-rights-prod.yaml
 ```
 
+Each file's block then reads, comments aside:
+
 ```yaml
-tag: 'v2.30.100'
+dex:
+  image:
+    repository: dimozone/dex
+    pullPolicy: IfNotPresent
+    tag: v2.30.100
 ```
 
 Run:
 
 ```bash
-grep -n -A8 "^  image:" charts/dimo-dex/values.yaml charts/dimo-dex/values-prod.yaml charts/dimo-dex/values-roles-rights.yaml charts/dimo-dex/values-roles-rights-prod.yaml | grep -E "pullPolicy|tag:"
+grep -nE "^ +(pullPolicy|tag):" charts/dimo-dex/values.yaml charts/dimo-dex/values-prod.yaml charts/dimo-dex/values-roles-rights.yaml charts/dimo-dex/values-roles-rights-prod.yaml
 helm lint charts/dimo-dex -f charts/dimo-dex/values-prod.yaml
 ```
 
-Expected: eight lines, `pullPolicy: IfNotPresent` and `tag: "v2.30.100"` four times each, and `1 chart(s) linted, 0 chart(s) failed`.
+Expected: eight lines, `pullPolicy: IfNotPresent` and `tag: v2.30.100` four times each, and `1 chart(s) linted, 0 chart(s) failed`.
 
 - [ ] **Step 3: Commit, open the PR, merge, and confirm the rollout**
 
@@ -194,7 +204,7 @@ All four dex deployments (dev, prod, roles-rights dev, roles-rights prod) run `d
 ## What
 
 - `v2.30.100` is tagged at the current dex `master`, the code `latest` already runs everywhere.
-- Pins all four values files to `tag: "v2.30.100"` with `pullPolicy: IfNotPresent`.
+- Pins all four values files to `tag: v2.30.100` with `pullPolicy: IfNotPresent`.
 
 ## Rollout
 
@@ -794,7 +804,8 @@ Expected: `origin/master` is the merge commit, the collision checks print nothin
 git -C ~/workspace/cluster-helm-charts fetch origin
 git -C ~/workspace/cluster-helm-charts worktree add ~/workspace/cluster-helm-charts-dex-dev -b chore/dex-dev-v2.30.101 origin/main
 cd ~/workspace/cluster-helm-charts-dex-dev
-sed -i '' 's/tag: "v2.30.100"/tag: "v2.30.101"/' charts/dimo-dex/values.yaml
+sed -E -i '' 's/^( +tag:).*/\1 v2.30.101/' charts/dimo-dex/values.yaml
+grep -nE "^ +(tag|pullPolicy):" charts/dimo-dex/values.yaml
 git diff --stat
 git add charts/dimo-dex/values.yaml
 git commit -m "chore(dimo-dex): dev dex to v2.30.101 (signer_address claim)"
@@ -804,7 +815,7 @@ gh pr create --repo DIMO-Network/cluster-helm-charts --base main --head chore/de
   --body "Dev only. v2.30.101 adds the signer_address claim to developer JWTs (DIMO-Network/dex). Production stays on v2.30.100 until the console-teams platform live pass in dev succeeds. Roles-rights deployments stay on v2.30.100."
 ```
 
-Expected: `git diff --stat` shows `charts/dimo-dex/values.yaml | 2 +-` only. Merge, then confirm in ArgoCD that dev dex runs `dimozone/dex:v2.30.101`.
+Expected: the `grep` shows `pullPolicy: IfNotPresent` and `tag: v2.30.101`, and `git diff --stat` shows `charts/dimo-dex/values.yaml | 2 +-` only. Merge, then confirm in ArgoCD that dev dex runs `dimozone/dex:v2.30.101`.
 
 ---
 
@@ -2170,10 +2181,11 @@ Expected: build succeeds and every package reports `ok`. The `createGRPCServer` 
 
 - [ ] **Step 4: Start every environment in log mode, add the alert, document operations**
 
-In `charts/token-exchange-api/values.yaml` and `charts/token-exchange-api/values-prod.yaml`, add under `env:`:
+In `charts/token-exchange-api/values.yaml` and `charts/token-exchange-api/values-prod.yaml`, add this key to the existing `env:` map (shown with its parent):
 
 ```yaml
-SIGNER_CHECK_MODE: log
+env:
+  SIGNER_CHECK_MODE: log
 ```
 
 Create `charts/token-exchange-api/templates/prometheusrule-signer-check.yaml`:
@@ -2202,8 +2214,8 @@ spec:
           annotations:
             summary: 'Signer checks are failing in {{ "{{" }} $labels.service {{ "}}" }}'
             description: >-
-              More than 1% of developer-JWT signer checks in {{ "{{" }} $labels.service {{ "}}" }}
-              errored over 5 minutes. In enforce mode those requests get 503. Check
+              More than 1% of non-skipped developer-JWT signer checks (allowed + denied + error)
+              in {{ "{{" }} $labels.service {{ "}}" }} errored over 5 minutes. In enforce mode those requests get 503. Check
               token-exchange-api's RPC and Identity reachability; to stop refusing, set
               SIGNER_CHECK_MODE=log on the affected service.
 ```
@@ -2226,7 +2238,7 @@ credit-tracker.
 | `SIGNER_CLAIM_REQUIRED_AFTER` | Unix time, unset by default       | License tokens issued after it without `signer_address` get the 403.                                                                                      |
 
 - **Metric:** `signer_check_total{service,result}`, with `result` one of `allowed`, `denied`, `error`, `skipped`.
-- **Alert:** `SignerCheckErrors` fires when `error` exceeds 1% of non-skipped checks for 5 minutes.
+- **Alert:** `SignerCheckErrors` fires when `error` exceeds 1% of non-skipped checks (`allowed` + `denied` + `error`) for 5 minutes.
 - **Rollback order:**
   - turn the console's `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED` off;
   - set `SIGNER_CHECK_MODE=off` (or roll back) on vehicle-triggers-api, tesla-oracle and credit-tracker, then token-exchange-api;
@@ -2519,7 +2531,7 @@ Disabling a license signer (API key) stops dex from minting new developer JWTs w
 - **gRPC `SignerCheck(license, signer) → is_signer`:** shares that cache. It answers true for non-licenses, `InvalidArgument` for non-hex input, and `Unavailable` on errors.
 - **`pkg/signercheck`:** shared by vehicle-triggers-api, tesla-oracle and credit-tracker. It holds `SIGNER_CHECK_MODE` (`enforce`|`log`|`off`), the `signer_check_total{service,result}` metric, the Fiber middleware, and a `SignerCheck` client with a 5 s deadline.
 - **`SIGNER_CHECK_MODE: log`** in dev and prod values; production switches to `enforce` after a week.
-- **Alert** `SignerCheckErrors` (error above 1% of checks over 5 min) as a PrometheusRule.
+- **Alert** `SignerCheckErrors` (error above 1% of non-skipped checks, allowed + denied + error, over 5 min) as a PrometheusRule.
 - **README** documents settings, metric, alert and rollback.
 
 ## Effect on existing developers
@@ -2546,7 +2558,7 @@ Expected: a PR URL. Merge after review and green CI, after the dex PR (Task 4) h
 
 ## vehicle-triggers-api
 
-All line references are to `origin/main` (8f1941b), which is what dev and prod (1.4.9) run. The local checkout's `road-speed-limit-trigger` branch is based on the unmerged `nats-jetstream-migration` line; don't build on it.
+All line references are to `origin/main` (2ba6a87; production runs its `1.4.11` tag). The local checkout's `road-speed-limit-trigger` branch is based on the unmerged `nats-jetstream-migration` line; don't build on it.
 
 ### Task 10: signer check on every authenticated request
 
@@ -2555,7 +2567,7 @@ All line references are to `origin/main` (8f1941b), which is what dev and prod (
 - Modify:
   - `go.mod`, `go.sum`
   - `internal/config/settings.go` (one setting)
-  - `internal/auth/auth.go:29-33` (`CustomDexClaims`) plus a new func
+  - `internal/auth/auth.go:28-33` (`CustomDexClaims`) plus a new func
   - `internal/clients/tokenexchange/token-exchange.go` (a new method)
   - `internal/app/app.go:122-125` (handler chain)
   - `charts/vehicle-triggers-api/values.yaml`, `values-prod.yaml` (`env`)
@@ -2762,7 +2774,7 @@ Expected: build failures:
 
 - [ ] **Step 4: Implement the claim, the token reader and the client accessor**
 
-In `internal/auth/auth.go`, extend `CustomDexClaims` (lines 29-33):
+In `internal/auth/auth.go`, extend `CustomDexClaims` (lines 28-33):
 
 ```go
 // CustomDexClaims is the custom claims for the token.
@@ -2844,11 +2856,24 @@ In `internal/app/app.go`, add the `signercheck` import and replace lines 123-125
 	devJWTAuth := app.Use(jwtMiddleware, devLicenseMiddleware, signerMiddleware)
 ```
 
-In `charts/vehicle-triggers-api/values.yaml` and `values-prod.yaml`, add under `env:`:
+Add these keys to the existing `env:` maps (shown with their parent).
+
+In `charts/vehicle-triggers-api/values.yaml` (dev):
 
 ```yaml
-SIGNER_CHECK_MODE: log
+env:
+  TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-dev:8086
+  SIGNER_CHECK_MODE: log
 ```
+
+In `charts/vehicle-triggers-api/values-prod.yaml`, which already has `TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-prod:8086`:
+
+```yaml
+env:
+  SIGNER_CHECK_MODE: log
+```
+
+Dev's `values.yaml` on `origin/main` has no `TOKEN_EXCHANGE_GRPC_ADDR`, and `internal/config/settings.go:22` has no default. The running dev configmap `vehicle-triggers-api-dev-config` and secret lack it too (checked 2026-10-02), so dev's existing permission checks can't reach token-exchange-api either. `kubectl get svc -n dev` shows the target, `token-exchange-api-dev`, serving gRPC on `8086/TCP`, the `grpc` port in token-exchange-api's chart.
 
 Run: `go build ./... && go test ./... 2>&1 | tail -30`
 Expected: every package reports `ok`.
@@ -2881,13 +2906,14 @@ Rules:
 
 - **Mark before the change.** A failed change after a successful mark over-attributes, which is the safe side for the console's removal review. A failed mark refuses the request before anything changes.
 - **A request without `signer_address` leaves the mark alone.** Otherwise a later claimless change would erase a member's mark.
+- **One writer per column.** `updated_by_signer` is written only by a single-column `UPDATE … SET updated_by_signer = $1` (`SetTriggerUpdatedBySigner`), on `PUT` and on every vehicle route alike. `UpdateTrigger`'s whole-row update excludes both signer columns, so concurrent requests can't write a stale mark back.
 
 **Files:**
 
 - Create: `internal/db/migrations/00006_trigger_signer_columns.sql`
 - Modify:
   - `internal/db/models/triggers.go` (generated)
-  - `internal/services/triggersrepo/triggersrepo.go:3-22` (imports), `:61-71` (`CreateTriggerRequest`), `:115-128` (insert), plus a new method
+  - `internal/services/triggersrepo/triggersrepo.go:3-22` (imports), `:61-71` (`CreateTriggerRequest`), `:115-128` (insert), `:295-302` (`updateTrigger` blacklist), plus two new functions
   - `internal/controllers/webhook/webhook_controller.go` (`Repository` interface, `RegisterWebhook`, `UpdateWebhook`, `ListWebhooks`)
   - `internal/controllers/webhook/vehicle_subscription_controller.go` (six handlers and a helper)
   - `internal/controllers/webhook/types.go:77-102` (`WebhookView`)
@@ -2905,7 +2931,7 @@ Rules:
   - columns `triggers.created_by_signer TEXT NULL` and `triggers.updated_by_signer TEXT NULL` (lowercase hex);
   - `triggersrepo.CreateTriggerRequest.CreatedBySigner common.Address`;
   - `triggersrepo.SignerValue(signer common.Address) null.String` (NULL for the zero address);
-  - `(*triggersrepo.Repository).SetTriggerUpdatedBySigner(ctx context.Context, triggerID string, signer common.Address) error` (a no-op for the zero address);
+  - `(*triggersrepo.Repository).SetTriggerUpdatedBySigner(ctx context.Context, triggerID string, signer common.Address) error`: a single-column `UPDATE triggers SET updated_by_signer = $1 WHERE id = $2`, and a no-op for the zero address. It's the only code that writes `updated_by_signer`. `UpdateTrigger`'s whole-row update excludes both signer columns, so a request holding a stale row can't write an old mark back over a concurrent one;
   - `webhook.WebhookView.CreatedBySigner` and `UpdatedBySigner` (`string`, `json:"createdBySigner,omitempty"` / `json:"updatedBySigner,omitempty"`, checksummed).
 
   Part 3's removal review consumes the two JSON fields.
@@ -3017,9 +3043,43 @@ func TestSetTriggerUpdatedBySigner(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, null.StringFrom("0x71efd5d71a597eb6bec28dfdb05a49283a3e20c5"), stored.UpdatedBySigner, "a claimless change keeps the mark")
 }
+
+func TestUpdateTriggerKeepsSignerColumns(t *testing.T) {
+	t.Parallel()
+	tc := tests.SetupTestContainer(t)
+	repo := NewRepository(tc.DB)
+	ctx := context.Background()
+
+	trigger, err := repo.CreateTrigger(ctx, CreateTriggerRequest{
+		Service:                 ServiceSignal,
+		MetricName:              "vss.speed",
+		Condition:               "valueNumber > 20",
+		TargetURI:               "https://example.com/webhook",
+		Status:                  StatusEnabled,
+		CooldownPeriod:          10,
+		DeveloperLicenseAddress: tests.RandomAddr(t),
+		CreatedBySigner:         common.HexToAddress("0x71efD5d71a597eB6BEC28DFDB05a49283a3e20c5"),
+	})
+	require.NoError(t, err)
+
+	// A PUT loads the row; meanwhile a vehicle route marks the webhook; then the PUT saves
+	// its stale copy.
+	stale, err := models.FindTrigger(ctx, tc.DB, trigger.ID)
+	require.NoError(t, err)
+	require.NoError(t, repo.SetTriggerUpdatedBySigner(ctx, trigger.ID, common.HexToAddress("0x955029AC2539f4D57A1D7E6Ef2b97617e95Eb1D4")))
+	stale.Description = null.StringFrom("renamed")
+	stale.CreatedBySigner = null.String{}
+	require.NoError(t, repo.UpdateTrigger(ctx, stale))
+
+	stored, err := models.FindTrigger(ctx, tc.DB, trigger.ID)
+	require.NoError(t, err)
+	assert.Equal(t, "renamed", stored.Description.String)
+	assert.Equal(t, null.StringFrom("0x955029ac2539f4d57a1d7e6ef2b97617e95eb1d4"), stored.UpdatedBySigner, "a whole-row update doesn't write back a stale updated_by_signer")
+	assert.Equal(t, null.StringFrom("0x71efd5d71a597eb6bec28dfdb05a49283a3e20c5"), stored.CreatedBySigner, "nor touch created_by_signer")
+}
 ```
 
-Run: `go test ./internal/services/triggersrepo/ -run 'TestCreateTrigger|TestSetTriggerUpdatedBySigner' -v`
+Run: `go test ./internal/services/triggersrepo/ -run 'TestCreateTrigger|TestSetTriggerUpdatedBySigner|TestUpdateTriggerKeepsSignerColumns' -v`
 Expected: build failure, `req.CreatedBySigner undefined` and `repo.SetTriggerUpdatedBySigner undefined`.
 
 - [ ] **Step 3: Implement the repository side**
@@ -3073,8 +3133,21 @@ func (r *Repository) SetTriggerUpdatedBySigner(ctx context.Context, triggerID st
 }
 ```
 
-Run: `go test ./internal/services/triggersrepo/ -run 'TestCreateTrigger|TestSetTriggerUpdatedBySigner' -v`
-Expected: `PASS`. These tests need Docker for testcontainers.
+In `updateTrigger` (lines 295-302), add both signer columns to the blacklist. `UpdateTrigger` then never writes them, and a stale whole-row update can't overwrite a concurrent mark:
+
+```go
+	ret, err := trigger.Update(ctx, tx, boil.Blacklist(models.TriggerColumns.ID,
+		models.TriggerColumns.ID,
+		models.TriggerColumns.DeveloperLicenseAddress,
+		models.TriggerColumns.Service,
+		models.TriggerColumns.CreatedAt,
+		models.TriggerColumns.CreatedBySigner,
+		models.TriggerColumns.UpdatedBySigner,
+	))
+```
+
+Run: `go test ./internal/services/triggersrepo/ -run 'TestCreateTrigger|TestSetTriggerUpdatedBySigner|TestUpdateTriggerKeepsSignerColumns' -v`
+Expected: `PASS`. These tests need Docker for testcontainers. To see `TestUpdateTriggerKeepsSignerColumns` guard the race, temporarily remove the two blacklist lines; it fails with `expected "0x955029…" actual ""`. Restore them.
 
 - [ ] **Step 4: Write the failing controller tests**
 
@@ -3182,19 +3255,17 @@ func TestWebhookController_UpdateWebhookRecordsTheSigner(t *testing.T) {
 	t.Parallel()
 	webhookID := "550e8400-e29b-41d4-a716-446655440000"
 	devLicense := common.HexToAddress("0x1234567890abcdef")
-	other := null.StringFrom("0x955029ac2539f4d57a1d7e6ef2b97617e95eb1d4")
 
 	tests := []struct {
 		name    string
 		signer  common.Address
-		before  null.String
 		payload string
-		want    null.String
+		marks   bool
 	}{
-		{name: "a target URL change marks the signer", signer: testSigner, payload: `{"targetURL":"https://example.com/new"}`, want: null.StringFrom(testSignerLower)},
-		{name: "a condition change marks the signer", signer: testSigner, payload: `{"condition":"valueNumber > 60"}`, want: null.StringFrom(testSignerLower)},
-		{name: "a description change does not", signer: testSigner, payload: `{"description":"renamed"}`},
-		{name: "a claimless target change keeps the existing mark", before: other, payload: `{"targetURL":"https://example.com/new"}`, want: other},
+		{name: "a target URL change marks the signer before saving", signer: testSigner, payload: `{"targetURL":"https://example.com/new"}`, marks: true},
+		{name: "a condition change marks the signer before saving", signer: testSigner, payload: `{"condition":"valueNumber > 60"}`, marks: true},
+		{name: "a description change does not mark", signer: testSigner, payload: `{"description":"renamed"}`},
+		{name: "a claimless target change does not mark", payload: `{"targetURL":"https://example.com/new"}`},
 	}
 
 	for _, tc := range tests {
@@ -3209,13 +3280,14 @@ func TestWebhookController_UpdateWebhookRecordsTheSigner(t *testing.T) {
 				DeveloperLicenseAddress: devLicense.Bytes(),
 				Service:                 triggersrepo.ServiceSignal,
 				MetricName:              "vss.speed",
-				UpdatedBySigner:         tc.before,
 			}, nil)
-			var saved *models.Trigger
-			mockRepo.EXPECT().UpdateTrigger(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, trigger *models.Trigger) error {
-				saved = trigger
-				return nil
-			})
+			update := mockRepo.EXPECT().UpdateTrigger(gomock.Any(), gomock.Any()).Return(nil)
+			if tc.marks {
+				gomock.InOrder(
+					mockRepo.EXPECT().SetTriggerUpdatedBySigner(gomock.Any(), webhookID, testSigner).Return(nil),
+					update,
+				)
+			}
 			mockCache.EXPECT().ScheduleRefresh(gomock.Any())
 
 			req := httptest.NewRequest(http.MethodPut, "/webhooks/"+webhookID, strings.NewReader(tc.payload))
@@ -3225,7 +3297,6 @@ func TestWebhookController_UpdateWebhookRecordsTheSigner(t *testing.T) {
 			defer resp.Body.Close() //nolint:errcheck // fine for tests
 
 			require.Equal(t, fiber.StatusOK, resp.StatusCode)
-			assert.Equal(t, tc.want, saved.UpdatedBySigner)
 		})
 	}
 }
@@ -3369,13 +3440,9 @@ In `RegisterWebhook`'s `CreateTriggerRequest` literal:
 	}
 ```
 
-In `UpdateWebhook`, read the signer after `devLicense`, and mark when the target URL or condition changes. Replace the two `if payload.TargetURL != nil {…}` and `if payload.Condition != nil {…}` blocks with:
+In `UpdateWebhook`, note when the target URL or condition changes, and mark the signer through the single-column `SetTriggerUpdatedBySigner` (by way of `markChanged`, below) before `UpdateTrigger` saves the row. Replace the two `if payload.TargetURL != nil {…}` and `if payload.Condition != nil {…}` blocks with:
 
 ```go
-	signer, err := getSigner(c)
-	if err != nil {
-		return err
-	}
 	changesDelivery := false
 	if payload.TargetURL != nil {
 		if err := validateTargetURL(*payload.TargetURL); err != nil {
@@ -3394,12 +3461,19 @@ In `UpdateWebhook`, read the signer after `devLicense`, and mark when the target
 		event.Condition = *payload.Condition
 		changesDelivery = true
 	}
-	if changesDelivery && signer != (common.Address{}) {
-		event.UpdatedBySigner = triggersrepo.SignerValue(signer)
+```
+
+Keep the `Status` block between them unchanged. Then, just before `w.repo.UpdateTrigger(c.Context(), event)`:
+
+```go
+	if changesDelivery {
+		if err := markChanged(c, w.repo, event.ID); err != nil {
+			return err
+		}
 	}
 ```
 
-Keep the `Status` block between them unchanged. `UpdateTrigger` writes every column except its blacklist, so the mark is saved atomically with the change.
+`UpdateTrigger` no longer writes either signer column (Step 3's blacklist), so this PUT can't overwrite a mark a vehicle route sets concurrently, and the vehicle routes can't overwrite this one.
 
 In `ListWebhooks`, compute both fields next to `desc` and set them on the view:
 
@@ -3480,7 +3554,7 @@ go generate ./internal/controllers/webhook/
 go test ./internal/controllers/webhook/ ./internal/services/triggersrepo/ -v 2>&1 | tail -40
 ```
 
-Expected: `PASS`, including every subtest of `TestWebhookChangesRecordTheSigner` and `TestWebhookController_UpdateWebhookRecordsTheSigner`. Existing tests still pass unchanged: their tokens carry no signer, so `SetTriggerUpdatedBySigner` is never called.
+Expected: `PASS`, including every subtest of `TestWebhookChangesRecordTheSigner`, `TestWebhookController_UpdateWebhookRecordsTheSigner` and `TestUpdateTriggerKeepsSignerColumns`. Existing tests still pass unchanged: their tokens carry no signer, so `SetTriggerUpdatedBySigner` is never called.
 
 - [ ] **Step 6: Regenerate swagger, then run the suite, lint and the generator check**
 
@@ -3528,10 +3602,12 @@ The console's team feature gives each member their own license signer, and remov
   - gRPC failure: `503 could not verify signer`.
   - Tokens without the claim pass.
 - **`SIGNER_CHECK_MODE`** (`enforce` default, `log`, `off`); the chart sets `log` in dev and prod for the rollout.
+- **Dev `TOKEN_EXCHANGE_GRPC_ADDR`:** dev's `values.yaml` never set it (only `values-prod.yaml` did), so dev couldn't reach token-exchange-api at all. It now points at `token-exchange-api-dev:8086`.
 - **Metric** `signer_check_total{service="vehicle-triggers-api",result}`.
 - **Migration `00006`:** `triggers.created_by_signer` (set on create) and `triggers.updated_by_signer` (set when a request changes the target URL, the condition, or the subscribed vehicles, on all six subscribe and unsubscribe routes). Both are nullable lowercase hex.
   - The mark is written before the change, so a failed change over-attributes rather than hiding the actor.
   - Claimless requests leave the mark untouched.
+  - The mark is only ever written by a single-column `UPDATE`; `UpdateTrigger`'s whole-row update now excludes both signer columns, so concurrent requests can't write a stale value back.
 - **`GET /v1/webhooks`** returns `createdBySigner` and `updatedBySigner`, checksummed and omitted when unknown.
 - **`token-exchange-api`** bumped to the commit with `SignerCheck` and `pkg/signercheck`.
 
@@ -3550,7 +3626,7 @@ The unmerged `nats-jetstream-migration` line also adds a `00006_…` migration. 
 ## Tests
 
 - `TestSignerCheckOnWebhooksAPI` (enforce, log, no claim), `TestTokenReadsSignerAddressClaim`, `TestSignerTokenInfo`, `TestClientSignerChecker`.
-- `TestCreateTrigger` (created_by stored lowercase; NULL without), `TestSetTriggerUpdatedBySigner` (claimless keeps the mark).
+- `TestCreateTrigger` (created_by stored lowercase; NULL without), `TestSetTriggerUpdatedBySigner` (claimless keeps the mark), `TestUpdateTriggerKeepsSignerColumns` (a stale whole-row update doesn't overwrite either column).
 - `TestWebhookController_UpdateWebhookRecordsTheSigner`.
 - `TestWebhookChangesRecordTheSigner`: all six vehicle routes mark before mutating; claimless records nothing.
 - The list returns or omits both fields.
@@ -3571,14 +3647,14 @@ Production tesla-oracle trusts `auth.dimo.zone` tokens (`charts/tesla-oracle/val
 - `POST /v1/telemetry/unsubscribe/:vehicleTokenId`
 - `POST /v1/telemetry/:vehicleTokenId/start`
 
-These routes are at `internal/app/app.go:116-118`, with the license checks at `internal/service/tesla.go:52` and `:162`, comparing with `MOBILE_APP_DEV_LICENSE`. A removed member's still-valid developer JWT for that license could keep managing Tesla telemetry, so these routes get the check. Line references are to `origin/main` (a9446c4); the local checkout is 20 commits behind.
+These routes are at `internal/app/app.go:117-119`, with the license checks at `internal/service/tesla.go:52` and `:162`, comparing with `MOBILE_APP_DEV_LICENSE`. A removed member's still-valid developer JWT for that license could keep managing Tesla telemetry, so these routes get the check. Line references are to `origin/main` (a9446c4); the local checkout is 20 commits behind.
 
 **Files:**
 
 - Modify:
   - `go.mod`, `go.sum`
   - `internal/config/settings.go` (two settings)
-  - `internal/app/app.go:26-33` (`App` signature) and `:115` (telemetry group)
+  - `internal/app/app.go:26-33` (`App` signature) and `:116` (telemetry group)
   - `internal/bootstrap/server.go:46-63` (`Initialize`)
   - `charts/tesla-oracle/values.yaml`, `values-prod.yaml` (`env`)
 - Create: `internal/app/signercheck.go`, `internal/app/signercheck_test.go`
@@ -3756,7 +3832,7 @@ func App(
 ) *fiber.App {
 ```
 
-and change the telemetry group (line 115):
+and change the telemetry group (line 116):
 
 ```go
 	telemetryGroup := app.Group("/v1/telemetry", jwtAuth, walletMdw, signerCheck)
@@ -3798,21 +3874,23 @@ func (sm *ServerManager) Initialize() error {
 	)
 ```
 
-In `charts/tesla-oracle/values.yaml`, add under `env:`:
+Add these keys to the existing `env:` maps (shown with their parent). In `charts/tesla-oracle/values.yaml` (dev):
 
 ```yaml
-TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-dev:8086
-SIGNER_CHECK_MODE: log
+env:
+  TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-dev:8086
+  SIGNER_CHECK_MODE: log
 ```
 
-In `charts/tesla-oracle/values-prod.yaml`, add under `env:`:
+In `charts/tesla-oracle/values-prod.yaml`:
 
 ```yaml
-TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-prod:8086
-SIGNER_CHECK_MODE: log
+env:
+  TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-prod:8086
+  SIGNER_CHECK_MODE: log
 ```
 
-These are the same in-namespace service names vehicle-triggers-api uses (its `values.yaml` and `values-prod.yaml`, `TOKEN_EXCHANGE_GRPC_ADDR`).
+Neither file sets `TOKEN_EXCHANGE_GRPC_ADDR` today; the running `tesla-oracle-dev-config` has only `TOKEN_EXCHANGE_JWK_KEY_SET_URL`. tesla-oracle runs in the `dev` and `prod` namespaces, where `kubectl get svc` shows `token-exchange-api-dev` and `token-exchange-api-prod` serving gRPC on `8086`. vehicle-triggers-api's `values-prod.yaml` already uses the same prod name.
 
 Run:
 
@@ -3871,12 +3949,12 @@ Expected: a PR URL. Merge after review and green CI, once token-exchange-api's d
 
 ### Task 14: signer check on the license routes, with PR
 
-Production credit-tracker trusts `auth.dimo.zone` tokens (`charts/credit-tracker/values-prod.yaml:14`). Its license routes, `internal/app/app.go:63-64`, check only that `ethereum_address` equals `:licenseId` (`internal/controllers/httphandlers/httphandler.go:133`):
+Production credit-tracker trusts `auth.dimo.zone` tokens (`charts/credit-tracker/values-prod.yaml:14`). Its license routes, `internal/app/app.go:62-63`, check only that `ethereum_address` equals `:licenseId` (`internal/controllers/httphandlers/httphandler.go:133`):
 
 - `GET /v1/credits/:licenseId/usage`
 - `GET /v1/credits/:licenseId/assets/:assetId/usage`
 
-They are the service's only HTTP routes besides swagger, and both get the check. Line references are to `origin/main` (dc5624e).
+They are the service's only HTTP routes besides swagger, and both get the check. Line references are to `origin/main` (4cc9b9a).
 
 **Files:**
 
@@ -3884,7 +3962,7 @@ They are the service's only HTTP routes besides swagger, and both get the check.
   - `go.mod`, `go.sum`
   - `internal/config/settings.go` (two settings)
   - `internal/auth/auth.go` (claim and a new func)
-  - `internal/app/app.go:31-38` (`CreateServers`), `:40-66` (`setupHttpServer`)
+  - `internal/app/app.go:30-38` (`CreateServers`), `:40-66` (`setupHttpServer`)
   - `tests/e2e/credit_tracker_test.go:33` (`setupTestServer`), `tests/e2e/auth_server_test.go` (a token helper)
   - `charts/credit-tracker/values.yaml`, `values-prod.yaml` (`env`)
 - Create: `internal/auth/auth_test.go`, `tests/e2e/signer_check_test.go`
@@ -4198,25 +4276,29 @@ func newSignerCheck(ctx context.Context, settings *config.Settings) (fiber.Handl
 func setupHttpServer(ctx context.Context, settings *config.Settings, ctrl *httphandlers.HTTPController, signerCheck fiber.Handler) *fiber.App {
 ```
 
-and change the two routes (lines 63-64):
+and change the two routes (lines 62-63):
 
 ```go
 	app.Get("/v1/credits/:licenseId/usage", jwtAuth, signerCheck, ctrl.GetLicenseUsageReport)
 	app.Get("/v1/credits/:licenseId/assets/:assetId/usage", jwtAuth, signerCheck, ctrl.GetLicenseAssetUsageReport)
 ```
 
-In `charts/credit-tracker/values.yaml`, add under `env:`:
+Add these keys to the existing `env:` maps (shown with their parent). Neither file sets them today; the running `credit-tracker-dev-config` has no `TOKEN_EXCHANGE_*` keys. credit-tracker runs in the `dev` and `prod` namespaces next to `token-exchange-api-dev` and `token-exchange-api-prod` (gRPC `8086`).
+
+In `charts/credit-tracker/values.yaml` (dev):
 
 ```yaml
-TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-dev:8086
-SIGNER_CHECK_MODE: log
+env:
+  TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-dev:8086
+  SIGNER_CHECK_MODE: log
 ```
 
-In `charts/credit-tracker/values-prod.yaml`, add under `env:`:
+In `charts/credit-tracker/values-prod.yaml`:
 
 ```yaml
-TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-prod:8086
-SIGNER_CHECK_MODE: log
+env:
+  TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-prod:8086
+  SIGNER_CHECK_MODE: log
 ```
 
 - [ ] **Step 5: Run the tests, the suite and lint**
@@ -4303,17 +4385,23 @@ Expected: a PR URL. Merge after review and green CI, once token-exchange-api's d
 - [ ] **Step 1: Confirm what dev runs**
 
 - **dex:** ArgoCD shows `dimozone/dex:v2.30.101` on the dev deployment (Task 4), with roles-rights dev still on `v2.30.100`.
-- **The four services:** each repo's `main` has a bot commit `Update Image Version to <sha of the feature merge>`, and each dev `values.yaml` has `SIGNER_CHECK_MODE: log`:
+- **The four services:** each repo's `main` has a bot commit `Update Image Version to <sha of the feature merge>`. Each dev chart, and the configmap ArgoCD rendered from it, has `SIGNER_CHECK_MODE: log`. Every caller also has `TOKEN_EXCHANGE_GRPC_ADDR`; without it a caller's checks all fail.
 
 ```bash
 for r in token-exchange-api vehicle-triggers-api tesla-oracle credit-tracker; do
   git -C ~/workspace/$r fetch -q origin
   echo "== $r"; git -C ~/workspace/$r log --oneline -2 origin/main
-  git -C ~/workspace/$r show origin/main:charts/$r/values.yaml | grep -n "SIGNER_CHECK_MODE"
+  git -C ~/workspace/$r show origin/main:charts/$r/values.yaml | grep -nE "SIGNER_CHECK_MODE|TOKEN_EXCHANGE_GRPC_ADDR"
+  echo "running: $(kubectl -n dev get configmap $r-dev-config -o jsonpath='{.data.SIGNER_CHECK_MODE} {.data.TOKEN_EXCHANGE_GRPC_ADDR}')"
 done
 ```
 
-Expected: each block shows the image-bump commit on top and `SIGNER_CHECK_MODE: log`.
+Expected:
+- each block shows the image-bump commit on top and `SIGNER_CHECK_MODE: log`;
+- for vehicle-triggers-api, tesla-oracle and credit-tracker, `TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-dev:8086` in the chart and `running: log token-exchange-api-dev:8086`;
+- token-exchange-api shows `running: log ` (it doesn't call itself).
+
+If a caller lacks the address, fix its chart before continuing; Steps 5 and 7 would otherwise show `error` instead of `denied`.
 
 - [ ] **Step 2: Prepare a test license, three keys and a vehicle**
 
@@ -4436,7 +4524,7 @@ In each of the four repos, open a PR that changes only `charts/<service>/values.
 for r in token-exchange-api vehicle-triggers-api tesla-oracle credit-tracker; do
   git -C ~/workspace/$r worktree add ~/workspace/$r-enforce-dev -b chore/signer-check-enforce-dev origin/main
   (cd ~/workspace/$r-enforce-dev &&
-    sed -i '' 's/SIGNER_CHECK_MODE: log/SIGNER_CHECK_MODE: enforce/' charts/$r/values.yaml &&
+    sed -E -i '' 's/^( +SIGNER_CHECK_MODE:).*/\1 enforce/' charts/$r/values.yaml &&
     git diff --stat && git add charts/$r/values.yaml &&
     git commit -m "chore(chart): enforce the signer check in dev" &&
     git push -u origin chore/signer-check-enforce-dev &&
@@ -4529,11 +4617,34 @@ Post these on the token-exchange-api PR:
 **Interfaces:**
 
 - Consumes: Task 15 passed.
-- Produces: production runs all five changes in `log` mode, with `dimozone/dex:v2.30.101`.
+- Produces:
+  - production runs all five changes in `log` mode, with `dimozone/dex:v2.30.101`;
+  - `~/workspace/signer-check-prod-baseline.txt`, the rollback targets.
 
 Order matters. token-exchange-api with `SignerCheck` must be in production before any caller. Each release must be live before the next tag.
 
-- [ ] **Step 1: Release token-exchange-api**
+- [ ] **Step 1: Record what production runs (the rollback targets)**
+
+Before tagging anything, read each service's production tag from its chart, and the image its production pods actually run:
+
+```bash
+for r in token-exchange-api vehicle-triggers-api tesla-oracle credit-tracker; do
+  git -C ~/workspace/$r fetch -q origin
+  tag=$(git -C ~/workspace/$r show origin/main:charts/$r/values-prod.yaml | awk '/^image:/{f=1;next} f&&/^  tag:/{print $2; exit} /^[^ ]/{f=0}')
+  image=$(kubectl -n prod get deploy $r-prod -o jsonpath='{.spec.template.spec.containers[0].image}')
+  echo "$r values-prod.yaml image.tag=$tag running=$image"
+done | tee ~/workspace/signer-check-prod-baseline.txt
+git -C ~/workspace/cluster-helm-charts fetch -q origin
+echo "dimo-dex values-prod.yaml $(git -C ~/workspace/cluster-helm-charts show origin/main:charts/dimo-dex/values-prod.yaml | grep -E '^ +tag:' | tr -s ' ')" | tee -a ~/workspace/signer-check-prod-baseline.txt
+```
+
+Expected: one line per service where the chart tag and the running image's tag agree, plus dex at `tag: v2.30.100`.
+- **At the last check** (2026-10-02): token-exchange-api `0.4.0`, vehicle-triggers-api `1.4.11`, tesla-oracle `0.6.10`, credit-tracker `0.0.6`.
+- **If a chart tag and a running image differ,** ArgoCD is out of sync; stop and resolve that first.
+
+These are the rollback targets. Paste the file into a comment on the token-exchange-api PR.
+
+- [ ] **Step 2: Release token-exchange-api**
 
 ```bash
 cd ~/workspace/token-exchange-api && git fetch --tags origin
@@ -4574,29 +4685,39 @@ EOF
 
 Wait for `buildpushtagged.yml` to commit `image.tag: 0.5.0` to `charts/token-exchange-api/values-prod.yaml` and for ArgoCD to sync production. Then confirm the production pods run `dimozone/token-exchange-api:0.5.0` with `SIGNER_CHECK_MODE=log`.
 
-- [ ] **Step 2: Release the three callers, after Step 1 is live**
+- [ ] **Step 3: Release the three callers, after Step 2 is live**
 
 For each of `vehicle-triggers-api`, `tesla-oracle` and `credit-tracker`:
 
 ```bash
-cd ~/workspace/<repo> && git fetch --tags origin && git tag --sort=-v:refname | head -3
+cd ~/workspace/<repo> && git fetch --tags origin && git tag --sort=-v:refname | head -1
 ```
 
-Choose the next minor version above the latest tag. vehicle-triggers-api is at `1.4.9`, so use `v1.5.0`. tesla-oracle is at `0.6.10`, so use `v0.7.0`. For credit-tracker, take whatever `git tag` shows as latest and raise the minor version.
+Tag the next minor version above that output (for example `v1.4.11` → `v1.5.0`):
 
 ```bash
 git tag -a <version> origin/main -m "Signer check (log mode first)" && git push origin <version>
 ```
 
-Expected: each repo's `buildpushtagged.yml` commits the new `image.tag` to `values-prod.yaml`, and ArgoCD syncs. Confirm each production pod has `SIGNER_CHECK_MODE=log` and `TOKEN_EXCHANGE_GRPC_ADDR=token-exchange-api-prod:8086`.
+Expected: each repo's `buildpushtagged.yml` commits the new `image.tag` to `values-prod.yaml`, and ArgoCD syncs. Then confirm every production service runs the check in log mode and can reach token-exchange-api:
 
-- [ ] **Step 3: Bump production dex**
+```bash
+kubectl -n prod get configmap token-exchange-api-prod-config -o jsonpath='{.data.SIGNER_CHECK_MODE}{"\n"}'
+for r in vehicle-triggers-api tesla-oracle credit-tracker; do
+  echo "$r: $(kubectl -n prod get configmap $r-prod-config -o jsonpath='{.data.SIGNER_CHECK_MODE} {.data.TOKEN_EXCHANGE_GRPC_ADDR}')"
+done
+```
+
+Expected: `log`, then `log token-exchange-api-prod:8086` for each caller.
+
+- [ ] **Step 4: Bump production dex**
 
 ```bash
 git -C ~/workspace/cluster-helm-charts fetch origin
 git -C ~/workspace/cluster-helm-charts worktree add ~/workspace/cluster-helm-charts-dex-prod -b chore/dex-prod-v2.30.101 origin/main
 cd ~/workspace/cluster-helm-charts-dex-prod
-sed -i '' 's/tag: "v2.30.100"/tag: "v2.30.101"/' charts/dimo-dex/values-prod.yaml
+sed -E -i '' 's/^( +tag:).*/\1 v2.30.101/' charts/dimo-dex/values-prod.yaml
+grep -nE "^ +(tag|pullPolicy):" charts/dimo-dex/values-prod.yaml
 git diff --stat
 git add charts/dimo-dex/values-prod.yaml
 git commit -m "chore(dimo-dex): production dex to v2.30.101 (signer_address claim)"
@@ -4606,9 +4727,13 @@ gh pr create --repo DIMO-Network/cluster-helm-charts --base main --head chore/de
   --body "Production only. v2.30.101 adds the signer_address claim to developer JWTs. The console-teams platform live pass in dev passed (log and enforce), and token-exchange-api, vehicle-triggers-api, tesla-oracle and credit-tracker are in production in log mode. Roles-rights stays on v2.30.100. Rollback: set this back to v2.30.100."
 ```
 
-Expected: `git diff --stat` shows only `charts/dimo-dex/values-prod.yaml | 2 +-`. Merge, confirm ArgoCD shows production dex on `v2.30.101`, and note the date. Task 17's `SIGNER_CLAIM_REQUIRED_AFTER` counts 14 days from it.
+Expected:
+- the `grep` shows `pullPolicy: IfNotPresent` and `tag: v2.30.101`;
+- `git diff --stat` shows only `charts/dimo-dex/values-prod.yaml | 2 +-`.
 
-- [ ] **Step 4: Smoke-test production**
+Merge, confirm ArgoCD shows production dex on `v2.30.101`, and note the date. Task 17's `SIGNER_CLAIM_REQUIRED_AFTER` counts 14 days from it.
+
+- [ ] **Step 5: Smoke-test production**
 
 Repeat Task 15 Steps 2-4 against production with a test license on `https://console.dimo.org`, member key A only. Set:
 
@@ -4624,10 +4749,10 @@ Use `https://identity-api.dimo.zone/query` for the Identity check.
 Expected:
 
 - the claim is present and checksummed;
-- every call returns the Step 4 baseline;
+- every call returns the Task 15 Step 4 baseline;
 - `signer_check_total{namespace="prod",result="allowed"}` grows.
 
-- [ ] **Step 5: Watch production in log mode for a week**
+- [ ] **Step 6: Watch production in log mode for a week**
 
 Check daily:
 
@@ -4637,60 +4762,82 @@ sum by (service, result) (increase(signer_check_total{namespace="prod"}[24h]))
 
 For any `result="denied"`, open the service's logs. Each denial names `license` and `signer`. Confirm the signer was deliberately disabled, which means it's a real revocation the check will soon enforce. Raise anything else, such as a signer still in use by a developer's backend, before Task 17. `SignerCheckErrors` must not have fired.
 
-### Task 17: production enforce, the claim cutoff, and the announcement
+### Task 17: announce, then enforce in production, then require the claim
 
 **Interfaces:**
 
-- Consumes: a clean week from Task 16 Step 5.
+- Consumes: a clean week from Task 16 Step 6.
 - Produces:
+  - developers told about the change before anything is refused;
   - production in `enforce`;
-  - `SIGNER_CLAIM_REQUIRED_AFTER` set;
-  - developers told about the change.
+  - `SIGNER_CLAIM_REQUIRED_AFTER` set.
 
 Part 3's flag may turn on in production after this and part 3's team live pass.
 
-- [ ] **Step 1: Switch production to enforce**
+- [ ] **Step 1: Announce the behavior change (owns index Rollout step 2.6)**
 
-As in Task 15 Step 6, open one PR per repo changing only `charts/<service>/values-prod.yaml` to `SIGNER_CHECK_MODE: enforce`, in this order: token-exchange-api, then vehicle-triggers-api, tesla-oracle and credit-tracker. Name each branch `chore/signer-check-enforce-prod`, and title it `chore(chart): enforce the signer check in production`. Merge each after the previous one has synced.
-
-- [ ] **Step 2: Repeat the enforce pass in production**
-
-Repeat Task 15 Steps 7-9 against production with member key B on the production test license, using the Task 16 Step 4 variables.
-
-Expected: the same results as in dev, with every `until_refused` showing `PASS: within 60 s`.
-
-- [ ] **Step 3: Require the claim on new license tokens**
-
-Fourteen days after the production dex release (Task 16 Step 3), every developer JWT minted before it has expired (336 hours). Compute the Unix time of that release date plus 14 days:
-
-```bash
-node -e 'console.log(Math.floor(new Date("<YYYY-MM-DD from Task 16 Step 3>T00:00:00Z").getTime()/1000) + 14*86400)'
-```
-
-Open a token-exchange-api PR adding the value under `env:` in `values-prod.yaml`, and in `values.yaml` with dev's own date:
-
-```yaml
-SIGNER_CLAIM_REQUIRED_AFTER: '<that number>'
-```
-
-Merge it after that date has passed. From then on, a license token issued after the cutoff without `signer_address` gets the 403. That catches any future dex path that forgets the claim.
-
-- [ ] **Step 4: Announce the behavior change**
+This step owns the index's Rollout step 2.6. It must happen before Step 2 switches production to `enforce`. Choose the enforce date first, and give developers notice of it.
 
 Send the developer announcement, wherever DIMO publishes platform changes (developer docs changelog and newsletter):
 
-> Disabling an API key on your developer license now cuts off the tokens it minted within about a minute, instead of when they expire. Token exchange, the webhooks API, tesla-oracle and credit-tracker can now answer `403 signer no longer authorized for this license` for such tokens, or `503 could not verify signer` if the check can't complete. Keys you haven't disabled are unaffected.
+> Starting {enforce date}, disabling an API key on your developer license cuts off the tokens it minted within about a minute, instead of when they expire. Token exchange, the webhooks API, tesla-oracle and credit-tracker will answer `403 signer no longer authorized for this license` for such tokens, or `503 could not verify signer` if the check can't complete. Keys you haven't disabled are unaffected.
+
+Don't start Step 2 before that date.
+
+- [ ] **Step 2: Switch production to enforce**
+
+As in Task 15 Step 6, open one PR per repo changing only `charts/<service>/values-prod.yaml`, in this order: token-exchange-api, then vehicle-triggers-api, tesla-oracle and credit-tracker. Merge each after the previous one has synced.
+
+```bash
+r=<repo>
+git -C ~/workspace/$r fetch origin
+git -C ~/workspace/$r worktree add ~/workspace/$r-enforce-prod -b chore/signer-check-enforce-prod origin/main
+cd ~/workspace/$r-enforce-prod
+sed -E -i '' 's/^( +SIGNER_CHECK_MODE:).*/\1 enforce/' charts/$r/values-prod.yaml
+grep -n "SIGNER_CHECK_MODE" charts/$r/values-prod.yaml && git diff --stat
+git add charts/$r/values-prod.yaml
+git commit -m "chore(chart): enforce the signer check in production"
+git push -u origin chore/signer-check-enforce-prod
+gh pr create --repo DIMO-Network/$r --base main --head chore/signer-check-enforce-prod \
+  --title "chore(chart): enforce the signer check in production" \
+  --body "Production. A week in log mode showed only deliberate revocations, and developers were notified (console-teams part 1, Task 17 Step 1)."
+```
+
+Expected: `SIGNER_CHECK_MODE: enforce`, and `git diff --stat` shows `charts/<repo>/values-prod.yaml | 2 +-` only.
+
+- [ ] **Step 3: Repeat the enforce pass in production**
+
+Repeat Task 15 Steps 7-9 against production with member key B on the production test license, using the Task 16 Step 5 variables.
+
+Expected: the same results as in dev, with every `until_refused` showing `PASS: within 60 s`.
+
+- [ ] **Step 4: Require the claim on new license tokens (token-exchange-api only)**
+
+Fourteen days after the production dex release (Task 16 Step 4), every developer JWT minted before it has expired (336 hours). Compute the Unix time of that release date plus 14 days:
+
+```bash
+node -e 'console.log(Math.floor(new Date("<YYYY-MM-DD from Task 16 Step 4>T00:00:00Z").getTime()/1000) + 14*86400)'
+```
+
+`SIGNER_CLAIM_REQUIRED_AFTER` exists only in token-exchange-api; the other services don't read it. Open a token-exchange-api PR adding it to the `env:` map of `charts/token-exchange-api/values-prod.yaml`, and of `values.yaml` with dev's own date (Task 4). The key goes under the existing `env:` map:
+
+```yaml
+env:
+  SIGNER_CLAIM_REQUIRED_AFTER: '<that number>'
+```
+
+Merge it after that date has passed. From then on, a license token issued after the cutoff without `signer_address` gets the 403. That catches any future dex path that forgets the claim.
 
 ## Rollback (C10)
 
 Turn the console's `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED` off before any of these. Then go as far down the list as the problem needs.
 
-1. **Stop refusing, no redeploy of code:** set `SIGNER_CHECK_MODE: log`, or `off`, in the affected service's `values-prod.yaml` (PR, merge, ArgoCD sync). Do it in this order:
+1. **Stop refusing, no redeploy of code:** set `SIGNER_CHECK_MODE` to `log` or `off` in the affected service's `values-prod.yaml` (PR, merge, ArgoCD sync), using the Task 17 Step 2 `sed -E` with `log` or `off`. Do it in this order:
    - vehicle-triggers-api, tesla-oracle, credit-tracker;
    - then token-exchange-api.
-2. **Roll back the callers:** set `image.tag` back to their previous versions in `values-prod.yaml`: vehicle-triggers-api `1.4.9`, tesla-oracle `0.6.10`, and credit-tracker's prior tag.
-3. **Roll back token-exchange-api:** set `image.tag` back to `0.4.0`.
-4. **Roll back dex:** set `charts/dimo-dex/values-prod.yaml` (and `values.yaml` for dev) back to `tag: "v2.30.100"`. Tokens minted by v2.30.101 still carry the claim and are honored by any service still checking, and they expire within 336 hours.
+2. **Roll back the callers:** in each caller's `charts/<repo>/values-prod.yaml`, set `image.tag` to its line in `~/workspace/signer-check-prod-baseline.txt` (Task 16 Step 1).
+3. **Roll back token-exchange-api:** set its `image.tag` to its baseline line.
+4. **Roll back dex:** in `cluster-helm-charts`, run `sed -E -i '' 's/^( +tag:).*/\1 v2.30.100/' charts/dimo-dex/values-prod.yaml` (and `values.yaml` for dev), then open and merge the PR. Tokens minted by `v2.30.101` still carry the claim, and any service still checking honors it; they expire within 336 hours.
 5. **Leave migrations in place.** `created_by_signer` and `updated_by_signer` are nullable, and older vehicle-triggers-api builds ignore them.
 
-Never roll back dex while a newer token-exchange-api runs with `SIGNER_CLAIM_REQUIRED_AFTER` set. Developer tokens from the old dex lack the claim and would be refused. Unset it first.
+Never roll back dex while token-exchange-api runs with `SIGNER_CLAIM_REQUIRED_AFTER` set: developer tokens from the old dex lack the claim and would be refused. Unset it first.

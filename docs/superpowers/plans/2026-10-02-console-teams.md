@@ -7,7 +7,7 @@ The spec spans seven repositories. It's split into three plans, each producing w
 | Part | Plan                                                  | Repositories                                                                          | Branch                                                              | Ships                                                                                             |
 | ---- | ----------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | 1    | `2026-10-02-console-teams-1-platform-signer-check.md` | `dex`, `token-exchange-api`, `vehicle-triggers-api`, `tesla-oracle`, `credit-tracker` | `feat/signer-address-claim` (dex), `feat/signer-check` (the others) | Independently, in the order in _Rollout_.                                                         |
-| 2    | `2026-10-02-console-teams-2-console-api.md`           | `dimo-developer-console-api`                                                          | `feat/teams` (from `master` after #80 merges)                       | Before part 3. Backward compatible with today's console.                                          |
+| 2    | `2026-10-02-console-teams-2-console-api.md`           | `dimo-developer-console-api`                                                          | `feat/teams` (from `master` after #80 merges)                       | Before part 3. Backward compatible with today's console, as described under _Until part 3 ships_ in C7. |
 | 3    | `2026-10-02-console-teams-3-console.md`               | `dimo-developer-console`                                                              | `console-teams`                                                     | After part 2. Granting data access stays behind a flag until part 1 enforces in that environment. |
 
 All repositories are checked out under `~/workspace/<repo>`.
@@ -20,7 +20,11 @@ All repositories are checked out under `~/workspace/<repo>`.
    2. Merge dex, tag `v2.30.101`, and pin dev to it. The roles-rights deployments stay on `v2.30.100`: they don't run the web3 code flow.
    3. Deploy token-exchange-api, then vehicle-triggers-api, tesla-oracle and credit-tracker, all with `SIGNER_CHECK_MODE=log` (C10).
    4. Run part 1's dev live pass.
-   5. Bump the production dex tag. Run production in `log` mode for a week, watching `signer_check_total{result="denied"}` for anything unexpected, then switch to `enforce`.
+   5. Bump the production dex tag. Run production in `log` mode for a week, watching `signer_check_total{result="denied"}` for anything unexpected.
+   6. **Announce the behavior change to developers** (part 1, Task 17 Step 1) before switching production to `enforce`:
+      - disabling an API key now cuts off its tokens within about a minute;
+      - token exchange, the webhooks API, tesla-oracle and credit-tracker can answer `403 signer no longer authorized for this license` or `503 could not verify signer`.
+   7. Switch production to `enforce`.
 3. **Part 2, console-api teams.** Run migration `init-db_12.sql` (with its down script ready) before deploying.
 4. **Part 3, the console**, with `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED` off. Invites, teams and the key registry go live.
 5. **Turn the flag on per environment** once part 1 is in `enforce` mode there and part 3's team live pass succeeds there.
@@ -29,9 +33,6 @@ All repositories are checked out under `~/workspace/<repo>`.
    - assign #286's three existing keys in the registry;
    - invite the support team and grant them data access.
 7. **Retire the legacy team routes** (part 2, final task), once the console no longer calls them.
-8. **Announce the behavior change to developers:**
-   - disabling an API key now cuts off its tokens within about a minute;
-   - token exchange, the webhooks API, tesla-oracle and credit-tracker can answer `403 signer no longer authorized for this license` or `503 could not verify signer`.
 
 ## Contracts
 
@@ -194,7 +195,7 @@ type HolderInput = { userId: string } | { name: string };
 | `POST /api/my/team/leave`                                  | member of the active team          | —                                                                     | `204` (status `LEFT`)                                                                                                                                        | `400 CANNOT_LEAVE_OWN_TEAM`, `403 NOT_A_MEMBER`                                                                                                                                                                                                                                                               |
 | `PUT /api/me/signer`                                       | any user                           | `{ address, message, signature }` (C6)                                | `200 { signerAddress, signerVerifiedAt }`                                                                                                                    | `400 SIGNER_PROOF_INVALID`, `409 SIGNER_IN_USE`, `409 SIGNER_LOCKED`                                                                                                                                                                                                                                          |
 | `GET /api/my/licenses/:tokenId/signers`                    | member or owner of the active team | —                                                                     | `200 { signers: LicenseSignerRecord[] }`                                                                                                                     | `403 LICENSE_NOT_IN_TEAM`, `502 IDENTITY_UNAVAILABLE`                                                                                                                                                                                                                                                         |
-| `PUT /api/my/licenses/:tokenId/signers/:address`           | owner                              | `{ kind: SignerKind, note?: string \| null, holders: HolderInput[] }` | `200 { signer: LicenseSignerRecord }`. Clears `disabledAt`, so call it after `enableSigner`.                                                                 | `400 INVALID_HOLDERS`, `400 INVALID_ADDRESS`, `400 SIGNER_MISMATCH` (a `MEMBER` key whose address isn't its one holder's verified `signerAddress`), `409 KIND_CONFLICT` (turning an `API_KEY` or `EXTERNAL` key into a `MEMBER` key), `403 LICENSE_NOT_IN_TEAM`, `403 OWNER_ONLY`, `502 IDENTITY_UNAVAILABLE` |
+| `PUT /api/my/licenses/:tokenId/signers/:address`           | owner                              | `{ kind: SignerKind, note?: string \| null, holders: HolderInput[] }` | `200 { signer: LicenseSignerRecord }`. Clears `disabledAt`, so call it after `enableSigner`.                                                                 | `400 INVALID_HOLDERS`, `400 INVALID_ADDRESS`, `400 SIGNER_MISMATCH` (a `MEMBER` key whose address isn't its one holder's verified `signerAddress`), `409 KIND_CONFLICT` (turning an `API_KEY` or `EXTERNAL` key into a `MEMBER` key, or a `MEMBER` key into any other kind), `409 SIGNER_IN_USE` (an `API_KEY` or `EXTERNAL` key at an address that is a user's verified `signerAddress`), `403 LICENSE_NOT_IN_TEAM`, `403 OWNER_ONLY`, `502 IDENTITY_UNAVAILABLE` |
 | `POST /api/my/licenses/:tokenId/signers/:address/disabled` | owner                              | —                                                                     | `200 { signer: LicenseSignerRecord }`                                                                                                                        | `404 NOT_FOUND`, `400 INVALID_ADDRESS`, `403 LICENSE_NOT_IN_TEAM`, `403 OWNER_ONLY`, `502 IDENTITY_UNAVAILABLE`                                                                                                                                                                                               |
 | `GET /api/my/license-access?clientId=0x…`                  | any user (ignores `X-Team-Id`)     | —                                                                     | `200 { access: 'OWNER' \| 'MEMBER' \| 'NONE', memberOfTeam: boolean, teamId: string \| null, signerAddress: \`0x${string}\` \| null, userEmail: string }`    | `400 INVALID_CLIENT_ID`, `502 IDENTITY_UNAVAILABLE`                                                                                                                                                                                                                                                           |
 
@@ -246,6 +247,12 @@ type HolderInput = { userId: string } | { name: string };
     - `This invitation was sent less than a minute ago.`
   - The console shows the message as given.
 
+**Until part 3 ships** (between the part 2 and part 3 deploys), today's console must keep working:
+
+- `GET /api/me` reports a member's role as `COLLABORATOR`, as today. Part 2's final task switches it to `MEMBER`.
+- The legacy `POST /api/my/team/invitation` keeps emailing the legacy `sign-in?code=` link, accepted through the legacy `invitation_code` path (bound to the invited email). Part 2's final task removes both.
+- Ship part 3 within 7 days of part 2 regardless.
+
 **Retired by part 2's final task, once part 3 has shipped:**
 
 - `GET /api/my/team`
@@ -265,6 +272,7 @@ type HolderInput = { userId: string } | { name: string };
 | Member left or was removed mid-session                       | `You're no longer a member of {team name}.`                                                                                                                                                               |
 | Re-registering a wallet while holding keys (`SIGNER_LOCKED`) | `Your access is tied to another wallet. Ask {ownerEmail} to revoke it first.`                                                                                                                             |
 | Member leaves                                                | Confirm: `Leave {team name}? {ownerEmail} will be asked to revoke your data access.`                                                                                                                      |
+| Wallet already used as another key (`SIGNER_IN_USE`) | `This wallet is already recorded as someone else's key, so it can't be used for data access. Contact DIMO support.` |
 
 ### C9. Data proxy privileges (part 3)
 
@@ -278,9 +286,9 @@ type HolderInput = { userId: string } | { name: string };
 - **Setting `SIGNER_CHECK_MODE`:** `enforce` | `log` | `off`. The default is `enforce`, and the rollout sets `log` first.
   - In `log` mode the check runs and is logged and counted, but never refuses.
   - In `off` mode it doesn't run.
-- **Setting `SIGNER_CLAIM_REQUIRED_AFTER`** (optional Unix time, unset by default): when set, a license token issued after it (`iat`) without `signer_address` answers 403 `signer no longer authorized for this license`. This catches a future dex path that forgets the claim. Set it 14 days after the dex release.
+- **Setting `SIGNER_CLAIM_REQUIRED_AFTER`** (token-exchange-api only; optional Unix time, unset by default): when set, a license token issued after it (`iat`) without `signer_address` answers 403 `signer no longer authorized for this license`. This catches a future dex path that forgets the claim. Set it 14 days after the dex release.
 - **Metric:** `signer_check_total{service, result}`, with `result` one of `allowed`, `denied`, `error`, `skipped`.
-- **Alert:** when `error` exceeds 1% of checks over 5 minutes.
+- **Alert:** when `error` exceeds 1% of non-skipped checks (`allowed` + `denied` + `error`) over 5 minutes.
 - **Rollback order:**
   - Turn the console flag off before any dex rollback.
   - Roll back the gRPC callers (vehicle-triggers-api, tesla-oracle, credit-tracker), then token-exchange-api, then dex.

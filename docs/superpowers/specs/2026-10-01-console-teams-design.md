@@ -267,7 +267,7 @@ Exact endpoints, payloads and codes: index C4, C6 and C7.
 **Data proxy**
 
 - It requests only the privileges in C9, never commands.
-- After token exchange, it logs one structured line per request with the outcome: session email, the license's team, license client ID, subject DID and API.
+- After token exchange, it logs one structured line per request with the outcome: session email, the license's team, license client ID, subject DID and API. On the owner fast path, which doesn't call console-api, it logs the session wallet in place of the email and team.
 - Its caches are bounded.
 - Owner-facing audit history is out of scope.
 

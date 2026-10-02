@@ -65,6 +65,10 @@ No task re-adds any of this. Tasks that change it keep #80's response bodies unl
 - Addresses are stored lowercase (`users.signer_address`, `license_signers.signer_address`) and returned checksummed with viem `getAddress`. `users.signer_address` is unique by `lower(...)`.
 - New timestamp columns are `TIMESTAMPTZ`. Tests run with `TZ=UTC`.
 - Invite tokens are `randomBytes(32).toString('base64url')`. Only `sha256(token)` as hex is stored. The link is `${config.frontendUrl}sign-in?invite=${token}`. Invites expire after 7 days.
+- **Until part 3 ships** (C7), today's console keeps working:
+  - `GET /api/me` reports a member's role as `COLLABORATOR` (Task 4);
+  - the legacy `POST /api/my/team/invitation` emails the legacy `sign-in?code=<base64 row id>` link, with no token, accepted through `invitation_code` for the invited email only (Tasks 8 and 9).
+  - Task 15 switches the role to `MEMBER` and removes the legacy link with its route.
 - Invite limits (C7):
   - 10 invite or resend emails per team per hour;
   - 30 per inviting user per day;
@@ -122,7 +126,7 @@ No task re-adds any of this. Tasks that change it keep #80's response bodies unl
 | `src/services/invitation.service.ts`                                                           | Create, resend, cancel, preview and accept invites, with limits                                                                                                       |
 | `src/services/signerProof.service.ts`                                                          | C6 message, verification, `SIGNER_IN_USE` / `SIGNER_LOCKED`                                                                                                           |
 | `src/services/identity.service.ts`                                                             | (from #80: `getLicense`, `getLicenseOwner`, `isLicenseOwner`) gains `getLicenseByTokenId` and `clearIdentityCache`; GraphQL errors other than `NOT_FOUND` are outages |
-| `src/services/licenseSigner.service.ts`                                                        | Key registry, with `SIGNER_MISMATCH` and `KIND_CONFLICT`                                                                                                              |
+| `src/services/licenseSigner.service.ts`                                                        | Key registry, with `SIGNER_MISMATCH`, `KIND_CONFLICT` and `SIGNER_IN_USE`                                                                                             |
 | `src/services/licenseAccess.service.ts`                                                        | Who may use a license, and `memberOfTeam`                                                                                                                             |
 | `src/app/api/my/**` (modify)                                                                   | Team context, owner-only writes, members without secrets                                                                                                              |
 | New routes                                                                                     | `teams`, `team/members`, `team/leave`, `team/invitations`, `invitations/preview`, `invitations/accept`, `me/signer`, `licenses/[tokenId]/signers`, `license-access`   |
@@ -1068,8 +1072,8 @@ describe('PR #80 regressions', () => {
 
 describe('PR #80 regressions: configurations belong to the license owner', () => {
   const setup = async () => {
-    const owner = await createUser();
-    const other = await createUser();
+    const owner = (await createOwner('Owner')).user;
+    const other = (await createOwner('Other')).user;
     const clientId = newClientId();
     fakeIdentity([{ tokenId: 1, clientId, owner: owner.address! }]);
     return { owner, other, clientId };
@@ -1177,7 +1181,7 @@ describe('PR #80 regressions: configurations belong to the license owner', () =>
   });
 
   it('answers 502 when Identity fails', async () => {
-    const owner = await createUser();
+    const owner = (await createOwner('Owner')).user;
     fakeIdentity([], { status: 500 });
 
     expect(await create(owner.address!, newClientId())).toEqual({
@@ -1417,7 +1421,8 @@ git commit -m "test: pin the scoped user routes and the /api/me/complete takeove
 This is a one-off check in a throwaway worktree. It runs the same tests against the code from just before #80.
 
 ```bash
-PRE80="$(git log --format=%H -1 --grep='stop any signed-in user' origin/master)~1"
+# master just before #80 (#80 branched from it): the code #80 fixed.
+PRE80=d19dcc6
 git worktree add --detach /tmp/console-api-pre80 "$PRE80"
 cp -R test vitest.config.mts /tmp/console-api-pre80/
 ln -s "$PWD/node_modules" /tmp/console-api-pre80/node_modules
@@ -1605,9 +1610,14 @@ describe('init-db_12.sql', () => {
     await runSql(MIGRATION);
     expect(await clientIdLength()).toBe(100);
 
-    await runSql('ALTER TABLE configurations ALTER COLUMN client_id TYPE VARCHAR(255)');
-    await runSql(MIGRATION);
-    expect(await clientIdLength()).toBe(255);
+    try {
+      await runSql('ALTER TABLE configurations ALTER COLUMN client_id TYPE VARCHAR(255)');
+      await runSql(MIGRATION);
+      expect(await clientIdLength()).toBe(255);
+    } finally {
+      // Leave the column as the harness builds it for later test files.
+      await runSql('ALTER TABLE configurations ALTER COLUMN client_id TYPE VARCHAR(100)');
+    }
   });
 
   it('stores signer addresses in lower case, holders as a member or a name, and one user per signer', async () => {
@@ -1649,7 +1659,10 @@ describe('init-db_12.sql', () => {
           id: other.id,
         },
       ),
-    ).rejects.toThrow(/idx_users_signer_address/);
+    ).rejects.toMatchObject({
+      name: 'SequelizeUniqueConstraintError',
+      parent: expect.objectContaining({ constraint: 'idx_users_signer_address' }),
+    });
   });
 });
 
@@ -2740,7 +2753,7 @@ describe('/api/me', () => {
     expect(response.body.team.id).toBe(own.team.id);
   });
 
-  it('keeps a legacy collaborator working: their oldest team, as a member', async () => {
+  it('keeps a legacy collaborator working: their oldest team, reported as COLLABORATOR', async () => {
     const acme = await createOwner('Acme');
     const collaborator = await createUser();
     await addMember(acme.team.id!, collaborator);
@@ -2749,7 +2762,8 @@ describe('/api/me', () => {
 
     expect(response.body.team.id).toBe(acme.team.id);
     expect(response.body.company.name).toBe('Acme Co');
-    expect(response.body.role).toBe('MEMBER');
+    // Until part 3 ships (contract C7); Task 15 makes this MEMBER.
+    expect(response.body.role).toBe('COLLABORATOR');
   });
 
   it('answers 401 UNAUTHORIZED for a wallet with no console account', async () => {
@@ -2936,6 +2950,8 @@ export const companyScope = (ctx: TeamContext): IUserWithCompanyAndTeam =>
 
 - [ ] **Step 5: Point `getCompanyAndTeam` at the default team**
 
+`/api/me` keeps today's console working until part 3 ships: a member's `role` is reported as `COLLABORATOR`, as today (contract C7, "Until part 3 ships"). Task 15 switches it to `MEMBER`.
+
 In `src/controllers/user.controller.ts`:
 
 - Replace `import { findTeamCollaboratorByUserId } from '@/services/teamCollaborator.service';` with `import { findDefaultTeam } from '@/services/membership.service';`.
@@ -2952,7 +2968,9 @@ export const getCompanyAndTeam = async (user: User) => {
 
   return {
     ...(user.dataValues || user),
-    role: team ? (team.created_by === userId ? 'OWNER' : 'MEMBER') : undefined,
+    // Until part 3 ships, today's console reads a member's role as COLLABORATOR
+    // (contract C7, "Until part 3 ships"). Task 15 switches it to MEMBER.
+    role: team ? (team.created_by === userId ? 'OWNER' : 'COLLABORATOR') : undefined,
     company: company?.dataValues,
     team: team?.dataValues,
     company_email_owner: companyOwner?.dataValues.email,
@@ -3277,7 +3295,13 @@ describe('connections under a team', () => {
 
   it('lists nothing for a user who has not finished sign-up', async () => {
     const { acme } = await setup();
-    await Connection.create({ name: 'Acme link', company_id: acme.company.id! });
+    await Connection.create({
+      name: 'Acme link',
+      company_id: acme.company.id!,
+      connection_license_public_key: '',
+      connection_license_private_key: '',
+      device_issuance_key: '',
+    });
     const newcomer = await createUser();
 
     const response = await read(
@@ -4206,7 +4230,7 @@ export const POST = async (request: NextRequest) => {
 - [ ] **Step 10: Run the tests**
 
 Run: `npm test -- test/utils/filter.test.ts test/api/team-scoped-routes.test.ts test/api/regressions-80.test.ts`
-Expected: all pass. That's 3 filter tests, 11 named route tests plus 12 `it.each` cases, and the #80 regressions, including the workspace check.
+Expected: all pass. That's 3 filter tests, 9 named route tests plus 12 `it.each` cases, and the #80 regressions, including the workspace check.
 
 - [ ] **Step 11: Run everything, typecheck, commit**
 
@@ -5137,7 +5161,7 @@ const DELETE = async (request: NextRequest, { params }: Params) => {
 export { GET, PUT, DELETE };
 ```
 
-Task 2's configuration regressions must still pass unchanged. A caller with no header is their own team's owner, so #80's behavior is preserved exactly.
+Task 2's configuration regressions keep passing. Their users finished sign-up (`createOwner`), so with no header each is the owner of their own team, and #80's license-owner rule applies to their own wallet exactly as before.
 
 - [ ] **Step 6: Scope simulated vehicles to the team owner**
 
@@ -5301,6 +5325,7 @@ git commit -m "feat(teams): key branding, configurations and simulated vehicles 
   - `toTeamMember(row: TeamCollaborator, ownerUserId: string, memberKeys?: MemberKey[]): TeamMember`. `role` is `OWNER` exactly when `row.user_id === ownerUserId`. Load `row.User` with `include: [{ model: User }]` for accepted rows. Pending rows have no `User`, and their `email` comes from the row.
   - `listTeamsForUser(user: User): Promise<TeamSummary[]>`: the team they created first, then teams they joined, by name. Teams whose owner has no wallet are left out.
   - `listMembers(ctx: TeamContext): Promise<TeamMember[]>`, ordered as C7 says: owner, accepted members, pending invites, then `REVOKED` and `LEFT` members who still hold an enabled `MEMBER` key, each group oldest first.
+    - The owner is listed even when the team has no membership row for them. That row's `id` is `owner:<teamId>`, and `DELETE /api/my/team/members/owner:<teamId>` answers 404.
   - `removeMember(ctx, membershipId): Promise<void>`: status `REVOKED`, `deleted = true`. Errors: 404 `NOT_FOUND`, 400 `CANNOT_REMOVE_OWNER`, 403 `OWNER_ONLY`.
   - `leaveTeam(ctx): Promise<void>`: status `LEFT`, `deleted = true`. Errors: 400 `CANNOT_LEAVE_OWN_TEAM`.
 - Every route here passes `consoleOnly: true` (C4).
@@ -5522,6 +5547,26 @@ describe('GET /api/my/team/members', () => {
       memberKeys: [],
       inviteExpiresAt: expires.toISOString(),
     });
+  });
+
+  it('lists the owner first even without a membership row', async () => {
+    const acme = await createOwner('Acme');
+    await acme.membership.destroy();
+    const mia = await createUser({ name: 'Mia' });
+    await addMember(acme.team.id!, mia);
+
+    const response = await members(mia.address!, acme.team.id!);
+
+    expect(
+      response.body.members.map((m: { id: string; email: string; role: string }) => [
+        m.id,
+        m.email,
+        m.role,
+      ]),
+    ).toEqual([
+      [`owner:${acme.team.id}`, acme.user.email, 'OWNER'],
+      [expect.any(String), mia.email, 'MEMBER'],
+    ]);
   });
 
   it('refuses someone outside the team', async () => {
@@ -5799,9 +5844,27 @@ export const listMembers = async (ctx: TeamContext): Promise<TeamMember[]> => {
     if (latest) departed.push(latest);
   }
 
-  return [...rows, ...departed]
-    .map((row) => toTeamMember(row, ownerUserId, keysByUser.get(row.user_id ?? '') ?? []))
-    .sort((a, b) => rank(a) - rank(b) || a.invitedAt.localeCompare(b.invitedAt));
+  const members = [...rows, ...departed].map((row) =>
+    toTeamMember(row, ownerUserId, keysByUser.get(row.user_id ?? '') ?? []),
+  );
+
+  // The creator owns the team even without a membership row; C7 lists them first.
+  if (!members.some((member) => member.userId === ownerUserId)) {
+    members.push({
+      id: `owner:${teamId}`,
+      userId: ownerUserId,
+      name: ctx.owner.name ?? null,
+      email: ctx.owner.email,
+      role: TeamRoles.OWNER,
+      status: InvitationStatuses.ACCEPTED as MembershipStatus,
+      signerAddress: ctx.owner.signer_address ? toChecksum(ctx.owner.signer_address) : null,
+      memberKeys: keysByUser.get(ownerUserId) ?? [],
+      invitedAt: (ctx.team.get('created_at') as Date).toISOString(),
+      inviteExpiresAt: null,
+    });
+  }
+
+  return members.sort((a, b) => rank(a) - rank(b) || a.invitedAt.localeCompare(b.invitedAt));
 };
 
 export const removeMember = async (ctx: TeamContext, membershipId: string) => {
@@ -5918,7 +5981,7 @@ export const POST = async (request: NextRequest) => {
 - [ ] **Step 5: Run the tests**
 
 Run: `npm test -- test/api/teams-and-members.test.ts`
-Expected: `10 passed`.
+Expected: `11 passed`.
 
 - [ ] **Step 6: Run everything, typecheck, commit**
 
@@ -5948,7 +6011,10 @@ git commit -m "feat(teams): list teams and members with their keys, remove membe
 - Consumes (Tasks 3, 4 and 7): `TeamContext`, `requireOwner`, `requireUser`, `resolveTeamContext`, `findMembership`, `activeMembershipWhere`, `notDeleted`, `toTeamMember`, `toTeamSummary`, `TeamInviteSend`, `ApiError`, `errorResponse`.
 - Produces:
   - `generateInviteToken(): string`, `hashInviteToken(token: string): string`, `inviteLink(token: string): string`.
-  - `createInvitation(ctx, rawEmail: unknown): Promise<TeamMember>`. Errors:
+  - `createInvitation(ctx, rawEmail: unknown, options?: { legacyLink?: boolean }): Promise<TeamMember>`.
+    - `legacyLink` exists only until part 3 ships (C7). Task 9's legacy route passes it: the row gets no token hash, and the email carries the legacy `sign-in?code=<base64 row id>` link, which the legacy `invitation_code` path accepts for the invited email.
+    - Task 15 removes the option.
+    - Errors:
     - 400 `INVALID_EMAIL`;
     - 409 `ALREADY_MEMBER`;
     - 409 `ALREADY_INVITED`, also for a concurrent duplicate caught by the unique index;
@@ -5988,7 +6054,8 @@ import {
   TeamRoles,
 } from '@/models/teamCollaborator.model';
 import { TeamInviteSend } from '@/models/teamInviteSend.model';
-import { hashInviteToken } from '@/services/invitation.service';
+import { createInvitation, hashInviteToken } from '@/services/invitation.service';
+import { resolveTeamContext } from '@/services/teamContext.service';
 import Mailer from '@/utils/mailer';
 import { sql } from '../support/db';
 import { addMember, createOwner, createUser } from '../support/fixtures';
@@ -6086,18 +6153,29 @@ describe('POST /api/my/team/invitations', () => {
     ).toBe('OWNER_ONLY');
   });
 
-  it('answers ALREADY_INVITED, not 500, to concurrent duplicates', async () => {
+  it('answers ALREADY_INVITED, not 500, when a concurrent invite wins the race', async () => {
     const acme = await createOwner('Acme');
+    // The other request inserts its pending row after this one checked for one and
+    // before it creates its own: exactly the window the unique index guards.
+    const realCreate = TeamCollaborator.create.bind(TeamCollaborator);
+    vi.spyOn(TeamCollaborator, 'create').mockImplementationOnce((async (
+      ...args: Parameters<typeof realCreate>
+    ) => {
+      await sql(
+        `INSERT INTO team_collaborators (id, team_id, email, role, status, created_at, updated_at, deleted)
+         VALUES (gen_random_uuid()::text, :team, 'Race@x.test', 'MEMBER', 'PENDING', now(), now(), false)`,
+        { team: acme.team.id },
+      );
+      return realCreate(...args);
+    }) as never);
 
-    const responses = await Promise.all([
-      invite(acme, 'race@x.test'),
-      invite(acme, 'race@x.test'),
-    ]);
-
-    expect(responses.map((response) => response.status).sort()).toEqual([201, 409]);
-    expect(responses.find((response) => response.status === 409)!.body.code).toBe(
-      'ALREADY_INVITED',
-    );
+    expect(await invite(acme, 'race@x.test')).toEqual({
+      status: 409,
+      body: { message: 'race@x.test already has a pending invitation', code: 'ALREADY_INVITED' },
+    });
+    expect(
+      await TeamCollaborator.count({ where: { team_id: acme.team.id!, status: 'PENDING' } }),
+    ).toBe(1);
   });
 
   it('refreshes an expired invite in place, as a member', async () => {
@@ -6135,6 +6213,25 @@ describe('POST /api/my/team/invitations', () => {
       body: { message: 'The invitation email could not be sent', code: 'EMAIL_FAILED' },
     });
     expect(await TeamCollaborator.count({ where: { status: 'PENDING' } })).toBe(0);
+  });
+
+  it('with legacyLink, emails the legacy sign-in?code= link and stores no token', async () => {
+    const acme = await createOwner('Acme');
+    const ctx = await resolveTeamContext(
+      await request('POST', '/x', { as: acme.user.address! }),
+    );
+
+    const member = await createInvitation(ctx, 'legacy@x.test', { legacyLink: true });
+
+    const code = Buffer.from(member.id).toString('base64');
+    expect(sentHtml()).toContain(`sign-in?code=${code}`);
+    expect(sentHtml()).not.toContain('sign-in?invite=');
+    const [row] = await sql<{ invite_token_hash: string | null; invite_expires_at: Date }>(
+      'SELECT invite_token_hash, invite_expires_at FROM team_collaborators WHERE id = :id',
+      { id: member.id },
+    );
+    expect(row.invite_token_hash).toBeNull();
+    expect(row.invite_expires_at).not.toBeNull();
   });
 
   it('escapes and caps the inviter and team names in the email', async () => {
@@ -6612,7 +6709,7 @@ const sendInvite = async (
   ctx: TeamContext,
   membershipId: string,
   email: string,
-  token: string,
+  link: string,
 ) => {
   await TeamInviteSend.create({
     team_id: ctx.team.id!,
@@ -6628,7 +6725,7 @@ const sendInvite = async (
       html: generateTeamInvitationTemplate({
         inviterName: inviter,
         teamName: ctx.team.name,
-        cta: inviteLink(token),
+        cta: link,
       }),
     });
   } catch (error) {
@@ -6650,9 +6747,16 @@ const findPendingInTeam = (teamId: string, id: string) =>
 const alreadyInvited = (email: string) =>
   new ApiError(409, 'ALREADY_INVITED', `${email} already has a pending invitation`);
 
+/**
+ * `legacyLink`: until part 3 ships, the legacy POST /api/my/team/invitation keeps
+ * emailing the old `sign-in?code=<base64 row id>` link, accepted through the legacy
+ * invitation_code path (contract C7, "Until part 3 ships"). Such rows carry no
+ * token hash. Task 15 removes the option.
+ */
 export const createInvitation = async (
   ctx: TeamContext,
   rawEmail: unknown,
+  { legacyLink = false }: { legacyLink?: boolean } = {},
 ): Promise<TeamMember> => {
   requireOwner(ctx);
   const teamId = ctx.team.id!;
@@ -6690,7 +6794,8 @@ export const createInvitation = async (
   if (!pending) await assertPendingRoom(teamId);
   await assertCanSend(ctx, pending?.id);
 
-  const { token, fields } = freshInvite();
+  const { token, fields: tokenFields } = freshInvite();
+  const fields = legacyLink ? { ...tokenFields, invite_token_hash: null } : tokenFields;
   let row: TeamCollaborator;
   try {
     // An expired invite, or one sent before links carried a token, is refreshed in
@@ -6716,7 +6821,10 @@ export const createInvitation = async (
   }
 
   try {
-    await sendInvite(ctx, row.id!, email, token);
+    const link = legacyLink
+      ? `${config.frontendUrl}sign-in?code=${Buffer.from(row.id!).toString('base64')}`
+      : inviteLink(token);
+    await sendInvite(ctx, row.id!, email, link);
   } catch (error) {
     await row.update({
       status: InvitationStatuses.REVOKED,
@@ -6742,7 +6850,7 @@ export const resendInvitation = async (
   await row.update({ ...fields, role: TeamRoles.MEMBER, invited_by: ctx.user.id });
   // If the email fails, the row keeps the new token (C7): the old link is dead
   // either way, and the owner can resend after a minute.
-  await sendInvite(ctx, row.id!, row.email!, token);
+  await sendInvite(ctx, row.id!, row.email!, inviteLink(token));
   return toTeamMember(row, ctx.team.created_by);
 };
 
@@ -6926,7 +7034,7 @@ export const POST = async (request: NextRequest) => {
 - [ ] **Step 6: Run the tests**
 
 Run: `npm test -- test/api/invitations.test.ts`
-Expected: `23 passed`.
+Expected: `24 passed`.
 
 - [ ] **Step 7: Run everything, typecheck, commit**
 
@@ -6957,7 +7065,7 @@ They become thin adapters over the new services and the active team. #80 (`b41eb
 This task doesn't redo any of that. It moves the routes onto the team model:
 
 - **Owner** is `teams.created_by`, through the team context, instead of a membership row's `role`.
-- **The legacy invite** goes through `createInvitation`: C7's limits, token links and `MEMBER` rows. It keeps #80's refusal message for non-owners, which the old Settings page shows.
+- **The legacy invite** goes through `createInvitation` with `legacyLink`: C7's limits, expiry and `MEMBER` rows. Until part 3 ships it keeps emailing the legacy `sign-in?code=` link, which today's console sends to `invitation_code` (C7, "Until part 3 ships"). It keeps #80's refusal message for non-owners, which the old Settings page shows. Task 15 removes the route and the link.
 - **Removal** keeps #80's messages, marks rows `REVOKED`, and cancels pending invites through the invitation service.
 - **`invitation_code` acceptance** keeps #80's checks and `markAsAccepted`, and adds three: it never accepts a token-based invite, an expired one, or one for someone already in the team.
 - **The collaborator list** returns only the fields the old page reads.
@@ -6980,6 +7088,7 @@ This task doesn't redo any of that. It moves the routes onto the team model:
     - the creator is shown as `OWNER` and everyone else as `COLLABORATOR`, so the old Settings page keeps its labels;
     - each row carries only `id`, `team_id`, `user_id`, `email`, `status`, `role`, `User` (`id`, `name`, `email`, `avatar_url`) and `Team` (`id`, `name`). Never the whole user row.
 - The legacy invite keeps #80's 400 `Only the team owner can invite collaborators` for non-owners. Its limit becomes C7's: 429 `RATE_LIMITED`, counted from `team_invite_sends`. Step 4 updates Task 2's rate-limit test to match.
+- The legacy invite's email carries `${frontendUrl}sign-in?code=<base64 row id>`, and its row has no token hash, so `acceptTeamInvitation` accepts it for the invited email.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -6998,6 +7107,7 @@ import {
   TeamCollaborator,
   TeamRoles,
 } from '@/models/teamCollaborator.model';
+import { TeamInviteSend } from '@/models/teamInviteSend.model';
 import Mailer from '@/utils/mailer';
 import { addMember, createOwner, createUser } from '../support/fixtures';
 import { read, request } from '../support/http';
@@ -7037,7 +7147,7 @@ describe('retired team routes', () => {
     ]);
   });
 
-  it('sends the new invite link from the old invite route', async () => {
+  it('keeps emailing the legacy sign-in?code= link, which the invited email accepts', async () => {
     const acme = await createOwner('Acme');
 
     const response = await read(
@@ -7053,7 +7163,22 @@ describe('retired team routes', () => {
       status: 200,
       body: { message: 'Invitation has been sent to pat@x.test' },
     });
-    expect(vi.mocked(Mailer.sendMail).mock.calls[0][0].html).toContain('sign-in?invite=');
+    // C7's limits and expiry apply, but the link is still the one today's console reads.
+    const row = await TeamCollaborator.findOne({ where: { email: 'pat@x.test' } });
+    expect(row).toMatchObject({ role: 'MEMBER', status: 'PENDING', invite_token_hash: null });
+    expect(row!.invite_expires_at).not.toBeNull();
+    expect(await TeamInviteSend.count({ where: { membership_id: row!.id! } })).toBe(1);
+    const code = Buffer.from(row!.id!).toString('base64');
+    const html = vi.mocked(Mailer.sendMail).mock.calls[0][0].html as string;
+    expect(html).toContain(`sign-in?code=${code}`);
+    expect(html).not.toContain('sign-in?invite=');
+
+    const pat = await createUser({ email: 'pat@x.test' });
+    await getMe(
+      await request('GET', `/api/me?invitation_code=${code}`, { as: pat.address! }),
+    );
+    await row!.reload();
+    expect(row).toMatchObject({ status: 'ACCEPTED', user_id: pat.id, role: 'MEMBER' });
   });
 
   it('keeps refusing a row of another team, as #80 does', async () => {
@@ -7170,9 +7295,11 @@ Run: `npm test -- test/api/retired-team-routes.test.ts`
 Expected: FAIL.
 
 - The list includes the revoked row and shows `MEMBER`.
-- The old invite route answers 400 for an account that already exists, and emails the old `sign-in?code=` link.
+- The old invite route records no `team_invite_sends` row and sets no `invite_expires_at`: #80 counts rows and never expires them.
 - Removed rows keep `status = 'ACCEPTED'`, because #80 only sets `deleted`.
-- `bob` accepts Pat's invite.
+- Pat accepts the token-based invite through `invitation_code`, because #80 doesn't look at the token hash.
+
+The invited-email test and the `GET /api/my/team` test already pass: #80 added both behaviors, and they guard them here.
 
 - [ ] **Step 3: Rewrite `src/controllers/teamCollaborator.controller.ts`**
 
@@ -7297,7 +7424,8 @@ import { legacyErrorResponse } from '@/utils/apiError';
 export async function GET(request: NextRequest) {
   try {
     const ctx = await resolveTeamContext(request);
-    return Response.json(ctx.membership?.dataValues);
+    // A creator without a membership row still answers with a JSON body.
+    return Response.json(ctx.membership?.dataValues ?? {});
   } catch (error: unknown) {
     return legacyErrorResponse(error, '[My Team] Get team created by the logged user');
   }
@@ -7365,7 +7493,8 @@ import { legacyErrorResponse } from '@/utils/apiError';
 import { ValidatorError } from '@/utils/error.utils';
 
 // Retired: replaced by POST /api/my/team/invitations. Only the email is read from
-// the body; invitations are always for a member.
+// the body; invitations are always for a member. The email carries the legacy link,
+// accepted through GET /api/me?invitation_code=.
 export const POST = async (request: NextRequest) => {
   try {
     const ctx = await resolveTeamContext(request);
@@ -7376,7 +7505,9 @@ export const POST = async (request: NextRequest) => {
     const { email } = _.pick(await request.json().catch(() => ({})), ['email']) as {
       email?: unknown;
     };
-    await createInvitation(ctx, email);
+    // Until part 3 ships, today's console only reads the legacy sign-in?code= link
+    // (contract C7). Task 15 removes this route.
+    await createInvitation(ctx, email, { legacyLink: true });
     return Response.json(
       { message: `Invitation has been sent to ${String(email).trim()}` },
       { status: 200 },
@@ -7454,6 +7585,7 @@ git commit -m "fix(teams): scope the retired team routes to the caller's team an
     - 409 `SIGNER_LOCKED` when the caller holds an enabled `MEMBER` key under a different address.
   - A concurrent registration that trips `idx_users_signer_address` also answers 409 `SIGNER_IN_USE`.
 - The route passes `consoleOnly: true` (C4).
+- The console shows C8's copy for `SIGNER_IN_USE` and `SIGNER_LOCKED`, chosen by `code`. The `message` here is for API callers and logs.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -8337,8 +8469,9 @@ git commit -m "feat(teams): look licenses up by token id, and treat Identity Gra
   2. path address (400 `INVALID_ADDRESS`);
   3. license (403 `LICENSE_NOT_IN_TEAM`, or 502);
   4. body (400 `INVALID_HOLDERS`);
-  5. kind change (409 `KIND_CONFLICT`: an `API_KEY` or `EXTERNAL` key can't become `MEMBER`);
-  6. member wallet (400 `SIGNER_MISMATCH`: a `MEMBER` key's address must equal its one holder's verified `signer_address`).
+  5. kind change (409 `KIND_CONFLICT`: an `API_KEY` or `EXTERNAL` key can't become `MEMBER`, and a `MEMBER` key can't become anything else);
+  6. for a `MEMBER` key, the member's wallet (400 `SIGNER_MISMATCH`: its address must equal its one holder's verified `signer_address`);
+  7. for a **new** `API_KEY` or `EXTERNAL` key, the address mustn't be any user's verified `signer_address` (409 `SIGNER_IN_USE`).
 - Every route here passes `consoleOnly: true` (C4).
 
 - [ ] **Step 1: Write the failing tests**
@@ -8526,15 +8659,54 @@ describe('license key registry', () => {
     ).toEqual(mismatch);
   });
 
-  it('refuses turning an API key or external key into a member key', async () => {
+  it('refuses turning a member key into an API key or external key', async () => {
     const { acme, member, memberWallet } = await setup();
     await put(acme.user.address!, memberWallet, {
-      kind: 'API_KEY',
-      holders: [{ name: 'Backend' }],
+      kind: 'MEMBER',
+      holders: [{ userId: member.id }],
     });
 
+    for (const kind of ['API_KEY', 'EXTERNAL']) {
+      expect(
+        await put(acme.user.address!, memberWallet, { kind, holders: [{ name: 'Backend' }] }),
+      ).toEqual({
+        status: 409,
+        body: {
+          message: 'A member key cannot become an API key or external key',
+          code: 'KIND_CONFLICT',
+        },
+      });
+    }
+  });
+
+  it("refuses a new API key or external key at a user's verified wallet", async () => {
+    const { acme, memberWallet } = await setup();
+
+    for (const kind of ['API_KEY', 'EXTERNAL']) {
+      expect(
+        await put(acme.user.address!, memberWallet.toLowerCase(), {
+          kind,
+          holders: [{ name: 'Backend' }],
+        }),
+      ).toEqual({
+        status: 409,
+        body: {
+          message: "This wallet is a user's verified wallet and cannot be recorded as a shared key",
+          code: 'SIGNER_IN_USE',
+        },
+      });
+    }
+  });
+
+  it('refuses turning an API key or external key into a member key', async () => {
+    const { acme, member } = await setup();
+    // An API key recorded before Mia verified that wallet as her own.
+    const wallet = newWallet().address;
+    await put(acme.user.address!, wallet, { kind: 'API_KEY', holders: [{ name: 'Backend' }] });
+    await member.update({ signer_address: wallet.toLowerCase() });
+
     expect(
-      await put(acme.user.address!, memberWallet, {
+      await put(acme.user.address!, wallet, {
         kind: 'MEMBER',
         holders: [{ userId: member.id }],
       }),
@@ -8650,6 +8822,7 @@ Expected: FAIL, `Failed to resolve import "@/app/api/my/licenses/[tokenId]/signe
 - [ ] **Step 3: Write `src/services/licenseSigner.service.ts`**
 
 ```ts
+import { col, fn, where as sqlWhere } from 'sequelize';
 import type { IncludeOptions } from 'sequelize';
 import { getAddress, isAddress } from 'viem';
 
@@ -8821,17 +8994,22 @@ export const upsertLicenseSigner = async (
   const tokenId = await assertLicenseInTeam(ctx, rawTokenId);
   const input = await parseSignerInput(ctx, body);
 
+  const existing = await LicenseSigner.findOne({
+    where: { license_token_id: tokenId, signer_address: signerAddress },
+  });
+  // A member key stays a member key, and an API or external key never becomes one
+  // (contract C7).
+  if (existing && (existing.kind === SignerKinds.MEMBER) !== (input.kind === 'MEMBER')) {
+    throw new ApiError(
+      409,
+      'KIND_CONFLICT',
+      existing.kind === SignerKinds.MEMBER
+        ? 'A member key cannot become an API key or external key'
+        : 'An API key or external key cannot become a member key',
+    );
+  }
+
   if (input.kind === 'MEMBER') {
-    const existing = await LicenseSigner.findOne({
-      where: { license_token_id: tokenId, signer_address: signerAddress },
-    });
-    if (existing && existing.kind !== SignerKinds.MEMBER) {
-      throw new ApiError(
-        409,
-        'KIND_CONFLICT',
-        'An API key or external key cannot become a member key',
-      );
-    }
     // A member key is the member's own verified wallet (C6), so the console can
     // tell their developer JWT apart from anyone else's.
     const holder = await User.findOne({ where: { id: input.holders[0].user_id! } });
@@ -8840,6 +9018,19 @@ export const upsertLicenseSigner = async (
         400,
         'SIGNER_MISMATCH',
         "A member key must be the member's verified wallet",
+      );
+    }
+  } else if (!existing) {
+    // A user's verified wallet signs for them alone (C6); it can't also be
+    // recorded as a shared key.
+    const walletOwner = await User.findOne({
+      where: sqlWhere(fn('lower', col('signer_address')), signerAddress),
+    });
+    if (walletOwner) {
+      throw new ApiError(
+        409,
+        'SIGNER_IN_USE',
+        "This wallet is a user's verified wallet and cannot be recorded as a shared key",
       );
     }
   }
@@ -8974,7 +9165,7 @@ export const POST = async (
 - [ ] **Step 5: Run the tests**
 
 Run: `npm test -- test/api/license-signers.test.ts`
-Expected: `9 passed`.
+Expected: `11 passed`.
 
 Run: `npm test -- test/api/license-signers.test.ts -t "marks a key disabled"`
 Expected: `1 passed`. Run alone, that test makes the file's first token check while `fakeIdentity` stubs `fetch`, so it proves the JWKS fetch passes through the fake.
@@ -9439,6 +9630,9 @@ Expected: no output. Support email uses `requireUser`; everything else uses `res
 console-api has no migration runner, and production has been changed by hand before (`configurations.client_id` is wider than `init-db_08` creates it). Diff the schemas before running anything. Use a read-only connection string for production.
 
 ```bash
+# The schema the code expects: the test database, as the last `npm test` built it.
+export TEST_PG_URL="${TEST_PG_URL:-postgres://admin@127.0.0.1:55432/console_api_test}"
+npm test -- test/api/harness.test.ts
 pg_dump --schema-only --no-owner --no-privileges "$TEST_PG_URL" > "$TMPDIR/harness-schema.sql"
 pg_dump --schema-only --no-owner --no-privileges "$PROD_PG_URL_READONLY" > "$TMPDIR/prod-schema.sql"
 diff -u "$TMPDIR/prod-schema.sql" "$TMPDIR/harness-schema.sql" > "$TMPDIR/schema.diff"; echo "exit $?"
@@ -9480,10 +9674,10 @@ Part 2 of console teams. Spec: `docs/superpowers/specs/2026-10-01-console-teams-
   - Tokens are random, stored only as SHA-256, expire after 7 days and are bound to the invited email. Acceptance always makes a member.
   - C7's limits answer 429 `RATE_LIMITED`. Names in the email are escaped and capped.
 - **Signer proof:** `PUT /api/me/signer` verifies the C6 message. One wallet per account (`409 SIGNER_IN_USE`), and no switching while holding member keys (`409 SIGNER_LOCKED`).
-- **Key registry:** `GET`, `PUT` and `POST …/disabled` under `/api/my/licenses/:tokenId/signers`, with `SIGNER_MISMATCH` and `KIND_CONFLICT`.
+- **Key registry:** `GET`, `PUT` and `POST …/disabled` under `/api/my/licenses/:tokenId/signers`, with `SIGNER_MISMATCH`, `KIND_CONFLICT` (no kind change to or from `MEMBER`) and `SIGNER_IN_USE` (no new shared key at a user's verified wallet).
 - **License access:** `GET /api/my/license-access?clientId=` answers `OWNER`, `MEMBER` or `NONE`, with `memberOfTeam` and the caller's email.
 - **Console-only routes** (team, invite, signer, registry, license access) require `aud` to include `developer-platform`.
-- **`/api/me`:** a legacy collaborator with no team of their own gets their oldest team. An unknown wallet gets `401 UNAUTHORIZED`.
+- **`/api/me`:** a legacy collaborator with no team of their own gets their oldest team, still reported as `COLLABORATOR` until part 3 ships. An unknown wallet gets `401 UNAUTHORIZED`.
 - **Identity:** a GraphQL error that isn't `NOT_FOUND` is a 502, never "no such license".
 - **Migration:** `init-db_12.sql` and `init-db_12.down.sql`.
   - It demotes non-creator `OWNER` rows, turns collaborators into members and folds duplicates (keeping the creator's row).
@@ -9508,7 +9702,10 @@ Part 2 of console teams. Spec: `docs/superpowers/specs/2026-10-01-console-teams-
 
 ## Compatibility
 - Today's console keeps working: the header is optional, and the retired team routes are thin adapters scoped to the caller's team. They're deleted by this plan's final task, after part 3 ships.
-- Invites created through the old route email the new `sign-in?invite=` link, which needs console part 3 to be accepted.
+- Until part 3 ships (contract C7):
+  - `GET /api/me` still reports a member's role as `COLLABORATOR`;
+  - the old invite route still emails the `sign-in?code=` link, accepted through `invitation_code` for the invited email only, now with C7's limits and a 7-day expiry.
+- The final task switches the role to `MEMBER` and removes the old link. Part 3 ships within 7 days of this deploy.
 
 ## Release checklist
 Migrations are run by hand; console-api has no migration runner.
@@ -9525,7 +9722,7 @@ Migrations are run by hand; console-api has no migration runner.
 8. Merge. Vercel deploys console-api.
 9. Run `init-db_12.sql` once more on production. It's idempotent. Any `COLLABORATOR` rows the old code wrote between steps 4 and 8 become `MEMBER`.
 10. Smoke test: with a console session, `GET /api/my/teams` returns the personal team, and `GET /api/my/team/members` lists the owner.
-11. Then ship console part 3.
+11. Ship console part 3 within 7 days (contract C7, "Until part 3 ships").
 
 **Rollback:**
 - Rolling back the code alone is safe. The old code reads none of the new columns or tables, and `MEMBER` rows behave as collaborators there.
@@ -9550,6 +9747,8 @@ C7 retires these routes once the console no longer calls them:
 - `POST /api/my/team/invitation`
 - the `invitation_code` query on `GET /api/me`
 
+It also ends C7's "Until part 3 ships" rules: `/api/me` reports a member's role as `MEMBER`, and the legacy `sign-in?code=` invite link goes away with the route that sent it.
+
 This is a separate PR from Task 14's, made only after console part 3 is in production.
 
 **Files:**
@@ -9558,12 +9757,17 @@ This is a separate PR from Task 14's, made only after console part 3 is in produ
 - Delete: `src/controllers/teamCollaborator.controller.ts`
 - Delete: `test/api/retired-team-routes.test.ts`
 - Modify: `src/app/api/me/route.ts` (drop `invitation_code`)
+- Modify: `src/controllers/user.controller.ts` (`getCompanyAndTeam` reports `MEMBER`)
+- Modify: `src/services/invitation.service.ts` (drop `createInvitation`'s `legacyLink` option)
+- Modify: `test/services/team-context.test.ts` (the legacy collaborator's role is `MEMBER`)
+- Modify: `test/api/invitations.test.ts` (drop the `legacyLink` test)
 - Modify: `test/api/regressions-80.test.ts` (drop the describes for routes that no longer exist; pin their absence)
 
 **Interfaces:**
 
-- Removes: `acceptTeamInvitation`, `listLegacyCollaborators` and `removeMyCollaboratorById` (Task 9).
+- Removes: `acceptTeamInvitation`, `listLegacyCollaborators` and `removeMyCollaboratorById` (Task 9), and `createInvitation`'s `legacyLink` option (Task 8).
 - Nothing else in console-api imports them. Step 3 checks.
+- Changes: `GET /api/me` answers `role: 'MEMBER'` for a member (was `COLLABORATOR`, Task 4).
 
 - [ ] **Step 1: Confirm nothing still calls the routes**
 
@@ -9576,6 +9780,14 @@ Expected: no output.
 Then, in the Vercel request logs for console-api production, filter on each retired path for the last 7 days.
 Expected: no requests after part 3's production deploy. If there are some, find the caller first and don't delete yet.
 
+Then count the pending invites that only the legacy link can accept:
+
+```bash
+psql "$PROD_PG_URL" -c "SELECT count(*) FROM team_collaborators WHERE status = 'PENDING' AND invite_token_hash IS NULL AND deleted IS NOT TRUE AND (invite_expires_at IS NULL OR invite_expires_at > now());"
+```
+
+Expected: 0. Invites from the legacy route expire 7 days after they're sent, and that route stopped being called when part 3 shipped. Any left are older invites without an expiry. After this PR they can't be accepted; their owners resend them from the console's Team page, which issues a token link.
+
 - [ ] **Step 2: Branch and write the failing test**
 
 ```bash
@@ -9583,11 +9795,20 @@ cd ~/workspace/dimo-developer-console-api
 git fetch origin && git switch -c chore/retire-legacy-team-routes origin/master
 ```
 
+In `test/services/team-context.test.ts`, in `'keeps a legacy collaborator working: their oldest team, reported as COLLABORATOR'`:
+
+- rename it `'keeps a legacy collaborator working: their oldest team, as a member'`;
+- delete the `// Until part 3 ships …` comment;
+- replace `expect(response.body.role).toBe('COLLABORATOR');` with `expect(response.body.role).toBe('MEMBER');`.
+
+In `test/api/invitations.test.ts`, delete the test `'with legacyLink, emails the legacy sign-in?code= link and stores no token'`, and `createInvitation` and `resolveTeamContext` from its imports if nothing else there uses them.
+
 In `test/api/regressions-80.test.ts`:
 
-- Delete the `describe('PR #80 regressions: legacy invites and workspaces', …)` test that invites through the legacy route. Keep its workspace test in a describe of its own.
+- Delete the whole `describe('PR #80 regressions: legacy invites', …)` block. Its rules live on in Task 8's tests: owner-only invites, C7's limits, the escaped names and email-bound acceptance.
+- Keep the `describe('PR #80 regressions: workspaces', …)` block as it is.
 - Delete the `describe("PR #80 regressions: collaborator removal stays inside the owner's team", …)` block.
-- Delete the now-unused imports `legacyInvite` and `deleteCollaborator`.
+- Delete the imports these leave unused: `legacyInvite`, `deleteCollaborator`, `Mailer`, `TeamInviteSend` (added by Task 9), and `vi` from the `vitest` import. `getMe`, `sql`, `createOwner` and `createUser` stay; the tests below use them.
 - Add:
 
 ```ts
@@ -9628,8 +9849,12 @@ describe('retired team routes', () => {
 });
 ```
 
-Run: `npm test -- test/api/regressions-80.test.ts`
-Expected: FAIL. The route files still exist, and `invitation_code` still accepts the invite.
+Run: `npm test -- test/api/regressions-80.test.ts test/services/team-context.test.ts`
+Expected: FAIL.
+
+- The route files still exist.
+- `invitation_code` still accepts the invite.
+- `/api/me` still reports the legacy collaborator as `COLLABORATOR`.
 
 - [ ] **Step 3: Delete the routes and the adapters**
 
@@ -9648,10 +9873,25 @@ In `src/app/api/me/route.ts`:
 
 `GET` then reads the token, finds the user (401 if none) and returns `getCompanyAndTeam(user)`.
 
+In `src/controllers/user.controller.ts`, in `getCompanyAndTeam`, replace the role line and its comment with:
+
+```ts
+    role: team ? (team.created_by === userId ? 'OWNER' : 'MEMBER') : undefined,
+```
+
+In `src/services/invitation.service.ts`:
+
+- delete the `legacyLink` doc comment above `createInvitation` and its third parameter, so the signature is `createInvitation(ctx: TeamContext, rawEmail: unknown)`;
+- replace `const { token, fields: tokenFields } = freshInvite();` and the `const fields = legacyLink ? …` line after it with `const { token, fields } = freshInvite();`;
+- replace the `const link = legacyLink ? … : inviteLink(token);` statement and the `sendInvite` call after it with `await sendInvite(ctx, row.id!, email, inviteLink(token));`.
+
+Run: `grep -rn "legacyLink\|sign-in?code" src test`
+Expected: no output.
+
 - [ ] **Step 4: Run everything**
 
 Run: `npm test && npm run typecheck && npm run lint`
-Expected: all pass, typecheck exits 0, and lint has no errors.
+Expected: all pass, including the three Step 2 tests. Typecheck exits 0, and lint has no errors.
 
 Run: `PG_URL=postgres://u:p@127.0.0.1:1/x npm run build`
 Expected: exit 0. The route table no longer lists `/api/my/team`, `/api/my/team/collaborator`, `/api/my/team/collaborator/[id]` or `/api/my/team/invitation`.
@@ -9659,13 +9899,13 @@ Expected: exit 0. The route table no longer lists `/api/my/team`, `/api/my/team/
 - [ ] **Step 5: Commit and open the PR**
 
 ```bash
-npx prettier --write src/app/api/me/route.ts test
+npx prettier --write src/app/api/me/route.ts src/controllers/user.controller.ts src/services/invitation.service.ts test
 git add -A src test
 git commit -m "chore(teams): retire the legacy team routes now that the console uses the team API"
 git push -u origin chore/retire-legacy-team-routes
 gh pr create --base master --head chore/retire-legacy-team-routes \
   --title "chore(teams): retire the legacy team routes" \
-  --body "Removes GET /api/my/team, GET /api/my/team/collaborator, DELETE /api/my/team/collaborator/:id, POST /api/my/team/invitation and the invitation_code query on GET /api/me (contract C7). Console part 3 no longer calls them; Vercel logs show no requests to them in the 7 days since it shipped. No schema change."
+  --body "Removes GET /api/my/team, GET /api/my/team/collaborator, DELETE /api/my/team/collaborator/:id, POST /api/my/team/invitation, its legacy sign-in?code= invite link and the invitation_code query on GET /api/me (contract C7). GET /api/me now reports a member's role as MEMBER instead of COLLABORATOR. Console part 3 no longer calls the removed routes; Vercel logs show no requests to them in the 7 days since it shipped. No schema change."
 ```
 
 Expected: `gh` prints the PR URL.
@@ -9685,14 +9925,14 @@ Expected: `gh` prints the PR URL.
 | Owner-only writes on the listed paths; support email open (401 for unknown users)                                                                                                                                                                                              | 5, 6                 |
 | Secrets owner-only (connection keys, signer API keys)                                                                                                                                                                                                                          | 5                    |
 | Audience rule (`aud` includes `developer-platform`) on team, invite, signer, registry and license-access routes                                                                                                                                                                | 4, 7, 8, 10, 12, 13  |
-| Teams list, members list with `memberKeys` and C7 ordering, removal (`REVOKED`), leaving (`LEFT`)                                                                                                                                                                              | 7                    |
+| Teams list, members list with `memberKeys` and C7 ordering (owner listed even without a row), removal (`REVOKED`), leaving (`LEFT`)                                                                                                                                            | 7                    |
 | Invitations, resend, cancel, preview, accept; limits and `429`; escaping; concurrent duplicates                                                                                                                                                                                | 8                    |
 | `PUT /api/me/signer` (C6) with `SIGNER_IN_USE` and `SIGNER_LOCKED`                                                                                                                                                                                                             | 10                   |
 | Identity lookups; GraphQL errors other than `NOT_FOUND` are 502; `tokenId` is `Int`                                                                                                                                                                                            | 11                   |
-| Registry `GET`/`PUT`/`disabled` with ownership check, holder validation, `SIGNER_MISMATCH`, `KIND_CONFLICT`                                                                                                                                                                    | 12                   |
+| Registry `GET`/`PUT`/`disabled` with ownership check, holder validation, `SIGNER_MISMATCH`, `KIND_CONFLICT` both ways, `SIGNER_IN_USE` for a new shared key at a verified wallet                                                                                               | 12                   |
 | `GET /api/my/license-access` with `memberOfTeam`, `MEMBER` only through a matching enabled key                                                                                                                                                                                 | 13                   |
 | `GET /api/me`: personal team, legacy-collaborator fallback, `401 UNAUTHORIZED`, ignores `X-Team-Id`                                                                                                                                                                            | 4                    |
-| Retired routes kept working until part 3, then deleted                                                                                                                                                                                                                         | 9, 15                |
+| Retired routes kept working until part 3, then deleted; until then `/api/me` reports `COLLABORATOR` and the old invite emails `sign-in?code=` (C7, "Until part 3 ships")                                                                                                       | 4, 8, 9, 15          |
 | Existing issues: redirect-uri/signer POST app check, deletes by row ID, `PUT /api/my/apps/:id` whitelist, legacy list trimmed fields                                                                                                                                           | 5, 9                 |
 | #80 behaviors pinned with its exact messages (scoped user routes, takeover, configurations, collaborator removal, legacy invite owner check, limit, role and escaping, `invitation_code` email check, workspace license and token check) and preserved or deliberately updated | 2, 3, 5, 6, 8, 9, 11 |
 | Schema drift (`configurations.client_id`) handled in harness and migration                                                                                                                                                                                                     | 1, 3                 |
@@ -9721,7 +9961,7 @@ Expected: `gh` prints the PR URL.
    - Task 4: "uses the team the caller created", "never trusts an OWNER membership row", "shows the caller's own company even when they joined another team first";
    - Task 3: the demotion migration test;
    - Task 7: "marks a team OWNER only for its creator".
-2. **Email case and spaces; concurrent duplicates:** Task 8, "refuses bad emails…", "answers ALREADY_INVITED, not 500, to concurrent duplicates" and "makes the invitee a member".
+2. **Email case and spaces; concurrent duplicates:** Task 8, "refuses bad emails…", "answers ALREADY_INVITED, not 500, when a concurrent invite wins the race" (it reaches the unique-index branch) and "makes the invitee a member".
 3. **Re-invite after removal or leaving:** Task 8, "lets someone who was removed, or who left, be invited and accept again".
 4. **Token reuse:** Task 8, "refuses a different account, an expired link, garbage and a second use".
 5. **Mixed-case addresses:**

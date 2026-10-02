@@ -5,7 +5,6 @@
 **Goal:** Let a license owner invite teammates into a console team, show members the team's licenses, let a member use Vehicles through a developer JWT signed by their own Turnkey wallet, record who every license key is for, and roll it out for DIMO's own support team.
 
 **Architecture:**
-
 - **`TeamProvider`** sits inside `AuthorizedLayout`.
   - It loads the caller's teams from console-api (part 2) and keeps the active team in the `active_team` cookie, which `dimoDevAPIClient` sends as `X-Team-Id`.
   - It accepts a pending invite after a "Join {team} owned by {owner}?" confirmation, through server actions that read the HttpOnly `invite_token` cookie.
@@ -26,7 +25,7 @@
 
 ## Global Constraints
 
-- Branch `console-teams` in `~/workspace/dimo-developer-console`. App Router only. Turnkey signing runs in the browser, and `@/services/turnkeyAccount` is imported lazily (`await import`) so modules that only _might_ sign don't pull `src/config/turnkey.ts`, which needs Turnkey env, into every test.
+- Branch `console-teams` in `~/workspace/dimo-developer-console`. App Router only. Turnkey signing runs in the browser, and `@/services/turnkeyAccount` is imported lazily (`await import`) so modules that only *might* sign don't pull `src/config/turnkey.ts`, which needs Turnkey env, into every test.
 - **Header and cookies (C4):**
   - Header `X-Team-Id`.
   - `active_team`: `Path=/; SameSite=Lax; Max-Age=31536000`, plus `Secure` on https.
@@ -43,10 +42,11 @@
 - **Signer proof (C6):**
   - the exact message `DIMO Developer Console\nLink signer ${eoa} to account ${kernelAddress}\nIssued at ${issuedAt}`, with checksummed addresses and an ISO time, signed by the Turnkey EOA with EIP-191;
   - `409 SIGNER_LOCKED` shows the C8 copy;
-  - `409 SIGNER_IN_USE` shows the console copy in Task 6.
+  - `409 SIGNER_IN_USE` shows the C8 copy (`SIGNER_IN_USE_MESSAGE`, Task 6).
 - **Endpoints (C7):** endpoints, error codes and wire types exactly as listed, with the types defined once in `src/types/team.ts`.
   - `GET /api/my/teams`, `GET /api/my/license-access` and `GET /api/me` ignore `X-Team-Id`.
   - `license-access` answers `{ access, memberOfTeam, teamId, signerAddress, userEmail }`. `MEMBER` means the caller holds an enabled `MEMBER` key on that license under their current signer.
+  - Registry upserts: `409 KIND_CONFLICT` also covers turning a `MEMBER` key into any other kind, and `409 SIGNER_IN_USE` refuses an `API_KEY` or `EXTERNAL` key at an address that is a user's verified `signerAddress`. The console never offers Assign on a team member's wallet (Task 16).
 - **Copy (C8)**, verbatim:
   - Grant warning, with the DCX sentence.
   - `Ask {ownerEmail} for data access to {license}.`
@@ -54,6 +54,7 @@
   - `Data access for team members isn't available yet.`
   - `You're no longer a member of {team name}.`
   - `Your access is tied to another wallet. Ask {ownerEmail} to revoke it first.`
+  - `This wallet is already recorded as someone else's key, so it can't be used for data access. Contact DIMO support.` (`SIGNER_IN_USE` on registration)
   - `Leave {team name}? {ownerEmail} will be asked to revoke your data access.`
 - **Proxy privileges (C9):** `GetNonLocationHistory`, `GetCurrentLocation`, `GetLocationHistory`, `GetRawData`, `GetApproximateLocation`, and only those the license holds. Never `ExecuteCommands`. Vehicles reads current and approximate coordinates, location history (trips) and raw events, so all five stay.
 - **Error codes:**
@@ -61,7 +62,9 @@
   - `429 RATE_LIMITED`: console-api's message as given (C7 lists the four), or `Too many invites right now. Try again in a while.` when it has none.
   - invitation `403 NOT_A_MEMBER`: console-api's own message (`Finish setting up your team first`).
   - `NOT_A_MEMBER` anywhere else, in a team that isn't the user's own: `TeamProvider.reportRemoved()`.
-  - `401 UNAUTHORIZED`, `INVALID_ADDRESS`, `SIGNER_MISMATCH` and `KIND_CONFLICT`: console-api's message.
+  - `401 UNAUTHORIZED`, `INVALID_ADDRESS`, `INVALID_HOLDERS`, `SIGNER_MISMATCH`, `KIND_CONFLICT` and a registry `SIGNER_IN_USE`: console-api's message, never retried and never offered Try again.
+  - A registry write that rejects or answers 5xx is retried once (`registryWrite`); if it still fails, the UI offers Try again (grant) or Assign (API keys).
+- **User operations:** `useContractGA().processTransactions` resolves with `success: false`, without throwing, when a user operation reverts without a reason. Every signer change in this plan goes through `assertUserOperation` (Task 14), which throws on `!success`, so a revert is never treated as done.
 - **Fleet design system** (`docs/DESIGN.md`) is locked:
   - token classes only, no hex, sentence case;
   - one `primary` per surface;
@@ -76,8 +79,7 @@
   - `API Key Assigned`, `Wallet Connected`
 
   `identifyUser` keeps `$role`, set from the active team once teams load.
-
-- **Commits:** no `Co-Authored-By` or other attribution lines. The pre-commit hook runs `npm run lint` and Prettier on staged files; let it.
+- **Commits:** no `Co-Authored-By` or other attribution lines. The pre-commit hook runs `npm run lint` (with `--fix`) and Prettier on staged files; let it. Tests therefore never rely on a `let` that only a later task reassigns (`--fix` turns it into `const`): mutable test state lives in a holder object. Plan files are in `.prettierignore`; never run Prettier on them.
 - **Dependencies:** console-api part 2 must be deployed before this ships. Unit tests mock server actions and never call console-api.
 - **Owners must not regress:**
   - If teams can't load, the console falls back to the personal team (owner wallet from the session) and says so.
@@ -121,11 +123,13 @@ Run:
 
 ```bash
 cd ~/workspace/dimo-developer-console && git status -sb && git log --oneline -3
-npx jest 2>&1 | grep -E '^Test Suites:' | tee /tmp/console-teams-baseline.txt
+npx jest 2>&1 | tee /tmp/console-teams-baseline.log | grep -E '^(Test Suites|Tests):'
+grep -E '^FAIL ' /tmp/console-teams-baseline.log | awk '{print $2}' | sort -u > /tmp/console-teams-baseline-failing.txt
+wc -l < /tmp/console-teams-baseline-failing.txt
 npx tsc --noEmit -p . 2>&1 | tail -3
 ```
 
-Expected: branch `console-teams`, clean. `/tmp/console-teams-baseline.txt` holds the `Test Suites:` line (master already had stale failing suites); only new failures count against this work.
+Expected: branch `console-teams`, clean. `/tmp/console-teams-baseline-failing.txt` lists, one path per line, the suites that already fail before this work (124 when this plan was written). Task 18 compares names against it, so only a suite missing from this list counts as a new failure.
 
 - [ ] **Step 2: Write the failing tests**
 
@@ -229,12 +233,8 @@ describe('team copy (contracts C8)', () => {
       'Ask ops@acme.dev for data access to Harness Fleet.',
     );
     expect(NO_LONGER_HAS_ACCESS).toBe('You no longer have access to this license.');
-    expect(DATA_ACCESS_UNAVAILABLE).toBe(
-      "Data access for team members isn't available yet.",
-    );
-    expect(removedFromTeam('Acme Mobility')).toBe(
-      "You're no longer a member of Acme Mobility.",
-    );
+    expect(DATA_ACCESS_UNAVAILABLE).toBe("Data access for team members isn't available yet.");
+    expect(removedFromTeam('Acme Mobility')).toBe("You're no longer a member of Acme Mobility.");
     expect(signerLocked('ops@acme.dev')).toBe(
       'Your access is tied to another wallet. Ask ops@acme.dev to revoke it first.',
     );
@@ -378,6 +378,7 @@ export type ApiResult<T> =
 Append to `src/utils/featureFlags.ts`:
 
 ```ts
+
 // Off until part 1 enforces the signer check in an environment and the team
 // live pass succeeds there (contracts Rollout 5). While off: no Grant, no Data
 // access column, members don't get Vehicles; teams and the key registry stay.
@@ -398,12 +399,7 @@ export const TEAM_ID_HEADER = 'X-Team-Id';
 export const ACTIVE_TEAM_MAX_AGE = 60 * 60 * 24 * 365;
 export const INVITE_TOKEN_MAX_AGE = 60 * 60 * 24;
 
-export const buildCookie = (
-  name: string,
-  value: string,
-  maxAge: number,
-  secure: boolean,
-) =>
+export const buildCookie = (name: string, value: string, maxAge: number, secure: boolean) =>
   `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; SameSite=Lax${secure ? '; Secure' : ''}`;
 
 const isHttps = () => typeof location !== 'undefined' && location.protocol === 'https:';
@@ -419,12 +415,7 @@ export const getActiveTeamCookie = (): string | null => {
 
 export const setActiveTeamCookie = (teamId: string) => {
   if (typeof document === 'undefined') return;
-  document.cookie = buildCookie(
-    ACTIVE_TEAM_COOKIE,
-    teamId,
-    ACTIVE_TEAM_MAX_AGE,
-    isHttps(),
-  );
+  document.cookie = buildCookie(ACTIVE_TEAM_COOKIE, teamId, ACTIVE_TEAM_MAX_AGE, isHttps());
 };
 
 export const clearActiveTeamCookie = () => {
@@ -451,8 +442,7 @@ export const askForAccess = (ownerEmail: string, license: string) =>
 
 export const NO_LONGER_HAS_ACCESS = 'You no longer have access to this license.';
 
-export const DATA_ACCESS_UNAVAILABLE =
-  "Data access for team members isn't available yet.";
+export const DATA_ACCESS_UNAVAILABLE = "Data access for team members isn't available yet.";
 
 export const removedFromTeam = (teamName: string) =>
   `You're no longer a member of ${teamName}.`;
@@ -666,17 +656,10 @@ describe('team endpoints', () => {
     await teams.postAcceptInvitation('tok');
     await teams.deleteTeamMember('m-1');
     await teams.postLeaveTeam();
-    await teams.putSignerProof({
-      address: '0xA',
-      message: 'm',
-      signature: '0xs',
-    } as never);
+    await teams.putSignerProof({ address: '0xA', message: 'm', signature: '0xs' } as never);
     await teams.fetchTeamMembers();
     await teams.fetchLicenseSigners(42);
-    await teams.putLicenseSigner(42, '0xAbC', {
-      kind: 'API_KEY',
-      holders: [{ name: 'Ops' }],
-    });
+    await teams.putLicenseSigner(42, '0xAbC', { kind: 'API_KEY', holders: [{ name: 'Ops' }] });
     await teams.postLicenseSignerDisabled(42, '0xAbC');
     expect(client.post.mock.calls.map((c) => c[0])).toEqual([
       '/api/my/team/invitations/inv%201/resend',
@@ -745,11 +728,7 @@ export const clearStaleTeamOnNotAMember = async (error: unknown) => {
     error instanceof AxiosError
       ? (error.response?.data as { code?: string } | undefined)?.code
       : undefined;
-  if (
-    error instanceof AxiosError &&
-    error.response?.status === 403 &&
-    code === 'NOT_A_MEMBER'
-  ) {
+  if (error instanceof AxiosError && error.response?.status === 403 && code === 'NOT_A_MEMBER') {
     try {
       (await cookies()).delete(ACTIVE_TEAM_COOKIE);
     } catch {
@@ -910,15 +889,11 @@ export const listTeamMembers = async () => api.fetchTeamMembers();
 export const inviteTeamMember = async (email: string) => api.postInvitation(email);
 export const resendTeamInvite = async (inviteId: string) =>
   api.postResendInvitation(inviteId);
-export const cancelTeamInvite = async (inviteId: string) =>
-  api.deleteInvitation(inviteId);
-export const removeTeamMember = async (memberId: string) =>
-  api.deleteTeamMember(memberId);
+export const cancelTeamInvite = async (inviteId: string) => api.deleteInvitation(inviteId);
+export const removeTeamMember = async (memberId: string) => api.deleteTeamMember(memberId);
 export const leaveTeam = async () => api.postLeaveTeam();
-export const registerSigner = async (input: SignerProofInput) =>
-  api.putSignerProof(input);
-export const listLicenseSigners = async (tokenId: number) =>
-  api.fetchLicenseSigners(tokenId);
+export const registerSigner = async (input: SignerProofInput) => api.putSignerProof(input);
+export const listLicenseSigners = async (tokenId: number) => api.fetchLicenseSigners(tokenId);
 export const upsertLicenseSigner = async (
   tokenId: number,
   address: string,
@@ -982,9 +957,7 @@ const TOKEN = 'Qm9vdHN0cmFwX3Rva2VuX2Zvcl90ZXN0aW5nXzEyMzQ1Ng';
 describe('inviteRedirect', () => {
   it('keeps a well-formed token in an HttpOnly cookie and strips it from the URL', () => {
     const res = inviteRedirect(
-      new NextRequest(
-        `http://console.test/sign-in?invite=${TOKEN}&focus=rentals_os_signup`,
-      ),
+      new NextRequest(`http://console.test/sign-in?invite=${TOKEN}&focus=rentals_os_signup`),
     )!;
     expect(res.status).toBe(307);
     const location = new URL(res.headers.get('location')!);
@@ -993,34 +966,23 @@ describe('inviteRedirect', () => {
     expect(location.searchParams.get('focus')).toBe('rentals_os_signup');
     const cookie = res.cookies.get('invite_token')!;
     expect(cookie.value).toBe(TOKEN);
-    expect(cookie).toMatchObject({
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: 86400,
-    });
+    expect(cookie).toMatchObject({ path: '/', httpOnly: true, sameSite: 'lax', maxAge: 86400 });
     expect(cookie.secure).toBeFalsy();
   });
 
   it('marks the cookie Secure on https', () => {
-    const res = inviteRedirect(
-      new NextRequest(`https://console.test/sign-in?invite=${TOKEN}`),
-    )!;
+    const res = inviteRedirect(new NextRequest(`https://console.test/sign-in?invite=${TOKEN}`))!;
     expect(res.cookies.get('invite_token')?.secure).toBe(true);
   });
 
   it('strips a malformed token without storing it', () => {
-    const res = inviteRedirect(
-      new NextRequest('http://console.test/sign-in?invite=a%3Cb'),
-    )!;
+    const res = inviteRedirect(new NextRequest('http://console.test/sign-in?invite=a%3Cb'))!;
     expect(res.status).toBe(307);
     expect(res.cookies.get('invite_token')).toBeUndefined();
   });
 
   it('ignores every path but /sign-in, and /sign-in without the parameter', () => {
-    expect(
-      inviteRedirect(new NextRequest(`http://console.test/app?invite=${TOKEN}`)),
-    ).toBeNull();
+    expect(inviteRedirect(new NextRequest(`http://console.test/app?invite=${TOKEN}`))).toBeNull();
     expect(inviteRedirect(new NextRequest('http://console.test/sign-in'))).toBeNull();
   });
 });
@@ -1086,12 +1048,7 @@ jest.mock('@/services/teams', () => ({
 import { postAcceptInvitation, postInvitePreview } from '@/services/teams';
 import { acceptPendingInvite, previewPendingInvite } from '@/actions/invites';
 
-const failure = (status: number, code: string | null) => ({
-  ok: false,
-  status,
-  code,
-  message: 'x',
-});
+const failure = (status: number, code: string | null) => ({ ok: false, status, code, message: 'x' });
 
 describe('invite server actions', () => {
   beforeEach(() => {
@@ -1109,11 +1066,7 @@ describe('invite server actions', () => {
     store.set('invite_token', 'tok');
     (postInvitePreview as jest.Mock).mockResolvedValue({
       ok: true,
-      data: {
-        teamName: 'Acme Mobility',
-        ownerEmail: 'ops@acme.dev',
-        expiresAt: '2026-10-09T00:00:00Z',
-      },
+      data: { teamName: 'Acme Mobility', ownerEmail: 'ops@acme.dev', expiresAt: '2026-10-09T00:00:00Z' },
     });
     await expect(previewPendingInvite()).resolves.toMatchObject({ ok: true });
     expect(postInvitePreview).toHaveBeenCalledWith('tok');
@@ -1122,19 +1075,11 @@ describe('invite server actions', () => {
 
   it('deletes the cookie on success and on terminal errors only', async () => {
     store.set('invite_token', 'tok');
-    (postAcceptInvitation as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      data: { team: { id: 't' } },
-    });
+    (postAcceptInvitation as jest.Mock).mockResolvedValueOnce({ ok: true, data: { team: { id: 't' } } });
     await acceptPendingInvite();
     expect(remove).toHaveBeenCalledWith('invite_token');
 
-    for (const code of [
-      'INVITE_INVALID',
-      'INVITE_EXPIRED',
-      'INVITE_EMAIL_MISMATCH',
-      'ALREADY_MEMBER',
-    ]) {
+    for (const code of ['INVITE_INVALID', 'INVITE_EXPIRED', 'INVITE_EMAIL_MISMATCH', 'ALREADY_MEMBER']) {
       store.set('invite_token', 'tok');
       remove.mockClear();
       (postAcceptInvitation as jest.Mock).mockResolvedValueOnce(failure(400, code));
@@ -1203,11 +1148,7 @@ import { LoggedUser } from '@/utils/loggedUser';
 import type { IUser } from '@/types/user';
 import type { ISubOrganization } from '@/types/wallet';
 
-const user = {
-  name: 'Sam',
-  email: 'sam@x.dev',
-  role: 'COLLABORATOR',
-} as unknown as IUser;
+const user = { name: 'Sam', email: 'sam@x.dev', role: 'COLLABORATOR' } as unknown as IUser;
 
 describe('LoggedUser', () => {
   it('no longer treats a collaborator without a sub-organization as a global account user', () => {
@@ -1217,9 +1158,7 @@ describe('LoggedUser', () => {
   });
 
   it('accepts anyone with their own sub-organization', () => {
-    const logged = new LoggedUser(user, {
-      subOrganizationId: 'sub-1',
-    } as ISubOrganization);
+    const logged = new LoggedUser(user, { subOrganizationId: 'sub-1' } as ISubOrganization);
     expect(logged.isGlobalAccountUser).toBe(true);
   });
 });
@@ -1291,22 +1230,21 @@ export const inviteRedirect = (request: NextRequest): NextResponse | null => {
 ```
 
 `src/middleware.ts`:
-
 - Add `import { inviteRedirect } from '@/utils/inviteCookie';`.
 - Make the first statement of `middleware`:
 
 ```ts
-// Before anything that can fail or redirect: an invite link keeps its token.
-const invite = inviteRedirect(request);
-if (invite) return invite;
+  // Before anything that can fail or redirect: an invite link keeps its token.
+  const invite = inviteRedirect(request);
+  if (invite) return invite;
 ```
 
 - In `validatePrivateSession`, replace `getUserSubOrganization(user.company_email_owner ?? user.email)` with:
 
 ```ts
-// Every console user signs in with their own global account; team members
-// are no longer represented by the company owner's account.
-const subOrganization = await getUserSubOrganization(user.email);
+  // Every console user signs in with their own global account; team members
+  // are no longer represented by the company owner's account.
+  const subOrganization = await getUserSubOrganization(user.email);
 ```
 
 `src/actions/invites.ts`:
@@ -1330,29 +1268,20 @@ const TERMINAL = new Set([
 
 const readToken = async () => (await cookies()).get(INVITE_TOKEN_COOKIE)?.value ?? null;
 
-const settle = async <T>(
-  result: ApiResult<T>,
-  consumed: boolean,
-): Promise<ApiResult<T>> => {
-  if (
-    (result.ok && consumed) ||
-    (!result.ok && result.code && TERMINAL.has(result.code))
-  ) {
+const settle = async <T>(result: ApiResult<T>, consumed: boolean): Promise<ApiResult<T>> => {
+  if ((result.ok && consumed) || (!result.ok && result.code && TERMINAL.has(result.code))) {
     (await cookies()).delete(INVITE_TOKEN_COOKIE);
   }
   return result;
 };
 
-export const previewPendingInvite =
-  async (): Promise<ApiResult<InvitePreview> | null> => {
-    const token = await readToken();
-    if (!token) return null;
-    return settle(await postInvitePreview(token), false);
-  };
+export const previewPendingInvite = async (): Promise<ApiResult<InvitePreview> | null> => {
+  const token = await readToken();
+  if (!token) return null;
+  return settle(await postInvitePreview(token), false);
+};
 
-export const acceptPendingInvite = async (): Promise<ApiResult<{
-  team: TeamSummary;
-}> | null> => {
+export const acceptPendingInvite = async (): Promise<ApiResult<{ team: TeamSummary }> | null> => {
   const token = await readToken();
   if (!token) return null;
   return settle(await postAcceptInvitation(token), true);
@@ -1377,6 +1306,7 @@ Also add `import { ACTIVE_TEAM_COOKIE, INVITE_TOKEN_COOKIE } from '@/utils/teamC
 `src/utils/devJwt.ts`: append:
 
 ```ts
+
 // Sign-out (contracts C4): every developer JWT this browser holds, owner keys
 // and member keys alike.
 export const clearAllDevJwts = () => {
@@ -1402,7 +1332,6 @@ export const clearConsoleBrowserState = () => {
 ```
 
 Call `clearConsoleBrowserState()` immediately before `await signOut()` in:
-
 - `src/components/Menu/Menu.tsx` (`onSignOut`)
 - `src/hoc/GlobalAccountProvider.tsx` (`logout`)
 - `src/hoc/AuthProvider.tsx` (`logout`)
@@ -1410,7 +1339,6 @@ Call `clearConsoleBrowserState()` immediately before `await signOut()` in:
 In each file, import it with `import { clearConsoleBrowserState } from '@/utils/consoleSession';`.
 
 `src/services/user.ts`:
-
 - Replace `getUserByToken` with the version below, and delete `acceptInvitation` (it has no callers):
 
 ```ts
@@ -1426,7 +1354,6 @@ export const getUserByToken = async () => {
 `src/utils/loggedUser.ts`: delete `if (isCollaborator(this._user?.role ?? '')) return true;` and the `import { isCollaborator } from './user';`.
 
 `src/app/sign-in/components/View/View.tsx`:
-
 - Delete `import { isCollaborator } from '@/utils/user';`.
 - Destructure `const { subOrganizationId, hasPasskey, currentWalletAddress } = userInformation;`.
 - Delete the `if (isCollaborator(role)) { router.replace('/app'); return; }` block.
@@ -1484,8 +1411,9 @@ git commit -m "feat(teams): HttpOnly invite cookie with server-side acceptance; 
   - **Default context (no provider, e.g. in unit tests):** `isOwner: true`, `isLoading: false`, `activeTeam: null`. Code outside a team keeps today's owner behavior.
   - **Inside the provider:**
     - `isOwner` is false while loading;
-    - `isOwner` is `activeTeam.role === 'OWNER'` after loading;
-    - if teams can't load, `activeTeam` is a synthesized personal `OWNER` team (`id: 'personal-fallback'`, `ownerAddress = currentUser.smartContractAddress`) and `teamsUnavailable` is true.
+    - after loading, `isOwner` is true only when the active team is `OWNER` and has an `ownerAddress` (license lists need one);
+    - if teams can't load, `activeTeam` is a synthesized personal `OWNER` team (`id: 'personal-fallback'`, `ownerAddress = currentUser.smartContractAddress`) and `teamsUnavailable` is true;
+    - if they load but the list is empty (`GET /api/my/teams` leaves out teams without an owner wallet), `activeTeam` is the same fallback team, without the toast, so license lists never wait forever.
   - **`reportRemoved()`** applies only while a team that isn't the user's own is active. It stores the C8 `You're no longer a member of {team}.` flash, points `active_team` at the personal team and reloads into Home.
   - **Flash:** `Flash = { tone: 'success' | 'error'; message: string }`, kept in session storage under `teamFlash`.
   - `hardNavigate(path)` and `inviteErrorMessage(code)`.
@@ -1504,9 +1432,7 @@ jest.mock('@/utils/hardNavigate', () => ({ hardNavigate: jest.fn() }));
 jest.mock('@/hooks/useSignerRegistration', () => ({ useSignerRegistration: jest.fn() }));
 const identifyUser = jest.fn();
 const trackEvent = jest.fn();
-jest.mock('@/hooks/useMixPanel', () => ({
-  useMixPanel: () => ({ identifyUser, trackEvent }),
-}));
+jest.mock('@/hooks/useMixPanel', () => ({ useMixPanel: () => ({ identifyUser, trackEvent }) }));
 jest.mock('sonner', () => ({
   toast: Object.assign(jest.fn(), { success: jest.fn(), error: jest.fn() }),
 }));
@@ -1586,10 +1512,7 @@ describe('TeamProvider', () => {
     document.cookie = 'active_team=; Path=/; Max-Age=0';
     sessionStorage.clear();
     localStorage.clear();
-    (listMyTeams as jest.Mock).mockResolvedValue({
-      ok: true,
-      data: { teams: [PERSONAL, ACME] },
-    });
+    (listMyTeams as jest.Mock).mockResolvedValue({ ok: true, data: { teams: [PERSONAL, ACME] } });
   });
 
   it('is not an owner until the teams load, then defaults to the personal team', async () => {
@@ -1602,28 +1525,18 @@ describe('TeamProvider', () => {
       isMember: false,
       owner: KERNEL,
     });
-    expect(identifyUser).toHaveBeenCalledWith(KERNEL, {
-      $role: 'OWNER',
-      $team: 'team-harness',
-    });
+    expect(identifyUser).toHaveBeenCalledWith(KERNEL, { $role: 'OWNER', $team: 'team-harness' });
   });
 
   it('uses the team named by the active_team cookie', async () => {
     document.cookie = 'active_team=team-acme; Path=/';
     renderProvider();
     await waitFor(() => expect(probe().loading).toBe(false));
-    expect(probe()).toMatchObject({
-      active: 'team-acme',
-      isMember: true,
-      owner: ACME.ownerAddress,
-    });
+    expect(probe()).toMatchObject({ active: 'team-acme', isMember: true, owner: ACME.ownerAddress });
   });
 
   it('falls back to the personal team once, with the C8 removed copy, for a stale cookie', async () => {
-    localStorage.setItem(
-      'lastActiveTeam',
-      JSON.stringify({ id: 'team-gone', name: 'Gone Co' }),
-    );
+    localStorage.setItem('lastActiveTeam', JSON.stringify({ id: 'team-gone', name: 'Gone Co' }));
     document.cookie = 'active_team=team-gone; Path=/';
     renderProvider();
     await waitFor(() => expect(hardNavigate).toHaveBeenCalledWith('/app'));
@@ -1634,14 +1547,32 @@ describe('TeamProvider', () => {
     });
   });
 
+  it('treats a user with no team as the owner of their own wallet, without a toast', async () => {
+    (listMyTeams as jest.Mock).mockResolvedValue({ ok: true, data: { teams: [] } });
+    renderProvider();
+    await waitFor(() => expect(probe().loading).toBe(false));
+    expect(probe()).toMatchObject({
+      active: 'personal-fallback',
+      isOwner: true,
+      owner: KERNEL,
+      unavailable: false,
+    });
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('is not an owner while the active team has no owner wallet', async () => {
+    (listMyTeams as jest.Mock).mockResolvedValue({
+      ok: true,
+      data: { teams: [{ ...PERSONAL, ownerAddress: null }] },
+    });
+    renderProvider();
+    await waitFor(() => expect(probe().loading).toBe(false));
+    expect(probe()).toMatchObject({ active: 'team-harness', isOwner: false });
+  });
+
   it('keeps owners working when teams cannot load', async () => {
     document.cookie = 'active_team=team-acme; Path=/';
-    (listMyTeams as jest.Mock).mockResolvedValue({
-      ok: false,
-      status: 502,
-      code: null,
-      message: 'x',
-    });
+    (listMyTeams as jest.Mock).mockResolvedValue({ ok: false, status: 502, code: null, message: 'x' });
     renderProvider();
     await waitFor(() => expect(probe().loading).toBe(false));
     expect(probe()).toMatchObject({
@@ -1680,10 +1611,7 @@ describe('TeamProvider', () => {
     document.cookie = 'active_team=team-acme; Path=/';
     renderProvider();
     await waitFor(() => expect(probe().active).toBe('team-acme'));
-    (listMyTeams as jest.Mock).mockResolvedValue({
-      ok: true,
-      data: { teams: [PERSONAL] },
-    });
+    (listMyTeams as jest.Mock).mockResolvedValue({ ok: true, data: { teams: [PERSONAL] } });
     await act(async () => {
       document.dispatchEvent(new Event('visibilitychange'));
     });
@@ -1714,18 +1642,12 @@ describe('TeamProvider', () => {
     await waitFor(() => expect(probe().loading).toBe(false));
     act(() => api.switchTeam('team-acme'));
     expect(document.cookie).toContain('active_team=team-acme');
-    expect(trackEvent).toHaveBeenCalledWith('Team Switched', {
-      teamId: 'team-acme',
-      via: 'switcher',
-    });
+    expect(trackEvent).toHaveBeenCalledWith('Team Switched', { teamId: 'team-acme', via: 'switcher' });
     expect(hardNavigate).toHaveBeenCalledWith('/app');
   });
 
   it('shows the flash left by the previous page, in its tone', async () => {
-    sessionStorage.setItem(
-      'teamFlash',
-      JSON.stringify({ tone: 'error', message: 'Gone' }),
-    );
+    sessionStorage.setItem('teamFlash', JSON.stringify({ tone: 'error', message: 'Gone' }));
     renderProvider();
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Gone'));
     expect(sessionStorage.getItem('teamFlash')).toBeNull();
@@ -1803,8 +1725,7 @@ export const hardNavigate = (path: string) => window.location.assign(path);
 
 ```ts
 const MESSAGES: Record<string, string> = {
-  INVITE_INVALID:
-    "This invite link isn't valid any more. Ask the team owner for a new one.",
+  INVITE_INVALID: "This invite link isn't valid any more. Ask the team owner for a new one.",
   INVITE_EXPIRED: 'This invite has expired. Ask the team owner to resend it.',
   INVITE_EMAIL_MISMATCH:
     'This invite was sent to a different email address. Sign in with that address to accept it.',
@@ -1911,8 +1832,7 @@ import { getFromLocalStorage, saveToLocalStorage } from '@/utils/localStorage';
 
 const FLASH_KEY = 'teamFlash';
 const LAST_TEAM_KEY = 'lastActiveTeam';
-export const TEAMS_UNAVAILABLE =
-  "Couldn't load your teams. Showing your own licenses for now.";
+export const TEAMS_UNAVAILABLE = "Couldn't load your teams. Showing your own licenses for now.";
 
 const flashAfterReload = (flash: Flash) => saveToSession(FLASH_KEY, flash);
 
@@ -1944,9 +1864,12 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
   const [teamsUnavailable, setTeamsUnavailable] = useState(false);
 
   const activeTeam = useMemo(() => {
-    if (teamsUnavailable) return currentUser ? fallbackTeam(currentUser) : null;
+    // No list (console-api down) or an empty one: the user's own wallet, as
+    // before teams existed, so license lists don't wait for an owner forever.
+    if (teamsUnavailable || (!isLoading && teams.length === 0))
+      return currentUser ? fallbackTeam(currentUser) : null;
     return teams.find((t) => t.id === activeId) ?? null;
-  }, [teams, activeId, teamsUnavailable, currentUser]);
+  }, [teams, activeId, teamsUnavailable, isLoading, currentUser]);
 
   useSignerRegistration(
     (activeTeam && !activeTeam.isPersonal ? activeTeam : teams.find((t) => !t.isPersonal))
@@ -2054,8 +1977,7 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
       queryClient.getQueryCache().subscribe((event) => {
         if (event.type !== 'updated' || event.action.type !== 'error') return;
         const error = event.action.error;
-        if (error instanceof TeamApiError && error.code === 'NOT_A_MEMBER')
-          reportRemoved();
+        if (error instanceof TeamApiError && error.code === 'NOT_A_MEMBER') reportRemoved();
       }),
     [queryClient, reportRemoved],
   );
@@ -2066,7 +1988,7 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
       activeTeam,
       isLoading,
       teamsUnavailable,
-      isOwner: activeTeam ? activeTeam.role === 'OWNER' : !isLoading,
+      isOwner: activeTeam?.role === 'OWNER' && !!activeTeam.ownerAddress,
       isMember: activeTeam?.role === 'MEMBER',
       ownerAddress: activeTeam?.ownerAddress ?? null,
       switchTeam,
@@ -2077,15 +1999,7 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
       reportRemoved,
       flashAfterReload,
     }),
-    [
-      teams,
-      activeTeam,
-      isLoading,
-      teamsUnavailable,
-      switchTeam,
-      fetchTeams,
-      reportRemoved,
-    ],
+    [teams, activeTeam, isLoading, teamsUnavailable, switchTeam, fetchTeams, reportRemoved],
   );
 
   return <TeamContext.Provider value={value}>{children}</TeamContext.Provider>;
@@ -2125,7 +2039,6 @@ const Providers = withGlobalAccounts(
 `src/types/user.ts`: delete `role: TeamRoles;` from `IUserSession`. Keep the `TeamRoles` import until Task 13, because `IUser.role` uses it.
 
 `src/hoc/GlobalAccountProvider.tsx`:
-
 - Delete `role: TeamRoles.OWNER,` from the `user` object in `loadUserSession`, and `import { TeamRoles } from '@/types/team';`.
 - Change the `identifyUser` call to omit `$role` (`{ $email: email, $subOrganizationId: subOrganizationId }`). `TeamProvider` sets `$role` once the active team is known.
 
@@ -2140,13 +2053,12 @@ import { Button } from '@/components/Button';
 ```
 
 ```tsx
-const { data: user } = useUser();
-const { setShowAccountInformation } = useContext(AccountInformationContext);
-const handleOpenAccountInformationModal = () => setShowAccountInformation(true);
+  const { data: user } = useUser();
+  const { setShowAccountInformation } = useContext(AccountInformationContext);
+  const handleOpenAccountInformationModal = () => setShowAccountInformation(true);
 ```
 
 `src/components/CreditsWidget/CreditsWidget.tsx`: the balance is the user's own wallet, which means nothing inside someone else's team; Account info (large variant) stays.
-
 - Replace the `isCollaborator`/`isOwner` imports with `import { useTeam } from '@/hooks/useTeam';`.
 - Add `const { isMember } = useTeam();`.
 - Delete `if (isCollaborator(currentUser?.role ?? '')) return;` and the commented-out `isOwner(currentUser?.role …)` blocks.
@@ -2195,7 +2107,7 @@ git commit -m "feat(teams): TeamProvider with owner fallback, switching and remo
 
 ```tsx
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 jest.mock('@/actions/invites', () => ({
   previewPendingInvite: jest.fn(),
@@ -2210,11 +2122,7 @@ import { acceptPendingInvite, previewPendingInvite } from '@/actions/invites';
 import { toast } from 'sonner';
 import { PendingInvite } from '@/components/PendingInvite';
 
-const PREVIEW = {
-  teamName: 'Acme Mobility',
-  ownerEmail: 'ops@acme.dev',
-  expiresAt: '2026-10-09T00:00:00Z',
-};
+const PREVIEW = { teamName: 'Acme Mobility', ownerEmail: 'ops@acme.dev', expiresAt: '2026-10-09T00:00:00Z' };
 const TEAM = {
   id: 'team-joined',
   name: 'Acme Mobility',
@@ -2226,36 +2134,34 @@ const TEAM = {
   isPersonal: false,
 };
 
+// Resolves once the component has handled preview call n (0-based): its
+// continuation was queued on the same promise before ours.
+const previewHandled = async (n: number) => {
+  await waitFor(() => expect(previewPendingInvite).toHaveBeenCalledTimes(n + 1));
+  await act(async () => {
+    await (previewPendingInvite as jest.Mock).mock.results[n].value;
+  });
+};
+
 describe('PendingInvite', () => {
   it('renders nothing without a pending invite', async () => {
     (previewPendingInvite as jest.Mock).mockResolvedValue(null);
     const { container } = render(<PendingInvite onJoined={jest.fn()} />);
-    await waitFor(() => expect(previewPendingInvite).toHaveBeenCalled());
+    await previewHandled(0);
     expect(container).toBeEmptyDOMElement();
   });
 
   it('asks before joining and hands the accepted team (MEMBER, not personal) to onJoined', async () => {
     (previewPendingInvite as jest.Mock).mockResolvedValue({ ok: true, data: PREVIEW });
-    (acceptPendingInvite as jest.Mock).mockResolvedValue({
-      ok: true,
-      data: { team: TEAM },
-    });
+    (acceptPendingInvite as jest.Mock).mockResolvedValue({ ok: true, data: { team: TEAM } });
     const onJoined = jest.fn();
     render(<PendingInvite onJoined={onJoined} />);
-    expect(
-      await screen.findByText('Join Acme Mobility owned by ops@acme.dev?'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Join Acme Mobility owned by ops@acme.dev?')).toBeInTheDocument();
     expect(acceptPendingInvite).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Join team' }));
     await waitFor(() => expect(onJoined).toHaveBeenCalledWith(TEAM));
-    expect(onJoined.mock.calls[0][0]).toMatchObject({
-      id: 'team-joined',
-      role: 'MEMBER',
-      isPersonal: false,
-    });
-    expect(trackEvent).toHaveBeenCalledWith('Team Invite Accepted', {
-      teamId: 'team-joined',
-    });
+    expect(onJoined.mock.calls[0][0]).toMatchObject({ id: 'team-joined', role: 'MEMBER', isPersonal: false });
+    expect(trackEvent).toHaveBeenCalledWith('Team Invite Accepted', { teamId: 'team-joined' });
   });
 
   it('closes on "Not now" without accepting', async () => {
@@ -2281,15 +2187,11 @@ describe('PendingInvite', () => {
     );
     unmount();
     (toast.error as jest.Mock).mockClear();
-    (previewPendingInvite as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      status: 0,
-      code: null,
-      message: 'x',
-    });
+    (previewPendingInvite as jest.Mock).mockResolvedValueOnce({ ok: false, status: 0, code: null, message: 'x' });
     render(<PendingInvite onJoined={jest.fn()} />);
-    await waitFor(() => expect(previewPendingInvite).toHaveBeenCalledTimes(2));
+    await previewHandled(1);
     expect(toast.error).not.toHaveBeenCalled();
+    expect(toast).not.toHaveBeenCalled();
   });
 });
 ```
@@ -2308,12 +2210,9 @@ const walk = (dir: string): string[] =>
   fs
     .readdirSync(dir, { withFileTypes: true })
     .flatMap((entry) =>
-      entry.isDirectory()
-        ? walk(path.join(dir, entry.name))
-        : [path.join(dir, entry.name)],
+      entry.isDirectory() ? walk(path.join(dir, entry.name)) : [path.join(dir, entry.name)],
     );
-const source = (dir: string) =>
-  walk(path.join(root, dir)).filter((f) => /\.(ts|tsx)$/.test(f));
+const source = (dir: string) => walk(path.join(root, dir)).filter((f) => /\.(ts|tsx)$/.test(f));
 const read = (file: string) =>
   fs.readFileSync(path.isAbsolute(file) ? file : path.join(root, file), 'utf8');
 const rel = (file: string) => path.relative(root, file);
@@ -2325,9 +2224,7 @@ describe('invite acceptance ordering (contracts C4)', () => {
         /AuthorizedLayout|TeamProvider|withTeams|PendingInvite|actions\/invites/,
       );
     }
-    expect(read('src/layouts/AuthorizedLayout/AuthorizedLayout.tsx')).toMatch(
-      /withTeams\(/,
-    );
+    expect(read('src/layouts/AuthorizedLayout/AuthorizedLayout.tsx')).toMatch(/withTeams\(/);
     expect(read('src/hoc/TeamProvider.tsx')).toMatch(/<PendingInvite/);
   });
 
@@ -2382,9 +2279,7 @@ const explain = (code: string | null, status: number) => {
 
 // A pending invite (HttpOnly cookie, contracts C4) is accepted only after the
 // user confirms which team and owner they are joining.
-export const PendingInvite: FC<{ onJoined: (team: TeamSummary) => void }> = ({
-  onJoined,
-}) => {
+export const PendingInvite: FC<{ onJoined: (team: TeamSummary) => void }> = ({ onJoined }) => {
   const [preview, setPreview] = useState<InvitePreview | null>(null);
   const [busy, setBusy] = useState(false);
   const { trackEvent } = useMixPanel();
@@ -2427,8 +2322,8 @@ export const PendingInvite: FC<{ onJoined: (team: TeamSummary) => void }> = ({
             {`Join ${preview.teamName} owned by ${preview.ownerEmail}?`}
           </Title>
           <p className="text-body-sm text-muted">
-            You&apos;ll see the team&apos;s licenses. The owner decides whether you also
-            get data access.
+            You&apos;ll see the team&apos;s licenses. The owner decides whether you also get
+            data access.
           </p>
         </div>
         <div className="flex flex-col gap-2 pt-2">
@@ -2452,25 +2347,24 @@ export * from './PendingInvite';
 ```
 
 `src/hoc/TeamProvider.tsx`:
-
 - Add `import { PendingInvite } from '@/components/PendingInvite';`.
 - Replace the provider's return with:
 
 ```tsx
-return (
-  <TeamContext.Provider value={value}>
-    {children}
-    {!isLoading && !teamsUnavailable && (
-      <PendingInvite
-        onJoined={(team) => {
-          // The accepted team (always MEMBER) becomes active by its id.
-          flashAfterReload({ tone: 'success', message: `You joined ${team.name}` });
-          switchTeam(team.id, 'invite');
-        }}
-      />
-    )}
-  </TeamContext.Provider>
-);
+  return (
+    <TeamContext.Provider value={value}>
+      {children}
+      {!isLoading && !teamsUnavailable && (
+        <PendingInvite
+          onJoined={(team) => {
+            // The accepted team (always MEMBER) becomes active by its id.
+            flashAfterReload({ tone: 'success', message: `You joined ${team.name}` });
+            switchTeam(team.id, 'invite');
+          }}
+        />
+      )}
+    </TeamContext.Provider>
+  );
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
@@ -2493,7 +2387,7 @@ git commit -m "feat(teams): confirm before joining a team from an invite link"
 **Files:**
 
 - Create: `src/utils/signerProof.ts`, `src/services/turnkeyAccount.ts`
-- Modify: `src/hooks/useSignerRegistration.ts` (replace the placeholder), `src/config/teamCopy.ts` (console copy for `SIGNER_IN_USE`)
+- Modify: `src/hooks/useSignerRegistration.ts` (replace the placeholder), `src/config/teamCopy.ts` (the C8 copy for `SIGNER_IN_USE`)
 - Test: `__tests__/unit/utils/signerProof.test.ts`, `__tests__/unit/hooks/useSignerRegistration.test.tsx`
 
 **Interfaces:**
@@ -2550,13 +2444,12 @@ jest.mock('@/services/turnkeyAccount', () => ({
   getSessionEoaAccount: jest.fn(async () => ({ signMessage })),
 }));
 jest.mock('sonner', () => ({ toast: Object.assign(jest.fn(), { error: jest.fn() }) }));
+jest.mock('@sentry/nextjs', () => ({ captureMessage: jest.fn(), captureException: jest.fn() }));
+import * as Sentry from '@sentry/nextjs';
 import { registerSigner } from '@/actions/teams';
 import { toast } from 'sonner';
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
-import {
-  signerRegisteredKey,
-  useSignerRegistration,
-} from '@/hooks/useSignerRegistration';
+import { signerRegisteredKey, useSignerRegistration } from '@/hooks/useSignerRegistration';
 import { SIGNER_IN_USE_MESSAGE } from '@/config/teamCopy';
 
 const SESSION = {
@@ -2596,9 +2489,7 @@ describe('useSignerRegistration', () => {
       ),
     );
     expect(signMessage).toHaveBeenCalledWith({ message: input.message });
-    expect(
-      sessionStorage.getItem(signerRegisteredKey(SESSION.walletAddress)),
-    ).not.toBeNull();
+    expect(sessionStorage.getItem(signerRegisteredKey(SESSION.walletAddress))).not.toBeNull();
     rerender();
     expect(registerSigner).toHaveBeenCalledTimes(1);
   });
@@ -2611,9 +2502,7 @@ describe('useSignerRegistration', () => {
         'Your access is tied to another wallet. Ask ops@acme.dev to revoke it first.',
       ),
     );
-    expect(
-      sessionStorage.getItem(signerRegisteredKey(SESSION.walletAddress)),
-    ).not.toBeNull();
+    expect(sessionStorage.getItem(signerRegisteredKey(SESSION.walletAddress))).not.toBeNull();
   });
 
   it('explains SIGNER_IN_USE', async () => {
@@ -2623,15 +2512,14 @@ describe('useSignerRegistration', () => {
   });
 
   it('retries on a later session after any other refusal', async () => {
-    (registerSigner as jest.Mock).mockResolvedValue({
-      ok: false,
-      status: 400,
-      code: 'SIGNER_PROOF_INVALID',
-      message: 'x',
-    });
+    (registerSigner as jest.Mock).mockResolvedValue({ ok: false, status: 400, code: 'SIGNER_PROOF_INVALID', message: 'x' });
     renderHook(() => useSignerRegistration(null), { wrapper });
-    await waitFor(() => expect(registerSigner).toHaveBeenCalled());
+    // The refusal is handled (reported) before the negative checks run.
+    await waitFor(() =>
+      expect(Sentry.captureMessage).toHaveBeenCalledWith('Signer proof refused: SIGNER_PROOF_INVALID'),
+    );
     expect(sessionStorage.getItem(signerRegisteredKey(SESSION.walletAddress))).toBeNull();
+    expect(toast.error).not.toHaveBeenCalled();
   });
 });
 ```
@@ -2643,10 +2531,12 @@ Expected: FAIL. `signerProof` is missing, and the placeholder never registers.
 
 - [ ] **Step 3: Implement**
 
-Append to `src/config/teamCopy.ts` (console copy, not a contract):
+Append to `src/config/teamCopy.ts` (contracts index C8, "Wallet already used as another key"):
 
 ```ts
-// 409 SIGNER_IN_USE: the wallet is another user's signer or an API key.
+
+// 409 SIGNER_IN_USE on PUT /api/me/signer: the wallet is another user's signer
+// or an API key (C8).
 export const SIGNER_IN_USE_MESSAGE =
   "This wallet is already recorded as someone else's key, so it can't be used for data access. Contact DIMO support.";
 ```
@@ -2711,8 +2601,7 @@ import { buildSignerProofMessage } from '@/utils/signerProof';
 import { getFromSession, saveToSession } from '@/utils/sessionStorage';
 import { SIGNER_IN_USE_MESSAGE, signerLocked } from '@/config/teamCopy';
 
-export const signerRegisteredKey = (eoa: string) =>
-  `signerRegistered:${eoa.toLowerCase()}`;
+export const signerRegisteredKey = (eoa: string) => `signerRegistered:${eoa.toLowerCase()}`;
 
 // Tells console-api which EOA this user signs with (contracts C6), so an owner
 // can grant it data access. Once per browser session per wallet; a refusal
@@ -2827,25 +2716,15 @@ const switchTeam = jest.fn();
 
 describe('TeamSwitcher', () => {
   it('renders nothing for a single team', () => {
-    (useTeam as jest.Mock).mockReturnValue({
-      teams: [PERSONAL],
-      activeTeam: PERSONAL,
-      switchTeam,
-    });
+    (useTeam as jest.Mock).mockReturnValue({ teams: [PERSONAL], activeTeam: PERSONAL, switchTeam });
     const { container } = render(<TeamSwitcher />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it('lists the teams with roles and switches on pick', () => {
-    (useTeam as jest.Mock).mockReturnValue({
-      teams: [PERSONAL, ACME],
-      activeTeam: PERSONAL,
-      switchTeam,
-    });
+    (useTeam as jest.Mock).mockReturnValue({ teams: [PERSONAL, ACME], activeTeam: PERSONAL, switchTeam });
     render(<TeamSwitcher />);
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Team: Harness Motors. Switch team' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Team: Harness Motors. Switch team' }));
     const options = screen.getAllByRole('option');
     expect(options).toHaveLength(2);
     expect(options[0]).toHaveAttribute('aria-selected', 'true');
@@ -2854,15 +2733,9 @@ describe('TeamSwitcher', () => {
   });
 
   it('does not reload when the active team is picked again', () => {
-    (useTeam as jest.Mock).mockReturnValue({
-      teams: [PERSONAL, ACME],
-      activeTeam: ACME,
-      switchTeam,
-    });
+    (useTeam as jest.Mock).mockReturnValue({ teams: [PERSONAL, ACME], activeTeam: ACME, switchTeam });
     render(<TeamSwitcher collapsed />);
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Team: Acme Mobility. Switch team' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'Team: Acme Mobility. Switch team' }));
     fireEvent.click(screen.getAllByRole('option')[1].querySelector('button')!);
     expect(switchTeam).not.toHaveBeenCalled();
   });
@@ -2872,29 +2745,26 @@ describe('TeamSwitcher', () => {
 Append to `__tests__/unit/config/navigation.test.ts`, inside the existing `describe` (the test name has an apostrophe, so it uses double quotes):
 
 ```ts
-it("hides owner-only pages from members of someone else's team", () => {
-  const item = (
-    label: string,
-    options: { isMember?: boolean; dataAccessEnabled?: boolean },
-  ) =>
-    getNavSections(true, options)
-      .find((s) => s.label === 'Workspace')!
-      .items.find((i) => i.label === label);
-  expect(item('Webhooks', { isMember: true })?.hidden).toBe(true);
-  expect(item('Connections', { isMember: true })?.hidden).toBe(true);
-  expect(item('Webhooks', {})?.hidden).toBeFalsy();
-  expect(item('Connections', {})?.hidden).toBeFalsy();
-});
+  it("hides owner-only pages from members of someone else's team", () => {
+    const item = (label: string, options: { isMember?: boolean; dataAccessEnabled?: boolean }) =>
+      getNavSections(true, options)
+        .find((s) => s.label === 'Workspace')!
+        .items.find((i) => i.label === label);
+    expect(item('Webhooks', { isMember: true })?.hidden).toBe(true);
+    expect(item('Connections', { isMember: true })?.hidden).toBe(true);
+    expect(item('Webhooks', {})?.hidden).toBeFalsy();
+    expect(item('Connections', {})?.hidden).toBeFalsy();
+  });
 
-it('shows members Vehicles only while team data access is enabled (C5)', () => {
-  const vehicles = (options: { isMember?: boolean; dataAccessEnabled?: boolean }) =>
-    getNavSections(true, options)
-      .find((s) => s.label === 'Workspace')!
-      .items.find((i) => i.label === 'Vehicles');
-  expect(vehicles({ isMember: true, dataAccessEnabled: false })?.hidden).toBe(true);
-  expect(vehicles({ isMember: true, dataAccessEnabled: true })?.hidden).toBeFalsy();
-  expect(vehicles({ isMember: false, dataAccessEnabled: false })?.hidden).toBeFalsy();
-});
+  it('shows members Vehicles only while team data access is enabled (C5)', () => {
+    const vehicles = (options: { isMember?: boolean; dataAccessEnabled?: boolean }) =>
+      getNavSections(true, options)
+        .find((s) => s.label === 'Workspace')!
+        .items.find((i) => i.label === 'Vehicles');
+    expect(vehicles({ isMember: true, dataAccessEnabled: false })?.hidden).toBe(true);
+    expect(vehicles({ isMember: true, dataAccessEnabled: true })?.hidden).toBeFalsy();
+    expect(vehicles({ isMember: false, dataAccessEnabled: false })?.hidden).toBeFalsy();
+  });
 ```
 
 `__tests__/unit/pages/app/HomeShortcuts.test.tsx`:
@@ -2907,12 +2777,7 @@ const hrefs = (isMember: boolean, dataAccessEnabled: boolean) =>
 
 describe('Home shortcuts', () => {
   it('shows owners every shortcut', () => {
-    expect(hrefs(false, false)).toEqual([
-      '/licenses',
-      '/connections',
-      '/webhooks',
-      '/vehicles',
-    ]);
+    expect(hrefs(false, false)).toEqual(['/licenses', '/connections', '/webhooks', '/vehicles']);
   });
 
   it('hides owner-only pages from members, and Vehicles while data access is off', () => {
@@ -2992,10 +2857,7 @@ export const TeamSwitcher: FC<{ collapsed?: boolean }> = ({ collapsed = false })
               </span>
               <span className="text-label text-muted">{ROLE_LABEL[activeTeam.role]}</span>
             </span>
-            <ChevronUpDownIcon
-              aria-hidden="true"
-              className="size-4 flex-shrink-0 text-muted"
-            />
+            <ChevronUpDownIcon aria-hidden="true" className="size-4 flex-shrink-0 text-muted" />
           </>
         )}
       </button>
@@ -3024,10 +2886,7 @@ export const TeamSwitcher: FC<{ collapsed?: boolean }> = ({ collapsed = false })
                 >
                   <span className="min-w-0 flex-1 truncate">{team.name}</span>
                   <span
-                    className={cn(
-                      'text-label',
-                      selected ? 'text-selected-fg/75' : 'text-muted',
-                    )}
+                    className={cn('text-label', selected ? 'text-selected-fg/75' : 'text-muted')}
                   >
                     {ROLE_LABEL[team.role]}
                   </span>
@@ -3051,7 +2910,6 @@ export * from './TeamSwitcher';
 ```
 
 `src/config/navigation.ts`:
-
 - Change the signature to:
 
 ```ts
@@ -3081,7 +2939,6 @@ export const getNavSections = (
 ```
 
 `src/components/Menu/Menu.tsx`:
-
 - Add these imports:
 
 ```ts
@@ -3093,16 +2950,15 @@ import { TEAM_DATA_ACCESS_ENABLED } from '@/utils/featureFlags';
 - In the component, add `const { isMember } = useTeam();`, and change `const sections = getNavSections(licensesLoading || hasDeveloperLicenses);` to:
 
 ```ts
-const sections = getNavSections(licensesLoading || hasDeveloperLicenses, {
-  isMember,
-  dataAccessEnabled: TEAM_DATA_ACCESS_ENABLED,
-});
+  const sections = getNavSections(licensesLoading || hasDeveloperLicenses, {
+    isMember,
+    dataAccessEnabled: TEAM_DATA_ACCESS_ENABLED,
+  });
 ```
 
 - Insert `<TeamSwitcher collapsed={isSidebarCollapsed} />` directly after the closing `</div>` of the `{/* Logo */}` row.
 
 `src/app/app/list/components/View/View.tsx`:
-
 - After the `shortcuts` array, add:
 
 ```ts
@@ -3152,7 +3008,7 @@ git commit -m "feat(teams): sidebar team switcher; members see only what they ma
 - Produces:
   - `LocalDeveloperLicense#tokenId: number | null`, `#owner: string | null`, and `#hasSigner(address?)`, which is case-insensitive.
   - `useValidDeveloperLicenses()` has the same shape as before; `loading` stays true until the team owner is known.
-  - `useIsLicenseOwner(license)` is true only when the user's wallet owns the license _and_ the active team is the user's own, or teams are still loading.
+  - `useIsLicenseOwner(license)` is true only when the user's wallet owns the license *and* the active team is the user's own, or teams are still loading.
 
 `VehiclesView`, `VehiclePage` and the webhooks page read licenses through `useValidDeveloperLicenses`, so they follow the active team with no edits beyond VehiclesView's empty state.
 
@@ -3224,33 +3080,25 @@ describe('useIsLicenseOwner', () => {
   it('is true for the owner in their own team, whatever the case', () => {
     asUser(KERNEL);
     inTeam('OWNER', KERNEL_UPPER);
-    expect(
-      renderHook(() => useIsLicenseOwner({ owner: KERNEL_UPPER })).result.current,
-    ).toBe(true);
+    expect(renderHook(() => useIsLicenseOwner({ owner: KERNEL_UPPER })).result.current).toBe(true);
   });
 
   it("is false for a member looking at the team owner's license", () => {
     asUser(KERNEL);
     inTeam('MEMBER', ACME);
-    expect(renderHook(() => useIsLicenseOwner({ owner: ACME })).result.current).toBe(
-      false,
-    );
+    expect(renderHook(() => useIsLicenseOwner({ owner: ACME })).result.current).toBe(false);
   });
 
   it("is false for the user's own license while working in another team", () => {
     asUser(KERNEL);
     inTeam('MEMBER', ACME);
-    expect(renderHook(() => useIsLicenseOwner({ owner: KERNEL })).result.current).toBe(
-      false,
-    );
+    expect(renderHook(() => useIsLicenseOwner({ owner: KERNEL })).result.current).toBe(false);
   });
 
   it('trusts the wallet while teams are still loading', () => {
     asUser(KERNEL);
     inTeam(null);
-    expect(renderHook(() => useIsLicenseOwner({ owner: KERNEL })).result.current).toBe(
-      true,
-    );
+    expect(renderHook(() => useIsLicenseOwner({ owner: KERNEL })).result.current).toBe(true);
   });
 });
 ```
@@ -3343,50 +3191,36 @@ import { LicenseList } from '@/app/license/list/LicenseList';
 
 describe('LicenseList', () => {
   it('lets owners create licenses', () => {
-    (useTeam as jest.Mock).mockReturnValue({
-      isMember: false,
-      activeTeam: { name: 'Harness Motors' },
-    });
+    (useTeam as jest.Mock).mockReturnValue({ isMember: false, activeTeam: { name: 'Harness Motors' } });
     render(<LicenseList licenseConnection={{ nodes: [{}] } as never} />);
     expect(screen.getByText('Your developer licenses')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create a license' })).toBeInTheDocument();
   });
 
   it("shows members the team's licenses without a create button", () => {
-    (useTeam as jest.Mock).mockReturnValue({
-      isMember: true,
-      activeTeam: { name: 'Acme Mobility' },
-    });
+    (useTeam as jest.Mock).mockReturnValue({ isMember: true, activeTeam: { name: 'Acme Mobility' } });
     render(<LicenseList licenseConnection={{ nodes: [] } as never} />);
     expect(screen.getByText('Acme Mobility licenses')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Create a license' })).toBeNull();
-    expect(
-      screen.getByText('This team has no developer licenses yet'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('This team has no developer licenses yet')).toBeInTheDocument();
   });
 });
 ```
 
 Extend `__tests__/unit/pages/vehicles/VehiclesView.test.tsx`:
-
 - Add `jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn(() => ({ isMember: false })) }));` beside the other mocks.
 - Add `import { useTeam } from '@/hooks/useTeam';`.
 - Append this test:
 
 ```tsx
-it('never offers a member to create a license on an empty team', () => {
-  (useTeam as jest.Mock).mockReturnValue({ isMember: true });
-  (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
-    developerLicenses: [],
-    loading: false,
+  it("never offers a member to create a license on an empty team", () => {
+    (useTeam as jest.Mock).mockReturnValue({ isMember: true });
+    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({ developerLicenses: [], loading: false });
+    render(<VehiclesView />);
+    expect(screen.getByText('This team has no developer licenses yet.')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Go to licenses' })).toBeNull();
+    expect(screen.queryByText(/Create a developer license/)).toBeNull();
   });
-  render(<VehiclesView />);
-  expect(
-    screen.getByText('This team has no developer licenses yet.'),
-  ).toBeInTheDocument();
-  expect(screen.queryByRole('link', { name: 'Go to licenses' })).toBeNull();
-  expect(screen.queryByText(/Create a developer license/)).toBeNull();
-});
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -3401,10 +3235,7 @@ Expected: FAIL. The getters are missing, the member is treated as owner, the lis
 ```ts
 // Old call sites and tests build licenses from alias, clientId and redirect
 // URIs only; the team fields are optional so they keep working.
-type LicenseInput = Pick<
-  DeveloperLicenseForWebhook,
-  'alias' | 'clientId' | 'redirectURIs'
-> &
+type LicenseInput = Pick<DeveloperLicenseForWebhook, 'alias' | 'clientId' | 'redirectURIs'> &
   Partial<Pick<DeveloperLicenseForWebhook, 'tokenId' | 'owner' | 'signers'>>;
 
 export class LocalDeveloperLicense {
@@ -3568,78 +3399,76 @@ export const useIsLicenseOwner = (license: { owner: string }) => {
 `src/app/license/list/LicenseList.tsx`: add `import { useTeam } from '@/hooks/useTeam';` and replace the return.
 
 ```tsx
-const { isMember, activeTeam } = useTeam();
+  const { isMember, activeTeam } = useTeam();
 
-return (
-  <div className="license-list-content">
-    <div className="description">
-      <p className="title">
-        {isMember ? `${activeTeam?.name ?? 'Team'} licenses` : 'Your developer licenses'}
-      </p>
-      {!isMember && <CreateAppButton disabled={atLimit} />}
+  return (
+    <div className="license-list-content">
+      <div className="description">
+        <p className="title">
+          {isMember ? `${activeTeam?.name ?? 'Team'} licenses` : 'Your developer licenses'}
+        </p>
+        {!isMember && <CreateAppButton disabled={atLimit} />}
+      </div>
+      {fragment.nodes.length ? (
+        <div className="license-list">
+          {fragment.nodes.map((licenseSummaryFragment, idx) => (
+            <LicenseCard license={licenseSummaryFragment} key={idx} />
+          ))}
+        </div>
+      ) : isMember ? (
+        <div className="flex w-full flex-1 flex-col items-center justify-center rounded-card bg-card p-10 text-center">
+          <p className="text-card-title text-ink">This team has no developer licenses yet</p>
+          <p className="mt-1 text-body-sm text-muted">
+            Licenses the team owner creates show up here.
+          </p>
+        </div>
+      ) : (
+        <EmptyList />
+      )}
     </div>
-    {fragment.nodes.length ? (
-      <div className="license-list">
-        {fragment.nodes.map((licenseSummaryFragment, idx) => (
-          <LicenseCard license={licenseSummaryFragment} key={idx} />
-        ))}
-      </div>
-    ) : isMember ? (
-      <div className="flex w-full flex-1 flex-col items-center justify-center rounded-card bg-card p-10 text-center">
-        <p className="text-card-title text-ink">
-          This team has no developer licenses yet
-        </p>
-        <p className="mt-1 text-body-sm text-muted">
-          Licenses the team owner creates show up here.
-        </p>
-      </div>
-    ) : (
-      <EmptyList />
-    )}
-  </div>
-);
+  );
 ```
 
 `src/app/vehicles/components/VehiclesView.tsx`: import `useTeam`, add `const { isMember } = useTeam();` in `Content`, and replace the zero-license block with:
 
 ```tsx
-if (!loading && developerLicenses.length === 0) {
-  return (
-    <Section>
-      {isMember ? (
-        <p className="text-body text-fg">This team has no developer licenses yet.</p>
-      ) : (
-        <>
-          <p className="text-body text-fg">
-            Create a developer license to see the vehicles shared with it.
-          </p>
-          <Link href="/licenses" className="text-body-sm text-ink underline">
-            Go to licenses
-          </Link>
-        </>
-      )}
-    </Section>
-  );
-}
+  if (!loading && developerLicenses.length === 0) {
+    return (
+      <Section>
+        {isMember ? (
+          <p className="text-body text-fg">This team has no developer licenses yet.</p>
+        ) : (
+          <>
+            <p className="text-body text-fg">
+              Create a developer license to see the vehicles shared with it.
+            </p>
+            <Link href="/licenses" className="text-body-sm text-ink underline">
+              Go to licenses
+            </Link>
+          </>
+        )}
+      </Section>
+    );
+  }
 ```
 
 `src/app/license/[tokenId]/details/components/Signers/Signers.tsx`: `handleOwnerSigner` enables the user's console key, which only the license owner's wallet can do. Replace the effect
 
 ```tsx
-useEffect(() => {
-  if (!currentUser) return;
-  void handleOwnerSigner();
-}, [currentUser]);
+  useEffect(() => {
+    if (!currentUser) return;
+    void handleOwnerSigner();
+  }, [currentUser]);
 ```
 
 with
 
 ```tsx
-useEffect(() => {
-  if (!currentUser || !isLicenseOwner) return;
-  void handleOwnerSigner();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [currentUser, isLicenseOwner]);
+  useEffect(() => {
+    if (!currentUser || !isLicenseOwner) return;
+    void handleOwnerSigner();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, isLicenseOwner]);
 ```
 
 - [ ] **Step 4: Regenerate GraphQL types and run the tests**
@@ -3663,11 +3492,11 @@ git commit -m "feat(teams): list the active team's licenses and check ownership 
 - Create: `src/components/OwnerOnly/OwnerOnly.tsx` (page gate), `src/components/OwnerOnly/OwnerAction.tsx` (inline gate), `src/components/OwnerOnly/index.ts`
 - Delete and recreate: `src/app/webhooks/layout.ts` becomes `src/app/webhooks/layout.tsx`; delete `src/app/connections/layout.ts` and rewrite `src/app/connections/layout.tsx`
 - Modify: `src/app/connections/components/View/View.tsx` (Create a connection)
-- Modify: `src/app/license/[tokenId]/configurator/components/ListView/ListView.tsx` (New configuration), `src/app/license/[tokenId]/configurator/new/page.tsx` (the whole page), `src/app/license/[tokenId]/configurator/components/ConfigurationForm/ConfigurationForm.tsx` and `src/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/ConfigurationForm.tsx` (Save)
+- Modify: `src/app/license/[tokenId]/configurator/components/ListView/ListView.tsx` (New configuration), `src/app/license/[tokenId]/configurator/components/ConfigurationList/ConfigurationList.tsx` (Delete, and "Create your first configuration"), `src/app/license/[tokenId]/configurator/new/page.tsx` (the whole page), `src/app/license/[tokenId]/configurator/components/ConfigurationForm/ConfigurationForm.tsx` and `src/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm/ConfigurationForm.tsx` (Save)
 - Create: `src/app/license/[tokenId]/details/components/View/OverviewQuickActions.tsx`; Modify: `src/app/license/[tokenId]/details/components/View/View.tsx`
 - Modify: `src/app/license/[tokenId]/details/components/Vehicles/Vehicles.tsx` (vehicle simulator, Configure sharing)
 - Modify: `src/app/license/vehicles/[clientId]/components/VehicleDetailsTable/constants.tsx` and `VehicleDetailsTable.tsx` (Renounce)
-- Test: `__tests__/unit/components/OwnerOnly.test.tsx`, `__tests__/unit/pages/license/details/OverviewQuickActions.test.tsx`, `__tests__/unit/pages/license/details/VehiclesTab.test.tsx`, `__tests__/unit/pages/license/vehicles/columns.test.tsx`
+- Test: `__tests__/unit/components/OwnerOnly.test.tsx`, `__tests__/unit/configurator/ConfigurationListMember.test.tsx`, `__tests__/unit/pages/license/details/OverviewQuickActions.test.tsx`, `__tests__/unit/pages/license/details/VehiclesTab.test.tsx`, `__tests__/unit/pages/license/vehicles/columns.test.tsx`
 
 **Interfaces:**
 
@@ -3702,16 +3531,8 @@ const MEMBER = {
 
 describe('OwnerOnly', () => {
   it('renders the page for owners', () => {
-    (useTeam as jest.Mock).mockReturnValue({
-      isLoading: false,
-      isOwner: true,
-      isMember: false,
-    });
-    render(
-      <OwnerOnly feature="Webhooks">
-        <p>webhooks table</p>
-      </OwnerOnly>,
-    );
+    (useTeam as jest.Mock).mockReturnValue({ isLoading: false, isOwner: true, isMember: false });
+    render(<OwnerOnly feature="Webhooks"><p>webhooks table</p></OwnerOnly>);
     expect(screen.getByText('webhooks table')).toBeInTheDocument();
   });
 
@@ -3719,34 +3540,20 @@ describe('OwnerOnly', () => {
     'tells members who manages %s and hides the page',
     (feature) => {
       (useTeam as jest.Mock).mockReturnValue(MEMBER);
-      render(
-        <OwnerOnly feature={feature}>
-          <p>secret page</p>
-        </OwnerOnly>,
-      );
+      render(<OwnerOnly feature={feature}><p>secret page</p></OwnerOnly>);
       expect(screen.queryByText('secret page')).toBeNull();
       expect(
         screen.getByRole('heading', { name: `${feature} are managed by the team owner` }),
       ).toBeInTheDocument();
       expect(
-        screen.getByText(
-          new RegExp(`ops@acme\\.dev manages ${feature.toLowerCase()} for Acme Mobility`),
-        ),
+        screen.getByText(new RegExp(`ops@acme\\.dev manages ${feature.toLowerCase()} for Acme Mobility`)),
       ).toBeInTheDocument();
     },
   );
 
   it('waits for the teams before deciding', () => {
-    (useTeam as jest.Mock).mockReturnValue({
-      isLoading: true,
-      isOwner: false,
-      isMember: false,
-    });
-    render(
-      <OwnerOnly feature="Connections">
-        <p>secret page</p>
-      </OwnerOnly>,
-    );
+    (useTeam as jest.Mock).mockReturnValue({ isLoading: true, isOwner: false, isMember: false });
+    render(<OwnerOnly feature="Connections"><p>secret page</p></OwnerOnly>);
     expect(screen.queryByText('secret page')).toBeNull();
   });
 });
@@ -3772,6 +3579,41 @@ describe('OwnerAction', () => {
 });
 ```
 
+`__tests__/unit/configurator/ConfigurationListMember.test.tsx`:
+
+```tsx
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+
+jest.mock('@/hooks/useTeam', () => ({ useTeam: () => ({ isOwner: false, isLoading: false }) }));
+jest.mock('@/actions/configurations', () => ({
+  getConfigurationsByClientId: jest.fn(),
+  deleteConfiguration: jest.fn(),
+}));
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+import { getConfigurationsByClientId } from '@/actions/configurations';
+import { ConfigurationList } from '@/app/license/[tokenId]/configurator/components/ConfigurationList';
+
+describe('ConfigurationList for members', () => {
+  it('lists configurations without Delete', async () => {
+    (getConfigurationsByClientId as jest.Mock).mockResolvedValue([
+      { id: 'abc123', configuration_name: 'My Config', entry_state: 'VEHICLE_MANAGER' },
+    ]);
+    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    expect(await screen.findByText('My Config')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy link' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull();
+  });
+
+  it('never offers to create the first configuration', async () => {
+    (getConfigurationsByClientId as jest.Mock).mockResolvedValue([]);
+    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    expect(await screen.findByText('No configurations yet.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Create your first configuration' })).toBeNull();
+  });
+});
+```
+
 `__tests__/unit/pages/license/details/OverviewQuickActions.test.tsx`:
 
 ```tsx
@@ -3787,12 +3629,7 @@ describe('OverviewQuickActions', () => {
   it('gives owners every quick action', () => {
     (useTeam as jest.Mock).mockReturnValue({ isOwner: true });
     render(<OverviewQuickActions tokenId={42} onSelectTab={jest.fn()} />);
-    for (const label of [
-      'Generate API key',
-      'Configure branding',
-      'Setup vehicle sharing',
-      'Docs',
-    ]) {
+    for (const label of ['Generate API key', 'Configure branding', 'Setup vehicle sharing', 'Docs']) {
       expect(screen.getByText(new RegExp(label))).toBeInTheDocument();
     }
   });
@@ -3857,9 +3694,7 @@ import { buildColumns } from '@/app/license/vehicles/[clientId]/components/Vehic
 
 const ids = (canRenounce?: boolean) =>
   buildColumns(new Set(), jest.fn(), { clientId: '0xaaa', canRenounce }).map(
-    (c) =>
-      (c as { id?: string; accessorKey?: string }).id ??
-      (c as { accessorKey?: string }).accessorKey,
+    (c) => (c as { id?: string; accessorKey?: string }).id ?? (c as { accessorKey?: string }).accessorKey,
   );
 
 describe('vehicle table columns', () => {
@@ -3873,8 +3708,8 @@ describe('vehicle table columns', () => {
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `npx jest __tests__/unit/components/OwnerOnly.test.tsx __tests__/unit/pages/license/details/OverviewQuickActions.test.tsx __tests__/unit/pages/license/details/VehiclesTab.test.tsx __tests__/unit/pages/license/vehicles/columns.test.tsx`
-Expected: FAIL. The modules are missing, members see the simulator, and `canRenounce` is ignored.
+Run: `npx jest __tests__/unit/components/OwnerOnly.test.tsx __tests__/unit/configurator/ConfigurationListMember.test.tsx __tests__/unit/pages/license/details/OverviewQuickActions.test.tsx __tests__/unit/pages/license/details/VehiclesTab.test.tsx __tests__/unit/pages/license/vehicles/columns.test.tsx`
+Expected: FAIL. The modules are missing, members see Delete, the simulator and the first-configuration button, and `canRenounce` is ignored.
 
 - [ ] **Step 3: Implement the gates**
 
@@ -3898,12 +3733,10 @@ export const OwnerOnly: FC<PropsWithChildren<{ feature: string }>> = ({
   const lower = feature.toLowerCase();
   return (
     <div className="flex flex-col items-start gap-3 rounded-card bg-card p-6">
-      <h2 className="text-card-title text-ink">
-        {feature} are managed by the team owner
-      </h2>
+      <h2 className="text-card-title text-ink">{feature} are managed by the team owner</h2>
       <p className="max-w-xl text-body-sm text-muted">
-        {activeTeam?.ownerEmail} manages {lower} for {activeTeam?.name}. Switch to your
-        own team to manage {lower} for your licenses.
+        {activeTeam?.ownerEmail} manages {lower} for {activeTeam?.name}. Switch to your own
+        team to manage {lower} for your licenses.
       </p>
     </div>
   );
@@ -3968,27 +3801,28 @@ export default function ConnectionsLayout({ children }: { children: ReactNode })
 }
 ```
 
-In `src/app/connections/components/View/View.tsx`, wrap the "Create a connection" `<Button …>` in `<OwnerAction>…</OwnerAction>` (import from `@/components/OwnerOnly`).
+   In `src/app/connections/components/View/View.tsx`, wrap the "Create a connection" `<Button …>` in `<OwnerAction>…</OwnerAction>` (import from `@/components/OwnerOnly`).
 
 3. **Configurator.**
    - `ListView.tsx`: wrap the "New configuration" `<Button …>` in `<OwnerAction>`.
+   - `ConfigurationList.tsx` (import `OwnerAction` from `@/components/OwnerOnly`): wrap the empty state's "Create your first configuration" `<Button …>` in `<OwnerAction>…</OwnerAction>`, and the row's "Delete" `<Button variant="destructive-ghost" …>` in `<OwnerAction>…</OwnerAction>`. Edit stays (its Save is gated below), and so does Copy link.
    - In both `ConfigurationForm.tsx` files, replace the Save button with:
 
 ```tsx
-<OwnerAction
-  fallback={
-    <p className="text-body-sm text-muted">
-      Only the team owner can change configurations.
-    </p>
-  }
->
-  <Button type="submit" className="w-full">
-    Save
-  </Button>
-</OwnerAction>
+        <OwnerAction
+          fallback={
+            <p className="text-body-sm text-muted">
+              Only the team owner can change configurations.
+            </p>
+          }
+        >
+          <Button type="submit" className="w-full">
+            Save
+          </Button>
+        </OwnerAction>
 ```
 
-- Replace `src/app/license/[tokenId]/configurator/new/page.tsx` with:
+   - Replace `src/app/license/[tokenId]/configurator/new/page.tsx` with:
 
 ```tsx
 import { Metadata } from 'next';
@@ -4040,11 +3874,7 @@ export const OverviewQuickActions: FC<{
             ⚙️ Setup vehicle sharing
           </button>
         </OwnerAction>
-        <Link
-          href="https://docs.dimo.org"
-          target="_blank"
-          className="overview-quick-action"
-        >
+        <Link href="https://docs.dimo.org" target="_blank" className="overview-quick-action">
           📖 Docs
         </Link>
       </div>
@@ -4053,7 +3883,7 @@ export const OverviewQuickActions: FC<{
 };
 ```
 
-In `View.tsx`, replace the whole `<div className="overview-quick-actions">…</div>` block with `<OverviewQuickActions tokenId={licenseFragment.tokenId} onSelectTab={setActiveTab} />`, and import it from `./OverviewQuickActions`.
+   In `View.tsx`, replace the whole `<div className="overview-quick-actions">…</div>` block with `<OverviewQuickActions tokenId={licenseFragment.tokenId} onSelectTab={setActiveTab} />`, and import it from `./OverviewQuickActions`.
 
 5. **Vehicles tab.** In `src/app/license/[tokenId]/details/components/Vehicles/Vehicles.tsx`, wrap both `<div className="flex-1 [&>button]:w-full"><VehicleSimulatorModal … /></div>` and the "Configure sharing" `<Button …>` in `<OwnerAction>…</OwnerAction>`.
 
@@ -4076,17 +3906,17 @@ In `View.tsx`, replace the whole `<div className="overview-quick-actions">…</d
       ]),
 ```
 
-In `VehicleDetailsTable.tsx`, add `const { isOwner } = useTeam();` (`import { useTeam } from '@/hooks/useTeam';`) and pass `canRenounce: isOwner` in both `buildColumns(…)` option objects.
+   In `VehicleDetailsTable.tsx`, add `const { isOwner } = useTeam();` (`import { useTeam } from '@/hooks/useTeam';`) and pass `canRenounce: isOwner` in both `buildColumns(…)` option objects.
 
 - [ ] **Step 5: Run the tests, the license suites and the type check**
 
 Run: `npx jest __tests__/unit/components/OwnerOnly.test.tsx __tests__/unit/pages/license __tests__/unit/configurator && npx tsc --noEmit -p . 2>&1 | head -20`
-Expected: PASS, including the existing configurator and vehicle-table suites, which run without a provider, where `isOwner` is true. `tsc` reports nothing new.
+Expected: PASS, including the existing configurator suites (`ConfigurationList.test.tsx` still finds Delete: without a provider `isOwner` is true) and the vehicle-table suites. `tsc` reports nothing new.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add -A src/components/OwnerOnly src/app/webhooks src/app/connections "src/app/license/[tokenId]" "src/app/license/vehicles/[clientId]/components/VehicleDetailsTable" __tests__/unit/components/OwnerOnly.test.tsx __tests__/unit/pages/license/details __tests__/unit/pages/license/vehicles
+git add -A src/components/OwnerOnly src/app/webhooks src/app/connections "src/app/license/[tokenId]" "src/app/license/vehicles/[clientId]/components/VehicleDetailsTable" __tests__/unit/components/OwnerOnly.test.tsx __tests__/unit/configurator/ConfigurationListMember.test.tsx __tests__/unit/pages/license/details __tests__/unit/pages/license/vehicles
 git commit -m "feat(teams): owner-only pages and actions (webhooks, connections, configurator, simulator, renounce)"
 ```
 
@@ -4115,7 +3945,7 @@ git commit -m "feat(teams): owner-only pages and actions (webhooks, connections,
 - Produces:
   - `setMemberDevJwtSigner(signer: string | null)`. While set, `saveDevJwt`, `getDevJwt`, `getAllDevJwts` and `removeDevJwt` use `devJwt_${clientId}_${signer}_list_v1` and return only tokens whose `signer_address` claim is that signer (case-insensitive).
   - From `@/actions/dimoAuth`: `requestDexChallenge(input): Promise<DexResult<{ state; challenge }>>` and `submitDexChallenge(input): Promise<DexResult<{ access_token; … }>>`, where `DexResult<T> = { ok: true; data: T } | { ok: false; status: number }`.
-  - `useMemberDevJwt(): ({ clientId, domain }) => Promise<string>`. It retries only when `submit_challenge` answers 4xx (dex hasn't indexed a fresh signer yet), up to `MEMBER_JWT_ATTEMPTS = 3`, `MEMBER_JWT_RETRY_MS = 5000` apart. Session, Turnkey, challenge and domain failures throw `MemberDevJwtError` at once.
+  - `useMemberDevJwt(): ({ clientId, domain }) => Promise<string>`. It retries only when `submit_challenge` answers 4xx (dex hasn't indexed a fresh signer yet), up to `MEMBER_JWT_ATTEMPTS = 3`, `MEMBER_JWT_RETRY_MS = 5000` apart. A missing session, a failed challenge request, or a submit answer other than 4xx throws `MemberDevJwtError` at once. A Turnkey signing error is rethrown unchanged, and `ConnectWalletButton` shows a generic message for it. The domain isn't checked here: it is passed to dex, which checks it against the license's redirect URIs.
   - `useLicenseDataAccess(license?, enabled?)`, returning `LicenseDataAccess`:
     - `{ kind: 'owner' }`
     - `{ kind: 'member' }`
@@ -4160,17 +3990,9 @@ describe('developer JWT storage', () => {
     setMemberDevJwtSigner(WALLET);
     const mine = jwt({ ethereum_address: CLIENT, signer_address: WALLET.toLowerCase() });
     saveDevJwt(CLIENT, mine);
-    saveDevJwt(
-      CLIENT,
-      jwt({
-        ethereum_address: CLIENT,
-        signer_address: '0x0000000000000000000000000000000000000001',
-      }),
-    );
+    saveDevJwt(CLIENT, jwt({ ethereum_address: CLIENT, signer_address: '0x0000000000000000000000000000000000000001' }));
     saveDevJwt(CLIENT, jwt({ ethereum_address: CLIENT }));
-    expect(
-      localStorage.getItem(`devJwt_${CLIENT}_${WALLET.toLowerCase()}_list_v1`),
-    ).not.toBeNull();
+    expect(localStorage.getItem(`devJwt_${CLIENT}_${WALLET.toLowerCase()}_list_v1`)).not.toBeNull();
     expect(getAllDevJwts(CLIENT).map((t) => t.token)).toEqual([mine]);
   });
 
@@ -4197,21 +4019,12 @@ const mockPost = jest.fn();
 jest.mock('axios', () => {
   const actual = jest.requireActual('axios');
   const client = { post: (...args: unknown[]) => mockPost(...args) };
-  return {
-    __esModule: true,
-    ...actual,
-    default: { ...actual.default, create: () => client },
-  };
+  return { __esModule: true, ...actual, default: { ...actual.default, create: () => client } };
 });
 import { AxiosError, type AxiosResponse } from 'axios';
 import { getDimoToken, submitDexChallenge } from '@/actions/dimoAuth';
 
-const INPUT = {
-  state: 'st',
-  signedChallenge: '0xsecret',
-  clientId: '0xaaa',
-  domain: 'https://x',
-};
+const INPUT = { state: 'st', signedChallenge: '0xsecret', clientId: '0xaaa', domain: 'https://x' };
 
 describe('dimoAuth', () => {
   it('never logs the signed challenge', async () => {
@@ -4280,10 +4093,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     {children}
   </GlobalAccountContext.Provider>
 );
-const ARGS = {
-  clientId: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
-  domain: 'https://harness.dev/callback',
-};
+const ARGS = { clientId: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f', domain: 'https://harness.dev/callback' };
 const challenge = { ok: true, data: { challenge: 'sign me', state: 'st' } };
 const run = () => renderHook(() => useMemberDevJwt(), { wrapper }).result.current(ARGS);
 // The hook sets no React state, so the calls need no act().
@@ -4297,10 +4107,7 @@ describe('useMemberDevJwt', () => {
   afterEach(() => jest.useRealTimers());
 
   it("asks dex for the license's challenge and signs it with the EOA", async () => {
-    (submitDexChallenge as jest.Mock).mockResolvedValue({
-      ok: true,
-      data: { access_token: 'dev.jwt' },
-    });
+    (submitDexChallenge as jest.Mock).mockResolvedValue({ ok: true, data: { access_token: 'dev.jwt' } });
     await expect(run()).resolves.toBe('dev.jwt');
     expect(requestDexChallenge).toHaveBeenCalledWith({
       address: ARGS.clientId,
@@ -4370,41 +4177,30 @@ const license = (signers: string[]) =>
     signers: { nodes: signers.map((address) => ({ address })) },
   } as never);
 const member = () =>
-  (useTeam as jest.Mock).mockReturnValue({
-    isMember: true,
-    activeTeam: { ownerEmail: 'ops@acme.dev' },
-  });
+  (useTeam as jest.Mock).mockReturnValue({ isMember: true, activeTeam: { ownerEmail: 'ops@acme.dev' } });
 
 describe('useLicenseDataAccess', () => {
   beforeEach(() =>
-    (useGlobalAccount as jest.Mock).mockReturnValue({
-      currentUser: { walletAddress: EOA },
-    }),
+    (useGlobalAccount as jest.Mock).mockReturnValue({ currentUser: { walletAddress: EOA } }),
   );
 
   it('treats everyone outside a member team as the owner', () => {
     (useTeam as jest.Mock).mockReturnValue({ isMember: false });
-    expect(
-      renderHook(() => useLicenseDataAccess(license([]), true)).result.current,
-    ).toEqual({
+    expect(renderHook(() => useLicenseDataAccess(license([]), true)).result.current).toEqual({
       kind: 'owner',
     });
   });
 
   it('gives a member access when their wallet is a signer, any case', () => {
     member();
-    expect(
-      renderHook(() => useLicenseDataAccess(license([EOA_UPPER]), true)).result.current,
-    ).toEqual({
+    expect(renderHook(() => useLicenseDataAccess(license([EOA_UPPER]), true)).result.current).toEqual({
       kind: 'member',
     });
   });
 
   it('tells a member without a key whom to ask', () => {
     member();
-    expect(
-      renderHook(() => useLicenseDataAccess(license([]), true)).result.current,
-    ).toEqual({
+    expect(renderHook(() => useLicenseDataAccess(license([]), true)).result.current).toEqual({
       kind: 'member-no-access',
       ownerEmail: 'ops@acme.dev',
     });
@@ -4412,9 +4208,7 @@ describe('useLicenseDataAccess', () => {
 
   it('is unavailable to members while the flag is off (C5)', () => {
     member();
-    expect(
-      renderHook(() => useLicenseDataAccess(license([EOA]), false)).result.current,
-    ).toEqual({
+    expect(renderHook(() => useLicenseDataAccess(license([EOA]), false)).result.current).toEqual({
       kind: 'member-unavailable',
     });
   });
@@ -4444,38 +4238,28 @@ const license = new LocalDeveloperLicense({
   redirectURIs: { nodes: [{ uri: 'https://x' }] },
 });
 const show = (access: Parameters<typeof DevJwtPrompt>[0]['access']) =>
-  render(
-    <DevJwtPrompt license={license} access={access} onSuccess={jest.fn()} message="m" />,
-  );
+  render(<DevJwtPrompt license={license} access={access} onSuccess={jest.fn()} message="m" />);
 
 describe('DevJwtPrompt', () => {
   it('offers owners the API-key flow', () => {
     show({ kind: 'owner' });
-    expect(
-      screen.getByRole('button', { name: 'Generate developer JWT' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Generate developer JWT' })).toBeInTheDocument();
   });
 
   it('offers members with access their wallet', () => {
     show({ kind: 'member' });
-    expect(
-      screen.getByRole('button', { name: 'Connect with your wallet' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Connect with your wallet' })).toBeInTheDocument();
   });
 
   it('tells members without access whom to ask (C8)', () => {
     show({ kind: 'member-no-access', ownerEmail: 'ops@acme.dev' });
-    expect(
-      screen.getByText('Ask ops@acme.dev for data access to Harness Fleet.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Ask ops@acme.dev for data access to Harness Fleet.')).toBeInTheDocument();
     expect(screen.queryByRole('button')).toBeNull();
   });
 
   it('says data access is not available yet while the flag is off (C8)', () => {
     show({ kind: 'member-unavailable' });
-    expect(
-      screen.getByText("Data access for team members isn't available yet."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Data access for team members isn't available yet.")).toBeInTheDocument();
   });
 });
 ```
@@ -4503,9 +4287,7 @@ describe('ConnectWalletButton', () => {
   it('connects, tracks Wallet Connected and reports success', async () => {
     mockGetJwt.mockResolvedValue('dev.jwt');
     const onSuccess = jest.fn();
-    render(
-      <ConnectWalletButton clientId="0xaaa" domain="https://x" onSuccess={onSuccess} />,
-    );
+    render(<ConnectWalletButton clientId="0xaaa" domain="https://x" onSuccess={onSuccess} />);
     fireEvent.click(screen.getByRole('button', { name: 'Connect with your wallet' }));
     await waitFor(() => expect(onSuccess).toHaveBeenCalled());
     expect(mockGetJwt).toHaveBeenCalledWith({ clientId: '0xaaa', domain: 'https://x' });
@@ -4537,7 +4319,6 @@ describe('ConnectWalletButton', () => {
 ```
 
 Extend `__tests__/unit/hoc/TeamProvider.test.tsx`:
-
 - Add this beside the other mocks:
 
 ```tsx
@@ -4551,18 +4332,18 @@ import { setMemberDevJwtSigner } from '@/utils/devJwt';
 - Append inside the `describe`:
 
 ```tsx
-it("reads developer JWTs from the member's wallet list while a member team is active", async () => {
-  document.cookie = 'active_team=team-acme; Path=/';
-  renderProvider();
-  await waitFor(() => expect(probe().active).toBe('team-acme'));
-  expect(setMemberDevJwtSigner).toHaveBeenLastCalledWith(USER.walletAddress);
-});
+  it("reads developer JWTs from the member's wallet list while a member team is active", async () => {
+    document.cookie = 'active_team=team-acme; Path=/';
+    renderProvider();
+    await waitFor(() => expect(probe().active).toBe('team-acme'));
+    expect(setMemberDevJwtSigner).toHaveBeenLastCalledWith(USER.walletAddress);
+  });
 
-it("keeps the per-license list for the user's own team", async () => {
-  renderProvider();
-  await waitFor(() => expect(probe().active).toBe('team-harness'));
-  expect(setMemberDevJwtSigner).toHaveBeenLastCalledWith(null);
-});
+  it("keeps the per-license list for the user's own team", async () => {
+    renderProvider();
+    await waitFor(() => expect(probe().active).toBe('team-harness'));
+    expect(setMemberDevJwtSigner).toHaveBeenLastCalledWith(null);
+  });
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -4591,9 +4372,7 @@ export const setMemberDevJwtSigner = (signer: string | null) => {
 };
 
 const getKey = (clientId: string) =>
-  memberSigner
-    ? `devJwt_${clientId}_${memberSigner}_list_v1`
-    : `devJwt_${clientId}_list_v1`;
+  memberSigner ? `devJwt_${clientId}_${memberSigner}_list_v1` : `devJwt_${clientId}_list_v1`;
 
 export interface StoredJwt {
   token: string;
@@ -4613,14 +4392,10 @@ const getValidTokens = (clientId: string): StoredJwt[] => {
   return tokens
     .filter((storedJwt) => {
       try {
-        const decoded = jwtDecode<{ exp?: number; signer_address?: string }>(
-          storedJwt.token,
-        );
+        const decoded = jwtDecode<{ exp?: number; signer_address?: string }>(storedJwt.token);
         const exp = decoded.exp ? decoded.exp * 1000 : null;
         if (exp && now > exp) return false;
-        return memberSigner
-          ? decoded.signer_address?.toLowerCase() === memberSigner
-          : true;
+        return memberSigner ? decoded.signer_address?.toLowerCase() === memberSigner : true;
       } catch {
         return false;
       }
@@ -4667,19 +4442,18 @@ export const clearAllDevJwts = () => {
 `src/hoc/TeamProvider.tsx`: import `setMemberDevJwtSigner` from `@/utils/devJwt`, then after the `activeTeam` memo add:
 
 ```tsx
-// Before children render: they read stored developer JWTs during this render
-// and in effects that run before the provider's own effects.
-useMemo(
-  () =>
-    setMemberDevJwtSigner(
-      activeTeam?.role === 'MEMBER' ? (currentUser?.walletAddress ?? null) : null,
-    ),
-  [activeTeam?.role, currentUser?.walletAddress],
-);
+  // Before children render: they read stored developer JWTs during this render
+  // and in effects that run before the provider's own effects.
+  useMemo(
+    () =>
+      setMemberDevJwtSigner(
+        activeTeam?.role === 'MEMBER' ? (currentUser?.walletAddress ?? null) : null,
+      ),
+    [activeTeam?.role, currentUser?.walletAddress],
+  );
 ```
 
 `src/actions/dimoAuth.ts`:
-
 - Delete `console.info({ state, signedChallenge, clientId, domain });` from `getDimoToken`. Member developer JWTs now go through it, and the signature must never reach logs.
 - Add `import { AxiosError } from 'axios';` (keep the default import), and append:
 
@@ -4747,14 +4521,14 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // for the license (address = clientId); dex verifies it through the license
 // account's ERC-1271 check. Only a submit_challenge 4xx is retried: right after
 // a grant dex may not have indexed the signer yet (the RentalOS flow allows the
-// same). Session, Turnkey, challenge and domain errors fail at once.
+// same). Session and challenge errors fail at once as MemberDevJwtError; a
+// signing error is rethrown unchanged. dex checks the domain.
 export const useMemberDevJwt = () => {
   const { validateCurrentSession } = useGlobalAccount();
   return useCallback(
     async ({ clientId, domain }: { clientId: string; domain: string }) => {
       const session = await validateCurrentSession();
-      if (!session)
-        throw new MemberDevJwtError('Your session has expired. Sign in again.');
+      if (!session) throw new MemberDevJwtError('Your session has expired. Sign in again.');
       // Lazy: @/services/turnkeyAccount pulls the Turnkey config, which needs env.
       const { getSessionEoaAccount } = await import('@/services/turnkeyAccount');
       const account = await getSessionEoaAccount(session);
@@ -4769,9 +4543,7 @@ export const useMemberDevJwt = () => {
             `Couldn't start connecting to this license (${challenge.status || 'no answer'}). Try again.`,
           );
         }
-        const signedChallenge = await account.signMessage({
-          message: challenge.data.challenge,
-        });
+        const signedChallenge = await account.signMessage({ message: challenge.data.challenge });
         const token = await submitDexChallenge({
           state: challenge.data.state,
           signedChallenge,
@@ -4823,10 +4595,7 @@ export const useLicenseDataAccess = (
   if (!isMember) return { kind: 'owner' };
   if (!enabled) return { kind: 'member-unavailable' };
   if (!license?.hasSigner(currentUser?.walletAddress)) {
-    return {
-      kind: 'member-no-access',
-      ownerEmail: activeTeam?.ownerEmail ?? 'the team owner',
-    };
+    return { kind: 'member-no-access', ownerEmail: activeTeam?.ownerEmail ?? 'the team owner' };
   }
   return { kind: 'member' };
 };
@@ -4913,9 +4682,7 @@ export const DevJwtPrompt: FC<{
   }
   if (access.kind === 'member-no-access') {
     return (
-      <p className="text-body-sm text-muted">
-        {askForAccess(access.ownerEmail, license.label)}
-      </p>
+      <p className="text-body-sm text-muted">{askForAccess(access.ownerEmail, license.label)}</p>
     );
   }
   return (
@@ -4944,22 +4711,19 @@ export * from './DevJwtPrompt';
 ```
 
 `src/app/vehicles/components/VehiclesView.tsx`:
-
 - Replace the `GenerateDevJWTSection` import with `import { DevJwtPrompt } from '@/components/DataAccess';` and `import { useLicenseDataAccess } from '@/hooks/useLicenseDataAccess';`.
 - In `Content`, after `useGetDevJwts`, add `const dataAccess = useLicenseDataAccess(selected);`.
 - Replace the `GenerateDevJWTSection` block with:
 
 ```tsx
-{
-  (!isAuthenticatedAsDev || dataAccess.kind.startsWith('member-')) && (
-    <DevJwtPrompt
-      license={selected}
-      access={dataAccess}
-      onSuccess={refetchJwts}
-      message="Generate a developer JWT to see when each vehicle was last seen."
-    />
-  );
-}
+          {(!isAuthenticatedAsDev || dataAccess.kind.startsWith('member-')) && (
+            <DevJwtPrompt
+              license={selected}
+              access={dataAccess}
+              onSuccess={refetchJwts}
+              message="Generate a developer JWT to see when each vehicle was last seen."
+            />
+          )}
 ```
 
 - [ ] **Step 5: Run the tests, including the Vehicles suites, which must still load**
@@ -4999,16 +4763,16 @@ git commit -m "feat(teams): members connect with their own wallet; developer JWT
   - `DataApiError#memberOfTeam?: boolean`.
   - `accessFromError(error, { member, walletIsSigner }): Access`:
 
-    | Code                                                                  | Access                                |
-    | --------------------------------------------------------------------- | ------------------------------------- |
-    | `NOT_SHARED`                                                          | `not-shared`                          |
-    | `DEV_JWT_*`                                                           | `jwt-expired`                         |
-    | `NO_ACCESS` with `memberOfTeam: false`                                | `removed` (and `reportRemoved()`)     |
-    | `NO_ACCESS`, member whose wallet is still a signer on Identity        | `reconnect`                           |
-    | `NO_ACCESS`, other member                                             | `no-access`                           |
-    | `NO_ACCESS`, owner (a disabled API key)                               | `jwt-expired`                         |
-    | `UPSTREAM`, `GRAPHQL`                                                 | `ok` (the panels show them per field) |
-    | anything else, `INVALID_CLIENT_ID` and `ACCESS_CHECK_FAILED` included | `error`                               |
+    | Code | Access |
+    |---|---|
+    | `NOT_SHARED` | `not-shared` |
+    | `DEV_JWT_*` | `jwt-expired` |
+    | `NO_ACCESS` with `memberOfTeam: false` | `removed` (and `reportRemoved()`) |
+    | `NO_ACCESS`, member whose wallet is still a signer on Identity | `reconnect` |
+    | `NO_ACCESS`, other member | `no-access` |
+    | `NO_ACCESS`, owner (a disabled API key) | `jwt-expired` |
+    | `UPSTREAM`, `GRAPHQL` | `ok` (the panels show them per field) |
+    | anything else, `INVALID_CLIENT_ID` and `ACCESS_CHECK_FAILED` included | `error` |
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -5062,12 +4826,8 @@ describe('accessFromError', () => {
     expect(accessFromError(error('DEV_JWT_INVALID'), member)).toBe('jwt-expired');
     expect(accessFromError(error('NO_ACCESS', false), member)).toBe('removed');
     expect(accessFromError(error('NO_ACCESS', true), member)).toBe('no-access');
-    expect(
-      accessFromError(error('NO_ACCESS', true), { member: true, walletIsSigner: true }),
-    ).toBe('reconnect');
-    expect(
-      accessFromError(error('NO_ACCESS'), { member: false, walletIsSigner: false }),
-    ).toBe('jwt-expired');
+    expect(accessFromError(error('NO_ACCESS', true), { member: true, walletIsSigner: true })).toBe('reconnect');
+    expect(accessFromError(error('NO_ACCESS'), { member: false, walletIsSigner: false })).toBe('jwt-expired');
   });
 
   it('shows an error state, not the data tabs, for anything else', () => {
@@ -5105,60 +4865,38 @@ const base = {
 
 describe('AccessNotice', () => {
   it('asks the team owner for access', () => {
-    render(
-      <AccessNotice {...base} access="no-access" ownerEmail="ops@acme.dev" member />,
-    );
-    expect(
-      screen.getByText('Ask ops@acme.dev for data access to Harness Fleet.'),
-    ).toBeInTheDocument();
+    render(<AccessNotice {...base} access="no-access" ownerEmail="ops@acme.dev" member />);
+    expect(screen.getByText('Ask ops@acme.dev for data access to Harness Fleet.')).toBeInTheDocument();
   });
 
   it('says a removed member no longer has access (C8)', () => {
     render(<AccessNotice {...base} access="removed" member ownerEmail="ops@acme.dev" />);
-    expect(
-      screen.getByText('You no longer have access to this license.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('You no longer have access to this license.')).toBeInTheDocument();
   });
 
   it('offers to reconnect when the chain still lists the wallet', () => {
-    render(
-      <AccessNotice {...base} access="reconnect" member ownerEmail="ops@acme.dev" />,
-    );
-    expect(
-      screen.getByRole('button', { name: 'Reconnect with your wallet' }),
-    ).toBeInTheDocument();
+    render(<AccessNotice {...base} access="reconnect" member ownerEmail="ops@acme.dev" />);
+    expect(screen.getByRole('button', { name: 'Reconnect with your wallet' })).toBeInTheDocument();
   });
 
   it('says data access is not available yet (C8)', () => {
-    render(
-      <AccessNotice {...base} access="unavailable" member ownerEmail="ops@acme.dev" />,
-    );
-    expect(
-      screen.getByText("Data access for team members isn't available yet."),
-    ).toBeInTheDocument();
+    render(<AccessNotice {...base} access="unavailable" member ownerEmail="ops@acme.dev" />);
+    expect(screen.getByText("Data access for team members isn't available yet.")).toBeInTheDocument();
   });
 
   it('shows an error with a retry for an unknown answer', () => {
     render(<AccessNotice {...base} access="error" />);
-    expect(
-      screen.getByText("We couldn't check your access to Harness Fleet."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("We couldn't check your access to Harness Fleet.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     expect(base.onRetry).toHaveBeenCalled();
   });
 
   it('offers a member their wallet instead of an API key, and keeps the owner flow', () => {
-    const { unmount } = render(
-      <AccessNotice {...base} access="no-jwt" member ownerEmail="ops@acme.dev" />,
-    );
-    expect(
-      screen.getByRole('button', { name: 'Connect with your wallet' }),
-    ).toBeInTheDocument();
+    const { unmount } = render(<AccessNotice {...base} access="no-jwt" member ownerEmail="ops@acme.dev" />);
+    expect(screen.getByRole('button', { name: 'Connect with your wallet' })).toBeInTheDocument();
     unmount();
     render(<AccessNotice {...base} access="no-jwt" />);
-    expect(
-      screen.getByRole('button', { name: 'Generate developer JWT' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Generate developer JWT' })).toBeInTheDocument();
   });
 });
 ```
@@ -5178,18 +4916,13 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/vehicles/190231',
   useSearchParams: () => new URLSearchParams('license=0xaaa'),
 }));
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
-  useQuery: jest.fn(),
-}));
+jest.mock('@apollo/client', () => ({ ...jest.requireActual('@apollo/client'), useQuery: jest.fn() }));
 jest.mock('@/components/Webhooks/hooks/useValidDeveloperLicenses', () => ({
   useValidDeveloperLicenses: jest.fn(),
 }));
 jest.mock('@/hooks/useGetDevJwts', () => ({ useGetDevJwts: jest.fn() }));
 jest.mock('@/hooks/useGlobalAccount', () => ({ useGlobalAccount: jest.fn() }));
-jest.mock('@/hooks/subjects/useSubjectFreshness', () => ({
-  useSubjectFreshness: jest.fn(),
-}));
+jest.mock('@/hooks/subjects/useSubjectFreshness', () => ({ useSubjectFreshness: jest.fn() }));
 jest.mock('@/hooks/subjects/useSubjectQuery', () => ({
   ...jest.requireActual('@/hooks/subjects/useSubjectQuery'),
   useSubjectQuery: jest.fn(() => ({ data: undefined, isLoading: false, error: null })),
@@ -5233,17 +4966,7 @@ const vehicle = {
   definition: { id: 'toyota_rav4_2024', make: 'Toyota', model: 'RAV4', year: 2024 },
   aftermarketDevice: null,
   syntheticDevice: null,
-  sacds: {
-    nodes: [
-      {
-        grantee: '0xaaa',
-        permissions: '0x3fc',
-        createdAt: '2026-08-02T00:00:00Z',
-        expiresAt: '2027-08-02T00:00:00Z',
-        source: 'ipfs://x',
-      },
-    ],
-  },
+  sacds: { nodes: [{ grantee: '0xaaa', permissions: '0x3fc', createdAt: '2026-08-02T00:00:00Z', expiresAt: '2027-08-02T00:00:00Z', source: 'ipfs://x' }] },
   privileges: { nodes: [] },
 };
 const refusal = (memberOfTeam: boolean) =>
@@ -5254,58 +4977,31 @@ beforeEach(() => {
   (useGlobalAccount as jest.Mock).mockReturnValue({
     currentUser: { smartContractAddress: '0xkernel', walletAddress: WALLET },
   });
-  (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
-    developerLicenses: [license],
-    loading: false,
-  });
-  (useGetDevJwts as jest.Mock).mockReturnValue({
-    isAuthenticatedAsDev: true,
-    refetch: jest.fn(),
-  });
+  (useValidDeveloperLicenses as jest.Mock).mockReturnValue({ developerLicenses: [license], loading: false });
+  (useGetDevJwts as jest.Mock).mockReturnValue({ isAuthenticatedAsDev: true, refetch: jest.fn() });
   (useLicenseDataAccess as jest.Mock).mockReturnValue({ kind: 'member' });
 });
 
 describe('VehiclePage for a member', () => {
   it('reports a removal when the proxy says the user is no longer in the team', async () => {
-    (useSubjectFreshness as jest.Mock).mockReturnValue({
-      byDid: {},
-      isLoading: false,
-      error: refusal(false),
-      refetch: jest.fn(),
-    });
+    (useSubjectFreshness as jest.Mock).mockReturnValue({ byDid: {}, isLoading: false, error: refusal(false), refetch: jest.fn() });
     render(<VehiclePage tokenId={190231} />);
-    expect(
-      screen.getByText('You no longer have access to this license.'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('You no longer have access to this license.')).toBeInTheDocument();
     await waitFor(() => expect(reportRemoved).toHaveBeenCalled());
   });
 
   it('offers to reconnect when the proxy refuses but Identity still lists the wallet', () => {
-    (useSubjectFreshness as jest.Mock).mockReturnValue({
-      byDid: {},
-      isLoading: false,
-      error: refusal(true),
-      refetch: jest.fn(),
-    });
+    (useSubjectFreshness as jest.Mock).mockReturnValue({ byDid: {}, isLoading: false, error: refusal(true), refetch: jest.fn() });
     render(<VehiclePage tokenId={190231} />);
-    expect(
-      screen.getByRole('button', { name: 'Reconnect with your wallet' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reconnect with your wallet' })).toBeInTheDocument();
     expect(reportRemoved).not.toHaveBeenCalled();
   });
 
   it('shows the C8 unavailable copy while the flag is off', () => {
     (useLicenseDataAccess as jest.Mock).mockReturnValue({ kind: 'member-unavailable' });
-    (useSubjectFreshness as jest.Mock).mockReturnValue({
-      byDid: {},
-      isLoading: false,
-      error: null,
-      refetch: jest.fn(),
-    });
+    (useSubjectFreshness as jest.Mock).mockReturnValue({ byDid: {}, isLoading: false, error: null, refetch: jest.fn() });
     render(<VehiclePage tokenId={190231} />);
-    expect(
-      screen.getByText("Data access for team members isn't available yet."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Data access for team members isn't available yet.")).toBeInTheDocument();
   });
 
   it('shows an error state for an unknown proxy answer', () => {
@@ -5316,23 +5012,21 @@ describe('VehiclePage for a member', () => {
       refetch: jest.fn(),
     });
     render(<VehiclePage tokenId={190231} />);
-    expect(
-      screen.getByText("We couldn't check your access to Harness Fleet."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("We couldn't check your access to Harness Fleet.")).toBeInTheDocument();
   });
 });
 ```
 
 Extend `__tests__/unit/pages/vehicles/VehiclesView.test.tsx`:
-
 - Add this beside the other mocks. The flag is read at render time through the getter, and stays on for every other test, including Task 8's member empty state:
 
 ```tsx
-let mockDataAccessEnabled = true;
+// Mutable test state lives in a holder (Global Constraints, Commits).
+const mockFlags = { dataAccess: true };
 jest.mock('@/utils/featureFlags', () => ({
   TEMPLATE_EDITOR_ENABLED: false,
   get TEAM_DATA_ACCESS_ENABLED() {
-    return mockDataAccessEnabled;
+    return mockFlags.dataAccess;
   },
 }));
 ```
@@ -5340,37 +5034,35 @@ jest.mock('@/utils/featureFlags', () => ({
 - Append inside the `describe`:
 
 ```tsx
-describe('while member data access is off', () => {
-  beforeEach(() => {
-    mockDataAccessEnabled = false;
-  });
-  afterEach(() => {
-    mockDataAccessEnabled = true;
-  });
-
-  it('tells a member who opens Vehicles directly that it is not available yet (C5)', () => {
-    (useTeam as jest.Mock).mockReturnValue({ isMember: true });
-    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
-      developerLicenses: [lic('0xaaa', 'Fleet Pulse')],
-      loading: false,
+  describe('while member data access is off', () => {
+    beforeEach(() => {
+      mockFlags.dataAccess = false;
     });
-    render(<VehiclesView />);
-    expect(
-      screen.getByText("Data access for team members isn't available yet."),
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId('table')).toBeNull();
-  });
-
-  it('leaves owners alone', () => {
-    (useTeam as jest.Mock).mockReturnValue({ isMember: false });
-    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
-      developerLicenses: [lic('0xaaa', 'Fleet Pulse')],
-      loading: false,
+    afterEach(() => {
+      mockFlags.dataAccess = true;
     });
-    render(<VehiclesView />);
-    expect(screen.getByTestId('table')).toBeInTheDocument();
+
+    it('tells a member who opens Vehicles directly that it is not available yet (C5)', () => {
+      (useTeam as jest.Mock).mockReturnValue({ isMember: true });
+      (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+        developerLicenses: [lic('0xaaa', 'Fleet Pulse')],
+        loading: false,
+      });
+      render(<VehiclesView />);
+      expect(screen.getByText("Data access for team members isn't available yet.")).toBeInTheDocument();
+      expect(screen.queryByTestId('table')).toBeNull();
+    });
+
+    it('leaves owners alone', () => {
+      (useTeam as jest.Mock).mockReturnValue({ isMember: false });
+      (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+        developerLicenses: [lic('0xaaa', 'Fleet Pulse')],
+        loading: false,
+      });
+      render(<VehiclesView />);
+      expect(screen.getByTestId('table')).toBeInTheDocument();
+    });
   });
-});
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -5421,15 +5113,14 @@ export class DataApiError extends Error {
 ```
 
 In `postSubjectQuery`:
-
 - Add `memberOfTeam?: boolean;` to the parsed body type.
 - Replace `if (body.code && body.error) throw new DataApiError(res.status, body.code, body.error);` with:
 
 ```ts
-if (body.code && body.error) {
-  const code = KNOWN_CODES.has(body.code) ? (body.code as DataApiCode) : 'UNKNOWN';
-  throw new DataApiError(res.status, code, body.error, [], body.memberOfTeam);
-}
+  if (body.code && body.error) {
+    const code = KNOWN_CODES.has(body.code) ? (body.code as DataApiCode) : 'UNKNOWN';
+    throw new DataApiError(res.status, code, body.error, [], body.memberOfTeam);
+  }
 ```
 
 - Change the body's `code?: DataApiCode` to `code?: string`.
@@ -5503,11 +5194,7 @@ import { FC, type ReactNode } from 'react';
 import { Button } from '@/components/Button';
 import { GenerateDevJWT } from '@/components/GenerateDevJWT';
 import { ConnectWalletButton } from '@/components/DataAccess/ConnectWalletButton';
-import {
-  askForAccess,
-  DATA_ACCESS_UNAVAILABLE,
-  NO_LONGER_HAS_ACCESS,
-} from '@/config/teamCopy';
+import { askForAccess, DATA_ACCESS_UNAVAILABLE, NO_LONGER_HAS_ACCESS } from '@/config/teamCopy';
 import type { Access } from './SourceRail';
 
 interface Props {
@@ -5560,9 +5247,7 @@ export const AccessNotice: FC<Props> = ({
     case 'no-access':
       return (
         <Card title={`You don't have data access to ${licenseLabel}`}>
-          <p className="max-w-xl text-body-sm text-muted">
-            {askForAccess(ownerEmail, licenseLabel)}
-          </p>
+          <p className="max-w-xl text-body-sm text-muted">{askForAccess(ownerEmail, licenseLabel)}</p>
         </Card>
       );
     case 'removed':
@@ -5599,8 +5284,8 @@ export const AccessNotice: FC<Props> = ({
             {clientId
               ? "The owner hasn't granted this license access"
               : "The owner hasn't granted any of your licenses access"}
-            , so its data can&apos;t be read here. You can still see which apps it is
-            shared with.
+            , so its data can&apos;t be read here. You can still see which apps it is shared
+            with.
           </p>
           <Button variant="secondary" onClick={onViewSharing}>
             View sharing
@@ -5619,8 +5304,7 @@ export const AccessNotice: FC<Props> = ({
         }
       >
         <p className="max-w-xl text-body-sm text-muted">
-          Your wallet signs a developer JWT for {licenseLabel}; the token stays in this
-          browser.
+          Your wallet signs a developer JWT for {licenseLabel}; the token stays in this browser.
         </p>
         {wallet()}
       </Card>
@@ -5639,17 +5323,13 @@ export const AccessNotice: FC<Props> = ({
           'Generate a new one to keep reading this vehicle.'
         ) : (
           <>
-            {licenseLabel} has no developer JWT in this browser yet. Generating one uses
-            the license&apos;s API key, and the token stays in this browser.
+            {licenseLabel} has no developer JWT in this browser yet. Generating one uses the
+            license&apos;s API key, and the token stays in this browser.
           </>
         )}
       </p>
       {clientId && redirectUri && (
-        <GenerateDevJWT
-          clientId={clientId}
-          domain={redirectUri}
-          onSuccess={onGenerated}
-        />
+        <GenerateDevJWT clientId={clientId} domain={redirectUri} onSuccess={onGenerated} />
       )}
     </Card>
   );
@@ -5657,7 +5337,6 @@ export const AccessNotice: FC<Props> = ({
 ```
 
 `src/app/vehicles/[tokenId]/components/VehiclePage.tsx`:
-
 - Add these imports (`useEffect` is already imported from `react`):
 
 ```ts
@@ -5665,47 +5344,46 @@ import { useLicenseDataAccess } from '@/hooks/useLicenseDataAccess';
 import { useTeam } from '@/hooks/useTeam';
 import { accessFromError } from './accessFromError';
 ```
-
 - After `const clientId = license?.clientId ?? '';`, add:
 
 ```ts
-const dataAccess = useLicenseDataAccess(license);
-const { activeTeam, reportRemoved } = useTeam();
+  const dataAccess = useLicenseDataAccess(license);
+  const { activeTeam, reportRemoved } = useTeam();
 ```
 
 - Replace `granted` with:
 
 ```ts
-const granted: Access =
-  licensesLoading || loading
-    ? 'loading'
-    : !license
-      ? 'not-shared'
-      : dataAccess.kind === 'member-unavailable'
-        ? 'unavailable'
-        : dataAccess.kind === 'member-no-access'
-          ? 'no-access'
-          : !isAuthenticatedAsDev
-            ? 'no-jwt'
-            : 'ok';
+  const granted: Access =
+    licensesLoading || loading
+      ? 'loading'
+      : !license
+        ? 'not-shared'
+        : dataAccess.kind === 'member-unavailable'
+          ? 'unavailable'
+          : dataAccess.kind === 'member-no-access'
+            ? 'no-access'
+            : !isAuthenticatedAsDev
+              ? 'no-jwt'
+              : 'ok';
 ```
 
 - Replace the `exchangeCode` and `access` computation (keep it above the early returns, since it adds a hook) with:
 
 ```ts
-// The rail's freshness request is the first exchange for the vehicle.
-const access: Access =
-  granted !== 'ok'
-    ? granted
-    : accessFromError(freshness.error, {
-        member: dataAccess.kind !== 'owner',
-        walletIsSigner: !!license?.hasSigner(currentUser?.walletAddress),
-      });
+  // The rail's freshness request is the first exchange for the vehicle.
+  const access: Access =
+    granted !== 'ok'
+      ? granted
+      : accessFromError(freshness.error, {
+          member: dataAccess.kind !== 'owner',
+          walletIsSigner: !!license?.hasSigner(currentUser?.walletAddress),
+        });
 
-// The proxy says the user is no longer in the team that owns this license.
-useEffect(() => {
-  if (access === 'removed') reportRemoved();
-}, [access, reportRemoved]);
+  // The proxy says the user is no longer in the team that owns this license.
+  useEffect(() => {
+    if (access === 'removed') reportRemoved();
+  }, [access, reportRemoved]);
 ```
 
 - Pass these extra props to `<AccessNotice …>`:
@@ -5719,14 +5397,14 @@ useEffect(() => {
 `src/app/vehicles/components/VehiclesView.tsx`: in `VehiclesView` (the exported component), before `return`, add:
 
 ```tsx
-const { isMember } = useTeam();
-if (isMember && !TEAM_DATA_ACCESS_ENABLED) {
-  return (
-    <Section>
-      <p className="text-body text-fg">{DATA_ACCESS_UNAVAILABLE}</p>
-    </Section>
-  );
-}
+  const { isMember } = useTeam();
+  if (isMember && !TEAM_DATA_ACCESS_ENABLED) {
+    return (
+      <Section>
+        <p className="text-body text-fg">{DATA_ACCESS_UNAVAILABLE}</p>
+      </Section>
+    );
+  }
 ```
 
 Import `TEAM_DATA_ACCESS_ENABLED` from `@/utils/featureFlags` and `DATA_ACCESS_UNAVAILABLE` from `@/config/teamCopy`. `useTeam` is already imported since Task 8.
@@ -5750,10 +5428,10 @@ git commit -m "feat(teams): Vehicles member states, removal from proxy refusals,
 **Files:**
 
 - Modify: `src/middleware.ts` (`/api/data/*` with a valid session skips `/api/me`)
-- Create: `src/services/licenseAccess.ts` (server only)
-- Modify: `src/services/subjectJwt.ts` (C9 privileges; token exchange's signer 403 becomes `NO_ACCESS`)
+- Create: `src/utils/boundedCache.ts`, `src/services/licenseAccess.ts` (server only)
+- Modify: `src/services/subjectJwt.ts` (C9 privileges; token exchange's signer 403 becomes `NO_ACCESS`; the token cache becomes bounded)
 - Modify: `src/app/api/data/proxy.ts`
-- Test: `__tests__/unit/services/licenseAccess.test.ts`, `__tests__/unit/services/subjectJwt.test.ts` (update and extend), `__tests__/unit/app/api/dataProxy.test.ts` (extend), `__tests__/unit/middleware/dataPath.test.ts`
+- Test: `__tests__/unit/utils/boundedCache.test.ts`, `__tests__/unit/services/licenseAccess.test.ts`, `__tests__/unit/services/subjectJwt.test.ts` (update and extend), `__tests__/unit/app/api/dataProxy.test.ts` (extend), `__tests__/unit/middleware/dataPath.test.ts`
 
 **Interfaces:**
 
@@ -5763,10 +5441,12 @@ git commit -m "feat(teams): Vehicles member states, removal from proxy refusals,
   - `LicenseAccess` (Task 1);
   - `NO_LONGER_HAS_ACCESS` and `TEAM_DATA_ACCESS_ENABLED`.
 - Produces:
+  - `BoundedCache<T>(max)`: `get(key, now)`, `set(key, value, expiresAt)`, `clear()`, `size`. It evicts the oldest entry at `max` and drops expired entries on read.
   - `authorizeLicenseAccess({ devJwt, sessionToken }, deps?): Promise<AccessDecision>`, where `AccessDecision` is one of:
-    - `{ allowed: true; access: 'OWNER' | 'MEMBER'; teamId; clientId; userEmail: string | null; wallet: string | null }`
+    - `{ allowed: true; access: 'OWNER' | 'MEMBER'; clientId; caller: { email: string; teamId: string | null } | { wallet: string } }`. `caller` is what the audit line names: console-api's session email and the license's team, or on the owner fast path the session wallet (spec, Data proxy).
     - `{ allowed: false; status: 400 | 401 | 403 | 503; code: 'NO_ACCESS' | 'ACCESS_CHECK_FAILED' | 'DEV_JWT_INVALID' | 'INVALID_CLIENT_ID'; message; memberOfTeam?: boolean }`
-  - `getLicenseAccess` and `getLicenseOwner`, both cached 60 s and capped at `ACCESS_CACHE_MAX = 1000` entries (oldest evicted first). Errors are never cached.
+  - `getLicenseAccess` and `getLicenseOwner`, both cached 60 s in a `BoundedCache` of `ACCESS_CACHE_MAX = 1000` entries. Errors are never cached.
+  - `getSubjectJwt`'s token cache is a `BoundedCache` of `SUBJECT_JWT_CACHE_MAX = 1000` entries, each kept until 30 s before its token expires.
   - `clearLicenseAccessCache()`.
   - `SubjectJwtCode` gains `NO_ACCESS`.
   - `PROXY_PRIVILEGE_IDS = [1, 3, 4, 7, 8]` (C9).
@@ -5777,10 +5457,44 @@ git commit -m "feat(teams): Vehicles member states, removal from proxy refusals,
   4. Access decision. A refusal answers `{ error, code, memberOfTeam }` and logs `outcome: 'refused'`.
   5. Token exchange, then upstream.
   6. One audit line after the exchange with `outcome` (`ok`, `upstream_error`, `not_shared`, `signer_revoked`, `exchange_error` or `unreachable`) and `status`.
-- **Owner fast path:** when Identity says the session wallet (`ethereum_address` of the session token) owns the developer JWT's license, the decision is `OWNER` without calling console-api. That audit line has `email: null` and `wallet` set.
+- **Owner fast path:** when Identity says the session wallet (`ethereum_address` of the session token) owns the developer JWT's license, the decision is `OWNER` without calling console-api. Its audit line names the session wallet in place of the email and team; every other line names the email and team, not the wallet.
 - **Test coverage:** the screenshot harness mocks `/api/data/*` in the browser (`scripts/visual/shoot.mjs`, the `context.route(/\/api\/data\/…/)` call), so this proxy is covered by Jest only.
 
 - [ ] **Step 1: Write the failing tests**
+
+`__tests__/unit/utils/boundedCache.test.ts`:
+
+```ts
+import { BoundedCache } from '@/utils/boundedCache';
+
+describe('BoundedCache', () => {
+  it('returns entries until they expire, and drops them after', () => {
+    const cache = new BoundedCache<string>(10);
+    cache.set('a', 'x', 1000);
+    expect(cache.get('a', 999)).toBe('x');
+    expect(cache.get('a', 1000)).toBeUndefined();
+    expect(cache.size).toBe(0);
+  });
+
+  it('evicts the oldest entry at the cap, and a rewrite counts as new', () => {
+    const cache = new BoundedCache<number>(2);
+    cache.set('a', 1, 100);
+    cache.set('b', 2, 100);
+    cache.set('a', 3, 100);
+    cache.set('c', 4, 100);
+    expect(cache.get('b', 0)).toBeUndefined();
+    expect(cache.get('a', 0)).toBe(3);
+    expect(cache.get('c', 0)).toBe(4);
+  });
+
+  it('keeps a stored null apart from a miss', () => {
+    const cache = new BoundedCache<string | null>(2);
+    cache.set('a', null, 100);
+    expect(cache.get('a', 0)).toBeNull();
+    expect(cache.get('b', 0)).toBeUndefined();
+  });
+});
+```
 
 `__tests__/unit/services/licenseAccess.test.ts`:
 
@@ -5797,8 +5511,7 @@ import {
 import type { LicenseAccess } from '@/types/team';
 
 const b64 = (o: object) => Buffer.from(JSON.stringify(o)).toString('base64url');
-const jwt = (claims: Record<string, unknown>) =>
-  [b64({ alg: 'none' }), b64(claims), 'sig'].join('.');
+const jwt = (claims: Record<string, unknown>) => [b64({ alg: 'none' }), b64(claims), 'sig'].join('.');
 const CLIENT = '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f';
 const KERNEL = '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d';
 const EOA = '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6';
@@ -5825,13 +5538,7 @@ describe('getLicenseAccess', () => {
     now += 60_001;
     await getLicenseAccess('session-a', CLIENT, deps);
     expect(request).toHaveBeenCalledTimes(2);
-    const failing = {
-      request: jest
-        .fn()
-        .mockRejectedValueOnce(new Error('down'))
-        .mockResolvedValue(access({})),
-      now: () => now,
-    };
+    const failing = { request: jest.fn().mockRejectedValueOnce(new Error('down')).mockResolvedValue(access({})), now: () => now };
     await expect(getLicenseAccess('session-c', CLIENT, failing)).rejects.toThrow('down');
     await getLicenseAccess('session-c', CLIENT, failing);
     expect(failing.request).toHaveBeenCalledTimes(2);
@@ -5840,8 +5547,7 @@ describe('getLicenseAccess', () => {
   it(`holds at most ${ACCESS_CACHE_MAX} entries, evicting the oldest`, async () => {
     const request = jest.fn(async () => access({}));
     const deps = { request, now: () => 0 };
-    for (let i = 0; i <= ACCESS_CACHE_MAX; i++)
-      await getLicenseAccess(`s${i}`, CLIENT, deps);
+    for (let i = 0; i <= ACCESS_CACHE_MAX; i++) await getLicenseAccess(`s${i}`, CLIENT, deps);
     request.mockClear();
     await getLicenseAccess(`s${ACCESS_CACHE_MAX}`, CLIENT, deps);
     expect(request).not.toHaveBeenCalled();
@@ -5860,62 +5566,48 @@ describe('authorizeLicenseAccess', () => {
     );
   beforeEach(() => {
     lookupAccess.mockReset();
-    lookupOwner
-      .mockReset()
-      .mockResolvedValue('0x0000000000000000000000000000000000000002');
+    lookupOwner.mockReset().mockResolvedValue('0x0000000000000000000000000000000000000002');
   });
 
-  it('serves the license owner from Identity without asking console-api', async () => {
+  it("serves the license owner from Identity without asking console-api", async () => {
     lookupOwner.mockResolvedValue(KERNEL.toUpperCase().replace('0X', '0x'));
     await expect(decide({ ethereum_address: CLIENT })).resolves.toEqual({
       allowed: true,
       access: 'OWNER',
-      teamId: null,
       clientId: CLIENT,
-      userEmail: null,
-      wallet: KERNEL,
+      caller: { wallet: KERNEL },
     });
     expect(lookupAccess).not.toHaveBeenCalled();
   });
 
   it('falls back to console-api when Identity fails', async () => {
     lookupOwner.mockRejectedValue(new Error('identity down'));
-    lookupAccess.mockResolvedValue(
-      access({ access: 'OWNER', teamId: 't1', userEmail: 'jane@harness.dev' }),
-    );
-    await expect(decide({ ethereum_address: CLIENT })).resolves.toMatchObject({
+    lookupAccess.mockResolvedValue(access({ access: 'OWNER', teamId: 't1', userEmail: 'jane@harness.dev' }));
+    await expect(decide({ ethereum_address: CLIENT })).resolves.toEqual({
       allowed: true,
       access: 'OWNER',
-      userEmail: 'jane@harness.dev',
+      clientId: CLIENT,
+      caller: { email: 'jane@harness.dev', teamId: 't1' },
     });
   });
 
   it('allows a member whose JWT was signed by their registered wallet, any case', async () => {
-    lookupAccess.mockResolvedValue(
-      access({ access: 'MEMBER', memberOfTeam: true, teamId: 't2', signerAddress: EOA }),
-    );
+    lookupAccess.mockResolvedValue(access({ access: 'MEMBER', memberOfTeam: true, teamId: 't2', signerAddress: EOA }));
     await expect(
       decide({ ethereum_address: CLIENT, signer_address: EOA.toLowerCase() }),
-    ).resolves.toMatchObject({
+    ).resolves.toEqual({
       allowed: true,
       access: 'MEMBER',
-      userEmail: 'sam@harness.dev',
+      clientId: CLIENT,
+      caller: { email: 'sam@harness.dev', teamId: 't2' },
     });
   });
 
   it('refuses a member JWT without signer_address, from another wallet, or with the flag off', async () => {
-    lookupAccess.mockResolvedValue(
-      access({ access: 'MEMBER', memberOfTeam: true, teamId: 't2', signerAddress: EOA }),
-    );
+    lookupAccess.mockResolvedValue(access({ access: 'MEMBER', memberOfTeam: true, teamId: 't2', signerAddress: EOA }));
     for (const [claims, enabled] of [
       [{ ethereum_address: CLIENT }, true],
-      [
-        {
-          ethereum_address: CLIENT,
-          signer_address: '0x0000000000000000000000000000000000000001',
-        },
-        true,
-      ],
+      [{ ethereum_address: CLIENT, signer_address: '0x0000000000000000000000000000000000000001' }, true],
       [{ ethereum_address: CLIENT, signer_address: EOA }, false],
     ] as const) {
       await expect(decide(claims, enabled)).resolves.toMatchObject({
@@ -5944,9 +5636,7 @@ describe('authorizeLicenseAccess', () => {
   });
 
   it("passes console-api's INVALID_CLIENT_ID through and fails closed otherwise", async () => {
-    lookupAccess.mockRejectedValueOnce(
-      Object.assign(new Error('x'), { code: 'INVALID_CLIENT_ID' }),
-    );
+    lookupAccess.mockRejectedValueOnce(Object.assign(new Error('x'), { code: 'INVALID_CLIENT_ID' }));
     await expect(decide({ ethereum_address: CLIENT })).resolves.toMatchObject({
       allowed: false,
       status: 400,
@@ -5962,23 +5652,16 @@ describe('authorizeLicenseAccess', () => {
 
   it('answers 401 for an unreadable developer JWT or a missing session', async () => {
     await expect(
-      authorizeLicenseAccess(
-        { devJwt: 'garbage', sessionToken: SESSION },
-        { lookupAccess, lookupOwner },
-      ),
+      authorizeLicenseAccess({ devJwt: 'garbage', sessionToken: SESSION }, { lookupAccess, lookupOwner }),
     ).resolves.toMatchObject({ status: 401, code: 'DEV_JWT_INVALID' });
     await expect(
-      authorizeLicenseAccess(
-        { devJwt: jwt({ ethereum_address: CLIENT }), sessionToken: null },
-        { lookupAccess, lookupOwner },
-      ),
+      authorizeLicenseAccess({ devJwt: jwt({ ethereum_address: CLIENT }), sessionToken: null }, { lookupAccess, lookupOwner }),
     ).resolves.toMatchObject({ status: 401, code: 'NO_ACCESS' });
   });
 });
 ```
 
 `__tests__/unit/services/subjectJwt.test.ts`:
-
 - In the first test, change the expected `permissions` to the C9 subset of what the license holds (the fixture holds 1, 2, 3, 4 and 7):
 
 ```ts
@@ -5990,43 +5673,50 @@ describe('authorizeLicenseAccess', () => {
       ],
 ```
 
+- Add `SUBJECT_JWT_CACHE_MAX` to the `@/services/subjectJwt` import.
 - Append:
 
 ```ts
-it('requests only the C9 privileges, never ExecuteCommands, even when the license holds all', async () => {
-  fetchMock
-    .mockImplementationOnce(() =>
-      json(200, { data: { vehicle: { sacd: { permissions: '0x3fffc' } } } }),
-    )
-    .mockImplementationOnce(() => json(200, { token: 'vehicle-jwt' }));
-  await getSubjectJwt(DEV, VEHICLE);
-  expect(JSON.parse(fetchMock.mock.calls[1][1].body).permissions).toEqual([
-    'privilege:GetNonLocationHistory',
-    'privilege:GetCurrentLocation',
-    'privilege:GetLocationHistory',
-    'privilege:GetRawData',
-    'privilege:GetApproximateLocation',
-  ]);
-});
-
-it('maps token exchange refusing a revoked signer to NO_ACCESS', async () => {
-  fetchMock
-    .mockImplementationOnce(() =>
-      json(200, { data: { vehicle: { sacd: { permissions: PERMS_HEX } } } }),
-    )
-    .mockImplementationOnce(() =>
-      json(403, { code: 403, message: 'signer no longer authorized for this license' }),
-    );
-  await expect(getSubjectJwt(DEV, VEHICLE)).rejects.toMatchObject({
-    status: 403,
-    code: 'NO_ACCESS',
-    message: 'You no longer have access to this license.',
+  it('requests only the C9 privileges, never ExecuteCommands, even when the license holds all', async () => {
+    fetchMock
+      .mockImplementationOnce(() => json(200, { data: { vehicle: { sacd: { permissions: '0x3fffc' } } } }))
+      .mockImplementationOnce(() => json(200, { token: 'vehicle-jwt' }));
+    await getSubjectJwt(DEV, VEHICLE);
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body).permissions).toEqual([
+      'privilege:GetNonLocationHistory',
+      'privilege:GetCurrentLocation',
+      'privilege:GetLocationHistory',
+      'privilege:GetRawData',
+      'privilege:GetApproximateLocation',
+    ]);
   });
-});
+
+  it(`keeps at most ${SUBJECT_JWT_CACHE_MAX} tokens, dropping the oldest`, async () => {
+    fetchMock.mockImplementation(() => json(200, { token: 'account-jwt' }));
+    const account = (i: number) => `did:ethr:80002:0x${i.toString(16).padStart(40, '0')}`;
+    for (let i = 0; i <= SUBJECT_JWT_CACHE_MAX; i++) await getSubjectJwt(DEV, account(i));
+    fetchMock.mockClear();
+    await getSubjectJwt(DEV, account(SUBJECT_JWT_CACHE_MAX));
+    expect(fetchMock).not.toHaveBeenCalled();
+    await getSubjectJwt(DEV, account(0));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps token exchange refusing a revoked signer to NO_ACCESS', async () => {
+    fetchMock
+      .mockImplementationOnce(() => json(200, { data: { vehicle: { sacd: { permissions: PERMS_HEX } } } }))
+      .mockImplementationOnce(() =>
+        json(403, { code: 403, message: 'signer no longer authorized for this license' }),
+      );
+    await expect(getSubjectJwt(DEV, VEHICLE)).rejects.toMatchObject({
+      status: 403,
+      code: 'NO_ACCESS',
+      message: 'You no longer have access to this license.',
+    });
+  });
 ```
 
 Extend `__tests__/unit/app/api/dataProxy.test.ts`:
-
 - Before the route imports, add:
 
 ```ts
@@ -6037,86 +5727,102 @@ import { authorizeLicenseAccess } from '@/services/licenseAccess';
 - In `beforeEach`, add:
 
 ```ts
-(authorizeLicenseAccess as jest.Mock).mockReset().mockResolvedValue({
-  allowed: true,
-  access: 'MEMBER',
-  teamId: 'team-acme',
-  clientId: '0xclient',
-  userEmail: 'jane@harness.dev',
-  wallet: '0xkernel',
-});
+  (authorizeLicenseAccess as jest.Mock).mockReset().mockResolvedValue({
+    allowed: true,
+    access: 'MEMBER',
+    clientId: '0xclient',
+    caller: { email: 'jane@harness.dev', teamId: 'team-acme' },
+  });
 ```
 
 - Append inside the `describe`:
 
 ```ts
-const auditLines = (spy: jest.SpyInstance) =>
-  spy.mock.calls
-    .map(([m]) => String(m))
-    .filter((m) => m.includes('"event":"data_proxy"'))
-    .map((m) => JSON.parse(m));
+  const auditLines = (spy: jest.SpyInstance) =>
+    spy.mock.calls.map(([m]) => String(m)).filter((m) => m.includes('"event":"data_proxy"')).map((m) => JSON.parse(m));
 
-it('refuses with the decision, includes memberOfTeam, never exchanges, and logs it', async () => {
-  const info = jest.spyOn(console, 'info').mockImplementation(() => {});
-  (authorizeLicenseAccess as jest.Mock).mockResolvedValue({
-    allowed: false,
-    status: 403,
-    code: 'NO_ACCESS',
-    message: 'You no longer have access to this license.',
-    memberOfTeam: false,
+  it('refuses with the decision, includes memberOfTeam, never exchanges, and logs it', async () => {
+    const info = jest.spyOn(console, 'info').mockImplementation(() => {});
+    (authorizeLicenseAccess as jest.Mock).mockResolvedValue({
+      allowed: false,
+      status: 403,
+      code: 'NO_ACCESS',
+      message: 'You no longer have access to this license.',
+      memberOfTeam: false,
+    });
+    const res = await telemetry(req({ asset: VEHICLE, query: 'query { x }' }));
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: 'You no longer have access to this license.',
+      code: 'NO_ACCESS',
+      memberOfTeam: false,
+    });
+    expect(getSubjectJwt).not.toHaveBeenCalled();
+    expect(auditLines(info)).toEqual([
+      expect.objectContaining({ outcome: 'refused', code: 'NO_ACCESS', asset: VEHICLE }),
+    ]);
+    info.mockRestore();
   });
-  const res = await telemetry(req({ asset: VEHICLE, query: 'query { x }' }));
-  expect(res.status).toBe(403);
-  expect(await res.json()).toEqual({
-    error: 'You no longer have access to this license.',
-    code: 'NO_ACCESS',
-    memberOfTeam: false,
-  });
-  expect(getSubjectJwt).not.toHaveBeenCalled();
-  expect(auditLines(info)).toEqual([
-    expect.objectContaining({ outcome: 'refused', code: 'NO_ACCESS', asset: VEHICLE }),
-  ]);
-  info.mockRestore();
-});
 
-it('writes the audit line after the exchange, with the outcome', async () => {
-  const info = jest.spyOn(console, 'info').mockImplementation(() => {});
-  fetchMock.mockResolvedValueOnce(new Response('{"data":{}}', { status: 200 }));
-  const request = req({ asset: VEHICLE, query: 'query { x }' });
-  request.cookies.set('session-token', 'session.jwt');
-  await telemetry(request);
-  expect(authorizeLicenseAccess).toHaveBeenCalledWith({
-    devJwt: 'dev.jwt',
-    sessionToken: 'session.jwt',
+  it('writes the audit line after the exchange, with the outcome', async () => {
+    const info = jest.spyOn(console, 'info').mockImplementation(() => {});
+    fetchMock.mockResolvedValueOnce(new Response('{"data":{}}', { status: 200 }));
+    const request = req({ asset: VEHICLE, query: 'query { x }' });
+    request.cookies.set('session-token', 'session.jwt');
+    await telemetry(request);
+    expect(authorizeLicenseAccess).toHaveBeenCalledWith({ devJwt: 'dev.jwt', sessionToken: 'session.jwt' });
+    expect(auditLines(info)).toEqual([
+      {
+        event: 'data_proxy',
+        api: 'telemetry',
+        email: 'jane@harness.dev',
+        teamId: 'team-acme',
+        clientId: '0xclient',
+        asset: VEHICLE,
+        access: 'MEMBER',
+        outcome: 'ok',
+        status: 200,
+      },
+    ]);
+    info.mockRestore();
   });
-  expect(auditLines(info)).toEqual([
-    {
-      event: 'data_proxy',
-      api: 'telemetry',
-      email: 'jane@harness.dev',
-      wallet: '0xkernel',
-      teamId: 'team-acme',
+
+  it('names the session wallet, not an email or team, on the owner fast path', async () => {
+    const info = jest.spyOn(console, 'info').mockImplementation(() => {});
+    (authorizeLicenseAccess as jest.Mock).mockResolvedValue({
+      allowed: true,
+      access: 'OWNER',
       clientId: '0xclient',
-      asset: VEHICLE,
-      access: 'MEMBER',
-      outcome: 'ok',
-      status: 200,
-    },
-  ]);
-  info.mockRestore();
-});
+      caller: { wallet: '0xkernel' },
+    });
+    fetchMock.mockResolvedValueOnce(new Response('{"data":{}}', { status: 200 }));
+    await telemetry(req({ asset: VEHICLE, query: 'query { x }' }));
+    expect(auditLines(info)).toEqual([
+      {
+        event: 'data_proxy',
+        api: 'telemetry',
+        wallet: '0xkernel',
+        clientId: '0xclient',
+        asset: VEHICLE,
+        access: 'OWNER',
+        outcome: 'ok',
+        status: 200,
+      },
+    ]);
+    info.mockRestore();
+  });
 
-it('logs a revoked signer from token exchange and answers NO_ACCESS', async () => {
-  const info = jest.spyOn(console, 'info').mockImplementation(() => {});
-  (getSubjectJwt as jest.Mock).mockRejectedValue(
-    new SubjectJwtError(403, 'NO_ACCESS', 'You no longer have access to this license.'),
-  );
-  const res = await telemetry(req({ asset: VEHICLE, query: 'query { x }' }));
-  expect(res.status).toBe(403);
-  expect((await res.json()).code).toBe('NO_ACCESS');
-  expect(auditLines(info)[0]).toMatchObject({ outcome: 'signer_revoked', status: 403 });
-  info.mockRestore();
-});
+  it('logs a revoked signer from token exchange and answers NO_ACCESS', async () => {
+    const info = jest.spyOn(console, 'info').mockImplementation(() => {});
+    (getSubjectJwt as jest.Mock).mockRejectedValue(
+      new SubjectJwtError(403, 'NO_ACCESS', 'You no longer have access to this license.'),
+    );
+    const res = await telemetry(req({ asset: VEHICLE, query: 'query { x }' }));
+    expect(res.status).toBe(403);
+    expect((await res.json()).code).toBe('NO_ACCESS');
+    expect(auditLines(info)[0]).toMatchObject({ outcome: 'signer_revoked', status: 403 });
+    info.mockRestore();
+  });
 ```
 
 `__tests__/unit/middleware/dataPath.test.ts`:
@@ -6154,11 +5860,10 @@ describe('middleware and the data proxy', () => {
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `npx jest __tests__/unit/services/licenseAccess.test.ts __tests__/unit/services/subjectJwt.test.ts __tests__/unit/app/api/dataProxy.test.ts __tests__/unit/middleware/dataPath.test.ts`
+Run: `npx jest __tests__/unit/utils/boundedCache.test.ts __tests__/unit/services/licenseAccess.test.ts __tests__/unit/services/subjectJwt.test.ts __tests__/unit/app/api/dataProxy.test.ts __tests__/unit/middleware/dataPath.test.ts`
 Expected: FAIL:
-
-- `licenseAccess` is missing;
-- the exchange still requests `ExecuteCommands` and calls a revoked signer `NOT_SHARED`;
+- `boundedCache` and `licenseAccess` are missing;
+- the exchange still requests `ExecuteCommands`, calls a revoked signer `NOT_SHARED` and caches without a bound;
 - the proxy neither checks nor logs;
 - the middleware calls `/api/me`.
 
@@ -6167,12 +5872,12 @@ Expected: FAIL:
 `src/middleware.ts`: directly after `const token = await getToken();`, add:
 
 ```ts
-// The data proxy authorizes every request itself (owners through Identity),
-// so it must not depend on console-api's /api/me answering. The session JWT
-// was verified by getToken above.
-if (token && request.nextUrl.pathname.startsWith(`${API_PATH}/data/`)) {
-  return NextResponse.next();
-}
+  // The data proxy authorizes every request itself (owners through Identity),
+  // so it must not depend on console-api's /api/me answering. The session JWT
+  // was verified by getToken above.
+  if (token && request.nextUrl.pathname.startsWith(`${API_PATH}/data/`)) {
+    return NextResponse.next();
+  }
 ```
 
 `API_PATH` is the existing configuration constant (`'/api'` in `src/config/default.ts`), so the prefix is `/api/data/`. This goes after Task 3's `inviteRedirect` call, which only handles `/sign-in`.
@@ -6189,16 +5894,17 @@ import { jwtDecode } from 'jwt-decode';
 import configuration from '@/config';
 import { NO_LONGER_HAS_ACCESS } from '@/config/teamCopy';
 import { TEAM_DATA_ACCESS_ENABLED } from '@/utils/featureFlags';
+import { BoundedCache } from '@/utils/boundedCache';
 import type { LicenseAccess } from '@/types/team';
 
 export type AccessDecision =
   | {
       allowed: true;
       access: 'OWNER' | 'MEMBER';
-      teamId: string | null;
       clientId: string;
-      userEmail: string | null;
-      wallet: string | null;
+      // Who the audit line names (spec, Data proxy): console-api's session email
+      // and the license's team, or on the owner fast path the session wallet.
+      caller: { email: string; teamId: string | null } | { wallet: string };
     }
   | {
       allowed: false;
@@ -6211,33 +5917,9 @@ export type AccessDecision =
 const TTL_MS = 60_000;
 export const ACCESS_CACHE_MAX = 1000;
 
-// Bounded like the JWKS cache (#308): entries live 60 s, the oldest goes first
-// when full, and a failed lookup is never stored.
-class BoundedCache<T> {
-  private entries = new Map<string, { value: T; expiresAt: number }>();
-  get(key: string, now: number): T | undefined {
-    const hit = this.entries.get(key);
-    if (!hit) return undefined;
-    if (hit.expiresAt <= now) {
-      this.entries.delete(key);
-      return undefined;
-    }
-    return hit.value;
-  }
-  set(key: string, value: T, now: number) {
-    this.entries.delete(key);
-    if (this.entries.size >= ACCESS_CACHE_MAX) {
-      this.entries.delete(this.entries.keys().next().value as string);
-    }
-    this.entries.set(key, { value, expiresAt: now + TTL_MS });
-  }
-  clear() {
-    this.entries.clear();
-  }
-}
-
-const accessCache = new BoundedCache<LicenseAccess>();
-const ownerCache = new BoundedCache<string | null>();
+// Entries live 60 s; a failed lookup is never stored.
+const accessCache = new BoundedCache<LicenseAccess>(ACCESS_CACHE_MAX);
+const ownerCache = new BoundedCache<string | null>(ACCESS_CACHE_MAX);
 export const clearLicenseAccessCache = () => {
   accessCache.clear();
   ownerCache.clear();
@@ -6302,7 +5984,7 @@ export const getLicenseAccess = async (
   const hit = accessCache.get(key, deps.now());
   if (hit) return hit;
   const value = await deps.request(sessionToken, clientId);
-  accessCache.set(key, value, deps.now());
+  accessCache.set(key, value, deps.now() + TTL_MS);
   return value;
 };
 
@@ -6314,7 +5996,7 @@ export const getLicenseOwner = async (
   const hit = ownerCache.get(key, deps.now());
   if (hit !== undefined) return hit;
   const value = await deps.request(clientId);
-  ownerCache.set(key, value, deps.now());
+  ownerCache.set(key, value, deps.now() + TTL_MS);
   return value;
 };
 
@@ -6334,45 +6016,26 @@ export const authorizeLicenseAccess = async (
     dataAccessEnabled?: boolean;
   } = {},
 ): Promise<AccessDecision> => {
-  const lookupAccess =
-    deps.lookupAccess ?? ((s: string, c: string) => getLicenseAccess(s, c));
+  const lookupAccess = deps.lookupAccess ?? ((s: string, c: string) => getLicenseAccess(s, c));
   const lookupOwner = deps.lookupOwner ?? ((c: string) => getLicenseOwner(c));
   const dataAccessEnabled = deps.dataAccessEnabled ?? TEAM_DATA_ACCESS_ENABLED;
 
   const claims = decode<{ ethereum_address?: string; signer_address?: string }>(devJwt);
   if (!claims?.ethereum_address) {
-    return {
-      allowed: false,
-      status: 401,
-      code: 'DEV_JWT_INVALID',
-      message: 'The developer JWT could not be read',
-    };
+    return { allowed: false, status: 401, code: 'DEV_JWT_INVALID', message: 'The developer JWT could not be read' };
   }
   if (!sessionToken) {
-    return {
-      allowed: false,
-      status: 401,
-      code: 'NO_ACCESS',
-      message: 'Sign in again to read this license.',
-    };
+    return { allowed: false, status: 401, code: 'NO_ACCESS', message: 'Sign in again to read this license.' };
   }
   const clientId = claims.ethereum_address;
-  const wallet =
-    decode<{ ethereum_address?: string }>(sessionToken)?.ethereum_address ?? null;
+  const wallet = decode<{ ethereum_address?: string }>(sessionToken)?.ethereum_address ?? null;
 
   // Owner fast path: console-api is not needed to know a wallet owns a license.
   if (wallet) {
     try {
       const owner = await lookupOwner(clientId);
       if (owner && owner.toLowerCase() === wallet.toLowerCase()) {
-        return {
-          allowed: true,
-          access: 'OWNER',
-          teamId: null,
-          clientId,
-          userEmail: null,
-          wallet,
-        };
+        return { allowed: true, access: 'OWNER', clientId, caller: { wallet } };
       }
     } catch {
       // Identity unavailable: console-api decides.
@@ -6400,14 +6063,7 @@ export const authorizeLicenseAccess = async (
   }
 
   if (access.access === 'OWNER') {
-    return {
-      allowed: true,
-      access: 'OWNER',
-      teamId: access.teamId,
-      clientId,
-      userEmail: access.userEmail,
-      wallet,
-    };
+    return { allowed: true, access: 'OWNER', clientId, caller: { email: access.userEmail, teamId: access.teamId } };
   }
   const signer = claims.signer_address?.toLowerCase();
   if (
@@ -6417,14 +6073,7 @@ export const authorizeLicenseAccess = async (
     access.signerAddress &&
     signer === access.signerAddress.toLowerCase()
   ) {
-    return {
-      allowed: true,
-      access: 'MEMBER',
-      teamId: access.teamId,
-      clientId,
-      userEmail: access.userEmail,
-      wallet,
-    };
+    return { allowed: true, access: 'MEMBER', clientId, caller: { email: access.userEmail, teamId: access.teamId } };
   }
   return {
     allowed: false,
@@ -6438,9 +6087,65 @@ export const authorizeLicenseAccess = async (
 };
 ```
 
-`src/services/subjectJwt.ts`:
+`src/utils/boundedCache.ts`:
 
-- Add `import { NO_LONGER_HAS_ACCESS } from '@/config/teamCopy';`.
+```ts
+// A Map with a size cap (the oldest entry goes first) and a per-entry expiry,
+// so a server cache stays bounded however many sessions, licenses or assets
+// pass through it (like the JWKS key set, #308).
+export class BoundedCache<T> {
+  private entries = new Map<string, { value: T; expiresAt: number }>();
+
+  constructor(private readonly max: number) {}
+
+  get(key: string, now: number): T | undefined {
+    const hit = this.entries.get(key);
+    if (!hit) return undefined;
+    if (hit.expiresAt <= now) {
+      this.entries.delete(key);
+      return undefined;
+    }
+    return hit.value;
+  }
+
+  set(key: string, value: T, expiresAt: number) {
+    this.entries.delete(key);
+    if (this.entries.size >= this.max) {
+      this.entries.delete(this.entries.keys().next().value as string);
+    }
+    this.entries.set(key, { value, expiresAt });
+  }
+
+  clear() {
+    this.entries.clear();
+  }
+
+  get size() {
+    return this.entries.size;
+  }
+}
+```
+
+`src/services/subjectJwt.ts`:
+- Add `import { NO_LONGER_HAS_ACCESS } from '@/config/teamCopy';` and `import { BoundedCache } from '@/utils/boundedCache';`.
+- Bound the token cache. Replace `type Cached = { token: string; expiresAt: number };` and `const cache = new Map<string, Cached>();` with:
+
+```ts
+export const SUBJECT_JWT_CACHE_MAX = 1000;
+// A token per (developer JWT, asset), kept until it expires; bounded so a long
+// running server doesn't grow with every asset ever read.
+const cache = new BoundedCache<string>(SUBJECT_JWT_CACHE_MAX);
+```
+
+- In `getSubjectJwt`, replace the two hit lines (`const hit = cache.get(key);` and the `if (hit && hit.expiresAt > …)` after it) with:
+
+```ts
+  // An entry within EXPIRY_SKEW_MS of expiring counts as expired.
+  const hit = cache.get(key, Date.now() + EXPIRY_SKEW_MS);
+  if (hit) return hit;
+```
+
+- In `exchangeFor`, replace `cache.set(key, { token, expiresAt: expiryOf(token) });` with `cache.set(key, token, expiryOf(token));`. `clearSubjectJwtCache` keeps calling `cache.clear()`.
 - Extend `export type SubjectJwtCode = 'DEV_JWT_INVALID' | 'NOT_SHARED' | 'NO_ACCESS' | 'UPSTREAM';`.
 - Add above `vehiclePermissions`:
 
@@ -6454,33 +6159,28 @@ export const PROXY_PRIVILEGE_IDS = [1, 3, 4, 7, 8];
 - In `vehiclePermissions`, filter the decoded IDs:
 
 ```ts
-const names = hex
-  ? decodeSacdPermissions(hex)
-      .filter((id) => PROXY_PRIVILEGE_IDS.includes(id))
-      .map((id) => PERMISSION_NAMES[id])
-      .filter((n): n is string => !!n)
-  : [];
+  const names = hex
+    ? decodeSacdPermissions(hex)
+        .filter((id) => PROXY_PRIVILEGE_IDS.includes(id))
+        .map((id) => PERMISSION_NAMES[id])
+        .filter((n): n is string => !!n)
+    : [];
 ```
 
 - In `exchangeFor`, replace the `res.status === 403` branch with:
 
 ```ts
-if (res.status === 403) {
-  const reason = await res.text();
-  // Token exchange refuses a disabled signer with this exact message (C2).
-  if (reason.includes('signer no longer authorized for this license')) {
-    throw new SubjectJwtError(403, 'NO_ACCESS', NO_LONGER_HAS_ACCESS);
+  if (res.status === 403) {
+    const reason = await res.text();
+    // Token exchange refuses a disabled signer with this exact message (C2).
+    if (reason.includes('signer no longer authorized for this license')) {
+      throw new SubjectJwtError(403, 'NO_ACCESS', NO_LONGER_HAS_ACCESS);
+    }
+    throw new SubjectJwtError(403, 'NOT_SHARED', 'This asset is not shared with the license');
   }
-  throw new SubjectJwtError(
-    403,
-    'NOT_SHARED',
-    'This asset is not shared with the license',
-  );
-}
 ```
 
 `src/app/api/data/proxy.ts`:
-
 - Add the imports:
 
 ```ts
@@ -6505,15 +6205,10 @@ type Outcome =
 const audit = (entry: Record<string, unknown> & { outcome: Outcome }) =>
   console.info(JSON.stringify({ event: 'data_proxy', ...entry }));
 
-const who = (
-  api: DataApi,
-  asset: string,
-  decision: Extract<AccessDecision, { allowed: true }>,
-) => ({
+// The email and team, or on the owner fast path the session wallet.
+const who = (api: DataApi, asset: string, decision: Extract<AccessDecision, { allowed: true }>) => ({
   api,
-  email: decision.userEmail,
-  wallet: decision.wallet,
-  teamId: decision.teamId,
+  ...decision.caller,
   clientId: decision.clientId,
   asset,
   access: decision.access,
@@ -6574,13 +6269,13 @@ const EXCHANGE_OUTCOME: Record<string, Outcome> = {
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: `npx jest __tests__/unit/services/licenseAccess.test.ts __tests__/unit/services/subjectJwt.test.ts __tests__/unit/app/api/dataProxy.test.ts __tests__/unit/middleware && npx tsc --noEmit -p . 2>&1 | head -20`
+Run: `npx jest __tests__/unit/utils/boundedCache.test.ts __tests__/unit/services/licenseAccess.test.ts __tests__/unit/services/subjectJwt.test.ts __tests__/unit/app/api/dataProxy.test.ts __tests__/unit/middleware && npx tsc --noEmit -p . 2>&1 | head -20`
 Expected: PASS. `tsc` reports nothing new.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/middleware.ts src/services/licenseAccess.ts src/services/subjectJwt.ts src/app/api/data/proxy.ts __tests__/unit/services/licenseAccess.test.ts __tests__/unit/services/subjectJwt.test.ts __tests__/unit/app/api/dataProxy.test.ts __tests__/unit/middleware/dataPath.test.ts
+git add src/middleware.ts src/utils/boundedCache.ts src/services/licenseAccess.ts src/services/subjectJwt.ts src/app/api/data/proxy.ts __tests__/unit/utils/boundedCache.test.ts __tests__/unit/services/licenseAccess.test.ts __tests__/unit/services/subjectJwt.test.ts __tests__/unit/app/api/dataProxy.test.ts __tests__/unit/middleware/dataPath.test.ts
 git commit -m "feat(teams): data proxy with an owner fast path, member key check, C9 privileges and post-exchange audit"
 ```
 
@@ -6614,16 +6309,16 @@ git commit -m "feat(teams): data proxy with an owner fast path, member key check
     - React Query key `['team-members', activeTeamId]`.
     - Failures throw `TeamApiError`, so `TeamProvider` sees `NOT_A_MEMBER`.
     - `mergeMember(list, member)` is exported.
-  - **`useTeamLicenses()`:** `{ licenses: TeamLicense[], loading, refetch }`, every license of the team owner (not only ones with a redirect URI), sharing Apollo's cache with `useValidDeveloperLicenses`. `TeamLicense = { tokenId, clientId, label, redirectUri: string | null, signers: string[] }`; the signers are lowercase.
+  - **`useTeamLicenses()`:** `{ licenses: TeamLicense[], loading, error, refetch }`, every license of the team owner (not only ones with a redirect URI), sharing Apollo's cache with `useValidDeveloperLicenses`. `TeamLicense = { tokenId, clientId, label, redirectUri: string | null, signers: string[] }`; the signers are lowercase. `licenses` is `[]` while loading and on error, so nothing may read "not on-chain" from it until it loaded cleanly.
   - **`memberLicenseKeys(member, licenses): MemberLicenseKey[]`:**
-    - `MemberLicenseKey = { tokenId, licenseLabel, signer, onChain, registered }`;
+    - `MemberLicenseKey = { tokenId, licenseLabel, signer, onChain, registered, licenseKnown }`, where `licenseKnown` says the license is in the loaded list (only then does `onChain: false` mean anything);
     - it combines every `memberKeys` entry (`registered: true`, any wallet the member ever used) with the member's current wallet wherever the chain lists it;
     - addresses compare case-insensitively.
   - `memberAddresses(member): string[]` returns lowercase addresses.
   - **`grantCandidates(member, licenses): { license, onChain }[]`:** licenses with a redirect URI where the member's current wallet has no recorded key. Empty unless the member is an accepted `MEMBER` with a linked wallet. `onChain: true` marks a key already enabled whose registry write failed, so it only needs recording.
   - `memberStatus(member, now?)` returns `{ tone, label }`: `Active`, `Invited`, `Invite expired`, `Removed` (`REVOKED`) or `Left`.
   - `inviteSendError(failure, email)`: C7/C8 invite errors; console-api's message for `RATE_LIMITED`, `NOT_A_MEMBER` and anything unknown.
-  - **`MembersTable`:** `{ members, licenses, isOwner, showDataAccess, handlers? }`.
+  - **`MembersTable`:** `{ members, licenses, licensesReady?, isOwner, showDataAccess, handlers? }`. Until `licensesReady` the Data access cell shows `—`.
     - `handlers: Partial<Record<'grant' | 'revoke' | 'remove' | 'resend' | 'cancel', (m) => void>>`. A menu item appears only when its handler exists; Tasks 14 and 15 add `grant`, `revoke` and `remove`.
     - Menu labels follow the spec: **Grant**, **Revoke** (**Retry** for a removed member's leftover keys), **Remove**, **Resend** and **Cancel invite**.
     - The Data access cell reads `Still a signer on {licenses}` for a removed or departed member whose keys are still on-chain, and `Needs to sign in once` for a member without a verified wallet.
@@ -6634,7 +6329,7 @@ git commit -m "feat(teams): data proxy with an owner fast path, member key check
     - the owner's empty state;
     - the table.
 
-    Owners get Invite; members get Leave team.
+    Owners get Invite; members get Leave team. If the team's licenses can't load, an alert with Try again says data access can't be changed right now; Tasks 14 and 15 offer Grant, Revoke and Remove only once they have loaded cleanly.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -6683,9 +6378,7 @@ describe('useTeamMembers', () => {
     const { result } = renderHook(() => useTeamMembers(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.members).toHaveLength(1));
     result.current.upsertMember(member('m-2', 'b@harness.dev'));
-    await waitFor(() =>
-      expect(result.current.members.map((m) => m.id)).toEqual(['m-1', 'm-2']),
-    );
+    await waitFor(() => expect(result.current.members.map((m) => m.id)).toEqual(['m-1', 'm-2']));
   });
 
   it('fails with a TeamApiError so TeamProvider can see NOT_A_MEMBER', async () => {
@@ -6703,9 +6396,7 @@ describe('useTeamMembers', () => {
 
   it('mergeMember replaces by id and appends new members', () => {
     const list = [member('m-1', 'a@harness.dev')];
-    expect(mergeMember(list, { ...list[0], status: 'ACCEPTED' })[0].status).toBe(
-      'ACCEPTED',
-    );
+    expect(mergeMember(list, { ...list[0], status: 'ACCEPTED' })[0].status).toBe('ACCEPTED');
     expect(mergeMember(list, member('m-2', 'b@harness.dev'))).toHaveLength(2);
   });
 });
@@ -6725,27 +6416,9 @@ import type { TeamMember } from '@/types/team';
 const CURRENT = '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6';
 const OLD = '0x7a3C9E1f2b4d6a8C0E1f3a5B7c9d1E2F4A6B8C0d';
 const LICENSES: TeamLicense[] = [
-  {
-    tokenId: 42,
-    clientId: '0xaaa',
-    label: 'Harness Fleet',
-    redirectUri: 'https://x',
-    signers: [CURRENT.toLowerCase()],
-  },
-  {
-    tokenId: 43,
-    clientId: '0xbbb',
-    label: 'Harness Labs',
-    redirectUri: 'https://y',
-    signers: [OLD.toLowerCase()],
-  },
-  {
-    tokenId: 44,
-    clientId: '0xccc',
-    label: 'Harness Old',
-    redirectUri: null,
-    signers: [],
-  },
+  { tokenId: 42, clientId: '0xaaa', label: 'Harness Fleet', redirectUri: 'https://x', signers: [CURRENT.toLowerCase()] },
+  { tokenId: 43, clientId: '0xbbb', label: 'Harness Labs', redirectUri: 'https://y', signers: [OLD.toLowerCase()] },
+  { tokenId: 44, clientId: '0xccc', label: 'Harness Old', redirectUri: null, signers: [] },
 ];
 const SAM: TeamMember = {
   id: 'm-sam',
@@ -6767,36 +6440,14 @@ const SAM: TeamMember = {
 describe('memberLicenseKeys', () => {
   it('covers keys under an old wallet and says which are still on-chain', () => {
     expect(memberLicenseKeys(SAM, LICENSES)).toEqual([
-      {
-        tokenId: 42,
-        licenseLabel: 'Harness Fleet',
-        signer: CURRENT,
-        onChain: true,
-        registered: true,
-      },
-      {
-        tokenId: 43,
-        licenseLabel: 'Harness Labs',
-        signer: OLD,
-        onChain: true,
-        registered: true,
-      },
-      {
-        tokenId: 44,
-        licenseLabel: 'Harness Old',
-        signer: OLD,
-        onChain: false,
-        registered: true,
-      },
+      { tokenId: 42, licenseLabel: 'Harness Fleet', signer: CURRENT, onChain: true, registered: true, licenseKnown: true },
+      { tokenId: 43, licenseLabel: 'Harness Labs', signer: OLD, onChain: true, registered: true, licenseKnown: true },
+      { tokenId: 44, licenseLabel: 'Harness Old', signer: OLD, onChain: false, registered: true, licenseKnown: true },
     ]);
   });
 
   it('adds the current wallet where the chain lists it without a registry row, any case', () => {
-    const unregistered = {
-      ...SAM,
-      signerAddress: CURRENT.toLowerCase() as `0x${string}`,
-      memberKeys: [],
-    };
+    const unregistered = { ...SAM, signerAddress: CURRENT.toLowerCase() as `0x${string}`, memberKeys: [] };
     expect(memberLicenseKeys(unregistered, LICENSES)).toEqual([
       {
         tokenId: 42,
@@ -6804,19 +6455,18 @@ describe('memberLicenseKeys', () => {
         signer: CURRENT.toLowerCase(),
         onChain: true,
         registered: false,
+        licenseKnown: true,
       },
     ]);
   });
 
-  it('names a license the team no longer owns by its token id', () => {
+  it('marks a key whose license is not in the loaded list, so nothing reads it as off-chain', () => {
     const moved = { ...SAM, memberKeys: [{ licenseTokenId: 99, signerAddress: OLD }] };
     expect(memberLicenseKeys(moved, LICENSES)).toContainEqual(
-      expect.objectContaining({
-        tokenId: 99,
-        licenseLabel: 'License #99',
-        onChain: false,
-      }),
+      expect.objectContaining({ tokenId: 99, licenseLabel: 'License #99', licenseKnown: false }),
     );
+    // Licenses still loading (or failed): every registry key is unknown.
+    expect(memberLicenseKeys(SAM, []).every((k) => !k.licenseKnown)).toBe(true);
   });
 
   it('lists every address the member used, lowercase and unique', () => {
@@ -6827,9 +6477,7 @@ describe('memberLicenseKeys', () => {
 describe('grantCandidates', () => {
   it('offers licenses with a redirect URI where the current wallet has no recorded key', () => {
     // 42: recorded under CURRENT. 43: recorded only under OLD. 44: no redirect URI.
-    expect(grantCandidates(SAM, LICENSES)).toEqual([
-      { license: LICENSES[1], onChain: false },
-    ]);
+    expect(grantCandidates(SAM, LICENSES)).toEqual([{ license: LICENSES[1], onChain: false }]);
   });
 
   it('offers an on-chain key whose registry write failed, marked onChain', () => {
@@ -6842,9 +6490,7 @@ describe('grantCandidates', () => {
 
   it('offers nothing to a member without a linked wallet, an invite or a former member', () => {
     expect(grantCandidates({ ...SAM, signerAddress: null }, LICENSES)).toEqual([]);
-    expect(
-      grantCandidates({ ...SAM, status: 'PENDING', userId: null }, LICENSES),
-    ).toEqual([]);
+    expect(grantCandidates({ ...SAM, status: 'PENDING', userId: null }, LICENSES)).toEqual([]);
     expect(grantCandidates({ ...SAM, status: 'LEFT' }, LICENSES)).toEqual([]);
   });
 });
@@ -6871,15 +6517,7 @@ const base = {
   inviteExpiresAt: null,
 };
 const MEMBERS: TeamMember[] = [
-  {
-    ...base,
-    id: 'm-owner',
-    userId: 'u-jane',
-    name: 'Jane Harness',
-    email: 'jane@harness.dev',
-    role: 'OWNER',
-    status: 'ACCEPTED',
-  },
+  { ...base, id: 'm-owner', userId: 'u-jane', name: 'Jane Harness', email: 'jane@harness.dev', role: 'OWNER', status: 'ACCEPTED' },
   {
     ...base,
     id: 'm-sam',
@@ -6890,13 +6528,7 @@ const MEMBERS: TeamMember[] = [
     signerAddress: SAM_WALLET,
     memberKeys: [{ licenseTokenId: 42, signerAddress: SAM_WALLET }],
   },
-  {
-    ...base,
-    id: 'm-ana',
-    email: 'ana@harness.dev',
-    status: 'PENDING',
-    inviteExpiresAt: '2099-01-01T00:00:00Z',
-  },
+  { ...base, id: 'm-ana', email: 'ana@harness.dev', status: 'PENDING', inviteExpiresAt: '2099-01-01T00:00:00Z' },
   {
     ...base,
     id: 'm-leo',
@@ -6908,20 +6540,8 @@ const MEMBERS: TeamMember[] = [
   },
 ];
 const LICENSES: TeamLicense[] = [
-  {
-    tokenId: 42,
-    clientId: '0xaaa',
-    label: 'Harness Fleet',
-    redirectUri: 'https://x',
-    signers: [SAM_WALLET.toLowerCase()],
-  },
-  {
-    tokenId: 43,
-    clientId: '0xbbb',
-    label: 'Harness Labs',
-    redirectUri: 'https://y',
-    signers: [],
-  },
+  { tokenId: 42, clientId: '0xaaa', label: 'Harness Fleet', redirectUri: 'https://x', signers: [SAM_WALLET.toLowerCase()] },
+  { tokenId: 43, clientId: '0xbbb', label: 'Harness Labs', redirectUri: 'https://y', signers: [] },
 ];
 const handlers = {
   grant: jest.fn(),
@@ -6943,9 +6563,7 @@ const show = (props: Partial<React.ComponentProps<typeof MembersTable>> = {}) =>
   );
 const menu = (email: string) => {
   fireEvent.click(screen.getByRole('button', { name: `Actions for ${email}` }));
-  return within(screen.getByRole('menu'))
-    .getAllByRole('menuitem')
-    .map((i) => i.textContent);
+  return within(screen.getByRole('menu')).getAllByRole('menuitem').map((i) => i.textContent);
 };
 
 describe('MembersTable', () => {
@@ -6970,17 +6588,9 @@ describe('MembersTable', () => {
 
   it('collapses row actions into one ⋯ menu and hides low-priority columns on phones', () => {
     show();
-    expect(screen.getByRole('columnheader', { name: 'Role' })).toHaveClass(
-      'hidden',
-      'md:table-cell',
-    );
-    expect(screen.getByRole('columnheader', { name: 'Data access' })).toHaveClass(
-      'hidden',
-      'md:table-cell',
-    );
-    expect(
-      screen.queryByRole('button', { name: 'Actions for jane@harness.dev' }),
-    ).toBeNull();
+    expect(screen.getByRole('columnheader', { name: 'Role' })).toHaveClass('hidden', 'md:table-cell');
+    expect(screen.getByRole('columnheader', { name: 'Data access' })).toHaveClass('hidden', 'md:table-cell');
+    expect(screen.queryByRole('button', { name: 'Actions for jane@harness.dev' })).toBeNull();
     expect(menu('sam@harness.dev')).toEqual(['Grant', 'Revoke', 'Remove']);
   });
 
@@ -6995,20 +6605,8 @@ describe('MembersTable', () => {
   it("shows a removed member who is still a signer, with Retry, and a member who hasn't linked a wallet", () => {
     show({
       members: [
-        {
-          ...MEMBERS[3],
-          id: 'm-rex',
-          email: 'rex@harness.dev',
-          status: 'REVOKED',
-          memberKeys: [{ licenseTokenId: 42, signerAddress: SAM_WALLET }],
-        },
-        {
-          ...MEMBERS[1],
-          id: 'm-new',
-          email: 'new@harness.dev',
-          signerAddress: null,
-          memberKeys: [],
-        },
+        { ...MEMBERS[3], id: 'm-rex', email: 'rex@harness.dev', status: 'REVOKED', memberKeys: [{ licenseTokenId: 42, signerAddress: SAM_WALLET }] },
+        { ...MEMBERS[1], id: 'm-new', email: 'new@harness.dev', signerAddress: null, memberKeys: [] },
       ],
     });
     expect(screen.getByText('Still a signer on Harness Fleet')).toBeInTheDocument();
@@ -7040,14 +6638,7 @@ import { InviteMemberModal } from '@/app/settings/components/Team/InviteMemberMo
 const onInvited = jest.fn();
 const onClose = jest.fn();
 const invite = async (email = 'sam@harness.dev') => {
-  render(
-    <InviteMemberModal
-      isOpen
-      onClose={onClose}
-      teamId="team-harness"
-      onInvited={onInvited}
-    />,
-  );
+  render(<InviteMemberModal isOpen onClose={onClose} teamId="team-harness" onInvited={onInvited} />);
   fireEvent.change(screen.getByLabelText('Email'), { target: { value: email } });
   fireEvent.click(screen.getByRole('button', { name: 'Send invite' }));
 };
@@ -7059,14 +6650,10 @@ describe('InviteMemberModal', () => {
     const member = { id: 'm-sam', email: 'sam@harness.dev' };
     (inviteTeamMember as jest.Mock).mockResolvedValue({ ok: true, data: { member } });
     await invite();
-    await waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith('Invite sent to sam@harness.dev'),
-    );
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Invite sent to sam@harness.dev'));
     expect(inviteTeamMember).toHaveBeenCalledWith('sam@harness.dev');
     expect(onInvited).toHaveBeenCalledWith(member);
-    expect(trackEvent).toHaveBeenCalledWith('Team Invite Sent', {
-      teamId: 'team-harness',
-    });
+    expect(trackEvent).toHaveBeenCalledWith('Team Invite Sent', { teamId: 'team-harness' });
     expect(onClose).toHaveBeenCalled();
   });
 
@@ -7080,11 +6667,7 @@ describe('InviteMemberModal', () => {
   });
 
   it("shows console-api's message for rate limits and an unfinished team", async () => {
-    refuse(
-      429,
-      'RATE_LIMITED',
-      'This team has sent 10 invitations in the last hour. Try again later.',
-    );
+    refuse(429, 'RATE_LIMITED', 'This team has sent 10 invitations in the last hour. Try again later.');
     await invite();
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'This team has sent 10 invitations in the last hour. Try again later.',
@@ -7094,9 +6677,7 @@ describe('InviteMemberModal', () => {
   it('shows Finish setting up your team first for NOT_A_MEMBER', async () => {
     refuse(403, 'NOT_A_MEMBER', 'Finish setting up your team first');
     await invite();
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Finish setting up your team first',
-    );
+    expect(await screen.findByRole('alert')).toHaveTextContent('Finish setting up your team first');
   });
 });
 ```
@@ -7137,9 +6718,7 @@ const confirmLeaving = () => {
   render(<LeaveTeam />);
   fireEvent.click(screen.getByRole('button', { name: 'Leave team' }));
   expect(
-    screen.getByText(
-      'Leave Acme Mobility? ops@acme.dev will be asked to revoke your data access.',
-    ),
+    screen.getByText('Leave Acme Mobility? ops@acme.dev will be asked to revoke your data access.'),
   ).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
 };
@@ -7155,19 +6734,11 @@ describe('LeaveTeam', () => {
     await waitFor(() => expect(hardNavigate).toHaveBeenCalledWith('/app'));
     expect(document.cookie).toContain('active_team=team-harness');
     expect(trackEvent).toHaveBeenCalledWith('Team Left', { teamId: 'team-acme' });
-    expect(flashAfterReload).toHaveBeenCalledWith({
-      tone: 'success',
-      message: 'You left Acme Mobility.',
-    });
+    expect(flashAfterReload).toHaveBeenCalledWith({ tone: 'success', message: 'You left Acme Mobility.' });
   });
 
   it('treats NOT_A_MEMBER as already removed', async () => {
-    (leaveTeam as jest.Mock).mockResolvedValue({
-      ok: false,
-      status: 403,
-      code: 'NOT_A_MEMBER',
-      message: 'x',
-    });
+    (leaveTeam as jest.Mock).mockResolvedValue({ ok: false, status: 403, code: 'NOT_A_MEMBER', message: 'x' });
     confirmLeaving();
     await waitFor(() => expect(reportRemoved).toHaveBeenCalled());
     expect(hardNavigate).not.toHaveBeenCalled();
@@ -7193,11 +6764,12 @@ jest.mock('@/actions/teams', () => ({
 const trackEvent = jest.fn();
 jest.mock('@/hooks/useMixPanel', () => ({ useMixPanel: () => ({ trackEvent }) }));
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
-let mockDataAccessEnabled = true;
+// Mutable test state lives in a holder (Global Constraints, Commits).
+const mockFlags = { dataAccess: true };
 jest.mock('@/utils/featureFlags', () => ({
   TEMPLATE_EDITOR_ENABLED: false,
   get TEAM_DATA_ACCESS_ENABLED() {
-    return mockDataAccessEnabled;
+    return mockFlags.dataAccess;
   },
 }));
 import { useTeam } from '@/hooks/useTeam';
@@ -7230,20 +6802,8 @@ const ANA: TeamMember = {
   status: 'PENDING',
   inviteExpiresAt: '2099-01-01T00:00:00Z',
 };
-const HARNESS = {
-  id: 'team-harness',
-  name: 'Harness Motors',
-  role: 'OWNER',
-  isPersonal: true,
-  ownerEmail: 'jane@harness.dev',
-};
-const ACME = {
-  id: 'team-acme',
-  name: 'Acme Mobility',
-  role: 'MEMBER',
-  isPersonal: false,
-  ownerEmail: 'ops@acme.dev',
-};
+const HARNESS = { id: 'team-harness', name: 'Harness Motors', role: 'OWNER', isPersonal: true, ownerEmail: 'jane@harness.dev' };
+const ACME = { id: 'team-acme', name: 'Acme Mobility', role: 'MEMBER', isPersonal: false, ownerEmail: 'ops@acme.dev' };
 const members = (over: Partial<ReturnType<typeof useTeamMembers>>) =>
   (useTeamMembers as jest.Mock).mockReturnValue({
     members: [OWNER_ROW, ANA],
@@ -7269,11 +6829,7 @@ describe('TeamSection', () => {
   beforeEach(() => {
     asOwner();
     members({});
-    (useTeamLicenses as jest.Mock).mockReturnValue({
-      licenses: [],
-      loading: false,
-      refetch: jest.fn(),
-    });
+    (useTeamLicenses as jest.Mock).mockReturnValue({ licenses: [], loading: false, refetch: jest.fn() });
   });
 
   it('shows a loader while the members load', () => {
@@ -7291,6 +6847,22 @@ describe('TeamSection', () => {
     expect(refetch).toHaveBeenCalled();
   });
 
+  it("says when the team's licenses can't load, and loads them again", () => {
+    const refetchLicenses = jest.fn();
+    (useTeamLicenses as jest.Mock).mockReturnValue({
+      licenses: [],
+      loading: false,
+      error: new Error('Identity down'),
+      refetch: refetchLicenses,
+    });
+    render(<TeamSection />);
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      "Couldn't load this team's licenses, so data access can't be changed right now.",
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Load licenses again' }));
+    expect(refetchLicenses).toHaveBeenCalled();
+  });
+
   it('invites the first teammate from the empty state', () => {
     members({ members: [OWNER_ROW] });
     render(<TeamSection />);
@@ -7299,20 +6871,13 @@ describe('TeamSection', () => {
   });
 
   it('resends an invite and tracks it', async () => {
-    (resendTeamInvite as jest.Mock).mockResolvedValue({
-      ok: true,
-      data: { member: ANA },
-    });
+    (resendTeamInvite as jest.Mock).mockResolvedValue({ ok: true, data: { member: ANA } });
     render(<TeamSection />);
     fireEvent.click(screen.getByRole('button', { name: 'Actions for ana@harness.dev' }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'Resend' }));
-    await waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith('Invite resent to ana@harness.dev'),
-    );
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Invite resent to ana@harness.dev'));
     expect(resendTeamInvite).toHaveBeenCalledWith('m-ana');
-    expect(trackEvent).toHaveBeenCalledWith('Team Invite Resent', {
-      teamId: 'team-harness',
-    });
+    expect(trackEvent).toHaveBeenCalledWith('Team Invite Resent', { teamId: 'team-harness' });
   });
 
   it('shows members the team without invite or row actions, and lets them leave', () => {
@@ -7352,8 +6917,7 @@ import { useTeam } from '@/hooks/useTeam';
 import { unwrap } from '@/utils/teamApiError';
 import type { TeamMember } from '@/types/team';
 
-export const teamMembersKey = (teamId: string | null) =>
-  ['team-members', teamId] as const;
+export const teamMembersKey = (teamId: string | null) => ['team-members', teamId] as const;
 
 export const mergeMember = (list: TeamMember[], member: TeamMember): TeamMember[] =>
   list.some((m) => m.id === member.id)
@@ -7374,9 +6938,7 @@ export const useTeamMembers = () => {
   });
   const upsertMember = useCallback(
     (member: TeamMember) =>
-      queryClient.setQueryData<TeamMember[]>(key, (prev = []) =>
-        mergeMember(prev, member),
-      ),
+      queryClient.setQueryData<TeamMember[]>(key, (prev = []) => mergeMember(prev, member)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [queryClient, activeTeam?.id],
   );
@@ -7423,15 +6985,15 @@ const toTeamLicense = (node: DeveloperLicenseForWebhook): TeamLicense => ({
 // useValidDeveloperLicenses, so one refetch updates both.
 export const useTeamLicenses = () => {
   const { ownerAddress } = useTeam();
-  const { data, loading, refetch } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
+  const { data, loading, error, refetch } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
     variables: { owner: ownerAddress ?? '' },
     skip: !ownerAddress,
   });
   const licenses = useMemo(
-    () => (data?.developerLicenses.nodes ?? []).map(toTeamLicense),
-    [data],
+    () => (error ? [] : (data?.developerLicenses.nodes ?? []).map(toTeamLicense)),
+    [data, error],
   );
-  return { licenses, loading: loading || !ownerAddress, refetch };
+  return { licenses, loading: loading || !ownerAddress, error, refetch };
 };
 ```
 
@@ -7449,6 +7011,9 @@ export interface MemberLicenseKey {
   onChain: boolean;
   // console-api holds an enabled MEMBER registry row for it (memberKeys).
   registered: boolean;
+  // The license is in the loaded list. Only then does onChain: false mean the
+  // chain no longer lists the key; never stamp or revoke an unknown one.
+  licenseKnown: boolean;
 }
 
 // Every key a member holds or held on this team's licenses: their registry
@@ -7474,6 +7039,7 @@ export const memberLicenseKeys = (
       signer,
       onChain: !!license?.signers.includes(signer.toLowerCase()),
       registered,
+      licenseKnown: !!license,
     });
   };
   member.memberKeys.forEach((k) => add(k.licenseTokenId, k.signerAddress, true));
@@ -7494,6 +7060,11 @@ export const memberAddresses = (member: TeamMember): string[] => [
   ),
 ];
 
+// Keys Revoke or Remove can act on: on-chain, or recorded on a license that
+// loaded (a stamp alone finishes an earlier revoke).
+export const actionableKeys = (keys: MemberLicenseKey[]) =>
+  keys.filter((k) => k.licenseKnown && (k.onChain || k.registered));
+
 export interface GrantCandidate {
   license: TeamLicense;
   // Already enabled on-chain; only the registry write is missing.
@@ -7509,12 +7080,7 @@ export const grantCandidates = (
   licenses: TeamLicense[],
 ): GrantCandidate[] => {
   const signer = member.signerAddress?.toLowerCase();
-  if (
-    member.status !== 'ACCEPTED' ||
-    member.role !== 'MEMBER' ||
-    !signer ||
-    !member.userId
-  )
+  if (member.status !== 'ACCEPTED' || member.role !== 'MEMBER' || !signer || !member.userId)
     return [];
   const recorded = new Set(
     member.memberKeys
@@ -7595,10 +7161,7 @@ export interface RowAction {
 
 // VehicleDetailsTable's ⋯ pattern: one 32px button per row, so the action cell
 // fits a 390px phone however many actions a row has (DESIGN.md, Table).
-export const RowActionsMenu: FC<{ label: string; items: RowAction[] }> = ({
-  label,
-  items,
-}) => {
+export const RowActionsMenu: FC<{ label: string; items: RowAction[] }> = ({ label, items }) => {
   const [open, setOpen] = useState(false);
   if (!items.length) return null;
   return (
@@ -7665,18 +7228,18 @@ import { StatusChip } from '@/components/StatusChip';
 import { formatList } from '@/config/teamCopy';
 import type { TeamLicense } from '@/hooks/useTeamLicenses';
 import type { TeamMember } from '@/types/team';
-import { grantCandidates, memberLicenseKeys } from './memberKeys';
+import { actionableKeys, grantCandidates, memberLicenseKeys } from './memberKeys';
 import { memberStatus } from './memberStatus';
 import { RowActionsMenu, type RowAction } from '@/components/RowActionsMenu';
 
 export type MemberAction = 'grant' | 'revoke' | 'remove' | 'resend' | 'cancel';
-export type MemberActionHandlers = Partial<
-  Record<MemberAction, (member: TeamMember) => void>
->;
+export type MemberActionHandlers = Partial<Record<MemberAction, (member: TeamMember) => void>>;
 
 interface Props {
   members: TeamMember[];
   licenses: TeamLicense[];
+  // The licenses loaded cleanly; until then no cell says what is on-chain.
+  licensesReady?: boolean;
   isOwner: boolean;
   // Owner and flag on (C5).
   showDataAccess: boolean;
@@ -7688,18 +7251,16 @@ export const displayName = (member: TeamMember) => member.name ?? member.email;
 const NameCell = (member: TeamMember) => (
   <div className="flex flex-col">
     <span className="text-body-sm text-ink">{displayName(member)}</span>
-    {member.name && (
-      <span className="break-all text-label text-muted">{member.email}</span>
-    )}
+    {member.name && <span className="break-all text-label text-muted">{member.email}</span>}
   </div>
 );
 
 const chip = 'rounded-chip bg-highest px-2 py-0.5 text-label text-muted';
 
-const DataAccessCell = (member: TeamMember, licenses: TeamLicense[]) => {
-  if (member.role === 'OWNER')
-    return <span className="text-body-sm text-muted">Owner</span>;
-  const keys = memberLicenseKeys(member, licenses);
+const DataAccessCell = (member: TeamMember, licenses: TeamLicense[], ready: boolean) => {
+  if (member.role === 'OWNER') return <span className="text-body-sm text-muted">Owner</span>;
+  if (!ready) return <span className="text-body-sm text-muted">—</span>;
+  const keys = memberLicenseKeys(member, licenses).filter((k) => k.licenseKnown);
   const live = keys.filter((k) => k.onChain);
   // Spec: "Removed — still a signer on {licenses}" / "Left — still a signer".
   if (live.length && member.status !== 'ACCEPTED')
@@ -7717,9 +7278,7 @@ const DataAccessCell = (member: TeamMember, licenses: TeamLicense[]) => {
           </span>
         ))}
         {/* On-chain without a registry row: console-api answers NONE until it is recorded. */}
-        {live.some((k) => !k.registered) && (
-          <StatusChip tone="pending">Not recorded</StatusChip>
-        )}
+        {live.some((k) => !k.registered) && <StatusChip tone="pending">Not recorded</StatusChip>}
       </div>
     );
   if (keys.some((k) => k.registered))
@@ -7751,7 +7310,7 @@ const actionsFor = (
   if (showDataAccess && grantCandidates(member, licenses).length) add('grant', 'Grant');
   // Revoking stays available with the flag off: keys granted earlier still work.
   // A removed member's leftover keys read "Retry" (spec: "Removed — … Retry").
-  if (memberLicenseKeys(member, licenses).length)
+  if (actionableKeys(memberLicenseKeys(member, licenses)).length)
     add('revoke', member.status === 'REVOKED' ? 'Retry' : 'Revoke', true);
   if (member.status === 'ACCEPTED') add('remove', 'Remove', true);
   return items;
@@ -7760,6 +7319,7 @@ const actionsFor = (
 export const MembersTable: FC<Props> = ({
   members,
   licenses,
+  licensesReady = true,
   isOwner,
   showDataAccess,
   handlers,
@@ -7771,9 +7331,7 @@ export const MembersTable: FC<Props> = ({
       label: 'Role',
       className: 'hidden md:table-cell',
       render: (m: TeamMember) => (
-        <span className="text-body-sm text-fg">
-          {m.role === 'OWNER' ? 'Owner' : 'Member'}
-        </span>
+        <span className="text-body-sm text-fg">{m.role === 'OWNER' ? 'Owner' : 'Member'}</span>
       ),
     },
     {
@@ -7790,7 +7348,7 @@ export const MembersTable: FC<Props> = ({
             name: 'memberKeys',
             label: 'Data access',
             className: 'hidden md:table-cell',
-            render: (m: TeamMember) => DataAccessCell(m, licenses),
+            render: (m: TeamMember) => DataAccessCell(m, licenses, licensesReady),
           },
         ]
       : []),
@@ -7877,8 +7435,8 @@ export const InviteMemberModal: FC<Props> = ({ isOpen, onClose, teamId, onInvite
           Invite a team member
         </Title>
         <p className="text-body-sm text-muted">
-          They&apos;ll see this team&apos;s licenses in the console. You choose separately
-          who gets data access.
+          They&apos;ll see this team&apos;s licenses in the console. You choose separately who
+          gets data access.
         </p>
         <label htmlFor="invite-email" className="text-label text-muted">
           Email
@@ -7990,10 +7548,18 @@ import { MembersTable, type MemberActionHandlers } from './MembersTable';
 const TeamSectionComponent: FC = () => {
   const { activeTeam, isOwner, isLoading: teamLoading } = useTeam();
   const { members, isLoading, isError, refetch, upsertMember } = useTeamMembers();
-  const { licenses } = useTeamLicenses();
+  const {
+    licenses,
+    loading: licensesLoading,
+    error: licensesError,
+    refetch: refetchLicenses,
+  } = useTeamLicenses();
   const { trackEvent } = useMixPanel();
   const [inviteOpen, setInviteOpen] = useState(false);
   const showDataAccess = isOwner && TEAM_DATA_ACCESS_ENABLED;
+  // Grant, Revoke and Remove read on-chain state from the licenses: only once
+  // they loaded cleanly (an empty list while loading would read as off-chain).
+  const licensesReady = !licensesLoading && !licensesError;
 
   const handlers: MemberActionHandlers = {
     resend: async (member) => {
@@ -8004,9 +7570,7 @@ const TeamSectionComponent: FC = () => {
         toast.success(`Invite resent to ${member.email}`);
       } else {
         toast.error(
-          result
-            ? inviteSendError(result, member.email)
-            : "We couldn't resend the invite. Try again.",
+          result ? inviteSendError(result, member.email) : "We couldn't resend the invite. Try again.",
         );
       }
     },
@@ -8038,8 +7602,8 @@ const TeamSectionComponent: FC = () => {
   } else if (isOwner && members.every((m) => m.role === 'OWNER')) {
     body = (
       <p className="text-body-sm text-muted">
-        Invite teammates to share this team&apos;s licenses with them. You choose who gets
-        data access.
+        Invite teammates to share this team&apos;s licenses with them. You choose who gets data
+        access.
       </p>
     );
   } else {
@@ -8047,6 +7611,7 @@ const TeamSectionComponent: FC = () => {
       <MembersTable
         members={members}
         licenses={licenses}
+        licensesReady={licensesReady}
         isOwner={isOwner}
         showDataAccess={showDataAccess}
         handlers={isOwner ? handlers : undefined}
@@ -8060,6 +7625,17 @@ const TeamSectionComponent: FC = () => {
         {isOwner && <Button onClick={() => setInviteOpen(true)}>Invite member</Button>}
       </SectionHeader>
       {body}
+      {isOwner && licensesError && (
+        <div className="flex flex-col items-start gap-2">
+          <p role="alert" className="text-body-sm text-negative">
+            Couldn&apos;t load this team&apos;s licenses, so data access can&apos;t be changed
+            right now.
+          </p>
+          <Button variant="secondary" onClick={() => void refetchLicenses()}>
+            Load licenses again
+          </Button>
+        </div>
+      )}
       <LeaveTeam />
       {isOwner && activeTeam && (
         <InviteMemberModal
@@ -8114,7 +7690,6 @@ git rm __tests__/unit/pages/app/settings/TeamManagement.test.tsx __tests__/unit/
 ```
 
 Then:
-
 - `src/hooks/index.ts`: delete `export * from './useTeamCollaborators';`.
 - `src/types/team.ts`: delete `TeamRoles`, `TeamRolesLabels`, `InvitationStatuses`, `InvitationStatusLabels`, `ITeamCollaborator` and `IInvitation`. Keep `ITeam` (the `/api/me` user payload) and its `import { IUser }` only if `ITeam` still uses it (it doesn't; delete the import).
 - `src/types/user.ts`: change the import to `import { ITeam, type TeamRole } from './team';` and `role?: TeamRoles;` to `role?: TeamRole;`.
@@ -8147,7 +7722,7 @@ git commit -m "feat(teams): Settings Team section with invites, leaving and memb
 
 **Files:**
 
-- Create: `src/hooks/useSetLicenseSigners.ts`, `src/utils/registryWrite.ts`, `src/utils/txErrorStatus.ts`
+- Create: `src/hooks/useSetLicenseSigners.ts`, `src/utils/userOperation.ts`, `src/utils/registryWrite.ts`, `src/utils/txErrorStatus.ts`
 - Create: `src/app/settings/components/Team/GrantAccessModal.tsx`, `src/app/settings/components/Team/PendingGrantBanner.tsx`
 - Modify: `src/app/settings/components/Team/TeamSection.tsx`
 - Test:
@@ -8164,14 +7739,17 @@ git commit -m "feat(teams): Settings Team section with invites, leaving and memb
   - `grantWarning` and `formatList` (C8);
   - `LoadingStatusContext`.
 - Produces:
-  - **`useSetLicenseSigners()`** returns `(fn: 'enableSigner' | 'disableSigner', changes: SignerChange[]) => Promise<void>`. All pairs go in one user operation, and an empty list does nothing. `SignerChange = { tokenId: number; signer: `0x${string}` }`.
+  - **`assertUserOperation(result)`** and `UserOperationFailedError` (`@/utils/userOperation`). `processTransactions` resolves with `success: false` without throwing when a user operation reverts without a reason; this throws on `!result?.success`. Grant, Revoke and Remove use it through `useSetLicenseSigners`, and the API-key hooks in Task 16.
+  - **`useSetLicenseSigners()`** returns `(fn: 'enableSigner' | 'disableSigner', changes: SignerChange[]) => Promise<void>`. All pairs go in one user operation, and an empty list does nothing. It rejects on a reverted operation. `SignerChange = { tokenId: number; signer: `0x${string}` }`.
   - **`registryWrite(write)`:** a registry call that never throws. A rejected server action (network, deploy) becomes `{ ok: false, status: 0, code: null, message }` and is reported to Sentry. A rejection or a 5xx is retried once (spec, Error handling: "The console retries once"); a 4xx isn't.
-  - **`txErrorStatus(error)`:** `Signers.tsx`'s mapping. Code 4001 gives `{ status: 'error', label: 'The transaction was denied' }`; anything else gives `Something went wrong`.
+  - **`txErrorStatus(error)`:** `Signers.tsx`'s mapping. Code 4001 gives `{ status: 'error', label: 'The transaction was denied' }`; a `UserOperationFailedError` gives `The transaction failed on-chain, so nothing changed`; anything else gives `Something went wrong`.
   - **`GrantAccessModal`:** `{ member, licenses, onClose, onGranted }`.
     - It lists only `grantCandidates` and shows the C8 warning for the chosen licenses.
     - It can't be closed while busy.
     - It enables the not-yet-on-chain ones in one transaction, then `PUT`s each key (`kind: 'MEMBER'`, the member as the only holder).
-    - A registry failure keeps the grant and offers Try again (registry only). It tracks `Data Access Granted`.
+    - A registry write that rejects or answers 5xx (after `registryWrite`'s retry) keeps the grant and offers Try again (registry only). A 4xx (`SIGNER_MISMATCH`, `KIND_CONFLICT`, `INVALID_HOLDERS`, …) shows console-api's message per license and offers only Done: retrying can't succeed.
+    - It tracks `Data Access Granted`.
+    - TeamSection offers Grant, and the banner, only once the team's licenses loaded cleanly.
   - **`PendingGrantBanner`:** `{ members, licenses, licensesLoading, onGrant }`. Nothing while licenses load. One row, `{name} joined. Grant data access?` (spec), per accepted member whose verified wallet is missing from at least one license it can be granted (a `grantCandidates` entry).
 
 - [ ] **Step 1: Write the failing tests**
@@ -8189,6 +7767,7 @@ jest.mock('@/hooks/useContractGA', () => ({
 import configuration from '@/config';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import { useSetLicenseSigners } from '@/hooks/useSetLicenseSigners';
+import { UserOperationFailedError } from '@/utils/userOperation';
 
 const SIGNER = '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6';
 
@@ -8200,13 +7779,8 @@ describe('useSetLicenseSigners', () => {
       { tokenId: 43, signer: SIGNER },
     ]);
     expect(mockProcess).toHaveBeenCalledTimes(1);
-    const calls = (
-      mockProcess.mock.calls[0] as unknown as [{ to: string; data: `0x${string}` }[]]
-    )[0];
-    expect(calls.map((c) => c.to)).toEqual([
-      configuration.DLC_ADDRESS,
-      configuration.DLC_ADDRESS,
-    ]);
+    const calls = (mockProcess.mock.calls[0] as unknown as [{ to: string; data: `0x${string}` }[]])[0];
+    expect(calls.map((c) => c.to)).toEqual([configuration.DLC_ADDRESS, configuration.DLC_ADDRESS]);
     expect(
       calls.map((c) => decodeFunctionData({ abi: DimoLicenseABI, data: c.data })),
     ).toEqual([
@@ -8219,6 +7793,13 @@ describe('useSetLicenseSigners', () => {
     await renderHook(() => useSetLicenseSigners()).result.current('enableSigner', []);
     expect(mockProcess).not.toHaveBeenCalled();
   });
+
+  it('rejects when the user operation lands but reverts (success: false, no throw)', async () => {
+    mockProcess.mockResolvedValueOnce({ success: false });
+    await expect(
+      renderHook(() => useSetLicenseSigners()).result.current('enableSigner', [{ tokenId: 42, signer: SIGNER }]),
+    ).rejects.toBeInstanceOf(UserOperationFailedError);
+  });
 });
 ```
 
@@ -8228,6 +7809,7 @@ describe('useSetLicenseSigners', () => {
 jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
 import { registryWrite } from '@/utils/registryWrite';
 import { txErrorStatus } from '@/utils/txErrorStatus';
+import { assertUserOperation, UserOperationFailedError } from '@/utils/userOperation';
 
 describe('registryWrite', () => {
   it('passes results through', async () => {
@@ -8252,12 +7834,7 @@ describe('registryWrite', () => {
   it('retries a 5xx once and returns the retry', async () => {
     const write = jest
       .fn()
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 502,
-        code: 'IDENTITY_UNAVAILABLE',
-        message: 'x',
-      })
+      .mockResolvedValueOnce({ ok: false, status: 502, code: 'IDENTITY_UNAVAILABLE', message: 'x' })
       .mockResolvedValueOnce({ ok: true, data: 1 });
     await expect(registryWrite(write)).resolves.toEqual({ ok: true, data: 1 });
   });
@@ -8275,15 +7852,23 @@ describe('registryWrite', () => {
 });
 
 describe('txErrorStatus', () => {
-  it('names a denied transaction', () => {
-    expect(txErrorStatus({ code: 4001 })).toEqual({
+  it('names a denied and a reverted transaction', () => {
+    expect(txErrorStatus({ code: 4001 })).toEqual({ status: 'error', label: 'The transaction was denied' });
+    expect(txErrorStatus(new UserOperationFailedError())).toEqual({
       status: 'error',
-      label: 'The transaction was denied',
+      label: 'The transaction failed on-chain, so nothing changed',
     });
-    expect(txErrorStatus(new Error('boom'))).toEqual({
-      status: 'error',
-      label: 'Something went wrong',
-    });
+    expect(txErrorStatus(new Error('boom'))).toEqual({ status: 'error', label: 'Something went wrong' });
+  });
+});
+
+describe('assertUserOperation', () => {
+  it('throws unless the user operation succeeded', () => {
+    expect(() => assertUserOperation({ success: true })).not.toThrow();
+    expect(() => assertUserOperation({ success: false, reason: 'AA23 reverted' })).toThrow(
+      'The transaction reverted: AA23 reverted',
+    );
+    expect(() => assertUserOperation(undefined)).toThrow(UserOperationFailedError);
   });
 });
 ```
@@ -8295,9 +7880,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 const mockSetSigners = jest.fn();
-jest.mock('@/hooks/useSetLicenseSigners', () => ({
-  useSetLicenseSigners: () => mockSetSigners,
-}));
+jest.mock('@/hooks/useSetLicenseSigners', () => ({ useSetLicenseSigners: () => mockSetSigners }));
 jest.mock('@/actions/teams', () => ({ upsertLicenseSigner: jest.fn() }));
 const trackEvent = jest.fn();
 jest.mock('@/hooks/useMixPanel', () => ({ useMixPanel: () => ({ trackEvent }) }));
@@ -8324,34 +7907,10 @@ const SAM: TeamMember = {
   inviteExpiresAt: null,
 };
 const LICENSES: TeamLicense[] = [
-  {
-    tokenId: 42,
-    clientId: '0xaaa',
-    label: 'Harness Fleet',
-    redirectUri: 'https://x',
-    signers: [SIGNER.toLowerCase()],
-  },
-  {
-    tokenId: 43,
-    clientId: '0xbbb',
-    label: 'Harness Labs',
-    redirectUri: 'https://y',
-    signers: [],
-  },
-  {
-    tokenId: 44,
-    clientId: '0xccc',
-    label: 'Harness Pilot',
-    redirectUri: 'https://z',
-    signers: [SIGNER.toLowerCase()],
-  },
-  {
-    tokenId: 45,
-    clientId: '0xddd',
-    label: 'No Redirect',
-    redirectUri: null,
-    signers: [],
-  },
+  { tokenId: 42, clientId: '0xaaa', label: 'Harness Fleet', redirectUri: 'https://x', signers: [SIGNER.toLowerCase()] },
+  { tokenId: 43, clientId: '0xbbb', label: 'Harness Labs', redirectUri: 'https://y', signers: [] },
+  { tokenId: 44, clientId: '0xccc', label: 'Harness Pilot', redirectUri: 'https://z', signers: [SIGNER.toLowerCase()] },
+  { tokenId: 45, clientId: '0xddd', label: 'No Redirect', redirectUri: null, signers: [] },
 ];
 const setLoadingStatus = jest.fn();
 const clearLoadingStatus = jest.fn();
@@ -8360,18 +7919,11 @@ const onGranted = jest.fn();
 const open = () =>
   render(
     <LoadingStatusContext.Provider value={{ setLoadingStatus, clearLoadingStatus }}>
-      <GrantAccessModal
-        member={SAM}
-        licenses={LICENSES}
-        onClose={onClose}
-        onGranted={onGranted}
-      />
+      <GrantAccessModal member={SAM} licenses={LICENSES} onClose={onClose} onGranted={onGranted} />
     </LoadingStatusContext.Provider>,
   );
-const choose = (label: string) =>
-  fireEvent.click(screen.getByRole('checkbox', { name: label }));
-const grant = () =>
-  fireEvent.click(screen.getByRole('button', { name: 'Grant data access' }));
+const choose = (label: string) => fireEvent.click(screen.getByRole('checkbox', { name: label }));
+const grant = () => fireEvent.click(screen.getByRole('button', { name: 'Grant data access' }));
 const recorded = { ok: true, data: { signer: {} } };
 
 describe('GrantAccessModal', () => {
@@ -8382,10 +7934,7 @@ describe('GrantAccessModal', () => {
 
   it('offers only licenses with a redirect URI where the wallet has no recorded key', () => {
     open();
-    expect(screen.getAllByRole('checkbox').map((c) => c.id)).toEqual([
-      'grant-43',
-      'grant-44',
-    ]);
+    expect(screen.getAllByRole('checkbox').map((c) => c.id)).toEqual(['grant-43', 'grant-44']);
   });
 
   it('shows the C8 warning for the chosen licenses', () => {
@@ -8405,27 +7954,14 @@ describe('GrantAccessModal', () => {
     grant();
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     // 44 is already on-chain (its registry write failed earlier): record only.
-    expect(mockSetSigners).toHaveBeenCalledWith('enableSigner', [
-      { tokenId: 43, signer: SIGNER },
-    ]);
-    expect(upsertLicenseSigner).toHaveBeenCalledWith(43, SIGNER, {
-      kind: 'MEMBER',
-      holders: [{ userId: 'u-sam' }],
-    });
-    expect(upsertLicenseSigner).toHaveBeenCalledWith(44, SIGNER, {
-      kind: 'MEMBER',
-      holders: [{ userId: 'u-sam' }],
-    });
+    expect(mockSetSigners).toHaveBeenCalledWith('enableSigner', [{ tokenId: 43, signer: SIGNER }]);
+    expect(upsertLicenseSigner).toHaveBeenCalledWith(43, SIGNER, { kind: 'MEMBER', holders: [{ userId: 'u-sam' }] });
+    expect(upsertLicenseSigner).toHaveBeenCalledWith(44, SIGNER, { kind: 'MEMBER', holders: [{ userId: 'u-sam' }] });
     expect(mockSetSigners.mock.invocationCallOrder[0]).toBeLessThan(
       (upsertLicenseSigner as jest.Mock).mock.invocationCallOrder[0],
     );
-    expect(trackEvent).toHaveBeenCalledWith('Data Access Granted', {
-      memberId: 'm-sam',
-      tokenIds: [43, 44],
-    });
-    expect(toast.success).toHaveBeenCalledWith(
-      'Sam Rivera now has data access to Harness Labs and Harness Pilot.',
-    );
+    expect(trackEvent).toHaveBeenCalledWith('Data Access Granted', { memberId: 'm-sam', tokenIds: [43, 44] });
+    expect(toast.success).toHaveBeenCalledWith('Sam Rivera now has data access to Harness Labs and Harness Pilot.');
     expect(onGranted).toHaveBeenCalled();
   });
 
@@ -8435,10 +7971,7 @@ describe('GrantAccessModal', () => {
     choose('Harness Labs');
     grant();
     await waitFor(() =>
-      expect(setLoadingStatus).toHaveBeenLastCalledWith({
-        status: 'error',
-        label: 'The transaction was denied',
-      }),
+      expect(setLoadingStatus).toHaveBeenLastCalledWith({ status: 'error', label: 'The transaction was denied' }),
     );
     expect(upsertLicenseSigner).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
@@ -8458,6 +7991,25 @@ describe('GrantAccessModal', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(mockSetSigners).toHaveBeenCalledTimes(1);
     expect(upsertLicenseSigner).toHaveBeenCalledTimes(3);
+  });
+
+  it("shows console-api's refusal and offers no retry for a 4xx", async () => {
+    (upsertLicenseSigner as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 400,
+      code: 'SIGNER_MISMATCH',
+      message: "This address isn't the member's verified wallet.",
+    });
+    open();
+    choose('Harness Labs');
+    grant();
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "Harness Labs: This address isn't the member's verified wallet.",
+    );
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull();
+    expect(upsertLicenseSigner).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('cannot be closed while the transaction is pending', async () => {
@@ -8493,46 +8045,22 @@ const SAM: TeamMember = {
   invitedAt: '2026-09-01T00:00:00Z',
   inviteExpiresAt: null,
 };
-const LICENSE: TeamLicense = {
-  tokenId: 42,
-  clientId: '0xaaa',
-  label: 'Harness Fleet',
-  redirectUri: 'https://x',
-  signers: [],
-};
-const LABS: TeamLicense = {
-  tokenId: 43,
-  clientId: '0xbbb',
-  label: 'Harness Labs',
-  redirectUri: 'https://y',
-  signers: [],
-};
+const LICENSE: TeamLicense = { tokenId: 42, clientId: '0xaaa', label: 'Harness Fleet', redirectUri: 'https://x', signers: [] };
+const LABS: TeamLicense = { tokenId: 43, clientId: '0xbbb', label: 'Harness Labs', redirectUri: 'https://y', signers: [] };
 const onGrant = jest.fn();
 const show = (members: TeamMember[], licenses = [LICENSE], licensesLoading = false) =>
-  render(
-    <PendingGrantBanner
-      members={members}
-      licenses={licenses}
-      licensesLoading={licensesLoading}
-      onGrant={onGrant}
-    />,
-  );
+  render(<PendingGrantBanner members={members} licenses={licenses} licensesLoading={licensesLoading} onGrant={onGrant} />);
 
 describe('PendingGrantBanner', () => {
   it('asks the owner to grant a member whose wallet is missing from a license', () => {
     show([SAM]);
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'Sam Rivera joined. Grant data access?',
-    );
+    expect(screen.getByRole('status')).toHaveTextContent('Sam Rivera joined. Grant data access?');
     fireEvent.click(screen.getByRole('button', { name: 'Grant' }));
     expect(onGrant).toHaveBeenCalledWith(SAM);
   });
 
   it('still asks when the member has some licenses but not all', () => {
-    show(
-      [{ ...SAM, memberKeys: [{ licenseTokenId: 42, signerAddress: SIGNER }] }],
-      [LICENSE, LABS],
-    );
+    show([{ ...SAM, memberKeys: [{ licenseTokenId: 42, signerAddress: SIGNER }] }], [LICENSE, LABS]);
     expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
@@ -8553,61 +8081,55 @@ describe('PendingGrantBanner', () => {
 ```
 
 Extend `__tests__/unit/pages/app/settings/TeamSection.test.tsx`:
-
 - Add this mock beside the others. `GrantAccessModal` pulls `useContractGA`, which loads the Turnkey config at import time:
 
 ```tsx
-jest.mock('@/hooks/useSetLicenseSigners', () => ({
-  useSetLicenseSigners: () => jest.fn(),
-}));
+jest.mock('@/hooks/useSetLicenseSigners', () => ({ useSetLicenseSigners: () => jest.fn() }));
 ```
 
 - Append inside the `describe`:
 
 ```tsx
-const SAM: TeamMember = {
-  ...OWNER_ROW,
-  id: 'm-sam',
-  userId: 'u-sam',
-  name: 'Sam Rivera',
-  email: 'sam@harness.dev',
-  role: 'MEMBER',
-  signerAddress: '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6',
-};
-const FLEET = {
-  tokenId: 42,
-  clientId: '0xaaa',
-  label: 'Harness Fleet',
-  redirectUri: 'https://x',
-  signers: [],
-};
+  const SAM: TeamMember = {
+    ...OWNER_ROW,
+    id: 'm-sam',
+    userId: 'u-sam',
+    name: 'Sam Rivera',
+    email: 'sam@harness.dev',
+    role: 'MEMBER',
+    signerAddress: '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6',
+  };
+  const FLEET = { tokenId: 42, clientId: '0xaaa', label: 'Harness Fleet', redirectUri: 'https://x', signers: [] };
 
-it('opens Grant from the banner for a member who linked a wallet', () => {
-  members({ members: [OWNER_ROW, SAM] });
-  (useTeamLicenses as jest.Mock).mockReturnValue({
-    licenses: [FLEET],
-    loading: false,
-    refetch: jest.fn(),
+  it('opens Grant from the banner for a member who linked a wallet', () => {
+    members({ members: [OWNER_ROW, SAM] });
+    (useTeamLicenses as jest.Mock).mockReturnValue({ licenses: [FLEET], loading: false, refetch: jest.fn() });
+    render(<TeamSection />);
+    fireEvent.click(screen.getByRole('button', { name: 'Grant' }));
+    expect(screen.getByRole('heading', { name: 'Grant Sam Rivera data access' })).toBeInTheDocument();
   });
-  render(<TeamSection />);
-  fireEvent.click(screen.getByRole('button', { name: 'Grant' }));
-  expect(
-    screen.getByRole('heading', { name: 'Grant Sam Rivera data access' }),
-  ).toBeInTheDocument();
-});
 
-it('hides the banner while member data access is off (C5)', () => {
-  mockDataAccessEnabled = false;
-  members({ members: [OWNER_ROW, SAM] });
-  (useTeamLicenses as jest.Mock).mockReturnValue({
-    licenses: [FLEET],
-    loading: false,
-    refetch: jest.fn(),
+  it('hides the banner while member data access is off (C5)', () => {
+    mockFlags.dataAccess = false;
+    members({ members: [OWNER_ROW, SAM] });
+    (useTeamLicenses as jest.Mock).mockReturnValue({ licenses: [FLEET], loading: false, refetch: jest.fn() });
+    render(<TeamSection />);
+    expect(screen.queryByRole('status')).toBeNull();
+    mockFlags.dataAccess = true;
   });
-  render(<TeamSection />);
-  expect(screen.queryByRole('status')).toBeNull();
-  mockDataAccessEnabled = true;
-});
+
+  it('offers no Grant while the licenses fail to load', () => {
+    members({ members: [OWNER_ROW, SAM] });
+    (useTeamLicenses as jest.Mock).mockReturnValue({
+      licenses: [],
+      loading: false,
+      error: new Error('Identity down'),
+      refetch: jest.fn(),
+    });
+    render(<TeamSection />);
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Grant' })).toBeNull();
+  });
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -8626,6 +8148,7 @@ import { encodeFunctionData } from 'viem';
 import configuration from '@/config';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import { useContractGA } from '@/hooks/useContractGA';
+import { assertUserOperation } from '@/utils/userOperation';
 
 export interface SignerChange {
   tokenId: number;
@@ -8639,20 +8162,38 @@ export const useSetLicenseSigners = () => {
   return useCallback(
     async (fn: 'enableSigner' | 'disableSigner', changes: SignerChange[]) => {
       if (!changes.length) return;
-      await processTransactions(
+      const result = await processTransactions(
         changes.map(({ tokenId, signer }) => ({
           to: configuration.DLC_ADDRESS,
           value: BigInt(0),
-          data: encodeFunctionData({
-            abi: DimoLicenseABI,
-            functionName: fn,
-            args: [tokenId, signer],
-          }),
+          data: encodeFunctionData({ abi: DimoLicenseABI, functionName: fn, args: [tokenId, signer] }),
         })),
       );
+      // A reverted operation resolves with success: false; never treat it as done.
+      assertUserOperation(result);
     },
     [processTransactions],
   );
+};
+```
+
+`src/utils/userOperation.ts`:
+
+```ts
+import type { IKernelOperationStatus } from '@/types/wallet';
+
+export class UserOperationFailedError extends Error {
+  constructor(reason?: string) {
+    super(reason ? `The transaction reverted: ${reason}` : 'The transaction reverted');
+    this.name = 'UserOperationFailedError';
+  }
+}
+
+// useContractGA().processTransactions throws when the receipt carries a reason,
+// but resolves with success: false when a user operation reverts without one.
+// Every signer change checks the result through this.
+export const assertUserOperation = (result: IKernelOperationStatus | undefined) => {
+  if (!result?.success) throw new UserOperationFailedError(result?.reason);
 };
 ```
 
@@ -8693,12 +8234,16 @@ export const registryWrite = async <T>(
 ```ts
 import { get } from 'lodash';
 import type { LoadingProps } from '@/components/LoadingModal';
+import { UserOperationFailedError } from '@/utils/userOperation';
 
 // Signers.tsx's mapping: 4001 is the user rejecting the user operation.
-export const txErrorStatus = (error: unknown): LoadingProps =>
-  get(error, 'code', null) === 4001
-    ? { status: 'error', label: 'The transaction was denied' }
-    : { status: 'error', label: 'Something went wrong' };
+export const txErrorStatus = (error: unknown): LoadingProps => {
+  if (get(error, 'code', null) === 4001)
+    return { status: 'error', label: 'The transaction was denied' };
+  if (error instanceof UserOperationFailedError)
+    return { status: 'error', label: 'The transaction failed on-chain, so nothing changed' };
+  return { status: 'error', label: 'Something went wrong' };
+};
 ```
 
 `src/app/settings/components/Team/GrantAccessModal.tsx`:
@@ -8739,25 +8284,28 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
   const [candidates] = useState(() => grantCandidates(member, licenses));
   const [selected, setSelected] = useState<number[]>([]);
   const [busy, setBusy] = useState(false);
-  const [unrecorded, setUnrecorded] = useState<SignerChange[] | null>(null);
+  // retryable: rejected or 5xx after registryWrite's retry. refused: a 4xx,
+  // shown with console-api's message and never retried.
+  const [unrecorded, setUnrecorded] = useState<{
+    retryable: SignerChange[];
+    refused: { tokenId: number; message: string }[];
+  } | null>(null);
   const name = displayName(member);
   const labels = useMemo(
     () => new Map(candidates.map(({ license }) => [license.tokenId, license.label])),
     [candidates],
   );
-  const labelsOf = (tokenIds: number[]) =>
-    formatList(tokenIds.map((id) => labels.get(id) ?? `License #${id}`));
+  const labelsOf = (tokenIds: number[]) => formatList(tokenIds.map((id) => labels.get(id) ?? `License #${id}`));
 
   const toggle = (tokenId: number, checked: boolean) =>
     setSelected((prev) =>
-      checked
-        ? [...prev, tokenId].sort((a, b) => a - b)
-        : prev.filter((id) => id !== tokenId),
+      checked ? [...prev, tokenId].sort((a, b) => a - b) : prev.filter((id) => id !== tokenId),
     );
 
   // Registry rows after the chain: the PUT clears disabledAt (C7).
   const record = async (changes: SignerChange[]) => {
-    const failed: SignerChange[] = [];
+    const retryable: SignerChange[] = [];
+    const refused: { tokenId: number; message: string }[] = [];
     for (const change of changes) {
       const result = await registryWrite(() =>
         upsertLicenseSigner(change.tokenId, change.signer, {
@@ -8765,19 +8313,23 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
           holders: [{ userId: member.userId! }],
         }),
       );
-      if (!result.ok) failed.push(change);
+      if (result.ok) continue;
+      if (result.status >= 400 && result.status < 500)
+        refused.push({ tokenId: change.tokenId, message: result.message });
+      else retryable.push(change);
     }
-    return failed;
+    return { retryable, refused };
   };
 
-  const settle = (failed: SignerChange[], all: SignerChange[]) => {
-    if (failed.length) {
-      setUnrecorded(failed);
+  const settle = (
+    outcome: { retryable: SignerChange[]; refused: { tokenId: number; message: string }[] },
+    all: SignerChange[],
+  ) => {
+    if (outcome.retryable.length || outcome.refused.length) {
+      setUnrecorded(outcome);
       return;
     }
-    toast.success(
-      `${name} now has data access to ${labelsOf(all.map((c) => c.tokenId))}.`,
-    );
+    toast.success(`${name} now has data access to ${labelsOf(all.map((c) => c.tokenId))}.`);
     onClose();
   };
 
@@ -8798,20 +8350,23 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
       return;
     }
     trackEvent('Data Access Granted', { memberId: member.id, tokenIds: selected });
-    const failed = await record(changes);
+    const outcome = await record(changes);
     clearLoadingStatus();
     setBusy(false);
     onGranted();
-    settle(failed, changes);
+    settle(outcome, changes);
   };
 
   const retry = async () => {
     if (!unrecorded) return;
     setBusy(true);
-    const failed = await record(unrecorded);
+    const outcome = await record(unrecorded.retryable);
     setBusy(false);
     onGranted();
-    settle(failed, unrecorded);
+    settle(
+      { retryable: outcome.retryable, refused: [...unrecorded.refused, ...outcome.refused] },
+      unrecorded.retryable,
+    );
   };
 
   return (
@@ -8820,9 +8375,7 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
         <Title component="h2" className="text-panel-title text-ink">
           {`Grant ${name} data access`}
         </Title>
-        <p className="text-body-sm text-muted">
-          Choose the licenses {name} can read in Vehicles.
-        </p>
+        <p className="text-body-sm text-muted">Choose the licenses {name} can read in Vehicles.</p>
         <ul className="flex flex-col gap-2">
           {candidates.map(({ license }) => (
             <li key={license.tokenId} className="flex items-center gap-2">
@@ -8832,10 +8385,7 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
                 disabled={busy || !!unrecorded}
                 onChange={(e) => toggle(license.tokenId, e.target.checked)}
               />
-              <label
-                htmlFor={`grant-${license.tokenId}`}
-                className="text-body-sm text-fg"
-              >
+              <label htmlFor={`grant-${license.tokenId}`} className="text-body-sm text-fg">
                 {license.label}
               </label>
             </li>
@@ -8847,13 +8397,32 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
           </p>
         )}
         {unrecorded ? (
-          <div className="flex flex-col items-start gap-2">
-            <p role="alert" className="text-body-sm text-negative">
-              {`Data access is on, but we couldn't record it for ${labelsOf(unrecorded.map((c) => c.tokenId))}, so ${name} can't use it yet.`}
-            </p>
-            <Button variant="secondary" loading={busy} onClick={retry}>
-              Try again
-            </Button>
+          <div role="alert" className="flex flex-col items-start gap-2">
+            {unrecorded.retryable.length > 0 && (
+              <p className="text-body-sm text-negative">
+                {`Data access is on, but we couldn't record it for ${labelsOf(unrecorded.retryable.map((c) => c.tokenId))}, so ${name} can't use it yet.`}
+              </p>
+            )}
+            {unrecorded.refused.map(({ tokenId, message }) => (
+              <p key={tokenId} className="text-body-sm text-negative">
+                {`${labelsOf([tokenId])}: ${message}`}
+              </p>
+            ))}
+            {unrecorded.refused.length > 0 && (
+              <p className="text-body-sm text-muted">
+                Those keys are enabled on-chain but not recorded. Check the member&apos;s row in
+                the Team list before granting again.
+              </p>
+            )}
+            {unrecorded.retryable.length > 0 ? (
+              <Button variant="secondary" loading={busy} onClick={retry}>
+                Try again
+              </Button>
+            ) : (
+              <Button variant="secondary" onClick={onClose}>
+                Done
+              </Button>
+            )}
           </div>
         ) : (
           <Button loading={busy} disabled={!selected.length} onClick={grant}>
@@ -8886,12 +8455,7 @@ interface Props {
 
 // Accepted members whose verified wallet is missing from a license they can be
 // granted. Waits for the licenses: before they load every member looks keyless.
-export const PendingGrantBanner: FC<Props> = ({
-  members,
-  licenses,
-  licensesLoading,
-  onGrant,
-}) => {
+export const PendingGrantBanner: FC<Props> = ({ members, licenses, licensesLoading, onGrant }) => {
   if (licensesLoading) return null;
   const waiting = members.filter((m) => grantCandidates(m, licenses).length > 0);
   if (!waiting.length) return null;
@@ -8915,48 +8479,42 @@ export const PendingGrantBanner: FC<Props> = ({
 ```
 
 `src/app/settings/components/Team/TeamSection.tsx`:
-
 - Add imports for `GrantAccessModal`, `PendingGrantBanner` and `type TeamMember` from `@/types/team`.
-- Change the licenses line to `const { licenses, loading: licensesLoading, refetch: refetchLicenses } = useTeamLicenses();`.
 - Add `const [grantFor, setGrantFor] = useState<TeamMember | null>(null);` and:
 
 ```tsx
-// After any signer change: the table reads both.
-const afterSignerChange = () => {
-  void refetch();
-  void refetchLicenses();
-};
+  // After any signer change: the table reads both.
+  const afterSignerChange = () => {
+    void refetch();
+    void refetchLicenses();
+  };
 ```
 
-- Add `...(showDataAccess ? { grant: setGrantFor } : {}),` as the last entry of `handlers`.
+- Add `...(showDataAccess && licensesReady ? { grant: setGrantFor } : {}),` as the last entry of `handlers`.
 - Directly after `</SectionHeader>`, add:
 
 ```tsx
-{
-  showDataAccess && !isLoading && !isError && (
-    <PendingGrantBanner
-      members={members}
-      licenses={licenses}
-      licensesLoading={licensesLoading}
-      onGrant={setGrantFor}
-    />
-  );
-}
+      {showDataAccess && !isLoading && !isError && (
+        <PendingGrantBanner
+          members={members}
+          licenses={licenses}
+          licensesLoading={!licensesReady}
+          onGrant={setGrantFor}
+        />
+      )}
 ```
 
 - Before `</Section>`, add:
 
 ```tsx
-{
-  grantFor && (
-    <GrantAccessModal
-      member={grantFor}
-      licenses={licenses}
-      onClose={() => setGrantFor(null)}
-      onGranted={afterSignerChange}
-    />
-  );
-}
+      {grantFor && (
+        <GrantAccessModal
+          member={grantFor}
+          licenses={licenses}
+          onClose={() => setGrantFor(null)}
+          onGranted={afterSignerChange}
+        />
+      )}
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
@@ -8993,8 +8551,8 @@ git commit -m "feat(teams): grant members data access on-chain, then record the 
   - `useDimoAuth().getGlobalAccountDeveloperJwt` (`src/hooks/useDimoAuth.ts:132-171`), `getDevJwt` and `fetchWebhooks`.
 - Produces:
   - **`revokeMemberKeys(keys, { disable, stamp }): Promise<{ txError, unstamped }>`:**
-    - it disables every on-chain key in one transaction;
-    - it stamps every registered key, registry-only ones included;
+    - it disables every on-chain key in one transaction (a reverted operation is a `txError`, via `useSetLicenseSigners`);
+    - it stamps every registered key on a license in the loaded list, registry-only ones included; a key whose license isn't in the list (`licenseKnown: false`) is never stamped or disabled;
     - after a failed transaction it stamps only keys already off-chain;
     - a stamp answering `NOT_FOUND` counts as done.
   - **`useMemberWebhooks({ clientId, redirectUri, addresses, pastedJwt? })`**, a React Query.
@@ -9002,6 +8560,7 @@ git commit -m "feat(teams): grant members data access on-chain, then record the 
     - It returns the webhooks whose `createdBySigner` **or** `updatedBySigner` matches any address (case-insensitive).
     - `touchedBy(webhook, addresses)` is exported.
   - `WebhookReview`: `{ member, licenses }`, one block per license the member holds or held a key on.
+  - Both modals start from `actionableKeys(memberLicenseKeys(member, licenses))`, and TeamSection offers Revoke and Remove only once the licenses loaded cleanly (Task 13's `licensesReady`).
   - `RevokeAccessModal`: `{ member, licenses, onClose, onDone }`. The licenses to revoke are a checklist, all chosen by default (spec: "for the chosen licenses"). It tracks `Data Access Revoked`; a failed stamp offers Retry (stamps only).
   - **`RemoveMemberModal`:** `{ member, licenses, teamName, onClose, onDone }`.
     - It revokes every key first, then deletes the membership unless the member is already `REVOKED` or `LEFT`.
@@ -9024,29 +8583,23 @@ const key = (
   signer: `0x${string}`,
   onChain: boolean,
   registered = true,
+  licenseKnown = true,
 ): MemberLicenseKey => ({
   tokenId,
   licenseLabel: `License ${tokenId}`,
   signer,
   onChain,
   registered,
+  licenseKnown,
 });
-const KEYS = [
-  key(42, CURRENT, true),
-  key(43, OLD, true),
-  key(44, OLD, false),
-  key(45, CURRENT, true, false),
-];
+const KEYS = [key(42, CURRENT, true), key(43, OLD, true), key(44, OLD, false), key(45, CURRENT, true, false)];
 const ok = { ok: true as const, data: {} };
 
 describe('revokeMemberKeys', () => {
   it('disables every on-chain key in one transaction and stamps every registered key', async () => {
     const disable = jest.fn(async () => {});
     const stamp = jest.fn(async () => ok);
-    await expect(revokeMemberKeys(KEYS, { disable, stamp })).resolves.toEqual({
-      txError: null,
-      unstamped: [],
-    });
+    await expect(revokeMemberKeys(KEYS, { disable, stamp })).resolves.toEqual({ txError: null, unstamped: [] });
     expect(disable).toHaveBeenCalledTimes(1);
     expect(disable).toHaveBeenCalledWith([
       { tokenId: 42, signer: CURRENT },
@@ -9063,12 +8616,19 @@ describe('revokeMemberKeys', () => {
   it('after a failed transaction stamps only keys already off-chain', async () => {
     const denied = { code: 4001 };
     const stamp = jest.fn(async () => ok);
-    const outcome = await revokeMemberKeys(KEYS, {
-      disable: jest.fn().mockRejectedValue(denied),
-      stamp,
-    });
+    const outcome = await revokeMemberKeys(KEYS, { disable: jest.fn().mockRejectedValue(denied), stamp });
     expect(outcome.txError).toBe(denied);
     expect(stamp.mock.calls).toEqual([[44, OLD]]);
+  });
+
+  it('never stamps a key whose license is not in the loaded list', async () => {
+    const disable = jest.fn();
+    const stamp = jest.fn(async () => ok);
+    await expect(
+      revokeMemberKeys([key(99, OLD, false, true, false)], { disable, stamp }),
+    ).resolves.toEqual({ txError: null, unstamped: [] });
+    expect(disable).not.toHaveBeenCalled();
+    expect(stamp).not.toHaveBeenCalled();
   });
 
   it('only stamps when nothing is on-chain (finishing an earlier revoke)', async () => {
@@ -9081,20 +8641,11 @@ describe('revokeMemberKeys', () => {
 
   it('reports stamps that fail or reject after the retry, and treats NOT_FOUND as done', async () => {
     const stamp = jest.fn(async (tokenId: number) => {
-      if (tokenId === 42)
-        return { ok: false as const, status: 404, code: 'NOT_FOUND', message: 'x' };
+      if (tokenId === 42) return { ok: false as const, status: 404, code: 'NOT_FOUND', message: 'x' };
       if (tokenId === 43) throw new Error('Failed to fetch');
-      return {
-        ok: false as const,
-        status: 502,
-        code: 'IDENTITY_UNAVAILABLE',
-        message: 'x',
-      };
+      return { ok: false as const, status: 502, code: 'IDENTITY_UNAVAILABLE', message: 'x' };
     });
-    const outcome = await revokeMemberKeys(KEYS, {
-      disable: jest.fn(async () => {}),
-      stamp,
-    });
+    const outcome = await revokeMemberKeys(KEYS, { disable: jest.fn(async () => {}), stamp });
     expect(outcome.unstamped.map((k) => k.tokenId)).toEqual([43, 44]);
     expect(stamp.mock.calls.map(([tokenId]) => tokenId)).toEqual([42, 43, 43, 44, 44]);
   });
@@ -9110,9 +8661,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@/services/webhook', () => ({ fetchWebhooks: jest.fn() }));
 const getGlobalAccountDeveloperJwt = jest.fn();
-jest.mock('@/hooks/useDimoAuth', () => ({
-  useDimoAuth: () => ({ getGlobalAccountDeveloperJwt }),
-}));
+jest.mock('@/hooks/useDimoAuth', () => ({ useDimoAuth: () => ({ getGlobalAccountDeveloperJwt }) }));
 jest.mock('@/utils/devJwt', () => ({ getDevJwt: jest.fn() }));
 import { fetchWebhooks } from '@/services/webhook';
 import { getDevJwt } from '@/utils/devJwt';
@@ -9136,13 +8685,7 @@ const SAM: TeamMember = {
   inviteExpiresAt: null,
 };
 const LICENSES: TeamLicense[] = [
-  {
-    tokenId: 42,
-    clientId: CLIENT,
-    label: 'Harness Fleet',
-    redirectUri: 'https://harness.dev/callback',
-    signers: [CURRENT.toLowerCase()],
-  },
+  { tokenId: 42, clientId: CLIENT, label: 'Harness Fleet', redirectUri: 'https://harness.dev/callback', signers: [CURRENT.toLowerCase()] },
 ];
 const webhook = (id: string, extra: object) => ({
   id,
@@ -9153,8 +8696,7 @@ const webhook = (id: string, extra: object) => ({
 // jsdom: btoa, not Buffer.
 const b64 = (o: object) =>
   btoa(JSON.stringify(o)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
-const jwtFor = (clientId: string) =>
-  `${b64({ alg: 'none' })}.${b64({ ethereum_address: clientId })}.sig`;
+const jwtFor = (clientId: string) => `${b64({ alg: 'none' })}.${b64({ ethereum_address: clientId })}.sig`;
 const show = () =>
   render(
     <QueryClientProvider client={new QueryClient()}>
@@ -9200,16 +8742,10 @@ describe('WebhookReview', () => {
     getGlobalAccountDeveloperJwt.mockResolvedValue(false);
     show();
     const field = await screen.findByLabelText('Paste a developer JWT for Harness Fleet');
-    fireEvent.change(field, {
-      target: { value: jwtFor('0x0000000000000000000000000000000000000002') },
-    });
+    fireEvent.change(field, { target: { value: jwtFor('0x0000000000000000000000000000000000000002') } });
     fireEvent.click(screen.getByRole('button', { name: 'Check webhooks' }));
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'That developer JWT is for another license.',
-    );
-    fireEvent.change(field, {
-      target: { value: jwtFor(CLIENT.toUpperCase().replace('0X', '0x')) },
-    });
+    expect(screen.getByRole('alert')).toHaveTextContent('That developer JWT is for another license.');
+    fireEvent.change(field, { target: { value: jwtFor(CLIENT.toUpperCase().replace('0X', '0x')) } });
     fireEvent.click(screen.getByRole('button', { name: 'Check webhooks' }));
     expect(await screen.findByText('Hook a')).toBeInTheDocument();
   });
@@ -9219,11 +8755,7 @@ describe('WebhookReview', () => {
     (fetchWebhooks as jest.Mock).mockResolvedValue([]);
     show();
     await waitFor(() =>
-      expect(
-        screen.getByText(
-          'No webhooks on Harness Fleet were created or changed by Sam Rivera.',
-        ),
-      ).toBeInTheDocument(),
+      expect(screen.getByText('No webhooks on Harness Fleet were created or changed by Sam Rivera.')).toBeInTheDocument(),
     );
   });
 });
@@ -9236,13 +8768,8 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 const mockSetSigners = jest.fn();
-jest.mock('@/hooks/useSetLicenseSigners', () => ({
-  useSetLicenseSigners: () => mockSetSigners,
-}));
-jest.mock('@/actions/teams', () => ({
-  markLicenseSignerDisabled: jest.fn(),
-  removeTeamMember: jest.fn(),
-}));
+jest.mock('@/hooks/useSetLicenseSigners', () => ({ useSetLicenseSigners: () => mockSetSigners }));
+jest.mock('@/actions/teams', () => ({ markLicenseSignerDisabled: jest.fn(), removeTeamMember: jest.fn() }));
 jest.mock('@/app/settings/components/Team/WebhookReview', () => ({
   WebhookReview: () => <div>webhook review</div>,
 }));
@@ -9275,36 +8802,16 @@ const SAM: TeamMember = {
   inviteExpiresAt: null,
 };
 const LICENSES: TeamLicense[] = [
-  {
-    tokenId: 42,
-    clientId: '0xaaa',
-    label: 'Harness Fleet',
-    redirectUri: 'https://x',
-    signers: [CURRENT.toLowerCase()],
-  },
-  {
-    tokenId: 43,
-    clientId: '0xbbb',
-    label: 'Harness Labs',
-    redirectUri: 'https://y',
-    signers: [],
-  },
+  { tokenId: 42, clientId: '0xaaa', label: 'Harness Fleet', redirectUri: 'https://x', signers: [CURRENT.toLowerCase()] },
+  { tokenId: 43, clientId: '0xbbb', label: 'Harness Labs', redirectUri: 'https://y', signers: [] },
 ];
 const setLoadingStatus = jest.fn();
 const onClose = jest.fn();
 const onDone = jest.fn();
 const remove = () => {
   render(
-    <LoadingStatusContext.Provider
-      value={{ setLoadingStatus, clearLoadingStatus: jest.fn() }}
-    >
-      <RemoveMemberModal
-        member={SAM}
-        licenses={LICENSES}
-        teamName="Harness Motors"
-        onClose={onClose}
-        onDone={onDone}
-      />
+    <LoadingStatusContext.Provider value={{ setLoadingStatus, clearLoadingStatus: jest.fn() }}>
+      <RemoveMemberModal member={SAM} licenses={LICENSES} teamName="Harness Motors" onClose={onClose} onDone={onDone} />
     </LoadingStatusContext.Provider>,
   );
   expect(screen.getByText('webhook review')).toBeInTheDocument();
@@ -9314,31 +8821,18 @@ const remove = () => {
 describe('RemoveMemberModal', () => {
   beforeEach(() => {
     mockSetSigners.mockReset().mockResolvedValue(undefined);
-    (markLicenseSignerDisabled as jest.Mock)
-      .mockReset()
-      .mockResolvedValue({ ok: true, data: {} });
-    (removeTeamMember as jest.Mock)
-      .mockReset()
-      .mockResolvedValue({ ok: true, data: null });
+    (markLicenseSignerDisabled as jest.Mock).mockReset().mockResolvedValue({ ok: true, data: {} });
+    (removeTeamMember as jest.Mock).mockReset().mockResolvedValue({ ok: true, data: null });
   });
 
   it('revokes on-chain, stamps every key including the old wallet, removes and tracks', async () => {
     remove();
-    await waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith(
-        'Sam Rivera was removed from Harness Motors.',
-      ),
-    );
-    expect(mockSetSigners).toHaveBeenCalledWith('disableSigner', [
-      { tokenId: 42, signer: CURRENT },
-    ]);
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Sam Rivera was removed from Harness Motors.'));
+    expect(mockSetSigners).toHaveBeenCalledWith('disableSigner', [{ tokenId: 42, signer: CURRENT }]);
     expect(markLicenseSignerDisabled).toHaveBeenCalledWith(42, CURRENT);
     expect(markLicenseSignerDisabled).toHaveBeenCalledWith(43, OLD);
     expect(removeTeamMember).toHaveBeenCalledWith('m-sam');
-    expect(trackEvent).toHaveBeenCalledWith('Data Access Revoked', {
-      memberId: 'm-sam',
-      tokenIds: [42, 43],
-    });
+    expect(trackEvent).toHaveBeenCalledWith('Data Access Revoked', { memberId: 'm-sam', tokenIds: [42, 43] });
     expect(trackEvent).toHaveBeenCalledWith('Team Member Removed', { memberId: 'm-sam' });
     expect(onClose).toHaveBeenCalled();
   });
@@ -9347,10 +8841,7 @@ describe('RemoveMemberModal', () => {
     mockSetSigners.mockRejectedValue({ code: 4001 });
     remove();
     await waitFor(() => expect(removeTeamMember).toHaveBeenCalledWith('m-sam'));
-    expect(setLoadingStatus).toHaveBeenLastCalledWith({
-      status: 'error',
-      label: 'The transaction was denied',
-    });
+    expect(setLoadingStatus).toHaveBeenLastCalledWith({ status: 'error', label: 'The transaction was denied' });
     expect(markLicenseSignerDisabled).toHaveBeenCalledTimes(1);
     expect(markLicenseSignerDisabled).toHaveBeenCalledWith(43, OLD);
     expect(toast.error).toHaveBeenCalledWith(
@@ -9381,9 +8872,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 const mockSetSigners = jest.fn();
-jest.mock('@/hooks/useSetLicenseSigners', () => ({
-  useSetLicenseSigners: () => mockSetSigners,
-}));
+jest.mock('@/hooks/useSetLicenseSigners', () => ({ useSetLicenseSigners: () => mockSetSigners }));
 jest.mock('@/actions/teams', () => ({ markLicenseSignerDisabled: jest.fn() }));
 jest.mock('@/app/settings/components/Team/WebhookReview', () => ({
   WebhookReview: () => <div>webhook review</div>,
@@ -9412,39 +8901,21 @@ const LEO: TeamMember = {
   inviteExpiresAt: null,
 };
 const LICENSES = [
-  {
-    tokenId: 42,
-    clientId: '0xaaa',
-    label: 'Harness Fleet',
-    redirectUri: 'https://x',
-    signers: [CURRENT.toLowerCase()],
-  },
+  { tokenId: 42, clientId: '0xaaa', label: 'Harness Fleet', redirectUri: 'https://x', signers: [CURRENT.toLowerCase()] },
 ];
 
 describe('RevokeAccessModal', () => {
   it('revokes the chosen licenses, and retries only the registry stamp when it failed', async () => {
     mockSetSigners.mockResolvedValue(undefined);
-    const unavailable = {
-      ok: false,
-      status: 502,
-      code: 'IDENTITY_UNAVAILABLE',
-      message: 'x',
-    };
+    const unavailable = { ok: false, status: 502, code: 'IDENTITY_UNAVAILABLE', message: 'x' };
     (markLicenseSignerDisabled as jest.Mock)
       .mockResolvedValueOnce(unavailable)
       .mockResolvedValueOnce(unavailable)
       .mockResolvedValueOnce({ ok: true, data: {} });
     const onClose = jest.fn();
     render(
-      <LoadingStatusContext.Provider
-        value={{ setLoadingStatus: jest.fn(), clearLoadingStatus: jest.fn() }}
-      >
-        <RevokeAccessModal
-          member={LEO}
-          licenses={LICENSES}
-          onClose={onClose}
-          onDone={jest.fn()}
-        />
+      <LoadingStatusContext.Provider value={{ setLoadingStatus: jest.fn(), clearLoadingStatus: jest.fn() }}>
+        <RevokeAccessModal member={LEO} licenses={LICENSES} onClose={onClose} onDone={jest.fn()} />
       </LoadingStatusContext.Provider>,
     );
     expect(screen.getByRole('checkbox', { name: 'Harness Fleet' })).toBeChecked();
@@ -9452,14 +8923,9 @@ describe('RevokeAccessModal', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       "Data access is off, but we couldn't record that for Harness Fleet.",
     );
-    expect(trackEvent).toHaveBeenCalledWith('Data Access Revoked', {
-      memberId: 'm-leo',
-      tokenIds: [42],
-    });
+    expect(trackEvent).toHaveBeenCalledWith('Data Access Revoked', { memberId: 'm-leo', tokenIds: [42] });
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
-    await waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith("Leo Park's data access is revoked."),
-    );
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Leo Park's data access is revoked."));
     expect(mockSetSigners).toHaveBeenCalledTimes(1);
     expect(markLicenseSignerDisabled).toHaveBeenCalledTimes(3);
     expect(onClose).toHaveBeenCalled();
@@ -9468,32 +8934,30 @@ describe('RevokeAccessModal', () => {
 ```
 
 Extend `__tests__/unit/pages/app/settings/TeamSection.test.tsx`:
-
 - Add this mock beside the others. `WebhookReview` uses `useDimoAuth`, which loads Turnkey:
 
 ```tsx
-jest.mock('@/hooks/useDimoAuth', () => ({
-  useDimoAuth: () => ({ getGlobalAccountDeveloperJwt: jest.fn() }),
-}));
+jest.mock('@/hooks/useDimoAuth', () => ({ useDimoAuth: () => ({ getGlobalAccountDeveloperJwt: jest.fn() }) }));
 ```
 
 - Append inside the `describe`:
 
 ```tsx
-it('opens Remove for an accepted member', () => {
-  members({ members: [OWNER_ROW, { ...SAM, memberKeys: [] }] });
-  (useTeamLicenses as jest.Mock).mockReturnValue({
-    licenses: [],
-    loading: false,
-    refetch: jest.fn(),
+  it('offers no Revoke or Remove until the licenses load', () => {
+    members({ members: [OWNER_ROW, { ...SAM, memberKeys: [{ licenseTokenId: 42, signerAddress: SAM.signerAddress! }] }] });
+    (useTeamLicenses as jest.Mock).mockReturnValue({ licenses: [], loading: true, refetch: jest.fn() });
+    render(<TeamSection />);
+    expect(screen.queryByRole('button', { name: 'Actions for sam@harness.dev' })).toBeNull();
   });
-  render(<TeamSection />);
-  fireEvent.click(screen.getByRole('button', { name: 'Actions for sam@harness.dev' }));
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Remove' }));
-  expect(
-    screen.getByRole('heading', { name: 'Remove Sam Rivera from Harness Motors?' }),
-  ).toBeInTheDocument();
-});
+
+  it('opens Remove for an accepted member', () => {
+    members({ members: [OWNER_ROW, { ...SAM, memberKeys: [] }] });
+    (useTeamLicenses as jest.Mock).mockReturnValue({ licenses: [], loading: false, refetch: jest.fn() });
+    render(<TeamSection />);
+    fireEvent.click(screen.getByRole('button', { name: 'Actions for sam@harness.dev' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Remove' }));
+    expect(screen.getByRole('heading', { name: 'Remove Sam Rivera from Harness Motors?' })).toBeInTheDocument();
+  });
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -9534,11 +8998,14 @@ export interface RevokeOutcome {
 // 2. Stamp every registered key disabled, including ones already off-chain (an
 //    old wallet, or an earlier revoke whose stamp failed).
 // After a failed transaction only keys already off-chain are stamped, so the
-// registry never calls a key disabled while the chain still honours it.
+// registry never calls a key disabled while the chain still honours it. "Off-
+// chain" is only known for a license in the loaded list: other keys are left
+// alone (the caller only offers Revoke once the licenses loaded cleanly).
 export const revokeMemberKeys = async (
-  keys: MemberLicenseKey[],
+  allKeys: MemberLicenseKey[],
   deps: RevokeDeps,
 ): Promise<RevokeOutcome> => {
+  const keys = allKeys.filter((k) => k.licenseKnown);
   const onChain = keys.filter((k) => k.onChain);
   let txError: unknown = null;
   if (onChain.length) {
@@ -9577,10 +9044,8 @@ export class NeedsDevJwtError extends Error {
 export const touchedBy = (webhook: Webhook, addresses: string[]) => {
   const wanted = new Set(addresses.map((a) => a.toLowerCase()));
   return {
-    created:
-      !!webhook.createdBySigner && wanted.has(webhook.createdBySigner.toLowerCase()),
-    updated:
-      !!webhook.updatedBySigner && wanted.has(webhook.updatedBySigner.toLowerCase()),
+    created: !!webhook.createdBySigner && wanted.has(webhook.createdBySigner.toLowerCase()),
+    updated: !!webhook.updatedBySigner && wanted.has(webhook.updatedBySigner.toLowerCase()),
   };
 };
 
@@ -9600,7 +9065,7 @@ export const useMemberWebhooks = ({
 }) => {
   const { getGlobalAccountDeveloperJwt } = useDimoAuth();
   return useQuery({
-    queryKey: ['member-webhooks', clientId, addresses.join(','), pastedJwt ?? ''],
+    queryKey: ['member-webhooks', clientId, redirectUri, addresses.join(','), pastedJwt ?? ''],
     retry: false,
     queryFn: async () => {
       let token = pastedJwt || getDevJwt(clientId);
@@ -9635,11 +9100,11 @@ import type { TeamMember } from '@/types/team';
 import { memberAddresses, memberLicenseKeys } from './memberKeys';
 import { displayName } from './MembersTable';
 
-const LicenseWebhooks: FC<{
-  license: TeamLicense;
-  addresses: string[];
-  name: string;
-}> = ({ license, addresses, name }) => {
+const LicenseWebhooks: FC<{ license: TeamLicense; addresses: string[]; name: string }> = ({
+  license,
+  addresses,
+  name,
+}) => {
   const [pasted, setPasted] = useState('');
   const [pastedJwt, setPastedJwt] = useState<string>();
   const [pasteError, setPasteError] = useState<string | null>(null);
@@ -9665,8 +9130,7 @@ const LicenseWebhooks: FC<{
     setPastedJwt(pasted.trim());
   };
 
-  if (query.isLoading)
-    return <p className="text-body-sm text-muted">Checking {license.label}…</p>;
+  if (query.isLoading) return <p className="text-body-sm text-muted">Checking {license.label}…</p>;
   if (query.error) {
     const id = `review-jwt-${license.tokenId}`;
     return (
@@ -9701,16 +9165,11 @@ const LicenseWebhooks: FC<{
   return (
     <ul className="flex flex-col gap-2">
       {query.data.map(({ webhook, created, updated }) => (
-        <li
-          key={webhook.id}
-          className="flex flex-col gap-0.5 rounded-control bg-control p-3"
-        >
+        <li key={webhook.id} className="flex flex-col gap-0.5 rounded-control bg-control p-3">
           <span className="text-body-sm text-ink">
             {webhook.displayName || webhook.description || webhook.id}
           </span>
-          <span className="break-all font-mono text-code text-muted">
-            {webhook.targetURL}
-          </span>
+          <span className="break-all font-mono text-code text-muted">{webhook.targetURL}</span>
           <span className="text-label text-muted">
             {created && updated
               ? 'Created and last changed by them'
@@ -9739,16 +9198,11 @@ export const WebhookReview: FC<{ member: TeamMember; licenses: TeamLicense[] }> 
     <div className="flex flex-col gap-3">
       <h3 className="text-body text-ink">Webhooks to review</h3>
       <p className="text-body-sm text-muted">
-        Webhooks keep sending vehicle data after {name} goes. Check the ones they created
-        or changed.
+        Webhooks keep sending vehicle data after {name} goes. Check the ones they created or
+        changed.
       </p>
       {reviewed.map((license) => (
-        <LicenseWebhooks
-          key={license.tokenId}
-          license={license}
-          addresses={addresses}
-          name={name}
-        />
+        <LicenseWebhooks key={license.tokenId} license={license} addresses={addresses} name={name} />
       ))}
     </div>
   );
@@ -9774,7 +9228,7 @@ import { useSetLicenseSigners } from '@/hooks/useSetLicenseSigners';
 import type { TeamLicense } from '@/hooks/useTeamLicenses';
 import type { TeamMember } from '@/types/team';
 import { txErrorStatus } from '@/utils/txErrorStatus';
-import { memberLicenseKeys, type MemberLicenseKey } from './memberKeys';
+import { actionableKeys, memberLicenseKeys, type MemberLicenseKey } from './memberKeys';
 import { displayName } from './MembersTable';
 import { revokeMemberKeys } from './revokeMemberKeys';
 import { WebhookReview } from './WebhookReview';
@@ -9795,15 +9249,13 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const setLicenseSigners = useSetLicenseSigners();
   const { trackEvent } = useMixPanel();
-  const [keys] = useState(() => memberLicenseKeys(member, licenses));
+  const [keys] = useState(() => actionableKeys(memberLicenseKeys(member, licenses)));
   // One entry per license; every license is chosen to start with.
   const choices = useMemo(
     () => [...new Map(keys.map((k) => [k.tokenId, k.licenseLabel])).entries()],
     [keys],
   );
-  const [chosen, setChosen] = useState<number[]>(() =>
-    choices.map(([tokenId]) => tokenId),
-  );
+  const [chosen, setChosen] = useState<number[]>(() => choices.map(([tokenId]) => tokenId));
   const [busy, setBusy] = useState(false);
   const [unstamped, setUnstamped] = useState<MemberLicenseKey[] | null>(null);
   const name = displayName(member);
@@ -9825,10 +9277,7 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
     }
     clearLoadingStatus();
     if (target.some((k) => k.onChain)) {
-      trackEvent('Data Access Revoked', {
-        memberId: member.id,
-        tokenIds: tokenIdsOfKeys(target),
-      });
+      trackEvent('Data Access Revoked', { memberId: member.id, tokenIds: tokenIdsOfKeys(target) });
     }
     if (outcome.unstamped.length) {
       // Off-chain now: a retry only stamps.
@@ -9846,8 +9295,8 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
           {`Revoke ${name}'s data access?`}
         </Title>
         <p className="text-body-sm text-muted">
-          Their wallet is removed from the chosen licenses on-chain. Tokens they already
-          hold stop working within about 10 minutes.
+          Their wallet is removed from the chosen licenses on-chain. Tokens they already hold stop
+          working within about 10 minutes.
         </p>
         <ul className="flex flex-col gap-2">
           {choices.map(([tokenId, label]) => (
@@ -9858,9 +9307,7 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
                 disabled={busy || !!unstamped}
                 onChange={(e) =>
                   setChosen((prev) =>
-                    e.target.checked
-                      ? [...prev, tokenId]
-                      : prev.filter((id) => id !== tokenId),
+                    e.target.checked ? [...prev, tokenId] : prev.filter((id) => id !== tokenId),
                   )
                 }
               />
@@ -9913,7 +9360,7 @@ import { useSetLicenseSigners } from '@/hooks/useSetLicenseSigners';
 import type { TeamLicense } from '@/hooks/useTeamLicenses';
 import type { TeamMember } from '@/types/team';
 import { txErrorStatus } from '@/utils/txErrorStatus';
-import { memberLicenseKeys, type MemberLicenseKey } from './memberKeys';
+import { actionableKeys, memberLicenseKeys, type MemberLicenseKey } from './memberKeys';
 import { displayName } from './MembersTable';
 import { labelsOfKeys, tokenIdsOfKeys } from './RevokeAccessModal';
 import { revokeMemberKeys } from './revokeMemberKeys';
@@ -9931,17 +9378,11 @@ interface Props {
 // the member (the proxy refuses them within a minute either way); their row
 // stays in the Team list as "Still a signer on …" with Retry (C7 lists REVOKED
 // members who still hold a key).
-export const RemoveMemberModal: FC<Props> = ({
-  member,
-  licenses,
-  teamName,
-  onClose,
-  onDone,
-}) => {
+export const RemoveMemberModal: FC<Props> = ({ member, licenses, teamName, onClose, onDone }) => {
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const setLicenseSigners = useSetLicenseSigners();
   const { trackEvent } = useMixPanel();
-  const [keys] = useState(() => memberLicenseKeys(member, licenses));
+  const [keys] = useState(() => actionableKeys(memberLicenseKeys(member, licenses)));
   const [busy, setBusy] = useState(false);
   const name = displayName(member);
 
@@ -9958,11 +9399,7 @@ export const RemoveMemberModal: FC<Props> = ({
       txError = outcome.txError;
       unstamped = outcome.unstamped;
       if (txError) Sentry.captureException(txError);
-      else
-        trackEvent('Data Access Revoked', {
-          memberId: member.id,
-          tokenIds: tokenIdsOfKeys(keys),
-        });
+      else trackEvent('Data Access Revoked', { memberId: member.id, tokenIds: tokenIdsOfKeys(keys) });
     }
     if (member.status !== 'REVOKED' && member.status !== 'LEFT') {
       const result = await removeTeamMember(member.id).catch(() => null);
@@ -10023,34 +9460,29 @@ export const RemoveMemberModal: FC<Props> = ({
 ```
 
 `src/app/settings/components/Team/TeamSection.tsx`:
-
 - Import `RevokeAccessModal` and `RemoveMemberModal`.
 - Add `const [revokeFor, setRevokeFor] = useState<TeamMember | null>(null);` and `const [removeFor, setRemoveFor] = useState<TeamMember | null>(null);`.
-- Add `revoke: setRevokeFor,` and `remove: setRemoveFor,` to `handlers`.
+- Add `...(licensesReady ? { revoke: setRevokeFor, remove: setRemoveFor } : {}),` to `handlers`: with no loaded licenses every key would read as off-chain and be stamped without a transaction.
 - Before `</Section>`, add:
 
 ```tsx
-{
-  revokeFor && (
-    <RevokeAccessModal
-      member={revokeFor}
-      licenses={licenses}
-      onClose={() => setRevokeFor(null)}
-      onDone={afterSignerChange}
-    />
-  );
-}
-{
-  removeFor && activeTeam && (
-    <RemoveMemberModal
-      member={removeFor}
-      licenses={licenses}
-      teamName={activeTeam.name}
-      onClose={() => setRemoveFor(null)}
-      onDone={afterSignerChange}
-    />
-  );
-}
+      {revokeFor && (
+        <RevokeAccessModal
+          member={revokeFor}
+          licenses={licenses}
+          onClose={() => setRevokeFor(null)}
+          onDone={afterSignerChange}
+        />
+      )}
+      {removeFor && activeTeam && (
+        <RemoveMemberModal
+          member={removeFor}
+          licenses={licenses}
+          teamName={activeTeam.name}
+          onClose={() => setRemoveFor(null)}
+          onDone={afterSignerChange}
+        />
+      )}
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
@@ -10073,9 +9505,9 @@ git commit -m "feat(teams): revoke and remove members across every key they held
 
 - Create: `src/hooks/useLicenseSignerRegistry.ts`
 - Create: `src/app/license/[tokenId]/details/components/Signers/KeyHoldersModal.tsx`, `src/app/license/[tokenId]/details/components/Signers/BelongsTo.tsx`
-- Modify: `src/app/license/[tokenId]/details/components/Signers/Signers.tsx`
+- Modify: `src/app/license/[tokenId]/details/components/Signers/Signers.tsx`, `src/hooks/useTransactions.ts` (`useEnableSigner` and `useDisableSigner` reject a reverted user operation)
 - Test:
-  - `__tests__/unit/hooks/useLicenseSignerRegistry.test.tsx`
+  - `__tests__/unit/hooks/useLicenseSignerRegistry.test.tsx`, `__tests__/unit/hooks/useTransactionsSigners.test.tsx`
   - `__tests__/unit/pages/license/[tokenId]/details/KeyHoldersModal.test.tsx`
   - `__tests__/unit/pages/license/[tokenId]/details/Signers.test.tsx`
 
@@ -10083,7 +9515,7 @@ git commit -m "feat(teams): revoke and remove members across every key they held
 
 - Consumes:
   - `listLicenseSigners`, `upsertLicenseSigner` and `markLicenseSignerDisabled` (Task 2);
-  - `registryWrite` (Task 14);
+  - `registryWrite` and `assertUserOperation` (Task 14);
   - `useTeamMembers` (Task 13) and `RowActionsMenu` (Task 13);
   - `unwrap` (Task 1) and `useTeam` (Task 4);
   - the spec's _License → API keys_ section.
@@ -10094,8 +9526,9 @@ git commit -m "feat(teams): revoke and remove members across every key they held
     - It requires at least one holder and a note of 200 characters or fewer (console-api's `INVALID_HOLDERS` rules).
     - `onSubmit(value): Promise<string | null>` returns an error to show, or null.
     - `KeyHolders = { holders: HolderInput[]; note: string | null }`.
-  - **`BelongsTo`:** `{ record?, offChain?, unavailable?, onAssign? }`. It shows:
+  - **`BelongsTo`:** `{ record?, memberWallet?, offChain?, unavailable?, onAssign? }`. It shows:
     - for member keys, the name and email;
+    - for a team member's verified wallet with no row (a grant whose record failed), the member and a `Not recorded` chip, without Assign; for the owner's own console wallet, the owner and a `Console wallet` chip;
     - for other keys, the holders and the note;
     - `Unassigned · Assign` when there is no row;
     - a `Disabled outside the console` chip for a registry row the chain no longer lists.
@@ -10103,7 +9536,9 @@ git commit -m "feat(teams): revoke and remove members across every key they held
     - **Generate key** asks for holders first, enables the key, shows it at once, then writes an `API_KEY` row. If that write fails after its retry, a toast offers **Assign** with the holders filled in.
     - **RentalOS** writes an `API_KEY` row noted `RentalOS` (holder `RentalOS`) after the tenant is registered. It is never part of the rollback, and the `localStorage` tag is gone.
     - **Delete** stamps the row disabled.
-    - Row actions sit in a `⋯` menu (Assign, Delete API key). A member's key has none; Settings → Team manages it.
+    - Row actions sit in a `⋯` menu (Assign, Delete API key). A member's key, or a member's verified wallet, has none: Settings → Team manages it. The owner's console wallet has only Delete. console-api refuses an `API_KEY` or `EXTERNAL` row at any user's verified wallet (C7 `409 SIGNER_IN_USE`).
+    - Assign shows `This address is a team member's wallet. Record it with Grant in Settings → Team.` for `SIGNER_IN_USE`, console-api's message for any other 4xx, and `We couldn't save this. Try again.` for a rejection or 5xx.
+    - `useEnableSigner` and `useDisableSigner` (Generate key, RentalOS and its rollback, Delete, the console key) reject a reverted user operation through `assertUserOperation`.
     - Members see the table read-only.
     - Assigning tracks `API Key Assigned`.
 
@@ -10148,18 +9583,14 @@ describe('useLicenseSignerRegistry', () => {
       ok: true,
       data: {
         signers: [
-          record('0x5B2E4f6A8c0D2e4F6a8C0d2E4f6A8c0D2e4F6a8C'),
+          record('0x5b2E4F6A8C0D2e4f6A8C0D2e4f6a8c0D2e4F6a8c'),
           record('0x3a5C7e9b2d4F6a8c1c3E5A7B9d0F2a4c6E8B0D1f', '2026-09-20T00:00:00Z'),
         ],
       },
     });
-    const { result } = renderHook(() => useLicenseSignerRegistry(42), {
-      wrapper: makeWrapper(),
-    });
+    const { result } = renderHook(() => useLicenseSignerRegistry(42), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.byAddress.size).toBe(1));
-    expect(
-      result.current.byAddress.has('0x5b2e4f6a8c0d2e4f6a8c0d2e4f6a8c0d2e4f6a8c'),
-    ).toBe(true);
+    expect(result.current.byAddress.has('0x5b2e4f6a8c0d2e4f6a8c0d2e4f6a8c0d2e4f6a8c')).toBe(true);
     expect(listLicenseSigners).toHaveBeenCalledWith(42);
   });
 
@@ -10170,11 +9601,44 @@ describe('useLicenseSignerRegistry', () => {
       code: 'IDENTITY_UNAVAILABLE',
       message: 'x',
     });
-    const { result } = renderHook(() => useLicenseSignerRegistry(42), {
-      wrapper: makeWrapper(),
-    });
+    const { result } = renderHook(() => useLicenseSignerRegistry(42), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBeInstanceOf(TeamApiError);
+  });
+});
+```
+
+`__tests__/unit/hooks/useTransactionsSigners.test.tsx`:
+
+```tsx
+import { renderHook } from '@testing-library/react';
+
+const mockProcess = jest.fn();
+// The @/hooks barrel pulls Turnkey; these two hooks only need these.
+jest.mock('@/hooks', () => ({
+  useContractGA: () => ({ processTransactions: mockProcess }),
+  useGlobalAccount: () => ({ validateCurrentSession: async () => ({ walletAddress: '0x1' }) }),
+}));
+jest.mock('@/hooks/useSACD', () => ({ useSACD: jest.fn() }));
+jest.mock('@/services/pricing', () => ({ getCurrentDimoPrice: jest.fn() }));
+import { useDisableSigner, useEnableSigner } from '@/hooks/useTransactions';
+import { UserOperationFailedError } from '@/utils/userOperation';
+
+const SIGNER = '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6';
+const enable = () => renderHook(() => useEnableSigner(42)).result.current(SIGNER);
+const disable = () => renderHook(() => useDisableSigner(42)).result.current(SIGNER);
+
+describe('useEnableSigner and useDisableSigner', () => {
+  it('resolve when the user operation succeeds', async () => {
+    mockProcess.mockResolvedValue({ success: true });
+    await expect(enable()).resolves.toBeUndefined();
+    await expect(disable()).resolves.toBeUndefined();
+  });
+
+  it('reject when it lands but reverts (success: false, no throw)', async () => {
+    mockProcess.mockResolvedValue({ success: false });
+    await expect(enable()).rejects.toBeInstanceOf(UserOperationFailedError);
+    await expect(disable()).rejects.toBeInstanceOf(UserOperationFailedError);
   });
 });
 ```
@@ -10188,20 +9652,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 jest.mock('@/hooks/useTeamMembers', () => ({
   useTeamMembers: () => ({
     members: [
-      {
-        id: 'm-sam',
-        userId: 'u-sam',
-        name: 'Sam Rivera',
-        email: 'sam@harness.dev',
-        status: 'ACCEPTED',
-      },
-      {
-        id: 'm-ana',
-        userId: null,
-        name: null,
-        email: 'ana@harness.dev',
-        status: 'PENDING',
-      },
+      { id: 'm-sam', userId: 'u-sam', name: 'Sam Rivera', email: 'sam@harness.dev', status: 'ACCEPTED' },
+      { id: 'm-ana', userId: null, name: null, email: 'ana@harness.dev', status: 'PENDING' },
     ],
   }),
 }));
@@ -10209,14 +9661,7 @@ import { KeyHoldersModal } from '@/app/license/[tokenId]/details/components/Sign
 
 const onSubmit = jest.fn();
 const open = (props: Partial<React.ComponentProps<typeof KeyHoldersModal>> = {}) =>
-  render(
-    <KeyHoldersModal
-      submitLabel="Save"
-      onSubmit={onSubmit}
-      onClose={jest.fn()}
-      {...props}
-    />,
-  );
+  render(<KeyHoldersModal submitLabel="Save" onSubmit={onSubmit} onClose={jest.fn()} {...props} />);
 const save = () => fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 describe('KeyHoldersModal', () => {
@@ -10231,9 +9676,7 @@ describe('KeyHoldersModal', () => {
   it('requires at least one holder', () => {
     open();
     save();
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'Choose at least one person, or type a name.',
-    );
+    expect(screen.getByRole('alert')).toHaveTextContent('Choose at least one person, or type a name.');
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -10255,21 +9698,12 @@ describe('KeyHoldersModal', () => {
 
   it('fills in earlier holders and shows the error the caller returns', async () => {
     onSubmit.mockResolvedValue('Holders must be members of this team.');
-    open({
-      initial: {
-        holders: [{ userId: 'u-sam' }, { name: 'Ops on-call' }],
-        note: 'Pager duty',
-      },
-    });
+    open({ initial: { holders: [{ userId: 'u-sam' }, { name: 'Ops on-call' }], note: 'Pager duty' } });
     expect(screen.getByRole('checkbox', { name: 'Sam Rivera' })).toBeChecked();
-    expect(screen.getByLabelText('Other people (comma-separated)')).toHaveValue(
-      'Ops on-call',
-    );
+    expect(screen.getByLabelText('Other people (comma-separated)')).toHaveValue('Ops on-call');
     expect(screen.getByLabelText('Note')).toHaveValue('Pager duty');
     save();
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Holders must be members of this team.',
-    );
+    expect(await screen.findByRole('alert')).toHaveTextContent('Holders must be members of this team.');
   });
 });
 ```
@@ -10285,9 +9719,7 @@ const disableSigner = jest.fn(async () => {});
 const trackEvent = jest.fn();
 // The @/hooks barrel pulls Turnkey and ZeroDev; Signers only needs these.
 jest.mock('@/hooks', () => ({
-  useDimoAuth: () => ({
-    hasGlobalAccountPrivateKey: async () => ({ hasPrivateKey: false }),
-  }),
+  useDimoAuth: () => ({ hasGlobalAccountPrivateKey: async () => ({ hasPrivateKey: false }) }),
   useDisableSigner: () => disableSigner,
   useEnableSigner: () => enableSigner,
   useEventEmitter: () => ({ publishEvent: jest.fn() }),
@@ -10305,42 +9737,29 @@ jest.mock('@/hoc', () => ({
 }));
 jest.mock('@/hooks/useIsLicenseOwner', () => ({ useIsLicenseOwner: jest.fn() }));
 jest.mock('@/hooks/useMixPanel', () => ({ useMixPanel: () => ({ trackEvent }) }));
-jest.mock('@/hooks/useTeamMembers', () => ({
-  useTeamMembers: () => ({
-    members: [
-      {
-        id: 'm-sam',
-        userId: 'u-sam',
-        name: 'Sam Rivera',
-        email: 'sam@harness.dev',
-        status: 'ACCEPTED',
-      },
-    ],
-  }),
-}));
+const SAM_ROW = {
+  id: 'm-sam',
+  userId: 'u-sam',
+  name: 'Sam Rivera',
+  email: 'sam@harness.dev',
+  role: 'MEMBER',
+  status: 'ACCEPTED',
+  signerAddress: null as string | null,
+};
+const mockTeam = { members: [SAM_ROW] };
+jest.mock('@/hooks/useTeamMembers', () => ({ useTeamMembers: () => mockTeam }));
 const registry = { byAddress: new Map(), isError: false, refetch: jest.fn() };
-jest.mock('@/hooks/useLicenseSignerRegistry', () => ({
-  useLicenseSignerRegistry: () => registry,
-}));
-jest.mock('@/actions/teams', () => ({
-  upsertLicenseSigner: jest.fn(),
-  markLicenseSignerDisabled: jest.fn(),
-}));
+jest.mock('@/hooks/useLicenseSignerRegistry', () => ({ useLicenseSignerRegistry: () => registry }));
+jest.mock('@/actions/teams', () => ({ upsertLicenseSigner: jest.fn(), markLicenseSignerDisabled: jest.fn() }));
 jest.mock('@/actions/user', () => ({ getUser: jest.fn() }));
 jest.mock('@/services/dimoDev', () => ({ getDeveloperJwt: jest.fn() }));
 jest.mock('@/utils/wallet', () => ({
-  generateWallet: () => ({
-    address: '0xA11cE0000000000000000000000000000000bEEF',
-    privateKey: '0xabc123',
-  }),
+  generateWallet: () => ({ address: '0xa11cE0000000000000000000000000000000Beef', privateKey: '0xabc123' }),
 }));
-jest.mock(
-  '@/app/license/[tokenId]/details/components/Signers/components/APIKeyModal',
-  () => ({
-    APIKeyModal: ({ isOpen, apiKey }: { isOpen: boolean; apiKey: string }) =>
-      isOpen ? <p>{`API key ${apiKey}`}</p> : null,
-  }),
-);
+jest.mock('@/app/license/[tokenId]/details/components/Signers/components/APIKeyModal', () => ({
+  APIKeyModal: ({ isOpen, apiKey }: { isOpen: boolean; apiKey: string }) =>
+    isOpen ? <p>{`API key ${apiKey}`}</p> : null,
+}));
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
 import { toast } from 'sonner';
@@ -10350,17 +9769,12 @@ import { getDeveloperJwt } from '@/services/dimoDev';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import { Signers } from '@/app/license/[tokenId]/details/components/Signers/Signers';
 
-const NEW_KEY = '0xA11cE0000000000000000000000000000000bEEF';
-const SIGNER = '0x5B2E4f6A8c0D2e4F6a8C0d2E4f6A8c0D2e4F6a8C';
+const NEW_KEY = '0xa11cE0000000000000000000000000000000Beef';
+const SIGNER = '0x5b2E4F6A8C0D2e4f6A8C0D2e4f6a8c0D2e4F6a8c';
 const SAM_WALLET = '0x1c3E5A7b9D0F2a4c6E8b0D1F3a5c7e9B2D4f6a8C';
 const UNASSIGNED = '0x2D4f6a8C1c3E5a7b9D0F2A4c6E8B0D1F3A5c7e9b';
 const OLD = '0x3a5C7e9b2d4F6a8c1c3E5A7B9d0F2a4c6E8B0D1f';
-const row = (
-  signerAddress: string,
-  kind: string,
-  holders: object[],
-  note: string | null = null,
-) => ({
+const row = (signerAddress: string, kind: string, holders: object[], note: string | null = null) => ({
   signerAddress,
   kind,
   note,
@@ -10378,12 +9792,7 @@ const show = (signers: string[] = []) =>
           owner: '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d',
           clientId: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
           tokenId: 42,
-          signers: {
-            nodes: signers.map((address) => ({
-              address,
-              enabledAt: '2026-09-01T00:00:00Z',
-            })),
-          },
+          signers: { nodes: signers.map((address) => ({ address, enabledAt: '2026-09-01T00:00:00Z' })) },
           redirectURIs: { nodes: [{ uri: 'https://rentals.dimo.co/' }] },
         } as never
       }
@@ -10394,6 +9803,7 @@ const show = (signers: string[] = []) =>
 describe('Signers', () => {
   beforeEach(() => {
     registry.byAddress = new Map();
+    mockTeam.members = [SAM_ROW];
     (useIsLicenseOwner as jest.Mock).mockReturnValue(true);
     (upsertLicenseSigner as jest.Mock).mockReset();
   });
@@ -10404,19 +9814,14 @@ describe('Signers', () => {
     show();
     fireEvent.click(screen.getByRole('button', { name: 'Generate key' }));
     fireEvent.click(screen.getByRole('checkbox', { name: 'Sam Rivera' }));
-    fireEvent.change(screen.getByLabelText('Note'), {
-      target: { value: 'Prod backend' },
-    });
+    fireEvent.change(screen.getByLabelText('Note'), { target: { value: 'Prod backend' } });
     fireEvent.click(screen.getByRole('button', { name: 'Generate API key' }));
     expect(await screen.findByText('API key abc123')).toBeInTheDocument();
     expect(enableSigner).toHaveBeenCalledWith(NEW_KEY);
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith(
-        "The key works, but we couldn't record who it's for.",
-        {
-          action: expect.objectContaining({ label: 'Assign' }),
-        },
-      ),
+      expect(toast.error).toHaveBeenCalledWith("The key works, but we couldn't record who it's for.", {
+        action: expect.objectContaining({ label: 'Assign' }),
+      }),
     );
     expect(upsertLicenseSigner).toHaveBeenCalledWith(42, NEW_KEY, {
       kind: 'API_KEY',
@@ -10432,18 +9837,9 @@ describe('Signers', () => {
   it('records a RentalOS key, and a registry failure never rolls the tenant back', async () => {
     jest.useFakeTimers();
     (upsertLicenseSigner as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));
-    (getDeveloperJwt as jest.Mock).mockResolvedValue({
-      headers: { Authorization: 'Bearer dev.jwt' },
-    });
-    (getUser as jest.Mock).mockResolvedValue({
-      name: 'Jane Developer',
-      email: 'jane@harness.dev',
-    });
-    global.fetch = jest.fn(async () => ({
-      ok: true,
-      status: 200,
-      text: async () => 'ok',
-    })) as never;
+    (getDeveloperJwt as jest.Mock).mockResolvedValue({ headers: { Authorization: 'Bearer dev.jwt' } });
+    (getUser as jest.Mock).mockResolvedValue({ name: 'Jane Developer', email: 'jane@harness.dev' });
+    global.fetch = jest.fn(async () => ({ ok: true, status: 200, text: async () => 'ok' })) as never;
     show();
     fireEvent.click(screen.getByRole('button', { name: 'Register RentalOS' }));
     fireEvent.click(screen.getByRole('button', { name: 'Proceed' }));
@@ -10463,50 +9859,23 @@ describe('Signers', () => {
 
   it("shows who each key belongs to, and leaves a member's key to Settings → Team", async () => {
     registry.byAddress = new Map([
-      [
-        SIGNER.toLowerCase(),
-        row(
-          SIGNER,
-          'API_KEY',
-          [{ userId: null, name: 'Ops on-call', email: null }],
-          'Pager duty',
-        ),
-      ],
-      [
-        SAM_WALLET.toLowerCase(),
-        row(SAM_WALLET, 'MEMBER', [
-          { userId: 'u-sam', name: 'Sam Rivera', email: 'sam@harness.dev' },
-        ]),
-      ],
-      [
-        OLD.toLowerCase(),
-        row(OLD, 'EXTERNAL', [{ userId: null, name: 'Old backend', email: null }]),
-      ],
+      [SIGNER.toLowerCase(), row(SIGNER, 'API_KEY', [{ userId: null, name: 'Ops on-call', email: null }], 'Pager duty')],
+      [SAM_WALLET.toLowerCase(), row(SAM_WALLET, 'MEMBER', [{ userId: 'u-sam', name: 'Sam Rivera', email: 'sam@harness.dev' }])],
+      [OLD.toLowerCase(), row(OLD, 'EXTERNAL', [{ userId: null, name: 'Old backend', email: null }])],
     ]);
-    (upsertLicenseSigner as jest.Mock).mockResolvedValue({
-      ok: true,
-      data: { signer: {} },
-    });
+    (upsertLicenseSigner as jest.Mock).mockResolvedValue({ ok: true, data: { signer: {} } });
     show([SIGNER, SAM_WALLET, UNASSIGNED]);
     expect(screen.getByText('Pager duty')).toBeInTheDocument();
     expect(screen.getByText('sam@harness.dev')).toBeInTheDocument();
     expect(screen.getByText('Disabled outside the console')).toBeInTheDocument();
     expect(screen.getByText(/Unassigned/)).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: `Actions for ${SAM_WALLET}` }),
-    ).toBeNull();
+    expect(screen.queryByRole('button', { name: `Actions for ${SAM_WALLET}` })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: `Actions for ${SIGNER}` }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'Assign' }));
-    expect(screen.getByLabelText('Other people (comma-separated)')).toHaveValue(
-      'Ops on-call',
-    );
+    expect(screen.getByLabelText('Other people (comma-separated)')).toHaveValue('Ops on-call');
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() =>
-      expect(trackEvent).toHaveBeenCalledWith('API Key Assigned', {
-        tokenId: 42,
-        signerAddress: SIGNER,
-        holders: 1,
-      }),
+      expect(trackEvent).toHaveBeenCalledWith('API Key Assigned', { tokenId: 42, signerAddress: SIGNER, holders: 1 }),
     );
     expect(upsertLicenseSigner).toHaveBeenCalledWith(42, SIGNER, {
       kind: 'API_KEY',
@@ -10516,15 +9885,10 @@ describe('Signers', () => {
   });
 
   it('assigns an unregistered key as EXTERNAL', async () => {
-    (upsertLicenseSigner as jest.Mock).mockResolvedValue({
-      ok: true,
-      data: { signer: {} },
-    });
+    (upsertLicenseSigner as jest.Mock).mockResolvedValue({ ok: true, data: { signer: {} } });
     show([UNASSIGNED]);
     fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
-    fireEvent.change(screen.getByLabelText('Other people (comma-separated)'), {
-      target: { value: 'Data team' },
-    });
+    fireEvent.change(screen.getByLabelText('Other people (comma-separated)'), { target: { value: 'Data team' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() =>
       expect(upsertLicenseSigner).toHaveBeenCalledWith(42, UNASSIGNED, {
@@ -10535,15 +9899,49 @@ describe('Signers', () => {
     );
   });
 
+  it("never offers Assign or actions on a team member's wallet", () => {
+    mockTeam.members = [{ ...SAM_ROW, signerAddress: SAM_WALLET }];
+    show([SAM_WALLET]);
+    expect(screen.getByText('Not recorded')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Assign' })).toBeNull();
+    expect(screen.queryByRole('button', { name: `Actions for ${SAM_WALLET}` })).toBeNull();
+  });
+
+  it("offers only Delete on the owner's own console wallet", () => {
+    const JANE_WALLET = '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6';
+    mockTeam.members = [
+      { ...SAM_ROW, id: 'm-jane', userId: 'u-jane', name: 'Jane Developer', email: 'jane@harness.dev', role: 'OWNER', signerAddress: JANE_WALLET },
+    ];
+    show([JANE_WALLET]);
+    expect(screen.getByText('Console wallet')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Assign' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: `Actions for ${JANE_WALLET}` }));
+    expect(screen.getAllByRole('menuitem').map((i) => i.textContent)).toEqual(['Delete API key']);
+  });
+
+  it('explains SIGNER_IN_USE when Assign meets a member wallet the list did not know', async () => {
+    (upsertLicenseSigner as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 409,
+      code: 'SIGNER_IN_USE',
+      message: 'x',
+    });
+    show([UNASSIGNED]);
+    fireEvent.click(screen.getByRole('button', { name: 'Assign' }));
+    fireEvent.change(screen.getByLabelText('Other people (comma-separated)'), { target: { value: 'Data team' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "This address is a team member's wallet. Record it with Grant in Settings → Team.",
+    );
+  });
+
   it('stamps the registry when an API key is deleted', async () => {
     (markLicenseSignerDisabled as jest.Mock).mockResolvedValue({ ok: true, data: {} });
     show([SIGNER]);
     fireEvent.click(screen.getByRole('button', { name: `Actions for ${SIGNER}` }));
     fireEvent.click(screen.getByRole('menuitem', { name: 'Delete API key' }));
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
-    await waitFor(() =>
-      expect(markLicenseSignerDisabled).toHaveBeenCalledWith(42, SIGNER),
-    );
+    await waitFor(() => expect(markLicenseSignerDisabled).toHaveBeenCalledWith(42, SIGNER));
     expect(disableSigner).toHaveBeenCalledWith(SIGNER);
   });
 
@@ -10559,8 +9957,8 @@ describe('Signers', () => {
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
-Run: `npx jest __tests__/unit/hooks/useLicenseSignerRegistry.test.tsx "__tests__/unit/pages/license/\[tokenId\]/details"`
-Expected: FAIL. The modules are missing, and `Signers` has no registry.
+Run: `npx jest __tests__/unit/hooks/useLicenseSignerRegistry.test.tsx __tests__/unit/hooks/useTransactionsSigners.test.tsx "__tests__/unit/pages/license/\[tokenId\]/details"`
+Expected: FAIL. The modules are missing, `Signers` has no registry, and a reverted user operation resolves.
 
 - [ ] **Step 3: Implement the hook and components**
 
@@ -10594,12 +9992,7 @@ export const useLicenseSignerRegistry = (tokenId: number) => {
       ),
     [query.data],
   );
-  return {
-    byAddress,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
-  };
+  return { byAddress, isError: query.isError, error: query.error, refetch: query.refetch };
 };
 ```
 
@@ -10634,13 +10027,7 @@ const NOTE_MAX = 200;
 
 // "Who is this key for?" — team members, other people by name, and a note.
 // console-api refuses an API_KEY or EXTERNAL row without a holder.
-export const KeyHoldersModal: FC<Props> = ({
-  signer,
-  initial,
-  submitLabel,
-  onSubmit,
-  onClose,
-}) => {
+export const KeyHoldersModal: FC<Props> = ({ signer, initial, submitLabel, onSubmit, onClose }) => {
   const { members } = useTeamMembers();
   const people = members.filter((m) => m.status === 'ACCEPTED' && m.userId);
   const [userIds, setUserIds] = useState<string[]>(() =>
@@ -10683,9 +10070,7 @@ export const KeyHoldersModal: FC<Props> = ({
         <Title component="h2" className="text-panel-title text-ink">
           Who is this key for?
         </Title>
-        {signer && (
-          <span className="break-all font-mono text-code text-muted">{signer}</span>
-        )}
+        {signer && <span className="break-all font-mono text-code text-muted">{signer}</span>}
         {people.length > 0 && (
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-1 text-label text-muted">Team members</legend>
@@ -10696,9 +10081,7 @@ export const KeyHoldersModal: FC<Props> = ({
                   checked={userIds.includes(m.userId!)}
                   onChange={(e) =>
                     setUserIds((prev) =>
-                      e.target.checked
-                        ? [...prev, m.userId!]
-                        : prev.filter((id) => id !== m.userId),
+                      e.target.checked ? [...prev, m.userId!] : prev.filter((id) => id !== m.userId),
                     )
                   }
                 />
@@ -10712,19 +10095,11 @@ export const KeyHoldersModal: FC<Props> = ({
         <label htmlFor="holder-others" className="text-label text-muted">
           Other people (comma-separated)
         </label>
-        <TextField
-          id="holder-others"
-          value={others}
-          onChange={(e) => setOthers(e.target.value)}
-        />
+        <TextField id="holder-others" value={others} onChange={(e) => setOthers(e.target.value)} />
         <label htmlFor="holder-note" className="text-label text-muted">
           Note
         </label>
-        <TextField
-          id="holder-note"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-        />
+        <TextField id="holder-note" value={note} onChange={(e) => setNote(e.target.value)} />
         {error && (
           <p role="alert" className="text-body-sm text-negative">
             {error}
@@ -10749,6 +10124,10 @@ import type { LicenseSignerRecord } from '@/types/team';
 
 interface Props {
   record?: LicenseSignerRecord;
+  // A verified wallet of the team with no registry row: the owner's console
+  // wallet, or a member's wallet whose grant wasn't recorded (Grant in Settings
+  // → Team records it). Assign never may (C7).
+  memberWallet?: { name: string; email: string; owner: boolean };
   // A registry row whose signer the chain no longer lists.
   offChain?: boolean;
   unavailable?: boolean;
@@ -10757,13 +10136,28 @@ interface Props {
 
 export const BelongsTo: FC<Props> = ({
   record,
+  memberWallet,
   offChain = false,
   unavailable = false,
   onAssign,
 }) => {
   if (unavailable) return <span className="text-body-sm text-muted">—</span>;
   let body;
-  if (!record) {
+  if (!record && memberWallet) {
+    body = (
+      <div className="flex flex-col items-start gap-1">
+        <span className="text-body-sm text-fg">{memberWallet.name}</span>
+        <span className="break-all text-label text-muted">{memberWallet.email}</span>
+        {memberWallet.owner ? (
+          <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
+            Console wallet
+          </span>
+        ) : (
+          <StatusChip tone="pending">Not recorded</StatusChip>
+        )}
+      </div>
+    );
+  } else if (!record) {
     body = (
       <span className="text-body-sm text-muted">
         Unassigned
@@ -10781,12 +10175,8 @@ export const BelongsTo: FC<Props> = ({
     const holder = record.holders[0];
     body = (
       <div className="flex flex-col">
-        <span className="text-body-sm text-fg">
-          {holder?.name ?? holder?.email ?? 'Team member'}
-        </span>
-        {holder?.email && (
-          <span className="break-all text-label text-muted">{holder.email}</span>
-        )}
+        <span className="text-body-sm text-fg">{holder?.name ?? holder?.email ?? 'Team member'}</span>
+        {holder?.email && <span className="break-all text-label text-muted">{holder.email}</span>}
       </div>
     );
   } else {
@@ -10812,7 +10202,6 @@ export const BelongsTo: FC<Props> = ({
 - [ ] **Step 4: Wire the registry into `Signers.tsx`**
 
 Imports:
-
 - Remove `TrashIcon`.
 - Add:
 
@@ -10821,6 +10210,7 @@ import { toast } from 'sonner';
 import { RowActionsMenu } from '@/components/RowActionsMenu';
 import { markLicenseSignerDisabled, upsertLicenseSigner } from '@/actions/teams';
 import { useLicenseSignerRegistry } from '@/hooks/useLicenseSignerRegistry';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { registryWrite } from '@/utils/registryWrite';
 import { BelongsTo } from './BelongsTo';
 import { KeyHoldersModal, type KeyHolders } from './KeyHoldersModal';
@@ -10828,7 +10218,6 @@ import type { LicenseSignerRecord } from '@/types/team';
 ```
 
 Drop the RentalOS `localStorage` tag (spec: the registry's `RentalOS` note replaces it):
-
 - Delete `rentalOSSignerKey`, `getRentalOSSigner` and `saveRentalOSSigner`.
 - Delete the `rentalOSSigner` state.
 - Delete the two lines `saveRentalOSSigner(fragment.clientId, account.address);` and `setRentalOSSigner(account.address.toLowerCase());`.
@@ -10837,159 +10226,164 @@ Drop the RentalOS `localStorage` tag (spec: the registry's `RentalOS` note repla
 Below the other hooks in `SignersComponent`, add:
 
 ```tsx
-const registry = useLicenseSignerRegistry(fragment.tokenId);
-const [holdersFor, setHoldersFor] = useState<
-  | { mode: 'generate' }
-  | {
-      mode: 'assign';
-      signer: `0x${string}`;
-      kind: 'API_KEY' | 'EXTERNAL';
-      initial?: KeyHolders;
-    }
-  | null
->(null);
-
-const toKeyHolders = (record: LicenseSignerRecord): KeyHolders => ({
-  holders: record.holders.map((h) =>
-    h.userId ? { userId: h.userId } : { name: h.name ?? '' },
-  ),
-  note: record.note,
-});
-
-// An unregistered on-chain key is EXTERNAL: assigned after the fact (spec).
-const openAssign = (address: string) => {
-  const record = registry.byAddress.get(address.toLowerCase());
-  setHoldersFor({
-    mode: 'assign',
-    signer: address as `0x${string}`,
-    kind: record?.kind === 'API_KEY' ? 'API_KEY' : 'EXTERNAL',
-    initial: record ? toKeyHolders(record) : undefined,
-  });
-};
-
-// Runs after the key is shown: a failed registry write never hides it.
-const recordKey = async (address: `0x${string}`, value: KeyHolders) => {
-  const result = await registryWrite(() =>
-    upsertLicenseSigner(fragment.tokenId, address, { kind: 'API_KEY', ...value }),
+  const registry = useLicenseSignerRegistry(fragment.tokenId);
+  const { members } = useTeamMembers();
+  // Verified wallets of the team (the owner's console wallet included): console
+  // -api refuses them as API_KEY or EXTERNAL keys (C7 SIGNER_IN_USE), so they
+  // are never offered for Assign.
+  const memberWallets = new Map(
+    members
+      .filter((m) => m.signerAddress)
+      .map((m) => [
+        m.signerAddress!.toLowerCase(),
+        { name: m.name ?? m.email, email: m.email, owner: m.role === 'OWNER' },
+      ]),
   );
-  void registry.refetch();
-  if (!result.ok) {
-    toast.error("The key works, but we couldn't record who it's for.", {
-      action: {
-        label: 'Assign',
-        onClick: () =>
-          setHoldersFor({
-            mode: 'assign',
-            signer: address,
-            kind: 'API_KEY',
-            initial: value,
-          }),
-      },
+  const [holdersFor, setHoldersFor] = useState<
+    | { mode: 'generate' }
+    | { mode: 'assign'; signer: `0x${string}`; kind: 'API_KEY' | 'EXTERNAL'; initial?: KeyHolders }
+    | null
+  >(null);
+
+  const toKeyHolders = (record: LicenseSignerRecord): KeyHolders => ({
+    holders: record.holders.map((h) => (h.userId ? { userId: h.userId } : { name: h.name ?? '' })),
+    note: record.note,
+  });
+
+  // An unregistered on-chain key is EXTERNAL: assigned after the fact (spec).
+  const openAssign = (address: string) => {
+    const record = registry.byAddress.get(address.toLowerCase());
+    setHoldersFor({
+      mode: 'assign',
+      signer: address as `0x${string}`,
+      kind: record?.kind === 'API_KEY' ? 'API_KEY' : 'EXTERNAL',
+      initial: record ? toKeyHolders(record) : undefined,
     });
-  }
-};
+  };
 
-const submitHolders = async (value: KeyHolders): Promise<string | null> => {
-  if (!holdersFor) return null;
-  if (holdersFor.mode === 'generate') {
+  // Runs after the key is shown: a failed registry write never hides it.
+  const recordKey = async (address: `0x${string}`, value: KeyHolders) => {
+    const result = await registryWrite(() =>
+      upsertLicenseSigner(fragment.tokenId, address, { kind: 'API_KEY', ...value }),
+    );
+    void registry.refetch();
+    if (!result.ok) {
+      toast.error("The key works, but we couldn't record who it's for.", {
+        action: {
+          label: 'Assign',
+          onClick: () => setHoldersFor({ mode: 'assign', signer: address, kind: 'API_KEY', initial: value }),
+        },
+      });
+    }
+  };
+
+  const submitHolders = async (value: KeyHolders): Promise<string | null> => {
+    if (!holdersFor) return null;
+    if (holdersFor.mode === 'generate') {
+      setHoldersFor(null);
+      void handleGenerateSigner(value);
+      return null;
+    }
+    const { signer, kind } = holdersFor;
+    const result = await registryWrite(() =>
+      upsertLicenseSigner(fragment.tokenId, signer, { kind, ...value }),
+    );
+    if (!result.ok) {
+      if (result.code === 'SIGNER_IN_USE')
+        return "This address is a team member's wallet. Record it with Grant in Settings → Team.";
+      return result.status === 0 || result.status >= 500
+        ? "We couldn't save this. Try again."
+        : result.message;
+    }
+    trackEvent('API Key Assigned', {
+      tokenId: fragment.tokenId,
+      signerAddress: signer,
+      holders: value.holders.length,
+    });
+    toast.success('Saved who this key is for.');
+    void registry.refetch();
     setHoldersFor(null);
-    void handleGenerateSigner(value);
     return null;
-  }
-  const { signer, kind } = holdersFor;
-  const result = await registryWrite(() =>
-    upsertLicenseSigner(fragment.tokenId, signer, { kind, ...value }),
-  );
-  if (!result.ok)
-    return result.status === 0 ? "We couldn't save this. Try again." : result.message;
-  trackEvent('API Key Assigned', {
-    tokenId: fragment.tokenId,
-    signerAddress: signer,
-    holders: value.holders.length,
-  });
-  toast.success('Saved who this key is for.');
-  void registry.refetch();
-  setHoldersFor(null);
-  return null;
-};
+  };
 ```
 
 `handleGenerateSigner` takes the holders. Change its signature to `async (holders: KeyHolders) => {`. After the existing `trackEvent('API Key Generated', …);`, add:
 
 ```tsx
-await recordKey(account.address, holders);
+      await recordKey(account.address, holders);
 ```
 
 In `handleGenerateRentalOSTenant`, after `trackEvent('RentalOS Tenant Generated', …);`, add:
 
 ```tsx
-// registryWrite never throws, so this can't reach the rollback below.
-await recordKey(account.address, { holders: [{ name: 'RentalOS' }], note: 'RentalOS' });
+      // registryWrite never throws, so this can't reach the rollback below.
+      await recordKey(account.address, { holders: [{ name: 'RentalOS' }], note: 'RentalOS' });
 ```
 
 In `handleDelete`, after `await handleDisableSigner(signer);`, add:
 
 ```tsx
-// Stamp the registry row; a key without one answers NOT_FOUND, which is fine.
-await registryWrite(() => markLicenseSignerDisabled(fragment.tokenId, signer));
-void registry.refetch();
+      // Stamp the registry row; a key without one answers NOT_FOUND, which is fine.
+      await registryWrite(() => markLicenseSignerDisabled(fragment.tokenId, signer));
+      void registry.refetch();
 ```
 
 Rows. Replace `displaySigners` with:
 
 ```tsx
-type SignerRow = SignerNode & { offChain?: boolean };
-const onChainRows: SignerRow[] = [
-  ...fragment.signers.nodes.filter((s) => !pendingRemovals.has(s.address)),
-  ...optimisticAdditions.filter(
-    (s) => !fragment.signers.nodes.some((n) => n.address === s.address),
-  ),
-];
-const listed = new Set(onChainRows.map((s) => String(s.address).toLowerCase()));
-// Registry rows the chain no longer lists (spec: "Disabled outside the console").
-const offChainRows: SignerRow[] = [...registry.byAddress.values()]
-  .filter((r) => !listed.has(r.signerAddress.toLowerCase()))
-  .map((r) => ({ address: r.signerAddress, enabledAt: null, offChain: true }));
-const displaySigners = [...onChainRows, ...offChainRows];
+  type SignerRow = SignerNode & { offChain?: boolean };
+  const onChainRows: SignerRow[] = [
+    ...fragment.signers.nodes.filter((s) => !pendingRemovals.has(s.address)),
+    ...optimisticAdditions.filter(
+      (s) => !fragment.signers.nodes.some((n) => n.address === s.address),
+    ),
+  ];
+  const listed = new Set(onChainRows.map((s) => String(s.address).toLowerCase()));
+  // Registry rows the chain no longer lists (spec: "Disabled outside the console").
+  const offChainRows: SignerRow[] = [...registry.byAddress.values()]
+    .filter((r) => !listed.has(r.signerAddress.toLowerCase()))
+    .map((r) => ({ address: r.signerAddress, enabledAt: null, offChain: true }));
+  const displaySigners = [...onChainRows, ...offChainRows];
 ```
 
 Replace `renderDeleteSignerAction` with:
 
 ```tsx
-const renderRowActions = (item: SignerRow) => {
-  if (!isLicenseOwner || item.offChain) return null;
-  // A member's key is granted and revoked in Settings → Team, which keeps the
-  // registry in step with the chain.
-  if (registry.byAddress.get(String(item.address).toLowerCase())?.kind === 'MEMBER')
-    return null;
-  return (
-    <RowActionsMenu
-      key={`actions-${item.address}`}
-      label={`Actions for ${item.address}`}
-      items={[
-        { label: 'Assign', onSelect: () => openAssign(item.address) },
-        {
-          label: 'Delete API key',
-          destructive: true,
-          onSelect: () => setSignerToDelete(item.address),
-        },
-      ]}
-    />
-  );
-};
+  const renderRowActions = (item: SignerRow) => {
+    if (!isLicenseOwner || item.offChain) return null;
+    // A member's key, or a member's wallet not yet recorded, is granted and
+    // revoked in Settings → Team, which keeps the registry in step with the chain.
+    const address = String(item.address).toLowerCase();
+    const wallet = memberWallets.get(address);
+    if (registry.byAddress.get(address)?.kind === 'MEMBER' || (wallet && !wallet.owner)) return null;
+    const remove = {
+      label: 'Delete API key',
+      destructive: true,
+      onSelect: () => setSignerToDelete(item.address),
+    };
+    return (
+      <RowActionsMenu
+        key={`actions-${item.address}`}
+        label={`Actions for ${item.address}`}
+        // The owner's own console wallet can be deleted, never assigned.
+        items={
+          wallet ? [remove] : [{ label: 'Assign', onSelect: () => openAssign(item.address) }, remove]
+        }
+      />
+    );
+  };
 ```
 
 Change `renderEnabledAt` to answer `—` for `enabledAt: null`:
 
 ```tsx
-const renderEnabledAt = (item: SignerRow) =>
-  item.enabledAt ? new Date(item.enabledAt).toLocaleDateString() : '—';
+  const renderEnabledAt = (item: SignerRow) =>
+    item.enabledAt ? new Date(item.enabledAt).toLocaleDateString() : '—';
 ```
 
 The Generate key button opens the holders modal: `onClick={() => setHoldersFor({ mode: 'generate' })}`.
 
 In the table:
-
 - Replace the address cell's RentalOS check `item.address.toLowerCase() === rentalOSSigner` with `registry.byAddress.get(String(item.address).toLowerCase())?.note === 'RentalOS'`.
 - Make the `columns` array:
 
@@ -11024,9 +10418,14 @@ In the table:
                   render: (item: SignerRow) => (
                     <BelongsTo
                       record={registry.byAddress.get(String(item.address).toLowerCase())}
+                      memberWallet={memberWallets.get(String(item.address).toLowerCase())}
                       offChain={item.offChain}
                       unavailable={registry.isError}
-                      onAssign={isLicenseOwner ? () => openAssign(item.address) : undefined}
+                      onAssign={
+                        isLicenseOwner && !memberWallets.has(String(item.address).toLowerCase())
+                          ? () => openAssign(item.address)
+                          : undefined
+                      }
                     />
                   ),
                 },
@@ -11038,30 +10437,30 @@ In the table:
 Before `<DeleteConfirmationModal`, add:
 
 ```tsx
-{
-  holdersFor && (
-    <KeyHoldersModal
-      signer={holdersFor.mode === 'assign' ? holdersFor.signer : undefined}
-      initial={holdersFor.mode === 'assign' ? holdersFor.initial : undefined}
-      submitLabel={holdersFor.mode === 'generate' ? 'Generate API key' : 'Save'}
-      onSubmit={submitHolders}
-      onClose={() => setHoldersFor(null)}
-    />
-  );
-}
+      {holdersFor && (
+        <KeyHoldersModal
+          signer={holdersFor.mode === 'assign' ? holdersFor.signer : undefined}
+          initial={holdersFor.mode === 'assign' ? holdersFor.initial : undefined}
+          submitLabel={holdersFor.mode === 'generate' ? 'Generate API key' : 'Save'}
+          onSubmit={submitHolders}
+          onClose={() => setHoldersFor(null)}
+        />
+      )}
 ```
 
 The `Belongs to` column is hidden below `md`, like Enabled on. On a phone the row keeps the address and the `⋯` menu, whose Assign covers the cell's link (`DESIGN.md`, Table).
 
+`src/hooks/useTransactions.ts`: add `import { assertUserOperation } from '@/utils/userOperation';`. In `useDisableSigner`, replace `await processTransactions(transaction);` with `assertUserOperation(await processTransactions(transaction));`. In `useEnableSigner`, replace `await processTransactions([transaction]);` with `assertUserOperation(await processTransactions([transaction]));`. A reverted user operation now fails Generate key, RentalOS (whose rollback runs), Delete and the console key instead of passing as done.
+
 - [ ] **Step 5: Run the tests and the typecheck**
 
-Run: `npx jest __tests__/unit/hooks/useLicenseSignerRegistry.test.tsx "__tests__/unit/pages/license/\[tokenId\]/details" && npx tsc --noEmit -p . 2>&1 | head -20`
+Run: `npx jest __tests__/unit/hooks/useLicenseSignerRegistry.test.tsx __tests__/unit/hooks/useTransactionsSigners.test.tsx "__tests__/unit/pages/license/\[tokenId\]/details" && npx tsc --noEmit -p . 2>&1 | head -20`
 Expected: PASS. `tsc` reports nothing new.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add src/hooks/useLicenseSignerRegistry.ts "src/app/license/[tokenId]/details/components/Signers" __tests__/unit/hooks/useLicenseSignerRegistry.test.tsx "__tests__/unit/pages/license/[tokenId]/details"
+git add src/hooks/useLicenseSignerRegistry.ts src/hooks/useTransactions.ts "src/app/license/[tokenId]/details/components/Signers" __tests__/unit/hooks/useLicenseSignerRegistry.test.tsx __tests__/unit/hooks/useTransactionsSigners.test.tsx "__tests__/unit/pages/license/[tokenId]/details"
 git commit -m "feat(teams): record who each API key is for; registry writes never hide a key or roll back RentalOS"
 ```
 
@@ -11121,7 +10520,7 @@ Expected: one `✓ <route> <theme> <viewport>` line per shot; a failure prints `
 
 - [ ] **Step 2: Fixtures**
 
-`scripts/visual/fixtures.mjs`. After `export const SIGNER = …;`, add:
+`scripts/visual/fixtures.mjs`. Correct `SIGNER` to its EIP-55 form (the current value's letter case isn't a valid checksum): `export const SIGNER = '0x5b2E4F6A8C0D2e4f6A8C0D2e4f6a8c0D2e4F6a8c';`. After it, add:
 
 ```js
 // Teams (src/types/team.ts, contracts C7). Checksummed, as console-api and
@@ -11209,12 +10608,7 @@ const MEMBERS = [
     email: 'max@harness.dev',
     signerAddress: MAX_WALLET,
   }),
-  member({
-    id: 'mem-ana',
-    email: 'ana@harness.dev',
-    status: 'PENDING',
-    inviteExpiresAt: IN_A_WEEK,
-  }),
+  member({ id: 'mem-ana', email: 'ana@harness.dev', status: 'PENDING', inviteExpiresAt: IN_A_WEEK }),
   // Left; a key under an old wallet is still in the registry (Revoke unfinished).
   member({
     id: 'mem-leo',
@@ -11226,13 +10620,7 @@ const MEMBERS = [
   }),
 ];
 const ACME_MEMBERS = [
-  member({
-    id: 'mem-olivia',
-    userId: 'user-acme',
-    name: 'Olivia Acme',
-    email: 'ops@acme.dev',
-    role: 'OWNER',
-  }),
+  member({ id: 'mem-olivia', userId: 'user-acme', name: 'Olivia Acme', email: 'ops@acme.dev', role: 'OWNER' }),
   member({
     id: 'mem-jane-acme',
     userId: 'user-harness',
@@ -11258,18 +10646,9 @@ const signerRow = (signerAddress, kind, holders, note = null) => ({
 export const licenseSigners = (tokenId) =>
   tokenId === LICENSE.tokenId
     ? [
-        signerRow(
-          SIGNER,
-          'API_KEY',
-          [{ userId: null, name: 'Ops on-call', email: null }],
-          'Pager duty',
-        ),
-        signerRow(SAM_WALLET, 'MEMBER', [
-          { userId: 'user-sam', name: 'Sam Rivera', email: 'sam@harness.dev' },
-        ]),
-        signerRow(LEO_OLD_WALLET, 'MEMBER', [
-          { userId: 'user-leo', name: 'Leo Park', email: 'leo@harness.dev' },
-        ]),
+        signerRow(SIGNER, 'API_KEY', [{ userId: null, name: 'Ops on-call', email: null }], 'Pager duty'),
+        signerRow(SAM_WALLET, 'MEMBER', [{ userId: 'user-sam', name: 'Sam Rivera', email: 'sam@harness.dev' }]),
+        signerRow(LEO_OLD_WALLET, 'MEMBER', [{ userId: 'user-leo', name: 'Leo Park', email: 'leo@harness.dev' }]),
       ]
     : [];
 
@@ -11303,10 +10682,7 @@ const license = (l, withUris, signers = [SIGNER]) => ({
 ```
 
 ```js
-const LICENSES = [
-  license(LICENSE, true, [SIGNER, SAM_WALLET]),
-  license(LICENSE_2, false),
-];
+const LICENSES = [license(LICENSE, true, [SIGNER, SAM_WALLET]), license(LICENSE_2, false)];
 // memberSigner: the harness wallet also signs for Harness Fleet (a member with data access).
 const LICENSES_WITH_MEMBER = [
   license(LICENSE, true, [SIGNER, SAM_WALLET, WALLET_CHECKSUM]),
@@ -11331,16 +10707,15 @@ Also make it `developerLicense: byVars ?? all[0],`.
 - [ ] **Step 3: Mock server, data mock, keys, shooter and routes**
 
 `scripts/visual/mock-server.mjs`:
-
 - Pass the request to handlers, and let one answer another status:
 
 ```js
-for (const [method, re, handler] of routes) {
-  const m = url.pathname.match(re);
-  if (!m || req.method !== method) continue;
-  const out = handler(m, url, req);
-  return out?.mockStatus ? send(res, out.mockStatus, out.body) : send(res, 200, out);
-}
+    for (const [method, re, handler] of routes) {
+      const m = url.pathname.match(re);
+      if (!m || req.method !== method) continue;
+      const out = handler(m, url, req);
+      return out?.mockStatus ? send(res, out.mockStatus, out.body) : send(res, 200, out);
+    }
 ```
 
 - Replace the `/api/my/team/collaborator` route with:
@@ -11394,89 +10769,80 @@ export async function dataApiHandler(
 ```
 
 `scripts/visual/keys.mjs`:
-
 - Import `WALLET_CHECKSUM` beside `LICENSE`.
 - In `generate()`, after `devJwt`, add the line below and return `memberDevJwt` with the rest:
 
 ```js
-// A member's developer JWT, signed by their wallet: it carries signer_address (C1).
-const memberDevJwt = `${b64url({ alg: 'none', typ: 'JWT' })}.${b64url({ aud: LICENSE.clientId, ethereum_address: LICENSE.clientId, signer_address: WALLET_CHECKSUM, exp })}.`;
+  // A member's developer JWT, signed by their wallet: it carries signer_address (C1).
+  const memberDevJwt = `${b64url({ alg: 'none', typ: 'JWT' })}.${b64url({ aud: LICENSE.clientId, ethereum_address: LICENSE.clientId, signer_address: WALLET_CHECKSUM, exp })}.`;
 ```
 
 - In `loadKeys`, regenerate cached keys that predate it: `if (keys.memberDevJwt && decodeJwt(keys.sessionJwt).exp * 1000 > Date.now() + 86400_000) return keys;`.
 
 `scripts/visual/shoot.mjs`, in `prepare`:
-
 - Pass `memberSigner: route.memberSigner` to `identityHandler`'s options and `noAccess: route.dataNoAccess` to `dataApiHandler`'s.
 - Replace `await context.addCookies([...])` with:
 
 ```js
-const cookies = [
-  {
-    name: 'session-token',
-    value: keys.sessionJwt,
-    domain: 'localhost',
-    path: '/',
-    httpOnly: true,
-    sameSite: 'Lax',
-  },
-];
-// The active team travels to the mock as X-Team-Id (contracts C4).
-if (route.team)
-  cookies.push({
-    name: 'active_team',
-    value: route.team,
-    domain: 'localhost',
-    path: '/',
-    sameSite: 'Lax',
-  });
-if (route.inviteToken)
-  cookies.push({
-    name: 'invite_token',
-    value: 'harness-invite-token',
-    domain: 'localhost',
-    path: '/',
-    httpOnly: true,
-    sameSite: 'Lax',
-  });
-await context.addCookies(cookies);
+  const cookies = [
+    {
+      name: 'session-token',
+      value: keys.sessionJwt,
+      domain: 'localhost',
+      path: '/',
+      httpOnly: true,
+      sameSite: 'Lax',
+    },
+  ];
+  // The active team travels to the mock as X-Team-Id (contracts C4).
+  if (route.team)
+    cookies.push({ name: 'active_team', value: route.team, domain: 'localhost', path: '/', sameSite: 'Lax' });
+  if (route.inviteToken)
+    cookies.push({
+      name: 'invite_token',
+      value: 'harness-invite-token',
+      domain: 'localhost',
+      path: '/',
+      httpOnly: true,
+      sameSite: 'Lax',
+    });
+  await context.addCookies(cookies);
 ```
 
 - Replace the second `addInitScript` call with:
 
 ```js
-await context.addInitScript(
-  ({ session, embedded, devJwtKey, devJwts, signerKey, memberJwtKey, memberJwts }) => {
-    sessionStorage.setItem('globalAccount', JSON.stringify(session));
-    localStorage.setItem('GlobalAccountEmbeddedKey', JSON.stringify(embedded));
-    localStorage.setItem(devJwtKey, JSON.stringify(devJwts));
-    // Wallet registration (C6) runs once per session and needs a Turnkey
-    // signature the mock can't make: mark it done.
-    sessionStorage.setItem(signerKey, JSON.stringify('done'));
-    if (memberJwts) localStorage.setItem(memberJwtKey, JSON.stringify(memberJwts));
-  },
-  {
-    session: {
-      email: fx.USER_EMAIL,
-      subOrganizationId: fx.SUB_ORG.subOrganizationId,
-      token: keys.credentialBundle,
-      expiry: Math.floor(Date.now() / 1000) + 86400,
+  await context.addInitScript(
+    ({ session, embedded, devJwtKey, devJwts, signerKey, memberJwtKey, memberJwts }) => {
+      sessionStorage.setItem('globalAccount', JSON.stringify(session));
+      localStorage.setItem('GlobalAccountEmbeddedKey', JSON.stringify(embedded));
+      localStorage.setItem(devJwtKey, JSON.stringify(devJwts));
+      // Wallet registration (C6) runs once per session and needs a Turnkey
+      // signature the mock can't make: mark it done.
+      sessionStorage.setItem(signerKey, JSON.stringify('done'));
+      if (memberJwts) localStorage.setItem(memberJwtKey, JSON.stringify(memberJwts));
     },
-    embedded: keys.embeddedPrivateKey,
-    devJwtKey: `devJwt_${fx.LICENSE.clientId}_list_v1`,
-    devJwts: [{ token: keys.devJwt, createdAt: Date.parse('2026-09-20T14:30:00Z') }],
-    signerKey: `signerRegistered:${fx.WALLET}`,
-    // Members keep developer JWTs per wallet (src/utils/devJwt.ts).
-    memberJwtKey: `devJwt_${fx.LICENSE.clientId}_${fx.WALLET}_list_v1`,
-    memberJwts: route.memberJwt
-      ? [{ token: keys.memberDevJwt, createdAt: Date.parse('2026-09-20T14:30:00Z') }]
-      : null,
-  },
-);
+    {
+      session: {
+        email: fx.USER_EMAIL,
+        subOrganizationId: fx.SUB_ORG.subOrganizationId,
+        token: keys.credentialBundle,
+        expiry: Math.floor(Date.now() / 1000) + 86400,
+      },
+      embedded: keys.embeddedPrivateKey,
+      devJwtKey: `devJwt_${fx.LICENSE.clientId}_list_v1`,
+      devJwts: [{ token: keys.devJwt, createdAt: Date.parse('2026-09-20T14:30:00Z') }],
+      signerKey: `signerRegistered:${fx.WALLET}`,
+      // Members keep developer JWTs per wallet (src/utils/devJwt.ts).
+      memberJwtKey: `devJwt_${fx.LICENSE.clientId}_${fx.WALLET}_list_v1`,
+      memberJwts: route.memberJwt
+        ? [{ token: keys.memberDevJwt, createdAt: Date.parse('2026-09-20T14:30:00Z') }]
+        : null,
+    },
+  );
 ```
 
 `scripts/visual/routes.mjs`:
-
 - Import `SIGNER` beside the other fixtures.
 - Document the new options in the header comment, after `hover`:
 
@@ -11633,7 +10999,6 @@ NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED="false"
 ```
 
 `scripts/visual/README.md`:
-
 - Under _Routes_, add a bullet: `Teams: Settings → Team (owner table with every member state, empty, member view with Leave team, invite, row menu, grant, remove with the webhook review), the team switcher, the pending-invite dialog, Assign on an API key, and the member vehicle states (with access, connect, no access, reconnect, empty). Route option team picks the scenario through X-Team-Id; see the header of routes.mjs.`
 - In the Vehicles bullet, after "`/api/data/*` is mocked by `dataApi.mjs`", add: `so the console data proxy (src/app/api/data) never runs here; its tests are in Jest`.
 
@@ -11656,13 +11021,11 @@ cd scripts/visual/out && for f in teams/*.png; do b="master/${f#teams/}"; if [ !
 ```
 
 Expected:
-
 - every shot prints `✓`;
 - `new:` lists the routes added in Step 3, in each theme and viewport;
 - `changed:` lists only `settings*` (the Team section replaces Team management) and `license-details*` (Belongs to, the `⋯` menu, Sam's signer and Leo's off-chain row). A shot whose only difference is a relative time ("… ago") isn't a change.
 
 Open every `new:` and `changed:` image with the Read tool and check it against `docs/DESIGN.md`:
-
 - token classes only;
 - one primary per surface;
 - status via `StatusChip`;
@@ -11689,22 +11052,26 @@ git commit -m "test(visual): team scenarios, member vehicle states and Assign; d
 
 - [ ] **Step 1: Full test suite against the baseline**
 
-Run: `npx jest 2>&1 | grep -E '^(Test Suites|Tests):'` and `cat /tmp/console-teams-baseline.txt`
-Expected: no suite fails that wasn't already failing in Task 1's baseline. If one does, run it alone with `npx jest <path>`, fix it, and commit the fix with its task's prefix.
+```bash
+npx jest 2>&1 | tee /tmp/console-teams-final.log | grep -E '^(Test Suites|Tests):'
+grep -E '^FAIL ' /tmp/console-teams-final.log | awk '{print $2}' | sort -u > /tmp/console-teams-final-failing.txt
+comm -13 /tmp/console-teams-baseline-failing.txt /tmp/console-teams-final-failing.txt
+```
+
+Expected: `comm` prints nothing: every failing suite was already in Task 1's list. Suites this branch deleted appear only in the baseline, which is fine. If `comm` prints a path, run it alone with `npx jest <path>`, fix it, and commit the fix with its task's prefix.
 
 - [ ] **Step 2: Typecheck, lint, format**
 
 ```bash
 npx tsc --noEmit -p .
 npx eslint . --quiet
-npx prettier --check $(git diff --name-only --diff-filter=d origin/master...HEAD -- '*.ts' '*.tsx' '*.mjs' '*.js' '*.css' '*.md' '*.json')
+npx prettier --check $(git diff --name-only --diff-filter=d origin/master...HEAD -- '*.ts' '*.tsx' '*.mjs' '*.js' '*.css' '*.md' '*.json' ':!docs/superpowers')
 ```
 
 Expected:
-
 - `tsc` prints nothing;
 - ESLint prints nothing;
-- Prettier prints `All matched files use Prettier code style!`. It skips `src/gql` through `.prettierignore`.
+- Prettier prints `All matched files use Prettier code style!`. It skips `src/gql` through `.prettierignore`, and the pathspec leaves out the specs and plans: never run Prettier on them, since it rewrites the code in their fenced blocks.
 
 If Prettier lists files, run the same command with `--write` in place of `--check`, review the diff, and commit it as `style: prettier`. `npm run lint:format` isn't used here: it rewrites the whole repository.
 
@@ -11722,7 +11089,6 @@ grep -rn "invite_token" src --include='*.ts' --include='*.tsx' | grep -v "INVITE
 ```
 
 Expected:
-
 - `no challenge logging`;
 - `PROXY_PRIVILEGE_IDS = [1, 3, 4, 7, 8]` (no 2, `ExecuteCommands`);
 - the cookie name appears only in `src/utils/teamCookies.ts`, through the constant.
@@ -11769,18 +11135,15 @@ Expected: `grep -c '@@'` prints `0`, and `gh` prints the PR URL.
 ### Task 19: Team live pass, then the flag on (index Rollout 5)
 
 Run this per environment: dev (Vercel **Preview**, which uses dev Identity and token exchange and the staging console-api) first, then **Production**. Before starting in an environment:
-
 - console-api part 2 is deployed there;
 - this branch is merged and deployed there;
 - part 1 runs `SIGNER_CHECK_MODE=enforce` there (index Rollout 2).
 
-The flag is read at build time:
-
-- **Preview:** set `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED=true` for Preview in Vercel and redeploy before Step 1.
-- **Production:** run Steps 1–3 and 8 with the flag still off. Turn it on (Step 9), then run Steps 4–7 at once. If any of them fails, set it back to `false` and redeploy.
+The flag is read at build time. Both environments run the steps in order, 1 to 10:
+- **Preview:** set `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED=true` for Preview in Vercel and redeploy before Step 1; Step 4 only confirms it.
+- **Production:** Steps 1–3 run with the flag off; Step 4 turns it on. If any of Steps 5–9 fails, set it back to `false`, redeploy, and stop.
 
 Production also differs here:
-
 - Identity is `https://identity-api.dimo.zone/query`;
 - token exchange is `https://token-exchange-api.dimo.zone/v1/tokens/exchange`.
 
@@ -11793,23 +11156,28 @@ Production also differs here:
   Write down L's token ID and client ID.
 
 - [ ] **Step 2: Invite.** As A: Settings → Team → Invite member → B's email.
-      Expected:
+Expected:
 - the toast `Invite sent to <B>`;
 - a row with status `Invited`;
 - the email arrives with `…/sign-in?invite=…`.
 
 - [ ] **Step 3: Accept.** As B, in a private window: open the link and sign in, or sign up first.
-      Expected:
+Expected:
 - the address bar loses `invite=`;
 - after sign-in the dialog reads `Join <A's team> owned by <A's email>?`;
 - Join team lands on Home in A's team, and the sidebar switcher lists both teams.
 
-- [ ] **Step 4: Grant.** As A, reload Settings.
-      Expected: B's row is `Active`, and the banner reads `<B> joined. Grant data access?`.
+- [ ] **Step 4: The flag.**
+- **Preview:** confirm a member sees Vehicles in the sidebar; the flag was set before Step 1.
+- **Production:** in Vercel → Project → Settings → Environment Variables, set `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED` = `true` for Production, and redeploy the latest production deployment.
+
+Expected: as B, Vehicles is in the sidebar; as A, Settings → Team shows the Data access column.
+
+- [ ] **Step 5: Grant.** As A, reload Settings.
+Expected: B's row is `Active`, and the banner reads `<B> joined. Grant data access?`.
 
 Then: Grant → tick L → read the warning (C8, with the DCX sentence) → Grant data access → approve.
 Expected:
-
 - the toast `<B> now has data access to <L>.`;
 - B's Data access cell shows L;
 - this lists B's wallet:
@@ -11819,15 +11187,15 @@ curl -s https://identity-api.dev.dimo.zone/query -H 'Content-Type: application/j
   -d '{"query":"{ developerLicense(by: { tokenId: <L token ID> }) { signers(first: 100) { nodes { address } } } }"}'
 ```
 
-- [ ] **Step 5: Use.** As B: Vehicles → L → open a vehicle → Connect with your wallet.
-      Expected:
+- [ ] **Step 6: Use.** As B: Vehicles → L → open a vehicle → Connect with your wallet.
+Expected:
 - the summary tab loads;
 - DevTools shows `/api/data/telemetry` with 200;
 - in Vercel's function logs, the request has a `{"event":"data_proxy",…,"access":"MEMBER","outcome":"ok"}` line with B's email.
 
-Copy the vehicle's DID from the page header (Copy DID) for Step 7.
+Copy the vehicle's DID from the page header (Copy DID) for Step 8.
 
-- [ ] **Step 6: A webhook to review.**
+- [ ] **Step 7: A webhook to review.**
 - As B, copy the developer JWT from DevTools → Application → Local Storage, key `devJwt_<L client ID>_<B wallet, lowercase>_list_v1`.
 - On https://webhook.site, open a URL and set its response body to `team-live-pass` (Edit → Response body). vehicle-triggers-api verifies a target by expecting the verification token back.
 - `EVENTS` is the environment's `NEXT_PUBLIC_EVENTS_API_URL` (Vercel → Environment Variables).
@@ -11840,8 +11208,8 @@ curl -s -X POST "$EVENTS/v1/webhooks" \
 
 Expected: a webhook object whose `createdBySigner` is B's wallet (checksummed). C3 sets it on create.
 
-- [ ] **Step 7: Remove, and the one-minute cut-off.** As A: B's row → ⋯ → Remove.
-      Expected: the dialog lists `team live pass` under Webhooks to review, marked `Created by them`.
+- [ ] **Step 8: Remove, and the one-minute cut-off.** As A: B's row → ⋯ → Remove.
+Expected: the dialog lists `team live pass` under Webhooks to review, marked `Created by them`.
 
 Confirm and approve the transaction, and note the time. From B's window, reload the vehicle.
 Expected: within a minute, `You're no longer a member of <A's team>.`, and the console returns to B's own team.
@@ -11851,25 +11219,20 @@ With B's old developer JWT:
 ```bash
 curl -s -X POST https://token-exchange-api.dev.dimo.zone/v1/tokens/exchange \
   -H "Authorization: Bearer <B's developer JWT>" -H 'Content-Type: application/json' \
-  -d '{"asset":"<vehicle DID from Step 5>","permissions":["privilege:GetNonLocationHistory"]}'
+  -d '{"asset":"<vehicle DID from Step 6>","permissions":["privilege:GetNonLocationHistory"]}'
 ```
 
 Expected: HTTP 403 with `signer no longer authorized for this license`, within 60 seconds of the transaction confirming (C2). Then delete `team live pass` as A on the Webhooks page.
 
-- [ ] **Step 8: Leave.** Invite B again, accept, and (flag on) grant L. Then as B: Settings → Leave team.
-      Expected:
+- [ ] **Step 9: Leave.** B was removed in Step 8, so invite B again (Step 2), accept (Step 3) and grant L (Step 5). Then as B: Settings → Leave team.
+Expected:
 - the confirmation reads `Leave <A's team>? <A's email> will be asked to revoke your data access.`;
 - after confirming, the toast `You left <A's team>.`;
-- A's table shows B as `Left`, with `Still a signer on <L>` if L was granted. Revoke it: ⋯ → Revoke → approve.
+- A's table shows B as `Left`, with `Still a signer on <L>`. Revoke it: ⋯ → Revoke → approve.
 
 The owner fallback when console-api can't list teams (Review Focus 1) is covered by Task 4's tests and the `licenses-teams-unavailable` shot. It isn't rehearsed against a live environment.
 
-- [ ] **Step 9: Turn the flag on.** Only after the steps above pass in this environment (Production: after Steps 1–3 and 8):
-
-1. In Vercel → Project → Settings → Environment Variables, set `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED` = `true` for that environment.
-2. Redeploy that environment's latest deployment.
-
-Expected: a member account sees Vehicles in the sidebar, and an owner sees Grant on Settings → Team. In Production, now run Steps 4–7. Record the date in the rollout notes.
+- [ ] **Step 10: Record the result.** Note the date and the environment in the rollout notes. In Preview, continue with Production. In Production, the flag stays on, and Task 20 can start.
 
 ---
 
@@ -11887,7 +11250,6 @@ curl -s https://identity-api.dimo.zone/query -H 'Content-Type: application/json'
 ```
 
 Expected:
-
 - `owner` is `0xb3562cC733b04c27D267Ab7B053F34E7957E2587` (any case);
 - `signers` include `0x955029AC2539f4D57A1D7E6Ef2b97617e95Eb1D4`, `0xC7c9853C2b217859E09B74DD21722D3917C14590` and `0x71efD5d71a597eB6BEC28DFDB05a49283a3e20c5`;
 - `redirectURIs` has at least one entry. Grant needs one; if there is none, add it on the license page first.
@@ -11908,14 +11270,12 @@ Expected: one row. Its `email` is the login to use. If there are no rows, the ac
 
 Settings → Team.
 Expected: the Team section loads, with Invite member.
-
 - If inviting answers `Finish setting up your team first` (`NOT_A_MEMBER`), complete the company step (sign-up's company information) and retry.
 - The sidebar shows no switcher unless that login is already in another team.
 
 - [ ] **Step 4: Assign #286's three keys**
 
 `/license/286/details` → API keys. For each of the three addresses from Step 1: ⋯ → Assign.
-
 - Under _Other people_, enter the people or service that use the key. Ask in #engineering whoever deployed it.
 - Add a note saying what it's for, for example `Mobile app backend`.
 - Save.
