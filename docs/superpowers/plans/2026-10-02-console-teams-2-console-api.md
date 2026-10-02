@@ -32,16 +32,23 @@
 
 **Repository:** `~/workspace/dimo-developer-console-api`. **Branch:** `feat/teams` from `origin/master` after PR #80 has merged.
 
-**Builds on #80 (last commit `b41eb28`):**
+**Builds on #80 (last commit `04250f2`):**
 
 - **Scoped user routes** and the `/api/me/complete` fix.
+- **Sign-up's wallet check ignores letter case:** `findUserByWalletAddressAnyCase` (`lower(address)`, in `src/controllers/user.controller.ts`) backs `POST /api/user`'s 409.
 - **Configurations** limited to the license owner (`isLicenseOwner`).
-- **Collaborator removal** limited to the owner's team.
-- **Empty-company guards** in `getMyApps` and `getMyConnections`.
+- **Collaborator removal** limited to the owner's team:
+  - a soft-deleted target answers `Collaborator not found`;
+  - the last-owner check counts `TeamCollaborator.count({ where: { team_id, role: OWNER, deleted: { [Op.not]: true } } })`.
+- **Soft-deleted collaborator rows don't count anywhere:** `findTeamCollaboratorByUserId` and `getTeamCollaborator` (`src/services/teamCollaborator.service.ts`), and `findMyTeam` and `getCollaboratorTeam` (the controller), all filter `deleted: { [Op.not]: true }`.
+- **Empty-company and empty-team guards:** `getMyApps` and `getMyConnections`; `getMyTeamCollaborators('')` answers `{ data: [], totalItems: 0, totalPages: 0 }`.
+- **List filters:** `transformObject` (`src/utils/filter.ts`) accumulates every non-empty key, so a query parameter can't replace a scoping key.
 - **`src/services/identity.service.ts`:** `License = { owner, tokenId }`, `getLicense(clientId)` with a 60-second cache of known licenses, `getLicenseOwner`, `isLicenseOwner`, `IdentityUnavailableError`, and the `IDENTITY_API_URL` override.
+  - `getLicense` throws `IdentityUnavailableError` when `body.errors` has any error whose `extensions.code !== 'NOT_FOUND'`. `NOT_FOUND` alone means `null`.
 - **The legacy invite** (`invitePersonToMyTeam(user, companyName, email)`):
   - the caller's membership must be `OWNER`, or it throws `ValidatorError('Only the team owner can invite collaborators')`;
   - at most 10 rows created per team per hour (`Too many invitations. Try again in an hour.`);
+  - it counts and inserts inside `DB.connection!.transaction`, after `SELECT pg_advisory_xact_lock(hashtext(:teamId))`, and `addTeamCollaborator(input, transaction?)` takes the transaction;
   - always `COLLABORATOR`, and the route reads only `email`.
 - **`acceptTeamInvitation`:** only a PENDING row sent to the caller's email. `markAsAccepted` sets `COLLABORATOR`.
 - **The invite template:** a module-level `escapeHtml`, and `escapeHtml(userName.slice(0, 60))` for the inviter.
@@ -50,10 +57,10 @@
 No task re-adds any of this. Tasks that change it keep #80's response bodies unless C7 says otherwise:
 
 - **Task 3** renames `COLLABORATOR` to `MEMBER`;
-- **Task 5** checks the workspace license against the team owner;
-- **Task 8** extends the template;
+- **Task 5** checks the workspace license against the team owner, and tests #80's filters as they are;
+- **Task 8** extends the template, and keeps C7's limits race-safe the way #80 keeps its own: count and record under advisory locks;
 - **Task 9** moves the legacy routes onto the team model;
-- **Task 11** extends the Identity service.
+- **Task 11** extends the Identity service, sharing `getLicense`'s request and error rule with the new token ID lookup.
 
 ## Global Constraints
 
@@ -97,7 +104,7 @@ No task re-adds any of this. Tasks that change it keep #80's response bodies unl
 ## Review Focus
 
 1. **A user who owns a team and is also a member of another.** With no header, the personal team (`teams.created_by`) is active, and `GET /api/me` shows the personal company, never the other team's. A membership row wrongly marked `OWNER` grants nothing. Covered in Tasks 3 and 4.
-2. **Invite email case and whitespace.** Inviting `"  Alice@X.test "` lets the account `alice@x.test` accept. A second invite to `ALICE@x.test` gets 409 `ALREADY_INVITED`, and so does a concurrent duplicate. Covered in Task 8.
+2. **Invite email case and whitespace.** Inviting `"  Alice@X.test "` lets the account `alice@x.test` accept. A second invite to `ALICE@x.test` gets 409 `ALREADY_INVITED`, and so does a concurrent duplicate. Concurrent invites can't pass C7's limits. Covered in Task 8.
 3. **Re-inviting someone who was removed or who left.** Their `REVOKED` or `LEFT` row doesn't block a new invite or its acceptance. Covered in Task 8.
 4. **Invite token reuse.** A token that was already accepted, or used by a different account, gets 400 `INVITE_INVALID` or 403 `INVITE_EMAIL_MISMATCH`, and never a second membership. Covered in Task 8.
 5. **Mixed-case addresses.**
@@ -113,7 +120,6 @@ No task re-adds any of this. Tasks that change it keep #80's response bodies unl
 | `vitest.config.mts`, `test/support/*`                                                          | Test harness: database, tokens (with `aud`), requests, fixtures, fake Identity                                                                                        |
 | `.github/workflows/ci.yml`                                                                     | Lint, typecheck and tests on every PR                                                                                                                                 |
 | `tsconfig.json` (modify)                                                                       | `"target": "es2017"`                                                                                                                                                  |
-| `src/utils/filter.ts` (modify)                                                                 | `transformObject` keeps every filter key                                                                                                                              |
 | `src/scripts/db/init-db_12.sql`, `init-db_12.down.sql`                                         | Migration and its rollback: owner demotion, membership columns and indexes, invite send log, user signer, key registry, `configurations.client_id` widening           |
 | `src/models/teamCollaborator.model.ts` (modify)                                                | `OWNER`/`MEMBER`; `PENDING`/`ACCEPTED`/`REVOKED`/`LEFT`; invite columns                                                                                               |
 | `src/models/user.model.ts` (modify)                                                            | `signer_address`, `signer_verified_at`                                                                                                                                |
@@ -125,7 +131,7 @@ No task re-adds any of this. Tasks that change it keep #80's response bodies unl
 | `src/services/teamMembers.service.ts`                                                          | Team summaries, member list with `memberKeys`, removal, leaving                                                                                                       |
 | `src/services/invitation.service.ts`                                                           | Create, resend, cancel, preview and accept invites, with limits                                                                                                       |
 | `src/services/signerProof.service.ts`                                                          | C6 message, verification, `SIGNER_IN_USE` / `SIGNER_LOCKED`                                                                                                           |
-| `src/services/identity.service.ts`                                                             | (from #80: `getLicense`, `getLicenseOwner`, `isLicenseOwner`) gains `getLicenseByTokenId` and `clearIdentityCache`; GraphQL errors other than `NOT_FOUND` are outages |
+| `src/services/identity.service.ts`                                                             | (from #80: `getLicense` with its `NOT_FOUND` rule, `getLicenseOwner`, `isLicenseOwner`) gains `getLicenseByTokenId`, sharing that request, and `clearIdentityCache` |
 | `src/services/licenseSigner.service.ts`                                                        | Key registry, with `SIGNER_MISMATCH`, `KIND_CONFLICT` and `SIGNER_IN_USE`                                                                                             |
 | `src/services/licenseAccess.service.ts`                                                        | Who may use a license, and `memberOfTeam`                                                                                                                             |
 | `src/app/api/my/**` (modify)                                                                   | Team context, owner-only writes, members without secrets                                                                                                              |
@@ -778,16 +784,21 @@ git commit -m "test: add a vitest harness with a disposable Postgres, local JWKS
 PR #80 had no tests. Its fixes are verified by hand and already in `master`, so these tests pass on the first run. They exist so later tasks can't reopen the holes. They cover every part of #80:
 
 - scoped user routes and the `/api/me/complete` takeover;
+- sign-up's one-account-per-wallet check, in any letter case;
 - configurations limited to the license owner (via `@/services/identity.service`);
-- collaborator removal limited to the caller's own team;
-- legacy invites only by the team owner, always as `COLLABORATOR`, at most 10 per team per hour, with the inviter's name escaped and cut to 60 characters, and `invitation_code` accepted only by the invited email (as `COLLABORATOR`);
-- `POST /api/my/workspace` only for a license the caller owns and whose token ID the body names, storing the license's real owner.
+- collaborator removal limited to the caller's own team, refusing a row already removed, and counting only rows not removed for the last-owner check;
+- the collaborator list: empty for a caller with no team, and never widened by a query parameter;
+- soft-deleted rows granting nothing: no team in `/api/me`, no right to invite;
+- legacy invites only by the team owner, always as `COLLABORATOR`, at most 10 per team per hour even when requests race, with the inviter's name escaped and cut to 60 characters, and `invitation_code` accepted only by the invited email (as `COLLABORATOR`);
+- `POST /api/my/workspace` only for a license the caller owns and whose token ID the body names, storing the license's real owner, with an Identity GraphQL error answered as 502.
 
-The assertions use #80's exact messages and roles (commit `b41eb28`). Three later tasks change behavior these tests see, and each updates the assertion it changes:
+The assertions use #80's exact messages and roles (commit `04250f2`). Three later tasks change behavior these tests see, and each updates the assertion it changes:
 
 - **Task 3** renames the role to `MEMBER`, in the two `COLLABORATOR` assertions.
 - **Task 4** answers 401 for an unknown wallet on `/api/me`.
 - **Task 9** moves the legacy invite onto C7's limits.
+
+Two tests also allow for Task 9 without an update: a caller with no team gets #80's 400 or empty page before it, and 403 `NOT_A_MEMBER` after it. Their assertions only require that nothing is sent and no other team's row is shown.
 
 **Files:**
 
@@ -796,10 +807,12 @@ The assertions use #80's exact messages and roles (commit `b41eb28`). Three late
 **Interfaces:**
 
 - Consumes (Task 1): `request`, `read`, `sql`, `createUser`, `createOwner`, `newWallet`, `fakeIdentity`, `newClientId`.
-- Consumes (#80, commit `b41eb28`):
-  - `getLicense`, `getLicenseOwner` and `isLicenseOwner` in `src/services/identity.service.ts`;
-  - `removeMyCollaboratorById`, `invitePersonToMyTeam` and `acceptTeamInvitation` in `src/controllers/teamCollaborator.controller.ts`;
-  - `markAsAccepted` in `src/services/teamCollaborator.service.ts`;
+- Consumes (#80, commit `04250f2`):
+  - `getLicense`, `getLicenseOwner` and `isLicenseOwner` in `src/services/identity.service.ts`, with the `NOT_FOUND` rule;
+  - `removeMyCollaboratorById`, `getMyTeamCollaborators`, `invitePersonToMyTeam` (advisory lock) and `acceptTeamInvitation` in `src/controllers/teamCollaborator.controller.ts`;
+  - `markAsAccepted` and `findTeamCollaboratorByUserId` in `src/services/teamCollaborator.service.ts`;
+  - `findUserByWalletAddressAnyCase` in `src/controllers/user.controller.ts`;
+  - `transformObject` in `src/utils/filter.ts`;
   - the escaping in `src/templates/team.ts`.
 
 - [ ] **Step 1: Write the tests**
@@ -823,6 +836,7 @@ import {
   POST as createConfiguration,
 } from '@/app/api/my/configurations/route';
 import { DELETE as deleteCollaborator } from '@/app/api/my/team/collaborator/[id]/route';
+import { GET as listCollaborators } from '@/app/api/my/team/collaborator/route';
 import { POST as legacyInvite } from '@/app/api/my/team/invitation/route';
 import { POST as createWorkspace } from '@/app/api/my/workspace/route';
 import { POST as createUserRoute } from '@/app/api/user/route';
@@ -931,6 +945,39 @@ describe('PR #80 regressions', () => {
       { wallet },
     );
     expect(rows[0].count).toBe('1');
+  });
+
+  it('POST /api/user refuses a second account for the same wallet in another letter case', async () => {
+    const wallet = newWallet().address;
+    await insertLegacyUser('lower@x.test', wallet.toLowerCase());
+
+    const again = await createUserRoute(
+      await request('POST', '/api/user', {
+        as: wallet,
+        body: { name: 'D', email: 'upper@x.test', auth: 'credentials', auth_login: 'd' },
+      }),
+    );
+
+    expect(again.status).toBe(409);
+    expect(await userByEmail('upper@x.test')).toBeUndefined();
+  });
+
+  it("gives a removed collaborator's account no team in GET /api/me", async () => {
+    const acme = await createOwner('Acme');
+    const removed = await createUser();
+    await sql(
+      `INSERT INTO team_collaborators (id, team_id, user_id, role, status, created_at, updated_at, deleted, deleted_at)
+       VALUES (gen_random_uuid()::text, :team, :user, 'COLLABORATOR', 'ACCEPTED', now(), now(), true, now())`,
+      { team: acme.team.id, user: removed.id },
+    );
+
+    const response = await read(
+      await getMe(await request('GET', '/api/me', { as: removed.address! })),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body.team).toBeUndefined();
+    expect(response.body.company).toBeUndefined();
   });
 
   it('POST /api/user without a token is rejected', async () => {
@@ -1251,6 +1298,49 @@ describe('PR #80 regressions: legacy invites', () => {
     });
   });
 
+  it('keeps the limit when invitations race', async () => {
+    const acme = await createOwner('Acme');
+    // Only invitations count toward the limit, not the owner's own row.
+    await sql(
+      "UPDATE team_collaborators SET created_at = now() - interval '2 hours' WHERE team_id = :team",
+      { team: acme.team.id },
+    );
+    for (let n = 0; n < 8; n += 1) {
+      expect((await invite(acme.user.address!, `early${n}@x.test`)).status).toBe(200);
+    }
+
+    // Four at once for the last two places. Four stays under Sequelize's default pool
+    // of five: each request waiting on the lock holds a connection.
+    const responses = await Promise.all(
+      [0, 1, 2, 3].map((n) => invite(acme.user.address!, `race${n}@x.test`)),
+    );
+
+    expect(responses.filter((response) => response.status === 200)).toHaveLength(2);
+    const [{ count }] = await sql<{ count: string }>(
+      "SELECT count(*) FROM team_collaborators WHERE team_id = :team AND status = 'PENDING'",
+      { team: acme.team.id },
+    );
+    expect(count).toBe('10');
+  });
+
+  it('gives a removed OWNER row no right to invite', async () => {
+    const acme = await createOwner('Acme');
+    const removed = await createUser();
+    await sql(
+      `INSERT INTO team_collaborators (id, team_id, user_id, role, status, created_at, updated_at, deleted, deleted_at)
+       VALUES (gen_random_uuid()::text, :team, :user, 'OWNER', 'ACCEPTED', now(), now(), true, now())`,
+      { team: acme.team.id, user: removed.id },
+    );
+
+    const response = await invite(removed.address!, 'sneaky@x.test');
+
+    // #80 answers 400. From Task 9 the route answers 403 NOT_A_MEMBER, because the
+    // caller has no team at all. Either way nothing is created or sent.
+    expect([400, 403]).toContain(response.status);
+    expect(await invitedRole('sneaky@x.test')).toBeUndefined();
+    expect(Mailer.sendMail).not.toHaveBeenCalled();
+  });
+
   it('escapes and shortens the inviter name in the email', async () => {
     const acme = await createOwner('Acme');
     await acme.user.update({ name: `<b>${'E'.repeat(70)}</b> Smith` });
@@ -1339,9 +1429,24 @@ describe('PR #80 regressions: workspaces', () => {
       body: { message: 'Could not verify license ownership' },
     });
   });
+
+  it('answers 502 for an Identity GraphQL error, and 403 for a license Identity does not know', async () => {
+    const acme = await createOwner('Acme');
+
+    fakeIdentity([], { graphqlError: 'database is down' });
+    expect(await create(acme.user.address!, body(newClientId(), 7))).toEqual({
+      status: 502,
+      body: { message: 'Could not verify license ownership' },
+    });
+
+    // Identity's real answer for an unknown license: HTTP 200 with NOT_FOUND.
+    fakeIdentity([]);
+    expect(await create(acme.user.address!, body(newClientId(), 7))).toEqual(notYours);
+    expect(await workspaceOwners()).toEqual([]);
+  });
 });
 
-describe("PR #80 regressions: collaborator removal stays inside the owner's team", () => {
+describe("PR #80 regressions: collaborator lists and removal stay inside the owner's team", () => {
   // Raw rows, as the old collaborator flow wrote them.
   const addCollaborator = async (
     teamId: string,
@@ -1360,6 +1465,16 @@ describe("PR #80 regressions: collaborator removal stays inside the owner's team
     read(
       await deleteCollaborator(await request('DELETE', '/x', { as }), { params: { id } }),
     );
+  const list = async (as: string, query = '') =>
+    read(
+      await listCollaborators(
+        await request('GET', `/api/my/team/collaborator${query}`, { as }),
+      ),
+    );
+  const markRemoved = (id: string) =>
+    sql('UPDATE team_collaborators SET deleted = true, deleted_at = now() WHERE id = :id', {
+      id,
+    });
   const isDeleted = async (id: string) =>
     (
       await sql<{ deleted: boolean }>(
@@ -1400,13 +1515,70 @@ describe("PR #80 regressions: collaborator removal stays inside the owner's team
     });
     expect(await isDeleted(collaborator)).toBe(true);
   });
+
+  it('refuses a row that was already removed', async () => {
+    const acme = await createOwner('Acme');
+    const gone = await addCollaborator(acme.team.id!, (await createUser()).id!);
+    await markRemoved(gone);
+
+    expect(await remove(acme.user.address!, gone)).toEqual({
+      status: 400,
+      body: { message: 'Collaborator not found' },
+    });
+  });
+
+  it('protects the last owner even with a removed OWNER row left in the team', async () => {
+    const acme = await createOwner('Acme');
+    await markRemoved(
+      await addCollaborator(acme.team.id!, (await createUser()).id!, 'OWNER'),
+    );
+
+    expect(await remove(acme.user.address!, acme.membership.id!)).toEqual({
+      status: 400,
+      body: { message: 'Cannot remove the only administrator from the group.' },
+    });
+    expect(await isDeleted(acme.membership.id!)).toBe(false);
+  });
+
+  it('lists no collaborators to a caller with no team', async () => {
+    const other = await createOwner('Other');
+    await addCollaborator(
+      other.team.id!,
+      (await createUser({ email: 'member@other.test' })).id!,
+    );
+    const loner = await createUser();
+
+    const response = await list(loner.address!);
+
+    // #80 answers an empty page. From Task 9 the route answers 403 NOT_A_MEMBER,
+    // because the caller has no team. Never another team's rows.
+    expect(response.body.data ?? []).toEqual([]);
+    expect(JSON.stringify(response.body)).not.toContain('member@other.test');
+  });
+
+  it("can't be widened past the caller's team by a query parameter", async () => {
+    const acme = await createOwner('Acme');
+    const other = await createOwner('Other');
+    const outsider = await createUser({ email: 'member@other.test' });
+    const outsiderRow = await addCollaborator(other.team.id!, outsider.id!);
+
+    for (const query of [`?user_id=${outsider.id}`, `?id=${outsiderRow}`]) {
+      const response = await list(acme.user.address!, query);
+
+      expect(response.status).toBe(200);
+      expect(JSON.stringify(response.body)).not.toContain('member@other.test');
+      expect(
+        response.body.data.every((row: { team_id: string }) => row.team_id === acme.team.id),
+      ).toBe(true);
+    }
+  });
 });
 ```
 
 - [ ] **Step 2: Run them**
 
 Run: `npm test -- test/api/regressions-80.test.ts`
-Expected: `25 passed`.
+Expected: `34 passed`.
 
 - [ ] **Step 3: Commit**
 
@@ -1432,10 +1604,13 @@ git worktree remove --force /tmp/console-api-pre80
 
 Expected: in the pre-#80 worktree, at least these FAIL:
 
-- the forged-role, PUT /api/me, takeover and deleted-routes tests;
+- the forged-role, PUT /api/me, takeover and deleted-routes tests, and the second account for a wallet in another letter case;
+- the removed collaborator's team in `/api/me`;
 - the other user's configuration read, update, delete, list and create;
-- the cross-team collaborator removal;
-- the legacy invite by a non-owner, and the workspace created for someone else's license.
+- the cross-team collaborator removal, the already-removed row and the last owner beside a removed `OWNER` row;
+- the collaborator list for a caller with no team, and through `?user_id=` and `?id=`;
+- the legacy invite by a non-owner and by a removed `OWNER` row, and the racing invites (all four go through);
+- the workspace created for someone else's license, and on an Identity GraphQL error.
 
 The worktree is then removed, and the branch is untouched.
 
@@ -3028,9 +3203,12 @@ git commit -m "feat(teams): resolve the active team, with ownership from teams.c
 
 ### Task 5: Apps, connections, redirect URIs, signers and workspace under a team
 
-These routes looked up the company with `getCompanyAndTeam(user)`. Now they take it from the active team. Every non-GET handler calls `requireOwner(ctx)` first, and members never see secrets. Along the way this task fixes five existing problems:
+These routes looked up the company with `getCompanyAndTeam(user)`. Now they take it from the active team. Every non-GET handler calls `requireOwner(ctx)` first, and members never see secrets.
 
-- **List filters drop keys.** `transformObject` (`src/utils/filter.ts`) keeps only the **last** non-empty filter key. Any list with two filters silently loses one, including the company condition.
+The lists below scope by company through `transformObject` (`src/utils/filter.ts`). #80 (`04250f2`) made it keep every non-empty key; before, only the last one survived, which could drop the company condition. This task doesn't change it: Steps 1 and 2 pin that behavior, because the routes below depend on it.
+
+Along the way this task fixes four existing problems:
+
 - **Redirect URIs and signers can attach to any app.** Their POSTs never checked that the app belongs to the caller's company.
 - **Their DELETEs match the wrong column.** They matched the row's ID against `app_id`.
 - **`PUT /api/my/apps/:id` passes the body straight through,** so it could set `company_id` and move an app to another company.
@@ -3038,7 +3216,6 @@ These routes looked up the company with `getCompanyAndTeam(user)`. Now they take
 
 **Files:**
 
-- Modify: `src/utils/filter.ts` (`transformObject`)
 - Modify: `src/services/redirectUri.service.ts`, `src/services/signer.service.ts`, `src/controllers/redirectUri.controller.ts`, `src/controllers/signer.controller.ts` (delete one row by its ID)
 - Modify (whole files below):
   - `src/app/api/my/apps/route.ts`
@@ -3064,7 +3241,9 @@ These routes looked up the company with `getCompanyAndTeam(user)`. Now they take
   - `redactApp(app)`: the app as JSON, with `api_key` removed from every signer;
   - `deleteRedirectUriById(id, companyId)` and `deleteSignerById(id, companyId)`, which soft-delete one row of that company.
 
-- [ ] **Step 1: Write the failing filter test**
+- [ ] **Step 1: Pin #80's list filters**
+
+These tests describe `transformObject` as #80 (`04250f2`) left it. They pass on the first run.
 
 `test/utils/filter.test.ts`:
 
@@ -3074,7 +3253,7 @@ import { describe, expect, it } from 'vitest';
 
 import { transformObject, transformObjectToSequelize } from '@/utils/filter';
 
-describe('list filters', () => {
+describe("list filters (#80's transformObject)", () => {
   it('keeps every non-empty key, not only the last one', () => {
     const where = transformObject(
       ['workspace_id', 'company_id'],
@@ -3117,33 +3296,10 @@ describe('list filters', () => {
 });
 ```
 
-- [ ] **Step 2: Run it to confirm it fails, then fix `transformObject`**
+- [ ] **Step 2: Run them**
 
 Run: `npm test -- test/utils/filter.test.ts`
-Expected: FAIL. The first test gets only `{ company_id: 'c1' }`, and the like test is missing `name`.
-
-In `src/utils/filter.ts`, replace `transformObject`:
-
-```ts
-export const transformObject = (
-  keys: string[] | undefined,
-  filter: FilterObject,
-  transformFn: (k: string, v: string) => WhereOptions,
-) => {
-  // Every non-empty key adds its condition. Returning only the last one used to
-  // drop earlier filters, including the company a list is scoped to.
-  return (
-    keys?.reduce<WhereOptions>((acc, key) => {
-      const value = filter[key];
-      if (_.isEmpty(value)) return acc;
-      return { ...acc, ...transformFn(key, value) };
-    }, {}) ?? {}
-  );
-};
-```
-
-Run: `npm test -- test/utils/filter.test.ts`
-Expected: `3 passed`.
+Expected: `3 passed`, with no change to `src/utils/filter.ts`. If any fails, `master` doesn't have #80's `04250f2`: stop and rebase onto it.
 
 - [ ] **Step 3: Write the failing route tests**
 
@@ -4041,7 +4197,7 @@ export const DELETE = async (
 
 - [ ] **Step 9: Rewrite the workspace and support routes**
 
-`src/app/api/my/workspace/route.ts`. #80 (`b41eb28`) made `POST` check through Identity (`getLicense`) that the caller's wallet owns the license and that `token_id` is that license's, and store `license.owner`. Its bodies are 403 `{ message: 'You do not own this license' }` and 502 `{ message: 'Could not verify license ownership' }`. The version below keeps all of that. The only change is whose wallet must own the license: the active team's owner. Members are refused before the check.
+`src/app/api/my/workspace/route.ts`. #80 (`04250f2`) made `POST` check through Identity (`getLicense`) that the caller's wallet owns the license and that `token_id` is that license's, and store `license.owner`. Its bodies are 403 `{ message: 'You do not own this license' }` and 502 `{ message: 'Could not verify license ownership' }`. The version below keeps all of that. The only change is whose wallet must own the license: the active team's owner. Members are refused before the check.
 
 ```ts
 import _ from 'lodash';
@@ -4238,7 +4394,7 @@ Run: `npm test && npm run typecheck`
 Expected: all pass, typecheck exits 0.
 
 ```bash
-npx prettier --write src/utils/filter.ts src/utils/redact.ts src/services/redirectUri.service.ts src/services/signer.service.ts src/controllers/redirectUri.controller.ts src/controllers/signer.controller.ts src/app/api/my/apps src/app/api/my/connections src/app/api/my/redirect-uris src/app/api/my/signers src/app/api/my/workspace/route.ts "src/app/api/my/workspace/[id]/apps" src/app/api/my/workspace/by-token src/app/api/my/support test
+npx prettier --write src/utils/redact.ts src/services/redirectUri.service.ts src/services/signer.service.ts src/controllers/redirectUri.controller.ts src/controllers/signer.controller.ts src/app/api/my/apps src/app/api/my/connections src/app/api/my/redirect-uris src/app/api/my/signers src/app/api/my/workspace/route.ts "src/app/api/my/workspace/[id]/apps" src/app/api/my/workspace/by-token src/app/api/my/support test
 git add src test
 git commit -m "feat(teams): scope apps, connections, signers and workspaces to the active team, without secrets for members"
 ```
@@ -6031,6 +6187,10 @@ git commit -m "feat(teams): list teams and members with their keys, remove membe
   - 50 pending invites per team;
   - one send per invite in the last 60 seconds.
   - Each answers 429 `RATE_LIMITED`.
+- The limits are race-safe, as #80 (`04250f2`) made its own:
+  - create and resend each run one transaction that takes `pg_advisory_xact_lock(hashtext('invites:team:<teamId>'))`, then `pg_advisory_xact_lock(hashtext('invites:sender:<userId>'))`, always in that order;
+  - under both locks they count, write the row and record the `team_invite_sends` row, and every query passes the transaction;
+  - the email is sent after commit.
 - Every route here passes `consoleOnly: true` (C4).
 
 - [ ] **Step 1: Write the failing tests**
@@ -6058,7 +6218,7 @@ import { createInvitation, hashInviteToken } from '@/services/invitation.service
 import { resolveTeamContext } from '@/services/teamContext.service';
 import Mailer from '@/utils/mailer';
 import { sql } from '../support/db';
-import { addMember, createOwner, createUser } from '../support/fixtures';
+import { addMember, createOwner, createOwnerFor, createUser } from '../support/fixtures';
 import { read, request } from '../support/http';
 
 type Owner = Awaited<ReturnType<typeof createOwner>>;
@@ -6155,8 +6315,9 @@ describe('POST /api/my/team/invitations', () => {
 
   it('answers ALREADY_INVITED, not 500, when a concurrent invite wins the race', async () => {
     const acme = await createOwner('Acme');
-    // The other request inserts its pending row after this one checked for one and
-    // before it creates its own: exactly the window the unique index guards.
+    // A writer that doesn't take the lock (an older instance mid-deploy) inserts its
+    // pending row after this one checked and before it creates its own: the window
+    // the unique index guards.
     const realCreate = TeamCollaborator.create.bind(TeamCollaborator);
     vi.spyOn(TeamCollaborator, 'create').mockImplementationOnce((async (
       ...args: Parameters<typeof realCreate>
@@ -6295,6 +6456,41 @@ describe('invite limits', () => {
       message: 'This team has 50 pending invitations. Cancel some before inviting more.',
       code: 'RATE_LIMITED',
     });
+  });
+
+  it('keeps the team limit when invites race', async () => {
+    const acme = await createOwner('Acme');
+    await sends(acme, 8);
+
+    // Four at once for the last two places. Four stays under Sequelize's default pool
+    // of five: each request waiting on the lock holds a connection.
+    const responses = await Promise.all(
+      [0, 1, 2, 3].map((n) => invite(acme, `race${n}@x.test`)),
+    );
+
+    expect(responses.map((response) => response.status).sort()).toEqual([
+      201, 201, 429, 429,
+    ]);
+    expect(await TeamInviteSend.count({ where: { team_id: acme.team.id! } })).toBe(10);
+  });
+
+  it("keeps the sender's daily limit when invites to two of their teams race", async () => {
+    const acme = await createOwner('Acme');
+    const beta = await createOwnerFor(acme.user, 'Beta');
+    await sends(acme, 28);
+    // Outside the team's hour, inside the sender's day.
+    await sql("UPDATE team_invite_sends SET created_at = now() - interval '2 hours'");
+
+    // Two teams take two different team locks; only the sender's lock orders these.
+    const responses = await Promise.all([
+      invite(acme, 'a1@x.test'),
+      invite(acme, 'a2@x.test'),
+      invite(beta, 'b1@x.test', beta.user.address!, beta.team.id!),
+      invite(beta, 'b2@x.test', beta.user.address!, beta.team.id!),
+    ]);
+
+    expect(responses.filter((response) => response.status === 201)).toHaveLength(2);
+    expect(await TeamInviteSend.count({ where: { sent_by: acme.user.id! } })).toBe(30);
   });
 
   it('allows one email per invite per minute', async () => {
@@ -6570,7 +6766,7 @@ Expected: FAIL, `Failed to resolve import "@/app/api/invitations/accept/route"`.
 
 - [ ] **Step 3: Escape the team name too, in #80's template**
 
-#80 (`b41eb28`) already has, in `src/templates/team.ts`:
+#80 (`04250f2`) already has, in `src/templates/team.ts`:
 
 - a module-level `escapeHtml`;
 - `const inviter = escapeHtml(userName.slice(0, 60));` at the top of `generateTeamInvitationTemplate(userName, cta)`;
@@ -6615,7 +6811,7 @@ Task 2's escaping test (`&lt;b&gt;` followed by 57 `E`s) still passes: the cut a
 
 ```ts
 import { createHash, randomBytes } from 'node:crypto';
-import { Op, UniqueConstraintError, col, fn, where as sqlWhere } from 'sequelize';
+import { Op, Transaction, UniqueConstraintError, col, fn, where as sqlWhere } from 'sequelize';
 import isEmail from 'validator/lib/isEmail';
 
 import config from '@/config';
@@ -6628,6 +6824,7 @@ import {
 } from '@/models/teamCollaborator.model';
 import { TeamInviteSend } from '@/models/teamInviteSend.model';
 import { User } from '@/models/user.model';
+import DB from '@/services/db';
 import {
   activeMembershipWhere,
   findMembership,
@@ -6670,10 +6867,34 @@ const rateLimited = (message: string) => new ApiError(429, 'RATE_LIMITED', messa
 const createdSince = (ms: number) =>
   sqlWhere(col('created_at'), { [Op.gt]: new Date(Date.now() - ms) });
 
-/** Contract C7's limits on invite and resend emails. */
-const assertCanSend = async (ctx: TeamContext, membershipId?: string) => {
+/**
+ * Takes C7's limit locks for this transaction: the team's, then the sender's. Always
+ * in that order, so two requests never wait on each other. A send is counted and
+ * recorded under both, so concurrent requests can't all pass a limit before any of
+ * them is recorded. #80's legacy invite uses the same per-team advisory lock.
+ *
+ * Every query made while holding them passes `transaction`. One that didn't would
+ * wait for a second pool connection, while the requests queued on the lock hold the
+ * others.
+ */
+const lockInviteLimits = async (ctx: TeamContext, transaction: Transaction) => {
+  for (const key of [`invites:team:${ctx.team.id}`, `invites:sender:${ctx.user.id}`]) {
+    await DB.connection!.query('SELECT pg_advisory_xact_lock(hashtext(:key))', {
+      replacements: { key },
+      transaction,
+    });
+  }
+};
+
+/** Contract C7's limits on invite and resend emails. Call under lockInviteLimits. */
+const assertCanSend = async (
+  ctx: TeamContext,
+  membershipId: string | undefined,
+  transaction: Transaction,
+) => {
   const teamSends = await TeamInviteSend.count({
     where: { team_id: ctx.team.id!, [Op.and]: [createdSince(HOUR)] },
+    transaction,
   });
   if (teamSends >= LIMITS.teamPerHour) {
     throw rateLimited(
@@ -6682,6 +6903,7 @@ const assertCanSend = async (ctx: TeamContext, membershipId?: string) => {
   }
   const senderSends = await TeamInviteSend.count({
     where: { sent_by: ctx.user.id!, [Op.and]: [createdSince(DAY)] },
+    transaction,
   });
   if (senderSends >= LIMITS.senderPerDay) {
     throw rateLimited('You have sent 30 invitations today. Try again tomorrow.');
@@ -6689,14 +6911,16 @@ const assertCanSend = async (ctx: TeamContext, membershipId?: string) => {
   if (membershipId) {
     const recent = await TeamInviteSend.count({
       where: { membership_id: membershipId, [Op.and]: [createdSince(MINUTE)] },
+      transaction,
     });
     if (recent > 0) throw rateLimited('This invitation was sent less than a minute ago.');
   }
 };
 
-const assertPendingRoom = async (teamId: string) => {
+const assertPendingRoom = async (teamId: string, transaction: Transaction) => {
   const pending = await TeamCollaborator.count({
     where: { team_id: teamId, status: InvitationStatuses.PENDING, deleted: notDeleted },
+    transaction,
   });
   if (pending >= LIMITS.pendingPerTeam) {
     throw rateLimited(
@@ -6705,17 +6929,15 @@ const assertPendingRoom = async (teamId: string) => {
   }
 };
 
-const sendInvite = async (
-  ctx: TeamContext,
-  membershipId: string,
-  email: string,
-  link: string,
-) => {
-  await TeamInviteSend.create({
-    team_id: ctx.team.id!,
-    membership_id: membershipId,
-    sent_by: ctx.user.id!,
-  });
+/** Records a send under lockInviteLimits; it counts even if the email then fails. */
+const recordSend = (ctx: TeamContext, membershipId: string, transaction: Transaction) =>
+  TeamInviteSend.create(
+    { team_id: ctx.team.id!, membership_id: membershipId, sent_by: ctx.user.id! },
+    { transaction },
+  );
+
+/** The email itself, sent after the transaction has committed. */
+const mailInvite = async (ctx: TeamContext, email: string, link: string) => {
   const inviter = ctx.user.name?.split(' ')[0] || ctx.user.email;
   try {
     await Mailer.sendMail({
@@ -6734,7 +6956,7 @@ const sendInvite = async (
   }
 };
 
-const findPendingInTeam = (teamId: string, id: string) =>
+const findPendingInTeam = (teamId: string, id: string, transaction?: Transaction) =>
   TeamCollaborator.findOne({
     where: {
       id,
@@ -6742,6 +6964,7 @@ const findPendingInTeam = (teamId: string, id: string) =>
       status: InvitationStatuses.PENDING,
       deleted: notDeleted,
     },
+    transaction,
   });
 
 const alreadyInvited = (email: string) =>
@@ -6780,42 +7003,51 @@ export const createInvitation = async (
     );
   }
 
-  const pending = await TeamCollaborator.findOne({
-    where: {
-      team_id: teamId,
-      status: InvitationStatuses.PENDING,
-      deleted: notDeleted,
-      [Op.and]: [sqlWhere(fn('lower', col('email')), lower)],
-    },
-  });
-  if (pending?.invite_expires_at && pending.invite_expires_at.getTime() > Date.now()) {
-    throw alreadyInvited(email);
-  }
-  if (!pending) await assertPendingRoom(teamId);
-  await assertCanSend(ctx, pending?.id);
-
   const { token, fields: tokenFields } = freshInvite();
   const fields = legacyLink ? { ...tokenFields, invite_token_hash: null } : tokenFields;
   let row: TeamCollaborator;
   try {
-    // An expired invite, or one sent before links carried a token, is refreshed in
-    // place. It is always a member's invite, whatever the old row said.
-    row = pending
-      ? await pending.update({
-          ...fields,
-          role: TeamRoles.MEMBER,
-          invited_by: ctx.user.id,
-        })
-      : await TeamCollaborator.create({
+    row = await DB.connection!.transaction(async (transaction) => {
+      await lockInviteLimits(ctx, transaction);
+      const pending = await TeamCollaborator.findOne({
+        where: {
           team_id: teamId,
-          email,
-          role: TeamRoles.MEMBER,
           status: InvitationStatuses.PENDING,
-          invited_by: ctx.user.id,
-          ...fields,
-        });
+          deleted: notDeleted,
+          [Op.and]: [sqlWhere(fn('lower', col('email')), lower)],
+        },
+        transaction,
+      });
+      if (pending?.invite_expires_at && pending.invite_expires_at.getTime() > Date.now()) {
+        throw alreadyInvited(email);
+      }
+      if (!pending) await assertPendingRoom(teamId, transaction);
+      await assertCanSend(ctx, pending?.id, transaction);
+
+      // An expired invite, or one sent before links carried a token, is refreshed in
+      // place. It is always a member's invite, whatever the old row said.
+      const saved = pending
+        ? await pending.update(
+            { ...fields, role: TeamRoles.MEMBER, invited_by: ctx.user.id },
+            { transaction },
+          )
+        : await TeamCollaborator.create(
+            {
+              team_id: teamId,
+              email,
+              role: TeamRoles.MEMBER,
+              status: InvitationStatuses.PENDING,
+              invited_by: ctx.user.id,
+              ...fields,
+            },
+            { transaction },
+          );
+      await recordSend(ctx, saved.id!, transaction);
+      return saved;
+    });
   } catch (error) {
-    // Two invites for the same email at once: the unique index lets one through.
+    // A pending invite for the same email written without the lock (say, by an older
+    // instance mid-deploy): the unique index lets only one through.
     if (error instanceof UniqueConstraintError) throw alreadyInvited(email);
     throw error;
   }
@@ -6824,7 +7056,7 @@ export const createInvitation = async (
     const link = legacyLink
       ? `${config.frontendUrl}sign-in?code=${Buffer.from(row.id!).toString('base64')}`
       : inviteLink(token);
-    await sendInvite(ctx, row.id!, email, link);
+    await mailInvite(ctx, email, link);
   } catch (error) {
     await row.update({
       status: InvitationStatuses.REVOKED,
@@ -6842,15 +7074,23 @@ export const resendInvitation = async (
   id: string,
 ): Promise<TeamMember> => {
   requireOwner(ctx);
-  const row = await findPendingInTeam(ctx.team.id!, id);
-  if (!row) throw new ApiError(404, 'NOT_FOUND', 'Invitation not found');
-  await assertCanSend(ctx, row.id);
-
   const { token, fields } = freshInvite();
-  await row.update({ ...fields, role: TeamRoles.MEMBER, invited_by: ctx.user.id });
+  const row = await DB.connection!.transaction(async (transaction) => {
+    await lockInviteLimits(ctx, transaction);
+    const found = await findPendingInTeam(ctx.team.id!, id, transaction);
+    if (!found) throw new ApiError(404, 'NOT_FOUND', 'Invitation not found');
+    await assertCanSend(ctx, found.id, transaction);
+
+    await found.update(
+      { ...fields, role: TeamRoles.MEMBER, invited_by: ctx.user.id },
+      { transaction },
+    );
+    await recordSend(ctx, found.id!, transaction);
+    return found;
+  });
   // If the email fails, the row keeps the new token (C7): the old link is dead
   // either way, and the owner can resend after a minute.
-  await sendInvite(ctx, row.id!, row.email!, inviteLink(token));
+  await mailInvite(ctx, row.email!, inviteLink(token));
   return toTeamMember(row, ctx.team.created_by);
 };
 
@@ -7034,7 +7274,7 @@ export const POST = async (request: NextRequest) => {
 - [ ] **Step 6: Run the tests**
 
 Run: `npm test -- test/api/invitations.test.ts`
-Expected: `24 passed`.
+Expected: `26 passed`.
 
 - [ ] **Step 7: Run everything, typecheck, commit**
 
@@ -7056,10 +7296,12 @@ Today's console calls these until part 3 ships:
 - `GET /api/my/team/collaborator`, `POST /api/my/team/invitation`, `DELETE /api/my/team/collaborator/:id` (`src/services/team.ts` in the console);
 - `GET /api/me?invitation_code=` (`src/services/user.ts`).
 
-They become thin adapters over the new services and the active team. #80 (`b41eb28`) already made them safe:
+They become thin adapters over the new services and the active team. #80 (`04250f2`) already made them safe:
 
-- removal is scoped to the owner's team, with a per-team last-owner count;
-- invites are owner-only, always `COLLABORATOR` (`MEMBER` since Task 3), and limited to 10 rows per team per hour;
+- removal is scoped to the owner's team, refuses a row already removed, and counts only rows not removed for the last-owner check;
+- the list is empty for a caller with no team, and a query parameter can't widen it;
+- soft-deleted rows grant no team and no owner rights;
+- invites are owner-only, always `COLLABORATOR` (`MEMBER` since Task 3), and limited to 10 rows per team per hour, counted and inserted under a per-team advisory lock;
 - `invitation_code` acceptance needs a PENDING row sent to the caller's email.
 
 This task doesn't redo any of that. It moves the routes onto the team model:
@@ -7068,7 +7310,8 @@ This task doesn't redo any of that. It moves the routes onto the team model:
 - **The legacy invite** goes through `createInvitation` with `legacyLink`: C7's limits, expiry and `MEMBER` rows. Until part 3 ships it keeps emailing the legacy `sign-in?code=` link, which today's console sends to `invitation_code` (C7, "Until part 3 ships"). It keeps #80's refusal message for non-owners, which the old Settings page shows. Task 15 removes the route and the link.
 - **Removal** keeps #80's messages, marks rows `REVOKED`, and cancels pending invites through the invitation service.
 - **`invitation_code` acceptance** keeps #80's checks and `markAsAccepted`, and adds three: it never accepts a token-based invite, an expired one, or one for someone already in the team.
-- **The collaborator list** returns only the fields the old page reads.
+- **The collaborator list** returns only the fields the old page reads, for the active team only, ignoring query parameters.
+- **A caller with no team** now gets 403 `NOT_A_MEMBER` from all four routes, from `resolveTeamContext`, where #80 answered 400 or an empty page. Task 2's two tests for that case accept either.
 
 **Files:**
 
@@ -7545,8 +7788,10 @@ Add `import { TeamInviteSend } from '@/models/teamInviteSend.model';` to that fi
 
 - [ ] **Step 5: Confirm nothing else used the deleted controller functions**
 
-Run: `grep -rnE "getMyTeamCollaborators|invitePersonToMyTeam|findTeamInvitationByEmail|getCollaboratorTeam|deleteTeamCollaboratorById" src`
-Expected: no output. `removeMyCollaboratorById` stays, with its new `(ctx, id)` signature, and is used only by the route above.
+The rewrite drops #80's `getTeamCollaborators`, `getMyTeamCollaborators`, `findTeamCollaboratorById`, `deleteTeamCollaboratorById`, `findMyTeam`, `findTeamInvitationByEmail`, `addTeamCollaborator`, `getCollaboratorTeam` and `invitePersonToMyTeam`, with its advisory lock (Task 8's locks replace it).
+
+Run: `grep -rn "@/controllers/teamCollaborator.controller" src`
+Expected: only `src/app/api/me/route.ts` (`acceptTeamInvitation`) and the two collaborator routes (`listLegacyCollaborators`, `removeMyCollaboratorById`). `src/controllers/team.controller.ts` has its own, unrelated `findMyTeam`.
 
 - [ ] **Step 6: Run everything, typecheck, commit**
 
@@ -7555,7 +7800,9 @@ Expected: all pass, including Task 2's regressions:
 
 - the collaborator removal answers 400 `Collaborator not found` for another team's row;
 - a non-owner's legacy invite answers 400 `Only the team owner can invite collaborators`;
-- the new rate-limit test answers 429.
+- the new rate-limit test answers 429;
+- the racing legacy invites still let exactly two through, now under Task 8's locks;
+- the removed `OWNER` row and the caller with no team now get 403 `NOT_A_MEMBER`.
 
 Typecheck exits 0.
 
@@ -8084,29 +8331,28 @@ git commit -m "feat(teams): verify and store the one wallet that signs for each 
 
 ---
 
-### Task 11: Extend #80's Identity service: lookups by token ID, and GraphQL errors as outages
+### Task 11: Extend #80's Identity service with a lookup by token ID
 
-#80 (`b41eb28`) added `src/services/identity.service.ts`:
+#80 (`04250f2`) added `src/services/identity.service.ts`:
 
 - `export type License = { owner: string; tokenId: number }`;
 - `getLicense(clientId)`, which queries `developerLicense(by: { clientId }) { owner tokenId }`, caches known licenses for 60 seconds under the lowercase client ID, doesn't cache unknown ones, and answers `null` for non-address input;
 - `getLicenseOwner` and `isLicenseOwner`, built on `getLicense`;
-- `IdentityUnavailableError`, thrown on HTTP or network failure;
+- `IdentityUnavailableError`, thrown on HTTP or network failure, and when `body.errors` has any error whose `extensions.code !== 'NOT_FOUND'` (C7's rule; `NOT_FOUND` alone means `null`);
 - the `IDENTITY_API_URL ?? config.identityApiUrl` override.
 
 `identityApiUrl` is set in `default.ts` (dev) and `production.ts`; preview inherits the default.
 
-This task keeps all of that and adds three things:
+This task keeps all of that and adds two things:
 
-- `getLicenseByTokenId` for the registry;
-- C7's rule that a GraphQL error is an outage unless it's `NOT_FOUND`, for both lookups;
+- `getLicenseByTokenId` for the registry. It shares `getLicense`'s request and `NOT_FOUND` rule: they move, unchanged, into one helper both lookups call, so the rule exists once;
 - `clearIdentityCache` for tests.
 
 There's no second client. Tasks 5, 6 and 13 use `getLicense`, and Task 12 uses `getLicenseByTokenId`.
 
 **Files:**
 
-- Modify: `src/services/identity.service.ts` (whole file below)
+- Modify: `src/services/identity.service.ts` (edits to #80's file, below)
 - Modify: `src/utils/apiError.ts` (`apiErrorResponse` maps `IdentityUnavailableError` to 502 `IDENTITY_UNAVAILABLE`)
 - Modify: `test/support/setup.ts` (clear the license cache before each test)
 - Test: `test/services/identity.test.ts`
@@ -8114,10 +8360,10 @@ There's no second client. Tasks 5, 6 and 13 use `getLicense`, and Task 12 uses `
 **Interfaces:**
 
 - Consumes (Task 1): `fakeIdentity`, `newClientId`.
-- Keeps (#80, same signatures and behavior): `License`, `getLicense(clientId)`, `getLicenseOwner(clientId)`, `isLicenseOwner(address, clientId)`, `IdentityUnavailableError`.
+- Keeps (#80, same signatures and behavior): `License`, `getLicense(clientId)`, `getLicenseOwner(clientId)`, `isLicenseOwner(address, clientId)`, `IdentityUnavailableError`, and the `NOT_FOUND` rule.
 - Produces:
   - `getLicenseByTokenId(tokenId: number): Promise<License | null>`. It answers `null` for a non-positive or non-integer ID, or for an unknown license, and caches a known license for 60 seconds per token ID. The query's variable is `Int!`, matching `DeveloperLicenseBy.tokenId` in the Identity schema (`~/workspace/dimo-developer-console/src/gql/graphql.ts`).
-  - Both lookups throw `IdentityUnavailableError` when an HTTP 200 carries GraphQL errors, unless every error has `extensions.code === 'NOT_FOUND'`. That is how Identity answers a license that doesn't exist (checked live on 2026-10-02).
+  - `getLicenseByTokenId` follows #80's rule through the shared helper: `IdentityUnavailableError` when an HTTP 200 carries GraphQL errors, unless every error has `extensions.code === 'NOT_FOUND'`. That is how Identity answers a license that doesn't exist (checked live on 2026-10-02).
   - `clearIdentityCache(): void`.
   - `apiErrorResponse` answers `IdentityUnavailableError` with 502 `{ message: 'Identity API is unavailable', code: 'IDENTITY_UNAVAILABLE' }`. The configuration and workspace routes check the error themselves first, so they keep #80's `{ error | message: 'Could not verify license ownership' }`.
 
@@ -8224,6 +8470,7 @@ describe('identity service', () => {
     );
   });
 
+  // getLicense's half pins #80's rule; getLicenseByTokenId's half is new.
   it('treats a GraphQL error answered with HTTP 200 as an outage, unless it is NOT_FOUND', async () => {
     fakeIdentity([], { graphqlError: 'database is down' });
     await expect(getLicenseByTokenId(7)).rejects.toBeInstanceOf(IdentityUnavailableError);
@@ -8280,43 +8527,41 @@ describe('identity service', () => {
 Run: `npm test -- test/services/identity.test.ts`
 Expected: FAIL. The import has no `getLicenseByTokenId` or `clearIdentityCache` export.
 
-- [ ] **Step 3: Rewrite `src/services/identity.service.ts`**
+- [ ] **Step 3: Share #80's request with a token ID lookup in `src/services/identity.service.ts`**
 
-Everything #80 exports keeps its name, signature and behavior. `getLicense`'s fetch moves into `queryLicense`, which both lookups share.
+Everything #80 exports keeps its name, signature and behavior. These are edits to #80's file, not a rewrite.
+
+1. Below `LICENSE_QUERY`, add:
 
 ```ts
-import config from '@/config';
-
-const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
-const LICENSE_QUERY =
-  'query ($clientId: Address!) { developerLicense(by: { clientId: $clientId }) { owner tokenId } }';
 // DeveloperLicenseBy.tokenId is an Int in the Identity schema.
 const LICENSE_BY_TOKEN_QUERY =
   'query ($tokenId: Int!) { developerLicense(by: { tokenId: $tokenId }) { owner tokenId } }';
+```
 
-// License owners rarely change, so a known owner is reused for a minute rather
-// than costing an Identity round trip on every request. Unknown licenses are not
-// cached: a license minted a moment ago must work as soon as Identity has it.
-const OWNER_TTL_MS = 60_000;
-export type License = { owner: string; tokenId: number };
-const licenses = new Map<string, { license: License; expires: number }>();
+2. Below `const licenses = new Map<…>();`, add:
+
+```ts
 const licensesByToken = new Map<number, { license: License; expires: number }>();
+```
 
-export class IdentityUnavailableError extends Error {}
+3. Move the middle of `getLicense` into a helper. Everything from `let body: {` down to and including `const license = { owner: found.owner, tokenId: Number(found.tokenId) };` moves into `queryLicense`, unchanged except for two things:
 
-const identityUrl = () => process.env.IDENTITY_API_URL ?? config.identityApiUrl;
+- the `fetch` body sends the helper's `query` and `variables`;
+- the helper returns `null` or the license.
 
-type IdentityAnswer = {
-  data?: { developerLicense?: { owner?: string; tokenId?: number } | null } | null;
-  errors?: { message?: string; extensions?: { code?: string } }[];
-};
+Put this above `getLicense`:
 
+```ts
 /** One developerLicense query. Null when Identity says the license doesn't exist. */
 const queryLicense = async (
   query: string,
   variables: Record<string, unknown>,
 ): Promise<License | null> => {
-  let body: IdentityAnswer;
+  let body: {
+    data?: { developerLicense?: { owner?: string; tokenId?: number } | null } | null;
+    errors?: { message?: string; extensions?: { code?: string } }[];
+  };
   try {
     const res = await fetch(identityUrl(), {
       method: 'POST',
@@ -8330,21 +8575,23 @@ const queryLicense = async (
     throw new IdentityUnavailableError(String(error));
   }
 
-  // Identity answers a license that doesn't exist with HTTP 200, null data and a
-  // NOT_FOUND error. Any other GraphQL error means it couldn't answer, which must
-  // never read as "no such license".
+  // Identity answers an unknown license with HTTP 200 and a NOT_FOUND error. Any
+  // other GraphQL error means Identity couldn't answer, which must not read as
+  // "this caller doesn't own the license".
   const errors = body.errors ?? [];
-  if (errors.some((error) => error.extensions?.code !== 'NOT_FOUND')) {
-    throw new IdentityUnavailableError(
-      `Identity answered with errors: ${JSON.stringify(errors)}`,
-    );
+  if (errors.some((e) => e.extensions?.code !== 'NOT_FOUND')) {
+    throw new IdentityUnavailableError(errors.map((e) => e.message).join('; '));
   }
 
   const found = body.data?.developerLicense;
   if (!found?.owner || found.tokenId === undefined) return null;
   return { owner: found.owner, tokenId: Number(found.tokenId) };
 };
+```
 
+`getLicense` becomes:
+
+```ts
 export const getLicense = async (clientId: string): Promise<License | null> => {
   if (!ADDRESS.test(clientId)) return null;
   const key = clientId.toLowerCase();
@@ -8355,7 +8602,11 @@ export const getLicense = async (clientId: string): Promise<License | null> => {
   if (license) licenses.set(key, { license, expires: Date.now() + OWNER_TTL_MS });
   return license;
 };
+```
 
+4. Below `getLicense`, add:
+
+```ts
 export const getLicenseByTokenId = async (tokenId: number): Promise<License | null> => {
   if (!Number.isInteger(tokenId) || tokenId <= 0) return null;
   const cached = licensesByToken.get(tokenId);
@@ -8366,23 +8617,22 @@ export const getLicenseByTokenId = async (tokenId: number): Promise<License | nu
     licensesByToken.set(tokenId, { license, expires: Date.now() + OWNER_TTL_MS });
   return license;
 };
+```
 
-export const getLicenseOwner = async (clientId: string): Promise<string | null> =>
-  (await getLicense(clientId))?.owner ?? null;
+5. At the end of the file, add:
 
-// Whether the wallet owns the license with this client ID on-chain.
-export const isLicenseOwner = async (address: string | undefined, clientId: string) => {
-  if (!address) return false;
-  const owner = await getLicenseOwner(clientId);
-  return !!owner && owner.toLowerCase() === address.toLowerCase();
-};
-
+```ts
 /** Forget every cached license. Tests call this between cases. */
 export const clearIdentityCache = () => {
   licenses.clear();
   licensesByToken.clear();
 };
 ```
+
+`getLicenseOwner` and `isLicenseOwner` don't change.
+
+Run: `grep -c "extensions?.code !== 'NOT_FOUND'" src/services/identity.service.ts`
+Expected: `1`. The rule exists once, and both lookups go through it.
 
 - [ ] **Step 4: Map Identity outages in `src/utils/apiError.ts`**
 
@@ -8433,7 +8683,7 @@ beforeEach(async () => {
 - [ ] **Step 6: Run the tests**
 
 Run: `npm test -- test/services/identity.test.ts test/api/regressions-80.test.ts test/api/team-owned-resources.test.ts test/api/team-scoped-routes.test.ts`
-Expected: all pass. That's 8 identity tests, plus #80's configuration and workspace tests and Tasks 5 and 6, unchanged.
+Expected: all pass. That's 8 identity tests, plus #80's configuration and workspace tests (the GraphQL-error one included) and Tasks 5 and 6.
 
 - [ ] **Step 7: Typecheck and commit**
 
@@ -8443,7 +8693,7 @@ Expected: exit 0.
 ```bash
 npx prettier --write src/services/identity.service.ts src/utils/apiError.ts test
 git add src/services/identity.service.ts src/utils/apiError.ts test
-git commit -m "feat(teams): look licenses up by token id, and treat Identity GraphQL errors as outages"
+git commit -m "feat(teams): look licenses up by token id through the Identity request #80 already checks"
 ```
 
 ---
@@ -9678,7 +9928,7 @@ Part 2 of console teams. Spec: `docs/superpowers/specs/2026-10-01-console-teams-
 - **License access:** `GET /api/my/license-access?clientId=` answers `OWNER`, `MEMBER` or `NONE`, with `memberOfTeam` and the caller's email.
 - **Console-only routes** (team, invite, signer, registry, license access) require `aud` to include `developer-platform`.
 - **`/api/me`:** a legacy collaborator with no team of their own gets their oldest team, still reported as `COLLABORATOR` until part 3 ships. An unknown wallet gets `401 UNAUTHORIZED`.
-- **Identity:** a GraphQL error that isn't `NOT_FOUND` is a 502, never "no such license".
+- **Identity:** a lookup by token ID, through the same request as #80's `getLicense`, so a GraphQL error that isn't `NOT_FOUND` is a 502 there too.
 - **Migration:** `init-db_12.sql` and `init-db_12.down.sql`.
   - It demotes non-creator `OWNER` rows, turns collaborators into members and folds duplicates (keeping the creator's row).
   - It adds the invite columns and the `team_invite_sends` log, the user signer (unique, case-insensitive) and the registry tables, all timestamps `TIMESTAMPTZ`.
@@ -9686,19 +9936,18 @@ Part 2 of console teams. Spec: `docs/superpowers/specs/2026-10-01-console-teams-
 - **Tests and CI:** vitest against a disposable Postgres, with a local JWKS, a fake Identity and GitHub Actions. Also #80 regressions.
 
 ## Fixed along the way
-- `transformObject` kept only the last list filter, which could drop the company condition.
 - Redirect URIs and signers could be attached to another company's app, and deleting one matched it against `app_id`.
 - `PUT /api/my/apps/:id` passed the body through, `company_id` included.
 - Legacy `invitation_code` acceptance now always makes a member.
 - `POST /api/my/support/email` answers 401 for an unknown user.
 
 ## Builds on #80
-- The scoped user routes.
+- The scoped user routes, and sign-up's any-case wallet check.
 - Configurations limited to the license owner; members of the owning team can now read them.
-- Collaborator removal scoped to the team, with #80's messages kept.
-- The empty-company guards.
-- `identity.service.ts`, now with token ID and client ID lookups.
-- The legacy invite rules and the workspace license check, now checked against the team owner.
+- Collaborator removal scoped to the team, with #80's messages kept. Removed rows still grant nothing.
+- The empty-company and empty-team guards, and `transformObject` keeping every filter key (now tested).
+- `identity.service.ts`, with #80's `NOT_FOUND` rule, now shared with a token ID lookup.
+- The legacy invite rules and the workspace license check, now checked against the team owner. C7's invite limits are counted and recorded under advisory locks, as #80's limit is.
 
 ## Compatibility
 - Today's console keeps working: the header is optional, and the retired team routes are thin adapters scoped to the caller's team. They're deleted by this plan's final task, after part 3 ships.
@@ -9805,10 +10054,10 @@ In `test/api/invitations.test.ts`, delete the test `'with legacyLink, emails the
 
 In `test/api/regressions-80.test.ts`:
 
-- Delete the whole `describe('PR #80 regressions: legacy invites', …)` block. Its rules live on in Task 8's tests: owner-only invites, C7's limits, the escaped names and email-bound acceptance.
-- Keep the `describe('PR #80 regressions: workspaces', …)` block as it is.
-- Delete the `describe("PR #80 regressions: collaborator removal stays inside the owner's team", …)` block.
-- Delete the imports these leave unused: `legacyInvite`, `deleteCollaborator`, `Mailer`, `TeamInviteSend` (added by Task 9), and `vi` from the `vitest` import. `getMe`, `sql`, `createOwner` and `createUser` stay; the tests below use them.
+- Delete the whole `describe('PR #80 regressions: legacy invites', …)` block. Its rules live on in Task 8's tests: owner-only invites, C7's limits and their locks, the escaped names and email-bound acceptance.
+- Keep the `describe('PR #80 regressions: workspaces', …)` block as it is, and the main `describe('PR #80 regressions', …)` block, including the any-case wallet and removed-collaborator `/api/me` tests.
+- Delete the `describe("PR #80 regressions: collaborator lists and removal stay inside the owner's team", …)` block. Task 7's member list and removal tests cover the team API that replaces those routes.
+- Delete the imports these leave unused: `legacyInvite`, `deleteCollaborator`, `listCollaborators`, `Mailer`, `TeamInviteSend` (added by Task 9), and `vi` from the `vitest` import. `getMe`, `sql`, `createOwner`, `createUser`, `insertLegacyUser` and `userByEmail` stay; the remaining tests use them.
 - Add:
 
 ```ts
@@ -9883,7 +10132,7 @@ In `src/services/invitation.service.ts`:
 
 - delete the `legacyLink` doc comment above `createInvitation` and its third parameter, so the signature is `createInvitation(ctx: TeamContext, rawEmail: unknown)`;
 - replace `const { token, fields: tokenFields } = freshInvite();` and the `const fields = legacyLink ? …` line after it with `const { token, fields } = freshInvite();`;
-- replace the `const link = legacyLink ? … : inviteLink(token);` statement and the `sendInvite` call after it with `await sendInvite(ctx, row.id!, email, inviteLink(token));`.
+- replace the `const link = legacyLink ? … : inviteLink(token);` statement and the `mailInvite` call after it with `await mailInvite(ctx, email, inviteLink(token));`.
 
 Run: `grep -rn "legacyLink\|sign-in?code" src test`
 Expected: no output.
@@ -9921,20 +10170,20 @@ Expected: `gh` prints the PR URL.
 | Data model: membership role/status (`LEFT`), invite token hash, expiry, invited_by; uniqueness; users signer (unique `lower()`); `license_signers`; `license_signer_holders`; `team_invite_sends`; TIMESTAMPTZ                                                                 | 3                    |
 | Owner is `teams.created_by` only: migration demotes others; context, summaries and members derive it; acceptance and refreshes set `MEMBER`                                                                                                                                    | 3, 4, 7, 8, 9        |
 | Team context on every `/api/my/*` route; header optional; never an empty company                                                                                                                                                                                               | 4, 5, 6, 9           |
-| `transformObject` keeps every filter key                                                                                                                                                                                                                                       | 5                    |
+| `transformObject` keeps every filter key (#80, pinned)                                                                                                                                                                                                                         | 2, 5                 |
 | Owner-only writes on the listed paths; support email open (401 for unknown users)                                                                                                                                                                                              | 5, 6                 |
 | Secrets owner-only (connection keys, signer API keys)                                                                                                                                                                                                                          | 5                    |
 | Audience rule (`aud` includes `developer-platform`) on team, invite, signer, registry and license-access routes                                                                                                                                                                | 4, 7, 8, 10, 12, 13  |
 | Teams list, members list with `memberKeys` and C7 ordering (owner listed even without a row), removal (`REVOKED`), leaving (`LEFT`)                                                                                                                                            | 7                    |
-| Invitations, resend, cancel, preview, accept; limits and `429`; escaping; concurrent duplicates                                                                                                                                                                                | 8                    |
+| Invitations, resend, cancel, preview, accept; limits and `429`, counted and recorded under per-team and per-sender advisory locks; escaping; concurrent duplicates                                                                                                             | 8                    |
 | `PUT /api/me/signer` (C6) with `SIGNER_IN_USE` and `SIGNER_LOCKED`                                                                                                                                                                                                             | 10                   |
-| Identity lookups; GraphQL errors other than `NOT_FOUND` are 502; `tokenId` is `Int`                                                                                                                                                                                            | 11                   |
+| Identity lookups; GraphQL errors other than `NOT_FOUND` are 502 (#80's rule, shared, not re-implemented); `tokenId` is `Int`                                                                                                                                                   | 2, 11                |
 | Registry `GET`/`PUT`/`disabled` with ownership check, holder validation, `SIGNER_MISMATCH`, `KIND_CONFLICT` both ways, `SIGNER_IN_USE` for a new shared key at a verified wallet                                                                                               | 12                   |
 | `GET /api/my/license-access` with `memberOfTeam`, `MEMBER` only through a matching enabled key                                                                                                                                                                                 | 13                   |
 | `GET /api/me`: personal team, legacy-collaborator fallback, `401 UNAUTHORIZED`, ignores `X-Team-Id`                                                                                                                                                                            | 4                    |
 | Retired routes kept working until part 3, then deleted; until then `/api/me` reports `COLLABORATOR` and the old invite emails `sign-in?code=` (C7, "Until part 3 ships")                                                                                                       | 4, 8, 9, 15          |
 | Existing issues: redirect-uri/signer POST app check, deletes by row ID, `PUT /api/my/apps/:id` whitelist, legacy list trimmed fields                                                                                                                                           | 5, 9                 |
-| #80 behaviors pinned with its exact messages (scoped user routes, takeover, configurations, collaborator removal, legacy invite owner check, limit, role and escaping, `invitation_code` email check, workspace license and token check) and preserved or deliberately updated | 2, 3, 5, 6, 8, 9, 11 |
+| #80 behaviors pinned with its exact messages (scoped user routes, takeover, any-case wallet, configurations, collaborator removal and lists, soft-deleted rows, legacy invite owner check, limit under a lock, role and escaping, `invitation_code` email check, workspace license and token check, Identity `NOT_FOUND` rule) and preserved or deliberately updated | 2, 3, 5, 6, 8, 9, 11 |
 | Schema drift (`configurations.client_id`) handled in harness and migration                                                                                                                                                                                                     | 1, 3                 |
 | Test harness: disposable Postgres, local JWKS with `aud`, fake Identity that passes the JWKS through, `TZ=UTC`, es2017 target; CI                                                                                                                                              | 1                    |
 | Migration operations: down script, schema diff, manual runs, rollback safety, preview deploy timing                                                                                                                                                                            | 3, 14                |
@@ -9942,7 +10191,7 @@ Expected: `gh` prints the PR URL.
 **Placeholder scan:**
 
 - Every code step carries complete code. There's no "TBD", no "similar to Task N", and no partial code block.
-- Every #80 behavior the plan touches is quoted from commit `b41eb28`: the workspace POST (Task 5), the template's escaping (Task 8), the legacy invite and acceptance (Tasks 2, 3 and 9), and the Identity service (Task 11). No step depends on code that hasn't been read.
+- Every #80 behavior the plan touches is quoted from commit `04250f2`: the workspace POST (Task 5), the list filters (Tasks 2 and 5), the template's escaping (Task 8), the legacy invite with its advisory lock, removal and acceptance (Tasks 2, 3 and 9), soft-deleted rows (Task 2), sign-up's any-case wallet check (Task 2), and the Identity service with its `NOT_FOUND` rule (Task 11). No step depends on code that hasn't been read, and none re-implements what #80 has.
 
 **Type consistency:**
 
@@ -9961,7 +10210,7 @@ Expected: `gh` prints the PR URL.
    - Task 4: "uses the team the caller created", "never trusts an OWNER membership row", "shows the caller's own company even when they joined another team first";
    - Task 3: the demotion migration test;
    - Task 7: "marks a team OWNER only for its creator".
-2. **Email case and spaces; concurrent duplicates:** Task 8, "refuses bad emails…", "answers ALREADY_INVITED, not 500, when a concurrent invite wins the race" (it reaches the unique-index branch) and "makes the invitee a member".
+2. **Email case and spaces; concurrent duplicates and limits:** Task 8, "refuses bad emails…", "answers ALREADY_INVITED, not 500, when a concurrent invite wins the race" (it reaches the unique-index branch), "keeps the team limit when invites race", "keeps the sender's daily limit when invites to two of their teams race" and "makes the invitee a member". Task 2 pins #80's own lock with "keeps the limit when invitations race".
 3. **Re-invite after removal or leaving:** Task 8, "lets someone who was removed, or who left, be invited and accept again".
 4. **Token reuse:** Task 8, "refuses a different account, an expired link, garbage and a second use".
 5. **Mixed-case addresses:**
