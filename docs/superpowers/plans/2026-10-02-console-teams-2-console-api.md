@@ -13,7 +13,7 @@
 **Architecture:**
 
 - `resolveTeamContext(request)` turns the token's user plus an optional `X-Team-Id` header into `{ user, team, company, role, owner, ownerAddress }`. Every `/api/my/*` route starts from it, and `requireOwner(ctx)` guards writes.
-- New services sit beside the existing controllers: team members, invitations, signer proof, the Identity client, the key registry and license access. Each throws an `ApiError(status, code, message)` that routes turn into `{ message, code }`.
+- New services sit beside the existing controllers: team members, invitations, signer proof, the key registry and license access. #80's `identity.service.ts` gains license lookups. Each throws an `ApiError(status, code, message)` that routes turn into `{ message, code }`.
 - The retired team routes stay as thin adapters over the new services until the console (part 3) stops calling them.
 
 **Tech Stack:**
@@ -35,7 +35,8 @@
 - Addresses are stored lowercase (`users.signer_address`, `license_signers.signer_address`) and returned checksummed with viem `getAddress`.
 - Invite tokens are `randomBytes(32).toString('base64url')`. Only `sha256(token)` as hex is stored. The link is `${config.frontendUrl}sign-in?invite=${token}`. Invites expire after 7 days.
 - The signer proof message is contract C6, verbatim. It may be at most 10 minutes old and at most 1 minute in the future.
-- Identity answers are cached in memory for 60 seconds, per token ID and per lowercase client ID.
+- All Identity access goes through #80's `src/services/identity.service.ts` (`IDENTITY_API_URL` overrides `config.identityApiUrl`); there is no second client. A known license is cached for 60 seconds per token ID and per lowercase client ID; unknown licenses and failures aren't cached. Tests reach Identity only through `fakeIdentity`.
+- Configurations stay authorized by #80's rule: the on-chain owner of the configuration's license, which under teams means the active team owner's wallet. There's no `owner_id` check.
 - `viem` is pinned to `2.41.2`, the console's installed version. `vitest` is `^3.2.4`.
 - Public routes stay untouched: `/api/configurations`, `/api/brand`, `/api/auth/exist`, `/api/crypto`.
 - `POST /api/my/support/email` stays open to members.
@@ -71,7 +72,7 @@
 | `src/services/teamMembers.service.ts`                               | Team summaries, member list, removal                                                                                           |
 | `src/services/invitation.service.ts`                                | Create, resend, cancel and accept invites                                                                                      |
 | `src/services/signerProof.service.ts`                               | C6 message and verification                                                                                                    |
-| `src/services/identity.service.ts`                                  | Identity GraphQL client with a 60-second cache                                                                                 |
+| `src/services/identity.service.ts`                                  | (from #80) gains `getLicenseByTokenId`, `getLicenseByClientId`, `clearIdentityCache`                                           |
 | `src/services/licenseSigner.service.ts`                             | Key registry                                                                                                                   |
 | `src/services/licenseAccess.service.ts`                             | Who may use a license                                                                                                          |
 | `src/app/api/my/**` (modify)                                        | Team context and owner-only writes                                                                                             |
@@ -84,7 +85,7 @@
 **Files:**
 
 - Create: `vitest.config.mts`
-- Create: `test/support/testDatabase.ts`, `test/support/globalSetup.ts`, `test/support/setup.ts`, `test/support/auth.ts`, `test/support/http.ts`, `test/support/db.ts`, `test/support/fixtures.ts`
+- Create: `test/support/testDatabase.ts`, `test/support/globalSetup.ts`, `test/support/setup.ts`, `test/support/auth.ts`, `test/support/http.ts`, `test/support/db.ts`, `test/support/fixtures.ts`, `test/support/identity.ts`
 - Create: `test/api/harness.test.ts`
 - Create: `.github/workflows/ci.yml`
 - Modify: `package.json` (scripts, `viem`, `vitest`)
@@ -99,8 +100,10 @@
   - `runSql(text: string): Promise<void>`;
   - `newWallet()` (a viem `PrivateKeyAccount`);
   - `createUser(overrides?)`;
-  - `createOwner(label?)`, returning `{ user, company, team, membership }`.
-- Mocks applied to every test file: `@/utils/mailer` (`sendMail` resolves) and `@/controllers/lead.controller` (`createTwentyLead` resolves).
+  - `createOwner(label?)`, returning `{ user, company, team, membership }`;
+  - `fakeIdentity(licenses: { tokenId: number; clientId: string; owner: string }[], options?: { status?: number })`, which stubs global `fetch` (the only way `@/services/identity.service` reaches Identity) and returns the mock;
+  - `newClientId()`: a fresh 42-character client ID. #80's owner cache lives for 60 seconds inside one test file, so every test uses its own licenses.
+- Mocks applied to every test file: `@/utils/mailer` (`sendMail` resolves) and `@/controllers/lead.controller` (`createTwentyLead` resolves). Global stubs (`fetch`) are undone after each test.
 
 - [ ] **Step 1: Create the branch and install the tools**
 
@@ -180,6 +183,8 @@ export default defineConfig({
       TWENTY_API_URL: 'http://127.0.0.1:9',
       TWENTY_API_KEY: 'test',
       DEVELOPER_SUPPORT_EMAIL: 'support@x.test',
+      // Identity is always faked (test/support/identity.ts); an unfaked call fails fast.
+      IDENTITY_API_URL: 'http://identity.test/query',
     },
   },
 });
@@ -198,6 +203,23 @@ import { Client } from 'pg';
 import { TEST_DATABASE_URL } from './testDatabase';
 
 const SCRIPTS_DIR = fileURLToPath(new URL('../../src/scripts/db/', import.meta.url));
+
+// init-db_08 creates configurations.client_id as VARCHAR(36), too short for a
+// 42-character client ID. Production was widened by hand; match it here. Widens
+// only a column still shorter than 42, so it never narrows anything.
+export const WIDEN_CONFIGURATION_CLIENT_ID = `
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = current_schema()
+      AND table_name = 'configurations'
+      AND column_name = 'client_id'
+      AND character_maximum_length < 42
+  ) THEN
+    ALTER TABLE configurations ALTER COLUMN client_id TYPE VARCHAR(100);
+  END IF;
+END $$;`;
 
 export const migrationFiles = () =>
   readdirSync(SCRIPTS_DIR)
@@ -223,6 +245,7 @@ export default async function setup() {
   for (const file of migrationFiles()) {
     await db.query(readFileSync(path.join(SCRIPTS_DIR, file), 'utf8'));
   }
+  await db.query(WIDEN_CONFIGURATION_CLIENT_ID);
   await db.end();
 }
 ```
@@ -409,6 +432,58 @@ export const createOwner = async (label = 'Acme') => {
 };
 ```
 
+`test/support/identity.ts`:
+
+```ts
+import { vi } from 'vitest';
+
+import { newWallet } from './fixtures';
+
+export interface FakeLicense {
+  tokenId: number;
+  clientId: string;
+  owner: string;
+}
+
+/**
+ * Stands in for the Identity API. Every fetch the app makes is answered as the
+ * developerLicense query, looked up by `variables.clientId` (case-insensitive)
+ * or `variables.tokenId`. `status` other than 200 simulates an outage.
+ */
+export const fakeIdentity = (
+  licenses: FakeLicense[],
+  options: { status?: number } = {},
+) => {
+  const fetchMock = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+    if (options.status && options.status !== 200) {
+      return new Response(JSON.stringify({ message: 'unavailable' }), {
+        status: options.status,
+      });
+    }
+    const { variables } = JSON.parse(String(init?.body ?? '{}')) as {
+      variables?: { clientId?: string; tokenId?: number };
+    };
+    const license = licenses.find((candidate) =>
+      variables?.clientId !== undefined
+        ? candidate.clientId.toLowerCase() === variables.clientId.toLowerCase()
+        : candidate.tokenId === variables?.tokenId,
+    );
+    const body = license
+      ? { data: { developerLicense: license } }
+      : { data: null, errors: [{ message: 'no developer license' }] };
+    return new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+};
+
+/** A client ID no earlier test has used, so Identity's owner cache can't carry over. */
+export const newClientId = () => newWallet().address;
+```
+
 - [ ] **Step 8: Write the per-file setup (mocks, auth server, truncation)**
 
 `test/support/setup.ts`:
@@ -447,8 +522,9 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
-  // Undo vi.spyOn stubs (Identity in later tasks).
+  // Undo vi.spyOn stubs and stubbed globals (fetch, for Identity).
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 afterAll(async () => {
@@ -465,8 +541,10 @@ afterAll(async () => {
 import { describe, expect, it } from 'vitest';
 
 import { GET as getMe } from '@/app/api/me/route';
+import { Configuration } from '@/models/configuration.model';
 import { createOwner } from '../support/fixtures';
 import { read, request } from '../support/http';
+import { newClientId } from '../support/identity';
 
 describe('test harness', () => {
   it('verifies a token minted for a user wallet and reads their team from the database', async () => {
@@ -486,13 +564,29 @@ describe('test harness', () => {
 
     expect(response).toEqual({ status: 200, body: {} });
   });
+
+  it('stores a configuration under a 42-character client ID, as production does', async () => {
+    const { user } = await createOwner('Wide');
+    const clientId = newClientId();
+
+    const configuration = await Configuration.create({
+      owner_id: user.id!,
+      client_id: clientId,
+      configuration_name: 'Main',
+      configuration: {},
+    });
+
+    await configuration.reload();
+    expect(configuration.client_id).toBe(clientId);
+    expect(clientId).toHaveLength(42);
+  });
 });
 ```
 
 - [ ] **Step 10: Run the smoke test**
 
 Run: `npm test -- test/api/harness.test.ts`
-Expected: `2 passed`. If it fails with `ECONNREFUSED 127.0.0.1:55432`, Postgres from step 2 isn't running.
+Expected: `3 passed`. Without the `WIDEN_CONFIGURATION_CLIENT_ID` step, the third test fails with `value too long for type character varying(36)`. If it fails with `ECONNREFUSED 127.0.0.1:55432`, Postgres from step 2 isn't running.
 
 - [ ] **Step 11: Add CI**
 
@@ -552,7 +646,11 @@ git commit -m "test: add a vitest harness with a disposable Postgres, local JWKS
 
 ### Task 2: Pin the #80 security fixes with regression tests
 
-PR #80 had no tests. Its fixes are verified by hand and already in `master`, so these tests pass on the first run. They exist so later tasks can't reopen the holes.
+PR #80 had no tests. Its fixes are verified by hand and already in `master`, so these tests pass on the first run. They exist so later tasks can't reopen the holes. They cover all three parts of #80:
+
+- scoped user routes and the `/api/me/complete` takeover;
+- configurations limited to the license owner (via `@/services/identity.service`);
+- collaborator removal limited to the caller's own team.
 
 **Files:**
 
@@ -560,7 +658,8 @@ PR #80 had no tests. Its fixes are verified by hand and already in `master`, so 
 
 **Interfaces:**
 
-- Consumes (Task 1): `request`, `read`, `sql`, `createUser`, `createOwner`, `newWallet`.
+- Consumes (Task 1): `request`, `read`, `sql`, `createUser`, `createOwner`, `newWallet`, `fakeIdentity`, `newClientId`.
+- Consumes (#80): `getLicenseOwner` and `isLicenseOwner` in `src/services/identity.service.ts`; `removeMyCollaboratorById` in `src/controllers/teamCollaborator.controller.ts`.
 
 - [ ] **Step 1: Write the tests**
 
@@ -570,12 +669,24 @@ PR #80 had no tests. Its fixes are verified by hand and already in `master`, so 
 import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
+import { GET as getPublicConfiguration } from '@/app/api/configurations/[id]/route';
 import { GET as getMe, PUT as updateMe } from '@/app/api/me/route';
 import { PUT as completeMe } from '@/app/api/me/complete/route';
+import {
+  DELETE as deleteConfiguration,
+  GET as getConfiguration,
+  PUT as putConfiguration,
+} from '@/app/api/my/configurations/[id]/route';
+import {
+  GET as listConfigurations,
+  POST as createConfiguration,
+} from '@/app/api/my/configurations/route';
+import { DELETE as deleteCollaborator } from '@/app/api/my/team/collaborator/[id]/route';
 import { POST as createUserRoute } from '@/app/api/user/route';
 import { sql } from '../support/db';
-import { createUser, newWallet } from '../support/fixtures';
+import { createOwner, createUser, newWallet } from '../support/fixtures';
 import { read, request } from '../support/http';
+import { fakeIdentity, newClientId } from '../support/identity';
 
 type UserRow = {
   id: string;
@@ -814,12 +925,194 @@ describe('PR #80 regressions', () => {
     }
   });
 });
+
+describe('PR #80 regressions: configurations belong to the license owner', () => {
+  const setup = async () => {
+    const owner = await createUser();
+    const other = await createUser();
+    const clientId = newClientId();
+    fakeIdentity([{ tokenId: 1, clientId, owner: owner.address! }]);
+    return { owner, other, clientId };
+  };
+
+  const create = async (as: string, clientId: string) =>
+    read(
+      await createConfiguration(
+        await request('POST', '/api/my/configurations', {
+          as,
+          body: {
+            client_id: clientId,
+            configuration_name: 'Main',
+            configuration: { a: 1 },
+          },
+        }),
+      ),
+    );
+
+  it('lets the owner create, list, read, update and delete', async () => {
+    const { owner, clientId } = await setup();
+    const as = owner.address!;
+
+    const created = await create(as, clientId);
+    expect(created.status).toBe(201);
+    const params = { params: { id: created.body.id } };
+
+    const listed = await read(
+      await listConfigurations(
+        await request('GET', `/api/my/configurations?clientId=${clientId}`, { as }),
+      ),
+    );
+    expect(listed.body.map((row: { id: string }) => row.id)).toEqual([created.body.id]);
+    expect(
+      (await getConfiguration(await request('GET', '/x', { as }), params)).status,
+    ).toBe(200);
+    expect(
+      (
+        await putConfiguration(
+          await request('PUT', '/x', {
+            as,
+            body: { configuration_name: 'Renamed', configuration: { a: 2 } },
+          }),
+          params,
+        )
+      ).status,
+    ).toBe(204);
+    expect(
+      (await deleteConfiguration(await request('DELETE', '/x', { as }), params)).status,
+    ).toBe(204);
+  });
+
+  it("answers 404 to another user's read, update, delete and list, and 403 to their create", async () => {
+    const { owner, other, clientId } = await setup();
+    const created = await create(owner.address!, clientId);
+    const params = { params: { id: created.body.id } };
+    const as = other.address!;
+
+    expect(
+      (await getConfiguration(await request('GET', '/x', { as }), params)).status,
+    ).toBe(404);
+    expect(
+      (
+        await putConfiguration(
+          await request('PUT', '/x', {
+            as,
+            body: { configuration_name: 'Hijacked', configuration: {} },
+          }),
+          params,
+        )
+      ).status,
+    ).toBe(404);
+    expect(
+      (await deleteConfiguration(await request('DELETE', '/x', { as }), params)).status,
+    ).toBe(404);
+    expect(
+      (
+        await listConfigurations(
+          await request('GET', `/api/my/configurations?clientId=${clientId}`, { as }),
+        )
+      ).status,
+    ).toBe(404);
+    expect(await create(as, clientId)).toEqual({
+      status: 403,
+      body: { error: 'You do not own this license' },
+    });
+
+    const [row] = await sql<{ configuration_name: string }>(
+      'SELECT configuration_name FROM configurations WHERE id = :id',
+      { id: created.body.id },
+    );
+    expect(row.configuration_name).toBe('Main');
+  });
+
+  it('keeps the public GET /api/configurations/:id open without a token', async () => {
+    const { owner, clientId } = await setup();
+    const created = await create(owner.address!, clientId);
+
+    const response = await getPublicConfiguration(
+      await request('GET', `/api/configurations/${created.body.id}`),
+      { params: { id: created.body.id } },
+    );
+
+    expect(response.status).toBe(200);
+  });
+
+  it('answers 502 when Identity fails', async () => {
+    const owner = await createUser();
+    fakeIdentity([], { status: 500 });
+
+    expect(await create(owner.address!, newClientId())).toEqual({
+      status: 502,
+      body: { error: 'Could not verify license ownership' },
+    });
+  });
+});
+
+describe("PR #80 regressions: collaborator removal stays inside the owner's team", () => {
+  // Raw rows, as the old collaborator flow wrote them.
+  const addCollaborator = async (
+    teamId: string,
+    userId: string,
+    role = 'COLLABORATOR',
+  ) => {
+    const [row] = await sql<{ id: string }>(
+      `INSERT INTO team_collaborators (id, team_id, user_id, role, status, created_at, updated_at, deleted)
+       VALUES (gen_random_uuid()::text, :teamId, :userId, :role, 'ACCEPTED', now(), now(), false)
+       RETURNING id`,
+      { teamId, userId, role },
+    );
+    return row.id;
+  };
+  const remove = async (as: string, id: string) =>
+    read(
+      await deleteCollaborator(await request('DELETE', '/x', { as }), { params: { id } }),
+    );
+  const isDeleted = async (id: string) =>
+    (
+      await sql<{ deleted: boolean }>(
+        'SELECT deleted FROM team_collaborators WHERE id = :id',
+        { id },
+      )
+    )[0].deleted;
+
+  it('refuses a row of another team and keeps it', async () => {
+    const acme = await createOwner('Acme');
+    const other = await createOwner('Other');
+    const victim = await addCollaborator(other.team.id!, (await createUser()).id!);
+
+    expect(await remove(acme.user.address!, victim)).toEqual({
+      status: 400,
+      body: { message: 'Collaborator not found' },
+    });
+    expect(await isDeleted(victim)).toBe(false);
+  });
+
+  it('refuses the only owner removing themselves', async () => {
+    const acme = await createOwner('Acme');
+
+    expect(await remove(acme.user.address!, acme.membership.id!)).toEqual({
+      status: 400,
+      body: { message: 'Cannot remove the only administrator from the group.' },
+    });
+    expect(await isDeleted(acme.membership.id!)).toBe(false);
+  });
+
+  it("removes a collaborator of the owner's own team", async () => {
+    const acme = await createOwner('Acme');
+    const collaborator = await addCollaborator(acme.team.id!, (await createUser()).id!);
+
+    expect(await remove(acme.user.address!, collaborator)).toEqual({
+      status: 200,
+      body: { message: 'The collaborator has been removed' },
+    });
+    expect(await isDeleted(collaborator)).toBe(true);
+  });
+});
 ```
 
 - [ ] **Step 2: Run them**
 
 Run: `npm test -- test/api/regressions-80.test.ts`
-Expected: `12 passed`.
+Expected: `19 passed`.
 
 - [ ] **Step 3: Commit**
 
@@ -842,7 +1135,13 @@ ln -s "$PWD/node_modules" /tmp/console-api-pre80/node_modules
 git worktree remove --force /tmp/console-api-pre80
 ```
 
-Expected: in the pre-#80 worktree, at least these FAIL: the forged-role, PUT /api/me, takeover and deleted-routes tests. The worktree is then removed, and the branch is untouched.
+Expected: in the pre-#80 worktree, at least these FAIL:
+
+- the forged-role, PUT /api/me, takeover and deleted-routes tests;
+- the other user's configuration read, update, delete, list and create;
+- the cross-team collaborator removal.
+
+The worktree is then removed, and the branch is untouched.
 
 ---
 
@@ -942,6 +1241,24 @@ describe('init-db_12.sql', () => {
     ]);
   });
 
+  it('widens configurations.client_id only while it is shorter than 42', async () => {
+    const clientIdLength = async () =>
+      (
+        await sql<{ length: number }>(
+          `SELECT character_maximum_length AS length FROM information_schema.columns
+           WHERE table_name = 'configurations' AND column_name = 'client_id'`,
+        )
+      )[0].length;
+
+    await runSql('ALTER TABLE configurations ALTER COLUMN client_id TYPE VARCHAR(36)');
+    await runSql(MIGRATION);
+    expect(await clientIdLength()).toBe(100);
+
+    await runSql('ALTER TABLE configurations ALTER COLUMN client_id TYPE VARCHAR(255)');
+    await runSql(MIGRATION);
+    expect(await clientIdLength()).toBe(255);
+  });
+
   it('stores signer addresses in lower case and each holder as a member or a name', async () => {
     const { team, user } = await createOwner();
     await expect(
@@ -1031,6 +1348,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_team_collaborators_invite_token
 ALTER TABLE users ADD COLUMN IF NOT EXISTS signer_address VARCHAR(42);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS signer_verified_at TIMESTAMP;
 
+-- init-db_08 created configurations.client_id as VARCHAR(36), too short for a
+-- 42-character client ID; production was widened by hand. Widen only a column
+-- that is still shorter than 42, so production's actual type is never narrowed.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = current_schema()
+      AND table_name = 'configurations'
+      AND column_name = 'client_id'
+      AND character_maximum_length < 42
+  ) THEN
+    ALTER TABLE configurations ALTER COLUMN client_id TYPE VARCHAR(100);
+  END IF;
+END $$;
+
 -- Who each license key is for. The chain decides whether a key works; this records
 -- who it belongs to. Addresses only, never private keys.
 CREATE TABLE IF NOT EXISTS license_signers (
@@ -1074,7 +1407,7 @@ CREATE INDEX IF NOT EXISTS idx_license_signer_holders_signer
 - [ ] **Step 4: Run the migration test**
 
 Run: `npm test -- test/db/migration-12.test.ts`
-Expected: `3 passed`. The global setup applies `init-db_12.sql` with the others, because it picks up every `init-db_*.sql`.
+Expected: `4 passed`. The global setup applies `init-db_12.sql` with the others, because it picks up every `init-db_*.sql`.
 
 - [ ] **Step 5: Write the failing model test**
 
@@ -2768,7 +3101,13 @@ git commit -m "feat(teams): scope apps, connections, redirect URIs, signers and 
 
 ### Task 6: Team context in branding, configurations and simulated vehicles
 
-Branding was guarded by "the caller's wallet owns the workspace". Configurations and simulated vehicles were keyed to the caller's user ID. Under teams, all three are keyed to the **team owner**. This also closes an existing hole: `PUT` and `DELETE /api/my/configurations/[id]` checked no ownership at all, so any signed-in user could edit or delete any configuration by ID.
+Branding was guarded by "the caller's wallet owns the workspace". Configurations are limited by #80 to "the caller's wallet owns the license on-chain". Simulated vehicles were keyed to the caller's user ID. Under teams, all three move to the **team owner**:
+
+- branding and configurations check the team owner's wallet;
+- simulated vehicles use the team owner's user ID;
+- members read, and only the owner writes.
+
+Configurations keep #80's rule, license ownership through `isLicenseOwner`, with the team owner's wallet in place of the caller's. There's no `owner_id` check.
 
 **Files:**
 
@@ -2779,14 +3118,20 @@ Branding was guarded by "the caller's wallet owns the workspace". Configurations
   - `src/app/api/my/workspace/[id]/brands/route.ts`
   - `src/app/api/my/workspace/[id]/brands/[brandId]/route.ts`
   - `src/app/api/my/workspace/[id]/brands/[brandId]/default/route.ts`
-- Modify: `src/services/configuration.service.ts` (`getConfigurationsByClientId` takes `owner_id`)
 - Modify: `src/app/api/my/configurations/route.ts`, `src/app/api/my/configurations/[id]/route.ts`
 - Modify: `src/app/api/my/simulated-vehicles/route.ts`, `src/app/api/my/simulated-vehicles/[vehicleId]/route.ts`
 - Test: `test/api/team-owned-resources.test.ts`
 
 **Interfaces:**
 
+- Consumes (#80): `isLicenseOwner(address, clientId)` and `IdentityUnavailableError` from `@/services/identity.service`. Consumes (Task 1): `fakeIdentity`, `newClientId`.
 - Produces: `assertWorkspaceInTeam(teamCtx: TeamContext, workspaceId: string): Promise<{ workspace: Workspace } | { error: NextResponse }>`, with the same `{ error: 'not_found' | 'forbidden' }` bodies as before.
+- Configuration responses keep #80's bodies:
+  - list for a license the team doesn't own: 404 `{ error: 'Client not found' }`;
+  - create: 403 `{ error: 'You do not own this license' }`;
+  - by ID: 404 `{ error: 'Configuration not found' }`;
+  - Identity failure: 502 `{ error: 'Could not verify license ownership' }`.
+    Team errors (`NOT_A_MEMBER`, `OWNER_ONLY`) come first as `{ message, code }`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -2817,6 +3162,7 @@ import { WorkspaceBrand } from '@/models/workspaceBrand.model';
 import { Workspace } from '@/models/workspace.model';
 import { addMember, createOwner, createUser } from '../support/fixtures';
 import { read, request } from '../support/http';
+import { fakeIdentity, newClientId } from '../support/identity';
 
 const setup = async () => {
   const acme = await createOwner('Acme');
@@ -2882,14 +3228,21 @@ describe('branding under a team', () => {
 });
 
 describe('configurations under a team', () => {
-  it("shows a member the owner's configurations and refuses member writes", async () => {
-    const { acme, member } = await setup();
+  const withLicense = async () => {
+    const team = await setup();
+    const clientId = newClientId();
+    fakeIdentity([{ tokenId: 1, clientId, owner: team.acme.user.address! }]);
+    return { ...team, clientId };
+  };
+
+  it("shows a member the configurations of the team owner's license and refuses member writes", async () => {
+    const { acme, member, clientId } = await withLicense();
     const saved = await read(
       await saveConfiguration(
         await request('POST', '/x', {
           as: acme.user.address!,
           body: {
-            client_id: 'client-1',
+            client_id: clientId,
             configuration_name: 'Main',
             configuration: { a: 1 },
           },
@@ -2897,58 +3250,61 @@ describe('configurations under a team', () => {
       ),
     );
     expect(saved.status).toBe(201);
+    const asMember = { as: member.address!, teamId: acme.team.id! };
 
     const listed = await read(
       await listConfigurations(
-        await request('GET', '/api/my/configurations?clientId=client-1', {
-          as: member.address!,
-          teamId: acme.team.id!,
+        await request('GET', `/api/my/configurations?clientId=${clientId}`, asMember),
+      ),
+    );
+    const one = await getConfiguration(await request('GET', '/x', asMember), {
+      params: { id: saved.body.id },
+    });
+    const memberCreate = await read(
+      await saveConfiguration(
+        await request('POST', '/x', {
+          ...asMember,
+          body: { client_id: clientId, configuration_name: 'Mine', configuration: {} },
         }),
       ),
     );
-    expect(
-      listed.body.map((row: { configuration_name: string }) => row.configuration_name),
-    ).toEqual(['Main']);
-
     const memberWrite = await read(
       await putConfiguration(
         await request('PUT', '/x', {
-          as: member.address!,
-          teamId: acme.team.id!,
+          ...asMember,
           body: { configuration_name: 'Changed', configuration: {} },
         }),
         { params: { id: saved.body.id } },
       ),
     );
+
+    expect(
+      listed.body.map((row: { configuration_name: string }) => row.configuration_name),
+    ).toEqual(['Main']);
+    expect(one.status).toBe(200);
+    expect(memberCreate).toEqual({ status: 403, body: ownerOnly });
     expect(memberWrite).toEqual({ status: 403, body: ownerOnly });
   });
 
-  it("no longer lets another account read or edit a team's configuration by id", async () => {
-    const { acme, outsider } = await setup();
+  it("answers 404 to another team for the license's configurations", async () => {
+    const { acme, outsider, clientId } = await withLicense();
     const configuration = await Configuration.create({
       owner_id: acme.user.id!,
-      client_id: 'client-1',
+      client_id: clientId,
       configuration_name: 'Main',
       configuration: { a: 1 },
     });
-    const params = { params: { id: configuration.id! } };
+    const asOutsider = { as: outsider.user.address! };
 
-    const read404 = await getConfiguration(
-      await request('GET', '/x', { as: outsider.user.address! }),
-      params,
-    );
-    const write404 = await putConfiguration(
-      await request('PUT', '/x', {
-        as: outsider.user.address!,
-        body: { configuration_name: 'Hijacked', configuration: {} },
-      }),
-      params,
+    const one = await getConfiguration(await request('GET', '/x', asOutsider), {
+      params: { id: configuration.id! },
+    });
+    const listed = await listConfigurations(
+      await request('GET', `/api/my/configurations?clientId=${clientId}`, asOutsider),
     );
 
-    expect(read404.status).toBe(404);
-    expect(write404.status).toBe(404);
-    await configuration.reload();
-    expect(configuration.configuration_name).toBe('Main');
+    expect(one.status).toBe(404);
+    expect(listed.status).toBe(404);
   });
 });
 
@@ -3007,7 +3363,11 @@ describe('simulated vehicles under a team', () => {
 - [ ] **Step 2: Run them to confirm they fail**
 
 Run: `npm test -- test/api/team-owned-resources.test.ts`
-Expected: FAIL. Brand reads by a member get 403 `forbidden`. Member writes succeed or fail without `OWNER_ONLY`. The outsider configuration read and write succeed.
+Expected: FAIL.
+
+- Brand reads by a member get 403 `forbidden`.
+- A member's configuration reads get 404, because #80 checks the member's own wallet.
+- Member writes succeed or fail without `OWNER_ONLY`.
 
 - [ ] **Step 3: Replace the workspace guard**
 
@@ -3415,24 +3775,9 @@ export const POST = async (request: NextRequest, ctx: Ctx) => {
 };
 ```
 
-- [ ] **Step 5: Scope configurations to the team owner**
+- [ ] **Step 5: Authorize configurations by the team owner's license**
 
-In `src/services/configuration.service.ts`, replace `getConfigurationsByClientId`:
-
-```ts
-export const getConfigurationsByClientId = ({
-  client_id,
-  owner_id,
-}: {
-  client_id: string;
-  owner_id: string;
-}) => {
-  return Configuration.findAll({
-    where: { client_id, owner_id },
-    attributes: ['id', 'configuration_name', 'configuration'],
-  });
-};
-```
+#80 already limits configurations to the license's on-chain owner. Keep that rule, and ask it about the active team's owner instead of the caller. `src/services/configuration.service.ts` stays as #80 left it.
 
 `src/app/api/my/configurations/route.ts`:
 
@@ -3443,31 +3788,39 @@ import {
   getConfigurationsByClientId,
   saveConfiguration,
 } from '@/services/configuration.service';
+import { IdentityUnavailableError, isLicenseOwner } from '@/services/identity.service';
 import { requireOwner, resolveTeamContext } from '@/services/teamContext.service';
 import { IConfiguration } from '@/types/user';
 import { apiErrorResponse } from '@/utils/apiError';
 
+// Configurations belong to the on-chain owner of their license. Under teams that
+// is the active team's owner: members read, only the owner writes.
 const failed = (error: unknown) => {
+  if (error instanceof IdentityUnavailableError) {
+    return NextResponse.json(
+      { error: 'Could not verify license ownership' },
+      { status: 502 },
+    );
+  }
   const handled = apiErrorResponse(error);
   if (handled) return handled;
   console.error(error);
   return NextResponse.json({ message: 'Error processing receipt' }, { status: 500 });
 };
 
-// A configuration belongs to the team whose owner saved it.
 const GET = async (request: NextRequest) => {
   try {
     const teamCtx = await resolveTeamContext(request);
     const clientId = request.nextUrl.searchParams.get('clientId');
 
-    if (!clientId) {
+    if (
+      !clientId ||
+      !(await isLicenseOwner(teamCtx.ownerAddress ?? undefined, clientId))
+    ) {
       return NextResponse.json({ error: 'Client not found' }, { status: 404 });
     }
 
-    const configurations = await getConfigurationsByClientId({
-      client_id: clientId,
-      owner_id: teamCtx.owner.id!,
-    });
+    const configurations = await getConfigurationsByClientId({ client_id: clientId });
 
     const result = configurations.map((c) => ({
       id: c.id,
@@ -3487,6 +3840,13 @@ const POST = async (request: NextRequest) => {
     requireOwner(teamCtx);
 
     const payload: IConfiguration = await request.json();
+
+    if (
+      !payload.client_id ||
+      !(await isLicenseOwner(teamCtx.ownerAddress ?? undefined, payload.client_id))
+    ) {
+      return NextResponse.json({ error: 'You do not own this license' }, { status: 403 });
+    }
 
     const configuration = await saveConfiguration({
       owner_id: teamCtx.user.id!,
@@ -3514,6 +3874,7 @@ import {
   getConfiguration,
   updateConfiguration,
 } from '@/services/configuration.service';
+import { IdentityUnavailableError, isLicenseOwner } from '@/services/identity.service';
 import {
   requireOwner,
   resolveTeamContext,
@@ -3524,10 +3885,16 @@ import { apiErrorResponse } from '@/utils/apiError';
 
 type Params = { params: { id: string } };
 
-// Only configurations saved by the active team's owner are visible here.
+// A configuration belongs to whoever owns its license on-chain; under teams, the
+// active team's owner. Everyone else gets the same 404 as for a configuration that
+// doesn't exist: configuration IDs are public (they're in Login with DIMO URLs).
 const findTeamConfiguration = async (teamCtx: TeamContext, id: string) => {
   const configuration = await getConfiguration({ configuration_id: id });
-  return configuration && configuration.owner_id === teamCtx.owner.id
+  if (!configuration) return null;
+  return (await isLicenseOwner(
+    teamCtx.ownerAddress ?? undefined,
+    configuration.client_id,
+  ))
     ? configuration
     : null;
 };
@@ -3536,6 +3903,12 @@ const notFound = () =>
   NextResponse.json({ error: 'Configuration not found' }, { status: 404 });
 
 const failed = (error: unknown, message: string) => {
+  if (error instanceof IdentityUnavailableError) {
+    return NextResponse.json(
+      { error: 'Could not verify license ownership' },
+      { status: 502 },
+    );
+  }
   const handled = apiErrorResponse(error);
   if (handled) return handled;
   console.error(error);
@@ -3590,6 +3963,8 @@ const DELETE = async (request: NextRequest, { params }: Params) => {
 
 export { GET, PUT, DELETE };
 ```
+
+Task 2's configuration regressions must still pass unchanged. A caller with no header is their own team's owner, so #80's behavior is preserved exactly.
 
 - [ ] **Step 6: Scope simulated vehicles to the team owner**
 
@@ -3730,7 +4105,7 @@ Expected: grep prints nothing, all tests pass, and typecheck exits 0.
 - [ ] **Step 8: Commit**
 
 ```bash
-npx prettier --write src/controllers/workspace.controller.ts src/app/api/my/workspace src/app/api/my/configurations src/app/api/my/simulated-vehicles src/services/configuration.service.ts test
+npx prettier --write src/controllers/workspace.controller.ts src/app/api/my/workspace src/app/api/my/configurations src/app/api/my/simulated-vehicles test
 git add src test
 git commit -m "feat(teams): key branding, configurations and simulated vehicles to the team owner"
 ```
@@ -4924,10 +5299,10 @@ Today's console calls these until part 3 ships:
 - `GET /api/my/team/collaborator`, `POST /api/my/team/invitation`, `DELETE /api/my/team/collaborator/:id` (`src/services/team.ts` in the console);
 - `GET /api/me?invitation_code=` (`src/services/user.ts`).
 
-They become thin adapters over the new services, which closes two holes along the way:
+They become thin adapters over the new services and the active team.
 
-- `DELETE /api/my/team/collaborator/:id` let any team owner delete a row of **any** team.
-- `invitation_code` acceptance didn't check the invitee's email.
+- **Collaborator removal:** #80 already limited it to the owner's own team and fixed the last-owner count. This task keeps #80's error messages, which the old Settings page shows, and only moves it onto the team context. Removed rows are now marked `REVOKED`, and pending invites are cancelled through the invitation service.
+- **New fix:** `invitation_code` acceptance didn't check the invitee's email.
 
 **Files:**
 
@@ -4938,8 +5313,9 @@ They become thin adapters over the new services, which closes two holes along th
 
 **Interfaces:**
 
-- Consumes (Tasks 4, 7 and 8): `resolveTeamContext`, `requireOwner`, `findMembership`, `removeMember`, `createInvitation`, `cancelInvitation`, `legacyErrorResponse`.
+- Consumes (Tasks 4, 7 and 8): `resolveTeamContext`, `TeamContext`, `findMembership`, `removeMember`, `createInvitation`, `cancelInvitation`, `legacyErrorResponse`. Consumes (#80): `ValidatorError` from `@/utils/error.utils`.
 - Produces:
+  - `removeMyCollaboratorById(ctx: TeamContext, id: string): Promise<void>`. It replaces #80's `(user, id)` version and throws #80's `ValidatorError` messages: `Do not have enough permissions to remove a collaborator`, `Collaborator not found`, `Cannot remove the only administrator from the group.` The route answers each as 400 `{ message }`.
   - `acceptTeamInvitation(user: User, invitationCode: string | null): Promise<void>`: legacy `base64(row id)` codes only, and only for rows with no token hash, not expired, sent to the caller's email.
   - `listLegacyCollaborators(teamId: string | undefined)`: `{ data, totalItems, totalPages }`, with `MEMBER` shown as `COLLABORATOR` so the old Settings page keeps its labels.
 
@@ -5011,7 +5387,7 @@ describe('retired team routes', () => {
     expect(vi.mocked(Mailer.sendMail).mock.calls[0][0].html).toContain('sign-in?invite=');
   });
 
-  it('no longer lets an owner delete a row of another team', async () => {
+  it('keeps refusing a row of another team, as #80 does', async () => {
     const acme = await createOwner('Acme');
     const other = await createOwner('Other');
     const victim = await addMember(other.team.id!, await createUser());
@@ -5025,7 +5401,10 @@ describe('retired team routes', () => {
       ),
     );
 
-    expect(response.status).toBe(404);
+    expect(response).toEqual({
+      status: 400,
+      body: { message: 'Collaborator not found' },
+    });
     await victim.reload();
     expect(victim.deleted).toBe(false);
   });
@@ -5123,7 +5502,7 @@ Expected: FAIL.
 
 - The list includes the revoked row and shows `MEMBER`.
 - The old invite route answers 400, because it refuses registered emails or uses the old link.
-- The cross-team delete succeeds.
+- Removed rows keep `status = 'ACCEPTED'`, because #80 only sets `deleted`.
 - `bob` accepts Pat's invite.
 
 - [ ] **Step 3: Rewrite `src/controllers/teamCollaborator.controller.ts`**
@@ -5140,7 +5519,11 @@ import {
   TeamRoles,
 } from '@/models/teamCollaborator.model';
 import { User } from '@/models/user.model';
+import { cancelInvitation } from '@/services/invitation.service';
 import { findMembership } from '@/services/membership.service';
+import type { TeamContext } from '@/services/teamContext.service';
+import { removeMember } from '@/services/teamMembers.service';
+import { ValidatorError } from '@/utils/error.utils';
 
 const notDeleted = { [Op.not]: true };
 
@@ -5191,6 +5574,32 @@ export const listLegacyCollaborators = async (teamId: string | undefined) => {
   }));
   return { data, totalItems: data.length, totalPages: data.length ? 1 : 0 };
 };
+
+/**
+ * Removes a member, or cancels a pending invite, of the active team. #80 limited
+ * this to the owner's own team; the messages stay #80's because the old Settings
+ * page shows them. A team has one owner, who can't be removed.
+ */
+export const removeMyCollaboratorById = async (ctx: TeamContext, id: string) => {
+  if (ctx.role !== TeamRoles.OWNER || !ctx.team) {
+    throw new ValidatorError('Do not have enough permissions to remove a collaborator');
+  }
+  const row = await TeamCollaborator.findOne({
+    where: {
+      id,
+      team_id: ctx.team.id!,
+      deleted: notDeleted,
+      status: { [Op.in]: [InvitationStatuses.ACCEPTED, InvitationStatuses.PENDING] },
+    },
+  });
+  if (!row) throw new ValidatorError('Collaborator not found');
+  if (row.role === TeamRoles.OWNER) {
+    throw new ValidatorError('Cannot remove the only administrator from the group.');
+  }
+
+  if (row.status === InvitationStatuses.PENDING) await cancelInvitation(ctx, id);
+  else await removeMember(ctx, id);
+};
 ```
 
 - [ ] **Step 4: Rewrite the four routes**
@@ -5236,12 +5645,8 @@ export const GET = async (request: NextRequest) => {
 `src/app/api/my/team/collaborator/[id]/route.ts`:
 
 ```ts
-import { Op } from 'sequelize';
-
-import { InvitationStatuses, TeamCollaborator } from '@/models/teamCollaborator.model';
-import { cancelInvitation } from '@/services/invitation.service';
-import { requireOwner, resolveTeamContext } from '@/services/teamContext.service';
-import { removeMember } from '@/services/teamMembers.service';
+import { removeMyCollaboratorById } from '@/controllers/teamCollaborator.controller';
+import { resolveTeamContext } from '@/services/teamContext.service';
 import { legacyErrorResponse } from '@/utils/apiError';
 
 type Params = { params: { id: string } };
@@ -5250,17 +5655,7 @@ type Params = { params: { id: string } };
 export const DELETE = async (request: NextRequest, { params: { id } }: Params) => {
   try {
     const ctx = await resolveTeamContext(request);
-    requireOwner(ctx);
-    const pending = await TeamCollaborator.findOne({
-      where: {
-        id,
-        team_id: ctx.team?.id ?? '',
-        status: InvitationStatuses.PENDING,
-        deleted: { [Op.not]: true },
-      },
-    });
-    if (pending) await cancelInvitation(ctx, id);
-    else await removeMember(ctx, id);
+    await removeMyCollaboratorById(ctx, id);
 
     return Response.json(
       { message: 'The collaborator has been removed' },
@@ -5300,13 +5695,13 @@ export const POST = async (request: NextRequest) => {
 
 - [ ] **Step 5: Confirm nothing else used the deleted controller functions**
 
-Run: `grep -rnE "getMyTeamCollaborators|removeMyCollaboratorById|invitePersonToMyTeam|findTeamInvitationByEmail|getCollaboratorTeam" src`
-Expected: no output.
+Run: `grep -rnE "getMyTeamCollaborators|invitePersonToMyTeam|findTeamInvitationByEmail|getCollaboratorTeam|deleteTeamCollaboratorById" src`
+Expected: no output. `removeMyCollaboratorById` stays, with its new `(ctx, id)` signature, and is used only by the route above.
 
 - [ ] **Step 6: Run everything, typecheck, commit**
 
 Run: `npm test && npm run typecheck`
-Expected: all pass, typecheck exits 0.
+Expected: all pass, including Task 2's collaborator regressions (still 400 `Collaborator not found` for another team's row). Typecheck exits 0.
 
 ```bash
 npx prettier --write src/controllers/teamCollaborator.controller.ts src/app/api/my/team/route.ts src/app/api/my/team/collaborator src/app/api/my/team/invitation test
@@ -5657,116 +6052,153 @@ git commit -m "feat(teams): verify and store the wallet that signs for each user
 
 ---
 
-### Task 11: Identity client with a 60-second cache
+### Task 11: Extend #80's Identity service: license lookups by token ID and client ID
+
+#80 added `src/services/identity.service.ts`. It provides `getLicenseOwner(clientId)` and `isLicenseOwner(address, clientId)`, caches known owners for 60 seconds, doesn't cache unknown licenses, throws `IdentityUnavailableError` on HTTP or network failure, and reads the URL from `IDENTITY_API_URL ?? config.identityApiUrl`. `identityApiUrl` is already set in `default.ts` (dev) and `production.ts`; preview inherits the default.
+
+This task keeps every one of those, with the same behavior. It adds the lookups the registry and the license-access route need, without a second client.
 
 **Files:**
 
-- Create: `src/services/identity.service.ts`
-- Modify: `src/config/index.ts`, `src/config/default.ts`, `src/config/preview.ts`, `src/config/production.ts`
+- Modify: `src/services/identity.service.ts` (whole file below)
+- Modify: `src/utils/apiError.ts` (`apiErrorResponse` maps `IdentityUnavailableError` to 502 `IDENTITY_UNAVAILABLE`)
+- Modify: `test/support/setup.ts` (clear the license cache before each test)
 - Test: `test/services/identity.test.ts`
 
 **Interfaces:**
 
+- Consumes (Task 1): `fakeIdentity`, `newClientId`.
+- Keeps (#80, unchanged): `getLicenseOwner(clientId: string): Promise<string | null>`, `isLicenseOwner(address: string | undefined, clientId: string): Promise<boolean>`, `class IdentityUnavailableError`.
 - Produces:
   - `interface LicenseInfo { tokenId: number; owner: string; clientId: string }`.
-  - `createIdentityClient({ url, fetchFn?, now? })`, returning `{ getLicenseByTokenId(tokenId: number): Promise<LicenseInfo | null>; getLicenseByClientId(clientId: string): Promise<LicenseInfo | null>; clear(): void }`.
-  - `identityClient`, the app-wide instance on `config.identityApiUrl`. Tests stub it with `vi.spyOn(identityClient, 'getLicenseByTokenId')`.
-  - Both getters answer `null` for an unknown license, and throw 502 `IDENTITY_UNAVAILABLE` on network errors or non-200 answers. Failures aren't cached.
+  - `getLicenseByClientId(clientId: string): Promise<LicenseInfo | null>`: null for a non-address input or an unknown license.
+  - `getLicenseByTokenId(tokenId: number): Promise<LicenseInfo | null>`: null for a non-positive or non-integer ID, or an unknown license.
+  - `clearIdentityCache(): void`, for tests.
+- Caching: a known license is cached for 60 seconds under both its token ID and its lowercase client ID. Unknown licenses and failures aren't cached.
+- `apiErrorResponse` answers `IdentityUnavailableError` with 502 `{ message: 'Identity API is unavailable', code: 'IDENTITY_UNAVAILABLE' }`. The configuration routes check the error themselves first, so they keep #80's `{ error: 'Could not verify license ownership' }`.
 
 - [ ] **Step 1: Write the failing tests**
 
 `test/services/identity.test.ts`:
 
 ```ts
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createIdentityClient } from '@/services/identity.service';
+import {
+  clearIdentityCache,
+  getLicenseByClientId,
+  getLicenseByTokenId,
+  getLicenseOwner,
+  IdentityUnavailableError,
+  isLicenseOwner,
+} from '@/services/identity.service';
+import { apiErrorResponse } from '@/utils/apiError';
+import { fakeIdentity, newClientId } from '../support/identity';
 
-const LICENSE = {
-  tokenId: 7,
-  owner: '0xAbCdEf0000000000000000000000000000000001',
-  clientId: '0xAbCdEf0000000000000000000000000000000002',
-};
+const later = (ms: number) => vi.setSystemTime(new Date(Date.now() + ms));
+const requestBody = (fetchMock: ReturnType<typeof fakeIdentity>, call = 0) =>
+  JSON.parse(String((fetchMock.mock.calls[call][1] as RequestInit).body));
 
-const answer = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
+describe('identity service', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-02T12:00:00Z'));
   });
 
-const setup = (respond: () => Promise<Response>) => {
-  let clock = 1_000_000;
-  const fetchFn = vi.fn(respond);
-  const client = createIdentityClient({
-    url: 'http://identity.test/query',
-    fetchFn: fetchFn as unknown as typeof fetch,
-    now: () => clock,
+  afterEach(() => {
+    vi.useRealTimers();
   });
-  return { client, fetchFn, advance: (ms: number) => (clock += ms) };
-};
 
-describe('identity client', () => {
-  it('looks a license up by token id and caches the answer for 60 seconds', async () => {
-    const { client, fetchFn, advance } = setup(async () =>
-      answer({ data: { developerLicense: LICENSE } }),
+  it('looks a license up by token id and reuses it for 60 seconds, by token or client id', async () => {
+    const license = { tokenId: 7, clientId: newClientId(), owner: newClientId() };
+    const fetchMock = fakeIdentity([license]);
+
+    expect(await getLicenseByTokenId(7)).toEqual(license);
+    later(59_999);
+    expect(await getLicenseByTokenId(7)).toEqual(license);
+    expect(await getLicenseByClientId(license.clientId.toLowerCase())).toEqual(license);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    later(1);
+    await getLicenseByTokenId(7);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    expect(fetchMock.mock.calls[0][0]).toBe('http://identity.test/query');
+    expect(requestBody(fetchMock).query).toContain(
+      'developerLicense(by: { tokenId: $tokenId })',
     );
-
-    expect(await client.getLicenseByTokenId(7)).toEqual(LICENSE);
-    advance(59_999);
-    expect(await client.getLicenseByTokenId(7)).toEqual(LICENSE);
-    expect(fetchFn).toHaveBeenCalledTimes(1);
-
-    advance(1);
-    await client.getLicenseByTokenId(7);
-    expect(fetchFn).toHaveBeenCalledTimes(2);
-
-    const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe('http://identity.test/query');
-    const body = JSON.parse(init.body as string);
-    expect(body.query).toContain('developerLicense(by: { tokenId: $tokenId })');
-    expect(body.variables).toEqual({ tokenId: 7 });
+    expect(requestBody(fetchMock).variables).toEqual({ tokenId: 7 });
   });
 
-  it('caches client ids without regard to letter case', async () => {
-    const { client, fetchFn } = setup(async () =>
-      answer({ data: { developerLicense: LICENSE } }),
-    );
+  it('looks a license up by client id regardless of letter case', async () => {
+    const license = { tokenId: 8, clientId: newClientId(), owner: newClientId() };
+    const fetchMock = fakeIdentity([license]);
 
-    await client.getLicenseByClientId(LICENSE.clientId);
-    await client.getLicenseByClientId(LICENSE.clientId.toLowerCase());
-
-    expect(fetchFn).toHaveBeenCalledTimes(1);
-    const body = JSON.parse(
-      (fetchFn.mock.calls[0] as unknown as [string, RequestInit])[1].body as string,
+    expect(
+      await getLicenseByClientId(license.clientId.toUpperCase().replace('0X', '0x')),
+    ).toEqual(license);
+    expect(await getLicenseByClientId(license.clientId.toLowerCase())).toEqual(license);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(requestBody(fetchMock).query).toContain(
+      'developerLicense(by: { clientId: $clientId })',
     );
-    expect(body.query).toContain('developerLicense(by: { clientId: $clientId })');
   });
 
-  it('answers null for an unknown license', async () => {
-    const { client } = setup(async () =>
-      answer({ data: null, errors: [{ message: 'no developer license' }] }),
-    );
+  it('does not cache unknown licenses, and answers null for bad input without asking', async () => {
+    const fetchMock = fakeIdentity([]);
 
-    expect(await client.getLicenseByTokenId(404)).toBeNull();
+    expect(await getLicenseByTokenId(404)).toBeNull();
+    expect(await getLicenseByTokenId(404)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    expect(await getLicenseByClientId('not-an-address')).toBeNull();
+    expect(await getLicenseByTokenId(0)).toBeNull();
+    expect(await getLicenseByTokenId(1.5)).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it('throws IDENTITY_UNAVAILABLE on network errors and non-200 answers, without caching', async () => {
-    const failing = setup(async () => {
-      throw new Error('ECONNREFUSED');
-    });
-    await expect(failing.client.getLicenseByTokenId(7)).rejects.toMatchObject({
-      status: 502,
-      code: 'IDENTITY_UNAVAILABLE',
-    });
-    await expect(failing.client.getLicenseByTokenId(7)).rejects.toMatchObject({
-      status: 502,
-    });
-    expect(failing.fetchFn).toHaveBeenCalledTimes(2);
+  it('throws IdentityUnavailableError on failures and does not cache them', async () => {
+    const fetchMock = fakeIdentity([], { status: 500 });
 
-    const down = setup(async () => answer({ message: 'bad gateway' }, 502));
-    await expect(
-      down.client.getLicenseByClientId(LICENSE.clientId),
-    ).rejects.toMatchObject({
+    await expect(getLicenseByTokenId(7)).rejects.toBeInstanceOf(IdentityUnavailableError);
+    await expect(getLicenseByTokenId(7)).rejects.toBeInstanceOf(IdentityUnavailableError);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')));
+    await expect(getLicenseByClientId(newClientId())).rejects.toBeInstanceOf(
+      IdentityUnavailableError,
+    );
+  });
+
+  it("keeps #80's getLicenseOwner and isLicenseOwner", async () => {
+    const owner = newClientId();
+    const license = { tokenId: 9, clientId: newClientId(), owner };
+    fakeIdentity([license]);
+
+    expect(await getLicenseOwner(license.clientId)).toBe(owner);
+    expect(await isLicenseOwner(owner.toLowerCase(), license.clientId)).toBe(true);
+    expect(await isLicenseOwner(newClientId(), license.clientId)).toBe(false);
+    expect(await isLicenseOwner(undefined, license.clientId)).toBe(false);
+    expect(await getLicenseOwner('nope')).toBeNull();
+  });
+
+  it('forgets everything on clearIdentityCache', async () => {
+    const license = { tokenId: 10, clientId: newClientId(), owner: newClientId() };
+    const fetchMock = fakeIdentity([license]);
+
+    await getLicenseByTokenId(10);
+    clearIdentityCache();
+    await getLicenseByTokenId(10);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('turns IdentityUnavailableError into a 502 IDENTITY_UNAVAILABLE response', async () => {
+    const response = apiErrorResponse(new IdentityUnavailableError('boom'))!;
+
+    expect(response.status).toBe(502);
+    expect(await response.json()).toEqual({
+      message: 'Identity API is unavailable',
       code: 'IDENTITY_UNAVAILABLE',
     });
   });
@@ -5776,41 +6208,17 @@ describe('identity client', () => {
 - [ ] **Step 2: Run them to confirm they fail**
 
 Run: `npm test -- test/services/identity.test.ts`
-Expected: FAIL, `Failed to resolve import "@/services/identity.service"`.
+Expected: FAIL, `getLicenseByTokenId is not a function` (or the import has no such export).
 
-- [ ] **Step 3: Add the Identity URL to config**
-
-`src/config/index.ts`: add to `type Configuration`:
-
-```ts
-identityApiUrl: string;
-```
-
-`src/config/default.ts`: append:
-
-```ts
-export const identityApiUrl = 'https://identity-api.dev.dimo.zone/query';
-```
-
-`src/config/preview.ts`: append:
-
-```ts
-export const identityApiUrl = 'https://identity-api.dev.dimo.zone/query';
-```
-
-`src/config/production.ts`: append:
-
-```ts
-export const identityApiUrl = 'https://identity-api.dimo.zone/query';
-```
-
-These are the values the console uses in `src/config/{default,preview,production}.ts`.
-
-- [ ] **Step 4: Write `src/services/identity.service.ts`**
+- [ ] **Step 3: Rewrite `src/services/identity.service.ts`**
 
 ```ts
 import config from '@/config';
-import { ApiError } from '@/utils/apiError';
+
+const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
+const LICENSE_FIELDS = '{ tokenId owner clientId }';
+const BY_CLIENT_ID = `query ($clientId: Address!) { developerLicense(by: { clientId: $clientId }) ${LICENSE_FIELDS} }`;
+const BY_TOKEN_ID = `query ($tokenId: Int!) { developerLicense(by: { tokenId: $tokenId }) ${LICENSE_FIELDS} }`;
 
 export interface LicenseInfo {
   tokenId: number;
@@ -5818,87 +6226,129 @@ export interface LicenseInfo {
   clientId: string;
 }
 
-const CACHE_TTL_MS = 60_000;
+// License owners rarely change, so a known license is reused for a minute rather
+// than costing an Identity round trip on every request. Unknown licenses are not
+// cached: a license minted a moment ago must work as soon as Identity has it.
+const LICENSE_TTL_MS = 60_000;
+const licenses = new Map<string, { license: LicenseInfo; expires: number }>();
+const clientKey = (clientId: string) => `client:${clientId.toLowerCase()}`;
+const tokenKey = (tokenId: number) => `token:${tokenId}`;
 
-const BY_TOKEN_ID = `query LicenseByTokenId($tokenId: Int!) {
-  developerLicense(by: { tokenId: $tokenId }) { tokenId owner clientId }
-}`;
+export class IdentityUnavailableError extends Error {}
 
-const BY_CLIENT_ID = `query LicenseByClientId($clientId: Address!) {
-  developerLicense(by: { clientId: $clientId }) { tokenId owner clientId }
-}`;
+const identityUrl = () => process.env.IDENTITY_API_URL ?? config.identityApiUrl;
 
-type Answer = { data?: { developerLicense?: LicenseInfo | null } | null };
-
-/**
- * Reads license ownership from the public Identity API. Answers, including "no such
- * license", are cached per key for 60 seconds; failures are not cached.
- */
-export const createIdentityClient = ({
-  url,
-  fetchFn = fetch,
-  now = Date.now,
-}: {
-  url: string;
-  fetchFn?: typeof fetch;
-  now?: () => number;
-}) => {
-  const cache = new Map<string, { value: LicenseInfo | null; expiresAt: number }>();
-
-  const lookup = async (
-    key: string,
-    query: string,
-    variables: Record<string, unknown>,
-  ) => {
-    const cached = cache.get(key);
-    if (cached && cached.expiresAt > now()) return cached.value;
-
-    let answer: Answer;
-    try {
-      const response = await fetchFn(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables }),
-      });
-      if (!response.ok) throw new Error(`Identity answered ${response.status}`);
-      answer = (await response.json()) as Answer;
-    } catch (error) {
-      console.error({ error, step: '[Identity] License lookup', key });
-      throw new ApiError(502, 'IDENTITY_UNAVAILABLE', 'Identity API is unavailable');
-    }
-
-    // Identity answers an unknown license with an error and null data.
-    const value = answer.data?.developerLicense ?? null;
-    cache.set(key, { value, expiresAt: now() + CACHE_TTL_MS });
-    return value;
-  };
-
-  return {
-    getLicenseByTokenId: (tokenId: number) =>
-      lookup(`token:${tokenId}`, BY_TOKEN_ID, { tokenId }),
-    getLicenseByClientId: (clientId: string) =>
-      lookup(`client:${clientId.toLowerCase()}`, BY_CLIENT_ID, { clientId }),
-    clear: () => cache.clear(),
-  };
+const fromCache = (key: string) => {
+  const cached = licenses.get(key);
+  return cached && cached.expires > Date.now() ? cached.license : null;
 };
 
-export const identityClient = createIdentityClient({ url: config.identityApiUrl });
+const remember = (license: LicenseInfo) => {
+  const entry = { license, expires: Date.now() + LICENSE_TTL_MS };
+  licenses.set(clientKey(license.clientId), entry);
+  licenses.set(tokenKey(license.tokenId), entry);
+};
+
+const queryLicense = async (
+  query: string,
+  variables: Record<string, unknown>,
+): Promise<LicenseInfo | null> => {
+  let body: { data?: { developerLicense?: LicenseInfo | null } | null };
+  try {
+    const res = await fetch(identityUrl(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables }),
+      cache: 'no-store',
+    });
+    if (!res.ok) throw new Error(`Identity answered ${res.status}`);
+    body = await res.json();
+  } catch (error) {
+    throw new IdentityUnavailableError(String(error));
+  }
+
+  // Identity answers an unknown license with an error and null data.
+  const license = body.data?.developerLicense ?? null;
+  if (license) remember(license);
+  return license;
+};
+
+export const getLicenseByClientId = async (clientId: string) => {
+  if (!ADDRESS.test(clientId)) return null;
+  return fromCache(clientKey(clientId)) ?? queryLicense(BY_CLIENT_ID, { clientId });
+};
+
+export const getLicenseByTokenId = async (tokenId: number) => {
+  if (!Number.isInteger(tokenId) || tokenId <= 0) return null;
+  return fromCache(tokenKey(tokenId)) ?? queryLicense(BY_TOKEN_ID, { tokenId });
+};
+
+export const getLicenseOwner = async (clientId: string): Promise<string | null> =>
+  (await getLicenseByClientId(clientId))?.owner ?? null;
+
+// Whether the wallet owns the license with this client ID on-chain.
+export const isLicenseOwner = async (address: string | undefined, clientId: string) => {
+  if (!address) return false;
+  const owner = await getLicenseOwner(clientId);
+  return !!owner && owner.toLowerCase() === address.toLowerCase();
+};
+
+/** Forget every cached license. Tests call this between cases. */
+export const clearIdentityCache = () => licenses.clear();
 ```
 
-- [ ] **Step 5: Run the tests**
+- [ ] **Step 4: Map Identity outages in `src/utils/apiError.ts`**
 
-Run: `npm test -- test/services/identity.test.ts`
-Expected: `4 passed`.
+Replace `apiErrorResponse` with:
 
-- [ ] **Step 6: Typecheck and commit**
+```ts
+import { IdentityUnavailableError } from '@/services/identity.service';
+
+export const apiErrorResponse = (error: unknown): Response | null => {
+  if (error instanceof ApiError) {
+    return Response.json(
+      { message: error.message, code: error.code },
+      { status: error.status },
+    );
+  }
+  if (error instanceof IdentityUnavailableError) {
+    return Response.json(
+      { message: 'Identity API is unavailable', code: 'IDENTITY_UNAVAILABLE' },
+      { status: 502 },
+    );
+  }
+  return null;
+};
+```
+
+Put the import with the other import at the top of the file.
+
+- [ ] **Step 5: Clear the license cache between tests**
+
+In `test/support/setup.ts`, import `clearIdentityCache` from `@/services/identity.service` and call it first thing in `beforeEach`:
+
+```ts
+beforeEach(async () => {
+  clearIdentityCache();
+  vi.clearAllMocks();
+  // …truncation as before
+});
+```
+
+- [ ] **Step 6: Run the tests**
+
+Run: `npm test -- test/services/identity.test.ts test/api/regressions-80.test.ts test/api/team-owned-resources.test.ts`
+Expected: all pass. That's 7 identity tests, plus #80's and Task 6's configuration tests unchanged.
+
+- [ ] **Step 7: Typecheck and commit**
 
 Run: `npm run typecheck`
 Expected: exit 0.
 
 ```bash
-npx prettier --write src/services/identity.service.ts src/config test
-git add src/services/identity.service.ts src/config test
-git commit -m "feat(teams): add an Identity client for license ownership with a 60 second cache"
+npx prettier --write src/services/identity.service.ts src/utils/apiError.ts test
+git add src/services/identity.service.ts src/utils/apiError.ts test
+git commit -m "feat(teams): look licenses up by token or client id through the one Identity service"
 ```
 
 ---
@@ -5913,9 +6363,9 @@ git commit -m "feat(teams): add an Identity client for license ownership with a 
 
 **Interfaces:**
 
-- Consumes (Tasks 3, 4 and 11): `TeamContext`, `resolveTeamContext`, `requireOwner`, `activeMembershipWhere`, `identityClient`, `LicenseSigner`, `LicenseSignerHolder`, the `@/types/teams` types, `ApiError`, `errorResponse`.
+- Consumes (Tasks 3, 4 and 11): `TeamContext`, `resolveTeamContext`, `requireOwner`, `activeMembershipWhere`, `getLicenseByTokenId`, `LicenseSigner`, `LicenseSignerHolder`, the `@/types/teams` types, `ApiError`, `errorResponse`.
 - Produces:
-  - `assertLicenseInTeam(ctx, rawTokenId: string): Promise<number>`: 403 `LICENSE_NOT_IN_TEAM`, 502 `IDENTITY_UNAVAILABLE`.
+  - `assertLicenseInTeam(ctx, rawTokenId: string): Promise<number>`: 403 `LICENSE_NOT_IN_TEAM`. An Identity outage propagates as `IdentityUnavailableError`, which `apiErrorResponse` answers as 502 `IDENTITY_UNAVAILABLE`.
   - `listLicenseSigners(ctx, rawTokenId): Promise<LicenseSignerRecord[]>`.
   - `upsertLicenseSigner(ctx, rawTokenId, rawAddress, body: unknown): Promise<LicenseSignerRecord>`. Saving clears `disabledAt`; the console calls it right after enabling the key on-chain.
   - `markLicenseSignerDisabled(ctx, rawTokenId, rawAddress): Promise<LicenseSignerRecord>`.
@@ -5927,17 +6377,16 @@ git commit -m "feat(teams): add an Identity client for license ownership with a 
 
 ```ts
 import { getAddress } from 'viem';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { POST as disableRoute } from '@/app/api/my/licenses/[tokenId]/signers/[address]/disabled/route';
 import { PUT as putRoute } from '@/app/api/my/licenses/[tokenId]/signers/[address]/route';
 import { GET as listRoute } from '@/app/api/my/licenses/[tokenId]/signers/route';
 import { GET as listMembersRoute } from '@/app/api/my/team/members/route';
 import { InvitationStatuses } from '@/models/teamCollaborator.model';
-import { identityClient } from '@/services/identity.service';
-import { ApiError } from '@/utils/apiError';
 import { addMember, createOwner, createUser, newWallet } from '../support/fixtures';
 import { read, request } from '../support/http';
+import { fakeIdentity } from '../support/identity';
 
 const CLIENT_ID = '0x' + '2'.repeat(40);
 
@@ -5947,9 +6396,7 @@ const setup = async () => {
   const membership = await addMember(acme.team.id!, member);
   const outsider = await createOwner('Other');
   // License 7 is owned by Acme's owner wallet; anything else doesn't exist.
-  vi.spyOn(identityClient, 'getLicenseByTokenId').mockImplementation(async (tokenId) =>
-    tokenId === 7 ? { tokenId: 7, owner: acme.user.address!, clientId: CLIENT_ID } : null,
-  );
+  fakeIdentity([{ tokenId: 7, owner: acme.user.address!, clientId: CLIENT_ID }]);
   return { acme, member, membership, outsider };
 };
 
@@ -6092,9 +6539,7 @@ describe('license key registry', () => {
 
   it('answers 502 when Identity is down', async () => {
     const { acme } = await setup();
-    vi.mocked(identityClient.getLicenseByTokenId).mockRejectedValueOnce(
-      new ApiError(502, 'IDENTITY_UNAVAILABLE', 'Identity API is unavailable'),
-    );
+    fakeIdentity([], { status: 500 });
 
     expect((await list(acme.user.address!)).status).toBe(502);
   });
@@ -6176,7 +6621,7 @@ import { LicenseSignerHolder } from '@/models/licenseSignerHolder.model';
 import { TeamCollaborator } from '@/models/teamCollaborator.model';
 import { User } from '@/models/user.model';
 import DB from '@/services/db';
-import { identityClient } from '@/services/identity.service';
+import { getLicenseByTokenId } from '@/services/identity.service';
 import { activeMembershipWhere } from '@/services/membership.service';
 import { requireOwner, TeamContext } from '@/services/teamContext.service';
 import type { HolderInput, LicenseSignerRecord, SignerKind } from '@/types/teams';
@@ -6216,7 +6661,7 @@ const parseSignerAddress = (raw: string) => {
 export const assertLicenseInTeam = async (ctx: TeamContext, rawTokenId: string) => {
   const tokenId = parseTokenId(rawTokenId);
   if (!tokenId || !ctx.team || !ctx.ownerAddress) throw notInTeam();
-  const license = await identityClient.getLicenseByTokenId(tokenId);
+  const license = await getLicenseByTokenId(tokenId);
   if (!license || license.owner.toLowerCase() !== ctx.ownerAddress.toLowerCase()) {
     throw notInTeam();
   }
@@ -6495,7 +6940,7 @@ The console's data proxy asks this before it forwards a request (part 3). The an
 
 **Interfaces:**
 
-- Consumes (Tasks 4 and 11): `requireUser`, `findMembership`, `findPersonalMembership`, `identityClient.getLicenseByClientId`, the `LicenseAccess` type, `errorResponse`.
+- Consumes (Tasks 4 and 11): `requireUser`, `findMembership`, `findPersonalMembership`, `getLicenseByClientId`, the `LicenseAccess` type, `errorResponse`.
 - Produces: `getLicenseAccess(user: User, rawClientId: string | null): Promise<LicenseAccess>`, the response body `{ access, teamId, signerAddress, userEmail }`.
   - `OWNER` when the caller's wallet owns the license; `teamId` is their personal team (or `null`).
   - `MEMBER` when the caller has an accepted membership in a team created by the user whose wallet owns the license; `teamId` is that team.
@@ -6510,14 +6955,13 @@ The console's data proxy asks this before it forwards a request (part 3). The an
 
 ```ts
 import { getAddress } from 'viem';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { GET as accessRoute } from '@/app/api/my/license-access/route';
 import { InvitationStatuses } from '@/models/teamCollaborator.model';
-import { identityClient } from '@/services/identity.service';
-import { ApiError } from '@/utils/apiError';
 import { addMember, createOwner, createUser } from '../support/fixtures';
 import { read, request } from '../support/http';
+import { fakeIdentity } from '../support/identity';
 
 const CLIENT_ID = '0xAbCdEf000000000000000000000000000000AbCd';
 
@@ -6527,11 +6971,10 @@ const setup = async () => {
   await member.update({ signer_address: '0x' + 'ab'.repeat(20) });
   const membership = await addMember(acme.team.id!, member);
   const outsider = await createOwner('Other');
-  vi.spyOn(identityClient, 'getLicenseByClientId').mockImplementation(async (clientId) =>
-    clientId.toLowerCase() === CLIENT_ID.toLowerCase()
-      ? { tokenId: 7, owner: acme.user.address!.toLowerCase(), clientId: CLIENT_ID }
-      : null,
-  );
+  // Identity reports the owner in lower case; console-api stores the wallet checksummed.
+  fakeIdentity([
+    { tokenId: 7, owner: acme.user.address!.toLowerCase(), clientId: CLIENT_ID },
+  ]);
   return { acme, member, membership, outsider };
 };
 
@@ -6628,9 +7071,7 @@ describe('GET /api/my/license-access', () => {
       'INVALID_CLIENT_ID',
     );
 
-    vi.mocked(identityClient.getLicenseByClientId).mockRejectedValueOnce(
-      new ApiError(502, 'IDENTITY_UNAVAILABLE', 'Identity API is unavailable'),
-    );
+    fakeIdentity([], { status: 500 });
     expect((await access(acme.user.address!, CLIENT_ID)).body.code).toBe(
       'IDENTITY_UNAVAILABLE',
     );
@@ -6651,7 +7092,7 @@ import { getAddress, isAddress } from 'viem';
 
 import { Team } from '@/models/team.model';
 import { User } from '@/models/user.model';
-import { identityClient } from '@/services/identity.service';
+import { getLicenseByClientId } from '@/services/identity.service';
 import { findMembership, findPersonalMembership } from '@/services/membership.service';
 import type { LicenseAccess } from '@/types/teams';
 import { ApiError } from '@/utils/apiError';
@@ -6671,7 +7112,7 @@ export const getLicenseAccess = async (
     userEmail,
   };
 
-  const license = await identityClient.getLicenseByClientId(rawClientId);
+  const license = await getLicenseByClientId(rawClientId);
   if (!license) return none;
   const owner = license.owner.toLowerCase();
   const signerAddress = user.signer_address
@@ -6832,12 +7273,15 @@ Part 2 of console teams. Spec: `docs/superpowers/specs/2026-10-01-console-teams-
 - **Signer proof:** `PUT /api/me/signer` verifies the C6 message and stores the wallet that signs for each user.
 - **Key registry:** `GET`, `PUT` and `POST …/disabled` under `/api/my/licenses/:tokenId/signers`. It records who each license key belongs to; addresses only.
 - **License access:** `GET /api/my/license-access?clientId=` answers `OWNER`, `MEMBER` or `NONE` for the console's data proxy, with the caller's `userEmail` for its audit line.
-- **Migration:** `init-db_12.sql`. Collaborators become members, duplicate active rows are folded, and it adds the invite columns, the user signer columns and the registry tables. Safe to run twice.
+- **Migration:** `init-db_12.sql`. Collaborators become members, duplicate active rows are folded, and it adds the invite columns, the user signer columns and the registry tables. It also widens `configurations.client_id` to `VARCHAR(100)`, but only where it's still shorter than 42 characters, so production's hand-widened column is untouched. Safe to run twice.
 - **Tests and CI:** vitest against a disposable Postgres, with a local JWKS and GitHub Actions. Also regression tests for #80.
 
+## Builds on #80
+- Configurations keep #80's license-owner rule; members of the owning team can now read them.
+- Collaborator removal keeps #80's team scoping and messages.
+- #80's `identity.service.ts` gains token ID and client ID lookups.
+
 ## Fixed along the way
-- `PUT` and `DELETE /api/my/configurations/:id` had no ownership check. They're now limited to the team owner's configurations.
-- `DELETE /api/my/team/collaborator/:id` could delete rows of any team. It's now limited to the caller's team.
 - Legacy `invitation_code` acceptance ignored the invitee's email. It now requires the invited email, and never accepts token-based invites.
 - `GET /api/me` now always shows the caller's own team. Before, it could pick up a team they had joined.
 
@@ -6851,13 +7295,14 @@ Part 2 of console teams. Spec: `docs/superpowers/specs/2026-10-01-console-teams-
 - `401 UNAUTHORIZED` from every new route.
 
 ## Release checklist
-1. Back up the database. Then run the migration on **preview**, and later **production**, before deploying this code. The User model reads the new columns.
+1. Confirm #80 is merged and deployed. This branch builds on its Identity service.
+2. Back up the database. Then run the migration on **preview**, and later **production**, before deploying this code. The User model reads the new columns.
    `psql "$PG_URL" -v ON_ERROR_STOP=1 --single-transaction -f src/scripts/db/init-db_12.sql`
-2. Check `SELECT role, count(*) FROM team_collaborators GROUP BY role;`: no `COLLABORATOR` rows remain.
-3. Check `\d license_signers` and `\d license_signer_holders`: both tables exist.
-4. Merge. Vercel deploys console-api.
-5. Smoke test: with a console session, `GET /api/my/teams` returns the personal team, and `GET /api/my/team/members` lists the owner.
-6. Then ship console part 3.
+3. Check `SELECT role, count(*) FROM team_collaborators GROUP BY role;`: no `COLLABORATOR` rows remain.
+4. Check `\d license_signers` and `\d license_signer_holders`: both tables exist. Check `\d configurations`: `client_id` is at least 42 characters wide.
+5. Merge. Vercel deploys console-api.
+6. Smoke test: with a console session, `GET /api/my/teams` returns the personal team, and `GET /api/my/team/members` lists the owner.
+7. Then ship console part 3.
 
 ## Verification
 lint, typecheck, `npm test` and `next build` pass locally and in CI.
@@ -6872,19 +7317,21 @@ Expected: `gh` prints the PR URL.
 
 **Spec coverage (part 2):**
 
-| Spec item                                                                                                                                                 | Task       |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| Data model: membership role, status, invite token hash, expiry, invited_by, uniqueness; users signer columns; `license_signers`; `license_signer_holders` | 3          |
-| Team context on every `/api/my/*` route; header optional                                                                                                  | 4, 5, 6, 9 |
-| Owner-only writes on the listed paths; support email open                                                                                                 | 5, 6       |
-| Every team endpoint (teams, members, invitations, resend, cancel, accept, remove)                                                                         | 7, 8       |
-| `PUT /api/me/signer` (C6)                                                                                                                                 | 10         |
-| Registry `GET`/`PUT`/`disabled` with the Identity ownership check (60 s cache) and holder validation                                                      | 11, 12     |
-| `GET /api/my/license-access`                                                                                                                              | 13         |
-| Retired routes kept working until part 3                                                                                                                  | 9          |
-| Revoked members still holding an enabled `MEMBER` key appear in the members list                                                                          | 7, 12      |
-| Route-level test harness with a disposable Postgres and local JWKS, plus #80 regressions                                                                  | 1, 2       |
-| Migration before deploy; console-api ships before the console                                                                                             | 14         |
+| Spec item                                                                                                                                                 | Task        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| Data model: membership role, status, invite token hash, expiry, invited_by, uniqueness; users signer columns; `license_signers`; `license_signer_holders` | 3           |
+| Team context on every `/api/my/*` route; header optional                                                                                                  | 4, 5, 6, 9  |
+| Owner-only writes on the listed paths; support email open                                                                                                 | 5, 6        |
+| Every team endpoint (teams, members, invitations, resend, cancel, accept, remove)                                                                         | 7, 8        |
+| `PUT /api/me/signer` (C6)                                                                                                                                 | 10          |
+| Registry `GET`/`PUT`/`disabled` with the Identity ownership check (60 s cache) and holder validation                                                      | 11, 12      |
+| `GET /api/my/license-access`                                                                                                                              | 13          |
+| Retired routes kept working until part 3                                                                                                                  | 9           |
+| Revoked members still holding an enabled `MEMBER` key appear in the members list                                                                          | 7, 12       |
+| Route-level test harness with a disposable Postgres and local JWKS, plus #80 regressions                                                                  | 1, 2        |
+| Migration before deploy; console-api ships before the console                                                                                             | 14          |
+| #80's configuration, collaborator-removal and Identity behavior pinned by tests; configurations stay license-owner based under teams                      | 2, 6, 9, 11 |
+| Schema drift: `configurations.client_id` widened only while shorter than 42 (harness and migration)                                                       | 1, 3        |
 
 **Placeholder scan:** every code step carries complete code. There's no "TBD", no "similar to Task N", and no undefined function.
 
@@ -6892,7 +7339,7 @@ Expected: `gh` prints the PR URL.
 
 - `TeamContext` (Task 4) is used unchanged in Tasks 5 to 13.
 - `toTeamMember` and `toTeamSummary` (Task 7) are reused in Task 8.
-- `identityClient.getLicenseByTokenId` and `getLicenseByClientId` (Task 11) are used in Tasks 12 and 13.
+- `getLicenseByTokenId` and `getLicenseByClientId`, added to #80's `identity.service.ts` in Task 11, are used in Tasks 12 and 13. Tests reach Identity only through `fakeIdentity` (Task 1).
 - Fixture `createOwnerFor` is introduced in Task 4 and used in Task 7.
 - `addMember` is introduced in Task 3.
 

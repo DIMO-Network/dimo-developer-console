@@ -16,7 +16,7 @@ Today:
   - The last-owner check counts owners across all teams.
   - The invite link is `base64(row id)` and isn't tied to the invited email.
 - **Nobody records who holds a key.** The API keys table on a license shows signer addresses from Identity and nothing else. The RentalOS key is tagged in one browser's `localStorage`.
-- **Already fixed separately:** the unscoped `/api/user*` and `/api/team*` routes and the `/api/me/complete` takeover were fixed in dimo-developer-console-api#80, which must merge first.
+- **Already fixed separately:** the unscoped `/api/user*` and `/api/team*` routes and the `/api/me/complete` takeover were fixed in dimo-developer-console-api#80, which must merge first. #80 also makes configurations answer only to their license's on-chain owner (any signed-in user could overwrite another developer's Login with DIMO configuration by its public ID), and scopes collaborator removal to the caller's team.
 
 ## Decisions made with the user
 
