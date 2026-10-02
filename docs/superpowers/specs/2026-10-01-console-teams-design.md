@@ -20,24 +20,28 @@ Today:
 
 ## Decisions made with the user
 
-- **Approach A now, C later.**
-  - **A:** each member's own console wallet becomes a signer on the licenses they're given. Nobody shares a key and no backend holds one.
-  - **C, a later protocol change:** signers carry a permission mask that token exchange enforces, and the developer JWT names the signer. Holding a backend key (B) was rejected because console-api would hold every opted-in license's key.
+- **Approach A, plus the signer half of C.**
+  - **A:** each member's own console wallet becomes a signer on the licenses they're given. Nobody shares a key and no backend holds one. Holding a backend key (B) was rejected because console-api would hold every opted-in license's key.
+  - **Signer check, required for launch:** dex puts the signer in the developer JWT, and token exchange and the webhooks API check that it's still a signer. See _Revocation within 10 minutes_.
+  - **Later:** permission masks on signers, so members can be read-only at the protocol level.
+- **Revocation target: about 10 minutes**, the lifetime of a vehicle JWT. A two-week lag is not acceptable.
 - **Fix the team collaborator model** rather than add a per-license email grant beside it.
 - **Multiple teams with a switcher.** Everyone keeps their personal team and can join others.
 - **Key registry.** The console records who every license key is for. A member's own wallet key belongs to that member alone. A generated key can belong to several people plus a note. The console stores addresses, never private keys.
-- **Defaults from the design review** (the user can change these):
-  - Members with data access get Webhooks as well as Vehicles.
-  - Members can see the member list, read-only.
-  - The revocation lag in _Risks_ is accepted for v1.
+- **Members get Vehicles only.** No Webhooks, because a webhook keeps sending data after its creator is removed.
+- **Default from the design review** (the user can change it): members can see the member list, read-only.
 
 ## Facts this rests on
 
 - **The license account checks the signer on-chain.** dex verifies the developer JWT challenge through ERC-1271 on the license account (`dex/connector/web3/web3.go`). The account recovers the signer with `ECDSA.recover` and calls `isSigner(tokenId, recovered)` (`developer-license/src/licenseAccount/DimoDeveloperLicenseAccount.sol`). So a signer must be an EOA. Every console user already has one: the Turnkey wallet `walletAddress` that signs for their kernel account (`services/zerodev.ts`, `createAccount` from `@turnkey/viem`).
-- **Signer rules:** only the license owner can call `enableSigner`/`disableSigner`. `isSigner` is true for `periodValidity` after enabling, 365 days by default (`DevLicenseCore.sol`). Enabling again resets the clock.
+- **Signer rules:** only the license owner can call `enableSigner`/`disableSigner`. `isSigner` is true for `periodValidity` after enabling. The source default is 365 days, but production reads 3,650 days (checked on-chain 2026-10-01 on `0x9A9D…7C85`), so signers don't expire in practice. The license account also exposes `isSigner(address)` for its own license.
 - **Identity supports `developerLicenses(filterBy: { signer })`** and returns `signers { address enabledAt }` per license.
 - **Transactions can be batched.** `useContractGA().processTransactions` takes an array of calls and sends them as one sponsored user operation.
-- **The developer JWT names the license, not the signer.** dex issues it with `ethereum_address` set to the license's client ID. In production, ID tokens last 336 hours (`cluster-helm-charts/charts/dimo-dex/values-prod.yaml`).
+- **The developer JWT names the license, not the signer.** dex issues it with `ethereum_address` set to the license's client ID. In production, `auth.dimo.zone` ID tokens last 336 hours (`cluster-helm-charts/charts/dimo-dex/values-prod.yaml`).
+- **Nothing downstream checks the signer.**
+  - `token-exchange-api` checks the developer JWT's signature and expiry, decodes the license from the subject, asks Identity whether it's a developer license (`internal/middleware/valid_dev_license.go`), then checks SACD. It issues 10-minute vehicle JWTs through `auth-roles-rights.dimo.zone`.
+  - `vehicle-triggers-api` (webhooks) authenticates by license in the same way.
+  - So today, `disableSigner` stops new developer JWTs but not the use of existing ones, for up to 336 hours.
 - **console-api knows each user by their kernel smart account address** (`users.address`, from the token's `ethereum_address`). It doesn't know their EOA.
 
 ## Roles
@@ -45,7 +49,8 @@ Today:
 | Capability                                                                                          | Owner | Member       | Member with data access to a license |
 | --------------------------------------------------------------------------------------------------- | ----- | ------------ | ------------------------------------ |
 | See the team's licenses, settings, connections, workspace and branding                              | ✓     | ✓, read-only | ✓, read-only                         |
-| Vehicles and Webhooks for that license                                                              | ✓     | —            | ✓                                    |
+| Vehicles for that license                                                                           | ✓     | —            | ✓                                    |
+| Webhooks                                                                                            | ✓     | —            | —                                    |
 | License actions that need the owner's wallet: create a license, API keys, redirect URIs, alias, DCX | ✓     | —            | —                                    |
 | Write console-api data: connections, configurations, workspace, branding, simulated vehicles        | ✓     | —            | —                                    |
 | Invite, remove, grant and revoke data access, assign keys                                           | ✓     | —            | —                                    |
@@ -53,6 +58,38 @@ Today:
 
 - **One owner per team.** The owner is the user who created the team, and the team's licenses are the ones their kernel account owns. Only that wallet can sign license transactions, so a second owner couldn't act on them anyway.
 - **"Data access" is not a console-api flag.** It means the member's EOA is a current signer on the license on-chain.
+
+## Revocation within 10 minutes (dex, token-exchange-api, vehicle-triggers-api)
+
+**Requirement:** once the owner removes a member or revokes their data access, and the `disableSigner` transaction confirms, the member can't get a vehicle token within 60 seconds. Every vehicle token they already hold expires within 10 minutes. This applies everywhere, not just in the console.
+
+**dex** (`auth.dimo.zone`)
+
+- In the ERC-1271 path of the web3 connector (`connector/web3/web3.go`), recover the EOA from the challenge signature. This is the same recovery the license account performs: `crypto.SigToPub` over the EIP-191 hash.
+- Carry the address on the connector identity, and emit it as a `signer_address` claim on developer JWTs (`server/oauth2.go`, next to `ethereum_address`).
+- EOA logins and tokens that aren't for a license are unchanged.
+
+**token-exchange-api**
+
+- In `valid_dev_license.go`, after the developer-license check:
+  - If the token has `signer_address`, call `isSigner(signer_address)` on the license account at the client ID.
+  - Cache the answer for 60 seconds per `(clientId, signer)`.
+  - A `false` answer returns 403 "Signer no longer authorized for this license".
+- Tokens without the claim (minted before the dex change) keep working until they expire. That leaves existing developers undisturbed. Members are unaffected: granting data access is switched on only after the dex and token-exchange changes are live, so every member token carries the claim.
+- Also applies to existing developers: disabling one of their API keys now ends its tokens within about a minute instead of two weeks.
+
+**vehicle-triggers-api**
+
+- Apply the same `isSigner` check on every authenticated request.
+- Store `created_by_signer` on each new webhook, and return it in webhook reads.
+
+**Console**
+
+- **Removing a member:** shows the license's webhooks whose `created_by_signer` is that member's EOA. They could have created them through the API even though the console doesn't offer it. The owner deletes them as part of finishing the removal.
+- **Data proxy (`/api/data/*`):**
+  - The license owner passes.
+  - Anyone else needs an accepted membership in the team that owns the license, and the developer JWT's `signer_address` must equal their registered `signer_address`. Membership is cached for 60 seconds.
+  - So inside the console, removal takes effect within a minute, even before the on-chain transaction confirms.
 
 ## Data model (console-api)
 
@@ -162,19 +199,21 @@ Migration `src/scripts/db/init-db_12.sql`.
 **A member's developer JWT, signed by their own wallet**
 
 - `useMemberDevJwt(clientId, domain)` asks dex for a challenge with `address = clientId`, signs it with the user's Turnkey EOA (the `localAccount` from `createAccount`, not the kernel), exchanges it for a token, and saves it with `saveDevJwt`.
-- Vehicles and Webhooks use it when the user is a member with data access. Where an owner sees _Generate developer JWT_, a member sees **Connect with your wallet**.
+- Vehicles uses it when the user is a member with data access. Where an owner sees _Generate developer JWT_, a member sees **Connect with your wallet**.
 - A member without data access sees: "Ask {owner} for data access to {license}."
+- The Webhooks page is owner-only, and hidden from the sidebar for members.
 
 **Registering a member's wallet:** the first time the user signs in (or accepts an invite), the console signs the fixed message with the EOA and calls `PUT /api/me/signer`. It repeats this if `signer_address` doesn't match the session's EOA.
 
 **Settings → Team** (owner view; members see it read-only)
 
-- **Members table:** name, email, role, status. A **Data access** column lists licenses with the signer's expiry date ("expires in 34 days"). Actions: **Grant**, **Renew**, **Revoke**, **Remove**, **Resend**, **Cancel invite**.
+- **Members table:** name, email, role, status, and a **Data access** column listing licenses. Actions: **Grant**, **Revoke**, **Remove**, **Resend**, **Cancel invite**. Signers are valid for 3,650 days in production, so there's no renewal.
 - **Invite modal:** email only.
 - **Pending-grant banner:** "{name} joined. Grant data access?" appears for accepted members with no data access. It opens a license checklist. Confirming sends one batched `enableSigner` transaction, then upserts a `MEMBER` registry row per license.
-- **Revoke** sends batched `disableSigner` for the chosen licenses and stamps the registry.
-- **Remove** does the same for every license, then deletes the membership. If the transaction fails, the membership is still removed and the row stays visible as "Removed — still a signer on {licenses}. Retry." The console keeps blocking the removed member's Vehicles in the meantime.
-- Grant and renew require the member to have a verified `signer_address`. Without one, the row says they need to sign in once.
+- **Revoke** sends batched `disableSigner` for the chosen licenses and stamps the registry. Then it lists webhooks on those licenses created by the member's signer (`created_by_signer`) and offers to delete them.
+- **Remove** does the same for every license, then deletes the membership. If the transaction fails, the membership is still removed and the row stays visible as "Removed — still a signer on {licenses}. Retry." The data proxy blocks the removed member at once regardless.
+- Grant requires the member to have a verified `signer_address`. Without one, the row says they need to sign in once.
+- **Grant is behind `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED`.** It stays off in an environment until token exchange enforces the signer check there. Invites, membership and the key registry ship without it.
 
 **License → API keys**
 
@@ -200,9 +239,8 @@ Migration `src/scripts/db/init-db_12.sql`.
    - The console posts the token to `/api/invitations/accept`, registers their wallet, and switches to the team.
    - Possible errors: expired token, email mismatch, already a member, revoked invite.
 3. **Grant.** The owner sees the banner, picks licenses and signs one transaction. Registry rows are written, and Identity reflects the new signer within seconds.
-4. **Use.** The member opens Vehicles in the team, connects with their wallet and gets a developer JWT. Vehicles works as it does for owners.
-5. **Renew.** Within 30 days of expiry the member row shows **Renew**, which re-enables the signer.
-6. **Revoke or remove** as described above.
+4. **Use.** The member opens Vehicles in the team, connects with their wallet and gets a developer JWT that carries `signer_address`. Vehicles works as it does for owners.
+5. **Revoke or remove.** The console blocks the member within a minute. Once `disableSigner` confirms, token exchange refuses them within 60 seconds. Vehicle tokens they already hold expire within 10 minutes. The owner reviews any webhooks the member created.
 
 ## Error handling
 
@@ -218,7 +256,10 @@ Migration `src/scripts/db/init-db_12.sql`.
 ## Risks and accepted limits
 
 1. **Data access is full signer power.** It includes every privilege vehicles granted the license (Commands among them) and works outside the console. The grant dialog says so. Only C limits it.
-2. **Revocation lag.** `disableSigner` stops new developer JWTs, but one minted before removal stays valid for up to 336 hours in production. During that time it can still be exchanged for vehicle tokens. The console blocks removed members at once; direct API use is cut off only when the token expires. Fixes are outside this repo: shorten developer JWT lifetime in dex, or C with token exchange checking `isSigner` per exchange.
+2. **Revocation depends on the platform change.** Without the dex and token-exchange signer check, a developer JWT minted before removal works for up to 336 hours. Granting stays behind its flag until the check is live, so this lag never applies to members. Once it ships:
+   - the worst case is about 11 minutes after `disableSigner` confirms (a 60-second cache plus the 10-minute vehicle JWT);
+   - the console path is cut within a minute of removal.
+   - Webhooks are the exception: a webhook the member created keeps running until the owner deletes it, which is why removal makes the owner review them.
 3. **The owner must be a console account.** For the DIMO Mobile license (#286), the owner `0xb356cC733b04c27D267Ab7B053F34E7957E2587` has to be checked. If it's a Safe or a hardware wallet, DIMO calls `enableSigner` outside the console, and the key can then be assigned in the registry.
 4. **One owner, no transfer.** If the owner leaves the company, the licenses stay with their wallet.
 5. **Unverified emails.** Invite acceptance matches the invited email against the account email, and console-api still doesn't verify emails server-side (see #80). The token in the emailed link is what proves receipt.
@@ -237,23 +278,36 @@ Migration `src/scripts/db/init-db_12.sql`.
 - **Console.**
   - Jest and React Testing Library cover `TeamProvider` and the `X-Team-Id` header, `useMemberDevJwt` (mocked dex and Turnkey), team-owner address substitution in the license hooks, the members table states, the grant and remove flows (batched calls, partial failure), and the Belongs to column states.
   - Screenshot harness: Team page (owner, member, empty, pending, removed-but-still-signer), team switcher, API keys with Belongs to, and member Vehicles with and without access. Dark and light themes.
-- **Live pass before release:**
+- **dex, token-exchange-api, vehicle-triggers-api** (Go, testify, each repo's mocks):
+  - **dex:** the ERC-1271 path emits `signer_address` equal to the recovered EOA; EOA logins are unchanged.
+  - **token-exchange-api:**
+    - a token with a current signer passes;
+    - a disabled signer gets 403, including after the cache expires;
+    - a token without the claim passes;
+    - the cache honors 60 seconds.
+  - **vehicle-triggers-api:** the same check, and `created_by_signer` is stored and returned.
+- **Live pass before release** (dev environment, then prod with a test license):
   - Create a test team. Invite a second account, grant one license, and use Vehicles as the member.
-  - Revoke, and confirm that the console blocks the member and that a new developer JWT is refused.
-  - Confirm the old developer JWT still exchanges, to document the lag.
+  - Revoke. Confirm the console blocks the member within a minute. Once `disableSigner` confirms, the member's existing developer JWT gets 403 from token exchange within 60 seconds, and a vehicle token issued just before revocation stops working within 10 minutes.
+  - Create a webhook with the member's developer JWT through the API, revoke, and confirm the removal flow lists it.
 
 ## Rollout
 
 1. Merge console-api #80.
-2. Ship console-api teams. Every change is backward compatible: the header is optional and the old acceptance path is removed only after step 3. Run migration `init-db_12.sql`.
-3. Ship the console.
-4. Remove the retired console-api routes.
-5. For DIMO: confirm who owns license #286, invite the support team, grant data access, and assign the three existing keys in the registry.
+2. **Platform, in parallel with steps 3 and 4:**
+   - dex emits `signer_address`;
+   - token-exchange-api and vehicle-triggers-api check it, and vehicle-triggers-api stores `created_by_signer`.
+   - Deploy in that order: dex first, so the checks have claims to read.
+3. Ship console-api teams. Every change is backward compatible: the header is optional and the old acceptance path is removed only after step 4. Run migration `init-db_12.sql`.
+4. Ship the console with `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED` off. Invites, teams and the key registry go live.
+5. Once step 2 is live in an environment and its live pass succeeds, turn the flag on there.
+6. Remove the retired console-api routes.
+7. For DIMO: confirm who owns license #286, assign its three existing keys in the registry, invite the support team, and grant them data access.
 
 ## Out of scope and follow-ups
 
-- C: signer permission masks in the DevLicense contract, the signer address in the developer JWT, and token exchange enforcing both. This makes members truly read-only and makes revocation immediate.
-- A shorter developer JWT lifetime in dex.
+- The rest of C: signer permission masks in the DevLicense contract, enforced by token exchange. This makes members truly read-only.
+- Webhooks for members.
 - An admin role, owner transfer, and an owner-visible audit history page.
 - Email verification in console-api.
 - `GET /api/auth/exist` returning role and wallet for any email.
