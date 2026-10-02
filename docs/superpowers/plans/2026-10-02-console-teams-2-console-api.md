@@ -4,79 +4,128 @@
 
 **Goal:** Give dimo-developer-console-api real teams. That means:
 
-- every `/api/my/*` route answers for the active team and refuses writes from members;
-- owners invite people by email with tokens tied to that email;
-- each user proves which wallet signs for them;
+- every `/api/my/*` route answers for the active team, refuses writes from members and hides secrets from them;
+- owners invite people by email, with rate-limited, email-bound tokens; members can leave;
+- each user proves which wallet signs for them, and that wallet can't be shared or swapped while it holds keys;
 - a license key registry records who every key belongs to;
-- the console's data proxy can ask whether the caller may use a license.
+- the console's data proxy can ask whether the caller may use a license;
+- the legacy team routes keep working until the console moves off them, and are then retired.
 
 **Architecture:**
 
-- `resolveTeamContext(request)` turns the token's user plus an optional `X-Team-Id` header into `{ user, team, company, role, owner, ownerAddress }`. Every `/api/my/*` route starts from it, and `requireOwner(ctx)` guards writes.
-- New services sit beside the existing controllers: team members, invitations, signer proof, the key registry and license access. #80's `identity.service.ts` gains license lookups. Each throws an `ApiError(status, code, message)` that routes turn into `{ message, code }`.
-- The retired team routes stay as thin adapters over the new services until the console (part 3) stops calling them.
+- `resolveTeamContext(request)` turns the token's user plus an optional `X-Team-Id` header into `{ user, team, company, role, owner, ownerAddress }`.
+  - Every `/api/my/*` route starts from it, and `requireOwner(ctx)` guards writes.
+  - **Owner** means `teams.created_by` and nothing else.
+  - It never returns a context without a team and a company, so no list can fall back to "all companies".
+- New services sit beside the existing controllers: team members, invitations (with limits), signer proof, the key registry and license access. #80's `identity.service.ts` gains license lookups. Each service throws an `ApiError(status, code, message)` that routes turn into `{ message, code }`.
+- Routes that only the console calls (team, invite, signer, registry, license access) also require the token's `aud` to include `developer-platform` (C4).
+- The retired team routes stay as thin adapters over the new services until the console (part 3) stops calling them. Task 15 then deletes them.
 
 **Tech Stack:**
 
-- Next.js 14.2 App Router route handlers, TypeScript strict, Sequelize 6 on PostgreSQL.
+- Next.js 14.2 App Router route handlers, TypeScript strict (target `es2017`), Sequelize 6 on PostgreSQL.
 - viem 2.41.2 for signature recovery and address checksums.
-- vitest 3 with a disposable Postgres and a local JWKS for tests.
+- vitest 3 with a disposable Postgres, a local JWKS and a fake Identity for tests.
 - GitHub Actions.
 
-**Spec:** `docs/superpowers/specs/2026-10-01-console-teams-design.md` (console repo). **Contracts:** `docs/superpowers/plans/2026-10-02-console-teams.md` (console repo), C4, C6 and C7. Executors read both before starting.
+**Spec:** `docs/superpowers/specs/2026-10-01-console-teams-design.md` (console repo). **Contracts:** `docs/superpowers/plans/2026-10-02-console-teams.md` (console repo); this part implements C4, C6, C7 and the part 2 steps of _Rollout_. Executors read both before starting.
 
-**Repository:** `~/workspace/dimo-developer-console-api`. **Branch:** `feat/teams` from `origin/master` after PR #80 (scoped user and team routes) has merged.
+**Repository:** `~/workspace/dimo-developer-console-api`. **Branch:** `feat/teams` from `origin/master` after PR #80 has merged.
+
+**Builds on #80 (last commit `b41eb28`):**
+
+- **Scoped user routes** and the `/api/me/complete` fix.
+- **Configurations** limited to the license owner (`isLicenseOwner`).
+- **Collaborator removal** limited to the owner's team.
+- **Empty-company guards** in `getMyApps` and `getMyConnections`.
+- **`src/services/identity.service.ts`:** `License = { owner, tokenId }`, `getLicense(clientId)` with a 60-second cache of known licenses, `getLicenseOwner`, `isLicenseOwner`, `IdentityUnavailableError`, and the `IDENTITY_API_URL` override.
+- **The legacy invite** (`invitePersonToMyTeam(user, companyName, email)`):
+  - the caller's membership must be `OWNER`, or it throws `ValidatorError('Only the team owner can invite collaborators')`;
+  - at most 10 rows created per team per hour (`Too many invitations. Try again in an hour.`);
+  - always `COLLABORATOR`, and the route reads only `email`.
+- **`acceptTeamInvitation`:** only a PENDING row sent to the caller's email. `markAsAccepted` sets `COLLABORATOR`.
+- **The invite template:** a module-level `escapeHtml`, and `escapeHtml(userName.slice(0, 60))` for the inviter.
+- **`POST /api/my/workspace`:** `getLicense(client_id)` must be owned by the caller and match `token_id`. Otherwise 403 `You do not own this license`; on an Identity failure, 502 `Could not verify license ownership`. It stores `license.owner`.
+
+No task re-adds any of this. Tasks that change it keep #80's response bodies unless C7 says otherwise:
+
+- **Task 3** renames `COLLABORATOR` to `MEMBER`;
+- **Task 5** checks the workspace license against the team owner;
+- **Task 8** extends the template;
+- **Task 9** moves the legacy routes onto the team model;
+- **Task 11** extends the Identity service.
 
 ## Global Constraints
 
-- Every path, status, error `code`, field name and wire type in contract C7 is used exactly as written. Error bodies are `{ "message": string, "code": string }`.
-- The header is `X-Team-Id` (read as `request.headers.get('x-team-id')`). Without it, the caller's own `OWNER` team is active.
-- `GET /api/my/teams`, `GET /api/my/license-access` and `GET /api/me` ignore `X-Team-Id`. They never answer 403 for a stale header, and `GET /api/me` keeps returning the caller's own user, personal team and company.
-- Addresses are stored lowercase (`users.signer_address`, `license_signers.signer_address`) and returned checksummed with viem `getAddress`.
+- Every path, status, error `code`, field name and wire type in contracts C4, C6 and C7 is used exactly as written. Error bodies are `{ "message": string, "code": string }`.
+- The header is `X-Team-Id` (read as `request.headers.get('x-team-id')`). Without it, the caller's personal team is active: the team they created (`teams.created_by`). A legacy collaborator with no team of their own gets their oldest accepted membership's team.
+- **Owner** is `teams.created_by` and nothing else. `team_collaborators.role` is never trusted to grant owner rights. Accepted invites, and invites refreshed in place, are always `MEMBER`.
+- `GET /api/my/teams`, `GET /api/my/license-access` and `GET /api/me` ignore `X-Team-Id`. They never answer 403 for a stale header.
+- Every route, `GET /api/me` included, answers `401 { message: 'User not found', code: 'UNAUTHORIZED' }` when the token maps to no console user. Team, invite, signer, registry and license-access routes answer the same 401 when the token's `aud` doesn't include `developer-platform`.
+- Addresses are stored lowercase (`users.signer_address`, `license_signers.signer_address`) and returned checksummed with viem `getAddress`. `users.signer_address` is unique by `lower(...)`.
+- New timestamp columns are `TIMESTAMPTZ`. Tests run with `TZ=UTC`.
 - Invite tokens are `randomBytes(32).toString('base64url')`. Only `sha256(token)` as hex is stored. The link is `${config.frontendUrl}sign-in?invite=${token}`. Invites expire after 7 days.
+- Invite limits (C7):
+  - 10 invite or resend emails per team per hour;
+  - 30 per inviting user per day;
+  - 50 pending invites per team;
+  - one resend per invite per 60 seconds.
+  - Any of these answers `429 RATE_LIMITED`.
+  - The inviter's name and the team name are HTML-escaped and capped at 60 characters in the email.
 - The signer proof message is contract C6, verbatim. It may be at most 10 minutes old and at most 1 minute in the future.
-- All Identity access goes through #80's `src/services/identity.service.ts` (`IDENTITY_API_URL` overrides `config.identityApiUrl`); there is no second client. A known license is cached for 60 seconds per token ID and per lowercase client ID; unknown licenses and failures aren't cached. Tests reach Identity only through `fakeIdentity`.
+- Identity:
+  - All Identity access goes through #80's `src/services/identity.service.ts` (`IDENTITY_API_URL` overrides `config.identityApiUrl`); there is no second client.
+  - A known license is cached for 60 seconds per token ID and per lowercase client ID. Unknown licenses and failures aren't cached.
+  - An HTTP 200 carrying GraphQL errors is an outage (`IdentityUnavailableError`), unless every error has `extensions.code === 'NOT_FOUND'`. That is how Identity answers a license that doesn't exist (checked live on 2026-10-02).
+  - The `tokenId` argument is `Int` (`DeveloperLicenseBy` in `~/workspace/dimo-developer-console/src/gql/graphql.ts`).
+  - Tests reach Identity only through `fakeIdentity`, which passes every other URL (the JWKS) to the real `fetch`.
 - Configurations stay authorized by #80's rule: the on-chain owner of the configuration's license, which under teams means the active team owner's wallet. There's no `owner_id` check.
-- `viem` is pinned to `2.41.2`, the console's installed version. `vitest` is `^3.2.4`.
+- Secrets are owner-only:
+  - members read connections with `connection_license_private_key` and `device_issuance_key` as `null`;
+  - members read apps whose signers have no `api_key`.
+- `viem` is pinned to `2.41.2`, the console's installed version. `vitest` is `^3.2.4`. `tsconfig.json` targets `es2017`, and the plan's code iterates `Set`s with `Array.from` regardless.
 - Public routes stay untouched: `/api/configurations`, `/api/brand`, `/api/auth/exist`, `/api/crypto`.
-- `POST /api/my/support/email` stays open to members.
-- Format only the files you touch, with `npx prettier --write <files>`. **Never** run `npm run lint:format`: it rewrites the whole repo.
+- `POST /api/my/support/email` stays open to members, and answers 401 for an unknown user.
+- Format only the files you touch, with `npx prettier --write <files>`. Prettier has no SQL parser, so never pass it `.sql` files. **Never** run `npm run lint:format`: it rewrites the whole repo.
 - Commit messages use conventional prefixes and **never** include a `Co-Authored-By` trailer or any Claude attribution.
-- The migration runs on each database **before** the code that reads its columns is deployed (see Task 14).
+- Migrations are run by hand; console-api has no migration runner. `init-db_12.sql` runs on each database **before** the code that reads its columns deploys, with `init-db_12.down.sql` ready (Task 14).
 
 ## Review Focus
 
-1. **A user who owns a team and is also a member of another.** With no header, the personal team is active, and `GET /api/me` shows the personal company, never the other team's. Covered in Task 4.
-2. **Invite email case and whitespace.** Inviting `"  Alice@X.test "` lets the account `alice@x.test` accept. A second invite to `ALICE@x.test` gets 409 `ALREADY_INVITED`. Covered in Task 8.
-3. **Re-inviting someone who was removed.** Their revoked row doesn't block a new invite or its acceptance, and the partial unique index allows it. Covered in Task 8.
+1. **A user who owns a team and is also a member of another.** With no header, the personal team (`teams.created_by`) is active, and `GET /api/me` shows the personal company, never the other team's. A membership row wrongly marked `OWNER` grants nothing. Covered in Tasks 3 and 4.
+2. **Invite email case and whitespace.** Inviting `"  Alice@X.test "` lets the account `alice@x.test` accept. A second invite to `ALICE@x.test` gets 409 `ALREADY_INVITED`, and so does a concurrent duplicate. Covered in Task 8.
+3. **Re-inviting someone who was removed or who left.** Their `REVOKED` or `LEFT` row doesn't block a new invite or its acceptance. Covered in Task 8.
 4. **Invite token reuse.** A token that was already accepted, or used by a different account, gets 400 `INVITE_INVALID` or 403 `INVITE_EMAIL_MISMATCH`, and never a second membership. Covered in Task 8.
 5. **Mixed-case addresses.**
    - Registry calls with a checksummed or lowercase path address hit the same row.
    - `license-access` with a lowercase client ID finds an owner whose wallet is stored checksummed.
-   - Covered in Tasks 12 and 13.
+   - Two users can't register the same signer in different letter case.
+   - Covered in Tasks 10, 12 and 13.
 
 ## File map
 
-| File                                                                | Responsibility                                                                                                                 |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `vitest.config.mts`, `test/support/*`                               | Test harness: database, tokens, requests, fixtures                                                                             |
-| `.github/workflows/ci.yml`                                          | Lint, typecheck and tests on every PR                                                                                          |
-| `src/scripts/db/init-db_12.sql`                                     | Migration: membership columns and indexes, user signer, key registry tables                                                    |
-| `src/models/teamCollaborator.model.ts` (modify)                     | `OWNER`/`MEMBER`, `PENDING`/`ACCEPTED`/`REVOKED`, invite columns                                                               |
-| `src/models/user.model.ts` (modify)                                 | `signer_address`, `signer_verified_at`                                                                                         |
-| `src/models/licenseSigner.model.ts`, `licenseSignerHolder.model.ts` | Key registry models and associations                                                                                           |
-| `src/types/teams.ts`                                                | C7 wire types                                                                                                                  |
-| `src/utils/apiError.ts`                                             | `ApiError` and route error responses                                                                                           |
-| `src/services/membership.service.ts`                                | Active-membership queries                                                                                                      |
-| `src/services/teamContext.service.ts`                               | `requireUser`, `resolveTeamContext`, `requireOwner`, `companyScope`                                                            |
-| `src/services/teamMembers.service.ts`                               | Team summaries, member list, removal                                                                                           |
-| `src/services/invitation.service.ts`                                | Create, resend, cancel and accept invites                                                                                      |
-| `src/services/signerProof.service.ts`                               | C6 message and verification                                                                                                    |
-| `src/services/identity.service.ts`                                  | (from #80) gains `getLicenseByTokenId`, `getLicenseByClientId`, `clearIdentityCache`                                           |
-| `src/services/licenseSigner.service.ts`                             | Key registry                                                                                                                   |
-| `src/services/licenseAccess.service.ts`                             | Who may use a license                                                                                                          |
-| `src/app/api/my/**` (modify)                                        | Team context and owner-only writes                                                                                             |
-| New routes                                                          | `teams`, `team/members`, `team/invitations`, `invitations/accept`, `me/signer`, `licenses/[tokenId]/signers`, `license-access` |
+| File                                                                                           | Responsibility                                                                                                                                                        |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vitest.config.mts`, `test/support/*`                                                          | Test harness: database, tokens (with `aud`), requests, fixtures, fake Identity                                                                                        |
+| `.github/workflows/ci.yml`                                                                     | Lint, typecheck and tests on every PR                                                                                                                                 |
+| `tsconfig.json` (modify)                                                                       | `"target": "es2017"`                                                                                                                                                  |
+| `src/utils/filter.ts` (modify)                                                                 | `transformObject` keeps every filter key                                                                                                                              |
+| `src/scripts/db/init-db_12.sql`, `init-db_12.down.sql`                                         | Migration and its rollback: owner demotion, membership columns and indexes, invite send log, user signer, key registry, `configurations.client_id` widening           |
+| `src/models/teamCollaborator.model.ts` (modify)                                                | `OWNER`/`MEMBER`; `PENDING`/`ACCEPTED`/`REVOKED`/`LEFT`; invite columns                                                                                               |
+| `src/models/user.model.ts` (modify)                                                            | `signer_address`, `signer_verified_at`                                                                                                                                |
+| `src/models/licenseSigner.model.ts`, `licenseSignerHolder.model.ts`, `teamInviteSend.model.ts` | Key registry and invite send log                                                                                                                                      |
+| `src/types/teams.ts`                                                                           | C7 wire types                                                                                                                                                         |
+| `src/utils/apiError.ts`                                                                        | `ApiError` and route error responses                                                                                                                                  |
+| `src/services/membership.service.ts`                                                           | Personal team and active-membership queries                                                                                                                           |
+| `src/services/teamContext.service.ts`                                                          | `requireUser`, `resolveTeamContext`, `requireOwner`, `companyScope`                                                                                                   |
+| `src/services/teamMembers.service.ts`                                                          | Team summaries, member list with `memberKeys`, removal, leaving                                                                                                       |
+| `src/services/invitation.service.ts`                                                           | Create, resend, cancel, preview and accept invites, with limits                                                                                                       |
+| `src/services/signerProof.service.ts`                                                          | C6 message, verification, `SIGNER_IN_USE` / `SIGNER_LOCKED`                                                                                                           |
+| `src/services/identity.service.ts`                                                             | (from #80: `getLicense`, `getLicenseOwner`, `isLicenseOwner`) gains `getLicenseByTokenId` and `clearIdentityCache`; GraphQL errors other than `NOT_FOUND` are outages |
+| `src/services/licenseSigner.service.ts`                                                        | Key registry, with `SIGNER_MISMATCH` and `KIND_CONFLICT`                                                                                                              |
+| `src/services/licenseAccess.service.ts`                                                        | Who may use a license, and `memberOfTeam`                                                                                                                             |
+| `src/app/api/my/**` (modify)                                                                   | Team context, owner-only writes, members without secrets                                                                                                              |
+| New routes                                                                                     | `teams`, `team/members`, `team/leave`, `team/invitations`, `invitations/preview`, `invitations/accept`, `me/signer`, `licenses/[tokenId]/signers`, `license-access`   |
 
 ---
 
@@ -89,19 +138,23 @@
 - Create: `test/api/harness.test.ts`
 - Create: `.github/workflows/ci.yml`
 - Modify: `package.json` (scripts, `viem`, `vitest`)
+- Modify: `tsconfig.json` (`"target": "es2017"`)
 
 **Interfaces:**
 
 - Produces:
-  - `request(method: string, path: string, options?: { as?: string; teamId?: string; body?: unknown; rawBody?: string }): Promise<NextRequest>`, where `as` is the wallet the bearer token is minted for;
+  - `request(method: string, path: string, options?: { as?: string; aud?: string | string[]; teamId?: string; body?: unknown; rawBody?: string }): Promise<NextRequest>`, where `as` is the wallet the bearer token is minted for;
   - `read(response: Response): Promise<{ status: number; body: any }>`;
-  - `tokenFor(address: string): Promise<string>`;
+  - `tokenFor(address: string, options?: { aud?: string | string[] }): Promise<string>`. `aud` defaults to `['developer-platform']`, the console's client ID (C4);
   - `sql<T>(query: string, replacements?: Record<string, unknown>): Promise<T[]>`;
   - `runSql(text: string): Promise<void>`;
   - `newWallet()` (a viem `PrivateKeyAccount`);
   - `createUser(overrides?)`;
-  - `createOwner(label?)`, returning `{ user, company, team, membership }`;
-  - `fakeIdentity(licenses: { tokenId: number; clientId: string; owner: string }[], options?: { status?: number })`, which stubs global `fetch` (the only way `@/services/identity.service` reaches Identity) and returns the mock;
+  - `createOwner(label?)` and `createOwnerFor(user, label?)`, returning `{ user, company, team, membership }`;
+  - `fakeIdentity(licenses: { tokenId: number; clientId: string; owner: string }[], options?: { status?: number; graphqlError?: string })`.
+    - It stubs global `fetch`, which is the only way `@/services/identity.service` reaches Identity, and returns the mock.
+    - It answers only requests to `process.env.IDENTITY_API_URL`. Every other URL goes to the real `fetch`. jose v6 reads global `fetch` lazily for the JWKS (`node_modules/jose/dist/webapi/jwks/remote.js`), so intercepting it would make every request 401.
+    - A license that isn't listed gets Identity's real not-found answer: HTTP 200, `data.developerLicense: null`, and one error with `extensions.code: 'NOT_FOUND'`.
   - `newClientId()`: a fresh 42-character client ID. #80's owner cache lives for 60 seconds inside one test file, so every test uses its own licenses.
 - Mocks applied to every test file: `@/utils/mailer` (`sendMail` resolves) and `@/controllers/lead.controller` (`createTwentyLead` resolves). Global stubs (`fetch`) are undone after each test.
 
@@ -135,7 +188,9 @@ docker run -d --name console-api-test-pg -e POSTGRES_USER=admin -e POSTGRES_HOST
 
 Expected: `pg_isready -h 127.0.0.1 -p 55432` prints `accepting connections`. The test run creates and rebuilds the `console_api_test` database itself. Point it elsewhere with `TEST_PG_URL`.
 
-- [ ] **Step 3: Add the scripts to `package.json`**
+- [ ] **Step 3: Add the scripts to `package.json` and target es2017**
+
+In `tsconfig.json`, add `"target": "es2017",` as the first entry of `compilerOptions`. Without it, TypeScript defaults to ES5, and `for…of` over a `Set` or `Map` fails to compile. Next builds with SWC, so the build output doesn't change.
 
 In `"scripts"`, add after `"lint:format"`:
 
@@ -177,6 +232,8 @@ export default defineConfig({
     testTimeout: 20_000,
     hookTimeout: 30_000,
     env: {
+      // Dates in assertions and TIMESTAMP columns read the same on every machine.
+      TZ: 'UTC',
       PG_URL: TEST_DATABASE_URL,
       JWT_ISSUER: 'http://console-api.test',
       VERCEL_ENV: 'development',
@@ -290,12 +347,19 @@ export const stopAuthServer = async () => {
   server = undefined;
 };
 
+/** The console's client ID: dex puts it in `aud` of every console login (C4). */
+export const CONSOLE_AUDIENCE = 'developer-platform';
+
 /** A DIMO-shaped access token for `address`, signed by the test key set. */
-export const tokenFor = async (address: string) => {
+export const tokenFor = async (
+  address: string,
+  { aud = [CONSOLE_AUDIENCE] }: { aud?: string | string[] } = {},
+) => {
   if (!privateKey) throw new Error('startAuthServer() has not run');
   return new SignJWT({ ethereum_address: address })
     .setProtectedHeader({ alg: 'RS256', kid: KEY_ID })
     .setIssuer(process.env.JWT_ISSUER!)
+    .setAudience(aud)
     .setSubject(address)
     .setIssuedAt()
     .setExpirationTime('1h')
@@ -315,6 +379,8 @@ import { tokenFor } from './auth';
 export interface RequestOptions {
   /** Wallet the bearer token is minted for. Omit for an anonymous request. */
   as?: string;
+  /** The token's audience; defaults to the console's (`developer-platform`). */
+  aud?: string | string[];
   /** Sent as X-Team-Id. */
   teamId?: string;
   body?: unknown;
@@ -327,7 +393,12 @@ export const request = async (
   options: RequestOptions = {},
 ) => {
   const headers = new Headers({ 'Content-Type': 'application/json' });
-  if (options.as) headers.set('Authorization', `Bearer ${await tokenFor(options.as)}`);
+  if (options.as) {
+    headers.set(
+      'Authorization',
+      `Bearer ${await tokenFor(options.as, { aud: options.aud })}`,
+    );
+  }
   if (options.teamId) headers.set('X-Team-Id', options.teamId);
   const body =
     options.rawBody ??
@@ -406,9 +477,8 @@ export const createUser = async (
   });
 };
 
-/** A user who finished sign-up: their company, personal team and OWNER membership. */
-export const createOwner = async (label = 'Acme') => {
-  const user = await createUser({ name: `${label} Owner` });
+/** Give an existing user the company, personal team and OWNER membership sign-up creates. */
+export const createOwnerFor = async (user: User, label = 'Acme') => {
   const company = await Company.create({
     name: `${label} Co`,
     website: '',
@@ -430,6 +500,10 @@ export const createOwner = async (label = 'Acme') => {
   });
   return { user, company, team, membership };
 };
+
+/** A user who finished sign-up: their company, personal team and OWNER membership. */
+export const createOwner = async (label = 'Acme') =>
+  createOwnerFor(await createUser({ name: `${label} Owner` }), label);
 ```
 
 `test/support/identity.ts`:
@@ -445,21 +519,49 @@ export interface FakeLicense {
   owner: string;
 }
 
+// Captured before any test stubs fetch: everything that isn't Identity, such as
+// jose fetching the JWKS, must still reach the network.
+const realFetch = globalThis.fetch;
+
+const urlOf = (input: string | URL | Request) =>
+  typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+
 /**
- * Stands in for the Identity API. Every fetch the app makes is answered as the
- * developerLicense query, looked up by `variables.clientId` (case-insensitive)
- * or `variables.tokenId`. `status` other than 200 simulates an outage.
+ * Stands in for the Identity API at IDENTITY_API_URL. It answers the
+ * developerLicense query by `variables.clientId` (case-insensitive) or
+ * `variables.tokenId`. A license it doesn't know gets Identity's real
+ * not-found answer.
+ * - `status`: any value other than 200 simulates an HTTP outage.
+ * - `graphqlError`: simulates an HTTP 200 carrying a GraphQL error.
  */
 export const fakeIdentity = (
   licenses: FakeLicense[],
-  options: { status?: number } = {},
+  options: { status?: number; graphqlError?: string } = {},
 ) => {
-  const fetchMock = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+  const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+    if (urlOf(input) !== process.env.IDENTITY_API_URL) return realFetch(input, init);
+
     if (options.status && options.status !== 200) {
-      return new Response(JSON.stringify({ message: 'unavailable' }), {
-        status: options.status,
+      return json({ message: 'unavailable' }, options.status);
+    }
+    if (options.graphqlError) {
+      return json({
+        errors: [
+          {
+            message: options.graphqlError,
+            extensions: { code: 'INTERNAL_SERVER_ERROR' },
+          },
+        ],
+        data: null,
       });
     }
+
     const { variables } = JSON.parse(String(init?.body ?? '{}')) as {
       variables?: { clientId?: string; tokenId?: number };
     };
@@ -468,12 +570,16 @@ export const fakeIdentity = (
         ? candidate.clientId.toLowerCase() === variables.clientId.toLowerCase()
         : candidate.tokenId === variables?.tokenId,
     );
-    const body = license
-      ? { data: { developerLicense: license } }
-      : { data: null, errors: [{ message: 'no developer license' }] };
-    return new Response(JSON.stringify(body), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+    if (license) return json({ data: { developerLicense: license } });
+    return json({
+      errors: [
+        {
+          message: 'No developer license with that id.',
+          path: ['developerLicense'],
+          extensions: { code: 'NOT_FOUND' },
+        },
+      ],
+      data: { developerLicense: null },
     });
   });
   vi.stubGlobal('fetch', fetchMock);
@@ -482,6 +588,10 @@ export const fakeIdentity = (
 
 /** A client ID no earlier test has used, so Identity's owner cache can't carry over. */
 export const newClientId = () => newWallet().address;
+
+/** The Identity calls a fetch mock received; JWKS fetches are left out. */
+export const identityCalls = (fetchMock: ReturnType<typeof fakeIdentity>) =>
+  fetchMock.mock.calls.filter(([input]) => urlOf(input) === process.env.IDENTITY_API_URL);
 ```
 
 - [ ] **Step 8: Write the per-file setup (mocks, auth server, truncation)**
@@ -544,7 +654,7 @@ import { GET as getMe } from '@/app/api/me/route';
 import { Configuration } from '@/models/configuration.model';
 import { createOwner } from '../support/fixtures';
 import { read, request } from '../support/http';
-import { newClientId } from '../support/identity';
+import { fakeIdentity, newClientId } from '../support/identity';
 
 describe('test harness', () => {
   it('verifies a token minted for a user wallet and reads their team from the database', async () => {
@@ -563,6 +673,18 @@ describe('test harness', () => {
     const response = await read(await getMe(await request('GET', '/api/me')));
 
     expect(response).toEqual({ status: 200, body: {} });
+  });
+
+  it('lets the JWKS fetch through while Identity is faked', async () => {
+    const { user } = await createOwner('Jwks');
+    fakeIdentity([]);
+
+    // The first token check in this file fetches the key set through global fetch.
+    const response = await read(
+      await getMe(await request('GET', '/api/me', { as: user.address! })),
+    );
+
+    expect(response.status).toBe(200);
   });
 
   it('stores a configuration under a 42-character client ID, as production does', async () => {
@@ -586,7 +708,10 @@ describe('test harness', () => {
 - [ ] **Step 10: Run the smoke test**
 
 Run: `npm test -- test/api/harness.test.ts`
-Expected: `3 passed`. Without the `WIDEN_CONFIGURATION_CLIENT_ID` step, the third test fails with `value too long for type character varying(36)`. If it fails with `ECONNREFUSED 127.0.0.1:55432`, Postgres from step 2 isn't running.
+Expected: `4 passed`. Without the `WIDEN_CONFIGURATION_CLIENT_ID` step, the configuration test fails with `value too long for type character varying(36)`.
+
+Run: `npm test -- test/api/harness.test.ts -t "JWKS"`
+Expected: `1 passed`. That test now makes the file's first token check, so it proves the key set is fetched through `fakeIdentity`. If it fails with `ECONNREFUSED 127.0.0.1:55432`, Postgres from step 2 isn't running.
 
 - [ ] **Step 11: Add CI**
 
@@ -637,8 +762,8 @@ Run: `npm run typecheck && npm run lint`
 Expected: typecheck exits 0, and lint reports warnings only (no `Error:` lines).
 
 ```bash
-npx prettier --write vitest.config.mts test .github/workflows/ci.yml package.json
-git add vitest.config.mts test .github/workflows/ci.yml package.json package-lock.json
+npx prettier --write vitest.config.mts test .github/workflows/ci.yml package.json tsconfig.json
+git add vitest.config.mts test .github/workflows/ci.yml package.json package-lock.json tsconfig.json
 git commit -m "test: add a vitest harness with a disposable Postgres, local JWKS and CI"
 ```
 
@@ -646,11 +771,19 @@ git commit -m "test: add a vitest harness with a disposable Postgres, local JWKS
 
 ### Task 2: Pin the #80 security fixes with regression tests
 
-PR #80 had no tests. Its fixes are verified by hand and already in `master`, so these tests pass on the first run. They exist so later tasks can't reopen the holes. They cover all three parts of #80:
+PR #80 had no tests. Its fixes are verified by hand and already in `master`, so these tests pass on the first run. They exist so later tasks can't reopen the holes. They cover every part of #80:
 
 - scoped user routes and the `/api/me/complete` takeover;
 - configurations limited to the license owner (via `@/services/identity.service`);
-- collaborator removal limited to the caller's own team.
+- collaborator removal limited to the caller's own team;
+- legacy invites only by the team owner, always as `COLLABORATOR`, at most 10 per team per hour, with the inviter's name escaped and cut to 60 characters, and `invitation_code` accepted only by the invited email (as `COLLABORATOR`);
+- `POST /api/my/workspace` only for a license the caller owns and whose token ID the body names, storing the license's real owner.
+
+The assertions use #80's exact messages and roles (commit `b41eb28`). Three later tasks change behavior these tests see, and each updates the assertion it changes:
+
+- **Task 3** renames the role to `MEMBER`, in the two `COLLABORATOR` assertions.
+- **Task 4** answers 401 for an unknown wallet on `/api/me`.
+- **Task 9** moves the legacy invite onto C7's limits.
 
 **Files:**
 
@@ -659,7 +792,11 @@ PR #80 had no tests. Its fixes are verified by hand and already in `master`, so 
 **Interfaces:**
 
 - Consumes (Task 1): `request`, `read`, `sql`, `createUser`, `createOwner`, `newWallet`, `fakeIdentity`, `newClientId`.
-- Consumes (#80): `getLicenseOwner` and `isLicenseOwner` in `src/services/identity.service.ts`; `removeMyCollaboratorById` in `src/controllers/teamCollaborator.controller.ts`.
+- Consumes (#80, commit `b41eb28`):
+  - `getLicense`, `getLicenseOwner` and `isLicenseOwner` in `src/services/identity.service.ts`;
+  - `removeMyCollaboratorById`, `invitePersonToMyTeam` and `acceptTeamInvitation` in `src/controllers/teamCollaborator.controller.ts`;
+  - `markAsAccepted` in `src/services/teamCollaborator.service.ts`;
+  - the escaping in `src/templates/team.ts`.
 
 - [ ] **Step 1: Write the tests**
 
@@ -667,7 +804,7 @@ PR #80 had no tests. Its fixes are verified by hand and already in `master`, so 
 
 ```ts
 import { existsSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { GET as getPublicConfiguration } from '@/app/api/configurations/[id]/route';
 import { GET as getMe, PUT as updateMe } from '@/app/api/me/route';
@@ -682,7 +819,10 @@ import {
   POST as createConfiguration,
 } from '@/app/api/my/configurations/route';
 import { DELETE as deleteCollaborator } from '@/app/api/my/team/collaborator/[id]/route';
+import { POST as legacyInvite } from '@/app/api/my/team/invitation/route';
+import { POST as createWorkspace } from '@/app/api/my/workspace/route';
 import { POST as createUserRoute } from '@/app/api/user/route';
+import Mailer from '@/utils/mailer';
 import { sql } from '../support/db';
 import { createOwner, createUser, newWallet } from '../support/fixtures';
 import { read, request } from '../support/http';
@@ -1047,6 +1187,156 @@ describe('PR #80 regressions: configurations belong to the license owner', () =>
   });
 });
 
+describe('PR #80 regressions: legacy invites', () => {
+  const addRow = (
+    teamId: string,
+    userId: string | null,
+    role: string,
+    email: string | null = null,
+  ) =>
+    sql(
+      `INSERT INTO team_collaborators (id, team_id, user_id, email, role, status, created_at, updated_at, deleted)
+       VALUES (gen_random_uuid()::text, :teamId, :userId, :email, :role, :status, now(), now(), false)`,
+      { teamId, userId, email, role, status: userId ? 'ACCEPTED' : 'PENDING' },
+    );
+  const invite = async (as: string, email: string) =>
+    read(
+      await legacyInvite(
+        await request('POST', '/api/my/team/invitation', {
+          as,
+          body: { email, role: 'OWNER' },
+        }),
+      ),
+    );
+  const invitedRole = async (email: string) =>
+    (
+      await sql<{ role: string }>(
+        'SELECT role FROM team_collaborators WHERE lower(email) = :email AND deleted IS NOT TRUE',
+        { email },
+      )
+    )[0]?.role;
+
+  it('lets only the team owner invite, always as a collaborator', async () => {
+    const acme = await createOwner('Acme');
+    const collaborator = await createUser();
+    await addRow(acme.team.id!, collaborator.id!, 'COLLABORATOR');
+
+    expect(await invite(collaborator.address!, 'sneaky@x.test')).toEqual({
+      status: 400,
+      body: { message: 'Only the team owner can invite collaborators' },
+    });
+    expect(await invitedRole('sneaky@x.test')).toBeUndefined();
+
+    expect(await invite(acme.user.address!, 'pat@x.test')).toEqual({
+      status: 200,
+      body: { message: 'Invitation has been sent to pat@x.test' },
+    });
+    // The body asked for OWNER; the role is never taken from it.
+    expect(await invitedRole('pat@x.test')).toBe('COLLABORATOR');
+  });
+
+  it('allows 10 invitations per team per hour', async () => {
+    const acme = await createOwner('Acme');
+    for (let n = 0; n < 10; n += 1) {
+      await addRow(acme.team.id!, null, 'COLLABORATOR', `earlier${n}@x.test`);
+    }
+
+    expect(await invite(acme.user.address!, 'eleventh@x.test')).toEqual({
+      status: 400,
+      body: { message: 'Too many invitations. Try again in an hour.' },
+    });
+  });
+
+  it('escapes and shortens the inviter name in the email', async () => {
+    const acme = await createOwner('Acme');
+    await acme.user.update({ name: `<b>${'E'.repeat(70)}</b> Smith` });
+
+    await invite(acme.user.address!, 'pat@x.test');
+
+    const { html } = vi.mocked(Mailer.sendMail).mock.calls[0][0];
+    expect(html).not.toContain('<b>');
+    expect(html).toContain(`&lt;b&gt;${'E'.repeat(57)}`);
+    expect(html).not.toContain('E'.repeat(58));
+  });
+
+  it('accepts an invitation_code only for the invited email, as a collaborator', async () => {
+    const acme = await createOwner('Acme');
+    await addRow(acme.team.id!, null, 'OWNER', 'Pat@x.test');
+    const [row] = await sql<{ id: string }>(
+      "SELECT id FROM team_collaborators WHERE email = 'Pat@x.test'",
+    );
+    const code = Buffer.from(row.id).toString('base64');
+    const bob = await createUser({ email: 'bob@x.test' });
+    const pat = await createUser({ email: 'pat@x.test' });
+    const state = async () =>
+      (
+        await sql<{ status: string; role: string; user_id: string | null }>(
+          'SELECT status, role, user_id FROM team_collaborators WHERE id = :id',
+          { id: row.id },
+        )
+      )[0];
+
+    await getMe(
+      await request('GET', `/api/me?invitation_code=${code}`, { as: bob.address! }),
+    );
+    expect((await state()).status).toBe('PENDING');
+
+    await getMe(
+      await request('GET', `/api/me?invitation_code=${code}`, { as: pat.address! }),
+    );
+    expect(await state()).toEqual({
+      status: 'ACCEPTED',
+      role: 'COLLABORATOR',
+      user_id: pat.id,
+    });
+  });
+});
+
+describe('PR #80 regressions: workspaces', () => {
+  const body = (clientId: string, tokenId: number) => ({
+    name: 'Acme workspace',
+    token_id: tokenId,
+    client_id: clientId,
+    owner: '0x9999999999999999999999999999999999999999',
+  });
+  const create = async (as: string, payload: unknown) =>
+    read(
+      await createWorkspace(
+        await request('POST', '/api/my/workspace', { as, body: payload }),
+      ),
+    );
+  const workspaceOwners = async () =>
+    (await sql<{ owner: string }>('SELECT owner FROM workspaces')).map(
+      (row) => row.owner,
+    );
+  const notYours = { status: 403, body: { message: 'You do not own this license' } };
+
+  it('creates a workspace only for a license the caller owns, with the license owner stored', async () => {
+    const acme = await createOwner('Acme');
+    const other = await createOwner('Other');
+    const clientId = newClientId();
+    fakeIdentity([{ tokenId: 7, clientId, owner: acme.user.address! }]);
+
+    expect(await create(other.user.address!, body(clientId, 7))).toEqual(notYours);
+    // The right owner, but a token ID that isn't this license's.
+    expect(await create(acme.user.address!, body(clientId, 8))).toEqual(notYours);
+    expect(await workspaceOwners()).toEqual([]);
+
+    expect((await create(acme.user.address!, body(clientId, 7))).status).toBe(200);
+    expect(await workspaceOwners()).toEqual([acme.user.address]);
+  });
+
+  it('answers 502 when Identity fails', async () => {
+    const acme = await createOwner('Acme');
+    fakeIdentity([], { status: 500 });
+
+    expect(await create(acme.user.address!, body(newClientId(), 7))).toEqual({
+      status: 502,
+      body: { message: 'Could not verify license ownership' },
+    });
+  });
+});
+
 describe("PR #80 regressions: collaborator removal stays inside the owner's team", () => {
   // Raw rows, as the old collaborator flow wrote them.
   const addCollaborator = async (
@@ -1112,7 +1402,7 @@ describe("PR #80 regressions: collaborator removal stays inside the owner's team
 - [ ] **Step 2: Run them**
 
 Run: `npm test -- test/api/regressions-80.test.ts`
-Expected: `19 passed`.
+Expected: `25 passed`.
 
 - [ ] **Step 3: Commit**
 
@@ -1139,34 +1429,41 @@ Expected: in the pre-#80 worktree, at least these FAIL:
 
 - the forged-role, PUT /api/me, takeover and deleted-routes tests;
 - the other user's configuration read, update, delete, list and create;
-- the cross-team collaborator removal.
+- the cross-team collaborator removal;
+- the legacy invite by a non-owner, and the workspace created for someone else's license.
 
 The worktree is then removed, and the branch is untouched.
 
 ---
 
-### Task 3: Migration, models, wire types and `ApiError`
+### Task 3: Migration (and its rollback), models, wire types and `ApiError`
 
 **Files:**
 
-- Create: `src/scripts/db/init-db_12.sql`
+- Create: `src/scripts/db/init-db_12.sql`, `src/scripts/db/init-db_12.down.sql`
 - Modify: `src/models/teamCollaborator.model.ts` (whole file below)
 - Modify: `src/models/user.model.ts` (two columns)
-- Create: `src/models/licenseSigner.model.ts`, `src/models/licenseSignerHolder.model.ts`
+- Create: `src/models/licenseSigner.model.ts`, `src/models/licenseSignerHolder.model.ts`, `src/models/teamInviteSend.model.ts`
 - Create: `src/types/teams.ts`, `src/utils/apiError.ts`
-- Modify: `test/support/fixtures.ts` (append `addMember`)
+- Modify: `src/controllers/teamCollaborator.controller.ts`, `src/services/teamCollaborator.service.ts` (#80's two `TeamRoles.COLLABORATOR` uses become `MEMBER`)
+- Modify: `test/support/fixtures.ts` (append `addMember`), `test/api/regressions-80.test.ts` (two role assertions)
 - Test: `test/db/migration-12.test.ts`, `test/models/team-models.test.ts`
 
 **Interfaces:**
 
 - Produces:
-  - `TeamRoles { OWNER = 'OWNER', MEMBER = 'MEMBER' }` and `InvitationStatuses { PENDING, ACCEPTED, REVOKED }` from `@/models/teamCollaborator.model`.
-  - `TeamCollaborator` gains `invite_token_hash`, `invite_expires_at`, `invited_by`, and the include accessors `User` and `Team`.
-  - `User` gains `signer_address?: string | null` and `signer_verified_at?: Date | null`.
+  - `TeamRoles { OWNER = 'OWNER', MEMBER = 'MEMBER' }` and `InvitationStatuses { PENDING, ACCEPTED, REVOKED, LEFT }` from `@/models/teamCollaborator.model`. The `role` column is descriptive only; who owns a team comes from `teams.created_by` (Task 4).
+  - `TeamCollaborator` gains `invite_token_hash`, `invite_expires_at` (TIMESTAMPTZ), `invited_by`, and the include accessors `User` and `Team`.
+  - `User` gains `signer_address?: string | null` (unique by `lower()`) and `signer_verified_at?: Date | null` (TIMESTAMPTZ).
   - `LicenseSigner` (`team_id`, `license_token_id: number`, `signer_address`, `kind`, `note`, `created_by`, `disabled_by`, `disabled_at`, include alias `holders`) and `SignerKinds`.
   - `LicenseSignerHolder` (`signer_id`, `user_id`, `name`, include accessor `User`).
-  - `@/types/teams`: `TeamRole`, `MembershipStatus`, `TeamSummary`, `TeamMember`, `SignerKind`, `LicenseSignerHolder`, `LicenseSignerRecord`, `HolderInput`, `LicenseAccess`.
-  - `@/utils/apiError`: `ApiError(status, code, message)`, `apiErrorResponse(error): Response | null`, `errorResponse(error, step): Response` (500 fallback), `legacyErrorResponse(error, step): Response` (400 fallback with `{ message }`, as the existing routes do).
+  - `TeamInviteSend` (`team_id`, `membership_id`, `sent_by`, `created_at`): one row per invite or resend email, for C7's limits.
+  - `@/types/teams`: `TeamRole`, `MembershipStatus`, `TeamSummary`, `MemberKey`, `TeamMember`, `SignerKind`, `LicenseSignerHolder`, `LicenseSignerRecord`, `HolderInput`, `LicenseAccess`, `InvitationPreview`.
+  - `@/utils/apiError`:
+    - `ApiError(status, code, message)`;
+    - `apiErrorResponse(error): Response | null`;
+    - `errorResponse(error, step): Response`, with a 500 fallback;
+    - `legacyErrorResponse(error, step): Response`, with a 400 `{ message }` fallback, as the existing routes do.
   - Fixture: `addMember(teamId: string, user: User): Promise<TeamCollaborator>`.
 
 - [ ] **Step 1: Write the failing migration test**
@@ -1180,12 +1477,23 @@ import { describe, expect, it } from 'vitest';
 import { runSql, sql } from '../support/db';
 import { createOwner, createUser } from '../support/fixtures';
 
-const MIGRATION = readFileSync(
-  new URL('../../src/scripts/db/init-db_12.sql', import.meta.url),
-  'utf8',
-);
+const read = (name: string) =>
+  readFileSync(new URL(`../../src/scripts/db/${name}`, import.meta.url), 'utf8');
+const MIGRATION = read('init-db_12.sql');
+const ROLLBACK = read('init-db_12.down.sql');
 
 const id = (n: number) => `00000000-0000-4000-8000-00000000000${n}`;
+const dropUniqueIndexes = () =>
+  runSql(
+    'DROP INDEX IF EXISTS idx_team_collaborators_member; DROP INDEX IF EXISTS idx_team_collaborators_pending_email;',
+  );
+const columnType = async (table: string, column: string) =>
+  (
+    await sql<{ data_type: string }>(
+      `SELECT data_type FROM information_schema.columns WHERE table_name = :table AND column_name = :column`,
+      { table, column },
+    )
+  )[0]?.data_type;
 
 describe('init-db_12.sql', () => {
   it('can run again on a database that already has it', async () => {
@@ -1195,7 +1503,8 @@ describe('init-db_12.sql', () => {
     const indexes = await sql<{ indexname: string }>(
       `SELECT indexname FROM pg_indexes WHERE indexname IN
         ('idx_team_collaborators_member', 'idx_team_collaborators_pending_email',
-         'idx_team_collaborators_invite_token', 'idx_license_signers_license_signer')
+         'idx_team_collaborators_invite_token', 'idx_license_signers_license_signer',
+         'idx_users_signer_address')
        ORDER BY indexname`,
     );
     expect(indexes.map((row) => row.indexname)).toEqual([
@@ -1203,15 +1512,57 @@ describe('init-db_12.sql', () => {
       'idx_team_collaborators_invite_token',
       'idx_team_collaborators_member',
       'idx_team_collaborators_pending_email',
+      'idx_users_signer_address',
     ]);
+  });
+
+  it('makes every new timestamp column TIMESTAMPTZ', async () => {
+    for (const [table, column] of [
+      ['team_collaborators', 'invite_expires_at'],
+      ['users', 'signer_verified_at'],
+      ['license_signers', 'disabled_at'],
+      ['license_signers', 'created_at'],
+      ['license_signer_holders', 'created_at'],
+      ['team_invite_sends', 'created_at'],
+    ]) {
+      expect(await columnType(table, column), `${table}.${column}`).toBe(
+        'timestamp with time zone',
+      );
+    }
+  });
+
+  it("demotes OWNER rows of anyone but the creator, and keeps the creator's row when folding duplicates", async () => {
+    const { team, user: creator, membership } = await createOwner('Acme');
+    const impostor = await createUser();
+    await dropUniqueIndexes();
+    await sql(
+      `INSERT INTO team_collaborators (id, team_id, user_id, email, role, status, created_at, updated_at, deleted) VALUES
+        (:a, :team, :impostor, NULL, 'OWNER', 'ACCEPTED', now(), now(), false),
+        (:b, :team, :creator, NULL, 'COLLABORATOR', 'ACCEPTED', now() - interval '2 days', now(), false)`,
+      { a: id(1), b: id(2), team: team.id, impostor: impostor.id, creator: creator.id },
+    );
+
+    await runSql(MIGRATION);
+
+    const rows = await sql<{ id: string; role: string; deleted: boolean }>(
+      `SELECT id, role, deleted FROM team_collaborators WHERE id IN (:ids) ORDER BY id`,
+      { ids: [id(1), id(2), membership.id] },
+    );
+    expect(rows).toHaveLength(3);
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        { id: id(1), role: 'MEMBER', deleted: false },
+        // Older than the creator's OWNER row, but folded into it.
+        { id: id(2), role: 'MEMBER', deleted: true },
+        { id: membership.id, role: 'OWNER', deleted: false },
+      ]),
+    );
   });
 
   it('renames collaborators to members and keeps one active row per duplicate', async () => {
     const { team } = await createOwner('Dupes');
     const person = await createUser();
-    await runSql(
-      'DROP INDEX IF EXISTS idx_team_collaborators_member; DROP INDEX IF EXISTS idx_team_collaborators_pending_email;',
-    );
+    await dropUniqueIndexes();
     await sql(
       `INSERT INTO team_collaborators (id, team_id, user_id, email, role, status, created_at, updated_at, deleted) VALUES
         (:a, :team, :person, NULL, 'COLLABORATOR', 'ACCEPTED', now() - interval '2 days', now(), false),
@@ -1259,7 +1610,7 @@ describe('init-db_12.sql', () => {
     expect(await clientIdLength()).toBe(255);
   });
 
-  it('stores signer addresses in lower case and each holder as a member or a name', async () => {
+  it('stores signer addresses in lower case, holders as a member or a name, and one user per signer', async () => {
     const { team, user } = await createOwner();
     await expect(
       sql(
@@ -1283,6 +1634,56 @@ describe('init-db_12.sql', () => {
         { user: user.id },
       ),
     ).rejects.toThrow(/license_signer_holders_one_of/);
+
+    const other = await createUser();
+    await sql(
+      `UPDATE users SET signer_address = '0xdef0000000000000000000000000000000000000' WHERE id = :id`,
+      {
+        id: user.id,
+      },
+    );
+    await expect(
+      sql(
+        `UPDATE users SET signer_address = '0xDEF0000000000000000000000000000000000000' WHERE id = :id`,
+        {
+          id: other.id,
+        },
+      ),
+    ).rejects.toThrow(/idx_users_signer_address/);
+  });
+});
+
+describe('init-db_12.down.sql', () => {
+  it('undoes the migration, and the migration applies again afterwards', async () => {
+    const { team } = await createOwner('Acme');
+    const member = await createUser();
+    await sql(
+      `INSERT INTO team_collaborators (id, team_id, user_id, role, status, created_at, updated_at, deleted)
+       VALUES (:id, :team, :member, 'MEMBER', 'LEFT', now(), now(), true)`,
+      { id: id(5), team: team.id, member: member.id },
+    );
+
+    try {
+      await runSql(ROLLBACK);
+
+      const tables = await sql<{ table_name: string }>(
+        `SELECT table_name FROM information_schema.tables
+         WHERE table_name IN ('license_signers', 'license_signer_holders', 'team_invite_sends')`,
+      );
+      expect(tables).toEqual([]);
+      expect(await columnType('users', 'signer_address')).toBeUndefined();
+      expect(await columnType('team_collaborators', 'invite_token_hash')).toBeUndefined();
+      const [row] = await sql<{ role: string; status: string; deleted: boolean }>(
+        'SELECT role, status, deleted FROM team_collaborators WHERE id = :id',
+        { id: id(5) },
+      );
+      expect(row).toEqual({ role: 'COLLABORATOR', status: 'ACCEPTED', deleted: true });
+    } finally {
+      // Later test files need the migrated schema.
+      await runSql(MIGRATION);
+    }
+
+    expect(await columnType('users', 'signer_address')).toBe('character varying');
   });
 });
 ```
@@ -1297,25 +1698,38 @@ Expected: FAIL, `ENOENT: no such file or directory … init-db_12.sql`.
 `src/scripts/db/init-db_12.sql`:
 
 ```sql
--- Console teams: membership roles and statuses, hashed invite tokens, each user's
--- verified signer wallet, and the license key registry. Safe to run more than once.
+-- Console teams. Safe to run more than once; init-db_12.down.sql undoes it.
+-- console-api has no migration runner: run this by hand on each database
+-- before deploying the code that reads it (see the PR's release checklist).
 
+-- Owner means the team's creator (teams.created_by). Rows claiming OWNER for
+-- anyone else are demoted; old collaborator rows become members.
+UPDATE team_collaborators tc SET role = 'MEMBER'
+FROM teams t
+WHERE t.id = tc.team_id
+  AND tc.role = 'OWNER'
+  AND tc.user_id IS DISTINCT FROM t.created_by;
 UPDATE team_collaborators SET role = 'MEMBER' WHERE role = 'COLLABORATOR';
 UPDATE team_collaborators SET status = 'PENDING' WHERE status = 'SENT';
 
 ALTER TABLE team_collaborators ADD COLUMN IF NOT EXISTS invite_token_hash VARCHAR(64);
-ALTER TABLE team_collaborators ADD COLUMN IF NOT EXISTS invite_expires_at TIMESTAMP;
+ALTER TABLE team_collaborators ADD COLUMN IF NOT EXISTS invite_expires_at TIMESTAMPTZ;
 ALTER TABLE team_collaborators ADD COLUMN IF NOT EXISTS invited_by VARCHAR(36);
 
--- Before the unique indexes: keep the earliest accepted row per (team, user)…
+-- Before the unique indexes: one active row per (team, user). The creator's
+-- OWNER row wins, then the earliest row.
 UPDATE team_collaborators SET deleted = TRUE, deleted_at = NOW()
 WHERE id IN (
   SELECT id FROM (
-    SELECT id, ROW_NUMBER() OVER (
-      PARTITION BY team_id, user_id ORDER BY created_at NULLS LAST, id
+    SELECT tc.id, ROW_NUMBER() OVER (
+      PARTITION BY tc.team_id, tc.user_id
+      ORDER BY COALESCE(tc.role = 'OWNER' AND tc.user_id = t.created_by, FALSE) DESC,
+               tc.created_at NULLS LAST,
+               tc.id
     ) AS position
-    FROM team_collaborators
-    WHERE status = 'ACCEPTED' AND deleted IS NOT TRUE AND user_id IS NOT NULL
+    FROM team_collaborators tc
+    LEFT JOIN teams t ON t.id = tc.team_id
+    WHERE tc.status = 'ACCEPTED' AND tc.deleted IS NOT TRUE AND tc.user_id IS NOT NULL
   ) ranked
   WHERE ranked.position > 1
 );
@@ -1345,8 +1759,27 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_team_collaborators_invite_token
   ON team_collaborators (invite_token_hash)
   WHERE invite_token_hash IS NOT NULL;
 
+-- One row per invite or resend email, for the limits in contract C7.
+CREATE TABLE IF NOT EXISTS team_invite_sends (
+  id VARCHAR(36) PRIMARY KEY NOT NULL,
+  team_id VARCHAR(36) NOT NULL,
+  membership_id VARCHAR(36) NOT NULL,
+  sent_by VARCHAR(36) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL,
+  updated_at TIMESTAMPTZ,
+  CONSTRAINT fk_team_invite_sends_team FOREIGN KEY (team_id) REFERENCES teams(id)
+);
+CREATE INDEX IF NOT EXISTS idx_team_invite_sends_team ON team_invite_sends (team_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_team_invite_sends_sender ON team_invite_sends (sent_by, created_at);
+CREATE INDEX IF NOT EXISTS idx_team_invite_sends_membership
+  ON team_invite_sends (membership_id, created_at);
+
 ALTER TABLE users ADD COLUMN IF NOT EXISTS signer_address VARCHAR(42);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS signer_verified_at TIMESTAMP;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS signer_verified_at TIMESTAMPTZ;
+-- A wallet signs for one user only (contract C6), whatever its letter case.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_signer_address
+  ON users (lower(signer_address))
+  WHERE signer_address IS NOT NULL;
 
 -- init-db_08 created configurations.client_id as VARCHAR(36), too short for a
 -- 42-character client ID; production was widened by hand. Widen only a column
@@ -1375,9 +1808,9 @@ CREATE TABLE IF NOT EXISTS license_signers (
   note VARCHAR(200),
   created_by VARCHAR(36),
   disabled_by VARCHAR(36),
-  disabled_at TIMESTAMP,
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP,
+  disabled_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ,
   CONSTRAINT fk_license_signers_team FOREIGN KEY (team_id) REFERENCES teams(id),
   CONSTRAINT license_signers_kind_check CHECK (kind IN ('MEMBER', 'API_KEY', 'EXTERNAL')),
   CONSTRAINT license_signers_address_check CHECK (signer_address = lower(signer_address))
@@ -1392,8 +1825,8 @@ CREATE TABLE IF NOT EXISTS license_signer_holders (
   signer_id VARCHAR(36) NOT NULL,
   user_id VARCHAR(36),
   name VARCHAR(100),
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP,
+  created_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ,
   CONSTRAINT fk_license_signer_holders_signer
     FOREIGN KEY (signer_id) REFERENCES license_signers(id) ON DELETE CASCADE,
   CONSTRAINT fk_license_signer_holders_user FOREIGN KEY (user_id) REFERENCES users(id),
@@ -1404,10 +1837,45 @@ CREATE INDEX IF NOT EXISTS idx_license_signer_holders_signer
   ON license_signer_holders (signer_id);
 ```
 
+`src/scripts/db/init-db_12.down.sql`:
+
+```sql
+-- Undoes init-db_12.sql. Roll the code back first (the old code reads none of
+-- this, so the code alone can be rolled back safely and this can wait). Data in
+-- the dropped tables and columns is lost.
+DROP TABLE IF EXISTS license_signer_holders;
+DROP TABLE IF EXISTS license_signers;
+DROP TABLE IF EXISTS team_invite_sends;
+
+DROP INDEX IF EXISTS idx_users_signer_address;
+ALTER TABLE users DROP COLUMN IF EXISTS signer_verified_at;
+ALTER TABLE users DROP COLUMN IF EXISTS signer_address;
+
+DROP INDEX IF EXISTS idx_team_collaborators_invite_token;
+DROP INDEX IF EXISTS idx_team_collaborators_pending_email;
+DROP INDEX IF EXISTS idx_team_collaborators_member;
+ALTER TABLE team_collaborators DROP COLUMN IF EXISTS invited_by;
+ALTER TABLE team_collaborators DROP COLUMN IF EXISTS invite_expires_at;
+ALTER TABLE team_collaborators DROP COLUMN IF EXISTS invite_token_hash;
+
+-- The old code knows OWNER/COLLABORATOR and PENDING/ACCEPTED. Members who were
+-- removed or left stay out of the team: their rows are deleted.
+UPDATE team_collaborators SET role = 'COLLABORATOR' WHERE role = 'MEMBER';
+UPDATE team_collaborators
+  SET deleted = TRUE, deleted_at = COALESCE(deleted_at, NOW())
+  WHERE status IN ('REVOKED', 'LEFT');
+UPDATE team_collaborators SET status = 'ACCEPTED' WHERE status IN ('REVOKED', 'LEFT');
+
+-- Not undone, on purpose:
+-- - duplicate rows folded into one stay deleted;
+-- - OWNER rows demoted for non-creators stay COLLABORATOR;
+-- - configurations.client_id stays wide (narrowing could fail or truncate).
+```
+
 - [ ] **Step 4: Run the migration test**
 
 Run: `npm test -- test/db/migration-12.test.ts`
-Expected: `4 passed`. The global setup applies `init-db_12.sql` with the others, because it picks up every `init-db_*.sql`.
+Expected: `7 passed`. The global setup applies `init-db_12.sql` along with the other scripts, because it picks up `init-db_*.sql`. Its pattern, `/^init-db_\d+\.sql$/`, skips `init-db_12.down.sql`.
 
 - [ ] **Step 5: Write the failing model test**
 
@@ -1418,17 +1886,24 @@ import { describe, expect, it } from 'vitest';
 
 import { LicenseSigner, SignerKinds } from '@/models/licenseSigner.model';
 import { LicenseSignerHolder } from '@/models/licenseSignerHolder.model';
-import { TeamCollaborator, TeamRoles } from '@/models/teamCollaborator.model';
+import {
+  InvitationStatuses,
+  TeamCollaborator,
+  TeamRoles,
+} from '@/models/teamCollaborator.model';
+import { TeamInviteSend } from '@/models/teamInviteSend.model';
 import { User } from '@/models/user.model';
 import { addMember, createOwner, createUser } from '../support/fixtures';
 
 describe('team models', () => {
-  it('accepts MEMBER and rejects the retired COLLABORATOR role', async () => {
+  it('accepts MEMBER and LEFT, and rejects the retired COLLABORATOR role', async () => {
     const { team } = await createOwner();
     const person = await createUser();
 
     const member = await addMember(team.id!, person);
     expect(member.role).toBe(TeamRoles.MEMBER);
+    await member.update({ status: InvitationStatuses.LEFT, deleted: true });
+    expect(member.status).toBe('LEFT');
 
     await expect(
       TeamCollaborator.create({
@@ -1467,23 +1942,29 @@ describe('team models', () => {
     ).toEqual(['Backend service', user.email].sort());
   });
 
-  it("stores a user's verified signer", async () => {
-    const user = await createUser();
+  it("stores a user's verified signer and logs invite sends", async () => {
+    const { team, user, membership } = await createOwner();
     const verifiedAt = new Date('2026-10-02T12:00:00Z');
 
     await user.update({
       signer_address: '0xdef0000000000000000000000000000000000000',
       signer_verified_at: verifiedAt,
     });
+    const send = await TeamInviteSend.create({
+      team_id: team.id!,
+      membership_id: membership.id!,
+      sent_by: user.id!,
+    });
 
     const reloaded = await User.findOne({ where: { id: user.id! } });
     expect(reloaded!.signer_address).toBe('0xdef0000000000000000000000000000000000000');
     expect(reloaded!.signer_verified_at!.toISOString()).toBe(verifiedAt.toISOString());
+    expect(send.get('created_at')).toBeInstanceOf(Date);
   });
 });
 ```
 
-Append to `test/support/fixtures.ts`:
+Append to `test/support/fixtures.ts`, and move the new `import` up to join the others:
 
 ```ts
 import { InvitationStatuses, TeamRoles } from '@/models/teamCollaborator.model';
@@ -1498,8 +1979,6 @@ export const addMember = (teamId: string, user: User) =>
     status: InvitationStatuses.ACCEPTED,
   });
 ```
-
-Move the new `import` line up to join the other imports at the top of the file.
 
 - [ ] **Step 6: Run it to confirm it fails**
 
@@ -1524,6 +2003,7 @@ import { FilterObject, transformObjectToSequelize } from '@/utils/filter';
 import { User } from './user.model';
 import { Team } from './team.model';
 
+// Descriptive only: who owns a team is teams.created_by (see teamContext.service).
 export enum TeamRoles {
   OWNER = 'OWNER',
   MEMBER = 'MEMBER',
@@ -1533,10 +2013,11 @@ export enum InvitationStatuses {
   PENDING = 'PENDING',
   ACCEPTED = 'ACCEPTED',
   REVOKED = 'REVOKED',
+  LEFT = 'LEFT',
 }
 
 // One row per person per team: the owner's own row, accepted members, pending
-// invites (user_id null until accepted) and revoked memberships.
+// invites (user_id null until accepted), and members who were removed or left.
 export class TeamCollaborator extends Model<
   InferAttributes<TeamCollaborator>,
   InferCreationAttributes<TeamCollaborator>
@@ -1653,6 +2134,18 @@ TeamCollaborator.belongsTo(User, { foreignKey: 'user_id' });
 TeamCollaborator.belongsTo(Team, { foreignKey: 'team_id' });
 ```
 
+`DataTypes.DATE` is `TIMESTAMP WITH TIME ZONE` in Sequelize's Postgres dialect, which matches the new columns.
+
+`TeamRoles.COLLABORATOR` no longer exists, and #80 uses it in two places. Point both at `TeamRoles.MEMBER`, so new rows match what the migration turns old ones into:
+
+- `src/controllers/teamCollaborator.controller.ts`, in `invitePersonToMyTeam`: `role: TeamRoles.COLLABORATOR` becomes `role: TeamRoles.MEMBER`;
+- `src/services/teamCollaborator.service.ts`, in `markAsAccepted`: `role: TeamRoles.COLLABORATOR` becomes `role: TeamRoles.MEMBER`. Keep its comment, with "collaborator" changed to "member".
+
+In `test/api/regressions-80.test.ts`, the two role assertions follow:
+
+- `expect(await invitedRole('pat@x.test')).toBe('COLLABORATOR');` becomes `.toBe('MEMBER')`;
+- in the `invitation_code` test, `role: 'COLLABORATOR'` becomes `role: 'MEMBER'`.
+
 - [ ] **Step 8: Add the signer columns to `src/models/user.model.ts`**
 
 In the class, after `declare address?: string;`:
@@ -1675,7 +2168,7 @@ In `User.init`, after the `address` attribute:
     },
 ```
 
-- [ ] **Step 9: Write the registry models**
+- [ ] **Step 9: Write the registry and invite-send models**
 
 `src/models/licenseSigner.model.ts`:
 
@@ -1802,6 +2295,52 @@ LicenseSignerHolder.belongsTo(LicenseSigner, { foreignKey: 'signer_id' });
 LicenseSignerHolder.belongsTo(User, { foreignKey: 'user_id' });
 ```
 
+`src/models/teamInviteSend.model.ts`:
+
+```ts
+import {
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  Sequelize,
+} from 'sequelize';
+
+import DB from '@/services/db';
+
+/** One invite or resend email, counted by the invite limits. */
+export class TeamInviteSend extends Model<
+  InferAttributes<TeamInviteSend>,
+  InferCreationAttributes<TeamInviteSend>
+> {
+  declare id?: string;
+  declare team_id: string;
+  declare membership_id: string;
+  declare sent_by: string;
+}
+
+TeamInviteSend.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      primaryKey: true,
+    },
+    team_id: { type: DataTypes.UUID, allowNull: false },
+    membership_id: { type: DataTypes.UUID, allowNull: false },
+    sent_by: { type: DataTypes.UUID, allowNull: false },
+  },
+  {
+    sequelize: DB.connection as Sequelize,
+    modelName: 'TeamInviteSend',
+    tableName: 'team_invite_sends',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+);
+```
+
 - [ ] **Step 10: Write the wire types and `ApiError`**
 
 `src/types/teams.ts`:
@@ -1811,7 +2350,7 @@ LicenseSignerHolder.belongsTo(User, { foreignKey: 'user_id' });
 // docs/superpowers/plans/2026-10-02-console-teams.md. Change them there first.
 
 export type TeamRole = 'OWNER' | 'MEMBER';
-export type MembershipStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED';
+export type MembershipStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'LEFT';
 
 export interface TeamSummary {
   id: string;
@@ -1824,6 +2363,11 @@ export interface TeamSummary {
   isPersonal: boolean;
 }
 
+export interface MemberKey {
+  licenseTokenId: number;
+  signerAddress: `0x${string}`;
+}
+
 export interface TeamMember {
   id: string;
   userId: string | null;
@@ -1832,6 +2376,7 @@ export interface TeamMember {
   role: TeamRole;
   status: MembershipStatus;
   signerAddress: `0x${string}` | null;
+  memberKeys: MemberKey[];
   invitedAt: string;
   inviteExpiresAt: string | null;
 }
@@ -1859,10 +2404,16 @@ export type HolderInput = { userId: string } | { name: string };
 
 export interface LicenseAccess {
   access: 'OWNER' | 'MEMBER' | 'NONE';
+  memberOfTeam: boolean;
   teamId: string | null;
   signerAddress: `0x${string}` | null;
-  /** The caller's users.email, for the console data proxy's audit line. */
   userEmail: string;
+}
+
+export interface InvitationPreview {
+  teamName: string;
+  ownerEmail: string;
+  expiresAt: string;
 }
 ```
 
@@ -1920,34 +2471,43 @@ Run: `npm run typecheck`
 Expected: exit 0.
 
 ```bash
-npx prettier --write src/models src/types/teams.ts src/utils/apiError.ts test
-git add src/scripts/db/init-db_12.sql src/models src/types/teams.ts src/utils/apiError.ts test
-git commit -m "feat(teams): add membership statuses, user signer columns and the license key registry schema"
+npx prettier --write src/models src/types/teams.ts src/utils/apiError.ts src/controllers/teamCollaborator.controller.ts src/services/teamCollaborator.service.ts test
+git add src/scripts/db/init-db_12.sql src/scripts/db/init-db_12.down.sql src/models src/types/teams.ts src/utils/apiError.ts src/controllers/teamCollaborator.controller.ts src/services/teamCollaborator.service.ts test
+git commit -m "feat(teams): migrate memberships, signers and the key registry, with a rollback script"
 ```
 
 ---
 
-### Task 4: Team context: `resolveTeamContext`, `requireOwner`, and `/api/me` on the personal team
+### Task 4: Team context: owner by `teams.created_by`, the audience rule, and `/api/me`
 
 **Files:**
 
 - Create: `src/services/membership.service.ts`, `src/services/teamContext.service.ts`
 - Modify: `src/controllers/user.controller.ts` (`getCompanyAndTeam`)
+- Modify: `src/app/api/me/route.ts` (401 `UNAUTHORIZED` for an unknown user)
+- Modify: `test/api/regressions-80.test.ts` (one assertion, from 404 to 401)
 - Test: `test/services/team-context.test.ts`
 
 **Interfaces:**
 
-- Consumes (Task 3): `TeamCollaborator`, `TeamRoles`, `InvitationStatuses`, `ApiError`.
-- Produces:
-  - `activeMembershipWhere` (where-fragment: accepted and not deleted).
-  - `findPersonalMembership(userId: string): Promise<TeamCollaborator | null>`.
-  - `findMembership(teamId: string, userId: string): Promise<TeamCollaborator | null>`.
-  - `TEAM_HEADER = 'x-team-id'`.
-  - `interface TeamContext { user: User; role: TeamRoles; team: Team | null; company: Company | null; membership: TeamCollaborator | null; owner: User; ownerAddress: string | null }`.
-  - `requireUser(request: NextRequest): Promise<User>`: 401 `UNAUTHORIZED`.
-  - `resolveTeamContext(request: NextRequest): Promise<TeamContext>`: 401 `UNAUTHORIZED`, 403 `NOT_A_MEMBER`.
-  - `requireOwner(ctx: TeamContext): void`: 403 `OWNER_ONLY` with message `Only the team owner can do this`.
+- Consumes (Task 3): `Team`, `TeamCollaborator`, `TeamRoles`, `InvitationStatuses`, `ApiError`. Consumes (#80): `getToken` from `@/utils/auth`.
+- Produces, in `@/services/membership.service`:
+  - `notDeleted`, a where fragment (`deleted IS NOT TRUE`);
+  - `activeMembershipWhere`, a where fragment (accepted and not deleted);
+  - `findPersonalTeam(userId): Promise<Team | null>`, the team the user created (`teams.created_by`), oldest first;
+  - `findMembership(teamId, userId): Promise<TeamCollaborator | null>`, accepted and not deleted;
+  - `findDefaultTeam(userId): Promise<Team | null>`: the personal team; for a legacy collaborator without one, the team of their oldest accepted membership.
+- Produces, in `@/services/teamContext.service`:
+  - `TEAM_HEADER = 'x-team-id'` and `CONSOLE_AUDIENCE = 'developer-platform'`.
+  - `interface TeamContext { user: User; role: TeamRoles; team: Team; company: Company; membership: TeamCollaborator | null; owner: User; ownerAddress: string | null }`. `team` and `company` are never null.
+  - `requireUser(request, options?: { consoleOnly?: boolean }): Promise<User>`. It answers 401 `UNAUTHORIZED` (`User not found`); with `consoleOnly`, also when the token's `aud` lacks `developer-platform`.
+  - `resolveTeamContext(request, options?: { consoleOnly?: boolean }): Promise<TeamContext>`. Errors:
+    - 401 `UNAUTHORIZED`;
+    - 403 `NOT_A_MEMBER` (`You are not a member of this team`);
+    - 403 `NOT_A_MEMBER` (`Finish setting up your team first`) when there's no team or company to act for.
+  - `requireOwner(ctx): void`: 403 `OWNER_ONLY` (`Only the team owner can do this`). `ctx.role` is `OWNER` exactly when `team.created_by === user.id`.
   - `companyScope(ctx): IUserWithCompanyAndTeam`, for the existing company-scoped controllers.
+- `consoleOnly` is passed by the routes that only the console calls (Tasks 7, 8, 10, 12 and 13). The existing `/api/my/*` data routes don't pass it.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1963,21 +2523,42 @@ import {
   TeamRoles,
 } from '@/models/teamCollaborator.model';
 import { requireOwner, resolveTeamContext } from '@/services/teamContext.service';
+import { sql } from '../support/db';
 import { addMember, createOwner, createOwnerFor, createUser } from '../support/fixtures';
 import { read, request } from '../support/http';
 
-const contextFor = async (address: string | undefined, teamId?: string) =>
-  resolveTeamContext(await request('GET', '/api/my/anything', { as: address, teamId }));
+const contextFor = async (
+  address: string | undefined,
+  teamId?: string,
+  options: { aud?: string[]; consoleOnly?: boolean } = {},
+) =>
+  resolveTeamContext(
+    await request('GET', '/api/my/anything', { as: address, teamId, aud: options.aud }),
+    { consoleOnly: options.consoleOnly },
+  );
+
+const insertRow = (
+  teamId: string,
+  userId: string,
+  role: string,
+  status = 'ACCEPTED',
+  deleted = false,
+) =>
+  sql(
+    `INSERT INTO team_collaborators (id, team_id, user_id, role, status, created_at, updated_at, deleted)
+     VALUES (gen_random_uuid()::text, :teamId, :userId, :role, :status, now() - interval '1 day', now(), :deleted)`,
+    { teamId, userId, role, status, deleted },
+  );
 
 describe('resolveTeamContext', () => {
-  it("uses the caller's own team when no team header is sent", async () => {
+  it('uses the team the caller created when no header is sent', async () => {
     const { user, team, company } = await createOwner('Acme');
 
     const ctx = await contextFor(user.address!);
 
     expect(ctx.role).toBe(TeamRoles.OWNER);
-    expect(ctx.team!.id).toBe(team.id);
-    expect(ctx.company!.id).toBe(company.id);
+    expect(ctx.team.id).toBe(team.id);
+    expect(ctx.company.id).toBe(company.id);
     expect(ctx.owner.id).toBe(user.id);
     expect(ctx.ownerAddress).toBe(user.address);
   });
@@ -1993,7 +2574,27 @@ describe('resolveTeamContext', () => {
     expect(ctx.user.id).toBe(member.id);
     expect(ctx.owner.id).toBe(acme.user.id);
     expect(ctx.ownerAddress).toBe(acme.user.address);
-    expect(ctx.company!.id).toBe(acme.company.id);
+    expect(ctx.company.id).toBe(acme.company.id);
+  });
+
+  it('never trusts an OWNER membership row of someone who did not create the team', async () => {
+    const acme = await createOwner('Acme');
+    const impostor = await createUser();
+    await insertRow(acme.team.id!, impostor.id!, 'OWNER');
+
+    const ctx = await contextFor(impostor.address!, acme.team.id!);
+
+    expect(ctx.role).toBe(TeamRoles.MEMBER);
+    expect(() => requireOwner(ctx)).toThrow('Only the team owner can do this');
+  });
+
+  it('lets the creator into their own team even without a membership row', async () => {
+    const acme = await createOwner('Acme');
+    await acme.membership.destroy();
+
+    const ctx = await contextFor(acme.user.address!, acme.team.id!);
+
+    expect(ctx.role).toBe(TeamRoles.OWNER);
   });
 
   it('refuses a team the caller does not belong to', async () => {
@@ -2004,20 +2605,28 @@ describe('resolveTeamContext', () => {
       {
         status: 403,
         code: 'NOT_A_MEMBER',
+        message: 'You are not a member of this team',
       },
     );
   });
 
-  it('refuses removed and pending memberships', async () => {
+  it('refuses removed, departed and pending memberships', async () => {
     const acme = await createOwner('Acme');
     const removed = await createUser();
-    const row = await addMember(acme.team.id!, removed);
-    await row.update({
+    const left = await createUser();
+    const invited = await createUser();
+    await (
+      await addMember(acme.team.id!, removed)
+    ).update({
       status: InvitationStatuses.REVOKED,
       deleted: true,
-      deleted_at: new Date(),
     });
-    const invited = await createUser();
+    await (
+      await addMember(acme.team.id!, left)
+    ).update({
+      status: InvitationStatuses.LEFT,
+      deleted: true,
+    });
     await TeamCollaborator.create({
       team_id: acme.team.id!,
       user_id: invited.id!,
@@ -2026,30 +2635,57 @@ describe('resolveTeamContext', () => {
       status: InvitationStatuses.PENDING,
     });
 
-    for (const person of [removed, invited]) {
+    for (const person of [removed, left, invited]) {
       await expect(contextFor(person.address!, acme.team.id!)).rejects.toMatchObject({
         code: 'NOT_A_MEMBER',
       });
     }
   });
 
-  it('refuses an unknown user with 401', async () => {
+  it('refuses an unknown user, an anonymous caller, and (console-only) another audience with 401', async () => {
+    const { user } = await createOwner('Acme');
+
     await expect(
       contextFor('0x1111111111111111111111111111111111111111'),
     ).rejects.toMatchObject({
       status: 401,
       code: 'UNAUTHORIZED',
+      message: 'User not found',
     });
     await expect(contextFor(undefined)).rejects.toMatchObject({ status: 401 });
+    await expect(
+      contextFor(user.address!, undefined, {
+        aud: ['some-other-app'],
+        consoleOnly: true,
+      }),
+    ).rejects.toMatchObject({ status: 401, code: 'UNAUTHORIZED' });
+    // Not console-only: another audience is still accepted, as today.
+    await expect(
+      contextFor(user.address!, undefined, { aud: ['some-other-app'] }),
+    ).resolves.toMatchObject({ role: TeamRoles.OWNER });
   });
 
-  it('treats a user who has not finished sign-up as the owner of no team, as before', async () => {
+  it('never returns an empty company: a user who has not finished sign-up gets nothing to act on', async () => {
     const user = await createUser();
 
-    const ctx = await contextFor(user.address!);
+    await expect(contextFor(user.address!)).rejects.toMatchObject({
+      status: 403,
+      code: 'NOT_A_MEMBER',
+      message: 'Finish setting up your team first',
+    });
+  });
 
-    expect(ctx).toMatchObject({ role: TeamRoles.OWNER, team: null, company: null });
-    expect(ctx.owner.id).toBe(user.id);
+  it('gives a legacy collaborator with no team of their own the oldest team they joined', async () => {
+    const older = await createOwner('Older');
+    const newer = await createOwner('Newer');
+    const collaborator = await createUser();
+    await insertRow(older.team.id!, collaborator.id!, 'MEMBER');
+    await addMember(newer.team.id!, collaborator);
+
+    const ctx = await contextFor(collaborator.address!);
+
+    expect(ctx.team.id).toBe(older.team.id);
+    expect(ctx.role).toBe(TeamRoles.MEMBER);
   });
 
   it('requireOwner refuses members with OWNER_ONLY', async () => {
@@ -2073,75 +2709,57 @@ describe('resolveTeamContext', () => {
   });
 });
 
-describe('/api/me with several teams', () => {
+describe('/api/me', () => {
+  const me = async (as: string, teamId?: string) =>
+    read(await getMe(await request('GET', '/api/me', { as, teamId })));
+
   it("shows the caller's own company even when they joined another team first", async () => {
     const other = await createOwner('Other');
     const person = await createUser();
     await addMember(other.team.id!, person); // the oldest membership row
     const own = await createOwnerFor(person, 'Mine');
 
-    const me = await read(
-      await getMe(await request('GET', '/api/me', { as: person.address! })),
-    );
+    const response = await me(person.address!);
 
-    expect(me.status).toBe(200);
-    expect(me.body.role).toBe('OWNER');
-    expect(me.body.team.id).toBe(own.team.id);
-    expect(me.body.company.name).toBe('Mine Co');
+    expect(response.status).toBe(200);
+    expect(response.body.role).toBe('OWNER');
+    expect(response.body.team.id).toBe(own.team.id);
+    expect(response.body.company.name).toBe('Mine Co');
   });
 
   it('ignores X-Team-Id, even for a team the caller has left', async () => {
     const other = await createOwner('Other');
     const person = await createUser();
     const row = await addMember(other.team.id!, person);
-    await row.update({ status: InvitationStatuses.REVOKED, deleted: true });
+    await row.update({ status: InvitationStatuses.LEFT, deleted: true });
     const own = await createOwnerFor(person, 'Mine');
 
-    const me = await read(
-      await getMe(
-        await request('GET', '/api/me', { as: person.address!, teamId: other.team.id! }),
-      ),
-    );
+    const response = await me(person.address!, other.team.id!);
 
-    expect(me.status).toBe(200);
-    expect(me.body.team.id).toBe(own.team.id);
+    expect(response.status).toBe(200);
+    expect(response.body.team.id).toBe(own.team.id);
+  });
+
+  it('keeps a legacy collaborator working: their oldest team, as a member', async () => {
+    const acme = await createOwner('Acme');
+    const collaborator = await createUser();
+    await addMember(acme.team.id!, collaborator);
+
+    const response = await me(collaborator.address!);
+
+    expect(response.body.team.id).toBe(acme.team.id);
+    expect(response.body.company.name).toBe('Acme Co');
+    expect(response.body.role).toBe('MEMBER');
+  });
+
+  it('answers 401 UNAUTHORIZED for a wallet with no console account', async () => {
+    expect(await me('0x1111111111111111111111111111111111111111')).toEqual({
+      status: 401,
+      body: { message: 'User not found', code: 'UNAUTHORIZED' },
+    });
   });
 });
 ```
-
-This needs `createOwnerFor(user, label)`, which gives an existing user their own company and team. Refactor `createOwner` in `test/support/fixtures.ts` to use it:
-
-```ts
-/** Give an existing user the company, personal team and OWNER membership sign-up creates. */
-export const createOwnerFor = async (user: User, label = 'Acme') => {
-  const company = await Company.create({
-    name: `${label} Co`,
-    website: '',
-    region: 'North America',
-    type: 'startup',
-    build_for: 'fleet',
-    created_by: user.id!,
-  });
-  const team = await Team.create({
-    name: `${label} Co`,
-    company_id: company.id!,
-    created_by: user.id!,
-  });
-  const membership = await TeamCollaborator.create({
-    team_id: team.id!,
-    user_id: user.id!,
-    role: 'OWNER',
-    status: 'ACCEPTED',
-  });
-  return { user, company, team, membership };
-};
-
-/** A user who finished sign-up: their company, personal team and OWNER membership. */
-export const createOwner = async (label = 'Acme') =>
-  createOwnerFor(await createUser({ name: `${label} Owner` }), label);
-```
-
-The test file imports `createOwnerFor` from `../support/fixtures` together with `addMember`, `createOwner` and `createUser`.
 
 - [ ] **Step 2: Run them to confirm they fail**
 
@@ -2153,22 +2771,21 @@ Expected: FAIL, `Failed to resolve import "@/services/teamContext.service"`.
 ```ts
 import { Op } from 'sequelize';
 
-import {
-  InvitationStatuses,
-  TeamCollaborator,
-  TeamRoles,
-} from '@/models/teamCollaborator.model';
+import { Team } from '@/models/team.model';
+import { InvitationStatuses, TeamCollaborator } from '@/models/teamCollaborator.model';
+
+export const notDeleted = { [Op.not]: true };
 
 /** A membership counts only while accepted and not deleted. */
 export const activeMembershipWhere = {
   status: InvitationStatuses.ACCEPTED,
-  deleted: { [Op.not]: true },
+  deleted: notDeleted,
 };
 
-/** The caller's own team: the OWNER membership created at sign-up. */
-export const findPersonalMembership = (userId: string) =>
-  TeamCollaborator.findOne({
-    where: { user_id: userId, role: TeamRoles.OWNER, ...activeMembershipWhere },
+/** The team the user created at sign-up: the only kind of team anyone owns. */
+export const findPersonalTeam = (userId: string) =>
+  Team.findOne({
+    where: { created_by: userId, deleted: notDeleted },
     order: [['created_at', 'ASC']],
   });
 
@@ -2176,77 +2793,128 @@ export const findMembership = (teamId: string, userId: string) =>
   TeamCollaborator.findOne({
     where: { team_id: teamId, user_id: userId, ...activeMembershipWhere },
   });
+
+/**
+ * The team a request without X-Team-Id acts for: the caller's own. A legacy
+ * collaborator who never created a team gets the oldest team they joined, so
+ * they keep working through the deploy (contract C7, GET /api/me).
+ */
+export const findDefaultTeam = async (userId: string): Promise<Team | null> => {
+  const personal = await findPersonalTeam(userId);
+  if (personal) return personal;
+
+  const oldest = await TeamCollaborator.findOne({
+    where: { user_id: userId, ...activeMembershipWhere },
+    order: [['created_at', 'ASC']],
+  });
+  return oldest
+    ? Team.findOne({ where: { id: oldest.team_id, deleted: notDeleted } })
+    : null;
+};
 ```
 
 - [ ] **Step 4: Write `src/services/teamContext.service.ts`**
 
 ```ts
-import { Op } from 'sequelize';
-
 import { AuthenticationMiddleware } from '@/middlewares/authentication.middleware';
 import { Company } from '@/models/company.model';
 import { Team } from '@/models/team.model';
 import { TeamCollaborator, TeamRoles } from '@/models/teamCollaborator.model';
 import { User } from '@/models/user.model';
-import { findMembership, findPersonalMembership } from '@/services/membership.service';
+import {
+  findDefaultTeam,
+  findMembership,
+  notDeleted,
+} from '@/services/membership.service';
 import type { ICompany } from '@/types/company';
 import type { IUserWithCompanyAndTeam } from '@/types/user';
 import { ApiError } from '@/utils/apiError';
+import { getToken } from '@/utils/auth';
 
 /** Sent by the console while a team other than the caller's own is active (contract C4). */
 export const TEAM_HEADER = 'x-team-id';
 
+/** The console's client ID: dex puts it in `aud` of every console login (contract C4). */
+export const CONSOLE_AUDIENCE = 'developer-platform';
+
 export interface TeamContext {
   /** The signed-in caller. */
   user: User;
+  /** OWNER exactly when the caller created the team. */
   role: TeamRoles;
-  /** Null only for a caller who hasn't finished sign-up and sent no header. */
-  team: Team | null;
-  company: Company | null;
+  team: Team;
+  company: Company;
   membership: TeamCollaborator | null;
-  /** The team owner. Their wallet owns the team's licenses. */
+  /** The team's creator. Their wallet owns the team's licenses. */
   owner: User;
   ownerAddress: string | null;
 }
 
-export const requireUser = async (request: NextRequest): Promise<User> => {
+const unauthorized = () => new ApiError(401, 'UNAUTHORIZED', 'User not found');
+
+const audienceOf = async (request: NextRequest): Promise<string[]> => {
+  try {
+    const aud = (await getToken({ req: request }))?.aud;
+    return Array.isArray(aud) ? aud : aud ? [aud] : [];
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * The signed-in console user. Team, invite, signer, registry and license-access
+ * routes pass `consoleOnly`: their token must be a console login (contract C4).
+ */
+export const requireUser = async (
+  request: NextRequest,
+  { consoleOnly = false }: { consoleOnly?: boolean } = {},
+): Promise<User> => {
+  if (consoleOnly && !(await audienceOf(request)).includes(CONSOLE_AUDIENCE)) {
+    throw unauthorized();
+  }
   await AuthenticationMiddleware(request);
   const user = request.user?.user as User | null | undefined;
-  if (!user?.id) throw new ApiError(401, 'UNAUTHORIZED', 'User not found');
+  if (!user?.id) throw unauthorized();
   return user;
 };
 
-const notAMember = () =>
-  new ApiError(403, 'NOT_A_MEMBER', 'You are not a member of this team');
+const notAMember = (message = 'You are not a member of this team') =>
+  new ApiError(403, 'NOT_A_MEMBER', message);
 
-export const resolveTeamContext = async (request: NextRequest): Promise<TeamContext> => {
-  const user = await requireUser(request);
+export const resolveTeamContext = async (
+  request: NextRequest,
+  options: { consoleOnly?: boolean } = {},
+): Promise<TeamContext> => {
+  const user = await requireUser(request, options);
   const teamId = request.headers.get(TEAM_HEADER);
 
-  const membership = teamId
-    ? await findMembership(teamId, user.id!)
-    : await findPersonalMembership(user.id!);
-  if (teamId && !membership) throw notAMember();
+  let team: Team | null;
+  if (teamId) {
+    team = await Team.findOne({ where: { id: teamId, deleted: notDeleted } });
+    // The creator always belongs to their own team, row or no row.
+    const belongs =
+      !!team &&
+      (team.created_by === user.id || !!(await findMembership(team.id!, user.id!)));
+    if (!belongs) throw notAMember();
+  } else {
+    team = await findDefaultTeam(user.id!);
+  }
 
-  const team = membership
-    ? await Team.findOne({
-        where: { id: membership.team_id, deleted: { [Op.not]: true } },
-      })
-    : null;
-  if (teamId && !team) throw notAMember();
+  const company = team ? await Company.findOne({ where: { id: team.company_id } }) : null;
+  // Without a team and a company there's nothing to scope to; an empty company ID
+  // must never reach a query (some list filters drop empty values).
+  if (!team || !company) throw notAMember('Finish setting up your team first');
 
-  const owner =
-    team && team.created_by !== user.id
-      ? await User.findOne({ where: { id: team.created_by } })
-      : user;
+  const isOwner = team.created_by === user.id;
+  const owner = isOwner ? user : await User.findOne({ where: { id: team.created_by } });
   if (!owner) throw notAMember();
 
   return {
     user,
-    role: membership?.role === TeamRoles.MEMBER ? TeamRoles.MEMBER : TeamRoles.OWNER,
+    role: isOwner ? TeamRoles.OWNER : TeamRoles.MEMBER,
     team,
-    company: team ? await Company.findOne({ where: { id: team.company_id } }) : null,
-    membership,
+    company,
+    membership: await findMembership(team.id!, user.id!),
     owner,
     ownerAddress: owner.address ?? null,
   };
@@ -2262,51 +2930,98 @@ export const requireOwner = (ctx: TeamContext) => {
 export const companyScope = (ctx: TeamContext): IUserWithCompanyAndTeam =>
   ({
     ...ctx.user.get({ plain: true }),
-    company: ctx.company?.get({ plain: true }) as ICompany,
+    company: ctx.company.get({ plain: true }) as ICompany,
   }) as IUserWithCompanyAndTeam;
 ```
 
-- [ ] **Step 5: Point `getCompanyAndTeam` at the personal team**
+- [ ] **Step 5: Point `getCompanyAndTeam` at the default team**
 
 In `src/controllers/user.controller.ts`:
 
-- Replace `import { findTeamCollaboratorByUserId } from '@/services/teamCollaborator.service';` with `import { findPersonalMembership } from '@/services/membership.service';`.
-- Change the first lines of `getCompanyAndTeam` to:
+- Replace `import { findTeamCollaboratorByUserId } from '@/services/teamCollaborator.service';` with `import { findDefaultTeam } from '@/services/membership.service';`.
+- Replace the whole `getCompanyAndTeam` with:
 
 ```ts
 export const getCompanyAndTeam = async (user: User) => {
   const userId = user?.id ?? '';
-  // Always the caller's own team. Other teams are reached with X-Team-Id.
-  const teamAssociated = await findPersonalMembership(userId);
-  const team = await findTeamById(teamAssociated?.team_id ?? '');
+  // The caller's own team. A legacy collaborator who never created one gets the
+  // oldest team they joined; other teams are reached with X-Team-Id.
+  const team = await findDefaultTeam(userId);
+  const company = await findCompanyById(team?.company_id ?? '');
+  const companyOwner = await findUserById(company?.created_by ?? '');
+
+  return {
+    ...(user.dataValues || user),
+    role: team ? (team.created_by === userId ? 'OWNER' : 'MEMBER') : undefined,
+    company: company?.dataValues,
+    team: team?.dataValues,
+    company_email_owner: companyOwner?.dataValues.email,
+  };
+};
 ```
 
-Leave the rest of the function as it is.
+`findTeamById` is no longer used here. Remove its import if nothing else in the file uses it.
 
-- [ ] **Step 6: Run the tests**
+- [ ] **Step 6: Answer 401 for an unknown user in `/api/me`**
+
+In `src/app/api/me/route.ts`:
+
+- In `GET`, replace `return Response.json({ message: 'User not found' }, { status: 404 });` with:
+
+```ts
+return Response.json(
+  { message: 'User not found', code: 'UNAUTHORIZED' },
+  { status: 401 },
+);
+```
+
+- At the top of `PUT`, after `await AuthenticationMiddleware(request);`, add:
+
+```ts
+if (!request.user?.user?.id) {
+  return Response.json(
+    { message: 'User not found', code: 'UNAUTHORIZED' },
+    { status: 401 },
+  );
+}
+```
+
+`PUT /api/me/complete` keeps its 404 for "no account yet". It's the sign-up path, where a missing account is expected, and Task 2 pins that answer.
+
+In `test/api/regressions-80.test.ts`, the takeover test's `expect(asAttacker.status).toBe(404);` becomes `expect(asAttacker.status).toBe(401);`.
+
+- [ ] **Step 7: Run the tests**
 
 Run: `npm test -- test/services/team-context.test.ts test/api`
-Expected: all pass.
+Expected: all pass. That's 10 `resolveTeamContext` tests and 4 `/api/me` tests, plus the harness and the #80 regressions.
 
-- [ ] **Step 7: Typecheck and commit**
+- [ ] **Step 8: Typecheck and commit**
 
 Run: `npm run typecheck`
 Expected: exit 0.
 
 ```bash
-npx prettier --write src/services/membership.service.ts src/services/teamContext.service.ts src/controllers/user.controller.ts test
-git add src/services/membership.service.ts src/services/teamContext.service.ts src/controllers/user.controller.ts test
-git commit -m "feat(teams): resolve the active team from X-Team-Id and keep /api/me on the personal team"
+npx prettier --write src/services/membership.service.ts src/services/teamContext.service.ts src/controllers/user.controller.ts src/app/api/me/route.ts test
+git add src/services/membership.service.ts src/services/teamContext.service.ts src/controllers/user.controller.ts src/app/api/me/route.ts test
+git commit -m "feat(teams): resolve the active team, with ownership from teams.created_by and the console audience rule"
 ```
 
 ---
 
-### Task 5: Team context and owner-only writes in apps, connections, redirect URIs, signers and workspace
+### Task 5: Apps, connections, redirect URIs, signers and workspace under a team
 
-Each of these routes looked up the company with `getCompanyAndTeam(user)`. Now they take it from the active team. Every non-GET handler calls `requireOwner(ctx)` first.
+These routes looked up the company with `getCompanyAndTeam(user)`. Now they take it from the active team. Every non-GET handler calls `requireOwner(ctx)` first, and members never see secrets. Along the way this task fixes five existing problems:
+
+- **List filters drop keys.** `transformObject` (`src/utils/filter.ts`) keeps only the **last** non-empty filter key. Any list with two filters silently loses one, including the company condition.
+- **Redirect URIs and signers can attach to any app.** Their POSTs never checked that the app belongs to the caller's company.
+- **Their DELETEs match the wrong column.** They matched the row's ID against `app_id`.
+- **`PUT /api/my/apps/:id` passes the body straight through,** so it could set `company_id` and move an app to another company.
+- **Support email crashes for an unknown user.** It answered 400 instead of 401.
 
 **Files:**
 
+- Modify: `src/utils/filter.ts` (`transformObject`)
+- Modify: `src/services/redirectUri.service.ts`, `src/services/signer.service.ts`, `src/controllers/redirectUri.controller.ts`, `src/controllers/signer.controller.ts` (delete one row by its ID)
 - Modify (whole files below):
   - `src/app/api/my/apps/route.ts`
   - `src/app/api/my/apps/[id]/route.ts`
@@ -2319,14 +3034,100 @@ Each of these routes looked up the company with `getCompanyAndTeam(user)`. Now t
   - `src/app/api/my/workspace/route.ts`
   - `src/app/api/my/workspace/[id]/apps/route.ts`
   - `src/app/api/my/workspace/by-token/[tokenId]/route.ts`
-- Unchanged and open to members: `src/app/api/my/support/email/route.ts`
-- Test: `test/api/team-scoped-routes.test.ts`
+  - `src/app/api/my/support/email/route.ts`
+- Create: `src/utils/redact.ts`
+- Test: `test/utils/filter.test.ts`, `test/api/team-scoped-routes.test.ts`
 
 **Interfaces:**
 
-- Consumes (Task 4): `resolveTeamContext`, `requireOwner`, `companyScope`. Consumes (Task 3): `legacyErrorResponse`, `apiErrorResponse`.
+- Consumes (Task 4): `resolveTeamContext`, `requireOwner`, `requireUser`, `companyScope`, `TeamRoles`. Consumes (Task 3): `legacyErrorResponse`, `apiErrorResponse`. Consumes (#80): `getLicense`, `IdentityUnavailableError`.
+- Produces:
+  - `redactConnection(connection)`: the connection as JSON, with `connection_license_private_key` and `device_issuance_key` set to `null`;
+  - `redactApp(app)`: the app as JSON, with `api_key` removed from every signer;
+  - `deleteRedirectUriById(id, companyId)` and `deleteSignerById(id, companyId)`, which soft-delete one row of that company.
 
-- [ ] **Step 1: Write the failing tests**
+- [ ] **Step 1: Write the failing filter test**
+
+`test/utils/filter.test.ts`:
+
+```ts
+import { Op } from 'sequelize';
+import { describe, expect, it } from 'vitest';
+
+import { transformObject, transformObjectToSequelize } from '@/utils/filter';
+
+describe('list filters', () => {
+  it('keeps every non-empty key, not only the last one', () => {
+    const where = transformObject(
+      ['workspace_id', 'company_id'],
+      {
+        workspace_id: 'w1',
+        company_id: 'c1',
+      },
+      (key, value) => ({ [key]: value }),
+    );
+
+    expect(where).toEqual({ workspace_id: 'w1', company_id: 'c1' });
+  });
+
+  it('skips empty values', () => {
+    const where = transformObject(
+      ['workspace_id', 'company_id'],
+      {
+        workspace_id: '',
+        company_id: 'c1',
+      },
+      (key, value) => ({ [key]: value }),
+    );
+
+    expect(where).toEqual({ company_id: 'c1' });
+  });
+
+  it('combines like and exact filters', () => {
+    const where = transformObjectToSequelize(
+      { name: 'fleet', scope: 'all', company_id: 'c1', workspace_id: 'w1' },
+      { like: ['name', 'scope'], exact: ['workspace_id', 'company_id'] },
+    ) as Record<string, unknown>;
+
+    expect(where).toMatchObject({
+      name: { [Op.like]: '%fleet%' },
+      scope: { [Op.like]: '%all%' },
+      workspace_id: 'w1',
+      company_id: 'c1',
+    });
+  });
+});
+```
+
+- [ ] **Step 2: Run it to confirm it fails, then fix `transformObject`**
+
+Run: `npm test -- test/utils/filter.test.ts`
+Expected: FAIL. The first test gets only `{ company_id: 'c1' }`, and the like test is missing `name`.
+
+In `src/utils/filter.ts`, replace `transformObject`:
+
+```ts
+export const transformObject = (
+  keys: string[] | undefined,
+  filter: FilterObject,
+  transformFn: (k: string, v: string) => WhereOptions,
+) => {
+  // Every non-empty key adds its condition. Returning only the last one used to
+  // drop earlier filters, including the company a list is scoped to.
+  return (
+    keys?.reduce<WhereOptions>((acc, key) => {
+      const value = filter[key];
+      if (_.isEmpty(value)) return acc;
+      return { ...acc, ...transformFn(key, value) };
+    }, {}) ?? {}
+  );
+};
+```
+
+Run: `npm test -- test/utils/filter.test.ts`
+Expected: `3 passed`.
+
+- [ ] **Step 3: Write the failing route tests**
 
 `test/api/team-scoped-routes.test.ts`:
 
@@ -2344,6 +3145,7 @@ import { POST as createAppSigner } from '@/app/api/my/apps/[id]/signers/route';
 import { GET as listApps } from '@/app/api/my/apps/route';
 import {
   DELETE as deleteConnection,
+  GET as getConnection,
   PUT as putConnection,
 } from '@/app/api/my/connections/[id]/route';
 import {
@@ -2362,10 +3164,16 @@ import {
   GET as getWorkspace,
   POST as createWorkspace,
 } from '@/app/api/my/workspace/route';
+import { App } from '@/models/app.model';
+import { Connection } from '@/models/connection.model';
+import { RedirectUri } from '@/models/redirectUri.model';
+import { Signer } from '@/models/signer.model';
 import { Workspace } from '@/models/workspace.model';
 import Mailer from '@/utils/mailer';
 import { addMember, createOwner, createUser } from '../support/fixtures';
 import { read, request } from '../support/http';
+
+type Owner = Awaited<ReturnType<typeof createOwner>>;
 
 const setup = async () => {
   const acme = await createOwner('Acme');
@@ -2375,76 +3183,298 @@ const setup = async () => {
   return { acme, member, outsider };
 };
 
+const workspaceFor = (owner: Owner, tokenId = '7') =>
+  Workspace.create({
+    name: `${owner.team.name} workspace`,
+    token_id: tokenId,
+    owner: owner.user.address!,
+    client_id: `0x${tokenId.padStart(40, '1')}`,
+    company_id: owner.company.id!,
+  });
+
+const appFor = async (owner: Owner) => {
+  const workspace = await workspaceFor(owner);
+  const app = await App.create({
+    name: 'Fleet app',
+    scope: 'production',
+    workspace_id: workspace.id!,
+    company_id: owner.company.id!,
+  });
+  await Signer.create({
+    api_key: 'super-secret-key',
+    address: '0x' + '3'.repeat(40),
+    app_id: app.id!,
+    company_id: owner.company.id!,
+  });
+  return app;
+};
+
 const ownerOnly = { message: 'Only the team owner can do this', code: 'OWNER_ONLY' };
 const notAMember = { message: 'You are not a member of this team', code: 'NOT_A_MEMBER' };
 
-describe('company-scoped /api/my routes under a team', () => {
-  it('lets the owner write and a member read the team connections', async () => {
+describe('connections under a team', () => {
+  it('lets the owner write and a member read, without the private keys', async () => {
     const { acme, member } = await setup();
-
     const created = await read(
       await createConnection(
         await request('POST', '/api/my/connections', {
           as: acme.user.address!,
-          body: { name: 'Fleet link' },
+          body: {
+            name: 'Fleet link',
+            connection_license_private_key: 'license-secret',
+            device_issuance_key: 'device-secret',
+          },
         }),
       ),
     );
     expect(created.status).toBe(200);
+    const asMember = { as: member.address!, teamId: acme.team.id! };
 
     const listed = await read(
+      await listConnections(await request('GET', '/api/my/connections', asMember)),
+    );
+    const one = await read(
+      await getConnection(await request('GET', '/x', asMember), {
+        params: { id: created.body.id },
+      }),
+    );
+    const asOwner = await read(
+      await getConnection(await request('GET', '/x', { as: acme.user.address! }), {
+        params: { id: created.body.id },
+      }),
+    );
+
+    expect(listed.body.data).toHaveLength(1);
+    expect(listed.body.data[0]).toMatchObject({
+      name: 'Fleet link',
+      connection_license_private_key: null,
+      device_issuance_key: null,
+    });
+    expect(one.body).toMatchObject({
+      connection_license_private_key: null,
+      device_issuance_key: null,
+    });
+    expect(asOwner.body).toMatchObject({
+      connection_license_private_key: 'license-secret',
+      device_issuance_key: 'device-secret',
+    });
+  });
+
+  it('refuses a team the caller does not belong to', async () => {
+    const { acme, outsider } = await setup();
+
+    const response = await read(
       await listConnections(
         await request('GET', '/api/my/connections', {
+          as: outsider.user.address!,
+          teamId: acme.team.id!,
+        }),
+      ),
+    );
+
+    expect(response).toEqual({ status: 403, body: notAMember });
+  });
+
+  it('lists nothing for a user who has not finished sign-up', async () => {
+    const { acme } = await setup();
+    await Connection.create({ name: 'Acme link', company_id: acme.company.id! });
+    const newcomer = await createUser();
+
+    const response = await read(
+      await listConnections(
+        await request('GET', '/api/my/connections', { as: newcomer.address! }),
+      ),
+    );
+
+    expect(response).toEqual({
+      status: 403,
+      body: { message: 'Finish setting up your team first', code: 'NOT_A_MEMBER' },
+    });
+  });
+});
+
+describe('apps under a team', () => {
+  it("shows a member the team's apps without signer API keys, and the owner with them", async () => {
+    const { acme, member } = await setup();
+    const app = await appFor(acme);
+    const asMember = { as: member.address!, teamId: acme.team.id! };
+
+    const listed = await read(
+      await listApps(await request('GET', '/api/my/apps', asMember)),
+    );
+    const one = await read(
+      await getApp(await request('GET', '/x', asMember), { params: { id: app.id! } }),
+    );
+    const asOwner = await read(
+      await getApp(await request('GET', '/x', { as: acme.user.address! }), {
+        params: { id: app.id! },
+      }),
+    );
+    const missing = await read(
+      await getApp(await request('GET', '/x', asMember), {
+        params: { id: 'no-such-app' },
+      }),
+    );
+
+    expect(listed.body.data.map((row: { name: string }) => row.name)).toEqual([
+      'Fleet app',
+    ]);
+    expect(one.body.name).toBe('Fleet app');
+    expect(one.body.Signers).toHaveLength(1);
+    expect(one.body.Signers[0]).not.toHaveProperty('api_key');
+    expect(asOwner.body.Signers[0].api_key).toBe('super-secret-key');
+    expect(missing).toEqual({ status: 200, body: null });
+  });
+
+  it('updates only the name and scope of an app, never its company', async () => {
+    const { acme, outsider } = await setup();
+    const app = await appFor(acme);
+
+    const response = await putApp(
+      await request('PUT', '/x', {
+        as: acme.user.address!,
+        body: {
+          name: 'Renamed',
+          company_id: outsider.company.id,
+          workspace_id: 'elsewhere',
+        },
+      }),
+      { params: { id: app.id! } },
+    );
+
+    expect(response.status).toBe(200);
+    await app.reload();
+    expect(app).toMatchObject({ name: 'Renamed', company_id: acme.company.id });
+    expect(app.workspace_id).not.toBe('elsewhere');
+  });
+
+  it("refuses redirect URIs and signers on another company's app", async () => {
+    const { acme, outsider } = await setup();
+    const theirs = await appFor(outsider);
+    const params = { params: { id: theirs.id! } };
+    const as = acme.user.address!;
+
+    const uri = await read(
+      await createRedirectUri(
+        await request('POST', '/x', { as, body: { uri: 'https://evil.test' } }),
+        params,
+      ),
+    );
+    const signer = await read(
+      await createAppSigner(
+        await request('POST', '/x', {
+          as,
+          body: { api_key: 'k', address: '0x' + '4'.repeat(40) },
+        }),
+        params,
+      ),
+    );
+
+    expect(uri).toEqual({ status: 404, body: { message: 'App not found' } });
+    expect(signer).toEqual({ status: 404, body: { message: 'App not found' } });
+    expect(await RedirectUri.count({ where: { app_id: theirs.id! } })).toBe(0);
+  });
+
+  it('deletes the one redirect URI or signer asked for', async () => {
+    const { acme } = await setup();
+    const app = await appFor(acme);
+    const [keep, drop] = await Promise.all(
+      ['https://keep.test', 'https://drop.test'].map((uri) =>
+        RedirectUri.create({
+          uri,
+          app_id: app.id!,
+          company_id: acme.company.id!,
+          status: true,
+        }),
+      ),
+    );
+    const extraSigner = await Signer.create({
+      api_key: 'other',
+      address: '0x' + '5'.repeat(40),
+      app_id: app.id!,
+      company_id: acme.company.id!,
+    });
+    const as = acme.user.address!;
+
+    await deleteRedirectUri(await request('DELETE', '/x', { as }), {
+      params: { id: drop.id! },
+    });
+    await deleteSigner(await request('DELETE', '/x', { as }), {
+      params: { id: extraSigner.id! },
+    });
+
+    await keep.reload();
+    await drop.reload();
+    await extraSigner.reload();
+    expect(keep.deleted).toBeFalsy();
+    expect(drop.deleted).toBe(true);
+    expect(extraSigner.deleted).toBe(true);
+    expect(await Signer.count({ where: { app_id: app.id!, deleted: false } })).toBe(1);
+  });
+});
+
+describe('workspace and support', () => {
+  it('resolves the workspace by license token for members and refuses outsiders', async () => {
+    const { acme, member, outsider } = await setup();
+    await workspaceFor(acme);
+
+    const asMember = await workspaceByToken(
+      await request('GET', '/api/my/workspace/by-token/7', {
+        as: member.address!,
+        teamId: acme.team.id!,
+      }),
+      { params: Promise.resolve({ tokenId: '7' }) },
+    );
+    const asOutsider = await workspaceByToken(
+      await request('GET', '/api/my/workspace/by-token/7', {
+        as: outsider.user.address!,
+      }),
+      { params: Promise.resolve({ tokenId: '7' }) },
+    );
+    const team = await read(
+      await getWorkspace(
+        await request('GET', '/api/my/workspace', {
           as: member.address!,
           teamId: acme.team.id!,
         }),
       ),
     );
-    expect(listed.status).toBe(200);
-    expect(listed.body.data.map((row: { name: string }) => row.name)).toEqual([
-      'Fleet link',
-    ]);
 
-    const renamed = await read(
-      await putConnection(
-        await request('PUT', `/api/my/connections/${created.body.id}`, {
-          as: acme.user.address!,
-          body: { name: 'Fleet link 2' },
-        }),
-        { params: { id: created.body.id } },
-      ),
-    );
-    expect(renamed.status).toBe(200);
+    expect(asMember.status).toBe(200);
+    expect(asOutsider.status).toBe(403);
+    expect(team.body.name).toBe('Acme Co workspace');
   });
 
-  it('shows a member the team apps and workspace', async () => {
+  it('keeps support email open to members, and answers 401 for an unknown user', async () => {
     const { acme, member } = await setup();
-    await Workspace.create({
-      name: 'Acme workspace',
-      token_id: '7',
-      owner: acme.user.address!,
-      client_id: `0x${'1'.repeat(40)}`,
-      company_id: acme.company.id!,
-    });
-    const asMember = { as: member.address!, teamId: acme.team.id! };
+    const body = { walletAddress: member.address, inquiryType: 'Data', message: 'Help' };
 
-    const apps = await read(
-      await listApps(await request('GET', '/api/my/apps', asMember)),
-    );
-    const workspace = await read(
-      await getWorkspace(await request('GET', '/api/my/workspace', asMember)),
-    );
-    const app = await read(
-      await getApp(await request('GET', '/api/my/apps/x', asMember), {
-        params: { id: 'x' },
+    const asMember = await sendSupport(
+      await request('POST', '/api/my/support/email', {
+        as: member.address!,
+        teamId: acme.team.id!,
+        body,
       }),
     );
+    const unknown = await read(
+      await sendSupport(
+        await request('POST', '/api/my/support/email', {
+          as: '0x1111111111111111111111111111111111111111',
+          body,
+        }),
+      ),
+    );
 
-    expect(apps.status).toBe(200);
-    expect(workspace.body.name).toBe('Acme workspace');
-    expect(app.status).toBe(200);
+    expect(asMember.status).toBe(200);
+    expect(vi.mocked(Mailer.sendMail)).toHaveBeenCalledOnce();
+    expect(unknown).toEqual({
+      status: 401,
+      body: { message: 'User not found', code: 'UNAUTHORIZED' },
+    });
   });
+});
 
+describe('member writes', () => {
   const writes: [string, (req: NextRequest) => Promise<Response>][] = [
     ['PUT /api/my/apps/:id', (req) => putApp(req, { params: { id: 'a' } })],
     ['DELETE /api/my/apps/:id', (req) => deleteApp(req, { params: { id: 'a' } })],
@@ -2493,74 +3523,88 @@ describe('company-scoped /api/my routes under a team', () => {
 
     expect(response).toEqual({ status: 403, body: ownerOnly });
   });
-
-  it('refuses a team the caller does not belong to', async () => {
-    const { acme, outsider } = await setup();
-
-    const response = await read(
-      await listConnections(
-        await request('GET', '/api/my/connections', {
-          as: outsider.user.address!,
-          teamId: acme.team.id!,
-        }),
-      ),
-    );
-
-    expect(response).toEqual({ status: 403, body: notAMember });
-  });
-
-  it('resolves the workspace by license token for members and refuses outsiders', async () => {
-    const { acme, member, outsider } = await setup();
-    await Workspace.create({
-      name: 'Acme workspace',
-      token_id: '7',
-      owner: acme.user.address!,
-      client_id: `0x${'1'.repeat(40)}`,
-      company_id: acme.company.id!,
-    });
-    const params = { params: Promise.resolve({ tokenId: '7' }) };
-
-    const asMember = await workspaceByToken(
-      await request('GET', '/api/my/workspace/by-token/7', {
-        as: member.address!,
-        teamId: acme.team.id!,
-      }),
-      params,
-    );
-    const asOutsider = await workspaceByToken(
-      await request('GET', '/api/my/workspace/by-token/7', {
-        as: outsider.user.address!,
-      }),
-      { params: Promise.resolve({ tokenId: '7' }) },
-    );
-
-    expect(asMember.status).toBe(200);
-    expect(asOutsider.status).toBe(403);
-  });
-
-  it('keeps support email open to members', async () => {
-    const { acme, member } = await setup();
-
-    const response = await sendSupport(
-      await request('POST', '/api/my/support/email', {
-        as: member.address!,
-        teamId: acme.team.id!,
-        body: { walletAddress: member.address, inquiryType: 'Data', message: 'Help' },
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    expect(vi.mocked(Mailer.sendMail)).toHaveBeenCalledOnce();
-  });
 });
 ```
 
-- [ ] **Step 2: Run them to confirm they fail**
+- [ ] **Step 4: Run them to confirm they fail**
 
 Run: `npm test -- test/api/team-scoped-routes.test.ts`
-Expected: FAIL. The member reads return the member's own (empty) company data, writes return 200 or 400 instead of 403 `OWNER_ONLY`, and the outsider gets 200 instead of `NOT_A_MEMBER`.
+Expected: FAIL. Among the failures:
 
-- [ ] **Step 3: Rewrite the apps routes**
+- members get the owner's private keys and signer API keys;
+- the outsider gets 200;
+- a redirect URI is created on another company's app;
+- deleting one redirect URI deletes none;
+- the app moves company;
+- member writes aren't refused with `OWNER_ONLY`.
+
+- [ ] **Step 5: Delete one redirect URI or signer by its ID, and add the redaction helpers**
+
+In `src/services/redirectUri.service.ts`, add:
+
+```ts
+export const deleteRedirectUriById = async (id: string, companyId: string) => {
+  return RedirectUri.update(
+    { status: false, deleted: true, deleted_at: new Date() },
+    { where: { id, company_id: companyId } },
+  );
+};
+```
+
+In `src/controllers/redirectUri.controller.ts`, replace the body of `deleteOwnRedirectUri` with `return deleteRedirectUriById(id, user?.company?.id ?? '');`, and import `deleteRedirectUriById` in place of `deleteRedirectUris`.
+
+In `src/services/signer.service.ts`, add:
+
+```ts
+export const deleteSignerById = async (id: string, companyId: string) => {
+  return Signer.update(
+    { deleted: true, deleted_at: new Date() },
+    { where: { id, company_id: companyId } },
+  );
+};
+```
+
+In `src/controllers/signer.controller.ts`, `deleteOwnSigner` becomes:
+
+```ts
+export const deleteOwnSigner = async (id: string, user: IUserWithCompanyAndTeam) => {
+  const companyId = user?.company?.id ?? '';
+  return deleteSignerById(id, companyId);
+};
+```
+
+Import `deleteSignerById` in place of `deleteSigners`. `deleteSigners` and `deleteRedirectUris` stay: `deleteOwnApp` uses them to delete every row of an app, by `app_id`, which is correct there.
+
+`src/utils/redact.ts`:
+
+```ts
+import type { App } from '@/models/app.model';
+import type { Connection } from '@/models/connection.model';
+
+// Secrets are owner-only (contract C7): members read the same rows without them.
+
+export const redactConnection = (connection: Connection | null) =>
+  connection
+    ? {
+        ...connection.toJSON(),
+        connection_license_private_key: null,
+        device_issuance_key: null,
+      }
+    : null;
+
+export const redactApp = (app: App | null) => {
+  if (!app) return null;
+  const json = app.toJSON() as Record<string, unknown> & {
+    Signers?: Record<string, unknown>[];
+  };
+  return {
+    ...json,
+    Signers: (json.Signers ?? []).map(({ api_key: _apiKey, ...signer }) => signer),
+  };
+};
+```
+
+- [ ] **Step 6: Rewrite the apps routes**
 
 `src/app/api/my/apps/route.ts`:
 
@@ -2576,7 +3620,8 @@ export const GET = async (request: NextRequest) => {
     const params = Object.fromEntries(request.nextUrl.searchParams.entries());
     const pagination = getPaginationFromParams(params);
 
-    const apps = await getMyApps(params, pagination, ctx.company?.id ?? '');
+    // The list includes workspaces only, no signers, so nothing to redact.
+    const apps = await getMyApps(params, pagination, ctx.company.id!);
 
     return Response.json(apps);
   } catch (error: unknown) {
@@ -2588,18 +3633,25 @@ export const GET = async (request: NextRequest) => {
 `src/app/api/my/apps/[id]/route.ts`:
 
 ```ts
+import _ from 'lodash';
+
 import { deleteOwnApp, findMyApp, updateMyApp } from '@/controllers/app.controller';
 import { updateWorkspace } from '@/controllers/workspace.controller';
+import { TeamRoles } from '@/models/teamCollaborator.model';
 import { requireOwner, resolveTeamContext } from '@/services/teamContext.service';
 import { legacyErrorResponse } from '@/utils/apiError';
+import { redactApp } from '@/utils/redact';
 
 type Params = { params: { id: string } };
+
+// What an owner may change on an app. Never company_id or workspace_id.
+const APP_UPDATABLE_FIELDS = ['name', 'scope'];
 
 export const GET = async (request: NextRequest, { params: { id: appId } }: Params) => {
   try {
     const ctx = await resolveTeamContext(request);
-    const app = await findMyApp(appId, ctx.company?.id ?? '');
-    return Response.json(app);
+    const app = await findMyApp(appId, ctx.company.id!);
+    return Response.json(ctx.role === TeamRoles.OWNER ? app : redactApp(app));
   } catch (error: unknown) {
     return legacyErrorResponse(error, '[My App] Get app created by the logged user');
   }
@@ -2609,7 +3661,7 @@ export const DELETE = async (request: NextRequest, { params: { id: appId } }: Pa
   try {
     const ctx = await resolveTeamContext(request);
     requireOwner(ctx);
-    await deleteOwnApp(appId, ctx.company?.id ?? '');
+    await deleteOwnApp(appId, ctx.company.id!);
     return Response.json({});
   } catch (error: unknown) {
     return legacyErrorResponse(error, '[My App] Delete app');
@@ -2620,11 +3672,11 @@ export const PUT = async (request: NextRequest, { params: { id: appId } }: Param
   try {
     const ctx = await resolveTeamContext(request);
     requireOwner(ctx);
-    const companyId = ctx.company?.id ?? '';
+    const companyId = ctx.company.id!;
 
     const newData = await request.json();
     const app = await findMyApp(appId, companyId);
-    await updateMyApp(appId, companyId, newData);
+    await updateMyApp(appId, companyId, _.pick(newData, APP_UPDATABLE_FIELDS));
 
     if (newData.Workspace?.name) {
       await updateWorkspace(app!.workspace_id, {
@@ -2645,6 +3697,7 @@ export const PUT = async (request: NextRequest, { params: { id: appId } }: Param
 import _ from 'lodash';
 import { Attributes } from 'sequelize';
 
+import { findMyApp } from '@/controllers/app.controller';
 import { createOwnRedirectUri } from '@/controllers/redirectUri.controller';
 import { RedirectUri, MODIFIABLE_FIELDS } from '@/models/redirectUri.model';
 import {
@@ -2660,6 +3713,9 @@ export const POST = async (request: NextRequest, { params: { id: appId } }: Para
   try {
     const ctx = await resolveTeamContext(request);
     requireOwner(ctx);
+    if (!(await findMyApp(appId, ctx.company.id!))) {
+      return Response.json({ message: 'App not found' }, { status: 404 });
+    }
 
     const redirectUriInput = _.pick(await request.json(), MODIFIABLE_FIELDS) as Partial<
       Attributes<RedirectUri>
@@ -2684,6 +3740,7 @@ export const POST = async (request: NextRequest, { params: { id: appId } }: Para
 import _ from 'lodash';
 import { Attributes } from 'sequelize';
 
+import { findMyApp } from '@/controllers/app.controller';
 import { createOwnSigner } from '@/controllers/signer.controller';
 import { Signer, MODIFIABLE_FIELDS } from '@/models/signer.model';
 import {
@@ -2699,6 +3756,9 @@ export const POST = async (request: NextRequest, { params: { id: appId } }: Para
   try {
     const ctx = await resolveTeamContext(request);
     requireOwner(ctx);
+    if (!(await findMyApp(appId, ctx.company.id!))) {
+      return Response.json({ message: 'App not found' }, { status: 404 });
+    }
 
     const signerInput = _.pick(await request.json(), MODIFIABLE_FIELDS) as Partial<
       Attributes<Signer>
@@ -2713,7 +3773,7 @@ export const POST = async (request: NextRequest, { params: { id: appId } }: Para
 };
 ```
 
-- [ ] **Step 4: Rewrite the connection routes**
+- [ ] **Step 7: Rewrite the connection routes**
 
 `src/app/api/my/connections/route.ts`:
 
@@ -2723,9 +3783,11 @@ import { Attributes } from 'sequelize';
 
 import { createConnection, getMyConnections } from '@/controllers/connection.controller';
 import { Connection, CONNECTION_MODIFIABLE_FIELDS } from '@/models/connection.model';
+import { TeamRoles } from '@/models/teamCollaborator.model';
 import { requireOwner, resolveTeamContext } from '@/services/teamContext.service';
 import { legacyErrorResponse } from '@/utils/apiError';
 import { getPaginationFromParams } from '@/utils/paginateData';
+import { redactConnection } from '@/utils/redact';
 
 const GET = async (request: NextRequest) => {
   try {
@@ -2733,8 +3795,9 @@ const GET = async (request: NextRequest) => {
     const params = Object.fromEntries(request.nextUrl.searchParams.entries());
     const pagination = getPaginationFromParams(params);
 
-    const connections = await getMyConnections(params, pagination, ctx.company?.id ?? '');
-    return Response.json(connections);
+    const page = await getMyConnections(params, pagination, ctx.company.id!);
+    if (ctx.role === TeamRoles.OWNER) return Response.json(page);
+    return Response.json({ ...page, data: page.data.map(redactConnection) });
   } catch (error: unknown) {
     return legacyErrorResponse(
       error,
@@ -2753,10 +3816,7 @@ const POST = async (request: NextRequest) => {
       CONNECTION_MODIFIABLE_FIELDS,
     ) as Attributes<Connection>;
 
-    const createdConnection = await createConnection(
-      connectionInput,
-      ctx.company?.id ?? '',
-    );
+    const createdConnection = await createConnection(connectionInput, ctx.company.id!);
 
     return Response.json(createdConnection);
   } catch (error: unknown) {
@@ -2779,16 +3839,20 @@ import {
   updateMyConnection,
 } from '@/controllers/connection.controller';
 import { Connection, CONNECTION_MODIFIABLE_FIELDS } from '@/models/connection.model';
+import { TeamRoles } from '@/models/teamCollaborator.model';
 import { requireOwner, resolveTeamContext } from '@/services/teamContext.service';
 import { legacyErrorResponse } from '@/utils/apiError';
+import { redactConnection } from '@/utils/redact';
 
 type Params = { params: { id: string } };
 
 const GET = async (request: NextRequest, { params: { id: connectionId } }: Params) => {
   try {
     const ctx = await resolveTeamContext(request);
-    const connection = await findMyConnection(connectionId, ctx.company?.id ?? '');
-    return Response.json(connection);
+    const connection = await findMyConnection(connectionId, ctx.company.id!);
+    return Response.json(
+      ctx.role === TeamRoles.OWNER ? connection : redactConnection(connection),
+    );
   } catch (error: unknown) {
     return legacyErrorResponse(
       error,
@@ -2801,7 +3865,7 @@ const PUT = async (request: NextRequest, { params: { id: connectionId } }: Param
   try {
     const ctx = await resolveTeamContext(request);
     requireOwner(ctx);
-    const companyId = ctx.company?.id ?? '';
+    const companyId = ctx.company.id!;
 
     const existingConnection = await findMyConnection(connectionId, companyId);
     if (!existingConnection) {
@@ -2833,7 +3897,7 @@ const DELETE = async (request: NextRequest, { params: { id: connectionId } }: Pa
   try {
     const ctx = await resolveTeamContext(request);
     requireOwner(ctx);
-    const companyId = ctx.company?.id ?? '';
+    const companyId = ctx.company.id!;
 
     const existingConnection = await findMyConnection(connectionId, companyId);
     if (!existingConnection) {
@@ -2855,7 +3919,7 @@ const DELETE = async (request: NextRequest, { params: { id: connectionId } }: Pa
 export { GET, PUT, DELETE };
 ```
 
-- [ ] **Step 5: Rewrite the redirect URI and legacy signer routes**
+- [ ] **Step 8: Rewrite the redirect URI and legacy signer routes**
 
 `src/app/api/my/redirect-uris/[id]/route.ts`:
 
@@ -2951,9 +4015,9 @@ export const DELETE = async (
 };
 ```
 
-- [ ] **Step 6: Rewrite the workspace routes**
+- [ ] **Step 9: Rewrite the workspace and support routes**
 
-`src/app/api/my/workspace/route.ts`:
+`src/app/api/my/workspace/route.ts`. #80 (`b41eb28`) made `POST` check through Identity (`getLicense`) that the caller's wallet owns the license and that `token_id` is that license's, and store `license.owner`. Its bodies are 403 `{ message: 'You do not own this license' }` and 502 `{ message: 'Could not verify license ownership' }`. The version below keeps all of that. The only change is whose wallet must own the license: the active team's owner. Members are refused before the check.
 
 ```ts
 import _ from 'lodash';
@@ -2961,13 +4025,14 @@ import { Attributes } from 'sequelize';
 
 import { createWorkspace, findMyWorkspace } from '@/controllers/workspace.controller';
 import { Workspace, MODIFIABLE_FIELDS } from '@/models/workspace.model';
+import { getLicense, IdentityUnavailableError } from '@/services/identity.service';
 import { requireOwner, resolveTeamContext } from '@/services/teamContext.service';
 import { legacyErrorResponse } from '@/utils/apiError';
 
 export const GET = async (request: NextRequest) => {
   try {
     const ctx = await resolveTeamContext(request);
-    const workspace = await findMyWorkspace(ctx.company?.id ?? '');
+    const workspace = await findMyWorkspace(ctx.company.id!);
 
     return Response.json(workspace?.dataValues ?? {});
   } catch (error: unknown) {
@@ -2988,10 +4053,33 @@ export const POST = async (request: NextRequest) => {
       MODIFIABLE_FIELDS,
     ) as Attributes<Workspace>;
 
-    const createdWorkspace = await createWorkspace(workspaceInput, ctx.company?.id ?? '');
+    // Branding is authorized by the workspace owner, so the owner and the license
+    // it names come from Identity, never from the body: the team owner must own the
+    // license on-chain, and token_id must be that license's.
+    const license = await getLicense(workspaceInput.client_id ?? '');
+    const teamOwner = ctx.ownerAddress?.toLowerCase();
+    if (
+      !license ||
+      !teamOwner ||
+      license.owner.toLowerCase() !== teamOwner ||
+      String(license.tokenId) !== String(workspaceInput.token_id)
+    ) {
+      return Response.json({ message: 'You do not own this license' }, { status: 403 });
+    }
+
+    const createdWorkspace = await createWorkspace(
+      { ...workspaceInput, owner: license.owner },
+      ctx.company.id!,
+    );
 
     return Response.json(createdWorkspace);
   } catch (error: unknown) {
+    if (error instanceof IdentityUnavailableError) {
+      return Response.json(
+        { message: 'Could not verify license ownership' },
+        { status: 502 },
+      );
+    }
     return legacyErrorResponse(error, '[My Workspace] Create workspace');
   }
 };
@@ -3018,7 +4106,7 @@ export const POST = async (
   try {
     const ctx = await resolveTeamContext(request);
     requireOwner(ctx);
-    const companyId = ctx.company?.id ?? '';
+    const companyId = ctx.company.id!;
     const workspace = await findWorkspaceByIdAndCompany(workspaceId, companyId);
 
     if (!workspace) {
@@ -3081,20 +4169,54 @@ export const GET = async (request: NextRequest, ctx: Ctx) => {
 };
 ```
 
-- [ ] **Step 7: Run the tests**
+`src/app/api/my/support/email/route.ts`:
 
-Run: `npm test -- test/api/team-scoped-routes.test.ts`
-Expected: all pass. That's 6 named tests plus 12 `it.each` cases.
+```ts
+import { NextResponse } from 'next/server';
 
-- [ ] **Step 8: Run everything, typecheck, commit**
+import { sendSupportEmail } from '@/controllers/email.controller';
+import { requireUser } from '@/services/teamContext.service';
+import { apiErrorResponse } from '@/utils/apiError';
+
+// Open to every signed-in user, members included. It acts for no team.
+export const POST = async (request: NextRequest) => {
+  try {
+    const user = await requireUser(request);
+    const { walletAddress, inquiryType, message } = await request.json();
+
+    await sendSupportEmail({
+      userName: user.name,
+      userEmail: user.email,
+      walletAddress,
+      inquiryType,
+      message,
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    const handled = apiErrorResponse(error);
+    if (handled) return handled;
+    console.error('Error sending support email:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 400 });
+  }
+};
+```
+
+- [ ] **Step 10: Run the tests**
+
+Run: `npm test -- test/utils/filter.test.ts test/api/team-scoped-routes.test.ts test/api/regressions-80.test.ts`
+Expected: all pass. That's 3 filter tests, 11 named route tests plus 12 `it.each` cases, and the #80 regressions, including the workspace check.
+
+- [ ] **Step 11: Run everything, typecheck, commit**
 
 Run: `npm test && npm run typecheck`
-Expected: all tests pass, typecheck exits 0.
+Expected: all pass, typecheck exits 0.
 
 ```bash
-npx prettier --write src/app/api/my/apps src/app/api/my/connections src/app/api/my/redirect-uris src/app/api/my/signers src/app/api/my/workspace/route.ts "src/app/api/my/workspace/[id]/apps" src/app/api/my/workspace/by-token test
-git add src/app/api/my test
-git commit -m "feat(teams): scope apps, connections, redirect URIs, signers and workspace to the active team"
+npx prettier --write src/utils/filter.ts src/utils/redact.ts src/services/redirectUri.service.ts src/services/signer.service.ts src/controllers/redirectUri.controller.ts src/controllers/signer.controller.ts src/app/api/my/apps src/app/api/my/connections src/app/api/my/redirect-uris src/app/api/my/signers src/app/api/my/workspace/route.ts "src/app/api/my/workspace/[id]/apps" src/app/api/my/workspace/by-token src/app/api/my/support test
+git add src test
+git commit -m "feat(teams): scope apps, connections, signers and workspaces to the active team, without secrets for members"
 ```
 
 ---
@@ -3141,6 +4263,7 @@ Configurations keep #80's rule, license ownership through `isLicenseOwner`, with
 import { describe, expect, it } from 'vitest';
 
 import {
+  DELETE as deleteConfiguration,
   GET as getConfiguration,
   PUT as putConfiguration,
 } from '@/app/api/my/configurations/[id]/route';
@@ -3153,6 +4276,13 @@ import {
   GET as listVehicles,
   POST as createVehicle,
 } from '@/app/api/my/simulated-vehicles/route';
+import { PUT as putDefaultBrandFields } from '@/app/api/my/workspace/[id]/brand/route';
+import { POST as uploadBrandImage } from '@/app/api/my/workspace/[id]/brand/upload/route';
+import { POST as makeDefaultBrand } from '@/app/api/my/workspace/[id]/brands/[brandId]/default/route';
+import {
+  DELETE as deleteBrand,
+  PUT as putBrand,
+} from '@/app/api/my/workspace/[id]/brands/[brandId]/route';
 import {
   GET as listBrands,
   POST as createBrand,
@@ -3225,6 +4355,41 @@ describe('branding under a team', () => {
     );
     expect(asOutsider).toEqual({ status: 403, body: { error: 'forbidden' } });
   });
+
+  it('refuses every other branding write to a member with OWNER_ONLY', async () => {
+    const { acme, member, workspace } = await setup();
+    const brand = await WorkspaceBrand.create({
+      workspace_id: workspace.id!,
+      client_id: workspace.client_id,
+      name: 'Acme',
+      is_default: true,
+      updated_by: acme.user.address!,
+    });
+    const asMember = () =>
+      request('POST', '/x', {
+        as: member.address!,
+        teamId: acme.team.id!,
+        body: { name: 'x' },
+      });
+    const workspaceParams = () => ({ params: Promise.resolve({ id: workspace.id! }) });
+    const brandParams = () => ({
+      params: Promise.resolve({ id: workspace.id!, brandId: brand.id! }),
+    });
+
+    const responses = [
+      await putDefaultBrandFields(await asMember(), workspaceParams()),
+      await uploadBrandImage(await asMember(), workspaceParams()),
+      await putBrand(await asMember(), brandParams()),
+      await deleteBrand(await asMember(), brandParams()),
+      await makeDefaultBrand(await asMember(), brandParams()),
+    ];
+
+    for (const response of responses) {
+      expect(await read(response)).toEqual({ status: 403, body: ownerOnly });
+    }
+    await brand.reload();
+    expect(brand.name).toBe('Acme');
+  });
 });
 
 describe('configurations under a team', () => {
@@ -3282,8 +4447,16 @@ describe('configurations under a team', () => {
       listed.body.map((row: { configuration_name: string }) => row.configuration_name),
     ).toEqual(['Main']);
     expect(one.status).toBe(200);
+    const memberDelete = await read(
+      await deleteConfiguration(await request('DELETE', '/x', asMember), {
+        params: { id: saved.body.id },
+      }),
+    );
+
     expect(memberCreate).toEqual({ status: 403, body: ownerOnly });
     expect(memberWrite).toEqual({ status: 403, body: ownerOnly });
+    expect(memberDelete).toEqual({ status: 403, body: ownerOnly });
+    expect(await Configuration.count({ where: { id: saved.body.id } })).toBe(1);
   });
 
   it("answers 404 to another team for the license's configurations", async () => {
@@ -4112,23 +5285,25 @@ git commit -m "feat(teams): key branding, configurations and simulated vehicles 
 
 ---
 
-### Task 7: `GET /api/my/teams`, `GET /api/my/team/members`, `DELETE /api/my/team/members/:id`
+### Task 7: Teams, members (with `memberKeys`), removal and leaving
 
 **Files:**
 
 - Create: `src/services/teamMembers.service.ts`
-- Create: `src/app/api/my/teams/route.ts`, `src/app/api/my/team/members/route.ts`, `src/app/api/my/team/members/[id]/route.ts`
+- Create: `src/app/api/my/teams/route.ts`, `src/app/api/my/team/members/route.ts`, `src/app/api/my/team/members/[id]/route.ts`, `src/app/api/my/team/leave/route.ts`
 - Test: `test/api/teams-and-members.test.ts`
 
 **Interfaces:**
 
-- Consumes (Tasks 3–4): `TeamContext`, `requireUser`, `resolveTeamContext`, `requireOwner`, `activeMembershipWhere`, `LicenseSigner`, `LicenseSignerHolder`, `SignerKinds`, `errorResponse`.
+- Consumes (Tasks 3–4): `TeamContext`, `requireUser`, `resolveTeamContext`, `requireOwner`, `notDeleted`, `activeMembershipWhere`, `LicenseSigner`, `LicenseSignerHolder`, `SignerKinds`, `errorResponse`.
 - Produces:
-  - `toTeamSummary(args: { team: Team; company: Company | null; owner: User; role: TeamRole; callerId: string }): TeamSummary`.
-  - `toTeamMember(row: TeamCollaborator): TeamMember`. Load `row.User` with `include: [{ model: User }]` for accepted rows. For pending rows `User` is unset and `email` comes from the row.
-  - `listTeamsForUser(user: User): Promise<TeamSummary[]>`: personal team first, then by name. Teams whose owner has no wallet are left out.
-  - `listMembers(ctx: TeamContext): Promise<TeamMember[]>`: owner first, then accepted, pending and revoked-but-still-a-signer, each oldest first.
-  - `removeMember(ctx: TeamContext, membershipId: string): Promise<void>`: 404 `NOT_FOUND`, 400 `CANNOT_REMOVE_OWNER`, 403 `OWNER_ONLY`.
+  - `toTeamSummary(args: { team: Team; company: Company | null; owner: User; callerId: string }): TeamSummary`. `role` and `isPersonal` both come from `team.created_by === callerId`.
+  - `toTeamMember(row: TeamCollaborator, ownerUserId: string, memberKeys?: MemberKey[]): TeamMember`. `role` is `OWNER` exactly when `row.user_id === ownerUserId`. Load `row.User` with `include: [{ model: User }]` for accepted rows. Pending rows have no `User`, and their `email` comes from the row.
+  - `listTeamsForUser(user: User): Promise<TeamSummary[]>`: the team they created first, then teams they joined, by name. Teams whose owner has no wallet are left out.
+  - `listMembers(ctx: TeamContext): Promise<TeamMember[]>`, ordered as C7 says: owner, accepted members, pending invites, then `REVOKED` and `LEFT` members who still hold an enabled `MEMBER` key, each group oldest first.
+  - `removeMember(ctx, membershipId): Promise<void>`: status `REVOKED`, `deleted = true`. Errors: 404 `NOT_FOUND`, 400 `CANNOT_REMOVE_OWNER`, 403 `OWNER_ONLY`.
+  - `leaveTeam(ctx): Promise<void>`: status `LEFT`, `deleted = true`. Errors: 400 `CANNOT_LEAVE_OWN_TEAM`.
+- Every route here passes `consoleOnly: true` (C4).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -4138,6 +5313,7 @@ git commit -m "feat(teams): key branding, configurations and simulated vehicles 
 import { getAddress } from 'viem';
 import { describe, expect, it } from 'vitest';
 
+import { POST as leaveRoute } from '@/app/api/my/team/leave/route';
 import { DELETE as removeMemberRoute } from '@/app/api/my/team/members/[id]/route';
 import { GET as listMembersRoute } from '@/app/api/my/team/members/route';
 import { GET as listTeamsRoute } from '@/app/api/my/teams/route';
@@ -4148,21 +5324,43 @@ import {
   TeamCollaborator,
   TeamRoles,
 } from '@/models/teamCollaborator.model';
+import { sql } from '../support/db';
 import { addMember, createOwner, createOwnerFor, createUser } from '../support/fixtures';
 import { read, request } from '../support/http';
 
+type Owner = Awaited<ReturnType<typeof createOwner>>;
+
+const teams = async (as: string, options: { teamId?: string; aud?: string[] } = {}) =>
+  read(await listTeamsRoute(await request('GET', '/api/my/teams', { as, ...options })));
+const members = async (as: string, teamId?: string) =>
+  read(
+    await listMembersRoute(await request('GET', '/api/my/team/members', { as, teamId })),
+  );
+
+const memberKey = async (
+  owner: Owner,
+  userId: string,
+  tokenId: number,
+  address: string,
+) => {
+  const key = await LicenseSigner.create({
+    team_id: owner.team.id!,
+    license_token_id: tokenId,
+    signer_address: address.toLowerCase(),
+    kind: SignerKinds.MEMBER,
+  });
+  await LicenseSignerHolder.create({ signer_id: key.id!, user_id: userId });
+  return key;
+};
+
 describe('GET /api/my/teams', () => {
-  it('lists the personal team first, then teams the caller joined', async () => {
+  it('lists the team the caller created first, then teams they joined', async () => {
     const zeta = await createOwner('Zeta');
     const person = await createUser({ name: 'Pat' });
     await addMember(zeta.team.id!, person);
     const own = await createOwnerFor(person, 'Mine');
 
-    const response = await read(
-      await listTeamsRoute(
-        await request('GET', '/api/my/teams', { as: person.address! }),
-      ),
-    );
+    const response = await teams(person.address!);
 
     expect(response.status).toBe(200);
     expect(response.body.teams).toEqual([
@@ -4189,36 +5387,43 @@ describe('GET /api/my/teams', () => {
     ]);
   });
 
-  it('leaves out memberships that were removed', async () => {
+  it('marks a team OWNER only for its creator, whatever the membership row says', async () => {
     const zeta = await createOwner('Zeta');
-    const person = await createUser();
-    const row = await addMember(zeta.team.id!, person);
-    await row.update({ status: InvitationStatuses.REVOKED, deleted: true });
-
-    const response = await read(
-      await listTeamsRoute(
-        await request('GET', '/api/my/teams', { as: person.address! }),
-      ),
+    const impostor = await createUser();
+    await sql(
+      `INSERT INTO team_collaborators (id, team_id, user_id, role, status, created_at, updated_at, deleted)
+       VALUES (gen_random_uuid()::text, :team, :user, 'OWNER', 'ACCEPTED', now(), now(), false)`,
+      { team: zeta.team.id, user: impostor.id },
     );
+    await zeta.membership.destroy();
 
-    expect(response.body.teams).toEqual([]);
+    expect((await teams(impostor.address!)).body.teams).toMatchObject([
+      { id: zeta.team.id, role: 'MEMBER', isPersonal: false },
+    ]);
+    expect((await teams(zeta.user.address!)).body.teams).toMatchObject([
+      { id: zeta.team.id, role: 'OWNER', isPersonal: true },
+    ]);
   });
 
-  it('ignores a stale X-Team-Id for a team the caller has left', async () => {
+  it('leaves out teams the caller was removed from or left, and ignores a stale X-Team-Id', async () => {
     const zeta = await createOwner('Zeta');
+    const yank = await createOwner('Yank');
     const person = await createUser();
-    const row = await addMember(zeta.team.id!, person);
-    await row.update({ status: InvitationStatuses.REVOKED, deleted: true });
+    await (
+      await addMember(zeta.team.id!, person)
+    ).update({
+      status: InvitationStatuses.REVOKED,
+      deleted: true,
+    });
+    await (
+      await addMember(yank.team.id!, person)
+    ).update({
+      status: InvitationStatuses.LEFT,
+      deleted: true,
+    });
     const own = await createOwnerFor(person, 'Mine');
 
-    const response = await read(
-      await listTeamsRoute(
-        await request('GET', '/api/my/teams', {
-          as: person.address!,
-          teamId: zeta.team.id!,
-        }),
-      ),
-    );
+    const response = await teams(person.address!, { teamId: zeta.team.id! });
 
     expect(response.status).toBe(200);
     expect(response.body.teams.map((team: { id: string }) => team.id)).toEqual([
@@ -4226,24 +5431,31 @@ describe('GET /api/my/teams', () => {
     ]);
   });
 
-  it('refuses an anonymous caller', async () => {
-    const response = await read(
-      await listTeamsRoute(await request('GET', '/api/my/teams')),
-    );
+  it('refuses an anonymous caller and a token from another app', async () => {
+    const { user } = await createOwner('Acme');
+    const unauthorized = { message: 'User not found', code: 'UNAUTHORIZED' };
 
-    expect(response).toEqual({
+    expect(
+      await read(await listTeamsRoute(await request('GET', '/api/my/teams'))),
+    ).toEqual({
       status: 401,
-      body: { message: 'User not found', code: 'UNAUTHORIZED' },
+      body: unauthorized,
+    });
+    expect(await teams(user.address!, { aud: ['some-other-app'] })).toEqual({
+      status: 401,
+      body: unauthorized,
     });
   });
 });
 
 describe('GET /api/my/team/members', () => {
-  it('shows the owner, members and pending invites, with verified signers', async () => {
+  it('orders owner, members, pending invites, then departed members still holding keys', async () => {
     const acme = await createOwner('Acme');
-    const member = await createUser({ name: 'Mia' });
-    await member.update({ signer_address: '0x' + 'ab'.repeat(20) });
-    await addMember(acme.team.id!, member);
+    const mia = await createUser({ name: 'Mia' });
+    await mia.update({ signer_address: '0x' + 'ab'.repeat(20) });
+    await addMember(acme.team.id!, mia);
+    // Mia's key is under her previous wallet: memberKeys still lists it.
+    await memberKey(acme, mia.id!, 7, '0x' + 'ee'.repeat(20));
     const expires = new Date(Date.now() + 86_400_000);
     await TeamCollaborator.create({
       team_id: acme.team.id!,
@@ -4253,15 +5465,31 @@ describe('GET /api/my/team/members', () => {
       invite_token_hash: 'a'.repeat(64),
       invite_expires_at: expires,
     });
+    const gone = await createUser({ name: 'Gone' });
+    await (
+      await addMember(acme.team.id!, gone)
+    ).update({
+      status: InvitationStatuses.REVOKED,
+      deleted: true,
+    });
+    await memberKey(acme, gone.id!, 7, '0x' + 'cd'.repeat(20));
+    const quit = await createUser({ name: 'Quit' });
+    await (
+      await addMember(acme.team.id!, quit)
+    ).update({
+      status: InvitationStatuses.LEFT,
+      deleted: true,
+    });
+    await memberKey(acme, quit.id!, 8, '0x' + 'ef'.repeat(20));
+    const forgotten = await createUser({ name: 'Forgotten' });
+    await (
+      await addMember(acme.team.id!, forgotten)
+    ).update({
+      status: InvitationStatuses.REVOKED,
+      deleted: true,
+    });
 
-    const response = await read(
-      await listMembersRoute(
-        await request('GET', '/api/my/team/members', {
-          as: member.address!,
-          teamId: acme.team.id!,
-        }),
-      ),
-    );
+    const response = await members(mia.address!, acme.team.id!);
 
     expect(response.status).toBe(200);
     expect(
@@ -4272,72 +5500,37 @@ describe('GET /api/my/team/members', () => {
       ]),
     ).toEqual([
       [acme.user.email, 'OWNER', 'ACCEPTED'],
-      [member.email, 'MEMBER', 'ACCEPTED'],
+      [mia.email, 'MEMBER', 'ACCEPTED'],
       ['invitee@x.test', 'MEMBER', 'PENDING'],
+      [gone.email, 'MEMBER', 'REVOKED'],
+      [quit.email, 'MEMBER', 'LEFT'],
     ]);
-    const [owner, mia, invitee] = response.body.members;
-    expect(owner.signerAddress).toBeNull();
-    expect(mia).toMatchObject({
-      userId: member.id,
+    const [owner, miaRow, invitee] = response.body.members;
+    expect(owner).toMatchObject({ signerAddress: null, memberKeys: [] });
+    expect(miaRow).toMatchObject({
+      userId: mia.id,
       name: 'Mia',
       signerAddress: getAddress('0x' + 'ab'.repeat(20)),
+      memberKeys: [
+        { licenseTokenId: 7, signerAddress: getAddress('0x' + 'ee'.repeat(20)) },
+      ],
       inviteExpiresAt: null,
     });
     expect(invitee).toMatchObject({
       userId: null,
       name: null,
+      memberKeys: [],
       inviteExpiresAt: expires.toISOString(),
     });
-  });
-
-  it('keeps showing a removed member who is still a signer on a team license', async () => {
-    const acme = await createOwner('Acme');
-    const gone = await createUser({ name: 'Gone' });
-    const row = await addMember(acme.team.id!, gone);
-    await row.update({
-      status: InvitationStatuses.REVOKED,
-      deleted: true,
-      deleted_at: new Date(),
-    });
-    const key = await LicenseSigner.create({
-      team_id: acme.team.id!,
-      license_token_id: 7,
-      signer_address: '0x' + 'cd'.repeat(20),
-      kind: SignerKinds.MEMBER,
-    });
-    await LicenseSignerHolder.create({ signer_id: key.id!, user_id: gone.id });
-
-    const response = await read(
-      await listMembersRoute(
-        await request('GET', '/api/my/team/members', { as: acme.user.address! }),
-      ),
-    );
-
-    expect(
-      response.body.members.map((m: { email: string; status: string }) => [
-        m.email,
-        m.status,
-      ]),
-    ).toEqual([
-      [acme.user.email, 'ACCEPTED'],
-      [gone.email, 'REVOKED'],
-    ]);
   });
 
   it('refuses someone outside the team', async () => {
     const acme = await createOwner('Acme');
     const outsider = await createOwner('Other');
 
-    const response = await read(
-      await listMembersRoute(
-        await request('GET', '/api/my/team/members', {
-          as: outsider.user.address!,
-          teamId: acme.team.id!,
-        }),
-      ),
+    expect((await members(outsider.user.address!, acme.team.id!)).body.code).toBe(
+      'NOT_A_MEMBER',
     );
-
-    expect(response.body.code).toBe('NOT_A_MEMBER');
   });
 });
 
@@ -4350,7 +5543,7 @@ describe('DELETE /api/my/team/members/:id', () => {
       ),
     );
 
-  it('lets the owner remove a member, who then loses the team at once', async () => {
+  it('marks the member REVOKED and deleted, and they lose the team at once', async () => {
     const acme = await createOwner('Acme');
     const member = await createUser();
     const row = await addMember(acme.team.id!, member);
@@ -4361,25 +5554,29 @@ describe('DELETE /api/my/team/members/:id', () => {
     });
 
     await row.reload();
-    expect(row).toMatchObject({ status: 'REVOKED', deleted: true });
-    const after = await read(
-      await listMembersRoute(
-        await request('GET', '/api/my/team/members', {
-          as: member.address!,
-          teamId: acme.team.id!,
-        }),
-      ),
+    expect(row.status).toBe('REVOKED');
+    expect(row.deleted).toBe(true);
+    expect((await members(member.address!, acme.team.id!)).body.code).toBe(
+      'NOT_A_MEMBER',
     );
-    expect(after.body.code).toBe('NOT_A_MEMBER');
   });
 
-  it('refuses members, the owner row, and rows of other teams', async () => {
+  it('refuses members, the owner, pending invites and rows of other teams', async () => {
     const acme = await createOwner('Acme');
     const member = await createUser();
     const row = await addMember(acme.team.id!, member);
+    const pending = await TeamCollaborator.create({
+      team_id: acme.team.id!,
+      email: 'pending@x.test',
+      role: TeamRoles.MEMBER,
+      status: InvitationStatuses.PENDING,
+    });
     const other = await createOwner('Other');
-    const otherMember = await createUser();
-    const otherRow = await addMember(other.team.id!, otherMember);
+    const otherRow = await addMember(other.team.id!, await createUser());
+    const notFound = {
+      status: 404,
+      body: { message: 'Member not found', code: 'NOT_FOUND' },
+    };
 
     expect((await remove(member.address!, row.id!, acme.team.id!)).body.code).toBe(
       'OWNER_ONLY',
@@ -4388,9 +5585,37 @@ describe('DELETE /api/my/team/members/:id', () => {
       status: 400,
       body: { message: 'The team owner cannot be removed', code: 'CANNOT_REMOVE_OWNER' },
     });
-    expect(await remove(acme.user.address!, otherRow.id!)).toEqual({
-      status: 404,
-      body: { message: 'Member not found', code: 'NOT_FOUND' },
+    expect(await remove(acme.user.address!, pending.id!)).toEqual(notFound);
+    expect(await remove(acme.user.address!, otherRow.id!)).toEqual(notFound);
+  });
+});
+
+describe('POST /api/my/team/leave', () => {
+  const leave = async (as: string, teamId?: string) =>
+    read(await leaveRoute(await request('POST', '/api/my/team/leave', { as, teamId })));
+
+  it('marks the member LEFT and deleted, and they lose the team at once', async () => {
+    const acme = await createOwner('Acme');
+    const member = await createUser();
+    const row = await addMember(acme.team.id!, member);
+
+    expect(await leave(member.address!, acme.team.id!)).toEqual({
+      status: 204,
+      body: null,
+    });
+
+    await row.reload();
+    expect(row.status).toBe('LEFT');
+    expect(row.deleted).toBe(true);
+    expect((await leave(member.address!, acme.team.id!)).body.code).toBe('NOT_A_MEMBER');
+  });
+
+  it('refuses the owner leaving their own team', async () => {
+    const acme = await createOwner('Acme');
+
+    expect(await leave(acme.user.address!)).toEqual({
+      status: 400,
+      body: { message: 'You cannot leave a team you own', code: 'CANNOT_LEAVE_OWN_TEAM' },
     });
   });
 });
@@ -4399,7 +5624,7 @@ describe('DELETE /api/my/team/members/:id', () => {
 - [ ] **Step 2: Run them to confirm they fail**
 
 Run: `npm test -- test/api/teams-and-members.test.ts`
-Expected: FAIL, `Failed to resolve import "@/app/api/my/team/members/[id]/route"`.
+Expected: FAIL, `Failed to resolve import "@/app/api/my/team/leave/route"`.
 
 - [ ] **Step 3: Write `src/services/teamMembers.service.ts`**
 
@@ -4417,12 +5642,10 @@ import {
   TeamRoles,
 } from '@/models/teamCollaborator.model';
 import { User } from '@/models/user.model';
-import { activeMembershipWhere } from '@/services/membership.service';
+import { activeMembershipWhere, notDeleted } from '@/services/membership.service';
 import { requireOwner, TeamContext } from '@/services/teamContext.service';
-import type { MembershipStatus, TeamMember, TeamRole, TeamSummary } from '@/types/teams';
+import type { MemberKey, MembershipStatus, TeamMember, TeamSummary } from '@/types/teams';
 import { ApiError } from '@/utils/apiError';
-
-const notDeleted = { [Op.not]: true };
 
 const toChecksum = (address: string) => getAddress(address) as `0x${string}`;
 
@@ -4430,26 +5653,31 @@ export const toTeamSummary = ({
   team,
   company,
   owner,
-  role,
   callerId,
 }: {
   team: Team;
   company: Company | null;
   owner: User;
-  role: TeamRole;
   callerId: string;
-}): TeamSummary => ({
-  id: team.id!,
-  name: team.name,
-  companyName: company?.name ?? null,
-  role,
-  ownerUserId: owner.id!,
-  ownerEmail: owner.email,
-  ownerAddress: toChecksum(owner.address!),
-  isPersonal: team.created_by === callerId,
-});
+}): TeamSummary => {
+  const isOwner = team.created_by === callerId;
+  return {
+    id: team.id!,
+    name: team.name,
+    companyName: company?.name ?? null,
+    role: isOwner ? TeamRoles.OWNER : TeamRoles.MEMBER,
+    ownerUserId: owner.id!,
+    ownerEmail: owner.email,
+    ownerAddress: toChecksum(owner.address!),
+    isPersonal: isOwner,
+  };
+};
 
-export const toTeamMember = (row: TeamCollaborator): TeamMember => {
+export const toTeamMember = (
+  row: TeamCollaborator,
+  ownerUserId: string,
+  memberKeys: MemberKey[] = [],
+): TeamMember => {
   const user = row.User ?? null;
   const createdAt = row.get('created_at') as Date;
   return {
@@ -4457,9 +5685,10 @@ export const toTeamMember = (row: TeamCollaborator): TeamMember => {
     userId: row.user_id ?? null,
     name: user?.name ?? null,
     email: user?.email ?? row.email ?? '',
-    role: row.role as TeamRole,
+    role: row.user_id && row.user_id === ownerUserId ? TeamRoles.OWNER : TeamRoles.MEMBER,
     status: row.status as MembershipStatus,
     signerAddress: user?.signer_address ? toChecksum(user.signer_address) : null,
+    memberKeys,
     invitedAt: createdAt.toISOString(),
     inviteExpiresAt:
       row.status === InvitationStatuses.PENDING && row.invite_expires_at
@@ -4469,16 +5698,21 @@ export const toTeamMember = (row: TeamCollaborator): TeamMember => {
 };
 
 export const listTeamsForUser = async (user: User): Promise<TeamSummary[]> => {
+  const created = await Team.findAll({
+    where: { created_by: user.id!, deleted: notDeleted },
+  });
   const memberships = await TeamCollaborator.findAll({
     where: { user_id: user.id!, ...activeMembershipWhere },
   });
+  const joinedIds = memberships
+    .map((membership) => membership.team_id)
+    .filter((teamId) => !created.some((team) => team.id === teamId));
+  const joined = joinedIds.length
+    ? await Team.findAll({ where: { id: { [Op.in]: joinedIds }, deleted: notDeleted } })
+    : [];
 
   const summaries: TeamSummary[] = [];
-  for (const membership of memberships) {
-    const team = await Team.findOne({
-      where: { id: membership.team_id, deleted: notDeleted },
-    });
-    if (!team) continue;
+  for (const team of [...created, ...joined]) {
     const owner =
       team.created_by === user.id
         ? user
@@ -4488,15 +5722,7 @@ export const listTeamsForUser = async (user: User): Promise<TeamSummary[]> => {
       continue;
     }
     const company = await Company.findOne({ where: { id: team.company_id } });
-    summaries.push(
-      toTeamSummary({
-        team,
-        company,
-        owner,
-        role: membership.role as TeamRole,
-        callerId: user.id!,
-      }),
-    );
+    summaries.push(toTeamSummary({ team, company, owner, callerId: user.id! }));
   }
 
   return summaries.sort(
@@ -4504,15 +5730,43 @@ export const listTeamsForUser = async (user: User): Promise<TeamSummary[]> => {
   );
 };
 
-const STATUS_ORDER: Record<MembershipStatus, number> = {
-  ACCEPTED: 0,
-  PENDING: 1,
-  REVOKED: 2,
+/** Every enabled MEMBER key in the team, by holder: what an owner must revoke. */
+const memberKeysByUser = async (teamId: string) => {
+  const keys = await LicenseSigner.findAll({
+    where: { team_id: teamId, kind: SignerKinds.MEMBER, disabled_at: null },
+    include: [{ model: LicenseSignerHolder, as: 'holders' }],
+    order: [['created_at', 'ASC']],
+  });
+  const byUser = new Map<string, MemberKey[]>();
+  for (const key of keys) {
+    for (const holder of key.holders ?? []) {
+      if (!holder.user_id) continue;
+      byUser.set(holder.user_id, [
+        ...(byUser.get(holder.user_id) ?? []),
+        {
+          licenseTokenId: key.license_token_id,
+          signerAddress: toChecksum(key.signer_address),
+        },
+      ]);
+    }
+  }
+  return byUser;
+};
+
+const rank = (member: TeamMember) => {
+  if (member.role === TeamRoles.OWNER) return 0;
+  const order: Record<MembershipStatus, number> = {
+    ACCEPTED: 1,
+    PENDING: 2,
+    REVOKED: 3,
+    LEFT: 3,
+  };
+  return order[member.status];
 };
 
 export const listMembers = async (ctx: TeamContext): Promise<TeamMember[]> => {
-  if (!ctx.team) return [];
   const teamId = ctx.team.id!;
+  const ownerUserId = ctx.team.created_by;
 
   const rows = await TeamCollaborator.findAll({
     where: {
@@ -4523,60 +5777,61 @@ export const listMembers = async (ctx: TeamContext): Promise<TeamMember[]> => {
     include: [{ model: User }],
     order: [['created_at', 'ASC']],
   });
+  const keysByUser = await memberKeysByUser(teamId);
   const activeUserIds = new Set(rows.map((row) => row.user_id).filter(Boolean));
 
-  // A removed member stays listed while the registry still shows them holding
-  // an enabled member key, so a revoke that failed on-chain stays visible.
-  const memberKeys = await LicenseSigner.findAll({
-    where: { team_id: teamId, kind: SignerKinds.MEMBER, disabled_at: null },
-    include: [{ model: LicenseSignerHolder, as: 'holders' }],
-  });
-  const stillSigners = new Set<string>();
-  for (const key of memberKeys) {
-    for (const holder of key.holders ?? []) {
-      if (holder.user_id && !activeUserIds.has(holder.user_id))
-        stillSigners.add(holder.user_id);
-    }
-  }
-
-  const revoked: TeamCollaborator[] = [];
-  for (const userId of stillSigners) {
+  // Someone removed or gone stays listed while they still hold an enabled member
+  // key, so the owner can see what is left to revoke.
+  const departedIds = Array.from(keysByUser.keys()).filter(
+    (id) => !activeUserIds.has(id),
+  );
+  const departed: TeamCollaborator[] = [];
+  for (const userId of departedIds) {
     const latest = await TeamCollaborator.findOne({
-      where: { team_id: teamId, user_id: userId, status: InvitationStatuses.REVOKED },
+      where: {
+        team_id: teamId,
+        user_id: userId,
+        status: { [Op.in]: [InvitationStatuses.REVOKED, InvitationStatuses.LEFT] },
+      },
       include: [{ model: User }],
       order: [['updated_at', 'DESC']],
     });
-    if (latest) revoked.push(latest);
+    if (latest) departed.push(latest);
   }
 
-  return [...rows, ...revoked]
-    .map(toTeamMember)
-    .sort(
-      (a, b) =>
-        Number(b.role === TeamRoles.OWNER) - Number(a.role === TeamRoles.OWNER) ||
-        STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
-        a.invitedAt.localeCompare(b.invitedAt),
-    );
+  return [...rows, ...departed]
+    .map((row) => toTeamMember(row, ownerUserId, keysByUser.get(row.user_id ?? '') ?? []))
+    .sort((a, b) => rank(a) - rank(b) || a.invitedAt.localeCompare(b.invitedAt));
 };
 
 export const removeMember = async (ctx: TeamContext, membershipId: string) => {
   requireOwner(ctx);
-  const row = ctx.team
-    ? await TeamCollaborator.findOne({
-        where: {
-          id: membershipId,
-          team_id: ctx.team.id!,
-          status: InvitationStatuses.ACCEPTED,
-          deleted: notDeleted,
-        },
-      })
-    : null;
+  const row = await TeamCollaborator.findOne({
+    where: {
+      id: membershipId,
+      team_id: ctx.team.id!,
+      status: InvitationStatuses.ACCEPTED,
+      deleted: notDeleted,
+    },
+  });
   if (!row) throw new ApiError(404, 'NOT_FOUND', 'Member not found');
-  if (row.role === TeamRoles.OWNER) {
+  if (row.user_id === ctx.team.created_by) {
     throw new ApiError(400, 'CANNOT_REMOVE_OWNER', 'The team owner cannot be removed');
   }
   await row.update({
     status: InvitationStatuses.REVOKED,
+    deleted: true,
+    deleted_at: new Date(),
+  });
+};
+
+export const leaveTeam = async (ctx: TeamContext) => {
+  if (ctx.role === TeamRoles.OWNER) {
+    throw new ApiError(400, 'CANNOT_LEAVE_OWN_TEAM', 'You cannot leave a team you own');
+  }
+  // resolveTeamContext only lets a non-owner in with an active membership.
+  await ctx.membership!.update({
+    status: InvitationStatuses.LEFT,
     deleted: true,
     deleted_at: new Date(),
   });
@@ -4595,7 +5850,7 @@ import { errorResponse } from '@/utils/apiError';
 // Every team the caller belongs to, for the console's team switcher. Ignores X-Team-Id.
 export const GET = async (request: NextRequest) => {
   try {
-    const user = await requireUser(request);
+    const user = await requireUser(request, { consoleOnly: true });
     return Response.json({ teams: await listTeamsForUser(user) });
   } catch (error: unknown) {
     return errorResponse(error, '[Teams] List my teams');
@@ -4612,7 +5867,7 @@ import { errorResponse } from '@/utils/apiError';
 
 export const GET = async (request: NextRequest) => {
   try {
-    const ctx = await resolveTeamContext(request);
+    const ctx = await resolveTeamContext(request, { consoleOnly: true });
     return Response.json({ members: await listMembers(ctx) });
   } catch (error: unknown) {
     return errorResponse(error, '[Team] List members');
@@ -4631,7 +5886,7 @@ type Params = { params: { id: string } };
 
 export const DELETE = async (request: NextRequest, { params: { id } }: Params) => {
   try {
-    const ctx = await resolveTeamContext(request);
+    const ctx = await resolveTeamContext(request, { consoleOnly: true });
     await removeMember(ctx, id);
     return new Response(null, { status: 204 });
   } catch (error: unknown) {
@@ -4640,10 +5895,30 @@ export const DELETE = async (request: NextRequest, { params: { id } }: Params) =
 };
 ```
 
+`src/app/api/my/team/leave/route.ts`:
+
+```ts
+import { resolveTeamContext } from '@/services/teamContext.service';
+import { leaveTeam } from '@/services/teamMembers.service';
+import { errorResponse } from '@/utils/apiError';
+
+// A member leaves the active team. Their keys stay until the owner revokes them;
+// the members list keeps showing them until then.
+export const POST = async (request: NextRequest) => {
+  try {
+    const ctx = await resolveTeamContext(request, { consoleOnly: true });
+    await leaveTeam(ctx);
+    return new Response(null, { status: 204 });
+  } catch (error: unknown) {
+    return errorResponse(error, '[Team] Leave');
+  }
+};
+```
+
 - [ ] **Step 5: Run the tests**
 
 Run: `npm test -- test/api/teams-and-members.test.ts`
-Expected: `9 passed`.
+Expected: `10 passed`.
 
 - [ ] **Step 6: Run everything, typecheck, commit**
 
@@ -4651,31 +5926,46 @@ Run: `npm test && npm run typecheck`
 Expected: all pass, typecheck exits 0.
 
 ```bash
-npx prettier --write src/services/teamMembers.service.ts src/app/api/my/teams src/app/api/my/team/members test
-git add src/services/teamMembers.service.ts src/app/api/my/teams src/app/api/my/team/members test
-git commit -m "feat(teams): list my teams and team members, and let the owner remove a member"
+npx prettier --write src/services/teamMembers.service.ts src/app/api/my/teams src/app/api/my/team/members src/app/api/my/team/leave test
+git add src/services/teamMembers.service.ts src/app/api/my/teams src/app/api/my/team/members src/app/api/my/team/leave test
+git commit -m "feat(teams): list teams and members with their keys, remove members and let members leave"
 ```
 
 ---
 
-### Task 8: Invitations: create, resend, cancel and accept
+### Task 8: Invitations: create, resend, cancel, preview and accept, with limits
 
 **Files:**
 
 - Create: `src/services/invitation.service.ts`
-- Create: `src/app/api/my/team/invitations/route.ts`, `src/app/api/my/team/invitations/[id]/route.ts`, `src/app/api/my/team/invitations/[id]/resend/route.ts`, `src/app/api/invitations/accept/route.ts`
+- Modify: `src/templates/team.ts` (#80's escaping extends to the team name)
+- Modify: `src/controllers/teamCollaborator.controller.ts` (#80's legacy call to the template, until Task 9 replaces it)
+- Create: `src/app/api/my/team/invitations/route.ts`, `src/app/api/my/team/invitations/[id]/route.ts`, `src/app/api/my/team/invitations/[id]/resend/route.ts`, `src/app/api/invitations/preview/route.ts`, `src/app/api/invitations/accept/route.ts`
 - Test: `test/api/invitations.test.ts`
 
 **Interfaces:**
 
-- Consumes (Tasks 3, 4 and 7): `TeamContext`, `requireOwner`, `requireUser`, `resolveTeamContext`, `findMembership`, `activeMembershipWhere`, `toTeamMember`, `toTeamSummary`, `ApiError`, `errorResponse`, `generateTeamInvitationTemplate(userName, cta)` from `@/templates/team` (existing, unchanged).
+- Consumes (Tasks 3, 4 and 7): `TeamContext`, `requireOwner`, `requireUser`, `resolveTeamContext`, `findMembership`, `activeMembershipWhere`, `notDeleted`, `toTeamMember`, `toTeamSummary`, `TeamInviteSend`, `ApiError`, `errorResponse`.
 - Produces:
   - `generateInviteToken(): string`, `hashInviteToken(token: string): string`, `inviteLink(token: string): string`.
-  - `createInvitation(ctx, rawEmail: unknown): Promise<TeamMember>`.
-  - `resendInvitation(ctx, id: string): Promise<TeamMember>`.
-  - `cancelInvitation(ctx, id: string): Promise<void>`.
-  - `acceptInvitation(user: User, rawToken: unknown): Promise<TeamSummary>`.
-- Errors, beyond those listed in C7: `502 EMAIL_FAILED` when the email can't be sent. On create, the row is revoked. On resend, it keeps its new token, and the owner can try again. This is proposed as a C7 addition.
+  - `createInvitation(ctx, rawEmail: unknown): Promise<TeamMember>`. Errors:
+    - 400 `INVALID_EMAIL`;
+    - 409 `ALREADY_MEMBER`;
+    - 409 `ALREADY_INVITED`, also for a concurrent duplicate caught by the unique index;
+    - 403 `OWNER_ONLY`;
+    - 429 `RATE_LIMITED`;
+    - 502 `EMAIL_FAILED`, after which the row is revoked so the invite can be retried.
+  - `resendInvitation(ctx, id: string): Promise<TeamMember>`. Errors: 404 `NOT_FOUND`, 403 `OWNER_ONLY`, 429 `RATE_LIMITED`, and 502 `EMAIL_FAILED`, after which the row keeps its new token.
+  - `cancelInvitation(ctx, id: string): Promise<void>`. Errors: 404 `NOT_FOUND`, 403 `OWNER_ONLY`.
+  - `previewInvitation(user, rawToken): Promise<InvitationPreview>` and `acceptInvitation(user, rawToken): Promise<TeamSummary>`. Both check the token the same way (`INVITE_INVALID`, `INVITE_EXPIRED`, `INVITE_EMAIL_MISMATCH`, `ALREADY_MEMBER`). Acceptance always makes the row `MEMBER`.
+  - `generateTeamInvitationTemplate({ inviterName, teamName, cta })`. It reuses #80's module-level `escapeHtml` and #80's 60-character cut (`slice(0, 60)`), now for the team name too. Escaping happens inside the template only.
+- Limits (C7), counted from `team_invite_sends`:
+  - 10 sends per team in the last hour;
+  - 30 per sender in the last 24 hours;
+  - 50 pending invites per team;
+  - one send per invite in the last 60 seconds.
+  - Each answers 429 `RATE_LIMITED`.
+- Every route here passes `consoleOnly: true` (C4).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -4685,12 +5975,19 @@ git commit -m "feat(teams): list my teams and team members, and let the owner re
 import { describe, expect, it, vi } from 'vitest';
 
 import { POST as acceptRoute } from '@/app/api/invitations/accept/route';
+import { POST as previewRoute } from '@/app/api/invitations/preview/route';
 import { DELETE as cancelRoute } from '@/app/api/my/team/invitations/[id]/route';
 import { POST as resendRoute } from '@/app/api/my/team/invitations/[id]/resend/route';
 import { POST as inviteRoute } from '@/app/api/my/team/invitations/route';
+import { POST as leaveRoute } from '@/app/api/my/team/leave/route';
 import { DELETE as removeMemberRoute } from '@/app/api/my/team/members/[id]/route';
 import { GET as listMembersRoute } from '@/app/api/my/team/members/route';
-import { TeamCollaborator } from '@/models/teamCollaborator.model';
+import {
+  InvitationStatuses,
+  TeamCollaborator,
+  TeamRoles,
+} from '@/models/teamCollaborator.model';
+import { TeamInviteSend } from '@/models/teamInviteSend.model';
 import { hashInviteToken } from '@/services/invitation.service';
 import Mailer from '@/utils/mailer';
 import { sql } from '../support/db';
@@ -4710,11 +6007,22 @@ const invite = async (
       await request('POST', '/api/my/team/invitations', { as, teamId, body: { email } }),
     ),
   );
-
-const accept = async (as: string | undefined, token: unknown) =>
+const resend = async (owner: Owner, id: string) =>
+  read(
+    await resendRoute(await request('POST', '/x', { as: owner.user.address! }), {
+      params: { id },
+    }),
+  );
+const accept = async (as: string | undefined, token: unknown, aud?: string[]) =>
   read(
     await acceptRoute(
-      await request('POST', '/api/invitations/accept', { as, body: { token } }),
+      await request('POST', '/api/invitations/accept', { as, aud, body: { token } }),
+    ),
+  );
+const preview = async (as: string, token: unknown) =>
+  read(
+    await previewRoute(
+      await request('POST', '/api/invitations/preview', { as, body: { token } }),
     ),
   );
 
@@ -4723,6 +6031,7 @@ const sentToken = (n = 0) => {
   const { html } = vi.mocked(Mailer.sendMail).mock.calls[n][0];
   return /sign-in\?invite=([A-Za-z0-9_-]+)/.exec(html)![1];
 };
+const sentHtml = (n = 0) => vi.mocked(Mailer.sendMail).mock.calls[n][0].html;
 
 describe('POST /api/my/team/invitations', () => {
   it('creates a pending invite, emails a link, and stores only the token hash', async () => {
@@ -4737,18 +6046,19 @@ describe('POST /api/my/team/invitations', () => {
       role: 'MEMBER',
       status: 'PENDING',
       signerAddress: null,
+      memberKeys: [],
     });
     const [mail] = vi.mocked(Mailer.sendMail).mock.calls[0];
     expect(mail.to).toBe('new.person@x.test');
     expect(mail.html).toContain('http://localhost:3000/sign-in?invite=');
     const token = sentToken();
     expect(Buffer.from(token, 'base64url')).toHaveLength(32);
-    const [row] = await sql<{ invite_token_hash: string }>(
-      'SELECT invite_token_hash FROM team_collaborators WHERE id = :id',
+    const [row] = await sql<{ invite_token_hash: string; role: string }>(
+      'SELECT invite_token_hash, role FROM team_collaborators WHERE id = :id',
       { id: response.body.member.id },
     );
     expect(row.invite_token_hash).toBe(hashInviteToken(token));
-    expect(row.invite_token_hash).not.toContain(token);
+    expect(row.role).toBe('MEMBER');
   });
 
   it('invites people who already have an account', async () => {
@@ -4758,7 +6068,7 @@ describe('POST /api/my/team/invitations', () => {
     expect((await invite(acme, existing.email)).status).toBe(201);
   });
 
-  it('refuses bad emails, members, current members and duplicate invites, ignoring case and spaces', async () => {
+  it('refuses bad emails, current members, duplicate invites and members of the team', async () => {
     const acme = await createOwner('Acme');
     const member = await createUser({ email: 'mia@x.test' });
     await addMember(acme.team.id!, member);
@@ -4776,19 +6086,42 @@ describe('POST /api/my/team/invitations', () => {
     ).toBe('OWNER_ONLY');
   });
 
-  it('refreshes an expired invite instead of refusing it', async () => {
+  it('answers ALREADY_INVITED, not 500, to concurrent duplicates', async () => {
+    const acme = await createOwner('Acme');
+
+    const responses = await Promise.all([
+      invite(acme, 'race@x.test'),
+      invite(acme, 'race@x.test'),
+    ]);
+
+    expect(responses.map((response) => response.status).sort()).toEqual([201, 409]);
+    expect(responses.find((response) => response.status === 409)!.body.code).toBe(
+      'ALREADY_INVITED',
+    );
+  });
+
+  it('refreshes an expired invite in place, as a member', async () => {
     const acme = await createOwner('Acme');
     const first = await invite(acme, 'late@x.test');
     await sql(
-      "UPDATE team_collaborators SET invite_expires_at = now() - interval '1 minute' WHERE id = :id",
+      `UPDATE team_collaborators SET invite_expires_at = now() - interval '1 minute', role = 'OWNER'
+       WHERE id = :id`,
       { id: first.body.member.id },
     );
+    await sql("UPDATE team_invite_sends SET created_at = now() - interval '2 minutes'");
 
     const again = await invite(acme, 'late@x.test');
 
     expect(again.status).toBe(201);
-    expect(again.body.member.id).toBe(first.body.member.id);
+    expect(again.body.member).toMatchObject({ id: first.body.member.id, role: 'MEMBER' });
     expect(sentToken(1)).not.toBe(sentToken(0));
+    const [row] = await sql<{ role: string }>(
+      'SELECT role FROM team_collaborators WHERE id = :id',
+      {
+        id: first.body.member.id,
+      },
+    );
+    expect(row.role).toBe('MEMBER');
   });
 
   it('answers 502 EMAIL_FAILED and leaves no pending invite when the email cannot be sent', async () => {
@@ -4801,25 +6134,119 @@ describe('POST /api/my/team/invitations', () => {
       status: 502,
       body: { message: 'The invitation email could not be sent', code: 'EMAIL_FAILED' },
     });
-    expect((await invite(acme, 'bounce@x.test')).status).toBe(201);
+    expect(await TeamCollaborator.count({ where: { status: 'PENDING' } })).toBe(0);
+  });
+
+  it('escapes and caps the inviter and team names in the email', async () => {
+    const acme = await createOwner('Acme');
+    await acme.user.update({ name: '<script>alert(1)</script> & Co' });
+    await acme.team.update({ name: 'T'.repeat(80) });
+
+    await invite(acme, 'pat@x.test');
+
+    const html = sentHtml();
+    expect(html).not.toContain('<script>');
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(html).toContain('T'.repeat(60));
+    expect(html).not.toContain('T'.repeat(61));
+  });
+});
+
+describe('invite limits', () => {
+  const sends = (owner: Owner, count: number) =>
+    TeamInviteSend.bulkCreate(
+      Array.from({ length: count }, () => ({
+        team_id: owner.team.id!,
+        membership_id: owner.membership.id!,
+        sent_by: owner.user.id!,
+      })),
+    );
+
+  it('allows 10 emails per team per hour', async () => {
+    const acme = await createOwner('Acme');
+    await sends(acme, 10);
+
+    expect((await invite(acme, 'eleventh@x.test')).body).toEqual({
+      message: 'This team has sent 10 invitations in the last hour. Try again later.',
+      code: 'RATE_LIMITED',
+    });
+  });
+
+  it('allows 30 emails per inviter per day', async () => {
+    const acme = await createOwner('Acme');
+    await sends(acme, 30);
+    await sql("UPDATE team_invite_sends SET created_at = now() - interval '2 hours'");
+
+    expect((await invite(acme, 'more@x.test')).body).toEqual({
+      message: 'You have sent 30 invitations today. Try again tomorrow.',
+      code: 'RATE_LIMITED',
+    });
+  });
+
+  it('allows 50 pending invites per team', async () => {
+    const acme = await createOwner('Acme');
+    await TeamCollaborator.bulkCreate(
+      Array.from({ length: 50 }, (_, n) => ({
+        team_id: acme.team.id!,
+        email: `pending${n}@x.test`,
+        role: TeamRoles.MEMBER,
+        status: InvitationStatuses.PENDING,
+      })),
+    );
+
+    expect((await invite(acme, 'fifty-first@x.test')).body).toEqual({
+      message: 'This team has 50 pending invitations. Cancel some before inviting more.',
+      code: 'RATE_LIMITED',
+    });
+  });
+
+  it('allows one email per invite per minute', async () => {
+    const acme = await createOwner('Acme');
+    const created = await invite(acme, 'pat@x.test');
+
+    expect((await resend(acme, created.body.member.id)).body).toEqual({
+      message: 'This invitation was sent less than a minute ago.',
+      code: 'RATE_LIMITED',
+    });
+
+    await sql("UPDATE team_invite_sends SET created_at = now() - interval '61 seconds'");
+    expect((await resend(acme, created.body.member.id)).status).toBe(200);
   });
 });
 
 describe('resend and cancel', () => {
+  const backdateSends = () =>
+    sql("UPDATE team_invite_sends SET created_at = now() - interval '61 seconds'");
+
   it('resend replaces the token; the old link stops working', async () => {
     const acme = await createOwner('Acme');
     const created = await invite(acme, 'pat@x.test');
     const oldToken = sentToken(0);
     const pat = await createUser({ email: 'pat@x.test' });
+    await backdateSends();
 
-    const resent = await read(
-      await resendRoute(await request('POST', '/x', { as: acme.user.address! }), {
-        params: { id: created.body.member.id },
-      }),
-    );
+    const resent = await resend(acme, created.body.member.id);
 
     expect(resent.status).toBe(200);
     expect(resent.body.member.inviteExpiresAt).not.toBeNull();
+    expect((await accept(pat.address!, oldToken)).body.code).toBe('INVITE_INVALID');
+    expect((await accept(pat.address!, sentToken(1))).status).toBe(200);
+  });
+
+  it('keeps the new token when the resend email fails', async () => {
+    const acme = await createOwner('Acme');
+    const created = await invite(acme, 'pat@x.test');
+    const oldToken = sentToken(0);
+    const pat = await createUser({ email: 'pat@x.test' });
+    await backdateSends();
+    vi.mocked(Mailer.sendMail).mockRejectedValueOnce(new Error('Error sending email'));
+
+    const failed = await resend(acme, created.body.member.id);
+
+    expect(failed).toEqual({
+      status: 502,
+      body: { message: 'The invitation email could not be sent', code: 'EMAIL_FAILED' },
+    });
     expect((await accept(pat.address!, oldToken)).body.code).toBe('INVITE_INVALID');
     expect((await accept(pat.address!, sentToken(1))).status).toBe(200);
   });
@@ -4843,25 +6270,60 @@ describe('resend and cancel', () => {
     const member = await createUser();
     await addMember(acme.team.id!, member);
     const created = await invite(acme, 'pat@x.test');
-    const params = { params: { id: created.body.member.id } };
 
-    const unknown = await read(
-      await resendRoute(await request('POST', '/x', { as: acme.user.address! }), {
-        params: { id: 'nope' },
-      }),
-    );
     const asMember = await read(
       await cancelRoute(
         await request('DELETE', '/x', { as: member.address!, teamId: acme.team.id! }),
-        params,
+        { params: { id: created.body.member.id } },
       ),
     );
 
-    expect(unknown).toEqual({
+    expect(await resend(acme, 'nope')).toEqual({
       status: 404,
       body: { message: 'Invitation not found', code: 'NOT_FOUND' },
     });
     expect(asMember.body.code).toBe('OWNER_ONLY');
+  });
+});
+
+describe('POST /api/invitations/preview', () => {
+  it('describes the invite to the invitee without accepting it', async () => {
+    const acme = await createOwner('Acme');
+    const created = await invite(acme, 'pat@x.test');
+    const pat = await createUser({ email: 'pat@x.test' });
+
+    const response = await preview(pat.address!, sentToken());
+
+    expect(response).toEqual({
+      status: 200,
+      body: {
+        teamName: 'Acme Co',
+        ownerEmail: acme.user.email,
+        expiresAt: created.body.member.inviteExpiresAt,
+      },
+    });
+    const [row] = await sql<{ status: string }>(
+      'SELECT status FROM team_collaborators WHERE id = :id',
+      { id: created.body.member.id },
+    );
+    expect(row.status).toBe('PENDING');
+  });
+
+  it('checks the token the way accept does', async () => {
+    const acme = await createOwner('Acme');
+    const created = await invite(acme, 'pat@x.test');
+    const bob = await createUser({ email: 'bob@x.test' });
+    const pat = await createUser({ email: 'pat@x.test' });
+
+    expect((await preview(bob.address!, sentToken())).body.code).toBe(
+      'INVITE_EMAIL_MISMATCH',
+    );
+    expect((await preview(pat.address!, 'garbage')).body.code).toBe('INVITE_INVALID');
+    await sql(
+      "UPDATE team_collaborators SET invite_expires_at = now() - interval '1 second' WHERE id = :id",
+      { id: created.body.member.id },
+    );
+    expect((await preview(pat.address!, sentToken())).body.code).toBe('INVITE_EXPIRED');
   });
 });
 
@@ -4880,12 +6342,35 @@ describe('POST /api/invitations/accept', () => {
       isPersonal: false,
       ownerUserId: acme.user.id,
     });
+    const [row] = await sql<{ role: string; status: string }>(
+      'SELECT role, status FROM team_collaborators WHERE user_id = :user',
+      { user: alice.id },
+    );
+    expect(row).toEqual({ role: 'MEMBER', status: 'ACCEPTED' });
     const members = await read(
       await listMembersRoute(
         await request('GET', '/x', { as: alice.address!, teamId: acme.team.id! }),
       ),
     );
     expect(members.status).toBe(200);
+  });
+
+  it('accepts as a member even if the invite row says OWNER', async () => {
+    const acme = await createOwner('Acme');
+    const created = await invite(acme, 'pat@x.test');
+    await sql("UPDATE team_collaborators SET role = 'OWNER' WHERE id = :id", {
+      id: created.body.member.id,
+    });
+    const pat = await createUser({ email: 'pat@x.test' });
+
+    expect((await accept(pat.address!, sentToken())).body.team.role).toBe('MEMBER');
+    const [row] = await sql<{ role: string }>(
+      'SELECT role FROM team_collaborators WHERE id = :id',
+      {
+        id: created.body.member.id,
+      },
+    );
+    expect(row.role).toBe('MEMBER');
   });
 
   it('refuses a different account, an expired link, garbage and a second use', async () => {
@@ -4923,10 +6408,11 @@ describe('POST /api/invitations/accept', () => {
     );
     expect((await accept(alice.address!, token)).status).toBe(200);
     expect((await accept(alice.address!, token)).body.code).toBe('INVITE_INVALID');
-    const memberships = await TeamCollaborator.count({
-      where: { team_id: acme.team.id!, user_id: alice.id! },
-    });
-    expect(memberships).toBe(1);
+    expect(
+      await TeamCollaborator.count({
+        where: { team_id: acme.team.id!, user_id: alice.id! },
+      }),
+    ).toBe(1);
   });
 
   it('answers ALREADY_MEMBER when the invitee is already in the team', async () => {
@@ -4948,20 +6434,34 @@ describe('POST /api/invitations/accept', () => {
     });
   });
 
-  it('lets a removed member be invited and accept again', async () => {
+  it('lets someone who was removed, or who left, be invited and accept again', async () => {
     const acme = await createOwner('Acme');
-    const alice = await createUser({ email: 'alice@x.test' });
-    const row = await addMember(acme.team.id!, alice);
+    const removed = await createUser({ email: 'removed@x.test' });
+    const left = await createUser({ email: 'left@x.test' });
+    const removedRow = await addMember(acme.team.id!, removed);
+    await addMember(acme.team.id!, left);
     await removeMemberRoute(await request('DELETE', '/x', { as: acme.user.address! }), {
-      params: { id: row.id! },
+      params: { id: removedRow.id! },
     });
+    await leaveRoute(
+      await request('POST', '/x', { as: left.address!, teamId: acme.team.id! }),
+    );
 
-    expect((await invite(acme, 'alice@x.test')).status).toBe(201);
-    expect((await accept(alice.address!, sentToken())).status).toBe(200);
+    expect((await invite(acme, 'removed@x.test')).status).toBe(201);
+    expect((await invite(acme, 'left@x.test')).status).toBe(201);
+    expect((await accept(removed.address!, sentToken(0))).status).toBe(200);
+    expect((await accept(left.address!, sentToken(1))).status).toBe(200);
   });
 
-  it('refuses an anonymous caller', async () => {
+  it('refuses an anonymous caller and a token from another app', async () => {
+    const acme = await createOwner('Acme');
+    await invite(acme, 'pat@x.test');
+    const pat = await createUser({ email: 'pat@x.test' });
+
     expect((await accept(undefined, 'anything')).status).toBe(401);
+    expect((await accept(pat.address!, sentToken(), ['some-other-app'])).status).toBe(
+      401,
+    );
   });
 });
 ```
@@ -4971,11 +6471,54 @@ describe('POST /api/invitations/accept', () => {
 Run: `npm test -- test/api/invitations.test.ts`
 Expected: FAIL, `Failed to resolve import "@/app/api/invitations/accept/route"`.
 
-- [ ] **Step 3: Write `src/services/invitation.service.ts`**
+- [ ] **Step 3: Escape the team name too, in #80's template**
+
+#80 (`b41eb28`) already has, in `src/templates/team.ts`:
+
+- a module-level `escapeHtml`;
+- `const inviter = escapeHtml(userName.slice(0, 60));` at the top of `generateTeamInvitationTemplate(userName, cta)`;
+- `${inviter}` in the sentence.
+
+Keep the helper and the 60-character cut. Change only the signature, add the team name, and escape the link:
+
+```ts
+export const generateTeamInvitationTemplate = ({
+  inviterName,
+  teamName,
+  cta,
+}: {
+  inviterName: string;
+  teamName: string;
+  cta: string;
+}): string => {
+  // Names come from users: escaped and cut to 60 characters (contract C7).
+  const inviter = escapeHtml(inviterName.slice(0, 60));
+  const team = escapeHtml(teamName.slice(0, 60));
+  const link = escapeHtml(cta);
+  return `
+```
+
+- In the template body, the sentence `${inviter} invited you to collaborate with them on the DIMO Developer Platform. Click` becomes `${inviter} invited you to join ${team} on the DIMO Developer Console. Click`.
+- Both `${cta}` (the `href` and `data-saferedirecturl`) become `${link}`.
+- Leave the rest of the template as it is.
+
+#80's legacy `invitePersonToMyTeam` (`src/controllers/teamCollaborator.controller.ts`) calls the old signature. Until Task 9 replaces it, update the call to:
+
+```ts
+const template = generateTeamInvitationTemplate({
+  inviterName: user.name.split(' ')[0],
+  teamName: companyName,
+  cta: `${config.frontendUrl}sign-in?code=${code}`,
+});
+```
+
+Task 2's escaping test (`&lt;b&gt;` followed by 57 `E`s) still passes: the cut and the helper are #80's.
+
+- [ ] **Step 4: Write `src/services/invitation.service.ts`**
 
 ```ts
 import { createHash, randomBytes } from 'node:crypto';
-import { Op, col, fn, where as sqlWhere } from 'sequelize';
+import { Op, UniqueConstraintError, col, fn, where as sqlWhere } from 'sequelize';
 import isEmail from 'validator/lib/isEmail';
 
 import config from '@/config';
@@ -4986,17 +6529,25 @@ import {
   TeamCollaborator,
   TeamRoles,
 } from '@/models/teamCollaborator.model';
+import { TeamInviteSend } from '@/models/teamInviteSend.model';
 import { User } from '@/models/user.model';
-import { activeMembershipWhere, findMembership } from '@/services/membership.service';
+import {
+  activeMembershipWhere,
+  findMembership,
+  notDeleted,
+} from '@/services/membership.service';
 import { requireOwner, TeamContext } from '@/services/teamContext.service';
 import { toTeamMember, toTeamSummary } from '@/services/teamMembers.service';
 import { generateTeamInvitationTemplate } from '@/templates/team';
-import type { TeamMember, TeamSummary } from '@/types/teams';
+import type { InvitationPreview, TeamMember, TeamSummary } from '@/types/teams';
 import { ApiError } from '@/utils/apiError';
 import Mailer from '@/utils/mailer';
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const notDeleted = { [Op.not]: true };
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+const LIMITS = { teamPerHour: 10, senderPerDay: 30, pendingPerTeam: 50 };
 
 export const generateInviteToken = () => randomBytes(32).toString('base64url');
 
@@ -5018,19 +6569,67 @@ const freshInvite = () => {
   };
 };
 
-const teamOf = (ctx: TeamContext) => {
-  if (!ctx.team)
-    throw new ApiError(403, 'NOT_A_MEMBER', 'Finish setting up your team first');
-  return ctx.team;
+const rateLimited = (message: string) => new ApiError(429, 'RATE_LIMITED', message);
+const createdSince = (ms: number) =>
+  sqlWhere(col('created_at'), { [Op.gt]: new Date(Date.now() - ms) });
+
+/** Contract C7's limits on invite and resend emails. */
+const assertCanSend = async (ctx: TeamContext, membershipId?: string) => {
+  const teamSends = await TeamInviteSend.count({
+    where: { team_id: ctx.team.id!, [Op.and]: [createdSince(HOUR)] },
+  });
+  if (teamSends >= LIMITS.teamPerHour) {
+    throw rateLimited(
+      'This team has sent 10 invitations in the last hour. Try again later.',
+    );
+  }
+  const senderSends = await TeamInviteSend.count({
+    where: { sent_by: ctx.user.id!, [Op.and]: [createdSince(DAY)] },
+  });
+  if (senderSends >= LIMITS.senderPerDay) {
+    throw rateLimited('You have sent 30 invitations today. Try again tomorrow.');
+  }
+  if (membershipId) {
+    const recent = await TeamInviteSend.count({
+      where: { membership_id: membershipId, [Op.and]: [createdSince(MINUTE)] },
+    });
+    if (recent > 0) throw rateLimited('This invitation was sent less than a minute ago.');
+  }
 };
 
-const sendInvite = async (ctx: TeamContext, email: string, token: string) => {
+const assertPendingRoom = async (teamId: string) => {
+  const pending = await TeamCollaborator.count({
+    where: { team_id: teamId, status: InvitationStatuses.PENDING, deleted: notDeleted },
+  });
+  if (pending >= LIMITS.pendingPerTeam) {
+    throw rateLimited(
+      'This team has 50 pending invitations. Cancel some before inviting more.',
+    );
+  }
+};
+
+const sendInvite = async (
+  ctx: TeamContext,
+  membershipId: string,
+  email: string,
+  token: string,
+) => {
+  await TeamInviteSend.create({
+    team_id: ctx.team.id!,
+    membership_id: membershipId,
+    sent_by: ctx.user.id!,
+  });
   const inviter = ctx.user.name?.split(' ')[0] || ctx.user.email;
   try {
     await Mailer.sendMail({
       to: email,
-      subject: `${inviter} invited you to ${teamOf(ctx).name} on the DIMO Developer Console`,
-      html: generateTeamInvitationTemplate(inviter, inviteLink(token)),
+      subject: `${inviter.slice(0, 60)} invited you to ${ctx.team.name.slice(0, 60)} on the DIMO Developer Console`,
+      // The subject is a header, not HTML: cut, not escaped. The body escapes.
+      html: generateTeamInvitationTemplate({
+        inviterName: inviter,
+        teamName: ctx.team.name,
+        cta: inviteLink(token),
+      }),
     });
   } catch (error) {
     console.error({ error, step: '[Invitations] Send invite email' });
@@ -5048,22 +6647,28 @@ const findPendingInTeam = (teamId: string, id: string) =>
     },
   });
 
+const alreadyInvited = (email: string) =>
+  new ApiError(409, 'ALREADY_INVITED', `${email} already has a pending invitation`);
+
 export const createInvitation = async (
   ctx: TeamContext,
   rawEmail: unknown,
 ): Promise<TeamMember> => {
   requireOwner(ctx);
-  const team = teamOf(ctx);
+  const teamId = ctx.team.id!;
   const email = typeof rawEmail === 'string' ? rawEmail.trim() : '';
   if (!isEmail(email))
     throw new ApiError(400, 'INVALID_EMAIL', 'Enter a valid email address');
   const lower = email.toLowerCase();
 
   const members = await TeamCollaborator.findAll({
-    where: { team_id: team.id!, ...activeMembershipWhere },
+    where: { team_id: teamId, ...activeMembershipWhere },
     include: [{ model: User }],
   });
-  if (members.some((row) => row.User?.email.toLowerCase() === lower)) {
+  if (
+    ctx.owner.email.toLowerCase() === lower ||
+    members.some((row) => row.User?.email.toLowerCase() === lower)
+  ) {
     throw new ApiError(
       409,
       'ALREADY_MEMBER',
@@ -5073,35 +6678,45 @@ export const createInvitation = async (
 
   const pending = await TeamCollaborator.findOne({
     where: {
-      team_id: team.id!,
+      team_id: teamId,
       status: InvitationStatuses.PENDING,
       deleted: notDeleted,
       [Op.and]: [sqlWhere(fn('lower', col('email')), lower)],
     },
   });
   if (pending?.invite_expires_at && pending.invite_expires_at.getTime() > Date.now()) {
-    throw new ApiError(
-      409,
-      'ALREADY_INVITED',
-      `${email} already has a pending invitation`,
-    );
+    throw alreadyInvited(email);
   }
+  if (!pending) await assertPendingRoom(teamId);
+  await assertCanSend(ctx, pending?.id);
 
   const { token, fields } = freshInvite();
-  // An expired invite, or one sent before links carried a token, is refreshed in place.
-  const row = pending
-    ? await pending.update({ ...fields, invited_by: ctx.user.id })
-    : await TeamCollaborator.create({
-        team_id: team.id!,
-        email,
-        role: TeamRoles.MEMBER,
-        status: InvitationStatuses.PENDING,
-        invited_by: ctx.user.id,
-        ...fields,
-      });
+  let row: TeamCollaborator;
+  try {
+    // An expired invite, or one sent before links carried a token, is refreshed in
+    // place. It is always a member's invite, whatever the old row said.
+    row = pending
+      ? await pending.update({
+          ...fields,
+          role: TeamRoles.MEMBER,
+          invited_by: ctx.user.id,
+        })
+      : await TeamCollaborator.create({
+          team_id: teamId,
+          email,
+          role: TeamRoles.MEMBER,
+          status: InvitationStatuses.PENDING,
+          invited_by: ctx.user.id,
+          ...fields,
+        });
+  } catch (error) {
+    // Two invites for the same email at once: the unique index lets one through.
+    if (error instanceof UniqueConstraintError) throw alreadyInvited(email);
+    throw error;
+  }
 
   try {
-    await sendInvite(ctx, email, token);
+    await sendInvite(ctx, row.id!, email, token);
   } catch (error) {
     await row.update({
       status: InvitationStatuses.REVOKED,
@@ -5111,7 +6726,7 @@ export const createInvitation = async (
     });
     throw error;
   }
-  return toTeamMember(row);
+  return toTeamMember(row, ctx.team.created_by);
 };
 
 export const resendInvitation = async (
@@ -5119,18 +6734,21 @@ export const resendInvitation = async (
   id: string,
 ): Promise<TeamMember> => {
   requireOwner(ctx);
-  const row = await findPendingInTeam(teamOf(ctx).id!, id);
+  const row = await findPendingInTeam(ctx.team.id!, id);
   if (!row) throw new ApiError(404, 'NOT_FOUND', 'Invitation not found');
+  await assertCanSend(ctx, row.id);
 
   const { token, fields } = freshInvite();
-  await row.update({ ...fields, invited_by: ctx.user.id });
-  await sendInvite(ctx, row.email!, token);
-  return toTeamMember(row);
+  await row.update({ ...fields, role: TeamRoles.MEMBER, invited_by: ctx.user.id });
+  // If the email fails, the row keeps the new token (C7): the old link is dead
+  // either way, and the owner can resend after a minute.
+  await sendInvite(ctx, row.id!, row.email!, token);
+  return toTeamMember(row, ctx.team.created_by);
 };
 
 export const cancelInvitation = async (ctx: TeamContext, id: string) => {
   requireOwner(ctx);
-  const row = await findPendingInTeam(teamOf(ctx).id!, id);
+  const row = await findPendingInTeam(ctx.team.id!, id);
   if (!row) throw new ApiError(404, 'NOT_FOUND', 'Invitation not found');
 
   await row.update({
@@ -5141,10 +6759,8 @@ export const cancelInvitation = async (ctx: TeamContext, id: string) => {
   });
 };
 
-export const acceptInvitation = async (
-  user: User,
-  rawToken: unknown,
-): Promise<TeamSummary> => {
+/** The pending invite a token names, checked for this user: what preview and accept share. */
+const findValidInvite = async (user: User, rawToken: unknown) => {
   const invalid = () =>
     new ApiError(400, 'INVITE_INVALID', 'This invitation link is not valid');
   const token = typeof rawToken === 'string' ? rawToken.trim() : '';
@@ -5175,26 +6791,41 @@ export const acceptInvitation = async (
   const team = await Team.findOne({ where: { id: row.team_id, deleted: notDeleted } });
   const owner = team ? await User.findOne({ where: { id: team.created_by } }) : null;
   if (!team || !owner?.address) throw invalid();
+  return { row, team, owner };
+};
+
+export const previewInvitation = async (
+  user: User,
+  rawToken: unknown,
+): Promise<InvitationPreview> => {
+  const { row, team, owner } = await findValidInvite(user, rawToken);
+  return {
+    teamName: team.name,
+    ownerEmail: owner.email,
+    expiresAt: row.invite_expires_at!.toISOString(),
+  };
+};
+
+export const acceptInvitation = async (
+  user: User,
+  rawToken: unknown,
+): Promise<TeamSummary> => {
+  const { row, team, owner } = await findValidInvite(user, rawToken);
 
   await row.update({
     status: InvitationStatuses.ACCEPTED,
+    role: TeamRoles.MEMBER,
     user_id: user.id,
     invite_token_hash: null,
     invite_expires_at: null,
   });
 
   const company = await Company.findOne({ where: { id: team.company_id } });
-  return toTeamSummary({
-    team,
-    company,
-    owner,
-    role: TeamRoles.MEMBER,
-    callerId: user.id!,
-  });
+  return toTeamSummary({ team, company, owner, callerId: user.id! });
 };
 ```
 
-- [ ] **Step 4: Write the routes**
+- [ ] **Step 5: Write the routes**
 
 `src/app/api/my/team/invitations/route.ts`:
 
@@ -5205,7 +6836,7 @@ import { errorResponse } from '@/utils/apiError';
 
 export const POST = async (request: NextRequest) => {
   try {
-    const ctx = await resolveTeamContext(request);
+    const ctx = await resolveTeamContext(request, { consoleOnly: true });
     const body = await request.json().catch(() => ({}));
     const member = await createInvitation(ctx, body?.email);
     return Response.json({ member }, { status: 201 });
@@ -5226,7 +6857,7 @@ type Params = { params: { id: string } };
 
 export const DELETE = async (request: NextRequest, { params: { id } }: Params) => {
   try {
-    const ctx = await resolveTeamContext(request);
+    const ctx = await resolveTeamContext(request, { consoleOnly: true });
     await cancelInvitation(ctx, id);
     return new Response(null, { status: 204 });
   } catch (error: unknown) {
@@ -5246,10 +6877,29 @@ type Params = { params: { id: string } };
 
 export const POST = async (request: NextRequest, { params: { id } }: Params) => {
   try {
-    const ctx = await resolveTeamContext(request);
+    const ctx = await resolveTeamContext(request, { consoleOnly: true });
     return Response.json({ member: await resendInvitation(ctx, id) });
   } catch (error: unknown) {
     return errorResponse(error, '[Team] Resend invite');
+  }
+};
+```
+
+`src/app/api/invitations/preview/route.ts`:
+
+```ts
+import { previewInvitation } from '@/services/invitation.service';
+import { requireUser } from '@/services/teamContext.service';
+import { errorResponse } from '@/utils/apiError';
+
+// What the console shows before the invitee accepts: "Join {teamName} owned by {ownerEmail}?"
+export const POST = async (request: NextRequest) => {
+  try {
+    const user = await requireUser(request, { consoleOnly: true });
+    const body = await request.json().catch(() => ({}));
+    return Response.json(await previewInvitation(user, body?.token));
+  } catch (error: unknown) {
+    return errorResponse(error, '[Invitations] Preview');
   }
 };
 ```
@@ -5261,11 +6911,10 @@ import { acceptInvitation } from '@/services/invitation.service';
 import { requireUser } from '@/services/teamContext.service';
 import { errorResponse } from '@/utils/apiError';
 
-// Authenticated by the global middleware like every non-public route; the token
-// in the body must belong to an invite sent to the caller's email.
+// The token in the body must belong to an invite sent to the caller's email.
 export const POST = async (request: NextRequest) => {
   try {
-    const user = await requireUser(request);
+    const user = await requireUser(request, { consoleOnly: true });
     const body = await request.json().catch(() => ({}));
     return Response.json({ team: await acceptInvitation(user, body?.token) });
   } catch (error: unknown) {
@@ -5274,20 +6923,20 @@ export const POST = async (request: NextRequest) => {
 };
 ```
 
-- [ ] **Step 5: Run the tests**
+- [ ] **Step 6: Run the tests**
 
 Run: `npm test -- test/api/invitations.test.ts`
-Expected: `13 passed`.
+Expected: `23 passed`.
 
-- [ ] **Step 6: Run everything, typecheck, commit**
+- [ ] **Step 7: Run everything, typecheck, commit**
 
 Run: `npm test && npm run typecheck`
 Expected: all pass, typecheck exits 0.
 
 ```bash
-npx prettier --write src/services/invitation.service.ts src/app/api/my/team/invitations src/app/api/invitations test
-git add src/services/invitation.service.ts src/app/api/my/team/invitations src/app/api/invitations test
-git commit -m "feat(teams): email-bound invitations with hashed tokens, resend, cancel and accept"
+npx prettier --write src/services/invitation.service.ts src/templates/team.ts src/controllers/teamCollaborator.controller.ts src/app/api/my/team/invitations src/app/api/invitations test
+git add src/services/invitation.service.ts src/templates/team.ts src/controllers/teamCollaborator.controller.ts src/app/api/my/team/invitations src/app/api/invitations test
+git commit -m "feat(teams): rate-limited, email-bound invitations with preview, resend, cancel and accept"
 ```
 
 ---
@@ -5299,25 +6948,38 @@ Today's console calls these until part 3 ships:
 - `GET /api/my/team/collaborator`, `POST /api/my/team/invitation`, `DELETE /api/my/team/collaborator/:id` (`src/services/team.ts` in the console);
 - `GET /api/me?invitation_code=` (`src/services/user.ts`).
 
-They become thin adapters over the new services and the active team.
+They become thin adapters over the new services and the active team. #80 (`b41eb28`) already made them safe:
 
-- **Collaborator removal:** #80 already limited it to the owner's own team and fixed the last-owner count. This task keeps #80's error messages, which the old Settings page shows, and only moves it onto the team context. Removed rows are now marked `REVOKED`, and pending invites are cancelled through the invitation service.
-- **New fix:** `invitation_code` acceptance didn't check the invitee's email.
+- removal is scoped to the owner's team, with a per-team last-owner count;
+- invites are owner-only, always `COLLABORATOR` (`MEMBER` since Task 3), and limited to 10 rows per team per hour;
+- `invitation_code` acceptance needs a PENDING row sent to the caller's email.
+
+This task doesn't redo any of that. It moves the routes onto the team model:
+
+- **Owner** is `teams.created_by`, through the team context, instead of a membership row's `role`.
+- **The legacy invite** goes through `createInvitation`: C7's limits, token links and `MEMBER` rows. It keeps #80's refusal message for non-owners, which the old Settings page shows.
+- **Removal** keeps #80's messages, marks rows `REVOKED`, and cancels pending invites through the invitation service.
+- **`invitation_code` acceptance** keeps #80's checks and `markAsAccepted`, and adds three: it never accepts a token-based invite, an expired one, or one for someone already in the team.
+- **The collaborator list** returns only the fields the old page reads.
 
 **Files:**
 
 - Modify (rewrite): `src/controllers/teamCollaborator.controller.ts`
 - Modify (whole files below): `src/app/api/my/team/route.ts`, `src/app/api/my/team/collaborator/route.ts`, `src/app/api/my/team/collaborator/[id]/route.ts`, `src/app/api/my/team/invitation/route.ts`
+- Modify: `test/api/regressions-80.test.ts` (the legacy rate-limit test, now C7's)
 - Unchanged: `src/app/api/me/route.ts`. It still calls `acceptTeamInvitation(user, invitationCode)`, which keeps its signature.
 - Test: `test/api/retired-team-routes.test.ts`
 
 **Interfaces:**
 
-- Consumes (Tasks 4, 7 and 8): `resolveTeamContext`, `TeamContext`, `findMembership`, `removeMember`, `createInvitation`, `cancelInvitation`, `legacyErrorResponse`. Consumes (#80): `ValidatorError` from `@/utils/error.utils`.
+- Consumes (Tasks 4, 7 and 8): `resolveTeamContext`, `TeamContext`, `findMembership`, `removeMember`, `createInvitation`, `cancelInvitation`, `legacyErrorResponse`. Consumes (#80): `ValidatorError` from `@/utils/error.utils`, and `markAsAccepted` from `@/services/teamCollaborator.service`, which sets `MEMBER` since Task 3.
 - Produces:
   - `removeMyCollaboratorById(ctx: TeamContext, id: string): Promise<void>`. It replaces #80's `(user, id)` version and throws #80's `ValidatorError` messages: `Do not have enough permissions to remove a collaborator`, `Collaborator not found`, `Cannot remove the only administrator from the group.` The route answers each as 400 `{ message }`.
-  - `acceptTeamInvitation(user: User, invitationCode: string | null): Promise<void>`: legacy `base64(row id)` codes only, and only for rows with no token hash, not expired, sent to the caller's email.
-  - `listLegacyCollaborators(teamId: string | undefined)`: `{ data, totalItems, totalPages }`, with `MEMBER` shown as `COLLABORATOR` so the old Settings page keeps its labels.
+  - `acceptTeamInvitation(user: User, invitationCode: string | null): Promise<void>`. It keeps #80's checks (PENDING, the caller's email, case-insensitive) and `markAsAccepted`. It adds three: no token hash, not expired, and not already a member.
+  - `listLegacyCollaborators(team: Team)`, returning `{ data, totalItems, totalPages }`:
+    - the creator is shown as `OWNER` and everyone else as `COLLABORATOR`, so the old Settings page keeps its labels;
+    - each row carries only `id`, `team_id`, `user_id`, `email`, `status`, `role`, `User` (`id`, `name`, `email`, `avatar_url`) and `Team` (`id`, `name`). Never the whole user row.
+- The legacy invite keeps #80's 400 `Only the team owner can invite collaborators` for non-owners. Its limit becomes C7's: 429 `RATE_LIMITED`, counted from `team_invite_sends`. Step 4 updates Task 2's rate-limit test to match.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -5365,6 +7027,13 @@ describe('retired team routes', () => {
     ).toEqual([
       [acme.user.email, 'OWNER'],
       [member.email, 'COLLABORATOR'],
+    ]);
+    // Only what the old Settings page reads: no wallet, tokens or auth fields.
+    expect(Object.keys(response.body.data[1].User).sort()).toEqual([
+      'avatar_url',
+      'email',
+      'id',
+      'name',
     ]);
   });
 
@@ -5501,7 +7170,7 @@ Run: `npm test -- test/api/retired-team-routes.test.ts`
 Expected: FAIL.
 
 - The list includes the revoked row and shows `MEMBER`.
-- The old invite route answers 400, because it refuses registered emails or uses the old link.
+- The old invite route answers 400 for an account that already exists, and emails the old `sign-in?code=` link.
 - Removed rows keep `status = 'ACCEPTED'`, because #80 only sets `deleted`.
 - `bob` accepts Pat's invite.
 
@@ -5521,15 +7190,20 @@ import {
 import { User } from '@/models/user.model';
 import { cancelInvitation } from '@/services/invitation.service';
 import { findMembership } from '@/services/membership.service';
+import { markAsAccepted } from '@/services/teamCollaborator.service';
 import type { TeamContext } from '@/services/teamContext.service';
 import { removeMember } from '@/services/teamMembers.service';
 import { ValidatorError } from '@/utils/error.utils';
 
 const notDeleted = { [Op.not]: true };
 
+/** What the old Settings page reads about a person; never the whole user row. */
+const LEGACY_USER_FIELDS = ['id', 'name', 'email', 'avatar_url'];
+
 /**
- * Old invite links carried base64(row id). They're honoured only for invites sent
- * before token links existed, before they expire, and for the invited email.
+ * Old invite links carried base64(row id). #80 honoured them only for a PENDING
+ * row sent to the caller's email. On top of that: never for an invite sent with a
+ * token link, an expired one, or one for someone already in the team.
  */
 export const acceptTeamInvitation = async (
   user: User,
@@ -5551,26 +7225,35 @@ export const acceptTeamInvitation = async (
   if ((row.email ?? '').trim().toLowerCase() !== user.email.trim().toLowerCase()) return;
   if (await findMembership(row.team_id, user.id)) return;
 
-  await row.update({ status: InvitationStatuses.ACCEPTED, user_id: user.id });
+  // #80's markAsAccepted: ACCEPTED, the user, and always MEMBER (contract C7).
+  await markAsAccepted(row.id!, user);
 };
 
 /** The old paginated collaborator list, for one team, without removed rows. */
-export const listLegacyCollaborators = async (teamId: string | undefined) => {
-  if (!teamId) return { data: [], totalItems: 0, totalPages: 0 };
-
+export const listLegacyCollaborators = async (team: Team) => {
   const rows = await TeamCollaborator.findAll({
     where: {
-      team_id: teamId,
+      team_id: team.id!,
       deleted: notDeleted,
       status: { [Op.in]: [InvitationStatuses.ACCEPTED, InvitationStatuses.PENDING] },
     },
-    include: [{ model: User }, { model: Team }],
+    include: [
+      { model: User, attributes: LEGACY_USER_FIELDS },
+      { model: Team, attributes: ['id', 'name'] },
+    ],
     order: [['created_at', 'ASC']],
   });
-  // The old Settings page labels only OWNER and COLLABORATOR.
+  // The old Settings page labels only OWNER and COLLABORATOR, and the owner is the
+  // team's creator, whatever the row says.
   const data = rows.map((row) => ({
-    ...row.toJSON(),
-    role: row.role === TeamRoles.MEMBER ? 'COLLABORATOR' : row.role,
+    id: row.id,
+    team_id: row.team_id,
+    user_id: row.user_id,
+    email: row.email,
+    status: row.status,
+    role: row.user_id && row.user_id === team.created_by ? 'OWNER' : 'COLLABORATOR',
+    User: row.User?.toJSON() ?? null,
+    Team: row.Team?.toJSON() ?? null,
   }));
   return { data, totalItems: data.length, totalPages: data.length ? 1 : 0 };
 };
@@ -5581,7 +7264,7 @@ export const listLegacyCollaborators = async (teamId: string | undefined) => {
  * page shows them. A team has one owner, who can't be removed.
  */
 export const removeMyCollaboratorById = async (ctx: TeamContext, id: string) => {
-  if (ctx.role !== TeamRoles.OWNER || !ctx.team) {
+  if (ctx.role !== TeamRoles.OWNER) {
     throw new ValidatorError('Do not have enough permissions to remove a collaborator');
   }
   const row = await TeamCollaborator.findOne({
@@ -5593,7 +7276,7 @@ export const removeMyCollaboratorById = async (ctx: TeamContext, id: string) => 
     },
   });
   if (!row) throw new ValidatorError('Collaborator not found');
-  if (row.role === TeamRoles.OWNER) {
+  if (row.user_id === ctx.team.created_by) {
     throw new ValidatorError('Cannot remove the only administrator from the group.');
   }
 
@@ -5632,7 +7315,7 @@ import { legacyErrorResponse } from '@/utils/apiError';
 export const GET = async (request: NextRequest) => {
   try {
     const ctx = await resolveTeamContext(request);
-    return Response.json(await listLegacyCollaborators(ctx.team?.id));
+    return Response.json(await listLegacyCollaborators(ctx.team));
   } catch (error: unknown) {
     return legacyErrorResponse(
       error,
@@ -5673,15 +7356,26 @@ export const DELETE = async (request: NextRequest, { params: { id } }: Params) =
 `src/app/api/my/team/invitation/route.ts`:
 
 ```ts
+import _ from 'lodash';
+
+import { TeamRoles } from '@/models/teamCollaborator.model';
 import { createInvitation } from '@/services/invitation.service';
 import { resolveTeamContext } from '@/services/teamContext.service';
 import { legacyErrorResponse } from '@/utils/apiError';
+import { ValidatorError } from '@/utils/error.utils';
 
-// Retired: replaced by POST /api/my/team/invitations. The role in the body is ignored.
+// Retired: replaced by POST /api/my/team/invitations. Only the email is read from
+// the body; invitations are always for a member.
 export const POST = async (request: NextRequest) => {
   try {
     const ctx = await resolveTeamContext(request);
-    const { email } = (await request.json().catch(() => ({}))) as { email?: unknown };
+    // #80's message, which the old Settings page shows.
+    if (ctx.role !== TeamRoles.OWNER) {
+      throw new ValidatorError('Only the team owner can invite collaborators');
+    }
+    const { email } = _.pick(await request.json().catch(() => ({})), ['email']) as {
+      email?: unknown;
+    };
     await createInvitation(ctx, email);
     return Response.json(
       { message: `Invitation has been sent to ${String(email).trim()}` },
@@ -5693,6 +7387,31 @@ export const POST = async (request: NextRequest) => {
 };
 ```
 
+The legacy invite now counts C7's sends, not #80's rows. In `test/api/regressions-80.test.ts`, replace the test `'allows 10 invitations per team per hour'` with:
+
+```ts
+it('allows 10 invitation emails per team per hour', async () => {
+  const acme = await createOwner('Acme');
+  await TeamInviteSend.bulkCreate(
+    Array.from({ length: 10 }, () => ({
+      team_id: acme.team.id!,
+      membership_id: acme.membership.id!,
+      sent_by: acme.user.id!,
+    })),
+  );
+
+  expect(await invite(acme.user.address!, 'eleventh@x.test')).toEqual({
+    status: 429,
+    body: {
+      message: 'This team has sent 10 invitations in the last hour. Try again later.',
+      code: 'RATE_LIMITED',
+    },
+  });
+});
+```
+
+Add `import { TeamInviteSend } from '@/models/teamInviteSend.model';` to that file's imports.
+
 - [ ] **Step 5: Confirm nothing else used the deleted controller functions**
 
 Run: `grep -rnE "getMyTeamCollaborators|invitePersonToMyTeam|findTeamInvitationByEmail|getCollaboratorTeam|deleteTeamCollaboratorById" src`
@@ -5701,7 +7420,13 @@ Expected: no output. `removeMyCollaboratorById` stays, with its new `(ctx, id)` 
 - [ ] **Step 6: Run everything, typecheck, commit**
 
 Run: `npm test && npm run typecheck`
-Expected: all pass, including Task 2's collaborator regressions (still 400 `Collaborator not found` for another team's row). Typecheck exits 0.
+Expected: all pass, including Task 2's regressions:
+
+- the collaborator removal answers 400 `Collaborator not found` for another team's row;
+- a non-owner's legacy invite answers 400 `Only the team owner can invite collaborators`;
+- the new rate-limit test answers 429.
+
+Typecheck exits 0.
 
 ```bash
 npx prettier --write src/controllers/teamCollaborator.controller.ts src/app/api/my/team/route.ts src/app/api/my/team/collaborator src/app/api/my/team/invitation test
@@ -5720,10 +7445,15 @@ git commit -m "fix(teams): scope the retired team routes to the caller's team an
 
 **Interfaces:**
 
-- Consumes: `requireUser` (Task 4), `ApiError` and `errorResponse` (Task 3), viem `recoverMessageAddress`, `getAddress`, `isAddress`, `isHex`.
+- Consumes: `requireUser` (Task 4); `ApiError` and `errorResponse` (Task 3); `LicenseSigner`, `LicenseSignerHolder`, `SignerKinds` (Task 3); viem `recoverMessageAddress`, `getAddress`, `isAddress`, `isHex`.
 - Produces:
   - `buildSignerProofMessage(eoa: string, kernelAddress: string, issuedAt: string): string`, the exact C6 text.
   - `verifySignerProof(input: { address: unknown; message: unknown; signature: unknown }, userAddress: string, now?: number): Promise<\`0x${string}\`>`. Returns the checksummed signer, or throws 400 `SIGNER_PROOF_INVALID` with a reason.
+  - `assertSignerAvailable(user: User, signer: string): Promise<void>`, enforcing C6's last two rules:
+    - 409 `SIGNER_IN_USE` when another user already has this signer, in any letter case, or the address is an `API_KEY` or `EXTERNAL` key in the registry;
+    - 409 `SIGNER_LOCKED` when the caller holds an enabled `MEMBER` key under a different address.
+  - A concurrent registration that trips `idx_users_signer_address` also answers 409 `SIGNER_IN_USE`.
+- The route passes `consoleOnly: true` (C4).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -5734,12 +7464,14 @@ import { getAddress } from 'viem';
 import { describe, expect, it } from 'vitest';
 
 import { PUT as putSigner } from '@/app/api/me/signer/route';
+import { LicenseSigner, SignerKinds } from '@/models/licenseSigner.model';
+import { LicenseSignerHolder } from '@/models/licenseSignerHolder.model';
 import { User } from '@/models/user.model';
 import {
   buildSignerProofMessage,
   verifySignerProof,
 } from '@/services/signerProof.service';
-import { createUser, newWallet } from '../support/fixtures';
+import { createOwner, createUser, newWallet } from '../support/fixtures';
 import { read, request } from '../support/http';
 
 const NOW = Date.parse('2026-10-02T12:00:00.000Z');
@@ -5894,10 +7626,89 @@ describe('PUT /api/me/signer', () => {
     });
   });
 
-  it('refuses an anonymous caller and a body that is not JSON', async () => {
+  const register = async (user: User, wallet = newWallet()) =>
+    read(
+      await putSigner(
+        await request('PUT', '/api/me/signer', {
+          as: user.address!,
+          body: await proofFor(wallet, user.address!),
+        }),
+      ),
+    );
+
+  it('lets the same user register the same wallet again', async () => {
+    const user = await createUser();
+    const wallet = newWallet();
+
+    expect((await register(user, wallet)).status).toBe(200);
+    expect((await register(user, wallet)).status).toBe(200);
+  });
+
+  it("refuses another user's wallet, in any letter case, and a license API key", async () => {
+    const owner = await createOwner('Acme');
+    const taken = newWallet();
+    const holder = await createUser();
+    await holder.update({
+      signer_address: taken.address.toUpperCase().replace('0X', '0x'),
+    });
+    const apiKey = newWallet();
+    await LicenseSigner.create({
+      team_id: owner.team.id!,
+      license_token_id: 7,
+      signer_address: apiKey.address.toLowerCase(),
+      kind: SignerKinds.API_KEY,
+    });
+    const user = await createUser();
+
+    expect((await register(user, taken)).body).toEqual({
+      message: 'This wallet already signs for another account',
+      code: 'SIGNER_IN_USE',
+    });
+    expect((await register(user, apiKey)).body).toEqual({
+      message: 'This wallet is a license API key and cannot sign for an account',
+      code: 'SIGNER_IN_USE',
+    });
+  });
+
+  it('refuses a new wallet while the caller still holds member keys under the old one', async () => {
+    const owner = await createOwner('Acme');
+    const user = await createUser();
+    const oldWallet = newWallet();
+    expect((await register(user, oldWallet)).status).toBe(200);
+    const key = await LicenseSigner.create({
+      team_id: owner.team.id!,
+      license_token_id: 7,
+      signer_address: oldWallet.address.toLowerCase(),
+      kind: SignerKinds.MEMBER,
+    });
+    await LicenseSignerHolder.create({ signer_id: key.id!, user_id: user.id });
+
+    expect((await register(user, newWallet())).body).toEqual({
+      message:
+        'Your access is tied to another wallet. Ask the team owner to revoke it first.',
+      code: 'SIGNER_LOCKED',
+    });
+    expect((await register(user, oldWallet)).status).toBe(200);
+
+    await key.update({ disabled_at: new Date() });
+    expect((await register(user, newWallet())).status).toBe(200);
+  });
+
+  it('refuses an anonymous caller, another app, and a body that is not JSON', async () => {
     const user = await createUser();
     expect(
       (await putSigner(await request('PUT', '/api/me/signer', { body: {} }))).status,
+    ).toBe(401);
+    expect(
+      (
+        await putSigner(
+          await request('PUT', '/api/me/signer', {
+            as: user.address!,
+            aud: ['some-other-app'],
+            body: await proofFor(newWallet(), user.address!),
+          }),
+        )
+      ).status,
     ).toBe(401);
     expect(
       (
@@ -5992,11 +7803,87 @@ export const verifySignerProof = async (
 
 The `signature must be hex` check runs before the message check, so the last malformed-input case in the test still hits it. `'nothex'` fails `isHex` first.
 
+Append to the same file. Merge the new imports into the import block at the top.
+
+```ts
+import { Op, col, fn, where as sqlWhere } from 'sequelize';
+
+import { LicenseSigner, SignerKinds } from '@/models/licenseSigner.model';
+import { LicenseSignerHolder } from '@/models/licenseSignerHolder.model';
+import { User } from '@/models/user.model';
+
+/**
+ * Contract C6's last two rules. A wallet signs for one account and is never also a
+ * license API key; and while someone holds member keys under one wallet, they can't
+ * switch to another (an owner revokes those keys first).
+ */
+export const assertSignerAvailable = async (user: User, signer: string) => {
+  const lower = signer.toLowerCase();
+
+  const otherUser = await User.findOne({
+    where: {
+      id: { [Op.ne]: user.id! },
+      [Op.and]: [sqlWhere(fn('lower', col('signer_address')), lower)],
+    },
+  });
+  if (otherUser) {
+    throw new ApiError(
+      409,
+      'SIGNER_IN_USE',
+      'This wallet already signs for another account',
+    );
+  }
+
+  const sharedKey = await LicenseSigner.findOne({
+    where: {
+      signer_address: lower,
+      kind: { [Op.in]: [SignerKinds.API_KEY, SignerKinds.EXTERNAL] },
+    },
+  });
+  if (sharedKey) {
+    throw new ApiError(
+      409,
+      'SIGNER_IN_USE',
+      'This wallet is a license API key and cannot sign for an account',
+    );
+  }
+
+  const heldElsewhere = await LicenseSigner.count({
+    where: {
+      kind: SignerKinds.MEMBER,
+      disabled_at: null,
+      signer_address: { [Op.ne]: lower },
+    },
+    include: [
+      {
+        model: LicenseSignerHolder,
+        as: 'holders',
+        where: { user_id: user.id! },
+        required: true,
+      },
+    ],
+  });
+  if (heldElsewhere > 0) {
+    throw new ApiError(
+      409,
+      'SIGNER_LOCKED',
+      'Your access is tied to another wallet. Ask the team owner to revoke it first.',
+    );
+  }
+};
+```
+
 - [ ] **Step 4: Write `src/app/api/me/signer/route.ts`**
 
 ```ts
+import { UniqueConstraintError } from 'sequelize';
+
 import { User } from '@/models/user.model';
-import { SignerProofInput, verifySignerProof } from '@/services/signerProof.service';
+import {
+  assertSignerAvailable,
+  SignerProofInput,
+  verifySignerProof,
+} from '@/services/signerProof.service';
 import { requireUser } from '@/services/teamContext.service';
 import { ApiError, errorResponse } from '@/utils/apiError';
 
@@ -6004,7 +7891,7 @@ import { ApiError, errorResponse } from '@/utils/apiError';
 // console proves control of it with the contract C6 message.
 export const PUT = async (request: NextRequest) => {
   try {
-    const user = await requireUser(request);
+    const user = await requireUser(request, { consoleOnly: true });
     const body = (await request.json().catch(() => null)) as SignerProofInput | null;
     if (!body || typeof body !== 'object') {
       throw new ApiError(
@@ -6015,14 +7902,27 @@ export const PUT = async (request: NextRequest) => {
     }
 
     const signerAddress = await verifySignerProof(body, user.address ?? '');
+    await assertSignerAvailable(user, signerAddress);
     const signerVerifiedAt = new Date();
-    await User.update(
-      {
-        signer_address: signerAddress.toLowerCase(),
-        signer_verified_at: signerVerifiedAt,
-      },
-      { where: { id: user.id! } },
-    );
+    try {
+      await User.update(
+        {
+          signer_address: signerAddress.toLowerCase(),
+          signer_verified_at: signerVerifiedAt,
+        },
+        { where: { id: user.id! } },
+      );
+    } catch (error) {
+      // Another account registered the same wallet at the same moment.
+      if (error instanceof UniqueConstraintError) {
+        throw new ApiError(
+          409,
+          'SIGNER_IN_USE',
+          'This wallet already signs for another account',
+        );
+      }
+      throw error;
+    }
 
     return Response.json({
       signerAddress,
@@ -6037,7 +7937,7 @@ export const PUT = async (request: NextRequest) => {
 - [ ] **Step 5: Run the tests**
 
 Run: `npm test -- test/api/me-signer.test.ts`
-Expected: `10 passed`.
+Expected: `13 passed`.
 
 - [ ] **Step 6: Run everything, typecheck, commit**
 
@@ -6047,16 +7947,30 @@ Expected: all pass, typecheck exits 0.
 ```bash
 npx prettier --write src/services/signerProof.service.ts src/app/api/me/signer test
 git add src/services/signerProof.service.ts src/app/api/me/signer test
-git commit -m "feat(teams): verify and store the wallet that signs for each user"
+git commit -m "feat(teams): verify and store the one wallet that signs for each user"
 ```
 
 ---
 
-### Task 11: Extend #80's Identity service: license lookups by token ID and client ID
+### Task 11: Extend #80's Identity service: lookups by token ID, and GraphQL errors as outages
 
-#80 added `src/services/identity.service.ts`. It provides `getLicenseOwner(clientId)` and `isLicenseOwner(address, clientId)`, caches known owners for 60 seconds, doesn't cache unknown licenses, throws `IdentityUnavailableError` on HTTP or network failure, and reads the URL from `IDENTITY_API_URL ?? config.identityApiUrl`. `identityApiUrl` is already set in `default.ts` (dev) and `production.ts`; preview inherits the default.
+#80 (`b41eb28`) added `src/services/identity.service.ts`:
 
-This task keeps every one of those, with the same behavior. It adds the lookups the registry and the license-access route need, without a second client.
+- `export type License = { owner: string; tokenId: number }`;
+- `getLicense(clientId)`, which queries `developerLicense(by: { clientId }) { owner tokenId }`, caches known licenses for 60 seconds under the lowercase client ID, doesn't cache unknown ones, and answers `null` for non-address input;
+- `getLicenseOwner` and `isLicenseOwner`, built on `getLicense`;
+- `IdentityUnavailableError`, thrown on HTTP or network failure;
+- the `IDENTITY_API_URL ?? config.identityApiUrl` override.
+
+`identityApiUrl` is set in `default.ts` (dev) and `production.ts`; preview inherits the default.
+
+This task keeps all of that and adds three things:
+
+- `getLicenseByTokenId` for the registry;
+- C7's rule that a GraphQL error is an outage unless it's `NOT_FOUND`, for both lookups;
+- `clearIdentityCache` for tests.
+
+There's no second client. Tasks 5, 6 and 13 use `getLicense`, and Task 12 uses `getLicenseByTokenId`.
 
 **Files:**
 
@@ -6068,14 +7982,12 @@ This task keeps every one of those, with the same behavior. It adds the lookups 
 **Interfaces:**
 
 - Consumes (Task 1): `fakeIdentity`, `newClientId`.
-- Keeps (#80, unchanged): `getLicenseOwner(clientId: string): Promise<string | null>`, `isLicenseOwner(address: string | undefined, clientId: string): Promise<boolean>`, `class IdentityUnavailableError`.
+- Keeps (#80, same signatures and behavior): `License`, `getLicense(clientId)`, `getLicenseOwner(clientId)`, `isLicenseOwner(address, clientId)`, `IdentityUnavailableError`.
 - Produces:
-  - `interface LicenseInfo { tokenId: number; owner: string; clientId: string }`.
-  - `getLicenseByClientId(clientId: string): Promise<LicenseInfo | null>`: null for a non-address input or an unknown license.
-  - `getLicenseByTokenId(tokenId: number): Promise<LicenseInfo | null>`: null for a non-positive or non-integer ID, or an unknown license.
-  - `clearIdentityCache(): void`, for tests.
-- Caching: a known license is cached for 60 seconds under both its token ID and its lowercase client ID. Unknown licenses and failures aren't cached.
-- `apiErrorResponse` answers `IdentityUnavailableError` with 502 `{ message: 'Identity API is unavailable', code: 'IDENTITY_UNAVAILABLE' }`. The configuration routes check the error themselves first, so they keep #80's `{ error: 'Could not verify license ownership' }`.
+  - `getLicenseByTokenId(tokenId: number): Promise<License | null>`. It answers `null` for a non-positive or non-integer ID, or for an unknown license, and caches a known license for 60 seconds per token ID. The query's variable is `Int!`, matching `DeveloperLicenseBy.tokenId` in the Identity schema (`~/workspace/dimo-developer-console/src/gql/graphql.ts`).
+  - Both lookups throw `IdentityUnavailableError` when an HTTP 200 carries GraphQL errors, unless every error has `extensions.code === 'NOT_FOUND'`. That is how Identity answers a license that doesn't exist (checked live on 2026-10-02).
+  - `clearIdentityCache(): void`.
+  - `apiErrorResponse` answers `IdentityUnavailableError` with 502 `{ message: 'Identity API is unavailable', code: 'IDENTITY_UNAVAILABLE' }`. The configuration and workspace routes check the error themselves first, so they keep #80's `{ error | message: 'Could not verify license ownership' }`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -6086,7 +7998,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   clearIdentityCache,
-  getLicenseByClientId,
+  getLicense,
   getLicenseByTokenId,
   getLicenseOwner,
   IdentityUnavailableError,
@@ -6098,6 +8010,11 @@ import { fakeIdentity, newClientId } from '../support/identity';
 const later = (ms: number) => vi.setSystemTime(new Date(Date.now() + ms));
 const requestBody = (fetchMock: ReturnType<typeof fakeIdentity>, call = 0) =>
   JSON.parse(String((fetchMock.mock.calls[call][1] as RequestInit).body));
+const fakeLicense = (tokenId: number) => ({
+  tokenId,
+  clientId: newClientId(),
+  owner: newClientId(),
+});
 
 describe('identity service', () => {
   beforeEach(() => {
@@ -6109,14 +8026,13 @@ describe('identity service', () => {
     vi.useRealTimers();
   });
 
-  it('looks a license up by token id and reuses it for 60 seconds, by token or client id', async () => {
-    const license = { tokenId: 7, clientId: newClientId(), owner: newClientId() };
+  it('looks a license up by token id and reuses it for 60 seconds', async () => {
+    const license = fakeLicense(7);
     const fetchMock = fakeIdentity([license]);
 
-    expect(await getLicenseByTokenId(7)).toEqual(license);
+    expect(await getLicenseByTokenId(7)).toEqual({ owner: license.owner, tokenId: 7 });
     later(59_999);
-    expect(await getLicenseByTokenId(7)).toEqual(license);
-    expect(await getLicenseByClientId(license.clientId.toLowerCase())).toEqual(license);
+    await getLicenseByTokenId(7);
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     later(1);
@@ -6127,17 +8043,22 @@ describe('identity service', () => {
     expect(requestBody(fetchMock).query).toContain(
       'developerLicense(by: { tokenId: $tokenId })',
     );
+    expect(requestBody(fetchMock).query).toContain('$tokenId: Int!');
     expect(requestBody(fetchMock).variables).toEqual({ tokenId: 7 });
   });
 
-  it('looks a license up by client id regardless of letter case', async () => {
-    const license = { tokenId: 8, clientId: newClientId(), owner: newClientId() };
+  it("keeps #80's getLicense: by client id, any letter case, cached", async () => {
+    const license = fakeLicense(8);
     const fetchMock = fakeIdentity([license]);
 
-    expect(
-      await getLicenseByClientId(license.clientId.toUpperCase().replace('0X', '0x')),
-    ).toEqual(license);
-    expect(await getLicenseByClientId(license.clientId.toLowerCase())).toEqual(license);
+    expect(await getLicense(license.clientId.toLowerCase())).toEqual({
+      owner: license.owner,
+      tokenId: 8,
+    });
+    expect(await getLicense(license.clientId)).toEqual({
+      owner: license.owner,
+      tokenId: 8,
+    });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(requestBody(fetchMock).query).toContain(
       'developerLicense(by: { clientId: $clientId })',
@@ -6149,15 +8070,16 @@ describe('identity service', () => {
 
     expect(await getLicenseByTokenId(404)).toBeNull();
     expect(await getLicenseByTokenId(404)).toBeNull();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(await getLicense(newClientId())).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
 
-    expect(await getLicenseByClientId('not-an-address')).toBeNull();
+    expect(await getLicense('not-an-address')).toBeNull();
     expect(await getLicenseByTokenId(0)).toBeNull();
     expect(await getLicenseByTokenId(1.5)).toBeNull();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
-  it('throws IdentityUnavailableError on failures and does not cache them', async () => {
+  it('throws IdentityUnavailableError on HTTP and network failures, without caching', async () => {
     const fetchMock = fakeIdentity([], { status: 500 });
 
     await expect(getLicenseByTokenId(7)).rejects.toBeInstanceOf(IdentityUnavailableError);
@@ -6165,32 +8087,48 @@ describe('identity service', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
 
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNREFUSED')));
-    await expect(getLicenseByClientId(newClientId())).rejects.toBeInstanceOf(
+    await expect(getLicense(newClientId())).rejects.toBeInstanceOf(
       IdentityUnavailableError,
     );
   });
 
+  it('treats a GraphQL error answered with HTTP 200 as an outage, unless it is NOT_FOUND', async () => {
+    fakeIdentity([], { graphqlError: 'database is down' });
+    await expect(getLicenseByTokenId(7)).rejects.toBeInstanceOf(IdentityUnavailableError);
+    await expect(getLicense(newClientId())).rejects.toBeInstanceOf(
+      IdentityUnavailableError,
+    );
+
+    // The fake's unknown-license answer is Identity's real NOT_FOUND shape.
+    fakeIdentity([]);
+    await expect(getLicenseByTokenId(7)).resolves.toBeNull();
+    await expect(getLicense(newClientId())).resolves.toBeNull();
+  });
+
   it("keeps #80's getLicenseOwner and isLicenseOwner", async () => {
-    const owner = newClientId();
-    const license = { tokenId: 9, clientId: newClientId(), owner };
+    const license = fakeLicense(9);
     fakeIdentity([license]);
 
-    expect(await getLicenseOwner(license.clientId)).toBe(owner);
-    expect(await isLicenseOwner(owner.toLowerCase(), license.clientId)).toBe(true);
+    expect(await getLicenseOwner(license.clientId)).toBe(license.owner);
+    expect(await isLicenseOwner(license.owner.toLowerCase(), license.clientId)).toBe(
+      true,
+    );
     expect(await isLicenseOwner(newClientId(), license.clientId)).toBe(false);
     expect(await isLicenseOwner(undefined, license.clientId)).toBe(false);
     expect(await getLicenseOwner('nope')).toBeNull();
   });
 
   it('forgets everything on clearIdentityCache', async () => {
-    const license = { tokenId: 10, clientId: newClientId(), owner: newClientId() };
+    const license = fakeLicense(10);
     const fetchMock = fakeIdentity([license]);
 
     await getLicenseByTokenId(10);
+    await getLicense(license.clientId);
     clearIdentityCache();
     await getLicenseByTokenId(10);
+    await getLicense(license.clientId);
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
   it('turns IdentityUnavailableError into a 502 IDENTITY_UNAVAILABLE response', async () => {
@@ -6208,52 +8146,45 @@ describe('identity service', () => {
 - [ ] **Step 2: Run them to confirm they fail**
 
 Run: `npm test -- test/services/identity.test.ts`
-Expected: FAIL, `getLicenseByTokenId is not a function` (or the import has no such export).
+Expected: FAIL. The import has no `getLicenseByTokenId` or `clearIdentityCache` export.
 
 - [ ] **Step 3: Rewrite `src/services/identity.service.ts`**
+
+Everything #80 exports keeps its name, signature and behavior. `getLicense`'s fetch moves into `queryLicense`, which both lookups share.
 
 ```ts
 import config from '@/config';
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
-const LICENSE_FIELDS = '{ tokenId owner clientId }';
-const BY_CLIENT_ID = `query ($clientId: Address!) { developerLicense(by: { clientId: $clientId }) ${LICENSE_FIELDS} }`;
-const BY_TOKEN_ID = `query ($tokenId: Int!) { developerLicense(by: { tokenId: $tokenId }) ${LICENSE_FIELDS} }`;
+const LICENSE_QUERY =
+  'query ($clientId: Address!) { developerLicense(by: { clientId: $clientId }) { owner tokenId } }';
+// DeveloperLicenseBy.tokenId is an Int in the Identity schema.
+const LICENSE_BY_TOKEN_QUERY =
+  'query ($tokenId: Int!) { developerLicense(by: { tokenId: $tokenId }) { owner tokenId } }';
 
-export interface LicenseInfo {
-  tokenId: number;
-  owner: string;
-  clientId: string;
-}
-
-// License owners rarely change, so a known license is reused for a minute rather
+// License owners rarely change, so a known owner is reused for a minute rather
 // than costing an Identity round trip on every request. Unknown licenses are not
 // cached: a license minted a moment ago must work as soon as Identity has it.
-const LICENSE_TTL_MS = 60_000;
-const licenses = new Map<string, { license: LicenseInfo; expires: number }>();
-const clientKey = (clientId: string) => `client:${clientId.toLowerCase()}`;
-const tokenKey = (tokenId: number) => `token:${tokenId}`;
+const OWNER_TTL_MS = 60_000;
+export type License = { owner: string; tokenId: number };
+const licenses = new Map<string, { license: License; expires: number }>();
+const licensesByToken = new Map<number, { license: License; expires: number }>();
 
 export class IdentityUnavailableError extends Error {}
 
 const identityUrl = () => process.env.IDENTITY_API_URL ?? config.identityApiUrl;
 
-const fromCache = (key: string) => {
-  const cached = licenses.get(key);
-  return cached && cached.expires > Date.now() ? cached.license : null;
+type IdentityAnswer = {
+  data?: { developerLicense?: { owner?: string; tokenId?: number } | null } | null;
+  errors?: { message?: string; extensions?: { code?: string } }[];
 };
 
-const remember = (license: LicenseInfo) => {
-  const entry = { license, expires: Date.now() + LICENSE_TTL_MS };
-  licenses.set(clientKey(license.clientId), entry);
-  licenses.set(tokenKey(license.tokenId), entry);
-};
-
+/** One developerLicense query. Null when Identity says the license doesn't exist. */
 const queryLicense = async (
   query: string,
   variables: Record<string, unknown>,
-): Promise<LicenseInfo | null> => {
-  let body: { data?: { developerLicense?: LicenseInfo | null } | null };
+): Promise<License | null> => {
+  let body: IdentityAnswer;
   try {
     const res = await fetch(identityUrl(), {
       method: 'POST',
@@ -6267,24 +8198,45 @@ const queryLicense = async (
     throw new IdentityUnavailableError(String(error));
   }
 
-  // Identity answers an unknown license with an error and null data.
-  const license = body.data?.developerLicense ?? null;
-  if (license) remember(license);
+  // Identity answers a license that doesn't exist with HTTP 200, null data and a
+  // NOT_FOUND error. Any other GraphQL error means it couldn't answer, which must
+  // never read as "no such license".
+  const errors = body.errors ?? [];
+  if (errors.some((error) => error.extensions?.code !== 'NOT_FOUND')) {
+    throw new IdentityUnavailableError(
+      `Identity answered with errors: ${JSON.stringify(errors)}`,
+    );
+  }
+
+  const found = body.data?.developerLicense;
+  if (!found?.owner || found.tokenId === undefined) return null;
+  return { owner: found.owner, tokenId: Number(found.tokenId) };
+};
+
+export const getLicense = async (clientId: string): Promise<License | null> => {
+  if (!ADDRESS.test(clientId)) return null;
+  const key = clientId.toLowerCase();
+  const cached = licenses.get(key);
+  if (cached && cached.expires > Date.now()) return cached.license;
+
+  const license = await queryLicense(LICENSE_QUERY, { clientId });
+  if (license) licenses.set(key, { license, expires: Date.now() + OWNER_TTL_MS });
   return license;
 };
 
-export const getLicenseByClientId = async (clientId: string) => {
-  if (!ADDRESS.test(clientId)) return null;
-  return fromCache(clientKey(clientId)) ?? queryLicense(BY_CLIENT_ID, { clientId });
-};
-
-export const getLicenseByTokenId = async (tokenId: number) => {
+export const getLicenseByTokenId = async (tokenId: number): Promise<License | null> => {
   if (!Number.isInteger(tokenId) || tokenId <= 0) return null;
-  return fromCache(tokenKey(tokenId)) ?? queryLicense(BY_TOKEN_ID, { tokenId });
+  const cached = licensesByToken.get(tokenId);
+  if (cached && cached.expires > Date.now()) return cached.license;
+
+  const license = await queryLicense(LICENSE_BY_TOKEN_QUERY, { tokenId });
+  if (license)
+    licensesByToken.set(tokenId, { license, expires: Date.now() + OWNER_TTL_MS });
+  return license;
 };
 
 export const getLicenseOwner = async (clientId: string): Promise<string | null> =>
-  (await getLicenseByClientId(clientId))?.owner ?? null;
+  (await getLicense(clientId))?.owner ?? null;
 
 // Whether the wallet owns the license with this client ID on-chain.
 export const isLicenseOwner = async (address: string | undefined, clientId: string) => {
@@ -6294,7 +8246,10 @@ export const isLicenseOwner = async (address: string | undefined, clientId: stri
 };
 
 /** Forget every cached license. Tests call this between cases. */
-export const clearIdentityCache = () => licenses.clear();
+export const clearIdentityCache = () => {
+  licenses.clear();
+  licensesByToken.clear();
+};
 ```
 
 - [ ] **Step 4: Map Identity outages in `src/utils/apiError.ts`**
@@ -6325,20 +8280,28 @@ Put the import with the other import at the top of the file.
 
 - [ ] **Step 5: Clear the license cache between tests**
 
-In `test/support/setup.ts`, import `clearIdentityCache` from `@/services/identity.service` and call it first thing in `beforeEach`:
+In `test/support/setup.ts`, import `clearIdentityCache` from `@/services/identity.service`, and make `beforeEach`:
 
 ```ts
 beforeEach(async () => {
   clearIdentityCache();
   vi.clearAllMocks();
-  // …truncation as before
+  const [rows] = await DB.connection!.query(
+    "SELECT tablename FROM pg_tables WHERE schemaname = 'public'",
+  );
+  const tables = (rows as { tablename: string }[]).map(
+    ({ tablename }) => `"${tablename}"`,
+  );
+  if (tables.length) {
+    await DB.connection!.query(`TRUNCATE ${tables.join(', ')} RESTART IDENTITY CASCADE`);
+  }
 });
 ```
 
 - [ ] **Step 6: Run the tests**
 
-Run: `npm test -- test/services/identity.test.ts test/api/regressions-80.test.ts test/api/team-owned-resources.test.ts`
-Expected: all pass. That's 7 identity tests, plus #80's and Task 6's configuration tests unchanged.
+Run: `npm test -- test/services/identity.test.ts test/api/regressions-80.test.ts test/api/team-owned-resources.test.ts test/api/team-scoped-routes.test.ts`
+Expected: all pass. That's 8 identity tests, plus #80's configuration and workspace tests and Tasks 5 and 6, unchanged.
 
 - [ ] **Step 7: Typecheck and commit**
 
@@ -6348,7 +8311,7 @@ Expected: exit 0.
 ```bash
 npx prettier --write src/services/identity.service.ts src/utils/apiError.ts test
 git add src/services/identity.service.ts src/utils/apiError.ts test
-git commit -m "feat(teams): look licenses up by token or client id through the one Identity service"
+git commit -m "feat(teams): look licenses up by token id, and treat Identity GraphQL errors as outages"
 ```
 
 ---
@@ -6369,7 +8332,14 @@ git commit -m "feat(teams): look licenses up by token or client id through the o
   - `listLicenseSigners(ctx, rawTokenId): Promise<LicenseSignerRecord[]>`.
   - `upsertLicenseSigner(ctx, rawTokenId, rawAddress, body: unknown): Promise<LicenseSignerRecord>`. Saving clears `disabledAt`; the console calls it right after enabling the key on-chain.
   - `markLicenseSignerDisabled(ctx, rawTokenId, rawAddress): Promise<LicenseSignerRecord>`.
-- Check order for writes: owner (403 `OWNER_ONLY`), then path address (400 `INVALID_ADDRESS`, proposed as a C7 addition), then license (403 `LICENSE_NOT_IN_TEAM` or 502), then body (400 `INVALID_HOLDERS`).
+- Check order for writes:
+  1. owner (403 `OWNER_ONLY`);
+  2. path address (400 `INVALID_ADDRESS`);
+  3. license (403 `LICENSE_NOT_IN_TEAM`, or 502);
+  4. body (400 `INVALID_HOLDERS`);
+  5. kind change (409 `KIND_CONFLICT`: an `API_KEY` or `EXTERNAL` key can't become `MEMBER`);
+  6. member wallet (400 `SIGNER_MISMATCH`: a `MEMBER` key's address must equal its one holder's verified `signer_address`).
+- Every route here passes `consoleOnly: true` (C4).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -6393,21 +8363,31 @@ const CLIENT_ID = '0x' + '2'.repeat(40);
 const setup = async () => {
   const acme = await createOwner('Acme');
   const member = await createUser({ name: 'Mia' });
+  // Mia's verified wallet: the only address a member key of hers may have.
+  const memberWallet = newWallet().address;
+  await member.update({ signer_address: memberWallet.toLowerCase() });
   const membership = await addMember(acme.team.id!, member);
   const outsider = await createOwner('Other');
   // License 7 is owned by Acme's owner wallet; anything else doesn't exist.
   fakeIdentity([{ tokenId: 7, owner: acme.user.address!, clientId: CLIENT_ID }]);
-  return { acme, member, membership, outsider };
+  return { acme, member, memberWallet, membership, outsider };
 };
 
-const put = async (
-  as: string,
-  address: string,
-  body: unknown,
-  opts: { tokenId?: string; teamId?: string } = {},
-) =>
+type Options = { tokenId?: string; teamId?: string; aud?: string[] };
+
+const put = async (as: string, address: string, body: unknown, opts: Options = {}) =>
   read(
-    await putRoute(await request('PUT', '/x', { as, body, teamId: opts.teamId }), {
+    await putRoute(
+      await request('PUT', '/x', { as, body, teamId: opts.teamId, aud: opts.aud }),
+      {
+        params: { tokenId: opts.tokenId ?? '7', address },
+      },
+    ),
+  );
+
+const disable = async (as: string, address: string, opts: Options = {}) =>
+  read(
+    await disableRoute(await request('POST', '/x', { as, teamId: opts.teamId }), {
       params: { tokenId: opts.tokenId ?? '7', address },
     }),
   );
@@ -6419,17 +8399,16 @@ const list = async (as: string, teamId?: string, tokenId = '7') =>
 
 describe('license key registry', () => {
   it('records a member key and an API key with several holders, and lists them to members', async () => {
-    const { acme, member } = await setup();
-    const memberKey = newWallet().address;
+    const { acme, member, memberWallet } = await setup();
     const apiKey = newWallet().address;
 
-    const saved = await put(acme.user.address!, memberKey, {
+    const saved = await put(acme.user.address!, memberWallet, {
       kind: 'MEMBER',
       holders: [{ userId: member.id }],
     });
     expect(saved.status).toBe(200);
     expect(saved.body.signer).toMatchObject({
-      signerAddress: getAddress(memberKey),
+      signerAddress: getAddress(memberWallet),
       kind: 'MEMBER',
       note: null,
       holders: [{ userId: member.id, name: 'Mia', email: member.email }],
@@ -6441,7 +8420,7 @@ describe('license key registry', () => {
     await put(acme.user.address!, apiKey, {
       kind: 'API_KEY',
       note: '  Prod backend  ',
-      holders: [{ userId: acme.user.id }, { name: 'Backend service' }],
+      holders: [{ name: 'Backend service' }, { userId: acme.user.id }],
     });
 
     const listed = await list(member.address!, acme.team.id!);
@@ -6452,9 +8431,10 @@ describe('license key registry', () => {
         s.note,
       ]),
     ).toEqual([
-      [getAddress(memberKey), null],
+      [getAddress(memberWallet), null],
       [getAddress(apiKey), 'Prod backend'],
     ]);
+    // Members first, then free-text names.
     expect(listed.body.signers[1].holders).toEqual([
       { userId: acme.user.id, name: acme.user.name, email: acme.user.email },
       { userId: null, name: 'Backend service', email: null },
@@ -6479,52 +8459,111 @@ describe('license key registry', () => {
   });
 
   it('refuses invalid holders and kinds', async () => {
-    const { acme, member } = await setup();
+    const { acme, member, memberWallet } = await setup();
     const stranger = await createUser();
     const key = newWallet().address;
-    const invalid = async (body: unknown) =>
-      (await put(acme.user.address!, key, body)).body.code;
+    const invalid = async (address: string, body: unknown) =>
+      (await put(acme.user.address!, address, body)).body.code;
 
-    expect(await invalid({ kind: 'MEMBER', holders: [{ userId: stranger.id }] })).toBe(
-      'INVALID_HOLDERS',
-    );
     expect(
-      await invalid({ kind: 'MEMBER', holders: [{ userId: member.id }, { name: 'x' }] }),
+      await invalid(memberWallet, { kind: 'MEMBER', holders: [{ userId: stranger.id }] }),
     ).toBe('INVALID_HOLDERS');
-    expect(await invalid({ kind: 'MEMBER', holders: [{ name: 'Mia' }] })).toBe(
-      'INVALID_HOLDERS',
-    );
-    expect(await invalid({ kind: 'API_KEY', holders: [] })).toBe('INVALID_HOLDERS');
-    expect(await invalid({ kind: 'API_KEY', holders: [{ name: '   ' }] })).toBe(
+    expect(
+      await invalid(memberWallet, {
+        kind: 'MEMBER',
+        holders: [{ userId: member.id }, { name: 'x' }],
+      }),
+    ).toBe('INVALID_HOLDERS');
+    expect(
+      await invalid(memberWallet, { kind: 'MEMBER', holders: [{ name: 'Mia' }] }),
+    ).toBe('INVALID_HOLDERS');
+    expect(await invalid(key, { kind: 'API_KEY', holders: [] })).toBe('INVALID_HOLDERS');
+    expect(await invalid(key, { kind: 'API_KEY', holders: [{ name: '   ' }] })).toBe(
       'INVALID_HOLDERS',
     );
     expect(
-      await invalid({
+      await invalid(key, {
         kind: 'API_KEY',
         holders: [{ userId: member.id }, { userId: member.id }],
       }),
     ).toBe('INVALID_HOLDERS');
     expect(
-      await invalid({ kind: 'API_KEY', note: 'x'.repeat(201), holders: [{ name: 'a' }] }),
+      await invalid(key, {
+        kind: 'API_KEY',
+        note: 'x'.repeat(201),
+        holders: [{ name: 'a' }],
+      }),
     ).toBe('INVALID_HOLDERS');
-    expect(await invalid({ kind: 'OWNER', holders: [{ name: 'a' }] })).toBe(
+    expect(await invalid(key, { kind: 'OWNER', holders: [{ name: 'a' }] })).toBe(
       'INVALID_HOLDERS',
     );
-    expect(await invalid(null)).toBe('INVALID_HOLDERS');
+    expect(await invalid(key, null)).toBe('INVALID_HOLDERS');
   });
 
-  it('refuses members, bad addresses, and licenses outside the team', async () => {
+  it("refuses a member key that isn't the member's verified wallet", async () => {
+    const { acme, member } = await setup();
+    const unverified = await createUser({ name: 'Nova' });
+    await addMember(acme.team.id!, unverified);
+    const mismatch = {
+      status: 400,
+      body: {
+        message: "A member key must be the member's verified wallet",
+        code: 'SIGNER_MISMATCH',
+      },
+    };
+
+    expect(
+      await put(acme.user.address!, newWallet().address, {
+        kind: 'MEMBER',
+        holders: [{ userId: member.id }],
+      }),
+    ).toEqual(mismatch);
+    expect(
+      await put(acme.user.address!, newWallet().address, {
+        kind: 'MEMBER',
+        holders: [{ userId: unverified.id }],
+      }),
+    ).toEqual(mismatch);
+  });
+
+  it('refuses turning an API key or external key into a member key', async () => {
+    const { acme, member, memberWallet } = await setup();
+    await put(acme.user.address!, memberWallet, {
+      kind: 'API_KEY',
+      holders: [{ name: 'Backend' }],
+    });
+
+    expect(
+      await put(acme.user.address!, memberWallet, {
+        kind: 'MEMBER',
+        holders: [{ userId: member.id }],
+      }),
+    ).toEqual({
+      status: 409,
+      body: {
+        message: 'An API key or external key cannot become a member key',
+        code: 'KIND_CONFLICT',
+      },
+    });
+  });
+
+  it('refuses members, bad addresses, licenses outside the team, and other apps', async () => {
     const { acme, member, outsider } = await setup();
     const key = newWallet().address;
     const body = { kind: 'EXTERNAL', holders: [{ name: 'x' }] };
+    const invalidAddress = {
+      status: 400,
+      body: { message: 'Signer must be an Ethereum address', code: 'INVALID_ADDRESS' },
+    };
 
     expect(
       (await put(member.address!, key, body, { teamId: acme.team.id! })).body.code,
     ).toBe('OWNER_ONLY');
-    expect(await put(acme.user.address!, 'not-an-address', body)).toEqual({
-      status: 400,
-      body: { message: 'Signer must be an Ethereum address', code: 'INVALID_ADDRESS' },
-    });
+    expect(
+      (await disable(member.address!, key, { teamId: acme.team.id! })).body.code,
+    ).toBe('OWNER_ONLY');
+    expect(await put(acme.user.address!, 'not-an-address', body)).toEqual(invalidAddress);
+    expect(await disable(acme.user.address!, 'not-an-address')).toEqual(invalidAddress);
     expect((await put(acme.user.address!, key, body, { tokenId: '8' })).body.code).toBe(
       'LICENSE_NOT_IN_TEAM',
     );
@@ -6535,50 +8574,50 @@ describe('license key registry', () => {
       'LICENSE_NOT_IN_TEAM',
     );
     expect((await list(outsider.user.address!)).body.code).toBe('LICENSE_NOT_IN_TEAM');
+    expect(
+      (await put(acme.user.address!, key, body, { aud: ['some-other-app'] })).status,
+    ).toBe(401);
   });
 
-  it('answers 502 when Identity is down', async () => {
+  it('answers 502 IDENTITY_UNAVAILABLE when Identity is down', async () => {
     const { acme } = await setup();
     fakeIdentity([], { status: 500 });
+    const unavailable = {
+      status: 502,
+      body: { message: 'Identity API is unavailable', code: 'IDENTITY_UNAVAILABLE' },
+    };
 
-    expect((await list(acme.user.address!)).status).toBe(502);
+    expect(await list(acme.user.address!)).toEqual(unavailable);
+    expect(await disable(acme.user.address!, newWallet().address)).toEqual(unavailable);
   });
 
   it('marks a key disabled, and saving it again re-activates it', async () => {
-    const { acme, member } = await setup();
-    const key = newWallet().address;
-    await put(acme.user.address!, key, {
+    const { acme, member, memberWallet } = await setup();
+    await put(acme.user.address!, memberWallet, {
       kind: 'MEMBER',
       holders: [{ userId: member.id }],
     });
-    const disable = async (address: string) =>
-      read(
-        await disableRoute(await request('POST', '/x', { as: acme.user.address! }), {
-          params: { tokenId: '7', address },
-        }),
-      );
 
-    const disabled = await disable(key);
+    const disabled = await disable(acme.user.address!, memberWallet);
     expect(disabled.status).toBe(200);
     expect(disabled.body.signer.disabledBy).toBe(acme.user.id);
     expect(Date.parse(disabled.body.signer.disabledAt)).not.toBeNaN();
 
-    const saved = await put(acme.user.address!, key, {
+    const saved = await put(acme.user.address!, memberWallet, {
       kind: 'MEMBER',
       holders: [{ userId: member.id }],
     });
     expect(saved.body.signer).toMatchObject({ disabledAt: null, disabledBy: null });
 
-    expect(await disable(newWallet().address)).toEqual({
+    expect(await disable(acme.user.address!, newWallet().address)).toEqual({
       status: 404,
       body: { message: 'Key not found', code: 'NOT_FOUND' },
     });
   });
 
   it('lists a removed member while their member key is enabled, and drops them once it is disabled', async () => {
-    const { acme, member, membership } = await setup();
-    const key = newWallet().address;
-    await put(acme.user.address!, key, {
+    const { acme, member, memberWallet, membership } = await setup();
+    await put(acme.user.address!, memberWallet, {
       kind: 'MEMBER',
       holders: [{ userId: member.id }],
     });
@@ -6595,15 +8634,13 @@ describe('license key registry', () => {
       [member.email, 'REVOKED'],
     ]);
 
-    await disableRoute(await request('POST', '/x', { as: acme.user.address! }), {
-      params: { tokenId: '7', address: key },
-    });
+    await disable(acme.user.address!, memberWallet);
     expect(await members()).toEqual([[acme.user.email, 'ACCEPTED']]);
   });
 });
 ```
 
-Note on the last test: the `MEMBER` key is saved while Mia is still a member, because the holder check requires current membership. She is removed afterwards.
+The `MEMBER` key in the last test is saved while Mia is still a member, because the holder check requires current membership. She is removed afterwards.
 
 - [ ] **Step 2: Run them to confirm they fail**
 
@@ -6616,7 +8653,7 @@ Expected: FAIL, `Failed to resolve import "@/app/api/my/licenses/[tokenId]/signe
 import type { IncludeOptions } from 'sequelize';
 import { getAddress, isAddress } from 'viem';
 
-import { LicenseSigner } from '@/models/licenseSigner.model';
+import { LicenseSigner, SignerKinds } from '@/models/licenseSigner.model';
 import { LicenseSignerHolder } from '@/models/licenseSignerHolder.model';
 import { TeamCollaborator } from '@/models/teamCollaborator.model';
 import { User } from '@/models/user.model';
@@ -6783,6 +8820,29 @@ export const upsertLicenseSigner = async (
   const signerAddress = parseSignerAddress(rawAddress);
   const tokenId = await assertLicenseInTeam(ctx, rawTokenId);
   const input = await parseSignerInput(ctx, body);
+
+  if (input.kind === 'MEMBER') {
+    const existing = await LicenseSigner.findOne({
+      where: { license_token_id: tokenId, signer_address: signerAddress },
+    });
+    if (existing && existing.kind !== SignerKinds.MEMBER) {
+      throw new ApiError(
+        409,
+        'KIND_CONFLICT',
+        'An API key or external key cannot become a member key',
+      );
+    }
+    // A member key is the member's own verified wallet (C6), so the console can
+    // tell their developer JWT apart from anyone else's.
+    const holder = await User.findOne({ where: { id: input.holders[0].user_id! } });
+    if (holder?.signer_address?.toLowerCase() !== signerAddress) {
+      throw new ApiError(
+        400,
+        'SIGNER_MISMATCH',
+        "A member key must be the member's verified wallet",
+      );
+    }
+  }
   const teamId = ctx.team!.id!;
 
   await DB.connection!.transaction(async (transaction) => {
@@ -6852,7 +8912,7 @@ type Params = { params: { tokenId: string } };
 
 export const GET = async (request: NextRequest, { params: { tokenId } }: Params) => {
   try {
-    const ctx = await resolveTeamContext(request);
+    const ctx = await resolveTeamContext(request, { consoleOnly: true });
     return Response.json({ signers: await listLicenseSigners(ctx, tokenId) });
   } catch (error: unknown) {
     return errorResponse(error, '[License signers] List');
@@ -6874,7 +8934,7 @@ export const PUT = async (
   { params: { tokenId, address } }: Params,
 ) => {
   try {
-    const ctx = await resolveTeamContext(request);
+    const ctx = await resolveTeamContext(request, { consoleOnly: true });
     const body = await request.json().catch(() => null);
     return Response.json({
       signer: await upsertLicenseSigner(ctx, tokenId, address, body),
@@ -6901,7 +8961,7 @@ export const POST = async (
   { params: { tokenId, address } }: Params,
 ) => {
   try {
-    const ctx = await resolveTeamContext(request);
+    const ctx = await resolveTeamContext(request, { consoleOnly: true });
     return Response.json({
       signer: await markLicenseSignerDisabled(ctx, tokenId, address),
     });
@@ -6914,7 +8974,10 @@ export const POST = async (
 - [ ] **Step 5: Run the tests**
 
 Run: `npm test -- test/api/license-signers.test.ts`
-Expected: `7 passed`.
+Expected: `9 passed`.
+
+Run: `npm test -- test/api/license-signers.test.ts -t "marks a key disabled"`
+Expected: `1 passed`. Run alone, that test makes the file's first token check while `fakeIdentity` stubs `fetch`, so it proves the JWKS fetch passes through the fake.
 
 - [ ] **Step 6: Run everything, typecheck, commit**
 
@@ -6940,14 +9003,17 @@ The console's data proxy asks this before it forwards a request (part 3). The an
 
 **Interfaces:**
 
-- Consumes (Tasks 4 and 11): `requireUser`, `findMembership`, `findPersonalMembership`, `getLicenseByClientId`, the `LicenseAccess` type, `errorResponse`.
-- Produces: `getLicenseAccess(user: User, rawClientId: string | null): Promise<LicenseAccess>`, the response body `{ access, teamId, signerAddress, userEmail }`.
-  - `OWNER` when the caller's wallet owns the license; `teamId` is their personal team (or `null`).
-  - `MEMBER` when the caller has an accepted membership in a team created by the user whose wallet owns the license; `teamId` is that team.
-  - `NONE` otherwise, including an unknown license; `teamId` and `signerAddress` are then `null`.
-  - `signerAddress` is the caller's verified signer, checksummed, or `null`.
-  - `userEmail` is always the caller's `users.email`, for the proxy's audit line.
-  - `X-Team-Id` is ignored, so a stale header still gets 200.
+- Consumes (Tasks 3, 4 and 11): `requireUser`, `findMembership`, `findPersonalTeam`, `notDeleted`, `getLicense` (#80), `LicenseSigner`, `LicenseSignerHolder`, `SignerKinds`, the `LicenseAccess` type, `errorResponse`.
+- Produces: `getLicenseAccess(user: User, rawClientId: string | null): Promise<LicenseAccess>`, the response body `{ access, memberOfTeam, teamId, signerAddress, userEmail }`:
+  - **`OWNER`:** the caller's wallet owns the license. `memberOfTeam` is `true`, and `teamId` is their personal team (or `null`).
+  - **`MEMBER`:** the caller is an accepted member of a team created by the user whose wallet owns the license, **and** holds an enabled `MEMBER` key on that license (by token ID) whose address equals their current `signer_address`. `teamId` is that team.
+  - **`NONE`** otherwise:
+    - a member without such a key gets `memberOfTeam: true`, with that team's `teamId` and their `signerAddress`, so the console can say "ask for access";
+    - everyone else, including callers of an unknown license, gets `memberOfTeam: false`, `teamId: null` and `signerAddress: null`.
+  - **`signerAddress`** is the caller's verified signer, checksummed, or `null`.
+  - **`userEmail`** is always the caller's `users.email`, for the proxy's audit line.
+  - **`X-Team-Id`** is ignored, so a stale header still gets 200.
+- Errors: 400 `INVALID_CLIENT_ID`, 502 `IDENTITY_UNAVAILABLE`, and 401 `UNAUTHORIZED` (including another `aud`, because the route passes `consoleOnly: true`).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -6958,8 +9024,10 @@ import { getAddress } from 'viem';
 import { describe, expect, it } from 'vitest';
 
 import { GET as accessRoute } from '@/app/api/my/license-access/route';
+import { LicenseSigner, SignerKinds } from '@/models/licenseSigner.model';
+import { LicenseSignerHolder } from '@/models/licenseSignerHolder.model';
 import { InvitationStatuses } from '@/models/teamCollaborator.model';
-import { addMember, createOwner, createUser } from '../support/fixtures';
+import { addMember, createOwner, createUser, newWallet } from '../support/fixtures';
 import { read, request } from '../support/http';
 import { fakeIdentity } from '../support/identity';
 
@@ -6968,17 +9036,37 @@ const CLIENT_ID = '0xAbCdEf000000000000000000000000000000AbCd';
 const setup = async () => {
   const acme = await createOwner('Acme');
   const member = await createUser();
-  await member.update({ signer_address: '0x' + 'ab'.repeat(20) });
+  const wallet = newWallet().address;
+  await member.update({ signer_address: wallet.toLowerCase() });
   const membership = await addMember(acme.team.id!, member);
   const outsider = await createOwner('Other');
   // Identity reports the owner in lower case; console-api stores the wallet checksummed.
   fakeIdentity([
     { tokenId: 7, owner: acme.user.address!.toLowerCase(), clientId: CLIENT_ID },
+    {
+      tokenId: 8,
+      owner: acme.user.address!.toLowerCase(),
+      clientId: '0x' + '8'.repeat(40),
+    },
   ]);
-  return { acme, member, membership, outsider };
+  const grant = async (tokenId = 7, address = wallet) => {
+    const key = await LicenseSigner.create({
+      team_id: acme.team.id!,
+      license_token_id: tokenId,
+      signer_address: address.toLowerCase(),
+      kind: SignerKinds.MEMBER,
+    });
+    await LicenseSignerHolder.create({ signer_id: key.id!, user_id: member.id });
+    return key;
+  };
+  return { acme, member, wallet, membership, outsider, grant };
 };
 
-const access = async (as: string, clientId: string | null, teamId?: string) =>
+const access = async (
+  as: string,
+  clientId: string | null,
+  options: { teamId?: string; aud?: string[] } = {},
+) =>
   read(
     await accessRoute(
       await request(
@@ -6986,7 +9074,7 @@ const access = async (as: string, clientId: string | null, teamId?: string) =>
         clientId === null
           ? '/api/my/license-access'
           : `/api/my/license-access?clientId=${clientId}`,
-        { as, teamId },
+        { as, ...options },
       ),
     ),
   );
@@ -6999,6 +9087,7 @@ describe('GET /api/my/license-access', () => {
       status: 200,
       body: {
         access: 'OWNER',
+        memberOfTeam: true,
         teamId: acme.team.id,
         signerAddress: null,
         userEmail: acme.user.email,
@@ -7006,30 +9095,66 @@ describe('GET /api/my/license-access', () => {
     });
   });
 
-  it('answers MEMBER with the team and the verified signer for a team member', async () => {
-    const { acme, member } = await setup();
+  it('answers MEMBER for a member holding an enabled member key on this license under their wallet', async () => {
+    const { acme, member, wallet, grant } = await setup();
+    await grant();
 
     expect(await access(member.address!, CLIENT_ID)).toEqual({
       status: 200,
       body: {
         access: 'MEMBER',
+        memberOfTeam: true,
         teamId: acme.team.id,
-        signerAddress: getAddress('0x' + 'ab'.repeat(20)),
+        signerAddress: getAddress(wallet),
         userEmail: member.email,
       },
     });
   });
 
+  it('answers NONE with memberOfTeam for a member without a usable key', async () => {
+    const { acme, member, wallet, grant } = await setup();
+    const noAccess = {
+      status: 200,
+      body: {
+        access: 'NONE',
+        memberOfTeam: true,
+        teamId: acme.team.id,
+        signerAddress: getAddress(wallet),
+        userEmail: member.email,
+      },
+    };
+
+    // No key at all.
+    expect(await access(member.address!, CLIENT_ID)).toEqual(noAccess);
+    // A key on another license only.
+    await grant(8);
+    expect(await access(member.address!, CLIENT_ID)).toEqual(noAccess);
+    // A key on this license, but not their current wallet.
+    await grant(7, newWallet().address);
+    expect(await access(member.address!, CLIENT_ID)).toEqual(noAccess);
+    // The right key, disabled.
+    const key = await grant(7);
+    await key.update({ disabled_at: new Date() });
+    expect(await access(member.address!, CLIENT_ID)).toEqual(noAccess);
+  });
+
   it('answers NONE for outsiders, removed members and unknown licenses', async () => {
-    const { acme, member, membership, outsider } = await setup();
+    const { acme, member, membership, outsider, grant } = await setup();
+    await grant();
     const none = (userEmail: string) => ({
       status: 200,
-      body: { access: 'NONE', teamId: null, signerAddress: null, userEmail },
+      body: {
+        access: 'NONE',
+        memberOfTeam: false,
+        teamId: null,
+        signerAddress: null,
+        userEmail,
+      },
     });
 
-    expect(await access(outsider.user.address!, CLIENT_ID, acme.team.id!)).toEqual(
-      none(outsider.user.email),
-    );
+    expect(
+      await access(outsider.user.address!, CLIENT_ID, { teamId: acme.team.id! }),
+    ).toEqual(none(outsider.user.email));
     expect(await access(member.address!, `0x${'9'.repeat(40)}`)).toEqual(
       none(member.email),
     );
@@ -7039,25 +9164,22 @@ describe('GET /api/my/license-access', () => {
 
   it('ignores a stale X-Team-Id and still answers 200', async () => {
     const { acme, member, membership } = await setup();
-    await membership.update({ status: InvitationStatuses.REVOKED, deleted: true });
+    await membership.update({ status: InvitationStatuses.LEFT, deleted: true });
 
-    const asOwner = await access(acme.user.address!, CLIENT_ID, 'no-such-team');
-    const asRemoved = await access(member.address!, CLIENT_ID, acme.team.id!);
+    const asOwner = await access(acme.user.address!, CLIENT_ID, {
+      teamId: 'no-such-team',
+    });
+    const asFormer = await access(member.address!, CLIENT_ID, { teamId: acme.team.id! });
 
     expect(asOwner.status).toBe(200);
     expect(asOwner.body.access).toBe('OWNER');
-    expect(asRemoved).toEqual({
+    expect(asFormer).toMatchObject({
       status: 200,
-      body: {
-        access: 'NONE',
-        teamId: null,
-        signerAddress: null,
-        userEmail: member.email,
-      },
+      body: { access: 'NONE', memberOfTeam: false },
     });
   });
 
-  it('refuses a missing or malformed client id, and reports Identity outages', async () => {
+  it('refuses a missing or malformed client id, another app, and reports Identity outages', async () => {
     const { acme } = await setup();
 
     expect(await access(acme.user.address!, null)).toEqual({
@@ -7070,11 +9192,15 @@ describe('GET /api/my/license-access', () => {
     expect((await access(acme.user.address!, 'nope')).body.code).toBe(
       'INVALID_CLIENT_ID',
     );
+    expect(
+      (await access(acme.user.address!, CLIENT_ID, { aud: ['some-other-app'] })).status,
+    ).toBe(401);
 
     fakeIdentity([], { status: 500 });
-    expect((await access(acme.user.address!, CLIENT_ID)).body.code).toBe(
-      'IDENTITY_UNAVAILABLE',
-    );
+    expect(await access(acme.user.address!, `0x${'7'.repeat(40)}`)).toEqual({
+      status: 502,
+      body: { message: 'Identity API is unavailable', code: 'IDENTITY_UNAVAILABLE' },
+    });
   });
 });
 ```
@@ -7090,10 +9216,16 @@ Expected: FAIL, `Failed to resolve import "@/app/api/my/license-access/route"`.
 import { Op, col, fn, where as sqlWhere } from 'sequelize';
 import { getAddress, isAddress } from 'viem';
 
+import { LicenseSigner, SignerKinds } from '@/models/licenseSigner.model';
+import { LicenseSignerHolder } from '@/models/licenseSignerHolder.model';
 import { Team } from '@/models/team.model';
 import { User } from '@/models/user.model';
-import { getLicenseByClientId } from '@/services/identity.service';
-import { findMembership, findPersonalMembership } from '@/services/membership.service';
+import { getLicense } from '@/services/identity.service';
+import {
+  findMembership,
+  findPersonalTeam,
+  notDeleted,
+} from '@/services/membership.service';
 import type { LicenseAccess } from '@/types/teams';
 import { ApiError } from '@/utils/apiError';
 
@@ -7105,25 +9237,27 @@ export const getLicenseAccess = async (
     throw new ApiError(400, 'INVALID_CLIENT_ID', 'clientId must be an Ethereum address');
   }
   const userEmail = user.email;
+  const signerAddress = user.signer_address
+    ? (getAddress(user.signer_address) as `0x${string}`)
+    : null;
   const none: LicenseAccess = {
     access: 'NONE',
+    memberOfTeam: false,
     teamId: null,
     signerAddress: null,
     userEmail,
   };
 
-  const license = await getLicenseByClientId(rawClientId);
+  const license = await getLicense(rawClientId);
   if (!license) return none;
   const owner = license.owner.toLowerCase();
-  const signerAddress = user.signer_address
-    ? (getAddress(user.signer_address) as `0x${string}`)
-    : null;
 
   if (user.address?.toLowerCase() === owner) {
-    const personal = await findPersonalMembership(user.id!);
+    const personal = await findPersonalTeam(user.id!);
     return {
       access: 'OWNER',
-      teamId: personal?.team_id ?? null,
+      memberOfTeam: true,
+      teamId: personal?.id ?? null,
       signerAddress,
       userEmail,
     };
@@ -7137,15 +9271,47 @@ export const getLicenseAccess = async (
   const teams = await Team.findAll({
     where: {
       created_by: { [Op.in]: ownerUsers.map((ownerUser) => ownerUser.id!) },
-      deleted: { [Op.not]: true },
+      deleted: notDeleted,
     },
   });
+  let memberTeam: Team | null = null;
   for (const team of teams) {
     if (await findMembership(team.id!, user.id!)) {
-      return { access: 'MEMBER', teamId: team.id!, signerAddress, userEmail };
+      memberTeam = team;
+      break;
     }
   }
-  return none;
+  if (!memberTeam) return none;
+
+  // A member uses the license only through an enabled member key on it that is
+  // their current wallet (contract C7). Anything less is "ask for access".
+  const key = user.signer_address
+    ? await LicenseSigner.findOne({
+        where: {
+          team_id: memberTeam.id!,
+          license_token_id: license.tokenId,
+          kind: SignerKinds.MEMBER,
+          disabled_at: null,
+          signer_address: user.signer_address.toLowerCase(),
+        },
+        include: [
+          {
+            model: LicenseSignerHolder,
+            as: 'holders',
+            where: { user_id: user.id! },
+            required: true,
+          },
+        ],
+      })
+    : null;
+
+  return {
+    access: key ? 'MEMBER' : 'NONE',
+    memberOfTeam: true,
+    teamId: memberTeam.id!,
+    signerAddress,
+    userEmail,
+  };
 };
 ```
 
@@ -7160,7 +9326,7 @@ import { errorResponse } from '@/utils/apiError';
 // Ignores X-Team-Id: the answer depends only on the license and the caller.
 export const GET = async (request: NextRequest) => {
   try {
-    const user = await requireUser(request);
+    const user = await requireUser(request, { consoleOnly: true });
     const clientId = request.nextUrl.searchParams.get('clientId');
     return Response.json(await getLicenseAccess(user, clientId));
   } catch (error: unknown) {
@@ -7172,7 +9338,7 @@ export const GET = async (request: NextRequest) => {
 - [ ] **Step 5: Run the tests**
 
 Run: `npm test -- test/api/license-access.test.ts`
-Expected: `5 passed`.
+Expected: `6 passed`.
 
 - [ ] **Step 6: Run everything, typecheck, commit**
 
@@ -7193,7 +9359,7 @@ git commit -m "feat(teams): tell the console's data proxy whether the caller may
 
 - Modify: `CLAUDE.md`, `README.md`
 
-- [ ] **Step 1: Document the tests and team scoping in `CLAUDE.md`**
+- [ ] **Step 1: Document the tests, team scoping and migrations in `CLAUDE.md`**
 
 Under `## Key Commands`, add to the bash block:
 
@@ -7205,9 +9371,19 @@ npm run typecheck    # tsc --noEmit
 Append to `## Patterns & Conventions`:
 
 ```markdown
-- **Teams**: every `/api/my/*` route starts with `resolveTeamContext(request)` (`src/services/teamContext.service.ts`). It reads the optional `X-Team-Id` header; without it the caller's own team is active. Writes call `requireOwner(ctx)`. Errors are `ApiError(status, code, message)` and routes answer `{ message, code }`. The contract with the console is `docs/superpowers/plans/2026-10-02-console-teams.md` in the console repo.
-- **Tests**: `test/` holds vitest suites that call route handlers directly against a disposable Postgres rebuilt from `src/scripts/db/init-db_*.sql`, with a local JWKS minting tokens (`test/support`). Mailer and Twenty are mocked.
-- **Migrations**: add a new `src/scripts/db/init-db_NN.sql`. It must be safe to run twice, and it runs on preview and production **before** the code that reads it deploys.
+- **Teams**:
+  - Every `/api/my/*` route starts with `resolveTeamContext(request)` (`src/services/teamContext.service.ts`). It reads the optional `X-Team-Id` header; without it, the caller's own team (`teams.created_by`) is active.
+  - The owner is the team's creator, never whatever `team_collaborators.role` says.
+  - Writes call `requireOwner(ctx)`; members get no secrets.
+  - Console-only routes (team, invite, signer, registry, license access) pass `{ consoleOnly: true }`, which requires `aud` to include `developer-platform`.
+  - Errors are `ApiError(status, code, message)`, and routes answer `{ message, code }`.
+  - The contract with the console is `docs/superpowers/plans/2026-10-02-console-teams.md` in the console repo.
+- **Identity**: only through `src/services/identity.service.ts`. A GraphQL error other than `NOT_FOUND` is an outage (502), never "no such license".
+- **Tests**: `test/` holds vitest suites that call route handlers directly against a disposable Postgres rebuilt from `src/scripts/db/init-db_*.sql`. `test/support` provides a local JWKS that mints tokens and a fake Identity. Mailer and Twenty are mocked. Tests run with `TZ=UTC`.
+- **Migrations**:
+  - There is no migration runner. Add `src/scripts/db/init-db_NN.sql`, safe to run twice, and `init-db_NN.down.sql`.
+  - Run both by hand with `psql`: on preview, then production, **before** the code that reads them deploys.
+  - Vercel builds a preview deployment on every push, against the preview database. Migrate preview before pushing a branch whose code reads new columns.
 ```
 
 - [ ] **Step 2: Add a "Running tests" section to `README.md`**
@@ -7245,19 +9421,45 @@ Expected:
 - lint reports no `Error:` lines;
 - typecheck exits 0;
 - vitest reports every file passing, with 0 failed;
-- the build exits 0, and its route table lists `/api/my/teams`, `/api/my/team/members`, `/api/my/team/members/[id]`, `/api/my/team/invitations`, `/api/my/team/invitations/[id]`, `/api/my/team/invitations/[id]/resend`, `/api/invitations/accept`, `/api/me/signer`, `/api/my/licenses/[tokenId]/signers`, `/api/my/licenses/[tokenId]/signers/[address]`, `/api/my/licenses/[tokenId]/signers/[address]/disabled` and `/api/my/license-access`.
+- the build exits 0, and its route table lists:
+  - `/api/my/teams`, `/api/my/team/members`, `/api/my/team/members/[id]` and `/api/my/team/leave`;
+  - `/api/my/team/invitations`, `/api/my/team/invitations/[id]` and `/api/my/team/invitations/[id]/resend`;
+  - `/api/invitations/preview` and `/api/invitations/accept`;
+  - `/api/me/signer`;
+  - `/api/my/licenses/[tokenId]/signers`, `/api/my/licenses/[tokenId]/signers/[address]` and `/api/my/licenses/[tokenId]/signers/[address]/disabled`;
+  - `/api/my/license-access`.
 
-- [ ] **Step 4: Check that every `/api/my` route resolves the team**
+- [ ] **Step 4: Check that every `/api/my` route resolves the caller**
 
 Run: `grep -rL "resolveTeamContext\|requireUser" src/app/api/my --include=route.ts`
-Expected: only `src/app/api/my/support/email/route.ts`, which stays open to members by design.
+Expected: no output. Support email uses `requireUser`; everything else uses `resolveTeamContext`.
 
-- [ ] **Step 5: Commit the docs and open the PR**
+- [ ] **Step 5: Compare production's schema with the one the code expects**
+
+console-api has no migration runner, and production has been changed by hand before (`configurations.client_id` is wider than `init-db_08` creates it). Diff the schemas before running anything. Use a read-only connection string for production.
+
+```bash
+pg_dump --schema-only --no-owner --no-privileges "$TEST_PG_URL" > "$TMPDIR/harness-schema.sql"
+pg_dump --schema-only --no-owner --no-privileges "$PROD_PG_URL_READONLY" > "$TMPDIR/prod-schema.sql"
+diff -u "$TMPDIR/prod-schema.sql" "$TMPDIR/harness-schema.sql" > "$TMPDIR/schema.diff"; echo "exit $?"
+```
+
+Expected: `exit 1`, a non-empty diff. Read it.
+
+- **Acceptable differences:** objects `init-db_12.sql` adds (the harness already has them), and columns production widened by hand.
+- **Stop and fix `init-db_12.sql` first** if production has anything the migration doesn't expect:
+  - a missing table or column it alters;
+  - a different type on a column it indexes;
+  - existing indexes or constraints with the same names.
+
+Attach `schema.diff` to the PR.
+
+- [ ] **Step 6: Commit the docs and open the PR**
 
 ```bash
 npx prettier --write CLAUDE.md README.md
 git add CLAUDE.md README.md
-git commit -m "docs: document team scoping, the test harness and migration order"
+git commit -m "docs: document team scoping, the test harness and how migrations run"
 git push -u origin feat/teams
 gh pr create --base master --head feat/teams \
   --title "feat(teams): team membership, invitations, signer proof and the license key registry" \
@@ -7265,44 +9467,69 @@ gh pr create --base master --head feat/teams \
 Part 2 of console teams. Spec: `docs/superpowers/specs/2026-10-01-console-teams-design.md`. Contracts: `docs/superpowers/plans/2026-10-02-console-teams.md` (both in dimo-developer-console).
 
 ## What changes
-- **Team context:** every `/api/my/*` route answers for the active team. That's `X-Team-Id`, or the caller's own team without it. Members read; only the owner writes (`403 OWNER_ONLY`). Non-members get `403 NOT_A_MEMBER`. `POST /api/my/support/email` stays open.
+- **Team context:**
+  - Every `/api/my/*` route answers for the active team: `X-Team-Id`, or the caller's own team without it.
+  - The owner is the team's creator (`teams.created_by`). Members read, and only the owner writes (`403 OWNER_ONLY`). Non-members get `403 NOT_A_MEMBER`.
+  - No context ever has an empty company, so no list can fall back to every company.
+  - Members never see connection private keys or app signer API keys.
 - **Teams and members:**
-  - `GET /api/my/teams`, `GET /api/my/team/members`, `DELETE /api/my/team/members/:id`.
-  - Invitations: `POST /api/my/team/invitations` (with resend and cancel) and `POST /api/invitations/accept`.
-  - Invite tokens are random, stored only as SHA-256, expire after 7 days, and are bound to the invited email. Existing accounts can be invited.
-- **Signer proof:** `PUT /api/me/signer` verifies the C6 message and stores the wallet that signs for each user.
-- **Key registry:** `GET`, `PUT` and `POST …/disabled` under `/api/my/licenses/:tokenId/signers`. It records who each license key belongs to; addresses only.
-- **License access:** `GET /api/my/license-access?clientId=` answers `OWNER`, `MEMBER` or `NONE` for the console's data proxy, with the caller's `userEmail` for its audit line.
-- **Migration:** `init-db_12.sql`. Collaborators become members, duplicate active rows are folded, and it adds the invite columns, the user signer columns and the registry tables. It also widens `configurations.client_id` to `VARCHAR(100)`, but only where it's still shorter than 42 characters, so production's hand-widened column is untouched. Safe to run twice.
-- **Tests and CI:** vitest against a disposable Postgres, with a local JWKS and GitHub Actions. Also regression tests for #80.
-
-## Builds on #80
-- Configurations keep #80's license-owner rule; members of the owning team can now read them.
-- Collaborator removal keeps #80's team scoping and messages.
-- #80's `identity.service.ts` gains token ID and client ID lookups.
+  - `GET /api/my/teams` and `GET /api/my/team/members`, the latter with `memberKeys` and C7's ordering.
+  - `DELETE /api/my/team/members/:id` (status `REVOKED`) and `POST /api/my/team/leave` (status `LEFT`).
+- **Invitations:**
+  - Create, resend and cancel under `/api/my/team/invitations`, plus `POST /api/invitations/preview` and `POST /api/invitations/accept`.
+  - Tokens are random, stored only as SHA-256, expire after 7 days and are bound to the invited email. Acceptance always makes a member.
+  - C7's limits answer 429 `RATE_LIMITED`. Names in the email are escaped and capped.
+- **Signer proof:** `PUT /api/me/signer` verifies the C6 message. One wallet per account (`409 SIGNER_IN_USE`), and no switching while holding member keys (`409 SIGNER_LOCKED`).
+- **Key registry:** `GET`, `PUT` and `POST …/disabled` under `/api/my/licenses/:tokenId/signers`, with `SIGNER_MISMATCH` and `KIND_CONFLICT`.
+- **License access:** `GET /api/my/license-access?clientId=` answers `OWNER`, `MEMBER` or `NONE`, with `memberOfTeam` and the caller's email.
+- **Console-only routes** (team, invite, signer, registry, license access) require `aud` to include `developer-platform`.
+- **`/api/me`:** a legacy collaborator with no team of their own gets their oldest team. An unknown wallet gets `401 UNAUTHORIZED`.
+- **Identity:** a GraphQL error that isn't `NOT_FOUND` is a 502, never "no such license".
+- **Migration:** `init-db_12.sql` and `init-db_12.down.sql`.
+  - It demotes non-creator `OWNER` rows, turns collaborators into members and folds duplicates (keeping the creator's row).
+  - It adds the invite columns and the `team_invite_sends` log, the user signer (unique, case-insensitive) and the registry tables, all timestamps `TIMESTAMPTZ`.
+  - It widens `configurations.client_id` only where it's shorter than 42.
+- **Tests and CI:** vitest against a disposable Postgres, with a local JWKS, a fake Identity and GitHub Actions. Also #80 regressions.
 
 ## Fixed along the way
-- Legacy `invitation_code` acceptance ignored the invitee's email. It now requires the invited email, and never accepts token-based invites.
-- `GET /api/me` now always shows the caller's own team. Before, it could pick up a team they had joined.
+- `transformObject` kept only the last list filter, which could drop the company condition.
+- Redirect URIs and signers could be attached to another company's app, and deleting one matched it against `app_id`.
+- `PUT /api/my/apps/:id` passed the body through, `company_id` included.
+- Legacy `invitation_code` acceptance now always makes a member.
+- `POST /api/my/support/email` answers 401 for an unknown user.
+
+## Builds on #80
+- The scoped user routes.
+- Configurations limited to the license owner; members of the owning team can now read them.
+- Collaborator removal scoped to the team, with #80's messages kept.
+- The empty-company guards.
+- `identity.service.ts`, now with token ID and client ID lookups.
+- The legacy invite rules and the workspace license check, now checked against the team owner.
 
 ## Compatibility
-- Today's console keeps working: the header is optional, and the retired team routes are thin adapters scoped to the caller's team.
-- Invites created through the old route now email the new `sign-in?invite=` link. That link needs console part 3 to be accepted.
-
-## Additions to contract C7 (proposed in the index)
-- `502 EMAIL_FAILED` on invite and resend.
-- `400 INVALID_ADDRESS` on the registry `PUT` and `disabled`.
-- `401 UNAUTHORIZED` from every new route.
+- Today's console keeps working: the header is optional, and the retired team routes are thin adapters scoped to the caller's team. They're deleted by this plan's final task, after part 3 ships.
+- Invites created through the old route email the new `sign-in?invite=` link, which needs console part 3 to be accepted.
 
 ## Release checklist
-1. Confirm #80 is merged and deployed. This branch builds on its Identity service.
-2. Back up the database. Then run the migration on **preview**, and later **production**, before deploying this code. The User model reads the new columns.
-   `psql "$PG_URL" -v ON_ERROR_STOP=1 --single-transaction -f src/scripts/db/init-db_12.sql`
-3. Check `SELECT role, count(*) FROM team_collaborators GROUP BY role;`: no `COLLABORATOR` rows remain.
-4. Check `\d license_signers` and `\d license_signer_holders`: both tables exist. Check `\d configurations`: `client_id` is at least 42 characters wide.
-5. Merge. Vercel deploys console-api.
-6. Smoke test: with a console session, `GET /api/my/teams` returns the personal team, and `GET /api/my/team/members` lists the owner.
-7. Then ship console part 3.
+Migrations are run by hand; console-api has no migration runner.
+1. Confirm #80 is merged and deployed.
+2. Diff production's schema against the harness's (`schema.diff` attached; see the plan's Task 14, step 5). Resolve anything unexpected first.
+3. **Preview:**
+   - Back up the preview database, then run `psql "$PREVIEW_PG_URL" -v ON_ERROR_STOP=1 --single-transaction -f src/scripts/db/init-db_12.sql`.
+   - Vercel builds this branch's preview against the preview database. Until this step runs, preview deployments fail on the new columns; that's expected and harmless.
+4. **Production:**
+   - Back up the database, then run the same command against production **before** merging. The User model reads the new columns, so the code can't deploy first.
+5. Check `SELECT role, count(*) FROM team_collaborators GROUP BY role;`: only `OWNER` and `MEMBER` remain.
+6. Check `SELECT count(*) FROM team_collaborators tc JOIN teams t ON t.id = tc.team_id WHERE tc.role = 'OWNER' AND tc.user_id <> t.created_by;`: the answer is 0.
+7. Check `\d license_signers`, `\d license_signer_holders` and `\d team_invite_sends`: all three tables exist. Check `\d configurations`: `client_id` is at least 42 characters wide.
+8. Merge. Vercel deploys console-api.
+9. Run `init-db_12.sql` once more on production. It's idempotent. Any `COLLABORATOR` rows the old code wrote between steps 4 and 8 become `MEMBER`.
+10. Smoke test: with a console session, `GET /api/my/teams` returns the personal team, and `GET /api/my/team/members` lists the owner.
+11. Then ship console part 3.
+
+**Rollback:**
+- Rolling back the code alone is safe. The old code reads none of the new columns or tables, and `MEMBER` rows behave as collaborators there.
+- `init-db_12.down.sql` is only for removing the schema afterwards. Run it after the code rollback, never before, because the new code reads those columns.
 
 ## Verification
 lint, typecheck, `npm test` and `next build` pass locally and in CI.
@@ -7313,40 +9540,192 @@ Expected: `gh` prints the PR URL.
 
 ---
 
+### Task 15: Retire the legacy team routes (after part 3 has shipped)
+
+C7 retires these routes once the console no longer calls them:
+
+- `GET /api/my/team`
+- `GET /api/my/team/collaborator`
+- `DELETE /api/my/team/collaborator/:id`
+- `POST /api/my/team/invitation`
+- the `invitation_code` query on `GET /api/me`
+
+This is a separate PR from Task 14's, made only after console part 3 is in production.
+
+**Files:**
+
+- Delete: `src/app/api/my/team/route.ts`, `src/app/api/my/team/collaborator/route.ts`, `src/app/api/my/team/collaborator/[id]/route.ts`, `src/app/api/my/team/invitation/route.ts`
+- Delete: `src/controllers/teamCollaborator.controller.ts`
+- Delete: `test/api/retired-team-routes.test.ts`
+- Modify: `src/app/api/me/route.ts` (drop `invitation_code`)
+- Modify: `test/api/regressions-80.test.ts` (drop the describes for routes that no longer exist; pin their absence)
+
+**Interfaces:**
+
+- Removes: `acceptTeamInvitation`, `listLegacyCollaborators` and `removeMyCollaboratorById` (Task 9).
+- Nothing else in console-api imports them. Step 3 checks.
+
+- [ ] **Step 1: Confirm nothing still calls the routes**
+
+```bash
+grep -rnE "/api/my/team/collaborator|/api/my/team/invitation['\`/]|invitation_code|'/api/my/team'" ~/workspace/dimo-developer-console/src
+```
+
+Expected: no output.
+
+Then, in the Vercel request logs for console-api production, filter on each retired path for the last 7 days.
+Expected: no requests after part 3's production deploy. If there are some, find the caller first and don't delete yet.
+
+- [ ] **Step 2: Branch and write the failing test**
+
+```bash
+cd ~/workspace/dimo-developer-console-api
+git fetch origin && git switch -c chore/retire-legacy-team-routes origin/master
+```
+
+In `test/api/regressions-80.test.ts`:
+
+- Delete the `describe('PR #80 regressions: legacy invites and workspaces', …)` test that invites through the legacy route. Keep its workspace test in a describe of its own.
+- Delete the `describe("PR #80 regressions: collaborator removal stays inside the owner's team", …)` block.
+- Delete the now-unused imports `legacyInvite` and `deleteCollaborator`.
+- Add:
+
+```ts
+describe('retired team routes', () => {
+  it('are gone', () => {
+    for (const route of [
+      'src/app/api/my/team/route.ts',
+      'src/app/api/my/team/collaborator/route.ts',
+      'src/app/api/my/team/collaborator/[id]/route.ts',
+      'src/app/api/my/team/invitation/route.ts',
+      'src/controllers/teamCollaborator.controller.ts',
+    ]) {
+      expect(existsSync(route), route).toBe(false);
+    }
+  });
+
+  it('ignores invitation_code on GET /api/me', async () => {
+    const acme = await createOwner('Acme');
+    const pat = await createUser({ email: 'pat@x.test' });
+    const [row] = await sql<{ id: string }>(
+      `INSERT INTO team_collaborators (id, team_id, email, role, status, created_at, updated_at, deleted)
+       VALUES (gen_random_uuid()::text, :team, 'pat@x.test', 'MEMBER', 'PENDING', now(), now(), false)
+       RETURNING id`,
+      { team: acme.team.id },
+    );
+    const code = Buffer.from(row.id).toString('base64');
+
+    await getMe(
+      await request('GET', `/api/me?invitation_code=${code}`, { as: pat.address! }),
+    );
+
+    const [after] = await sql<{ status: string }>(
+      'SELECT status FROM team_collaborators WHERE id = :id',
+      { id: row.id },
+    );
+    expect(after.status).toBe('PENDING');
+  });
+});
+```
+
+Run: `npm test -- test/api/regressions-80.test.ts`
+Expected: FAIL. The route files still exist, and `invitation_code` still accepts the invite.
+
+- [ ] **Step 3: Delete the routes and the adapters**
+
+```bash
+git rm src/app/api/my/team/route.ts src/app/api/my/team/collaborator/route.ts "src/app/api/my/team/collaborator/[id]/route.ts" src/app/api/my/team/invitation/route.ts src/controllers/teamCollaborator.controller.ts test/api/retired-team-routes.test.ts
+grep -rnE "acceptTeamInvitation|listLegacyCollaborators|removeMyCollaboratorById|teamCollaborator.controller" src test
+```
+
+Expected: the only matches are in `src/app/api/me/route.ts`.
+
+In `src/app/api/me/route.ts`:
+
+- delete the `acceptTeamInvitation` import;
+- delete the `invitationCode` line;
+- delete the `await acceptTeamInvitation(...)` statement.
+
+`GET` then reads the token, finds the user (401 if none) and returns `getCompanyAndTeam(user)`.
+
+- [ ] **Step 4: Run everything**
+
+Run: `npm test && npm run typecheck && npm run lint`
+Expected: all pass, typecheck exits 0, and lint has no errors.
+
+Run: `PG_URL=postgres://u:p@127.0.0.1:1/x npm run build`
+Expected: exit 0. The route table no longer lists `/api/my/team`, `/api/my/team/collaborator`, `/api/my/team/collaborator/[id]` or `/api/my/team/invitation`.
+
+- [ ] **Step 5: Commit and open the PR**
+
+```bash
+npx prettier --write src/app/api/me/route.ts test
+git add -A src test
+git commit -m "chore(teams): retire the legacy team routes now that the console uses the team API"
+git push -u origin chore/retire-legacy-team-routes
+gh pr create --base master --head chore/retire-legacy-team-routes \
+  --title "chore(teams): retire the legacy team routes" \
+  --body "Removes GET /api/my/team, GET /api/my/team/collaborator, DELETE /api/my/team/collaborator/:id, POST /api/my/team/invitation and the invitation_code query on GET /api/me (contract C7). Console part 3 no longer calls them; Vercel logs show no requests to them in the 7 days since it shipped. No schema change."
+```
+
+Expected: `gh` prints the PR URL.
+
+---
+
 ## Self-review
 
-**Spec coverage (part 2):**
+**Spec and contract coverage (part 2):**
 
-| Spec item                                                                                                                                                 | Task        |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| Data model: membership role, status, invite token hash, expiry, invited_by, uniqueness; users signer columns; `license_signers`; `license_signer_holders` | 3           |
-| Team context on every `/api/my/*` route; header optional                                                                                                  | 4, 5, 6, 9  |
-| Owner-only writes on the listed paths; support email open                                                                                                 | 5, 6        |
-| Every team endpoint (teams, members, invitations, resend, cancel, accept, remove)                                                                         | 7, 8        |
-| `PUT /api/me/signer` (C6)                                                                                                                                 | 10          |
-| Registry `GET`/`PUT`/`disabled` with the Identity ownership check (60 s cache) and holder validation                                                      | 11, 12      |
-| `GET /api/my/license-access`                                                                                                                              | 13          |
-| Retired routes kept working until part 3                                                                                                                  | 9           |
-| Revoked members still holding an enabled `MEMBER` key appear in the members list                                                                          | 7, 12       |
-| Route-level test harness with a disposable Postgres and local JWKS, plus #80 regressions                                                                  | 1, 2        |
-| Migration before deploy; console-api ships before the console                                                                                             | 14          |
-| #80's configuration, collaborator-removal and Identity behavior pinned by tests; configurations stay license-owner based under teams                      | 2, 6, 9, 11 |
-| Schema drift: `configurations.client_id` widened only while shorter than 42 (harness and migration)                                                       | 1, 3        |
+| Requirement (spec / index)                                                                                                                                                                                                                                                     | Task                 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
+| Data model: membership role/status (`LEFT`), invite token hash, expiry, invited_by; uniqueness; users signer (unique `lower()`); `license_signers`; `license_signer_holders`; `team_invite_sends`; TIMESTAMPTZ                                                                 | 3                    |
+| Owner is `teams.created_by` only: migration demotes others; context, summaries and members derive it; acceptance and refreshes set `MEMBER`                                                                                                                                    | 3, 4, 7, 8, 9        |
+| Team context on every `/api/my/*` route; header optional; never an empty company                                                                                                                                                                                               | 4, 5, 6, 9           |
+| `transformObject` keeps every filter key                                                                                                                                                                                                                                       | 5                    |
+| Owner-only writes on the listed paths; support email open (401 for unknown users)                                                                                                                                                                                              | 5, 6                 |
+| Secrets owner-only (connection keys, signer API keys)                                                                                                                                                                                                                          | 5                    |
+| Audience rule (`aud` includes `developer-platform`) on team, invite, signer, registry and license-access routes                                                                                                                                                                | 4, 7, 8, 10, 12, 13  |
+| Teams list, members list with `memberKeys` and C7 ordering, removal (`REVOKED`), leaving (`LEFT`)                                                                                                                                                                              | 7                    |
+| Invitations, resend, cancel, preview, accept; limits and `429`; escaping; concurrent duplicates                                                                                                                                                                                | 8                    |
+| `PUT /api/me/signer` (C6) with `SIGNER_IN_USE` and `SIGNER_LOCKED`                                                                                                                                                                                                             | 10                   |
+| Identity lookups; GraphQL errors other than `NOT_FOUND` are 502; `tokenId` is `Int`                                                                                                                                                                                            | 11                   |
+| Registry `GET`/`PUT`/`disabled` with ownership check, holder validation, `SIGNER_MISMATCH`, `KIND_CONFLICT`                                                                                                                                                                    | 12                   |
+| `GET /api/my/license-access` with `memberOfTeam`, `MEMBER` only through a matching enabled key                                                                                                                                                                                 | 13                   |
+| `GET /api/me`: personal team, legacy-collaborator fallback, `401 UNAUTHORIZED`, ignores `X-Team-Id`                                                                                                                                                                            | 4                    |
+| Retired routes kept working until part 3, then deleted                                                                                                                                                                                                                         | 9, 15                |
+| Existing issues: redirect-uri/signer POST app check, deletes by row ID, `PUT /api/my/apps/:id` whitelist, legacy list trimmed fields                                                                                                                                           | 5, 9                 |
+| #80 behaviors pinned with its exact messages (scoped user routes, takeover, configurations, collaborator removal, legacy invite owner check, limit, role and escaping, `invitation_code` email check, workspace license and token check) and preserved or deliberately updated | 2, 3, 5, 6, 8, 9, 11 |
+| Schema drift (`configurations.client_id`) handled in harness and migration                                                                                                                                                                                                     | 1, 3                 |
+| Test harness: disposable Postgres, local JWKS with `aud`, fake Identity that passes the JWKS through, `TZ=UTC`, es2017 target; CI                                                                                                                                              | 1                    |
+| Migration operations: down script, schema diff, manual runs, rollback safety, preview deploy timing                                                                                                                                                                            | 3, 14                |
 
-**Placeholder scan:** every code step carries complete code. There's no "TBD", no "similar to Task N", and no undefined function.
+**Placeholder scan:**
+
+- Every code step carries complete code. There's no "TBD", no "similar to Task N", and no partial code block.
+- Every #80 behavior the plan touches is quoted from commit `b41eb28`: the workspace POST (Task 5), the template's escaping (Task 8), the legacy invite and acceptance (Tasks 2, 3 and 9), and the Identity service (Task 11). No step depends on code that hasn't been read.
 
 **Type consistency:**
 
-- `TeamContext` (Task 4) is used unchanged in Tasks 5 to 13.
-- `toTeamMember` and `toTeamSummary` (Task 7) are reused in Task 8.
-- `getLicenseByTokenId` and `getLicenseByClientId`, added to #80's `identity.service.ts` in Task 11, are used in Tasks 12 and 13. Tests reach Identity only through `fakeIdentity` (Task 1).
-- Fixture `createOwnerFor` is introduced in Task 4 and used in Task 7.
-- `addMember` is introduced in Task 3.
+- `TeamContext` (Task 4) has a non-null `team` and `company`, and is used unchanged in Tasks 5–13.
+- `toTeamMember(row, ownerUserId, memberKeys?)` and `toTeamSummary({ team, company, owner, callerId })` (Task 7) are reused in Task 8.
+- `findPersonalTeam`, `findMembership`, `findDefaultTeam`, `notDeleted` and `activeMembershipWhere` (Task 4) are used in Tasks 7, 8, 9 and 13.
+- #80's `getLicense` (returns `{ owner, tokenId }`) is used in Tasks 5 and 13, and `isLicenseOwner` in Task 6. `getLicenseByTokenId`, added next to them in Task 11, is used in Task 12. There's no second Identity client.
+- `requireUser(request, { consoleOnly })` and `resolveTeamContext(request, { consoleOnly })` have the same option everywhere.
+- Fixtures `createOwnerFor` (Task 1) and `addMember` (Task 3) are used throughout.
+- Wire types in `src/types/teams.ts` (Task 3) match C7: `MembershipStatus` includes `LEFT`, `TeamMember.memberKeys`, `LicenseAccess.memberOfTeam`, `InvitationPreview`.
+- No `for…of` over a `Set` or `Map`: `listMembers` uses `Array.from(keysByUser.keys())`. `tsconfig.json` targets es2017 regardless.
 
 **Review Focus coverage:**
 
-1. User who owns a team and is a member of another: Task 4, `/api/me with several teams`.
-2. Email case and spaces: Task 8, "refuses bad emails… ignoring case and spaces" and "makes the invitee a member".
-3. Re-invite after removal: Task 8, "lets a removed member be invited and accept again".
-4. Token reuse: Task 8, "refuses a different account, an expired link, garbage and a second use".
-5. Mixed-case addresses: Task 12, "treats checksummed and lowercase addresses as the same key"; Task 13, lowercase owner versus checksummed stored wallet.
+1. **Owner of one team and member of another; wrongly marked `OWNER` rows:**
+   - Task 4: "uses the team the caller created", "never trusts an OWNER membership row", "shows the caller's own company even when they joined another team first";
+   - Task 3: the demotion migration test;
+   - Task 7: "marks a team OWNER only for its creator".
+2. **Email case and spaces; concurrent duplicates:** Task 8, "refuses bad emails…", "answers ALREADY_INVITED, not 500, to concurrent duplicates" and "makes the invitee a member".
+3. **Re-invite after removal or leaving:** Task 8, "lets someone who was removed, or who left, be invited and accept again".
+4. **Token reuse:** Task 8, "refuses a different account, an expired link, garbage and a second use".
+5. **Mixed-case addresses:**
+   - Task 12: "treats checksummed and lowercase addresses as the same key";
+   - Task 13: lowercase owner versus a checksummed stored wallet;
+   - Task 10: "refuses another user's wallet, in any letter case";
+   - Task 3: the unique index test.
