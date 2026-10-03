@@ -2,6 +2,7 @@ import configuration from '@/config';
 import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import { useCallback } from 'react';
+import { assertUserOperation } from '@/utils/userOperation';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import { useSACD } from '@/hooks/useSACD';
 import DimoABI from '@/contracts/DimoTokenContract.json';
@@ -74,7 +75,7 @@ export const useDisableSigner = (tokenId: number) => {
           }),
         },
       ];
-      await processTransactions(transaction);
+      assertUserOperation(await processTransactions(transaction));
     },
     [processTransactions, tokenId, validateCurrentSession],
   );
@@ -93,7 +94,7 @@ export const useEnableSigner = (tokenId: number) => {
           args: [tokenId, signer],
         }),
       };
-      await processTransactions([transaction]);
+      assertUserOperation(await processTransactions([transaction]));
     },
     [processTransactions, tokenId],
   );
