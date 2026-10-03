@@ -16,6 +16,9 @@ import { VehicleHeader } from './VehicleHeader';
 import { SourceRail, type Access, type AccountState } from './SourceRail';
 import { SubjectTabs } from './SubjectTabs';
 import { AccessNotice } from './AccessNotice';
+import { useLicenseDataAccess } from '@/hooks/useLicenseDataAccess';
+import { useTeam } from '@/hooks/useTeam';
+import { accessFromError } from './accessFromError';
 import { SharingPanel } from './tabs/SharingPanel';
 import { SubjectView, type SubjectContext } from './SubjectView';
 import { shortDid } from '@/services/subjects/did';
@@ -50,6 +53,8 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
     eligible.find((l) => l.clientId.toLowerCase() === url.license.toLowerCase()) ??
     eligible[0];
   const clientId = license?.clientId ?? '';
+  const dataAccess = useLicenseDataAccess(license);
+  const { activeTeam, reportRemoved } = useTeam();
 
   useEffect(() => {
     if (license && license.clientId.toLowerCase() !== url.license.toLowerCase()) {
@@ -67,23 +72,28 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
       ? 'loading'
       : !license
         ? 'not-shared'
-        : !isAuthenticatedAsDev
-          ? 'no-jwt'
-          : 'ok';
+        : dataAccess.kind === 'member-unavailable'
+          ? 'unavailable'
+          : dataAccess.kind === 'member-no-access'
+            ? 'no-access'
+            : !isAuthenticatedAsDev
+              ? 'no-jwt'
+              : 'ok';
 
   const freshness = useSubjectFreshness({ graph, clientId, enabled: granted === 'ok' });
-  // The rail's freshness request is the first exchange for the vehicle: a
-  // refused exchange or a rejected developer JWT closes the data tabs.
-  const exchangeCode = freshness.error?.code;
+  // The rail's freshness request is the first exchange for the vehicle.
   const access: Access =
     granted !== 'ok'
       ? granted
-      : exchangeCode === 'NOT_SHARED'
-        ? 'not-shared'
-        : // MISSING here means the stored JWT expired since the page read it.
-          exchangeCode === 'DEV_JWT_INVALID' || exchangeCode === 'DEV_JWT_MISSING'
-          ? 'jwt-expired'
-          : 'ok';
+      : accessFromError(freshness.error, {
+          member: dataAccess.kind !== 'owner',
+          walletIsSigner: !!license?.hasSigner(currentUser?.walletAddress),
+        });
+
+  // The proxy says the user is no longer in the team that owns this license.
+  useEffect(() => {
+    if (access === 'removed') reportRemoved();
+  }, [access, reportRemoved]);
   const accountProbe = useSubjectQuery<{ latestIndex: unknown }>({
     api: 'fetch',
     asset: graph?.account.asset ?? '',
@@ -191,6 +201,9 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
                       void freshness.refetch();
                     }}
                     onViewSharing={() => url.set({ subject: 'sharing' })}
+                    member={dataAccess.kind !== 'owner'}
+                    ownerEmail={activeTeam?.ownerEmail}
+                    onRetry={() => void freshness.refetch()}
                   />
                 )}
               </>

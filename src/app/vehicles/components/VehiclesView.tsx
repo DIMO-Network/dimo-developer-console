@@ -14,6 +14,8 @@ import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useTeam } from '@/hooks/useTeam';
 import { LocalDeveloperLicense } from '@/types/webhook';
+import { TEAM_DATA_ACCESS_ENABLED } from '@/utils/featureFlags';
+import { DATA_ACCESS_UNAVAILABLE } from '@/config/teamCopy';
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 
@@ -146,6 +148,14 @@ const Content = () => {
 
 export const VehiclesView = () => {
   const { loading, error } = useLicenses();
+  const { isMember } = useTeam();
+  if (isMember && !TEAM_DATA_ACCESS_ENABLED) {
+    return (
+      <Section>
+        <p className="text-body text-fg">{DATA_ACCESS_UNAVAILABLE}</p>
+      </Section>
+    );
+  }
   return (
     <div className="flex flex-col gap-6">
       <QueryPageWrapper
