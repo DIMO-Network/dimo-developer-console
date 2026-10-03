@@ -2,6 +2,7 @@ import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 
+jest.mock('@/components/PendingInvite', () => ({ PendingInvite: () => null }));
 jest.mock('@/actions/teams', () => ({ listMyTeams: jest.fn() }));
 jest.mock('@/utils/hardNavigate', () => ({ hardNavigate: jest.fn() }));
 jest.mock('@/hooks/useSignerRegistration', () => ({ useSignerRegistration: jest.fn() }));

@@ -26,6 +26,7 @@ import {
 import { hardNavigate } from '@/utils/hardNavigate';
 import { getFromSession, removeFromSession, saveToSession } from '@/utils/sessionStorage';
 import { getFromLocalStorage, saveToLocalStorage } from '@/utils/localStorage';
+import { PendingInvite } from '@/components/PendingInvite';
 
 const FLASH_KEY = 'teamFlash';
 const LAST_TEAM_KEY = 'lastActiveTeam';
@@ -209,7 +210,20 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
     ],
   );
 
-  return <TeamContext.Provider value={value}>{children}</TeamContext.Provider>;
+  return (
+    <TeamContext.Provider value={value}>
+      {children}
+      {!isLoading && !teamsUnavailable && (
+        <PendingInvite
+          onJoined={(team) => {
+            // The accepted team (always MEMBER) becomes active by its id.
+            flashAfterReload({ tone: 'success', message: `You joined ${team.name}` });
+            switchTeam(team.id, 'invite');
+          }}
+        />
+      )}
+    </TeamContext.Provider>
+  );
 };
 
 export const withTeams = <P extends object>(WrappedComponent: ComponentType<P>) => {
