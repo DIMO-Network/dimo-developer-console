@@ -5,7 +5,18 @@ import {
 } from '@/utils/localStorage';
 import { jwtDecode } from 'jwt-decode';
 
-const getKey = (clientId: string) => `devJwt_${clientId}_list_v1`;
+// Members keep developer JWTs per wallet, and use only those their own wallet
+// signed (signer_address). Owners keep the per-license list. TeamProvider sets
+// the signer while a member team is active.
+let memberSigner: string | null = null;
+export const setMemberDevJwtSigner = (signer: string | null) => {
+  memberSigner = signer ? signer.toLowerCase() : null;
+};
+
+const getKey = (clientId: string) =>
+  memberSigner
+    ? `devJwt_${clientId}_${memberSigner}_list_v1`
+    : `devJwt_${clientId}_list_v1`;
 
 export interface StoredJwt {
   token: string;
@@ -15,39 +26,35 @@ export interface StoredJwt {
 export const saveDevJwt = (clientId: string, token: string) => {
   const key = getKey(clientId);
   const existingTokens = getFromLocalStorage<StoredJwt[]>(key) || [];
-
-  // Add new token with creation timestamp
-  const newToken: StoredJwt = {
-    token,
-    createdAt: Date.now(),
-  };
-
+  const newToken: StoredJwt = { token, createdAt: Date.now() };
   return saveToLocalStorage(key, [...existingTokens, newToken]);
 };
 
 const getValidTokens = (clientId: string): StoredJwt[] => {
-  const key = getKey(clientId);
-  const tokens = getFromLocalStorage<StoredJwt[]>(key) || [];
-
+  const tokens = getFromLocalStorage<StoredJwt[]>(getKey(clientId)) || [];
   const now = Date.now();
-  const validTokens = tokens.filter((storedJwt) => {
-    try {
-      const decoded = jwtDecode(storedJwt.token);
-      const exp = decoded.exp ? decoded.exp * 1000 : null;
-      return exp ? now <= exp : true;
-    } catch {
-      return false;
-    }
-  });
-
-  return validTokens.sort((a, b) => b.createdAt - a.createdAt);
+  return tokens
+    .filter((storedJwt) => {
+      try {
+        const decoded = jwtDecode<{ exp?: number; signer_address?: string }>(
+          storedJwt.token,
+        );
+        const exp = decoded.exp ? decoded.exp * 1000 : null;
+        if (exp && now > exp) return false;
+        return memberSigner
+          ? decoded.signer_address?.toLowerCase() === memberSigner
+          : true;
+      } catch {
+        return false;
+      }
+    })
+    .sort((a, b) => b.createdAt - a.createdAt);
 };
 
 export const getDevJwt = (clientId: string) => {
   if (typeof window === 'undefined') {
     return null;
   }
-
   const validTokens = getValidTokens(clientId);
   return validTokens.length ? validTokens[0].token : null;
 };

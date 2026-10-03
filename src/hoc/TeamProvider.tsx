@@ -27,6 +27,7 @@ import { hardNavigate } from '@/utils/hardNavigate';
 import { getFromSession, removeFromSession, saveToSession } from '@/utils/sessionStorage';
 import { getFromLocalStorage, saveToLocalStorage } from '@/utils/localStorage';
 import { PendingInvite } from '@/components/PendingInvite';
+import { setMemberDevJwtSigner } from '@/utils/devJwt';
 
 const FLASH_KEY = 'teamFlash';
 const LAST_TEAM_KEY = 'lastActiveTeam';
@@ -69,6 +70,16 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
       return currentUser ? fallbackTeam(currentUser) : null;
     return teams.find((t) => t.id === activeId) ?? null;
   }, [teams, activeId, teamsUnavailable, isLoading, currentUser]);
+
+  // Before children render: they read stored developer JWTs during this render
+  // and in effects that run before the provider's own effects.
+  useMemo(
+    () =>
+      setMemberDevJwtSigner(
+        activeTeam?.role === 'MEMBER' ? (currentUser?.walletAddress ?? null) : null,
+      ),
+    [activeTeam?.role, currentUser?.walletAddress],
+  );
 
   useSignerRegistration(
     (activeTeam && !activeTeam.isPersonal ? activeTeam : teams.find((t) => !t.isPersonal))

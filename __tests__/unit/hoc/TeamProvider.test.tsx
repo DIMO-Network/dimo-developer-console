@@ -6,6 +6,11 @@ jest.mock('@/components/PendingInvite', () => ({ PendingInvite: () => null }));
 jest.mock('@/actions/teams', () => ({ listMyTeams: jest.fn() }));
 jest.mock('@/utils/hardNavigate', () => ({ hardNavigate: jest.fn() }));
 jest.mock('@/hooks/useSignerRegistration', () => ({ useSignerRegistration: jest.fn() }));
+jest.mock('@/utils/devJwt', () => ({
+  ...jest.requireActual('@/utils/devJwt'),
+  setMemberDevJwtSigner: jest.fn(),
+}));
+import { setMemberDevJwtSigner } from '@/utils/devJwt';
 const identifyUser = jest.fn();
 const trackEvent = jest.fn();
 jest.mock('@/hooks/useMixPanel', () => ({
@@ -256,5 +261,18 @@ describe('TeamProvider', () => {
     renderProvider();
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Gone'));
     expect(sessionStorage.getItem('teamFlash')).toBeNull();
+  });
+
+  it("reads developer JWTs from the member's wallet list while a member team is active", async () => {
+    document.cookie = 'active_team=team-acme; Path=/';
+    renderProvider();
+    await waitFor(() => expect(probe().active).toBe('team-acme'));
+    expect(setMemberDevJwtSigner).toHaveBeenLastCalledWith(USER.walletAddress);
+  });
+
+  it("keeps the per-license list for the user's own team", async () => {
+    renderProvider();
+    await waitFor(() => expect(probe().active).toBe('team-harness'));
+    expect(setMemberDevJwtSigner).toHaveBeenLastCalledWith(null);
   });
 });

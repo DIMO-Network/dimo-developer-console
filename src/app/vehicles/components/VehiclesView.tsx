@@ -8,7 +8,8 @@ import { VehicleDetailsTable } from '@/app/license/vehicles/[clientId]/component
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { Section, SectionHeader } from '@/components/Section';
 import { TextField } from '@/components/TextField';
-import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
+import { DevJwtPrompt } from '@/components/DataAccess';
+import { useLicenseDataAccess } from '@/hooks/useLicenseDataAccess';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useTeam } from '@/hooks/useTeam';
@@ -56,6 +57,7 @@ const Content = () => {
   const { isAuthenticatedAsDev, refetch: refetchJwts } = useGetDevJwts(
     selected?.clientId,
   );
+  const dataAccess = useLicenseDataAccess(selected);
 
   const select = (license: LocalDeveloperLicense) => {
     router.replace(`${pathname}?license=${license.clientId}`, { scroll: false });
@@ -117,10 +119,10 @@ const Content = () => {
               Enter a token ID or a full 0x address.
             </p>
           )}
-          {!isAuthenticatedAsDev && (
-            <GenerateDevJWTSection
-              clientId={selected.clientId}
-              redirectUri={selected.firstRedirectURI}
+          {(!isAuthenticatedAsDev || dataAccess.kind.startsWith('member-')) && (
+            <DevJwtPrompt
+              license={selected}
+              access={dataAccess}
               onSuccess={refetchJwts}
               message="Generate a developer JWT to see when each vehicle was last seen."
             />
