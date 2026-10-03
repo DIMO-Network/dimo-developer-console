@@ -353,9 +353,10 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || !isLicenseOwner) return;
     void handleOwnerSigner();
-  }, [currentUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, isLicenseOwner]);
 
   useEffect(() => {
     if (!isLicenseOwner) return;

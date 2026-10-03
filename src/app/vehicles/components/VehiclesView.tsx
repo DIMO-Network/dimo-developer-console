@@ -11,6 +11,7 @@ import { TextField } from '@/components/TextField';
 import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import { useTeam } from '@/hooks/useTeam';
 import { LocalDeveloperLicense } from '@/types/webhook';
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
@@ -36,6 +37,7 @@ const useLicenses = () => {
 };
 
 const Content = () => {
+  const { isMember } = useTeam();
   const { developerLicenses, loading } = useLicenses();
   const router = useRouter();
   const pathname = usePathname();
@@ -73,12 +75,18 @@ const Content = () => {
   if (!loading && developerLicenses.length === 0) {
     return (
       <Section>
-        <p className="text-body text-fg">
-          Create a developer license to see the vehicles shared with it.
-        </p>
-        <Link href="/licenses" className="text-body-sm text-ink underline">
-          Go to licenses
-        </Link>
+        {isMember ? (
+          <p className="text-body text-fg">This team has no developer licenses yet.</p>
+        ) : (
+          <>
+            <p className="text-body text-fg">
+              Create a developer license to see the vehicles shared with it.
+            </p>
+            <Link href="/licenses" className="text-body-sm text-ink underline">
+              Go to licenses
+            </Link>
+          </>
+        )}
       </Section>
     );
   }

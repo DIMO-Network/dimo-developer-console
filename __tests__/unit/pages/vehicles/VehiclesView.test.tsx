@@ -18,12 +18,14 @@ jest.mock('@/app/license/vehicles/[clientId]/components/VehicleDetailsTable', ()
 }));
 jest.mock('@/hooks/useGlobalAccount', () => ({ useGlobalAccount: jest.fn() }));
 jest.mock('@/hooks/useGetDevJwts', () => ({ useGetDevJwts: jest.fn() }));
+jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn(() => ({ isMember: false })) }));
 jest.mock('@/components/GenerateDevJWT', () => ({
   GenerateDevJWT: () => <button>Generate developer JWT</button>,
 }));
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import { useTeam } from '@/hooks/useTeam';
 import { LocalDeveloperLicense } from '@/types/webhook';
 import { VehiclesView } from '@/app/vehicles/components/VehiclesView';
 
@@ -170,5 +172,19 @@ describe('VehiclesView', () => {
     expect(
       screen.getByText('Create a developer license to see the vehicles shared with it.'),
     ).toBeInTheDocument();
+  });
+
+  it('never offers a member to create a license on an empty team', () => {
+    (useTeam as jest.Mock).mockReturnValue({ isMember: true });
+    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+      developerLicenses: [],
+      loading: false,
+    });
+    render(<VehiclesView />);
+    expect(
+      screen.getByText('This team has no developer licenses yet.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Go to licenses' })).toBeNull();
+    expect(screen.queryByText(/Create a developer license/)).toBeNull();
   });
 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, DocumentNode } from '@apollo/client';
-import { useGlobalAccount } from '@/hooks';
+import { useTeam } from '@/hooks/useTeam';
 import { gql } from '@/gql';
 
 // Query to check if user has any developer licenses
@@ -14,13 +14,13 @@ const CHECK_HAS_DEVELOPER_LICENSES = gql(`
 `);
 
 export const useHasDeveloperLicenses = () => {
-  const { currentUser } = useGlobalAccount();
-  const hasAddress = !!currentUser?.smartContractAddress;
+  const { ownerAddress } = useTeam();
+  const hasAddress = !!ownerAddress;
 
   const { data, loading, error } = useQuery(
     CHECK_HAS_DEVELOPER_LICENSES as DocumentNode,
     {
-      variables: { owner: currentUser?.smartContractAddress ?? '' },
+      variables: { owner: ownerAddress ?? '' },
       skip: !hasAddress,
     },
   );
