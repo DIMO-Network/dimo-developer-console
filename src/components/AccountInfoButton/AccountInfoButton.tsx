@@ -1,6 +1,5 @@
-import { isOwner } from '@/utils/user';
 import { UserAvatar } from '@/components/UserAvatar';
-import { useGlobalAccount, useUser } from '@/hooks';
+import { useUser } from '@/hooks';
 import { FC, useContext } from 'react';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { Button } from '@/components/Button';
@@ -13,13 +12,8 @@ export const AccountInfoButton: FC<IAccountInfoButtonProps> = ({
   variant = 'avatar',
 }) => {
   const { data: user } = useUser();
-  const { currentUser } = useGlobalAccount();
   const { setShowAccountInformation } = useContext(AccountInformationContext);
-  const handleOpenAccountInformationModal = () => {
-    if (isOwner(currentUser?.role ?? '')) {
-      setShowAccountInformation(true);
-    }
-  };
+  const handleOpenAccountInformationModal = () => setShowAccountInformation(true);
 
   if (variant === 'button') {
     return (

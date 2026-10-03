@@ -20,7 +20,6 @@ import { getKernelAccount, getPublicClient } from '@/services/zerodev';
 import { Abi } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
-import { TeamRoles } from '@/types/team';
 import { signOut } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
@@ -198,7 +197,6 @@ export const withGlobalAccounts = <P extends object>(
       identifyUser(smartContractAddress, {
         $email: email,
         $subOrganizationId: subOrganizationId,
-        $role: TeamRoles.OWNER,
       });
 
       rememberedUser = user;

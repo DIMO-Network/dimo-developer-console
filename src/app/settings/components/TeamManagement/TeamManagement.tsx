@@ -13,10 +13,9 @@ import {
   TeamRolesLabels,
 } from '@/types/team';
 import { deleteCollaborator } from '@/actions/team';
-import { isOwner } from '@/utils/user';
+import { useTeam } from '@/hooks/useTeam';
 import { LoadingModal, LoadingProps } from '@/components/LoadingModal';
 import { Table } from '@/components/Table';
-import { useGlobalAccount } from '@/hooks';
 
 interface IProps {
   teamCollaborators: ITeamCollaborator[];
@@ -26,7 +25,7 @@ interface IProps {
 export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) => {
   const [isOpened, setIsOpened] = useState<boolean>(false);
   const [loadingStatus, setLoadingStatus] = useState<LoadingProps>();
-  const { currentUser } = useGlobalAccount();
+  const { isOwner } = useTeam();
 
   const renderUserName = ({ ...teamCollaborator }: ITeamCollaborator) => {
     const { User: me, email = '' } = teamCollaborator ?? {};
@@ -53,7 +52,7 @@ export const TeamManagement: FC<IProps> = ({ teamCollaborators, refreshData }) =
     role: invitationRole,
   }: ITeamCollaborator) => {
     return (
-      isOwner(currentUser!.role) &&
+      isOwner &&
       invitationRole !== TeamRoles.OWNER && (
         <div
           className="flex flex-row items-center justify-end cursor-pointer text-muted hover:text-negative"
