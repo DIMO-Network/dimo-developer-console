@@ -24,6 +24,9 @@ jest.mock('@/utils/featureFlags', () => ({
 jest.mock('@/hooks/useSetLicenseSigners', () => ({
   useSetLicenseSigners: () => jest.fn(),
 }));
+jest.mock('@/hooks/useDimoAuth', () => ({
+  useDimoAuth: () => ({ getGlobalAccountDeveloperJwt: jest.fn() }),
+}));
 import { useTeam } from '@/hooks/useTeam';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamLicenses } from '@/hooks/useTeamLicenses';
@@ -229,5 +232,41 @@ describe('TeamSection', () => {
     render(<TeamSection />);
     expect(screen.queryByRole('status')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Grant' })).toBeNull();
+  });
+
+  it('offers no Revoke or Remove until the licenses load', () => {
+    members({
+      members: [
+        OWNER_ROW,
+        {
+          ...SAM,
+          memberKeys: [{ licenseTokenId: 42, signerAddress: SAM.signerAddress! }],
+        },
+      ],
+    });
+    (useTeamLicenses as jest.Mock).mockReturnValue({
+      licenses: [],
+      loading: true,
+      refetch: jest.fn(),
+    });
+    render(<TeamSection />);
+    expect(
+      screen.queryByRole('button', { name: 'Actions for sam@harness.dev' }),
+    ).toBeNull();
+  });
+
+  it('opens Remove for an accepted member', () => {
+    members({ members: [OWNER_ROW, { ...SAM, memberKeys: [] }] });
+    (useTeamLicenses as jest.Mock).mockReturnValue({
+      licenses: [],
+      loading: false,
+      refetch: jest.fn(),
+    });
+    render(<TeamSection />);
+    fireEvent.click(screen.getByRole('button', { name: 'Actions for sam@harness.dev' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Remove' }));
+    expect(
+      screen.getByText('Remove Sam Rivera from Harness Motors?', { selector: 'h2' }),
+    ).toBeInTheDocument();
   });
 });

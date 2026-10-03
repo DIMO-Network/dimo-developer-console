@@ -17,6 +17,8 @@ import { LeaveTeam } from './LeaveTeam';
 import { MembersTable, type MemberActionHandlers } from './MembersTable';
 import { GrantAccessModal } from './GrantAccessModal';
 import { PendingGrantBanner } from './PendingGrantBanner';
+import { RevokeAccessModal } from './RevokeAccessModal';
+import { RemoveMemberModal } from './RemoveMemberModal';
 import type { TeamMember } from '@/types/team';
 
 const TeamSectionComponent: FC = () => {
@@ -31,6 +33,8 @@ const TeamSectionComponent: FC = () => {
   const { trackEvent } = useMixPanel();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [grantFor, setGrantFor] = useState<TeamMember | null>(null);
+  const [revokeFor, setRevokeFor] = useState<TeamMember | null>(null);
+  const [removeFor, setRemoveFor] = useState<TeamMember | null>(null);
   const showDataAccess = isOwner && TEAM_DATA_ACCESS_ENABLED;
   // Grant, Revoke and Remove read on-chain state from the licenses: only once
   // they loaded cleanly (an empty list while loading would read as off-chain).
@@ -61,6 +65,7 @@ const TeamSectionComponent: FC = () => {
       }
     },
     ...(showDataAccess && licensesReady ? { grant: setGrantFor } : {}),
+    ...(licensesReady ? { revoke: setRevokeFor, remove: setRemoveFor } : {}),
   };
 
   // After any signer change: the table reads both.
@@ -143,6 +148,23 @@ const TeamSectionComponent: FC = () => {
           licenses={licenses}
           onClose={() => setGrantFor(null)}
           onGranted={afterSignerChange}
+        />
+      )}
+      {revokeFor && (
+        <RevokeAccessModal
+          member={revokeFor}
+          licenses={licenses}
+          onClose={() => setRevokeFor(null)}
+          onDone={afterSignerChange}
+        />
+      )}
+      {removeFor && activeTeam && (
+        <RemoveMemberModal
+          member={removeFor}
+          licenses={licenses}
+          teamName={activeTeam.name}
+          onClose={() => setRemoveFor(null)}
+          onDone={afterSignerChange}
         />
       )}
     </Section>

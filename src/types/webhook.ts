@@ -15,6 +15,10 @@ export interface Webhook {
   description: string;
   displayName?: string;
   failure_count: number;
+  // Contracts C3: the signer that created the webhook, or last changed its
+  // target, vehicles or condition. Checksummed; absent for older webhooks.
+  createdBySigner?: string;
+  updatedBySigner?: string;
 }
 
 export type WebhookEditableFields = Partial<
