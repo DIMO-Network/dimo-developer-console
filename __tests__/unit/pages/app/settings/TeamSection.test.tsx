@@ -21,6 +21,9 @@ jest.mock('@/utils/featureFlags', () => ({
     return mockFlags.dataAccess;
   },
 }));
+jest.mock('@/hooks/useSetLicenseSigners', () => ({
+  useSetLicenseSigners: () => jest.fn(),
+}));
 import { useTeam } from '@/hooks/useTeam';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { useTeamLicenses } from '@/hooks/useTeamLicenses';
@@ -168,5 +171,63 @@ describe('TeamSection', () => {
     expect(screen.queryByRole('button', { name: 'Invite member' })).toBeNull();
     expect(screen.queryByRole('button', { name: /^Actions for/ })).toBeNull();
     expect(screen.getByRole('button', { name: 'Leave team' })).toBeInTheDocument();
+  });
+
+  const SAM: TeamMember = {
+    ...OWNER_ROW,
+    id: 'm-sam',
+    userId: 'u-sam',
+    name: 'Sam Rivera',
+    email: 'sam@harness.dev',
+    role: 'MEMBER',
+    signerAddress: '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6',
+  };
+  const FLEET = {
+    tokenId: 42,
+    clientId: '0xaaa',
+    label: 'Harness Fleet',
+    redirectUri: 'https://x',
+    signers: [],
+  };
+
+  it('opens Grant from the banner for a member who linked a wallet', () => {
+    members({ members: [OWNER_ROW, SAM] });
+    (useTeamLicenses as jest.Mock).mockReturnValue({
+      licenses: [FLEET],
+      loading: false,
+      refetch: jest.fn(),
+    });
+    render(<TeamSection />);
+    fireEvent.click(screen.getByRole('button', { name: 'Grant' }));
+    // Modal titles render through Title (<h2 role="h2">): no accessible heading role.
+    expect(
+      screen.getByText('Grant Sam Rivera data access', { selector: 'h2' }),
+    ).toBeInTheDocument();
+  });
+
+  it('hides the banner while member data access is off (C5)', () => {
+    mockFlags.dataAccess = false;
+    members({ members: [OWNER_ROW, SAM] });
+    (useTeamLicenses as jest.Mock).mockReturnValue({
+      licenses: [FLEET],
+      loading: false,
+      refetch: jest.fn(),
+    });
+    render(<TeamSection />);
+    expect(screen.queryByRole('status')).toBeNull();
+    mockFlags.dataAccess = true;
+  });
+
+  it('offers no Grant while the licenses fail to load', () => {
+    members({ members: [OWNER_ROW, SAM] });
+    (useTeamLicenses as jest.Mock).mockReturnValue({
+      licenses: [],
+      loading: false,
+      error: new Error('Identity down'),
+      refetch: jest.fn(),
+    });
+    render(<TeamSection />);
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Grant' })).toBeNull();
   });
 });

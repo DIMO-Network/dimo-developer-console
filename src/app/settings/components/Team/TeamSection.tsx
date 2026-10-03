@@ -15,6 +15,9 @@ import { InviteMemberModal } from './InviteMemberModal';
 import { inviteSendError } from './inviteSendError';
 import { LeaveTeam } from './LeaveTeam';
 import { MembersTable, type MemberActionHandlers } from './MembersTable';
+import { GrantAccessModal } from './GrantAccessModal';
+import { PendingGrantBanner } from './PendingGrantBanner';
+import type { TeamMember } from '@/types/team';
 
 const TeamSectionComponent: FC = () => {
   const { activeTeam, isOwner, isLoading: teamLoading } = useTeam();
@@ -27,6 +30,7 @@ const TeamSectionComponent: FC = () => {
   } = useTeamLicenses();
   const { trackEvent } = useMixPanel();
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [grantFor, setGrantFor] = useState<TeamMember | null>(null);
   const showDataAccess = isOwner && TEAM_DATA_ACCESS_ENABLED;
   // Grant, Revoke and Remove read on-chain state from the licenses: only once
   // they loaded cleanly (an empty list while loading would read as off-chain).
@@ -56,6 +60,13 @@ const TeamSectionComponent: FC = () => {
         toast.error(result?.message ?? "We couldn't cancel the invite. Try again.");
       }
     },
+    ...(showDataAccess && licensesReady ? { grant: setGrantFor } : {}),
+  };
+
+  // After any signer change: the table reads both.
+  const afterSignerChange = () => {
+    void refetch();
+    void refetchLicenses();
   };
 
   let body: ReactNode;
@@ -97,6 +108,14 @@ const TeamSectionComponent: FC = () => {
       <SectionHeader title={isOwner ? 'Team' : (activeTeam?.name ?? 'Team')}>
         {isOwner && <Button onClick={() => setInviteOpen(true)}>Invite member</Button>}
       </SectionHeader>
+      {showDataAccess && !isLoading && !isError && (
+        <PendingGrantBanner
+          members={members}
+          licenses={licenses}
+          licensesLoading={!licensesReady}
+          onGrant={setGrantFor}
+        />
+      )}
       {body}
       {isOwner && licensesError && (
         <div className="flex flex-col items-start gap-2">
@@ -116,6 +135,14 @@ const TeamSectionComponent: FC = () => {
           onClose={() => setInviteOpen(false)}
           teamId={activeTeam.id}
           onInvited={upsertMember}
+        />
+      )}
+      {grantFor && (
+        <GrantAccessModal
+          member={grantFor}
+          licenses={licenses}
+          onClose={() => setGrantFor(null)}
+          onGranted={afterSignerChange}
         />
       )}
     </Section>
