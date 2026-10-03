@@ -29,6 +29,9 @@ export type Subject = {
   // subject, so a device is the vehicle DID narrowed to its producer.
   fetchDid: string;
   fetchFilter?: { producer: string };
+  // Events Fetch files under the subject's own DID (subject = producer), such
+  // as an aftermarket device's status: Ruptela r/v0/dev, AutoPi's device copy.
+  ownFetchDid?: string;
   tokenId?: number;
   telemetrySource?: string;
   capabilities: SubjectCapability[];
@@ -77,6 +80,7 @@ export const buildVehicleGraph = (v: VehicleDetail, chainId: number): SubjectGra
       asset: v.tokenDID,
       fetchDid: v.tokenDID,
       fetchFilter: { producer: ad.tokenDID },
+      ownFetchDid: ad.tokenDID,
       tokenId: v.tokenId,
       capabilities: ['summary', 'signals', 'raw'],
       parent: v.tokenDID,

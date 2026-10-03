@@ -30,6 +30,7 @@ import { absoluteTime } from '@/utils/freshness';
 import { safeHttpUrl } from '@/utils/safeHttpUrl';
 
 type Mode = 'events' | 'latest' | 'index';
+type Scope = 'vehicle' | 'device';
 type Header = {
   id: string;
   source: string;
@@ -54,6 +55,47 @@ const MODES: { id: Mode; label: string }[] = [
   { id: 'index', label: 'Index only' },
 ];
 
+const SCOPES: { id: Scope; label: string }[] = [
+  { id: 'vehicle', label: 'Vehicle data' },
+  { id: 'device', label: 'Device status' },
+];
+
+function Pills<T extends string>({
+  label,
+  options,
+  value,
+  onPick,
+}: {
+  label: string;
+  options: { id: T; label: string }[];
+  value: T;
+  onPick: (id: T) => void;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label={label}
+      className="flex w-fit gap-0.5 rounded-full bg-control p-[3px]"
+    >
+      {options.map((o) => (
+        <button
+          key={o.id}
+          type="button"
+          role="radio"
+          aria-checked={value === o.id}
+          onClick={() => onPick(o.id)}
+          className={classNames(
+            'rounded-full px-3.5 py-1.5 text-[13px] font-medium leading-[18px] transition-colors',
+            value === o.id ? 'bg-bright text-ink shadow-sm' : 'text-muted hover:text-fg',
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 const build = (
   mode: Mode,
   did: string,
@@ -68,6 +110,7 @@ const build = (
 
 type Spec = {
   mode: Mode;
+  scope: Scope;
   filter: CloudEventFilter;
   limit: number;
   withUrl: boolean;
@@ -102,9 +145,10 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     withUrl: false,
   });
   const [more, setMore] = useState(false);
-  // The spec only changes on Run query / mode change, so typing never refetches.
+  // The spec only changes on Run query or a mode/scope change, so typing never refetches.
   const [spec, setSpec] = useState<Spec>(() => ({
     mode: 'events',
+    scope: 'vehicle',
     filter: { after: range.from, before: range.to },
     limit: 25,
     withUrl: false,
@@ -117,7 +161,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   // A device's producer comes from the subject and always wins over the form.
   const lockedProducer = subject.fetchFilter?.producer;
 
-  const run = (nextMode: Mode = mode) => {
+  const run = (nextMode: Mode = mode, nextScope: Scope = spec.scope) => {
     let { from, to } = range;
     if (range.preset !== 'custom') {
       const r = resolveRange(range.preset);
@@ -129,6 +173,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     setExpanded(undefined);
     setSpec({
       mode: nextMode,
+      scope: nextScope,
       filter: {
         type: form.type,
         dataversion: form.dataversion,
@@ -143,22 +188,28 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     });
   };
 
+  // Device status is filed under the device's own DID (subject = producer);
+  // everything else a device sends is the vehicle DID narrowed to it.
+  const own = spec.scope === 'device' ? subject.ownFetchDid : undefined;
+  const fetchDid = own ?? subject.fetchDid;
+  const fetchFilter = own ? undefined : subject.fetchFilter;
+
   const requests = useMemo(
     () =>
       [null, ...olderBefores].map((before) =>
         build(
           spec.mode,
-          subject.fetchDid,
+          fetchDid,
           {
             ...spec.filter,
             ...(before ? { before } : {}),
-            ...subject.fetchFilter,
+            ...fetchFilter,
           },
           spec.limit,
           spec.withUrl,
         ),
       ),
-    [spec, olderBefores, subject.fetchDid, subject.fetchFilter],
+    [spec, olderBefores, fetchDid, fetchFilter],
   );
   const pages = useQueries({
     queries: requests.map((req) => ({
@@ -180,7 +231,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     api: 'fetch',
     asset: subject.asset,
     clientId: ctx.clientId,
-    request: availableCloudEventTypesQuery(subject.fetchDid, subject.fetchFilter),
+    request: availableCloudEventTypesQuery(fetchDid, fetchFilter),
   });
   const knownTypes = types.data?.data?.availableCloudEventTypes ?? [];
 
@@ -221,31 +272,24 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-3.5 rounded-card bg-card p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div
-            role="radiogroup"
-            aria-label="Query"
-            className="flex w-fit gap-0.5 rounded-full bg-control p-[3px]"
-          >
-            {MODES.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                role="radio"
-                aria-checked={mode === m.id}
-                onClick={() => {
-                  setMode(m.id);
-                  run(m.id);
-                }}
-                className={classNames(
-                  'rounded-full px-3.5 py-1.5 text-[13px] font-medium leading-[18px] transition-colors',
-                  mode === m.id
-                    ? 'bg-bright text-ink shadow-sm'
-                    : 'text-muted hover:text-fg',
-                )}
-              >
-                {m.label}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-2">
+            {subject.ownFetchDid && (
+              <Pills
+                label="Scope"
+                options={SCOPES}
+                value={spec.scope}
+                onPick={(id) => run(mode, id)}
+              />
+            )}
+            <Pills
+              label="Query"
+              options={MODES}
+              value={mode}
+              onPick={(id) => {
+                setMode(id);
+                run(id);
+              }}
+            />
           </div>
           <TimeRangePicker value={range} onChange={setRange} />
         </div>
@@ -285,7 +329,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               onChange={(e) => setForm({ ...form, limit: Number(e.target.value) })}
             />
           </label>
-          {lockedProducer && (
+          {lockedProducer && !own && (
             // The device's own filter: shown, never editable.
             <span className="flex h-10 items-center">
               <span
@@ -345,7 +389,14 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       {subject.kind === 'vehicle' && (
         <p className="px-1 text-body-sm text-muted">
           Cloud events for the vehicle DID from every device. Pick a device on the left to
-          see only that device.
+          see only that device, or its Device status for what it files under its own DID,
+          such as firmware.
+        </p>
+      )}
+      {own && (
+        <p className="px-1 text-body-sm text-muted">
+          Status events filed under the device itself rather than the vehicle, such as its
+          firmware version.
         </p>
       )}
 
@@ -360,7 +411,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           <QueryActions
             request={request}
             result={base.data?.data}
-            filename={`${subject.label.toLowerCase()}-cloud-events.json`}
+            filename={`${subject.label.toLowerCase()}-${own ? 'device-status' : 'cloud-events'}.json`}
           />
         </div>
         <div className="grid grid-cols-[116px_minmax(0,1fr)_32px] md:grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px] gap-4 border-t border-outline px-5 py-2 text-label text-muted">

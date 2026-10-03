@@ -7,6 +7,8 @@ jest.mock('@/services/subjects/client', () => ({
   postSubjectQuery: jest.fn(),
 }));
 import { postSubjectQuery } from '@/services/subjects/client';
+jest.mock('file-saver', () => ({ saveAs: jest.fn() }));
+import { saveAs } from 'file-saver';
 import { RawDataTab } from '@/app/vehicles/[tokenId]/components/tabs/RawDataTab';
 import { buildVehicleGraph, type VehicleDetail } from '@/services/subjects/graph';
 import type { SubjectContext } from '@/app/vehicles/[tokenId]/components/SubjectView';
@@ -113,6 +115,7 @@ describe('RawDataTab', () => {
   beforeEach(() => {
     olderPage = [];
     (postSubjectQuery as jest.Mock).mockReset().mockImplementation(answer);
+    (saveAs as unknown as jest.Mock).mockReset();
   });
 
   it('queries a device through the vehicle DID filtered by producer and resolves producers', async () => {
@@ -171,6 +174,88 @@ describe('RawDataTab', () => {
       before: '2026-09-29T20:46:12.001Z',
       producer: graph.devices[0].did,
     });
+  });
+
+  it('switches a device to its own status events, filed under the device DID', async () => {
+    const device = graph.devices[0];
+    renderTab(device);
+    await screen.findByText('3 cloud events');
+    expect(screen.getByRole('radio', { name: 'Vehicle data' })).toBeChecked();
+    fireEvent.change(screen.getByLabelText('Data version'), {
+      target: { value: 'r/v0/dev' },
+    });
+    fireEvent.click(screen.getByRole('radio', { name: 'Device status' }));
+    await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+    expect(screen.getByRole('radio', { name: 'Device status' })).toBeChecked();
+    // subject = producer = device: the device DID, no producer filter, still
+    // authorised by the vehicle's token.
+    const [, input] = (postSubjectQuery as jest.Mock).mock.calls
+      .filter((c) => opName(c[1].request.query) === 'CloudEvents')
+      .at(-1);
+    expect(input.asset).toBe(graph.vehicle.did);
+    expect(input.request.variables.did).toBe(device.did);
+    expect(input.request.variables.filter.producer).toBeUndefined();
+    expect(input.request.variables.filter.dataversion).toBe('r/v0/dev');
+    await waitFor(() =>
+      expect(calls('AvailableCloudEventTypes').at(-1).variables).toEqual({
+        did: device.did,
+        filter: null,
+      }),
+    );
+    expect(screen.queryByText(/^Producer: /)).not.toBeInTheDocument();
+    expect(screen.getByText(/filed under the device itself/)).toBeInTheDocument();
+  });
+
+  it('pages older device status on the device DID', async () => {
+    olderPage = [ev('2026-09-29T20:45:42Z', 'dimo.status', 'older')];
+    renderTab(graph.devices[0]);
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('radio', { name: 'Device status' }));
+    await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('button', { name: 'Load older' }));
+    expect(await screen.findByText('4 cloud events')).toBeInTheDocument();
+    const older = calls('CloudEvents').at(-1).variables;
+    expect(older.did).toBe(graph.devices[0].did);
+    expect(older.filter.before).toBe('2026-09-29T20:46:12.001Z');
+    expect(older.filter.producer).toBeUndefined();
+  });
+
+  it('offers device status only where the subject files its own events', async () => {
+    const { rerenderWith } = renderTab(graph.vehicle);
+    await screen.findByText('3 cloud events');
+    expect(
+      screen.queryByRole('radio', { name: 'Device status' }),
+    ).not.toBeInTheDocument();
+    rerenderWith(graph.account);
+    expect(
+      screen.queryByRole('radio', { name: 'Device status' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('never applies a leftover device scope to a subject without its own DID', async () => {
+    const device = graph.devices[0];
+    const { rerenderWith } = renderTab(device);
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('radio', { name: 'Device status' }));
+    await screen.findByText(/filed under the device itself/);
+    rerenderWith({ ...device, ownFetchDid: undefined });
+    expect(screen.queryByText(/filed under the device itself/)).not.toBeInTheDocument();
+    expect(screen.getByText('Producer: AutoPi')).toBeInTheDocument();
+  });
+
+  it('names a device status download apart from the vehicle data one', async () => {
+    renderTab(graph.devices[0]);
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('button', { name: 'Download JSON' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Device status' }));
+    await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('button', { name: 'Download JSON' }));
+    expect((saveAs as unknown as jest.Mock).mock.calls.map((c) => c[1])).toEqual([
+      'autopi-cloud-events.json',
+      'autopi-device-status.json',
+    ]);
   });
 
   it('expands a row to its JSON, including string and null data', async () => {
@@ -322,6 +407,8 @@ describe('RawDataTab', () => {
   it('shows the vehicle hint only on the vehicle', async () => {
     const { rerenderWith } = renderTab(graph.vehicle);
     expect(screen.getByText(/from every device/)).toBeInTheDocument();
+    // Device status never reaches the vehicle DID, so the hint points to it.
+    expect(screen.getByText(/Device status/)).toBeInTheDocument();
     rerenderWith(graph.devices[0]);
     expect(screen.queryByText(/from every device/)).not.toBeInTheDocument();
     await screen.findByText('3 cloud events');
