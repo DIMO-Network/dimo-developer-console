@@ -1,5 +1,5 @@
 import { ICompany } from './company';
-import { ITeam, TeamRoles } from './team';
+import { ITeam, type TeamRole } from './team';
 
 export interface IUser {
   id?: string;
@@ -8,7 +8,7 @@ export interface IUser {
   address?: string;
   auth: string;
   auth_login: string;
-  role?: TeamRoles;
+  role?: TeamRole;
   refresh_token?: string;
   refresh_token_expiration?: Date;
   team?: ITeam;
