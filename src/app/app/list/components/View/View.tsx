@@ -6,6 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import './View.css';
 import { BubbleLoader } from '@/components/BubbleLoader';
+import { useTeam } from '@/hooks/useTeam';
+import { TEAM_DATA_ACCESS_ENABLED } from '@/utils/featureFlags';
 import { FOCUS_QUERY_PARAM, saveFocus } from '@/utils/focus';
 import {
   DeveloperBoardIcon,
@@ -47,8 +49,18 @@ const shortcuts = [
   },
 ];
 
+// Members don't manage connections or webhooks (owner-only), and read
+// Vehicles only while team data access is enabled (contracts C5).
+export const visibleShortcuts = (isMember: boolean, dataAccessEnabled: boolean) =>
+  shortcuts.filter((shortcut) => {
+    if (!isMember) return true;
+    if (shortcut.href === '/vehicles') return dataAccessEnabled;
+    return shortcut.href !== '/connections' && shortcut.href !== '/webhooks';
+  });
+
 export const View: FC = () => {
   const { data: user, isLoading: loadingUser } = useUser();
+  const { isMember } = useTeam();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -84,17 +96,19 @@ export const View: FC = () => {
         </div>
 
         <div className="shortcuts-grid">
-          {shortcuts.map(({ label, description, icon: Icon, href }) => (
-            <Link key={href} href={href} className="shortcut-card">
-              <div className="shortcut-card__icon">
-                <Icon className="h-5 w-5" />
-              </div>
-              <div className="shortcut-card__body">
-                <p className="shortcut-card__title">{label}</p>
-                <p className="shortcut-card__desc">{description}</p>
-              </div>
-            </Link>
-          ))}
+          {visibleShortcuts(isMember, TEAM_DATA_ACCESS_ENABLED).map(
+            ({ label, description, icon: Icon, href }) => (
+              <Link key={href} href={href} className="shortcut-card">
+                <div className="shortcut-card__icon">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="shortcut-card__body">
+                  <p className="shortcut-card__title">{label}</p>
+                  <p className="shortcut-card__desc">{description}</p>
+                </div>
+              </Link>
+            ),
+          )}
         </div>
       </div>
     </div>

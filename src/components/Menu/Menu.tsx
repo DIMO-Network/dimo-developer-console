@@ -22,6 +22,9 @@ import { cn } from '@/lib/utils';
 
 import './Menu.css';
 import { clearConsoleBrowserState } from '@/utils/consoleSession';
+import { TeamSwitcher } from '@/components/TeamSwitcher';
+import { useTeam } from '@/hooks/useTeam';
+import { TEAM_DATA_ACCESS_ENABLED } from '@/utils/featureFlags';
 
 export const Menu: FC = withLoadingStatus(() => {
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
@@ -64,7 +67,11 @@ export const Menu: FC = withLoadingStatus(() => {
     disabled: false,
   };
 
-  const sections = getNavSections(licensesLoading || hasDeveloperLicenses);
+  const { isMember } = useTeam();
+  const sections = getNavSections(licensesLoading || hasDeveloperLicenses, {
+    isMember,
+    dataAccessEnabled: TEAM_DATA_ACCESS_ENABLED,
+  });
 
   return (
     <div className={cn('main-menu', isSidebarCollapsed && 'collapsed')}>
@@ -94,6 +101,7 @@ export const Menu: FC = withLoadingStatus(() => {
           </button>
         )}
       </div>
+      <TeamSwitcher collapsed={isSidebarCollapsed} />
 
       {/* Grouped nav sections */}
       <nav className="flex-1 flex flex-col gap-4 overflow-y-auto">
