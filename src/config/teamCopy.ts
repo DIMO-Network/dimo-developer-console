@@ -24,3 +24,8 @@ export const signerLocked = (ownerEmail: string) =>
 
 export const leaveConfirm = (teamName: string, ownerEmail: string) =>
   `Leave ${teamName}? ${ownerEmail} will be asked to revoke your data access.`;
+
+// 409 SIGNER_IN_USE on PUT /api/me/signer: the wallet is another user's signer
+// or an API key (C8).
+export const SIGNER_IN_USE_MESSAGE =
+  "This wallet is already recorded as someone else's key, so it can't be used for data access. Contact DIMO support.";
