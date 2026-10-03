@@ -134,7 +134,6 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   ctx,
 }) => {
   const [mode, setMode] = useState<Mode>('events');
-  const [scope, setScope] = useState<Scope>('vehicle');
   const [range, setRange] = useState<TimeRange>({ preset: '7d', ...resolveRange('7d') });
   const [form, setForm] = useState({
     type: '',
@@ -162,7 +161,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   // A device's producer comes from the subject and always wins over the form.
   const lockedProducer = subject.fetchFilter?.producer;
 
-  const run = (nextMode: Mode = mode, nextScope: Scope = scope) => {
+  const run = (nextMode: Mode = mode, nextScope: Scope = spec.scope) => {
     let { from, to } = range;
     if (range.preset !== 'custom') {
       const r = resolveRange(range.preset);
@@ -191,8 +190,8 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
 
   // Device status is filed under the device's own DID (subject = producer);
   // everything else a device sends is the vehicle DID narrowed to it.
-  const own = spec.scope === 'device' && subject.ownFetchDid;
-  const fetchDid = own || subject.fetchDid;
+  const own = spec.scope === 'device' ? subject.ownFetchDid : undefined;
+  const fetchDid = own ?? subject.fetchDid;
   const fetchFilter = own ? undefined : subject.fetchFilter;
 
   const requests = useMemo(
@@ -278,11 +277,8 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               <Pills
                 label="Scope"
                 options={SCOPES}
-                value={scope}
-                onPick={(id) => {
-                  setScope(id);
-                  run(mode, id);
-                }}
+                value={spec.scope}
+                onPick={(id) => run(mode, id)}
               />
             )}
             <Pills
@@ -333,7 +329,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               onChange={(e) => setForm({ ...form, limit: Number(e.target.value) })}
             />
           </label>
-          {lockedProducer && scope === 'vehicle' && (
+          {lockedProducer && !own && (
             // The device's own filter: shown, never editable.
             <span className="flex h-10 items-center">
               <span
@@ -393,10 +389,11 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       {subject.kind === 'vehicle' && (
         <p className="px-1 text-body-sm text-muted">
           Cloud events for the vehicle DID from every device. Pick a device on the left to
-          see only that device.
+          see only that device, or its Device status for what it files under its own DID,
+          such as firmware.
         </p>
       )}
-      {scope === 'device' && (
+      {own && (
         <p className="px-1 text-body-sm text-muted">
           Status events filed under the device itself rather than the vehicle, such as its
           firmware version.
@@ -414,7 +411,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           <QueryActions
             request={request}
             result={base.data?.data}
-            filename={`${subject.label.toLowerCase()}-cloud-events.json`}
+            filename={`${subject.label.toLowerCase()}-${own ? 'device-status' : 'cloud-events'}.json`}
           />
         </div>
         <div className="grid grid-cols-[116px_minmax(0,1fr)_32px] md:grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px] gap-4 border-t border-outline px-5 py-2 text-label text-muted">

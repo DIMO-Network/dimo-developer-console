@@ -7,6 +7,8 @@ jest.mock('@/services/subjects/client', () => ({
   postSubjectQuery: jest.fn(),
 }));
 import { postSubjectQuery } from '@/services/subjects/client';
+jest.mock('file-saver', () => ({ saveAs: jest.fn() }));
+import { saveAs } from 'file-saver';
 import { RawDataTab } from '@/app/vehicles/[tokenId]/components/tabs/RawDataTab';
 import { buildVehicleGraph, type VehicleDetail } from '@/services/subjects/graph';
 import type { SubjectContext } from '@/app/vehicles/[tokenId]/components/SubjectView';
@@ -113,6 +115,7 @@ describe('RawDataTab', () => {
   beforeEach(() => {
     olderPage = [];
     (postSubjectQuery as jest.Mock).mockReset().mockImplementation(answer);
+    (saveAs as unknown as jest.Mock).mockReset();
   });
 
   it('queries a device through the vehicle DID filtered by producer and resolves producers', async () => {
@@ -228,6 +231,31 @@ describe('RawDataTab', () => {
     expect(
       screen.queryByRole('radio', { name: 'Device status' }),
     ).not.toBeInTheDocument();
+  });
+
+  it('never applies a leftover device scope to a subject without its own DID', async () => {
+    const device = graph.devices[0];
+    const { rerenderWith } = renderTab(device);
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('radio', { name: 'Device status' }));
+    await screen.findByText(/filed under the device itself/);
+    rerenderWith({ ...device, ownFetchDid: undefined });
+    expect(screen.queryByText(/filed under the device itself/)).not.toBeInTheDocument();
+    expect(screen.getByText('Producer: AutoPi')).toBeInTheDocument();
+  });
+
+  it('names a device status download apart from the vehicle data one', async () => {
+    renderTab(graph.devices[0]);
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('button', { name: 'Download JSON' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Device status' }));
+    await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('button', { name: 'Download JSON' }));
+    expect((saveAs as unknown as jest.Mock).mock.calls.map((c) => c[1])).toEqual([
+      'autopi-cloud-events.json',
+      'autopi-device-status.json',
+    ]);
   });
 
   it('expands a row to its JSON, including string and null data', async () => {
@@ -379,6 +407,8 @@ describe('RawDataTab', () => {
   it('shows the vehicle hint only on the vehicle', async () => {
     const { rerenderWith } = renderTab(graph.vehicle);
     expect(screen.getByText(/from every device/)).toBeInTheDocument();
+    // Device status never reaches the vehicle DID, so the hint points to it.
+    expect(screen.getByText(/Device status/)).toBeInTheDocument();
     rerenderWith(graph.devices[0]);
     expect(screen.queryByText(/from every device/)).not.toBeInTheDocument();
     await screen.findByText('3 cloud events');
