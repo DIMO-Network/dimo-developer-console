@@ -174,6 +174,12 @@ export const middleware = async (request: NextRequest, event: NextFetchEvent) =>
   try {
     const rawToken = await getCookie(cookieName);
     token = rawToken ? await verifyToken(rawToken) : null;
+    // The data proxy authorizes every request itself (owners through Identity),
+    // so it must not depend on console-api's /api/me answering. The session JWT
+    // was verified just above.
+    if (token && request.nextUrl.pathname.startsWith(`${API_PATH}/data/`)) {
+      return NextResponse.next();
+    }
     if (rawToken && token) {
       return await validatePrivateSession(request, rawToken);
     }

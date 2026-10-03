@@ -6,8 +6,10 @@ import { jwtDecode } from 'jwt-decode';
 import configuration from '@/config';
 import { parseErc721Did, parseEthrDid } from '@/services/subjects/did';
 import { decodeSacdPermissions, PERMISSION_NAMES } from '@/utils/sacdPermissions';
+import { NO_LONGER_HAS_ACCESS } from '@/config/teamCopy';
+import { BoundedCache } from '@/utils/boundedCache';
 
-export type SubjectJwtCode = 'DEV_JWT_INVALID' | 'NOT_SHARED' | 'UPSTREAM';
+export type SubjectJwtCode = 'DEV_JWT_INVALID' | 'NOT_SHARED' | 'NO_ACCESS' | 'UPSTREAM';
 
 export class SubjectJwtError extends Error {
   constructor(
@@ -20,8 +22,10 @@ export class SubjectJwtError extends Error {
   }
 }
 
-type Cached = { token: string; expiresAt: number };
-const cache = new Map<string, Cached>();
+export const SUBJECT_JWT_CACHE_MAX = 1000;
+// A token per (developer JWT, asset), kept until it expires; bounded so a long
+// running server doesn't grow with every asset ever read.
+const cache = new BoundedCache<string>(SUBJECT_JWT_CACHE_MAX);
 // Exchanges in flight, so concurrent requests for one key share a single
 // exchange. Removed when it settles: a failure is never cached.
 const pending = new Map<string, Promise<string>>();
@@ -77,6 +81,11 @@ const decodeDevJwt = (devJwt: string): { clientId: string } => {
   return { clientId: payload.ethereum_address };
 };
 
+// Contracts C9: only the privileges Vehicles reads — non-location history,
+// current and approximate location, location history (trips) and raw events.
+// Never ExecuteCommands, VIN credentials or live data.
+export const PROXY_PRIVILEGE_IDS = [1, 3, 4, 7, 8];
+
 const vehiclePermissions = async (
   tokenId: number,
   clientId: string,
@@ -100,6 +109,7 @@ const vehiclePermissions = async (
   const hex = body.data?.vehicle?.sacd?.permissions;
   const names = hex
     ? decodeSacdPermissions(hex)
+        .filter((id) => PROXY_PRIVILEGE_IDS.includes(id))
         .map((id) => PERMISSION_NAMES[id])
         .filter((n): n is string => !!n)
     : [];
@@ -124,8 +134,9 @@ const permissionsFor = async (asset: string, clientId: string): Promise<string[]
 export const getSubjectJwt = async (devJwt: string, asset: string): Promise<string> => {
   const { clientId } = decodeDevJwt(devJwt);
   const key = `${createHash('sha256').update(devJwt).digest('hex')}:${asset}`;
-  const hit = cache.get(key);
-  if (hit && hit.expiresAt > Date.now() + EXPIRY_SKEW_MS) return hit.token;
+  // An entry within EXPIRY_SKEW_MS of expiring counts as expired.
+  const hit = cache.get(key, Date.now() + EXPIRY_SKEW_MS);
+  if (hit) return hit;
 
   const inFlight = pending.get(key);
   if (inFlight) return inFlight;
@@ -157,6 +168,11 @@ const exchangeFor = async (
     );
   }
   if (res.status === 403) {
+    const reason = await res.text();
+    // Token exchange refuses a disabled signer with this exact message (C2).
+    if (reason.includes('signer no longer authorized for this license')) {
+      throw new SubjectJwtError(403, 'NO_ACCESS', NO_LONGER_HAS_ACCESS);
+    }
     throw new SubjectJwtError(
       403,
       'NOT_SHARED',
@@ -169,6 +185,6 @@ const exchangeFor = async (
   const { token } = (await res.json()) as { token?: string };
   if (!token)
     throw new SubjectJwtError(502, 'UPSTREAM', 'Token exchange returned no token');
-  cache.set(key, { token, expiresAt: expiryOf(token) });
+  cache.set(key, token, expiryOf(token));
   return token;
 };
