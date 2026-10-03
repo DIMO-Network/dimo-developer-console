@@ -7,7 +7,7 @@ import { generateKeyPair, exportJWK, SignJWT, decodeJwt } from 'jose';
 import { generateP256KeyPair, hpkeEncrypt } from '@turnkey/crypto';
 import { uint8ArrayFromHexString } from '@turnkey/encoding';
 import bs58check from 'bs58check';
-import { USER_EMAIL, LICENSE } from './fixtures.mjs';
+import { USER_EMAIL, LICENSE, WALLET_CHECKSUM } from './fixtures.mjs';
 
 const FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), '.keys.json');
 export const ISSUER = 'http://localhost:3001';
@@ -40,19 +40,26 @@ async function generate() {
   // Only ever jwtDecode-d by the app, so it is unsigned.
   const exp = Math.floor(Date.now() / 1000) + 30 * 86400;
   const devJwt = `${b64url({ alg: 'none', typ: 'JWT' })}.${b64url({ aud: LICENSE.clientId, exp })}.`;
+  // A member's developer JWT, signed by their wallet: it carries signer_address (C1).
+  const memberDevJwt = `${b64url({ alg: 'none', typ: 'JWT' })}.${b64url({ aud: LICENSE.clientId, ethereum_address: LICENSE.clientId, signer_address: WALLET_CHECKSUM, exp })}.`;
   return {
     publicJwk,
     sessionJwt,
     embeddedPrivateKey: embedded.privateKey,
     credentialBundle,
     devJwt,
+    memberDevJwt,
   };
 }
 
 export async function loadKeys() {
   try {
     const keys = JSON.parse(await fs.readFile(FILE, 'utf8'));
-    if (decodeJwt(keys.sessionJwt).exp * 1000 > Date.now() + 86400_000) return keys;
+    if (
+      keys.memberDevJwt &&
+      decodeJwt(keys.sessionJwt).exp * 1000 > Date.now() + 86400_000
+    )
+      return keys;
   } catch {
     // missing or unreadable: regenerate
   }

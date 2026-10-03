@@ -5,7 +5,21 @@ import { DATA_API, DATA_ERRORS } from './fixtures.mjs';
 // gets the variables. notShared: every call answers 403 like the proxy does.
 // dataErrors: operation names answered with their DATA_ERRORS body (HTTP 200,
 // data: null, errors), the way gqlgen refuses a privilege.
-export async function dataApiHandler(route, { notShared = false, dataErrors = [] } = {}) {
+export async function dataApiHandler(
+  route,
+  { notShared = false, dataErrors = [], noAccess = false } = {},
+) {
+  if (noAccess) {
+    // The console proxy refusing a member whose wallet Identity still lists.
+    return route.fulfill({
+      status: 403,
+      json: {
+        error: "You don't have data access to this license.",
+        code: 'NO_ACCESS',
+        memberOfTeam: true,
+      },
+    });
+  }
   if (notShared) {
     return route.fulfill({
       status: 403,
