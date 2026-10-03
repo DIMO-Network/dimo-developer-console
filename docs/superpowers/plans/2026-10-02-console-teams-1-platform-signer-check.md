@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Disabling a developer-license signer cuts off every token that signer minted within 60 seconds, on token exchange, the webhooks API, tesla-oracle and credit-tracker, so a removed console team member loses all access within about 10 minutes (the vehicle JWT lifetime).
+**Goal:** Disabling a developer-license signer cuts off every token that signer minted within 60 seconds, on token exchange, the webhooks API and tesla-oracle, so a removed console team member loses all access within about 10 minutes (the vehicle JWT lifetime).
 
 **Architecture:**
 
@@ -11,7 +11,7 @@
   - Its exchange endpoint checks every token by `ethereum_address`, whatever the audience.
   - It serves the same check over gRPC `SignerCheck`.
   - A shared package `pkg/signercheck` holds the mode setting, the `signer_check_total` metric, a Fiber middleware and a gRPC client with a 5 s deadline.
-- **vehicle-triggers-api, tesla-oracle and credit-tracker** use that package against `SignerCheck`. vehicle-triggers-api also records which signer created or last changed each webhook.
+- **vehicle-triggers-api and tesla-oracle** use that package against `SignerCheck`. vehicle-triggers-api also records which signer created or last changed each webhook.
 
 **Tech Stack:**
 
@@ -25,6 +25,24 @@
 
 **Contracts:** `docs/superpowers/plans/2026-10-02-console-teams.md` — Rollout step 2 and contracts C1, C2, C3 and C10 are binding on this plan.
 
+## Status (2026-10-02)
+
+| Task | State |
+|---|---|
+| 1 | `v2.30.100` tagged at dex `master` c13c657f; image on Docker Hub. **Pinning the four values files (Steps 2–3) is the user's step**: the auto-mode classifier blocks Claude from editing `cluster-helm-charts` values. |
+| 2–4 | dex PR DIMO-Network/dex#332 open. Merge only after the Task 1 pin; then tag `v2.30.101` and pin dev. |
+| 5–9 | token-exchange-api PR DIMO-Network/token-exchange-api#120 open. |
+| 10–12 | vehicle-triggers-api PR DIMO-Network/vehicle-triggers-api#132 open. |
+| 13 | tesla-oracle PR DIMO-Network/tesla-oracle#169 open. |
+| 14 | **Skipped** (credit-tracker isn't running). Tasks 15–17 leave it out. |
+| 15–17 | Not started. |
+
+Changes since the plan was written:
+
+- **`SIGNER_CLAIM_REQUIRED_AFTER` is dropped** (code and plan). Tokens without `signer_address` are never checked and never looked up, so DIMO Mobile users' token exchanges never touch Identity. Code blocks in Tasks 5–7 still show the cutoff as first written; the PRs are authoritative.
+- vehicle-triggers-api and tesla-oracle pin token-exchange-api to #120's branch commit; re-point them to token-exchange-api `main` after #120 merges, before merging them.
+- The progress ledger, with every ruling and deferred minor, is `.superpowers/sdd/2026-10-02-console-teams-1-platform-signer-check/progress.md` in this repo (git-ignored).
+
 ## Global Constraints
 
 - **Claim** `signer_address`: the EIP-55 checksummed address (`common.Address.Hex()`) of the EOA that signed the web3 challenge.
@@ -33,7 +51,7 @@
   - Only the authorization-code flow sets it, on both the `access_token` and the ID token, not gated by scope.
 - **Platform consumers:**
   - compare the claim case-insensitively;
-  - treat a missing claim as "minted before the claim existed" and allow it (unless `SIGNER_CLAIM_REQUIRED_AFTER` applies);
+  - treat a missing claim as "minted before the claim existed" and allow it, with no check and no lookup (DIMO Mobile users' tokens never carry it);
   - never trust it without their existing JWT signature check.
 - **When to check:** whenever a token carries `signer_address` and its `ethereum_address` is a developer license (Identity `developerLicense(by: { clientId })` exists), **whatever the `aud`**, including `dimo-driver`. A token whose `ethereum_address` isn't a license isn't checked.
 - **Call:** `isSigner(address signer) returns (bool)` on the license account at `ethereum_address`.
@@ -49,24 +67,22 @@
 - **`SIGNER_CHECK_MODE`** (`enforce` | `log` | `off`; default `enforce`) in every service:
   - `log` checks, logs and counts but never refuses;
   - `off` doesn't check.
-- **`SIGNER_CLAIM_REQUIRED_AFTER`** (optional Unix time, token-exchange-api only): a license token issued after it without the claim answers the 403.
 - **Metric** `signer_check_total{service, result}`:
   - `result` is one of `allowed`, `denied`, `error`, `skipped`;
-  - `service` is one of `token-exchange-api`, `vehicle-triggers-api`, `tesla-oracle`, `credit-tracker`.
+  - `service` is one of `token-exchange-api`, `vehicle-triggers-api`, `tesla-oracle`.
   - **Alert:** `error` above 1% of non-skipped checks (`allowed` + `denied` + `error`) over 5 minutes.
 - **vehicle-triggers-api columns:** `created_by_signer` and `updated_by_signer` (nullable text, lowercase hex).
 - **vehicle-triggers-api JSON:** fields `createdBySigner` and `updatedBySigner` (checksummed, omitted when null) on every `WebhookView` from `GET /v1/webhooks`.
 - **Deploy order (identical in every task):**
   1. Pin all four dex deployments to `v2.30.100`.
   2. Merge dex, tag `v2.30.101`, pin **dev** dex to it.
-  3. Deploy token-exchange-api, then vehicle-triggers-api, tesla-oracle and credit-tracker, all `SIGNER_CHECK_MODE=log`.
+  3. Deploy token-exchange-api, then vehicle-triggers-api and tesla-oracle, all `SIGNER_CHECK_MODE=log`.
   4. Run the dev live pass: log mode, then enforce in dev.
   5. Release production token-exchange-api, then the three callers, all `log`.
   6. Bump production dex to `v2.30.101`.
   7. Run a week in production `log` mode (Task 16).
   8. Announce the behavior change to developers, naming the enforce date (Task 17 Step 1; index Rollout 2.6).
   9. Switch production to `enforce` (Task 17 Step 2).
-  10. Set `SIGNER_CLAIM_REQUIRED_AFTER` (token-exchange-api only) to 14 days after the production dex release (Task 17 Step 4).
 - **Commits and PRs:**
   - no `Co-Authored-By` trailer and no tool attribution in commit messages or PR descriptions;
   - stage files by path. Never commit the local `.gitignore` edits in the `dex`, `token-exchange-api`, `tesla-oracle`, `credit-tracker` and `cluster-helm-charts` checkouts.
@@ -98,12 +114,7 @@ These conditions are implied by the spec but not exercised by a happy-path test.
    - `TestGRPCCheckerTimesOut` (Task 5);
    - `TestCheckerTimesOut` and `TestCheckerDoesNotCacheErrors` (Task 6).
 
-4. **Claimless tokens:**
-   - existing developers' tokens pass;
-   - after `SIGNER_CLAIM_REQUIRED_AFTER`, a claimless **license** token issued later is refused;
-   - a claimless non-license token passes.
-
-   Test: `TestMiddleware` cutoff cases (Task 5).
+4. **Claimless tokens** (minted before dex set the claim, and every DIMO Mobile user's token) pass without any check or Identity lookup. Test: `TestMiddleware` "a token without signer_address is skipped" (Task 5).
 
 5. **Webhooks created or changed before the columns existed, or by claimless tokens,** show neither field, and a later claimless change doesn't erase a member's mark. Tests, all in Task 11:
    - `TestSetTriggerUpdatedBySigner` (a zero signer keeps the stored mark);
@@ -4362,7 +4373,7 @@ Expected: a PR URL. Merge after review and green CI, once token-exchange-api's d
 
 ### Task 15: dev live pass — log mode, then enforce
 
-**Files:** in each of `token-exchange-api`, `vehicle-triggers-api`, `tesla-oracle` and `credit-tracker`, `charts/<service>/values.yaml` (`SIGNER_CHECK_MODE: enforce`) after the log pass. Record the results as a comment on the token-exchange-api PR.
+**Files:** in each of `token-exchange-api`, `vehicle-triggers-api` and `tesla-oracle`, `charts/<service>/values.yaml` (`SIGNER_CHECK_MODE: enforce`) after the log pass. Record the results as a comment on the token-exchange-api PR.
 
 **Interfaces:**
 
@@ -4375,7 +4386,6 @@ Expected: a PR URL. Merge after review and green CI, once token-exchange-api's d
 - `https://token-exchange-api.dev.dimo.zone`
 - `https://vehicle-triggers-api.dev.dimo.zone`
 - `https://tesla-oracle.dev.dimo.zone`
-- `https://credit-tracker.dev.dimo.zone`
 - `https://telemetry-api.dev.dimo.zone/query`
 - `https://identity-api.dev.dimo.zone/query`
 - Vehicle NFT (Amoy) `0x45fbCD3ef7361d156e8b16F5538AE36DEdf61Da8`
@@ -4388,7 +4398,7 @@ Expected: a PR URL. Merge after review and green CI, once token-exchange-api's d
 - **The four services:** each repo's `main` has a bot commit `Update Image Version to <sha of the feature merge>`. Each dev chart, and the configmap ArgoCD rendered from it, has `SIGNER_CHECK_MODE: log`. Every caller also has `TOKEN_EXCHANGE_GRPC_ADDR`; without it a caller's checks all fail.
 
 ```bash
-for r in token-exchange-api vehicle-triggers-api tesla-oracle credit-tracker; do
+for r in token-exchange-api vehicle-triggers-api tesla-oracle; do
   git -C ~/workspace/$r fetch -q origin
   echo "== $r"; git -C ~/workspace/$r log --oneline -2 origin/main
   git -C ~/workspace/$r show origin/main:charts/$r/values.yaml | grep -nE "SIGNER_CHECK_MODE|TOKEN_EXCHANGE_GRPC_ADDR"
@@ -4398,7 +4408,7 @@ done
 
 Expected:
 - each block shows the image-bump commit on top and `SIGNER_CHECK_MODE: log`;
-- for vehicle-triggers-api, tesla-oracle and credit-tracker, `TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-dev:8086` in the chart and `running: log token-exchange-api-dev:8086`;
+- for vehicle-triggers-api and tesla-oracle, `TOKEN_EXCHANGE_GRPC_ADDR: token-exchange-api-dev:8086` in the chart and `running: log token-exchange-api-dev:8086`;
 - token-exchange-api shows `running: log ` (it doesn't call itself).
 
 If a caller lacks the address, fix its chart before continuing; Steps 5 and 7 would otherwise show `error` instead of `denied`.
@@ -4413,7 +4423,7 @@ export DOMAIN=https://...     # one of the license's redirect URIs
 export MEMBER_A_PK=0x... MEMBER_B_PK=0x... OWNER_PK=0x...
 export VEHICLE_TOKEN_ID=...
 export AUTH=https://auth.dev.dimo.zone TX=https://token-exchange-api.dev.dimo.zone VT=https://vehicle-triggers-api.dev.dimo.zone
-export TESLA=https://tesla-oracle.dev.dimo.zone CREDITS=https://credit-tracker.dev.dimo.zone
+export TESLA=https://tesla-oracle.dev.dimo.zone
 export TELEMETRY=https://telemetry-api.dev.dimo.zone/query VEHICLE_NFT=0x45fbCD3ef7361d156e8b16F5538AE36DEdf61Da8
 export MOBILE_DOMAIN=https://auth.dev.dimo.zone/void/callback
 curl -s https://identity-api.dev.dimo.zone/query -H 'Content-Type: application/json' \
@@ -4452,7 +4462,6 @@ status_of() { tail -1 <<<"$1"; }
 exchange() { curl -s -w '\n%{http_code}' -X POST "$TX/v1/tokens/exchange" -H "Authorization: Bearer $1" -H 'Content-Type: application/json' \
   -d "{\"nftContractAddress\":\"$VEHICLE_NFT\",\"tokenId\":$VEHICLE_TOKEN_ID,\"privileges\":[1]}"; }
 webhooks() { curl -s -w '\n%{http_code}' "$VT/v1/webhooks" -H "Authorization: Bearer $1"; }
-credits() { curl -s -w '\n%{http_code}' "$CREDITS/v1/credits/$CLIENT_ID/usage?fromDate=2025-01-01T00:00:00Z" -H "Authorization: Bearer $1"; }
 tesla() { curl -s -w '\n%{http_code}' -X POST "$TESLA/v1/telemetry/subscribe/999999999" -H "Authorization: Bearer $1"; }
 telemetry() { curl -s -w '\n%{http_code}' "$TELEMETRY" -H "Authorization: Bearer $1" -H 'Content-Type: application/json' \
   -d "{\"query\":\"{ signalsLatest(tokenId: $VEHICLE_TOKEN_ID) { lastSeen } }\"}"; }
@@ -4479,7 +4488,7 @@ claims "$A_JWT" | grep -E '"(aud|ethereum_address|signer_address)"'
 claims "$A_MOBILE" | grep -E '"(aud|ethereum_address|signer_address)"'
 echo "expected signer_address: $MEMBER_A"
 status_of "$(exchange "$A_JWT")"; status_of "$(exchange "$A_MOBILE")"
-status_of "$(webhooks "$A_JWT")"; status_of "$(credits "$A_JWT")"
+status_of "$(webhooks "$A_JWT")"
 export TESLA_BEFORE=$(tesla "$A_JWT"); echo "$TESLA_BEFORE"
 ```
 
@@ -4488,7 +4497,7 @@ Expected:
 - **Developer JWT:** `aud` is `CLIENT_ID`.
 - **Mobile token:** `aud` is `dimo-driver`.
 - **Both tokens:** `ethereum_address` is `CLIENT_ID` and `signer_address` is exactly `MEMBER_A`.
-- **Calls:** exchange `200` for both tokens, webhooks `200`, credits `200`. tesla-oracle answers its own non-signer refusal; note the status and message.
+- **Calls:** exchange `200` for both tokens, webhooks `200`. tesla-oracle answers its own non-signer refusal; note the status and message.
 
 If `signer_address` is missing, dev dex isn't on `v2.30.101`; go back to Step 1.
 
@@ -4499,7 +4508,7 @@ In the staging console, delete member A's API key (this calls `disableSigner`). 
 ```bash
 sleep 70
 status_of "$(exchange "$A_JWT")"; status_of "$(exchange "$A_MOBILE")"
-status_of "$(webhooks "$A_JWT")"; status_of "$(credits "$A_JWT")"
+status_of "$(webhooks "$A_JWT")"
 tesla "$A_JWT"
 ```
 
@@ -4514,14 +4523,14 @@ Log mode never refuses. In Grafana (Explore, the dev Prometheus), run:
 sum by (service, result) (increase(signer_check_total{namespace="dev"}[15m]))
 ```
 
-Expected: `result="denied"` above zero for all four services: `token-exchange-api`, `vehicle-triggers-api`, `credit-tracker` and `tesla-oracle`. Each service's logs show `Signer check refused a developer JWT.` with `"mode":"log"`, `"result":"denied"` and `"signer":"<MEMBER_A>"`. If a service shows only `skipped`, its `SIGNER_CHECK_MODE` is `off` or the deploy didn't land; fix before continuing.
+Expected: `result="denied"` above zero for all three services: `token-exchange-api`, `vehicle-triggers-api` and `tesla-oracle`. Each service's logs show `Signer check refused a developer JWT.` with `"mode":"log"`, `"result":"denied"` and `"signer":"<MEMBER_A>"`. If a service shows only `skipped`, its `SIGNER_CHECK_MODE` is `off` or the deploy didn't land; fix before continuing.
 
 - [ ] **Step 6: Switch dev to enforce**
 
 In each of the four repos, open a PR that changes only `charts/<service>/values.yaml` to `SIGNER_CHECK_MODE: enforce`:
 
 ```bash
-for r in token-exchange-api vehicle-triggers-api tesla-oracle credit-tracker; do
+for r in token-exchange-api vehicle-triggers-api tesla-oracle; do
   git -C ~/workspace/$r worktree add ~/workspace/$r-enforce-dev -b chore/signer-check-enforce-dev origin/main
   (cd ~/workspace/$r-enforce-dev &&
     sed -E -i '' 's/^( +SIGNER_CHECK_MODE:).*/\1 enforce/' charts/$r/values.yaml &&
@@ -4569,13 +4578,13 @@ In the staging console, delete member B's API key. When the success toast appear
 ```bash
 until_refused 'exchange "$B_JWT"'
 until_refused 'exchange "$B_MOBILE"'
-webhooks "$B_JWT"; credits "$B_JWT"; tesla "$B_JWT"
+webhooks "$B_JWT"; tesla "$B_JWT"
 ```
 
 Expected:
 
 - **Developer JWT and mobile-audience token:** each `until_refused` prints a body containing `signer no longer authorized for this license`, `refused after Ns` with N ≤ 60, and `PASS: within 60 s`.
-- **vehicle-triggers-api, credit-tracker and tesla-oracle:** each answers `403` with `"message":"signer no longer authorized for this license"`. Their caches started together with token-exchange's, so they're already past the 60 s.
+- **vehicle-triggers-api and tesla-oracle:** each answers `403` with `"message":"signer no longer authorized for this license"`. Their caches started together with token-exchange's, so they're already past the 60 s.
 
 - [ ] **Step 8: The vehicle JWT minted before the cutoff expires on schedule; the owner is unaffected**
 
@@ -4628,7 +4637,7 @@ Order matters. token-exchange-api with `SignerCheck` must be in production befor
 Before tagging anything, read each service's production tag from its chart, and the image its production pods actually run:
 
 ```bash
-for r in token-exchange-api vehicle-triggers-api tesla-oracle credit-tracker; do
+for r in token-exchange-api vehicle-triggers-api tesla-oracle; do
   git -C ~/workspace/$r fetch -q origin
   tag=$(git -C ~/workspace/$r show origin/main:charts/$r/values-prod.yaml | awk '/^image:/{f=1;next} f&&/^  tag:/{print $2; exit} /^[^ ]/{f=0}')
   image=$(kubectl -n prod get deploy $r-prod -o jsonpath='{.spec.template.spec.containers[0].image}')
@@ -4639,7 +4648,7 @@ echo "dimo-dex values-prod.yaml $(git -C ~/workspace/cluster-helm-charts show or
 ```
 
 Expected: one line per service where the chart tag and the running image's tag agree, plus dex at `tag: v2.30.100`.
-- **At the last check** (2026-10-02): token-exchange-api `0.4.0`, vehicle-triggers-api `1.4.11`, tesla-oracle `0.6.10`, credit-tracker `0.0.6`.
+- **At the last check** (2026-10-02): token-exchange-api `0.4.0`, vehicle-triggers-api `1.4.11`, tesla-oracle `0.6.10`.
 - **If a chart tag and a running image differ,** ArgoCD is out of sync; stop and resolve that first.
 
 These are the rollback targets. Paste the file into a comment on the token-exchange-api PR.
@@ -4670,7 +4679,7 @@ gh release create v0.5.0 --repo DIMO-Network/token-exchange-api --title v0.5.0 -
   - Disabled signer: 403 `signer no longer authorized for this license`.
   - Identity or chain failure: 503 `could not verify signer`.
   - Ships with `SIGNER_CHECK_MODE=log` in production: denials are logged and counted (`signer_check_total`), and nothing is refused until the switch to `enforce`.
-- New gRPC `SignerCheck` and package `pkg/signercheck` for vehicle-triggers-api, tesla-oracle and credit-tracker.
+- New gRPC `SignerCheck` and package `pkg/signercheck` for vehicle-triggers-api and tesla-oracle.
 - New PrometheusRule `SignerCheckErrors`.
 
 ## Also first released here (merged after v0.4.0)
@@ -4685,9 +4694,9 @@ EOF
 
 Wait for `buildpushtagged.yml` to commit `image.tag: 0.5.0` to `charts/token-exchange-api/values-prod.yaml` and for ArgoCD to sync production. Then confirm the production pods run `dimozone/token-exchange-api:0.5.0` with `SIGNER_CHECK_MODE=log`.
 
-- [ ] **Step 3: Release the three callers, after Step 2 is live**
+- [ ] **Step 3: Release the two callers, after Step 2 is live**
 
-For each of `vehicle-triggers-api`, `tesla-oracle` and `credit-tracker`:
+For each of `vehicle-triggers-api` and `tesla-oracle`:
 
 ```bash
 cd ~/workspace/<repo> && git fetch --tags origin && git tag --sort=-v:refname | head -1
@@ -4703,7 +4712,7 @@ Expected: each repo's `buildpushtagged.yml` commits the new `image.tag` to `valu
 
 ```bash
 kubectl -n prod get configmap token-exchange-api-prod-config -o jsonpath='{.data.SIGNER_CHECK_MODE}{"\n"}'
-for r in vehicle-triggers-api tesla-oracle credit-tracker; do
+for r in vehicle-triggers-api tesla-oracle; do
   echo "$r: $(kubectl -n prod get configmap $r-prod-config -o jsonpath='{.data.SIGNER_CHECK_MODE} {.data.TOKEN_EXCHANGE_GRPC_ADDR}')"
 done
 ```
@@ -4724,14 +4733,14 @@ git commit -m "chore(dimo-dex): production dex to v2.30.101 (signer_address clai
 git push -u origin chore/dex-prod-v2.30.101
 gh pr create --repo DIMO-Network/cluster-helm-charts --base main --head chore/dex-prod-v2.30.101 \
   --title "chore(dimo-dex): production dex to v2.30.101" \
-  --body "Production only. v2.30.101 adds the signer_address claim to developer JWTs. The console-teams platform live pass in dev passed (log and enforce), and token-exchange-api, vehicle-triggers-api, tesla-oracle and credit-tracker are in production in log mode. Roles-rights stays on v2.30.100. Rollback: set this back to v2.30.100."
+  --body "Production only. v2.30.101 adds the signer_address claim to developer JWTs. The console-teams platform live pass in dev passed (log and enforce), and token-exchange-api, vehicle-triggers-api and tesla-oracle are in production in log mode. Roles-rights stays on v2.30.100. Rollback: set this back to v2.30.100."
 ```
 
 Expected:
 - the `grep` shows `pullPolicy: IfNotPresent` and `tag: v2.30.101`;
 - `git diff --stat` shows only `charts/dimo-dex/values-prod.yaml | 2 +-`.
 
-Merge, confirm ArgoCD shows production dex on `v2.30.101`, and note the date. Task 17's `SIGNER_CLAIM_REQUIRED_AFTER` counts 14 days from it.
+Merge, confirm ArgoCD shows production dex on `v2.30.101`, and note the date.
 
 - [ ] **Step 5: Smoke-test production**
 
@@ -4739,7 +4748,7 @@ Repeat Task 15 Steps 2-4 against production with a test license on `https://cons
 
 ```bash
 export AUTH=https://auth.dimo.zone TX=https://token-exchange-api.dimo.zone VT=https://vehicle-triggers-api.dimo.zone
-export TESLA=https://tesla-oracle.dimo.zone CREDITS=https://credit-tracker.dimo.zone
+export TESLA=https://tesla-oracle.dimo.zone
 export TELEMETRY=https://telemetry-api.dimo.zone/query VEHICLE_NFT=0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF
 export MOBILE_DOMAIN=https://auth.dimo.zone/void/callback
 ```
@@ -4762,15 +4771,14 @@ sum by (service, result) (increase(signer_check_total{namespace="prod"}[24h]))
 
 For any `result="denied"`, open the service's logs. Each denial names `license` and `signer`. Confirm the signer was deliberately disabled, which means it's a real revocation the check will soon enforce. Raise anything else, such as a signer still in use by a developer's backend, before Task 17. `SignerCheckErrors` must not have fired.
 
-### Task 17: announce, then enforce in production, then require the claim
+### Task 17: announce, then enforce in production
 
 **Interfaces:**
 
 - Consumes: a clean week from Task 16 Step 6.
 - Produces:
   - developers told about the change before anything is refused;
-  - production in `enforce`;
-  - `SIGNER_CLAIM_REQUIRED_AFTER` set.
+  - production in `enforce`.
 
 Part 3's flag may turn on in production after this and part 3's team live pass.
 
@@ -4780,13 +4788,13 @@ This step owns the index's Rollout step 2.6. It must happen before Step 2 switch
 
 Send the developer announcement, wherever DIMO publishes platform changes (developer docs changelog and newsletter):
 
-> Starting {enforce date}, disabling an API key on your developer license cuts off the tokens it minted within about a minute, instead of when they expire. Token exchange, the webhooks API, tesla-oracle and credit-tracker will answer `403 signer no longer authorized for this license` for such tokens, or `503 could not verify signer` if the check can't complete. Keys you haven't disabled are unaffected.
+> Starting {enforce date}, disabling an API key on your developer license cuts off the tokens it minted within about a minute, instead of when they expire. Token exchange, the webhooks API and tesla-oracle will answer `403 signer no longer authorized for this license` for such tokens, or `503 could not verify signer` if the check can't complete. Keys you haven't disabled are unaffected.
 
 Don't start Step 2 before that date.
 
 - [ ] **Step 2: Switch production to enforce**
 
-As in Task 15 Step 6, open one PR per repo changing only `charts/<service>/values-prod.yaml`, in this order: token-exchange-api, then vehicle-triggers-api, tesla-oracle and credit-tracker. Merge each after the previous one has synced.
+As in Task 15 Step 6, open one PR per repo changing only `charts/<service>/values-prod.yaml`, in this order: token-exchange-api, then vehicle-triggers-api and tesla-oracle. Merge each after the previous one has synced.
 
 ```bash
 r=<repo>
@@ -4811,33 +4819,16 @@ Repeat Task 15 Steps 7-9 against production with member key B on the production 
 
 Expected: the same results as in dev, with every `until_refused` showing `PASS: within 60 s`.
 
-- [ ] **Step 4: Require the claim on new license tokens (token-exchange-api only)**
-
-Fourteen days after the production dex release (Task 16 Step 4), every developer JWT minted before it has expired (336 hours). Compute the Unix time of that release date plus 14 days:
-
-```bash
-node -e 'console.log(Math.floor(new Date("<YYYY-MM-DD from Task 16 Step 4>T00:00:00Z").getTime()/1000) + 14*86400)'
-```
-
-`SIGNER_CLAIM_REQUIRED_AFTER` exists only in token-exchange-api; the other services don't read it. Open a token-exchange-api PR adding it to the `env:` map of `charts/token-exchange-api/values-prod.yaml`, and of `values.yaml` with dev's own date (Task 4). The key goes under the existing `env:` map:
-
-```yaml
-env:
-  SIGNER_CLAIM_REQUIRED_AFTER: '<that number>'
-```
-
-Merge it after that date has passed. From then on, a license token issued after the cutoff without `signer_address` gets the 403. That catches any future dex path that forgets the claim.
+`SIGNER_CLAIM_REQUIRED_AFTER` (a former Step 4 that refused claimless license tokens after a date) was dropped on 2026-10-02 and removed from token-exchange-api: once set, it would have made every DIMO Mobile user's token exchange look up Identity.
 
 ## Rollback (C10)
 
 Turn the console's `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED` off before any of these. Then go as far down the list as the problem needs.
 
 1. **Stop refusing, no redeploy of code:** set `SIGNER_CHECK_MODE` to `log` or `off` in the affected service's `values-prod.yaml` (PR, merge, ArgoCD sync), using the Task 17 Step 2 `sed -E` with `log` or `off`. Do it in this order:
-   - vehicle-triggers-api, tesla-oracle, credit-tracker;
+   - vehicle-triggers-api, tesla-oracle;
    - then token-exchange-api.
 2. **Roll back the callers:** in each caller's `charts/<repo>/values-prod.yaml`, set `image.tag` to its line in `~/workspace/signer-check-prod-baseline.txt` (Task 16 Step 1).
 3. **Roll back token-exchange-api:** set its `image.tag` to its baseline line.
 4. **Roll back dex:** in `cluster-helm-charts`, run `sed -E -i '' 's/^( +tag:).*/\1 v2.30.100/' charts/dimo-dex/values-prod.yaml` (and `values.yaml` for dev), then open and merge the PR. Tokens minted by `v2.30.101` still carry the claim, and any service still checking honors it; they expire within 336 hours.
 5. **Leave migrations in place.** `created_by_signer` and `updated_by_signer` are nullable, and older vehicle-triggers-api builds ignore them.
-
-Never roll back dex while token-exchange-api runs with `SIGNER_CLAIM_REQUIRED_AFTER` set: developer tokens from the old dex lack the claim and would be refused. Unset it first.
