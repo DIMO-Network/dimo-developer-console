@@ -21,6 +21,7 @@ import { LogoutIcon } from '@/components/Icons/LogoutIcon';
 import { cn } from '@/lib/utils';
 
 import './Menu.css';
+import { clearConsoleBrowserState } from '@/utils/consoleSession';
 
 export const Menu: FC = withLoadingStatus(() => {
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
@@ -37,6 +38,7 @@ export const Menu: FC = withLoadingStatus(() => {
   const onSignOut = async () => {
     try {
       setLoadingStatus({ status: 'loading', label: 'Signing out' });
+      clearConsoleBrowserState();
       await signOut();
       await turnkeyClient.logout();
       queryClient.clear();

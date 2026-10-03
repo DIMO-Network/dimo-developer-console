@@ -27,6 +27,7 @@ import { decodeJwtToken } from '@/utils/middlewareUtils';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
 import { queryClient } from '@/hoc/QueryProvider';
+import { clearConsoleBrowserState } from '@/utils/consoleSession';
 const halfHour = 60 * 30;
 const fifteenMinutes = 15 * 60;
 
@@ -251,6 +252,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     };
 
     const logout = async () => {
+      clearConsoleBrowserState();
       await signOut();
       await turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);

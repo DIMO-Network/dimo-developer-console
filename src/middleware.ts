@@ -17,6 +17,7 @@ import * as Sentry from '@sentry/nextjs';
 import { JWTPayload } from 'jose/dist/types';
 import { cookieName, getCookie } from './services/dimoDevAPI';
 import { FOCUS_QUERY_PARAM } from '@/utils/focusConstants';
+import { inviteRedirect } from '@/utils/inviteCookie';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
@@ -108,9 +109,9 @@ const validatePrivateSession = async (request: NextRequest, token: string) => {
 
   console.info('Validating private session', request.nextUrl.pathname);
   const user = await getUserByToken();
-  const subOrganization = await getUserSubOrganization(
-    user.company_email_owner ?? user.email,
-  );
+  // Every console user signs in with their own global account; team members
+  // are no longer represented by the company owner's account.
+  const subOrganization = await getUserSubOrganization(user.email);
   if (!subOrganization) {
     Sentry.captureMessage('Suborganization not found');
     return NextResponse.redirect(new URL('/sign-in', request.url), {
@@ -164,6 +165,9 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
+  // Before anything that can fail or redirect: an invite link keeps its token.
+  const invite = inviteRedirect(request);
+  if (invite) return invite;
   const hasError = request.nextUrl.searchParams.get('error');
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   let token: JWTPayload | null = null;

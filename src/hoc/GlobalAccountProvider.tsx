@@ -26,6 +26,7 @@ import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
 import { queryClient } from '@/hoc/QueryProvider';
+import { clearConsoleBrowserState } from '@/utils/consoleSession';
 
 // Resolving who is signed in costs two Turnkey calls (wallets, then the wallet
 // account) and chain RPC to derive the smart account address. Neither address
@@ -212,6 +213,7 @@ export const withGlobalAccounts = <P extends object>(
       queryClient.clear();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
+      clearConsoleBrowserState();
       await signOut();
       router.replace('/sign-in');
     };

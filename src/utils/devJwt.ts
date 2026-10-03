@@ -69,3 +69,12 @@ export const removeDevJwt = (clientId: string, tokenToRemove: string) => {
     saveToLocalStorage(key, remainingTokens);
   }
 };
+
+// Sign-out (contracts C4): every developer JWT this browser holds, owner keys
+// and member keys alike.
+export const clearAllDevJwts = () => {
+  if (typeof window === 'undefined') return;
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith('devJwt_'))
+    .forEach((key) => localStorage.removeItem(key));
+};

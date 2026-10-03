@@ -11,6 +11,7 @@ import { TSignedRequest } from '@turnkey/http';
 import { cookies } from 'next/headers';
 import { cookieName } from '@/services/dimoDevAPI';
 import { SESSION_VERDICT_COOKIE } from '@/utils/middlewareUtils';
+import { ACTIVE_TEAM_COOKIE, INVITE_TOKEN_COOKIE } from '@/utils/teamCookies';
 
 export const getUser = async () => {
   try {
@@ -93,5 +94,8 @@ export const signOut = async () => {
   const userCookies = await cookies();
   userCookies.delete(cookieName);
   userCookies.delete(SESSION_VERDICT_COOKIE);
+  // Contracts C4: sign-out also forgets the active team and a pending invite.
+  userCookies.delete(ACTIVE_TEAM_COOKIE);
+  userCookies.delete(INVITE_TOKEN_COOKIE);
   return true;
 };
