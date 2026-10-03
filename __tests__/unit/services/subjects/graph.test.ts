@@ -58,6 +58,15 @@ describe('buildVehicleGraph', () => {
     expect(g.devices[0].did).toBe(vehicle.aftermarketDevice!.tokenDID);
   });
 
+  it('gives only the aftermarket device its own Fetch DID for device status', () => {
+    // Device status (Ruptela r/v0/dev, AutoPi's device copy) is filed with
+    // subject = producer = the device DID, not under the vehicle.
+    expect(g.devices[0].ownFetchDid).toBe(vehicle.aftermarketDevice!.tokenDID);
+    expect(g.devices[1].ownFetchDid).toBeUndefined();
+    expect(g.vehicle.ownFetchDid).toBeUndefined();
+    expect(g.account.ownFetchDid).toBeUndefined();
+  });
+
   it('breaks each device out under the vehicle, authorised by the vehicle DID', () => {
     expect(g.devices.map((d) => [d.kind, d.label, d.sublabel])).toEqual([
       ['aftermarket-device', 'AutoPi', 'Aftermarket device'],

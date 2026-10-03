@@ -173,6 +173,63 @@ describe('RawDataTab', () => {
     });
   });
 
+  it('switches a device to its own status events, filed under the device DID', async () => {
+    const device = graph.devices[0];
+    renderTab(device);
+    await screen.findByText('3 cloud events');
+    expect(screen.getByRole('radio', { name: 'Vehicle data' })).toBeChecked();
+    fireEvent.change(screen.getByLabelText('Data version'), {
+      target: { value: 'r/v0/dev' },
+    });
+    fireEvent.click(screen.getByRole('radio', { name: 'Device status' }));
+    await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+    expect(screen.getByRole('radio', { name: 'Device status' })).toBeChecked();
+    // subject = producer = device: the device DID, no producer filter, still
+    // authorised by the vehicle's token.
+    const [, input] = (postSubjectQuery as jest.Mock).mock.calls
+      .filter((c) => opName(c[1].request.query) === 'CloudEvents')
+      .at(-1);
+    expect(input.asset).toBe(graph.vehicle.did);
+    expect(input.request.variables.did).toBe(device.did);
+    expect(input.request.variables.filter.producer).toBeUndefined();
+    expect(input.request.variables.filter.dataversion).toBe('r/v0/dev');
+    await waitFor(() =>
+      expect(calls('AvailableCloudEventTypes').at(-1).variables).toEqual({
+        did: device.did,
+        filter: null,
+      }),
+    );
+    expect(screen.queryByText(/^Producer: /)).not.toBeInTheDocument();
+    expect(screen.getByText(/filed under the device itself/)).toBeInTheDocument();
+  });
+
+  it('pages older device status on the device DID', async () => {
+    olderPage = [ev('2026-09-29T20:45:42Z', 'dimo.status', 'older')];
+    renderTab(graph.devices[0]);
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('radio', { name: 'Device status' }));
+    await waitFor(() => expect(calls('CloudEvents').length).toBe(2));
+    await screen.findByText('3 cloud events');
+    fireEvent.click(screen.getByRole('button', { name: 'Load older' }));
+    expect(await screen.findByText('4 cloud events')).toBeInTheDocument();
+    const older = calls('CloudEvents').at(-1).variables;
+    expect(older.did).toBe(graph.devices[0].did);
+    expect(older.filter.before).toBe('2026-09-29T20:46:12.001Z');
+    expect(older.filter.producer).toBeUndefined();
+  });
+
+  it('offers device status only where the subject files its own events', async () => {
+    const { rerenderWith } = renderTab(graph.vehicle);
+    await screen.findByText('3 cloud events');
+    expect(
+      screen.queryByRole('radio', { name: 'Device status' }),
+    ).not.toBeInTheDocument();
+    rerenderWith(graph.account);
+    expect(
+      screen.queryByRole('radio', { name: 'Device status' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('expands a row to its JSON, including string and null data', async () => {
     renderTab();
     await screen.findByText('3 cloud events');
