@@ -19,6 +19,7 @@ import { fetchMyBrands } from '@/actions/brand';
 import { getWorkspace, getWorkspaceByTokenId } from '@/actions/workspace';
 import { OutputPrint } from '@/app/license/[tokenId]/configurator/components/OutputPrint/OutputPrint';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
+import { OwnerAction } from '@/components/OwnerOnly';
 
 export const USER_CONFIG_FRAGMENT = gql(`
   fragment UserConfigurationFragment on DeveloperLicense {
@@ -214,9 +215,17 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
           brandNames={brandNames}
         />
 
-        <Button type="submit" className="w-full">
-          Save
-        </Button>
+        <OwnerAction
+          fallback={
+            <p className="text-body-sm text-muted">
+              Only the team owner can change configurations.
+            </p>
+          }
+        >
+          <Button type="submit" className="w-full">
+            Save
+          </Button>
+        </OwnerAction>
       </form>
 
       {/* RIGHT: sticky preview */}

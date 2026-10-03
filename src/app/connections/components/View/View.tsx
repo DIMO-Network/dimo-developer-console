@@ -12,6 +12,7 @@ import { ChipIcon } from '@/components/Icons';
 import { toast } from 'sonner';
 
 import './View.css';
+import { OwnerAction } from '@/components/OwnerOnly';
 
 const MainComponent: React.FC = () => {
   const router = useRouter();
@@ -82,14 +83,16 @@ const MainComponent: React.FC = () => {
       <Section>
         <SectionHeader title="Connections">
           {(!connections || connections.length === 0) && (
-            <Button
-              variant="primary"
-              onClick={handleCreateConnection}
-              disabled={isLoading}
-            >
-              <PlusIcon className="w-4 h-4" />
-              Create a connection
-            </Button>
+            <OwnerAction>
+              <Button
+                variant="primary"
+                onClick={handleCreateConnection}
+                disabled={isLoading}
+              >
+                <PlusIcon className="w-4 h-4" />
+                Create a connection
+              </Button>
+            </OwnerAction>
           )}
         </SectionHeader>
 
