@@ -34,7 +34,9 @@ export const RowActionsMenu: FC<{ label: string; items: RowAction[] }> = ({
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div
             role="menu"
-            className="absolute right-0 top-full z-20 mt-1 min-w-[180px] rounded-control border border-outline bg-overlay p-1 shadow-float"
+            // A column: table action cells are whitespace-nowrap, which would otherwise
+            // keep inline buttons on one line past the menu edge.
+            className="absolute right-0 top-full z-20 mt-1 flex min-w-[180px] flex-col rounded-control border border-outline bg-overlay p-1 shadow-float"
           >
             {items.map((item) => (
               <button
