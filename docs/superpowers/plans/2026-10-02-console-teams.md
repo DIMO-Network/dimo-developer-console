@@ -6,26 +6,34 @@ The spec spans seven repositories. It's split into three plans, each producing w
 
 | Part | Plan                                                  | Repositories                                                                          | Branch                                                              | Ships                                                                                             |
 | ---- | ----------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| 1    | `2026-10-02-console-teams-1-platform-signer-check.md` | `dex`, `token-exchange-api`, `vehicle-triggers-api`, `tesla-oracle`, `credit-tracker` | `feat/signer-address-claim` (dex), `feat/signer-check` (the others) | Independently, in the order in _Rollout_.                                                         |
+| 1    | `2026-10-02-console-teams-1-platform-signer-check.md` | `dex`, `token-exchange-api`, `vehicle-triggers-api`, `tesla-oracle` (`credit-tracker` skipped) | `feat/signer-address-claim` (dex), `feat/signer-check` (the others) | Independently, in the order in _Rollout_.                                                         |
 | 2    | `2026-10-02-console-teams-2-console-api.md`           | `dimo-developer-console-api`                                                          | `feat/teams` (from `master` after #80 merges)                       | Before part 3. Backward compatible with today's console, as described under _Until part 3 ships_ in C7. |
 | 3    | `2026-10-02-console-teams-3-console.md`               | `dimo-developer-console`                                                              | `console-teams`                                                     | After part 2. Granting data access stays behind a flag until part 1 enforces in that environment. |
 
 All repositories are checked out under `~/workspace/<repo>`.
 
+## Status (2026-10-02)
+
+| Part | State |
+| ---- | ----- |
+| 1 | PRs open, CI green: DIMO-Network/dex#332, DIMO-Network/token-exchange-api#120, DIMO-Network/vehicle-triggers-api#132, DIMO-Network/tesla-oracle#169. `v2.30.100` tagged at dex `master`. credit-tracker skipped (not running). `SIGNER_CLAIM_REQUIRED_AFTER` dropped. The dex pin in `cluster-helm-charts` is the user's step. |
+| 2 | DIMO-Network/dimo-developer-console-api#81 open, CI green. Preview database migrated (`init-db_10`, `11` and `12`; preview had never had the branding migrations). Production schema check and migration pending. |
+| 3 | Not started. |
+
 ## Rollout
 
-1. **console-api #80 merges and deploys.** Afterwards, check console-api's request logs for `GET /api/my/connections` from accounts with no company, and decide whether connection keys need rotating (see #80's description).
+1. **console-api #80 merges and deploys.** Done 2026-10-02; no connection-key rotation. Afterwards, check console-api's request logs for `GET /api/my/connections` from accounts with no company, and decide whether connection keys need rotating (see #80's description).
 2. **Part 1, platform:**
    1. Pin every dex deployment to version tags first: dev, prod, roles-rights dev and roles-rights prod. Before merging, tag the current dex `master` as `v2.30.100` (DIMO has never cut its own dex tag, and upstream already uses `v2.30.3` and later) and pin to it with `pullPolicy: IfNotPresent`. Today all four run `dimozone/dex:latest` with `pullPolicy: Always`, so a merge would reach production on the next pod restart.
    2. Merge dex, tag `v2.30.101`, and pin dev to it. The roles-rights deployments stay on `v2.30.100`: they don't run the web3 code flow.
-   3. Deploy token-exchange-api, then vehicle-triggers-api, tesla-oracle and credit-tracker, all with `SIGNER_CHECK_MODE=log` (C10).
+   3. Deploy token-exchange-api, then vehicle-triggers-api and tesla-oracle, all with `SIGNER_CHECK_MODE=log` (C10). Before merging the two callers, re-point their token-exchange-api requirement from #120's branch commit to `main`.
    4. Run part 1's dev live pass.
    5. Bump the production dex tag. Run production in `log` mode for a week, watching `signer_check_total{result="denied"}` for anything unexpected.
    6. **Announce the behavior change to developers** (part 1, Task 17 Step 1) before switching production to `enforce`:
       - disabling an API key now cuts off its tokens within about a minute;
-      - token exchange, the webhooks API, tesla-oracle and credit-tracker can answer `403 signer no longer authorized for this license` or `503 could not verify signer`.
+      - token exchange, the webhooks API and tesla-oracle can answer `403 signer no longer authorized for this license` or `503 could not verify signer`.
    7. Switch production to `enforce`.
-3. **Part 2, console-api teams.** Run migration `init-db_12.sql` (with its down script ready) before deploying.
+3. **Part 2, console-api teams.** Run migration `init-db_12.sql` (with its down script ready) before deploying: preview is done; production follows #81's release checklist (schema check, backup, migrate, merge, re-run). Deploying #81 starts C7's 7-day clock for part 3, so deploy it only when part 3 is ready to follow.
 4. **Part 3, the console**, with `NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED` off. Invites, teams and the key registry go live.
 5. **Turn the flag on per environment** once part 1 is in `enforce` mode there and part 3's team live pass succeeds there.
 6. **DIMO's own rollout (part 3, final task):**
@@ -65,8 +73,8 @@ All repositories are checked out under `~/workspace/<repo>`.
   - **token-exchange-api** calls the chain. It also serves gRPC `SignerCheck(SignerCheckRequest{license, signer}) → SignerCheckResponse{is_signer}` from the same cache. That call returns `InvalidArgument` for non-hex input and `Unavailable` (`could not verify signer`) on chain errors.
   - **vehicle-triggers-api** checks every authenticated request.
   - **tesla-oracle** checks its `/v1/telemetry/*` routes.
-  - **credit-tracker** checks its license routes.
-  - These three call token-exchange-api's `SignerCheck` and map any gRPC error to the 503.
+  - **credit-tracker** is skipped (not running). If it's revived, it needs the same check on its license routes.
+  - These callers use token-exchange-api's `SignerCheck` and map any gRPC error to the 503.
   - `SignerCheck` answers `is_signer: true` when `license` isn't a developer license, because non-licenses aren't checked.
 - **Release order:** token-exchange-api with `SignerCheck` reaches an environment before any service that calls it.
 
@@ -282,14 +290,14 @@ type HolderInput = { userId: string } | { name: string };
 
 ### C10. Platform operations (part 1)
 
-- **Shared code:** services implement C2 and C10 with `token-exchange-api/pkg/signercheck` (middleware, gRPC client, mode, metric and cutoff).
+- **Shared code:** services implement C2 and C10 with `token-exchange-api/pkg/signercheck` (middleware, gRPC client, mode and metric).
 - **Setting `SIGNER_CHECK_MODE`:** `enforce` | `log` | `off`. The default is `enforce`, and the rollout sets `log` first.
   - In `log` mode the check runs and is logged and counted, but never refuses.
   - In `off` mode it doesn't run.
-- **Setting `SIGNER_CLAIM_REQUIRED_AFTER`** (token-exchange-api only; optional Unix time, unset by default): when set, a license token issued after it (`iat`) without `signer_address` answers 403 `signer no longer authorized for this license`. This catches a future dex path that forgets the claim. Set it 14 days after the dex release.
+- **No claim cutoff.** A token without `signer_address` is never checked and never looked up. (`SIGNER_CLAIM_REQUIRED_AFTER` was dropped on 2026-10-02: it only backstopped a hypothetical dex path that forgets the claim, and once set it made every claimless exchange, DIMO Mobile users' included, depend on Identity.)
 - **Metric:** `signer_check_total{service, result}`, with `result` one of `allowed`, `denied`, `error`, `skipped`.
 - **Alert:** when `error` exceeds 1% of non-skipped checks (`allowed` + `denied` + `error`) over 5 minutes.
 - **Rollback order:**
   - Turn the console flag off before any dex rollback.
-  - Roll back the gRPC callers (vehicle-triggers-api, tesla-oracle, credit-tracker), then token-exchange-api, then dex.
+  - Roll back the gRPC callers (vehicle-triggers-api, tesla-oracle), then token-exchange-api, then dex.
   - Leave migrations in place; the new columns are nullable.
