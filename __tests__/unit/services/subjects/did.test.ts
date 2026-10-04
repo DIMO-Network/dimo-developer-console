@@ -61,4 +61,8 @@ describe('did helpers', () => {
       '0x7a3F…91c2',
     );
   });
+
+  it('keeps a longer contract tail when asked', () => {
+    expect(shortDid(VEHICLE, 6)).toBe('did:erc721:137:0xbA57…c9B0cF:184223');
+  });
 });

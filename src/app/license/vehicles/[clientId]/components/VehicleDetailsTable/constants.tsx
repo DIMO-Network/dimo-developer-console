@@ -1,5 +1,6 @@
 import { ColumnDef, createColumnHelper } from '@tanstack/table-core';
 import { useState } from 'react';
+import { shortDid } from '@/services/subjects/did';
 import { LastSeenCell } from './LastSeenCell';
 
 // Structural row type: satisfied by both GetVehiclesByClientId nodes and the
@@ -74,15 +75,20 @@ export const buildColumns = (
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): ColumnDef<VehicleRow, any>[] => [
-  columnHelper.accessor('tokenId', {
-    header: 'Vehicle token ID',
-    cell: (i) => <span className="whitespace-nowrap">{i.getValue()}</span>,
-  }),
   columnHelper.accessor('tokenDID', {
     header: 'Vehicle token DID',
-    cell: (i) => <span className="font-mono text-code">{i.getValue()}</span>,
-    // Phones keep the ID, vehicle and last seen; the DID is on the vehicle page.
-    meta: { className: 'hidden md:table-cell' },
+    // The DID ends in the token ID, so phones show just that; the full DID is
+    // on hover and on the vehicle page.
+    cell: (i) => (
+      <span className="whitespace-nowrap font-mono text-code">
+        <span className="md:hidden" title={i.getValue()}>
+          {i.row.original.tokenId}
+        </span>
+        <span className="hidden md:inline" title={i.getValue()}>
+          {shortDid(i.getValue(), 6)}
+        </span>
+      </span>
+    ),
   }),
   columnHelper.display({
     id: 'vehicleMMY',

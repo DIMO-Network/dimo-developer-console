@@ -28,14 +28,14 @@ export const accountDid = (chainId: number, address: string) =>
 export const sourceDid = (chainId: number, address: string) =>
   `did:ethr:${chainId}:${address}`;
 
-export const shortAddress = (address: string) =>
-  address.length > 12 ? `${address.slice(0, 6)}…${address.slice(-4)}` : address;
+export const shortAddress = (address: string, tail = 4) =>
+  address.length > 8 + tail ? `${address.slice(0, 6)}…${address.slice(-tail)}` : address;
 
-export const shortDid = (did: string) => {
+export const shortDid = (did: string, tail = 4) => {
   const erc = parseErc721Did(did);
   if (erc)
-    return `did:erc721:${erc.chainId}:${shortAddress(erc.contract)}:${erc.tokenId}`;
+    return `did:erc721:${erc.chainId}:${shortAddress(erc.contract, tail)}:${erc.tokenId}`;
   const m = ETHR.exec(did);
-  if (m) return `did:ethr:${m[1]}:${shortAddress(m[2])}`;
+  if (m) return `did:ethr:${m[1]}:${shortAddress(m[2], tail)}`;
   return did;
 };

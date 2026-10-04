@@ -57,4 +57,18 @@ describe('VehicleDetailsTable token ID search', () => {
     fireEvent.click(screen.getByText('Renounce access'));
     expect(screen.getByText('Token ID: 7')).toBeInTheDocument();
   });
+
+  it('identifies a vehicle by its short DID alone, with the full DID on hover', () => {
+    const did = 'did:erc721:137:0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF:7';
+    mockSingle({
+      data: { vehicle: { ...vehicle({ permissions: '0x1' }), tokenDID: did } },
+    });
+    render(<VehicleDetailsTable clientId="0xaaa" tokenIdSearch={7} />);
+    expect(screen.queryByText('Vehicle token ID')).toBeNull();
+    expect(screen.getByText('did:erc721:137:0xbA57…c9B0cF:7')).toHaveAttribute(
+      'title',
+      did,
+    );
+    expect(screen.queryByText(did)).toBeNull();
+  });
 });
