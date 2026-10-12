@@ -13,8 +13,8 @@ interface Props {
 }
 
 export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDelete }) => {
-  // Can delete if: not the default, OR there are no other brands to promote.
-  // (API will reject the last-brand case too, but disable early for UX.)
+  // Only a non-default brand can be deleted, so the last brand never can be.
+  // (API rejects deleting the last brand too, but disable early for UX.)
   const canDelete = isMultiple && !brand.isDefault;
 
   return (

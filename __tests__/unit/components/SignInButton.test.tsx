@@ -4,44 +4,15 @@ import { SignInButton } from '@/components/SignInButton';
 import { GoogleIcon } from '@/components/Icons';
 
 describe('SignInButton', () => {
-  it('renders a sign in button', () => {
-    const handlerGitHubLogin = jest.fn();
+  it('renders the provider icon and calls onClick', () => {
+    const onClick = jest.fn();
 
-    render(
-      <SignInButton
-        className="sm"
-        Icon={GoogleIcon}
-        onClick={() => handlerGitHubLogin('google')}
-      />,
-    );
+    render(<SignInButton className="sm" Icon={GoogleIcon} onClick={onClick} />);
 
-    const button = screen.getByText('Sign In');
-    const googleIcon = screen.getByRole('google-icon');
-
+    const button = screen.getByRole('sign-in-button');
     fireEvent.click(button);
 
-    expect(button).toBeInTheDocument();
-    expect(googleIcon).toBeInTheDocument();
-    expect(handlerGitHubLogin).toHaveBeenCalledWith('google');
-  });
-  it('renders a sign up button', () => {
-    const handlerGitHubLogin = jest.fn();
-
-    render(
-      <SignInButton
-        className="sm"
-        Icon={GoogleIcon}
-        onClick={() => handlerGitHubLogin('google')}
-      />,
-    );
-
-    const button = screen.getByText('Sign Up');
-    const googleIcon = screen.getByRole('google-icon');
-
-    fireEvent.click(button);
-
-    expect(button).toBeInTheDocument();
-    expect(googleIcon).toBeInTheDocument();
-    expect(handlerGitHubLogin).toHaveBeenCalledWith('google');
+    expect(screen.getByRole('google-icon')).toBeInTheDocument();
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });

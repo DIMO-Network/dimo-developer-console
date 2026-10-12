@@ -2,10 +2,20 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { RedirectUriForm } from '@/components/RedirectUriForm';
 
+jest.mock('@/hooks', () => ({
+  useMixPanel: () => ({ trackEvent: jest.fn() }),
+  useSetRedirectUri: () => jest.fn(),
+}));
+
 describe('RedirectUriForm', () => {
   it('renders the redirect uri form on the app details page', () => {
     render(
-      <RedirectUriForm tokenId={0} refreshData={() => {}} redirectUris={[]} owner={''} />,
+      <RedirectUriForm
+        tokenId={0}
+        refreshData={async () => {}}
+        redirectUris={[]}
+        owner={''}
+      />,
     );
 
     const signerAddressInputElm = screen.getByRole('redirect-url-input');
@@ -17,7 +27,12 @@ describe('RedirectUriForm', () => {
 
   it('renders the redirect uri validation texts', () => {
     render(
-      <RedirectUriForm tokenId={0} refreshData={() => {}} redirectUris={[]} owner={''} />,
+      <RedirectUriForm
+        tokenId={0}
+        refreshData={async () => {}}
+        redirectUris={[]}
+        owner={''}
+      />,
     );
 
     const signerAddressInputElm = screen.getByRole('redirect-url-input');

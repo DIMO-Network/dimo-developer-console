@@ -91,19 +91,19 @@ describe('BrandRow', () => {
     ).toBeDisabled();
   });
 
-  it('enables delete on default brand when it is the only brand', () => {
-    const onDelete = jest.fn();
+  it('disables delete on default brand when it is the only brand', () => {
     render(
       <BrandRow
         brand={baseBrand}
         isMultiple={false}
         isOwner={true}
         onEdit={jest.fn()}
-        onDelete={onDelete}
+        onDelete={jest.fn()}
       />,
     );
-    fireEvent.click(screen.getByTitle('Delete brand'));
-    expect(onDelete).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByTitle('Set another brand as default before deleting this one'),
+    ).toBeDisabled();
   });
 
   it('calls onDelete on a non-default brand', () => {

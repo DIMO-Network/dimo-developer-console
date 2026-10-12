@@ -19,13 +19,17 @@ const renderWithForm = (ui: React.ReactElement, { defaultValues = {} } = {}) => 
 describe('TokenInput', () => {
   it('renders the component', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    renderWithForm(<TokenInput name="dcx" control={null as any} />);
+    renderWithForm(<TokenInput name="dcx" control={null as any} />, {
+      defaultValues: { dcx: 0 },
+    });
     expect(screen.getByRole('token-value-input')).toBeInTheDocument();
   });
 
   it('handles value changes', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    renderWithForm(<TokenInput name="dcx" control={null as any} />);
+    renderWithForm(<TokenInput name="dcx" control={null as any} />, {
+      defaultValues: { dcx: 0 },
+    });
     const input = screen.getByRole('token-value-input');
 
     fireEvent.change(input, { target: { value: '100' } });
@@ -49,18 +53,19 @@ describe('TokenInput', () => {
         ]}
         showControls={true}
       />,
+      { defaultValues: { dcx: 0 } },
     );
 
     fireEvent.click(screen.getByText('10k'));
-    expect(screen.getByRole('token-value-input')).toHaveValue('10000');
+    expect(screen.getByRole('token-value-input')).toHaveValue('10,000');
 
     fireEvent.click(screen.getByText('100k'));
-    expect(screen.getByRole('token-value-input')).toHaveValue('100000');
+    expect(screen.getByRole('token-value-input')).toHaveValue('100,000');
 
     fireEvent.click(screen.getByText('500k'));
-    expect(screen.getByRole('token-value-input')).toHaveValue('500000');
+    expect(screen.getByRole('token-value-input')).toHaveValue('500,000');
 
     fireEvent.click(screen.getByText('1M'));
-    expect(screen.getByRole('token-value-input')).toHaveValue('1000000');
+    expect(screen.getByRole('token-value-input')).toHaveValue('1,000,000');
   });
 });

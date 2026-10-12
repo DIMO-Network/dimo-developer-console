@@ -7,13 +7,14 @@ describe('Configuration Loader', () => {
   it('should load default configuration for development environment', () => {
     process.env.VERCEL_ENV = 'development';
 
-    expect(getConfig()).toEqual(defaultConfig);
+    expect(getConfig()).toEqual({ environment: 'development', ...defaultConfig });
   });
 
   it('should merge production configuration with default for production environment', () => {
     process.env.VERCEL_ENV = 'production';
 
     const expectedConfig = {
+      environment: 'production',
       ...defaultConfig,
       ...productionConfig,
     };
@@ -24,6 +25,7 @@ describe('Configuration Loader', () => {
     process.env.VERCEL_ENV = 'preview';
 
     const expectedConfig = {
+      environment: 'preview',
       ...defaultConfig,
       ...previewConfig,
     };

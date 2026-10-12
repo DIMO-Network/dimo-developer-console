@@ -1,57 +1,35 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import { toast } from 'sonner';
 
 import { SignInButtons } from '@/components/SignInButton';
 
-const replace = window.location.replace;
-
-beforeEach(() => {
-  Object.defineProperty(window, 'location', {
-    value: { replace: jest.fn() },
-  });
-});
-
-afterEach(() => {
-  window.location.replace = replace;
-});
+jest.mock('sonner', () => ({ toast: { error: jest.fn() } }));
 
 describe('SignInButtons', () => {
-  it('redirects to the sign with google endpoint', () => {
-    window.location.replace = jest.fn();
+  it.each([
+    [0, 'google'],
+    [1, 'apple'],
+    [2, 'github'],
+  ])('calls onCTA when button %i is clicked with %s', (index, app) => {
+    const onCTA = jest.fn();
 
-    render(<SignInButtons disabled={false} onCTA={() => {}} />);
+    render(<SignInButtons disabled={false} onCTA={onCTA} />);
 
-    const [googleButton] = screen.getAllByText('Sign In');
+    fireEvent.click(screen.getAllByRole('sign-in-button')[index]);
 
-    fireEvent.click(googleButton);
-
-    expect(window.location.replace).toHaveBeenCalledWith(
-      '/api/auth/authorize?app=google',
-    );
+    expect(onCTA).toHaveBeenCalledWith(app);
   });
 
-  it('redirects to the sign with github endpoint', () => {
-    window.location.replace = jest.fn();
+  it('shows an error instead of signing in when disabled', () => {
+    const onCTA = jest.fn();
 
-    render(<SignInButtons disabled={false} onCTA={() => {}} />);
+    render(<SignInButtons disabled onCTA={onCTA} />);
 
-    const [, githubButton] = screen.getAllByText('Sign In');
+    fireEvent.click(screen.getAllByRole('sign-in-button')[0]);
 
-    fireEvent.click(githubButton);
-
-    expect(window.location.replace).toHaveBeenCalledWith(
-      '/api/auth/authorize?app=github',
+    expect(onCTA).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalledWith(
+      'You must accept terms of service and privacy policy',
     );
-  });
-
-  it('should not redirect to the sign with google endpoint', () => {
-    window.location.replace = jest.fn();
-
-    render(<SignInButtons disabled onCTA={() => {}} />);
-
-    const [googleButton] = screen.getAllByText('Sign In');
-
-    fireEvent.click(googleButton);
-
-    expect(window.location.replace).not.toHaveBeenCalled();
   });
 });

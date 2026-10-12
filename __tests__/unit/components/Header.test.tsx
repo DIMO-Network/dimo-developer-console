@@ -1,20 +1,24 @@
 import { render, screen } from '@testing-library/react';
 import { Header } from '@/components/Header';
 
-jest.mock('next-auth/react', () => ({
-  useSession: () => ({
-    data: { user: { name: 'John Doe' } },
+jest.mock('next/navigation', () => ({
+  usePathname: () => '/app',
+}));
+
+jest.mock('@/hooks', () => ({
+  useGlobalAccount: () => ({
+    currentUser: { role: 'OWNER' },
+    getCurrentDcxBalance: jest.fn().mockResolvedValue(0),
   }),
+  useUser: () => ({ data: { name: 'John Doe' } }),
 }));
 
 describe('Header', () => {
-  it('renders a card', () => {
+  it('renders the user information and credits', () => {
     render(<Header />);
 
-    const userInformationElm = screen.getByRole('user-information');
-    const creditsElm = screen.getByRole('credits-display');
-
-    expect(userInformationElm).toBeInTheDocument();
-    expect(creditsElm).toBeInTheDocument();
+    expect(screen.getByRole('user-information')).toBeInTheDocument();
+    expect(screen.getByRole('credits-display')).toBeInTheDocument();
+    expect(screen.getByTitle('Account Information')).toBeInTheDocument();
   });
 });

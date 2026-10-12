@@ -5,7 +5,7 @@ describe('formatAndGenerateCEL', () => {
     const cel = {
       conditions: [
         {
-          field: 'speed',
+          field: 'vss.speed',
           operator: '>',
           value: '50',
         },
@@ -13,8 +13,8 @@ describe('formatAndGenerateCEL', () => {
     };
     const result = formatAndGenerateCEL(cel);
     expect(result).toEqual({
-      data: 'speed',
-      trigger: 'valueNumber > 50',
+      metricName: 'vss.speed',
+      condition: 'valueNumber > 50',
     });
   });
 
@@ -22,7 +22,7 @@ describe('formatAndGenerateCEL', () => {
     const cel = {
       conditions: [
         {
-          field: 'isIgnitionOn',
+          field: 'vss.isIgnitionOn',
           operator: '==',
           value: '1',
         },
@@ -30,16 +30,16 @@ describe('formatAndGenerateCEL', () => {
     };
     const result = formatAndGenerateCEL(cel);
     expect(result).toEqual({
-      data: 'isIgnitionOn',
-      trigger: 'valueNumber == 1',
+      metricName: 'vss.isIgnitionOn',
+      condition: 'valueNumber == 1',
     });
   });
 
   it('should throw if there are multiple conditions', () => {
     const cel = {
       conditions: [
-        { field: 'speed', operator: '>', value: '50' },
-        { field: 'isIgnitionOn', operator: '==', value: '1' },
+        { field: 'vss.speed', operator: '>', value: '50' },
+        { field: 'vss.isIgnitionOn', operator: '==', value: '1' },
       ],
     };
     expect(() => formatAndGenerateCEL(cel)).toThrow(
@@ -58,7 +58,7 @@ describe('formatAndGenerateCEL', () => {
 
   it('should throw if a condition is missing an operator', () => {
     const cel = {
-      conditions: [{ field: 'speed', operator: '', value: '50' }],
+      conditions: [{ field: 'vss.speed', operator: '', value: '50' }],
     };
     expect(() => formatAndGenerateCEL(cel)).toThrow(
       'Please complete all condition fields before saving.',
@@ -67,7 +67,7 @@ describe('formatAndGenerateCEL', () => {
 
   it('should throw if a condition is missing a value', () => {
     const cel = {
-      conditions: [{ field: 'speed', operator: '>', value: '' }],
+      conditions: [{ field: 'vss.speed', operator: '>', value: '' }],
     };
     expect(() => formatAndGenerateCEL(cel)).toThrow(
       'Please complete all condition fields before saving.',
