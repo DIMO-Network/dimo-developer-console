@@ -84,5 +84,10 @@ export default withSentryConfig(nextConfig, {
   // An auth token is required for uploading source maps.
   authToken: process.env.SENTRY_AUTH_TOKEN,
 
+  // Sentry turns on client source maps; delete them after upload so they're not served publicly.
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+
   silent: false, // Can be used to suppress logs
 });
