@@ -11,10 +11,14 @@
   }
 }
 
-/* The expanded sidebar leaves the lockup 220px. Full size it needs 236px and
-   "Developer Console" runs past the sidebar, so the sidebar draws it a step
-   smaller (209px). */
+/* The expanded sidebar leaves the lockup 220px (244 − 2 × 12). Full size it
+   needs 236px and "Developer Console" runs past the sidebar, so the sidebar
+   draws it a step smaller (209px). The box is pinned to 220px so the fit in
+   BrandLockup.tsx measures against the expanded width, not the sidebar
+   mid-transition. */
 .main-menu .brand-lockup {
+  @apply w-[220px] origin-left;
+
   .wordmark {
     @apply h-4;
   }
