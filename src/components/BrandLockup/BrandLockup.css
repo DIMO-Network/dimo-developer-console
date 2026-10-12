@@ -1,6 +1,4 @@
 .brand-lockup {
-  /* Fleet's 18px wordmark is wider than the old one; with "Developer Console"
-     the lockup must still end inside the 244px sidebar. */
   @apply flex h-8 items-center gap-1.5 px-2.5;
 
   .wordmark {
@@ -10,6 +8,19 @@
   .product {
     @apply whitespace-nowrap border-l border-canvas-divider pl-1.5 text-[14px] font-medium leading-none text-fg;
     letter-spacing: -0.01em;
+  }
+}
+
+/* The expanded sidebar leaves the lockup 220px. Full size it needs 236px and
+   "Developer Console" runs past the sidebar, so the sidebar draws it a step
+   smaller (209px). */
+.main-menu .brand-lockup {
+  .wordmark {
+    @apply h-4;
+  }
+
+  .product {
+    @apply text-[13px];
   }
 }
 
