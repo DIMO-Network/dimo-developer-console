@@ -28,8 +28,17 @@ export interface ISubOrganization {
   email: string;
   subOrganizationId: string;
   emailVerified: boolean;
-  walletAddress: `0x${string}`;
-  smartContractAddress: `0x${string}`;
+  // Optional because the Global Account API does not return them. A live
+  // GET /api/account/<email> answers 200 with exactly
+  // {subOrganizationId, isDeployed, hasPasskey, hasPhone, emailVerified,
+  //  providedSignerAddress, authenticators}. Declaring these required made the
+  // compiler vouch for fields that are never on the wire, which is how
+  // resolveCaller came to read `smartContractAddress` off this response and
+  // 401 every template request. Console's real address comes from
+  // GlobalAccountProvider, which derives it client-side as
+  // `kernelAccount.address`; it has never come from here.
+  walletAddress?: `0x${string}`;
+  smartContractAddress?: `0x${string}`;
   hasPasskey: boolean;
 }
 
