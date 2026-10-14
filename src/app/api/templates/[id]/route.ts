@@ -26,7 +26,7 @@ const SERVER_OWNED = ['version', 'createdAt', 'updatedAt', 'author'] as const;
 
 type Params = { params: Promise<{ id: string }> };
 
-async function entitlementFor(caller: string, id: string) {
+async function entitlementFor(caller: string | null, id: string) {
   const template = await fetchTemplate(id);
   const entitlement = await resolveEntitlement({
     caller,
@@ -235,10 +235,17 @@ export async function PUT(req: NextRequest, { params }: Params) {
     // TemplatePayload deliberately excludes `author` -- it is not client input.
     // The wire body does carry it, stamped here, which is the one place the two
     // shapes differ.
+    // `author` is stamped only when the session actually carries an address.
+    // Writing `null` would be a schema violation at the worker, and writing a
+    // placeholder would claim ownership on someone's behalf -- so an authorless
+    // session leaves the template unowned, exactly as the backfill left it.
+    // Nothing is lost by that: a caller with no address can only have reached
+    // this line through a tier that required no identity, and a template that
+    // already HAS an author is refused above as proposal-required.
     const payload = {
       ...submitted,
       manufacturer: { ...submittedManufacturer, tokenId: held.tokenId },
-      author: caller.address,
+      ...(caller.address ? { author: caller.address } : {}),
     } as unknown as TemplatePayload;
     const result = await publishTemplate(id, payload, precondition);
 

@@ -1,7 +1,6 @@
 import config from '@/config';
 import type { Template } from '@/types/template';
 import { getUserByToken } from '@/services/user';
-import { getUserSubOrganization } from '@/services/globalAccount';
 
 export type EntitlementKind =
   | 'create'
@@ -40,22 +39,48 @@ export const curatorAddresses = (): string[] =>
     .filter((a) => a.length > 0);
 
 /**
- * The caller, from the session Console already has. Mirrors src/middleware.ts:
- * the session cookie identifies a user, and the Global Account sub-organisation
- * is what turns that user into an address. The smart contract address is used,
- * not the Turnkey EOA: it is the address DIMO records on chain, so it is the
- * one that can hold a Manufacturer NFT.
+ * The caller, from the session Console already has. The address is
+ * `user.address`, which dimo-developer-console-api fills from the
+ * `ethereum_address` claim of the session JWT: /api/me refuses to answer at all
+ * without that claim (hasMandatoryInformation), and processOAuth looks the user
+ * up BY it, so it is signature-verified rather than anything a client asserts.
+ * console-api treats it as the on-chain caller itself -- assertOwnsWorkspace
+ * compares it against workspace.owner and 403s on a mismatch -- which is the
+ * same question entitlement asks about a Manufacturer NFT.
+ *
+ * This used to read `smartContractAddress` off the Global Account
+ * sub-organisation instead, and that field does not exist. GET
+ * /api/account/<email> answers 200 with {subOrganizationId, isDeployed,
+ * hasPasskey, hasPhone, emailVerified, providedSignerAddress, authenticators} --
+ * no smartContractAddress, no walletAddress, providedSignerAddress null. The
+ * address the rest of Console uses is derived CLIENT-side in
+ * GlobalAccountProvider as `kernelAccount.address`, from a Turnkey session only
+ * the browser holds, so it was never reachable here. ISubOrganization declared
+ * the field required, so the compiler vouched for it, and every
+ * /api/templates/[id] request answered 401 to every user in production.
+ *
+ * getUserByToken was already being called for the email; the address was in
+ * that same response the whole time.
+ *
+ * `address` stays nullable so a session that somehow carries no address is a
+ * narrowing rather than a lockout: every identity-dependent tier (curator,
+ * claimed author, Manufacturer NFT holder) compares through `eq`, which is
+ * false for null, so such a caller reaches only the tiers that depend on no
+ * identity at all and can never be mistaken for a curator or a manufacturer.
  */
 export async function resolveCaller(): Promise<{
-  address: `0x${string}`;
+  address: `0x${string}` | null;
   email: string;
 } | null> {
   try {
     const user = await getUserByToken();
     const email = user.company_email_owner ?? user.email;
-    const sub = await getUserSubOrganization(email);
-    if (!sub?.smartContractAddress) return null;
-    return { address: sub.smartContractAddress, email };
+    if (!email) return null;
+    const address = typeof user.address === 'string' ? user.address.trim() : '';
+    return {
+      address: address === '' ? null : (address as `0x${string}`),
+      email,
+    };
   } catch {
     return null;
   }
@@ -190,7 +215,8 @@ export function hardwareTemplateIdChanged(
 }
 
 export interface EntitlementArgs {
-  caller: string;
+  /** null when the session carries no on-chain address; see resolveCaller. */
+  caller: string | null;
   /** The definition id, which exists whether or not a template document does. */
   id: string;
   template: Template | null;
