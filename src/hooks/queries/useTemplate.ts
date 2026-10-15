@@ -4,6 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import type { DeviceType, Template, TemplatePayload } from '@/types/template';
 import type { Entitlement } from '@/services/templateEntitlement';
 import { HttpError } from '@/utils/httpError';
+import { CLIENT_TIMEOUT_MS, fetchWithTimeout, isTimeout } from '@/utils/fetchWithTimeout';
 
 export interface TemplateBundle {
   template: Template | null;
@@ -26,7 +27,11 @@ export const useTemplate = (id: string) =>
     staleTime: 0,
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      const resp = await fetch(`/api/templates/${encodeURIComponent(id)}`);
+      const resp = await fetchWithTimeout(
+        `/api/templates/${encodeURIComponent(id)}`,
+        {},
+        { timeoutMs: CLIENT_TIMEOUT_MS, label: 'The template service' },
+      );
       const json = await resp.json();
       // HttpError, not Error: the retry policy in QueryProvider reads the
       // status off the thrown value, and a 401 that arrives as a bare Error is
@@ -44,7 +49,37 @@ export const usePublishTemplate = (id: string) =>
     { payload: TemplatePayload; version: number | null }
   >({
     mutationFn: async ({ payload, version }) => {
-      const resp = await fetch(`/api/templates/${encodeURIComponent(id)}`, {
+      const resp = await publishRequest(id, payload, version);
+      const json = await resp.json();
+      if (!resp.ok) {
+        throw {
+          status: resp.status,
+          message: json.error,
+          errors: json.errors,
+          conflict: json.conflict,
+        } as PublishFailure;
+      }
+      return json.template as Template;
+    },
+  });
+
+/**
+ * The PUT itself. Split out so the timeout is applied in one place and a
+ * timeout can be reported as a PublishFailure -- the shape every caller of
+ * this mutation already renders. Thrown as a bare Error it would reach the
+ * create page's catch with no `status`, no `errors` and no `message`, and be
+ * shown as "Could not create this template", which says nothing about waiting
+ * 30 seconds for a service that never replied.
+ */
+async function publishRequest(
+  id: string,
+  payload: TemplatePayload,
+  version: number | null,
+): Promise<Response> {
+  try {
+    return await fetchWithTimeout(
+      `/api/templates/${encodeURIComponent(id)}`,
+      {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -59,16 +94,14 @@ export const usePublishTemplate = (id: string) =>
             : { 'If-Match': `"${version}"` }),
         },
         body: JSON.stringify(payload),
-      });
-      const json = await resp.json();
-      if (!resp.ok) {
-        throw {
-          status: resp.status,
-          message: json.error,
-          errors: json.errors,
-          conflict: json.conflict,
-        } as PublishFailure;
-      }
-      return json.template as Template;
-    },
-  });
+      },
+      { timeoutMs: CLIENT_TIMEOUT_MS, label: 'The template service' },
+    );
+  } catch (err) {
+    // 0 is not a real HTTP status, and that is the point: nothing answered.
+    // It keeps the failure in the shape the pages render while staying
+    // distinguishable from any status a server could actually send.
+    if (isTimeout(err)) throw { status: 0, message: err.message } as PublishFailure;
+    throw err;
+  }
+}

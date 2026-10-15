@@ -1,4 +1,5 @@
 import config from '@/config';
+import { fetchWithTimeout } from '@/utils/fetchWithTimeout';
 import type { DeviceType, Template, TemplatePayload } from '@/types/template';
 
 // definitions-worker/src/index.ts MAX_DOC_BYTES. Checked here so an oversized
@@ -65,7 +66,7 @@ export async function fetchTemplate(
 ): Promise<Template | null> {
   assertServer();
   const url = `${config.definitionsWorkerUrl}/t/${encodeURIComponent(id)}`;
-  const resp = await fetch(
+  const resp = await fetchWithTimeout(
     allowEdgeCache ? url : `${url}?${FRESH_PARAM}=${freshValue()}`,
     {
       // A template's ETag is its version, and the editor's whole conflict story
@@ -73,6 +74,7 @@ export async function fetchTemplate(
       // this covers Next's Data Cache, the cache key above covers the edge.
       cache: 'no-store',
     },
+    { label: `definitions-worker GET /t/${id}` },
   );
   if (resp.status === 404) return null;
   if (!resp.ok)
@@ -82,7 +84,7 @@ export async function fetchTemplate(
 
 export async function fetchVocabulary(): Promise<DeviceType> {
   assertServer();
-  const resp = await fetch(
+  const resp = await fetchWithTimeout(
     `${config.definitionsWorkerUrl}/schema/device-type-vehicle.json`,
     {
       // Matches the worker's own max-age. The vocabulary decides which options
@@ -90,6 +92,7 @@ export async function fetchVocabulary(): Promise<DeviceType> {
       // longer than the validator that enforces it.
       next: { revalidate: 300 },
     },
+    { label: 'definitions-worker GET /schema/device-type-vehicle.json' },
   );
   if (!resp.ok) {
     throw new Error(
@@ -118,12 +121,11 @@ export async function publishTemplate(
   if (precondition.kind === 'create') headers['If-None-Match'] = '*';
   else headers['If-Match'] = `"${precondition.version}"`;
 
-  const resp = await fetch(`${config.definitionsWorkerUrl}/t/${encodeURIComponent(id)}`, {
-    method: 'PUT',
-    headers,
-    body,
-    cache: 'no-store',
-  });
+  const resp = await fetchWithTimeout(
+    `${config.definitionsWorkerUrl}/t/${encodeURIComponent(id)}`,
+    { method: 'PUT', headers, body, cache: 'no-store' },
+    { label: `definitions-worker PUT /t/${id}` },
+  );
 
   if (resp.ok) return { ok: true, template: (await resp.json()) as Template };
 
