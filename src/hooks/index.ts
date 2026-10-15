@@ -1,7 +1,6 @@
 export * from './useContractGA';
 export * from './useCredits';
 export * from './useErrorHandler';
-export * from './useOnboarding';
 export * from './useTeamCollaborators';
 export * from './useUser';
 export * from './useGlobalAccount';

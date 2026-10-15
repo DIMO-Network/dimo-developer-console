@@ -19,7 +19,6 @@ import configuration from '@/config';
 import './Form.css';
 
 interface IProps {
-  workspace?: IWorkspace;
   onSuccess: () => void;
   onClose?: () => void;
 }
