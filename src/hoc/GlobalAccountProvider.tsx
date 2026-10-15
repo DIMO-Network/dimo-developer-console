@@ -25,6 +25,7 @@ import { signOut } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
+import { queryClient } from '@/hoc/QueryProvider';
 
 // Resolving who is signed in costs two Turnkey calls (wallets, then the wallet
 // account) and chain RPC to derive the smart account address. Neither address
@@ -206,6 +207,9 @@ export const withGlobalAccounts = <P extends object>(
     const logout = async () => {
       await turnkeyClient.logout();
       forgetResolvedAccount();
+      // Cached queries (the user, the team) are not keyed by account; the next
+      // person to sign in on this tab must not see them.
+      queryClient.clear();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
       await signOut();

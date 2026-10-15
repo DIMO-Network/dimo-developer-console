@@ -45,7 +45,11 @@ export const LicenseCard = (props: {
 
   // A GET rather than the server action: the cards on a page load side by side
   // instead of queueing one after another.
-  const { data: configs, isPending: sharingLinkLoading } = useRestQuery({
+  const {
+    data: configs,
+    isPending: sharingLinkLoading,
+    isError: sharingLinkFailed,
+  } = useRestQuery({
     queryKey: ['configurations', license.clientId],
     queryFn: () =>
       fetchJson<IConfigurationListItem[]>(
@@ -101,6 +105,8 @@ export const LicenseCard = (props: {
         {/* Sharing link */}
         {sharingLinkLoading ? (
           <BubbleLoader isLoading isSmall />
+        ) : sharingLinkFailed ? (
+          <span className="text-label text-muted">Sharing status unavailable</span>
         ) : configCount !== null && configCount > 1 ? (
           <Anchor
             href={`/license/${license.tokenId}/configurator`}
