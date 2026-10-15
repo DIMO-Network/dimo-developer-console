@@ -23,6 +23,7 @@ jest.mock('@/utils/middlewareUtils', () => ({
 }));
 
 import { config, middleware } from '@/middleware';
+import * as Sentry from '@sentry/nextjs';
 import { getUserByToken } from '@/services/user';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import {
@@ -192,6 +193,18 @@ describe('middleware never lets an unverified token through', () => {
     expect(isPassThrough(res)).toBe(false);
   });
 
+  it('does not report a crafted token to Sentry, only a key set it could not check', async () => {
+    (decodeJwtToken as jest.Mock).mockRejectedValue(
+      Object.assign(new Error('crit'), { code: 'ERR_JOSE_NOT_SUPPORTED' }),
+    );
+    await run(request('/licenses', { 'session-token': TOKEN }));
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+
+    (decodeJwtToken as jest.Mock).mockRejectedValue(new TypeError('fetch failed'));
+    await run(request('/licenses', { 'session-token': TOKEN }));
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+  });
+
   it('treats a key set outage as signed out, not as a pass', async () => {
     (decodeJwtToken as jest.Mock).mockRejectedValue(new Error('fetch failed'));
     const page = await run(request('/licenses?error=1', { 'session-token': TOKEN }));
@@ -213,6 +226,7 @@ describe('middleware matcher', () => {
 
   it('skips the app icon and static assets', () => {
     expect(runsOn('/icon.png')).toBe(false);
+    expect(runsOn('/icon.pngs/anything')).toBe(true);
     expect(runsOn('/_next/static/chunks/main.js')).toBe(false);
   });
 

@@ -40,22 +40,20 @@ export const decodeJwtToken = async (token: string): Promise<JWTPayload> => {
   return payload;
 };
 
-// Failures that say the token itself is no good: expired, signed by a key the
-// auth server never issued, malformed, or for another issuer. Such a cookie is
-// no session at all. Anything else (the key set could not be fetched, say) is
-// an outage, not a verdict on the token, and is left to the caller.
-const INVALID_TOKEN_CODES = new Set([
-  'ERR_JWT_EXPIRED',
-  'ERR_JWT_CLAIM_VALIDATION_FAILED',
-  'ERR_JWT_INVALID',
-  'ERR_JWS_INVALID',
-  'ERR_JWS_SIGNATURE_VERIFICATION_FAILED',
-  'ERR_JWKS_NO_MATCHING_KEY',
-  'ERR_JOSE_ALG_NOT_ALLOWED',
+// Failures to check a token at all -- the key set could not be fetched or
+// read -- as opposed to verdicts on the token (expired, forged, malformed).
+// Both mean no session. Only these are worth reporting: anyone can send a
+// crafted token that makes jose throw the others, as often as they like.
+const KEY_SET_FAILURE_CODES = new Set([
+  'ERR_JWKS_TIMEOUT',
+  'ERR_JWKS_INVALID',
+  'ERR_JOSE_GENERIC',
 ]);
 
-export const isInvalidTokenError = (error: unknown): boolean =>
-  INVALID_TOKEN_CODES.has((error as { code?: string } | null)?.code ?? '');
+export const isKeySetFailure = (error: unknown): boolean => {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code !== 'string' || KEY_SET_FAILURE_CODES.has(code);
+};
 
 // The middleware checks that a signed-in user has finished onboarding by asking
 // console-api (/api/me) and the accounts API who they are. That costs two

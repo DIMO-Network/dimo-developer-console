@@ -2,7 +2,7 @@ import { NextFetchEvent, NextResponse } from 'next/server';
 import {
   decodeJwtToken,
   isIn,
-  isInvalidTokenError,
+  isKeySetFailure,
   isSessionExpiredError,
   SESSION_VERDICT_COOKIE,
   SESSION_VERDICT_MAX_AGE,
@@ -38,9 +38,9 @@ const verifyToken = async (token: string) => {
   try {
     return await decodeJwtToken(token);
   } catch (error) {
-    if (!isInvalidTokenError(error)) {
-      // Not a bad token but a failure to check it, e.g. the key set could not
-      // be fetched: worth seeing, still no session.
+    if (isKeySetFailure(error)) {
+      // Not a bad token but a failure to check it: worth seeing, still no
+      // session.
       Sentry.captureException(error);
       console.error('Session token could not be verified:', error);
     }
@@ -194,5 +194,5 @@ export const middleware = async (request: NextRequest, event: NextFetchEvent) =>
 export const config = {
   // icon.png is the app icon: it needs no session. Excluded by name, not by
   // extension -- a dynamic route (/api/templates/[id]) can end in ".png" too.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.png|images|api/auth).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon\\.png$|images|api/auth).*)'],
 };
