@@ -1,5 +1,13 @@
 import { NextFetchEvent, NextResponse } from 'next/server';
-import { decodeJwtToken, isIn, isSessionExpiredError } from '@/utils/middlewareUtils';
+import {
+  decodeJwtToken,
+  isIn,
+  isKeySetFailure,
+  isSessionExpiredError,
+  SESSION_VERDICT_COOKIE,
+  SESSION_VERDICT_MAX_AGE,
+  sessionVerdictFor,
+} from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
@@ -21,15 +29,23 @@ const buildRedirectUrl = (path: string, request: NextRequest) => {
   return url;
 };
 
-const getToken = async () => {
-  const token = await getCookie(cookieName);
-  if (!token) {
+// A token that does not verify is no session: the visitor is sent to sign in
+// (or gets a 401) rather than an error page. That holds for every failure,
+// not only the expected ones -- an attacker can make jose throw other errors
+// (an unsupported "crit" header, say), and a failure here must never fall
+// through to the error handling below, which lets requests continue.
+const verifyToken = async (token: string) => {
+  try {
+    return await decodeJwtToken(token);
+  } catch (error) {
+    if (isKeySetFailure(error)) {
+      // Not a bad token but a failure to check it: worth seeing, still no
+      // session.
+      Sentry.captureException(error);
+      console.error('Session token could not be verified:', error);
+    }
     return null;
   }
-
-  const payload = await decodeJwtToken(token);
-
-  return payload;
 };
 
 const mustBeAuthorize = (request: NextRequest, token: JWTPayload | null) => {
@@ -61,10 +77,37 @@ const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
   return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
 };
 
-const validatePrivateSession = async (request: NextRequest) => {
+const rememberVerdict = (
+  request: NextRequest,
+  response: NextResponse,
+  verdict: string,
+) => {
+  response.cookies.set(SESSION_VERDICT_COOKIE, verdict, {
+    httpOnly: true,
+    secure: request.nextUrl.protocol === 'https:',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: SESSION_VERDICT_MAX_AGE,
+  });
+  return response;
+};
+
+const validatePrivateSession = async (request: NextRequest, token: string) => {
+  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  const verdict = await sessionVerdictFor(token);
+  // /api/me accepts a pending team invitation as a side effect, so while one is
+  // waiting the full check runs every time.
+  const hasInvitation = Boolean(await getCookie('invitation_code'));
+
+  // This session already passed the check below: see SESSION_VERDICT_COOKIE.
+  if (!hasInvitation && request.cookies.get(SESSION_VERDICT_COOKIE)?.value === verdict) {
+    return isLoginPage
+      ? NextResponse.redirect(buildRedirectUrl('/app', request), { status: 307 })
+      : NextResponse.next();
+  }
+
   console.info('Validating private session', request.nextUrl.pathname);
   const user = await getUserByToken();
-  const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const subOrganization = await getUserSubOrganization(
     user.company_email_owner ?? user.email,
   );
@@ -75,34 +118,28 @@ const validatePrivateSession = async (request: NextRequest) => {
     });
   }
 
-  request.user = new LoggedUser(user, subOrganization);
-
-  const isCompliant = request.user?.isCompliant ?? false;
-  const missingFlow = request.user?.missingFlow ?? null;
+  const loggedUser = new LoggedUser(user, subOrganization);
   const flow = request.nextUrl.searchParams.get('flow');
 
-  //TODO: check how isLoginPage affects on safari
-  if (isLoginPage && isCompliant) {
-    return NextResponse.redirect(buildRedirectUrl('/app', request), {
-      status: 307,
-    });
-  }
-
-  if (!isCompliant && !flow) {
+  if (!loggedUser.isCompliant) {
+    if (flow) return NextResponse.next();
     return NextResponse.redirect(
-      buildRedirectUrl(`/sign-up?flow=${missingFlow}`, request),
+      buildRedirectUrl(`/sign-up?flow=${loggedUser.missingFlow}`, request),
       {
         status: 307,
       },
     );
   }
 
-  return NextResponse.next();
+  //TODO: check how isLoginPage affects on safari
+  const response = isLoginPage
+    ? NextResponse.redirect(buildRedirectUrl('/app', request), { status: 307 })
+    : NextResponse.next();
+  return rememberVerdict(request, response, verdict);
 };
 
-const validatePublicSession = async (request: NextRequest) => {
+const validatePublicSession = async (request: NextRequest, token: JWTPayload | null) => {
   console.info('Validating public session', request.nextUrl.pathname);
-  const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const isAPIProtected = mustBeAuthorize(request, token);
   const isAPI = request.nextUrl.pathname.startsWith(API_PATH);
@@ -128,17 +165,22 @@ const validatePublicSession = async (request: NextRequest) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
   const hasError = request.nextUrl.searchParams.get('error');
-  const token = await getToken();
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  let token: JWTPayload | null = null;
   try {
-    if (token) {
-      return validatePrivateSession(request);
+    const rawToken = await getCookie(cookieName);
+    token = rawToken ? await verifyToken(rawToken) : null;
+    if (rawToken && token) {
+      return await validatePrivateSession(request, rawToken);
     }
 
-    return validatePublicSession(request);
+    return await validatePublicSession(request, token);
   } catch (error: unknown) {
     Sentry.captureException(error);
     console.error('Middleware error:', error);
+    // Only a verified session may continue past a failure (the ?error= branch
+    // below lets the request through). Anything else is treated as signed out.
+    if (!token) return validatePublicSession(request, null);
     let path = handleConnectionError(error, isLoginPage);
     path = path ?? handleExpiredSession(error, isLoginPage);
     const redirectUrl = `${configuration.frontendUrl}${path}`;
@@ -150,5 +192,7 @@ export const middleware = async (request: NextRequest, event: NextFetchEvent) =>
 };
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|images|api/auth).*)'],
+  // icon.png is the app icon: it needs no session. Excluded by name, not by
+  // extension -- a dynamic route (/api/templates/[id]) can end in ".png" too.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon\\.png$|images|api/auth).*)'],
 };

@@ -39,3 +39,40 @@ export const decodeJwtToken = async (token: string): Promise<JWTPayload> => {
   });
   return payload;
 };
+
+// Failures to check a token at all -- the key set could not be fetched or
+// read -- as opposed to verdicts on the token (expired, forged, malformed).
+// Both mean no session. Only these are worth reporting: anyone can send a
+// crafted token that makes jose throw the others, as often as they like.
+const KEY_SET_FAILURE_CODES = new Set([
+  'ERR_JWKS_TIMEOUT',
+  'ERR_JWKS_INVALID',
+  'ERR_JOSE_GENERIC',
+]);
+
+export const isKeySetFailure = (error: unknown): boolean => {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code !== 'string' || KEY_SET_FAILURE_CODES.has(code);
+};
+
+// The middleware checks that a signed-in user has finished onboarding by asking
+// console-api (/api/me) and the accounts API who they are. That costs two
+// sequential round trips -- 300-450ms warm, seconds cold -- and it ran on every
+// navigation, prefetch, server action and API call. Once a session passes, the
+// answer is remembered in this cookie for a while, and requests carrying it
+// skip both lookups.
+//
+// The cookie holds a digest of the session token it was issued for, so it ends
+// with that session and cannot be carried to another. It is not a security
+// boundary: it only spares the onboarding redirect, and every request for data
+// is still authorised by console-api against the session token itself.
+export const SESSION_VERDICT_COOKIE = 'session-verdict';
+export const SESSION_VERDICT_MAX_AGE = 15 * 60;
+
+export const sessionVerdictFor = async (token: string): Promise<string> => {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+};

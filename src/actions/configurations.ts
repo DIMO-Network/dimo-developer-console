@@ -22,7 +22,7 @@ export const getConfigurationsByClientId = async ({
   try {
     const client = await dimoDevAPIClient();
     const { data } = await client.get<IConfigurationListItem[] | IConfigurationListItem>(
-      `/api/my/configurations?clientId=${client_id}`,
+      `/api/my/configurations?clientId=${encodeURIComponent(client_id)}`,
     );
     return Array.isArray(data) ? data : data ? [data] : [];
   } catch {

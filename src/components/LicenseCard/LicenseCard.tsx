@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Card } from '@/components/Card';
 import classNames from 'classnames';
 import { Anchor } from '@/components/Anchor';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
+import { useQuery as useRestQuery } from '@tanstack/react-query';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';
 import { GET_VEHICLE_COUNT_BY_CLIENT_ID } from '@/app/license/[tokenId]/details/components/Vehicles';
-import { getConfigurationsByClientId } from '@/actions/configurations';
+import type { IConfigurationListItem } from '@/actions/configurations';
+import { fetchJson } from '@/utils/fetchJson';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
@@ -42,19 +43,24 @@ export const LicenseCard = (props: {
     },
   );
 
-  const [configCount, setConfigCount] = useState<number | null>(null);
-  const [sharingLink, setSharingLink] = useState<string | null>(null);
-  const [sharingLinkLoading, setSharingLinkLoading] = useState(true);
-
-  useEffect(() => {
-    if (!license.clientId) return;
-    getConfigurationsByClientId({ client_id: license.clientId }).then((configs) => {
-      setConfigCount(configs.length);
-      const id = configs[0]?.id;
-      setSharingLink(id ? `${DIMO_LOGIN_BASE}/?configurationId=${id}` : null);
-      setSharingLinkLoading(false);
-    });
-  }, [license.clientId]);
+  // A GET rather than the server action: the cards on a page load side by side
+  // instead of queueing one after another.
+  const {
+    data: configs,
+    isPending: sharingLinkLoading,
+    isError: sharingLinkFailed,
+  } = useRestQuery({
+    queryKey: ['configurations', license.clientId],
+    queryFn: () =>
+      fetchJson<IConfigurationListItem[]>(
+        `/api/configurations?clientId=${encodeURIComponent(license.clientId)}`,
+      ),
+    enabled: Boolean(license.clientId),
+  });
+  const configCount = configs?.length ?? null;
+  const sharingLink = configs?.[0]?.id
+    ? `${DIMO_LOGIN_BASE}/?configurationId=${configs[0].id}`
+    : null;
 
   const vehicleCount = vehicleData?.vehicles?.totalCount ?? 0;
   const hasVehicles = vehicleCount > 0;
@@ -99,6 +105,8 @@ export const LicenseCard = (props: {
         {/* Sharing link */}
         {sharingLinkLoading ? (
           <BubbleLoader isLoading isSmall />
+        ) : sharingLinkFailed ? (
+          <span className="text-label text-muted">Sharing status unavailable</span>
         ) : configCount !== null && configCount > 1 ? (
           <Anchor
             href={`/license/${license.tokenId}/configurator`}

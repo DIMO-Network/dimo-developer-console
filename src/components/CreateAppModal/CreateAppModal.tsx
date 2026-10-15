@@ -2,7 +2,6 @@ import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { FC } from 'react';
 import { Form } from '@/app/app/create/components/Form';
-import { useOnboarding } from '@/hooks';
 
 import './CreateAppModal.css';
 
@@ -11,7 +10,6 @@ interface Props {
   handleIsOpen: (e: boolean) => void;
 }
 export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
-  const { workspace } = useOnboarding();
   const handleClose = () => {
     handleIsOpen(false);
   };
@@ -25,7 +23,7 @@ export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
           </Title>
         </div>
         <div className={'flex w-full flex-1 pt-6'}>
-          <Form workspace={workspace} onSuccess={handleClose} onClose={handleClose} />
+          <Form onSuccess={handleClose} onClose={handleClose} />
         </div>
       </div>
     </Modal>
