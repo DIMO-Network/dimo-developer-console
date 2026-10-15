@@ -10,6 +10,7 @@ import {
 import {
   countMintedVehicles,
   curatorAddresses,
+  developerLicense,
   hardwareTemplateIdChanged,
   manufacturerOwner,
   resolveCaller,
@@ -37,6 +38,7 @@ async function entitlementFor(caller: string | null, id: string) {
     template,
     countMintedVehicles,
     manufacturerOwner,
+    developerLicense,
     curators: curatorAddresses(),
   });
   // A count that could not be read is a state, not a throw, so it would pass
@@ -239,9 +241,12 @@ export async function PUT(req: NextRequest, { params }: Params) {
     // Writing `null` would be a schema violation at the worker, and writing a
     // placeholder would claim ownership on someone's behalf -- so an authorless
     // session leaves the template unowned, exactly as the backfill left it.
-    // Nothing is lost by that: a caller with no address can only have reached
-    // this line through a tier that required no identity, and a template that
-    // already HAS an author is refused above as proposal-required.
+    // Since the gate became the developer license this branch is belt and
+    // braces: every tier that can publish is one identity answered a question
+    // about an address with, so a session with no address reaches
+    // 'license-required' and never gets here. It stays because the author
+    // stamp is what makes an edit attributable, and a wrong author is worse
+    // than none.
     const payload = {
       ...submitted,
       manufacturer: { ...submittedManufacturer, tokenId: held.tokenId },

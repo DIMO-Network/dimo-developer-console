@@ -140,20 +140,22 @@ describe('TrimSelectorEditor', () => {
 });
 
 describe('EntitlementBanner', () => {
-  it('explains a proposal requirement and names the vehicle count', () => {
+  it('explains a missing developer license and names the vehicle count', () => {
     render(
       <EntitlementBanner
         entitlement={{
-          kind: 'proposal-required',
+          kind: 'license-required',
           canPublish: false,
           canSetHardwareTemplateId: false,
           mintedVehicles: 4212,
-          reason: '4,212 minted vehicles resolve to this template.',
+          reason:
+            'Creating or editing a template takes a DIMO developer license. 4,212 minted vehicles resolve to it.',
         }}
       />,
     );
+    expect(screen.getByRole('status')).toHaveTextContent('Developer license required');
     expect(screen.getByRole('status')).toHaveTextContent(
-      '4,212 minted vehicles resolve to this template.',
+      '4,212 minted vehicles resolve to it.',
     );
     expect(screen.getByRole('status')).toHaveTextContent('read only');
     expect(screen.getByTestId('read-only-warning')).toBeInTheDocument();
@@ -181,16 +183,17 @@ describe('EntitlementBanner', () => {
     render(
       <EntitlementBanner
         entitlement={{
-          kind: 'author',
+          kind: 'licensed',
           canPublish: true,
           canSetHardwareTemplateId: false,
           mintedVehicles: 0,
-          reason: 'No vehicle references this template yet.',
+          reason:
+            'You hold DIMO developer license 472 ("DEMO App"), which is what publishing takes. No vehicle resolves to it yet.',
         }}
       />,
     );
     expect(screen.getByRole('status')).toHaveTextContent(
-      'No vehicle references this template yet.',
+      'No vehicle resolves to it yet.',
     );
     expect(screen.queryByTestId('read-only-warning')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).not.toHaveTextContent('read only');

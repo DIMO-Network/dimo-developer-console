@@ -12,6 +12,7 @@ jest.mock('@/services/templateEntitlement', () => ({
   resolveCaller: jest.fn(),
   countMintedVehicles: jest.fn().mockResolvedValue(0),
   manufacturerOwner: jest.fn().mockResolvedValue(null),
+  developerLicense: jest.fn(),
   curatorAddresses: jest.fn().mockReturnValue([]),
 }));
 
@@ -20,8 +21,16 @@ import {
   resolveCaller,
   countMintedVehicles,
   curatorAddresses,
+  developerLicense,
   manufacturerOwner,
 } from '@/services/templateEntitlement';
+
+const LICENSED = {
+  kind: 'held' as const,
+  tokenId: 472,
+  alias: 'DEMO App',
+  via: 'owner' as const,
+};
 
 const actual = jest.requireActual('@/services/templateEntitlement');
 
@@ -64,6 +73,7 @@ describe('PUT /api/templates/[id]', () => {
       tokenId: 131,
     });
     (curatorAddresses as jest.Mock).mockReturnValue([]);
+    (developerLicense as jest.Mock).mockResolvedValue(LICENSED);
   });
 
   it('401s when there is no session', async () => {
@@ -173,21 +183,31 @@ describe('PUT /api/templates/[id]', () => {
     expect(publishTemplate).not.toHaveBeenCalled();
   });
 
-  it('403s a caller who needs a proposal, and names the count', async () => {
+  it('403s a caller with no developer license', async () => {
+    (developerLicense as jest.Mock).mockResolvedValue({ kind: 'none' });
     (countMintedVehicles as jest.Mock).mockResolvedValue(4212);
     const resp = await PUT(put(body(), { 'if-match': '"3"' }), params);
     expect(resp.status).toBe(403);
     expect((await resp.json()).entitlement).toMatchObject({
-      kind: 'proposal-required',
+      kind: 'license-required',
       mintedVehicles: 4212,
     });
     expect(publishTemplate).not.toHaveBeenCalled();
   });
 
-  it('503s, publishing nothing, when the vehicle count cannot be verified', async () => {
+  it('publishes for a license holder however many vehicles resolve to the id', async () => {
+    // The count is a warning now, not a veto: 4,212 cars is exactly the row
+    // somebody needs to be able to correct.
+    (countMintedVehicles as jest.Mock).mockResolvedValue(4212);
+    const resp = await PUT(put(body(), { 'if-match': '"3"' }), params);
+    expect(resp.status).toBe(200);
+    expect(publishTemplate).toHaveBeenCalled();
+  });
+
+  it('503s, publishing nothing, when the developer license cannot be verified', async () => {
     // Not a 403: nobody was refused, identity did not answer. A client should
     // retry, not re-request access.
-    (countMintedVehicles as jest.Mock).mockRejectedValueOnce(
+    (developerLicense as jest.Mock).mockRejectedValueOnce(
       new Error('identity-api returned 500'),
     );
     const resp = await PUT(put(body(), { 'if-match': '"3"' }), params);
@@ -196,6 +216,15 @@ describe('PUT /api/templates/[id]', () => {
     expect(json.entitlement).toMatchObject({ kind: 'unavailable', canPublish: false });
     expect(json.error).toMatch(/try again/i);
     expect(publishTemplate).not.toHaveBeenCalled();
+  });
+
+  it('publishes through an unreadable vehicle count rather than 503ing on it', async () => {
+    (countMintedVehicles as jest.Mock).mockRejectedValueOnce(
+      new Error('identity-api returned 500'),
+    );
+    const resp = await PUT(put(body(), { 'if-match': '"3"' }), params);
+    expect(resp.status).toBe(200);
+    expect(publishTemplate).toHaveBeenCalled();
   });
 
   it('403s a hardwareTemplateId change from a non-curator, at every tier', async () => {
@@ -401,6 +430,11 @@ describe('PUT /api/templates/[id]', () => {
 });
 
 describe('GET /api/templates/[id]', () => {
+  beforeEach(() => {
+    (developerLicense as jest.Mock).mockResolvedValue(LICENSED);
+    (countMintedVehicles as jest.Mock).mockResolvedValue(0);
+  });
+
   it('returns the template, the live vocabulary and the caller entitlement in one payload', async () => {
     (resolveCaller as jest.Mock).mockResolvedValue({ address: CALLER, email: 'a@b.c' });
     (fetchTemplate as jest.Mock).mockResolvedValue(stored);
@@ -417,10 +451,10 @@ describe('GET /api/templates/[id]', () => {
     ).json();
     expect(json.template.version).toBe(3);
     expect(json.vocabulary.id).toBe('vehicle');
-    expect(json.entitlement.kind).toBe('author');
+    expect(json.entitlement.kind).toBe('licensed');
   });
 
-  it('still loads the template, read only, when the vehicle count cannot be verified', async () => {
+  it('still loads the template, read only, when the developer license cannot be verified', async () => {
     (resolveCaller as jest.Mock).mockResolvedValue({ address: CALLER, email: 'a@b.c' });
     (fetchTemplate as jest.Mock).mockResolvedValue(stored);
     (fetchVocabulary as jest.Mock).mockResolvedValue({
@@ -428,7 +462,7 @@ describe('GET /api/templates/[id]', () => {
       name: 'Vehicle',
       attributes: [],
     });
-    (countMintedVehicles as jest.Mock).mockRejectedValueOnce(
+    (developerLicense as jest.Mock).mockRejectedValueOnce(
       new Error('identity-api returned 500'),
     );
     const resp = await GET(
@@ -439,5 +473,29 @@ describe('GET /api/templates/[id]', () => {
     const json = await resp.json();
     expect(json.template.version).toBe(3);
     expect(json.entitlement).toMatchObject({ kind: 'unavailable', canPublish: false });
+  });
+
+  it('still loads the template, editable, when only the vehicle count is unreadable', async () => {
+    (resolveCaller as jest.Mock).mockResolvedValue({ address: CALLER, email: 'a@b.c' });
+    (fetchTemplate as jest.Mock).mockResolvedValue(stored);
+    (fetchVocabulary as jest.Mock).mockResolvedValue({
+      id: 'vehicle',
+      name: 'Vehicle',
+      attributes: [],
+    });
+    (developerLicense as jest.Mock).mockResolvedValue(LICENSED);
+    (countMintedVehicles as jest.Mock).mockRejectedValueOnce(
+      new Error('identity-api returned 500'),
+    );
+    const resp = await GET(
+      new NextRequest('https://console.test/api/templates/toyota_camry_2020'),
+      params,
+    );
+    const json = await resp.json();
+    expect(json.entitlement).toMatchObject({
+      kind: 'licensed',
+      canPublish: true,
+      mintedVehicles: null,
+    });
   });
 });
