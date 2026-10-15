@@ -1,4 +1,5 @@
 import config from '@/config';
+import { fetchWithTimeout, isTimeout } from '@/utils/fetchWithTimeout';
 import type { Template } from '@/types/template';
 import { getUserByToken } from '@/services/user';
 
@@ -96,12 +97,28 @@ async function identity<T>(
   query: string,
   variables: Record<string, unknown>,
 ): Promise<T> {
-  const resp = await fetch(config.identityApiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables }),
-    cache: 'no-store',
-  });
+  let resp: Response;
+  try {
+    resp = await fetchWithTimeout(
+      config.identityApiUrl,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+        cache: 'no-store',
+      },
+      { label: 'identity-api' },
+    );
+  } catch (err) {
+    // A timeout IS identity failing to answer, so it has to arrive as an
+    // IdentityError like every other way of failing to answer. Letting a
+    // TimeoutError escape instead would skip resolveEntitlement's
+    // 'unavailable' state -- the one that means "nothing was decided, retry"
+    // and answers 503 -- and surface as a flat 502 for a condition that is
+    // very often transient.
+    if (isTimeout(err)) throw new IdentityError(err.message);
+    throw err;
+  }
   if (!resp.ok) throw new IdentityError(`identity-api returned ${resp.status}`);
   const json = (await resp.json()) as {
     data?: T | null;
