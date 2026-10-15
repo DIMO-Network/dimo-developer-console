@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState, type FC } from 'react';
 import { Button } from '@/components/Button';
 import { Title } from '@/components/Title';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
+import { HttpError } from '@/utils/httpError';
 import { TrimGrid } from '@/components/TemplateEditor/TrimGrid';
 import { TrimSelectorEditor } from '@/components/TemplateEditor/TrimSelectorEditor';
 import { NormalisationPanel } from '@/components/TemplateEditor/NormalisationPanel';
@@ -108,7 +109,15 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
     <QueryPageWrapper
       loading={isLoading}
       error={error ?? undefined}
-      customErrorMessage="Could not load this template"
+      // A 401 here means the session cannot edit templates, which is a
+      // different thing to do about it than a 404 or a server fault. The
+      // generic line alone left the reason on the network tab only, so the
+      // server's own wording is carried through when there is one.
+      customErrorMessage={
+        error instanceof HttpError
+          ? `Could not load this template: ${error.message} (${error.status})`
+          : 'Could not load this template'
+      }
     >
       {draft && data && (
         <div className="flex flex-col gap-6">

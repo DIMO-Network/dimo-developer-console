@@ -1,5 +1,5 @@
 import { NextFetchEvent, NextResponse } from 'next/server';
-import { decodeJwtToken, isIn } from '@/utils/middlewareUtils';
+import { decodeJwtToken, isIn, isSessionExpiredError } from '@/utils/middlewareUtils';
 import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
@@ -50,13 +50,13 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
 };
 
 const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
-  if (error instanceof AxiosError) {
-    const status = error.response?.status;
-    if (status === 401) {
-      const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
-      axios.post(signOutUrl);
-      return 'sign-in?error=expired';
-    }
+  // isSessionExpiredError, not "any 401": see src/utils/middlewareUtils.ts.
+  if (isSessionExpiredError(error)) {
+    const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
+    // Floating, and it has to not reject: an unhandled rejection here takes
+    // the middleware down on the way to the redirect that replaces it.
+    axios.post(signOutUrl).catch(() => {});
+    return 'sign-in?error=expired';
   }
   return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
 };

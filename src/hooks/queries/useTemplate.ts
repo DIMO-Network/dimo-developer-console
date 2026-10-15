@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { DeviceType, Template, TemplatePayload } from '@/types/template';
 import type { Entitlement } from '@/services/templateEntitlement';
+import { HttpError } from '@/utils/httpError';
 
 export interface TemplateBundle {
   template: Template | null;
@@ -27,7 +28,11 @@ export const useTemplate = (id: string) =>
     queryFn: async () => {
       const resp = await fetch(`/api/templates/${encodeURIComponent(id)}`);
       const json = await resp.json();
-      if (!resp.ok) throw new Error(json.error ?? 'Failed to load template');
+      // HttpError, not Error: the retry policy in QueryProvider reads the
+      // status off the thrown value, and a 401 that arrives as a bare Error is
+      // indistinguishable from a timeout, so it gets retried three times.
+      if (!resp.ok)
+        throw new HttpError(resp.status, json.error ?? 'Failed to load template');
       return json as TemplateBundle;
     },
   });
