@@ -39,3 +39,42 @@ export const decodeJwtToken = async (token: string): Promise<JWTPayload> => {
   });
   return payload;
 };
+
+// Failures that say the token itself is no good: expired, signed by a key the
+// auth server never issued, malformed, or for another issuer. Such a cookie is
+// no session at all. Anything else (the key set could not be fetched, say) is
+// an outage, not a verdict on the token, and is left to the caller.
+const INVALID_TOKEN_CODES = new Set([
+  'ERR_JWT_EXPIRED',
+  'ERR_JWT_CLAIM_VALIDATION_FAILED',
+  'ERR_JWT_INVALID',
+  'ERR_JWS_INVALID',
+  'ERR_JWS_SIGNATURE_VERIFICATION_FAILED',
+  'ERR_JWKS_NO_MATCHING_KEY',
+  'ERR_JOSE_ALG_NOT_ALLOWED',
+]);
+
+export const isInvalidTokenError = (error: unknown): boolean =>
+  INVALID_TOKEN_CODES.has((error as { code?: string } | null)?.code ?? '');
+
+// The middleware checks that a signed-in user has finished onboarding by asking
+// console-api (/api/me) and the accounts API who they are. That costs two
+// sequential round trips -- 300-450ms warm, seconds cold -- and it ran on every
+// navigation, prefetch, server action and API call. Once a session passes, the
+// answer is remembered in this cookie for a while, and requests carrying it
+// skip both lookups.
+//
+// The cookie holds a digest of the session token it was issued for, so it ends
+// with that session and cannot be carried to another. It is not a security
+// boundary: it only spares the onboarding redirect, and every request for data
+// is still authorised by console-api against the session token itself.
+export const SESSION_VERDICT_COOKIE = 'session-verdict';
+export const SESSION_VERDICT_MAX_AGE = 15 * 60;
+
+export const sessionVerdictFor = async (token: string): Promise<string> => {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+};

@@ -10,6 +10,7 @@ import { ICreateGlobalAccountRequest, ISubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import { cookies } from 'next/headers';
 import { cookieName } from '@/services/dimoDevAPI';
+import { SESSION_VERDICT_COOKIE } from '@/utils/middlewareUtils';
 
 export const getUser = async () => {
   try {
@@ -91,5 +92,6 @@ export const saveToken = async (token: string, sessionExpiration: number) => {
 export const signOut = async () => {
   const userCookies = await cookies();
   userCookies.delete(cookieName);
+  userCookies.delete(SESSION_VERDICT_COOKIE);
   return true;
 };
