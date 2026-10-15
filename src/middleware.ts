@@ -29,14 +29,22 @@ const buildRedirectUrl = (path: string, request: NextRequest) => {
   return url;
 };
 
-// A cookie whose token no longer verifies (expired, or not ours) is treated as
-// no session, so the visitor is sent to sign in rather than shown an error.
+// A token that does not verify is no session: the visitor is sent to sign in
+// (or gets a 401) rather than an error page. That holds for every failure,
+// not only the expected ones -- an attacker can make jose throw other errors
+// (an unsupported "crit" header, say), and a failure here must never fall
+// through to the error handling below, which lets requests continue.
 const verifyToken = async (token: string) => {
   try {
     return await decodeJwtToken(token);
   } catch (error) {
-    if (isInvalidTokenError(error)) return null;
-    throw error;
+    if (!isInvalidTokenError(error)) {
+      // Not a bad token but a failure to check it, e.g. the key set could not
+      // be fetched: worth seeing, still no session.
+      Sentry.captureException(error);
+      console.error('Session token could not be verified:', error);
+    }
+    return null;
   }
 };
 
@@ -158,9 +166,10 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
 export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
   const hasError = request.nextUrl.searchParams.get('error');
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
+  let token: JWTPayload | null = null;
   try {
     const rawToken = await getCookie(cookieName);
-    const token = rawToken ? await verifyToken(rawToken) : null;
+    token = rawToken ? await verifyToken(rawToken) : null;
     if (rawToken && token) {
       return await validatePrivateSession(request, rawToken);
     }
@@ -169,6 +178,9 @@ export const middleware = async (request: NextRequest, event: NextFetchEvent) =>
   } catch (error: unknown) {
     Sentry.captureException(error);
     console.error('Middleware error:', error);
+    // Only a verified session may continue past a failure (the ?error= branch
+    // below lets the request through). Anything else is treated as signed out.
+    if (!token) return validatePublicSession(request, null);
     let path = handleConnectionError(error, isLoginPage);
     path = path ?? handleExpiredSession(error, isLoginPage);
     const redirectUrl = `${configuration.frontendUrl}${path}`;
@@ -180,8 +192,7 @@ export const middleware = async (request: NextRequest, event: NextFetchEvent) =>
 };
 
 export const config = {
-  // Public files (the app icon, images) need no session and skip it entirely.
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|images|api/auth|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|txt|xml)$).*)',
-  ],
+  // icon.png is the app icon: it needs no session. Excluded by name, not by
+  // extension -- a dynamic route (/api/templates/[id]) can end in ".png" too.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.png|images|api/auth).*)'],
 };

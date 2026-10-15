@@ -22,7 +22,7 @@ jest.mock('@/utils/middlewareUtils', () => ({
   decodeJwtToken: jest.fn(),
 }));
 
-import { middleware } from '@/middleware';
+import { config, middleware } from '@/middleware';
 import { getUserByToken } from '@/services/user';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import {
@@ -163,5 +163,62 @@ describe('middleware with a session', () => {
     const res = await run(request('/licenses', { 'session-token': TOKEN }));
     expect(res.status).toBe(302);
     expect(res.headers.get('location')).toMatch(/app\?error=true$/);
+  });
+});
+
+describe('middleware never lets an unverified token through', () => {
+  const post = (path: string, cookies: Record<string, string>) => {
+    Object.keys(cookieJar).forEach((k) => delete cookieJar[k]);
+    Object.assign(cookieJar, cookies);
+    const cookie = Object.entries(cookies)
+      .map(([k, v]) => `${k}=${v}`)
+      .join('; ');
+    return new NextRequest(`https://console.test${path}`, {
+      method: 'POST',
+      headers: { cookie },
+    });
+  };
+
+  // jose throws ERR_JOSE_NOT_SUPPORTED for a forged token with an unknown
+  // "crit" header; with ?error= set, the error branch lets requests continue.
+  it('rejects a forged token that makes verification throw an unexpected error', async () => {
+    (decodeJwtToken as jest.Mock).mockRejectedValue(
+      Object.assign(new Error('Extension Header Parameter "x" is not recognized'), {
+        code: 'ERR_JOSE_NOT_SUPPORTED',
+      }),
+    );
+    const res = await run(post('/api/webhook?error=1', { 'session-token': TOKEN }));
+    expect(res.status).toBe(401);
+    expect(isPassThrough(res)).toBe(false);
+  });
+
+  it('treats a key set outage as signed out, not as a pass', async () => {
+    (decodeJwtToken as jest.Mock).mockRejectedValue(new Error('fetch failed'));
+    const page = await run(request('/licenses?error=1', { 'session-token': TOKEN }));
+    expect(page.headers.get('location')).toMatch(/\/sign-in(\?|$)/);
+    const api = await run(post('/api/webhook?error=1', { 'session-token': TOKEN }));
+    expect(api.status).toBe(401);
+  });
+
+  it('still lets a verified session past a failed lookup on an ?error= page', async () => {
+    (getUserByToken as jest.Mock).mockRejectedValue(new AxiosError('Network Error'));
+    const res = await run(request('/app?error=true', { 'session-token': TOKEN }));
+    expect(isPassThrough(res)).toBe(true);
+  });
+});
+
+describe('middleware matcher', () => {
+  const runsOn = (path: string) =>
+    config.matcher.some((m) => new RegExp(`^${m}$`).test(path));
+
+  it('skips the app icon and static assets', () => {
+    expect(runsOn('/icon.png')).toBe(false);
+    expect(runsOn('/_next/static/chunks/main.js')).toBe(false);
+  });
+
+  it('runs on routes whose last segment looks like a file name', () => {
+    expect(runsOn('/api/templates/toyota.png')).toBe(true);
+    expect(runsOn('/api/webhook')).toBe(true);
+    expect(runsOn('/license/1/details')).toBe(true);
   });
 });

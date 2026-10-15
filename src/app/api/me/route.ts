@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server';
+
+// Per-user data: never stored by Vercel, Cloudflare or the browser.
+const PRIVATE = { 'Cache-Control': 'private, no-store' };
 import { AxiosError } from 'axios';
 import { getUserByToken } from '@/services/user';
 
@@ -8,9 +11,12 @@ import { getUserByToken } from '@/services/user';
 // alongside them.
 export const GET = async () => {
   try {
-    return NextResponse.json(await getUserByToken());
+    return NextResponse.json(await getUserByToken(), { headers: PRIVATE });
   } catch (error) {
     const status = error instanceof AxiosError ? (error.response?.status ?? 502) : 500;
-    return NextResponse.json({ message: 'Could not load the user' }, { status });
+    return NextResponse.json(
+      { message: 'Could not load the user' },
+      { status, headers: PRIVATE },
+    );
   }
 };
