@@ -1,32 +1,32 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { getMyCollaborators } from '@/actions/team';
 import { ITeamCollaborator } from '@/types/team';
 import * as Sentry from '@sentry/nextjs';
 
+// A query rather than an effect, so going back to Settings shows the team at
+// once and refreshes it behind the page instead of behind a full-page loader.
 export const useTeamCollaborators = () => {
-  const [teamCollaborators, setTeamCollaborators] = useState<ITeamCollaborator[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    void refreshData();
-  }, []);
+  const { data, isPending, refetch } = useQuery({
+    queryKey: ['team-collaborators'],
+    queryFn: async (): Promise<ITeamCollaborator[]> => {
+      try {
+        const { data } = await getMyCollaborators();
+        return data;
+      } catch (error) {
+        Sentry.captureException(error);
+        console.error(error);
+        return [];
+      }
+    },
+  });
 
   const refreshData = async () => {
-    setIsLoading(true);
-    try {
-      const { data } = await getMyCollaborators();
-      setTeamCollaborators(data);
-    } catch (error) {
-      Sentry.captureException(error);
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
+    await refetch();
   };
 
-  return { isLoading, teamCollaborators, setTeamCollaborators, refreshData };
+  return { isLoading: isPending, teamCollaborators: data ?? [], refreshData };
 };
 
 export default useTeamCollaborators;
