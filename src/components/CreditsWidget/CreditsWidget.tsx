@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { FC, useContext, useEffect, useState } from 'react';
+import { FC, useContext } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useGlobalAccount } from '@/hooks';
 import { isCollaborator, isOwner } from '@/utils/user';
 import { formatToCurrency } from '@/utils/formatBalance';
@@ -17,31 +18,32 @@ interface ICreditsWidgetProps {
 const DCX_IN_USD = 0.001;
 
 export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) => {
-  const [dcxBalance, setDcxBalance] = useState<string>('$0.00');
   const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
   const { setIsOpen: _setIsOpen } = useContext(CreditsContext);
 
-  const loadAndFormatDcxBalance = async () => {
-    try {
-      if (isCollaborator(currentUser?.role ?? '')) return;
-      const balance = await getCurrentDcxBalance();
-      setDcxBalance(formatToCurrency(balance * DCX_IN_USD));
-    } catch (error: unknown) {
-      Sentry.captureException(error);
-      console.error(error);
-    }
-  };
+  // Cached by account so the header keeps showing the balance when a section
+  // change remounts it, instead of flashing $0.00 while it reads the chain again.
+  const { data: balance } = useQuery({
+    queryKey: ['dcx-balance', currentUser?.smartContractAddress],
+    queryFn: async () => {
+      try {
+        return await getCurrentDcxBalance();
+      } catch (error: unknown) {
+        Sentry.captureException(error);
+        console.error(error);
+        throw error;
+      }
+    },
+    enabled: Boolean(currentUser) && !isCollaborator(currentUser?.role ?? ''),
+    staleTime: 30_000,
+  });
+  const dcxBalance = formatToCurrency((balance ?? 0) * DCX_IN_USD);
 
   // const handleBuyCredits = () => {
   //   if (isOwner(currentUser?.role ?? '')) {
   //     setIsOpen(true);
   //   }
   // };
-
-  useEffect(() => {
-    if (!currentUser) return;
-    void loadAndFormatDcxBalance();
-  }, [currentUser]);
 
   if (variant === 'large') {
     return (

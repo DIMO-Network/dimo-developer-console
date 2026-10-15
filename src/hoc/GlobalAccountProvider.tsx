@@ -5,6 +5,7 @@ import {
   getFromSession,
   GlobalAccountSession,
   removeFromSession,
+  saveToSession,
 } from '@/utils/sessionStorage';
 import React, { ComponentType, useEffect, useState } from 'react';
 import { utils } from 'web3';
@@ -15,8 +16,8 @@ import {
   getFromLocalStorage,
   removeFromLocalStorage,
 } from '@/utils/localStorage';
-import { getKernelAccount, getKernelClient, getPublicClient } from '@/services/zerodev';
-import { getContract } from 'viem';
+import { getKernelAccount, getPublicClient } from '@/services/zerodev';
+import { Abi } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import { TeamRoles } from '@/types/team';
@@ -25,11 +26,47 @@ import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
 
+// Resolving who is signed in costs two Turnkey calls (wallets, then the wallet
+// account) and chain RPC to derive the smart account address. Neither address
+// changes for a sub-organization, so the result is kept for the tab:
+// - in memory, because every section declares its own AuthorizedLayout and a
+//   move between sections remounts this provider;
+// - in sessionStorage, next to the session it belongs to, for reloads.
+// Both are dropped on logout.
+const ResolvedAccountSession = 'globalAccountAddresses';
+let rememberedUser: IUserSession | null = null;
+
+type ResolvedAccount = Pick<
+  IUserSession,
+  'subOrganizationId' | 'walletAddress' | 'smartContractAddress'
+>;
+
+const currentSession = () => {
+  const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
+  if (!session || session.expiry < Math.floor(Date.now() / 1000)) return null;
+  return session;
+};
+
+// Only for a remount: on the first render after a page load rememberedUser is
+// always null, so the server render and hydration agree.
+const rememberedUserForSession = () => {
+  if (!rememberedUser) return null;
+  const session = currentSession();
+  return session?.subOrganizationId === rememberedUser.subOrganizationId
+    ? rememberedUser
+    : null;
+};
+
+const forgetResolvedAccount = () => {
+  rememberedUser = null;
+  removeFromSession(ResolvedAccountSession);
+};
+
 export const withGlobalAccounts = <P extends object>(
   WrappedComponent: ComponentType<P>,
 ) => {
   const HOC: React.FC<P> = (props) => {
-    const [user, setUser] = useState<IUserSession | null>(null);
+    const [user, setUser] = useState<IUserSession | null>(rememberedUserForSession);
     const { identifyUser } = useMixPanel();
     const router = useRouter();
 
@@ -57,7 +94,9 @@ export const withGlobalAccounts = <P extends object>(
       return sessionUser;
     };
 
-    const getCurrentDimoBalance = async (): Promise<number> => {
+    // A balance is a read: the public client does it in one RPC call, without
+    // the Turnkey client and kernel client a transaction would need.
+    const readBalance = async (address: `0x${string}`, abi: Abi): Promise<number> => {
       const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
       const eKey = getFromLocalStorage<string>(EmbeddedKey);
 
@@ -66,93 +105,28 @@ export const withGlobalAccounts = <P extends object>(
         return 0;
       }
 
-      const { subOrganizationId, walletAddress, smartContractAddress } = user!;
-      const { token, expiry } = session;
-
       const nowInSeconds = Math.floor(Date.now() / 1000);
 
-      if (expiry < nowInSeconds) {
+      if (session.expiry < nowInSeconds) {
         await logout();
         return 0;
       }
 
-      const client = getTurnkeyClient({ authKey: token, eKey: eKey });
-
-      const kernelClient = await getKernelClient({
-        subOrganizationId: subOrganizationId,
-        walletAddress: walletAddress,
-        client: client,
+      const currentBalanceOnWei = await getPublicClient().readContract({
+        address,
+        abi,
+        functionName: 'balanceOf',
+        args: [user!.smartContractAddress],
       });
-
-      if (!kernelClient) {
-        return 0;
-      }
-
-      const publicClient = getPublicClient();
-
-      const dimoTokenContract = getContract({
-        address: configuration.DC_ADDRESS,
-        abi: DimoABI,
-        client: {
-          public: publicClient,
-          wallet: kernelClient,
-        },
-      });
-
-      const currentBalanceOnWei = await dimoTokenContract.read.balanceOf([
-        smartContractAddress,
-      ]);
 
       return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
     };
 
-    const getCurrentDcxBalance = async (): Promise<number> => {
-      const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const eKey = getFromLocalStorage<string>(EmbeddedKey);
+    const getCurrentDimoBalance = (): Promise<number> =>
+      readBalance(configuration.DC_ADDRESS, DimoABI as Abi);
 
-      if (!eKey || !session) {
-        await logout();
-        return 0;
-      }
-
-      const { subOrganizationId, walletAddress, smartContractAddress } = user!;
-      const { token, expiry } = session;
-
-      const nowInSeconds = Math.floor(Date.now() / 1000);
-
-      if (expiry < nowInSeconds) {
-        await logout();
-        return 0;
-      }
-
-      const client = getTurnkeyClient({ authKey: token, eKey: eKey });
-
-      const kernelClient = await getKernelClient({
-        subOrganizationId: subOrganizationId,
-        walletAddress: walletAddress,
-        client: client,
-      });
-
-      if (!kernelClient) {
-        return 0;
-      }
-
-      const publicClient = getPublicClient();
-      const creditsContract = getContract({
-        address: configuration.DCX_ADDRESS,
-        abi: DimoCreditsABI,
-        client: {
-          public: publicClient,
-          wallet: kernelClient,
-        },
-      });
-
-      const currentBalanceOnWei = await creditsContract.read.balanceOf([
-        smartContractAddress,
-      ]);
-
-      return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
-    };
+    const getCurrentDcxBalance = (): Promise<number> =>
+      readBalance(configuration.DCX_ADDRESS, DimoCreditsABI as Abi);
 
     const loadUserSession = async (): Promise<IUserSession | null> => {
       const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
@@ -172,6 +146,27 @@ export const withGlobalAccounts = <P extends object>(
         return null;
       }
 
+      const resolved = await resolveAccount(subOrganizationId, token, eKey);
+
+      const user: IUserSession = {
+        email: email,
+        subOrganizationId: subOrganizationId,
+        walletAddress: resolved.walletAddress,
+        smartContractAddress: resolved.smartContractAddress,
+        role: TeamRoles.OWNER,
+      };
+
+      return user;
+    };
+
+    const resolveAccount = async (
+      subOrganizationId: string,
+      token: string,
+      eKey: string,
+    ): Promise<ResolvedAccount> => {
+      const saved = getFromSession<ResolvedAccount>(ResolvedAccountSession);
+      if (saved?.subOrganizationId === subOrganizationId) return saved;
+
       const client = getTurnkeyClient({ authKey: token, eKey: eKey });
 
       const walletAddress = await getTurnkeyWalletAddress({
@@ -185,15 +180,13 @@ export const withGlobalAccounts = <P extends object>(
         client: client,
       });
 
-      const user: IUserSession = {
-        email: email,
-        subOrganizationId: subOrganizationId,
-        walletAddress: walletAddress,
+      const resolved: ResolvedAccount = {
+        subOrganizationId,
+        walletAddress,
         smartContractAddress: kernelAccount.address,
-        role: TeamRoles.OWNER,
       };
-
-      return user;
+      saveToSession(ResolvedAccountSession, resolved);
+      return resolved;
     };
 
     const loadUserInformation = async (): Promise<void> => {
@@ -206,11 +199,13 @@ export const withGlobalAccounts = <P extends object>(
         $role: TeamRoles.OWNER,
       });
 
+      rememberedUser = user;
       setUser(user);
     };
 
     const logout = async () => {
       await turnkeyClient.logout();
+      forgetResolvedAccount();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
       await signOut();
