@@ -38,11 +38,9 @@ const fill = (label: RegExp, value: string) =>
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
 
 const fillGrenadier = () => {
-  fill(/make slug/i, 'ineos');
-  fill(/model slug/i, 'grenadier');
+  fill(/^manufacturer/i, 'INEOS');
+  fill(/^model/i, 'Grenadier');
   fill(/^year/i, '2024');
-  fill(/manufacturer name/i, 'INEOS');
-  fill(/model name/i, 'Grenadier');
   fill(/first trim/i, 'Trialmaster');
 };
 
@@ -52,12 +50,23 @@ describe('NewTemplateView', () => {
     ok();
   });
 
-  it('builds the id from make slug, model slug and year, and shows it', () => {
+  it('derives the id from the names, so the slug is never typed twice', () => {
     show();
-    fill(/make slug/i, 'ineos');
-    fill(/model slug/i, 'grenadier');
+    fill(/^manufacturer/i, 'INEOS');
+    fill(/^model/i, 'Grenadier');
     fill(/^year/i, '2024');
     expect(screen.getByTestId('derived-id')).toHaveTextContent('ineos_grenadier_2024');
+  });
+
+  it('gives the same id whether the person types the display name or the slug', () => {
+    show();
+    fill(/^manufacturer/i, 'Toyota');
+    fill(/^model/i, 'Camry');
+    fill(/^year/i, '2020');
+    expect(screen.getByTestId('derived-id')).toHaveTextContent('toyota_camry_2020');
+    fill(/^manufacturer/i, 'toyota');
+    fill(/^model/i, 'camry');
+    expect(screen.getByTestId('derived-id')).toHaveTextContent('toyota_camry_2020');
   });
 
   it('pre-fills the id the browse page handed it', () => {
@@ -65,11 +74,37 @@ describe('NewTemplateView', () => {
     expect(screen.getByTestId('derived-id')).toHaveTextContent('toyota_supra_2020');
   });
 
-  it('refuses a slug the id pattern cannot accept, before any request', async () => {
+  it('repairs a model an id cannot carry instead of refusing it', async () => {
+    // This used to be a refusal, because the slug was typed and
+    // `tribeca-(ny/nj)` is not a legal id segment. Deriving it means the person
+    // types the real model name and the id is built the way the only minter of
+    // ids builds it -- the live catalog holds subaru_tribeca-ny-nj_2008.
     const f = ok();
     show();
-    fill(/make slug/i, 'Subaru');
-    fill(/model slug/i, 'tribeca-(ny/nj)');
+    fill(/^manufacturer/i, 'Subaru');
+    fill(/^model/i, 'Tribeca (NY/NJ)');
+    fill(/^year/i, '2008');
+    fill(/first trim/i, 'Base');
+    expect(screen.getByTestId('derived-id')).toHaveTextContent(
+      'subaru_tribeca-ny-nj_2008',
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create/i }));
+    await waitFor(() => expect(f).toHaveBeenCalled());
+    const [url, init] = f.mock.calls[0];
+    expect(url).toBe('/api/templates/subaru_tribeca-ny-nj_2008');
+    // The BODY keeps the real name; only the id is slugged.
+    expect(JSON.parse(init.body).model).toBe('Tribeca (NY/NJ)');
+    expect(JSON.parse(init.body).manufacturer).toMatchObject({
+      slug: 'subaru',
+      name: 'Subaru',
+    });
+  });
+
+  it('still refuses an id it cannot build at all, before any request', async () => {
+    const f = ok();
+    show();
+    fill(/^manufacturer/i, 'Subaru');
+    fill(/^model/i, '');
     fill(/^year/i, '2008');
     fireEvent.click(screen.getByRole('button', { name: /create/i }));
     expect(
@@ -116,11 +151,9 @@ describe('NewTemplateView', () => {
       }),
     );
     show();
-    fill(/make slug/i, 'toyota');
-    fill(/model slug/i, 'camry');
+    fill(/^manufacturer/i, 'Toyota');
+    fill(/^model/i, 'Camry');
     fill(/^year/i, '2020');
-    fill(/manufacturer name/i, 'Toyota');
-    fill(/model name/i, 'Camry');
     fill(/first trim/i, 'LE');
     fireEvent.click(screen.getByRole('button', { name: /create/i }));
     expect(await screen.findByRole('alert')).toHaveTextContent('already exists');

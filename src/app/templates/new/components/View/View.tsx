@@ -8,6 +8,7 @@ import { Title } from '@/components/Title';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { usePublishTemplate, type PublishFailure } from '@/hooks/queries/useTemplate';
+import { idPart, templateId } from '@/utils/definitionSlug';
 import { validateDraft } from '@/utils/templateValidate';
 import { toPayload } from '@/utils/templateGrid';
 import type { DeviceType, Template } from '@/types/template';
@@ -21,24 +22,23 @@ const EMPTY_VOCAB: DeviceType = { id: 'vehicle', name: 'Vehicle', attributes: []
 /** `presetId` comes from the browse page's Create link, e.g. toyota_supra_2020. */
 export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
   const router = useRouter();
+  // The slug is DERIVED from the name, never typed. The two always had to
+  // agree -- the worker refuses an id its own body could not have produced --
+  // so asking for both only offered a way to get it wrong.
   const [form, setForm] = useState(() => {
     const parts = (presetId ?? '').split('_');
-    const blank = {
-      makeSlug: '',
-      modelSlug: '',
-      year: '',
-      manufacturerName: '',
-      modelName: '',
-      trimName: '',
-    };
+    const blank = { year: '', manufacturerName: '', modelName: '', trimName: '' };
+    // A preset carries slugs, not display names. They are the best available
+    // starting text, and the person can correct the capitalisation: the id
+    // they produce is the same either way, because idPart is idempotent.
     return parts.length === 3
-      ? { ...blank, makeSlug: parts[0], modelSlug: parts[1], year: parts[2] }
+      ? { ...blank, manufacturerName: parts[0], modelName: parts[1], year: parts[2] }
       : blank;
   });
   const [errors, setErrors] = useState<string[]>([]);
   const [exists, setExists] = useState(false);
 
-  const id = `${form.makeSlug}_${form.modelSlug}_${form.year}`;
+  const id = templateId(form.manufacturerName, form.modelName, form.year);
   // The id is derived from the form, so the mutation has to be created after it
   // -- usePublishTemplate('') would PUT to /api/templates/ and 404.
   const publish = usePublishTemplate(id);
@@ -48,8 +48,11 @@ export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
       ({
         id,
         deviceType: 'vehicle',
-        manufacturer: { slug: form.makeSlug, name: form.manufacturerName },
-        model: form.modelName,
+        manufacturer: {
+          slug: idPart(form.manufacturerName),
+          name: form.manufacturerName.trim(),
+        },
+        model: form.modelName.trim(),
         year: Number(form.year),
         attributes: {},
         trims: [{ name: form.trimName, attributes: {} }],
@@ -100,12 +103,10 @@ export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
         is attributed to you — nothing points at it yet, so nothing can be re-described.
       </p>
 
-      <div className="grid gap-3 md:grid-cols-3">
-        {field('makeSlug', 'Make slug', 'ineos')}
-        {field('modelSlug', 'Model slug', 'grenadier')}
+      <div className="grid gap-3 md:grid-cols-2">
+        {field('manufacturerName', 'Manufacturer', 'INEOS')}
+        {field('modelName', 'Model', 'Grenadier')}
         {field('year', 'Year', '2024')}
-        {field('manufacturerName', 'Manufacturer name', 'INEOS')}
-        {field('modelName', 'Model name', 'Grenadier')}
         {field('trimName', 'First trim', 'Trialmaster')}
       </div>
 
