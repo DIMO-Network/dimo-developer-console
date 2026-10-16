@@ -7,10 +7,10 @@ import type { Entitlement } from '@/services/templateEntitlement';
 
 const TITLES: Record<Entitlement['kind'], string> = {
   'create': 'New template',
-  'author': 'You can publish this',
+  'licensed': 'You can publish this',
   'manufacturer': 'You hold this Manufacturer NFT',
   'curator': 'Curator',
-  'proposal-required': 'Read only',
+  'license-required': 'Developer license required',
   'unavailable': 'Access could not be verified',
 };
 

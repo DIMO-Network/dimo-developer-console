@@ -90,6 +90,9 @@ describe('entitlement for a caller with no address', () => {
       ...over,
     }) as Template;
 
+  // Mirrors the real lookup, which answers 'none' for an addressless session
+  // without asking identity -- so this also proves resolveEntitlement passes
+  // the caller through rather than substituting something for it.
   const deps = (minted: number, owner: string | null) => ({
     id: 'toyota_camry_2020',
     countMintedVehicles: jest.fn().mockResolvedValue(minted),
@@ -98,18 +101,43 @@ describe('entitlement for a caller with no address', () => {
       .mockResolvedValue(
         owner ? { kind: 'found', owner, tokenId: 131 } : { kind: 'absent' },
       ),
+    developerLicense: jest.fn(async (address: string | null) =>
+      address
+        ? {
+            kind: 'held' as const,
+            tokenId: 472,
+            alias: 'DEMO App',
+            via: 'owner' as const,
+          }
+        : { kind: 'none' as const },
+    ),
     curators: ['0x3333333333333333333333333333333333333333'],
   });
 
-  it('may edit an unowned template nothing references', async () => {
+  it('cannot publish at all: no address is no developer license', async () => {
+    // It used to reach the open tier -- an unowned template nothing references
+    // was editable by any session, address or not. The license is now the gate,
+    // and a session with no address can hold none.
+    const d = deps(0, null);
     const e = await resolveEntitlement({
       caller: null,
       template: template({ author: undefined }),
+      ...d,
+    });
+    expect(e.kind).toBe('license-required');
+    expect(e.canPublish).toBe(false);
+    expect(e.canSetHardwareTemplateId).toBe(false);
+    expect(d.developerLicense).toHaveBeenCalledWith(null);
+  });
+
+  it('cannot create one either', async () => {
+    const e = await resolveEntitlement({
+      caller: null,
+      template: null,
       ...deps(0, null),
     });
-    expect(e.kind).toBe('author');
-    expect(e.canPublish).toBe(true);
-    expect(e.canSetHardwareTemplateId).toBe(false);
+    expect(e.kind).toBe('license-required');
+    expect(e.canPublish).toBe(false);
   });
 
   it('is never mistaken for a curator', async () => {
@@ -120,16 +148,6 @@ describe('entitlement for a caller with no address', () => {
     });
     expect(e.kind).not.toBe('curator');
     expect(e.canSetHardwareTemplateId).toBe(false);
-  });
-
-  it('is never mistaken for the author of a claimed template', async () => {
-    const e = await resolveEntitlement({
-      caller: null,
-      template: template({ author: '0x2222222222222222222222222222222222222222' }),
-      ...deps(0, null),
-    });
-    expect(e.kind).toBe('proposal-required');
-    expect(e.canPublish).toBe(false);
   });
 
   it('is never mistaken for the Manufacturer NFT holder', async () => {

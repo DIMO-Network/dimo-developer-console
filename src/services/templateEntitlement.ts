@@ -5,10 +5,12 @@ import { getUserByToken } from '@/services/user';
 
 export type EntitlementKind =
   | 'create'
-  | 'author'
+  /** Holds (or signs for) a DIMO developer license, which is what publishing takes. */
+  | 'licensed'
   | 'manufacturer'
   | 'curator'
-  | 'proposal-required'
+  /** No developer license, so there is nothing to publish with. */
+  | 'license-required'
   /** identity-api could not answer something the decision needs, so nothing is decided. */
   | 'unavailable';
 
@@ -17,7 +19,12 @@ export interface Entitlement {
   canPublish: boolean;
   /** DIMO only, at every tier. It decides what hardware ships. */
   canSetHardwareTemplateId: boolean;
-  /** null when identity-api did not answer: an unknown count is not zero. */
+  /**
+   * How many vehicles resolve to the definition. null when identity-api did not
+   * answer -- an unknown count is not zero. Since the developer licence became
+   * the gate this number decides nothing; it is shown so an editor knows how
+   * many cars a publish re-describes.
+   */
   mintedVehicles: number | null;
   reason: string;
 }
@@ -198,6 +205,84 @@ export async function manufacturerOwner(slug: string): Promise<ManufacturerLooku
 }
 
 /**
+ * Whether this address holds a DIMO developer license, which is what the editor
+ * now gates on. Told apart the same way the manufacturer lookup is: "identity
+ * answered, and the answer is no license" is a fact the person can act on --
+ * mint one -- while "identity did not answer" is a retry, and conflating the
+ * two tells a licensed developer they have no license during an outage.
+ *
+ * Both halves of the question are asked, because both are the license: the
+ * owner of the NFT and the signers it authorises are equally the license
+ * holder as far as every other DIMO API is concerned, and a team whose signer
+ * key is in Console would otherwise be refused by their own license.
+ */
+export type DeveloperLicenseLookup =
+  | { kind: 'held'; tokenId: number; alias: string | null; via: 'owner' | 'signer' }
+  | { kind: 'none' };
+
+interface LicenseConnection {
+  totalCount?: unknown;
+  nodes?: unknown;
+}
+
+const firstLicense = (
+  conn: LicenseConnection | null | undefined,
+  via: 'owner' | 'signer',
+): DeveloperLicenseLookup => {
+  if (conn === null || conn === undefined) {
+    throw new IdentityError('identity-api returned no developer license connection');
+  }
+  if (typeof conn.totalCount !== 'number') {
+    throw new IdentityError('identity-api returned no developer license count');
+  }
+  if (conn.totalCount === 0) return { kind: 'none' };
+  const node = Array.isArray(conn.nodes) ? conn.nodes[0] : undefined;
+  // A positive count with no node is a partial answer, not a license: the
+  // count alone is enough to grant on, but then the reason would name a token
+  // nobody can check. Fail closed and let the caller retry.
+  if (typeof node !== 'object' || node === null) {
+    throw new IdentityError('identity-api returned a developer license with no node');
+  }
+  const { tokenId, alias } = node as { tokenId?: unknown; alias?: unknown };
+  if (typeof tokenId !== 'number') {
+    throw new IdentityError('identity-api returned a developer license with no token id');
+  }
+  return { kind: 'held', tokenId, alias: typeof alias === 'string' ? alias : null, via };
+};
+
+export async function developerLicense(
+  address: string | null,
+): Promise<DeveloperLicenseLookup> {
+  // No on-chain address on the session is not an outage and not a license: see
+  // resolveCaller. Asking identity about an empty address would be a malformed
+  // query, which would read as "identity did not answer" and lock the caller
+  // behind a retry that can never succeed.
+  if (!address) return { kind: 'none' };
+  const data = await identity<{
+    owned?: LicenseConnection | null;
+    signing?: LicenseConnection | null;
+  }>(
+    `query TemplateDeveloperLicense($address: Address!) {
+       owned: developerLicenses(filterBy: { owner: $address }, first: 1) {
+         totalCount
+         nodes { tokenId alias }
+       }
+       signing: developerLicenses(filterBy: { signer: $address }, first: 1) {
+         totalCount
+         nodes { tokenId alias }
+       }
+     }`,
+    { address },
+  );
+  if (!('owned' in data) || !('signing' in data)) {
+    throw new IdentityError('identity-api returned no developer license fields');
+  }
+  const owned = firstLicense(data.owned, 'owner');
+  if (owned.kind === 'held') return owned;
+  return firstLicense(data.signing, 'signer');
+}
+
+/**
  * Every (trim name, hardwareTemplateId) pair a template carries, as a sorted
  * multiset. Trims without one do not appear: adding, removing or renaming
  * those is vehicle description, not a hardware decision. A pair is kept per
@@ -239,6 +324,7 @@ export interface EntitlementArgs {
   template: Template | null;
   countMintedVehicles: (id: string) => Promise<number>;
   manufacturerOwner: (slug: string) => Promise<ManufacturerLookup>;
+  developerLicense: (address: string | null) => Promise<DeveloperLicenseLookup>;
   curators: string[];
 }
 
@@ -251,35 +337,51 @@ export interface EntitlementArgs {
 const makeSlug = (id: string): string => id.split('_')[0] ?? '';
 
 /**
- * The split falls where risk falls, and risk is the vehicle count -- never the
- * presence of a template document. Creating ineos_grenadier_2024 harms nobody.
- * Writing toyota_camry_2020 silently re-describes every vehicle pointing at it,
- * and that is just as true when no template has been imported for it yet: the
- * production extraction has never been run, so Console's own search renders
- * those rows as 'missing' while identity serves the definition to hundreds of
- * thousands of vehicles. The count is asked about the DEFINITION, so an absent
- * template goes through exactly the same tiers as a stored one.
+ * A DIMO developer license is what it takes to create or edit a template.
+ *
+ * It used to be the vehicle count: anything with a minted vehicle on it was
+ * read-only to everybody but the Manufacturer NFT holder, waiting on a proposal
+ * flow that is still not built. That left the registry uneditable in practice
+ * -- a Camry with 80 cars on it is exactly the row somebody needs to fix -- and
+ * DIMO_CURATOR_ADDRESSES is deliberately unset, so the curator tier that was
+ * supposed to be the escape hatch is empty and even DIMO staff saw "read only".
+ *
+ * So the gate is now the license, the same credential every other write path in
+ * this console takes, and the vehicle count is demoted to what it always
+ * honestly was: a warning about blast radius, shown rather than enforced. The
+ * worker still versions every write with a compare-and-swap, keeps history and
+ * stamps an author, so an edit by the wrong person is visible and revertible --
+ * which is the protection that actually exists, rather than a proposal queue
+ * that does not.
+ *
+ * hardwareTemplateId stays DIMO-only at every tier below curator: it decides
+ * what hardware ships, which is not a description of a car.
  */
 export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitlement> {
   const { caller, id, template, curators } = args;
   const isCurator = curators.some((c) => eq(c, caller));
 
-  // The count is what the rest of this function decides on. When it cannot
-  // be read the answer is "not now", for everyone: a count that fell back to
-  // zero would open an unauthored template to whoever was editing it during
-  // the blip, and a decision made on a guess is not one anybody granted.
-  let mintedVehicles: number;
+  // Informational, and so no longer fatal. It used to decide the tier, which
+  // is why a count that could not be read had to close everything down; now a
+  // blip costs the editor a number on a banner and nothing else.
+  let mintedVehicles: number | null = null;
   try {
     mintedVehicles = await args.countMintedVehicles(id);
   } catch {
-    return {
-      kind: 'unavailable',
-      canPublish: false,
-      canSetHardwareTemplateId: false,
-      mintedVehicles: null,
-      reason: 'Could not verify the vehicle count for this template. Try again.',
-    };
+    mintedVehicles = null;
   }
+
+  const vehicles = (): string => {
+    if (mintedVehicles === null) {
+      return 'The vehicle count could not be read, so this template may describe cars that are already on the road.';
+    }
+    if (mintedVehicles === 0) return 'No vehicle resolves to it yet.';
+    return (
+      `${mintedVehicles.toLocaleString()} minted vehicle${mintedVehicles === 1 ? '' : 's'} ` +
+      `resolve${mintedVehicles === 1 ? 's' : ''} to it, so publishing re-describes ` +
+      `${mintedVehicles === 1 ? 'that car' : 'all of them'}.`
+    );
+  };
 
   if (isCurator) {
     return {
@@ -287,45 +389,55 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
       canPublish: true,
       canSetHardwareTemplateId: true,
       mintedVehicles,
-      reason: 'You are a DIMO curator.',
+      reason: `You are a DIMO curator. ${vehicles()}`,
     };
   }
 
-  if (mintedVehicles === 0) {
+  // Fails closed, like every other identity question here: "we could not check
+  // your license" is not "you have no license".
+  let license: DeveloperLicenseLookup;
+  try {
+    license = await args.developerLicense(caller);
+  } catch {
+    return {
+      kind: 'unavailable',
+      canPublish: false,
+      canSetHardwareTemplateId: false,
+      mintedVehicles,
+      reason: 'Could not verify your DIMO developer license. Try again.',
+    };
+  }
+
+  if (license.kind === 'held') {
+    const named = license.alias
+      ? `${license.tokenId} ("${license.alias}")`
+      : `${license.tokenId}`;
+    const held =
+      license.via === 'owner'
+        ? `You hold DIMO developer license ${named}`
+        : `You are a signer on DIMO developer license ${named}`;
     if (template === null) {
       return {
         kind: 'create',
         canPublish: true,
         canSetHardwareTemplateId: false,
-        mintedVehicles: 0,
-        reason:
-          'This template does not exist yet and no vehicle resolves to the definition, so creating it cannot re-describe anything.',
-      };
-    }
-    // An absent author is a backfill-created template, which nobody has claimed.
-    // Treating it as unowned is what keeps the open tier from being empty.
-    if (!template.author || eq(template.author, caller)) {
-      return {
-        kind: 'author',
-        canPublish: true,
-        canSetHardwareTemplateId: false,
-        mintedVehicles: 0,
-        reason: 'No vehicle references this template yet.',
+        mintedVehicles,
+        reason: `${held}, and no template exists for this definition yet. ${vehicles()}`,
       };
     }
     return {
-      kind: 'proposal-required',
-      canPublish: false,
+      kind: 'licensed',
+      canPublish: true,
       canSetHardwareTemplateId: false,
-      mintedVehicles: 0,
-      reason: `This template was published by ${template.author}. Editing someone else's template opens a proposal, which is not built yet.`,
+      mintedVehicles,
+      reason: `${held}, which is what publishing takes. ${vehicles()}`,
     };
   }
 
-  // Same rule as the count. The holder lookup throws on the same identity
-  // failures, and uncaught that turned the editor's GET into a 502 during an
-  // outage. "Could not check" is also not "somebody else holds it": a
-  // manufacturer told proposal-required would read it as a denial.
+  // Kept below the license rather than removed. Holding the Manufacturer NFT for
+  // the make is a stronger claim on the row than any developer license, and an
+  // OEM that has never minted a license should not be locked out of its own
+  // models.
   const slug = template?.manufacturer.slug ?? makeSlug(id);
   let held: ManufacturerLookup;
   try {
@@ -346,18 +458,18 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
       canPublish: true,
       canSetHardwareTemplateId: false,
       mintedVehicles,
-      reason: `You hold the ${template?.manufacturer.name ?? slug} Manufacturer NFT (token ${held.tokenId}).`,
+      reason: `You hold the ${template?.manufacturer.name ?? slug} Manufacturer NFT (token ${held.tokenId}). ${vehicles()}`,
     };
   }
 
-  const what = template === null ? 'definition' : 'template';
   return {
-    kind: 'proposal-required',
+    kind: 'license-required',
     canPublish: false,
     canSetHardwareTemplateId: false,
     mintedVehicles,
     reason:
-      `${mintedVehicles.toLocaleString()} minted vehicle${mintedVehicles === 1 ? '' : 's'} resolve to this ` +
-      `${what}. Editing it needs a proposal a curator merges, which is not built yet.`,
+      'Creating or editing a template takes a DIMO developer license, and this ' +
+      'account does not hold one or sign for one. Create a license under ' +
+      'Developer licenses, then reload this page.',
   };
 }

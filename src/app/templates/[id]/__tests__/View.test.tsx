@@ -33,11 +33,12 @@ const authorBundle = () => ({
   template: t,
   vocabulary: vehicleVocab,
   entitlement: {
-    kind: 'author',
+    kind: 'licensed',
     canPublish: true,
     canSetHardwareTemplateId: false,
     mintedVehicles: 0,
-    reason: 'No vehicle references this template yet.',
+    reason:
+      'You hold DIMO developer license 472 ("DEMO App"), which is what publishing takes. No vehicle resolves to it yet.',
   },
 });
 
@@ -248,15 +249,15 @@ describe('TemplateEditorView', () => {
     });
   });
 
-  it('is read only, with no publish button, when a proposal is required', () => {
+  it('is read only, with no publish button, without a developer license', () => {
     bundle = {
       ...authorBundle(),
       entitlement: {
-        kind: 'proposal-required',
+        kind: 'license-required',
         canPublish: false,
         canSetHardwareTemplateId: false,
         mintedVehicles: 4212,
-        reason: '4,212 minted vehicles resolve to this template.',
+        reason: 'Creating or editing a template takes a DIMO developer license.',
       },
     };
     render(<TemplateEditorView id={t.id} />);
