@@ -16,12 +16,12 @@ const STATUS_COPY: Record<string, { label: string; tone: StatusTone; hint: strin
   'missing': {
     label: 'No template yet',
     tone: 'off',
-    hint: 'This model-year exists but no template has been imported for it.',
+    hint: 'This model year exists, but nobody has written a template for it yet.',
   },
   'invalid-id': {
-    label: 'Id cannot be a template',
+    label: 'Id needs fixing first',
     tone: 'error',
-    hint: 'This device definition id does not match the template id pattern, so it cannot be edited until the id is corrected.',
+    hint: 'This id is not in the make_model_year shape a template needs, so there is nothing to edit until the id itself is corrected.',
   },
 };
 
@@ -59,11 +59,11 @@ export const TemplatesPage = () => {
       <QueryPageWrapper
         loading={isLoading}
         error={error ?? undefined}
-        customErrorMessage="There was a problem searching device definitions"
+        customErrorMessage="Something went wrong searching the catalog"
       >
         {data && !data.manufacturer && (
           <p className="text-body-sm text-muted">
-            No manufacturer matched that name or slug.
+            No make matched that name. Try the brand as it is spelled on the car.
           </p>
         )}
         <ul className="flex flex-col divide-y divide-outline rounded-card bg-card">

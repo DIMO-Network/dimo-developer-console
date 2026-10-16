@@ -5,7 +5,7 @@ export const Header = () => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <p className="text-body-sm text-muted">
-        One model-year, and the trims it shipped in
+        Search the catalog by make, model and year to edit what a car is
       </p>
       {/*
         The only reliable way into the create form. The per-row "Create" button

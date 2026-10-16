@@ -99,8 +99,9 @@ export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
     <div className="flex flex-col gap-6">
       <Title>New template</Title>
       <p className="text-body-sm text-muted">
-        A model-year and the trims it shipped in. Creating one publishes immediately and
-        is attributed to you — nothing points at it yet, so nothing can be re-described.
+        A template is one model year and the trims it shipped in. Creating it publishes
+        straight away, under your name. No cars use it yet, so nothing on the road
+        changes.
       </p>
 
       <div className="grid gap-3 md:grid-cols-2">
