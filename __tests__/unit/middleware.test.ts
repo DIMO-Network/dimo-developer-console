@@ -132,16 +132,20 @@ describe('middleware with a session', () => {
     expect(getUserByToken).toHaveBeenCalledTimes(1);
   });
 
-  it('runs the full check while a team invitation is pending', async () => {
-    const verdict = await sessionVerdictFor(TOKEN);
-    await run(
-      request('/licenses', {
-        'session-token': TOKEN,
-        [SESSION_VERDICT_COOKIE]: verdict,
-        'invitation_code': 'abc',
+  it('lets a verified session reach the data proxy without the onboarding check', async () => {
+    const res = await run(request('/api/data/telemetry', { 'session-token': TOKEN }));
+    expect(isPassThrough(res)).toBe(true);
+    expect(getUserByToken).not.toHaveBeenCalled();
+  });
+
+  it('refuses the data proxy to a token that does not verify', async () => {
+    (decodeJwtToken as jest.Mock).mockRejectedValue(
+      Object.assign(new Error('unsupported "crit" header'), {
+        code: 'ERR_JOSE_NOT_SUPPORTED',
       }),
     );
-    expect(getUserByToken).toHaveBeenCalledTimes(1);
+    const res = await run(request('/api/data/telemetry', { 'session-token': TOKEN }));
+    expect(res.status).toBe(401);
   });
 
   it('sends an unfinished account to its onboarding step and remembers nothing', async () => {

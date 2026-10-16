@@ -154,7 +154,6 @@ export const withGlobalAccounts = <P extends object>(
         subOrganizationId: subOrganizationId,
         walletAddress: resolved.walletAddress,
         smartContractAddress: resolved.smartContractAddress,
-        role: TeamRoles.OWNER,
       };
 
       return user;

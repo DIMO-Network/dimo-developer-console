@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { postAcceptInvitation, postInvitePreview } from '@/services/teams';
 import { INVITE_TOKEN_COOKIE } from '@/utils/teamCookies';
+import { SESSION_VERDICT_COOKIE } from '@/utils/middlewareUtils';
 import type { ApiResult, InvitePreview, TeamSummary } from '@/types/team';
 
 // Codes after which the invite can never succeed (contracts C4); any other
@@ -25,6 +26,11 @@ const settle = async <T>(
     (!result.ok && result.code && TERMINAL.has(result.code))
   ) {
     (await cookies()).delete(INVITE_TOKEN_COOKIE);
+  }
+  // A new team changes who this session is; the next request re-runs the
+  // middleware's full check instead of trusting the remembered verdict.
+  if (result.ok && consumed) {
+    (await cookies()).delete(SESSION_VERDICT_COOKIE);
   }
   return result;
 };

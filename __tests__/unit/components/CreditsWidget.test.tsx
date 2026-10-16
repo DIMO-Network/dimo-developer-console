@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn() }));
 // The @/hooks barrel loads modules jsdom can't run (next/cache, wagmi's ESM);
@@ -16,17 +17,19 @@ import { CreditsWidget } from '@/components/CreditsWidget';
 
 const withUser = (ui: React.ReactNode) =>
   render(
-    <GlobalAccountContext.Provider
-      value={{
-        currentUser: null,
-        validateCurrentSession: async () => null,
-        getCurrentDcxBalance: async () => 0,
-        getCurrentDimoBalance: async () => 0,
-        logout: async () => {},
-      }}
-    >
-      {ui}
-    </GlobalAccountContext.Provider>,
+    <QueryClientProvider client={new QueryClient()}>
+      <GlobalAccountContext.Provider
+        value={{
+          currentUser: null,
+          validateCurrentSession: async () => null,
+          getCurrentDcxBalance: async () => 0,
+          getCurrentDimoBalance: async () => 0,
+          logout: async () => {},
+        }}
+      >
+        {ui}
+      </GlobalAccountContext.Provider>
+    </QueryClientProvider>,
   );
 
 describe('CreditsWidget for members', () => {

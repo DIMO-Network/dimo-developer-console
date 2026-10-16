@@ -96,12 +96,10 @@ const rememberVerdict = (
 const validatePrivateSession = async (request: NextRequest, token: string) => {
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const verdict = await sessionVerdictFor(token);
-  // /api/me accepts a pending team invitation as a side effect, so while one is
-  // waiting the full check runs every time.
-  const hasInvitation = Boolean(await getCookie('invitation_code'));
 
   // This session already passed the check below: see SESSION_VERDICT_COOKIE.
-  if (!hasInvitation && request.cookies.get(SESSION_VERDICT_COOKIE)?.value === verdict) {
+  // Accepting a team invite deletes the cookie (src/actions/invites.ts).
+  if (request.cookies.get(SESSION_VERDICT_COOKIE)?.value === verdict) {
     return isLoginPage
       ? NextResponse.redirect(buildRedirectUrl('/app', request), { status: 307 })
       : NextResponse.next();

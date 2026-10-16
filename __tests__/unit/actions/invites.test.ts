@@ -13,6 +13,8 @@ jest.mock('@/services/teams', () => ({
   postInvitePreview: jest.fn(),
   postAcceptInvitation: jest.fn(),
 }));
+// middlewareUtils (SESSION_VERDICT_COOKIE) imports jose (ESM) at load time.
+jest.mock('jose', () => ({ createRemoteJWKSet: jest.fn(), jwtVerify: jest.fn() }));
 import { postAcceptInvitation, postInvitePreview } from '@/services/teams';
 import { acceptPendingInvite, previewPendingInvite } from '@/actions/invites';
 
@@ -58,6 +60,8 @@ describe('invite server actions', () => {
     });
     await acceptPendingInvite();
     expect(remove).toHaveBeenCalledWith('invite_token');
+    // The middleware re-checks the session on the next request.
+    expect(remove).toHaveBeenCalledWith('session-verdict');
 
     for (const code of [
       'INVITE_INVALID',
@@ -70,6 +74,7 @@ describe('invite server actions', () => {
       (postAcceptInvitation as jest.Mock).mockResolvedValueOnce(failure(400, code));
       await acceptPendingInvite();
       expect(remove).toHaveBeenCalledWith('invite_token');
+      expect(remove).not.toHaveBeenCalledWith('session-verdict');
     }
   });
 
