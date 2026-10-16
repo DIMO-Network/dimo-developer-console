@@ -103,7 +103,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
     );
   }
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form className="create-app-form" onSubmit={handleSubmit(onSubmit)}>
       <Label htmlFor="namespace">
         Developer license name
         <TextField
