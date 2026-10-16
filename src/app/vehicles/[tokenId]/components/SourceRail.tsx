@@ -6,7 +6,17 @@ import type { LatestIndexHeader } from '@/hooks/subjects/useSubjectFreshness';
 import { FreshnessDot } from '@/components/FreshnessDot';
 import { SelectWithChevron } from '@/components/SelectWithChevron';
 
-export type Access = 'ok' | 'not-shared' | 'no-jwt' | 'jwt-expired' | 'loading';
+export type Access =
+  | 'ok'
+  | 'not-shared'
+  | 'no-jwt'
+  | 'jwt-expired'
+  | 'no-access'
+  | 'removed'
+  | 'reconnect'
+  | 'unavailable'
+  | 'error'
+  | 'loading';
 export type AccountState = 'unknown' | 'loading' | 'shared' | 'not-shared';
 
 interface Props {
@@ -26,6 +36,11 @@ const ACCESS_LABEL: Record<Exclude<Access, 'ok'>, string> = {
   'not-shared': 'No access',
   'no-jwt': 'Needs a developer JWT',
   'jwt-expired': 'Needs a new developer JWT',
+  'no-access': 'No data access',
+  'removed': 'No data access',
+  'reconnect': 'Reconnect your wallet',
+  'unavailable': 'Not available yet',
+  'error': "Couldn't check access",
   'loading': 'Checking…',
 };
 const ACCOUNT_LABEL: Record<AccountState, string> = {

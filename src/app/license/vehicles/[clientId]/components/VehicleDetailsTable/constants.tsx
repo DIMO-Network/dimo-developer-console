@@ -70,7 +70,12 @@ function ActionsCell({
 export const buildColumns = (
   simulatedTokenIds: Set<number>,
   onRenounce: (tokenId: number) => void,
-  opts: { showSources?: boolean; showLastSeen?: boolean; clientId: string } = {
+  opts: {
+    showSources?: boolean;
+    showLastSeen?: boolean;
+    clientId: string;
+    canRenounce?: boolean;
+  } = {
     clientId: '',
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -149,13 +154,18 @@ export const buildColumns = (
         }),
       ]
     : []),
-  columnHelper.display({
-    id: 'actions',
-    header: '',
-    cell: (info) => (
-      <ActionsCell tokenId={info.row.original.tokenId} onRenounce={onRenounce} />
-    ),
-  }),
+  // Renounce signs from the user's own wallet: owners only.
+  ...(opts.canRenounce === false
+    ? []
+    : [
+        columnHelper.display({
+          id: 'actions',
+          header: '',
+          cell: (info) => (
+            <ActionsCell tokenId={info.row.original.tokenId} onRenounce={onRenounce} />
+          ),
+        }),
+      ]),
 ];
 
 export const PAGE_SIZE = 10;

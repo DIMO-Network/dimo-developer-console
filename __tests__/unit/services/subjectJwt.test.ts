@@ -5,6 +5,7 @@ import {
   getSubjectJwt,
   SubjectJwtError,
   clearSubjectJwtCache,
+  SUBJECT_JWT_CACHE_MAX,
 } from '@/services/subjectJwt';
 
 const b64 = (o: object) => Buffer.from(JSON.stringify(o)).toString('base64url');
@@ -45,7 +46,6 @@ describe('getSubjectJwt', () => {
       asset: VEHICLE,
       permissions: [
         'privilege:GetNonLocationHistory',
-        'privilege:ExecuteCommands',
         'privilege:GetCurrentLocation',
         'privilege:GetLocationHistory',
         'privilege:GetRawData',
@@ -173,6 +173,48 @@ describe('getSubjectJwt', () => {
   it('rejects an asset that is neither an erc721 nor an ethr DID', async () => {
     await expect(getSubjectJwt(DEV, 'did:web:example.com')).rejects.toMatchObject({
       status: 403,
+    });
+  });
+
+  it('requests only the C9 privileges, never ExecuteCommands, even when the license holds all', async () => {
+    fetchMock
+      .mockImplementationOnce(() =>
+        json(200, { data: { vehicle: { sacd: { permissions: '0x3fffc' } } } }),
+      )
+      .mockImplementationOnce(() => json(200, { token: 'vehicle-jwt' }));
+    await getSubjectJwt(DEV, VEHICLE);
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body).permissions).toEqual([
+      'privilege:GetNonLocationHistory',
+      'privilege:GetCurrentLocation',
+      'privilege:GetLocationHistory',
+      'privilege:GetRawData',
+      'privilege:GetApproximateLocation',
+    ]);
+  });
+
+  it(`keeps at most ${SUBJECT_JWT_CACHE_MAX} tokens, dropping the oldest`, async () => {
+    fetchMock.mockImplementation(() => json(200, { token: 'account-jwt' }));
+    const account = (i: number) => `did:ethr:80002:0x${i.toString(16).padStart(40, '0')}`;
+    for (let i = 0; i <= SUBJECT_JWT_CACHE_MAX; i++) await getSubjectJwt(DEV, account(i));
+    fetchMock.mockClear();
+    await getSubjectJwt(DEV, account(SUBJECT_JWT_CACHE_MAX));
+    expect(fetchMock).not.toHaveBeenCalled();
+    await getSubjectJwt(DEV, account(0));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps token exchange refusing a revoked signer to NO_ACCESS', async () => {
+    fetchMock
+      .mockImplementationOnce(() =>
+        json(200, { data: { vehicle: { sacd: { permissions: PERMS_HEX } } } }),
+      )
+      .mockImplementationOnce(() =>
+        json(403, { code: 403, message: 'signer no longer authorized for this license' }),
+      );
+    await expect(getSubjectJwt(DEV, VEHICLE)).rejects.toMatchObject({
+      status: 403,
+      code: 'NO_ACCESS',
+      message: 'You no longer have access to this license.',
     });
   });
 });

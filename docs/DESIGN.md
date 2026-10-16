@@ -610,6 +610,10 @@ addresses are `font-mono text-code`. A destructive row action in a menu
 (`VehicleDetailsTable` `constants.tsx`, the row-actions popover) is
 `rounded-chip px-3 py-2 text-body-sm text-negative hover:bg-negative-soft` in an
 `bg-overlay` menu (`rounded-control border border-outline p-1 shadow-float`).
+`src/components/RowActionsMenu` is that popover as a component: one 32px `⋯`
+button per row, with items in `role="menu"`. Use it for any table whose row has
+more than one action (Settings → Team, License → API keys), so the action cell
+fits a 390px phone.
 
 **Split panel with sticky preview** (configurator: `ConfigurationForm.tsx`
 for new and edit): the form on the left, a live preview on the right. Layout

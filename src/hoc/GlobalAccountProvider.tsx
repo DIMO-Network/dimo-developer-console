@@ -20,8 +20,7 @@ import { getKernelAccount, getPublicClient } from '@/services/zerodev';
 import { Abi } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
-import { TeamRoles } from '@/types/team';
-import { signOut } from '@/actions/user';
+import { endSession } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
@@ -154,7 +153,6 @@ export const withGlobalAccounts = <P extends object>(
         subOrganizationId: subOrganizationId,
         walletAddress: resolved.walletAddress,
         smartContractAddress: resolved.smartContractAddress,
-        role: TeamRoles.OWNER,
       };
 
       return user;
@@ -197,7 +195,6 @@ export const withGlobalAccounts = <P extends object>(
       identifyUser(smartContractAddress, {
         $email: email,
         $subOrganizationId: subOrganizationId,
-        $role: TeamRoles.OWNER,
       });
 
       rememberedUser = user;
@@ -212,7 +209,9 @@ export const withGlobalAccounts = <P extends object>(
       queryClient.clear();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
-      await signOut();
+      // Reached when the session expired or this tab has none; an explicit
+      // sign-out (the menu) also clears the team and developer JWTs.
+      await endSession();
       router.replace('/sign-in');
     };
 

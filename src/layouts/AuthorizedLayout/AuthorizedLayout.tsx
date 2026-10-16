@@ -7,6 +7,7 @@ import {
   withApollo,
   withAccountInformation,
   withLayout,
+  withTeams,
 } from '@/hoc';
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
@@ -16,12 +17,14 @@ import { cn } from '@/lib/utils';
 import './AuthorizedLayout.css';
 
 const Providers = withGlobalAccounts(
-  withLayout(
-    withCredits(
-      withApollo(
-        withAccountInformation(({ children }: { children: React.ReactNode }) => (
-          <>{children}</>
-        )),
+  withTeams(
+    withLayout(
+      withCredits(
+        withApollo(
+          withAccountInformation(({ children }: { children: React.ReactNode }) => (
+            <>{children}</>
+          )),
+        ),
       ),
     ),
   ),

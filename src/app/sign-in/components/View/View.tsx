@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 import { OtpInputForm, PasskeyLogin, SignInMethodForm } from '@/app/sign-in/components';
 import { getUserInformation } from '@/actions/user';
-import { isCollaborator } from '@/utils/user';
 import { isEmpty, isNull } from 'lodash';
 import { FOCUS_QUERY_PARAM, saveFocus } from '@/utils/focus';
 
@@ -88,13 +87,7 @@ export const View = () => {
         'Sign In Method': 'Email',
       });
 
-      const { role, subOrganizationId, hasPasskey, currentWalletAddress } =
-        userInformation;
-
-      if (isCollaborator(role)) {
-        router.replace('/app');
-        return;
-      }
+      const { subOrganizationId, hasPasskey, currentWalletAddress } = userInformation;
 
       setUser({
         subOrganizationId: subOrganizationId,

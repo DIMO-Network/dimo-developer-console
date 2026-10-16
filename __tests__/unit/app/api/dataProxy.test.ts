@@ -8,6 +8,8 @@ jest.mock('@/services/subjectJwt', () => {
   return { ...actual, getSubjectJwt: jest.fn() };
 });
 
+jest.mock('@/services/licenseAccess', () => ({ authorizeLicenseAccess: jest.fn() }));
+import { authorizeLicenseAccess } from '@/services/licenseAccess';
 import { POST as telemetry } from '@/app/api/data/telemetry/route';
 import { POST as fetchRoute } from '@/app/api/data/fetch/route';
 import { getSubjectJwt, SubjectJwtError } from '@/services/subjectJwt';
@@ -29,6 +31,12 @@ beforeEach(() => {
   global.fetch = fetchMock as unknown as typeof fetch;
   (getSubjectJwt as jest.Mock).mockReset();
   (getSubjectJwt as jest.Mock).mockResolvedValue('asset-jwt');
+  (authorizeLicenseAccess as jest.Mock).mockReset().mockResolvedValue({
+    allowed: true,
+    access: 'MEMBER',
+    clientId: '0xclient',
+    caller: { email: 'jane@harness.dev', teamId: 'team-acme' },
+  });
 });
 
 describe('data proxy routes', () => {
@@ -125,5 +133,97 @@ describe('data proxy routes', () => {
     const res = await fetchRoute(req({ asset: VEHICLE, query: 'query { x }' }));
     expect(res.status).toBe(502);
     expect((await res.json()).code).toBe('UPSTREAM');
+  });
+
+  const auditLines = (spy: jest.SpyInstance) =>
+    spy.mock.calls
+      .map(([m]) => String(m))
+      .filter((m) => m.includes('"event":"data_proxy"'))
+      .map((m) => JSON.parse(m));
+
+  it('refuses with the decision, includes memberOfTeam, never exchanges, and logs it', async () => {
+    const info = jest.spyOn(console, 'info').mockImplementation(() => {});
+    (authorizeLicenseAccess as jest.Mock).mockResolvedValue({
+      allowed: false,
+      status: 403,
+      code: 'NO_ACCESS',
+      message: 'You no longer have access to this license.',
+      memberOfTeam: false,
+    });
+    const res = await telemetry(req({ asset: VEHICLE, query: 'query { x }' }));
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: 'You no longer have access to this license.',
+      code: 'NO_ACCESS',
+      memberOfTeam: false,
+    });
+    expect(getSubjectJwt).not.toHaveBeenCalled();
+    expect(auditLines(info)).toEqual([
+      expect.objectContaining({ outcome: 'refused', code: 'NO_ACCESS', asset: VEHICLE }),
+    ]);
+    info.mockRestore();
+  });
+
+  it('writes the audit line after the exchange, with the outcome', async () => {
+    const info = jest.spyOn(console, 'info').mockImplementation(() => {});
+    fetchMock.mockResolvedValueOnce(new Response('{"data":{}}', { status: 200 }));
+    const request = req({ asset: VEHICLE, query: 'query { x }' });
+    request.cookies.set('session-token', 'session.jwt');
+    await telemetry(request);
+    expect(authorizeLicenseAccess).toHaveBeenCalledWith({
+      devJwt: 'dev.jwt',
+      sessionToken: 'session.jwt',
+    });
+    expect(auditLines(info)).toEqual([
+      {
+        event: 'data_proxy',
+        api: 'telemetry',
+        email: 'jane@harness.dev',
+        teamId: 'team-acme',
+        clientId: '0xclient',
+        asset: VEHICLE,
+        access: 'MEMBER',
+        outcome: 'ok',
+        status: 200,
+      },
+    ]);
+    info.mockRestore();
+  });
+
+  it('names the session wallet, not an email or team, on the owner fast path', async () => {
+    const info = jest.spyOn(console, 'info').mockImplementation(() => {});
+    (authorizeLicenseAccess as jest.Mock).mockResolvedValue({
+      allowed: true,
+      access: 'OWNER',
+      clientId: '0xclient',
+      caller: { wallet: '0xkernel' },
+    });
+    fetchMock.mockResolvedValueOnce(new Response('{"data":{}}', { status: 200 }));
+    await telemetry(req({ asset: VEHICLE, query: 'query { x }' }));
+    expect(auditLines(info)).toEqual([
+      {
+        event: 'data_proxy',
+        api: 'telemetry',
+        wallet: '0xkernel',
+        clientId: '0xclient',
+        asset: VEHICLE,
+        access: 'OWNER',
+        outcome: 'ok',
+        status: 200,
+      },
+    ]);
+    info.mockRestore();
+  });
+
+  it('logs a revoked signer from token exchange and answers NO_ACCESS', async () => {
+    const info = jest.spyOn(console, 'info').mockImplementation(() => {});
+    (getSubjectJwt as jest.Mock).mockRejectedValue(
+      new SubjectJwtError(403, 'NO_ACCESS', 'You no longer have access to this license.'),
+    );
+    const res = await telemetry(req({ asset: VEHICLE, query: 'query { x }' }));
+    expect(res.status).toBe(403);
+    expect((await res.json()).code).toBe('NO_ACCESS');
+    expect(auditLines(info)[0]).toMatchObject({ outcome: 'signer_revoked', status: 403 });
+    info.mockRestore();
   });
 });

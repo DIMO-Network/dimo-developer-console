@@ -79,7 +79,13 @@ export const bottomMenu: NavItem[] = [
   },
 ];
 
-export const getNavSections = (includeConnections: boolean = true): NavSection[] => [
+export const getNavSections = (
+  includeConnections: boolean = true,
+  {
+    isMember = false,
+    dataAccessEnabled = false,
+  }: { isMember?: boolean; dataAccessEnabled?: boolean } = {},
+): NavSection[] => [
   {
     label: 'Workspace',
     items: [
@@ -106,6 +112,9 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
         link: '/vehicles',
         external: false,
         disabled: false,
+        // Members read Vehicles through their own wallet, which needs the
+        // platform signer check (contracts C5).
+        hidden: isMember && !dataAccessEnabled,
       },
       {
         label: 'Webhooks',
@@ -114,6 +123,9 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
         link: '/webhooks',
         external: false,
         disabled: false,
+        // Owner-only (Task 9): a member's webhook outlives their membership,
+        // and connection keys are secrets.
+        hidden: isMember,
       },
       {
         label: 'Templates',
@@ -132,6 +144,9 @@ export const getNavSections = (includeConnections: boolean = true): NavSection[]
               link: '/connections',
               external: false,
               disabled: false,
+              // Owner-only (Task 9): a member's webhook outlives their membership,
+              // and connection keys are secrets.
+              hidden: isMember,
             },
           ]
         : []),

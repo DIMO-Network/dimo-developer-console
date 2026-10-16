@@ -108,3 +108,27 @@ describe('postSubjectQuery', () => {
     ).rejects.toMatchObject({ status: 502, code: 'UPSTREAM' });
   });
 });
+
+describe('postSubjectQuery error codes', () => {
+  const query = () =>
+    postSubjectQuery('fetch', { asset: ASSET, clientId: '0xabc', request: req });
+
+  it('carries the proxy refusal and memberOfTeam', async () => {
+    answer(403, {
+      error: 'You no longer have access to this license.',
+      code: 'NO_ACCESS',
+      memberOfTeam: false,
+    });
+    await expect(query()).rejects.toMatchObject({
+      code: 'NO_ACCESS',
+      memberOfTeam: false,
+      status: 403,
+    });
+  });
+
+  it('turns an unknown code into UNKNOWN, keeping the message', async () => {
+    answer(400, { error: 'Bad client id', code: 'SOMETHING_NEW' });
+    const error = await query().catch((e: DataApiError) => e);
+    expect(error).toMatchObject({ code: 'UNKNOWN', message: 'Bad client id' });
+  });
+});

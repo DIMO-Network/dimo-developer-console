@@ -2,7 +2,7 @@
 import { Suspense } from 'react';
 import { useQuery } from '@apollo/client';
 import { gql } from '@/gql';
-import { useGlobalAccount } from '@/hooks';
+import { useTeam } from '@/hooks/useTeam';
 import { Loader } from '@/components/Loader';
 import { LicenseList } from '@/app/license/list';
 
@@ -15,13 +15,13 @@ const GET_ALL_LICENSES = gql(`
 `);
 
 const LicensesView = () => {
-  const { currentUser } = useGlobalAccount();
+  const { ownerAddress } = useTeam();
   const { data, loading } = useQuery(GET_ALL_LICENSES, {
-    variables: { owner: currentUser?.smartContractAddress ?? '' },
-    skip: !currentUser?.smartContractAddress,
+    variables: { owner: ownerAddress ?? '' },
+    skip: !ownerAddress,
   });
 
-  if (loading || !currentUser || !data) {
+  if (loading || !ownerAddress || !data) {
     return <Loader isLoading={true} />;
   }
 

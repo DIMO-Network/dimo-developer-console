@@ -15,6 +15,10 @@ export interface Webhook {
   description: string;
   displayName?: string;
   failure_count: number;
+  // Contracts C3: the signer that created the webhook, or last changed its
+  // target, vehicles or condition. Checksummed; absent for older webhooks.
+  createdBySigner?: string;
+  updatedBySigner?: string;
 }
 
 export type WebhookEditableFields = Partial<
@@ -97,10 +101,18 @@ export class FormStep {
 export type DeveloperLicenseForWebhook =
   GetDeveloperLicensesForWebhooksQuery['developerLicenses']['nodes'][0];
 
-export class LocalDeveloperLicense {
-  private gqlDeveloperLicense: DeveloperLicenseForWebhook;
+// Old call sites and tests build licenses from alias, clientId and redirect
+// URIs only; the team fields are optional so they keep working.
+type LicenseInput = Pick<
+  DeveloperLicenseForWebhook,
+  'alias' | 'clientId' | 'redirectURIs'
+> &
+  Partial<Pick<DeveloperLicenseForWebhook, 'tokenId' | 'owner' | 'signers'>>;
 
-  constructor(remoteDeveloperLicense: DeveloperLicenseForWebhook) {
+export class LocalDeveloperLicense {
+  private gqlDeveloperLicense: LicenseInput;
+
+  constructor(remoteDeveloperLicense: LicenseInput) {
     this.gqlDeveloperLicense = remoteDeveloperLicense;
   }
 
@@ -114,6 +126,23 @@ export class LocalDeveloperLicense {
 
   get firstRedirectURI() {
     return this.gqlDeveloperLicense.redirectURIs.nodes[0].uri;
+  }
+
+  get tokenId(): number | null {
+    return this.gqlDeveloperLicense.tokenId ?? null;
+  }
+
+  get owner(): string | null {
+    return this.gqlDeveloperLicense.owner ?? null;
+  }
+
+  // Identity returns checksummed addresses and Turnkey lowercase ones.
+  hasSigner(address?: string | null): boolean {
+    if (!address) return false;
+    const target = address.toLowerCase();
+    return (this.gqlDeveloperLicense.signers?.nodes ?? []).some(
+      (signer) => String(signer.address).toLowerCase() === target,
+    );
   }
 }
 

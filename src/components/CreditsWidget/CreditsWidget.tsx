@@ -2,7 +2,7 @@
 import { FC, useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useGlobalAccount } from '@/hooks';
-import { isCollaborator, isOwner } from '@/utils/user';
+import { useTeam } from '@/hooks/useTeam';
 import { formatToCurrency } from '@/utils/formatBalance';
 import * as Sentry from '@sentry/nextjs';
 import { PlusIcon, WalletIcon } from '@/components/Icons';
@@ -19,6 +19,7 @@ const DCX_IN_USD = 0.001;
 
 export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) => {
   const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
+  const { isMember } = useTeam();
   const { setIsOpen: _setIsOpen } = useContext(CreditsContext);
 
   // Cached by account so the header keeps showing the balance when a section
@@ -34,30 +35,26 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
         throw error;
       }
     },
-    enabled: Boolean(currentUser) && !isCollaborator(currentUser?.role ?? ''),
+    enabled: Boolean(currentUser) && !isMember,
     staleTime: 30_000,
   });
   const dcxBalance = formatToCurrency((balance ?? 0) * DCX_IN_USD);
-
-  // const handleBuyCredits = () => {
-  //   if (isOwner(currentUser?.role ?? '')) {
-  //     setIsOpen(true);
-  //   }
-  // };
 
   if (variant === 'large') {
     return (
       <div className="credits-large">
         <div className="flex flex-col gap-10">
-          <div className="flex flex-col gap-4">
-            <WalletIcon className="w-4 h-4 text-muted" />
-            <div className="flex flex-col">
-              <div className="flex flex-row gap-2.5 items-center">
-                <p className="text-metric text-ink">{dcxBalance}</p>
+          {!isMember && (
+            <div className="flex flex-col gap-4">
+              <WalletIcon className="w-4 h-4 text-muted" />
+              <div className="flex flex-col">
+                <div className="flex flex-row gap-2.5 items-center">
+                  <p className="text-metric text-ink">{dcxBalance}</p>
+                </div>
+                <p className="text-label text-muted">Current Balance</p>
               </div>
-              <p className="text-label text-muted">Current Balance</p>
             </div>
-          </div>
+          )}
           <div className="flex flex-1 flex-col w-full gap-2">
             {/* <Button variant="secondary" className="w-full" onClick={handleBuyCredits}>
               Buy Credits
@@ -69,6 +66,8 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
     );
   }
 
+  if (isMember) return null;
+
   return (
     <div
       role="credits-display"
@@ -76,18 +75,6 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
     >
       <span className="text-label text-muted">$</span>
       <span className="text-card-title text-ink">{dcxBalance.replace('$', '')}</span>
-      {/* {isOwner(currentUser?.role ?? '') && (
-        <button
-          type="button"
-          title="Add Credits"
-          aria-label="Add Credits"
-          className="ml-0.5 w-5 h-5 rounded-full bg-control flex items-center justify-center hover:bg-highest transition-colors"
-          onClick={handleBuyCredits}
-          role="add-credits"
-        >
-          <PlusIcon className="h-3 w-3 text-ink" />
-        </button>
-      )} */}
     </div>
   );
 };

@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { PencilIcon } from '@heroicons/react/16/solid';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { gql, useFragment } from '@/gql';
 import { useQuery } from '@apollo/client';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
@@ -20,6 +19,7 @@ import { DeveloperJwts } from '@/app/license/[tokenId]/details/components/Develo
 import { Brand } from '@/app/license/[tokenId]/details/components/Brand';
 import { Usage } from '@/app/license/[tokenId]/details/components/Usage/Usage';
 import './View.css';
+import { OverviewQuickActions } from './OverviewQuickActions';
 
 type Tab = 'overview' | 'config' | 'vehicles' | 'brand';
 
@@ -94,7 +94,6 @@ interface LicenseDetailsContentProps {
 const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps) => {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [isRenameOpen, setIsRenameOpen] = useState(false);
-  const router = useRouter();
   const licenseFragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
   const isLicenseOwner = useIsLicenseOwner(licenseFragment);
 
@@ -169,38 +168,10 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
                 ) : null}
               </div>
             </div>
-            <div className="overview-quick-actions">
-              <p className="overview-quick-actions__label">Quick actions</p>
-              <div className="overview-quick-actions__grid">
-                <button
-                  className="overview-quick-action"
-                  onClick={() => setActiveTab('config')}
-                >
-                  🔑 Generate API key
-                </button>
-                <button
-                  className="overview-quick-action"
-                  onClick={() => setActiveTab('brand')}
-                >
-                  🪪 Configure branding
-                </button>
-                <button
-                  className="overview-quick-action"
-                  onClick={() =>
-                    router.push(`/license/${licenseFragment.tokenId}/configurator`)
-                  }
-                >
-                  ⚙️ Setup vehicle sharing
-                </button>
-                <Link
-                  href="https://docs.dimo.org"
-                  target="_blank"
-                  className="overview-quick-action"
-                >
-                  📖 Docs
-                </Link>
-              </div>
-            </div>
+            <OverviewQuickActions
+              tokenId={licenseFragment.tokenId}
+              onSelectTab={setActiveTab}
+            />
           </>
         )}
 

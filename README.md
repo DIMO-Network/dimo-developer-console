@@ -98,6 +98,13 @@ DIMO_CURATOR_ADDRESSES=<COMMA_SEPARATED_0X_ADDRESSES>
 # off, the Templates menu item is greyed out, /templates shows a notice and the
 # /api/templates routes answer 404.
 NEXT_PUBLIC_TEMPLATE_EDITOR_ENABLED="true"
+
+# Team members' data access (read at build time; only "true" turns it on).
+# While off, owners can't grant data access, the Team page hides the Data access
+# column and members don't get Vehicles. Invites, teams, leaving and the API-key
+# registry work either way. Turn it on per environment only after the platform
+# signer check runs in enforce mode there (docs/superpowers/plans/2026-10-02-console-teams.md, Rollout 5).
+NEXT_PUBLIC_TEAM_DATA_ACCESS_ENABLED="false"
 ```
 
 Make sure that the `NEXT_PUBLIC_GA_API` maps to your [Accounts API](https://github.com/DIMO-Network/accounts/tree/main) deployment URL.

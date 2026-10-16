@@ -11,6 +11,7 @@ import { USER_CONFIG_FRAGMENT } from '@/app/license/[tokenId]/configurator/compo
 import { Button } from '@/components/Button';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { OwnerAction } from '@/components/OwnerOnly';
 
 export const DEVELOPER_LICENSE_INFO = gql(`
   query DeveloperLicenseInfo($tokenId: Int!) {
@@ -74,13 +75,15 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
       </nav>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <PageSubtitle subtitle="Login with DIMO configurator" />
-        <Button
-          variant="primary"
-          className="shrink-0 whitespace-nowrap px-4"
-          onClick={() => router.push(`/license/${tokenId}/configurator/new`)}
-        >
-          New configuration
-        </Button>
+        <OwnerAction>
+          <Button
+            variant="primary"
+            className="shrink-0 whitespace-nowrap px-4"
+            onClick={() => router.push(`/license/${tokenId}/configurator/new`)}
+          >
+            New configuration
+          </Button>
+        </OwnerAction>
       </div>
       <p className="mb-4 text-body-sm text-muted">
         A vehicle sharing link is required for vehicle owners to grant data permissions to

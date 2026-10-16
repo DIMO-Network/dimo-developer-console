@@ -39,10 +39,17 @@ editing it, since the mock server reads it at startup). Groups:
   from the row's actions menu; confirming is not clicked).
 - Vehicles `/vehicles` and the vehicle page (summary, device, raw, raw on a
   device, signals, trips, trips without the location privilege, documents,
-  sharing, not-shared); `/api/data/*` is mocked by `dataApi.mjs`. Device
+  sharing, not-shared); `/api/data/*` is mocked by `dataApi.mjs`, so the console
+  data proxy (src/app/api/data) never runs here; its tests are in Jest. Device
   queries arrive as the vehicle DID with `filter.producer`, and the fixtures
   answer per producer; a route's `dataErrors` makes the named operations
   answer 200 with `data: null` and a privilege error.
+- Teams: Settings → Team (owner table with every member state, empty, member
+  view with Leave team, invite, row menu, grant, remove with the webhook
+  review), the team switcher, the pending-invite dialog, Assign on an API key,
+  and the member vehicle states (with access, connect, no access, reconnect,
+  empty). Route option `team` picks the scenario through `X-Team-Id`; see the
+  header of `routes.mjs`.
 - Connections, webhooks, templates (the harness sets
   `NEXT_PUBLIC_TEMPLATE_EDITOR_ENABLED=true`; production has it off),
   settings, support, and the guest pages (sign-in, sign-up flows, email

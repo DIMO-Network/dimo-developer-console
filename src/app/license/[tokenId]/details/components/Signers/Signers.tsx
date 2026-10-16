@@ -3,7 +3,6 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 import { Button } from '@/components/Button';
 import { KeyIcon, TruckIcon } from '@heroicons/react/20/solid';
 import { Table } from '@/components/Table';
-import { TrashIcon } from '@heroicons/react/24/outline';
 import { Modal } from '@/components/Modal';
 import { SignerFragmentFragment } from '@/gql/graphql';
 import * as Sentry from '@sentry/nextjs';
@@ -17,7 +16,6 @@ import {
   useMixPanel,
   useSetRedirectUri,
 } from '@/hooks';
-import { getFromLocalStorage, saveToLocalStorage } from '@/utils/localStorage';
 import { getDeveloperJwt } from '@/services/dimoDev';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/[tokenId]/details/components/Signers/components/APIKeyModal';
@@ -29,15 +27,18 @@ import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
 import { getUser } from '@/actions/user';
 import { FOCUS_RENTALS_OS_SIGNUP, clearFocus, getFocus } from '@/utils/focus';
+import { toast } from 'sonner';
+import { RowActionsMenu } from '@/components/RowActionsMenu';
+import { markLicenseSignerDisabled, upsertLicenseSigner } from '@/actions/teams';
+import { useLicenseSignerRegistry } from '@/hooks/useLicenseSignerRegistry';
+import { useTeamMembers } from '@/hooks/useTeamMembers';
+import { registryWrite } from '@/utils/registryWrite';
+import { BelongsTo } from './BelongsTo';
+import { KeyHoldersModal, type KeyHolders } from './KeyHoldersModal';
+import type { LicenseSignerRecord } from '@/types/team';
 
 const RENTAL_OS_URL = 'https://rentals.dimo.co/';
 const RENTAL_OS_REGISTER_ENDPOINT = 'https://rentals.dimo.co/tenant/register';
-
-const rentalOSSignerKey = (clientId: string) => `rentalOS_signer_${clientId}`;
-const getRentalOSSigner = (clientId: string) =>
-  getFromLocalStorage<string>(rentalOSSignerKey(clientId));
-const saveRentalOSSigner = (clientId: string, address: string) =>
-  saveToLocalStorage(rentalOSSignerKey(clientId), address.toLowerCase());
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -73,9 +74,6 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const [optimisticAdditions, setOptimisticAdditions] = useState<SignerNode[]>([]);
   const [pendingRemovals, setPendingRemovals] = useState<Set<string>>(new Set());
   const [showRentalOSConfirm, setShowRentalOSConfirm] = useState(false);
-  const [rentalOSSigner, setRentalOSSigner] = useState<string | null>(() =>
-    getRentalOSSigner(fragment.clientId),
-  );
   const { trackEvent } = useMixPanel();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const handleDisableSigner = useDisableSigner(fragment.tokenId);
@@ -87,6 +85,98 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
 
   const { hasGlobalAccountPrivateKey } = useDimoAuth();
   const setFleetRedirectUri = useSetRedirectUri(fragment.tokenId);
+  const registry = useLicenseSignerRegistry(fragment.tokenId);
+  const { members } = useTeamMembers();
+  // Verified wallets of the team (the owner's console wallet included): console
+  // -api refuses them as API_KEY or EXTERNAL keys (C7 SIGNER_IN_USE), so they
+  // are never offered for Assign.
+  const memberWallets = new Map(
+    members
+      .filter((m) => m.signerAddress)
+      .map((m) => [
+        m.signerAddress!.toLowerCase(),
+        { name: m.name ?? m.email, email: m.email, owner: m.role === 'OWNER' },
+      ]),
+  );
+  const [holdersFor, setHoldersFor] = useState<
+    | { mode: 'generate' }
+    | {
+        mode: 'assign';
+        signer: `0x${string}`;
+        kind: 'API_KEY' | 'EXTERNAL';
+        initial?: KeyHolders;
+      }
+    | null
+  >(null);
+
+  const toKeyHolders = (record: LicenseSignerRecord): KeyHolders => ({
+    holders: record.holders.map((h) =>
+      h.userId ? { userId: h.userId } : { name: h.name ?? '' },
+    ),
+    note: record.note,
+  });
+
+  // An unregistered on-chain key is EXTERNAL: assigned after the fact (spec).
+  const openAssign = (address: string) => {
+    const record = registry.byAddress.get(address.toLowerCase());
+    setHoldersFor({
+      mode: 'assign',
+      signer: address as `0x${string}`,
+      kind: record?.kind === 'API_KEY' ? 'API_KEY' : 'EXTERNAL',
+      initial: record ? toKeyHolders(record) : undefined,
+    });
+  };
+
+  // Runs after the key is shown: a failed registry write never hides it.
+  const recordKey = async (address: `0x${string}`, value: KeyHolders) => {
+    const result = await registryWrite(() =>
+      upsertLicenseSigner(fragment.tokenId, address, { kind: 'API_KEY', ...value }),
+    );
+    void registry.refetch();
+    if (!result.ok) {
+      toast.error("The key works, but we couldn't record who it's for.", {
+        action: {
+          label: 'Assign',
+          onClick: () =>
+            setHoldersFor({
+              mode: 'assign',
+              signer: address,
+              kind: 'API_KEY',
+              initial: value,
+            }),
+        },
+      });
+    }
+  };
+
+  const submitHolders = async (value: KeyHolders): Promise<string | null> => {
+    if (!holdersFor) return null;
+    if (holdersFor.mode === 'generate') {
+      setHoldersFor(null);
+      void handleGenerateSigner(value);
+      return null;
+    }
+    const { signer, kind } = holdersFor;
+    const result = await registryWrite(() =>
+      upsertLicenseSigner(fragment.tokenId, signer, { kind, ...value }),
+    );
+    if (!result.ok) {
+      if (result.code === 'SIGNER_IN_USE')
+        return "This address is a team member's wallet. Record it with Grant in Settings → Team.";
+      return result.status === 0 || result.status >= 500
+        ? "We couldn't save this. Try again."
+        : result.message;
+    }
+    trackEvent('API Key Assigned', {
+      tokenId: fragment.tokenId,
+      signerAddress: signer,
+      holders: value.holders.length,
+    });
+    toast.success('Saved who this key is for.');
+    void registry.refetch();
+    setHoldersFor(null);
+    return null;
+  };
 
   const handleError = (error: unknown) => {
     Sentry.captureException(error);
@@ -99,7 +189,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     else setLoadingStatus({ label: 'Something went wrong', status: 'error' });
   };
 
-  const handleGenerateSigner = async () => {
+  const handleGenerateSigner = async (holders: KeyHolders) => {
     try {
       setLoadingStatus({
         status: 'loading',
@@ -119,6 +209,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         tokenId: fragment.tokenId,
         signerAddress: account.address,
       });
+      // web3's account.address is typed string; it's always 0x-prefixed.
+      await recordKey(account.address as `0x${string}`, holders);
     } catch (error: unknown) {
       handleError(error);
     }
@@ -260,9 +352,6 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       }
       if (!response?.ok) throw lastError ?? new Error('RentalOS registration failed');
 
-      saveRentalOSSigner(fragment.clientId, account.address);
-      setRentalOSSigner(account.address.toLowerCase());
-
       clearLoadingStatus();
       setApiKey(account.privateKey);
       setOptimisticAdditions((prev) => [
@@ -275,6 +364,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         distinct_id: fragment.owner,
         tokenId: fragment.tokenId,
         signerAddress: account.address,
+      });
+      // registryWrite never throws, so this can't reach the rollback below.
+      await recordKey(account.address as `0x${string}`, {
+        holders: [{ name: 'RentalOS' }],
+        note: 'RentalOS',
       });
     } catch (error: unknown) {
       if (enabledSignerAddress || addedRedirectUri) {
@@ -299,6 +393,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         status: 'loading',
       });
       await handleDisableSigner(signer);
+      // Stamp the registry row; a key without one answers NOT_FOUND, which is fine.
+      await registryWrite(() => markLicenseSignerDisabled(fragment.tokenId, signer));
+      void registry.refetch();
       setPendingRemovals((prev) => new Set([...prev, signer]));
       refetch().then(() => setPendingRemovals(new Set()));
       setLoadingStatus({ label: 'API key deleted', status: 'success' });
@@ -307,30 +404,45 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     }
   };
 
-  const displaySigners = [
+  type SignerRow = SignerNode & { offChain?: boolean };
+  const onChainRows: SignerRow[] = [
     ...fragment.signers.nodes.filter((s) => !pendingRemovals.has(s.address)),
     ...optimisticAdditions.filter(
       (s) => !fragment.signers.nodes.some((n) => n.address === s.address),
     ),
   ];
+  const listed = new Set(onChainRows.map((s) => String(s.address).toLowerCase()));
+  // Registry rows the chain no longer lists (spec: "Disabled outside the console").
+  const offChainRows: SignerRow[] = [...registry.byAddress.values()]
+    .filter((r) => !listed.has(r.signerAddress.toLowerCase()))
+    .map((r) => ({ address: r.signerAddress, enabledAt: null, offChain: true }));
+  const displaySigners = [...onChainRows, ...offChainRows];
 
-  const renderDeleteSignerAction = (item: SignerNode, index: number) => {
-    if (isLicenseOwner) {
-      return (
-        <Button
-          variant="secondary"
-          size="icon"
-          title="Delete API key"
-          type="button"
-          onClick={() => {
-            setSignerToDelete(item.address);
-          }}
-          key={`delete-action-${index}`}
-        >
-          <TrashIcon className="h-5 w-5" />
-        </Button>
-      );
-    }
+  const renderRowActions = (item: SignerRow) => {
+    if (!isLicenseOwner || item.offChain) return null;
+    // A member's key, or a member's wallet not yet recorded, is granted and
+    // revoked in Settings → Team, which keeps the registry in step with the chain.
+    const address = String(item.address).toLowerCase();
+    const wallet = memberWallets.get(address);
+    if (registry.byAddress.get(address)?.kind === 'MEMBER' || (wallet && !wallet.owner))
+      return null;
+    const remove = {
+      label: 'Delete API key',
+      destructive: true,
+      onSelect: () => setSignerToDelete(item.address),
+    };
+    return (
+      <RowActionsMenu
+        key={`actions-${item.address}`}
+        label={`Actions for ${item.address}`}
+        // The owner's own console wallet can be deleted, never assigned.
+        items={
+          wallet
+            ? [remove]
+            : [{ label: 'Assign', onSelect: () => openAssign(item.address) }, remove]
+        }
+      />
+    );
   };
 
   // Check if current wallet address is listed in the signers
@@ -353,9 +465,10 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || !isLicenseOwner) return;
     void handleOwnerSigner();
-  }, [currentUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, isLicenseOwner]);
 
   useEffect(() => {
     if (!isLicenseOwner) return;
@@ -372,10 +485,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     setSignerToDelete(undefined);
   };
 
-  const renderEnabledAt = (item: SignerNode) => {
-    const date = new Date(item.enabledAt);
-    return date.toLocaleDateString();
-  };
+  const renderEnabledAt = (item: SignerRow) =>
+    item.enabledAt ? new Date(item.enabledAt).toLocaleDateString() : '—';
 
   return (
     <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
@@ -391,7 +502,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               <TruckIcon className="h-4 w-4" />
               Register RentalOS
             </Button>
-            <Button variant="secondary" className="px-4" onClick={handleGenerateSigner}>
+            <Button
+              variant="secondary"
+              className="px-4"
+              onClick={() => setHoldersFor({ mode: 'generate' })}
+            >
               <KeyIcon className="h-4 w-4" />
               Generate key
             </Button>
@@ -407,27 +522,61 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                   name: 'address',
                   label: 'Signer address',
                   CustomHeader: <SignerAddressHeader key="header-addr" />,
-                  render: (item: SignerNode) => (
+                  render: (item: SignerRow) => (
                     <div className="flex items-center gap-2">
                       <span className="break-all font-mono text-code">
                         {item.address}
                       </span>
-                      {item.address.toLowerCase() === rentalOSSigner && (
-                        <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted whitespace-nowrap">
+                      {registry.byAddress.get(String(item.address).toLowerCase())
+                        ?.note === 'RentalOS' && (
+                        <span className="whitespace-nowrap rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
                           RentalOS
                         </span>
                       )}
                     </div>
                   ),
                 },
-                { name: 'enabledAt', label: 'Enabled on', render: renderEnabledAt },
+                {
+                  name: 'enabledAt',
+                  label: 'Enabled on',
+                  className: 'hidden md:table-cell',
+                  render: renderEnabledAt,
+                },
+                {
+                  name: 'belongsTo',
+                  label: 'Belongs to',
+                  className: 'hidden md:table-cell',
+                  render: (item: SignerRow) => (
+                    <BelongsTo
+                      record={registry.byAddress.get(String(item.address).toLowerCase())}
+                      memberWallet={memberWallets.get(String(item.address).toLowerCase())}
+                      offChain={item.offChain}
+                      unavailable={registry.isError}
+                      onAssign={
+                        isLicenseOwner &&
+                        !memberWallets.has(String(item.address).toLowerCase())
+                          ? () => openAssign(item.address)
+                          : undefined
+                      }
+                    />
+                  ),
+                },
               ]}
               data={displaySigners}
-              actions={[renderDeleteSignerAction]}
+              actions={[renderRowActions]}
             />
           </div>
         )}
       </div>
+      {holdersFor && (
+        <KeyHoldersModal
+          signer={holdersFor.mode === 'assign' ? holdersFor.signer : undefined}
+          initial={holdersFor.mode === 'assign' ? holdersFor.initial : undefined}
+          submitLabel={holdersFor.mode === 'generate' ? 'Generate API key' : 'Save'}
+          onSubmit={submitHolders}
+          onClose={() => setHoldersFor(null)}
+        />
+      )}
       <DeleteConfirmationModal
         isOpen={!!signerToDelete}
         title={'Are you sure you want to delete this API key?'}

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { View } from './components/View';
+import { OwnerOnly } from '@/components/OwnerOnly';
 import configuration from '@/config';
 
 // The page is a client shell with no server data. Rendering each path once and
@@ -14,6 +15,8 @@ export const metadata: Metadata = {
 // Only params, not searchParams: handing the client view every prop would keep
 // the route dynamic, and generateStaticParams could not cache it.
 const NewConfiguratorPage = ({ params }: { params: Promise<{ tokenId: string }> }) => (
-  <View params={params} />
+  <OwnerOnly feature="Configurations">
+    <View params={params} />
+  </OwnerOnly>
 );
 export default NewConfiguratorPage;
