@@ -7,7 +7,7 @@
 **Architecture:**
 
 - **dex** recovers the EOA that signed a web3 challenge and stamps it on developer JWTs as `signer_address`. It travels in the existing `connector_data` columns, so no storage migration is needed.
-- **token-exchange-api** holds the one chain-facing checker: Identity says whether the address is a license, then `isSigner(signer)` on its account, cached for 60 s with singleflight and 3 s timeouts.
+- **token-exchange-api** holds the one chain-facing checker: Identity says whether the address is a license, then `isSigner(signer)` on its account, cached for 60 s with singleflight and 2 s timeouts.
   - Its exchange endpoint checks every token by `ethereum_address`, whatever the audience.
   - It serves the same check over gRPC `SignerCheck`.
   - A shared package `pkg/signercheck` holds the mode setting, the `signer_check_total` metric, a Fiber middleware and a gRPC client with a 5 s deadline.
@@ -40,6 +40,7 @@
 Changes since the plan was written:
 
 - **`SIGNER_CLAIM_REQUIRED_AFTER` is dropped** (code and plan). Tokens without `signer_address` are never checked and never looked up, so DIMO Mobile users' token exchanges never touch Identity. Code blocks in Tasks 5–7 still show the cutoff as first written; the PRs are authoritative.
+- **2026-10-16 review fixes.** token-exchange-api's per-call timeout is 2 s, not 3 s, so a cold check (Identity, then chain) fits the 5 s gRPC deadline; `SignerCheck` failures are logged. vehicle-triggers-api's ServiceMonitor is enabled (it was off, so its metric was never scraped). Query the metric by `exported_service`, not `service`: Prometheus Operator's own `service` label wins. Code blocks below still show 3 s and `service=`; the PRs are authoritative.
 - vehicle-triggers-api and tesla-oracle pin token-exchange-api to #120's branch commit; re-point them to token-exchange-api `main` after #120 merges, before merging them.
 - The progress ledger, with every ruling and deferred minor, is `.superpowers/sdd/2026-10-02-console-teams-1-platform-signer-check/progress.md` in this repo (git-ignored).
 
@@ -56,7 +57,7 @@ Changes since the plan was written:
 - **When to check:** whenever a token carries `signer_address` and its `ethereum_address` is a developer license (Identity `developerLicense(by: { clientId })` exists), **whatever the `aud`**, including `dimo-driver`. A token whose `ethereum_address` isn't a license isn't checked.
 - **Call:** `isSigner(address signer) returns (bool)` on the license account at `ethereum_address`.
 - **Cache:** 60 s per `(license, signer)`, positive and negative answers alike, bounded at 10,000 entries. Errors are never cached. Concurrent misses for one key share one call.
-- **Timeouts:** 3 s for each chain and Identity call; 5 s for a gRPC `SignerCheck` call.
+- **Timeouts:** 2 s for each chain and Identity call (worst case 4 s); 5 s for a gRPC `SignerCheck` call.
 - **On `false`:** 403 `signer no longer authorized for this license`.
 - **On an error or timeout:** 503 `could not verify signer`. Never fail open in `enforce` mode.
 - **gRPC** `SignerCheck(SignerCheckRequest{license, signer}) → SignerCheckResponse{is_signer}`:
