@@ -1,5 +1,6 @@
 'use client';
 import { type FC, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
@@ -16,6 +17,11 @@ const explain = (code: string | null, status: number) => {
   else toast.error(inviteErrorMessage(code));
 };
 
+// The invite cookie is set only by a page load of /sign-in?invite=, so once
+// there was none, section changes needn't ask again (Next runs server actions
+// one at a time). The cache entry ends with the query cache's gc or a logout.
+const NO_PENDING_INVITE = ['pending-invite', 'none'];
+
 // A pending invite (HttpOnly cookie, contracts C4) is accepted only after the
 // user confirms which team and owner they are joining.
 export const PendingInvite: FC<{ onJoined: (team: TeamSummary) => void }> = ({
@@ -24,14 +30,20 @@ export const PendingInvite: FC<{ onJoined: (team: TeamSummary) => void }> = ({
   const [preview, setPreview] = useState<InvitePreview | null>(null);
   const [busy, setBusy] = useState(false);
   const { trackEvent } = useMixPanel();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
+    if (queryClient.getQueryData(NO_PENDING_INVITE)) return;
     void (async () => {
       const result = await previewPendingInvite();
-      if (!result) return;
+      if (!result) {
+        queryClient.setQueryData(NO_PENDING_INVITE, true);
+        return;
+      }
       if (result.ok) setPreview(result.data);
       else explain(result.code, result.status);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const join = async () => {

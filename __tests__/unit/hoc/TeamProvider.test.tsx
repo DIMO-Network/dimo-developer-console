@@ -117,6 +117,33 @@ describe('TeamProvider', () => {
     });
   });
 
+  it('writes the team it picked to the cookie, so X-Team-Id names it', async () => {
+    renderProvider();
+    await waitFor(() => expect(probe().loading).toBe(false));
+    expect(document.cookie).toContain('active_team=team-harness');
+  });
+
+  it('starts a remount settled from the cached list, without asking again', async () => {
+    const client = new QueryClient();
+    const { unmount } = renderProvider(<Probe />, client);
+    await waitFor(() => expect(probe().loading).toBe(false));
+    unmount();
+    renderProvider(<Probe />, client);
+    expect(probe()).toMatchObject({ loading: false, active: 'team-harness' });
+    expect(listMyTeams).toHaveBeenCalledTimes(1);
+  });
+
+  it('reloads when another tab switched team, even on the personal team', async () => {
+    renderProvider();
+    await waitFor(() => expect(probe().active).toBe('team-harness'));
+    document.cookie = 'active_team=team-acme; Path=/';
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    expect(hardNavigate).toHaveBeenCalledWith('/app');
+    expect(listMyTeams).toHaveBeenCalledTimes(1);
+  });
+
   it('uses the team named by the active_team cookie', async () => {
     document.cookie = 'active_team=team-acme; Path=/';
     renderProvider();

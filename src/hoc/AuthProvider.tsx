@@ -57,8 +57,10 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       saveToLocalStorage(EmbeddedKey, privateKey);
       // A new session starts with an empty query cache: the user and team
       // queries are not keyed by account, and a session that ended without a
-      // logout (it expired) leaves the last person's data in this tab.
+      // logout (it expired) leaves the last person's data in this tab. The same
+      // goes for the active team and stored developer JWTs.
       queryClient.clear();
+      clearConsoleBrowserState();
 
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
         email: user!.email,

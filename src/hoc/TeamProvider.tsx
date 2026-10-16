@@ -31,6 +31,12 @@ import { setMemberDevJwtSigner } from '@/utils/devJwt';
 
 const FLASH_KEY = 'teamFlash';
 const LAST_TEAM_KEY = 'lastActiveTeam';
+const FALLBACK_TEAM_ID = 'personal-fallback';
+// The team list, kept in the query cache: every section mounts its own
+// provider, and refetching on each move held up every license list (#326).
+// Switching, joining, leaving and removal reload the page; sign-in and logout
+// clear the cache.
+export const MY_TEAMS_KEY = ['my-teams'];
 export const TEAMS_UNAVAILABLE =
   "Couldn't load your teams. Showing your own licenses for now.";
 
@@ -44,7 +50,7 @@ const pickActive = (teams: TeamSummary[], cookieId: string | null) =>
 
 // Owners must not regress when console-api is down: their own wallet's licenses.
 const fallbackTeam = (user: IUserSession): TeamSummary => ({
-  id: 'personal-fallback',
+  id: FALLBACK_TEAM_ID,
   name: 'Your team',
   companyName: null,
   role: 'OWNER',
@@ -58,9 +64,21 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
   const { currentUser } = useGlobalAccount();
   const { identifyUser, trackEvent } = useMixPanel();
   const queryClient = useQueryClient();
-  const [teams, setTeams] = useState<TeamSummary[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // A remount with a cached list that agrees with the cookie starts settled.
+  // Never on the first render after a page load: the cache is empty then, so
+  // the server render and hydration agree.
+  const [initial] = useState(() => {
+    const cached = queryClient.getQueryData<TeamSummary[]>(MY_TEAMS_KEY);
+    if (!cached) return null;
+    const cookieId = getActiveTeamCookie();
+    const active = pickActive(cached, cookieId);
+    return active && active.id === cookieId
+      ? { teams: cached, activeId: active.id }
+      : null;
+  });
+  const [teams, setTeams] = useState<TeamSummary[]>(initial?.teams ?? []);
+  const [activeId, setActiveId] = useState<string | null>(initial?.activeId ?? null);
+  const [isLoading, setIsLoading] = useState(!initial);
   const [teamsUnavailable, setTeamsUnavailable] = useState(false);
 
   const activeTeam = useMemo(() => {
@@ -88,8 +106,10 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
 
   const fetchTeams = useCallback(async (): Promise<TeamSummary[] | null> => {
     const result = await listMyTeams();
-    return result.ok ? result.data.teams : null;
-  }, []);
+    if (!result.ok) return null;
+    queryClient.setQueryData(MY_TEAMS_KEY, result.data.teams);
+    return result.data.teams;
+  }, [queryClient]);
 
   const switchTeam = useCallback(
     (teamId: string, via: 'switcher' | 'invite' = 'switcher') => {
@@ -117,9 +137,11 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
       if (flash.tone === 'error') toast.error(flash.message);
       else toast.success(flash.message);
     }
+    if (initial) return;
     let cancelled = false;
     void (async () => {
-      const loaded = await fetchTeams();
+      const loaded =
+        queryClient.getQueryData<TeamSummary[]>(MY_TEAMS_KEY) ?? (await fetchTeams());
       if (cancelled) return;
       if (!loaded) {
         clearActiveTeamCookie();
@@ -144,6 +166,9 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
         hardNavigate('/app');
         return;
       }
+      // No cookie yet (a new session): name the team the console picked, so
+      // X-Team-Id and this page agree instead of console-api choosing its own.
+      if (active && cookieId !== active.id) setActiveTeamCookie(active.id);
       if (active) saveToLocalStorage(LAST_TEAM_KEY, { id: active.id, name: active.name });
       setActiveId(active?.id ?? null);
       setIsLoading(false);
@@ -165,11 +190,17 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.smartContractAddress, activeTeam?.id]);
 
-  // Removed while away: re-check when the tab becomes visible or focused.
+  // Back on this tab: another tab may have switched team or signed out (the
+  // cookie, and so X-Team-Id, is shared), or the user was removed while away.
   useEffect(() => {
-    if (!activeTeam || activeTeam.isPersonal) return;
+    if (!activeTeam || activeTeam.id === FALLBACK_TEAM_ID) return;
     const recheck = async () => {
       if (document.visibilityState === 'hidden') return;
+      if (getActiveTeamCookie() !== activeTeam.id) {
+        hardNavigate('/app');
+        return;
+      }
+      if (activeTeam.isPersonal) return;
       const loaded = await fetchTeams();
       if (loaded && !loaded.some((t) => t.id === activeTeam.id)) reportRemoved();
     };

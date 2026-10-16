@@ -1,5 +1,6 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@/actions/invites', () => ({
   previewPendingInvite: jest.fn(),
@@ -30,6 +31,13 @@ const TEAM = {
   isPersonal: false,
 };
 
+const renderInvite = (onJoined = jest.fn(), client = new QueryClient()) =>
+  render(
+    <QueryClientProvider client={client}>
+      <PendingInvite onJoined={onJoined} />
+    </QueryClientProvider>,
+  );
+
 // Resolves once the component has handled preview call n (0-based): its
 // continuation was queued on the same promise before ours.
 const previewHandled = async (n: number) => {
@@ -42,9 +50,20 @@ const previewHandled = async (n: number) => {
 describe('PendingInvite', () => {
   it('renders nothing without a pending invite', async () => {
     (previewPendingInvite as jest.Mock).mockResolvedValue(null);
-    const { container } = render(<PendingInvite onJoined={jest.fn()} />);
+    const { container } = renderInvite();
     await previewHandled(0);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('does not ask again on the next section once there was no invite', async () => {
+    (previewPendingInvite as jest.Mock).mockResolvedValue(null);
+    const client = new QueryClient();
+    const { unmount } = renderInvite(jest.fn(), client);
+    await previewHandled(0);
+    unmount();
+    renderInvite(jest.fn(), client);
+    await act(async () => {});
+    expect(previewPendingInvite).toHaveBeenCalledTimes(1);
   });
 
   it('asks before joining and hands the accepted team (MEMBER, not personal) to onJoined', async () => {
@@ -54,7 +73,7 @@ describe('PendingInvite', () => {
       data: { team: TEAM },
     });
     const onJoined = jest.fn();
-    render(<PendingInvite onJoined={onJoined} />);
+    renderInvite(onJoined);
     expect(
       await screen.findByText('Join Acme Mobility owned by ops@acme.dev?'),
     ).toBeInTheDocument();
@@ -73,7 +92,7 @@ describe('PendingInvite', () => {
 
   it('closes on "Not now" without accepting', async () => {
     (previewPendingInvite as jest.Mock).mockResolvedValue({ ok: true, data: PREVIEW });
-    render(<PendingInvite onJoined={jest.fn()} />);
+    renderInvite();
     fireEvent.click(await screen.findByRole('button', { name: 'Not now' }));
     expect(screen.queryByText('Join Acme Mobility owned by ops@acme.dev?')).toBeNull();
     expect(acceptPendingInvite).not.toHaveBeenCalled();
@@ -86,7 +105,7 @@ describe('PendingInvite', () => {
       code: 'INVITE_EMAIL_MISMATCH',
       message: 'x',
     });
-    const { unmount } = render(<PendingInvite onJoined={jest.fn()} />);
+    const { unmount } = renderInvite();
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith(
         'This invite was sent to a different email address. Sign in with that address to accept it.',
@@ -100,7 +119,7 @@ describe('PendingInvite', () => {
       code: null,
       message: 'x',
     });
-    render(<PendingInvite onJoined={jest.fn()} />);
+    renderInvite();
     await previewHandled(1);
     expect(toast.error).not.toHaveBeenCalled();
     expect(toast).not.toHaveBeenCalled();
