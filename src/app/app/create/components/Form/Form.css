@@ -1,3 +1,13 @@
-form {
-  @apply flex flex-col flex-1 gap-4;
+/*
+ * Scoped on purpose. This was a bare `form` selector, which is not scoped to
+ * this component at all: once the chunk was on the page it styled EVERY form
+ * in the console. Nothing in the templates search row's class list sets
+ * flex-direction -- `flex flex-wrap items-end gap-3` says nothing about it --
+ * so this rule was the only declaration for the property, won without any
+ * contest, and turned that row into a column `items-end` then pushed to the
+ * right edge. A soft navigation does not load this chunk, which is why the
+ * same page looked correct on a second visit and broken on a cold load.
+ */
+.create-app-form {
+  @apply flex flex-1 flex-col gap-4;
 }

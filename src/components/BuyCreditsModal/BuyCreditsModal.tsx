@@ -129,7 +129,10 @@ export const BuyCreditsModal: FC = () => {
   return (
     <Modal isOpen={isOpen} setIsOpen={handleIsOpen} className="buy-credits-modal">
       <div className="buy-credits-content">
-        <form onSubmit={handleSubmit(handleProceedToPayment)}>
+        <form
+          className="flex flex-1 flex-col gap-4"
+          onSubmit={handleSubmit(handleProceedToPayment)}
+        >
           <div className="buy-credits-header">
             <Title className="text-panel-title" component="h3">
               Buy DCX
