@@ -15,7 +15,7 @@ const jwt = (claims: Record<string, unknown>) =>
 const CLIENT = '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f';
 const KERNEL = '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d';
 const EOA = '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6';
-const SESSION = jwt({ ethereum_address: KERNEL });
+const SESSION = jwt({ ethereum_address: KERNEL, aud: ['developer-platform'] });
 const access = (over: Partial<LicenseAccess>): LicenseAccess => ({
   access: 'NONE',
   memberOfTeam: false,
@@ -87,6 +87,22 @@ describe('authorizeLicenseAccess', () => {
       caller: { wallet: KERNEL },
     });
     expect(lookupAccess).not.toHaveBeenCalled();
+  });
+
+  it("sends a session issued to another app to console-api, even for the owner's wallet", async () => {
+    lookupOwner.mockResolvedValue(KERNEL);
+    lookupAccess.mockResolvedValue(access({}));
+    await expect(
+      authorizeLicenseAccess(
+        {
+          devJwt: jwt({ ethereum_address: CLIENT }),
+          sessionToken: jwt({ ethereum_address: KERNEL, aud: 'some-other-app' }),
+        },
+        { lookupAccess, lookupOwner, dataAccessEnabled: true },
+      ),
+    ).resolves.toMatchObject({ allowed: false, code: 'NO_ACCESS' });
+    expect(lookupOwner).not.toHaveBeenCalled();
+    expect(lookupAccess).toHaveBeenCalled();
   });
 
   it('falls back to console-api when Identity fails', async () => {

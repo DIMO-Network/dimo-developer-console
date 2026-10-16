@@ -29,6 +29,8 @@ export type AccessDecision =
 
 const TTL_MS = 60_000;
 export const ACCESS_CACHE_MAX = 1000;
+// The client ID of every console login: the audience of a console session.
+const CONSOLE_CLIENT_ID = 'developer-platform';
 
 // Entries live 60 s; a failed lookup is never stored.
 const accessCache = new BoundedCache<LicenseAccess>(ACCESS_CACHE_MAX);
@@ -75,6 +77,8 @@ const requestLicenseOwner = async (clientId: string): Promise<string | null> => 
       variables: { clientId },
     }),
     cache: 'no-store',
+    // A hung Identity must fall through to console-api, not hold the request.
+    signal: AbortSignal.timeout(3000),
   });
   if (!res.ok) throw new Error(`Identity API answered ${res.status}`);
   const body = (await res.json()) as {
@@ -152,11 +156,18 @@ export const authorizeLicenseAccess = async (
     };
   }
   const clientId = claims.ethereum_address;
-  const wallet =
-    decode<{ ethereum_address?: string }>(sessionToken)?.ethereum_address ?? null;
+  const session = decode<{ ethereum_address?: string; aud?: string | string[] }>(
+    sessionToken,
+  );
+  const wallet = session?.ethereum_address ?? null;
+  // The middleware verified the session's signature and issuer, not its
+  // audience: a token another DIMO app received would pass. Only a console
+  // session takes the fast path (C4); console-api checks the rest itself.
+  const audience = [session?.aud ?? []].flat();
+  const isConsoleSession = audience.includes(CONSOLE_CLIENT_ID);
 
   // Owner fast path: console-api is not needed to know a wallet owns a license.
-  if (wallet) {
+  if (wallet && isConsoleSession) {
     try {
       const owner = await lookupOwner(clientId);
       if (owner && owner.toLowerCase() === wallet.toLowerCase()) {
