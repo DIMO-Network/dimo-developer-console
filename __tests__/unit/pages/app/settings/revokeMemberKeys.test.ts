@@ -27,7 +27,7 @@ const KEYS = [
 const ok = { ok: true as const, data: {} };
 
 describe('revokeMemberKeys', () => {
-  it('disables every on-chain key in one transaction and stamps every registered key', async () => {
+  it('disables every listed or registered key in one transaction and stamps every registered key', async () => {
     const disable = jest.fn(async () => {});
     const stamp = jest.fn(async () => ok);
     await expect(revokeMemberKeys(KEYS, { disable, stamp })).resolves.toEqual({
@@ -38,6 +38,7 @@ describe('revokeMemberKeys', () => {
     expect(disable).toHaveBeenCalledWith([
       { tokenId: 42, signer: CURRENT },
       { tokenId: 43, signer: OLD },
+      { tokenId: 44, signer: OLD },
       { tokenId: 45, signer: CURRENT },
     ]);
     expect(stamp.mock.calls).toEqual([
@@ -47,7 +48,7 @@ describe('revokeMemberKeys', () => {
     ]);
   });
 
-  it('after a failed transaction stamps only keys already off-chain', async () => {
+  it('stamps nothing after a failed transaction', async () => {
     const denied = { code: 4001 };
     const stamp = jest.fn(async () => ok);
     const outcome = await revokeMemberKeys(KEYS, {
@@ -55,7 +56,7 @@ describe('revokeMemberKeys', () => {
       stamp,
     });
     expect(outcome.txError).toBe(denied);
-    expect(stamp.mock.calls).toEqual([[44, OLD]]);
+    expect(stamp).not.toHaveBeenCalled();
   });
 
   it('never stamps a key whose license is not in the loaded list', async () => {
@@ -68,12 +69,24 @@ describe('revokeMemberKeys', () => {
     expect(stamp).not.toHaveBeenCalled();
   });
 
-  it('only stamps when nothing is on-chain (finishing an earlier revoke)', async () => {
-    const disable = jest.fn();
+  it('disables a registered key Identity no longer lists: its index trails the chain', async () => {
+    const disable = jest.fn(async () => {});
     const stamp = jest.fn(async () => ok);
     await revokeMemberKeys([key(44, OLD, false)], { disable, stamp });
-    expect(disable).not.toHaveBeenCalled();
+    expect(disable).toHaveBeenCalledWith([{ tokenId: 44, signer: OLD }]);
     expect(stamp).toHaveBeenCalledWith(44, OLD);
+  });
+
+  it('only stamps when finishing a revoke whose transaction succeeded', async () => {
+    const disable = jest.fn();
+    const stamp = jest.fn(async () => ok);
+    await revokeMemberKeys(
+      [key(42, CURRENT, true)],
+      { disable, stamp },
+      { stampOnly: true },
+    );
+    expect(disable).not.toHaveBeenCalled();
+    expect(stamp).toHaveBeenCalledWith(42, CURRENT);
   });
 
   it('reports stamps that fail or reject after the retry, and treats NOT_FOUND as done', async () => {

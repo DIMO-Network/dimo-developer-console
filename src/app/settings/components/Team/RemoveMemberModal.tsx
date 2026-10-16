@@ -29,7 +29,8 @@ interface Props {
 // Revoke first, then end the membership. A failed transaction still removes
 // the member (the proxy refuses them within a minute either way); their row
 // stays in the Team list as "Still a signer on …" with Retry (C7 lists REVOKED
-// members who still hold a key).
+// members who still hold a key). The exception is a key with no registry row:
+// nothing would list it, so the member stays until it is off.
 export const RemoveMemberModal: FC<Props> = ({
   member,
   licenses,
@@ -57,7 +58,19 @@ export const RemoveMemberModal: FC<Props> = ({
       txError = outcome.txError;
       unstamped = outcome.unstamped;
       if (txError) Sentry.captureException(txError);
-      else
+      // console-api lists a departed member only by their registry keys, so a
+      // key with no row would vanish from Team while still enabled: keep them
+      // on the team until it is off.
+      if (txError && keys.some((k) => !k.registered)) {
+        setBusy(false);
+        setLoadingStatus(txErrorStatus(txError));
+        toast.error(
+          `${name} is still on ${teamName}: we couldn't remove their wallet from ${labelsOfKeys(keys)} on-chain. Try again.`,
+        );
+        onDone();
+        return;
+      }
+      if (!txError)
         trackEvent('Data Access Revoked', {
           memberId: member.id,
           tokenIds: tokenIdsOfKeys(keys),
@@ -80,7 +93,7 @@ export const RemoveMemberModal: FC<Props> = ({
     if (txError) {
       setLoadingStatus(txErrorStatus(txError));
       toast.error(
-        `${name} was removed, but is still a signer on ${labelsOfKeys(keys.filter((k) => k.onChain))}. Use Retry on their row.`,
+        `${name} was removed, but is still a signer on ${labelsOfKeys(keys)}. Use Retry on their row.`,
       );
     } else {
       clearLoadingStatus();

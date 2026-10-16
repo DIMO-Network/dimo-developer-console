@@ -95,8 +95,10 @@ describe('RemoveMemberModal', () => {
         'Sam Rivera was removed from Harness Motors.',
       ),
     );
+    // 43 (the old wallet) is no longer listed, but Identity can trail the chain.
     expect(mockSetSigners).toHaveBeenCalledWith('disableSigner', [
       { tokenId: 42, signer: CURRENT },
+      { tokenId: 43, signer: OLD },
     ]);
     expect(markLicenseSignerDisabled).toHaveBeenCalledWith(42, CURRENT);
     expect(markLicenseSignerDisabled).toHaveBeenCalledWith(43, OLD);
@@ -117,12 +119,36 @@ describe('RemoveMemberModal', () => {
       status: 'error',
       label: 'The transaction was denied',
     });
-    expect(markLicenseSignerDisabled).toHaveBeenCalledTimes(1);
-    expect(markLicenseSignerDisabled).toHaveBeenCalledWith(43, OLD);
+    expect(markLicenseSignerDisabled).not.toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith(
-      'Sam Rivera was removed, but is still a signer on Harness Fleet. Use Retry on their row.',
+      'Sam Rivera was removed, but is still a signer on Harness Fleet and Harness Labs. Use Retry on their row.',
     );
     expect(trackEvent).not.toHaveBeenCalledWith('Data Access Revoked', expect.anything());
+  });
+
+  it('keeps a member whose unrecorded key could not be disabled', async () => {
+    mockSetSigners.mockRejectedValue({ code: 4001 });
+    render(
+      <LoadingStatusContext.Provider
+        value={{ setLoadingStatus, clearLoadingStatus: jest.fn() }}
+      >
+        <RemoveMemberModal
+          member={{ ...SAM, memberKeys: [] }}
+          licenses={LICENSES}
+          teamName="Harness Motors"
+          onClose={onClose}
+          onDone={onDone}
+        />
+      </LoadingStatusContext.Provider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Remove from team' }));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(
+        "Sam Rivera is still on Harness Motors: we couldn't remove their wallet from Harness Fleet on-chain. Try again.",
+      ),
+    );
+    expect(removeTeamMember).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('still removes when a stamp fails twice, and says how to finish', async () => {

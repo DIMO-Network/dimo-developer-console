@@ -39,6 +39,8 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     retryable: SignerChange[];
     refused: { tokenId: number; message: string }[];
   } | null>(null);
+  // Whether every refused key was disabled again.
+  const [rolledBack, setRolledBack] = useState(true);
   const name = displayName(member);
   const labels = useMemo(
     () => new Map(candidates.map(({ license }) => [license.tokenId, license.label])),
@@ -90,16 +92,31 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     onClose();
   };
 
+  // A key console-api refused to record (the member left, or their wallet
+  // changed) must not stay enabled with nothing listing it: disable it again.
+  const rollBack = async (refused: { tokenId: number }[], signer: `0x${string}`) => {
+    if (!refused.length) return true;
+    try {
+      await setLicenseSigners(
+        'disableSigner',
+        refused.map(({ tokenId }) => ({ tokenId, signer })),
+      );
+      return true;
+    } catch (error) {
+      Sentry.captureException(error);
+      return false;
+    }
+  };
+
   const grant = async () => {
     const signer = member.signerAddress!;
     const changes = selected.map((tokenId) => ({ tokenId, signer }));
-    const toEnable = changes.filter(
-      (c) => !candidates.find((k) => k.license.tokenId === c.tokenId)?.onChain,
-    );
     setBusy(true);
     setLoadingStatus({ status: 'loading', label: `Granting ${name} data access` });
+    // Every chosen key, even one Identity already lists: its index trails the
+    // chain, and enableSigner is idempotent.
     try {
-      await setLicenseSigners('enableSigner', toEnable);
+      await setLicenseSigners('enableSigner', changes);
     } catch (error) {
       Sentry.captureException(error);
       setBusy(false);
@@ -108,6 +125,7 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     }
     trackEvent('Data Access Granted', { memberId: member.id, tokenIds: selected });
     const outcome = await record(changes);
+    setRolledBack(await rollBack(outcome.refused, signer));
     clearLoadingStatus();
     setBusy(false);
     onGranted();
@@ -118,6 +136,10 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     if (!unrecorded) return;
     setBusy(true);
     const outcome = await record(unrecorded.retryable);
+    if (outcome.refused.length) {
+      const undone = await rollBack(outcome.refused, member.signerAddress!);
+      setRolledBack((prev) => prev && undone);
+    }
     setBusy(false);
     onGranted();
     settle(
@@ -173,12 +195,17 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
                 {`${labelsOf([tokenId])}: ${message}`}
               </p>
             ))}
-            {unrecorded.refused.length > 0 && (
-              <p className="text-body-sm text-muted">
-                Those keys are enabled on-chain but not recorded. Check the member&apos;s
-                row in the Team list before granting again.
-              </p>
-            )}
+            {unrecorded.refused.length > 0 &&
+              (rolledBack ? (
+                <p className="text-body-sm text-muted">
+                  {`${name} doesn't have data access to ${labelsOf(unrecorded.refused.map((r) => r.tokenId))}.`}
+                </p>
+              ) : (
+                <p className="text-body-sm text-muted">
+                  Those keys are enabled on-chain but not recorded. Check the
+                  member&apos;s row in the Team list before granting again.
+                </p>
+              ))}
             {unrecorded.retryable.length > 0 ? (
               <Button variant="secondary" loading={busy} onClick={retry}>
                 Try again

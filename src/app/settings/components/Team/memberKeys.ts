@@ -65,14 +65,15 @@ export const actionableKeys = (keys: MemberLicenseKey[]) =>
 
 export interface GrantCandidate {
   license: TeamLicense;
-  // Already enabled on-chain; only the registry write is missing.
+  // Identity lists the key on-chain already (its registry write failed).
   onChain: boolean;
 }
 
 // Licenses a member can be given data access to: ones with a redirect URI (dex
 // needs a domain for their developer JWT) where their current wallet has no
 // recorded key. A key enabled on-chain whose registry write failed is still a
-// candidate, so granting again records it without a second transaction.
+// candidate, so granting again records it (and enables it again: Identity's
+// list can trail the chain).
 export const grantCandidates = (
   member: TeamMember,
   licenses: TeamLicense[],

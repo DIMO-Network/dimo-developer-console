@@ -111,9 +111,11 @@ describe('GrantAccessModal', () => {
     choose('Harness Pilot');
     grant();
     await waitFor(() => expect(onClose).toHaveBeenCalled());
-    // 44 is already on-chain (its registry write failed earlier): record only.
+    // 44 is listed on-chain already (its registry write failed earlier); it is
+    // enabled again anyway, since Identity's list can trail the chain.
     expect(mockSetSigners).toHaveBeenCalledWith('enableSigner', [
       { tokenId: 43, signer: SIGNER },
+      { tokenId: 44, signer: SIGNER },
     ]);
     expect(upsertLicenseSigner).toHaveBeenCalledWith(43, SIGNER, {
       kind: 'MEMBER',
@@ -167,7 +169,7 @@ describe('GrantAccessModal', () => {
     expect(upsertLicenseSigner).toHaveBeenCalledTimes(3);
   });
 
-  it("shows console-api's refusal and offers no retry for a 4xx", async () => {
+  it("shows console-api's refusal, disables the refused key again and offers no retry for a 4xx", async () => {
     (upsertLicenseSigner as jest.Mock).mockResolvedValue({
       ok: false,
       status: 400,
@@ -180,10 +182,32 @@ describe('GrantAccessModal', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       "Harness Labs: This address isn't the member's verified wallet.",
     );
+    expect(mockSetSigners).toHaveBeenLastCalledWith('disableSigner', [
+      { tokenId: 43, signer: SIGNER },
+    ]);
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      "Sam Rivera doesn't have data access to Harness Labs.",
+    );
     expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull();
     expect(upsertLicenseSigner).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('says the key is still enabled when disabling a refused key fails', async () => {
+    (upsertLicenseSigner as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 400,
+      code: 'INVALID_HOLDERS',
+      message: 'They are no longer on this team.',
+    });
+    mockSetSigners.mockResolvedValueOnce(undefined).mockRejectedValueOnce({ code: 4001 });
+    open();
+    choose('Harness Labs');
+    grant();
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Those keys are enabled on-chain but not recorded.',
+    );
   });
 
   it('cannot be closed while the transaction is pending', async () => {

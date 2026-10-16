@@ -49,13 +49,17 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
   const name = displayName(member);
   const target = keys.filter((k) => chosen.includes(k.tokenId));
 
-  const run = async (target: MemberLicenseKey[]) => {
+  const run = async (target: MemberLicenseKey[], stampOnly = false) => {
     setBusy(true);
     setLoadingStatus({ status: 'loading', label: `Revoking ${name}'s data access` });
-    const outcome = await revokeMemberKeys(target, {
-      disable: (changes) => setLicenseSigners('disableSigner', changes),
-      stamp: markLicenseSignerDisabled,
-    });
+    const outcome = await revokeMemberKeys(
+      target,
+      {
+        disable: (changes) => setLicenseSigners('disableSigner', changes),
+        stamp: markLicenseSignerDisabled,
+      },
+      { stampOnly },
+    );
     setBusy(false);
     onDone();
     if (outcome.txError) {
@@ -64,7 +68,7 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
       return;
     }
     clearLoadingStatus();
-    if (target.some((k) => k.onChain)) {
+    if (!stampOnly) {
       trackEvent('Data Access Revoked', {
         memberId: member.id,
         tokenIds: tokenIdsOfKeys(target),
@@ -72,7 +76,7 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
     }
     if (outcome.unstamped.length) {
       // Off-chain now: a retry only stamps.
-      setUnstamped(outcome.unstamped.map((k) => ({ ...k, onChain: false })));
+      setUnstamped(outcome.unstamped);
       return;
     }
     toast.success(`${name}'s data access is revoked.`);
@@ -116,7 +120,11 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
             <p role="alert" className="text-body-sm text-negative">
               {`Data access is off, but we couldn't record that for ${labelsOfKeys(unstamped)}.`}
             </p>
-            <Button variant="secondary" loading={busy} onClick={() => run(unstamped)}>
+            <Button
+              variant="secondary"
+              loading={busy}
+              onClick={() => run(unstamped, true)}
+            >
               Retry
             </Button>
           </div>
