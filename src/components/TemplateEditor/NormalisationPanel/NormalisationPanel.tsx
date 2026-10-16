@@ -20,7 +20,7 @@ export const NormalisationPanel: FC<Props> = ({ notes, onDismiss }) => {
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-4">
           <h2 className="text-body-sm font-medium text-ink">
-            What the editor changed that you did not type
+            What the editor changed that you didn&#39;t type
           </h2>
           <button
             type="button"

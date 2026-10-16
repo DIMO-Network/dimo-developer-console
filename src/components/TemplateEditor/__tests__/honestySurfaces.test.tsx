@@ -149,14 +149,12 @@ describe('EntitlementBanner', () => {
           canSetHardwareTemplateId: false,
           mintedVehicles: 4212,
           reason:
-            'Creating or editing a template takes a DIMO developer license. 4,212 minted vehicles resolve to it.',
+            'Editing a template takes a DIMO developer license. 4,212 cars already use it.',
         }}
       />,
     );
-    expect(screen.getByRole('status')).toHaveTextContent('Developer license required');
-    expect(screen.getByRole('status')).toHaveTextContent(
-      '4,212 minted vehicles resolve to it.',
-    );
+    expect(screen.getByRole('status')).toHaveTextContent('A developer license is needed');
+    expect(screen.getByRole('status')).toHaveTextContent('4,212 cars already use it.');
     expect(screen.getByRole('status')).toHaveTextContent('read only');
     expect(screen.getByTestId('read-only-warning')).toBeInTheDocument();
   });
@@ -169,13 +167,14 @@ describe('EntitlementBanner', () => {
           canPublish: false,
           canSetHardwareTemplateId: false,
           mintedVehicles: null,
-          reason: 'Could not verify the vehicle count for this template. Try again.',
+          reason:
+            "We couldn't check your DIMO developer license just now. Reload in a moment and it should clear.",
         }}
       />,
     );
-    expect(screen.getByRole('status')).toHaveTextContent('Access could not be verified');
+    expect(screen.getByRole('status')).toHaveTextContent("Access couldn't be checked");
     expect(screen.getByRole('status')).toHaveTextContent('read only');
-    expect(screen.getByRole('status')).toHaveTextContent('Try again');
+    expect(screen.getByRole('status')).toHaveTextContent('Reload in a moment');
     expect(screen.getByTestId('read-only-warning')).toBeInTheDocument();
   });
 
@@ -188,13 +187,11 @@ describe('EntitlementBanner', () => {
           canSetHardwareTemplateId: false,
           mintedVehicles: 0,
           reason:
-            'You hold DIMO developer license 472 ("DEMO App"), which is what publishing takes. No vehicle resolves to it yet.',
+            "You hold DIMO developer license #472, DEMO App, and that's all it takes to publish changes here. No cars use it yet.",
         }}
       />,
     );
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'No vehicle resolves to it yet.',
-    );
+    expect(screen.getByRole('status')).toHaveTextContent('No cars use it yet.');
     expect(screen.queryByTestId('read-only-warning')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).not.toHaveTextContent('read only');
   });

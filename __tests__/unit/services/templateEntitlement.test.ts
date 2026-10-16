@@ -73,7 +73,7 @@ describe('resolveEntitlement', () => {
       mintedVehicles: 13,
     });
     expect(e.reason).toContain('472');
-    expect(e.reason).toContain('13 minted vehicles');
+    expect(e.reason).toContain('13 cars already use it');
   });
 
   it('says how many cars a publish re-describes rather than refusing over it', async () => {
@@ -84,7 +84,7 @@ describe('resolveEntitlement', () => {
     });
     expect(e).toMatchObject({ kind: 'licensed', canPublish: true });
     expect(e.reason).toContain('300,000');
-    expect(e.reason).toMatch(/re-describes/);
+    expect(e.reason).toMatch(/changes how all of them are described/);
   });
 
   it('counts one vehicle in the singular', async () => {
@@ -93,7 +93,7 @@ describe('resolveEntitlement', () => {
       template: template(),
       ...deps(1, OTHER),
     });
-    expect(e.reason).toContain('1 minted vehicle resolves');
+    expect(e.reason).toContain('One car already uses it');
   });
 
   it('lets a license holder create a template that does not exist', async () => {
@@ -117,7 +117,7 @@ describe('resolveEntitlement', () => {
       ...deps(13, OTHER, { kind: 'held', tokenId: 472, alias: null, via: 'signer' }),
     });
     expect(e).toMatchObject({ kind: 'licensed', canPublish: true });
-    expect(e.reason).toMatch(/signer on DIMO developer license 472/);
+    expect(e.reason).toMatch(/sign for DIMO developer license #472/);
   });
 
   it('refuses an account with no developer license, and says how to get one', async () => {
@@ -196,7 +196,7 @@ describe('resolveEntitlement', () => {
       canPublish: true,
       mintedVehicles: null,
     });
-    expect(e.reason).toMatch(/count could not be read/i);
+    expect(e.reason).toMatch(/couldn't check how many cars/i);
   });
 
   it('fails closed when the developer license cannot be verified', async () => {
@@ -217,7 +217,7 @@ describe('resolveEntitlement', () => {
       canSetHardwareTemplateId: false,
       mintedVehicles: 13,
     });
-    expect(e.reason).toMatch(/try again/i);
+    expect(e.reason).toMatch(/reload in a moment/i);
   });
 
   it('fails closed when an unlicensed caller cannot have the NFT holder looked up', async () => {

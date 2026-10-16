@@ -38,7 +38,7 @@ const authorBundle = () => ({
     canSetHardwareTemplateId: false,
     mintedVehicles: 0,
     reason:
-      'You hold DIMO developer license 472 ("DEMO App"), which is what publishing takes. No vehicle resolves to it yet.',
+      "You hold DIMO developer license #472, DEMO App, and that's all it takes to publish changes here. No cars use it yet.",
   },
 });
 
@@ -171,7 +171,7 @@ describe('TemplateEditorView', () => {
     fireEvent.change(input, { target: { value: '16.000000' } });
     fireEvent.blur(input);
     expect(
-      screen.getByText(/What the editor changed that you did not type/),
+      screen.getByText(/What the editor changed that you didn't type/),
     ).toBeInTheDocument();
     expect(screen.getByText(/stored as the number 16/)).toBeInTheDocument();
   });

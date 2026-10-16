@@ -214,7 +214,7 @@ describe('PUT /api/templates/[id]', () => {
     expect(resp.status).toBe(503);
     const json = await resp.json();
     expect(json.entitlement).toMatchObject({ kind: 'unavailable', canPublish: false });
-    expect(json.error).toMatch(/try again/i);
+    expect(json.error).toMatch(/reload in a moment/i);
     expect(publishTemplate).not.toHaveBeenCalled();
   });
 

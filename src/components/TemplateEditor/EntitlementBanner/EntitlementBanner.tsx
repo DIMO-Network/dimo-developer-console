@@ -5,13 +5,16 @@ import { WarningAmberIcon } from '@/components/Icons';
 // build. The type is erased; the module is never bundled.
 import type { Entitlement } from '@/services/templateEntitlement';
 
+// Each title says what the reader can do, not what they are. The reason line
+// below says why. Nothing here repeats "read only" -- that is appended once,
+// from canPublish, so a tier can never read as open while being closed.
 const TITLES: Record<Entitlement['kind'], string> = {
-  'create': 'New template',
-  'licensed': 'You can publish this',
-  'manufacturer': 'You hold this Manufacturer NFT',
-  'curator': 'Curator',
-  'license-required': 'Developer license required',
-  'unavailable': 'Access could not be verified',
+  'create': 'You can create this template',
+  'licensed': 'You can edit this template',
+  'manufacturer': 'You can edit this template',
+  'curator': 'You can edit anything here',
+  'license-required': 'A developer license is needed',
+  'unavailable': "Access couldn't be checked",
 };
 
 export const EntitlementBanner: FC<{ entitlement: Entitlement }> = ({ entitlement }) => (
@@ -29,7 +32,8 @@ export const EntitlementBanner: FC<{ entitlement: Entitlement }> = ({ entitlemen
       <span className="text-body-sm text-muted">{entitlement.reason}</span>
       {!entitlement.canSetHardwareTemplateId && (
         <span className="text-body-sm text-muted">
-          hardwareTemplateId decides what hardware ships and is set by DIMO only.
+          Which hardware ships with a car is DIMO&#39;s call, so the hardware template
+          field stays locked.
         </span>
       )}
     </div>

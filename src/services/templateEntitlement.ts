@@ -373,13 +373,15 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
 
   const vehicles = (): string => {
     if (mintedVehicles === null) {
-      return 'The vehicle count could not be read, so this template may describe cars that are already on the road.';
+      return "We couldn't check how many cars use this definition, so assume some are already on the road.";
     }
-    if (mintedVehicles === 0) return 'No vehicle resolves to it yet.';
+    if (mintedVehicles === 0) return 'No cars use it yet.';
+    if (mintedVehicles === 1) {
+      return 'One car already uses it, so publishing changes how that car is described.';
+    }
     return (
-      `${mintedVehicles.toLocaleString()} minted vehicle${mintedVehicles === 1 ? '' : 's'} ` +
-      `resolve${mintedVehicles === 1 ? 's' : ''} to it, so publishing re-describes ` +
-      `${mintedVehicles === 1 ? 'that car' : 'all of them'}.`
+      `${mintedVehicles.toLocaleString()} cars already use it, so publishing changes ` +
+      'how all of them are described.'
     );
   };
 
@@ -389,7 +391,7 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
       canPublish: true,
       canSetHardwareTemplateId: true,
       mintedVehicles,
-      reason: `You are a DIMO curator. ${vehicles()}`,
+      reason: `You're a DIMO curator, so nothing here is locked for you. ${vehicles()}`,
     };
   }
 
@@ -404,25 +406,32 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
       canPublish: false,
       canSetHardwareTemplateId: false,
       mintedVehicles,
-      reason: 'Could not verify your DIMO developer license. Try again.',
+      reason:
+        "We couldn't check your DIMO developer license just now, so nothing is editable. Reload in a moment and it should clear.",
     };
   }
 
   if (license.kind === 'held') {
     const named = license.alias
-      ? `${license.tokenId} ("${license.alias}")`
-      : `${license.tokenId}`;
+      ? `#${license.tokenId}, ${license.alias}`
+      : `#${license.tokenId}`;
     const held =
       license.via === 'owner'
         ? `You hold DIMO developer license ${named}`
-        : `You are a signer on DIMO developer license ${named}`;
+        : `You sign for DIMO developer license ${named}`;
     if (template === null) {
       return {
         kind: 'create',
         canPublish: true,
         canSetHardwareTemplateId: false,
         mintedVehicles,
-        reason: `${held}, and no template exists for this definition yet. ${vehicles()}`,
+        // The count is skipped at zero here and only here: "nothing has been
+        // published yet" and "no cars use it yet" are the same fact told twice.
+        // A non-zero count, or one that could not be read, still has to be said
+        // -- a definition can have cars on it with no template written for it.
+        reason:
+          `${held}. Nothing has been published for this model year yet, so you're ` +
+          `writing the first one.${mintedVehicles === 0 ? '' : ` ${vehicles()}`}`,
       };
     }
     return {
@@ -430,7 +439,7 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
       canPublish: true,
       canSetHardwareTemplateId: false,
       mintedVehicles,
-      reason: `${held}, which is what publishing takes. ${vehicles()}`,
+      reason: `${held}, and that's all it takes to publish changes here. ${vehicles()}`,
     };
   }
 
@@ -449,7 +458,7 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
       canSetHardwareTemplateId: false,
       mintedVehicles,
       reason:
-        'Could not verify who holds the Manufacturer NFT for this template. Try again.',
+        "We couldn't check who holds the Manufacturer NFT for this make just now. Reload in a moment and it should clear.",
     };
   }
   if (held.kind === 'found' && eq(held.owner, caller)) {
@@ -458,7 +467,7 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
       canPublish: true,
       canSetHardwareTemplateId: false,
       mintedVehicles,
-      reason: `You hold the ${template?.manufacturer.name ?? slug} Manufacturer NFT (token ${held.tokenId}). ${vehicles()}`,
+      reason: `You hold the ${template?.manufacturer.name ?? slug} Manufacturer NFT (#${held.tokenId}), so this make is yours to edit. ${vehicles()}`,
     };
   }
 
@@ -468,8 +477,8 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
     canSetHardwareTemplateId: false,
     mintedVehicles,
     reason:
-      'Creating or editing a template takes a DIMO developer license, and this ' +
-      'account does not hold one or sign for one. Create a license under ' +
-      'Developer licenses, then reload this page.',
+      "Editing a template takes a DIMO developer license, and this account doesn't " +
+      'hold one or sign for one. Create one under Developer licenses, then reload ' +
+      'this page.',
   };
 }

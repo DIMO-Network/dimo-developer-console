@@ -17,6 +17,6 @@ describe('templates Header', () => {
 
   it('keeps the page description', () => {
     render(<Header />);
-    expect(screen.getByText(/one model-year/i)).toBeInTheDocument();
+    expect(screen.getByText(/search the catalog/i)).toBeInTheDocument();
   });
 });

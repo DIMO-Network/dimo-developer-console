@@ -124,7 +124,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       return NextResponse.json(
         {
           error:
-            'hardwareTemplateId is set by DIMO only — it decides what hardware ships, and is not a vehicle attribute',
+            'hardwareTemplateId is set by DIMO only: it decides which hardware ships, which is not part of describing a car',
           entitlement,
         },
         { status: 403 },
@@ -212,7 +212,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
       // answer, so nothing was decided and the client should retry rather than
       // read a stamped guess as fact.
       return NextResponse.json(
-        { error: `Could not look up the Manufacturer NFT for "${slug}". Try again.` },
+        {
+          error: `We couldn't look up the Manufacturer NFT for "${slug}" just now. Try again in a moment.`,
+        },
         { status: 503 },
       );
     }
