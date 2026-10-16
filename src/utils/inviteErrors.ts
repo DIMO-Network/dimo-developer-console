@@ -3,7 +3,7 @@ const MESSAGES: Record<string, string> = {
     "This invite link isn't valid any more. Ask the team owner for a new one.",
   INVITE_EXPIRED: 'This invite has expired. Ask the team owner to resend it.',
   INVITE_EMAIL_MISMATCH:
-    'This invite was sent to a different email address. Sign in with that address to accept it.',
+    'This invite was sent to a different email address. Sign in with that address, then open the invite link again.',
 };
 
 export const inviteErrorMessage = (code: string | null): string =>

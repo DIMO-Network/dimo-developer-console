@@ -108,7 +108,7 @@ describe('PendingInvite', () => {
     const { unmount } = renderInvite();
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith(
-        'This invite was sent to a different email address. Sign in with that address to accept it.',
+        'This invite was sent to a different email address. Sign in with that address, then open the invite link again.',
       ),
     );
     unmount();

@@ -37,6 +37,10 @@ const FALLBACK_TEAM_ID = 'personal-fallback';
 // Switching, joining, leaving and removal reload the page; sign-in and logout
 // clear the cache.
 export const MY_TEAMS_KEY = ['my-teams'];
+// Until when console-api counts as down: sections mount on the fallback team
+// instead of each waiting out the request again.
+const TEAMS_UNAVAILABLE_KEY = ['my-teams-unavailable'];
+const UNAVAILABLE_FOR_MS = 60_000;
 export const TEAMS_UNAVAILABLE =
   "Couldn't load your teams. Showing your own licenses for now.";
 
@@ -69,17 +73,22 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
   // the server render and hydration agree.
   const [initial] = useState(() => {
     const cached = queryClient.getQueryData<TeamSummary[]>(MY_TEAMS_KEY);
-    if (!cached) return null;
+    if (!cached) {
+      const downUntil = queryClient.getQueryData<number>(TEAMS_UNAVAILABLE_KEY);
+      return downUntil && downUntil > Date.now()
+        ? { teams: [], activeId: null, unavailable: true }
+        : null;
+    }
     const cookieId = getActiveTeamCookie();
     const active = pickActive(cached, cookieId);
     return active && active.id === cookieId
-      ? { teams: cached, activeId: active.id }
+      ? { teams: cached, activeId: active.id, unavailable: false }
       : null;
   });
   const [teams, setTeams] = useState<TeamSummary[]>(initial?.teams ?? []);
   const [activeId, setActiveId] = useState<string | null>(initial?.activeId ?? null);
   const [isLoading, setIsLoading] = useState(!initial);
-  const [teamsUnavailable, setTeamsUnavailable] = useState(false);
+  const [teamsUnavailable, setTeamsUnavailable] = useState(initial?.unavailable ?? false);
 
   const activeTeam = useMemo(() => {
     // No list (console-api down) or an empty one: the user's own wallet, as
@@ -144,6 +153,7 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
         queryClient.getQueryData<TeamSummary[]>(MY_TEAMS_KEY) ?? (await fetchTeams());
       if (cancelled) return;
       if (!loaded) {
+        queryClient.setQueryData(TEAMS_UNAVAILABLE_KEY, Date.now() + UNAVAILABLE_FOR_MS);
         clearActiveTeamCookie();
         setTeamsUnavailable(true);
         setIsLoading(false);
@@ -196,13 +206,22 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
     if (!activeTeam || activeTeam.id === FALLBACK_TEAM_ID) return;
     const recheck = async () => {
       if (document.visibilityState === 'hidden') return;
-      if (getActiveTeamCookie() !== activeTeam.id) {
+      const cookieId = getActiveTeamCookie();
+      // Another tab switched team: this page belongs to the old one.
+      if (cookieId && cookieId !== activeTeam.id) {
         hardNavigate('/app');
         return;
       }
-      if (activeTeam.isPersonal) return;
+      // No cookie: console-api's NOT_A_MEMBER cleared it, another tab signed
+      // out, or the browser dropped it. The team list tells which.
+      if (activeTeam.isPersonal) {
+        if (!cookieId) setActiveTeamCookie(activeTeam.id);
+        return;
+      }
       const loaded = await fetchTeams();
-      if (loaded && !loaded.some((t) => t.id === activeTeam.id)) reportRemoved();
+      if (!loaded) return;
+      if (!loaded.some((t) => t.id === activeTeam.id)) reportRemoved();
+      else if (!cookieId) setActiveTeamCookie(activeTeam.id);
     };
     document.addEventListener('visibilitychange', recheck);
     window.addEventListener('focus', recheck);

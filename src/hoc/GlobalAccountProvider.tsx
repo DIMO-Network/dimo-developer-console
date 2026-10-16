@@ -20,12 +20,11 @@ import { getKernelAccount, getPublicClient } from '@/services/zerodev';
 import { Abi } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
-import { signOut } from '@/actions/user';
+import { endSession } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
 import { queryClient } from '@/hoc/QueryProvider';
-import { clearConsoleBrowserState } from '@/utils/consoleSession';
 
 // Resolving who is signed in costs two Turnkey calls (wallets, then the wallet
 // account) and chain RPC to derive the smart account address. Neither address
@@ -210,8 +209,9 @@ export const withGlobalAccounts = <P extends object>(
       queryClient.clear();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);
-      clearConsoleBrowserState();
-      await signOut();
+      // Reached when the session expired or this tab has none; an explicit
+      // sign-out (the menu) also clears the team and developer JWTs.
+      await endSession();
       router.replace('/sign-in');
     };
 

@@ -206,7 +206,7 @@ describe('GrantAccessModal', () => {
     choose('Harness Labs');
     grant();
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Those keys are enabled on-chain but not recorded.',
+      'Those keys are still enabled on-chain and nothing lists them. Delete them under API keys on the Config tab of Harness Labs.',
     );
   });
 

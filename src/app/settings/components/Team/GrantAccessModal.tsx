@@ -16,13 +16,14 @@ import type { TeamMember } from '@/types/team';
 import { registryWrite } from '@/utils/registryWrite';
 import { txErrorStatus } from '@/utils/txErrorStatus';
 import { grantCandidates } from './memberKeys';
+import type { SignerToggle } from './signerOverlay';
 import { displayName } from './MembersTable';
 
 interface Props {
   member: TeamMember;
   licenses: TeamLicense[];
   onClose: () => void;
-  onGranted: () => void;
+  onGranted: (changed: SignerToggle[]) => void;
 }
 
 export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGranted }) => {
@@ -125,10 +126,12 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     }
     trackEvent('Data Access Granted', { memberId: member.id, tokenIds: selected });
     const outcome = await record(changes);
-    setRolledBack(await rollBack(outcome.refused, signer));
+    const undone = await rollBack(outcome.refused, signer);
+    setRolledBack(undone);
     clearLoadingStatus();
     setBusy(false);
-    onGranted();
+    const disabledAgain = new Set(undone ? outcome.refused.map((r) => r.tokenId) : []);
+    onGranted(changes.map((c) => ({ ...c, enabled: !disabledAgain.has(c.tokenId) })));
     settle(outcome, changes);
   };
 
@@ -136,12 +139,21 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     if (!unrecorded) return;
     setBusy(true);
     const outcome = await record(unrecorded.retryable);
+    let undoneNow = false;
     if (outcome.refused.length) {
-      const undone = await rollBack(outcome.refused, member.signerAddress!);
-      setRolledBack((prev) => prev && undone);
+      undoneNow = await rollBack(outcome.refused, member.signerAddress!);
+      setRolledBack((prev) => prev && undoneNow);
     }
     setBusy(false);
-    onGranted();
+    onGranted(
+      undoneNow
+        ? outcome.refused.map(({ tokenId }) => ({
+            tokenId,
+            signer: member.signerAddress!,
+            enabled: false,
+          }))
+        : [],
+    );
     settle(
       {
         retryable: outcome.retryable,
@@ -202,8 +214,7 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
                 </p>
               ) : (
                 <p className="text-body-sm text-muted">
-                  Those keys are enabled on-chain but not recorded. Check the
-                  member&apos;s row in the Team list before granting again.
+                  {`Those keys are still enabled on-chain and nothing lists them. Delete them under API keys on the Config tab of ${labelsOf(unrecorded.refused.map((r) => r.tokenId))}.`}
                 </p>
               ))}
             {unrecorded.retryable.length > 0 ? (

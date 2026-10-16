@@ -1,5 +1,5 @@
 'use client';
-import { type FC, type ReactNode, useState } from 'react';
+import { type FC, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Section, SectionHeader } from '@/components/Section';
 import { Button } from '@/components/Button';
@@ -20,17 +20,34 @@ import { PendingGrantBanner } from './PendingGrantBanner';
 import { RevokeAccessModal } from './RevokeAccessModal';
 import { RemoveMemberModal } from './RemoveMemberModal';
 import type { TeamMember } from '@/types/team';
+import {
+  applySignerOverlay,
+  type RecordedToggle,
+  type SignerToggle,
+} from './signerOverlay';
+
+// Identity needs a few seconds to index a signer change; reloading the licenses
+// sooner would bring back the old state (license details waits the same).
+const IDENTITY_INDEX_DELAY_MS = 6000;
 
 const TeamSectionComponent: FC = () => {
   const { activeTeam, isOwner, isLoading: teamLoading } = useTeam();
   const { members, isLoading, isError, refetch, upsertMember } = useTeamMembers();
   const {
-    licenses,
+    licenses: indexedLicenses,
     loading: licensesLoading,
     error: licensesError,
     refetch: refetchLicenses,
   } = useTeamLicenses();
   const { trackEvent } = useMixPanel();
+  // Signer changes made here, shown over Identity's lists until it catches up.
+  const [toggles, setToggles] = useState<RecordedToggle[]>([]);
+  const licenses = useMemo(
+    () => applySignerOverlay(indexedLicenses, toggles, Date.now()),
+    [indexedLicenses, toggles],
+  );
+  const reloadTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(reloadTimer.current), []);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [grantFor, setGrantFor] = useState<TeamMember | null>(null);
   const [revokeFor, setRevokeFor] = useState<TeamMember | null>(null);
@@ -68,10 +85,19 @@ const TeamSectionComponent: FC = () => {
     ...(licensesReady ? { revoke: setRevokeFor, remove: setRemoveFor } : {}),
   };
 
-  // After any signer change: the table reads both.
-  const afterSignerChange = () => {
+  // After any signer change: the table reads both, the members now and the
+  // licenses once Identity has indexed the change.
+  const afterSignerChange = (changed: SignerToggle[] = []) => {
+    if (changed.length) {
+      const at = Date.now();
+      setToggles((prev) => [...prev, ...changed.map((t) => ({ ...t, at }))]);
+    }
     void refetch();
-    void refetchLicenses();
+    clearTimeout(reloadTimer.current);
+    reloadTimer.current = setTimeout(
+      () => void refetchLicenses(),
+      IDENTITY_INDEX_DELAY_MS,
+    );
   };
 
   let body: ReactNode;

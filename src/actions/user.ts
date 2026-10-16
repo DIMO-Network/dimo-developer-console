@@ -90,6 +90,15 @@ export const saveToken = async (token: string, sessionExpiration: number) => {
   userCookies.set(cookieName, token, { maxAge: sessionExpiration });
 };
 
+// A session that ended on its own (it expired): the next sign-in decides
+// whether the active team and a pending invite still apply (startConsoleSession).
+export const endSession = async () => {
+  const userCookies = await cookies();
+  userCookies.delete(cookieName);
+  userCookies.delete(SESSION_VERDICT_COOKIE);
+  return true;
+};
+
 export const signOut = async () => {
   const userCookies = await cookies();
   userCookies.delete(cookieName);

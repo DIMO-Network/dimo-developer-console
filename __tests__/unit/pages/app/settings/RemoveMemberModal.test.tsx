@@ -8,6 +8,7 @@ jest.mock('@/hooks/useSetLicenseSigners', () => ({
 jest.mock('@/actions/teams', () => ({
   markLicenseSignerDisabled: jest.fn(),
   removeTeamMember: jest.fn(),
+  upsertLicenseSigner: jest.fn(),
 }));
 jest.mock('@/app/settings/components/Team/WebhookReview', () => ({
   WebhookReview: () => <div>webhook review</div>,
@@ -16,7 +17,11 @@ const trackEvent = jest.fn();
 jest.mock('@/hooks/useMixPanel', () => ({ useMixPanel: () => ({ trackEvent }) }));
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
-import { markLicenseSignerDisabled, removeTeamMember } from '@/actions/teams';
+import {
+  markLicenseSignerDisabled,
+  removeTeamMember,
+  upsertLicenseSigner,
+} from '@/actions/teams';
 import { toast } from 'sonner';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { RemoveMemberModal } from '@/app/settings/components/Team/RemoveMemberModal';
@@ -126,8 +131,7 @@ describe('RemoveMemberModal', () => {
     expect(trackEvent).not.toHaveBeenCalledWith('Data Access Revoked', expect.anything());
   });
 
-  it('keeps a member whose unrecorded key could not be disabled', async () => {
-    mockSetSigners.mockRejectedValue({ code: 4001 });
+  const removeUnrecorded = () => {
     render(
       <LoadingStatusContext.Provider
         value={{ setLoadingStatus, clearLoadingStatus: jest.fn() }}
@@ -142,6 +146,34 @@ describe('RemoveMemberModal', () => {
       </LoadingStatusContext.Provider>,
     );
     fireEvent.click(screen.getByRole('button', { name: 'Remove from team' }));
+  };
+
+  it('records an unrecorded key it could not disable, then removes the member', async () => {
+    mockSetSigners.mockRejectedValue({ code: 4001 });
+    (upsertLicenseSigner as jest.Mock).mockResolvedValue({ ok: true, data: {} });
+    removeUnrecorded();
+    await waitFor(() => expect(removeTeamMember).toHaveBeenCalledWith('m-sam'));
+    expect(upsertLicenseSigner).toHaveBeenCalledWith(42, CURRENT, {
+      kind: 'MEMBER',
+      holders: [{ userId: 'u-sam' }],
+    });
+    expect((upsertLicenseSigner as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      (removeTeamMember as jest.Mock).mock.invocationCallOrder[0],
+    );
+    expect(toast.error).toHaveBeenCalledWith(
+      'Sam Rivera was removed, but is still a signer on Harness Fleet. Use Retry on their row.',
+    );
+  });
+
+  it('keeps a member whose unrecorded key could be neither disabled nor recorded', async () => {
+    mockSetSigners.mockRejectedValue({ code: 4001 });
+    (upsertLicenseSigner as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 502,
+      code: null,
+      message: 'x',
+    });
+    removeUnrecorded();
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith(
         "Sam Rivera is still on Harness Motors: we couldn't remove their wallet from Harness Fleet on-chain. Try again.",

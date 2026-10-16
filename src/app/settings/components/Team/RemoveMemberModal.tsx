@@ -6,16 +6,22 @@ import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
-import { markLicenseSignerDisabled, removeTeamMember } from '@/actions/teams';
+import {
+  markLicenseSignerDisabled,
+  removeTeamMember,
+  upsertLicenseSigner,
+} from '@/actions/teams';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { useSetLicenseSigners } from '@/hooks/useSetLicenseSigners';
 import type { TeamLicense } from '@/hooks/useTeamLicenses';
 import type { TeamMember } from '@/types/team';
+import { registryWrite } from '@/utils/registryWrite';
 import { txErrorStatus } from '@/utils/txErrorStatus';
 import { actionableKeys, memberLicenseKeys, type MemberLicenseKey } from './memberKeys';
 import { displayName } from './MembersTable';
 import { labelsOfKeys, tokenIdsOfKeys } from './RevokeAccessModal';
 import { revokeMemberKeys } from './revokeMemberKeys';
+import type { SignerToggle } from './signerOverlay';
 import { WebhookReview } from './WebhookReview';
 
 interface Props {
@@ -23,14 +29,14 @@ interface Props {
   licenses: TeamLicense[];
   teamName: string;
   onClose: () => void;
-  onDone: () => void;
+  onDone: (changed?: SignerToggle[]) => void;
 }
 
 // Revoke first, then end the membership. A failed transaction still removes
 // the member (the proxy refuses them within a minute either way); their row
 // stays in the Team list as "Still a signer on …" with Retry (C7 lists REVOKED
-// members who still hold a key). The exception is a key with no registry row:
-// nothing would list it, so the member stays until it is off.
+// members who still hold a key). A key with no registry row would not be
+// listed, so it is recorded first; if that fails too, the member stays.
 export const RemoveMemberModal: FC<Props> = ({
   member,
   licenses,
@@ -45,6 +51,20 @@ export const RemoveMemberModal: FC<Props> = ({
   const [busy, setBusy] = useState(false);
   const name = displayName(member);
 
+  const recordKeys = async (unrecorded: MemberLicenseKey[]) => {
+    if (!member.userId) return false;
+    for (const key of unrecorded) {
+      const result = await registryWrite(() =>
+        upsertLicenseSigner(key.tokenId, key.signer, {
+          kind: 'MEMBER',
+          holders: [{ userId: member.userId! }],
+        }),
+      );
+      if (!result.ok) return false;
+    }
+    return true;
+  };
+
   const remove = async () => {
     setBusy(true);
     setLoadingStatus({ status: 'loading', label: `Removing ${name}` });
@@ -58,10 +78,12 @@ export const RemoveMemberModal: FC<Props> = ({
       txError = outcome.txError;
       unstamped = outcome.unstamped;
       if (txError) Sentry.captureException(txError);
-      // console-api lists a departed member only by their registry keys, so a
-      // key with no row would vanish from Team while still enabled: keep them
-      // on the team until it is off.
-      if (txError && keys.some((k) => !k.registered)) {
+      // console-api lists a departed member only by their registry keys: a key
+      // still enabled with no row would vanish from Team. Record it while they
+      // are still a member (it is their current wallet); if that fails, keep
+      // them on the team.
+      const unrecorded = keys.filter((k) => !k.registered);
+      if (txError && unrecorded.length && !(await recordKeys(unrecorded))) {
         setBusy(false);
         setLoadingStatus(txErrorStatus(txError));
         toast.error(
@@ -104,7 +126,11 @@ export const RemoveMemberModal: FC<Props> = ({
         `We couldn't record the revoked access for ${labelsOfKeys(unstamped)}. Use Retry on their row to finish.`,
       );
     }
-    onDone();
+    onDone(
+      txError
+        ? []
+        : keys.map(({ tokenId, signer }) => ({ tokenId, signer, enabled: false })),
+    );
     onClose();
   };
 

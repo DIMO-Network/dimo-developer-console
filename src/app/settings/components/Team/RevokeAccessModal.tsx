@@ -17,6 +17,7 @@ import { txErrorStatus } from '@/utils/txErrorStatus';
 import { actionableKeys, memberLicenseKeys, type MemberLicenseKey } from './memberKeys';
 import { displayName } from './MembersTable';
 import { revokeMemberKeys } from './revokeMemberKeys';
+import type { SignerToggle } from './signerOverlay';
 import { WebhookReview } from './WebhookReview';
 
 export const labelsOfKeys = (keys: MemberLicenseKey[]) =>
@@ -28,7 +29,7 @@ interface Props {
   member: TeamMember;
   licenses: TeamLicense[];
   onClose: () => void;
-  onDone: () => void;
+  onDone: (changed: SignerToggle[]) => void;
 }
 
 export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone }) => {
@@ -61,7 +62,11 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
       { stampOnly },
     );
     setBusy(false);
-    onDone();
+    onDone(
+      outcome.txError || stampOnly
+        ? []
+        : target.map(({ tokenId, signer }) => ({ tokenId, signer, enabled: false })),
+    );
     if (outcome.txError) {
       Sentry.captureException(outcome.txError);
       setLoadingStatus(txErrorStatus(outcome.txError));

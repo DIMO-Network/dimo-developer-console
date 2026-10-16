@@ -1,5 +1,5 @@
 import { exchangeDimoToken, getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
-import { saveToken, signOut } from '@/actions/user';
+import { endSession, saveToken } from '@/actions/user';
 import { completeUserData, createNewUser } from '@/app/sign-up/actions';
 import { passkeyClient, turnkeyClient } from '@/config/turnkey';
 import { AuthContext } from '@/context/AuthContext';
@@ -27,7 +27,7 @@ import { decodeJwtToken } from '@/utils/middlewareUtils';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
 import { queryClient } from '@/hoc/QueryProvider';
-import { clearConsoleBrowserState } from '@/utils/consoleSession';
+import { startConsoleSession } from '@/utils/consoleSession';
 const halfHour = 60 * 30;
 const fifteenMinutes = 15 * 60;
 
@@ -57,10 +57,10 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       saveToLocalStorage(EmbeddedKey, privateKey);
       // A new session starts with an empty query cache: the user and team
       // queries are not keyed by account, and a session that ended without a
-      // logout (it expired) leaves the last person's data in this tab. The same
-      // goes for the active team and stored developer JWTs.
+      // logout (it expired) leaves the last person's data in this tab. Stored
+      // developer JWTs and the active team are kept only for the same account.
       queryClient.clear();
-      clearConsoleBrowserState();
+      startConsoleSession(user!.subOrganizationId);
 
       saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
         email: user!.email,
@@ -253,9 +253,9 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       return { success: true, newWalletAddress };
     };
 
+    // Reached when the session expired (loadUserInformation).
     const logout = async () => {
-      clearConsoleBrowserState();
-      await signOut();
+      await endSession();
       await turnkeyClient.logout();
       removeFromSession(GlobalAccountSession);
       removeFromLocalStorage(EmbeddedKey);

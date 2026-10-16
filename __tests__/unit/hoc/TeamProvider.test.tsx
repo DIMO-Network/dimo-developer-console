@@ -144,6 +144,53 @@ describe('TeamProvider', () => {
     expect(listMyTeams).toHaveBeenCalledTimes(1);
   });
 
+  it('reports a removal, with the team name, when the cookie was cleared while away', async () => {
+    document.cookie = 'active_team=team-acme; Path=/';
+    renderProvider();
+    await waitFor(() => expect(probe().active).toBe('team-acme'));
+    document.cookie = 'active_team=; Path=/; Max-Age=0';
+    (listMyTeams as jest.Mock).mockResolvedValue({
+      ok: true,
+      data: { teams: [PERSONAL] },
+    });
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    await waitFor(() => expect(hardNavigate).toHaveBeenCalledWith('/app'));
+    expect(JSON.parse(sessionStorage.getItem('teamFlash')!)).toEqual({
+      tone: 'error',
+      message: "You're no longer a member of Acme Mobility.",
+    });
+  });
+
+  it('writes the cookie back, without reloading, when the browser dropped it', async () => {
+    renderProvider();
+    await waitFor(() => expect(probe().active).toBe('team-harness'));
+    document.cookie = 'active_team=; Path=/; Max-Age=0';
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    expect(hardNavigate).not.toHaveBeenCalled();
+    expect(document.cookie).toContain('active_team=team-harness');
+  });
+
+  it('remembers for a minute that teams could not load, so remounts start on the fallback', async () => {
+    (listMyTeams as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 502,
+      code: null,
+      message: 'x',
+    });
+    const client = new QueryClient();
+    const { unmount } = renderProvider(<Probe />, client);
+    await waitFor(() => expect(probe().unavailable).toBe(true));
+    unmount();
+    renderProvider(<Probe />, client);
+    expect(probe()).toMatchObject({ loading: false, active: 'personal-fallback' });
+    expect(listMyTeams).toHaveBeenCalledTimes(1);
+    expect(toast.error).toHaveBeenCalledTimes(1);
+  });
+
   it('uses the team named by the active_team cookie', async () => {
     document.cookie = 'active_team=team-acme; Path=/';
     renderProvider();
