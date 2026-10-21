@@ -10,3 +10,4 @@ export { FormStepContextProvider } from '@/hoc/FormStepContextProvider';
 export { FormStepContext } from '@/hoc/FormStepContextProvider';
 
 export { FormStep } from '@/types/webhook';
+export * from './TeamProvider';

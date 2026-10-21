@@ -8,8 +8,23 @@ export type DataApiCode =
   | 'DEV_JWT_MISSING'
   | 'DEV_JWT_INVALID'
   | 'NOT_SHARED'
+  | 'NO_ACCESS'
+  | 'ACCESS_CHECK_FAILED'
+  | 'INVALID_CLIENT_ID'
   | 'UPSTREAM'
-  | 'GRAPHQL';
+  | 'GRAPHQL'
+  | 'UNKNOWN';
+
+const KNOWN_CODES = new Set<string>([
+  'DEV_JWT_MISSING',
+  'DEV_JWT_INVALID',
+  'NOT_SHARED',
+  'NO_ACCESS',
+  'ACCESS_CHECK_FAILED',
+  'INVALID_CLIENT_ID',
+  'UPSTREAM',
+  'GRAPHQL',
+]);
 
 export class DataApiError extends Error {
   constructor(
@@ -17,6 +32,8 @@ export class DataApiError extends Error {
     public readonly code: DataApiCode,
     message: string,
     public readonly graphqlErrors: GqlError[] = [],
+    // From the data proxy's NO_ACCESS: false means the user left the team.
+    public readonly memberOfTeam?: boolean,
   ) {
     super(message);
     this.name = 'DataApiError';
@@ -52,9 +69,13 @@ export const postSubjectQuery = async <T>(
     data?: T | null;
     errors?: GqlError[];
     error?: string;
-    code?: DataApiCode;
+    code?: string;
+    memberOfTeam?: boolean;
   };
-  if (body.code && body.error) throw new DataApiError(res.status, body.code, body.error);
+  if (body.code && body.error) {
+    const code = KNOWN_CODES.has(body.code) ? (body.code as DataApiCode) : 'UNKNOWN';
+    throw new DataApiError(res.status, code, body.error, [], body.memberOfTeam);
+  }
   // gqlgen answers a refused privilege with 200, data: null and the errors, so
   // no data plus errors is a failure whatever the status. Partial data (data
   // set, errors on some fields) is returned for the panels to show per field.

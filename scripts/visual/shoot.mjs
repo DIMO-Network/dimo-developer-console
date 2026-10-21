@@ -48,7 +48,11 @@ async function prepare(context, route, theme) {
     origin: BASE,
   });
   await context.route('https://identity-api.dev.dimo.zone/query', (r) =>
-    identityHandler(r, { noLicenses: route.noLicenses, notShared: route.notShared }),
+    identityHandler(r, {
+      noLicenses: route.noLicenses,
+      notShared: route.notShared,
+      memberSigner: route.memberSigner,
+    }),
   );
   await context.route(/\/api\/templates\?/, (r) =>
     r.fulfill({ json: fx.TEMPLATE_SEARCH }),
@@ -57,14 +61,18 @@ async function prepare(context, route, theme) {
     r.fulfill({ json: fx.TEMPLATE_DETAIL }),
   );
   await context.route(/\/api\/data\/(telemetry|fetch)/, (r) =>
-    dataApiHandler(r, { notShared: route.notShared, dataErrors: route.dataErrors }),
+    dataApiHandler(r, {
+      notShared: route.notShared,
+      dataErrors: route.dataErrors,
+      noAccess: route.dataNoAccess,
+    }),
   );
   await context.addInitScript((t) => {
     // next-themes: default storage key `theme`; master defaults to dark.
     localStorage.setItem('theme', t);
   }, theme);
   if (route.guest) return;
-  await context.addCookies([
+  const cookies = [
     {
       name: 'session-token',
       value: keys.sessionJwt,
@@ -73,17 +81,40 @@ async function prepare(context, route, theme) {
       httpOnly: true,
       sameSite: 'Lax',
     },
-  ]);
+  ];
+  // The active team travels to the mock as X-Team-Id (contracts C4).
+  if (route.team)
+    cookies.push({
+      name: 'active_team',
+      value: route.team,
+      domain: 'localhost',
+      path: '/',
+      sameSite: 'Lax',
+    });
+  if (route.inviteToken)
+    cookies.push({
+      name: 'invite_token',
+      value: 'harness-invite-token',
+      domain: 'localhost',
+      path: '/',
+      httpOnly: true,
+      sameSite: 'Lax',
+    });
+  await context.addCookies(cookies);
+
   await context.addInitScript(
-    ({ session, embedded, devJwtKey, devJwts }) => {
+    ({ session, embedded, devJwtKey, devJwts, signerKey, memberJwtKey, memberJwts }) => {
       sessionStorage.setItem('globalAccount', JSON.stringify(session));
       localStorage.setItem('GlobalAccountEmbeddedKey', JSON.stringify(embedded));
       localStorage.setItem(devJwtKey, JSON.stringify(devJwts));
+      // Wallet registration (C6) runs once per session and needs a Turnkey
+      // signature the mock can't make: mark it done.
+      sessionStorage.setItem(signerKey, JSON.stringify('done'));
+      if (memberJwts) localStorage.setItem(memberJwtKey, JSON.stringify(memberJwts));
     },
     {
       session: {
         email: fx.USER_EMAIL,
-        role: 'OWNER',
         subOrganizationId: fx.SUB_ORG.subOrganizationId,
         token: keys.credentialBundle,
         expiry: Math.floor(Date.now() / 1000) + 86400,
@@ -91,6 +122,12 @@ async function prepare(context, route, theme) {
       embedded: keys.embeddedPrivateKey,
       devJwtKey: `devJwt_${fx.LICENSE.clientId}_list_v1`,
       devJwts: [{ token: keys.devJwt, createdAt: Date.parse('2026-09-20T14:30:00Z') }],
+      signerKey: `signerRegistered:${fx.WALLET}`,
+      // Members keep developer JWTs per wallet (src/utils/devJwt.ts).
+      memberJwtKey: `devJwt_${fx.LICENSE.clientId}_${fx.WALLET}_list_v1`,
+      memberJwts: route.memberJwt
+        ? [{ token: keys.memberDevJwt, createdAt: Date.parse('2026-09-20T14:30:00Z') }]
+        : null,
     },
   );
 }

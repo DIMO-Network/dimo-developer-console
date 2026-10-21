@@ -10,7 +10,14 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 export const USER_EMAIL = 'jane@harness.dev';
 export const KERNEL = '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d';
 export const WALLET = '0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6';
-export const SIGNER = '0x5B2E4f6A8c0D2e4F6a8C0d2E4f6A8c0D2e4F6a8C';
+export const SIGNER = '0x5b2E4F6A8C0D2e4f6A8C0D2e4f6a8c0D2e4F6a8c';
+// Teams (src/types/team.ts, contracts C7). Checksummed, as console-api and
+// Identity return them; the console compares addresses case-insensitively.
+export const WALLET_CHECKSUM = '0x9f1e2d3c4b5A69788796A5b4c3d2E1f0a9b8C7d6';
+export const SAM_WALLET = '0x1c3E5A7b9D0F2a4c6E8b0D1F3a5c7e9B2D4f6a8C';
+export const MAX_WALLET = '0x2D4f6a8C1c3E5a7b9D0F2A4c6E8B0D1F3A5c7e9b';
+export const LEO_OLD_WALLET = '0x3a5C7e9b2d4F6a8c1c3E5A7B9d0F2a4c6E8B0D1f';
+export const ACME_OWNER = '0x2B6E1c4f8a0d3E5b7c9a1D2E3f4A5b6c7D8e9f0a';
 export const LICENSE = {
   tokenId: 42,
   clientId: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
@@ -157,28 +164,149 @@ export const SIMULATED_VEHICLES = [
   },
 ];
 
-// src/types/team.ts ITeamCollaborator
-export const COLLABORATORS = [
-  {
-    id: 'col-1',
-    team_id: 'team-harness',
-    user_id: 'user-harness',
-    User: USER,
-    email: USER_EMAIL,
-    role: 'OWNER',
-    status: 'ACCEPTED',
-    deleted: false,
-  },
-  {
-    id: 'col-2',
-    team_id: 'team-harness',
-    user_id: 'user-2',
+const IN_A_WEEK = new Date(Date.now() + 7 * 86400_000).toISOString();
+const team = (over) => ({
+  companyName: null,
+  role: 'OWNER',
+  ownerUserId: 'user-harness',
+  ownerEmail: USER_EMAIL,
+  ownerAddress: KERNEL,
+  isPersonal: true,
+  ...over,
+});
+// src/types/team.ts TeamSummary
+export const TEAM_HARNESS = team({
+  id: 'team-harness',
+  name: 'Harness Motors',
+  companyName: 'Harness Motors',
+});
+export const TEAM_ACME = team({
+  id: 'team-acme',
+  name: 'Acme Mobility',
+  companyName: 'Acme Mobility',
+  role: 'MEMBER',
+  ownerUserId: 'user-acme',
+  ownerEmail: 'ops@acme.dev',
+  ownerAddress: ACME_OWNER,
+  isPersonal: false,
+});
+// The scenario follows X-Team-Id, i.e. the active_team cookie a route sets.
+// team-down: console-api can't list teams (mock-server answers 500).
+export const teamsFor = (teamId) => {
+  if (teamId === 'team-acme') return [TEAM_HARNESS, TEAM_ACME];
+  if (teamId === 'team-empty') return [{ ...TEAM_HARNESS, id: 'team-empty' }];
+  return [TEAM_HARNESS];
+};
+
+// src/types/team.ts TeamMember
+const member = (over) => ({
+  userId: null,
+  name: null,
+  role: 'MEMBER',
+  status: 'ACCEPTED',
+  signerAddress: null,
+  memberKeys: [],
+  invitedAt: NOW,
+  inviteExpiresAt: null,
+  ...over,
+});
+const OWNER_ROW = member({
+  id: 'mem-jane',
+  userId: 'user-harness',
+  name: USER.name,
+  email: USER_EMAIL,
+  role: 'OWNER',
+  signerAddress: WALLET_CHECKSUM,
+});
+const MEMBERS = [
+  OWNER_ROW,
+  // Data access to Harness Fleet.
+  member({
+    id: 'mem-sam',
+    userId: 'user-sam',
+    name: 'Sam Rivera',
     email: 'sam@harness.dev',
-    role: 'COLLABORATOR',
-    status: 'SENT',
-    deleted: false,
-  },
+    signerAddress: SAM_WALLET,
+    memberKeys: [{ licenseTokenId: LICENSE.tokenId, signerAddress: SAM_WALLET }],
+  }),
+  // Joined with a verified wallet and no key: the pending-grant banner.
+  member({
+    id: 'mem-max',
+    userId: 'user-max',
+    name: 'Max Chen',
+    email: 'max@harness.dev',
+    signerAddress: MAX_WALLET,
+  }),
+  member({
+    id: 'mem-ana',
+    email: 'ana@harness.dev',
+    status: 'PENDING',
+    inviteExpiresAt: IN_A_WEEK,
+  }),
+  // Left; a key under an old wallet is still in the registry (Revoke unfinished).
+  member({
+    id: 'mem-leo',
+    userId: 'user-leo',
+    name: 'Leo Park',
+    email: 'leo@harness.dev',
+    status: 'LEFT',
+    memberKeys: [{ licenseTokenId: LICENSE.tokenId, signerAddress: LEO_OLD_WALLET }],
+  }),
 ];
+const ACME_MEMBERS = [
+  member({
+    id: 'mem-olivia',
+    userId: 'user-acme',
+    name: 'Olivia Acme',
+    email: 'ops@acme.dev',
+    role: 'OWNER',
+  }),
+  member({
+    id: 'mem-jane-acme',
+    userId: 'user-harness',
+    name: USER.name,
+    email: USER_EMAIL,
+    signerAddress: WALLET_CHECKSUM,
+  }),
+];
+export const membersFor = (teamId) =>
+  teamId === 'team-acme' ? ACME_MEMBERS : teamId === 'team-empty' ? [OWNER_ROW] : MEMBERS;
+
+// src/types/team.ts LicenseSignerRecord
+const signerRow = (signerAddress, kind, holders, note = null) => ({
+  signerAddress,
+  kind,
+  note,
+  holders,
+  createdAt: NOW,
+  createdBy: 'user-harness',
+  disabledAt: null,
+  disabledBy: null,
+});
+export const licenseSigners = (tokenId) =>
+  tokenId === LICENSE.tokenId
+    ? [
+        signerRow(
+          SIGNER,
+          'API_KEY',
+          [{ userId: null, name: 'Ops on-call', email: null }],
+          'Pager duty',
+        ),
+        signerRow(SAM_WALLET, 'MEMBER', [
+          { userId: 'user-sam', name: 'Sam Rivera', email: 'sam@harness.dev' },
+        ]),
+        signerRow(LEO_OLD_WALLET, 'MEMBER', [
+          { userId: 'user-leo', name: 'Leo Park', email: 'leo@harness.dev' },
+        ]),
+      ]
+    : [];
+
+// src/types/team.ts InvitePreview
+export const INVITE_PREVIEW = {
+  teamName: TEAM_ACME.name,
+  ownerEmail: TEAM_ACME.ownerEmail,
+  expiresAt: IN_A_WEEK,
+};
 
 // src/types/wallet.ts ICreditUsage
 export const creditUsage = (licenseId, url) => ({
@@ -229,6 +357,7 @@ export const WEBHOOKS = [
     description: 'Speeding alert',
     displayName: 'Speeding alert',
     failure_count: 0,
+    createdBySigner: SAM_WALLET,
   },
   {
     id: 'wh-2',
@@ -305,7 +434,7 @@ const PAGE_INFO = {
   hasNextPage: false,
   hasPreviousPage: false,
 };
-const license = (l, withUris) => ({
+const license = (l, withUris, signers = [SIGNER]) => ({
   __typename: 'DeveloperLicense',
   alias: l.alias,
   tokenId: l.tokenId,
@@ -314,9 +443,13 @@ const license = (l, withUris) => ({
   mintedAt: '2026-03-02T15:04:05Z',
   signers: {
     __typename: 'SignerConnection',
-    totalCount: 1,
+    totalCount: signers.length,
     pageInfo: PAGE_INFO,
-    nodes: [{ __typename: 'Signer', address: SIGNER, enabledAt: '2026-03-02T15:04:05Z' }],
+    nodes: signers.map((address) => ({
+      __typename: 'Signer',
+      address,
+      enabledAt: '2026-03-02T15:04:05Z',
+    })),
   },
   redirectURIs: {
     __typename: 'RedirectURIConnection',
@@ -338,7 +471,15 @@ const license = (l, withUris) => ({
       : [],
   },
 });
-const LICENSES = [license(LICENSE, true), license(LICENSE_2, false)];
+const LICENSES = [
+  license(LICENSE, true, [SIGNER, SAM_WALLET]),
+  license(LICENSE_2, false),
+];
+// memberSigner: the harness wallet also signs for Harness Fleet (a member with data access).
+const LICENSES_WITH_MEMBER = [
+  license(LICENSE, true, [SIGNER, SAM_WALLET, WALLET_CHECKSUM]),
+  license(LICENSE_2, false),
+];
 const DEVICE_AD = (tokenId) => ({
   __typename: 'AftermarketDevice',
   tokenId: tokenId + 300000,
@@ -438,9 +579,13 @@ const VEHICLES = [
 // Superset root: every identity query in the console selects a subset of these.
 // noLicenses: the owner has no developer licenses yet (the empty /app state).
 // notShared: the vehicle's SACDs name neither harness license (no license can read it).
-export const identityData = (vars, { noLicenses = false, notShared = false } = {}) => {
-  const licenses = noLicenses ? [] : LICENSES;
-  const byVars = LICENSES.find(
+export const identityData = (
+  vars,
+  { noLicenses = false, notShared = false, memberSigner = false } = {},
+) => {
+  const all = memberSigner ? LICENSES_WITH_MEMBER : LICENSES;
+  const licenses = noLicenses ? [] : all;
+  const byVars = all.find(
     (l) =>
       String(l.tokenId) === String(vars.tokenId) ||
       (vars.clientId && l.clientId.toLowerCase() === String(vars.clientId).toLowerCase()),
@@ -467,7 +612,7 @@ export const identityData = (vars, { noLicenses = false, notShared = false } = {
       pageInfo: PAGE_INFO,
       nodes: licenses,
     },
-    developerLicense: byVars ?? LICENSES[0],
+    developerLicense: byVars ?? all[0],
     // GetAccountSacds: grants on the owner's account DID (Sharing's second table).
     account: {
       __typename: 'Account',

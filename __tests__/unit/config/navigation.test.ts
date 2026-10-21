@@ -26,4 +26,28 @@ describe('navigation', () => {
     expect(getPageTitle('/vehicles/184223')).toBe('Vehicle');
     expect(getPageTitle('/explorer')).toBeUndefined();
   });
+
+  it("hides owner-only pages from members of someone else's team", () => {
+    const item = (
+      label: string,
+      options: { isMember?: boolean; dataAccessEnabled?: boolean },
+    ) =>
+      getNavSections(true, options)
+        .find((s) => s.label === 'Workspace')!
+        .items.find((i) => i.label === label);
+    expect(item('Webhooks', { isMember: true })?.hidden).toBe(true);
+    expect(item('Connections', { isMember: true })?.hidden).toBe(true);
+    expect(item('Webhooks', {})?.hidden).toBeFalsy();
+    expect(item('Connections', {})?.hidden).toBeFalsy();
+  });
+
+  it('shows members Vehicles only while team data access is enabled (C5)', () => {
+    const vehicles = (options: { isMember?: boolean; dataAccessEnabled?: boolean }) =>
+      getNavSections(true, options)
+        .find((s) => s.label === 'Workspace')!
+        .items.find((i) => i.label === 'Vehicles');
+    expect(vehicles({ isMember: true, dataAccessEnabled: false })?.hidden).toBe(true);
+    expect(vehicles({ isMember: true, dataAccessEnabled: true })?.hidden).toBeFalsy();
+    expect(vehicles({ isMember: false, dataAccessEnabled: false })?.hidden).toBeFalsy();
+  });
 });

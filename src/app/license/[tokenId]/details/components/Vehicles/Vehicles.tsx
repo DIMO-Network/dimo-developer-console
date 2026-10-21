@@ -8,6 +8,7 @@ import { Button } from '@/components/Button';
 import { useRouter } from 'next/navigation';
 import { VehicleSimulatorModal } from '@/app/app/list/components/VehicleSimulator/VehicleSimulatorModal';
 import './Vehicles.css';
+import { OwnerAction } from '@/components/OwnerOnly';
 
 export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
@@ -64,16 +65,20 @@ export const Vehicles: FC<IProps> = ({ license }) => {
             Vehicle list
           </Button>
         </Link>
-        <div className="flex-1 [&>button]:w-full">
-          <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
-        </div>
-        <Button
-          variant="secondary"
-          className="flex-1"
-          onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
-        >
-          Configure sharing
-        </Button>
+        <OwnerAction>
+          <div className="flex-1 [&>button]:w-full">
+            <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
+          </div>
+        </OwnerAction>
+        <OwnerAction>
+          <Button
+            variant="secondary"
+            className="flex-1"
+            onClick={() => router.push(`/license/${fragment.tokenId}/configurator`)}
+          >
+            Configure sharing
+          </Button>
+        </OwnerAction>
       </div>
     </div>
   );

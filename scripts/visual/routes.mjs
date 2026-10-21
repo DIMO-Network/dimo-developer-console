@@ -7,13 +7,20 @@
 // dataErrors: data API operation names answered 200 with data: null and a
 // privilege error (fixtures DATA_ERRORS), like gqlgen refusing a privilege.
 // hover: a selector the pointer rests on for the shot (hover states).
+// team: active_team cookie (fixtures teamsFor: team-acme = member of Acme
+// Mobility, team-empty = owner alone, team-down = /api/my/teams answers 500).
+// inviteToken: a pending invite cookie.
+// memberSigner: Identity lists the harness wallet on Harness Fleet. memberJwt:
+// a member developer JWT in this browser. dataNoAccess: /api/data/* answers the
+// proxy's NO_ACCESS for a member whose wallet is still listed. /api/data/* is
+// mocked in the browser, so the data proxy itself is tested in Jest only.
 // knownConsoleWarning: { pattern, reason } for a console error reproducible on
 // untouched master. Matching messages are logged as "known warning" and excluded
 // (the dev badge's issue count is excused only up to the number matched);
 // hydration mismatches, other errors and overlay dialogs still fail the shot.
 // On master: /app and /settings mismatch on the Suspense hydration (3 of 3 runs,
 // light mobile); the webhook form logs a React controlled-input warning.
-import { LICENSE, CONNECTIONS, WEBHOOKS, WALLET } from './fixtures.mjs';
+import { LICENSE, CONNECTIONS, WEBHOOKS, WALLET, SIGNER } from './fixtures.mjs';
 
 // Both pages wrap their view in <Suspense>, which can hydrate after the header's
 // useUser() query has resolved; the view then renders user data the server
@@ -355,6 +362,127 @@ export const ROUTES = [
     click: 'text=Developer support',
     after: 'Contact developer support',
     knownConsoleWarning: SETTINGS_HYDRATION,
+  },
+  {
+    name: 'settings-team-empty',
+    path: '/settings',
+    ready: 'Invite teammates to share',
+    team: 'team-empty',
+    knownConsoleWarning: SETTINGS_HYDRATION,
+  },
+  {
+    name: 'settings-team-member',
+    path: '/settings',
+    ready: 'Leave team',
+    team: 'team-acme',
+    knownConsoleWarning: SETTINGS_HYDRATION,
+  },
+  {
+    name: 'settings-invite-modal',
+    path: '/settings',
+    ready: 'Sam Rivera',
+    click: 'text="Invite member"',
+    after: 'Invite a team member',
+    knownConsoleWarning: SETTINGS_HYDRATION,
+  },
+  {
+    // The ⋯ menu must fit a 390px phone (DESIGN.md, Table).
+    name: 'settings-member-menu',
+    path: '/settings',
+    ready: 'Sam Rivera',
+    click: '[aria-label="Actions for ana@harness.dev"]',
+    after: 'Cancel invite',
+    knownConsoleWarning: SETTINGS_HYDRATION,
+  },
+  {
+    name: 'settings-grant-modal',
+    path: '/settings',
+    ready: 'Max Chen joined. Grant data access?',
+    click: 'text="Grant"',
+    after: 'Grant Max Chen data access',
+    knownConsoleWarning: SETTINGS_HYDRATION,
+  },
+  {
+    name: 'settings-remove-modal',
+    path: '/settings',
+    ready: 'Sam Rivera',
+    click: ['[aria-label="Actions for sam@harness.dev"]', 'text="Remove"'],
+    after: 'Created by them',
+    knownConsoleWarning: SETTINGS_HYDRATION,
+  },
+  {
+    name: 'app-team-switcher',
+    path: '/app',
+    ready: 'Welcome',
+    team: 'team-acme',
+    click: '[aria-haspopup="listbox"]',
+    after: 'Harness Motors',
+    viewports: ['desktop'],
+    knownConsoleWarning: APP_HYDRATION,
+  },
+  {
+    // Review Focus 1: console-api can't list teams; owners keep their licenses.
+    name: 'licenses-teams-unavailable',
+    path: '/licenses',
+    ready: LICENSE.alias,
+    team: 'team-down',
+    after: "Couldn't load your teams",
+  },
+  {
+    name: 'app-pending-invite',
+    path: '/app',
+    ready: 'Join Acme Mobility owned by ops@acme.dev?',
+    inviteToken: true,
+    knownConsoleWarning: APP_HYDRATION,
+  },
+  {
+    name: 'license-details-assign-key',
+    path: `/license/${t}/details`,
+    ready: LICENSE.alias,
+    // The API keys table is on the Config tab.
+    click: [
+      'role=tab[name="Config"]',
+      `[aria-label="Actions for ${SIGNER}"]`,
+      'text="Assign"',
+    ],
+    after: 'Who is this key for?',
+  },
+  {
+    name: 'vehicle-member',
+    path: `/vehicles/190231?license=${c}`,
+    ready: 'Available signals',
+    team: 'team-acme',
+    memberSigner: true,
+    memberJwt: true,
+  },
+  {
+    name: 'vehicle-member-connect',
+    path: `/vehicles/190231?license=${c}`,
+    ready: 'Connect your wallet to read this vehicle',
+    team: 'team-acme',
+    memberSigner: true,
+  },
+  {
+    name: 'vehicle-member-no-access',
+    path: `/vehicles/190231?license=${c}`,
+    ready: 'Ask ops@acme.dev for data access to Harness Fleet.',
+    team: 'team-acme',
+  },
+  {
+    name: 'vehicle-member-reconnect',
+    path: `/vehicles/190231?license=${c}`,
+    ready: 'Reconnect to Harness Fleet',
+    team: 'team-acme',
+    memberSigner: true,
+    memberJwt: true,
+    dataNoAccess: true,
+  },
+  {
+    name: 'vehicles-member-empty',
+    path: '/vehicles',
+    ready: 'This team has no developer licenses yet.',
+    team: 'team-acme',
+    noLicenses: true,
   },
   { name: 'support', path: '/support', ready: 'Report an issue' },
   { name: 'sign-in', path: '/sign-in', ready: 'Build with car data', guest: true },

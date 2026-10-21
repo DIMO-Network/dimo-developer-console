@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import NextAuth, { DefaultSession } from 'next-auth';
-import { TeamRoles } from './team';
+import { TeamRole } from './team';
 
 declare module 'next-auth' {
   /**
@@ -9,7 +9,7 @@ declare module 'next-auth' {
   interface Session {
     user: {
       /** The user's postal address. */
-      role: TeamRoles;
+      role: TeamRole;
     } & DefaultSession['user'];
   }
 }

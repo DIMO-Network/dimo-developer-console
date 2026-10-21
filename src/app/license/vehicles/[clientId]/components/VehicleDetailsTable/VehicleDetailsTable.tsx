@@ -16,6 +16,7 @@ import { useRenounceVehiclePermissions } from '@/hooks/useRenounceVehiclePermiss
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { GetVehiclesByClientIdQuery } from '@/gql/graphql';
+import { useTeam } from '@/hooks/useTeam';
 
 type VehicleNode = GetVehiclesByClientIdQuery['vehicles']['nodes'][0];
 
@@ -75,6 +76,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
   showLastSeen = false,
 }) => {
   const router = useRouter();
+  const { isOwner } = useTeam();
   const { data, refetch, loading, error } = useQuery(VEHICLES_BY_CLIENT_ID, {
     variables: { clientId, owner: owner || null, first: PAGE_SIZE },
     skip: tokenIdSearch !== null,
@@ -147,6 +149,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
             showSources,
             showLastSeen,
             clientId,
+            canRenounce: isOwner,
           })}
           onPaginationChange={() => {}}
           rowCount={1}
@@ -191,7 +194,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
               data.vehicles.nodes.find((n: VehicleNode) => n.tokenId === tokenId) ?? null;
             setRenouncingVehicle(node);
           },
-          { showSources, showLastSeen, clientId },
+          { showSources, showLastSeen, clientId, canRenounce: isOwner },
         )}
         onPaginationChange={refetch}
         rowCount={visibleCount}

@@ -96,13 +96,32 @@ const routes = [
     (m) => fx.CONNECTIONS.find((c) => c.id === m[1]) ?? null,
   ],
   ['GET', /^\/api\/my\/simulated-vehicles$/, () => ({ data: fx.SIMULATED_VEHICLES })],
+  // Teams (contracts C7). The scenario follows X-Team-Id: see fixtures teamsFor.
   [
     'GET',
-    /^\/api\/my\/team\/collaborator$/,
+    /^\/api\/my\/teams$/,
+    (m, url, req) =>
+      req.headers['x-team-id'] === 'team-down'
+        ? { mockStatus: 500, body: { message: 'harness: teams unavailable' } }
+        : { teams: fx.teamsFor(req.headers['x-team-id']) },
+  ],
+  [
+    'GET',
+    /^\/api\/my\/team\/members$/,
+    (m, url, req) => ({ members: fx.membersFor(req.headers['x-team-id']) }),
+  ],
+  [
+    'GET',
+    /^\/api\/my\/licenses\/(\d+)\/signers$/,
+    (m) => ({ signers: fx.licenseSigners(Number(m[1])) }),
+  ],
+  ['POST', /^\/api\/invitations\/preview$/, () => fx.INVITE_PREVIEW],
+  [
+    'PUT',
+    /^\/api\/me\/signer$/,
     () => ({
-      data: fx.COLLABORATORS,
-      totalItems: fx.COLLABORATORS.length,
-      totalPages: 1,
+      signerAddress: fx.WALLET_CHECKSUM,
+      signerVerifiedAt: '2026-09-20T14:30:00Z',
     }),
   ],
   ['GET', /^\/api\/crypto\/[^/]+$/, () => fx.CRYPTO_PRICE],
@@ -135,7 +154,9 @@ http
     }
     for (const [method, re, handler] of routes) {
       const m = url.pathname.match(re);
-      if (m && req.method === method) return send(res, 200, handler(m, url));
+      if (!m || req.method !== method) continue;
+      const out = handler(m, url, req);
+      return out?.mockStatus ? send(res, out.mockStatus, out.body) : send(res, 200, out);
     }
     console.log(`[mock] unhandled ${req.method} ${url.pathname}${url.search}`);
     send(res, 404, { message: 'not mocked' });

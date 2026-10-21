@@ -1,4 +1,3 @@
-import { isCollaborator } from './user';
 import { ISubOrganization } from '@/types/wallet';
 import { IUser } from '@/types/user';
 
@@ -33,7 +32,6 @@ export class LoggedUser {
   }
 
   get isGlobalAccountUser(): boolean {
-    if (isCollaborator(this._user?.role ?? '')) return true;
     return Boolean(this._subOrganization?.subOrganizationId);
   }
 

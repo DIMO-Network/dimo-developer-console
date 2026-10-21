@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/Button';
 import { Table } from '@/components/Table';
 import { toast } from 'sonner';
+import { OwnerAction } from '@/components/OwnerOnly';
 
 const DIMO_LOGIN_BASE =
   process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
@@ -58,9 +59,11 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted">
         <p className="mb-4">No configurations yet.</p>
-        <Button onClick={() => router.push(`/license/${tokenId}/configurator/new`)}>
-          Create your first configuration
-        </Button>
+        <OwnerAction>
+          <Button onClick={() => router.push(`/license/${tokenId}/configurator/new`)}>
+            Create your first configuration
+          </Button>
+        </OwnerAction>
       </div>
     );
   }
@@ -97,12 +100,14 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
           >
             Copy link
           </Button>
-          <Button
-            variant="destructive-ghost"
-            onClick={() => setPendingDeleteId(config.id)}
-          >
-            Delete
-          </Button>
+          <OwnerAction>
+            <Button
+              variant="destructive-ghost"
+              onClick={() => setPendingDeleteId(config.id)}
+            >
+              Delete
+            </Button>
+          </OwnerAction>
         </>
       )}
     </div>

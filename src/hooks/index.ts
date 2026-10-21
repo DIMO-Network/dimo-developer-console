@@ -1,7 +1,6 @@
 export * from './useContractGA';
 export * from './useCredits';
 export * from './useErrorHandler';
-export * from './useTeamCollaborators';
 export * from './useUser';
 export * from './useGlobalAccount';
 export * from './useLoading';
@@ -19,3 +18,4 @@ export * from './queries/useMyConnections';
 export * from './useDimoAuth';
 export { useMintVehicle } from './useMintVehicle';
 export { useBurnVehicle } from './useBurnVehicle';
+export * from './useTeam';

@@ -8,10 +8,14 @@ import { VehicleDetailsTable } from '@/app/license/vehicles/[clientId]/component
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { Section, SectionHeader } from '@/components/Section';
 import { TextField } from '@/components/TextField';
-import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
+import { DevJwtPrompt } from '@/components/DataAccess';
+import { useLicenseDataAccess } from '@/hooks/useLicenseDataAccess';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import { useTeam } from '@/hooks/useTeam';
 import { LocalDeveloperLicense } from '@/types/webhook';
+import { TEAM_DATA_ACCESS_ENABLED } from '@/utils/featureFlags';
+import { DATA_ACCESS_UNAVAILABLE } from '@/config/teamCopy';
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 
@@ -36,6 +40,7 @@ const useLicenses = () => {
 };
 
 const Content = () => {
+  const { isMember } = useTeam();
   const { developerLicenses, loading } = useLicenses();
   const router = useRouter();
   const pathname = usePathname();
@@ -54,6 +59,7 @@ const Content = () => {
   const { isAuthenticatedAsDev, refetch: refetchJwts } = useGetDevJwts(
     selected?.clientId,
   );
+  const dataAccess = useLicenseDataAccess(selected);
 
   const select = (license: LocalDeveloperLicense) => {
     router.replace(`${pathname}?license=${license.clientId}`, { scroll: false });
@@ -73,12 +79,18 @@ const Content = () => {
   if (!loading && developerLicenses.length === 0) {
     return (
       <Section>
-        <p className="text-body text-fg">
-          Create a developer license to see the vehicles shared with it.
-        </p>
-        <Link href="/licenses" className="text-body-sm text-ink underline">
-          Go to licenses
-        </Link>
+        {isMember ? (
+          <p className="text-body text-fg">This team has no developer licenses yet.</p>
+        ) : (
+          <>
+            <p className="text-body text-fg">
+              Create a developer license to see the vehicles shared with it.
+            </p>
+            <Link href="/licenses" className="text-body-sm text-ink underline">
+              Go to licenses
+            </Link>
+          </>
+        )}
       </Section>
     );
   }
@@ -109,10 +121,10 @@ const Content = () => {
               Enter a token ID or a full 0x address.
             </p>
           )}
-          {!isAuthenticatedAsDev && (
-            <GenerateDevJWTSection
-              clientId={selected.clientId}
-              redirectUri={selected.firstRedirectURI}
+          {(!isAuthenticatedAsDev || dataAccess.kind.startsWith('member-')) && (
+            <DevJwtPrompt
+              license={selected}
+              access={dataAccess}
               onSuccess={refetchJwts}
               message="Generate a developer JWT to see when each vehicle was last seen."
             />
@@ -136,6 +148,14 @@ const Content = () => {
 
 export const VehiclesView = () => {
   const { loading, error } = useLicenses();
+  const { isMember } = useTeam();
+  if (isMember && !TEAM_DATA_ACCESS_ENABLED) {
+    return (
+      <Section>
+        <p className="text-body text-fg">{DATA_ACCESS_UNAVAILABLE}</p>
+      </Section>
+    );
+  }
   return (
     <div className="flex flex-col gap-6">
       <QueryPageWrapper

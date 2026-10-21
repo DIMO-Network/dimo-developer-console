@@ -17,6 +17,7 @@ import * as Sentry from '@sentry/nextjs';
 import { JWTPayload } from 'jose/dist/types';
 import { cookieName, getCookie } from './services/dimoDevAPI';
 import { FOCUS_QUERY_PARAM } from '@/utils/focusConstants';
+import { inviteRedirect } from '@/utils/inviteCookie';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
@@ -95,12 +96,10 @@ const rememberVerdict = (
 const validatePrivateSession = async (request: NextRequest, token: string) => {
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const verdict = await sessionVerdictFor(token);
-  // /api/me accepts a pending team invitation as a side effect, so while one is
-  // waiting the full check runs every time.
-  const hasInvitation = Boolean(await getCookie('invitation_code'));
 
   // This session already passed the check below: see SESSION_VERDICT_COOKIE.
-  if (!hasInvitation && request.cookies.get(SESSION_VERDICT_COOKIE)?.value === verdict) {
+  // Accepting a team invite deletes the cookie (src/actions/invites.ts).
+  if (request.cookies.get(SESSION_VERDICT_COOKIE)?.value === verdict) {
     return isLoginPage
       ? NextResponse.redirect(buildRedirectUrl('/app', request), { status: 307 })
       : NextResponse.next();
@@ -108,9 +107,9 @@ const validatePrivateSession = async (request: NextRequest, token: string) => {
 
   console.info('Validating private session', request.nextUrl.pathname);
   const user = await getUserByToken();
-  const subOrganization = await getUserSubOrganization(
-    user.company_email_owner ?? user.email,
-  );
+  // Every console user signs in with their own global account; team members
+  // are no longer represented by the company owner's account.
+  const subOrganization = await getUserSubOrganization(user.email);
   if (!subOrganization) {
     Sentry.captureMessage('Suborganization not found');
     return NextResponse.redirect(new URL('/sign-in', request.url), {
@@ -164,12 +163,21 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
+  // Before anything that can fail or redirect: an invite link keeps its token.
+  const invite = inviteRedirect(request);
+  if (invite) return invite;
   const hasError = request.nextUrl.searchParams.get('error');
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   let token: JWTPayload | null = null;
   try {
     const rawToken = await getCookie(cookieName);
     token = rawToken ? await verifyToken(rawToken) : null;
+    // The data proxy authorizes every request itself (owners through Identity),
+    // so it must not depend on console-api's /api/me answering. The session JWT
+    // was verified just above.
+    if (token && request.nextUrl.pathname.startsWith(`${API_PATH}/data/`)) {
+      return NextResponse.next();
+    }
     if (rawToken && token) {
       return await validatePrivateSession(request, rawToken);
     }

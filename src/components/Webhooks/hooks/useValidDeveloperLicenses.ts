@@ -1,7 +1,7 @@
-import { useGlobalAccount } from '@/hooks';
 import { useQuery } from '@apollo/client';
 import { DeveloperLicenseForWebhook, LocalDeveloperLicense } from '@/types/webhook';
 import { gql } from '@/gql';
+import { useTeam } from '@/hooks/useTeam';
 
 export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
   query GetDeveloperLicensesForWebhooks($owner: Address!) {
@@ -9,9 +9,16 @@ export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
       nodes {
         alias
         clientId
+        tokenId
+        owner
         redirectURIs(first:100) {
           nodes {
             uri
+          }
+        }
+        signers(first:100) {
+          nodes {
+            address
           }
         }
       }
@@ -19,11 +26,12 @@ export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
   }
 `);
 
+// The active team's licenses (its owner's wallet), usable for a developer JWT.
 export const useValidDeveloperLicenses = () => {
-  const { currentUser } = useGlobalAccount();
-  const { data, ...rest } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
-    variables: { owner: currentUser?.smartContractAddress ?? '' },
-    skip: !currentUser?.smartContractAddress,
+  const { ownerAddress } = useTeam();
+  const { data, loading, ...rest } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
+    variables: { owner: ownerAddress ?? '' },
+    skip: !ownerAddress,
   });
 
   const isValid = (devLicense: DeveloperLicenseForWebhook) => {
@@ -36,6 +44,8 @@ export const useValidDeveloperLicenses = () => {
   return {
     developerLicenses:
       data?.developerLicenses.nodes.filter(isValid).map(convertLicense) ?? [],
+    // A skipped query is "not loading"; until the team owner is known it is.
+    loading: loading || !ownerAddress,
     ...rest,
   };
 };

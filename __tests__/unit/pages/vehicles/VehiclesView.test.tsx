@@ -18,12 +18,22 @@ jest.mock('@/app/license/vehicles/[clientId]/components/VehicleDetailsTable', ()
 }));
 jest.mock('@/hooks/useGlobalAccount', () => ({ useGlobalAccount: jest.fn() }));
 jest.mock('@/hooks/useGetDevJwts', () => ({ useGetDevJwts: jest.fn() }));
+jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn(() => ({ isMember: false })) }));
+// Mutable test state lives in a holder (Global Constraints, Commits).
+const mockFlags = { dataAccess: true };
+jest.mock('@/utils/featureFlags', () => ({
+  TEMPLATE_EDITOR_ENABLED: false,
+  get TEAM_DATA_ACCESS_ENABLED() {
+    return mockFlags.dataAccess;
+  },
+}));
 jest.mock('@/components/GenerateDevJWT', () => ({
   GenerateDevJWT: () => <button>Generate developer JWT</button>,
 }));
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import { useTeam } from '@/hooks/useTeam';
 import { LocalDeveloperLicense } from '@/types/webhook';
 import { VehiclesView } from '@/app/vehicles/components/VehiclesView';
 
@@ -170,5 +180,51 @@ describe('VehiclesView', () => {
     expect(
       screen.getByText('Create a developer license to see the vehicles shared with it.'),
     ).toBeInTheDocument();
+  });
+
+  it('never offers a member to create a license on an empty team', () => {
+    (useTeam as jest.Mock).mockReturnValue({ isMember: true });
+    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+      developerLicenses: [],
+      loading: false,
+    });
+    render(<VehiclesView />);
+    expect(
+      screen.getByText('This team has no developer licenses yet.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Go to licenses' })).toBeNull();
+    expect(screen.queryByText(/Create a developer license/)).toBeNull();
+  });
+
+  describe('while member data access is off', () => {
+    beforeEach(() => {
+      mockFlags.dataAccess = false;
+    });
+    afterEach(() => {
+      mockFlags.dataAccess = true;
+    });
+
+    it('tells a member who opens Vehicles directly that it is not available yet (C5)', () => {
+      (useTeam as jest.Mock).mockReturnValue({ isMember: true });
+      (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+        developerLicenses: [lic('0xaaa', 'Fleet Pulse')],
+        loading: false,
+      });
+      render(<VehiclesView />);
+      expect(
+        screen.getByText("Data access for team members isn't available yet."),
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('table')).toBeNull();
+    });
+
+    it('leaves owners alone', () => {
+      (useTeam as jest.Mock).mockReturnValue({ isMember: false });
+      (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+        developerLicenses: [lic('0xaaa', 'Fleet Pulse')],
+        loading: false,
+      });
+      render(<VehiclesView />);
+      expect(screen.getByTestId('table')).toBeInTheDocument();
+    });
   });
 });
