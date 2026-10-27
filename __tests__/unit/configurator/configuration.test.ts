@@ -235,4 +235,16 @@ describe('buildSnippet', () => {
     expect(snippet).toContain('<LoginWithDimo');
     expect(snippet).not.toContain('permissions=');
   });
+
+  it('escapes quotes so the code still parses', () => {
+    const snippet = buildSnippet(
+      share({
+        utm: 'utm_campaign="spring"',
+        tosUrl: "https://app.example/o'neil\\terms",
+      }),
+      '0xclient',
+    );
+    expect(snippet).toContain('  utm={"utm_campaign=\\"spring\\""}');
+    expect(snippet).toContain("    tosUrl: 'https://app.example/o\\'neil\\\\terms',");
+  });
 });

@@ -273,7 +273,10 @@ const formatProps = (props: Record<string, unknown>): string =>
     })
     .map(([k, v]) => {
       if (isRaw(v)) return `  ${k}={${v.__raw}}`;
-      if (typeof v === 'string') return `  ${k}="${v}"`;
+      // JSX attribute strings can't escape a quote; the expression form can.
+      if (typeof v === 'string') {
+        return v.includes('"') ? `  ${k}={${JSON.stringify(v)}}` : `  ${k}="${v}"`;
+      }
       if (Array.isArray(v)) {
         // Enum members one per line; plain values fit on one.
         const items = v.map((x) => (isRaw(x) ? x.__raw : JSON.stringify(x)));
@@ -290,14 +293,17 @@ const formatProps = (props: Record<string, unknown>): string =>
     })
     .join('\n');
 
+/** A single-quoted JS string literal. */
+const quote = (value: string) => `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+
 // initializeDimoSDK's argument, without the keys that aren't set.
 const formatObject = (
   entries: Record<string, string | undefined | null>,
   indent: string,
 ) =>
   Object.entries(entries)
-    .filter(([, v]) => v)
-    .map(([k, v]) => `${indent}${k}: '${v}',`)
+    .filter((entry): entry is [string, string] => !!entry[1])
+    .map(([k, v]) => `${indent}${k}: ${quote(v)},`)
     .join('\n');
 
 /** The SDK code for these values: initializeDimoSDK plus the button. */
@@ -376,8 +382,8 @@ export const buildSnippet = (values: DynamicFormProps, clientId: string) => {
     '    ',
   );
   const init = [
-    `  clientId: '${clientId}',`,
-    `  redirectUri: '${values.redirectUri ?? ''}',`,
+    `  clientId: ${quote(clientId)},`,
+    `  redirectUri: ${quote(values.redirectUri ?? '')},`,
     ...(options ? [`  options: {\n${options}\n  },`] : []),
   ].join('\n');
 
