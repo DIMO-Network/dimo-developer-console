@@ -158,4 +158,31 @@ describe('BrandForm', () => {
     fireEvent.click(screen.getByText('Cancel'));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
+
+  it('warns, without blocking, when the color is hard to see in the sign-in window', async () => {
+    render(
+      <BrandForm
+        brand={existingBrand}
+        workspaceId="ws-1"
+        isOwner={true}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onSetDefault={jest.fn()}
+      />,
+    );
+    const color = screen.getByPlaceholderText('#C8A84B');
+    fireEvent.change(color, { target: { value: '#FFE066' } });
+    await waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent(/hard to see .* light mode/),
+    );
+    expect(screen.getByText('Save brand')).not.toBeDisabled();
+
+    fireEvent.change(color, { target: { value: '#000000' } });
+    await waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent(/dark mode/),
+    );
+
+    fireEvent.change(color, { target: { value: '#3366CC' } });
+    await waitFor(() => expect(screen.queryByRole('status')).not.toBeInTheDocument());
+  });
 });

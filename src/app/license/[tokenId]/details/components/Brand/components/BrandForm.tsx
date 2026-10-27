@@ -18,10 +18,25 @@ import {
 } from '@/actions/brand';
 import { ImagePicker } from './ImagePicker';
 import type { BrandView } from '@/services/brand';
+import { contrastRatio } from '@/utils/colorContrast';
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 const DEFAULT_PRIMARY_COLOR = '#000000'; // token-check:allow (color-input value)
 const EXAMPLE_PRIMARY_COLOR = '#C8A84B'; // token-check:allow (example brand color)
+
+// The sign-in window's background in each mode (dimo-login's --sheet).
+const SIGN_IN_BACKGROUNDS = [
+  { mode: 'light', color: '#FFFFFF' }, // token-check:allow (dimo-login color)
+  { mode: 'dark', color: '#16181B' }, // token-check:allow (dimo-login color)
+];
+// WCAG's minimum contrast for buttons against what surrounds them.
+const MIN_BUTTON_CONTRAST = 3;
+
+/** The modes where buttons in this color would be hard to make out. */
+const lowContrastModes = (color: string) =>
+  SIGN_IN_BACKGROUNDS.filter(
+    ({ color: background }) => contrastRatio(color, background) < MIN_BUTTON_CONTRAST,
+  ).map(({ mode }) => mode);
 
 interface FormInputs {
   name: string;
@@ -72,6 +87,8 @@ export const BrandForm: FC<Props> = ({
   });
 
   const watchedColor = watch('primaryColor');
+  const hardToSeeIn =
+    watchedColor && HEX_COLOR_RE.test(watchedColor) ? lowContrastModes(watchedColor) : [];
   const showRenameWarning = isExisting && !!dirtyFields.name;
 
   const onSubmit = async ({ name, primaryColor }: FormInputs) => {
@@ -159,7 +176,7 @@ export const BrandForm: FC<Props> = ({
 
       <ImagePicker
         label="Logo"
-        hint="Wide brand mark used on the auth button. PNG, JPEG, WebP, or SVG."
+        hint="Wide brand mark shown on the Login with DIMO button and at the top of the sign-in window. PNG, JPEG, WebP, or SVG."
         currentUrl={brand?.logoUrl ?? null}
         file={logoFile}
         onFile={setLogoFile}
@@ -173,7 +190,7 @@ export const BrandForm: FC<Props> = ({
 
       <ImagePicker
         label="Icon"
-        hint="Square mark used in popup chrome + tab favicon. PNG, JPEG, WebP, or SVG."
+        hint="Square mark. Login with DIMO doesn't show it yet. PNG, JPEG, WebP, or SVG."
         currentUrl={brand?.iconUrl ?? null}
         file={iconFile}
         onFile={setIconFile}
@@ -189,7 +206,8 @@ export const BrandForm: FC<Props> = ({
         <Label>
           Primary color
           <p className="font-normal text-muted">
-            Used as the auth button background + popup CTA. 7-char hex, e.g.{' '}
+            Colors the Login with DIMO button and the main buttons in the sign-in window;
+            their text turns black or white to stay readable. 7-char hex, e.g.{' '}
             <code className="font-mono text-code">{EXAMPLE_PRIMARY_COLOR}</code>. Leave
             blank for DIMO defaults.
           </p>
@@ -226,6 +244,12 @@ export const BrandForm: FC<Props> = ({
           </div>
           {errors.primaryColor && (
             <TextError errorMessage={errors.primaryColor.message!} />
+          )}
+          {hardToSeeIn.length > 0 && (
+            <p className="text-label font-normal text-warning" role="status">
+              Buttons in this color are hard to see in the sign-in window&apos;s{' '}
+              {hardToSeeIn.join(' and ')} mode. You can still save it.
+            </p>
           )}
         </Label>
       </div>

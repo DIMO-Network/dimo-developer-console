@@ -8,7 +8,7 @@ export interface BrandView {
   iconCid: string | null;
   logoUrl: string | null;
   iconUrl: string | null;
-  /** 7-char hex (#RRGGBB) or null. Drives SDK button + popup CTA color. */
+  /** 7-char hex (#RRGGBB) or null. Colors the SDK button and the sign-in window's main buttons. */
   primaryColor: string | null;
   isDefault: boolean;
   updatedAt: string | null;
