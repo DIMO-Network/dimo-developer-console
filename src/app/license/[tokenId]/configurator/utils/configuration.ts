@@ -3,10 +3,13 @@ import {
   DOCUMENT_OPTIONS,
   DocumentPattern,
   DynamicFormProps,
+  EMAIL_REQUESTS,
   EmailRequest,
+  LOGIN_LANGUAGES,
   LoginLanguage,
   PERMISSIONS,
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
+import config from '@/config';
 
 /*
  * How a configurator form is saved, loaded back for editing and shown as code.
@@ -16,7 +19,7 @@ import {
  * agreements. Configurations saved before this keep loading: see toFormValues.
  */
 
-export type SavedConfiguration = Record<string, unknown>;
+type SavedConfiguration = Record<string, unknown>;
 
 const ENTRY_STATES: Record<ComponentType, string> = {
   LoginWithDimo: 'EMAIL_INPUT',
@@ -24,22 +27,22 @@ const ENTRY_STATES: Record<ComponentType, string> = {
   ExecuteAdvancedTransactionWithDimo: 'ADVANCED_TRANSACTION',
 };
 
-export const formatComponent = (component: ComponentType) => ENTRY_STATES[component];
+const formatComponent = (component: ComponentType) => ENTRY_STATES[component];
 
-export const inverseFormatComponent = (entryState: unknown) =>
+const inverseFormatComponent = (entryState: unknown) =>
   (Object.keys(ENTRY_STATES) as ComponentType[]).find(
     (component) => ENTRY_STATES[component] === entryState,
   );
 
 /** Permissions as the login reads them: one digit per PERMISSIONS entry. */
-export const formatPermissions = (permissions?: string[]) =>
+const formatPermissions = (permissions?: string[]) =>
   PERMISSIONS.map((p) => (permissions?.includes(p.key) ? '1' : '0')).join('');
 
-export const inverseFormatPermissions = (bits: string) =>
+const inverseFormatPermissions = (bits: string) =>
   PERMISSIONS.filter((_, i) => bits[i] === '1').map((p) => p.key);
 
 /** "a, b,,c" → ['a', 'b', 'c'] */
-export const parseList = (value?: string | null) =>
+const parseList = (value?: string | null) =>
   (value ?? '')
     .split(',')
     .map((s) => s.trim())
@@ -69,7 +72,7 @@ export const toEndDate = (value?: string | Date | null) => {
 };
 
 /** Documents as the agreements DIMO login signs, built as the SDK's `documents` prop does. */
-export const toCloudEvent = (documents: readonly DocumentPattern[] = []) =>
+const toCloudEvent = (documents: readonly DocumentPattern[] = []) =>
   documents.map((eventType) => ({ eventType, ids: [], tags: ['documents'] }));
 
 export const buildConfiguration = (values: DynamicFormProps): SavedConfiguration => {
@@ -123,25 +126,9 @@ export const buildConfiguration = (values: DynamicFormProps): SavedConfiguration
   return saved;
 };
 
-// Saved for the edit page only.
-const CONSOLE_ONLY_KEYS = ['permissionsMode'];
-
-/** The same values as a login link's query string; lists repeat their key. */
-export const toLoginQuery = (values: DynamicFormProps, clientId: string) => {
-  const params = new URLSearchParams();
-  if (clientId) params.set('clientId', clientId);
-  Object.entries(buildConfiguration(values)).forEach(([key, value]) => {
-    if (CONSOLE_ONLY_KEYS.includes(key)) return;
-    if (Array.isArray(value) && value.every((v) => typeof v === 'string')) {
-      value.forEach((v) => params.append(key, v));
-    } else if (typeof value === 'object') {
-      params.set(key, JSON.stringify(value));
-    } else {
-      params.set(key, String(value));
-    }
-  });
-  return params.toString();
-};
+/** The short link to a saved configuration. */
+export const configurationLink = (configurationId: string) =>
+  `${config.loginBaseUrl}/?configurationId=${encodeURIComponent(configurationId)}`;
 
 const text = (value: unknown) =>
   typeof value === 'string' || typeof value === 'number' ? String(value) : '';
@@ -173,11 +160,8 @@ const savedEndDate = (value: unknown) => {
   ).toISOString();
 };
 
-const LANGUAGES: readonly LoginLanguage[] = ['en', 'ja'];
-const EMAIL_REQUESTS: readonly EmailRequest[] = ['none', 'optional', 'required'];
-
 const savedEmailRequest = (saved: SavedConfiguration): EmailRequest => {
-  if (EMAIL_REQUESTS.includes(saved.emailRequest as EmailRequest)) {
+  if ((EMAIL_REQUESTS as readonly unknown[]).includes(saved.emailRequest)) {
     return saved.emailRequest as EmailRequest;
   }
   return saved.forceEmail === true || saved.forceEmail === 'true'
@@ -185,7 +169,7 @@ const savedEmailRequest = (saved: SavedConfiguration): EmailRequest => {
     : 'optional';
 };
 
-const DOCUMENT_PATTERNS: readonly string[] = DOCUMENT_OPTIONS.map((d) => d.value);
+const DOCUMENT_PATTERNS = DOCUMENT_OPTIONS.map((d) => d.value);
 
 // What the old Attestations setting's tags are now part of.
 const ATTESTATION_TAG_DOCUMENTS: Record<string, DocumentPattern> = {
@@ -204,7 +188,10 @@ const savedDocuments = (cloudEvent: unknown): DocumentPattern[] => {
   const requested = agreements.flatMap((agreement): string[] => {
     if (!agreement || typeof agreement !== 'object') return [];
     const { eventType, tags } = agreement;
-    if (typeof eventType === 'string' && DOCUMENT_PATTERNS.includes(eventType)) {
+    if (
+      typeof eventType === 'string' &&
+      (DOCUMENT_PATTERNS as readonly string[]).includes(eventType)
+    ) {
       return [eventType];
     }
     if (eventType === 'dimo.attestation' && Array.isArray(tags)) {
@@ -212,9 +199,7 @@ const savedDocuments = (cloudEvent: unknown): DocumentPattern[] => {
     }
     return [];
   });
-  return DOCUMENT_OPTIONS.map((d) => d.value).filter((value) =>
-    requested.includes(value),
-  );
+  return DOCUMENT_PATTERNS.filter((value) => requested.includes(value));
 };
 
 /** A saved configuration as form values, repairing what older versions saved. */
@@ -223,12 +208,14 @@ export const toFormValues = (
   { id, configuration_name }: { id: string; configuration_name: string },
 ): DynamicFormProps => {
   const permissionTemplateId = text(saved.permissionTemplateId) || null;
+  // Without a saved mode (older saves, or a Login config switched to Share),
+  // custom only if custom permissions were saved.
   const permissionsMode =
     saved.permissionsMode === 'template' || saved.permissionsMode === 'custom'
       ? saved.permissionsMode
-      : permissionTemplateId
-        ? 'template'
-        : 'custom';
+      : !permissionTemplateId && text(saved.permissions)
+        ? 'custom'
+        : 'template';
 
   return {
     component: inverseFormatComponent(saved.entryState) ?? 'LoginWithDimo',
@@ -239,7 +226,7 @@ export const toFormValues = (
     privacyPolicyUrl: text(saved.privacyPolicyUrl) || null,
     tosUrl: text(saved.tosUrl) || null,
     expirationDate: savedEndDate(saved.expirationDate),
-    language: LANGUAGES.includes(saved.language as LoginLanguage)
+    language: (LOGIN_LANGUAGES as readonly unknown[]).includes(saved.language)
       ? (saved.language as LoginLanguage)
       : '',
     emailRequest: savedEmailRequest(saved),
@@ -254,7 +241,17 @@ export const toFormValues = (
     vehicleMakes: savedList(saved.vehicleMakes),
     powertrainTypes: savedList(saved.powertrainTypes ?? saved.powerTrainTypes),
     documents: savedDocuments(saved.cloudEvent),
-  } as DynamicFormProps;
+    // An old transaction configuration keeps its fields when re-saved.
+    value: text(saved.value),
+    abi:
+      saved.abi && typeof saved.abi === 'object'
+        ? JSON.stringify(saved.abi)
+        : text(saved.abi),
+    functionName: text(saved.functionName),
+    args: Array.isArray(saved.args) ? saved.args.map(text) : parseList(text(saved.args)),
+    // The form holds every component's fields at once, wider than any one
+    // member of the union.
+  } as unknown as DynamicFormProps;
 };
 
 type RawCode = { __raw: string };
@@ -310,13 +307,8 @@ const formatObject = (
 export const buildSnippet = (values: DynamicFormProps, clientId: string) => {
   const imports = new Set(['initializeDimoSDK', 'DimoSDKModes']);
   const baseProps: Record<string, unknown> = {
-    mode: raw(
-      values.mode === 'redirect' ? 'DimoSDKModes.REDIRECT' : 'DimoSDKModes.POPUP',
-    ),
+    mode: raw('DimoSDKModes.POPUP'),
     utm: values.utm,
-    altTitle: values.altTitle || undefined,
-    authenticatedLabel: values.authenticatedLabel,
-    unAuthenticatedLabel: values.unAuthenticatedLabel,
     expirationDate: toEndDate(values.expirationDate),
     onSuccess: raw('(authData) => console.log("Success:", authData)'),
     onError: raw('(error) => console.error("Error:", error)'),
@@ -342,12 +334,12 @@ export const buildSnippet = (values: DynamicFormProps, clientId: string) => {
       ...baseProps,
       permissionTemplateId: custom ? undefined : values.permissionTemplateId,
       permissions: custom
-        ? values.permissions?.map((k) =>
-            raw(PERMISSIONS.find((p) => p.key === k)?.enum ?? 'none'),
+        ? PERMISSIONS.filter((p) => values.permissions?.includes(p.key)).map((p) =>
+            raw(p.enum),
           )
         : undefined,
-      documents: values.documents?.map((d) =>
-        raw(DOCUMENT_OPTIONS.find((o) => o.value === d)?.enum ?? `'${d}'`),
+      documents: DOCUMENT_OPTIONS.filter((o) => values.documents?.includes(o.value)).map(
+        (o) => raw(o.enum),
       ),
       vehicles: parseList(values.vehicles),
       vehicleMakes: parseList(values.vehicleMakes),

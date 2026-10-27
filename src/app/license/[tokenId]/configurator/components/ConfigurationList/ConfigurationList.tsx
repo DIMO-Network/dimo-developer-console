@@ -11,11 +11,7 @@ import { Button } from '@/components/Button';
 import { Table } from '@/components/Table';
 import { toast } from 'sonner';
 import { OwnerAction } from '@/components/OwnerOnly';
-
-const DIMO_LOGIN_BASE =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
-    ? 'https://login.dimo.org'
-    : 'https://login.dev.dimo.org';
+import { configurationLink } from '@/app/license/[tokenId]/configurator/utils/configuration';
 
 interface Props {
   clientId: string;
@@ -37,7 +33,8 @@ const entryStateLabel = (entryState: string): string => {
 
 export const ConfigurationList = ({ clientId, tokenId }: Props) => {
   const router = useRouter();
-  const [configs, setConfigs] = useState<IConfigurationListItem[]>([]);
+  // null until the first load, so "No configurations yet" isn't shown early.
+  const [configs, setConfigs] = useState<IConfigurationListItem[] | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const load = async () => {
@@ -54,6 +51,10 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
     setPendingDeleteId(null);
     await load();
   };
+
+  if (configs === null) {
+    return <p className="py-12 text-center text-body-sm text-muted">Loading…</p>;
+  }
 
   if (configs.length === 0) {
     return (
@@ -93,7 +94,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
           <Button
             variant="secondary"
             onClick={() => {
-              const url = `${DIMO_LOGIN_BASE}/?configurationId=${config.id}`;
+              const url = configurationLink(config.id);
               navigator.clipboard.writeText(url);
               toast.success('Sharing link copied');
             }}

@@ -1,4 +1,5 @@
-const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+/** A 7-character #RRGGBB color. */
+export const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 
 /** WCAG relative luminance of a #RRGGBB color, 0 (black) to 1 (white). */
 export const relativeLuminance = (hex: string): number => {

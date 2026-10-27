@@ -4,42 +4,26 @@ import { Button } from '@/components/Button';
 import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import {
   buildSnippet,
-  toLoginQuery,
+  configurationLink,
 } from '@/app/license/[tokenId]/configurator/utils/configuration';
-import { FragmentType, useFragment } from '@/gql';
-import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
-import configuration from '@/config';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useFormContext } from 'react-hook-form';
 
 interface IOutputPrintProps {
-  license: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
+  clientId: string;
 }
 
-export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
-  const fragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
+/** The saved configuration's link, or the SDK code for the current values. */
+export const OutputPrint: FC<IOutputPrintProps> = ({ clientId }) => {
   const [viewMode, setViewMode] = useState<'code' | 'url'>('url');
   const { watch } = useFormContext<DynamicFormProps>();
   const values = watch();
-  const configurationId = (values as { configuration_id?: string }).configuration_id;
 
-  const getBaseUrl = (): string => {
-    if (configuration.environment === 'production') {
-      return 'https://login.dimo.org';
-    }
-    return 'https://login.dev.dimo.org';
-  };
+  const buildUrl = () =>
+    values.configuration_id ? configurationLink(values.configuration_id) : '';
 
-  const buildUrl = (): string => {
-    const baseUrl = getBaseUrl();
-    if (configurationId) {
-      return `${baseUrl}/?configurationId=${configurationId}`;
-    }
-    return `${baseUrl}/?${toLoginQuery(values, fragment?.clientId ?? '')}`;
-  };
-
-  const renderSnippet = () => buildSnippet(values, fragment?.clientId ?? '');
+  const renderSnippet = () => buildSnippet(values, clientId);
 
   return (
     <>

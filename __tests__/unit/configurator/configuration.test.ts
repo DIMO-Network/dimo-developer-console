@@ -2,8 +2,8 @@ import {
   buildConfiguration,
   buildSnippet,
   toEndDate,
+  configurationLink,
   toFormValues,
-  toLoginQuery,
 } from '@/app/license/[tokenId]/configurator/utils/configuration';
 import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 
@@ -158,6 +158,35 @@ describe('toFormValues', () => {
     expect(resaved.cloudEvent).toHaveLength(2);
   });
 
+  it('opens a Login configuration switched to Share on the template', () => {
+    expect(toFormValues({ entryState: 'EMAIL_INPUT' }, meta)).toMatchObject({
+      permissionsMode: 'template',
+    });
+    expect(
+      toFormValues({ entryState: 'VEHICLE_MANAGER', permissions: '10000000' }, meta),
+    ).toMatchObject({
+      permissionsMode: 'custom',
+      permissions: ['NONLOCATION_TELEMETRY'],
+    });
+  });
+
+  it('keeps an old transaction configuration’s fields when re-saved', () => {
+    const saved = {
+      entryState: 'ADVANCED_TRANSACTION',
+      redirectUri: 'https://app.example/callback',
+      value: '0',
+      abi: { name: 'transfer' },
+      functionName: 'transfer',
+      args: ['0xabc', '1'],
+    };
+    expect(buildConfiguration(toFormValues(saved, meta))).toMatchObject({
+      value: '0',
+      abi: { name: 'transfer' },
+      functionName: 'transfer',
+      args: ['0xabc', '1'],
+    });
+  });
+
   it('reads the old email flag and a template without a mode', () => {
     expect(
       toFormValues({ entryState: 'EMAIL_INPUT', forceEmail: 'true' }, meta).emailRequest,
@@ -168,20 +197,11 @@ describe('toFormValues', () => {
   });
 });
 
-describe('toLoginQuery', () => {
-  it('repeats list keys and leaves out console-only keys', () => {
-    const query = new URLSearchParams(
-      toLoginQuery(
-        share({ vehicleMakes: 'Toyota, Lexus', documents: ['dimo.document.vehicle.*'] }),
-        '0xclient',
-      ),
+describe('configurationLink', () => {
+  it('links the login to the saved configuration', () => {
+    expect(configurationLink('cfg 1')).toBe(
+      'https://login.dev.dimo.org/?configurationId=cfg%201',
     );
-    expect(query.get('clientId')).toBe('0xclient');
-    expect(query.getAll('vehicleMakes')).toEqual(['Toyota', 'Lexus']);
-    expect(JSON.parse(query.get('cloudEvent')!)).toEqual([
-      { eventType: 'dimo.document.vehicle.*', ids: [], tags: ['documents'] },
-    ]);
-    expect(query.has('permissionsMode')).toBe(false);
   });
 });
 

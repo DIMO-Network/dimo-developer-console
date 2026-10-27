@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client';
 import { Loader } from '@/components/Loader';
 import { useEffect, useState } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
-import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/[id]/components/ConfigurationForm';
+import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 import { FormProvider, useForm } from 'react-hook-form';
 import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import {
@@ -12,7 +12,6 @@ import {
   toFormValues,
 } from '@/app/license/[tokenId]/configurator/utils/configuration';
 import { getConfiguration, updateConfiguration } from '@/actions/configurations';
-import './View.css';
 import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/ListView/ListView';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -55,11 +54,16 @@ export const View = ({
   useEffect(() => {
     if (!configurationId) return;
     const populateConfiguration = async () => {
-      const response = await getConfiguration({ id: configurationId });
-      const raw = response.configuration;
-      const savedConfiguration: Record<string, unknown> =
-        typeof raw === 'string' ? JSON.parse(raw) : raw;
-      reset(toFormValues(savedConfiguration, response));
+      try {
+        const response = await getConfiguration({ id: configurationId });
+        const raw = response.configuration;
+        const savedConfiguration: Record<string, unknown> =
+          typeof raw === 'string' ? JSON.parse(raw) : raw;
+        reset(toFormValues(savedConfiguration, response));
+      } catch (error) {
+        console.error(error);
+        toast.error("Couldn't load this configuration. Reload the page to try again.");
+      }
     };
 
     void populateConfiguration();
@@ -100,7 +104,7 @@ export const View = ({
   }
 
   return (
-    <div className="liwd-configurator-page">
+    <div className="flex flex-col gap-6">
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link
           href={`/license/${tokenId}/details`}
@@ -121,11 +125,7 @@ export const View = ({
       <PageSubtitle subtitle="Edit configuration" />
       {data?.developerLicense && (
         <FormProvider {...methods}>
-          <ConfigurationForm
-            license={data?.developerLicense}
-            licenseSummary={data?.developerLicense}
-            submit={submit}
-          />
+          <ConfigurationForm license={data?.developerLicense} submit={submit} editing />
         </FormProvider>
       )}
     </div>

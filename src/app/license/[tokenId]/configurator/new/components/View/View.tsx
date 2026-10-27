@@ -77,7 +77,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   }
 
   return (
-    <div className="liwd-configurator-page">
+    <div className="flex flex-col gap-6">
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link
           href={`/license/${tokenId}/details`}
@@ -98,11 +98,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
       <PageSubtitle subtitle="New configuration" />
       {data?.developerLicense && (
         <FormProvider {...methods}>
-          <ConfigurationForm
-            license={data?.developerLicense}
-            licenseSummary={data?.developerLicense}
-            submit={submit}
-          />
+          <ConfigurationForm license={data?.developerLicense} submit={submit} />
         </FormProvider>
       )}
     </div>

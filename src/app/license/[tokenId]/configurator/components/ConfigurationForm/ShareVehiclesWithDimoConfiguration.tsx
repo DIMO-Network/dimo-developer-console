@@ -1,14 +1,26 @@
 import { FC } from 'react';
 import { TextField } from '@/components/TextField';
+import { TextError } from '@/components/TextError';
 import { Label } from '@/components/Label';
-import { SelectField } from '@/components/SelectField';
-import { Control, Controller, UseFormRegister, useWatch } from 'react-hook-form';
+import {
+  Control,
+  Controller,
+  UseFormRegister,
+  useFormState,
+  useWatch,
+} from 'react-hook-form';
 import {
   DOCUMENT_OPTIONS,
   DynamicFormProps,
   PERMISSIONS,
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
+import {
+  BrandSelect,
+  LegalLinksCard,
+  ToggleCard,
+  toggled,
+} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/SharedFields';
 
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
@@ -17,42 +29,18 @@ interface IFormProps {
   brandNames?: string[];
 }
 
-type PermissionCardProps = {
-  selected: boolean;
-  title: string;
-  description: string;
-  onToggle: () => void;
-};
-
-const PermissionCard = ({
-  selected,
-  title,
-  description,
-  onToggle,
-}: PermissionCardProps) => (
-  <div
-    role="button"
-    aria-pressed={!!selected}
-    onClick={onToggle}
-    className={`cursor-pointer rounded-control px-3 py-2 transition-colors duration-150 ${
-      selected ? 'bg-control shadow-selected' : 'bg-sheet hover:bg-control/70'
-    }`}
-  >
-    <h4 className="text-body-sm font-medium text-ink">{title}</h4>
-    <p className="text-label font-normal text-muted">{description}</p>
-  </div>
-);
-
 export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
   register,
   control,
   brandNames = [],
 }: IFormProps) => {
-  const permissionsMode = useWatch({
-    control,
-    name: 'permissionsMode',
-    defaultValue: 'template',
-  });
+  // A useWatch defaultValue would win over the form's own initial value, so
+  // fall back only when the form has none.
+  const permissionsMode = useWatch({ control, name: 'permissionsMode' }) ?? 'template';
+  const { errors } = useFormState({ control });
+  const shareErrors = errors as Partial<
+    Record<'permissionTemplateId' | 'permissions', { message?: string }>
+  >;
 
   return (
     <>
@@ -68,15 +56,21 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           name="permissionsMode"
           role="permission-segmented"
         />
+        {/* A share without permissions fails in the login (or grants nothing). */}
         {permissionsMode === 'template' && (
           <Label>
             Permissions template ID
             <TextField
               type="text"
               placeholder="1"
-              {...register('permissionTemplateId', { required: false, validate: {} })}
+              {...register('permissionTemplateId', {
+                required: 'Enter a permissions template ID',
+              })}
               role="company-website-input"
             />
+            {shareErrors.permissionTemplateId?.message && (
+              <TextError errorMessage={shareErrors.permissionTemplateId.message} />
+            )}
           </Label>
         )}
         {permissionsMode === 'custom' && (
@@ -84,46 +78,32 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             name="permissions"
             control={control}
             defaultValue={[]}
+            rules={{
+              validate: (value) =>
+                (Array.isArray(value) && value.length > 0) ||
+                'Choose at least one permission',
+            }}
             render={({ field }) => (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
-                {PERMISSIONS.map((p) => (
-                  <PermissionCard
-                    key={p.key}
-                    title={p.title}
-                    description={p.description}
-                    selected={field.value?.includes(p.key)}
-                    onToggle={() => {
-                      if (field.value?.includes(p.key)) {
-                        field.onChange(field.value.filter((v: string) => v !== p.key));
-                      } else {
-                        field.onChange([...(field.value || []), p.key]);
-                      }
-                    }}
-                  />
-                ))}
+              <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
+                  {PERMISSIONS.map((p) => (
+                    <ToggleCard
+                      key={p.key}
+                      title={p.title}
+                      description={p.description}
+                      selected={!!field.value?.includes(p.key)}
+                      onToggle={() => field.onChange(toggled(field.value, p.key))}
+                    />
+                  ))}
+                </div>
+                {shareErrors.permissions?.message && (
+                  <TextError errorMessage={shareErrors.permissions.message} />
+                )}
               </div>
             )}
           />
         )}
-        {brandNames.length > 1 && (
-          <Label htmlFor="brandName" className="w-full">
-            Brand
-            <p className="text-label font-normal text-muted">
-              Which brand the button and the sign-in window show. Leave as
-              &quot;Default&quot; to use your workspace default brand.
-            </p>
-            <SelectField
-              {...register('brandName', { required: false })}
-              options={[
-                { value: '', text: 'Default' },
-                ...brandNames.map((name) => ({ value: name, text: name })),
-              ]}
-              control={control}
-              placeholder="Default"
-              role="brandName-select"
-            />
-          </Label>
-        )}
+        <BrandSelect register={register} control={control} brandNames={brandNames} />
       </div>
 
       {/* Documents */}
@@ -142,18 +122,12 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
           render={({ field }) => (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
               {DOCUMENT_OPTIONS.map((d) => (
-                <PermissionCard
+                <ToggleCard
                   key={d.value}
                   title={d.title}
                   description={d.description}
                   selected={!!field.value?.includes(d.value)}
-                  onToggle={() =>
-                    field.onChange(
-                      field.value?.includes(d.value)
-                        ? field.value.filter((v) => v !== d.value)
-                        : [...(field.value ?? []), d.value],
-                    )
-                  }
+                  onToggle={() => field.onChange(toggled(field.value, d.value))}
                 />
               ))}
             </div>
@@ -202,38 +176,10 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
         </div>
       </div>
 
-      {/* Privacy Policy & Terms of Service */}
-      <div className="rounded-card bg-card p-4 flex flex-col gap-4">
-        <h3 className="text-card-title text-ink">
-          Privacy policy &amp; terms of service
-        </h3>
-        <Label>
-          Privacy policy URL
-          <TextField
-            type="url"
-            placeholder="https://yourapp.com/privacy"
-            {...register('privacyPolicyUrl', { required: false })}
-            role="privacy-policy-url-input"
-          />
-          <p className="text-label font-normal text-muted">
-            Displayed to vehicle owners before they grant permissions. Leave blank to
-            skip.
-          </p>
-        </Label>
-        <Label>
-          Terms of service URL
-          <TextField
-            type="url"
-            placeholder="https://yourapp.com/terms"
-            {...register('tosUrl', { required: false })}
-            role="tos-url-input"
-          />
-          <p className="text-label font-normal text-muted">
-            Displayed to vehicle owners before they grant permissions. Leave blank to
-            skip.
-          </p>
-        </Label>
-      </div>
+      <LegalLinksCard
+        register={register}
+        shownTo="vehicle owners before they grant permissions"
+      />
     </>
   );
 };

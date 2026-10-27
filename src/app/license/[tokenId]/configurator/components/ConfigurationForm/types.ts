@@ -3,11 +3,7 @@ interface SharedProps {
   configuration_name: string;
   configuration_id: string;
   redirectUri: string;
-  mode: 'popup' | 'redirect';
   utm: string | null;
-  altTitle: boolean;
-  authenticatedLabel: string;
-  unAuthenticatedLabel: string;
   expirationDate: string;
   privacyPolicyUrl?: string | null;
   tosUrl?: string | null;
@@ -17,8 +13,10 @@ interface SharedProps {
   emailRequest?: EmailRequest;
 }
 
-export type LoginLanguage = '' | 'en' | 'ja';
-export type EmailRequest = 'none' | 'optional' | 'required';
+export const LOGIN_LANGUAGES = ['', 'en', 'ja'] as const;
+export type LoginLanguage = (typeof LOGIN_LANGUAGES)[number];
+export const EMAIL_REQUESTS = ['none', 'optional', 'required'] as const;
+export type EmailRequest = (typeof EMAIL_REQUESTS)[number];
 
 interface LoginWithDimoProps extends SharedProps {
   /** Brand name for the SDK's `brandOverride`. Empty = use workspace default. */

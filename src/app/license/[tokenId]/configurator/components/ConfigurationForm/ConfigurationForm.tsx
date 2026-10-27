@@ -19,8 +19,9 @@ import { DatePicker } from '@/components/DatePicker';
 import { fetchMyBrands } from '@/actions/brand';
 import { getWorkspace, getWorkspaceByTokenId } from '@/actions/workspace';
 import { OutputPrint } from '@/app/license/[tokenId]/configurator/components/OutputPrint/OutputPrint';
-import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
+import { configurationLink } from '@/app/license/[tokenId]/configurator/utils/configuration';
 import { OwnerAction } from '@/components/OwnerOnly';
+import { toast } from 'sonner';
 
 export const USER_CONFIG_FRAGMENT = gql(`
   fragment UserConfigurationFragment on DeveloperLicense {
@@ -37,8 +38,9 @@ export const USER_CONFIG_FRAGMENT = gql(`
 
 interface Props {
   license: FragmentType<typeof USER_CONFIG_FRAGMENT>;
-  licenseSummary: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
   submit: (data: DynamicFormProps) => void;
+  /** The edit page: shows the configuration's ID and link, and Update. */
+  editing?: boolean;
 }
 
 interface IFormProps {
@@ -79,7 +81,15 @@ const Configuration: FC<IFormProps> = ({ component, control, register, brandName
   }
 };
 
-export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }) => {
+// The end date is a calendar day; today is the earliest that grants anything.
+const startOfToday = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+};
+
+/** The configuration form, for the new and the edit page. */
+export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false }) => {
   const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
   const [brandNames, setBrandNames] = useState<string[]>([]);
 
@@ -107,6 +117,17 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
   } = useFormContext<DynamicFormProps>();
   const component = watch('component', 'ShareVehiclesWithDimo');
   const configurationId = watch('configuration_id');
+  // Only a share signs a grant that ends; a plain login ignores the date.
+  const needsEndDate = component === 'ShareVehiclesWithDimo';
+
+  const handleCopyConfigurationLink = () => {
+    if (!configurationId) {
+      toast.error('Configuration ID is not available');
+      return;
+    }
+    void navigator.clipboard.writeText(configurationLink(configurationId));
+    toast.success('Configuration link copied to clipboard');
+  };
 
   return (
     <div className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-6 lg:items-start">
@@ -115,6 +136,30 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
         {/* Basics */}
         <div className="rounded-card bg-card p-4 flex flex-col gap-4">
           <h3 className="text-card-title text-ink">Basics</h3>
+          {editing && (
+            <Label className="w-full">
+              Configuration ID
+              <div className="flex gap-2 items-center">
+                <div className="flex-1 min-w-0">
+                  <TextField
+                    type="text"
+                    readOnly
+                    {...register('configuration_id', { required: false })}
+                    role="company-website-input"
+                    className="font-mono text-code"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="shrink-0"
+                  onClick={handleCopyConfigurationLink}
+                >
+                  Copy link
+                </Button>
+              </div>
+            </Label>
+          )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Label>
               Configuration name
@@ -179,15 +224,24 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
           </Label>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Label>
-              Expiration date
+              {needsEndDate ? 'Expiration date' : 'Expiration date (sharing only)'}
               <Controller
                 control={control}
                 name="expirationDate"
-                rules={{ required: 'Expiration date is required' }}
+                rules={{
+                  validate: (value) => {
+                    if (!value)
+                      return needsEndDate ? 'Expiration date is required' : true;
+                    return (
+                      new Date(value) >= startOfToday() || 'Pick today or a later date'
+                    );
+                  },
+                }}
                 render={({ field }) => (
                   <DatePicker
                     value={field.value ? new Date(field.value) : undefined}
                     onChange={(value) => field.onChange(value ?? '')}
+                    min={startOfToday()}
                   />
                 )}
               />
@@ -226,20 +280,20 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
           }
         >
           <Button type="submit" className="w-full">
-            Save
+            {editing ? 'Update' : 'Save'}
           </Button>
         </OwnerAction>
       </form>
 
       {/* RIGHT: sticky preview */}
       <div className="sticky top-6 hidden lg:block">
-        {configurationId ? (
+        {editing ? (
           <div className="overflow-hidden rounded-card bg-card">
             <div className="px-4 pt-3">
               <p className="text-label text-muted">Generated output</p>
             </div>
             <div className="p-4">
-              <OutputPrint license={licenseSummary} />
+              <OutputPrint clientId={fragment.clientId} />
             </div>
           </div>
         ) : (

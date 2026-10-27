@@ -181,7 +181,7 @@ export const DocumentsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       <SharingLinkCard
         ctx={ctx}
         title="Need another document?"
-        body="Send the owner a link that asks them to share documents with your license. It opens in the DIMO app."
+        body="Send the owner a link that asks them to share documents with your license. It opens DIMO sign-in."
       />
     </div>
   );

@@ -62,7 +62,7 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
   }
 
   return (
-    <div className="liwd-configurator-page">
+    <div className="flex flex-col gap-6">
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link
           href={`/license/${tokenId}/details`}

@@ -18,9 +18,8 @@ import {
 } from '@/actions/brand';
 import { ImagePicker } from './ImagePicker';
 import type { BrandView } from '@/services/brand';
-import { contrastRatio } from '@/utils/colorContrast';
+import { contrastRatio, HEX_COLOR_RE } from '@/utils/colorContrast';
 
-const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 const DEFAULT_PRIMARY_COLOR = '#000000'; // token-check:allow (color-input value)
 const EXAMPLE_PRIMARY_COLOR = '#C8A84B'; // token-check:allow (example brand color)
 

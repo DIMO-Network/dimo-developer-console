@@ -31,15 +31,15 @@ export function SegmentedControl<T extends string = string>({
       {options.map((opt) => {
         const selected = value === opt.value;
         return (
-          <div
+          <button
+            type="button"
             key={opt.value}
+            aria-pressed={selected}
             onClick={() => onChange?.(opt.value)}
-            className={`segment 
-              ${selected ? 'selected' : ''}
-            `}
+            className={`segment ${selected ? 'selected' : ''}`}
           >
             {opt.label}
-          </div>
+          </button>
         );
       })}
     </div>
