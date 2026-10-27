@@ -120,9 +120,12 @@ export const View = () => {
     }));
   };
 
-  const handleExternalAuth = async (provider: string) => {
+  const handleExternalAuth = async (code: string) => {
     try {
-      const { success, email } = await completeExternalAuth(provider);
+      const { success, email } = await completeExternalAuth(
+        code,
+        searchParams.get('state'),
+      );
       if (!success) {
         toast.error('Failed to login with external provider');
         return;

@@ -28,6 +28,7 @@ import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
 import { queryClient } from '@/hoc/QueryProvider';
 import { startConsoleSession } from '@/utils/consoleSession';
+import { createOAuthState, takeOAuthState } from '@/utils/oauthState';
 const halfHour = 60 * 30;
 const fifteenMinutes = 15 * 60;
 
@@ -262,7 +263,12 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     };
 
     const handleExternalAuth = (provider: string) => {
-      const url = `${process.env.NEXT_PUBLIC_DIMO_AUTH_URL}/auth/${provider}?client_id=developer-platform&redirect_uri=${config.frontendUrl}sign-in&response_type=code&scope=openid profile email`;
+      const state = createOAuthState();
+      if (!state) {
+        console.error('Sign-in with an external provider needs sessionStorage');
+        return;
+      }
+      const url = `${process.env.NEXT_PUBLIC_DIMO_AUTH_URL}/auth/${provider}?client_id=developer-platform&redirect_uri=${config.frontendUrl}sign-in&response_type=code&scope=openid profile email&state=${state}`;
       trackEvent('Sign In Attempt', {
         'type': 'External Auth',
         'Sign In Method': provider,
@@ -272,7 +278,9 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
     const completeExternalAuth = async (
       code: string,
+      state: string | null,
     ): Promise<{ success: boolean; email: string }> => {
+      if (!takeOAuthState(state)) return { success: false, email: '' };
       const token = await exchangeDimoToken(code);
       const payload = await decodeJwtToken(token.access_token);
       const { email } = payload;

@@ -10,6 +10,7 @@ import { ICreateGlobalAccountRequest, ISubOrganization } from '@/types/wallet';
 import { TSignedRequest } from '@turnkey/http';
 import { cookies } from 'next/headers';
 import { cookieName } from '@/services/dimoDevAPI';
+import config from '@/config';
 import { SESSION_VERDICT_COOKIE } from '@/utils/middlewareUtils';
 import { ACTIVE_TEAM_COOKIE, INVITE_TOKEN_COOKIE } from '@/utils/teamCookies';
 
@@ -87,7 +88,15 @@ export const saveNewPasskey = async ({
 
 export const saveToken = async (token: string, sessionExpiration: number) => {
   const userCookies = await cookies();
-  userCookies.set(cookieName, token, { maxAge: sessionExpiration });
+  // Only server code reads it. Lax keeps it off cross-site POSTs, while the
+  // console's own pages and the sign-in redirect still carry it.
+  userCookies.set(cookieName, token, {
+    maxAge: sessionExpiration,
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: config.frontendUrl.startsWith('https:'),
+    path: '/',
+  });
 };
 
 // A session that ended on its own (it expired): the next sign-in decides

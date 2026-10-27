@@ -12,7 +12,8 @@ const cspHeader = `
     img-src 'self' blob: https://assets.dimo.org;
     manifest-src 'self';
     media-src 'self';
-    worker-src blob:;`;
+    worker-src blob:;
+    frame-ancestors 'none';`;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -60,13 +61,17 @@ const nextConfig = {
     ];
   },
   async headers() {
+    // Nothing frames the console; refusing it keeps another site from
+    // overlaying its buttons (licenses, team, payments). Every environment.
+    const framing = [{ key: 'X-Frame-Options', value: 'DENY' }];
     if (process.env.VERCEL_ENV === 'development') {
-      return [];
+      return [{ source: '/(.*)', headers: framing }];
     }
     return [
       {
         source: '/(.*)',
         headers: [
+          ...framing,
           {
             key: 'Content-Security-Policy',
             value: cspHeader.replace(/\n/g, ''),

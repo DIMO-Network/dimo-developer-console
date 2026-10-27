@@ -2,10 +2,13 @@
  * @jest-environment node
  */
 const remove = jest.fn();
-jest.mock('next/headers', () => ({ cookies: jest.fn(async () => ({ delete: remove })) }));
+const set = jest.fn();
+jest.mock('next/headers', () => ({
+  cookies: jest.fn(async () => ({ delete: remove, set })),
+}));
 // middlewareUtils (SESSION_VERDICT_COOKIE) imports jose (ESM) at load time.
 jest.mock('jose', () => ({ createRemoteJWKSet: jest.fn(), jwtVerify: jest.fn() }));
-import { endSession, signOut } from '@/actions/user';
+import { endSession, saveToken, signOut } from '@/actions/user';
 
 describe('signOut (contracts C4)', () => {
   it('deletes the session, its verdict, the active team and a pending invite', async () => {
@@ -28,5 +31,16 @@ describe('endSession', () => {
       'session-token',
       'session-verdict',
     ]);
+  });
+});
+
+describe('saveToken', () => {
+  it('keeps the session off cross-site requests and out of page scripts', async () => {
+    await saveToken('jwt', 900);
+    expect(set).toHaveBeenCalledWith(
+      'session-token',
+      'jwt',
+      expect.objectContaining({ httpOnly: true, sameSite: 'lax', path: '/' }),
+    );
   });
 });
