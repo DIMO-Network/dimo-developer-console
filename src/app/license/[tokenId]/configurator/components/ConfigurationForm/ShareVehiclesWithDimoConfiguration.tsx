@@ -2,20 +2,13 @@ import { FC } from 'react';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
+import { Control, Controller, UseFormRegister, useWatch } from 'react-hook-form';
 import {
-  Control,
-  Controller,
-  UseFormRegister,
-  useWatch,
-  useFormContext,
-} from 'react-hook-form';
-import {
+  DOCUMENT_OPTIONS,
   DynamicFormProps,
   PERMISSIONS,
-  ATTESTATION_TAGS,
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { Toggle } from '@/components/Toggle';
 
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
@@ -60,8 +53,6 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
     name: 'permissionsMode',
     defaultValue: 'template',
   });
-  const requireAttestation = useWatch({ control, name: 'requireAttestation' });
-  const { setValue } = useFormContext<DynamicFormProps>();
 
   return (
     <>
@@ -114,58 +105,12 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             )}
           />
         )}
-        <div className="flex flex-col gap-3">
-          <Controller
-            name="requireAttestation"
-            control={control}
-            render={({ field }) => (
-              <div className="flex flex-row gap-2 items-center">
-                <Toggle
-                  checked={field.value}
-                  onToggle={(checked) => {
-                    field.onChange(checked);
-                    if (!checked) setValue('attestation.tags', []);
-                  }}
-                />
-                <label className="text-body-sm font-medium text-ink">Attestations</label>
-              </div>
-            )}
-          />
-          {requireAttestation && (
-            <Controller
-              name="attestation.tags"
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
-                  {ATTESTATION_TAGS.map((p) => (
-                    <PermissionCard
-                      key={p.value}
-                      title={p.title}
-                      description={p.description}
-                      selected={field.value?.includes(p.value)}
-                      onToggle={() => {
-                        if (field.value?.includes(p.value)) {
-                          field.onChange(
-                            field.value.filter((v: string) => v !== p.value),
-                          );
-                        } else {
-                          field.onChange([...(field.value || []), p.value]);
-                        }
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            />
-          )}
-        </div>
         {brandNames.length > 1 && (
           <Label htmlFor="brandName" className="w-full">
             Brand
             <p className="text-label font-normal text-muted">
-              Which brand to show on the DIMO button. Leave as &quot;Default&quot; to use
-              your workspace default brand.
+              Which brand the button and the sign-in window show. Leave as
+              &quot;Default&quot; to use your workspace default brand.
             </p>
             <SelectField
               {...register('brandName', { required: false })}
@@ -179,6 +124,82 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             />
           </Label>
         )}
+      </div>
+
+      {/* Documents */}
+      <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-card-title text-ink">Documents</h3>
+          <p className="text-label font-normal text-muted">
+            Documents your app can read for each shared vehicle. Users see them in the
+            request before they share.
+          </p>
+        </div>
+        <Controller
+          name="documents"
+          control={control}
+          defaultValue={[]}
+          render={({ field }) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+              {DOCUMENT_OPTIONS.map((d) => (
+                <PermissionCard
+                  key={d.value}
+                  title={d.title}
+                  description={d.description}
+                  selected={!!field.value?.includes(d.value)}
+                  onToggle={() =>
+                    field.onChange(
+                      field.value?.includes(d.value)
+                        ? field.value.filter((v) => v !== d.value)
+                        : [...(field.value ?? []), d.value],
+                    )
+                  }
+                />
+              ))}
+            </div>
+          )}
+        />
+      </div>
+
+      {/* Which vehicles */}
+      <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-card-title text-ink">Which vehicles</h3>
+          <p className="text-label font-normal text-muted">
+            Leave blank to let users share any of their vehicles. Others are listed as
+            &quot;Can&apos;t be shared&quot;, with the reason. Separate values with
+            commas.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Label>
+            Vehicle token IDs
+            <TextField
+              type="text"
+              placeholder="1, 2, 3"
+              {...register('vehicles', { required: false })}
+              role="vehicles-input"
+            />
+          </Label>
+          <Label>
+            Vehicle makes
+            <TextField
+              type="text"
+              placeholder="Toyota, Mazda"
+              {...register('vehicleMakes', { required: false })}
+              role="vehicle-makes-input"
+            />
+          </Label>
+          <Label>
+            Powertrain types
+            <TextField
+              type="text"
+              placeholder="BEV, HEV"
+              {...register('powertrainTypes', { required: false })}
+              role="powertrain-types-input"
+            />
+          </Label>
+        </div>
       </div>
 
       {/* Privacy Policy & Terms of Service */}

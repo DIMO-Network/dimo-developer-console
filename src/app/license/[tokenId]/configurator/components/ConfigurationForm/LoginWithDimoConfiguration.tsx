@@ -19,44 +19,13 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
 }: IFormProps) => {
   return (
     <>
-      <div className="rounded-card bg-card p-4 flex flex-col gap-4">
-        <h3 className="text-card-title text-ink">Login settings</h3>
-        <div className="flex w-full flex-col gap-4 sm:flex-row">
-          <Label className="w-full">
-            Vehicles
-            <TextField
-              type="text"
-              placeholder="1,2,3"
-              {...register('vehicles', { required: false, validate: {} })}
-              role="company-website-input"
-            />
-          </Label>
-          <Label className="w-full">
-            Vehicle makes
-            <TextField
-              type="text"
-              placeholder="toyota, mazda..."
-              {...register('vehicleMakes', { required: false, validate: {} })}
-              role="company-website-input"
-            />
-          </Label>
-        </div>
-        <div className="flex w-full flex-col gap-4 sm:flex-row">
-          <Label className="w-full">
-            Powertrain types
-            <TextField
-              type="text"
-              placeholder="ICE, HEV..."
-              {...register('powerTrainTypes', { required: false, validate: {} })}
-              role="company-website-input"
-            />
-          </Label>
-        </div>
-        {brandNames.length > 1 && (
+      {brandNames.length > 1 && (
+        <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+          <h3 className="text-card-title text-ink">Login settings</h3>
           <Label htmlFor="brandName" className="w-full">
             Brand
             <p className="text-label font-normal text-muted">
-              Which brand to show on the Login with DIMO button. Leave as
+              Which brand the button and the sign-in window show. Leave as
               &quot;Default&quot; to use your workspace default brand.
             </p>
             <SelectField
@@ -70,8 +39,8 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
               role="brandName-select"
             />
           </Label>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Privacy Policy & Terms of Service */}
       <div className="rounded-card bg-card p-4 flex flex-col gap-4">

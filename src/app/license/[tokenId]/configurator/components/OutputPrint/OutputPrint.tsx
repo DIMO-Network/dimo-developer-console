@@ -1,11 +1,11 @@
 import { FC, useState } from 'react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Button } from '@/components/Button';
+import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import {
-  DynamicFormProps,
-  ComponentType,
-  PERMISSIONS,
-} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
+  buildSnippet,
+  toLoginQuery,
+} from '@/app/license/[tokenId]/configurator/utils/configuration';
 import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import configuration from '@/config';
@@ -16,10 +16,6 @@ import { useFormContext } from 'react-hook-form';
 interface IOutputPrintProps {
   license: FragmentType<typeof DEVELOPER_LICENSE_SUMMARY_FRAGMENT>;
 }
-
-type RawCode = { __raw: string };
-
-const raw = (code: string): RawCode => ({ __raw: code });
 
 export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
   const fragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
@@ -35,192 +31,15 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ license }) => {
     return 'https://login.dev.dimo.org';
   };
 
-  const parseArray = (val?: string) =>
-    val
-      ?.split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-  const tryParseJSON = (val?: string) => {
-    try {
-      return val ? JSON.parse(val) : {};
-    } catch {
-      return {};
-    }
-  };
-
-  const formatProps = (props: Record<string, unknown>): string => {
-    return Object.entries(props)
-      .filter(([, v]) => {
-        if (v === undefined || v === null || v === '') return false;
-        if (Array.isArray(v) && v.length === 0) return false;
-        return true;
-      })
-      .map(([k, v]) => {
-        if ((v as RawCode)?.__raw) return `  ${k}={${(v as RawCode).__raw}}`;
-        if (typeof v === 'string') return `  ${k}="${v}"`;
-        if (typeof v === 'boolean') return `  ${k}={${v}}`;
-        if (Array.isArray(v))
-          return `  ${k}={[${v
-            .map((x) =>
-              (x as RawCode)?.__raw
-                ? (x as RawCode).__raw
-                : typeof x === 'string'
-                  ? `"${x}"`
-                  : x,
-            )
-            .join(`,\n${''.padEnd(k.length + 5, ' ')}`)}]}`;
-        if (typeof v === 'object') {
-          return `  ${k}={${JSON.stringify(v, null, 2)
-            .split('\n')
-            .map((line, i) => (i === 0 ? line : '  ' + line))
-            .join('\n')}}`;
-        }
-        return `  ${k}={${v}}`;
-      })
-      .join('\n');
-  };
-
-  const formatComponent = (component: ComponentType) => {
-    switch (component) {
-      case 'LoginWithDimo':
-        return 'EMAIL_INPUT';
-      case 'ShareVehiclesWithDimo':
-        return 'VEHICLE_MANAGER';
-      case 'ExecuteAdvancedTransactionWithDimo':
-        return 'ADVANCED_TRANSACTION';
-    }
-  };
-
-  function formatDate(date?: Date) {
-    if (!date) return '';
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    return `${mm}-${dd}-${yyyy}`;
-  }
-
   const buildUrl = (): string => {
     const baseUrl = getBaseUrl();
-
     if (configurationId) {
       return `${baseUrl}/?configurationId=${configurationId}`;
     }
-
-    const params = new URLSearchParams();
-
-    const add = (key: string, val: unknown) => {
-      if (val === undefined || val === null || val === '') return;
-      if (Array.isArray(val)) {
-        if (val.length === 0) return;
-        params.set(key, val.join(','));
-      } else if (typeof val === 'object') {
-        params.set(key, JSON.stringify(val));
-      } else {
-        params.set(key, String(val));
-      }
-    };
-
-    add('clientId', fragment?.clientId);
-    add('redirectUri', values.redirectUri);
-    add('entryState', formatComponent(values.component));
-    add('utm', values.utm);
-    add(
-      'expirationDate',
-      values.expirationDate ? formatDate(new Date(values.expirationDate)) : undefined,
-    );
-    add('privacyPolicyUrl', values.privacyPolicyUrl);
-    add('tosUrl', values.tosUrl);
-
-    if (values.component === 'LoginWithDimo') {
-      add('vehicles', parseArray(values.vehicles));
-      add('vehicleMakes', parseArray(values.vehicleMakes));
-      add('powerTrainTypes', parseArray(values.powerTrainTypes));
-      add('brandName', values.brandName);
-    }
-
-    if (values.component === 'ShareVehiclesWithDimo') {
-      add('brandName', values.brandName);
-      if (values.permissionsMode === 'template') {
-        add('permissionTemplateId', values.permissionTemplateId);
-      } else if (values.permissionsMode === 'custom') {
-        const permissionValues = PERMISSIONS.map((p) => {
-          const k = values.permissions?.find((vp) => vp === p.key);
-          if (k) return '1';
-          return '0';
-        });
-        add('permissions', permissionValues?.join(''));
-      }
-    }
-
-    if (values.component === 'ExecuteAdvancedTransactionWithDimo') {
-      add('value', values.value);
-      add('abi', tryParseJSON(values.abi as string));
-      add('functionName', values.functionName);
-      add('args', parseArray(values.args as string));
-    }
-
-    return `${baseUrl}/?${params.toString()}`;
+    return `${baseUrl}/?${toLoginQuery(values, fragment?.clientId ?? '')}`;
   };
 
-  const renderSnippet = () => {
-    const baseProps: Record<string, unknown> = {
-      mode: values.mode,
-      utm: values.utm,
-      altTitle: values.altTitle,
-      authenticatedLabel: values.authenticatedLabel,
-      unAuthenticatedLabel: values.unAuthenticatedLabel,
-      expirationDate: values.expirationDate
-        ? formatDate(new Date(values.expirationDate))
-        : undefined,
-      privacyPolicyUrl: values.privacyPolicyUrl || undefined,
-      tosUrl: values.tosUrl || undefined,
-      onSuccess: raw('(authData) => console.log("Success:", authData)'),
-      onError: raw('(error) => console.error("Error:", error)'),
-    };
-
-    let codeSnippet = '';
-
-    if (values.component === 'LoginWithDimo') {
-      const props: Record<string, unknown> = {
-        ...baseProps,
-        vehicles: parseArray(values.vehicles),
-        vehicleMakes: parseArray(values.vehicleMakes),
-        powerTrainTypes: parseArray(values.powerTrainTypes),
-        brandName: values.brandName || undefined,
-      };
-      codeSnippet = `<LoginWithDimo\n${formatProps(props)}\n/>`;
-    }
-
-    if (values.component === 'ShareVehiclesWithDimo') {
-      const props: Record<string, unknown> = {
-        ...baseProps,
-        permissionTemplateId:
-          values.permissionsMode === 'template' ? values.permissionTemplateId : undefined,
-        permissions:
-          values.permissionsMode === 'custom'
-            ? values.permissions?.map((k: string) =>
-                raw(PERMISSIONS.find((p) => p.key === k)?.enum ?? 'none'),
-              )
-            : undefined,
-      };
-      props.brandName = values.brandName || undefined;
-      codeSnippet = `<ShareVehiclesWithDimo\n${formatProps(props)}\n/>`;
-    }
-
-    if (values.component === 'ExecuteAdvancedTransactionWithDimo') {
-      const props: Record<string, unknown> = {
-        ...baseProps,
-        value: values.value,
-        abi: tryParseJSON(values.abi as string),
-        functionName: values.functionName,
-        args: parseArray(values.args as string),
-      };
-      codeSnippet = `<ExecuteAdvanceTransactionWithDimo\n${formatProps(props)}\n/>`;
-    }
-
-    return `initializeDimoSDK({\n\tclientId: '${fragment?.clientId ?? ''}',\n\tredirectUri: '${values.redirectUri ?? ''}',\n});\n\n${codeSnippet}`;
-  };
+  const renderSnippet = () => buildSnippet(values, fragment?.clientId ?? '');
 
   return (
     <>

@@ -11,30 +11,31 @@ interface SharedProps {
   expirationDate: string;
   privacyPolicyUrl?: string | null;
   tosUrl?: string | null;
+  /** Login screens' language; empty lets the login follow the user's browser. */
+  language?: LoginLanguage;
+  /** Whether the login asks for the user's email; unset means optional. */
+  emailRequest?: EmailRequest;
 }
+
+export type LoginLanguage = '' | 'en' | 'ja';
+export type EmailRequest = 'none' | 'optional' | 'required';
 
 interface LoginWithDimoProps extends SharedProps {
-  vehicles?: string;
-  vehicleMakes?: string;
-  powerTrainTypes?: string;
-  /** Brand name to pass as `brandName` to the SDK. Empty = use workspace default. */
+  /** Brand name for the SDK's `brandOverride`. Empty = use workspace default. */
   brandName?: string;
-}
-
-interface AttestationsProps {
-  source: string;
-  tags: string[];
-  ids: string[];
-  eventType: string;
 }
 
 interface ShareVehiclesWithDimoProps extends SharedProps {
   permissionsMode: 'template' | 'custom';
   permissionTemplateId: string | null;
   permissions: string[];
-  requireAttestation: boolean;
-  attestation: AttestationsProps;
-  /** Brand name to pass as `brandName` to the SDK. Empty = use workspace default. */
+  /** Comma-separated in the form; saved as lists. */
+  vehicles?: string;
+  vehicleMakes?: string;
+  powertrainTypes?: string;
+  /** Document patterns (DOCUMENT_OPTIONS values) the app can read per vehicle. */
+  documents?: DocumentPattern[];
+  /** Brand name for the SDK's `brandOverride`. Empty = use workspace default. */
   brandName?: string;
 }
 
@@ -108,20 +109,35 @@ export const PERMISSIONS = [
   },
 ];
 
-export const ATTESTATION_TAGS = [
+/**
+ * Documents a vehicle share can include, as the cloudevent patterns DIMO
+ * login signs and names to the user (the SDK's DocumentAccess enum).
+ */
+export const DOCUMENT_OPTIONS = [
   {
-    value: 'DriversLicense',
-    title: "Driver's License",
-    description: "Driver's License",
+    value: 'dimo.document.vehicle.*',
+    enum: 'DocumentAccess.VehicleDocuments',
+    title: 'Vehicle documents',
+    description: 'Registration, insurance, service records and other vehicle documents.',
   },
   {
-    value: 'Insurance',
-    title: 'Insurance',
-    description: 'Insurance',
+    value: 'dimo.document.driver.*',
+    enum: 'DocumentAccess.DriverDocuments',
+    title: 'Driver documents',
+    description: "The owner's driver's license and other driver documents.",
   },
   {
-    value: 'ServiceRecords',
-    title: 'Service Records',
-    description: 'Service Records',
+    value: 'dimo.raw.vehicle.*',
+    enum: 'DocumentAccess.RawVehicleDocuments',
+    title: 'Original vehicle files',
+    description: 'The photos and PDFs behind the vehicle documents.',
   },
-];
+  {
+    value: 'dimo.raw.driver.*',
+    enum: 'DocumentAccess.RawDriverDocuments',
+    title: 'Original driver files',
+    description: 'The photos and PDFs behind the driver documents.',
+  },
+] as const;
+
+export type DocumentPattern = (typeof DOCUMENT_OPTIONS)[number]['value'];

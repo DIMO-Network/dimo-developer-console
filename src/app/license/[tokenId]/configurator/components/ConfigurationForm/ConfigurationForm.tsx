@@ -7,6 +7,7 @@ import { Control, Controller, UseFormRegister, useFormContext } from 'react-hook
 import { LoginWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/LoginWithDimoConfiguration';
 import { ShareVehiclesWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
 import { ExecuteAdvanceTransactionWithDimoConfiguration } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ExecuteAdvanceTransactionWithDimoConfiguration';
+import { SignInWindowFields } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/SignInWindowFields';
 import {
   DynamicFormProps,
   ComponentType,
@@ -206,6 +207,8 @@ export const ConfigurationForm: FC<Props> = ({ license, licenseSummary, submit }
             </Label>
           </div>
         </div>
+
+        <SignInWindowFields control={control} />
 
         {/* Component-specific settings */}
         <Configuration
