@@ -71,6 +71,15 @@ describe('buildConfiguration', () => {
     expect(optional).not.toHaveProperty('language');
   });
 
+  it('keeps Spanish through saving, loading and the snippet', () => {
+    const saved = buildConfiguration(share({ language: 'es' }));
+    expect(saved).toMatchObject({ language: 'es' });
+    expect(toFormValues(saved, meta).language).toBe('es');
+    expect(buildSnippet(share({ language: 'es' }), '0xclient')).toContain(
+      "    language: 'es',",
+    );
+  });
+
   it('saves the template id when the mode was never touched', () => {
     const saved = buildConfiguration(
       share({ permissionsMode: undefined, permissionTemplateId: '1' }),
