@@ -9,6 +9,8 @@ interface IProps {
   value?: Date;
   onChange: (date: Date) => void;
   placeholder?: string;
+  /** Days before this one can't be picked. */
+  min?: Date;
 }
 
 const getDaysInMonth = (month: number, year: number): Date[] => {
@@ -23,7 +25,7 @@ const getDaysInMonth = (month: number, year: number): Date[] => {
   return days;
 };
 
-export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
+export const DatePicker: FC<IProps> = ({ value, onChange, placeholder, min }) => {
   const [show, setShow] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const today = new Date();
@@ -65,7 +67,11 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
       {show && (
         <div className="absolute mt-2 w-64 bg-overlay shadow-float rounded-control z-10">
           <div className="flex justify-between items-center p-2">
-            <div
+            {/* Buttons, not divs: keyboard reachable, and a click inside a
+                wrapping <label> doesn't reopen the picker. */}
+            <button
+              type="button"
+              aria-label="Previous month"
               onClick={() => {
                 if (month === 0) {
                   setMonth(11);
@@ -77,14 +83,16 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
               className="px-2 cursor-pointer"
             >
               ‹
-            </div>
+            </button>
             <div className="font-medium">
               {new Date(year, month).toLocaleString('default', {
                 month: 'long',
                 year: 'numeric',
               })}
             </div>
-            <div
+            <button
+              type="button"
+              aria-label="Next month"
               onClick={() => {
                 if (month === 11) {
                   setMonth(0);
@@ -96,7 +104,7 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
               className="px-2 cursor-pointer"
             >
               ›
-            </div>
+            </button>
           </div>
 
           <div className="grid grid-cols-7 text-center text-sm text-muted border-t border-outline pt-2">
@@ -120,13 +128,20 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
                 value.getMonth() === day.getMonth() &&
                 value.getFullYear() === day.getFullYear();
 
+              const disabled = !!min && day < min;
+
               return (
-                <div
+                <button
+                  type="button"
                   key={day.toDateString()}
-                  className={`p-2 rounded-full cursor-pointer ${
-                    isSelected
-                      ? 'bg-selected-bg text-selected-fg hover:bg-selected-bg'
-                      : 'hover:bg-control'
+                  disabled={disabled}
+                  aria-pressed={!!isSelected}
+                  className={`p-2 rounded-full ${
+                    disabled
+                      ? 'cursor-not-allowed text-muted opacity-40'
+                      : isSelected
+                        ? 'cursor-pointer bg-selected-bg text-selected-fg hover:bg-selected-bg'
+                        : 'cursor-pointer hover:bg-control'
                   }`}
                   onClick={() => {
                     onChange(day);
@@ -134,7 +149,7 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder }) => {
                   }}
                 >
                   {day.getDate()}
-                </div>
+                </button>
               );
             })}
           </div>

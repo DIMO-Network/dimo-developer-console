@@ -16,7 +16,10 @@ interface IProps {
     existOnDevConsole: boolean;
   }) => Promise<{ success: boolean; newWalletAddress?: `0x${string}` }>;
   handleExternalAuth: (provider: string) => void;
-  completeExternalAuth: (code: string) => Promise<{ success: boolean; email: string }>;
+  completeExternalAuth: (
+    code: string,
+    state: string | null,
+  ) => Promise<{ success: boolean; email: string }>;
   logout: () => Promise<void>;
 }
 

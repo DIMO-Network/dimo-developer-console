@@ -150,9 +150,10 @@ export const Brand: FC<Props> = ({ license }) => {
                 <p className="mb-2 text-body-sm font-medium text-ink">
                   Using multiple brands with Login with DIMO
                 </p>
-                <pre className="overflow-x-auto font-mono text-code text-muted">{`dimo.login({ clientId: '${fragment.clientId}', brandName: 'Fleet App' })`}</pre>
+                <pre className="overflow-x-auto font-mono text-code text-muted">{`<LoginWithDimo\n  mode={DimoSDKModes.POPUP}\n  brandOverride={{ name: 'Fleet App' }}\n  onSuccess={…}\n  onError={…}\n/>`}</pre>
                 <p className="mt-1 text-label text-muted">
-                  Omit <code>brandName</code> to use your default brand.
+                  Every Login with DIMO button takes <code>brandOverride</code>. Omit it
+                  to use your default brand.
                 </p>
               </div>
             )}
