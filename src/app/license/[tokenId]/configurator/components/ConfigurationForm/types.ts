@@ -13,7 +13,7 @@ interface SharedProps {
   emailRequest?: EmailRequest;
 }
 
-export const LOGIN_LANGUAGES = ['', 'en', 'ja'] as const;
+export const LOGIN_LANGUAGES = ['', 'en', 'ja', 'es'] as const;
 export type LoginLanguage = (typeof LOGIN_LANGUAGES)[number];
 export const EMAIL_REQUESTS = ['none', 'optional', 'required'] as const;
 export type EmailRequest = (typeof EMAIL_REQUESTS)[number];
