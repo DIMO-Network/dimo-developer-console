@@ -62,7 +62,7 @@
     "papaparse": "^5.7.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-easy-crop": "^5.5.7",
+    "react-easy-crop": "^6.2.4",
     "react-hook-form": "~7.68.0",
     "react-syntax-highlighter": "^16.1.2",
     "recharts": "^3.10.1",
