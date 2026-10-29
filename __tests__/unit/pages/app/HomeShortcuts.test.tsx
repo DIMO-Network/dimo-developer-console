@@ -1,4 +1,4 @@
-// The @/hooks barrel loads next/cache and wagmi's ESM, which jsdom can't run;
+// The @/hooks barrel loads next/cache and ESM-only wallet libraries, which jsdom can't run;
 // this test only calls the pure visibleShortcuts.
 jest.mock('@/hooks', () => ({ useUser: jest.fn() }));
 import { visibleShortcuts } from '@/app/app/list/components/View/View';
