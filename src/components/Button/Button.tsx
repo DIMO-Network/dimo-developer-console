@@ -10,12 +10,7 @@ import './Button.css';
 import { BubbleLoader } from '@/components/BubbleLoader';
 
 export type ButtonVariant =
-  | 'primary'
-  | 'brand'
-  | 'secondary'
-  | 'ghost'
-  | 'destructive'
-  | 'destructive-ghost';
+  'primary' | 'brand' | 'secondary' | 'ghost' | 'destructive' | 'destructive-ghost';
 
 // md: the 40px pill. icon: a 32px round icon-only button (pagers, row actions);
 // give it a title or aria-label.

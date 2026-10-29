@@ -216,9 +216,7 @@ export const useMintLicense = () => {
 };
 
 export type MintConnectionStep =
-  | 'minting'
-  | 'signing-agreements'
-  | 'granting-permissions';
+  'minting' | 'signing-agreements' | 'granting-permissions';
 
 export interface MintConnectionParams {
   connectionName: string;
