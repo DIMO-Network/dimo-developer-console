@@ -25,3 +25,6 @@ Sentry.init({
   // `release` value here - use the environment variable `SENTRY_RELEASE`, so
   // that it will also get attached to your source maps
 });
+
+// Traces App Router navigations.
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
