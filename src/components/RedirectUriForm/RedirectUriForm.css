@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .redirect-uri-form {
   @apply flex flex-col;
 

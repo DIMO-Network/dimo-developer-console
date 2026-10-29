@@ -13,9 +13,9 @@ export const BubbleLoader: FC<IProps> = ({ isLoading, isSmall = false, className
     <>
       {isLoading && (
         <div className={classnames('bubble-loader', className)}>
-          <div className={classnames('bubble bubble-1', isSmall && `!w-2 !h-2`)}></div>
-          <div className={classnames('bubble bubble-2', isSmall && `!w-2 !h-2`)}></div>
-          <div className={classnames('bubble bubble-3', isSmall && `!w-2 !h-2`)}></div>
+          <div className={classnames('bubble bubble-1', isSmall && `w-2! h-2!`)}></div>
+          <div className={classnames('bubble bubble-2', isSmall && `w-2! h-2!`)}></div>
+          <div className={classnames('bubble bubble-3', isSmall && `w-2! h-2!`)}></div>
         </div>
       )}
     </>

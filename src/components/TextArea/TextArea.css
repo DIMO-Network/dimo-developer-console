@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .text-area {
   @apply flex flex-row rounded-control border border-control-border bg-control px-3 py-2 text-fg transition-[border-color,box-shadow] focus-within:border-focus-ring focus-within:ring-[3px] focus-within:ring-accent-soft;
 

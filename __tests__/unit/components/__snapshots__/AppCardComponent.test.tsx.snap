@@ -38,7 +38,7 @@ exports[`AppCard renders an app card 1`] = `
         target="_self"
       >
         <button
-          class="button secondary w-full !h-9"
+          class="button secondary w-full h-9!"
         >
           <span
             class="content"

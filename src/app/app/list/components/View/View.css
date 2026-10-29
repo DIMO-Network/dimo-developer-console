@@ -1,3 +1,5 @@
+@reference '../../../../globals.css';
+
 .app-list-page {
   @apply flex flex-1 flex-col gap-6;
 

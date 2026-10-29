@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .table {
   @apply min-w-full;
 

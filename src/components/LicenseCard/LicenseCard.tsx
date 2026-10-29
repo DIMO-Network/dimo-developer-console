@@ -73,7 +73,7 @@ export const LicenseCard = (props: {
       <div className="content">
         {/* Header */}
         <div className="flex w-full flex-row items-start justify-between gap-3">
-          <p className="title min-w-0 break-words">{license.alias}</p>
+          <p className="title min-w-0 wrap-break-word">{license.alias}</p>
           <span className="license-card-token-id">#{license.tokenId}</span>
         </div>
 

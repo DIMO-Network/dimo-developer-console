@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .create-app-modal {
   .dialog-panel {
     @apply my-auto ml-auto mr-auto min-h-[95vh] min-w-[95vw] p-6 md:m-auto md:h-auto md:min-h-0 md:min-w-[480px] md:max-w-[480px];

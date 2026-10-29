@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .dcx-input {
   @apply flex w-full flex-col items-center gap-2;
 

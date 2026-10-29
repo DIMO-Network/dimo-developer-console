@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .button {
   @apply inline-flex h-10 min-h-10 flex-row items-center justify-center gap-2 rounded-full px-4 text-body-sm font-semibold transition-[filter,background-color,color] duration-150 disabled:cursor-not-allowed disabled:opacity-40;
 

@@ -1,3 +1,5 @@
+@reference '../../../../../globals.css';
+
 .vehicles-stat {
   @apply flex flex-col items-center gap-1 rounded-card bg-card p-8 text-center;
 }

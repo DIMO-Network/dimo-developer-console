@@ -118,7 +118,7 @@ describe('TrimSelectorEditor', () => {
     ]);
   });
 
-  it('leaves a stored value containing a comma alone through a focus and a blur', () => {
+  it('leaves a stored value containing a comma alone through a focus and a blur-sm', () => {
     // The same round trip split an existing styleName on its comma the moment
     // the field was touched, changing which VINs the trim claims.
     const onChange = jest.fn();

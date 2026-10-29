@@ -1,6 +1,150 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-inherit: inherit;
+  --color-canvas: rgb(var(--canvas));
+  --color-sheet: rgb(var(--sheet));
+
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--fg));
+
+  --color-control: rgb(var(--control));
+  --color-highest: rgb(var(--highest));
+  --color-bright: rgb(var(--bright));
+  --color-overlay: rgb(var(--overlay));
+  --color-outline: rgb(var(--outline));
+  --color-outline-strong: rgb(var(--outline-strong));
+  --color-canvas-divider: rgb(var(--canvas-divider));
+  --color-control-border: rgb(var(--control-border));
+  --color-control-border-hover: rgb(var(--control-border-hover));
+  --color-focus-ring: rgb(var(--focus-ring));
+  --color-sheet-border: var(--sheet-border);
+  --color-ink: rgb(var(--ink));
+  --color-fg: rgb(var(--fg));
+
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted));
+
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--on-accent));
+  --color-accent-ink: rgb(var(--accent-ink));
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-strong: var(--accent-soft-strong);
+
+  --color-on-accent: rgb(var(--on-accent));
+  --color-selected-bg: rgb(var(--selected-bg));
+  --color-selected-fg: rgb(var(--selected-fg));
+  --color-btn-primary: rgb(var(--btn-primary));
+  --color-btn-primary-fg: rgb(var(--btn-primary-fg));
+  --color-btn-primary-hover: rgb(var(--btn-primary-hover));
+  --color-sky: rgb(var(--sky));
+  --color-positive: rgb(var(--positive));
+  --color-warning: rgb(var(--warning));
+  --color-negative: rgb(var(--negative));
+  --color-negative-soft: rgb(var(--negative-soft));
+  --color-favorite: rgb(var(--favorite));
+  --color-chart-1: rgb(var(--chart-1));
+  --color-chart-2: rgb(var(--chart-2));
+  --color-chart-3: rgb(var(--chart-3));
+  --color-chart-4: rgb(var(--chart-4));
+  --color-chart-5: rgb(var(--chart-5));
+  --color-chart-6: rgb(var(--chart-6));
+  --color-nav-hover: var(--nav-hover);
+  --color-nav-active: rgb(var(--nav-active));
+  --color-scrim: var(--scrim);
+  --color-background: rgb(var(--sheet));
+  --color-foreground: rgb(var(--fg));
+
+  --color-popover: rgb(var(--overlay));
+  --color-popover-foreground: rgb(var(--fg));
+
+  --color-sidebar: rgb(var(--canvas));
+  --color-border: rgb(var(--outline));
+  --color-input: rgb(var(--control-border));
+  --color-ring: rgb(var(--focus-ring));
+
+  --color-destructive: rgb(var(--negative));
+  --color-destructive-foreground: rgb(var(--fg));
+
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-conic: conic-gradient(
+    from 180deg at 50% 50%,
+    var(--tw-gradient-stops)
+  );
+  --background-image-brand-gradient: var(--brand-gradient);
+  --background-image-brand-glow: var(--brand-glow);
+  --background-image-progress-fill: var(--progress-fill);
+
+  --shadow-float: var(--shadow-float);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-selected: inset 3px 0 0 rgb(var(--ink));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-chip: 6px;
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+
+  --text-title: 20px;
+  --text-title--line-height: 28px;
+  --text-title--letter-spacing: -0.01em;
+  --text-title--font-weight: 600;
+  --text-card-title: 15px;
+  --text-card-title--line-height: 22px;
+  --text-card-title--font-weight: 600;
+  --text-panel-title: 17px;
+  --text-panel-title--line-height: 24px;
+  --text-panel-title--font-weight: 600;
+  --text-metric: 40px;
+  --text-metric--line-height: 44px;
+  --text-metric--letter-spacing: -0.03em;
+  --text-metric--font-weight: 600;
+  --text-body: 15px;
+  --text-body--line-height: 22px;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 20px;
+  --text-label: 12px;
+  --text-label--line-height: 16px;
+  --text-label--font-weight: 500;
+  --text-code: 13px;
+  --text-code--line-height: 20px;
+
+  --font-sans: var(--font-dimo), system-ui, -apple-system, Segoe UI, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* Tailwind v4's preflight gives buttons the default cursor; keep v3's. */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
 
 /*
  * Design tokens. Values match fleet-lite-app web/src/global-styles.ts.
@@ -156,12 +300,8 @@
   }
 }
 
-.content {
-  @apply flex flex-row;
-}
-
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .content {
+    @apply flex flex-row;
   }
 }

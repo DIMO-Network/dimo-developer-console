@@ -17,7 +17,7 @@ export const NativeSelect = forwardRef<HTMLSelectElement, Props>(
       <select
         ref={ref}
         className={classNames(
-          'h-10 w-full cursor-pointer appearance-none rounded-control border border-control-border bg-control pl-3 pr-9 text-[14px] leading-5 text-fg outline-none transition-[border-color,box-shadow] hover:border-control-border-hover focus:border-focus-ring focus:ring-[3px] focus:ring-accent-soft disabled:cursor-not-allowed disabled:opacity-50',
+          'h-10 w-full cursor-pointer appearance-none rounded-control border border-control-border bg-control pl-3 pr-9 text-[14px] leading-5 text-fg outline-hidden transition-[border-color,box-shadow] hover:border-control-border-hover focus:border-focus-ring focus:ring-[3px] focus:ring-accent-soft disabled:cursor-not-allowed disabled:opacity-50',
           className,
         )}
         {...props}

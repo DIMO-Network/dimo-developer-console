@@ -1,3 +1,5 @@
+@reference '../../../app/globals.css';
+
 .full-screen-menu-container {
   @apply fixed inset-y-0 left-0 z-50 flex w-screen bg-canvas text-fg transition-transform md:hidden;
 }

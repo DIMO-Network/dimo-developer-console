@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .copyable-row {
   @apply flex flex-row items-center gap-2.5 rounded-control bg-control px-3 py-2 font-mono text-code text-fg;
 }

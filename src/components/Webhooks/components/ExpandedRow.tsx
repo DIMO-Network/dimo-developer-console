@@ -68,6 +68,6 @@ const Actions = ({
 const MetaItem = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div className="flex min-w-0 flex-col gap-0.5">
     <dt className="text-label text-muted">{label}</dt>
-    <dd className="break-words text-body-sm text-fg">{value}</dd>
+    <dd className="wrap-break-word text-body-sm text-fg">{value}</dd>
   </div>
 );
