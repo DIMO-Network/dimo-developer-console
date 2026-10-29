@@ -205,9 +205,27 @@ const config: Config = {
   // watchman: true,
 };
 
-// TanStack Table 9 and its store ship ESM only; let Jest transform them
-// alongside the packages next/jest already transpiles.
-const ESM_PACKAGES = '@tanstack/(?:react-table|table-core|react-store|store)';
+// Packages that ship ESM only, which Jest transforms alongside the ones
+// next/jest already transpiles: TanStack Table 9 with its store, and
+// refractor with its dependencies (react-syntax-highlighter 16).
+const ESM_PACKAGES = [
+  '@tanstack/(?:react-table|table-core|react-store|store)',
+  'refractor',
+  'hastscript',
+  'hast-util-parse-selector',
+  'property-information',
+  'space-separated-tokens',
+  'comma-separated-tokens',
+  'parse-entities',
+  'decode-named-character-reference',
+  'character-entities',
+  'character-entities-legacy',
+  'character-reference-invalid',
+  'is-alphabetical',
+  'is-alphanumerical',
+  'is-decimal',
+  'is-hexadecimal',
+].join('|');
 
 const jestConfig = async () => {
   const nextConfig = await createJestConfig(config)();
