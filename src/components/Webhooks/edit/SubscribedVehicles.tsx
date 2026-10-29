@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import {
   invalidateQuery,
   useWebhookVehiclesById,
@@ -42,6 +42,8 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
   const [unsubscribingAll, setUnsubscribingAll] = useState(false);
   const [subscribingAll, setSubscribingAll] = useState(false);
   const { data, isLoading, error } = useWebhookVehiclesById({ webhookId, clientId });
+  // A new rows array on every render would send the table back to page 1.
+  const rows = useMemo(() => (data ?? []).map((tokenId) => ({ tokenId })), [data]);
   if (isLoading) {
     return <Loader isLoading />;
   }
@@ -146,7 +148,7 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
           </Button>
         </div>
         <div className="-mx-4 -mb-4">
-          <PaginatedTable data={data.map((tokenId) => ({ tokenId }))} columns={columns} />
+          <PaginatedTable data={rows} columns={columns} />
         </div>
       </Section>
     </div>
