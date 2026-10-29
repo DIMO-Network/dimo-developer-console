@@ -6,7 +6,7 @@ import {
 import { Title } from '@/components/Title';
 import { Section, SectionHeader } from '@/components/Section';
 import { Loader } from '@/components/Loader';
-import { ColumnDef } from '@tanstack/react-table';
+import { LegacyColumnDef } from '@tanstack/react-table/legacy';
 import { PaginatedTable } from '@/components/Table';
 import { Button } from '@/components/Button';
 import { AddVehiclesModal } from '@/components/Webhooks/edit/AddVehiclesModal';
@@ -24,10 +24,13 @@ interface Props {
   clientId: string;
 }
 
-const columns: ColumnDef<string>[] = [
+// Table rows must be objects, so each token ID is wrapped.
+type VehicleRow = { tokenId: string };
+
+const columns: LegacyColumnDef<VehicleRow>[] = [
   {
     header: 'Vehicle token ID',
-    accessorFn: (row) => row,
+    accessorFn: (row) => row.tokenId,
     cell: (info) => info.getValue(),
   },
 ];
@@ -143,7 +146,7 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
           </Button>
         </div>
         <div className="-mx-4 -mb-4">
-          <PaginatedTable data={data} columns={columns} />
+          <PaginatedTable data={data.map((tokenId) => ({ tokenId }))} columns={columns} />
         </div>
       </Section>
     </div>

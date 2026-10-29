@@ -205,4 +205,20 @@ const config: Config = {
   // watchman: true,
 };
 
-export default createJestConfig(config);
+// TanStack Table 9 and its store ship ESM only; let Jest transform them
+// alongside the packages next/jest already transpiles.
+const ESM_PACKAGES = '@tanstack/(?:react-table|table-core|react-store|store)';
+
+const jestConfig = async () => {
+  const nextConfig = await createJestConfig(config)();
+  return {
+    ...nextConfig,
+    transformIgnorePatterns: (nextConfig.transformIgnorePatterns ?? []).map((pattern) =>
+      pattern.startsWith('/node_modules/(?!.pnpm)(?!(')
+        ? pattern.replace('(?!.pnpm)(?!(', `(?!.pnpm)(?!(${ESM_PACKAGES}|`)
+        : pattern,
+    ),
+  };
+};
+
+export default jestConfig;

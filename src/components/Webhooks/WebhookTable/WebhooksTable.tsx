@@ -1,12 +1,12 @@
 import { Webhook } from '@/types/webhook';
 import { useWebhookTableContext } from '@/components/Webhooks/providers/WebhookTableContextProvider';
+import { flexRender } from '@tanstack/react-table';
 import {
-  ColumnDef,
-  flexRender,
   getCoreRowModel,
-  Row,
-  useReactTable,
-} from '@tanstack/react-table';
+  LegacyColumnDef,
+  LegacyRow,
+  useLegacyTable,
+} from '@tanstack/react-table/legacy';
 import Column from '@/components/Table/Column';
 import React from 'react';
 import { ExpandedRow } from '@/components/Webhooks/components/ExpandedRow';
@@ -19,10 +19,10 @@ import { StatusChip } from '@/components/StatusChip';
 
 // Low-priority columns drop out on phones so the status and the row stay on screen.
 const PHONE_HIDDEN = 'hidden md:table-cell';
-const getColumnClassName = (columnDef: ColumnDef<Webhook>) =>
+const getColumnClassName = (columnDef: LegacyColumnDef<Webhook>) =>
   (columnDef.meta as { className?: string } | undefined)?.className;
 
-const getColumns = (clientId: string): ColumnDef<Webhook>[] => {
+const getColumns = (clientId: string): LegacyColumnDef<Webhook>[] => {
   return [
     { header: 'Description', accessorKey: 'description' },
     {
@@ -62,7 +62,7 @@ export const WebhooksTable = ({
   clientId: string;
 }) => {
   const { toggleExpandedWebhookId, expandedWebhook } = useWebhookTableContext();
-  const table = useReactTable({
+  const table = useLegacyTable({
     data: webhooks,
     columns: getColumns(clientId),
     getCoreRowModel: getCoreRowModel(),
@@ -112,7 +112,7 @@ const TableRowBasic = ({
 }: {
   isExpanded: boolean;
   onClick: () => void;
-  row: Row<Webhook>;
+  row: LegacyRow<Webhook>;
 }) => {
   return (
     <tr

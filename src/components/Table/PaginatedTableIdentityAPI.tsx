@@ -1,12 +1,16 @@
 import {
+  CellData,
   flexRender,
-  getCoreRowModel,
-  useReactTable,
-  ColumnDef,
   PaginationState,
   RowData,
   OnChangeFn,
+  TableFeatures,
 } from '@tanstack/react-table';
+import {
+  getCoreRowModel,
+  LegacyColumnDef,
+  useLegacyTable,
+} from '@tanstack/react-table/legacy';
 import { Button } from '@/components/Button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
 import { Column } from './Column';
@@ -16,18 +20,23 @@ import { useState } from 'react';
 
 declare module '@tanstack/react-table' {
   // A column's className lands on its <th> and every <td>.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<TData extends RowData, TValue> {
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  interface ColumnMeta<
+    TFeatures extends TableFeatures,
+    TData extends RowData,
+    TValue extends CellData = CellData,
+  > {
     className?: string;
   }
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 }
 
 // A column's meta.className lands on its <th> and every <td>, e.g.
 // 'hidden md:table-cell' to drop the column on phones.
 const columnClass = (def: { meta?: { className?: string } }) => def.meta?.className;
 
-interface PaginatedTableProps<TData> {
-  columns: ColumnDef<TData>[];
+interface PaginatedTableProps<TData extends RowData> {
+  columns: LegacyColumnDef<TData>[];
   data: TData[];
   onPaginationChange: (pageChangeArgs: {
     first?: number | null;
@@ -48,7 +57,7 @@ interface PaginatedTableProps<TData> {
  * This paginated table is for use with the Identity API.
  * It's specifically designed to handle Identity API's paginated table structure
  */
-export const PaginatedTableIdentityAPI = <TData,>({
+export const PaginatedTableIdentityAPI = <TData extends RowData>({
   columns,
   data,
   onPaginationChange,
@@ -82,7 +91,7 @@ export const PaginatedTableIdentityAPI = <TData,>({
     }
     setPagination(newPagination);
   };
-  const table = useReactTable({
+  const table = useLegacyTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
