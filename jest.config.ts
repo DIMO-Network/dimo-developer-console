@@ -96,7 +96,8 @@ const config: Config = {
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    '^axios$': require.resolve('axios'),
+    // Jest 30 loads this file as ESM, where `require` doesn't exist.
+    '^axios$': '<rootDir>/node_modules/axios/dist/node/axios.cjs',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
 

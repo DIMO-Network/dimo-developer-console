@@ -14,7 +14,7 @@ import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import axios, { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
-import { JWTPayload } from 'jose/dist/types';
+import type { JWTPayload } from 'jose';
 import { cookieName, getCookie } from './services/dimoDevAPI';
 import { FOCUS_QUERY_PARAM } from '@/utils/focusConstants';
 import { inviteRedirect } from '@/utils/inviteCookie';
@@ -162,7 +162,7 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const middleware = async (request: NextRequest, event: NextFetchEvent) => {
+export const proxy = async (request: NextRequest, event: NextFetchEvent) => {
   // Before anything that can fail or redirect: an invite link keeps its token.
   const invite = inviteRedirect(request);
   if (invite) return invite;

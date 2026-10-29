@@ -12,10 +12,7 @@ import {
 } from '@zerodev/sdk';
 import { getEntryPoint, KERNEL_V3_1 } from '@zerodev/sdk/constants';
 import { Chain, Client, createPublicClient, http, RpcSchema, Transport } from 'viem';
-import {
-  GetPaymasterDataParameters,
-  SmartAccount,
-} from 'viem/_types/account-abstraction';
+import { GetPaymasterDataParameters, SmartAccount } from 'viem/account-abstraction';
 import { polygon, polygonAmoy } from 'viem/chains';
 import configuration from '@/config';
 

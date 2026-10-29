@@ -18,11 +18,11 @@ jest.mock('@/utils/middlewareUtils', () => ({
 jest.mock('@/services/user', () => ({ getUserByToken: jest.fn() }));
 jest.mock('@/services/globalAccount', () => ({ getUserSubOrganization: jest.fn() }));
 import { getUserByToken } from '@/services/user';
-import { middleware } from '@/middleware';
+import { proxy } from '@/proxy';
 
-describe('middleware and the data proxy', () => {
+describe('proxy and the data API route', () => {
   it("lets /api/data/* through on a valid session without calling console-api's /api/me", async () => {
-    const res = await middleware(
+    const res = await proxy(
       new NextRequest('http://console.test/api/data/telemetry', { method: 'POST' }),
       {} as never,
     );

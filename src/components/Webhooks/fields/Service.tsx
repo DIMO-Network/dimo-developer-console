@@ -16,7 +16,7 @@ export const WebhookServiceField = () => {
   } = useFormContext<WebhookFormInput>();
 
   const service = watch('service');
-  const prevServiceRef = useRef<string | undefined>();
+  const prevServiceRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     const prev = prevServiceRef.current;
