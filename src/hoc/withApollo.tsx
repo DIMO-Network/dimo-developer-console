@@ -1,6 +1,7 @@
 'use client';
 import config from '@/config';
-import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client/react';
 import React, { ComponentType } from 'react';
 
 const apolloClient = new ApolloClient({

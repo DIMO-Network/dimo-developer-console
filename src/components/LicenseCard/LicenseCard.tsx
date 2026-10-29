@@ -3,7 +3,7 @@ import { Card } from '@/components/Card';
 import classNames from 'classnames';
 import { Anchor } from '@/components/Anchor';
 import Link from 'next/link';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { useQuery as useRestQuery } from '@tanstack/react-query';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';

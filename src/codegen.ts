@@ -12,6 +12,11 @@ const config: CodegenConfig = {
       presetConfig: {
         gqlTagName: 'gql',
       },
+      // client-preset 6 types custom scalars (Address, BigInt, Time…) as
+      // unknown; keep them as before.
+      config: {
+        defaultScalarType: 'any',
+      },
     },
   },
   ignoreNoDocuments: true,

@@ -10,8 +10,8 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/vehicles/190231',
   useSearchParams: () => new URLSearchParams('license=0xaaa'),
 }));
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }));
 jest.mock('@/components/Webhooks/hooks/useValidDeveloperLicenses', () => ({
@@ -39,7 +39,7 @@ jest.mock('@/components/DataAccess/ConnectWalletButton', () => ({
 jest.mock('@/components/GenerateDevJWT', () => ({
   GenerateDevJWT: () => <button>Generate developer JWT</button>,
 }));
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
@@ -82,7 +82,10 @@ const refusal = (memberOfTeam: boolean) =>
   new DataApiError(403, 'NO_ACCESS', 'x', [], memberOfTeam);
 
 beforeEach(() => {
-  (useQuery as jest.Mock).mockReturnValue({ data: { vehicle }, loading: false });
+  (useQuery as unknown as jest.Mock).mockReturnValue({
+    data: { vehicle },
+    loading: false,
+  });
   (useGlobalAccount as jest.Mock).mockReturnValue({
     currentUser: { smartContractAddress: '0xkernel', walletAddress: WALLET },
   });

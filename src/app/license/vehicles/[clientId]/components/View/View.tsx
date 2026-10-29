@@ -4,7 +4,7 @@ import { Section, SectionHeader } from '@/components/Section';
 import { VehicleDetailsTable } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable';
 import { use } from 'react';
 import { gql } from '@/gql';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { Title } from '@/components/Title';
 import configuration from '@/config';
 import Link from 'next/link';

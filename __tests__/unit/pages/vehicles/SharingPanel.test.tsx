@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }));
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { SharingPanel } from '@/app/vehicles/[tokenId]/components/tabs/SharingPanel';
 import type { VehicleDetail } from '@/services/subjects/graph';
 
@@ -81,7 +81,7 @@ beforeEach(() => {
   jest.setSystemTime(new Date('2026-09-30T12:00:00Z'));
   accountGrants = [];
   accountResult = null;
-  (useQuery as jest.Mock).mockImplementation(
+  (useQuery as unknown as jest.Mock).mockImplementation(
     (_doc: unknown, opts: { variables: { clientId?: string; address?: string } }) =>
       opts.variables.address
         ? (accountResult ?? {

@@ -23,7 +23,7 @@
     "visual:check": "bash scripts/visual/check-tokens.sh"
   },
   "dependencies": {
-    "@apollo/client": "^3.14.1",
+    "@apollo/client": "^4.3.5",
     "@base-ui/react": "^1.9.0",
     "@dimo-network/data-sdk": "~1.4.0",
     "@ethereumjs/util": "^9.1.0",
@@ -50,7 +50,7 @@
     "clsx": "^2.1.1",
     "encoding": "^0.1.14",
     "file-saver": "^2.0.5",
-    "graphql": "^16.14.2",
+    "graphql": "^17.0.2",
     "jose": "^6.2.13",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.18.1",
@@ -66,6 +66,7 @@
     "react-hook-form": "~7.68.0",
     "react-syntax-highlighter": "^15.6.6",
     "recharts": "^2.15.4",
+    "rxjs": "^7.8.2",
     "shadcn": "^4.23.0",
     "simple-icons": "^16.36.0",
     "sonner": "^2.0.8",
@@ -76,8 +77,8 @@
     "web3": "^4.16.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^6.3.1",
-    "@graphql-codegen/client-preset": "^5.3.0",
+    "@graphql-codegen/cli": "^7.4.6",
+    "@graphql-codegen/client-preset": "^6.2.3",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tanstack/eslint-plugin-query": "^5.105.0",
