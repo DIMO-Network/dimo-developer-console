@@ -65,7 +65,7 @@
     "react-easy-crop": "^5.5.7",
     "react-hook-form": "~7.68.0",
     "react-syntax-highlighter": "^15.6.6",
-    "recharts": "^2.15.4",
+    "recharts": "^3.10.1",
     "rxjs": "^7.8.2",
     "shadcn": "^4.23.0",
     "simple-icons": "^16.36.0",
