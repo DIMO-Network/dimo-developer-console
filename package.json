@@ -2,6 +2,9 @@
   "name": "dimo-developer-console",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "prebuild": "npm run lint && npm run check:template-types",
     "build": "next build",
@@ -89,7 +92,7 @@
     "@types/jest": "^30.0.0",
     "@types/lodash": "^4.17.27",
     "@types/mixpanel-browser": "^2.60.0",
-    "@types/node": "^20.19.43",
+    "@types/node": "^24.19.2",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
