@@ -7,8 +7,13 @@
     @apply border-b border-outline;
   }
 
-  .table-body {
-    @apply divide-y divide-outline;
+  /*
+    v3's divide-y: a top border on every row after the first. v4's divide-y
+    instead zeroes the rows' top borders, which removed the line the first
+    row's border-t draws under a header without .table-header.
+  */
+  .table-body > :not([hidden]) ~ :not([hidden]) {
+    @apply border-t border-outline;
   }
 
   .table-action-column {
