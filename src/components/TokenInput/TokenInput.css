@@ -15,7 +15,7 @@
     }
 
     .dcx-value {
-      @apply h-8 w-full bg-transparent text-center text-metric text-ink focus:outline-none [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none;
+      @apply h-8 w-full bg-transparent text-center text-metric text-ink focus:outline-hidden [-moz-appearance:_textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none;
     }
 
     .amount-container {
