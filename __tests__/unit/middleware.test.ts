@@ -10,6 +10,8 @@ jest.mock('jose', () => ({ createRemoteJWKSet: jest.fn(), jwtVerify: jest.fn() }
 jest.mock('@sentry/nextjs', () => ({
   captureException: jest.fn(),
   captureMessage: jest.fn(),
+  flush: jest.fn(async () => true),
+  wrapMiddlewareWithSentry: (handler: unknown) => handler,
 }));
 jest.mock('@/services/dimoDevAPI', () => ({
   cookieName: 'session-token',
@@ -52,8 +54,9 @@ const request = (path: string, cookies: Record<string, string> = {}) => {
   });
 };
 
+const waitUntil = jest.fn();
 const run = (req: NextRequest) =>
-  proxy(req as unknown as Parameters<typeof proxy>[0], {} as never);
+  proxy(req as unknown as Parameters<typeof proxy>[0], { waitUntil } as never);
 
 const isPassThrough = (res: Response) => res.headers.get('x-middleware-next') === '1';
 
@@ -168,6 +171,21 @@ describe('proxy with a session', () => {
     const res = await run(request('/licenses', { 'session-token': TOKEN }));
     expect(res.status).toBe(302);
     expect(res.headers.get('location')).toMatch(/app\?error=true$/);
+  });
+
+  it('gives up on the account lookup after 25 seconds, as Edge did', async () => {
+    await run(request('/licenses', { 'session-token': TOKEN }));
+    expect(getUserSubOrganization).toHaveBeenCalledWith(compliantUser.email, {
+      timeout: 25_000,
+    });
+  });
+
+  it('stays alive until Sentry has sent what it captured', async () => {
+    (getUserByToken as jest.Mock).mockRejectedValue(new AxiosError('Network Error'));
+    await run(request('/licenses', { 'session-token': TOKEN }));
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    expect(Sentry.flush).toHaveBeenCalledWith(2000);
+    expect(waitUntil).toHaveBeenCalledWith(expect.any(Promise));
   });
 });
 

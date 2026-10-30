@@ -29,7 +29,7 @@ describe('proxy and invite links', () => {
   it('keeps the invite even when the session check would fail and redirect', async () => {
     const res = (await proxy(
       new NextRequest(`http://console.test/sign-in?invite=${TOKEN}`),
-      {} as never,
+      { waitUntil: jest.fn() } as never,
     )) as Response & { cookies: { get: (n: string) => { value: string } | undefined } };
     expect(res.status).toBe(307);
     expect(new URL(res.headers.get('location')!).searchParams.get('invite')).toBeNull();

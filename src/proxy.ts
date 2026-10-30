@@ -93,6 +93,10 @@ const rememberVerdict = (
   return response;
 };
 
+// Navigations without a fresh session verdict wait on this lookup. Edge stopped the
+// middleware at about 25 seconds; a Node function would wait out the client's minutes.
+const ACCOUNT_LOOKUP_TIMEOUT_MS = 25_000;
+
 const validatePrivateSession = async (request: NextRequest, token: string) => {
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const verdict = await sessionVerdictFor(token);
@@ -109,7 +113,9 @@ const validatePrivateSession = async (request: NextRequest, token: string) => {
   const user = await getUserByToken();
   // Every console user signs in with their own global account; team members
   // are no longer represented by the company owner's account.
-  const subOrganization = await getUserSubOrganization(user.email);
+  const subOrganization = await getUserSubOrganization(user.email, {
+    timeout: ACCOUNT_LOOKUP_TIMEOUT_MS,
+  });
   if (!subOrganization) {
     Sentry.captureMessage('Suborganization not found');
     return NextResponse.redirect(new URL('/sign-in', request.url), {
@@ -161,8 +167,7 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
   return NextResponse.next();
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const proxy = async (request: NextRequest, event: NextFetchEvent) => {
+const handleRequest = async (request: NextRequest) => {
   // Before anything that can fail or redirect: an invite link keeps its token.
   const invite = inviteRedirect(request);
   if (invite) return invite;
@@ -198,6 +203,19 @@ export const proxy = async (request: NextRequest, event: NextFetchEvent) => {
     return NextResponse.next();
   }
 };
+
+// Sentry 8's webpack plugin wrapped the middleware like this; under Turbopack nothing
+// does. Sentry only keeps an Edge function alive to send its events, so on Node the
+// proxy asks Next to wait for the flush.
+export const proxy = Sentry.wrapMiddlewareWithSentry(
+  async (request: NextRequest, event: NextFetchEvent) => {
+    try {
+      return await handleRequest(request);
+    } finally {
+      event.waitUntil(Sentry.flush(2000));
+    }
+  },
+);
 
 export const config = {
   // icon.png is the app icon: it needs no session. Excluded by name, not by

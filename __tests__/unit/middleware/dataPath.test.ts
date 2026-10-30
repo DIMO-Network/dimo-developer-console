@@ -24,7 +24,7 @@ describe('proxy and the data API route', () => {
   it("lets /api/data/* through on a valid session without calling console-api's /api/me", async () => {
     const res = await proxy(
       new NextRequest('http://console.test/api/data/telemetry', { method: 'POST' }),
-      {} as never,
+      { waitUntil: jest.fn() } as never,
     );
     expect(res.headers.get('x-middleware-next')).toBe('1');
     expect(getUserByToken).not.toHaveBeenCalled();
