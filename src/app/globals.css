@@ -124,6 +124,15 @@
   currentcolor, as they are in v4.
 */
 @layer base {
+  /*
+    v4's preflight zeroes padding on every element; v3's left table cells the
+    browser's 1px. Cells that set their own padding still override this.
+  */
+  th,
+  td {
+    padding: 1px;
+  }
+
   /* Tailwind v4's preflight gives buttons the default cursor; keep v3's. */
   button:not(:disabled),
   [role='button']:not(:disabled) {
