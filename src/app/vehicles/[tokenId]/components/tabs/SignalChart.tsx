@@ -59,7 +59,13 @@ export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number
       </div>
       <div className="h-40 w-full" role="img" aria-label={describe(name, points)}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+          {/* Recharts 3 turns its keyboard layer on by default; the wrapper is
+              the accessible image, so the chart itself stays out of the tab order. */}
+          <LineChart
+            data={points}
+            margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
+            accessibilityLayer={false}
+          >
             <CartesianGrid stroke="rgb(var(--outline))" vertical={false} />
             <XAxis
               dataKey="t"
