@@ -21,6 +21,11 @@ const Probe = () => {
 
 const ProbeWithApollo = withApollo(Probe);
 
+const realFetch = global.fetch;
+afterEach(() => {
+  global.fetch = realFetch;
+});
+
 beforeEach(() => {
   global.fetch = jest.fn().mockResolvedValue({
     ok: true,
