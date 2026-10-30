@@ -121,9 +121,6 @@
     "eslint": "$eslint",
     "next": {
       "postcss": "^8.5.32"
-    },
-    "@sentry/nextjs": {
-      "rollup": "^3.30.0"
     }
   }
 }
