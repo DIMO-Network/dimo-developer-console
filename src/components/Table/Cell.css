@@ -1,5 +1,9 @@
 @reference '../../app/globals.css';
 
-.table-cell {
+/*
+  Not `.table-cell`: that's also Tailwind's display utility, which v4 emits after
+  `hidden`, so a column's `hidden md:table-cell` stopped hiding it on phones.
+*/
+.table-data-cell {
   @apply h-[52px] max-w-[300px] break-all py-3 text-body-sm text-fg;
 }

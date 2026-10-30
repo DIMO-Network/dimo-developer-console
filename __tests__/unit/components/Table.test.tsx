@@ -85,7 +85,7 @@ describe('Table', () => {
       'md:table-cell',
     );
     expect(screen.getByRole('columnheader', { name: 'name' })).not.toHaveClass('hidden');
-    const scopeCells = document.querySelectorAll('td.table-cell.hidden');
+    const scopeCells = document.querySelectorAll('td.table-data-cell.hidden');
     expect(scopeCells).toHaveLength(appListMock.length);
   });
 

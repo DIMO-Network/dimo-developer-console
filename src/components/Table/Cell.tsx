@@ -8,7 +8,7 @@ interface IProps {
 }
 
 export const Cell: FC<IProps> = ({ children, className }) => {
-  return <td className={classNames('table-cell', className)}>{children}</td>;
+  return <td className={classNames('table-data-cell', className)}>{children}</td>;
 };
 
 export default Cell;
