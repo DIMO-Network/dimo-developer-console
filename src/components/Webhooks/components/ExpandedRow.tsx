@@ -24,7 +24,11 @@ export const ExpandedRow = ({
   return (
     <tr className="expanded-row bg-sheet border-t-0">
       <td colSpan={colSpan} className={'px-4 pb-4 pt-3 cell-bottom-border'}>
-        <div className="expanded-content space-y-4">
+        {/*
+          md:pt-4: Tailwind 3's space-y put a gap above the URL even with the meta list
+          hidden on desktop. Tailwind 4's puts it below the hidden list, where it's lost.
+        */}
+        <div className="expanded-content space-y-4 md:pt-4">
           <dl className="grid grid-cols-3 gap-3 md:hidden">
             <MetaItem label="Display name" value={webhook.displayName || '-'} />
             <MetaItem label="Service" value={webhook.service} />
