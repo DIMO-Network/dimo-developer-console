@@ -1,7 +1,7 @@
 import { InputHTMLAttributes, useState } from 'react';
 
 import classnames from 'classnames';
-import { Control, Controller, FieldValues, Path } from 'react-hook-form';
+import { Control, Controller, ControllerProps, FieldValues, Path } from 'react-hook-form';
 
 import { ChevronDownIcon } from '@/components/Icons';
 
@@ -16,6 +16,9 @@ interface IProps<T extends FieldValues> extends InputHTMLAttributes<HTMLSelectEl
   className?: string;
   options: IOption[];
   control: Control<T>;
+  // Pass validation here, not through a register() spread: the Controller registers
+  // this name on every render, and react-hook-form 7.91 drops rules it leaves out.
+  rules?: ControllerProps<T, Path<T>>['rules'];
   includeEmptyOption?: boolean;
 }
 
@@ -29,6 +32,7 @@ export const SelectField = <T extends FieldValues>({
   role,
   includeEmptyOption = true,
   control,
+  rules,
   ...props
 }: IProps<T>) => {
   const [show, setShow] = useState<boolean>(false);
@@ -37,6 +41,7 @@ export const SelectField = <T extends FieldValues>({
     <Controller
       control={control}
       name={(props.name || '') as Path<T>}
+      rules={rules}
       render={({ field: { onChange, value: selectedOption, ref } }) => {
         const selectedOptionData = options.find(
           (item) => item.value === selectedOption,

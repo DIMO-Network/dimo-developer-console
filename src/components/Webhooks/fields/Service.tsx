@@ -7,7 +7,6 @@ import React, { useEffect, useRef } from 'react';
 
 export const WebhookServiceField = () => {
   const {
-    register,
     control,
     formState: { errors },
     getValues,
@@ -32,9 +31,8 @@ export const WebhookServiceField = () => {
       <SelectField
         value={getValues('service')}
         placeholder={'Choose a service'}
-        {...register('service', {
-          required: 'Please select a webhook service',
-        })}
+        name="service"
+        rules={{ required: 'Please select a webhook service' }}
         options={[
           { value: 'signals', text: 'VSS Signals' },
           { value: 'events', text: 'Events' },
