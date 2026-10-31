@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .banner-content {
   @apply w-full rounded-2xl bg-control p-4 flex flex-col items-start gap-4;
 }

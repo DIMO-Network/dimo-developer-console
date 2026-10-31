@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .payment-method-selector {
   @apply flex flex-col gap-2;
 

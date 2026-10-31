@@ -10,10 +10,12 @@ const globalAccountClient = axios.create({
 
 export const getUserSubOrganization = async (
   email: string,
+  options: { timeout?: number } = {},
 ): Promise<ISubOrganization | null> => {
   try {
     const { data } = await globalAccountClient.get<ISubOrganization>(
       `/api/account/${encodeURIComponent(email)}`,
+      options,
     );
     return { ...data, email: email };
   } catch (error) {

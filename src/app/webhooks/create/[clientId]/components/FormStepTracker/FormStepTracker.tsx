@@ -42,13 +42,13 @@ const FormStepTrackerRow = ({
       )}
     >
       {isComplete ? (
-        <div className={'flex h-5 w-5 flex-shrink-0 items-center justify-center'}>
+        <div className={'flex h-5 w-5 shrink-0 items-center justify-center'}>
           <CheckIcon />
         </div>
       ) : (
         <div
           className={clsx(
-            'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-label',
+            'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-label',
             isActive
               ? 'bg-selected-bg text-selected-fg'
               : 'border border-control-border text-muted',

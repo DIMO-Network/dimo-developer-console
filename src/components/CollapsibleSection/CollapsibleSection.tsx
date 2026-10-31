@@ -36,7 +36,7 @@ export const CollapsibleSection: FC<PropsWithChildren<Props>> = ({
         >
           <ChevronRightIcon
             className={classNames(
-              'size-4 flex-shrink-0 text-muted transition-transform',
+              'size-4 shrink-0 text-muted transition-transform',
               open && 'rotate-90',
             )}
           />
@@ -52,9 +52,7 @@ export const CollapsibleSection: FC<PropsWithChildren<Props>> = ({
             </span>
           )}
         </button>
-        {actions && (
-          <div className="flex flex-shrink-0 items-center gap-2">{actions}</div>
-        )}
+        {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
       </div>
       {open && <div className="flex flex-col">{children}</div>}
     </div>

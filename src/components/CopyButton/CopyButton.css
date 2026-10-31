@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 /* size="icon": a 32px round icon button, matching <Button size="icon"> (row
    actions next to it). Styled here so CopyButton never depends on another
    component having loaded Button.css. Focus uses the global :focus-visible

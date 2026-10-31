@@ -32,10 +32,7 @@ export const StatusChip: FC<Props> = ({ tone, children, className }) => (
   >
     <span
       aria-hidden="true"
-      className={classNames(
-        'inline-block size-1.5 flex-shrink-0 rounded-full',
-        DOT[tone],
-      )}
+      className={classNames('inline-block size-1.5 shrink-0 rounded-full', DOT[tone])}
     />
     {children}
   </span>

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { PencilIcon } from '@heroicons/react/16/solid';
 import Link from 'next/link';
 import { gql, useFragment } from '@/gql';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import { CopyableRow } from '@/components/CopyableRow';
 import { WorkspaceNameModal } from '@/components/WorkspaceNameModal';

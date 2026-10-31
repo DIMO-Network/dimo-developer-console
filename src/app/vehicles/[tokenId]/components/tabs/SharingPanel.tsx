@@ -1,6 +1,6 @@
 'use client';
 import { FC } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { ACCOUNT_SACDS, LICENSE_ALIAS } from '../../queries';
 import type { VehicleDetail } from '@/services/subjects/graph';
 import { permissionLabels } from '@/utils/sacdPermissions';

@@ -3,7 +3,7 @@ import { Card } from '@/components/Card';
 import classNames from 'classnames';
 import { Anchor } from '@/components/Anchor';
 import Link from 'next/link';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { useQuery as useRestQuery } from '@tanstack/react-query';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';
@@ -73,7 +73,7 @@ export const LicenseCard = (props: {
       <div className="content">
         {/* Header */}
         <div className="flex w-full flex-row items-start justify-between gap-3">
-          <p className="title min-w-0 break-words">{license.alias}</p>
+          <p className="title min-w-0 wrap-break-word">{license.alias}</p>
           <span className="license-card-token-id">#{license.tokenId}</span>
         </div>
 

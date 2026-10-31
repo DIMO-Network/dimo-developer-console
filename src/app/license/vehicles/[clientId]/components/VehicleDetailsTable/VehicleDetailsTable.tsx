@@ -2,7 +2,7 @@
 import { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { PaginatedTableIdentityAPI } from '@/components/Table';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { gql } from '@/gql';
 import { Loader } from '@/components/Loader';
 import {

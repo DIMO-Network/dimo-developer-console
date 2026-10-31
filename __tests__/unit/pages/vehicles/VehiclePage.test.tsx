@@ -12,8 +12,8 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/vehicles/190231',
   useSearchParams: () => params,
 }));
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: jest.fn(),
 }));
 jest.mock('@/components/Webhooks/hooks/useValidDeveloperLicenses', () => ({
@@ -32,7 +32,7 @@ jest.mock('@/components/GenerateDevJWT', () => ({
   GenerateDevJWT: () => <button>Generate developer JWT</button>,
 }));
 
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
@@ -96,7 +96,7 @@ beforeEach(() => {
 
 describe('VehiclePage', () => {
   it('renders the header with the eligible license selected', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as unknown as jest.Mock).mockReturnValue({
       data: { vehicle: vehicle(['0xAAA']) },
       loading: false,
     });
@@ -114,7 +114,7 @@ describe('VehiclePage', () => {
   });
 
   it('shows the not-shared notice and asks for no data when no license has a grant', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as unknown as jest.Mock).mockReturnValue({
       data: { vehicle: vehicle(['0xccc']) },
       loading: false,
     });
@@ -145,7 +145,7 @@ describe('VehiclePage', () => {
       developerLicenses: [],
       loading: false,
     });
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as unknown as jest.Mock).mockReturnValue({
       data: { vehicle: vehicle(['0xaaa']) },
       loading: false,
     });
@@ -160,7 +160,7 @@ describe('VehiclePage', () => {
 
   it('shows the sharing panel for a vehicle no license can read', () => {
     params = new URLSearchParams('license=0xaaa&subject=sharing');
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as unknown as jest.Mock).mockReturnValue({
       data: { vehicle: vehicle(['0xccc']) },
       loading: false,
     });
@@ -171,7 +171,7 @@ describe('VehiclePage', () => {
   });
 
   it('asks for a developer JWT when the license has none stored', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as unknown as jest.Mock).mockReturnValue({
       data: { vehicle: vehicle(['0xaaa']) },
       loading: false,
     });
@@ -189,7 +189,7 @@ describe('VehiclePage', () => {
   });
 
   it('treats a refused token exchange as not shared with the selected license', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as unknown as jest.Mock).mockReturnValue({
       data: { vehicle: vehicle(['0xaaa']) },
       loading: false,
     });
@@ -213,7 +213,7 @@ describe('VehiclePage', () => {
   });
 
   it('asks for a new developer JWT when the proxy refuses the stored one', () => {
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as unknown as jest.Mock).mockReturnValue({
       data: { vehicle: vehicle(['0xaaa']) },
       loading: false,
     });
@@ -243,7 +243,7 @@ describe('VehiclePage', () => {
 
   it('falls back to the first eligible license when the URL names an ineligible one', () => {
     params = new URLSearchParams('license=0xbbb');
-    (useQuery as jest.Mock).mockReturnValue({
+    (useQuery as unknown as jest.Mock).mockReturnValue({
       data: { vehicle: vehicle(['0xaaa']) },
       loading: false,
     });
@@ -254,7 +254,10 @@ describe('VehiclePage', () => {
   });
 
   it('says so when the vehicle does not exist', () => {
-    (useQuery as jest.Mock).mockReturnValue({ data: { vehicle: null }, loading: false });
+    (useQuery as unknown as jest.Mock).mockReturnValue({
+      data: { vehicle: null },
+      loading: false,
+    });
     render(<VehiclePage tokenId={1} />);
     expect(screen.getByText('No vehicle has token ID 1.')).toBeInTheDocument();
   });

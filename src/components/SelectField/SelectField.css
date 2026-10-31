@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .select-field {
   @apply relative flex min-h-10 flex-row items-center justify-between rounded-control border border-control-border bg-control px-3 text-body-sm font-normal text-fg outline-0 transition-colors hover:border-control-border-hover;
 

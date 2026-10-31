@@ -34,7 +34,7 @@ export const FreshnessDot: FC<Props> = ({ at, now, label = true, className }) =>
         data-freshness={freshness}
         aria-hidden="true"
         className={classNames(
-          'inline-block size-1.5 flex-shrink-0 rounded-full',
+          'inline-block size-1.5 shrink-0 rounded-full',
           DOT[freshness],
         )}
       />

@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .buy-credits-modal {
   .dialog-panel {
     @apply w-auto h-auto;

@@ -96,7 +96,8 @@ const config: Config = {
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    '^axios$': require.resolve('axios'),
+    // Jest 30 loads this file as ESM, where `require` doesn't exist.
+    '^axios$': '<rootDir>/node_modules/axios/dist/node/axios.cjs',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
 
@@ -204,4 +205,38 @@ const config: Config = {
   // watchman: true,
 };
 
-export default createJestConfig(config);
+// Packages that ship ESM only, which Jest transforms alongside the ones
+// next/jest already transpiles: TanStack Table 9 with its store, and
+// refractor with its dependencies (react-syntax-highlighter 16).
+const ESM_PACKAGES = [
+  '@tanstack/(?:react-table|table-core|react-store|store)',
+  'refractor',
+  'hastscript',
+  'hast-util-parse-selector',
+  'property-information',
+  'space-separated-tokens',
+  'comma-separated-tokens',
+  'parse-entities',
+  'decode-named-character-reference',
+  'character-entities',
+  'character-entities-legacy',
+  'character-reference-invalid',
+  'is-alphabetical',
+  'is-alphanumerical',
+  'is-decimal',
+  'is-hexadecimal',
+].join('|');
+
+const jestConfig = async () => {
+  const nextConfig = await createJestConfig(config)();
+  return {
+    ...nextConfig,
+    transformIgnorePatterns: (nextConfig.transformIgnorePatterns ?? []).map((pattern) =>
+      pattern.startsWith('/node_modules/(?!.pnpm)(?!(')
+        ? pattern.replace('(?!.pnpm)(?!(', `(?!.pnpm)(?!(${ESM_PACKAGES}|`)
+        : pattern,
+    ),
+  };
+};
+
+export default jestConfig;

@@ -1,4 +1,4 @@
-import { ColumnDef, createColumnHelper } from '@tanstack/table-core';
+import { legacyCreateColumnHelper, LegacyColumnDef } from '@tanstack/react-table/legacy';
 import { useState } from 'react';
 import { shortDid } from '@/services/subjects/did';
 import { LastSeenCell } from './LastSeenCell';
@@ -16,7 +16,7 @@ export type VehicleRow = {
   aftermarketDevice?: { manufacturer?: { name?: string | null } | null } | null;
   syntheticDevice?: { connection?: { name?: string | null } | null } | null;
 };
-const columnHelper = createColumnHelper<VehicleRow>();
+const columnHelper = legacyCreateColumnHelper<VehicleRow>();
 
 function ActionsCell({
   tokenId,
@@ -79,7 +79,7 @@ export const buildColumns = (
     clientId: '',
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): ColumnDef<VehicleRow, any>[] => [
+): LegacyColumnDef<VehicleRow, any>[] => [
   columnHelper.accessor('tokenDID', {
     header: 'Vehicle token DID',
     // The DID ends in the token ID, so phones show just that; the full DID is

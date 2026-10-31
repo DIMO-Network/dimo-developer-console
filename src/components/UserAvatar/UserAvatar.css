@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .user-avatar-default {
   @apply flex h-10 w-10 items-center justify-center rounded-full bg-control text-body-sm font-medium text-ink;
 }

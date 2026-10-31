@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .credits-large {
   @apply flex flex-col rounded-card bg-card p-4;
 }

@@ -1,6 +1,6 @@
 'use client';
 import { useMemo } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { DEVELOPER_LICENSES_FOR_WEBHOOKS } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useTeam } from '@/hooks/useTeam';
 import type { DeveloperLicenseForWebhook } from '@/types/webhook';

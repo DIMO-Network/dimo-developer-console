@@ -1,3 +1,5 @@
+@reference '../../../globals.css';
+
 .email-recovery {
   @apply flex flex-row justify-center gap-4;
 

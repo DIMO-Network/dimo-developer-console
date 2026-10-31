@@ -1,3 +1,5 @@
+@reference '../../globals.css';
+
 .license-list-content {
   .description {
     @apply mb-3 flex w-full flex-row items-center justify-between gap-2 text-muted;

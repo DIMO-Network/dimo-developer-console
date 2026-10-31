@@ -156,7 +156,7 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           <Button variant="ghost" onClick={() => setAdvanced((a) => !a)}>
             Advanced settings
           </Button>
-          <div className="flex-grow" />
+          <div className="grow" />
           <Button onClick={run} disabled={!canRun}>
             Run query
           </Button>

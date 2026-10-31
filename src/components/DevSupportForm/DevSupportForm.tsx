@@ -66,9 +66,8 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
           <Label htmlFor="inquiryType">
             Inquiry type
             <SelectField
-              {...register('inquiryType', {
-                required: 'This field is required',
-              })}
+              name="inquiryType"
+              rules={{ required: 'This field is required' }}
               options={memoizedInquiryOptions}
               control={control}
               placeholder="Select inquiry"

@@ -20,7 +20,7 @@ const TITLES: Record<Entitlement['kind'], string> = {
 export const EntitlementBanner: FC<{ entitlement: Entitlement }> = ({ entitlement }) => (
   <div role="status" className="flex items-start gap-3 rounded-card bg-card p-4">
     {!entitlement.canPublish && (
-      <span data-testid="read-only-warning" className="mt-0.5 flex flex-shrink-0">
+      <span data-testid="read-only-warning" className="mt-0.5 flex shrink-0">
         <WarningAmberIcon className="size-4 text-warning" />
       </span>
     )}

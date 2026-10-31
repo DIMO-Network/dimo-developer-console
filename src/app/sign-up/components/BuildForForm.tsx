@@ -17,10 +17,10 @@ interface BuildForFormInputs {
 }
 
 enum buildForValues {
-  'mobileApp' = 'mobile-app',
-  'webApp' = 'web-app',
-  'personalProject' = 'personal-project',
-  'somethingElse' = 'something-else',
+  mobileApp = 'mobile-app',
+  webApp = 'web-app',
+  personalProject = 'personal-project',
+  somethingElse = 'something-else',
 }
 
 const buildForList = [
@@ -120,11 +120,13 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
                 <Card
                   role="radio"
                   aria-checked={isSelected}
+                  // `!` on the hover too: Card.css's background is outside
+                  // Tailwind's layers, so it beats any utility that isn't important.
                   className={classnames(
                     'flex cursor-pointer flex-row items-center justify-between transition-colors',
                     isSelected
-                      ? '!bg-control text-ink shadow-selected'
-                      : 'text-ink hover:bg-control/70',
+                      ? 'bg-control! text-ink shadow-selected'
+                      : 'text-ink hover:bg-control/70!',
                   )}
                   onClick={() => handleSelection(value)}
                   key={value}
@@ -142,9 +144,10 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
             className={classnames(
               'flex cursor-pointer flex-col gap-4 transition-colors',
               {
-                '!bg-control text-ink shadow-selected':
+                'bg-control! text-ink shadow-selected':
                   buildFor === buildForValues.somethingElse,
-                'text-ink hover:bg-control/70': buildFor !== buildForValues.somethingElse,
+                'text-ink hover:bg-control/70!':
+                  buildFor !== buildForValues.somethingElse,
               },
             )}
             onClick={() => handleSelection(buildForValues.somethingElse)}

@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { type FC, type ReactNode } from 'react';
 
 import './Option.css';
 
@@ -8,7 +8,7 @@ export interface RenderParams {
 }
 
 export interface OptionItem {
-  render: FC<RenderParams>;
+  render: (params: RenderParams) => ReactNode;
   value: string;
   selected?: boolean;
 }

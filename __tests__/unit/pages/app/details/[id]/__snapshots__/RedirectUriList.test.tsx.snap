@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`RedirectUriList renders the redirect uri list 1`] = `
 <div>
@@ -27,7 +27,7 @@ exports[`RedirectUriList renders the redirect uri list 1`] = `
           class="border-t border-outline"
         >
           <td
-            class="table-cell"
+            class="table-data-cell"
           >
             https://google.com/
           </td>
@@ -88,7 +88,7 @@ exports[`RedirectUriList renders the redirect uri list 1`] = `
           class="border-t border-outline"
         >
           <td
-            class="table-cell"
+            class="table-data-cell"
           >
             https://google.com.co/
           </td>
