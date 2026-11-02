@@ -228,8 +228,9 @@ export interface MintConnectionParams {
 }
 
 export const useMintConnection = () => {
-  const { validateCurrentSession, currentUser } = useGlobalAccount();
-  const { checkEnoughBalance, processTransactions } = useContractGA();
+  const { validateCurrentSession, currentUser, getCurrentDimoBalance } =
+    useGlobalAccount();
+  const { processTransactions } = useContractGA();
   const { signAndUploadPermissionSACD } = useSACD();
   return useCallback(
     async ({
@@ -248,7 +249,6 @@ export const useMintConnection = () => {
       }
 
       const currentSession = await validateCurrentSession();
-      const enoughBalance = await checkEnoughBalance();
 
       // Get current DIMO price and calculate required tokens for $1 USD
       const dimoPrice = await getCurrentDimoPrice();
@@ -263,7 +263,18 @@ export const useMintConnection = () => {
 
       if (!currentSession) throw new Error('Web3 connection failed');
       if (!currentUser) throw new Error('User not found');
-      if (!enoughBalance.dimo) {
+
+      let dimoBalance: number;
+      try {
+        dimoBalance = await getCurrentDimoBalance();
+      } catch (error: unknown) {
+        console.error('[useMintConnection] could not read the DIMO balance', error);
+        return {
+          success: false,
+          reason: "Couldn't check your DIMO balance. Try again.",
+        };
+      }
+      if (dimoBalance < requiredDIMO) {
         return {
           success: false,
           reason: `Insufficient DIMO balance. You need at least ${requiredDIMO.toFixed(2)} DIMO tokens (approximately $${targetUsdAmount}) to mint a connection.`,
@@ -429,8 +440,8 @@ export const useMintConnection = () => {
       }
     },
     [
-      checkEnoughBalance,
       currentUser,
+      getCurrentDimoBalance,
       processTransactions,
       signAndUploadPermissionSACD,
       validateCurrentSession,
