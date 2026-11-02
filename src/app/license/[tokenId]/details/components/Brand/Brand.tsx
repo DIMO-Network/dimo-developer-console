@@ -8,13 +8,14 @@ import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import { FragmentType, gql, useFragment } from '@/gql';
 
 import { fetchMyBrands, deleteMyBrand } from '@/actions/brand';
-import { getWorkspace, getWorkspaceByTokenId } from '@/actions/workspace';
+import { getOrCreateLicenseWorkspace } from '@/actions/workspace';
 import { BrandRow } from './components/BrandRow';
 import { BrandForm } from './components/BrandForm';
 import type { BrandView } from '@/services/brand';
 
 const BRAND_FRAGMENT = gql(`
   fragment BrandFragment on DeveloperLicense {
+    alias
     owner
     tokenId
     clientId
@@ -41,8 +42,12 @@ export const Brand: FC<Props> = ({ license }) => {
     let cancelled = false;
     const load = async () => {
       try {
-        const ws =
-          (await getWorkspaceByTokenId(licenseTokenId)) ?? (await getWorkspace());
+        const ws = await getOrCreateLicenseWorkspace({
+          name: fragment.alias ?? `License #${licenseTokenId}`,
+          token_id: licenseTokenId,
+          client_id: fragment.clientId,
+          owner: fragment.owner,
+        });
         if (cancelled) return;
         if (!ws?.id) {
           Sentry.captureMessage('[Brand] no workspace resolved for license', {
@@ -111,7 +116,7 @@ export const Brand: FC<Props> = ({ license }) => {
     <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
       <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
         <h2 className="text-card-title text-ink">Brand</h2>
-        {isOwner && !editing && (
+        {isOwner && workspaceId && !editing && (
           <Button type="button" variant="secondary" onClick={() => setEditing('new')}>
             Add brand
           </Button>
