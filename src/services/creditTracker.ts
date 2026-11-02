@@ -21,25 +21,14 @@ export const getCreditConsumptionByLicense = async ({
     },
   });
 
-  try {
-    const { data } = await dimoApiClient.get<ICreditUsage>(
-      `/v1/credits/${licenseId}/usage`,
-      {
-        params: {
-          fromDate,
-          toDate,
-        },
+  const { data } = await dimoApiClient.get<ICreditUsage>(
+    `/v1/credits/${licenseId}/usage`,
+    {
+      params: {
+        fromDate,
+        toDate,
       },
-    );
-    return data;
-  } catch {
-    return {
-      fromDate,
-      toDate: toDate ?? '',
-      licenseId,
-      numOfAssets: 0,
-      numOfCreditsGrantsPurchased: 0,
-      numOfCreditsUsed: 0,
-    };
-  }
+    },
+  );
+  return data;
 };

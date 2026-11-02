@@ -4,9 +4,9 @@ import Cropper, { Area } from 'react-easy-crop';
 
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
+import { BRAND_IMAGE_MAX_BYTES } from '@/utils/brandImage';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
-const MAX_BYTES = 2 * 1024 * 1024;
 
 interface Props {
   label: string;
@@ -58,7 +58,7 @@ export const ImagePicker: FC<Props> = ({
       setError(`Unsupported file type ${picked.type}. Use PNG, JPEG, WebP, or SVG.`);
       return;
     }
-    if (picked.size > MAX_BYTES) {
+    if (picked.size > BRAND_IMAGE_MAX_BYTES) {
       setError(`File too large (${Math.round(picked.size / 1024)} KB). Max 2 MB.`);
       return;
     }

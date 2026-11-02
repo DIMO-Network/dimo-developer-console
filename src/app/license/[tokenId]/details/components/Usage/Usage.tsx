@@ -3,7 +3,6 @@ import { useCreditTracker, useEventEmitter } from '@/hooks';
 import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import Link from 'next/link';
-import { AxiosError } from 'axios';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import './Usage.css';
 
@@ -13,7 +12,8 @@ interface Props {
 
 export const Usage: FC<Props> = ({ license }) => {
   const { getUsageByLicense } = useCreditTracker();
-  const [credits, setCredits] = useState(0);
+  // null until known: a failed lookup must not read as no usage.
+  const [credits, setCredits] = useState<number | null>(null);
   const fragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
   const { eventData } = useEventEmitter<unknown>('developer-jwt-updated');
   const { isAuthenticatedAsDev, devJwts, refetch } = useGetDevJwts(fragment?.clientId);
@@ -27,10 +27,8 @@ export const Usage: FC<Props> = ({ license }) => {
         });
         setCredits(numOfCreditsUsed);
       } catch (error: unknown) {
-        if (error instanceof AxiosError) {
-          console.error(error.response?.data.message || 'Error fetching usage');
-        }
         console.error('Error fetching usage:', error);
+        setCredits(null);
       }
     };
     refetch();
@@ -40,7 +38,9 @@ export const Usage: FC<Props> = ({ license }) => {
 
   return (
     <div className="overview-stat-card">
-      <p className="overview-stat-card__number">{isAuthenticatedAsDev ? credits : '—'}</p>
+      <p className="overview-stat-card__number">
+        {isAuthenticatedAsDev ? (credits ?? '—') : '—'}
+      </p>
       <p className="overview-stat-card__label">Credits used</p>
       {!isAuthenticatedAsDev && (
         <p className="overview-stat-card__hint">Generate a JWT to see usage</p>

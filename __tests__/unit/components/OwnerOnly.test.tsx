@@ -82,3 +82,26 @@ describe('OwnerAction', () => {
     expect(screen.getByText('owner only')).toBeInTheDocument();
   });
 });
+
+// Owning your team doesn't make every license you can open yours: console-api
+// checks the chain, so offering the action only leads to a refusal.
+describe('OwnerAction for one license', () => {
+  const OWNER = '0xAbCdEf000000000000000000000000000000AbCd';
+
+  it('shows the action to the team owner whose wallet owns the license', () => {
+    (useTeam as jest.Mock).mockReturnValue({ isOwner: true, ownerAddress: OWNER });
+    render(<OwnerAction licenseOwner={OWNER.toLowerCase()}>action</OwnerAction>);
+    expect(screen.getByText('action')).toBeInTheDocument();
+  });
+
+  it('hides it from a team owner whose wallet does not', () => {
+    (useTeam as jest.Mock).mockReturnValue({ isOwner: true, ownerAddress: OWNER });
+    render(
+      <OwnerAction licenseOwner={`0x${'1'.repeat(40)}`} fallback="not yours">
+        action
+      </OwnerAction>,
+    );
+    expect(screen.queryByText('action')).not.toBeInTheDocument();
+    expect(screen.getByText('not yours')).toBeInTheDocument();
+  });
+});

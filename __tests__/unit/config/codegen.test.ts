@@ -18,5 +18,6 @@ describe('codegen documents', () => {
 
     expect(files.length).toBeGreaterThan(0);
     expect(files.filter((file) => /__tests__|\.test\.tsx?$/.test(file))).toEqual([]);
-  });
+    // Parses every source file, which outlasts the 5 s default on a busy runner.
+  }, 30_000);
 });

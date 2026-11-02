@@ -41,9 +41,11 @@ export const useValidDeveloperLicenses = () => {
   const convertLicense = (devLicense: DeveloperLicenseForWebhook) => {
     return new LocalDeveloperLicense(devLicense);
   };
+  const licenses = data?.developerLicenses.nodes ?? [];
   return {
-    developerLicenses:
-      data?.developerLicenses.nodes.filter(isValid).map(convertLicense) ?? [],
+    developerLicenses: licenses.filter(isValid).map(convertLicense),
+    // A new license has no redirect URI, and without one no developer JWT.
+    hasLicenseWithoutRedirectUri: licenses.some((license) => !isValid(license)),
     // A skipped query is "not loading"; until the team owner is known it is.
     loading: loading || !ownerAddress,
     ...rest,

@@ -11,6 +11,18 @@ import {
   type BrandPatch,
   type BrandView,
 } from '@/services/brand';
+import { toFailure } from '@/services/teams';
+import type { ApiResult } from '@/types/team';
+
+// What a Server Action throws reaches the browser masked, without its status. A
+// refusal the form has to explain comes back as a value instead.
+const settled = async <T>(run: () => Promise<T>): Promise<ApiResult<T>> => {
+  try {
+    return { ok: true, data: await run() };
+  } catch (error) {
+    return toFailure(error);
+  }
+};
 
 // ── compat shims (kept for existing callers) ──────────────────────────────
 
@@ -30,13 +42,14 @@ export const fetchMyBrands = async (workspaceId: string): Promise<BrandView[]> =
 export const createMyBrand = async (
   workspaceId: string,
   patch: BrandPatch,
-): Promise<BrandView> => createBrandService(workspaceId, patch);
+): Promise<ApiResult<BrandView>> => settled(() => createBrandService(workspaceId, patch));
 
 export const updateMyBrandById = async (
   workspaceId: string,
   brandId: string,
   patch: BrandPatch,
-): Promise<BrandView> => updateBrandByIdService(workspaceId, brandId, patch);
+): Promise<ApiResult<BrandView>> =>
+  settled(() => updateBrandByIdService(workspaceId, brandId, patch));
 
 export const deleteMyBrand = async (
   workspaceId: string,
@@ -51,4 +64,5 @@ export const setDefaultBrand = async (
 export const uploadMyBrandAsset = async (
   workspaceId: string,
   file: File,
-): Promise<{ cid: string; gatewayUrl: string }> => uploadBrandAsset(workspaceId, file);
+): Promise<ApiResult<{ cid: string; gatewayUrl: string }>> =>
+  settled(() => uploadBrandAsset(workspaceId, file));

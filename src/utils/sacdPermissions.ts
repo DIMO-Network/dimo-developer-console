@@ -11,6 +11,9 @@ export const decodeSacdPermissions = (hex: string): number[] => {
   return granted;
 };
 
+// Privileges 1 to 8, each as its 0b11 pair (pair i starts at bit 2i).
+export const ALL_VEHICLE_PERMISSIONS = BigInt(262140);
+
 export const PERMISSION_NAMES: Record<number, string> = {
   1: 'privilege:GetNonLocationHistory',
   2: 'privilege:ExecuteCommands',

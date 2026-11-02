@@ -104,8 +104,14 @@ const vehiclePermissions = async (
     throw new SubjectJwtError(502, 'UPSTREAM', `Identity API answered ${res.status}`);
   }
   const body = (await res.json()) as {
-    data?: { vehicle?: { sacd?: { permissions: string } | null } | null };
+    data?: { vehicle?: { sacd?: { permissions: string } | null } | null } | null;
+    errors?: { extensions?: { code?: string } }[];
   };
+  // Identity answers an unknown vehicle with NOT_FOUND. Any other error means it
+  // couldn't say, which must not read as "this vehicle isn't shared".
+  if (body.errors?.some((error) => error.extensions?.code !== 'NOT_FOUND')) {
+    throw new SubjectJwtError(502, 'UPSTREAM', 'Identity API could not answer');
+  }
   const hex = body.data?.vehicle?.sacd?.permissions;
   const names = hex
     ? decodeSacdPermissions(hex)

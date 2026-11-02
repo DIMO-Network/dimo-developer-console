@@ -50,10 +50,14 @@ export const Brand: FC<Props> = ({ license }) => {
         });
         if (cancelled) return;
         if (!ws?.id) {
-          Sentry.captureMessage('[Brand] no workspace resolved for license', {
-            extra: { tokenId: licenseTokenId, workspace: ws },
-          });
-          setLoadError('Could not load your workspace. Re-login and try again.');
+          // Only the owner can create it: for anyone else this is an unbranded
+          // license, not a failure.
+          if (isOwner) {
+            Sentry.captureMessage('[Brand] no workspace resolved for license', {
+              extra: { license: licenseTokenId, workspace: ws },
+            });
+            setLoadError('Could not load your workspace. Re-login and try again.');
+          }
           return;
         }
         setWorkspaceId(ws.id);
@@ -116,7 +120,7 @@ export const Brand: FC<Props> = ({ license }) => {
     <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
       <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
         <h2 className="text-card-title text-ink">Brand</h2>
-        {isOwner && workspaceId && !editing && (
+        {isOwner && workspaceId && !loadError && !editing && (
           <Button type="button" variant="secondary" onClick={() => setEditing('new')}>
             Add brand
           </Button>
@@ -134,6 +138,10 @@ export const Brand: FC<Props> = ({ license }) => {
             onCancel={() => setEditing(null)}
             onSetDefault={handleSetDefault}
           />
+        ) : loadError ? (
+          <p role="alert" className="text-body-sm text-negative">
+            {loadError}
+          </p>
         ) : (
           <div className="flex flex-col">
             {brands.length === 0 ? (

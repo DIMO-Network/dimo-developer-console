@@ -1,3 +1,4 @@
+import { ALL_VEHICLE_PERMISSIONS } from '@/utils/sacdPermissions';
 import { useCallback } from 'react';
 import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
 import { useContractGA, useGlobalAccount } from '@/hooks';
@@ -18,10 +19,6 @@ const ERC721_TRANSFER_TOPIC = keccak256(toBytes('Transfer(address,address,uint25
 
 const ZERO_ADDRESS_PADDED =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
-
-// All 8 DIMO permissions (bits 1–8): non-location telemetry, commands,
-// current location, all-time location, credentials, streams, raw data, approximate location
-const ALL_PERMISSIONS = BigInt(510);
 
 // ~75 years — effectively permanent for a test vehicle
 const SACD_EXPIRATION = BigInt(4102444800);
@@ -144,7 +141,7 @@ export const useMintVehicle = () => {
                   configuration.VEHICLE_NFT_ADDRESS,
                   BigInt(tokenId),
                   sacdGrantee,
-                  ALL_PERMISSIONS,
+                  ALL_VEHICLE_PERMISSIONS,
                   SACD_EXPIRATION,
                   sacdSource,
                 ],

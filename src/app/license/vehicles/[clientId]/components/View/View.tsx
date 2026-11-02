@@ -28,7 +28,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     variables: { clientId },
   });
   const { data: defsData } = useQuery(VEHICLES_BY_CLIENT_ID, {
-    variables: { clientId, first: 1000 },
+    variables: { clientId, first: 100 },
     skip: !IS_TESTNET,
   });
 

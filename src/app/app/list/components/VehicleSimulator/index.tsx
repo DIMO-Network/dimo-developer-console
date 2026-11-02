@@ -1,4 +1,5 @@
 'use client';
+import { mintNotice, removalNotice } from './notices';
 import { FC, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Abi } from 'viem';
@@ -145,7 +146,8 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
       console.log('[VehicleSimulator] Vehicle removed', { vehicleId, tokenId });
-      toast.success('Vehicle removed successfully');
+      const removal = removalNotice(burnResult.success);
+      toast[removal.tone](removal.message);
     } catch (e) {
       console.error('[VehicleSimulator] Delete error', e);
       toast.error(e instanceof Error ? e.message : 'Failed to remove vehicle');
@@ -226,7 +228,15 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       });
 
       if (!recordResult.success) {
+        // Without the record there's no row to remove the vehicle from later.
         console.warn('[VehicleSimulator] Failed to record vehicle', recordResult);
+        const notice = mintNotice({
+          tokenId: result.tokenId,
+          recorded: false,
+          registered: false,
+        });
+        toast[notice.tone](notice.message);
+        return;
       }
 
       console.log('[VehicleSimulator] Registering vehicle with simulator', {
@@ -248,7 +258,12 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
 
       console.log('[VehicleSimulator] Mint complete — tokenId', result.tokenId);
-      toast.success('Vehicle minted successfully!');
+      const notice = mintNotice({
+        tokenId: result.tokenId,
+        recorded: true,
+        registered: registration.status !== 'registration_failed',
+      });
+      toast[notice.tone](notice.message);
     } catch (e) {
       console.error('[VehicleSimulator] Mint error', e);
       toast.error(

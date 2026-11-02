@@ -2,6 +2,7 @@ import {
   decodeSacdPermissions,
   permissionLabels,
   permissionNames,
+  ALL_VEHICLE_PERMISSIONS,
 } from '@/utils/sacdPermissions';
 
 // pairs 1,3,4,7 granted
@@ -30,5 +31,13 @@ describe('sacd permissions', () => {
   it('shows unknown ids as their number', () => {
     const odd = '0x' + (3n << 40n).toString(16);
     expect(permissionLabels(odd)).toEqual(['Privilege 20']);
+  });
+});
+
+describe('ALL_VEHICLE_PERMISSIONS', () => {
+  it('grants every permission a signed vehicle SACD lists', () => {
+    expect(decodeSacdPermissions(ALL_VEHICLE_PERMISSIONS.toString(16))).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8,
+    ]);
   });
 });

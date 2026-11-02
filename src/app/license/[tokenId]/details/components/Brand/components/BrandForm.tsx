@@ -2,7 +2,6 @@
 import React, { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as Sentry from '@sentry/nextjs';
-import { isAxiosError } from 'axios';
 
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
@@ -18,6 +17,7 @@ import {
 } from '@/actions/brand';
 import { ImagePicker } from './ImagePicker';
 import type { BrandView } from '@/services/brand';
+import type { ApiResult } from '@/types/team';
 import { contrastRatio, HEX_COLOR_RE } from '@/utils/colorContrast';
 
 const DEFAULT_PRIMARY_COLOR = '#000000'; // token-check:allow (color-input value)
@@ -41,6 +41,8 @@ interface FormInputs {
   name: string;
   primaryColor: string;
 }
+
+type Failure = Extract<ApiResult<unknown>, { ok: false }>;
 
 interface Props {
   /** null = creating a new brand */
@@ -75,6 +77,7 @@ export const BrandForm: FC<Props> = ({
     handleSubmit,
     reset,
     watch,
+    setError,
     setValue,
     formState: { errors, isDirty, dirtyFields },
   } = useForm<FormInputs>({
@@ -90,18 +93,37 @@ export const BrandForm: FC<Props> = ({
     watchedColor && HEX_COLOR_RE.test(watchedColor) ? lowContrastModes(watchedColor) : [];
   const showRenameWarning = isExisting && !!dirtyFields.name;
 
+  const saveFailed = (failure: Failure) => {
+    Sentry.captureException(
+      new Error(`Saving a brand failed (${failure.status}): ${failure.message}`),
+    );
+    toast.error('Failed to save brand');
+  };
+
+  const imageRefused = (failure: Failure) => {
+    if (failure.status !== 400) return saveFailed(failure);
+    toast.error('That image was refused. Use a PNG, JPEG, WebP, or SVG up to 2 MB.');
+  };
+
+  const brandRefused = (failure: Failure) => {
+    if (failure.code !== 'BRAND_NAME_TAKEN') return saveFailed(failure);
+    setError('name', { message: 'A brand with this name already exists' });
+  };
+
   const onSubmit = async ({ name, primaryColor }: FormInputs) => {
     setSaving(true);
     try {
       let nextLogoCid = logoCid;
       let nextIconCid = iconCid;
       if (logoFile) {
-        const r = await uploadMyBrandAsset(workspaceId, logoFile);
-        nextLogoCid = r.cid;
+        const upload = await uploadMyBrandAsset(workspaceId, logoFile);
+        if (!upload.ok) return imageRefused(upload);
+        nextLogoCid = upload.data.cid;
       }
       if (iconFile) {
-        const r = await uploadMyBrandAsset(workspaceId, iconFile);
-        nextIconCid = r.cid;
+        const upload = await uploadMyBrandAsset(workspaceId, iconFile);
+        if (!upload.ok) return imageRefused(upload);
+        nextIconCid = upload.data.cid;
       }
       const patch = {
         name: name || null,
@@ -110,10 +132,12 @@ export const BrandForm: FC<Props> = ({
         primaryColor:
           primaryColor && HEX_COLOR_RE.test(primaryColor) ? primaryColor : null,
       };
-      const updated = isExisting
+      const saved = isExisting
         ? await updateMyBrandById(workspaceId, brand.id, patch)
         : await createMyBrand(workspaceId, patch);
+      if (!saved.ok) return brandRefused(saved);
 
+      const updated = saved.data;
       onSave(updated);
       reset({ name: updated.name ?? '', primaryColor: updated.primaryColor ?? '' });
       setLogoCid(updated.logoCid);
@@ -122,12 +146,9 @@ export const BrandForm: FC<Props> = ({
       setIconFile(null);
       toast.success('Brand saved');
     } catch (error) {
-      if (isAxiosError(error) && error.response?.status === 409) {
-        toast.error('A brand with this name already exists');
-      } else {
-        Sentry.captureException(error);
-        toast.error('Failed to save brand');
-      }
+      // The action itself failed: the network, a deploy, or a body over the limit.
+      Sentry.captureException(error);
+      toast.error('Failed to save brand');
     } finally {
       setSaving(false);
     }
@@ -148,7 +169,9 @@ export const BrandForm: FC<Props> = ({
     }
   };
 
-  const dirty = isDirty || !!logoFile || !!iconFile;
+  const imageRemoved =
+    logoCid !== (brand?.logoCid ?? null) || iconCid !== (brand?.iconCid ?? null);
+  const dirty = isDirty || !!logoFile || !!iconFile || imageRemoved;
 
   return (
     <form className="flex flex-col gap-6 pt-4 pb-2" onSubmit={handleSubmit(onSubmit)}>
@@ -176,7 +199,7 @@ export const BrandForm: FC<Props> = ({
       <ImagePicker
         label="Logo"
         hint="Wide brand mark shown on the Login with DIMO button and at the top of the sign-in window. PNG, JPEG, WebP, or SVG."
-        currentUrl={brand?.logoUrl ?? null}
+        currentUrl={logoCid ? (brand?.logoUrl ?? null) : null}
         file={logoFile}
         onFile={setLogoFile}
         onClear={() => {
@@ -190,7 +213,7 @@ export const BrandForm: FC<Props> = ({
       <ImagePicker
         label="Icon"
         hint="Square mark. Login with DIMO doesn't show it yet. PNG, JPEG, WebP, or SVG."
-        currentUrl={brand?.iconUrl ?? null}
+        currentUrl={iconCid ? (brand?.iconUrl ?? null) : null}
         file={iconFile}
         onFile={setIconFile}
         onClear={() => {

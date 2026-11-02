@@ -51,7 +51,7 @@ export const useSetRedirectUri = (tokenId: number) => {
           }),
         },
       ];
-      await processTransactions(transaction);
+      assertUserOperation(await processTransactions(transaction));
     },
     [processTransactions, tokenId, validateCurrentSession],
   );
@@ -186,7 +186,7 @@ export const usePayLicenseFee = () => {
     }
     transactions.push(...(await prepareIssueInDC(desiredTokenAmount, enoughBalance)));
     if (transactions.length) {
-      await processTransactions(transactions);
+      assertUserOperation(await processTransactions(transactions));
     }
     return { success: true };
   }, [checkEnoughBalance, getDesiredTokenAmount, mintDCX, processTransactions]);
@@ -196,7 +196,7 @@ export const useMintLicense = () => {
   const { processTransactions } = useContractGA();
   return useCallback(
     async (licenseName: string) => {
-      return processTransactions(
+      const result = await processTransactions(
         [
           {
             to: configuration.DLC_ADDRESS,
@@ -210,6 +210,8 @@ export const useMintLicense = () => {
         ],
         { abi: DimoLicenseABI as Abi },
       );
+      assertUserOperation(result);
+      return result;
     },
     [processTransactions],
   );

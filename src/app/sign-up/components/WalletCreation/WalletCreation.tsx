@@ -7,7 +7,7 @@ import * as Sentry from '@sentry/nextjs';
 
 import { createUserGlobalAccount } from '@/actions/user';
 import { PasskeySignup } from '@/app/sign-up/components/WalletCreation/PasskeySignup';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { IPasskeyAttestation } from '@/types/wallet';
 import { OtpSignup } from './OtpSignup';
 import { isNull } from 'lodash';
@@ -49,6 +49,7 @@ const WalletCreationForm = ({
 };
 
 export const WalletCreation: FC<IProps> = ({ onNext }) => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { trackEvent } = useMixPanel();
   const [email, setEmail] = useState<string>('');
@@ -59,6 +60,13 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
   const { setUser, loginWithPasskey } = useAuth();
 
   const { isPasskeyAvailable, getNewUserPasskey } = usePasskey();
+
+  // This screen is a spinner: a failure has to leave it. Sign-in picks up an
+  // account that got as far as a global account.
+  const giveUp = () => {
+    toast.error('Something went wrong while creating the user wallet');
+    router.replace('/sign-in');
+  };
 
   const tryCreatePasskey = async (
     email: string,
@@ -120,7 +128,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     } catch (error) {
       Sentry.captureException(error);
       console.error('Something went wrong while creating the user wallet', error);
-      toast.error('Something went wrong while creating the user wallet');
+      giveUp();
     }
   };
 
@@ -157,7 +165,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     } catch (error: unknown) {
       Sentry.captureException(error);
       console.error('Something went wrong while creating the user wallet', error);
-      toast.error('Something went wrong while creating the user wallet');
+      giveUp();
     }
   };
 
@@ -167,16 +175,16 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
       return;
     }
 
-    const { success, newWalletAddress } = await loginWithPasskey({
-      existOnDevConsole: false,
-    });
-
-    if (!success) {
-      toast.error('Something went wrong while creating the user wallet');
-      return;
+    try {
+      const { success, newWalletAddress } = await loginWithPasskey({
+        existOnDevConsole: false,
+      });
+      if (!success) return giveUp();
+      globalAccountSignupComplete(newWalletAddress!);
+    } catch (error) {
+      Sentry.captureException(error);
+      giveUp();
     }
-
-    globalAccountSignupComplete(newWalletAddress!);
   };
 
   useEffect(() => {
@@ -188,7 +196,10 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
     if (isNull(isPasskeyAvailable)) return;
     const email = searchParams.get('email');
     const hasGlobalAccount = searchParams.get('hasGlobalAccount');
-    if (!email) return;
+    if (!email) {
+      router.replace('/sign-in');
+      return;
+    }
     setEmail(email);
     if (hasGlobalAccount === 'true') {
       void handleUserAlreadyHasGlobalAccount(email);
