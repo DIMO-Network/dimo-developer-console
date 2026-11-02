@@ -78,6 +78,18 @@ describe('proxy without a session', () => {
     expect(res.status).toBe(401);
   });
 
+  // The vehicle page reads `code` to say the session ended; older readers
+  // still read `message`.
+  it('tells API callers the session has expired, and keeps message', async () => {
+    const res = await run(request('/api/data/telemetry'));
+    expect(res.status).toBe(401);
+    await expect(res.json()).resolves.toEqual({
+      error: 'Your session has expired',
+      code: 'SESSION_EXPIRED',
+      message: 'Unauthorized Access',
+    });
+  });
+
   it('treats an expired token as signed out instead of failing', async () => {
     (decodeJwtToken as jest.Mock).mockRejectedValue(
       Object.assign(new Error('"exp" claim timestamp check failed'), {

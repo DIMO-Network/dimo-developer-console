@@ -126,6 +126,29 @@ describe('postSubjectQuery error codes', () => {
     });
   });
 
+  it('throws SESSION_EXPIRED when the console session itself has ended', async () => {
+    answer(401, {
+      error: 'Your session has expired',
+      code: 'SESSION_EXPIRED',
+      message: 'Unauthorized Access',
+    });
+    await expect(query()).rejects.toMatchObject({
+      status: 401,
+      code: 'SESSION_EXPIRED',
+      message: 'Your session has expired',
+    });
+  });
+
+  it('does not call a refused developer JWT a session expiry', async () => {
+    answer(401, { error: 'Developer JWT required', code: 'DEV_JWT_INVALID' });
+    await expect(query()).rejects.toMatchObject({ code: 'DEV_JWT_INVALID' });
+  });
+
+  it('does not call a bare 401 a session expiry', async () => {
+    answer(401, { message: 'Unauthorized Access' });
+    await expect(query()).rejects.toMatchObject({ status: 401, code: 'UPSTREAM' });
+  });
+
   it('turns an unknown code into UNKNOWN, keeping the message', async () => {
     answer(400, { error: 'Bad client id', code: 'SOMETHING_NEW' });
     const error = await query().catch((e: DataApiError) => e);

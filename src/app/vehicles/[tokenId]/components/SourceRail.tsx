@@ -11,6 +11,7 @@ export type Access =
   | 'not-shared'
   | 'no-jwt'
   | 'jwt-expired'
+  | 'session-expired'
   | 'no-access'
   | 'removed'
   | 'reconnect'
@@ -36,6 +37,7 @@ const ACCESS_LABEL: Record<Exclude<Access, 'ok'>, string> = {
   'not-shared': 'No access',
   'no-jwt': 'Needs a developer JWT',
   'jwt-expired': 'Needs a new developer JWT',
+  'session-expired': 'Session expired',
   'no-access': 'No data access',
   'removed': 'No data access',
   'reconnect': 'Reconnect your wallet',

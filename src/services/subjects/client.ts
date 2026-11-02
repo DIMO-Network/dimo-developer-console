@@ -7,6 +7,7 @@ export type GqlResult<T> = { data: T | null; errors?: GqlError[] };
 export type DataApiCode =
   | 'DEV_JWT_MISSING'
   | 'DEV_JWT_INVALID'
+  | 'SESSION_EXPIRED'
   | 'NOT_SHARED'
   | 'NO_ACCESS'
   | 'ACCESS_CHECK_FAILED'
@@ -18,6 +19,7 @@ export type DataApiCode =
 const KNOWN_CODES = new Set<string>([
   'DEV_JWT_MISSING',
   'DEV_JWT_INVALID',
+  'SESSION_EXPIRED',
   'NOT_SHARED',
   'NO_ACCESS',
   'ACCESS_CHECK_FAILED',
