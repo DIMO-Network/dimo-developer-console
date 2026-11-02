@@ -11,8 +11,7 @@ jest.mock('@/hooks/useIsLicenseOwner', () => ({
 }));
 
 jest.mock('@/actions/workspace', () => ({
-  getWorkspace: jest.fn().mockResolvedValue({ id: 'ws-1' }),
-  getWorkspaceByTokenId: jest.fn().mockResolvedValue({ id: 'ws-1' }),
+  getOrCreateLicenseWorkspace: jest.fn(),
 }));
 
 jest.mock('@/actions/brand', () => ({
@@ -20,9 +19,18 @@ jest.mock('@/actions/brand', () => ({
   deleteMyBrand: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { fetchMyBrands } from '@/actions/brand';
+jest.mock('sonner', () => ({ toast: { error: jest.fn() } }));
 
-const mockLicense = { owner: '0xOwner', tokenId: 42, clientId: '0xClient' };
+import { toast } from 'sonner';
+import { fetchMyBrands } from '@/actions/brand';
+import { getOrCreateLicenseWorkspace } from '@/actions/workspace';
+
+const mockLicense = {
+  alias: 'Fleet Co',
+  owner: '0xOwner',
+  tokenId: 42,
+  clientId: '0xClient',
+};
 
 const fleetBrand = {
   id: 'b1',
@@ -37,7 +45,41 @@ const fleetBrand = {
 };
 
 describe('Brand', () => {
+  beforeEach(() =>
+    (getOrCreateLicenseWorkspace as jest.Mock).mockResolvedValue({ id: 'ws-1' }),
+  );
   afterEach(() => jest.clearAllMocks());
+
+  it('gives a new license its own workspace, named after it', async () => {
+    (fetchMyBrands as jest.Mock).mockResolvedValue([]);
+    render(<Brand license={mockLicense as never} />);
+    await waitFor(() => expect(screen.getByText('No brand set.')).toBeInTheDocument());
+    expect(getOrCreateLicenseWorkspace).toHaveBeenCalledWith({
+      name: 'Fleet Co',
+      token_id: 42,
+      client_id: '0xClient',
+      owner: '0xOwner',
+    });
+    expect(fetchMyBrands).toHaveBeenCalledWith('ws-1');
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('names the workspace after the token when the license has no alias', async () => {
+    (fetchMyBrands as jest.Mock).mockResolvedValue([]);
+    render(<Brand license={{ ...mockLicense, alias: null } as never} />);
+    await waitFor(() => expect(screen.getByText('No brand set.')).toBeInTheDocument());
+    expect(getOrCreateLicenseWorkspace).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'License #42' }),
+    );
+  });
+
+  it('offers no brand form when there is no workspace to save to', async () => {
+    (getOrCreateLicenseWorkspace as jest.Mock).mockResolvedValue(null);
+    render(<Brand license={mockLicense as never} />);
+    await waitFor(() => expect(toast.error).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByText('No brand set.')).toBeInTheDocument());
+    expect(screen.queryByText('Add brand')).not.toBeInTheDocument();
+  });
 
   it('shows loading state initially', () => {
     (fetchMyBrands as jest.Mock).mockReturnValue(new Promise(() => {}));

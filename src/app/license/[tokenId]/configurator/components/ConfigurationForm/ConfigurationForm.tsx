@@ -17,7 +17,7 @@ import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { DatePicker } from '@/components/DatePicker';
 import { fetchMyBrands } from '@/actions/brand';
-import { getWorkspace, getWorkspaceByTokenId } from '@/actions/workspace';
+import { getWorkspaceByTokenId } from '@/actions/workspace';
 import { OutputPrint } from '@/app/license/[tokenId]/configurator/components/OutputPrint/OutputPrint';
 import { configurationLink } from '@/app/license/[tokenId]/configurator/utils/configuration';
 import { OwnerAction } from '@/components/OwnerOnly';
@@ -96,8 +96,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
   useEffect(() => {
     const load = async () => {
       try {
-        const ws =
-          (await getWorkspaceByTokenId(fragment.tokenId)) ?? (await getWorkspace());
+        const ws = await getWorkspaceByTokenId(fragment.tokenId);
         if (!ws?.id) return;
         const brands = await fetchMyBrands(ws.id);
         setBrandNames(brands.map((b) => b.name).filter((n): n is string => !!n));

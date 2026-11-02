@@ -16,7 +16,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 type Documents = {
     "\n  fragment UserConfigurationFragment on DeveloperLicense {\n    tokenId\n    clientId\n    owner\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.UserConfigurationFragmentFragmentDoc,
     "\n  query DeveloperLicenseInfo($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment\n      ...SignerFragment\n      ...RedirectUriFragment\n      ...DeveloperLicenseVehiclesFragment\n      ...DeveloperJwtsFragment\n      ...UserConfigurationFragment\n    }\n  }\n": typeof types.DeveloperLicenseInfoDocument,
-    "\n  fragment BrandFragment on DeveloperLicense {\n    owner\n    tokenId\n    clientId\n  }\n": typeof types.BrandFragmentFragmentDoc,
+    "\n  fragment BrandFragment on DeveloperLicense {\n    alias\n    owner\n    tokenId\n    clientId\n  }\n": typeof types.BrandFragmentFragmentDoc,
     "\n  fragment DeveloperJwtsFragment on DeveloperLicense {\n    owner\n    clientId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.DeveloperJwtsFragmentFragmentDoc,
     "\n  fragment RedirectUriFragment on DeveloperLicense {\n    owner\n    tokenId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.RedirectUriFragmentFragmentDoc,
     "\n  fragment SignerFragment on DeveloperLicense {\n    owner\n    clientId\n    tokenId\n    signers(first:100) {\n      nodes {\n        address\n        enabledAt\n      }\n    }\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": typeof types.SignerFragmentFragmentDoc,
@@ -40,7 +40,7 @@ type Documents = {
 const documents: Documents = {
     "\n  fragment UserConfigurationFragment on DeveloperLicense {\n    tokenId\n    clientId\n    owner\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.UserConfigurationFragmentFragmentDoc,
     "\n  query DeveloperLicenseInfo($tokenId: Int!) {\n    developerLicense(by: {tokenId: $tokenId}) {\n      ...DeveloperLicenseSummaryFragment\n      ...SignerFragment\n      ...RedirectUriFragment\n      ...DeveloperLicenseVehiclesFragment\n      ...DeveloperJwtsFragment\n      ...UserConfigurationFragment\n    }\n  }\n": types.DeveloperLicenseInfoDocument,
-    "\n  fragment BrandFragment on DeveloperLicense {\n    owner\n    tokenId\n    clientId\n  }\n": types.BrandFragmentFragmentDoc,
+    "\n  fragment BrandFragment on DeveloperLicense {\n    alias\n    owner\n    tokenId\n    clientId\n  }\n": types.BrandFragmentFragmentDoc,
     "\n  fragment DeveloperJwtsFragment on DeveloperLicense {\n    owner\n    clientId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.DeveloperJwtsFragmentFragmentDoc,
     "\n  fragment RedirectUriFragment on DeveloperLicense {\n    owner\n    tokenId\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.RedirectUriFragmentFragmentDoc,
     "\n  fragment SignerFragment on DeveloperLicense {\n    owner\n    clientId\n    tokenId\n    signers(first:100) {\n      nodes {\n        address\n        enabledAt\n      }\n    }\n    redirectURIs(first:100) {\n      nodes {\n        uri\n      }\n    }\n  }\n": types.SignerFragmentFragmentDoc,
@@ -87,7 +87,7 @@ export function gql(source: "\n  query DeveloperLicenseInfo($tokenId: Int!) {\n 
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment BrandFragment on DeveloperLicense {\n    owner\n    tokenId\n    clientId\n  }\n"): (typeof documents)["\n  fragment BrandFragment on DeveloperLicense {\n    owner\n    tokenId\n    clientId\n  }\n"];
+export function gql(source: "\n  fragment BrandFragment on DeveloperLicense {\n    alias\n    owner\n    tokenId\n    clientId\n  }\n"): (typeof documents)["\n  fragment BrandFragment on DeveloperLicense {\n    alias\n    owner\n    tokenId\n    clientId\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

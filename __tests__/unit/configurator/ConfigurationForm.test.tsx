@@ -10,7 +10,6 @@ jest.mock('@/gql', () => ({
 jest.mock('@/actions/brand', () => ({ fetchMyBrands: jest.fn().mockResolvedValue([]) }));
 jest.mock('@/actions/workspace', () => ({
   getWorkspaceByTokenId: jest.fn().mockResolvedValue(null),
-  getWorkspace: jest.fn().mockResolvedValue(null),
 }));
 jest.mock('@/hooks/useTeam', () => ({ useTeam: () => ({ isOwner: true }) }));
 jest.mock('react-syntax-highlighter', () => ({
