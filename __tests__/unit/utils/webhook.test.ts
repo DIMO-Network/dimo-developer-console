@@ -74,10 +74,32 @@ describe('formatAndGenerateCEL', () => {
     );
   });
 
-  it('should throw if the field is not in conditionsConfig', () => {
+  it('saves a metric outside the list with a numeric value', () => {
     const cel = {
-      conditions: [{ field: 'unknownField', operator: '==', value: '1' }],
+      conditions: [{ field: 'somethingNew', operator: '>', value: '5' }],
     };
-    expect(() => formatAndGenerateCEL(cel)).toThrow('Could not find condition config');
+    expect(formatAndGenerateCEL(cel)).toEqual({
+      metricName: 'somethingNew',
+      condition: 'valueNumber > 5',
+    });
+  });
+
+  it('saves a metric outside the list with a text value', () => {
+    const cel = {
+      conditions: [{ field: 'somethingNew', operator: '==', value: 'abc' }],
+    };
+    const result = formatAndGenerateCEL(cel);
+    expect(result.metricName).toBe('somethingNew');
+    expect(result.condition).toMatch(/^valueString == /);
+  });
+
+  it('keeps the type of a listed metric', () => {
+    // A listed numeric metric stays numeric even when its value is not a number.
+    const speed = { conditions: [{ field: 'vss.speed', operator: '>', value: 'abc' }] };
+    expect(formatAndGenerateCEL(speed).condition).toBe('valueNumber > abc');
+    const ignition = {
+      conditions: [{ field: 'vss.isIgnitionOn', operator: '==', value: '1' }],
+    };
+    expect(formatAndGenerateCEL(ignition).condition).toBe('valueNumber == 1');
   });
 });

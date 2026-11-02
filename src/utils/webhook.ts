@@ -192,8 +192,9 @@ export const validateCel = (cel: { conditions: Condition[] }) => {
 
 const getValueType = (condition: Condition) => {
   const conditionConfig = conditionsConfig.find((it) => it.field === condition.field);
+  // A metric outside the list has no declared type: go by what was typed.
   if (!conditionConfig) {
-    throw new Error('Could not find condition config');
+    return Number.isNaN(Number(condition.value)) ? 'valueString' : 'valueNumber';
   }
   return conditionConfig.inputType === 'number' || conditionConfig.inputType === 'boolean'
     ? 'valueNumber'
