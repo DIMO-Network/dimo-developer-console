@@ -14,6 +14,7 @@ export const DEVELOPER_LICENSE_VEHICLES_FRAGMENT = gql(`
   fragment DeveloperLicenseVehiclesFragment on DeveloperLicense {
     clientId
     tokenId
+    owner
   }
 `);
 
@@ -65,12 +66,12 @@ export const Vehicles: FC<IProps> = ({ license }) => {
             Vehicle list
           </Button>
         </Link>
-        <OwnerAction>
+        <OwnerAction licenseOwner={fragment.owner}>
           <div className="flex-1 [&>button]:w-full">
             <VehicleSimulatorModal clientId={fragment.clientId as `0x${string}`} />
           </div>
         </OwnerAction>
-        <OwnerAction>
+        <OwnerAction licenseOwner={fragment.owner}>
           <Button
             variant="secondary"
             className="flex-1"
