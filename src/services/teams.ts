@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import { AxiosError, type AxiosInstance } from 'axios';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 import type {
@@ -12,6 +13,9 @@ import type {
 
 export const toFailure = (error: unknown): ApiResult<never> => {
   if (error instanceof AxiosError && error.response) {
+    // A refusal below 500 is the API answering as designed. A 5xx is not, and
+    // returning it as a value means it never throws, so report it here.
+    if (error.response.status >= 500) Sentry.captureException(error);
     const body = error.response.data as { message?: string; code?: string } | undefined;
     return {
       ok: false,
@@ -20,6 +24,8 @@ export const toFailure = (error: unknown): ApiResult<never> => {
       message: body?.message ?? error.message,
     };
   }
+  // No answer at all (socket hang up, DNS, timeout, a bug before the request).
+  Sentry.captureException(error);
   return {
     ok: false,
     status: 0,
