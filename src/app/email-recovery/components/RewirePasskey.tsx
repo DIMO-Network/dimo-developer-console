@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 import { EmbeddedKey, getFromLocalStorage } from '@/utils/localStorage';
+import { emailFromRecoveryLink } from '@/utils/recoveryEmail';
 import { getUserInformation, saveNewPasskey } from '@/actions/user';
 
 import { getTurnkeyClient } from '@/services/turnkey';
@@ -93,7 +94,7 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
 
   useEffect(() => {
     const recoveryKey = params.get('token');
-    const email = params.get('email');
+    const email = emailFromRecoveryLink(params.get('email'));
     if (recoveryKey && email) {
       void handleRewirePasskey({ recoveryKey, email });
     }
