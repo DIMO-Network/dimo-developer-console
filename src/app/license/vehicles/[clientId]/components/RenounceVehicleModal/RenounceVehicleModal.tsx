@@ -52,7 +52,7 @@ export const RenounceVehicleModal: FC<Props> = ({ vehicle, onConfirm, onClose })
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <WarningAmberIcon className="h-6 w-6 flex-shrink-0 text-warning" />
+          <WarningAmberIcon className="h-6 w-6 shrink-0 text-warning" />
           <Title component="h2" className="text-panel-title">
             Renounce vehicle access?
           </Title>

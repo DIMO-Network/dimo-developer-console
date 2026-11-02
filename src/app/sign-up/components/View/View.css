@@ -1,3 +1,5 @@
+@reference '../../../globals.css';
+
 .sign-up {
   @apply flex flex-row justify-center gap-4;
 

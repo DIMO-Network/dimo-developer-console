@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { MockedProvider } from '@apollo/client/testing';
+import { MockedProvider } from '@apollo/client/testing/react';
 
 jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn() }));
 import { useTeam } from '@/hooks/useTeam';

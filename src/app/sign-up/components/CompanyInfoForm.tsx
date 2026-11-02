@@ -90,9 +90,8 @@ const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
       <Label htmlFor="region">
         Main operating region *
         <SelectField
-          {...register('region', {
-            required: 'This field is required',
-          })}
+          name="region"
+          rules={{ required: 'This field is required' }}
           options={regionOptions}
           control={control}
           placeholder="Select"
@@ -146,9 +145,8 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
       <Label htmlFor="region">
         Region *
         <SelectField
-          {...register('region', {
-            required: 'This field is required',
-          })}
+          name="region"
+          rules={{ required: 'This field is required' }}
           options={regionOptions}
           control={control}
           placeholder="Select"
@@ -201,9 +199,8 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
           <Label htmlFor="type">
             Business/developer type *
             <SelectField
-              {...register('type', {
-                required: 'This field is required',
-              })}
+              name="type"
+              rules={{ required: 'This field is required' }}
               options={typeOptions}
               control={control}
               placeholder="Select"

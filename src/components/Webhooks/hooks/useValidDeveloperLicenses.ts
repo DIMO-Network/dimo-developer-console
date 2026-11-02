@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { DeveloperLicenseForWebhook, LocalDeveloperLicense } from '@/types/webhook';
 import { gql } from '@/gql';
 import { useTeam } from '@/hooks/useTeam';

@@ -2,7 +2,7 @@
 
 import { ReactNode, use } from 'react';
 import { gql } from '@/gql';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { Header } from '@/app/license/vehicles/[clientId]/components/Header';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { Loader } from '@/components/Loader';

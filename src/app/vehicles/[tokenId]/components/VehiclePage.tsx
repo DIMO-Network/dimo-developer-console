@@ -1,6 +1,6 @@
 'use client';
 import { FC, useEffect, useMemo } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import configuration from '@/config';
 import { VEHICLE_DETAIL } from '../queries';
 import { buildVehicleGraph } from '@/services/subjects/graph';

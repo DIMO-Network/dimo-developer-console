@@ -174,7 +174,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
           </Button>
           <Button
             variant="secondary"
-            className="!mt-3"
+            className="mt-3!"
             role="continue-button"
             loading={isRequestingNewOtp}
             onClick={handleResendCode}

@@ -1,7 +1,7 @@
 'use client';
 import React, { FC } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { Loader } from '@/components/Loader';
 import Link from 'next/link';
 import { Button } from '@/components/Button';

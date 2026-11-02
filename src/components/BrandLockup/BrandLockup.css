@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .brand-lockup {
   @apply flex h-8 items-center gap-1.5 px-2.5;
 

@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .license-card {
   @apply flex flex-row items-start justify-between rounded-card bg-card !p-0 transition-colors hover:bg-control;
 

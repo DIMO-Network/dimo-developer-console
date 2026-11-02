@@ -45,9 +45,7 @@ interface ExecuteAdvanceTransactionWithDimoProps extends SharedProps {
 }
 
 export type ComponentType =
-  | 'LoginWithDimo'
-  | 'ShareVehiclesWithDimo'
-  | 'ExecuteAdvancedTransactionWithDimo';
+  'LoginWithDimo' | 'ShareVehiclesWithDimo' | 'ExecuteAdvancedTransactionWithDimo';
 
 export type DynamicFormProps =
   | ({ component: 'LoginWithDimo' } & LoginWithDimoProps)

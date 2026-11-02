@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .date-picker {
   @apply relative w-full;
 }

@@ -1,3 +1,5 @@
+@reference '../../../globals.css';
+
 .connections-page {
   @apply flex flex-col gap-8;
 }

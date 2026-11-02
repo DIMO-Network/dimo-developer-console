@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { type FC } from 'react';
+import { type FC, type ReactNode } from 'react';
 
 import { Column, type IColumn } from './Column';
 import { Cell } from './Cell';
@@ -11,7 +11,7 @@ interface IProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  actions?: FC<any>[];
+  actions?: ((item: any, index: number) => ReactNode)[];
 }
 
 export const Table: FC<IProps> = ({ columns, data, actions }) => {

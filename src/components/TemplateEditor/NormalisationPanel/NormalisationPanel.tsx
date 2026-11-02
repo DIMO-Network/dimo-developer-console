@@ -16,7 +16,7 @@ export const NormalisationPanel: FC<Props> = ({ notes, onDismiss }) => {
   if (notes.length === 0) return null;
   return (
     <section className="flex items-start gap-3 rounded-card bg-card p-4">
-      <InformationCircleIcon className="mt-0.5 size-4 flex-shrink-0 text-muted" />
+      <InformationCircleIcon className="mt-0.5 size-4 shrink-0 text-muted" />
       <div className="flex flex-1 flex-col gap-2">
         <div className="flex items-start justify-between gap-4">
           <h2 className="text-body-sm font-medium text-ink">

@@ -12,19 +12,22 @@ const booleanValueOptions = [
 export const ValueInput = ({ index }: { index: number }) => {
   const { register, control } = useFormContext<WebhookFormInput>();
   const config = useFindTriggerConfig(index);
-  // @ts-expect-error validation type isn't strict enough
-  const registerReturn = register(`cel.conditions.${index}.value`, config.validation);
 
   if (config.inputType === 'number') {
+    // @ts-expect-error validation type isn't strict enough
+    const registerReturn = register(`cel.conditions.${index}.value`, config.validation);
     return (
       <div className={'text-field'}>
         <input {...registerReturn} placeholder="Enter a number" type="number" />
       </div>
     );
   }
+  // Not registered here as well: SelectField's Controller would drop these rules.
   return (
     <SelectField
       name={`cel.conditions.${index}.value`}
+      // @ts-expect-error validation type isn't strict enough
+      rules={config.validation}
       control={control}
       options={booleanValueOptions}
       placeholder="Select value"

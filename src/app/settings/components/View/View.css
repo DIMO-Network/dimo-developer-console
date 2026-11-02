@@ -1,3 +1,5 @@
+@reference '../../../globals.css';
+
 .settings-page {
   @apply flex flex-col gap-8;
 }

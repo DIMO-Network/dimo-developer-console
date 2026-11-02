@@ -1,3 +1,5 @@
+@reference '../../../globals.css';
+
 .vehicle-tabs {
   @apply flex w-fit max-w-full flex-row gap-0.5 overflow-x-auto rounded-full bg-control p-[3px];
 }

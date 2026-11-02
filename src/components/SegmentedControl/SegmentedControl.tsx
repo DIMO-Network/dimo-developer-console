@@ -1,27 +1,32 @@
-import { useController, Control } from 'react-hook-form';
+import { useController, Control, FieldValues, Path } from 'react-hook-form';
 
 import './SegmentedControl.css';
 
-interface SegmentedControlProps<T extends string = string> {
+interface SegmentedControlProps<
+  T extends string = string,
+  F extends FieldValues = FieldValues,
+> {
   name?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control?: Control<any>;
+  control?: Control<F>;
   value?: T;
   onChange?: (value: T) => void;
   options: { value: T; label: string }[];
   role?: string;
 }
 
-export function SegmentedControl<T extends string = string>({
+export function SegmentedControl<
+  T extends string = string,
+  F extends FieldValues = FieldValues,
+>({
   name,
   control,
   value: propValue,
   onChange: propOnChange,
   options,
   role,
-}: SegmentedControlProps<T>) {
+}: SegmentedControlProps<T, F>) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const rhf = name && control ? useController({ name, control }) : null;
+  const rhf = name && control ? useController({ name: name as Path<F>, control }) : null;
 
   const value = rhf ? rhf.field.value : propValue;
   const onChange = rhf ? rhf.field.onChange : propOnChange;

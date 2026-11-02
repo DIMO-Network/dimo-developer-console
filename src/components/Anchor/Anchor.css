@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .anchor {
   @apply cursor-pointer py-1 text-ink underline-offset-2 hover:underline;
 

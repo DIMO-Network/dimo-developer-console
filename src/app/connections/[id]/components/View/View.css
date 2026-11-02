@@ -1,3 +1,5 @@
+@reference '../../../../globals.css';
+
 .connection-details-page {
   @apply flex flex-col gap-4;
 }

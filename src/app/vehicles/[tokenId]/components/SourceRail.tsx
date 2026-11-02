@@ -102,7 +102,8 @@ export const SourceRail: FC<Props> = ({
       <FreshnessDot
         at={freshness[s.did]?.time ?? null}
         now={now}
-        className="text-label"
+        // Important: FreshnessDot's own text-body-sm comes later in Tailwind 4's CSS.
+        className="text-label!"
       />
     );
   };

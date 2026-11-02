@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .segmented-control {
   @apply flex w-fit flex-row gap-0.5 rounded-full bg-control p-[3px];
 

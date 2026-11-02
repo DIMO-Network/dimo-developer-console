@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .back-button {
   @apply py-4 cursor-pointer;
 }

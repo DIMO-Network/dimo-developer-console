@@ -209,7 +209,8 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
           <Label htmlFor="redirectUri">
             Redirect URI
             <SelectField
-              {...register('redirectUri', { required: 'Redirect URI is required' })}
+              name="redirectUri"
+              rules={{ required: 'Redirect URI is required' }}
               options={fragment.redirectURIs.nodes.map((node) => ({
                 value: node.uri,
                 text: node.uri,

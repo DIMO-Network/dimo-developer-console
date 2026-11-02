@@ -11,7 +11,7 @@ interface ConditionRowProps {
 
 export const WebhookTriggerBuilderRow = ({ index }: ConditionRowProps) => {
   const { setValue, watch, resetField, trigger } = useFormContext<WebhookFormInput>();
-  const prevFieldRef = React.useRef<string | undefined>();
+  const prevFieldRef = React.useRef<string | undefined>(undefined);
   const selectedField = watch(`cel.conditions.${index}.field`);
 
   useEffect(() => {

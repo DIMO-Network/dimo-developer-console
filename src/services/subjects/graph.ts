@@ -5,10 +5,7 @@ import { accountDid, sourceDid } from './did';
 export type VehicleDetail = NonNullable<GetVehicleDetailQuery['vehicle']>;
 
 export type SubjectKind =
-  | 'vehicle'
-  | 'aftermarket-device'
-  | 'synthetic-device'
-  | 'account';
+  'vehicle' | 'aftermarket-device' | 'synthetic-device' | 'account';
 export type SubjectCapability = 'summary' | 'signals' | 'raw' | 'trips' | 'documents';
 
 export type DetailRow = { label: string; value: string; mono?: boolean };

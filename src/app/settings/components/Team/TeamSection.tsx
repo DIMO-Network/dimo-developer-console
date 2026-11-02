@@ -46,7 +46,7 @@ const TeamSectionComponent: FC = () => {
     () => applySignerOverlay(indexedLicenses, toggles, Date.now()),
     [indexedLicenses, toggles],
   );
-  const reloadTimer = useRef<ReturnType<typeof setTimeout>>();
+  const reloadTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(reloadTimer.current), []);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [grantFor, setGrantFor] = useState<TeamMember | null>(null);

@@ -46,7 +46,7 @@ export const TeamSwitcher: FC<{ collapsed?: boolean }> = ({ collapsed = false })
       >
         <span
           aria-hidden="true"
-          className="flex size-7 flex-shrink-0 items-center justify-center rounded-chip bg-control text-label text-ink"
+          className="flex size-7 shrink-0 items-center justify-center rounded-chip bg-control text-label text-ink"
         >
           {activeTeam.name.charAt(0).toUpperCase()}
         </span>
@@ -60,7 +60,7 @@ export const TeamSwitcher: FC<{ collapsed?: boolean }> = ({ collapsed = false })
             </span>
             <ChevronUpDownIcon
               aria-hidden="true"
-              className="size-4 flex-shrink-0 text-muted"
+              className="size-4 shrink-0 text-muted"
             />
           </>
         )}

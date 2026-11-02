@@ -5,8 +5,8 @@ jest.mock('@/gql', () => ({
   gql: (s: TemplateStringsArray) => s,
   useFragment: (_def: unknown, data: unknown) => data,
 }));
-jest.mock('@apollo/client', () => ({
-  ...jest.requireActual('@apollo/client'),
+jest.mock('@apollo/client/react', () => ({
+  ...jest.requireActual('@apollo/client/react'),
   useQuery: () => ({ data: { vehicles: { totalCount: 6 } }, loading: false }),
 }));
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));

@@ -1,4 +1,4 @@
-import { withSentryConfig } from '@sentry/nextjs';
+import { withSentryConfig } from '@sentry/nextjs/config';
 
 const cspHeader = `
     default-src 'self';
@@ -26,24 +26,10 @@ const nextConfig = {
     allowedOrigins: ['console.dimo.org', 'console-staging.dimo.org'],
   },
   transpilePackages: ['@dimo-network/data-sdk'],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   env: {
     VERCEL_ENV: process.env.VERCEL_ENV,
     JWT_KEY_SET_URL: process.env.JWT_KEY_SET_URL,
     JWT_ISSUER: process.env.JWT_ISSUER,
-  },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
-    }
-    return config;
   },
   logging: {
     fetches: {

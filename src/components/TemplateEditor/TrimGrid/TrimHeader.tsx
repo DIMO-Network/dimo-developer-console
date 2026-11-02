@@ -20,7 +20,7 @@ export const TrimHeader: FC<Props> = ({ trim, multiTrim }) => {
   const missing = multiTrim && !hasEffectiveSelector(trim.selectors);
 
   return (
-    <div className="flex min-w-[9rem] flex-col gap-0.5 px-3 py-2 text-left">
+    <div className="flex min-w-36 flex-col gap-0.5 px-3 py-2 text-left">
       <span className="text-body-sm font-medium text-ink">{trim.name}</span>
       {missing ? (
         <span className="text-label text-negative">no selector</span>

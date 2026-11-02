@@ -1,25 +1,23 @@
 // @ts-check
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import js from '@eslint/js';
+import nextVitals from 'eslint-config-next/core-web-vitals';
 import ts from 'typescript-eslint';
 import prettierConfigRecommended from 'eslint-plugin-prettier/recommended';
 import pluginQuery from '@tanstack/eslint-plugin-query';
-import { FlatCompat } from '@eslint/eslintrc';
-import { fixupConfigRules } from '@eslint/compat';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-const patchedConfig = fixupConfigRules([...compat.extends('next/core-web-vitals')]);
 
 const config = [
-  ...patchedConfig,
+  ...nextVitals,
+  {
+    // eslint-config-next 16 brings react-hooks 7, whose React Compiler rules
+    // flag code written before them. The console doesn't use the compiler;
+    // these stay off until that code is reworked on purpose.
+    rules: {
+      'react-hooks/globals': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+    },
+  },
   ...ts.configs.recommended,
   ...pluginQuery.configs['flat/recommended'],
   prettierConfigRecommended,

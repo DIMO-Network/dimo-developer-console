@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .guest-layout {
   @apply relative flex min-h-screen flex-col items-center justify-center bg-canvas bg-brand-glow px-4 py-12;
 

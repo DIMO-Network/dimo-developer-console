@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .label {
   @apply flex flex-col gap-2 text-label text-muted;
 }

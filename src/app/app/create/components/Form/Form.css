@@ -1,3 +1,5 @@
+@reference '../../../../globals.css';
+
 /*
  * Scoped on purpose. This was a bare `form` selector, which is not scoped to
  * this component at all: once the chunk was on the page it styled EVERY form

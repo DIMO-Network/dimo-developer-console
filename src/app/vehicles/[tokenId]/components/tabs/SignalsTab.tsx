@@ -187,7 +187,7 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             </NativeSelect>
           </label>
           <TimeRangePicker value={range} onChange={setRange} />
-          <div className="flex-grow" />
+          <div className="grow" />
           <Button
             variant="ghost"
             onClick={() =>

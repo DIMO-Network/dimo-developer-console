@@ -1,6 +1,6 @@
 'use client';
 import { Suspense } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { gql } from '@/gql';
 import { useTeam } from '@/hooks/useTeam';
 import { Loader } from '@/components/Loader';

@@ -21,15 +21,15 @@ jest.mock('@/services/user', () => ({
   }),
 }));
 jest.mock('@/services/globalAccount', () => ({ getUserSubOrganization: jest.fn() }));
-import { middleware } from '@/middleware';
+import { proxy } from '@/proxy';
 
 const TOKEN = 'Qm9vdHN0cmFwX3Rva2VuX2Zvcl90ZXN0aW5nXzEyMzQ1Ng';
 
-describe('middleware and invite links', () => {
+describe('proxy and invite links', () => {
   it('keeps the invite even when the session check would fail and redirect', async () => {
-    const res = (await middleware(
+    const res = (await proxy(
       new NextRequest(`http://console.test/sign-in?invite=${TOKEN}`),
-      {} as never,
+      { waitUntil: jest.fn() } as never,
     )) as Response & { cookies: { get: (n: string) => { value: string } | undefined } };
     expect(res.status).toBe(307);
     expect(new URL(res.headers.get('location')!).searchParams.get('invite')).toBeNull();

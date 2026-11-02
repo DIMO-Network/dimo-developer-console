@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .text-field {
   @apply flex min-h-10 flex-row items-center rounded-control border border-control-border bg-control px-3 text-fg transition-[border-color,box-shadow] focus-within:border-focus-ring focus-within:ring-[3px] focus-within:ring-accent-soft;
 

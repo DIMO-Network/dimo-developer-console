@@ -1,3 +1,5 @@
+@reference '../../../globals.css';
+
 .support-form-modal {
   .dialog-panel {
     @apply min-w-[95vw] min-h-[95vh] ml-auto mr-auto my-auto md:m-auto md:h-auto md:min-w-[480px] md:min-h-0 p-6;

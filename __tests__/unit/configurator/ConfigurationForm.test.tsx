@@ -85,6 +85,13 @@ describe('ConfigurationForm', () => {
     await waitFor(() => expect(submit).toHaveBeenCalled());
   });
 
+  it('needs a redirect URI', async () => {
+    const submit = renderForm({ component: 'LoginWithDimo', redirectUri: '' });
+    save();
+    expect(await screen.findByText('Redirect URI is required')).toBeInTheDocument();
+    expect(submit).not.toHaveBeenCalled();
+  });
+
   it('saves a plain login without an end date', async () => {
     const submit = renderForm({ component: 'LoginWithDimo' });
     save();

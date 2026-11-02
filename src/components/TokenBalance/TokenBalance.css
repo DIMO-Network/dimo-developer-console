@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .token-balance {
   @apply flex flex-col md:flex-row md:items-center gap-2 rounded-card bg-card px-4 py-2 justify-between;
 

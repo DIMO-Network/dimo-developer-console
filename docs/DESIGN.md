@@ -3,8 +3,8 @@
 The console shares its visual language with DIMO Fleet and the DIMO Driver app:
 Euclid Circular A, cool blue-black surfaces, solid ink actions, the sky→mint
 DIMO gradient for brand moments, and generous radii, in dark and light. Tokens
-live in `src/app/globals.css` and are exposed as Tailwind classes by
-`tailwind.config.ts`; this doc is how to use them. Every class recipe below is
+live in `src/app/globals.css` and are exposed as Tailwind classes by its
+`@theme` block; this doc is how to use them. Every class recipe below is
 read from the source as it stands on this branch; where a screen has not been
 through the visual pass yet, the recipe is marked **target** and says which
 pass applies it (see "Adoption status").
@@ -842,19 +842,19 @@ contrast for the status colors on `card`/`control`/`overlay`,
 `sheet`/`card`/`overlay`/`canvas`, `accent` dots on `sheet`/`card`/`overlay`,
 and the toggle knob (`on-accent`) on `accent`.
 
-The shadcn names in `tailwind.config.ts` (`background`, `foreground`, `card`,
+The shadcn names in the `@theme` block (`background`, `foreground`, `card`,
 `popover`, `border`, `input`, `ring`, `destructive`, `muted-foreground`,
 `sidebar`) are aliases onto these tokens with the same meaning, so primitives
 under `src/components/ui` inherit the theme. `accent` means the Fleet mint
 (live status only) and `muted` means secondary text — not shadcn's
 accent-surface and muted-surface.
 
-The palette is locked: `tailwind.config.ts` puts the Fleet tokens, the aliases
-above, `transparent`, `current` and `inherit` in `theme.colors` (not
-`theme.extend.colors`), so Tailwind's default palette (`white`, `black`,
-`gray-*`, `red-*`, `blue-*` …) and the legacy names (`primary`, `secondary`,
-`surface`, `cta`, `feedback`, `text`, `grey`, `dark-grey`, `dark`, `red`,
-`text-secondary`) no longer exist. Tailwind does not fail on an unknown class
+The palette is locked: the `@theme` block clears Tailwind's colors
+(`--color-*: initial`) and defines only the Fleet tokens, the aliases above,
+`transparent`, `current` and `inherit`, so Tailwind's default palette
+(`white`, `black`, `gray-*`, `red-*`, `blue-*` …) and the legacy names
+(`primary`, `secondary`, `surface`, `cta`, `feedback`, `text`, `grey`,
+`dark-grey`, `dark`, `red`, `text-secondary`) no longer exist. Tailwind does not fail on an unknown class
 in `className`, it just emits nothing, so such a class renders unstyled;
 `npm run visual:check` flags them. An `@apply` of one fails the build.
 

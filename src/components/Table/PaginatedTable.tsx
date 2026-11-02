@@ -1,28 +1,31 @@
 import { useState } from 'react';
+import { flexRender, RowData } from '@tanstack/react-table';
 import {
-  ColumnDef,
-  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+  LegacyColumnDef,
+  useLegacyTable,
+} from '@tanstack/react-table/legacy';
 import Column from '@/components/Table/Column';
 import Cell from '@/components/Table/Cell';
 import { Button } from '@/components/Button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
 
-interface PaginatedTableProps<T> {
+interface PaginatedTableProps<T extends RowData> {
   data: T[];
-  columns: ColumnDef<T>[];
+  columns: LegacyColumnDef<T>[];
 }
 
-export function PaginatedTable<T>({ data, columns }: PaginatedTableProps<T>) {
+export function PaginatedTable<T extends RowData>({
+  data,
+  columns,
+}: PaginatedTableProps<T>) {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  const table = useReactTable({
+  const table = useLegacyTable({
     data,
     columns,
     state: {

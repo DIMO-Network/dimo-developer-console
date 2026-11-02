@@ -352,7 +352,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             />
             Include data URL
           </label>
-          <div className="flex-grow" />
+          <div className="grow" />
           <Button disabled={!valid} onClick={() => run()}>
             Run query
           </Button>

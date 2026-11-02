@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .multi-card-options {
   @apply flex flex-col gap-4;
 }

@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 /* Checked/unchecked colors live on ui/checkbox (accent fill, on-accent check). */
 .checkbox {
   &.required {

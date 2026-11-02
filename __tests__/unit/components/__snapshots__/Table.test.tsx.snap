@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Table renders a table with actions 1`] = `
 <div>
@@ -27,7 +27,7 @@ exports[`Table renders a table with actions 1`] = `
           class="border-t border-outline"
         >
           <td
-            class="table-cell"
+            class="table-data-cell"
           >
             Test App
           </td>
@@ -91,7 +91,7 @@ exports[`Table renders a table with custom render 1`] = `
           class="border-t border-outline"
         >
           <td
-            class="table-cell"
+            class="table-data-cell"
           >
             <p>
               Test App
@@ -100,7 +100,7 @@ exports[`Table renders a table with custom render 1`] = `
             </p>
           </td>
           <td
-            class="table-cell"
+            class="table-data-cell"
           />
         </tr>
       </tbody>

@@ -11,14 +11,9 @@ import {
   createZeroDevPaymasterClient,
 } from '@zerodev/sdk';
 import { getEntryPoint, KERNEL_V3_1 } from '@zerodev/sdk/constants';
-import { Client, createPublicClient, RpcSchema } from 'viem';
-import {
-  GetPaymasterDataParameters,
-  SmartAccount,
-} from 'viem/_types/account-abstraction';
-import { http, Transport } from 'wagmi';
-import { Chain } from 'wagmi/chains';
-import { polygon, polygonAmoy } from 'wagmi/chains';
+import { Chain, Client, createPublicClient, http, RpcSchema, Transport } from 'viem';
+import { GetPaymasterDataParameters, SmartAccount } from 'viem/account-abstraction';
+import { polygon, polygonAmoy } from 'viem/chains';
 import configuration from '@/config';
 
 const getChain = (): Chain => {

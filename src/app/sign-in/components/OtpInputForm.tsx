@@ -178,7 +178,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
           </Button>
           <Button
             variant="secondary"
-            className="!mt-3"
+            className="mt-3!"
             role="continue-button"
             onClick={handleResendCode}
             loading={isRequestingNewOtp}

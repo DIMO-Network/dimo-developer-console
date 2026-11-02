@@ -10,6 +10,8 @@ jest.mock('jose', () => ({ createRemoteJWKSet: jest.fn(), jwtVerify: jest.fn() }
 jest.mock('@sentry/nextjs', () => ({
   captureException: jest.fn(),
   captureMessage: jest.fn(),
+  flush: jest.fn(async () => true),
+  wrapMiddlewareWithSentry: (handler: unknown) => handler,
 }));
 jest.mock('@/services/dimoDevAPI', () => ({
   cookieName: 'session-token',
@@ -22,7 +24,7 @@ jest.mock('@/utils/middlewareUtils', () => ({
   decodeJwtToken: jest.fn(),
 }));
 
-import { config, middleware } from '@/middleware';
+import { config, proxy } from '@/proxy';
 import * as Sentry from '@sentry/nextjs';
 import { getUserByToken } from '@/services/user';
 import { getUserSubOrganization } from '@/services/globalAccount';
@@ -52,8 +54,9 @@ const request = (path: string, cookies: Record<string, string> = {}) => {
   });
 };
 
+const waitUntil = jest.fn();
 const run = (req: NextRequest) =>
-  middleware(req as unknown as Parameters<typeof middleware>[0], {} as never);
+  proxy(req as unknown as Parameters<typeof proxy>[0], { waitUntil } as never);
 
 const isPassThrough = (res: Response) => res.headers.get('x-middleware-next') === '1';
 
@@ -63,7 +66,7 @@ beforeEach(() => {
   (getUserSubOrganization as jest.Mock).mockResolvedValue(subOrganization);
 });
 
-describe('middleware without a session', () => {
+describe('proxy without a session', () => {
   it('sends pages to sign in', async () => {
     const res = await run(request('/licenses'));
     expect(res.status).toBe(307);
@@ -87,7 +90,7 @@ describe('middleware without a session', () => {
   });
 });
 
-describe('middleware with a session', () => {
+describe('proxy with a session', () => {
   it('checks onboarding once, then remembers the verdict for this token', async () => {
     const res = await run(request('/licenses', { 'session-token': TOKEN }));
     expect(isPassThrough(res)).toBe(true);
@@ -169,9 +172,24 @@ describe('middleware with a session', () => {
     expect(res.status).toBe(302);
     expect(res.headers.get('location')).toMatch(/app\?error=true$/);
   });
+
+  it('gives up on the account lookup after 25 seconds, as Edge did', async () => {
+    await run(request('/licenses', { 'session-token': TOKEN }));
+    expect(getUserSubOrganization).toHaveBeenCalledWith(compliantUser.email, {
+      timeout: 25_000,
+    });
+  });
+
+  it('stays alive until Sentry has sent what it captured', async () => {
+    (getUserByToken as jest.Mock).mockRejectedValue(new AxiosError('Network Error'));
+    await run(request('/licenses', { 'session-token': TOKEN }));
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+    expect(Sentry.flush).toHaveBeenCalledWith(2000);
+    expect(waitUntil).toHaveBeenCalledWith(expect.any(Promise));
+  });
 });
 
-describe('middleware never lets an unverified token through', () => {
+describe('proxy never lets an unverified token through', () => {
   const post = (path: string, cookies: Record<string, string>) => {
     Object.keys(cookieJar).forEach((k) => delete cookieJar[k]);
     Object.assign(cookieJar, cookies);
@@ -224,7 +242,7 @@ describe('middleware never lets an unverified token through', () => {
   });
 });
 
-describe('middleware matcher', () => {
+describe('proxy matcher', () => {
   const runsOn = (path: string) =>
     config.matcher.some((m) => new RegExp(`^${m}$`).test(path));
 

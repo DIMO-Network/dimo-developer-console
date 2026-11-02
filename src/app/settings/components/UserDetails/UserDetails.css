@@ -1,3 +1,5 @@
+@reference '../../../globals.css';
+
 .user-detail-fields {
   @apply flex flex-col gap-4;
 }

@@ -1,3 +1,5 @@
+@reference '../../../../../globals.css';
+
 /* Tonal stat card: number in ink, caption muted, link reads as meta. */
 .overview-stat-card {
   @apply flex flex-col gap-1 rounded-card bg-card p-5;

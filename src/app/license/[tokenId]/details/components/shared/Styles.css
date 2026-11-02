@@ -1,3 +1,5 @@
+@reference '../../../../../globals.css';
+
 .license-details-section {
   @apply flex flex-col justify-between gap-4 rounded-card bg-card p-4;
 }

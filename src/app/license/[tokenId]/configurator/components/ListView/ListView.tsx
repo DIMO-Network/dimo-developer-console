@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { Loader } from '@/components/Loader';
 import { useEffect, useState } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';

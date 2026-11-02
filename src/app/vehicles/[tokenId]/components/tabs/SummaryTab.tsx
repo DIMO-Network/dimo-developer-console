@@ -20,8 +20,7 @@ import { relativeTime, absoluteTime, utcDate } from '@/utils/freshness';
 
 type Types = {
   availableCloudEventTypes:
-    | { type: string; count: number; firstSeen: string; lastSeen: string }[]
-    | null;
+    { type: string; count: number; firstSeen: string; lastSeen: string }[] | null;
 };
 type Latest = {
   latestCloudEvent: { header: Record<string, string>; data: unknown } | null;

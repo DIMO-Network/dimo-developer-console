@@ -12,7 +12,7 @@ export const VehicleCount = ({
   const { data, isLoading } = useWebhookVehiclesById({ webhookId, clientId });
 
   if (isLoading) {
-    return <BubbleLoader isLoading isSmall className={'!justify-start'} />;
+    return <BubbleLoader isLoading isSmall className={'justify-start!'} />;
   }
 
   return <>{data?.length ?? 0}</>;

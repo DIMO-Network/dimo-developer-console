@@ -1,3 +1,5 @@
+@reference '../../app/globals.css';
+
 .app-card {
   @apply flex flex-row justify-between items-center bg-card border border-border rounded-xl p-4;
 
