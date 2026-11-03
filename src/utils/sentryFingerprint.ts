@@ -10,12 +10,19 @@ export const upstreamRoute = (config?: {
   baseURL?: string;
 }): string => {
   if (!config?.url) return 'unknown';
-  const path = new URL(config.url, config.baseURL || 'http://upstream.invalid').pathname;
-  const route = path
-    .split('/')
-    .map((segment) => (ID_SEGMENT.test(segment) ? ':id' : segment))
-    .join('/');
-  return `${(config.method ?? 'get').toUpperCase()} ${route}`;
+  try {
+    // A relative or malformed baseURL ('/api') makes URL throw; a thrown beforeSend
+    // would lose the very error being reported.
+    const path = new URL(config.url, config.baseURL || 'http://upstream.invalid')
+      .pathname;
+    const route = path
+      .split('/')
+      .map((segment) => (ID_SEGMENT.test(segment) ? ':id' : segment))
+      .join('/');
+    return `${(config.method ?? 'get').toUpperCase()} ${route}`;
+  } catch {
+    return 'unknown';
+  }
 };
 
 export const fingerprintUpstreamError = (

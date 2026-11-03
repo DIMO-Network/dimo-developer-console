@@ -62,6 +62,16 @@ describe('sentryFingerprint', () => {
     expect(upstreamRoute({ method: 'get' })).toBe('unknown');
   });
 
+  it('never throws on a relative baseURL or a malformed url', () => {
+    for (const config of [
+      { method: 'get', baseURL: '/api', url: '/x' },
+      { method: 'get', url: 'http://' },
+    ]) {
+      const event = run(failure(config, 500));
+      expect(event.fingerprint).toEqual(['axios', 'unknown', '500']);
+    }
+  });
+
   it('names a failure without a response by its code', () => {
     const event = run(
       failure({ method: 'get', url: '/api/x' }, undefined, 'ECONNABORTED'),

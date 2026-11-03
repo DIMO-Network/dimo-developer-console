@@ -37,10 +37,21 @@ export const withoutRequestDetails = async <T>(request: Promise<T>): Promise<T> 
   }
 };
 
+// The DIMO SDK (Method.js) catches the axios error and rethrows a DimoError, which
+// carries the upstream status as `statusCode` (the response body's `code`). Without a
+// response it throws a plain TypeError, so only a DimoError with a status says "refused".
+const sdkStatus = (error: unknown): number | undefined => {
+  if (!(error instanceof Error) || error instanceof AxiosError) return undefined;
+  const { statusCode } = error as { statusCode?: unknown };
+  return typeof statusCode === 'number' ? statusCode : undefined;
+};
+
 // An upstream refusal below 500 is the API answering as designed. A 5xx, a failure
 // with no answer at all, and anything that is not an HTTP error are not.
 export const isUnexpectedFailure = (error: unknown): boolean => {
   if (error instanceof AxiosError && error.response) return error.response.status >= 500;
+  const status = sdkStatus(error);
+  if (status !== undefined) return status >= 500;
   return true;
 };
 
