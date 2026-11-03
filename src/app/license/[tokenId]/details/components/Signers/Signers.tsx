@@ -99,6 +99,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const [enabling, setEnabling] = useState(false);
   const [enableError, setEnableError] = useState<string | null>(null);
   const consoleKeyRecorded = useRef(false);
+  const consoleKeyAnnounced = useRef(false);
+  // The key we just enabled, shown as on until Identity lists it (one enable per mount).
+  const [enabledKey, setEnabledKey] = useState<string | null>(null);
   // Read-only Turnkey lookup (never creates a key); members never run it.
   const consoleKeyQuery = useQuery({
     queryKey: ['console-key', currentUser?.subOrganizationId],
@@ -106,7 +109,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     enabled: isLicenseOwner && !!currentUser,
     retry: false,
   });
-  const consoleKey = consoleKeyQuery.data?.toLowerCase() ?? null;
+  const consoleKey = (consoleKeyQuery.data ?? enabledKey)?.toLowerCase() ?? null;
   const setFleetRedirectUri = useSetRedirectUri(fragment.tokenId);
   const registry = useLicenseSignerRegistry(fragment.tokenId);
   const { members } = useTeamMembers();
@@ -410,9 +413,12 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   const handleDelete = async (signer: string) => {
+    const turningOff = signer.toLowerCase() === consoleKey;
     try {
       setLoadingStatus({
-        label: 'Deleting the selected API key',
+        label: turningOff
+          ? 'Turning off console access'
+          : 'Deleting the selected API key',
         status: 'loading',
       });
       await handleDisableSigner(signer);
@@ -421,7 +427,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       void registry.refetch();
       setPendingRemovals((prev) => new Set([...prev, signer]));
       refetch().then(() => setPendingRemovals(new Set()));
-      setLoadingStatus({ label: 'API key deleted', status: 'success' });
+      if (turningOff) setEnabledKey(null);
+      setLoadingStatus({
+        label: turningOff ? 'Console access turned off' : 'API key deleted',
+        status: 'success',
+      });
     } catch (error: unknown) {
       handleError(error);
     }
@@ -434,6 +444,12 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       (s) => !fragment.signers.nodes.some((n) => n.address === s.address),
     ),
   ];
+  if (
+    enabledKey &&
+    !pendingRemovals.has(enabledKey) &&
+    !onChainRows.some((r) => String(r.address).toLowerCase() === enabledKey.toLowerCase())
+  )
+    onChainRows.push({ address: enabledKey, enabledAt: new Date().toISOString() });
   const listed = new Set(onChainRows.map((s) => String(s.address).toLowerCase()));
   // Registry rows the chain no longer lists (spec: "Disabled outside the console").
   const offChainRows: SignerRow[] = [...registry.byAddress.values()]
@@ -515,6 +531,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       if (!isSigner(privateKeyAddress)) {
         await handleEnableSigner(privateKeyAddress);
         consoleKeyRecorded.current = true;
+        consoleKeyAnnounced.current = true;
+        setEnabledKey(privateKeyAddress);
         await refetch();
       }
       await recordConsoleKey(privateKeyAddress);
@@ -528,14 +546,19 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     }
   };
 
-  // Console key already a signer (enabled before this registry row existed):
-  // record the row once, so members can see console access is on.
+  const consoleKeyOnChain =
+    !!consoleKey &&
+    onChainRows.some((r) => String(r.address).toLowerCase() === consoleKey);
+
+  // Decided once per mount, from the state at open: a later registry refetch
+  // (turning access off) must never re-record the row as active.
+  // Console key already a signer: record the registry row if it has none (so
+  // members can see console access is on). A console-api write, not a transaction.
   useEffect(() => {
     if (!isLicenseOwner || !consoleKey || !registry.isLoaded || registry.isError) return;
     if (consoleKeyRecorded.current) return;
-    if (!isSigner(consoleKey as `0x${string}`)) return;
-    if (registry.byAddress.has(consoleKey)) return;
     consoleKeyRecorded.current = true;
+    if (!consoleKeyOnChain || registry.byAddress.has(consoleKey)) return;
     void recordConsoleKey(consoleKey as `0x${string}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -545,6 +568,15 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     registry.isError,
     registry.byAddress,
   ]);
+
+  // Console access already on: mint the owner's developer JWT as the old open
+  // did (off-chain, no transaction), because webhook pages read the stored JWT.
+  useEffect(() => {
+    if (!isLicenseOwner || !consoleKey || consoleKeyAnnounced.current) return;
+    consoleKeyAnnounced.current = true;
+    if (consoleKeyOnChain) publishEvent({ client_id: consoleKey as `0x${string}` }, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLicenseOwner, consoleKey]);
 
   useEffect(() => {
     if (!isLicenseOwner) return;
@@ -595,15 +627,19 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           </div>
         )}
       </div>
-      <ConsoleAccess
-        isLicenseOwner={isLicenseOwner}
-        on={consoleOn}
-        enabling={enabling}
-        error={enableError}
-        onEnable={() => void enableConsoleAccess()}
-        clientId={fragment.clientId}
-        domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
-      />
+      {isLicenseOwner && consoleKeyQuery.isLoading ? (
+        <p className="text-body-sm text-muted">Checking console access…</p>
+      ) : (
+        <ConsoleAccess
+          isLicenseOwner={isLicenseOwner}
+          on={consoleOn}
+          enabling={enabling}
+          error={enableError}
+          onEnable={() => void enableConsoleAccess()}
+          clientId={fragment.clientId}
+          domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
+        />
+      )}
       <div>
         {!!displaySigners.length && (
           <div className="-mx-4 -mb-4">
@@ -676,8 +712,16 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       )}
       <DeleteConfirmationModal
         isOpen={!!signerToDelete}
-        title={'Are you sure you want to delete this API key?'}
-        subtitle={'You will no longer be able to use this key in your app.'}
+        title={
+          signerToDelete?.toLowerCase() === consoleKey
+            ? 'Turn off console access?'
+            : 'Are you sure you want to delete this API key?'
+        }
+        subtitle={
+          signerToDelete?.toLowerCase() === consoleKey
+            ? 'The console will stop making developer JWTs for this license. JWTs already issued keep working until they expire.'
+            : 'You will no longer be able to use this key in your app.'
+        }
         onConfirm={onConfirmDelete}
         onCancel={() => {
           setSignerToDelete(undefined);

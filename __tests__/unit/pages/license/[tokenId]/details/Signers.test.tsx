@@ -169,8 +169,12 @@ describe('Signers', () => {
   it('sends no transaction when the owner opens the tab', async () => {
     mockTeam.members = [OWNER_ROW];
     show();
-    expect(screen.getByText(/Console access lets this console/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Enable console access' })).toBeEnabled();
+    expect(
+      await screen.findByText(/Console access lets this console/),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: 'Enable console access' }),
+    ).toBeEnabled();
     await waitFor(() => expect(findConsoleKeyAddress).toHaveBeenCalled());
     expect(enableSigner).not.toHaveBeenCalled();
     expect(hasGlobalAccountPrivateKey).not.toHaveBeenCalled();
@@ -180,7 +184,7 @@ describe('Signers', () => {
   it('sends exactly one transaction from the button', async () => {
     mockTeam.members = [OWNER_ROW];
     show();
-    fireEvent.click(screen.getByRole('button', { name: 'Enable console access' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Enable console access' }));
     await waitFor(() =>
       expect(mockPublishEvent).toHaveBeenCalledWith({ client_id: CONSOLE_KEY }, true),
     );
@@ -258,10 +262,77 @@ describe('Signers', () => {
     expect(enableSigner).not.toHaveBeenCalled();
   });
 
+  it('publishes the JWT event on open when console access is already on, with no transaction', async () => {
+    mockTeam.members = [OWNER_ROW];
+    show([CONSOLE_KEY.toLowerCase()]);
+    await waitFor(() =>
+      expect(mockPublishEvent).toHaveBeenCalledWith(
+        { client_id: CONSOLE_KEY.toLowerCase() },
+        true,
+      ),
+    );
+    expect(mockPublishEvent).toHaveBeenCalledTimes(1);
+    expect(enableSigner).not.toHaveBeenCalled();
+  });
+
+  it('publishes nothing on open when the console key is not a signer', async () => {
+    mockTeam.members = [OWNER_ROW];
+    show();
+    await screen.findByRole('button', { name: 'Enable console access' });
+    expect(mockPublishEvent).not.toHaveBeenCalled();
+    expect(enableSigner).not.toHaveBeenCalled();
+  });
+
+  it('shows no Enable button while the console key is still being looked up', async () => {
+    findConsoleKeyAddress.mockImplementationOnce(() => new Promise(() => {}));
+    show();
+    expect(await screen.findByText('Checking console access…')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Enable console access' })).toBeNull();
+  });
+
+  it('keeps access on after an enable the license list has not caught up with', async () => {
+    mockTeam.members = [OWNER_ROW];
+    show();
+    fireEvent.click(await screen.findByRole('button', { name: 'Enable console access' }));
+    expect(await screen.findByText('Console (you)')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Enable console access' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Copy JWT' })).toBeInTheDocument();
+    expect(enableSigner).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps console access off after turning it off, without re-recording the row', async () => {
+    mockTeam.members = [OWNER_ROW];
+    (markLicenseSignerDisabled as jest.Mock).mockResolvedValue({ ok: true, data: {} });
+    registry.byAddress = new Map([
+      [
+        CONSOLE_KEY.toLowerCase(),
+        row(CONSOLE_KEY, 'API_KEY', [{ userId: 'u-jane' }], 'Console'),
+      ],
+    ]);
+    registry.refetch.mockImplementation(() => {
+      registry.byAddress = new Map();
+    });
+    show([CONSOLE_KEY.toLowerCase()]);
+    await screen.findByText('Console (you)');
+    fireEvent.click(
+      await screen.findByRole('button', {
+        name: `Actions for ${CONSOLE_KEY.toLowerCase()}`,
+      }),
+    );
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Turn off console access' }));
+    expect(screen.getByText('Turn off console access?')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() => expect(markLicenseSignerDisabled).toHaveBeenCalled());
+    await waitFor(() => expect(registry.refetch).toHaveBeenCalled());
+    await act(async () => {});
+    expect(upsertLicenseSigner).not.toHaveBeenCalled();
+    registry.refetch.mockReset();
+  });
+
   it('shows a failed enable on the card', async () => {
     enableSigner.mockRejectedValue({ code: 4001 });
     show();
-    fireEvent.click(screen.getByRole('button', { name: 'Enable console access' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Enable console access' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'The transaction was denied',
     );
@@ -270,7 +341,7 @@ describe('Signers', () => {
 
   it("refuses before sending when the console wallet doesn't own the license", async () => {
     show([], '0x1111111111111111111111111111111111111111');
-    fireEvent.click(screen.getByRole('button', { name: 'Enable console access' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Enable console access' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       "Your console wallet doesn't own this license on-chain, so it can't turn on console access.",
     );
