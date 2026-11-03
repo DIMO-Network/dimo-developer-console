@@ -27,6 +27,7 @@ import { TeamProvider } from '@/hoc/TeamProvider';
 import { useTeam } from '@/hooks/useTeam';
 import { TeamApiError } from '@/utils/teamApiError';
 import type { TeamSummary } from '@/types/team';
+import { SESSION_KEY } from '@/utils/globalAccountSession';
 
 const KERNEL = '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d';
 const PERSONAL: TeamSummary = {
@@ -73,6 +74,19 @@ const Probe = () => {
   );
 };
 const probe = () => JSON.parse(screen.getByTestId('probe').textContent!);
+// The shared session store, as the account's sign-in left it.
+const storeSession = (subOrganizationId: string) =>
+  localStorage.setItem(
+    SESSION_KEY,
+    JSON.stringify({
+      email: USER.email,
+      role: 'owner',
+      subOrganizationId,
+      token: 'bundle-1',
+      eKey: 'key-1',
+      expiry: Math.floor(Date.now() / 1000) + 600,
+    }),
+  );
 const renderProvider = (child: React.ReactNode = <Probe />, client = new QueryClient()) =>
   render(
     <QueryClientProvider client={client}>
@@ -95,6 +109,7 @@ describe('TeamProvider', () => {
     document.cookie = 'active_team=; Path=/; Max-Age=0';
     sessionStorage.clear();
     localStorage.clear();
+    storeSession(USER.subOrganizationId);
     (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: true,
       data: { teams: [PERSONAL, ACME] },
@@ -172,6 +187,46 @@ describe('TeamProvider', () => {
     });
     expect(hardNavigate).not.toHaveBeenCalled();
     expect(document.cookie).toContain('active_team=team-harness');
+  });
+
+  // Another tab signed in as someone else, which cleared the team cookie, and
+  // the account provider is reloading this tab: the team re-check leaves the
+  // cookie and the flash to the new account.
+  describe("when the store holds another account's session", () => {
+    const signedInElsewhere = () => {
+      storeSession('sub-other');
+      document.cookie = 'active_team=; Path=/; Max-Age=0';
+    };
+
+    it('leaves the team cookie alone on the personal team', async () => {
+      renderProvider();
+      await waitFor(() => expect(probe().active).toBe('team-harness'));
+      signedInElsewhere();
+      await act(async () => {
+        window.dispatchEvent(new Event('focus'));
+      });
+      expect(document.cookie).not.toContain('active_team=');
+      expect(hardNavigate).not.toHaveBeenCalled();
+    });
+
+    it('reports no removal from a member team', async () => {
+      document.cookie = 'active_team=team-acme; Path=/';
+      renderProvider();
+      await waitFor(() => expect(probe().active).toBe('team-acme'));
+      signedInElsewhere();
+      (fetchApiResult as jest.Mock).mockResolvedValue({
+        ok: true,
+        data: { teams: [{ ...PERSONAL, id: 'team-other' }] },
+      });
+      await act(async () => {
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      await act(async () => {});
+      expect(fetchApiResult).toHaveBeenCalledTimes(1);
+      expect(sessionStorage.getItem('teamFlash')).toBeNull();
+      expect(document.cookie).not.toContain('active_team=');
+      expect(hardNavigate).not.toHaveBeenCalled();
+    });
   });
 
   it('remembers for a minute that teams could not load, so remounts start on the fallback', async () => {

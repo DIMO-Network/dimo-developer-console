@@ -10,13 +10,14 @@ import { getKernelAccount } from '@/services/zerodev';
 import {
   clearSession,
   isLive,
+  onSessionChange,
   readSession,
   writeSession,
 } from '@/utils/globalAccountSession';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty } from 'lodash';
 import config from '@/config';
-import React, { ComponentType, useEffect, useState } from 'react';
+import React, { ComponentType, useEffect, useRef, useState } from 'react';
 import { decodeJwtToken } from '@/utils/middlewareUtils';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
@@ -34,6 +35,10 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       email: string;
       subOrganizationId: string;
     } | null>(null);
+    // Set once this tab stores a session itself: sign-up goes on to ask for
+    // company details on this page, and coming back to the tab must not skip
+    // them by following that session to /app.
+    const signedInHere = useRef(false);
 
     const createSession = async ({
       accessToken,
@@ -56,6 +61,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       queryClient.clear();
       startConsoleSession(user!.subOrganizationId);
 
+      signedInHere.current = true;
       // One entry for every tab, the bundle with the key it was encrypted to;
       // the other tabs hear of it.
       writeSession({
@@ -161,10 +167,12 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
       const sessionExpiration = nowInSeconds + halfHour;
 
+      // A window in seconds, not a point in time: the key lasts as long as the
+      // console session.
       const { credentialBundle } = await passkeyClient.createReadWriteSession({
         organizationId: subOrganizationId,
         targetPublicKey: targetPubHex,
-        expirationSeconds: sessionExpiration.toString(),
+        expirationSeconds: String(halfHour),
       });
 
       if (isEmpty(credentialBundle)) return { success: false };
@@ -254,14 +262,20 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
 
     // Reached when the shared session expired (loadUserInformation).
     const logout = async () => {
-      // The proxy answers this action with a 401 once the session cookie is
-      // gone (it lives until the same expiry); the store is cleared either way.
+      // This runs on a login page, which the proxy lets an action through on
+      // without a session, so there is no 401 here. It can still fail: a 307
+      // to /app while the cookie is valid, or the network. The store is
+      // cleared either way.
       try {
         await endSession();
       } catch {
-        // The proxy's 401 already cleared the cookies.
+        // Best effort; the cookie expires with the session.
       }
-      await turnkeyClient.logout();
+      try {
+        await turnkeyClient.logout();
+      } catch {
+        // Local only; the store below is what holds the session.
+      }
       // Every other tab hears this and goes to sign-in.
       clearSession();
     };
@@ -306,10 +320,33 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       return true;
     };
 
+    // A live session goes to /app: the one found on arrival, one signed in to
+    // in another tab, or one found when the user comes back to this tab.
     useEffect(() => {
-      void loadUserInformation().then((isValid) => {
-        if (isValid) router.replace('/app');
+      const follow = () => {
+        if (signedInHere.current) return;
+        void loadUserInformation().then((isValid) => {
+          if (isValid) router.replace('/app');
+        });
+      };
+      const onVisible = () => {
+        if (document.visibilityState === 'visible') follow();
+      };
+
+      follow();
+      window.addEventListener('focus', follow);
+      document.addEventListener('visibilitychange', onVisible);
+      const off = onSessionChange((event) => {
+        if (event.type === 'signed-in') follow();
       });
+
+      return () => {
+        window.removeEventListener('focus', follow);
+        document.removeEventListener('visibilitychange', onVisible);
+        off();
+      };
+      // Once per mount; the store is read when it is needed.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

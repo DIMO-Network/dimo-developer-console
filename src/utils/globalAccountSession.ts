@@ -39,7 +39,8 @@ const announce = (event: SessionEvent) => {
     const envelope: Envelope = { from: tabId, event };
     getChannel()?.postMessage(envelope);
   } catch {
-    // Other tabs still learn of it through the storage event.
+    // Best effort. The storage event is listened to only where BroadcastChannel
+    // is missing; elsewhere a tab still finds the store on focus or its timer.
   }
 };
 

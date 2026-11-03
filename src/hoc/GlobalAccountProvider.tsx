@@ -32,6 +32,9 @@ import {
 // Both are dropped on logout (clearSession drops the stored one).
 let rememberedUser: IUserSession | null = null;
 
+// The longest delay setTimeout holds (2^31-1 ms, about 24.8 days).
+const MAX_TIMER_DELAY_MS = 2 ** 31 - 1;
+
 type ResolvedAccount = Pick<
   IUserSession,
   'subOrganizationId' | 'walletAddress' | 'smartContractAddress'
@@ -168,25 +171,30 @@ export const withGlobalAccounts = <P extends object>(
       setUser(user);
     };
 
+    // Reached when the session expired or this tab has none; an explicit
+    // sign-out (the menu) also clears the team and developer JWTs.
     const logout = async () => {
       if (leaving.current) return;
       leaving.current = true;
-      await turnkeyClient.logout();
+      // The cookie goes first, so a tab that hears the announcement below
+      // finds no session on the server either. The proxy answers this action
+      // with a 401 when the session is already gone; nothing below depends on it.
+      try {
+        await endSession();
+      } catch {
+        // The proxy's 401 already cleared the cookies.
+      }
+      try {
+        await turnkeyClient.logout();
+      } catch {
+        // Local only; the store below is what holds the session.
+      }
       rememberedUser = null;
       // Cached queries (the user, the team) are not keyed by account; the next
       // person to sign in on this tab must not see them.
       queryClient.clear();
       // Every other tab hears this and goes to sign-in.
       clearSession();
-      // Reached when the session expired or this tab has none; an explicit
-      // sign-out (the menu) also clears the team and developer JWTs.
-      // The proxy answers this action with a 401 when the session is already
-      // gone; the sign-in redirect must not depend on it.
-      try {
-        await endSession();
-      } catch {
-        // The proxy's 401 already cleared the cookies.
-      }
       router.replace('/sign-in');
     };
 
@@ -210,7 +218,10 @@ export const withGlobalAccounts = <P extends object>(
       const schedule = (expiry: number) => {
         clearTimeout(timer);
         // A second past the expiry second, when the session is no longer live.
-        timer = setTimeout(check, expiry * 1000 - Date.now() + 1000);
+        // setTimeout fires at once for a longer delay than it can hold; check
+        // then schedules the rest.
+        const delay = expiry * 1000 - Date.now() + 1000;
+        timer = setTimeout(check, Math.min(delay, MAX_TIMER_DELAY_MS));
       };
 
       const check = () => {
@@ -236,6 +247,9 @@ export const withGlobalAccounts = <P extends object>(
       const off = onSessionChange((event) => {
         if (leaving.current) return;
         if (event.type === 'signed-out') {
+          // A sign-out older than the session now stored: a later sign-in's
+          // own event decides.
+          if (isLive(readSession())) return;
           // That tab ended the server session and cleared the store.
           rememberedUser = null;
           queryClient.clear();
@@ -243,9 +257,12 @@ export const withGlobalAccounts = <P extends object>(
         } else if (event.subOrganizationId !== loaded) {
           rememberedUser = null;
           leave('/app');
+        } else {
+          // The same account signed in again: the next Turnkey call reads the
+          // new bundle and key together, and panels that failed while the
+          // cookie was gone ask again.
+          void queryClient.invalidateQueries();
         }
-        // The same account signed in again: the next Turnkey call reads the
-        // new bundle and key together.
       });
 
       return () => {

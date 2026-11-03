@@ -145,14 +145,19 @@ describe('globalAccountSession', () => {
     });
 
     // A BroadcastChannel message can arrive before the write it announces is
-    // visible to this tab's localStorage.
+    // visible to this tab's localStorage. This tab re-reads every 5 ms, ten
+    // times, then delivers anyway. Fake timers keep the clock; the fake channel
+    // delivers on real microtasks, which advanceTimersByTimeAsync runs.
     describe('a sign-in announced before this tab can read it', () => {
-      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
       const announce = (other: ReturnType<typeof fake.otherTab>, expiry: number) =>
         other.post({
           from: 'x',
           event: { type: 'signed-in', subOrganizationId: 'sub-1', expiry },
         });
+      const advance = (ms: number) => jest.advanceTimersByTimeAsync(ms);
+
+      beforeEach(() => jest.useFakeTimers());
+      afterEach(() => jest.useRealTimers());
 
       it('waits for the announced session before telling the listener', async () => {
         mod.writeSession(session({ token: 'tok-1' }));
@@ -161,10 +166,10 @@ describe('globalAccountSession', () => {
         const other = fake.otherTab();
         const next = session({ token: 'tok-2', expiry: future() + 60 });
         announce(other, next.expiry);
-        await flush();
+        await advance(4);
         expect(tokens).toEqual([]);
         localStorage.setItem(mod.SESSION_KEY, JSON.stringify(next));
-        await sleep(20);
+        await advance(1);
         expect(tokens).toEqual(['tok-2']);
       });
 
@@ -172,7 +177,9 @@ describe('globalAccountSession', () => {
         const listener = jest.fn();
         mod.onSessionChange(listener);
         announce(fake.otherTab(), future() + 60);
-        await sleep(100);
+        await advance(49);
+        expect(listener).not.toHaveBeenCalled();
+        await advance(1);
         expect(listener).toHaveBeenCalledTimes(1);
       });
 
@@ -182,7 +189,9 @@ describe('globalAccountSession', () => {
         const other = fake.otherTab();
         announce(other, future() + 60);
         other.post({ from: 'x', event: { type: 'signed-out' } });
-        await sleep(100);
+        await advance(49);
+        expect(types).toEqual([]);
+        await advance(1);
         expect(types).toEqual(['signed-in', 'signed-out']);
       });
 
@@ -190,9 +199,9 @@ describe('globalAccountSession', () => {
         const listener = jest.fn();
         const off = mod.onSessionChange(listener);
         announce(fake.otherTab(), future() + 60);
-        await flush();
+        await advance(0);
         off();
-        await sleep(100);
+        await advance(100);
         expect(listener).not.toHaveBeenCalled();
       });
     });

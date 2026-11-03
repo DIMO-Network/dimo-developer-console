@@ -33,7 +33,6 @@ const session = (n: number, over = {}) => ({
   expiry: future() + n,
   ...over,
 });
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 describe('getSessionTurnkeyClient', () => {
   let fake: ReturnType<typeof installFakeBroadcastChannel>;
@@ -46,6 +45,7 @@ describe('getSessionTurnkeyClient', () => {
     localStorage.clear();
     sessionStorage.clear();
   });
+  afterEach(() => jest.useRealTimers());
 
   it("builds the client from the session's own bundle and key, not the recovery key", () => {
     localStorage.setItem('GlobalAccountEmbeddedKey', '"recovery-key"');
@@ -69,6 +69,8 @@ describe('getSessionTurnkeyClient', () => {
   // announces it before its write is visible here. This tab's next Turnkey
   // call, made when it hears the news, uses the new bundle with the new key.
   it("acts with the other tab's new pair, never a mixed one", async () => {
+    // The store re-reads every 5 ms until the announced session is visible.
+    jest.useFakeTimers();
     writeSession(session(1));
     const other = fake.otherTab();
     const built: unknown[] = [];
@@ -81,9 +83,10 @@ describe('getSessionTurnkeyClient', () => {
       from: 'tab-2',
       event: { type: 'signed-in', subOrganizationId: 'sub-1', expiry: next.expiry },
     });
-    await sleep(2);
+    await jest.advanceTimersByTimeAsync(2);
+    expect(built).toEqual([]);
     localStorage.setItem(SESSION_KEY, JSON.stringify(next));
-    await sleep(60);
+    await jest.advanceTimersByTimeAsync(3);
     off();
     other.close();
     expect(built).toEqual([expect.objectContaining({ apiPrivateKey: privateKeyOf(2) })]);

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { useContext, useEffect, useState } from 'react';
 import { installFakeBroadcastChannel } from '@/utils/__fixtures__/fakeBroadcastChannel';
 
@@ -11,7 +11,9 @@ jest.mock('@/actions/user', () => ({
 }));
 jest.mock('@/config/turnkey', () => ({
   turnkeyClient: { logout: jest.fn(async () => undefined) },
-  passkeyClient: {},
+  passkeyClient: {
+    createReadWriteSession: jest.fn(async () => ({ credentialBundle: 'bundle-1' })),
+  },
 }));
 jest.mock('@/services/globalAccount', () => ({
   initOtpLogin: jest.fn(),
@@ -51,6 +53,7 @@ jest.mock('@/hoc/QueryProvider', () => ({ queryClient: { clear: jest.fn() } }));
 
 import { endSession } from '@/actions/user';
 import { createNewUser, completeUserData } from '@/app/sign-up/actions';
+import { passkeyClient, turnkeyClient } from '@/config/turnkey';
 import { AuthContext } from '@/context/AuthContext';
 import { withAuth } from '@/hoc/AuthProvider';
 import { readSession, SESSION_KEY } from '@/utils/globalAccountSession';
@@ -58,25 +61,33 @@ import { readSession, SESSION_KEY } from '@/utils/globalAccountSession';
 const KERNEL = '0x00000000000000000000000000000000000000bb';
 const nowS = () => Math.floor(Date.now() / 1000);
 
-const SignIn = () => {
-  const { setUser, completeOtpLogin } = useContext(AuthContext);
-  const [step, setStep] = useState<'start' | 'user set' | 'signed in'>('start');
-  useEffect(() => {
-    if (step === 'start') {
-      setUser({ email: 'a@b.co', subOrganizationId: 'sub-1' });
-      setStep('user set');
-    } else if (step === 'user set') {
-      void completeOtpLogin({
-        otp: '123456',
-        otpId: 'otp-1',
-        existOnDevConsole: true,
-        currentWalletValue: KERNEL,
-      }).then(({ success }) => success && setStep('signed in'));
-    }
-  }, [step]);
-  return <p>{step}</p>;
+const signInWith = (method: 'otp' | 'passkey') => {
+  const SignIn = () => {
+    const { setUser, completeOtpLogin, loginWithPasskey } = useContext(AuthContext);
+    const [step, setStep] = useState<'start' | 'user set' | 'signed in'>('start');
+    useEffect(() => {
+      if (step === 'start') {
+        setUser({ email: 'a@b.co', subOrganizationId: 'sub-1' });
+        setStep('user set');
+      } else if (step === 'user set') {
+        const login =
+          method === 'otp'
+            ? completeOtpLogin({
+                otp: '123456',
+                otpId: 'otp-1',
+                existOnDevConsole: true,
+                currentWalletValue: KERNEL,
+              })
+            : loginWithPasskey({ existOnDevConsole: true, currentWalletValue: KERNEL });
+        void login.then(({ success }) => success && setStep('signed in'));
+      }
+    }, [step]);
+    return <p>{step}</p>;
+  };
+  return SignIn;
 };
-const SignInPage = withAuth(SignIn);
+const SignInPage = withAuth(signInWith('otp'));
+const PasskeySignInPage = withAuth(signInWith('passkey'));
 const IdlePage = withAuth(() => <p>sign in</p>);
 
 const store = (over = {}) =>
@@ -160,5 +171,99 @@ describe('withAuth and the shared session', () => {
     render(<IdlePage />);
     await waitFor(() => expect(localStorage.getItem(SESSION_KEY)).toBeNull());
     expect(replace).not.toHaveBeenCalledWith('/app');
+  });
+
+  it("clears an expired shared session even when Turnkey's logout fails", async () => {
+    (turnkeyClient.logout as jest.Mock).mockRejectedValueOnce(new Error('storage'));
+    store({ expiry: nowS() - 5 });
+    render(<IdlePage />);
+    await waitFor(() => expect(localStorage.getItem(SESSION_KEY)).toBeNull());
+    await waitFor(() =>
+      expect(other.received).toContainEqual({
+        from: expect.any(String),
+        event: { type: 'signed-out' },
+      }),
+    );
+  });
+
+  // Turnkey reads expirationSeconds as a window, not a point in time.
+  it('asks Turnkey for a passkey session key that lasts 30 minutes', async () => {
+    render(<PasskeySignInPage />);
+    expect(await screen.findByText('signed in')).toBeInTheDocument();
+    expect(passkeyClient.createReadWriteSession).toHaveBeenCalledWith({
+      organizationId: 'sub-1',
+      targetPublicKey: 'pub-1',
+      expirationSeconds: '1800',
+    });
+  });
+
+  describe('a sign-in page with no session', () => {
+    // The mount check has found nothing.
+    const idle = async () => {
+      const view = render(<IdlePage />);
+      await act(async () => {});
+      expect(replace).not.toHaveBeenCalled();
+      return view;
+    };
+
+    it('follows a sign-in made in another tab to /app', async () => {
+      await idle();
+      store();
+      other.post({
+        from: 'tab-2',
+        event: { type: 'signed-in', subOrganizationId: 'sub-1', expiry: nowS() + 600 },
+      });
+      await waitFor(() => expect(replace).toHaveBeenCalledWith('/app'));
+      expect(endSession).not.toHaveBeenCalled();
+    });
+
+    it('goes to /app when the tab comes back to a live session', async () => {
+      await idle();
+      store();
+      act(() => {
+        window.dispatchEvent(new Event('focus'));
+      });
+      await waitFor(() => expect(replace).toHaveBeenCalledWith('/app'));
+    });
+
+    it('goes to /app when the tab becomes visible with a live session', async () => {
+      await idle();
+      store();
+      act(() => {
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      await waitFor(() => expect(replace).toHaveBeenCalledWith('/app'));
+    });
+
+    it('stops following once it is gone', async () => {
+      const { unmount } = await idle();
+      unmount();
+      store();
+      other.post({
+        from: 'tab-2',
+        event: { type: 'signed-in', subOrganizationId: 'sub-1', expiry: nowS() + 600 },
+      });
+      window.dispatchEvent(new Event('focus'));
+      document.dispatchEvent(new Event('visibilitychange'));
+      // A listener left behind would have been called by now: the signed-in
+      // event is delivered at once, the store already holds its session.
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+      expect(replace).not.toHaveBeenCalled();
+    });
+  });
+
+  // Sign-up writes the session, then asks for company details on the same
+  // page: coming back to the tab must not skip them.
+  it('a tab that signed in itself stays on its page when it comes back', async () => {
+    render(<SignInPage />);
+    expect(await screen.findByText('signed in')).toBeInTheDocument();
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await act(async () => {});
+    expect(replace).not.toHaveBeenCalled();
   });
 });

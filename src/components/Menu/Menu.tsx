@@ -38,20 +38,28 @@ export const Menu: FC = withLoadingStatus(() => {
   const { hasDeveloperLicenses } = useHasDeveloperLicenses();
 
   const onSignOut = async () => {
+    setLoadingStatus({ status: 'loading', label: 'Signing out' });
+    clearConsoleBrowserState();
+    // The server half first, best effort. It fails on the network, on a deploy
+    // (an old action id), or with the proxy's 401 once the cookie no longer
+    // verifies; none of that may leave the shared session live in every tab.
     try {
-      setLoadingStatus({ status: 'loading', label: 'Signing out' });
-      clearConsoleBrowserState();
       await signOut();
-      await turnkeyClient.logout();
-      queryClient.clear();
-      // Every other tab hears this and goes to sign-in.
-      clearSession();
-      clearLoadingStatus();
-      router.replace('/sign-in');
     } catch (err) {
-      Sentry.captureException(err);
-      setLoadingStatus({ status: 'error', label: 'There was a problem signing you out' });
+      Sentry.captureException(err, {
+        extra: { context: 'Sign-out: the server half failed; signing out locally' },
+      });
     }
+    try {
+      await turnkeyClient.logout();
+    } catch {
+      // Local only; the store below is what holds the session.
+    }
+    queryClient.clear();
+    // Every other tab hears this and goes to sign-in.
+    clearSession();
+    clearLoadingStatus();
+    router.replace('/sign-in');
   };
 
   const isHighlighted = (link: string | (() => void)) =>

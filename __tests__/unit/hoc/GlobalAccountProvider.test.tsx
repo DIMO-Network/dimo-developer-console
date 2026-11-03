@@ -23,7 +23,9 @@ jest.mock('@/services/zerodev', () => ({
   getPublicClient: jest.fn(),
 }));
 jest.mock('@/utils/hardNavigate', () => ({ hardNavigate: jest.fn() }));
-jest.mock('@/hoc/QueryProvider', () => ({ queryClient: { clear: jest.fn() } }));
+jest.mock('@/hoc/QueryProvider', () => ({
+  queryClient: { clear: jest.fn(), invalidateQueries: jest.fn() },
+}));
 
 import { endSession } from '@/actions/user';
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
@@ -41,7 +43,6 @@ const Page = withGlobalAccounts(Probe);
 
 const T0 = new Date('2026-11-03T12:00:00Z').getTime();
 const nowS = () => Math.floor(Date.now() / 1000);
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // The provider remembers the resolved user across remounts (module state), so
 // each test signs in to its own sub-organization.
@@ -119,7 +120,8 @@ describe('withGlobalAccounts across tabs', () => {
     expect(endSession).not.toHaveBeenCalled();
   });
 
-  it('keeps working when another tab signs in to the same account', async () => {
+  // Panels that failed while the cookie was gone ask again, without a reload.
+  it('refetches, and stays, when another tab signs in to the same account', async () => {
     const first = store();
     render(<Page />);
     await screen.findByText('a@b.co');
@@ -128,8 +130,25 @@ describe('withGlobalAccounts across tabs', () => {
       from: 'tab-2',
       event: { type: 'signed-in', subOrganizationId: sub, expiry: next.expiry },
     });
-    await act(() => sleep(80));
+    await waitFor(() => expect(queryClient.invalidateQueries).toHaveBeenCalledTimes(1));
     expect(hardNavigate).not.toHaveBeenCalled();
+    expect(queryClient.clear).not.toHaveBeenCalled();
+    expect(screen.getByText('a@b.co')).toBeInTheDocument();
+  });
+
+  it('ignores a sign-out announced while a newer session is live', async () => {
+    const live = store();
+    render(<Page />);
+    await screen.findByText('a@b.co');
+    other.post({ from: 'tab-2', event: { type: 'signed-out' } });
+    // Events arrive in order: once this one is heard, so was the sign-out.
+    other.post({
+      from: 'tab-2',
+      event: { type: 'signed-in', subOrganizationId: sub, expiry: live.expiry },
+    });
+    await waitFor(() => expect(queryClient.invalidateQueries).toHaveBeenCalledTimes(1));
+    expect(hardNavigate).not.toHaveBeenCalled();
+    expect(queryClient.clear).not.toHaveBeenCalled();
     expect(screen.getByText('a@b.co')).toBeInTheDocument();
   });
 
@@ -194,6 +213,37 @@ describe('withGlobalAccounts across tabs', () => {
     expect(replace).toHaveBeenCalledWith('/sign-in');
   });
 
+  // setTimeout fires at once for a delay past 2^31-1 ms (about 24.8 days).
+  it('waits out an expiry beyond the longest timer in steps, not at once', async () => {
+    const MAX_DELAY = 2 ** 31 - 1;
+    jest.useFakeTimers({ now: T0 });
+    const timers = jest.spyOn(global, 'setTimeout');
+    try {
+      const far = store({ expiry: nowS() + 30 * 24 * 3600 });
+      render(<Page />);
+      await screen.findByText('a@b.co');
+      const delays = timers.mock.calls.map(([, ms]) => ms ?? 0);
+      expect(Math.max(...delays)).toBe(MAX_DELAY);
+      act(() => {
+        jest.advanceTimersByTime(MAX_DELAY);
+      });
+      expect(endSession).not.toHaveBeenCalled();
+      expect(hardNavigate).not.toHaveBeenCalled();
+      // Then the rest: a second past the expiry second, as for any session.
+      act(() => {
+        jest.advanceTimersByTime(far.expiry * 1000 - Date.now());
+      });
+      expect(endSession).not.toHaveBeenCalled();
+      act(() => {
+        jest.advanceTimersByTime(2_000);
+      });
+      await waitFor(() => expect(endSession).toHaveBeenCalledTimes(1));
+      expect(replace).toHaveBeenCalledWith('/sign-in');
+    } finally {
+      timers.mockRestore();
+    }
+  });
+
   it('checks the session when the tab comes back', async () => {
     jest.useFakeTimers({ now: T0 });
     store({ expiry: nowS() + 60 });
@@ -229,6 +279,24 @@ describe('withGlobalAccounts across tabs', () => {
     });
     expect(hardNavigate).toHaveBeenCalledWith('/app');
     expect(endSession).not.toHaveBeenCalled();
+  });
+
+  it('ends the server session before it tells the other tabs', async () => {
+    const post = jest.spyOn(BroadcastChannel.prototype, 'postMessage');
+    try {
+      store({ expiry: nowS() - 5 });
+      render(<Page />);
+      await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
+      const announced = post.mock.calls.findIndex(
+        ([data]) => (data as { event?: { type?: string } }).event?.type === 'signed-out',
+      );
+      expect(announced).toBeGreaterThanOrEqual(0);
+      expect((endSession as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+        post.mock.invocationCallOrder[announced],
+      );
+    } finally {
+      post.mockRestore();
+    }
   });
 
   it('clears an expired shared session it finds and tells the other tabs', async () => {
