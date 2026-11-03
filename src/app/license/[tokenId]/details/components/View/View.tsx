@@ -81,7 +81,11 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   if (!data?.developerLicense) return null;
 
   return (
-    <LicenseDetailsContent license={data.developerLicense} refetch={handleRefetch} />
+    // Above the tabs so a pending URI change survives a tab switch; keyed so it
+    // never carries over to another license.
+    <RedirectUriOverlayProvider key={tokenId} refetch={handleRefetch}>
+      <LicenseDetailsContent license={data.developerLicense} refetch={handleRefetch} />
+    </RedirectUriOverlayProvider>
   );
 };
 
@@ -177,11 +181,11 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
         )}
 
         {activeTab === 'config' && (
-          <RedirectUriOverlayProvider refetch={refetch}>
+          <>
             <Signers license={license} refetch={refetch} />
             <DeveloperJwts license={license} />
             <RedirectUris license={license} refetch={refetch} />
-          </RedirectUriOverlayProvider>
+          </>
         )}
 
         {activeTab === 'vehicles' && <Vehicles license={license} />}

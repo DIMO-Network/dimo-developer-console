@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 const mockQuery = jest.fn();
 const mockIsOwner = jest.fn();
@@ -19,9 +19,22 @@ jest.mock('@/components/CopyableRow', () => ({ CopyableRow: () => null }));
 jest.mock('@/app/license/[tokenId]/details/components/Signers', () => ({
   Signers: () => null,
 }));
-jest.mock('@/app/license/[tokenId]/details/components/RedirectUris', () => ({
-  RedirectUris: () => null,
-}));
+jest.mock('@/app/license/[tokenId]/details/components/RedirectUris', () => {
+  const { useRedirectUris } = jest.requireActual(
+    '@/app/license/[tokenId]/details/components/redirectUriOverlay',
+  );
+  return {
+    RedirectUris: () => {
+      const { uris, recordUriChange } = useRedirectUris([]);
+      return (
+        <div>
+          <p data-testid="uris">{uris.map((u: { uri: string }) => u.uri).join(',')}</p>
+          <button onClick={() => recordUriChange('https://a.test', true)}>add uri</button>
+        </div>
+      );
+    },
+  };
+});
 jest.mock('@/app/license/[tokenId]/details/components/Vehicles/Vehicles', () => ({
   Vehicles: () => null,
   GET_VEHICLE_COUNT_BY_CLIENT_ID: 'query',
@@ -60,6 +73,17 @@ describe('License details', () => {
     mockIsOwner.mockReturnValue(true);
     await open();
     expect(screen.getByText(/Configure branding/)).toBeInTheDocument();
+  });
+
+  it('keeps a just-added redirect URI listed across a tab switch', async () => {
+    mockIsOwner.mockReturnValue(true);
+    await open();
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    fireEvent.click(screen.getByText('add uri'));
+    expect(screen.getByTestId('uris').textContent).toBe('https://a.test');
+    fireEvent.click(screen.getByRole('tab', { name: 'Overview' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Config' }));
+    expect(screen.getByTestId('uris').textContent).toBe('https://a.test');
   });
 
   it('leaves anyone else without them', async () => {

@@ -87,12 +87,16 @@ describe('redirect URI overlay', () => {
     expect(screen.queryByTestId('list')).toBeNull();
   });
 
-  it('drops a deleted URI at once and keeps it dropped through a stale refetch', () => {
+  it('drops a deleted URI at once and keeps it dropped through a stale refetch', async () => {
     const refetch = jest.fn(async () => {});
     const nodes = [{ uri: 'https://old.test' }, { uri: 'https://keep.test' }];
     const { rerender } = render(ui(nodes, refetch));
     click('remove');
     expect(screen.getByTestId('list').textContent).not.toContain('https://old.test');
+    // Let the refetch promise settle, as it does before a real stale rerender.
+    await act(async () => {
+      await Promise.resolve();
+    });
     rerender(ui([...nodes], refetch));
     expect(screen.getByTestId('list').textContent).not.toContain('https://old.test');
     expect(screen.getByTestId('list').textContent).toContain('https://keep.test');

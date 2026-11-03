@@ -117,7 +117,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   });
   const consoleKey = (consoleKeyQuery.data ?? enabledKey)?.toLowerCase() ?? null;
   const setFleetRedirectUri = useSetRedirectUri(fragment.tokenId);
-  const { uris: redirectUris } = useRedirectUris(fragment.redirectURIs.nodes);
+  const { uris: redirectUris, recordUriChange } = useRedirectUris(
+    fragment.redirectURIs.nodes,
+  );
   const registry = useLicenseSignerRegistry(fragment.tokenId);
   const { members } = useTeamMembers();
   // Verified wallets of the team (the owner's console wallet included): console
@@ -262,6 +264,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           label: 'Adding RentalOS as an authorized redirect URI...',
         });
         await setFleetRedirectUri(RENTAL_OS_URL, true);
+        recordUriChange(RENTAL_OS_URL, true);
         addedRedirectUri = true;
       }
 
@@ -409,7 +412,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
             ? handleDisableSigner(enabledSignerAddress)
             : Promise.resolve(),
           addedRedirectUri
-            ? setFleetRedirectUri(RENTAL_OS_URL, false)
+            ? setFleetRedirectUri(RENTAL_OS_URL, false).then(() =>
+                recordUriChange(RENTAL_OS_URL, false),
+              )
             : Promise.resolve(),
         ]);
       }
