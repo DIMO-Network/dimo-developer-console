@@ -423,7 +423,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     // the license refetch finish behind the page.
     await handleDisableSigner(signer);
     if (turningOff) setEnabledKey(null);
-    setPendingRemovals((prev) => new Set([...prev, signer]));
+    setPendingRemovals((prev) => new Set([...prev, signer.toLowerCase()]));
     toast.success(
       turningOff
         ? 'Console access turned off.'
@@ -438,19 +438,32 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       }
       void registry.refetch();
     })();
-    void refetch().then(() => setPendingRemovals(new Set()));
+    // A failed refetch leaves the address pending; the effect below clears it
+    // once the license stops listing it.
+    void refetch().catch((error: unknown) => Sentry.captureException(error));
   };
+
+  useEffect(() => {
+    setPendingRemovals((prev) => {
+      if (!prev.size) return prev;
+      const listed = new Set(fragment.signers.nodes.map((n) => n.address.toLowerCase()));
+      const next = new Set([...prev].filter((a) => listed.has(a)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [fragment.signers.nodes]);
 
   type SignerRow = SignerNode & { offChain?: boolean };
   const onChainRows: SignerRow[] = [
-    ...fragment.signers.nodes.filter((s) => !pendingRemovals.has(s.address)),
+    ...fragment.signers.nodes.filter(
+      (s) => !pendingRemovals.has(s.address.toLowerCase()),
+    ),
     ...optimisticAdditions.filter(
       (s) => !fragment.signers.nodes.some((n) => n.address === s.address),
     ),
   ];
   if (
     enabledKey &&
-    !pendingRemovals.has(enabledKey) &&
+    !pendingRemovals.has(enabledKey.toLowerCase()) &&
     !onChainRows.some((r) => String(r.address).toLowerCase() === enabledKey.toLowerCase())
   )
     onChainRows.push({ address: enabledKey, enabledAt: new Date().toISOString() });

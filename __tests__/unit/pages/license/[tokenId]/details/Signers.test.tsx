@@ -591,6 +591,74 @@ describe('Signers', () => {
     expect(markLicenseSignerDisabled).toHaveBeenCalled();
   });
 
+  it('keeps a deleted key hidden until the license stops listing it', async () => {
+    (markLicenseSignerDisabled as jest.Mock).mockResolvedValue({ ok: true, data: {} });
+    const view = show([SIGNER]);
+    openDelete();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() => expect(refetchLicense).toHaveBeenCalled());
+    await act(async () => {});
+    // refetch resolved but the license still lists the key: stay hidden
+    expect(screen.queryByRole('button', { name: `Actions for ${SIGNER}` })).toBeNull();
+    const license = (signers: string[]) =>
+      ({
+        owner: OWNER,
+        clientId: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
+        tokenId: 42,
+        signers: {
+          nodes: signers.map((address) => ({
+            address,
+            enabledAt: '2026-09-01T00:00:00Z',
+          })),
+        },
+        redirectURIs: { nodes: [{ uri: 'https://rentals.dimo.co/' }] },
+      }) as never;
+    const rerenderWith = (signers: string[]) =>
+      view.rerender(
+        <QueryClientProvider client={new QueryClient()}>
+          <Signers license={license(signers)} refetch={refetchLicense} />
+        </QueryClientProvider>,
+      );
+    rerenderWith([SIGNER.toLowerCase()]);
+    expect(screen.queryByRole('button', { name: `Actions for ${SIGNER}` })).toBeNull();
+    rerenderWith([]);
+    rerenderWith([SIGNER]);
+    expect(
+      await screen.findByRole('button', { name: `Actions for ${SIGNER}` }),
+    ).toBeInTheDocument();
+  });
+
+  it('survives a failing refetch', async () => {
+    (markLicenseSignerDisabled as jest.Mock).mockResolvedValue({ ok: true, data: {} });
+    refetchLicense.mockRejectedValueOnce(new Error('offline'));
+    show([SIGNER]);
+    openDelete();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() => expect(refetchLicense).toHaveBeenCalled());
+    await act(async () => {});
+    expect(screen.queryByRole('button', { name: `Actions for ${SIGNER}` })).toBeNull();
+  });
+
+  it('turns off the console key with its own copy and toast', async () => {
+    mockTeam.members = [OWNER_ROW];
+    (markLicenseSignerDisabled as jest.Mock).mockResolvedValue({ ok: true, data: {} });
+    show([CONSOLE_KEY.toLowerCase()]);
+    await screen.findByText('Console (you)');
+    fireEvent.click(
+      await screen.findByRole('button', {
+        name: `Actions for ${CONSOLE_KEY.toLowerCase()}`,
+      }),
+    );
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Turn off console access' }));
+    expect(
+      screen.getByText(/The console stops making developer JWTs/),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('Console access turned off.'),
+    );
+  });
+
   it('never covers the page with the loading modal', async () => {
     (markLicenseSignerDisabled as jest.Mock).mockResolvedValue({ ok: true, data: {} });
     mockSetLoadingStatus.mockClear();

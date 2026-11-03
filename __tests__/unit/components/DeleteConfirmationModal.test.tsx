@@ -32,24 +32,34 @@ describe('DeleteConfirmationModal', () => {
   });
 
   it('shows an error and stays open when confirming fails', async () => {
-    const onConfirm = jest.fn(async () => {
-      throw new Error('boom');
-    });
     const onCancel = jest.fn();
-    const { rerender } = renderModal({ onConfirm, onCancel });
+    const Caller = () => {
+      const [error, setError] = React.useState<string | null>(null);
+      return (
+        <DeleteConfirmationModal
+          isOpen
+          title="Delete it?"
+          error={error}
+          onCancel={onCancel}
+          onConfirm={async () => {
+            try {
+              await Promise.reject(new Error('boom'));
+            } catch {
+              setError('The transaction was denied');
+              throw new Error('boom');
+            }
+          }}
+        />
+      );
+    };
+    render(<Caller />);
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
-    await waitFor(() => expect(onConfirm).toHaveBeenCalled());
-    rerender(
-      <DeleteConfirmationModal
-        isOpen
-        title="Delete it?"
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-        error="The transaction was denied"
-      />,
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The transaction was denied',
     );
-    expect(screen.getByRole('alert')).toHaveTextContent('The transaction was denied');
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled(),
+    );
     expect(onCancel).not.toHaveBeenCalled();
   });
 });
