@@ -158,6 +158,7 @@ describe('Signers', () => {
     mockTeam.members = [SAM_ROW];
     (useIsLicenseOwner as jest.Mock).mockReturnValue(true);
     (upsertLicenseSigner as jest.Mock).mockReset();
+    registry.refetch.mockReset();
     mockOwnerKey.hasPrivateKey = true;
     mockOwnerKey.privateKeyAddress = CONSOLE_KEY;
     enableSigner.mockReset();
@@ -209,6 +210,7 @@ describe('Signers', () => {
     expect(findConsoleKeyAddress).not.toHaveBeenCalled();
     expect(hasGlobalAccountPrivateKey).not.toHaveBeenCalled();
     expect(enableSigner).not.toHaveBeenCalled();
+    expect(mockPublishEvent).not.toHaveBeenCalled();
   });
 
   it('tells a member nothing once console access is on', () => {
@@ -326,7 +328,6 @@ describe('Signers', () => {
     await waitFor(() => expect(registry.refetch).toHaveBeenCalled());
     await act(async () => {});
     expect(upsertLicenseSigner).not.toHaveBeenCalled();
-    registry.refetch.mockReset();
   });
 
   it('shows a failed enable on the card', async () => {

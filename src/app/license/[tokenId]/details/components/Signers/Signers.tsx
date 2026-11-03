@@ -528,10 +528,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         setEnableError('Something went wrong');
         return;
       }
+      // Enable handles the row and the event itself; the open-time effects stand down.
+      consoleKeyRecorded.current = true;
+      consoleKeyAnnounced.current = true;
       if (!isSigner(privateKeyAddress)) {
         await handleEnableSigner(privateKeyAddress);
-        consoleKeyRecorded.current = true;
-        consoleKeyAnnounced.current = true;
         setEnabledKey(privateKeyAddress);
         await refetch();
       }
@@ -574,7 +575,17 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   useEffect(() => {
     if (!isLicenseOwner || !consoleKey || consoleKeyAnnounced.current) return;
     consoleKeyAnnounced.current = true;
-    if (consoleKeyOnChain) publishEvent({ client_id: consoleKey as `0x${string}` }, true);
+    if (!consoleKeyOnChain) return;
+    // After the commit: with a warm query cache this runs in the first effect
+    // flush, before the sibling DeveloperJwts registers its listener.
+    const timer = setTimeout(
+      () => publishEvent({ client_id: consoleKey as `0x${string}` }, true),
+      0,
+    );
+    return () => {
+      clearTimeout(timer);
+      consoleKeyAnnounced.current = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLicenseOwner, consoleKey]);
 
