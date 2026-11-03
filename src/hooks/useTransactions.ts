@@ -220,25 +220,26 @@ export const useMintLicense = () => {
 export type MintConnectionStep =
   'minting' | 'signing-agreements' | 'granting-permissions';
 
-export interface MintConnectionParams {
-  connectionName: string;
+export type MintConnectionResult =
+  { success: true; connectionId: bigint } | { success: false; reason: string };
+
+export interface GrantConnectionParams {
+  connectionId: bigint;
   licenseGrantee: `0x${string}`;
   deviceIssuanceGrantee: `0x${string}`;
   onStep?: (step: MintConnectionStep) => void;
 }
 
+// Two steps, so a caller can record the mint before granting: the connection costs
+// real DIMO, and whatever fails after the mint has to be finishable later.
 export const useMintConnection = () => {
   const { validateCurrentSession, currentUser, getCurrentDimoBalance } =
     useGlobalAccount();
   const { processTransactions } = useContractGA();
   const { signAndUploadPermissionSACD } = useSACD();
-  return useCallback(
-    async ({
-      connectionName,
-      licenseGrantee,
-      deviceIssuanceGrantee,
-      onStep,
-    }: MintConnectionParams) => {
+
+  const mint = useCallback(
+    async (connectionName: string): Promise<MintConnectionResult> => {
       const nameBytes = new TextEncoder().encode(connectionName).length;
       if (nameBytes > 32) {
         return {
@@ -315,10 +316,10 @@ export const useMintConnection = () => {
       ];
 
       try {
-        onStep?.('minting');
         const result = await processTransactions(transactions, {
           abi: DimoConnectionABI as Abi,
         });
+        assertUserOperation(result);
 
         // Pull connectionId out of the ConnectionMinted event so we can grant
         // permissions to the generated keys. Token IDs are full uint256 — keep
@@ -341,67 +342,7 @@ export const useMintConnection = () => {
           'uint256',
         ) as bigint;
 
-        const asset = configuration.DCC_ADDRESS;
-        const grantor = currentUser.smartContractAddress;
-
-        onStep?.('signing-agreements');
-        const [deviceIssuanceSource, licenseSource] = await Promise.all([
-          signAndUploadPermissionSACD({
-            grantee: deviceIssuanceGrantee,
-            grantor,
-            asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
-            expiration: CONNECTION_SACD_EXPIRATION,
-            permissionNames: ['MintSD'],
-          }),
-          signAndUploadPermissionSACD({
-            grantee: licenseGrantee,
-            grantor,
-            asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
-            expiration: CONNECTION_SACD_EXPIRATION,
-            permissionNames: ['GenerateCertificate'],
-          }),
-        ]);
-
-        onStep?.('granting-permissions');
-        await processTransactions(
-          [
-            {
-              to: configuration.DIMO_SACD_ADDRESS,
-              value: BigInt(0),
-              data: encodeFunctionData({
-                abi: SacdABI as Abi,
-                functionName: 'setPermissions',
-                args: [
-                  asset,
-                  connectionId,
-                  deviceIssuanceGrantee,
-                  CONNECTION_PERMS_MINT_SYNTHETIC_DEVICES,
-                  CONNECTION_SACD_EXPIRATION,
-                  deviceIssuanceSource,
-                ],
-              }),
-            },
-            {
-              to: configuration.DIMO_SACD_ADDRESS,
-              value: BigInt(0),
-              data: encodeFunctionData({
-                abi: SacdABI as Abi,
-                functionName: 'setPermissions',
-                args: [
-                  asset,
-                  connectionId,
-                  licenseGrantee,
-                  CONNECTION_PERMS_GET_CERTIFICATES,
-                  CONNECTION_SACD_EXPIRATION,
-                  licenseSource,
-                ],
-              }),
-            },
-          ],
-          { abi: SacdABI as Abi },
-        );
-
-        return { ...result, connectionId };
+        return { success: true, connectionId };
       } catch (error: unknown) {
         const errorMessage =
           (error as Error)?.message || (error as Error)?.toString() || 'Unknown error';
@@ -439,12 +380,82 @@ export const useMintConnection = () => {
         throw error;
       }
     },
-    [
-      currentUser,
-      getCurrentDimoBalance,
-      processTransactions,
-      signAndUploadPermissionSACD,
-      validateCurrentSession,
-    ],
+    [currentUser, getCurrentDimoBalance, processTransactions, validateCurrentSession],
   );
+
+  const grant = useCallback(
+    async ({
+      connectionId,
+      licenseGrantee,
+      deviceIssuanceGrantee,
+      onStep,
+    }: GrantConnectionParams): Promise<void> => {
+      if (!currentUser) throw new Error('User not found');
+
+      const asset = configuration.DCC_ADDRESS;
+      const grantor = currentUser.smartContractAddress;
+
+      onStep?.('signing-agreements');
+      const [deviceIssuanceSource, licenseSource] = await Promise.all([
+        signAndUploadPermissionSACD({
+          grantee: deviceIssuanceGrantee,
+          grantor,
+          asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
+          expiration: CONNECTION_SACD_EXPIRATION,
+          permissionNames: ['MintSD'],
+        }),
+        signAndUploadPermissionSACD({
+          grantee: licenseGrantee,
+          grantor,
+          asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
+          expiration: CONNECTION_SACD_EXPIRATION,
+          permissionNames: ['GenerateCertificate'],
+        }),
+      ]);
+
+      onStep?.('granting-permissions');
+      assertUserOperation(
+        await processTransactions(
+          [
+            {
+              to: configuration.DIMO_SACD_ADDRESS,
+              value: BigInt(0),
+              data: encodeFunctionData({
+                abi: SacdABI as Abi,
+                functionName: 'setPermissions',
+                args: [
+                  asset,
+                  connectionId,
+                  deviceIssuanceGrantee,
+                  CONNECTION_PERMS_MINT_SYNTHETIC_DEVICES,
+                  CONNECTION_SACD_EXPIRATION,
+                  deviceIssuanceSource,
+                ],
+              }),
+            },
+            {
+              to: configuration.DIMO_SACD_ADDRESS,
+              value: BigInt(0),
+              data: encodeFunctionData({
+                abi: SacdABI as Abi,
+                functionName: 'setPermissions',
+                args: [
+                  asset,
+                  connectionId,
+                  licenseGrantee,
+                  CONNECTION_PERMS_GET_CERTIFICATES,
+                  CONNECTION_SACD_EXPIRATION,
+                  licenseSource,
+                ],
+              }),
+            },
+          ],
+          { abi: SacdABI as Abi },
+        ),
+      );
+    },
+    [currentUser, processTransactions, signAndUploadPermissionSACD],
+  );
+
+  return { mint, grant };
 };

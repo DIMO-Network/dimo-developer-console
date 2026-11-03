@@ -1,5 +1,8 @@
 import { renderHook } from '@testing-library/react';
-import { keccak256, toBytes, toHex } from 'viem';
+import { type Abi, decodeFunctionData, keccak256, toBytes, toHex } from 'viem';
+import DimoConnectionABI from '@/contracts/DimoConnectionABI.json';
+import SacdABI from '@/contracts/Sacd.json';
+import { UserOperationFailedError } from '@/utils/userOperation';
 
 const mockProcess = jest.fn();
 const mockDimoBalance = jest.fn();
@@ -34,11 +37,14 @@ const MINTED_LOG = {
   ],
 };
 
-const mint = () =>
-  renderHook(() => useMintConnection()).result.current({
-    connectionName: 'My connection',
+const hook = () => renderHook(() => useMintConnection()).result.current;
+const mint = () => hook().mint('My connection');
+const grant = (onStep?: (step: string) => void) =>
+  hook().grant({
+    connectionId: CONNECTION_ID,
     licenseGrantee: LICENSE_GRANTEE,
     deviceIssuanceGrantee: ISSUANCE_GRANTEE,
+    onStep,
   });
 
 // $1 / $0.0169 per DIMO, plus the 5% buffer: 62.13 DIMO.
@@ -85,5 +91,97 @@ describe('useMintConnection DIMO balance check', () => {
       reason: expect.stringContaining('Insufficient'),
     });
     expect(mockProcess).not.toHaveBeenCalled();
+  });
+});
+
+describe('useMintConnection mint', () => {
+  beforeEach(() => {
+    jest.mocked(getCurrentDimoPrice).mockResolvedValue(0.0169);
+    mockDimoBalance.mockResolvedValue(100);
+    mockProcess.mockResolvedValue({ success: true, logs: [MINTED_LOG] });
+  });
+
+  it('answers with the id and grants nothing', async () => {
+    await expect(mint()).resolves.toEqual({
+      success: true,
+      connectionId: CONNECTION_ID,
+    });
+
+    expect(mockProcess).toHaveBeenCalledTimes(1);
+    expect(mockSign).not.toHaveBeenCalled();
+  });
+
+  it('mints to the smart account', async () => {
+    await mint();
+
+    const [[, mintCall]] = mockProcess.mock.calls[0];
+    const { args } = decodeFunctionData({
+      abi: DimoConnectionABI as Abi,
+      data: mintCall.data,
+    });
+    expect(args).toEqual([WALLET, 'My connection']);
+  });
+
+  // A revert with no reason resolves with success: false rather than throwing, and
+  // must not read as a mint.
+  it('throws on a user operation that reverted', async () => {
+    mockProcess.mockResolvedValue({ success: false });
+
+    await expect(mint()).rejects.toBeInstanceOf(UserOperationFailedError);
+  });
+
+  it('translates a refusal', async () => {
+    mockProcess.mockRejectedValue(new Error('NameAlreadyInUse("My connection")'));
+
+    await expect(mint()).resolves.toEqual({
+      success: false,
+      reason: expect.stringContaining('already taken'),
+    });
+  });
+
+  it('passes on what it cannot explain', async () => {
+    mockProcess.mockRejectedValue(new Error('bundler timed out'));
+
+    await expect(mint()).rejects.toThrow('bundler timed out');
+  });
+});
+
+describe('useMintConnection grant', () => {
+  beforeEach(() => {
+    mockProcess.mockResolvedValue({ success: true, logs: [] });
+    mockSign.mockResolvedValue('ipfs://sacd');
+  });
+
+  it('gives each key its permission on the connection', async () => {
+    const steps: string[] = [];
+
+    await grant((step) => steps.push(step));
+
+    expect(steps).toEqual(['signing-agreements', 'granting-permissions']);
+    expect(mockSign.mock.calls.map(([{ grantee }]) => grantee).sort()).toEqual(
+      [ISSUANCE_GRANTEE, LICENSE_GRANTEE].sort(),
+    );
+    expect(mockProcess).toHaveBeenCalledTimes(1);
+    const [calls] = mockProcess.mock.calls[0];
+    const granted = calls.map(({ data }: { data: `0x${string}` }) =>
+      decodeFunctionData({ abi: SacdABI as Abi, data }).args?.slice(1, 3),
+    );
+    expect(granted).toEqual([
+      [CONNECTION_ID, ISSUANCE_GRANTEE],
+      [CONNECTION_ID, LICENSE_GRANTEE],
+    ]);
+  });
+
+  it('spends nothing: no balance check, no mint', async () => {
+    await grant();
+
+    expect(mockDimoBalance).not.toHaveBeenCalled();
+    expect(getCurrentDimoPrice).not.toHaveBeenCalled();
+  });
+
+  it('throws on a user operation that reverted', async () => {
+    mockProcess.mockResolvedValue({ success: false });
+
+    await expect(grant()).rejects.toBeInstanceOf(UserOperationFailedError);
   });
 });
