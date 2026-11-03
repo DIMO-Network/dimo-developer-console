@@ -97,6 +97,32 @@ describe('proxy without a session', () => {
     });
   });
 
+  it('clears the session cookies when it refuses an action for an invalid token', async () => {
+    (decodeJwtToken as jest.Mock).mockRejectedValue(
+      Object.assign(new Error('"exp" claim timestamp check failed'), {
+        code: 'ERR_JWT_EXPIRED',
+      }),
+    );
+    const res = await run(
+      request(
+        '/connections',
+        { 'session-token': TOKEN, [SESSION_VERDICT_COOKIE]: 'v' },
+        { method: 'POST', headers: { 'next-action': 'abc123' } },
+      ),
+    );
+    expect(res.status).toBe(401);
+    const cookies = (
+      res as unknown as {
+        cookies: { get: (n: string) => { value: string; expires?: Date } | undefined };
+      }
+    ).cookies;
+    for (const name of ['session-token', SESSION_VERDICT_COOKIE]) {
+      const cookie = cookies.get(name);
+      expect(cookie?.value).toBe('');
+      expect(cookie?.expires?.getTime()).toBe(0);
+    }
+  });
+
   it('lets a server action on the sign-in page run without a session', async () => {
     const res = await run(
       request('/sign-in', {}, { method: 'POST', headers: { 'next-action': 'abc123' } }),

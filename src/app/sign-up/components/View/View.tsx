@@ -51,6 +51,7 @@ const View = () => {
       explainSignUpRefusal(new SignUpRefusedError(result.reason), () =>
         router.replace('/sign-in'),
       );
+      setIsLoading(false);
       return;
     }
     router.replace('/app');

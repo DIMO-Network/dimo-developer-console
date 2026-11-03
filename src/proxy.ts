@@ -164,8 +164,11 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
 
   // A redirect would make the browser replay the action's POST at /sign-in,
   // where a login page lets it through and console-api answers 401.
+  // The token is missing or did not verify, so a stale cookie goes with this
+  // answer: logout()'s endSession() action lands here when the session is gone,
+  // and could not delete the cookies itself.
   if (!isLoginPage && request.headers.has('next-action')) {
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         error: 'Your session has expired',
         code: 'SESSION_EXPIRED',
@@ -173,6 +176,9 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
       },
       { status: 401 },
     );
+    response.cookies.delete(cookieName);
+    response.cookies.delete(SESSION_VERDICT_COOKIE);
+    return response;
   }
 
   if (!isLoginPage) {
