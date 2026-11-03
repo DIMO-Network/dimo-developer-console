@@ -29,6 +29,7 @@ jest.mock('@sentry/nextjs', () => ({
   captureException: jest.fn(),
 }));
 
+import { deleteMyBrand } from '@/actions/brand';
 import * as Sentry from '@sentry/nextjs';
 import { toast } from 'sonner';
 import { fetchJson } from '@/utils/fetchJson';
@@ -245,5 +246,50 @@ describe('Brand', () => {
     expect(await screen.findByText('Fleet App')).toBeInTheDocument();
     expect(screen.getByText('Consumer App')).toBeInTheDocument();
     expect(getOrCreateLicenseWorkspace).not.toHaveBeenCalled();
+  });
+
+  const BRAND_DELETE =
+    "Sites that ask for this brand by name get DIMO's own look instead. Pages already open can take a few minutes to change.";
+  const LAST_BRAND_DELETE =
+    "Login with DIMO goes back to DIMO's own look for this license. Pages already open can take a few minutes to change.";
+  const consumer = { ...fleetBrand, id: 'b2', name: 'Consumer App', isDefault: false };
+
+  it('asks before deleting a brand', async () => {
+    routeReturns(WS, [fleetBrand, consumer]);
+    renderBrand();
+    await screen.findByText('Consumer App');
+    fireEvent.click(screen.getByTitle('Delete brand'));
+    expect(await screen.findByText('Delete Consumer App?')).toBeInTheDocument();
+    expect(screen.getByText(BRAND_DELETE)).toBeInTheDocument();
+    expect(deleteMyBrand).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(deleteMyBrand).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.queryByText('Delete Consumer App?')).not.toBeInTheDocument(),
+    );
+  });
+
+  it('deletes the last brand after confirming', async () => {
+    routeReturns(WS, [fleetBrand]);
+    renderBrand();
+    await screen.findByText('Fleet App');
+    fireEvent.click(screen.getByTitle('Delete brand'));
+    expect(await screen.findByText('Delete Fleet App?')).toBeInTheDocument();
+    expect(screen.getByText(LAST_BRAND_DELETE)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    expect(await screen.findByText('No brand set.')).toBeInTheDocument();
+    expect(deleteMyBrand).toHaveBeenCalledWith('ws-1', 'b1');
+  });
+
+  it('keeps the dialog open and says so when the delete fails', async () => {
+    (deleteMyBrand as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+    routeReturns(WS, [fleetBrand, consumer]);
+    renderBrand();
+    await screen.findByText('Consumer App');
+    fireEvent.click(screen.getByTitle('Delete brand'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to delete brand');
+    expect(screen.getByText('Delete Consumer App?')).toBeInTheDocument();
+    expect(Sentry.captureException).toHaveBeenCalled();
   });
 });

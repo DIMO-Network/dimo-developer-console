@@ -76,7 +76,7 @@ describe('BrandRow', () => {
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
-  it('disables delete when brand is default and multiple brands exist', () => {
+  it('keeps the default among several undeletable', () => {
     render(
       <BrandRow
         brand={baseBrand}
@@ -91,7 +91,7 @@ describe('BrandRow', () => {
     ).toBeDisabled();
   });
 
-  it('disables delete on default brand when it is the only brand', () => {
+  it('lets the only brand be deleted', () => {
     render(
       <BrandRow
         brand={baseBrand}
@@ -101,9 +101,7 @@ describe('BrandRow', () => {
         onDelete={jest.fn()}
       />,
     );
-    expect(
-      screen.getByTitle('Set another brand as default before deleting this one'),
-    ).toBeDisabled();
+    expect(screen.getByTitle('Delete brand')).toBeEnabled();
   });
 
   it('calls onDelete on a non-default brand', () => {
