@@ -13,8 +13,9 @@ jest.mock('axios', () => {
     default: { ...actual.default, create: () => client },
   };
 });
-import { AxiosError, type AxiosResponse } from 'axios';
-import { getDimoToken, submitDexChallenge } from '@/actions/dimoAuth';
+import { inspect } from 'node:util';
+import { AxiosError, AxiosHeaders, type AxiosResponse } from 'axios';
+import { exchangeDimoToken, getDimoToken, submitDexChallenge } from '@/actions/dimoAuth';
 
 const INPUT = {
   state: 'st',
@@ -42,5 +43,39 @@ describe('dimoAuth', () => {
     await expect(submitDexChallenge(INPUT)).resolves.toEqual({ ok: false, status: 400 });
     mockPost.mockRejectedValue(new Error('socket hang up'));
     await expect(submitDexChallenge(INPUT)).resolves.toEqual({ ok: false, status: 0 });
+  });
+
+  const failure = (data: string) =>
+    new AxiosError(
+      'Bad Request',
+      'ERR_BAD_REQUEST',
+      { headers: new AxiosHeaders({ Authorization: 'Bearer t' }), data } as never,
+      { body: '0xsecret' },
+      { status: 400, data: {} } as AxiosResponse,
+    );
+
+  it('strips the signed challenge from a failed submit', async () => {
+    const error = failure('signature=0xsecret');
+    mockPost.mockRejectedValue(error);
+    await expect(getDimoToken(INPUT)).rejects.toBe(error);
+    expect(error.config?.data).toBeUndefined();
+    expect(error.request).toBeUndefined();
+    expect(inspect(error, { depth: null })).not.toContain('0xsecret');
+  });
+
+  it('strips the auth code from a failed exchange', async () => {
+    const error = failure('code=code-123');
+    mockPost.mockRejectedValue(error);
+    await expect(exchangeDimoToken('code-123')).rejects.toBe(error);
+    expect(error.config?.data).toBeUndefined();
+    expect(error.request).toBeUndefined();
+    expect(inspect(error, { depth: null })).not.toContain('code-123');
+  });
+
+  it('keeps the status a caller reads', async () => {
+    mockPost.mockRejectedValue(failure('signature=0xsecret'));
+    await expect(getDimoToken(INPUT)).rejects.toMatchObject({
+      response: { status: 400 },
+    });
   });
 });

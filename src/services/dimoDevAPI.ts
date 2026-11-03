@@ -3,6 +3,7 @@ import axios, { AxiosError } from 'axios';
 
 import config from '@/config';
 import { ACTIVE_TEAM_COOKIE, TEAM_ID_HEADER } from '@/utils/teamCookies';
+import { stripRequestDetails } from '@/utils/upstreamErrors';
 
 export const cookieName = 'session-token';
 
@@ -32,32 +33,6 @@ export const clearStaleTeamOnNotAMember = async (error: unknown) => {
     }
   }
   throw error;
-};
-
-// Next logs what a Server Action throws, and that prints every field of the error: the
-// session token and the request body sit in its configs, and again in the raw requests.
-// Callers read the message, the code, and the response's status and data, so those stay.
-const dropAuthorization = (headers: unknown) => {
-  if (!headers) return;
-  // AxiosHeaders matches the name in any case. A plain object, which an adapter or a
-  // rebuilt config can leave, has no delete(), and a TypeError here would replace the
-  // AxiosError the caller reads.
-  const { delete: remove } = headers as { delete?: unknown };
-  if (typeof remove === 'function') {
-    remove.call(headers, 'Authorization');
-  } else {
-    delete (headers as Record<string, unknown>).Authorization;
-  }
-};
-
-const stripRequestDetails = (error: unknown) => {
-  if (!(error instanceof AxiosError)) return;
-  for (const config of [error.config, error.response?.config]) {
-    dropAuthorization(config?.headers);
-    delete config?.data;
-  }
-  delete error.request;
-  delete error.response?.request;
 };
 
 export const dimoDevAPIClient = async (timeout: number = 5000, token?: string) => {
