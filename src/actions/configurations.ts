@@ -41,7 +41,7 @@ export const getConfiguration = async ({
 }): Promise<IConfiguration> => {
   const client = await dimoDevAPIClient();
   const { data } = await client.get<{ configuration: IConfiguration }>(
-    `/api/my/configurations/${id}`,
+    `/api/my/configurations/${encodeURIComponent(id)}`,
   );
   return data.configuration;
 };
@@ -77,7 +77,7 @@ export const updateConfiguration = async ({
   configuration: Record<string, unknown>;
 }) => {
   const client = await dimoDevAPIClient();
-  await client.put(`/api/my/configurations/${id}`, {
+  await client.put(`/api/my/configurations/${encodeURIComponent(id)}`, {
     client_id,
     configuration_name,
     configuration,
@@ -86,5 +86,5 @@ export const updateConfiguration = async ({
 
 export const deleteConfiguration = async ({ id }: { id: string }) => {
   const client = await dimoDevAPIClient();
-  await client.delete(`/api/my/configurations/${id}`);
+  await client.delete(`/api/my/configurations/${encodeURIComponent(id)}`);
 };

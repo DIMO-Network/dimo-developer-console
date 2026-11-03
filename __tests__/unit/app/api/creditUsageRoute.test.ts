@@ -69,6 +69,7 @@ describe('GET /api/credit-usage', () => {
   });
 
   it('answers 502 when the tracker times out, without the JWT', async () => {
+    const logged = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockGet.mockRejectedValue(
       new AxiosError('timeout of 3000ms exceeded', 'ECONNABORTED', {
         headers: new AxiosHeaders({ Authorization: 'Bearer jwt-1' }),
@@ -79,5 +80,11 @@ describe('GET /api/credit-usage', () => {
     const body = await res.json();
     expect(body).toEqual({ message: 'Credit usage unavailable' });
     expect(JSON.stringify(body)).not.toContain('jwt-1');
+    expect(logged).toHaveBeenCalledWith(
+      '[credit-usage]',
+      'Credit usage request failed (no response)',
+    );
+    expect(JSON.stringify(logged.mock.calls)).not.toContain('jwt-1');
+    logged.mockRestore();
   });
 });

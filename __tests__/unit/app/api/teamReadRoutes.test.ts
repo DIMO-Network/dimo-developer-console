@@ -49,6 +49,31 @@ describe('team read routes', () => {
     expect(res.status).toBe(502);
   });
 
+  it('GET /api/team/members keeps transport text out of the body', async () => {
+    (fetchTeamMembers as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 0,
+      code: null,
+      message: 'getaddrinfo ENOTFOUND x',
+    });
+    const res = await getMembers();
+    const body = await res.json();
+    expect(res.status).toBe(502);
+    expect(body).toMatchObject({ ok: false, status: 0, code: null });
+    expect(body.message).toBe('Could not reach the console API');
+    expect(JSON.stringify(body)).not.toContain('ENOTFOUND');
+  });
+
+  it('GET /api/team/members keeps the message of a 403 refusal', async () => {
+    (fetchTeamMembers as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 403,
+      code: 'NOT_A_MEMBER',
+      message: 'gone',
+    });
+    expect((await (await getMembers()).json()).message).toBe('gone');
+  });
+
   it('GET /api/invites/pending answers ok with null when there is no invite', async () => {
     (previewPendingInvite as jest.Mock).mockResolvedValue(null);
     const res = await getPendingInvite();

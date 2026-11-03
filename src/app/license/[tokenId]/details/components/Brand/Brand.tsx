@@ -69,6 +69,8 @@ export const Brand: FC<Props> = ({ license }) => {
           setCreateError('Could not load your workspace. Re-login and try again.');
           return;
         }
+        // An earlier refetch landing after this write would restore workspace: null.
+        await queryClient.cancelQueries({ queryKey: licenseBrandsKey(licenseTokenId) });
         queryClient.setQueryData<LicenseBrands>(licenseBrandsKey(licenseTokenId), {
           workspace: ws,
           brands: [],
@@ -93,13 +95,15 @@ export const Brand: FC<Props> = ({ license }) => {
     toast.error(loadError);
   }, [loadError]);
 
-  const setBrands = (update: (prev: BrandView[]) => BrandView[]) =>
+  const setBrands = async (update: (prev: BrandView[]) => BrandView[]) => {
+    await queryClient.cancelQueries({ queryKey: licenseBrandsKey(licenseTokenId) });
     queryClient.setQueryData<LicenseBrands>(licenseBrandsKey(licenseTokenId), (prev) =>
       prev ? { ...prev, brands: update(prev.brands) } : prev,
     );
+  };
 
-  const handleSave = (saved: BrandView) => {
-    setBrands((prev) => {
+  const handleSave = async (saved: BrandView) => {
+    await setBrands((prev) => {
       const idx = prev.findIndex((b) => b.id === saved.id);
       if (idx === -1) return [...prev, saved];
       const next = [...prev];
@@ -113,7 +117,7 @@ export const Brand: FC<Props> = ({ license }) => {
     if (!workspaceId) return;
     try {
       await deleteMyBrand(workspaceId, brandId);
-      setBrands((prev) => prev.filter((b) => b.id !== brandId));
+      await setBrands((prev) => prev.filter((b) => b.id !== brandId));
     } catch (error) {
       Sentry.captureException(error);
       toast.error('Failed to delete brand. Try again.');

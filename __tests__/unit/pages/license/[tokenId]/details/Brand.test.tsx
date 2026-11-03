@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Brand } from '@/app/license/[tokenId]/details/components/Brand/Brand';
 
@@ -87,6 +87,33 @@ describe('Brand', () => {
     });
     expect(fetchJson).toHaveBeenCalledWith('/api/licenses/42/brands');
     expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('keeps the created workspace when an earlier refetch lands afterwards', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    let created!: (ws: unknown) => void;
+    let stale!: (v: unknown) => void;
+    (getOrCreateLicenseWorkspace as jest.Mock).mockReturnValue(
+      new Promise((resolve) => (created = resolve)),
+    );
+    (fetchJson as jest.Mock)
+      .mockResolvedValueOnce({ workspace: null, brands: [] })
+      .mockReturnValueOnce(new Promise((resolve) => (stale = resolve)));
+    render(
+      <QueryClientProvider client={client}>
+        <Brand license={mockLicense as never} />
+      </QueryClientProvider>,
+    );
+    await waitFor(() => expect(getOrCreateLicenseWorkspace).toHaveBeenCalled());
+    void client.refetchQueries();
+    await waitFor(() => expect(fetchJson).toHaveBeenCalledTimes(2));
+
+    await act(async () => created(WS));
+    await act(async () => stale({ workspace: null, brands: [] }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Add brand' })).toBeInTheDocument(),
+    );
   });
 
   it('names the workspace after the token when the license has no alias', async () => {

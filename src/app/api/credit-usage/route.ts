@@ -31,7 +31,9 @@ export const GET = async (request: NextRequest) => {
       devJwt,
     });
     return NextResponse.json(usage, { headers: PRIVATE_HEADERS });
-  } catch {
+  } catch (error) {
+    // The service throws only the status, never the JWT; the request headers stay out.
+    console.error('[credit-usage]', error instanceof Error ? error.message : 'unknown');
     return NextResponse.json(
       { message: 'Credit usage unavailable' },
       { status: 502, headers: PRIVATE_HEADERS },
