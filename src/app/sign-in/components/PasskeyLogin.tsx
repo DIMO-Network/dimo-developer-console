@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks';
 import { FC, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { useRouter } from 'next/navigation';
+import { explainSignUpRefusal } from '@/app/sign-up/signUpResult';
 
 interface IProps {
   handlePasskeyRejected: (shouldFallback: boolean) => void;
@@ -31,6 +32,10 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
 
       router.replace('/app');
     } catch (error: unknown) {
+      if (explainSignUpRefusal(error, () => router.replace('/sign-in'))) {
+        handlePasskeyRejected(false);
+        return;
+      }
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
           handlePasskeyRejected(true);

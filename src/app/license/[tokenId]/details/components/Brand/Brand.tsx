@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/nextjs';
 import { Button } from '@/components/Button';
 import { toast } from 'sonner';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { FragmentType, gql, useFragment } from '@/gql';
 
 import { deleteMyBrand } from '@/actions/brand';
@@ -31,6 +32,7 @@ interface Props {
 export const Brand: FC<Props> = ({ license }) => {
   const fragment = useFragment(BRAND_FRAGMENT, license);
   const isOwner = useIsLicenseOwner(fragment);
+  const { currentUser } = useGlobalAccount();
   const queryClient = useQueryClient();
   const licenseTokenId = fragment.tokenId;
   const query = useLicenseBrands(licenseTokenId);
@@ -48,10 +50,12 @@ export const Brand: FC<Props> = ({ license }) => {
   const loading = query.isLoading || creating;
 
   // Only the owner can create the workspace; for anyone else a license with
-  // none is unbranded, not a failure. Creation is a write: a server action.
+  // none is unbranded, not a failure. Creation is a write: a server action, so
+  // it waits for a signed-in user: a tab without a session never resolves one,
+  // and the action's 401 would be reported as `POST /sign-in`.
   const noWorkspace = query.isSuccess && !query.data.workspace?.id;
   useEffect(() => {
-    if (!noWorkspace || !isOwner || createStarted.current) return;
+    if (!noWorkspace || !isOwner || !currentUser || createStarted.current) return;
     createStarted.current = true;
     setCreating(true);
     const create = async () => {
@@ -84,7 +88,7 @@ export const Brand: FC<Props> = ({ license }) => {
     };
     void create();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [noWorkspace, isOwner, licenseTokenId]);
+  }, [noWorkspace, isOwner, !!currentUser, licenseTokenId]);
 
   useEffect(() => {
     if (query.isError) Sentry.captureException(query.error);

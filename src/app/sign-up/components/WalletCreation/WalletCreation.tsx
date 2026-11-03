@@ -14,6 +14,7 @@ import { isNull } from 'lodash';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import { NoPasskeySignup } from './NoPasskeyAccount';
 import { AccountFoundSignup } from './AccountFound';
+import { explainSignUpRefusal } from '@/app/sign-up/signUpResult';
 
 interface IProps {
   auth?: Partial<IAuth>;
@@ -182,6 +183,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
       if (!success) return giveUp();
       globalAccountSignupComplete(newWalletAddress!);
     } catch (error) {
+      if (explainSignUpRefusal(error, () => router.replace('/sign-in'))) return;
       Sentry.captureException(error);
       giveUp();
     }

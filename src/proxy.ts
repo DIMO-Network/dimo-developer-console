@@ -162,6 +162,19 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
     );
   }
 
+  // A redirect would make the browser replay the action's POST at /sign-in,
+  // where a login page lets it through and console-api answers 401.
+  if (!isLoginPage && request.headers.has('next-action')) {
+    return NextResponse.json(
+      {
+        error: 'Your session has expired',
+        code: 'SESSION_EXPIRED',
+        message: 'Unauthorized Access',
+      },
+      { status: 401 },
+    );
+  }
+
   if (!isLoginPage) {
     return NextResponse.redirect(buildRedirectUrl('/sign-in', request), {
       status: 307,

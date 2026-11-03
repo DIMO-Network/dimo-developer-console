@@ -11,6 +11,8 @@ jest.mock('@/hooks/useIsLicenseOwner', () => ({
   useIsLicenseOwner: jest.fn(),
 }));
 
+jest.mock('@/hooks/useGlobalAccount', () => ({ useGlobalAccount: jest.fn() }));
+
 jest.mock('@/actions/workspace', () => ({
   getOrCreateLicenseWorkspace: jest.fn(),
 }));
@@ -32,6 +34,7 @@ import { toast } from 'sonner';
 import { fetchJson } from '@/utils/fetchJson';
 import { getOrCreateLicenseWorkspace } from '@/actions/workspace';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 
 const mockLicense = {
   alias: 'Fleet Co',
@@ -69,6 +72,9 @@ const renderBrand = (license: unknown = mockLicense) => {
 describe('Brand', () => {
   beforeEach(() => {
     (useIsLicenseOwner as jest.Mock).mockReturnValue(true);
+    (useGlobalAccount as jest.Mock).mockReturnValue({
+      currentUser: { email: 'dev@x.test' },
+    });
     (getOrCreateLicenseWorkspace as jest.Mock).mockResolvedValue(WS);
     routeReturns(WS, []);
   });
@@ -216,6 +222,18 @@ describe('Brand', () => {
     renderBrand();
     expect(await screen.findByText('Add brand')).toBeInTheDocument();
     expect(getOrCreateLicenseWorkspace).toHaveBeenCalledTimes(1);
+  });
+
+  // A tab without a session never resolves the user; the create is a server
+  // action, and its 401 would be reported as `POST /sign-in`.
+  it('does not create a workspace in a tab without a session', async () => {
+    (useGlobalAccount as jest.Mock).mockReturnValue({ currentUser: null });
+    routeReturns(null, []);
+    renderBrand();
+    await waitFor(() => expect(fetchJson).toHaveBeenCalled());
+    await act(async () => {});
+    expect(getOrCreateLicenseWorkspace).not.toHaveBeenCalled();
+    expect(toast.error).not.toHaveBeenCalled();
   });
 
   it('lists the brands from the route', async () => {

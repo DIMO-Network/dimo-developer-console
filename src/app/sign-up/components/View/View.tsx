@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/nextjs';
 
 import { BuildForForm, CompanyInfoForm, WalletCreation } from '@/app/sign-up/components';
 import { completeUserData } from '@/app/sign-up/actions';
+import { explainSignUpRefusal, SignUpRefusedError } from '@/app/sign-up/signUpResult';
 import { IAuth } from '@/types/auth';
 import { toast } from 'sonner';
 import { useErrorHandler } from '@/hooks';
@@ -45,7 +46,13 @@ const View = () => {
 
   const handleCompleteUserData = async (auth: Partial<IAuth>) => {
     setIsLoading(true);
-    await completeUserData(auth);
+    const result = await completeUserData(auth);
+    if (!result.ok) {
+      explainSignUpRefusal(new SignUpRefusedError(result.reason), () =>
+        router.replace('/sign-in'),
+      );
+      return;
+    }
     router.replace('/app');
   };
 

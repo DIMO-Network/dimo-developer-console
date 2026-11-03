@@ -43,14 +43,19 @@ const compliantUser = {
 };
 const subOrganization = { subOrganizationId: 'sub-1', hasPasskey: true };
 
-const request = (path: string, cookies: Record<string, string> = {}) => {
+const request = (
+  path: string,
+  cookies: Record<string, string> = {},
+  init: { method?: string; headers?: Record<string, string> } = {},
+) => {
   Object.keys(cookieJar).forEach((k) => delete cookieJar[k]);
   Object.assign(cookieJar, cookies);
   const cookie = Object.entries(cookies)
     .map(([k, v]) => `${k}=${v}`)
     .join('; ');
   return new NextRequest(`https://console.test${path}`, {
-    headers: cookie ? { cookie } : {},
+    method: init.method,
+    headers: { ...(cookie ? { cookie } : {}), ...init.headers },
   });
 };
 
@@ -71,6 +76,34 @@ describe('proxy without a session', () => {
     const res = await run(request('/licenses'));
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toBe('https://console.test/sign-in');
+  });
+
+  // A 307 would replay the POST at /sign-in, where the proxy lets it through
+  // and console-api answers 401 (reported as `POST /sign-in`).
+  it('answers a server action without a session with 401 instead of replaying it at sign-in', async () => {
+    const res = await run(
+      request(
+        '/connections',
+        {},
+        { method: 'POST', headers: { 'next-action': 'abc123' } },
+      ),
+    );
+    expect(res.status).toBe(401);
+    expect(res.headers.get('location')).toBeNull();
+    await expect(res.json()).resolves.toEqual({
+      error: 'Your session has expired',
+      code: 'SESSION_EXPIRED',
+      message: 'Unauthorized Access',
+    });
+  });
+
+  it('lets a server action on the sign-in page run without a session', async () => {
+    const res = await run(
+      request('/sign-in', {}, { method: 'POST', headers: { 'next-action': 'abc123' } }),
+    );
+    expect(isPassThrough(res)).toBe(true);
+    expect(res.status).not.toBe(401);
+    expect(res.headers.get('location')).toBeNull();
   });
 
   it('answers protected API calls with 401', async () => {

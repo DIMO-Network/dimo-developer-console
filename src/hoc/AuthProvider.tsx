@@ -1,6 +1,7 @@
 import { exchangeDimoToken, getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
 import { endSession, saveToken } from '@/actions/user';
 import { completeUserData, createNewUser } from '@/app/sign-up/actions';
+import { SignUpRefusedError } from '@/app/sign-up/signUpResult';
 import { passkeyClient, turnkeyClient } from '@/config/turnkey';
 import { AuthContext } from '@/context/AuthContext';
 import { initOtpLogin, otpLogin } from '@/services/globalAccount';
@@ -118,7 +119,7 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       }
 
       if (!existsOnDevConsole) {
-        await createNewUser(
+        const created = await createNewUser(
           {
             name: user!.email,
             email: user!.email,
@@ -128,16 +129,18 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
           },
           token.access_token,
         );
+        if (!created.ok) throw new SignUpRefusedError(created.reason);
       }
 
       if (existsOnDevConsole && currentWalletValue !== kernelAccount.address) {
-        await completeUserData(
+        const completed = await completeUserData(
           {
             email: user!.email,
             address: kernelAccount.address,
           },
           token.access_token,
         );
+        if (!completed.ok) throw new SignUpRefusedError(completed.reason);
       }
 
       return { token, newWalletAddress: kernelAccount.address };
