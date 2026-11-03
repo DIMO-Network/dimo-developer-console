@@ -1,4 +1,5 @@
-import { getCreditConsumptionByLicense } from '@/services/creditTracker';
+import { HttpError } from '@/utils/httpError';
+import type { ICreditUsage } from '@/types/wallet';
 
 export const useCreditTracker = () => {
   const getUsageByLicense = async ({
@@ -7,17 +8,16 @@ export const useCreditTracker = () => {
   }: {
     licenseId: `0x${string}`;
     devJwt: string;
-  }) => {
-    const fromDate = new Date();
-    fromDate.setMonth(fromDate.getMonth() - 1); // Default to one month ago
-    const toDate = new Date(); // Default to today
-
-    return await getCreditConsumptionByLicense({
-      licenseId,
-      fromDate: fromDate.toISOString(),
-      toDate: toDate.toISOString(),
-      devJwt,
-    });
+  }): Promise<ICreditUsage> => {
+    // The JWT goes in a header: a URL ends up in logs and caches.
+    const response = await fetch(
+      `/api/credit-usage?licenseId=${encodeURIComponent(licenseId)}`,
+      { headers: { 'X-Developer-Jwt': devJwt } },
+    );
+    if (!response.ok) {
+      throw new HttpError(response.status, 'Credit usage unavailable');
+    }
+    return (await response.json()) as ICreditUsage;
   };
 
   return {

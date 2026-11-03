@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 
-const mockUsage = jest.fn();
 jest.mock('@/hooks', () => ({
-  useCreditTracker: () => ({ getUsageByLicense: mockUsage }),
+  ...jest.requireActual('@/hooks/useCreditTracker'),
+  useCreditTracker: jest.requireActual('@/hooks/useCreditTracker').useCreditTracker,
   useEventEmitter: () => ({ eventData: null }),
 }));
 jest.mock('@/hooks/useGetDevJwts', () => ({
@@ -23,18 +23,37 @@ import { Usage } from '@/app/license/[tokenId]/details/components/Usage/Usage';
 
 const license = { clientId: '0xabc' } as never;
 
+const respond = (status: number, body: unknown) =>
+  Promise.resolve({ ok: status >= 200 && status < 300, status, json: async () => body });
+
 describe('Usage', () => {
-  it('shows the credits the license used', async () => {
-    mockUsage.mockResolvedValue({ numOfCreditsUsed: 42 });
+  const fetchMock = jest.fn();
+  beforeEach(() => {
+    fetchMock.mockReset();
+    global.fetch = fetchMock as never;
+  });
+
+  it('shows the credits used', async () => {
+    fetchMock.mockReturnValue(respond(200, { numOfCreditsUsed: 12 }));
     render(<Usage license={license} />);
-    expect(await screen.findByText('42')).toBeInTheDocument();
+    expect(await screen.findByText('12')).toBeInTheDocument();
   });
 
   // An outage used to read as a license that had used nothing.
-  it('does not show 0 when usage could not be loaded', async () => {
-    mockUsage.mockRejectedValue(new Error('credit tracker is down'));
+  it('says usage is unavailable when the tracker fails', async () => {
+    fetchMock.mockReturnValue(respond(502, { message: 'Credit usage unavailable' }));
     render(<Usage license={license} />);
-    await waitFor(() => expect(screen.getByText('—')).toBeInTheDocument());
+    expect(await screen.findByText('Usage unavailable right now')).toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
     expect(screen.queryByText('0')).not.toBeInTheDocument();
+  });
+
+  it('sends the JWT as a header, not in the URL', async () => {
+    fetchMock.mockReturnValue(respond(200, { numOfCreditsUsed: 1 }));
+    render(<Usage license={license} />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).not.toContain('jwt');
+    expect(init.headers['X-Developer-Jwt']).toBe('dev.jwt');
   });
 });
