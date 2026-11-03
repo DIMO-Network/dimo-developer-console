@@ -80,3 +80,14 @@ describe('VehicleDetailsTable token ID search', () => {
     expect(screen.queryByText(did)).toBeNull();
   });
 });
+
+describe('VehicleDetailsTable list', () => {
+  beforeEach(() => useQuery.mockReset());
+
+  it('says an empty list is empty', () => {
+    mockSingle({ data: { vehicles: { nodes: [], totalCount: 0, pageInfo: {} } } });
+    render(<VehicleDetailsTable clientId="0xaaa" tokenIdSearch={null} />);
+    expect(screen.getByText('Showing 0 of 0')).toBeInTheDocument();
+    expect(screen.queryByText(/Showing 1–0/)).toBeNull();
+  });
+});

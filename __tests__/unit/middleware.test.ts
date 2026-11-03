@@ -43,14 +43,19 @@ const compliantUser = {
 };
 const subOrganization = { subOrganizationId: 'sub-1', hasPasskey: true };
 
-const request = (path: string, cookies: Record<string, string> = {}) => {
+const request = (
+  path: string,
+  cookies: Record<string, string> = {},
+  init: { method?: string; headers?: Record<string, string> } = {},
+) => {
   Object.keys(cookieJar).forEach((k) => delete cookieJar[k]);
   Object.assign(cookieJar, cookies);
   const cookie = Object.entries(cookies)
     .map(([k, v]) => `${k}=${v}`)
     .join('; ');
   return new NextRequest(`https://console.test${path}`, {
-    headers: cookie ? { cookie } : {},
+    method: init.method,
+    headers: { ...(cookie ? { cookie } : {}), ...init.headers },
   });
 };
 
@@ -71,6 +76,76 @@ describe('proxy without a session', () => {
     const res = await run(request('/licenses'));
     expect(res.status).toBe(307);
     expect(res.headers.get('location')).toBe('https://console.test/sign-in');
+  });
+
+  // A 307 would replay the POST at /sign-in, where the proxy lets it through
+  // and console-api answers 401 (reported as `POST /sign-in`).
+  it('answers a server action without a session with 401 instead of replaying it at sign-in', async () => {
+    const res = await run(
+      request(
+        '/connections',
+        {},
+        { method: 'POST', headers: { 'next-action': 'abc123' } },
+      ),
+    );
+    expect(res.status).toBe(401);
+    expect(res.headers.get('location')).toBeNull();
+    await expect(res.json()).resolves.toEqual({
+      error: 'Your session has expired',
+      code: 'SESSION_EXPIRED',
+      message: 'Unauthorized Access',
+    });
+  });
+
+  it('clears the session cookies when it refuses an action for an invalid token', async () => {
+    (decodeJwtToken as jest.Mock).mockRejectedValue(
+      Object.assign(new Error('"exp" claim timestamp check failed'), {
+        code: 'ERR_JWT_EXPIRED',
+      }),
+    );
+    const res = await run(
+      request(
+        '/connections',
+        { 'session-token': TOKEN, [SESSION_VERDICT_COOKIE]: 'v' },
+        { method: 'POST', headers: { 'next-action': 'abc123' } },
+      ),
+    );
+    expect(res.status).toBe(401);
+    const cookies = (
+      res as unknown as {
+        cookies: { get: (n: string) => { value: string; expires?: Date } | undefined };
+      }
+    ).cookies;
+    for (const name of ['session-token', SESSION_VERDICT_COOKIE]) {
+      const cookie = cookies.get(name);
+      expect(cookie?.value).toBe('');
+      expect(cookie?.expires?.getTime()).toBe(0);
+    }
+  });
+
+  // A key set that could not be fetched says nothing about the token: a brief JWKS
+  // outage must not sign everyone out.
+  it('keeps the session cookies when it refuses an action because the key set is down', async () => {
+    (decodeJwtToken as jest.Mock).mockRejectedValue(new TypeError('fetch failed'));
+    const res = await run(
+      request(
+        '/connections',
+        { 'session-token': TOKEN, [SESSION_VERDICT_COOKIE]: 'v' },
+        { method: 'POST', headers: { 'next-action': 'abc123' } },
+      ),
+    );
+    expect(res.status).toBe(401);
+    await expect(res.json()).resolves.toMatchObject({ code: 'SESSION_EXPIRED' });
+    expect(res.headers.get('set-cookie')).toBeNull();
+  });
+
+  it('lets a server action on the sign-in page run without a session', async () => {
+    const res = await run(
+      request('/sign-in', {}, { method: 'POST', headers: { 'next-action': 'abc123' } }),
+    );
+    expect(isPassThrough(res)).toBe(true);
+    expect(res.status).not.toBe(401);
+    expect(res.headers.get('location')).toBeNull();
   });
 
   it('answers protected API calls with 401', async () => {

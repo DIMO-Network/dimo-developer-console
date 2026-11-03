@@ -16,6 +16,8 @@ export interface KeyHolders {
 interface Props {
   signer?: `0x${string}`;
   initial?: KeyHolders;
+  // Generate mode: what an API key is for.
+  explainer?: string;
   submitLabel: string;
   // Resolves to an error message to show, or null when done.
   onSubmit: (value: KeyHolders) => Promise<string | null>;
@@ -29,6 +31,7 @@ const NOTE_MAX = 200;
 export const KeyHoldersModal: FC<Props> = ({
   signer,
   initial,
+  explainer,
   submitLabel,
   onSubmit,
   onClose,
@@ -73,8 +76,9 @@ export const KeyHoldersModal: FC<Props> = ({
     <Modal isOpen setIsOpen={(open) => !open && !busy && onClose()} showClose={!busy}>
       <div className="flex flex-col gap-4">
         <Title component="h2" className="text-panel-title text-ink">
-          Who is this key for?
+          {explainer ? 'Create an API key for your server' : 'Who is this key for?'}
         </Title>
+        {explainer && <p className="text-body-sm text-muted">{explainer}</p>}
         {signer && (
           <span className="break-all font-mono text-code text-muted">{signer}</span>
         )}

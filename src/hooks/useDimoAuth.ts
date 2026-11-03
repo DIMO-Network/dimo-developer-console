@@ -73,6 +73,18 @@ export const useDimoAuth = () => {
     };
   };
 
+  // Read-only: never creates a key and never signs, so it is safe on open.
+  const findConsoleKeyAddress = async (): Promise<`0x${string}` | null> => {
+    const currentSession = await validateCurrentSession();
+    if (!currentSession) return null;
+    const client = getSessionTurnkeyClient();
+    if (!client) return null;
+    const { privateKeys } = await client.getPrivateKeys({
+      organizationId: currentSession.subOrganizationId,
+    });
+    return (privateKeys[0]?.addresses?.[0]?.address as `0x${string}` | undefined) ?? null;
+  };
+
   const getPrivateKeyId = async ({
     subOrganizationId,
   }: {
@@ -173,6 +185,7 @@ export const useDimoAuth = () => {
   return {
     getGlobalAccountDeveloperJwt,
     hasGlobalAccountPrivateKey,
+    findConsoleKeyAddress,
   };
 };
 

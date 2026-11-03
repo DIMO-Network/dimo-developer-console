@@ -22,6 +22,8 @@ import {
   toggled,
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/SharedFields';
 
+export const TEMPLATE_ID_HINT = 'The number of a permissions template, for example 1.';
+
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +64,6 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             Permissions template ID
             <TextField
               type="text"
-              placeholder="1"
               {...register('permissionTemplateId', {
                 required: 'Enter a permissions template ID',
               })}
@@ -71,6 +72,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             {shareErrors.permissionTemplateId?.message && (
               <TextError errorMessage={shareErrors.permissionTemplateId.message} />
             )}
+            <p className="text-label font-normal text-muted">{TEMPLATE_ID_HINT}</p>
           </Label>
         )}
         {permissionsMode === 'custom' && (

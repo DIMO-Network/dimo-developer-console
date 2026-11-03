@@ -2,6 +2,7 @@
 import config from '@/config';
 import axios from 'axios';
 import { AxiosError } from 'axios';
+import { reportUnexpected, withoutRequestDetails } from '@/utils/upstreamErrors';
 
 const client = axios.create({
   baseURL: process.env.JWT_ISSUER!,
@@ -29,20 +30,22 @@ export const getDimoChallenge = async ({
   clientId: string;
   domain: string;
 }) => {
-  const { data } = await client.post<IAuthChallenge>(
-    '/auth/web3/generate_challenge',
-    {
-      client_id: clientId,
-      domain: domain,
-      scope: 'openid email',
-      response_type: 'code',
-      address: address,
-    },
-    {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+  const { data } = await withoutRequestDetails(
+    client.post<IAuthChallenge>(
+      '/auth/web3/generate_challenge',
+      {
+        client_id: clientId,
+        domain: domain,
+        scope: 'openid email',
+        response_type: 'code',
+        address: address,
       },
-    },
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    ),
   );
 
   return data;
@@ -59,39 +62,43 @@ export const getDimoToken = async ({
   clientId: string;
   domain: string;
 }) => {
-  const { data } = await client.post<IAuthResponse>(
-    '/auth/web3/submit_challenge',
-    {
-      client_id: clientId,
-      domain: domain,
-      state: state,
-      grant_type: 'authorization_code',
-      signature: signedChallenge,
-    },
-    {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+  const { data } = await withoutRequestDetails(
+    client.post<IAuthResponse>(
+      '/auth/web3/submit_challenge',
+      {
+        client_id: clientId,
+        domain: domain,
+        state: state,
+        grant_type: 'authorization_code',
+        signature: signedChallenge,
       },
-    },
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    ),
   );
 
   return data;
 };
 
 export const exchangeDimoToken = async (code: string) => {
-  const { data } = await client.post<IAuthResponse>(
-    '/token',
-    {
-      client_id: 'developer-platform',
-      code: code,
-      grant_type: 'authorization_code',
-      redirect_uri: `${config.frontendUrl}sign-in`,
-    },
-    {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+  const { data } = await withoutRequestDetails(
+    client.post<IAuthResponse>(
+      '/token',
+      {
+        client_id: 'developer-platform',
+        code: code,
+        grant_type: 'authorization_code',
+        redirect_uri: `${config.frontendUrl}sign-in`,
       },
-    },
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    ),
   );
 
   return data;
@@ -99,10 +106,13 @@ export const exchangeDimoToken = async (code: string) => {
 
 export type DexResult<T> = { ok: true; data: T } | { ok: false; status: number };
 
-const dexFailure = (error: unknown) => ({
-  ok: false as const,
-  status: error instanceof AxiosError ? (error.response?.status ?? 0) : 0,
-});
+const dexFailure = (error: unknown) => {
+  reportUnexpected(error);
+  return {
+    ok: false as const,
+    status: error instanceof AxiosError ? (error.response?.status ?? 0) : 0,
+  };
+};
 
 // Status-aware versions for the member flow: the client retries only a
 // submit_challenge 4xx (dex has not indexed a just-granted signer yet), and a

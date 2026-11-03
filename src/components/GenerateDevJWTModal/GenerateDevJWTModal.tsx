@@ -84,7 +84,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
 
   const subtitle = useMemo(() => {
     if (generatedKey) return '';
-    return 'This will generate a new Developer JWT using your Client ID and the first available Redirect URI. Enter one of your saved API keys to get started.';
+    return "Test an API key you created for your server: this makes a developer JWT from it and the license's first redirect URI. To get a JWT without an API key, turn on console access and use Copy JWT.";
   }, [generatedKey]);
 
   const MainComponent = useMemo(() => {

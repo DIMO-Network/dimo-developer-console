@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { PencilIcon } from '@heroicons/react/16/solid';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { gql, useFragment } from '@/gql';
 import { useQuery } from '@apollo/client/react';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
@@ -18,12 +19,16 @@ import {
 import { DeveloperJwts } from '@/app/license/[tokenId]/details/components/DeveloperJwts';
 import { Brand } from '@/app/license/[tokenId]/details/components/Brand';
 import { Usage } from '@/app/license/[tokenId]/details/components/Usage/Usage';
+import { IDENTITY_INDEX_DELAY_MS } from '@/utils/identityOverlay';
+import { RedirectUriOverlayProvider } from '../redirectUriOverlay';
 import './View.css';
 import { OverviewQuickActions } from './OverviewQuickActions';
 
 type Tab = 'overview' | 'config' | 'vehicles' | 'brand';
 
-const IDENTITY_API_UPDATE_DELAY = 6000;
+const TABS: Tab[] = ['overview', 'config', 'vehicles', 'brand'];
+const tabFrom = (value: string | null): Tab =>
+  TABS.find((tab) => tab === value) ?? 'overview';
 
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
@@ -51,7 +56,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
         refetch({ tokenId })
           .then(() => resolve())
           .catch(reject);
-      }, IDENTITY_API_UPDATE_DELAY);
+      }, IDENTITY_INDEX_DELAY_MS);
     });
 
   useEffect(() => {
@@ -81,7 +86,11 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   if (!data?.developerLicense) return null;
 
   return (
-    <LicenseDetailsContent license={data.developerLicense} refetch={handleRefetch} />
+    // Above the tabs so a pending URI change survives a tab switch; keyed so it
+    // never carries over to another license.
+    <RedirectUriOverlayProvider key={tokenId} refetch={handleRefetch}>
+      <LicenseDetailsContent license={data.developerLicense} refetch={handleRefetch} />
+    </RedirectUriOverlayProvider>
   );
 };
 
@@ -92,7 +101,8 @@ interface LicenseDetailsContentProps {
 }
 
 const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps) => {
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>(() => tabFrom(searchParams.get('tab')));
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const licenseFragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
   const isLicenseOwner = useIsLicenseOwner(licenseFragment);

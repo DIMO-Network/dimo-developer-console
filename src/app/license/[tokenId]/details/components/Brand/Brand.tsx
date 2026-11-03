@@ -4,8 +4,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
+import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { toast } from 'sonner';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { FragmentType, gql, useFragment } from '@/gql';
 
 import { deleteMyBrand } from '@/actions/brand';
@@ -24,6 +26,11 @@ const BRAND_FRAGMENT = gql(`
   }
 `);
 
+const BRAND_DELETE =
+  "Sites that ask for this brand by name get DIMO's own look instead. Pages already open can take a few minutes to change.";
+const LAST_BRAND_DELETE =
+  "Login with DIMO goes back to DIMO's own look for this license. Pages already open can take a few minutes to change.";
+
 interface Props {
   license: FragmentType<typeof BRAND_FRAGMENT>;
 }
@@ -31,6 +38,7 @@ interface Props {
 export const Brand: FC<Props> = ({ license }) => {
   const fragment = useFragment(BRAND_FRAGMENT, license);
   const isOwner = useIsLicenseOwner(fragment);
+  const { currentUser } = useGlobalAccount();
   const queryClient = useQueryClient();
   const licenseTokenId = fragment.tokenId;
   const query = useLicenseBrands(licenseTokenId);
@@ -38,6 +46,8 @@ export const Brand: FC<Props> = ({ license }) => {
   const [createError, setCreateError] = useState<string | null>(null);
   /** null = list view; 'new' = create form; BrandView = edit form */
   const [editing, setEditing] = useState<BrandView | 'new' | null>(null);
+  const [deleting, setDeleting] = useState<BrandView | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const createStarted = useRef(false);
 
   const workspaceId = query.data?.workspace?.id ?? null;
@@ -48,10 +58,12 @@ export const Brand: FC<Props> = ({ license }) => {
   const loading = query.isLoading || creating;
 
   // Only the owner can create the workspace; for anyone else a license with
-  // none is unbranded, not a failure. Creation is a write: a server action.
+  // none is unbranded, not a failure. Creation is a write: a server action, so
+  // it waits for a signed-in user: a tab without a session never resolves one,
+  // and the action's 401 would be reported as `POST /sign-in`.
   const noWorkspace = query.isSuccess && !query.data.workspace?.id;
   useEffect(() => {
-    if (!noWorkspace || !isOwner || createStarted.current) return;
+    if (!noWorkspace || !isOwner || !currentUser || createStarted.current) return;
     createStarted.current = true;
     setCreating(true);
     const create = async () => {
@@ -84,7 +96,7 @@ export const Brand: FC<Props> = ({ license }) => {
     };
     void create();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [noWorkspace, isOwner, licenseTokenId]);
+  }, [noWorkspace, isOwner, !!currentUser, licenseTokenId]);
 
   useEffect(() => {
     if (query.isError) Sentry.captureException(query.error);
@@ -113,14 +125,21 @@ export const Brand: FC<Props> = ({ license }) => {
     setEditing(null);
   };
 
+  const closeDelete = () => {
+    setDeleting(null);
+    setDeleteError(null);
+  };
+
   const handleDelete = async (brandId: string) => {
     if (!workspaceId) return;
+    setDeleteError(null);
     try {
       await deleteMyBrand(workspaceId, brandId);
       await setBrands((prev) => prev.filter((b) => b.id !== brandId));
+      closeDelete();
     } catch (error) {
       Sentry.captureException(error);
-      toast.error('Failed to delete brand. Try again.');
+      setDeleteError('Failed to delete brand. Try again.');
     }
   };
 
@@ -172,7 +191,7 @@ export const Brand: FC<Props> = ({ license }) => {
                   isMultiple={brands.length > 1}
                   isOwner={isOwner}
                   onEdit={() => setEditing(brand)}
-                  onDelete={() => void handleDelete(brand.id)}
+                  onDelete={() => setDeleting(brand)}
                 />
               ))
             )}
@@ -191,6 +210,15 @@ export const Brand: FC<Props> = ({ license }) => {
           </div>
         )}
       </div>
+      <DeleteConfirmationModal
+        isOpen={!!deleting}
+        title={`Delete ${deleting?.name ?? ''}?`}
+        subtitle={brands.length === 1 ? LAST_BRAND_DELETE : BRAND_DELETE}
+        loadingLabel="Deleting brand…"
+        error={deleteError}
+        onConfirm={() => handleDelete(deleting!.id)}
+        onCancel={closeDelete}
+      />
     </div>
   );
 };

@@ -10,6 +10,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { CopyButton } from '@/components/CopyButton';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
+import { useRedirectUris } from '../redirectUriOverlay';
 import { useEventEmitter, useIsLicenseOwner, useDimoAuth } from '@/hooks';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
@@ -30,6 +31,7 @@ interface Props {
 
 export const DeveloperJwts: FC<Props> = ({ license }) => {
   const fragment = useFragment(DEVELOPER_JWTS_FRAGMENT, license);
+  const { uris: redirectUris } = useRedirectUris(fragment.redirectURIs.nodes);
   const { devJwts, refetch } = useGetDevJwts(fragment.clientId);
   const [jwtToDelete, setJwtToDelete] = useState<string>();
   const isLicenseOwner = useIsLicenseOwner(fragment);
@@ -115,8 +117,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
     try {
       if (!eventData) return;
       if (devJwts.length > 0) return;
-      if (fragment.redirectURIs.nodes.length === 0) return;
-      const domain = fragment.redirectURIs.nodes[0]?.uri ?? undefined;
+      const domain = redirectUris[0]?.uri ?? undefined;
       if (!domain) return;
       const success = await getGlobalAccountDeveloperJwt({
         clientId: fragment.clientId,
@@ -142,7 +143,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
         <h2 className="text-card-title text-ink">Developer JWTs</h2>
         <GenerateDevJWT
           clientId={fragment.clientId}
-          domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
+          domain={redirectUris[0]?.uri ?? undefined}
           buttonText="Generate new JWT"
           onSuccess={handleGenerateSuccess}
         />

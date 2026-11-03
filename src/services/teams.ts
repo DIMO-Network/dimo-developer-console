@@ -1,6 +1,6 @@
-import * as Sentry from '@sentry/nextjs';
-import { AxiosError, type AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
+import { toFailure } from '@/utils/upstreamErrors';
 import type {
   ApiResult,
   InvitePreview,
@@ -11,28 +11,7 @@ import type {
   TeamSummary,
 } from '@/types/team';
 
-export const toFailure = (error: unknown): ApiResult<never> => {
-  if (error instanceof AxiosError && error.response) {
-    // A refusal below 500 is the API answering as designed. A 5xx is not, and
-    // returning it as a value means it never throws, so report it here.
-    if (error.response.status >= 500) Sentry.captureException(error);
-    const body = error.response.data as { message?: string; code?: string } | undefined;
-    return {
-      ok: false,
-      status: error.response.status,
-      code: body?.code ?? null,
-      message: body?.message ?? error.message,
-    };
-  }
-  // No answer at all (socket hang up, DNS, timeout, a bug before the request).
-  Sentry.captureException(error);
-  return {
-    ok: false,
-    status: 0,
-    code: null,
-    message: error instanceof Error ? error.message : 'Request failed',
-  };
-};
+export { toFailure };
 
 const call = async <T>(
   run: (client: AxiosInstance) => Promise<{ data: T }>,

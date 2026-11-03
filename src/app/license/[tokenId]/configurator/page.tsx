@@ -8,7 +8,7 @@ import configuration from '@/config';
 export const generateStaticParams = async () => [];
 
 export const metadata: Metadata = {
-  title: `Settings | ${configuration.appName}`,
+  title: `SDK configurator | ${configuration.appName}`,
 };
 
 // Only params, not searchParams: handing the client view every prop would keep

@@ -27,6 +27,8 @@ import {
   type ConnectionStatus,
 } from '@/actions/connections';
 import { fetchJson } from '@/utils/fetchJson';
+import { HttpError } from '@/utils/httpError';
+import { KEYS_UNREADABLE_ON_RESUME, NAME_TAKEN_IN_TEAM } from '@/app/connections/copy';
 import { invalidateMyConnectionsQuery } from '@/hooks/queries/useMyConnections';
 
 // Server Actions mask what they throw in production, so every failure here is told
@@ -120,13 +122,13 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   useEffect(() => {
     if (!resumeId) return;
     let abandoned = false;
-    fetchJson<Connection | null>(`/api/connections/${encodeURIComponent(resumeId)}`).then(
+    fetchJson<Connection>(`/api/connections/${encodeURIComponent(resumeId)}`).then(
       (connection) => {
         if (abandoned) return;
-        if (!connection) {
-          setStopped(CONNECTION_GONE);
-        } else if (connection.status !== 'PENDING' && connection.status !== 'MINTED') {
+        if (connection.status !== 'PENDING' && connection.status !== 'MINTED') {
           router.replace('/connections');
+        } else if (connection.keys_unreadable) {
+          setStopped(KEYS_UNREADABLE_ON_RESUME);
         } else if (
           !connection.connection_license_private_key ||
           !connection.device_issuance_key
@@ -136,8 +138,13 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
           setResumable(connection);
         }
       },
-      () => {
-        if (!abandoned) setStopped(LOAD_FAILED);
+      (error: unknown) => {
+        if (abandoned) return;
+        setStopped(
+          error instanceof HttpError && error.status === 404
+            ? CONNECTION_GONE
+            : LOAD_FAILED,
+        );
       },
     );
     return () => {
@@ -215,13 +222,24 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       const wallets = await generateConnectionWallets();
 
       setLoadingLabel('Saving your connection keys…');
-      const { id } = await createConnection({
+      const created = await createConnection({
         name: connectionName,
         connection_license_public_key: wallets.connectionLicense.publicKey,
         connection_license_private_key: wallets.connectionLicense.privateKey,
         device_issuance_key: wallets.deviceIssuance.privateKey,
         status: 'PENDING',
       });
+      if (!created.ok) {
+        if (created.code === 'CONNECTION_NAME_TAKEN') {
+          setIsPendingPurchase(false);
+          setNameValidationError(NAME_TAKEN_IN_TEAM);
+        } else {
+          console.error('Saving the connection keys failed:', created.status);
+          setError(KEYS_NOT_SAVED);
+        }
+        return null;
+      }
+      const { id } = created.data;
       return {
         id,
         grantees: {
@@ -238,15 +256,20 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
   // Only a refused mint on the first attempt deletes: nothing landed, and this row is
   // new. If the delete fails the row stays PENDING, and the list offers to finish it.
+  // A delete that throws (no answer, or the proxy's 401) must not reach runSetup, whose
+  // message would replace the refusal's.
   const removeRefusedConnection = async (id: string, reason: string) => {
     console.error('Connection minting failed', reason);
     setError(reason);
-    try {
-      await deleteConnection(id);
-      await invalidateMyConnectionsQuery();
-    } catch (error) {
-      console.error('Removing the refused connection failed:', error);
+    const removed = await deleteConnection(id).catch(() => null);
+    if (!removed?.ok) {
+      console.error(
+        'Removing the refused connection failed:',
+        removed?.status ?? 'threw',
+      );
+      return;
     }
+    await invalidateMyConnectionsQuery();
   };
 
   const startSetup = async () => {

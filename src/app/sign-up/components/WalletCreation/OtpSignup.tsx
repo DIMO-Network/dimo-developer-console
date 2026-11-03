@@ -5,6 +5,8 @@ import { Button } from '@/components/Button';
 import { useState, useRef, useEffect, FC } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { explainSignUpRefusal } from '@/app/sign-up/signUpResult';
 
 interface IProps {
   email: string;
@@ -16,6 +18,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
   const [isRequestingNewOtp, setIsRequestingNewOtp] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const inputRefs = useRef<HTMLInputElement[]>([]);
+  const router = useRouter();
   const { beginOtpLogin, completeOtpLogin } = useAuth();
   const [otpId, setOtpId] = useState<string>('');
 
@@ -93,6 +96,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
 
       handleSignupComplete(newWalletAddress!);
     } catch (error: unknown) {
+      if (explainSignUpRefusal(error, () => router.replace('/sign-in'))) return;
       toast.error('Something went wrong');
       captureException(error);
     } finally {

@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { DIMO } from '@dimo-network/data-sdk';
 import configuration from '@/config';
+import { reportUnexpected } from '@/utils/upstreamErrors';
 
 export const dimoDevClient = axios.create({
   baseURL: `/api`,
@@ -29,7 +30,8 @@ export const getDeveloperJwt = async (
       domain: tokenParams.domain,
       private_key: tokenParams.private_key,
     });
-  } catch {
+  } catch (error) {
+    reportUnexpected(error);
     return null;
   }
 };

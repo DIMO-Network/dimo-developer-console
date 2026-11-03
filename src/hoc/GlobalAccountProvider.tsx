@@ -211,7 +211,13 @@ export const withGlobalAccounts = <P extends object>(
       removeFromLocalStorage(EmbeddedKey);
       // Reached when the session expired or this tab has none; an explicit
       // sign-out (the menu) also clears the team and developer JWTs.
-      await endSession();
+      // The proxy answers this action with a 401 when the session is already
+      // gone; the sign-in redirect must not depend on it.
+      try {
+        await endSession();
+      } catch {
+        // The proxy's 401 already cleared the cookies.
+      }
       router.replace('/sign-in');
     };
 

@@ -9,6 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { Connection } from '@/actions/connections';
 import { fetchJson } from '@/utils/fetchJson';
 import Link from 'next/link';
+import { HttpError } from '@/utils/httpError';
+import { CONNECTION_GONE_DETAIL, KEYS_UNREADABLE_DETAIL } from '@/app/connections/copy';
 
 import './View.css';
 
@@ -16,9 +18,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
   const { data: connection } = useQuery({
     queryKey: ['connection', connectionId],
     queryFn: () =>
-      fetchJson<Connection | null>(
-        `/api/connections/${encodeURIComponent(connectionId)}`,
-      ),
+      fetchJson<Connection>(`/api/connections/${encodeURIComponent(connectionId)}`),
   });
 
   const maskKey = () => {
@@ -26,7 +26,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
   };
 
   const deviceIssuanceAddress = useMemo(() => {
-    if (!connection?.device_issuance_key) return null;
+    if (connection?.keys_unreadable || !connection?.device_issuance_key) return null;
     return privateKeyToAddress(connection.device_issuance_key as `0x${string}`);
   }, [connection?.device_issuance_key]);
 
@@ -59,31 +59,37 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
             </div>
           </div>
 
-          <div className="field-row">
-            <label className="field-label">Connection license private key</label>
-            <div className="field-value-container">
-              <span className="field-value">{maskKey()}</span>
-              <CopyButton value={connection.connection_license_private_key} />
-            </div>
-          </div>
-
-          {deviceIssuanceAddress && (
-            <div className="field-row">
-              <label className="field-label">Device issuance address</label>
-              <div className="field-value-container">
-                <span className="field-value">{deviceIssuanceAddress}</span>
-                <CopyButton value={deviceIssuanceAddress} />
+          {connection.keys_unreadable ? (
+            <p className="text-body-sm text-negative">{KEYS_UNREADABLE_DETAIL}</p>
+          ) : (
+            <>
+              <div className="field-row">
+                <label className="field-label">Connection license private key</label>
+                <div className="field-value-container">
+                  <span className="field-value">{maskKey()}</span>
+                  <CopyButton value={connection.connection_license_private_key ?? ''} />
+                </div>
               </div>
-            </div>
-          )}
 
-          <div className="field-row">
-            <label className="field-label">Device issuance key</label>
-            <div className="field-value-container">
-              <span className="field-value">{maskKey()}</span>
-              <CopyButton value={connection.device_issuance_key} />
-            </div>
-          </div>
+              {deviceIssuanceAddress && (
+                <div className="field-row">
+                  <label className="field-label">Device issuance address</label>
+                  <div className="field-value-container">
+                    <span className="field-value">{deviceIssuanceAddress}</span>
+                    <CopyButton value={deviceIssuanceAddress} />
+                  </div>
+                </div>
+              )}
+
+              <div className="field-row">
+                <label className="field-label">Device issuance key</label>
+                <div className="field-value-container">
+                  <span className="field-value">{maskKey()}</span>
+                  <CopyButton value={connection.device_issuance_key ?? ''} />
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -95,9 +101,10 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
 
   const { isLoading, error } = useQuery({
     queryKey: ['connection', id],
-    queryFn: () =>
-      fetchJson<Connection | null>(`/api/connections/${encodeURIComponent(id)}`),
+    queryFn: () => fetchJson<Connection>(`/api/connections/${encodeURIComponent(id)}`),
   });
+
+  const isGone = error instanceof HttpError && error.status === 404;
 
   return (
     <>
@@ -110,10 +117,19 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
       </nav>
       <QueryPageWrapper
         loading={isLoading}
-        error={error || undefined}
+        error={error && !isGone ? error : undefined}
         customErrorMessage={'There was a problem loading the connection details'}
       >
-        <MainComponent connectionId={id} />
+        {isGone ? (
+          <div className="space-y-6">
+            <p className="text-body-sm text-muted">{CONNECTION_GONE_DETAIL}</p>
+            <Link href="/connections" className="button secondary">
+              Back to Connections
+            </Link>
+          </div>
+        ) : (
+          <MainComponent connectionId={id} />
+        )}
       </QueryPageWrapper>
     </>
   );

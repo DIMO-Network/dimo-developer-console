@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { StatusChip } from '@/components/StatusChip';
 import { formatList } from '@/config/teamCopy';
+import { CONSOLE_KEY_LABEL } from './consoleAccessCopy';
 import type { LicenseSignerRecord } from '@/types/team';
 
 interface Props {
@@ -9,6 +10,8 @@ interface Props {
   // wallet, or a member's wallet whose grant wasn't recorded (Grant in Settings
   // → Team records it). Assign never may (C7).
   memberWallet?: { name: string; email: string; owner: boolean };
+  // The owner's console key: access to this license for the console itself.
+  consoleKey?: boolean;
   // A registry row whose signer the chain no longer lists.
   offChain?: boolean;
   unavailable?: boolean;
@@ -18,13 +21,16 @@ interface Props {
 export const BelongsTo: FC<Props> = ({
   record,
   memberWallet,
+  consoleKey = false,
   offChain = false,
   unavailable = false,
   onAssign,
 }) => {
   if (unavailable) return <span className="text-body-sm text-muted">—</span>;
   let body;
-  if (!record && memberWallet) {
+  if (consoleKey) {
+    body = <span className="text-body-sm text-fg">{CONSOLE_KEY_LABEL}</span>;
+  } else if (!record && memberWallet) {
     body = (
       <div className="flex flex-col items-start gap-1">
         <span className="text-body-sm text-fg">{memberWallet.name}</span>

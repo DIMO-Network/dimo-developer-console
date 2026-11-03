@@ -1,5 +1,6 @@
 import { FragmentType, gql, useFragment } from '@/gql';
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useRef, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/Button';
 import { KeyIcon, TruckIcon } from '@heroicons/react/20/solid';
 import { Table } from '@/components/Table';
@@ -33,10 +34,25 @@ import { markLicenseSignerDisabled, upsertLicenseSigner } from '@/actions/teams'
 import { useLicenseSignerRegistry } from '@/hooks/useLicenseSignerRegistry';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { registryWrite } from '@/utils/registryWrite';
+import { txErrorStatus } from '@/utils/txErrorStatus';
 import { BelongsTo } from './BelongsTo';
+import { ConsoleAccess } from './ConsoleAccess';
+import {
+  API_KEY_BUTTON,
+  API_KEY_EXPLAINER,
+  CONSOLE_KEY_NOTE,
+  NOT_LICENSE_OWNER_ON_CHAIN,
+  TURN_OFF_CONSOLE_ACCESS,
+  isConsoleAccessOn,
+} from './consoleAccessCopy';
 import { KeyHoldersModal, type KeyHolders } from './KeyHoldersModal';
 import type { LicenseSignerRecord } from '@/types/team';
+import { useRedirectUris } from '../redirectUriOverlay';
 
+const DELETE_KEY_SUBTITLE =
+  'Apps using this key stop getting new developer JWTs. JWTs already issued with it keep working until they expire, up to 14 days.';
+const CONSOLE_OFF_SUBTITLE =
+  'The console stops making developer JWTs for this license. JWTs it already made keep working until they expire, up to 14 days.';
 const RENTAL_OS_URL = 'https://rentals.dimo.co/';
 const RENTAL_OS_REGISTER_ENDPOINT = 'https://rentals.dimo.co/tenant/register';
 
@@ -71,6 +87,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const fragment = useFragment(SIGNERS_FRAGMENT, license);
   const [apiKey, setApiKey] = useState<string>();
   const [signerToDelete, setSignerToDelete] = useState<string>();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [optimisticAdditions, setOptimisticAdditions] = useState<SignerNode[]>([]);
   const [pendingRemovals, setPendingRemovals] = useState<Set<string>>(new Set());
   const [showRentalOSConfirm, setShowRentalOSConfirm] = useState(false);
@@ -83,8 +100,26 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     'generate-my-developer-jwt',
   );
 
-  const { hasGlobalAccountPrivateKey } = useDimoAuth();
+  const { hasGlobalAccountPrivateKey, findConsoleKeyAddress } = useDimoAuth();
+  const queryClient = useQueryClient();
+  const [enabling, setEnabling] = useState(false);
+  const [enableError, setEnableError] = useState<string | null>(null);
+  const consoleKeyRecorded = useRef(false);
+  const consoleKeyAnnounced = useRef(false);
+  // The key we just enabled, shown as on until Identity lists it (one enable per mount).
+  const [enabledKey, setEnabledKey] = useState<string | null>(null);
+  // Read-only Turnkey lookup (never creates a key); members never run it.
+  const consoleKeyQuery = useQuery({
+    queryKey: ['console-key', currentUser?.subOrganizationId],
+    queryFn: findConsoleKeyAddress,
+    enabled: isLicenseOwner && !!currentUser,
+    retry: false,
+  });
+  const consoleKey = (consoleKeyQuery.data ?? enabledKey)?.toLowerCase() ?? null;
   const setFleetRedirectUri = useSetRedirectUri(fragment.tokenId);
+  const { uris: redirectUris, recordUriChange } = useRedirectUris(
+    fragment.redirectURIs.nodes,
+  );
   const registry = useLicenseSignerRegistry(fragment.tokenId);
   const { members } = useTeamMembers();
   // Verified wallets of the team (the owner's console wallet included): console
@@ -222,15 +257,14 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     let lastError: unknown;
 
     try {
-      const hasFleetUri = fragment.redirectURIs.nodes.some(
-        (n) => n.uri === RENTAL_OS_URL,
-      );
+      const hasFleetUri = redirectUris.some((n) => n.uri === RENTAL_OS_URL);
       if (!hasFleetUri) {
         setLoadingStatus({
           status: 'loading',
           label: 'Adding RentalOS as an authorized redirect URI...',
         });
         await setFleetRedirectUri(RENTAL_OS_URL, true);
+        recordUriChange(RENTAL_OS_URL, true);
         addedRedirectUri = true;
       }
 
@@ -378,7 +412,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
             ? handleDisableSigner(enabledSignerAddress)
             : Promise.resolve(),
           addedRedirectUri
-            ? setFleetRedirectUri(RENTAL_OS_URL, false)
+            ? setFleetRedirectUri(RENTAL_OS_URL, false).then(() =>
+                recordUriChange(RENTAL_OS_URL, false),
+              )
             : Promise.resolve(),
         ]);
       }
@@ -387,30 +423,55 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   };
 
   const handleDelete = async (signer: string) => {
-    try {
-      setLoadingStatus({
-        label: 'Deleting the selected API key',
-        status: 'loading',
-      });
-      await handleDisableSigner(signer);
-      // Stamp the registry row; a key without one answers NOT_FOUND, which is fine.
-      await registryWrite(() => markLicenseSignerDisabled(fragment.tokenId, signer));
+    const turningOff = signer.toLowerCase() === consoleKey;
+    // The dialog closes once the transaction confirms; the registry stamp and
+    // the license refetch finish behind the page.
+    await handleDisableSigner(signer);
+    if (turningOff) setEnabledKey(null);
+    setPendingRemovals((prev) => new Set([...prev, signer.toLowerCase()]));
+    toast.success(
+      turningOff
+        ? 'Console access turned off.'
+        : 'API key deleted. JWTs already issued with it work until they expire (up to 14 days).',
+    );
+    void (async () => {
+      try {
+        // A key without a registry row answers NOT_FOUND, which is fine.
+        await registryWrite(() => markLicenseSignerDisabled(fragment.tokenId, signer));
+      } catch (error: unknown) {
+        Sentry.captureException(error);
+      }
       void registry.refetch();
-      setPendingRemovals((prev) => new Set([...prev, signer]));
-      refetch().then(() => setPendingRemovals(new Set()));
-      setLoadingStatus({ label: 'API key deleted', status: 'success' });
-    } catch (error: unknown) {
-      handleError(error);
-    }
+    })();
+    // A failed refetch leaves the address pending; the effect below clears it
+    // once the license stops listing it.
+    void refetch().catch((error: unknown) => Sentry.captureException(error));
   };
+
+  useEffect(() => {
+    setPendingRemovals((prev) => {
+      if (!prev.size) return prev;
+      const listed = new Set(fragment.signers.nodes.map((n) => n.address.toLowerCase()));
+      const next = new Set([...prev].filter((a) => listed.has(a)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [fragment.signers.nodes]);
 
   type SignerRow = SignerNode & { offChain?: boolean };
   const onChainRows: SignerRow[] = [
-    ...fragment.signers.nodes.filter((s) => !pendingRemovals.has(s.address)),
+    ...fragment.signers.nodes.filter(
+      (s) => !pendingRemovals.has(s.address.toLowerCase()),
+    ),
     ...optimisticAdditions.filter(
       (s) => !fragment.signers.nodes.some((n) => n.address === s.address),
     ),
   ];
+  if (
+    enabledKey &&
+    !pendingRemovals.has(enabledKey.toLowerCase()) &&
+    !onChainRows.some((r) => String(r.address).toLowerCase() === enabledKey.toLowerCase())
+  )
+    onChainRows.push({ address: enabledKey, enabledAt: new Date().toISOString() });
   const listed = new Set(onChainRows.map((s) => String(s.address).toLowerCase()));
   // Registry rows the chain no longer lists (spec: "Disabled outside the console").
   const offChainRows: SignerRow[] = [...registry.byAddress.values()]
@@ -424,12 +485,19 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     // revoked in Settings → Team, which keeps the registry in step with the chain.
     const address = String(item.address).toLowerCase();
     const wallet = memberWallets.get(address);
-    if (registry.byAddress.get(address)?.kind === 'MEMBER' || (wallet && !wallet.owner))
+    if (
+      address !== consoleKey &&
+      (registry.byAddress.get(address)?.kind === 'MEMBER' || (wallet && !wallet.owner))
+    )
       return null;
+    const isConsoleKey = address === consoleKey;
     const remove = {
-      label: 'Delete API key',
+      label: isConsoleKey ? TURN_OFF_CONSOLE_ACCESS : 'Delete API key',
       destructive: true,
-      onSelect: () => setSignerToDelete(item.address),
+      onSelect: () => {
+        setDeleteError(null);
+        setSignerToDelete(item.address);
+      },
     };
     return (
       <RowActionsMenu
@@ -437,40 +505,124 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         label={`Actions for ${item.address}`}
         // The owner's own console wallet can be deleted, never assigned.
         items={
-          wallet
+          isConsoleKey
             ? [remove]
-            : [{ label: 'Assign', onSelect: () => openAssign(item.address) }, remove]
+            : wallet
+              ? [remove]
+              : [{ label: 'Assign', onSelect: () => openAssign(item.address) }, remove]
         }
       />
     );
   };
 
-  // Check if current wallet address is listed in the signers
+  // Check if current wallet address is listed in the signers. onChainRows, not the
+  // fragment: a key just turned off is still listed until Identity catches up, and
+  // enabling it then needs the transaction.
   const isSigner = (owner: `0x${string}`) => {
-    return fragment.signers.nodes.some(
-      (signer) => signer.address.toLowerCase() === owner.toLowerCase(),
+    return onChainRows.some(
+      (signer) => String(signer.address).toLowerCase() === owner.toLowerCase(),
     );
   };
 
-  const handleOwnerSigner = async () => {
+  const ownerUserId = members.find((m) => m.role === 'OWNER')?.userId;
+
+  // A console-api write, not a transaction; a failure is ignored like recordKey's.
+  const recordConsoleKey = async (address: `0x${string}`) => {
+    if (!ownerUserId) return;
+    await registryWrite(() =>
+      upsertLicenseSigner(fragment.tokenId, address, {
+        kind: 'API_KEY',
+        note: CONSOLE_KEY_NOTE,
+        holders: [{ userId: ownerUserId }],
+      }),
+    );
+    void registry.refetch();
+  };
+
+  const enableConsoleAccess = async () => {
+    setEnabling(true);
+    setEnableError(null);
     try {
+      if (
+        !currentUser?.smartContractAddress ||
+        fragment.owner.toLowerCase() !== currentUser.smartContractAddress.toLowerCase()
+      ) {
+        setEnableError(NOT_LICENSE_OWNER_ON_CHAIN);
+        return;
+      }
       const { hasPrivateKey, privateKeyAddress } = await hasGlobalAccountPrivateKey();
-      if (!hasPrivateKey) return;
-      if (!isSigner(privateKeyAddress!)) {
-        await handleEnableSigner(privateKeyAddress!);
+      if (!hasPrivateKey || !privateKeyAddress) {
+        setEnableError('Something went wrong');
+        return;
+      }
+      // Enable handles the row and the event itself; the open-time effects stand down.
+      consoleKeyRecorded.current = true;
+      consoleKeyAnnounced.current = true;
+      if (!isSigner(privateKeyAddress)) {
+        await handleEnableSigner(privateKeyAddress);
+        setEnabledKey(privateKeyAddress);
+        // Enabled again after a turn-off: the list may still show it, and now rightly.
+        setPendingRemovals((prev) => {
+          const next = new Set(prev);
+          return next.delete(privateKeyAddress.toLowerCase()) ? next : prev;
+        });
         await refetch();
       }
-      publishEvent({ client_id: privateKeyAddress! }, true);
+      await recordConsoleKey(privateKeyAddress);
+      publishEvent({ client_id: privateKeyAddress }, true);
+      await queryClient.invalidateQueries({ queryKey: ['console-key'] });
     } catch (error: unknown) {
-      handleError(error);
+      Sentry.captureException(error);
+      setEnableError(txErrorStatus(error).label ?? 'Something went wrong');
+    } finally {
+      setEnabling(false);
     }
   };
 
+  const consoleKeyOnChain =
+    !!consoleKey &&
+    onChainRows.some((r) => String(r.address).toLowerCase() === consoleKey);
+
+  // Decided once per mount, from the state at open: a later registry refetch
+  // (turning access off) must never re-record the row as active.
+  // Console key already a signer: record the registry row if it has none (so
+  // members can see console access is on). A console-api write, not a transaction.
+  // Waits for the team members too: the row is recorded for the owner's user id.
   useEffect(() => {
-    if (!currentUser || !isLicenseOwner) return;
-    void handleOwnerSigner();
+    if (!isLicenseOwner || !consoleKey || !registry.isLoaded || registry.isError) return;
+    if (!ownerUserId) return;
+    if (consoleKeyRecorded.current) return;
+    consoleKeyRecorded.current = true;
+    if (!consoleKeyOnChain || registry.byAddress.has(consoleKey)) return;
+    void recordConsoleKey(consoleKey as `0x${string}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser, isLicenseOwner]);
+  }, [
+    isLicenseOwner,
+    consoleKey,
+    registry.isLoaded,
+    registry.isError,
+    registry.byAddress,
+    ownerUserId,
+  ]);
+
+  // Console access already on: mint the owner's developer JWT as the old open
+  // did (off-chain, no transaction), because webhook pages read the stored JWT.
+  useEffect(() => {
+    if (!isLicenseOwner || !consoleKey || consoleKeyAnnounced.current) return;
+    consoleKeyAnnounced.current = true;
+    if (!consoleKeyOnChain) return;
+    // After the commit: with a warm query cache this runs in the first effect
+    // flush, before the sibling DeveloperJwts registers its listener.
+    const timer = setTimeout(
+      () => publishEvent({ client_id: consoleKey as `0x${string}` }, true),
+      0,
+    );
+    return () => {
+      clearTimeout(timer);
+      consoleKeyAnnounced.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLicenseOwner, consoleKey]);
 
   useEffect(() => {
     if (!isLicenseOwner) return;
@@ -479,13 +631,25 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     setShowRentalOSConfirm(true);
   }, [isLicenseOwner]);
 
-  const onConfirmDelete = () => {
+  const onConfirmDelete = async () => {
     if (!signerToDelete) {
       throw new Error('No signer to delete');
     }
-    void handleDelete(signerToDelete);
-    setSignerToDelete(undefined);
+    setDeleteError(null);
+    try {
+      await handleDelete(signerToDelete);
+      setSignerToDelete(undefined);
+    } catch (error: unknown) {
+      Sentry.captureException(error);
+      setDeleteError(txErrorStatus(error).label ?? 'Something went wrong');
+    }
   };
+
+  const consoleOn = isConsoleAccessOn({
+    consoleKey,
+    signers: onChainRows.map((s) => String(s.address)),
+    registry: registry.byAddress,
+  });
 
   const renderEnabledAt = (item: SignerRow) =>
     item.enabledAt ? new Date(item.enabledAt).toLocaleDateString() : '—';
@@ -510,11 +674,24 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               onClick={() => setHoldersFor({ mode: 'generate' })}
             >
               <KeyIcon className="h-4 w-4" />
-              Generate key
+              {API_KEY_BUTTON}
             </Button>
           </div>
         )}
       </div>
+      {isLicenseOwner && consoleKeyQuery.isLoading ? (
+        <p className="text-body-sm text-muted">Checking console access…</p>
+      ) : (
+        <ConsoleAccess
+          isLicenseOwner={isLicenseOwner}
+          on={consoleOn}
+          enabling={enabling}
+          error={enableError}
+          onEnable={() => void enableConsoleAccess()}
+          clientId={fragment.clientId}
+          domain={redirectUris[0]?.uri ?? undefined}
+        />
+      )}
       <div>
         {!!displaySigners.length && (
           <div className="-mx-4 -mb-4">
@@ -552,10 +729,15 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                     <BelongsTo
                       record={registry.byAddress.get(String(item.address).toLowerCase())}
                       memberWallet={memberWallets.get(String(item.address).toLowerCase())}
+                      consoleKey={
+                        String(item.address).toLowerCase() === consoleKey &&
+                        !item.offChain
+                      }
                       offChain={item.offChain}
                       unavailable={registry.isError}
                       onAssign={
                         isLicenseOwner &&
+                        String(item.address).toLowerCase() !== consoleKey &&
                         !memberWallets.has(String(item.address).toLowerCase())
                           ? () => openAssign(item.address)
                           : undefined
@@ -574,6 +756,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         <KeyHoldersModal
           signer={holdersFor.mode === 'assign' ? holdersFor.signer : undefined}
           initial={holdersFor.mode === 'assign' ? holdersFor.initial : undefined}
+          explainer={holdersFor.mode === 'generate' ? API_KEY_EXPLAINER : undefined}
           submitLabel={holdersFor.mode === 'generate' ? 'Generate API key' : 'Save'}
           onSubmit={submitHolders}
           onClose={() => setHoldersFor(null)}
@@ -581,11 +764,22 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       )}
       <DeleteConfirmationModal
         isOpen={!!signerToDelete}
-        title={'Are you sure you want to delete this API key?'}
-        subtitle={'You will no longer be able to use this key in your app.'}
+        title={
+          signerToDelete?.toLowerCase() === consoleKey
+            ? 'Turn off console access?'
+            : 'Are you sure you want to delete this API key?'
+        }
+        subtitle={
+          signerToDelete?.toLowerCase() === consoleKey
+            ? CONSOLE_OFF_SUBTITLE
+            : DELETE_KEY_SUBTITLE
+        }
+        loadingLabel="Waiting for the network to confirm…"
+        error={deleteError}
         onConfirm={onConfirmDelete}
         onCancel={() => {
           setSignerToDelete(undefined);
+          setDeleteError(null);
         }}
         confirmButtonClassName={'error'}
       />

@@ -11,6 +11,9 @@ import { useGlobalAccount } from '@/hooks';
 import { useMyConnections } from '@/hooks/queries/useMyConnections';
 import { ChipIcon } from '@/components/Icons';
 import { toast } from 'sonner';
+import { StatusChip } from '@/components/StatusChip';
+import { DiscardConnection } from '../DiscardConnection';
+import { KEYS_UNREADABLE_CHIP } from '../../copy';
 
 import './View.css';
 import { OwnerAction } from '@/components/OwnerOnly';
@@ -61,7 +64,10 @@ const MainComponent: React.FC = () => {
                 <div className="connection-public-key">
                   {connection.connection_license_public_key}
                 </div>
-                {owner && isUnfinished(connection) && (
+                {connection.keys_unreadable && (
+                  <StatusChip tone="off">{KEYS_UNREADABLE_CHIP}</StatusChip>
+                )}
+                {owner && isUnfinished(connection) && !connection.keys_unreadable && (
                   <OwnerAction>
                     <Link
                       href={`/connections/create/${owner}?resume=${connection.id}`}
@@ -71,6 +77,7 @@ const MainComponent: React.FC = () => {
                     </Link>
                   </OwnerAction>
                 )}
+                <DiscardConnection connection={connection} />
                 <Button
                   variant="secondary"
                   className="w-full"

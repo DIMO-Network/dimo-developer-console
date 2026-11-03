@@ -20,15 +20,12 @@ import { PendingGrantBanner } from './PendingGrantBanner';
 import { RevokeAccessModal } from './RevokeAccessModal';
 import { RemoveMemberModal } from './RemoveMemberModal';
 import type { TeamMember } from '@/types/team';
+import { IDENTITY_INDEX_DELAY_MS } from '@/utils/identityOverlay';
 import {
   applySignerOverlay,
   type RecordedToggle,
   type SignerToggle,
 } from './signerOverlay';
-
-// Identity needs a few seconds to index a signer change; reloading the licenses
-// sooner would bring back the old state (license details waits the same).
-const IDENTITY_INDEX_DELAY_MS = 6000;
 
 const TeamSectionComponent: FC = () => {
   const { activeTeam, isOwner, isLoading: teamLoading } = useTeam();

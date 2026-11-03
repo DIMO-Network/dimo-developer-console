@@ -67,6 +67,8 @@ export const View = ({
       ),
   });
 
+  const [filled, setFilled] = useState(false);
+  const [fillFailed, setFillFailed] = useState(false);
   const filledFor = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (!saved || !configurationId || filledFor.current === configurationId) return;
@@ -76,8 +78,10 @@ export const View = ({
       const savedConfiguration: Record<string, unknown> =
         typeof raw === 'string' ? JSON.parse(raw) : raw;
       reset(toFormValues(savedConfiguration, saved));
+      setFilled(true);
     } catch (error) {
       console.error(error);
+      setFillFailed(true);
       toast.error("Couldn't load this configuration. Reload the page to try again.");
     }
   }, [saved, configurationId, reset]);
@@ -142,7 +146,11 @@ export const View = ({
         <span className="text-ink">Edit configuration</span>
       </nav>
       <PageSubtitle subtitle="Edit configuration" />
-      {data?.developerLicense && (
+      {(loadError || fillFailed) && (
+        <p>Couldn&apos;t load this configuration. Reload the page to try again.</p>
+      )}
+      {!loadError && !fillFailed && !filled && <Loader isLoading />}
+      {data?.developerLicense && filled && (
         <FormProvider {...methods}>
           <ConfigurationForm license={data?.developerLicense} submit={submit} editing />
         </FormProvider>

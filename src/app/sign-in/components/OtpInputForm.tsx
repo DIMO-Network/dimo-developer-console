@@ -8,6 +8,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { captureException } from '@sentry/nextjs';
 import { useRouter } from 'next/navigation';
+import { explainSignUpRefusal } from '@/app/sign-up/signUpResult';
 
 interface IProps {
   currentEmail: string;
@@ -97,6 +98,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
 
       router.replace('/app');
     } catch (error) {
+      if (explainSignUpRefusal(error, () => router.replace('/sign-in'))) return;
       captureException(error);
       toast.error('Failed to login with OTP');
     } finally {

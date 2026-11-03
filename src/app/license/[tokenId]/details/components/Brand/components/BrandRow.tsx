@@ -13,9 +13,9 @@ interface Props {
 }
 
 export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDelete }) => {
-  // Only a non-default brand can be deleted, so the last brand never can be.
-  // (API rejects deleting the last brand too, but disable early for UX.)
-  const canDelete = isMultiple && !brand.isDefault;
+  // The only brand can go (the license falls back to DIMO's own look). The
+  // default among several waits for another default, so one always remains.
+  const canDelete = !isMultiple || !brand.isDefault;
 
   return (
     <div className="flex flex-row items-center justify-between border-b border-outline py-3 last:border-0">

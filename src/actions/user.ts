@@ -11,13 +11,15 @@ import { TSignedRequest } from '@turnkey/http';
 import { cookies } from 'next/headers';
 import { cookieName } from '@/services/dimoDevAPI';
 import config from '@/config';
+import { reportUnexpected } from '@/utils/upstreamErrors';
 import { SESSION_VERDICT_COOKIE } from '@/utils/middlewareUtils';
 import { ACTIVE_TEAM_COOKIE, INVITE_TOKEN_COOKIE } from '@/utils/teamCookies';
 
 export const getUser = async () => {
   try {
     return await getUserByToken();
-  } catch {
+  } catch (error) {
+    reportUnexpected(error);
     return null;
   }
 };
