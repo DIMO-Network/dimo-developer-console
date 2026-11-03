@@ -18,12 +18,12 @@ import {
 import { DeveloperJwts } from '@/app/license/[tokenId]/details/components/DeveloperJwts';
 import { Brand } from '@/app/license/[tokenId]/details/components/Brand';
 import { Usage } from '@/app/license/[tokenId]/details/components/Usage/Usage';
+import { IDENTITY_INDEX_DELAY_MS } from '@/utils/identityOverlay';
+import { RedirectUriOverlayProvider } from '../redirectUriOverlay';
 import './View.css';
 import { OverviewQuickActions } from './OverviewQuickActions';
 
 type Tab = 'overview' | 'config' | 'vehicles' | 'brand';
-
-const IDENTITY_API_UPDATE_DELAY = 6000;
 
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
@@ -51,7 +51,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
         refetch({ tokenId })
           .then(() => resolve())
           .catch(reject);
-      }, IDENTITY_API_UPDATE_DELAY);
+      }, IDENTITY_INDEX_DELAY_MS);
     });
 
   useEffect(() => {
@@ -177,11 +177,11 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
         )}
 
         {activeTab === 'config' && (
-          <>
+          <RedirectUriOverlayProvider refetch={refetch}>
             <Signers license={license} refetch={refetch} />
             <DeveloperJwts license={license} />
             <RedirectUris license={license} refetch={refetch} />
-          </>
+          </RedirectUriOverlayProvider>
         )}
 
         {activeTab === 'vehicles' && <Vehicles license={license} />}

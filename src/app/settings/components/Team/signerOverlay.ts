@@ -1,4 +1,5 @@
 import type { TeamLicense } from '@/hooks/useTeamLicenses';
+import { OVERLAY_MS, applyToggles } from '@/utils/identityOverlay';
 
 export interface SignerToggle {
   tokenId: number;
@@ -10,8 +11,7 @@ export interface RecordedToggle extends SignerToggle {
   at: number;
 }
 
-// How long a change this page made outranks Identity's list.
-export const OVERLAY_MS = 60_000;
+export { OVERLAY_MS };
 
 // Identity indexes SignerEnabled and SignerDisabled seconds after the chain, so
 // right after a grant or revoke its lists still show the old state. Changes this
@@ -24,13 +24,10 @@ export const applySignerOverlay = (
   const live = toggles.filter((t) => now - t.at < OVERLAY_MS);
   if (!live.length) return licenses;
   return licenses.map((license) => {
-    const mine = live.filter((t) => t.tokenId === license.tokenId);
+    const mine = live
+      .filter((t) => t.tokenId === license.tokenId)
+      .map((t) => ({ value: t.signer.toLowerCase(), enabled: t.enabled, at: t.at }));
     if (!mine.length) return license;
-    const signers = new Set(license.signers);
-    for (const { signer, enabled } of mine) {
-      if (enabled) signers.add(signer.toLowerCase());
-      else signers.delete(signer.toLowerCase());
-    }
-    return { ...license, signers: [...signers] };
+    return { ...license, signers: applyToggles(license.signers, mine, now) };
   });
 };

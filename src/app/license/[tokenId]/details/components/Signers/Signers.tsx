@@ -47,6 +47,7 @@ import {
 } from './consoleAccessCopy';
 import { KeyHoldersModal, type KeyHolders } from './KeyHoldersModal';
 import type { LicenseSignerRecord } from '@/types/team';
+import { useRedirectUris } from '../redirectUriOverlay';
 
 const DELETE_KEY_SUBTITLE =
   'Apps using this key stop getting new developer JWTs. JWTs already issued with it keep working until they expire, up to 14 days.';
@@ -116,6 +117,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   });
   const consoleKey = (consoleKeyQuery.data ?? enabledKey)?.toLowerCase() ?? null;
   const setFleetRedirectUri = useSetRedirectUri(fragment.tokenId);
+  const { uris: redirectUris } = useRedirectUris(fragment.redirectURIs.nodes);
   const registry = useLicenseSignerRegistry(fragment.tokenId);
   const { members } = useTeamMembers();
   // Verified wallets of the team (the owner's console wallet included): console
@@ -253,9 +255,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     let lastError: unknown;
 
     try {
-      const hasFleetUri = fragment.redirectURIs.nodes.some(
-        (n) => n.uri === RENTAL_OS_URL,
-      );
+      const hasFleetUri = redirectUris.some((n) => n.uri === RENTAL_OS_URL);
       if (!hasFleetUri) {
         setLoadingStatus({
           status: 'loading',
@@ -674,7 +674,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
           error={enableError}
           onEnable={() => void enableConsoleAccess()}
           clientId={fragment.clientId}
-          domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
+          domain={redirectUris[0]?.uri ?? undefined}
         />
       )}
       <div>

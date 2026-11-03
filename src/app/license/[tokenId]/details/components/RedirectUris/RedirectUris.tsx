@@ -1,9 +1,10 @@
 import { FragmentType, gql, useFragment } from '@/gql';
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import { RedirectUriList } from '@/components/RedirectUriList';
 import { RedirectUriForm } from '@/components/RedirectUriForm';
 
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
+import { useRedirectUris } from '../redirectUriOverlay';
 
 const REDIRECT_URIS_FRAGMENT = gql(`
   fragment RedirectUriFragment on DeveloperLicense {
@@ -25,25 +26,9 @@ interface Props {
 export const RedirectUris: FC<Props> = ({ license, refetch }) => {
   const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
   const isLicenseOwner = useIsLicenseOwner(fragment);
-  const [optimisticAdditions, setOptimisticAdditions] = useState<string[]>([]);
-  const [pendingRemovals, setPendingRemovals] = useState<Set<string>>(new Set());
-
-  const displayUris = [
-    ...fragment.redirectURIs.nodes.filter((n) => !pendingRemovals.has(n.uri)),
-    ...optimisticAdditions
-      .filter((uri) => !fragment.redirectURIs.nodes.some((n) => n.uri === uri))
-      .map((uri) => ({ uri })),
-  ];
-
-  const handleAdded = (uri: string) => {
-    setOptimisticAdditions((prev) => [...prev, uri]);
-    refetch().then(() => setOptimisticAdditions([]));
-  };
-
-  const handleRemoved = (uri: string) => {
-    setPendingRemovals((prev) => new Set([...prev, uri]));
-    refetch().then(() => setPendingRemovals(new Set()));
-  };
+  const { uris: displayUris, recordUriChange } = useRedirectUris(
+    fragment.redirectURIs.nodes,
+  );
 
   return (
     <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
@@ -58,7 +43,7 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
               refreshData={refetch}
               redirectUris={displayUris}
               owner={fragment.owner}
-              onAdded={handleAdded}
+              onAdded={(uri) => recordUriChange(uri, true)}
             />
           </div>
         )}
@@ -69,7 +54,7 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
               redirectUris={displayUris}
               refreshData={refetch}
               tokenId={fragment.tokenId}
-              onRemoved={handleRemoved}
+              onRemoved={(uri) => recordUriChange(uri, false)}
             />
           </div>
         )}
