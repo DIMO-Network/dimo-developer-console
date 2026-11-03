@@ -17,8 +17,6 @@ export const removeTeamMember = async (memberId: string) =>
 export const leaveTeam = async () => api.postLeaveTeam();
 export const registerSigner = async (input: SignerProofInput) =>
   api.putSignerProof(input);
-export const listLicenseSigners = async (tokenId: number) =>
-  api.fetchLicenseSigners(tokenId);
 export const upsertLicenseSigner = async (
   tokenId: number,
   address: string,

@@ -7,9 +7,8 @@ jest.mock('@/gql', () => ({
   gql: (s: unknown) => s,
   useFragment: (_d: unknown, f: unknown) => f,
 }));
-jest.mock('@/actions/brand', () => ({ fetchMyBrands: jest.fn().mockResolvedValue([]) }));
-jest.mock('@/actions/workspace', () => ({
-  getWorkspaceByTokenId: jest.fn().mockResolvedValue(null),
+jest.mock('@/hooks/useLicenseBrands', () => ({
+  useLicenseBrands: () => ({ data: { workspace: null, brands: [] } }),
 }));
 jest.mock('@/hooks/useTeam', () => ({
   useTeam: () => ({ isOwner: true, ownerAddress: '0x1' }),

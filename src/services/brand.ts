@@ -1,5 +1,6 @@
 import { isAxiosError } from 'axios';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
+import type { IWorkspace } from '@/types/workspace';
 
 export interface BrandView {
   id: string;
@@ -12,6 +13,12 @@ export interface BrandView {
   primaryColor: string | null;
   isDefault: boolean;
   updatedAt: string | null;
+}
+
+/** A license's workspace (null when this caller sees none) and its brands. */
+export interface LicenseBrands {
+  workspace: IWorkspace | null;
+  brands: BrandView[];
 }
 
 export interface BrandPatch {

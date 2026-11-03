@@ -1,5 +1,6 @@
 'use client';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
@@ -7,11 +8,12 @@ import { toast } from 'sonner';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import { FragmentType, gql, useFragment } from '@/gql';
 
-import { fetchMyBrands, deleteMyBrand } from '@/actions/brand';
+import { deleteMyBrand } from '@/actions/brand';
 import { getOrCreateLicenseWorkspace } from '@/actions/workspace';
 import { BrandRow } from './components/BrandRow';
 import { BrandForm } from './components/BrandForm';
-import type { BrandView } from '@/services/brand';
+import { useLicenseBrands, licenseBrandsKey } from '@/hooks/useLicenseBrands';
+import type { BrandView, LicenseBrands } from '@/services/brand';
 
 const BRAND_FRAGMENT = gql(`
   fragment BrandFragment on DeveloperLicense {
@@ -29,18 +31,30 @@ interface Props {
 export const Brand: FC<Props> = ({ license }) => {
   const fragment = useFragment(BRAND_FRAGMENT, license);
   const isOwner = useIsLicenseOwner(fragment);
-  const [workspaceId, setWorkspaceId] = useState<string | null>(null);
-  const [brands, setBrands] = useState<BrandView[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const licenseTokenId = fragment.tokenId;
+  const query = useLicenseBrands(licenseTokenId);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   /** null = list view; 'new' = create form; BrandView = edit form */
   const [editing, setEditing] = useState<BrandView | 'new' | null>(null);
+  const createStarted = useRef(false);
 
-  const licenseTokenId = fragment.tokenId;
+  const workspaceId = query.data?.workspace?.id ?? null;
+  const brands = query.data?.brands ?? [];
+  const loadError = query.isError
+    ? 'Failed to load brands. Check your connection and reload.'
+    : createError;
+  const loading = query.isLoading || creating;
 
+  // Only the owner can create the workspace; for anyone else a license with
+  // none is unbranded, not a failure. Creation is a write: a server action.
+  const noWorkspace = query.isSuccess && !query.data.workspace?.id;
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
+    if (!noWorkspace || !isOwner || createStarted.current) return;
+    createStarted.current = true;
+    setCreating(true);
+    const create = async () => {
       try {
         const ws = await getOrCreateLicenseWorkspace({
           name: fragment.alias ?? `License #${licenseTokenId}`,
@@ -48,40 +62,41 @@ export const Brand: FC<Props> = ({ license }) => {
           client_id: fragment.clientId,
           owner: fragment.owner,
         });
-        if (cancelled) return;
         if (!ws?.id) {
-          // Only the owner can create it: for anyone else this is an unbranded
-          // license, not a failure.
-          if (isOwner) {
-            Sentry.captureMessage('[Brand] no workspace resolved for license', {
-              extra: { license: licenseTokenId, workspace: ws },
-            });
-            setLoadError('Could not load your workspace. Re-login and try again.');
-          }
+          Sentry.captureMessage('[Brand] no workspace resolved for license', {
+            extra: { license: licenseTokenId, workspace: ws },
+          });
+          setCreateError('Could not load your workspace. Re-login and try again.');
           return;
         }
-        setWorkspaceId(ws.id);
-        const list = await fetchMyBrands(ws.id);
-        if (cancelled) return;
-        setBrands(list);
+        queryClient.setQueryData<LicenseBrands>(licenseBrandsKey(licenseTokenId), {
+          workspace: ws,
+          brands: [],
+        });
       } catch (error) {
         Sentry.captureException(error);
-        setLoadError('Failed to load brands. Check your connection and reload.');
+        setCreateError('Failed to load brands. Check your connection and reload.');
       } finally {
-        if (!cancelled) setLoading(false);
+        setCreating(false);
       }
     };
-    void load();
-    return () => {
-      cancelled = true;
-    };
+    void create();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [licenseTokenId]);
+  }, [noWorkspace, isOwner, licenseTokenId]);
+
+  useEffect(() => {
+    if (query.isError) Sentry.captureException(query.error);
+  }, [query.isError, query.error]);
 
   useEffect(() => {
     if (!loadError) return;
     toast.error(loadError);
   }, [loadError]);
+
+  const setBrands = (update: (prev: BrandView[]) => BrandView[]) =>
+    queryClient.setQueryData<LicenseBrands>(licenseBrandsKey(licenseTokenId), (prev) =>
+      prev ? { ...prev, brands: update(prev.brands) } : prev,
+    );
 
   const handleSave = (saved: BrandView) => {
     setBrands((prev) => {
@@ -108,8 +123,7 @@ export const Brand: FC<Props> = ({ license }) => {
   const handleSetDefault = async () => {
     if (!workspaceId) return;
     try {
-      const list = await fetchMyBrands(workspaceId);
-      setBrands(list);
+      await query.refetch();
     } catch (error) {
       Sentry.captureException(error);
     }
