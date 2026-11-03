@@ -67,7 +67,7 @@ export const View = ({
       ),
   });
 
-  const filledFor = useRef<string>();
+  const filledFor = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (!saved || !configurationId || filledFor.current === configurationId) return;
     filledFor.current = configurationId;
