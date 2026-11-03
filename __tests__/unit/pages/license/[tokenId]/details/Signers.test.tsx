@@ -547,16 +547,79 @@ describe('Signers', () => {
     );
   });
 
+  const openDelete = () => {
+    fireEvent.click(screen.getByRole('button', { name: `Actions for ${SIGNER}` }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Delete API key' }));
+  };
+
   it('stamps the registry when an API key is deleted', async () => {
     (markLicenseSignerDisabled as jest.Mock).mockResolvedValue({ ok: true, data: {} });
     show([SIGNER]);
-    fireEvent.click(screen.getByRole('button', { name: `Actions for ${SIGNER}` }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Delete API key' }));
+    openDelete();
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() =>
       expect(markLicenseSignerDisabled).toHaveBeenCalledWith(42, SIGNER),
     );
     expect(disableSigner).toHaveBeenCalledWith(SIGNER);
+    await waitFor(() => expect(registry.refetch).toHaveBeenCalled());
+    expect(toast.success).toHaveBeenCalledWith(
+      'API key deleted. JWTs already issued with it work until they expire (up to 14 days).',
+    );
+  });
+
+  it('closes the dialog as soon as the transaction confirms', async () => {
+    let confirm: () => void = () => {};
+    disableSigner.mockImplementationOnce(
+      () => new Promise<void>((resolve) => (confirm = resolve)),
+    );
+    (markLicenseSignerDisabled as jest.Mock).mockReturnValue(new Promise(() => {}));
+    // The license has not refetched yet, so only pendingRemovals hides the row.
+    refetchLicense.mockImplementationOnce(() => new Promise(() => {}));
+    show([SIGNER]);
+    openDelete();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    expect(
+      await screen.findByText('Waiting for the network to confirm…'),
+    ).toBeInTheDocument();
+    await act(async () => confirm());
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: 'Confirm' })).toBeNull(),
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole('button', { name: `Actions for ${SIGNER}` })).toBeNull(),
+    );
+    expect(markLicenseSignerDisabled).toHaveBeenCalled();
+  });
+
+  it('never covers the page with the loading modal', async () => {
+    (markLicenseSignerDisabled as jest.Mock).mockResolvedValue({ ok: true, data: {} });
+    mockSetLoadingStatus.mockClear();
+    show([SIGNER]);
+    openDelete();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() => expect(markLicenseSignerDisabled).toHaveBeenCalled());
+    await act(async () => {});
+    expect(mockSetLoadingStatus).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'loading' }),
+    );
+  });
+
+  it('says before deleting that issued JWTs keep working', () => {
+    show([SIGNER]);
+    openDelete();
+    expect(screen.getByText(/up to 14 days/)).toBeInTheDocument();
+  });
+
+  it('shows a failed transaction in the dialog', async () => {
+    disableSigner.mockRejectedValueOnce({ code: 4001 });
+    show([SIGNER]);
+    openDelete();
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The transaction was denied',
+    );
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
+    expect(screen.getByText(SIGNER)).toBeInTheDocument();
   });
 
   it('is read-only for members', () => {

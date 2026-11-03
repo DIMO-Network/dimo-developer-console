@@ -9,6 +9,8 @@ interface Props {
   isOpen: boolean;
   title: string;
   subtitle?: string;
+  loadingLabel?: string;
+  error?: string | null;
   onConfirm: () => void | Promise<void>;
   onCancel: () => void;
   confirmButtonClassName?: string;
@@ -18,6 +20,8 @@ export const DeleteConfirmationModal: FC<Props> = ({
   isOpen,
   title,
   subtitle,
+  loadingLabel,
+  error,
   onConfirm,
   onCancel,
 }) => {
@@ -27,6 +31,8 @@ export const DeleteConfirmationModal: FC<Props> = ({
     setIsLoading(true);
     try {
       await onConfirm();
+    } catch {
+      // The caller reports its own failure through `error`.
     } finally {
       setIsLoading(false);
     }
@@ -61,6 +67,14 @@ export const DeleteConfirmationModal: FC<Props> = ({
           >
             Cancel
           </Button>
+          {isLoading && !!loadingLabel && (
+            <p className={'text-center text-body-sm text-muted'}>{loadingLabel}</p>
+          )}
+          {!!error && (
+            <p role="alert" className={'text-center text-body-sm text-negative'}>
+              {error}
+            </p>
+          )}
         </div>
       </div>
     </Modal>

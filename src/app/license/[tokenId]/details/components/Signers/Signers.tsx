@@ -48,6 +48,10 @@ import {
 import { KeyHoldersModal, type KeyHolders } from './KeyHoldersModal';
 import type { LicenseSignerRecord } from '@/types/team';
 
+const DELETE_KEY_SUBTITLE =
+  'Apps using this key stop getting new developer JWTs. JWTs already issued with it keep working until they expire, up to 14 days.';
+const CONSOLE_OFF_SUBTITLE =
+  'The console stops making developer JWTs for this license. JWTs it already made keep working until they expire, up to 14 days.';
 const RENTAL_OS_URL = 'https://rentals.dimo.co/';
 const RENTAL_OS_REGISTER_ENDPOINT = 'https://rentals.dimo.co/tenant/register';
 
@@ -82,6 +86,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const fragment = useFragment(SIGNERS_FRAGMENT, license);
   const [apiKey, setApiKey] = useState<string>();
   const [signerToDelete, setSignerToDelete] = useState<string>();
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [optimisticAdditions, setOptimisticAdditions] = useState<SignerNode[]>([]);
   const [pendingRemovals, setPendingRemovals] = useState<Set<string>>(new Set());
   const [showRentalOSConfirm, setShowRentalOSConfirm] = useState(false);
@@ -414,27 +419,26 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
 
   const handleDelete = async (signer: string) => {
     const turningOff = signer.toLowerCase() === consoleKey;
-    try {
-      setLoadingStatus({
-        label: turningOff
-          ? 'Turning off console access'
-          : 'Deleting the selected API key',
-        status: 'loading',
-      });
-      await handleDisableSigner(signer);
-      // Stamp the registry row; a key without one answers NOT_FOUND, which is fine.
-      await registryWrite(() => markLicenseSignerDisabled(fragment.tokenId, signer));
+    // The dialog closes once the transaction confirms; the registry stamp and
+    // the license refetch finish behind the page.
+    await handleDisableSigner(signer);
+    if (turningOff) setEnabledKey(null);
+    setPendingRemovals((prev) => new Set([...prev, signer]));
+    toast.success(
+      turningOff
+        ? 'Console access turned off.'
+        : 'API key deleted. JWTs already issued with it work until they expire (up to 14 days).',
+    );
+    void (async () => {
+      try {
+        // A key without a registry row answers NOT_FOUND, which is fine.
+        await registryWrite(() => markLicenseSignerDisabled(fragment.tokenId, signer));
+      } catch (error: unknown) {
+        Sentry.captureException(error);
+      }
       void registry.refetch();
-      setPendingRemovals((prev) => new Set([...prev, signer]));
-      refetch().then(() => setPendingRemovals(new Set()));
-      if (turningOff) setEnabledKey(null);
-      setLoadingStatus({
-        label: turningOff ? 'Console access turned off' : 'API key deleted',
-        status: 'success',
-      });
-    } catch (error: unknown) {
-      handleError(error);
-    }
+    })();
+    void refetch().then(() => setPendingRemovals(new Set()));
   };
 
   type SignerRow = SignerNode & { offChain?: boolean };
@@ -472,7 +476,10 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     const remove = {
       label: isConsoleKey ? TURN_OFF_CONSOLE_ACCESS : 'Delete API key',
       destructive: true,
-      onSelect: () => setSignerToDelete(item.address),
+      onSelect: () => {
+        setDeleteError(null);
+        setSignerToDelete(item.address);
+      },
     };
     return (
       <RowActionsMenu
@@ -596,12 +603,18 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     setShowRentalOSConfirm(true);
   }, [isLicenseOwner]);
 
-  const onConfirmDelete = () => {
+  const onConfirmDelete = async () => {
     if (!signerToDelete) {
       throw new Error('No signer to delete');
     }
-    void handleDelete(signerToDelete);
-    setSignerToDelete(undefined);
+    setDeleteError(null);
+    try {
+      await handleDelete(signerToDelete);
+      setSignerToDelete(undefined);
+    } catch (error: unknown) {
+      Sentry.captureException(error);
+      setDeleteError(txErrorStatus(error).label ?? 'Something went wrong');
+    }
   };
 
   const consoleOn = isConsoleAccessOn({
@@ -730,12 +743,15 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         }
         subtitle={
           signerToDelete?.toLowerCase() === consoleKey
-            ? 'The console will stop making developer JWTs for this license. JWTs already issued keep working until they expire.'
-            : 'You will no longer be able to use this key in your app.'
+            ? CONSOLE_OFF_SUBTITLE
+            : DELETE_KEY_SUBTITLE
         }
+        loadingLabel="Waiting for the network to confirm…"
+        error={deleteError}
         onConfirm={onConfirmDelete}
         onCancel={() => {
           setSignerToDelete(undefined);
+          setDeleteError(null);
         }}
         confirmButtonClassName={'error'}
       />
