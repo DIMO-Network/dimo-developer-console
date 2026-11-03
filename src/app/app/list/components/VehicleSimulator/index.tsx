@@ -18,7 +18,12 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { getPublicClient } from '@/services/zerodev';
 import DimoVehicleIdABI from '@/contracts/DimoVehicleIdABI.json';
 import configuration from '@/config';
-import { MAKES, VehicleMake, buildDeviceDefinitionId } from './constants';
+import {
+  MAKES,
+  SIMULATOR_GRANTEE,
+  VehicleMake,
+  buildDeviceDefinitionId,
+} from './constants';
 import './VehicleSimulator.css';
 
 const MAX_TEST_VEHICLES = 1;
@@ -187,7 +192,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         model: modelLabel,
         year: Number(selectedYear),
         powertrainType: selectedModel!.powertrainType,
-        sacdGrantee: '0x299671D2b32ED62Cc61ce65D8f2b9e4f78486B37',
+        sacdGrantees: [SIMULATOR_GRANTEE, clientId],
       });
 
       console.log('[VehicleSimulator] mintVehicle result', result);
@@ -234,6 +239,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           tokenId: result.tokenId,
           recorded: false,
           registered: false,
+          shared: !result.sacdFailed,
         });
         toast[notice.tone](notice.message);
         return;
@@ -262,6 +268,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         tokenId: result.tokenId,
         recorded: true,
         registered: registration.status !== 'registration_failed',
+        shared: !result.sacdFailed,
       });
       toast[notice.tone](notice.message);
     } catch (e) {

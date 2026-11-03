@@ -1,5 +1,8 @@
 import { siToyota, siFord, siChevrolet, siBmw, siHonda } from 'simple-icons';
 
+/** DIMO's own license (#286); simulated vehicles have always been granted to it. */
+export const SIMULATOR_GRANTEE = '0x299671D2b32ED62Cc61ce65D8f2b9e4f78486B37' as const;
+
 export type PowertrainType = 'ICE' | 'HEV' | 'PHEV' | 'BEV' | 'FCEV';
 
 export interface VehicleModel {

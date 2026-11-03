@@ -1,7 +1,13 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { VehicleSimulator } from '../index';
+import { SIMULATOR_GRANTEE } from '../constants';
+
+jest.mock('sonner', () => ({
+  toast: { success: jest.fn(), warning: jest.fn(), error: jest.fn() },
+}));
 
 jest.mock('@/services/zerodev', () => ({
   getPublicClient: jest.fn(),
@@ -16,9 +22,12 @@ jest.mock('@/hooks', () => ({
 jest.mock('@/actions/simulatedVehicles', () => ({
   getSimulatedVehicles: jest.fn(),
   recordSimulatedVehicle: jest.fn(),
+  registerVehicleWithSimulator: jest.fn(),
 }));
 
-const { getSimulatedVehicles } = jest.requireMock('@/actions/simulatedVehicles');
+const { getSimulatedVehicles, recordSimulatedVehicle, registerVehicleWithSimulator } =
+  jest.requireMock('@/actions/simulatedVehicles');
+const { useMintVehicle, useGlobalAccount } = jest.requireMock('@/hooks');
 
 const mockClientId = '0x1234567890123456789012345678901234567890' as `0x${string}`;
 
@@ -106,5 +115,64 @@ describe('VehicleSimulator', () => {
     fireEvent.click(screen.getByRole('button', { name: 'RAV4' }));
     fireEvent.click(screen.getByRole('button', { name: '2022' }));
     expect(screen.getByRole('button', { name: /mint vehicle/i })).toBeDisabled();
+  });
+
+  describe('minting', () => {
+    const mintVehicle = jest.fn();
+
+    beforeEach(() => {
+      useMintVehicle.mockReturnValue(mintVehicle);
+      useGlobalAccount.mockReturnValue({
+        currentUser: {
+          smartContractAddress: '0x9999999999999999999999999999999999999999',
+        },
+      });
+      recordSimulatedVehicle.mockResolvedValue({ success: true });
+      registerVehicleWithSimulator.mockResolvedValue({ status: 'registered' });
+    });
+
+    afterEach(() => {
+      useMintVehicle.mockReturnValue(jest.fn());
+      useGlobalAccount.mockReturnValue({ currentUser: null });
+    });
+
+    const mint = async () => {
+      renderComponent();
+      fireEvent.click(screen.getByRole('button', { name: 'USA' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Toyota' }));
+      fireEvent.click(screen.getByRole('button', { name: 'RAV4' }));
+      fireEvent.click(screen.getByRole('button', { name: '2022' }));
+      fireEvent.click(screen.getByRole('button', { name: /mint vehicle/i }));
+      await waitFor(() => expect(mintVehicle).toHaveBeenCalled());
+    };
+
+    it('grants the simulator and the license that minted the vehicle', async () => {
+      mintVehicle.mockResolvedValue({ success: true, tokenId: 42, sacdFailed: false });
+
+      await mint();
+
+      expect(mintVehicle).toHaveBeenCalledWith(
+        expect.objectContaining({ sacdGrantees: [SIMULATOR_GRANTEE, mockClientId] }),
+      );
+      await waitFor(() =>
+        expect(toast.success).toHaveBeenCalledWith('Vehicle minted successfully!'),
+      );
+    });
+
+    it("records the vehicle and warns when the license wasn't granted", async () => {
+      mintVehicle.mockResolvedValue({ success: true, tokenId: 42, sacdFailed: true });
+
+      await mint();
+
+      await waitFor(() =>
+        expect(toast.warning).toHaveBeenCalledWith(
+          expect.stringContaining("couldn't be shared with this license"),
+        ),
+      );
+      expect(recordSimulatedVehicle).toHaveBeenCalledWith(
+        expect.objectContaining({ tokenId: 42, clientId: mockClientId }),
+      );
+      expect(toast.success).not.toHaveBeenCalled();
+    });
   });
 });

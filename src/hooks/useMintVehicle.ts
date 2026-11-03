@@ -1,6 +1,7 @@
 import { ALL_VEHICLE_PERMISSIONS } from '@/utils/sacdPermissions';
 import { useCallback } from 'react';
-import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
+import * as Sentry from '@sentry/nextjs';
+import { Abi, Call, encodeFunctionData, keccak256, toBytes } from 'viem';
 import { useContractGA, useGlobalAccount } from '@/hooks';
 import { useSACD } from '@/hooks/useSACD';
 import configuration from '@/config';
@@ -23,6 +24,18 @@ const ZERO_ADDRESS_PADDED =
 // ~75 years — effectively permanent for a test vehicle
 const SACD_EXPIRATION = BigInt(4102444800);
 
+// A license can own an address that is already a grantee (case differs), and
+// signing it twice would put two grants on the same vehicle for one account.
+const uniqueAddresses = (addresses: `0x${string}`[]) => {
+  const seen = new Set<string>();
+  return addresses.filter((address) => {
+    const key = address.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 export interface MintVehicleParams {
   manufacturerNodeId: number;
   deviceDefinitionId: string;
@@ -30,7 +43,7 @@ export interface MintVehicleParams {
   model: string;
   year: number;
   powertrainType: string;
-  sacdGrantee?: `0x${string}`;
+  sacdGrantees: `0x${string}`[];
 }
 
 export const useMintVehicle = () => {
@@ -45,7 +58,7 @@ export const useMintVehicle = () => {
       make,
       model,
       year,
-      sacdGrantee,
+      sacdGrantees,
     }: MintVehicleParams) => {
       if (!currentUser?.smartContractAddress) throw new Error('User session is invalid');
 
@@ -108,30 +121,29 @@ export const useMintVehicle = () => {
           ? Number(decodeHex(rawTokenId as `0x${string}`, 'uint256'))
           : null;
 
-      if (tokenId !== null && sacdGrantee) {
-        const chainId = Number(configuration.CONTRACT_NETWORK);
-        const asset = `did:erc721:${chainId}:${configuration.VEHICLE_NFT_ADDRESS}:${tokenId}`;
+      // The vehicle is minted by now, so a failed grant must not lose it.
+      let sacdFailed = false;
+      if (tokenId !== null) {
+        try {
+          const chainId = Number(configuration.CONTRACT_NETWORK);
+          const asset = `did:erc721:${chainId}:${configuration.VEHICLE_NFT_ADDRESS}:${tokenId}`;
 
-        console.log('[useMintVehicle] Generating and uploading SACD agreement', {
-          tokenId,
-          grantee: sacdGrantee,
-          asset,
-        });
-        const sacdSource = await signAndUploadPermissionSACD({
-          grantee: sacdGrantee,
-          grantor: currentUser.smartContractAddress,
-          asset,
-          expiration: SACD_EXPIRATION,
-        });
-        console.log('[useMintVehicle] SACD agreement uploaded', { sacdSource });
-
-        console.log('[useMintVehicle] Setting SACD permissions', {
-          tokenId,
-          grantee: sacdGrantee,
-        });
-        await processTransactions(
-          [
-            {
+          // One signed agreement per grantee, then every grant in a single
+          // operation so the vehicle is shared with all of them or none.
+          const calls: Call[] = [];
+          for (const grantee of uniqueAddresses(sacdGrantees)) {
+            console.log('[useMintVehicle] Generating and uploading SACD agreement', {
+              tokenId,
+              grantee,
+              asset,
+            });
+            const sacdSource = await signAndUploadPermissionSACD({
+              grantee,
+              grantor: currentUser.smartContractAddress,
+              asset,
+              expiration: SACD_EXPIRATION,
+            });
+            calls.push({
               to: configuration.DIMO_SACD_ADDRESS,
               value: BigInt(0),
               data: encodeFunctionData({
@@ -140,23 +152,34 @@ export const useMintVehicle = () => {
                 args: [
                   configuration.VEHICLE_NFT_ADDRESS,
                   BigInt(tokenId),
-                  sacdGrantee,
+                  grantee,
                   ALL_VEHICLE_PERMISSIONS,
                   SACD_EXPIRATION,
                   sacdSource,
                 ],
               }),
-            },
-          ],
-          { abi: SacdABI as Abi },
-        );
-        console.log('[useMintVehicle] SACD permissions set', {
-          tokenId,
-          grantee: sacdGrantee,
-        });
+            });
+          }
+
+          if (calls.length > 0) {
+            console.log('[useMintVehicle] Setting SACD permissions', {
+              tokenId,
+              grantees: sacdGrantees,
+            });
+            const grant = await processTransactions(calls, { abi: SacdABI as Abi });
+            if (!grant.success) {
+              throw new Error(grant.reason ?? 'SACD permissions transaction reverted');
+            }
+            console.log('[useMintVehicle] SACD permissions set', { tokenId });
+          }
+        } catch (e) {
+          console.error('[useMintVehicle] SACD grant failed', { tokenId, error: e });
+          Sentry.captureException(e);
+          sacdFailed = true;
+        }
       }
 
-      return { ...result, tokenId };
+      return { ...result, tokenId, sacdFailed };
     },
     [currentUser, processTransactions, signAndUploadPermissionSACD],
   );

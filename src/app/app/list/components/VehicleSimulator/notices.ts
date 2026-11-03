@@ -8,10 +8,13 @@ export const mintNotice = ({
   tokenId,
   recorded,
   registered,
+  shared,
 }: {
   tokenId: number;
   recorded: boolean;
   registered: boolean;
+  /** The vehicle's permissions were granted to the simulator and to this license. */
+  shared: boolean;
 }): Notice => {
   if (!recorded) {
     return {
@@ -19,10 +22,16 @@ export const mintNotice = ({
       message: `Vehicle #${tokenId} was minted, but it couldn't be saved to this license.`,
     };
   }
-  if (!registered) {
+  const problems = [
+    ...(registered ? [] : ["the simulator couldn't start it"]),
+    ...(shared
+      ? []
+      : ["it couldn't be shared with this license, so it won't be listed here"]),
+  ];
+  if (problems.length > 0) {
     return {
       tone: 'warning',
-      message: `Vehicle #${tokenId} was minted, but the simulator couldn't start it.`,
+      message: `Vehicle #${tokenId} was minted, but ${problems.join(' and ')}.`,
     };
   }
   return { tone: 'success', message: 'Vehicle minted successfully!' };
