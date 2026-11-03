@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import { fingerprintUpstreamError } from '@/utils/sentryFingerprint';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -18,6 +19,9 @@ Sentry.init({
   // Learn more at
   // https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
   tracesSampleRate: 1.0,
+
+  // One issue per upstream route and status, not per call site.
+  beforeSend: fingerprintUpstreamError,
 
   // ...
 

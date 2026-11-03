@@ -1,5 +1,12 @@
 import { AxiosError, AxiosHeaders, type AxiosResponse } from 'axios';
-import { stripRequestDetails, withoutRequestDetails } from '@/utils/upstreamErrors';
+jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
+import * as Sentry from '@sentry/nextjs';
+import {
+  isUnexpectedFailure,
+  reportUnexpected,
+  stripRequestDetails,
+  withoutRequestDetails,
+} from '@/utils/upstreamErrors';
 
 const build = (headers: unknown) =>
   new AxiosError(
@@ -50,5 +57,23 @@ describe('upstreamErrors', () => {
     expect(error).toMatchObject({ config: { data: 'keep' }, request: 'keep' });
     await expect(withoutRequestDetails(Promise.reject(error))).rejects.toBe(error);
     expect(error).toMatchObject({ config: { data: 'keep' }, request: 'keep' });
+  });
+
+  it('tells an unexpected failure from the API refusing', () => {
+    const withStatus = (status: number) =>
+      new AxiosError('x', 'E', undefined, undefined, { status } as AxiosResponse);
+    expect(isUnexpectedFailure(withStatus(503))).toBe(true);
+    expect(isUnexpectedFailure(withStatus(404))).toBe(false);
+    expect(isUnexpectedFailure(new AxiosError('no response'))).toBe(true);
+    expect(isUnexpectedFailure(new Error('boom'))).toBe(true);
+  });
+
+  it('reportUnexpected strips before it captures', () => {
+    const error = build({ Authorization: 'Bearer t' });
+    Object.assign(error.response!, { status: 500 });
+    reportUnexpected(error);
+    const captured = (Sentry.captureException as jest.Mock).mock.calls[0][0];
+    expect(captured).toBe(error);
+    expect(captured.config.data).toBeUndefined();
   });
 });

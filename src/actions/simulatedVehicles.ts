@@ -3,6 +3,7 @@
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 import configuration from '@/config';
 import { AxiosError } from 'axios';
+import { reportUnexpected } from '@/utils/upstreamErrors';
 
 export interface SimulatedVehicle {
   id: string;
@@ -27,7 +28,8 @@ export const getSimulatedVehicles = async ({
       `/api/my/simulated-vehicles?clientId=${clientId}`,
     );
     return data.data;
-  } catch {
+  } catch (error) {
+    reportUnexpected(error);
     return [];
   }
 };
