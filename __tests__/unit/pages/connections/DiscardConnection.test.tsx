@@ -6,8 +6,9 @@ const STRANGER = '0x8888888888888888888888888888888888888888';
 
 jest.mock('@/actions/connections', () => ({ deleteConnection: jest.fn() }));
 jest.mock('@/services/connectionLookup', () => ({ findMintedConnection: jest.fn() }));
+let mockUser: { smartContractAddress?: string } | undefined;
 jest.mock('@/hooks', () => ({
-  useGlobalAccount: () => ({ currentUser: { smartContractAddress: WALLET } }),
+  useGlobalAccount: () => ({ currentUser: mockUser }),
 }));
 jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn() }));
 jest.mock('@/hooks/queries/useMyConnections', () => ({
@@ -61,6 +62,7 @@ const discard = async () => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockUser = { smartContractAddress: WALLET };
   (findMintedConnection as jest.Mock).mockResolvedValue(null);
   (deleteConnection as jest.Mock).mockResolvedValue({ ok: true, data: null });
 });
@@ -120,6 +122,15 @@ describe('DiscardConnection', () => {
 
     expect(deleteConnection).toHaveBeenCalledWith('c1');
     expect(toast.success).toHaveBeenCalledWith('Connection discarded');
+  });
+
+  it("discards nothing when the wallet isn't known", async () => {
+    mockUser = undefined;
+    await discard();
+
+    expect(toast.error).toHaveBeenCalledWith(DISCARD_LOOKUP_FAILED);
+    expect(deleteConnection).not.toHaveBeenCalled();
+    expect(toast.success).not.toHaveBeenCalled();
   });
 
   it('discards nothing when the lookup fails', async () => {

@@ -28,6 +28,12 @@ export const DiscardConnection: FC<{ connection: Connection }> = ({ connection }
 
   const discard = async () => {
     const wallet = currentUser?.smartContractAddress?.toLowerCase();
+    // Without the wallet nobody can say the name isn't this user's: fail closed.
+    if (!wallet) {
+      toast.error(DISCARD_LOOKUP_FAILED);
+      setOpen(false);
+      return;
+    }
     try {
       const found = await findMintedConnection(connection.name);
       if (found && found.owner.toLowerCase() === wallet) {
