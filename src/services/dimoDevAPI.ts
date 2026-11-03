@@ -34,6 +34,19 @@ export const clearStaleTeamOnNotAMember = async (error: unknown) => {
   throw error;
 };
 
+// Next logs what a Server Action throws, and that prints every field of the error: the
+// session token and the request body sit in its configs, and again in the raw requests.
+// Callers read the message, the code, and the response's status and data, so those stay.
+const stripRequestDetails = (error: unknown) => {
+  if (!(error instanceof AxiosError)) return;
+  for (const config of [error.config, error.response?.config]) {
+    config?.headers?.delete('Authorization');
+    delete config?.data;
+  }
+  delete error.request;
+  delete error.response?.request;
+};
+
 export const dimoDevAPIClient = async (timeout: number = 5000, token?: string) => {
   let authHeader = undefined;
 
@@ -58,6 +71,9 @@ export const dimoDevAPIClient = async (timeout: number = 5000, token?: string) =
       ...(teamId ? { [TEAM_ID_HEADER]: teamId } : {}),
     },
   });
-  client.interceptors.response.use(undefined, clearStaleTeamOnNotAMember);
+  client.interceptors.response.use(undefined, (error: unknown) => {
+    stripRequestDetails(error);
+    return clearStaleTeamOnNotAMember(error);
+  });
   return client;
 };

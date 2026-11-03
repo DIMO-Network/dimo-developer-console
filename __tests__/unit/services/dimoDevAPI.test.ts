@@ -2,7 +2,10 @@
  * @jest-environment node
  */
 jest.mock('next/headers', () => ({ cookies: jest.fn() }));
-import { AxiosError, type AxiosResponse } from 'axios';
+import { createServer, type Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { inspect } from 'node:util';
+import { AxiosError, AxiosHeaders, type AxiosAdapter, type AxiosResponse } from 'axios';
 import { cookies } from 'next/headers';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
@@ -68,5 +71,180 @@ describe('dimoDevAPIClient', () => {
       ),
     ).rejects.toBeInstanceOf(AxiosError);
     expect(remove).not.toHaveBeenCalled();
+  });
+});
+
+// Next logs what a Server Action throws, and that prints every field of the error.
+describe('a failed dimoDevAPIClient call', () => {
+  const TOKEN = 'token-marker-3f1a';
+  const BODY = 'body-marker-9c2e';
+  const logged = (error: unknown) => inspect(error, { depth: 10 });
+
+  // What the real adapters hold on to: the config, and a raw request with the headers
+  // and the body exactly as they were sent.
+  const rawRequest = (config: Parameters<AxiosAdapter>[0]) => ({
+    _header: `POST / HTTP/1.1\r\nAuthorization: ${config.headers.Authorization}\r\n`,
+    body: config.data,
+  });
+
+  const answers500: AxiosAdapter = async (config) => {
+    const request = rawRequest(config);
+    throw new AxiosError(
+      'Request failed with status code 500',
+      'ERR_BAD_RESPONSE',
+      config,
+      request,
+      {
+        status: 500,
+        statusText: 'Internal Server Error',
+        data: { code: 'BOOM', message: 'It broke' },
+        headers: {},
+        config,
+        request,
+      },
+    );
+  };
+
+  const neverAnswers: AxiosAdapter = async (config) => {
+    throw new AxiosError(
+      'timeout of 5000ms exceeded',
+      'ECONNABORTED',
+      config,
+      rawRequest(config),
+    );
+  };
+
+  const failedCall = async (adapter: AxiosAdapter) => {
+    withCookies({ 'session-token': TOKEN });
+    const client = await dimoDevAPIClient();
+    return client
+      .post('/api/my/connections', { secret: BODY }, { adapter })
+      .catch((error: AxiosError) => error);
+  };
+
+  it('keeps the token and the body out of what gets logged', async () => {
+    const printed = logged(await failedCall(answers500));
+
+    expect(printed).not.toContain(TOKEN);
+    expect(printed).not.toContain(BODY);
+  });
+
+  it('keeps what callers read', async () => {
+    const error = (await failedCall(answers500)) as AxiosError;
+
+    expect(error).toBeInstanceOf(AxiosError);
+    expect(error.message).toBe('Request failed with status code 500');
+    expect(error.code).toBe('ERR_BAD_RESPONSE');
+    expect(error.response?.status).toBe(500);
+    expect(error.response?.data).toEqual({ code: 'BOOM', message: 'It broke' });
+  });
+
+  it('strips a request that got no response too', async () => {
+    const error = (await failedCall(neverAnswers)) as AxiosError;
+
+    expect(logged(error)).not.toContain(TOKEN);
+    expect(logged(error)).not.toContain(BODY);
+    expect(error.code).toBe('ECONNABORTED');
+    expect(error.response).toBeUndefined();
+  });
+
+  it('strips the response config when it is not the same object', async () => {
+    const answersWithItsOwnConfig: AxiosAdapter = async (config) => {
+      const copy = { ...config, headers: new AxiosHeaders(config.headers) };
+      throw new AxiosError('Failed', 'ERR_BAD_RESPONSE', config, undefined, {
+        status: 500,
+        statusText: '',
+        data: {},
+        headers: {},
+        config: copy,
+      });
+    };
+
+    const error = (await failedCall(answersWithItsOwnConfig)) as AxiosError;
+    const printed = logged(error);
+
+    expect(error.response?.status).toBe(500);
+    expect(printed).not.toContain(TOKEN);
+    expect(printed).not.toContain(BODY);
+  });
+
+  it('still drops the team cookie, with the token gone', async () => {
+    const remove = withCookies({ 'session-token': TOKEN, 'active_team': 'team-acme' });
+    const client = await dimoDevAPIClient();
+
+    const error = await client
+      .get('/api/my/apps', {
+        adapter: async (config) => {
+          throw new AxiosError(
+            'Forbidden',
+            'ERR_BAD_REQUEST',
+            config,
+            rawRequest(config),
+            {
+              status: 403,
+              statusText: 'Forbidden',
+              data: { code: 'NOT_A_MEMBER' },
+              headers: {},
+              config,
+            },
+          );
+        },
+      })
+      .catch((failure: AxiosError) => failure);
+
+    expect(remove).toHaveBeenCalledWith('active_team');
+    expect(logged(error)).not.toContain(TOKEN);
+  });
+
+  // The real adapter, for the real ClientRequest: its _header is what would print.
+  describe('over HTTP', () => {
+    let server: Server;
+    let url: string;
+
+    beforeAll(async () => {
+      server = createServer((request, response) => {
+        request.resume();
+        request.on('end', () => {
+          response.writeHead(500, { 'Content-Type': 'application/json' });
+          response.end(JSON.stringify({ code: 'BOOM' }));
+        });
+      });
+      await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+      url = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    });
+
+    afterAll(() => {
+      server.close();
+    });
+
+    const realCall = async (target: string) => {
+      withCookies({ 'session-token': TOKEN });
+      const client = await dimoDevAPIClient();
+      return client
+        .post(target, { secret: BODY })
+        .catch((error: AxiosError) => error) as Promise<AxiosError>;
+    };
+
+    it('strips a real 500', async () => {
+      const error = await realCall(`${url}/api/my/connections`);
+
+      expect(error.response?.status).toBe(500);
+      expect(error.response?.data).toEqual({ code: 'BOOM' });
+      expect(logged(error)).not.toContain(TOKEN);
+      expect(logged(error)).not.toContain(BODY);
+    });
+
+    it('strips a real refused connection', async () => {
+      const closed = createServer();
+      await new Promise<void>((resolve) => closed.listen(0, '127.0.0.1', resolve));
+      const { port } = closed.address() as AddressInfo;
+      await new Promise((resolve) => closed.close(resolve));
+
+      const error = await realCall(`http://127.0.0.1:${port}/api/my/connections`);
+
+      expect(error.code).toBe('ECONNREFUSED');
+      expect(logged(error)).not.toContain(TOKEN);
+      expect(logged(error)).not.toContain(BODY);
+    });
   });
 });
