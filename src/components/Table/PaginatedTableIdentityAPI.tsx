@@ -13,6 +13,7 @@ import {
 } from '@tanstack/react-table/legacy';
 import { Button } from '@/components/Button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
+import { paginationSummary } from './paginationSummary';
 import { Column } from './Column';
 import { Cell } from './Cell';
 import './Table.css';
@@ -145,11 +146,7 @@ export const PaginatedTableIdentityAPI = <TData extends RowData>({
       </div>
 
       <div className={'flex flex-row items-center justify-between pt-4'}>
-        <p>
-          Showing {pagination.pageIndex * pagination.pageSize + 1}–
-          {Math.min((pagination.pageIndex + 1) * pagination.pageSize, rowCount)} of{' '}
-          {rowCount}
-        </p>
+        <p>{paginationSummary(pagination.pageIndex, pagination.pageSize, rowCount)}</p>
         <div className={'flex flex-row items-center'}>
           <Button
             variant="secondary"

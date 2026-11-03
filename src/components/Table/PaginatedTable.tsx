@@ -9,6 +9,7 @@ import {
 import Column from '@/components/Table/Column';
 import Cell from '@/components/Table/Cell';
 import { Button } from '@/components/Button';
+import { paginationSummary } from '@/components/Table/paginationSummary';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
 
 interface PaginatedTableProps<T extends RowData> {
@@ -67,14 +68,7 @@ export function PaginatedTable<T extends RowData>({
         </table>
       </div>
       <div className="flex items-center justify-between text-sm text-muted">
-        <p>
-          {data.length === 0
-            ? 'Showing 0 of 0'
-            : `Showing ${pagination.pageIndex * pagination.pageSize + 1}–${Math.min(
-                (pagination.pageIndex + 1) * pagination.pageSize,
-                data.length,
-              )} of ${data.length}`}
-        </p>
+        <p>{paginationSummary(pagination.pageIndex, pagination.pageSize, data.length)}</p>
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"

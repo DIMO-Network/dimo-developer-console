@@ -36,7 +36,7 @@ export const Menu: FC = withLoadingStatus(() => {
   } = useContext(LayoutContext);
   const pathname = usePathname();
   const router = useRouter();
-  const { hasDeveloperLicenses, loading: licensesLoading } = useHasDeveloperLicenses();
+  const { hasDeveloperLicenses } = useHasDeveloperLicenses();
 
   const onSignOut = async () => {
     try {
@@ -68,7 +68,7 @@ export const Menu: FC = withLoadingStatus(() => {
   };
 
   const { isMember } = useTeam();
-  const sections = getNavSections(licensesLoading || hasDeveloperLicenses, {
+  const sections = getNavSections(hasDeveloperLicenses !== false, {
     isMember,
     dataAccessEnabled: TEAM_DATA_ACCESS_ENABLED,
   });
