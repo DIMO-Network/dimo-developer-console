@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -20,24 +20,31 @@ jest.mock('@/app/license/[tokenId]/configurator/components/ListView/ListView', (
 }));
 jest.mock('@/app/license/[tokenId]/configurator/components/ConfigurationForm', () => ({
   ConfigurationForm: () => {
-    const { watch } = useFormContext();
-    return <p>{`name: ${watch('configuration_name') ?? ''}`}</p>;
+    const { watch, register } = useFormContext();
+    return (
+      <>
+        <p>{`name: ${watch('configuration_name') ?? ''}`}</p>
+        <input aria-label="name" {...register('configuration_name')} />
+      </>
+    );
   },
 }));
 jest.mock('@/actions/configurations', () => ({ updateConfiguration: jest.fn() }));
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 const renderView = () =>
   render(
-    <QueryClientProvider
-      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
-    >
+    <QueryClientProvider client={queryClient}>
       <View params={Promise.resolve({ tokenId: '42', id: 'c1' })} />
     </QueryClientProvider>,
   );
 
 describe('configurator edit View', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+  });
 
   it('fills the form from the route', async () => {
     global.fetch = jest.fn().mockResolvedValue({
@@ -66,5 +73,29 @@ describe('configurator edit View', () => {
         "Couldn't load this configuration. Reload the page to try again.",
       ),
     );
+  });
+
+  it("never overwrites the user's edits when the same configuration is refreshed", async () => {
+    const body = (name: string) => ({
+      id: 'c1',
+      client_id: '0xclient',
+      configuration_name: name,
+      configuration: JSON.stringify({ component: 'LoginWithDimo' }),
+    });
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => body('Saved name'),
+    });
+    renderView();
+    await screen.findByText('name: Saved name');
+    fireEvent.change(screen.getByLabelText('name'), { target: { value: 'My edit' } });
+    await screen.findByText('name: My edit');
+    act(() => {
+      queryClient.setQueryData(['configuration', 'c1'], body('Newer from server'));
+    });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(screen.getByText('name: My edit')).toBeInTheDocument();
+    expect(screen.getByLabelText('name')).toHaveValue('My edit');
   });
 });

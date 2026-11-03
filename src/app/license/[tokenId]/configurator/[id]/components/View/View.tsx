@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client/react';
 import { useQuery as useRestQuery } from '@tanstack/react-query';
 import { fetchJson } from '@/utils/fetchJson';
 import { Loader } from '@/components/Loader';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -56,14 +56,19 @@ export const View = ({
   const { data: saved, error: loadError } = useRestQuery({
     queryKey: ['configuration', configurationId],
     enabled: !!configurationId,
+    // Fill the form once, like a one-shot load: a refetch must not reset edits.
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
     queryFn: () =>
       fetchJson<IConfiguration>(
         `/api/configurations/${encodeURIComponent(configurationId!)}`,
       ),
   });
 
+  const filledFor = useRef<string>();
   useEffect(() => {
-    if (!saved) return;
+    if (!saved || !configurationId || filledFor.current === configurationId) return;
+    filledFor.current = configurationId;
     try {
       const raw = saved.configuration;
       const savedConfiguration: Record<string, unknown> =
@@ -73,7 +78,7 @@ export const View = ({
       console.error(error);
       toast.error("Couldn't load this configuration. Reload the page to try again.");
     }
-  }, [saved, reset]);
+  }, [saved, configurationId, reset]);
 
   useEffect(() => {
     if (!loadError) return;
