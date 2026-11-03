@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { DevLicenseSelector } from '@/components/Webhooks/components/DeveloperLicenseSelector';
 import { Header } from '@/app/webhooks/webhooksPage/Header';
@@ -11,7 +12,8 @@ import { LocalDeveloperLicense } from '@/types/webhook';
 const MainComponent = () => {
   const [selectedDeveloperLicense, setSelectedDeveloperLicense] =
     useState<LocalDeveloperLicense>();
-  const { developerLicenses, loading } = useValidDeveloperLicenses();
+  const { developerLicenses, hasLicenseWithoutRedirectUri, loading } =
+    useValidDeveloperLicenses();
   const { refetch, isAuthenticatedAsDev } = useGetDevJwts(
     selectedDeveloperLicense?.clientId,
   );
@@ -21,6 +23,23 @@ const MainComponent = () => {
       setSelectedDeveloperLicense(developerLicenses[0]);
     }
   }, [loading, developerLicenses, selectedDeveloperLicense]);
+
+  // A webhook needs a developer JWT, and a license makes one only once it has a
+  // redirect URI: say so instead of showing an empty selector.
+  if (!loading && developerLicenses.length === 0) {
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-body text-fg">
+          {hasLicenseWithoutRedirectUri
+            ? 'Add a redirect URI to your license to set up webhooks.'
+            : 'Create a developer license to set up webhooks.'}
+        </p>
+        <Link href="/licenses" className="text-body-sm text-ink underline">
+          Go to licenses
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <>

@@ -13,11 +13,20 @@ jest.mock('@/app/license/vehicles/[clientId]/components/View/View', () => ({
   View: () => null,
 }));
 jest.mock('@/components/OwnerOnly', () => ({ OwnerOnly: () => null }));
+jest.mock('@/layouts/AuthorizedLayout', () => ({ AuthorizedLayout: () => null }));
+jest.mock('@/app/templates/templatesPage/View', () => ({ TemplatesPage: () => null }));
+jest.mock('@/app/templates/new/components/PresetView', () => ({
+  PresetView: () => null,
+}));
 
 import { metadata as list } from '@/app/license/[tokenId]/configurator/page';
 import { metadata as create } from '@/app/license/[tokenId]/configurator/new/page';
 import { metadata as edit } from '@/app/license/[tokenId]/configurator/[id]/page';
 import { metadata as vehicles } from '@/app/license/vehicles/[clientId]/page';
+import { metadata as licenses } from '@/app/licenses/layout';
+import { metadata as webhooks } from '@/app/webhooks/layout';
+import { metadata as templates } from '@/app/templates/page';
+import { metadata as newTemplate } from '@/app/templates/new/page';
 
 describe('page titles', () => {
   it.each([
@@ -25,6 +34,10 @@ describe('page titles', () => {
     ['new configuration', create, 'New configuration'],
     ['edit configuration', edit, 'Edit configuration'],
     ['licensed vehicles', vehicles, 'Licensed vehicles'],
+    ['licenses', licenses, 'Licenses'],
+    ['webhooks', webhooks, 'Webhooks'],
+    ['templates', templates, 'Templates'],
+    ['new template', newTemplate, 'New template'],
   ])('%s', (_name, metadata, title) => {
     expect(metadata.title).toBe(`${title} | ${configuration.appName}`);
   });

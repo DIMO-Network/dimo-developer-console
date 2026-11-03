@@ -10,6 +10,9 @@ export const RESOLVED_ACCOUNT_KEY = 'globalAccountAddresses';
 export const SESSION_CHANNEL = 'dimo-console-session';
 // The old per-tab sessionStorage entry, migrated once.
 export const LEGACY_TAB_SESSION_KEY = 'globalAccount';
+// Marks that this sign-in already proved its signer (useSignerRegistration), so
+// the other tabs of the same sign-in skip the proof.
+export const SIGNER_PROOF_KEY = 'signerProof';
 
 export interface StoredSession extends IGlobalAccountSession {
   eKey: string;
@@ -113,6 +116,7 @@ export const writeSession = (session: StoredSession): void => {
 export const clearSession = (): void => {
   localStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(RESOLVED_ACCOUNT_KEY);
+  localStorage.removeItem(SIGNER_PROOF_KEY);
   localStorage.removeItem(EmbeddedKey);
   sessionStorage.removeItem(LEGACY_TAB_SESSION_KEY);
   announce({ type: 'signed-out' });
