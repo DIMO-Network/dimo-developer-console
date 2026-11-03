@@ -13,7 +13,10 @@ export const mintNotice = ({
   tokenId: number;
   recorded: boolean;
   registered: boolean;
-  /** The vehicle's permissions were granted to the simulator and to this license. */
+  /**
+   * The vehicle's permissions were granted to the simulator and to this license. That is
+   * one user operation, so false means neither of them has it.
+   */
   shared: boolean;
 }): Notice => {
   if (!recorded) {
@@ -22,16 +25,18 @@ export const mintNotice = ({
       message: `Vehicle #${tokenId} was minted, but it couldn't be saved to this license.`,
     };
   }
-  const problems = [
-    ...(registered ? [] : ["the simulator couldn't start it"]),
-    ...(shared
-      ? []
-      : ["it couldn't be shared with this license, so it won't be listed here"]),
-  ];
-  if (problems.length > 0) {
+  // Only one test vehicle is allowed and this one holds the slot, so a vehicle nobody
+  // was granted can't be replaced without removing it first.
+  if (!shared) {
     return {
       tone: 'warning',
-      message: `Vehicle #${tokenId} was minted, but ${problems.join(' and ')}.`,
+      message: `Vehicle #${tokenId} was minted, but neither the simulator nor this license was granted access to it. Remove the vehicle and mint again to fix this.`,
+    };
+  }
+  if (!registered) {
+    return {
+      tone: 'warning',
+      message: `Vehicle #${tokenId} was minted, but the simulator couldn't start it.`,
     };
   }
   return { tone: 'success', message: 'Vehicle minted successfully!' };

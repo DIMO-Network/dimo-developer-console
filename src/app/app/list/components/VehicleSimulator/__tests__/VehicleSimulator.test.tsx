@@ -159,14 +159,14 @@ describe('VehicleSimulator', () => {
       );
     });
 
-    it("records the vehicle and warns when the license wasn't granted", async () => {
+    it('records the vehicle and warns that neither grant landed', async () => {
       mintVehicle.mockResolvedValue({ success: true, tokenId: 42, sacdFailed: true });
 
       await mint();
 
       await waitFor(() =>
         expect(toast.warning).toHaveBeenCalledWith(
-          expect.stringContaining("couldn't be shared with this license"),
+          expect.stringContaining('neither the simulator nor this license was granted'),
         ),
       );
       expect(recordSimulatedVehicle).toHaveBeenCalledWith(

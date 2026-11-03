@@ -1,5 +1,5 @@
 'use server';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { ICreditUsage } from '@/types/wallet';
 
 export const getCreditConsumptionByLicense = async ({
@@ -21,14 +21,22 @@ export const getCreditConsumptionByLicense = async ({
     },
   });
 
-  const { data } = await dimoApiClient.get<ICreditUsage>(
-    `/v1/credits/${licenseId}/usage`,
-    {
-      params: {
-        fromDate,
-        toDate,
+  try {
+    const { data } = await dimoApiClient.get<ICreditUsage>(
+      `/v1/credits/${licenseId}/usage`,
+      {
+        params: {
+          fromDate,
+          toDate,
+        },
       },
-    },
-  );
-  return data;
+    );
+    return data;
+  } catch (error) {
+    // Next logs what an action throws and onRequestError ships it to Sentry, and an
+    // AxiosError holds the dev JWT in config.headers and in the raw request. Only the
+    // status leaves here. It still rejects: a failure must not read as zero usage.
+    const status = error instanceof AxiosError ? error.response?.status : undefined;
+    throw new Error(`Credit usage request failed (${status ?? 'no response'})`);
+  }
 };

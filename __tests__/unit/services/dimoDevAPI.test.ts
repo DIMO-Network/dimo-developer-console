@@ -168,6 +168,54 @@ describe('a failed dimoDevAPIClient call', () => {
     expect(printed).not.toContain(BODY);
   });
 
+  // An adapter, or code that rebuilt a config, can leave headers as a plain object, and
+  // a plain object has no delete(): the TypeError would replace the AxiosError.
+  it('strips plain-object headers and still rejects with the AxiosError', async () => {
+    const answersWithPlainHeaders: AxiosAdapter = async (config) => {
+      const plain = { Authorization: `Bearer ${TOKEN}`, Accept: 'application/json' };
+      const request = rawRequest(config);
+      throw new AxiosError(
+        'Request failed with status code 500',
+        'ERR_BAD_RESPONSE',
+        { ...config, headers: plain } as unknown as typeof config,
+        request,
+        {
+          status: 500,
+          statusText: '',
+          data: { code: 'BOOM' },
+          headers: {},
+          config: { ...config, headers: { ...plain } } as unknown as typeof config,
+          request,
+        },
+      );
+    };
+
+    const error = (await failedCall(answersWithPlainHeaders)) as AxiosError;
+
+    expect(error).toBeInstanceOf(AxiosError);
+    expect(error.response?.status).toBe(500);
+    expect(error.response?.data).toEqual({ code: 'BOOM' });
+    expect(error.config?.headers).toEqual({ Accept: 'application/json' });
+    expect(error.response?.config.headers).toEqual({ Accept: 'application/json' });
+    expect(logged(error)).not.toContain(TOKEN);
+    expect(logged(error)).not.toContain(BODY);
+  });
+
+  it('strips an error whose config has no headers at all', async () => {
+    const error = (await failedCall(async (config) => {
+      throw new AxiosError(
+        'Failed',
+        'ERR_BAD_RESPONSE',
+        { ...config, headers: undefined } as unknown as typeof config,
+        rawRequest(config),
+      );
+    })) as AxiosError;
+
+    expect(error).toBeInstanceOf(AxiosError);
+    expect(error.code).toBe('ERR_BAD_RESPONSE');
+    expect(logged(error)).not.toContain(TOKEN);
+  });
+
   it('still drops the team cookie, with the token gone', async () => {
     const remove = withCookies({ 'session-token': TOKEN, 'active_team': 'team-acme' });
     const client = await dimoDevAPIClient();

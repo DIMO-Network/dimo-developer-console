@@ -24,20 +24,26 @@ describe('mintNotice', () => {
 
   it('warns when the simulator did not take the vehicle', () => {
     expect(
-      mintNotice({ tokenId: 7, recorded: true, registered: false, shared: true }).tone,
-    ).toBe('warning');
+      mintNotice({ tokenId: 7, recorded: true, registered: false, shared: true }),
+    ).toEqual({
+      tone: 'warning',
+      message: "Vehicle #7 was minted, but the simulator couldn't start it.",
+    });
   });
 
-  it("warns when the license wasn't granted", () => {
+  // The grant to the simulator and to the license is one user operation, and the one
+  // test vehicle holds the only slot: the user has to remove it before minting again.
+  it('says neither the simulator nor the license was granted, and how to fix it', () => {
     expect(
       mintNotice({ tokenId: 7, recorded: true, registered: true, shared: false }),
     ).toEqual({
       tone: 'warning',
-      message: expect.stringContaining('#7'),
+      message:
+        'Vehicle #7 was minted, but neither the simulator nor this license was granted access to it. Remove the vehicle and mint again to fix this.',
     });
   });
 
-  it('names both problems when the simulator and the grant both failed', () => {
+  it('says it once when the simulator did not start either, as one grant covers both', () => {
     const { tone, message } = mintNotice({
       tokenId: 7,
       recorded: true,
@@ -45,8 +51,10 @@ describe('mintNotice', () => {
       shared: false,
     });
     expect(tone).toBe('warning');
-    expect(message).toContain("simulator couldn't start");
-    expect(message).toContain("couldn't be shared with this license");
+    expect(message).toContain('neither the simulator nor this license was granted');
+    expect(message).toContain('Remove the vehicle and mint again');
+    expect(message).not.toContain("couldn't start");
+    expect(message).not.toContain("won't be listed");
   });
 });
 
