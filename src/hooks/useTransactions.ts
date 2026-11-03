@@ -221,7 +221,9 @@ export type MintConnectionStep =
   'minting' | 'signing-agreements' | 'granting-permissions';
 
 export type MintConnectionResult =
-  { success: true; connectionId: bigint } | { success: false; reason: string };
+  | { success: true; connectionId: bigint }
+  // nameInUse: `reason` advises another name, which only helps where one can be chosen.
+  | { success: false; reason: string; nameInUse?: boolean };
 
 export interface GrantConnectionParams {
   connectionId: bigint;
@@ -364,6 +366,7 @@ export const useMintConnection = () => {
         ) {
           return {
             success: false,
+            nameInUse: true,
             reason:
               'This connection name is already taken. Please choose a different name and try again.',
           };

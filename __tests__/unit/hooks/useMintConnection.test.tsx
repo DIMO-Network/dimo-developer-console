@@ -135,7 +135,17 @@ describe('useMintConnection mint', () => {
 
     await expect(mint()).resolves.toEqual({
       success: false,
+      nameInUse: true,
       reason: expect.stringContaining('already taken'),
+    });
+  });
+
+  it('marks only a name collision as one', async () => {
+    mockProcess.mockRejectedValue(new Error('ERC20: transfer amount exceeds balance'));
+
+    await expect(mint()).resolves.toEqual({
+      success: false,
+      reason: expect.stringContaining('$DIMO'),
     });
   });
 

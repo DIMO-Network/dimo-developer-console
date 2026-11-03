@@ -51,6 +51,11 @@ jest.mock('@/hooks', () => ({
   useGlobalAccount: () => ({ currentUser: mockUser }),
 }));
 
+const mockReadContract = jest.fn();
+jest.mock('@/services/zerodev', () => ({
+  getPublicClient: () => ({ readContract: mockReadContract }),
+}));
+
 jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn() }));
 jest.mock('sonner', () => ({ toast: { success: jest.fn() } }));
 
@@ -103,6 +108,11 @@ const identityHasNoSuchName = () =>
     data: { connection: null },
   });
 
+const chainSaysHeldBy = (owner: string | null) =>
+  mockReadContract.mockImplementation(async ({ functionName }) =>
+    functionName === 'exists' ? owner !== null : owner,
+  );
+
 const renderPage = async (search = '') => {
   mockSearch = search;
   const params = Promise.resolve({ owner: SIGNER });
@@ -134,6 +144,7 @@ const statusesSaved = () =>
 beforeEach(() => {
   mockUser = { walletAddress: SIGNER, smartContractAddress: WALLET };
   global.fetch = jest.fn();
+  chainSaysHeldBy(null);
   jest.spyOn(console, 'error').mockImplementation(() => undefined);
   (createConnection as jest.Mock).mockResolvedValue(row());
   (updateConnection as jest.Mock).mockResolvedValue(undefined);
@@ -201,6 +212,19 @@ describe('creating a connection', () => {
     const invalidated = (invalidateMyConnectionsQuery as jest.Mock).mock
       .invocationCallOrder;
     expect(invalidated.some((call) => call > deleted)).toBe(true);
+  });
+
+  // Here the name field is on the page, and the row is new: the advice holds.
+  it('tells a new purchase to choose a different name', async () => {
+    const reason =
+      'This connection name is already taken. Please choose a different name and try again.';
+    mockMint.mockResolvedValue({ success: false, nameInUse: true, reason });
+    await renderPage('name=Fleet');
+
+    await buy();
+
+    expect(screen.getByText(reason)).toBeInTheDocument();
+    expect(deleteConnection).toHaveBeenCalledWith('conn-1');
   });
 
   it('still shows why the mint was refused if the row cannot be removed', async () => {
@@ -435,8 +459,73 @@ describe('resuming a connection', () => {
     expect(mockReplace).toHaveBeenCalledWith('/connections?success=connection-created');
   });
 
+  // The window right after a mint: on chain, not yet indexed. Without the chain read
+  // this opens the $1 modal, and the mint is refused with NameAlreadyInUse.
+  describe('when Identity has not indexed the mint yet', () => {
+    // A real connection, so the id the page saves is the contract's.
+    const named = () => row({ name: 'Vehicle Simulator' });
+
+    it("finishes this wallet's connection without minting", async () => {
+      identityHasNoSuchName();
+      chainSaysHeldBy(WALLET);
+      await resumeWith(named());
+
+      await click('Finish setup');
+
+      expect(mockMint).not.toHaveBeenCalled();
+      expect(
+        screen.queryByRole('button', { name: 'Continue with payment', hidden: true }),
+      ).toBeNull();
+      expect((updateConnection as jest.Mock).mock.calls).toEqual([
+        ['conn-1', { status: 'MINTED', token_id: TOKEN_ID }],
+        ['conn-1', { status: 'READY' }],
+      ]);
+      expect(mockGrant).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectionId: BigInt(TOKEN_ID),
+          deviceIssuanceGrantee: DEVICE_ADDRESS,
+        }),
+      );
+    });
+
+    it('stops when the chain says another wallet holds the name', async () => {
+      identityHasNoSuchName();
+      chainSaysHeldBy(STRANGER);
+      await resumeWith(named());
+
+      await click('Finish setup');
+
+      expect(screen.getByText(/name is taken/i)).toBeInTheDocument();
+      expect(mockMint).not.toHaveBeenCalled();
+      expect(mockGrant).not.toHaveBeenCalled();
+      expect(deleteConnection).not.toHaveBeenCalled();
+      expect(updateConnection).not.toHaveBeenCalled();
+    });
+
+    it('does not mint when the chain cannot be read', async () => {
+      identityHasNoSuchName();
+      mockReadContract.mockRejectedValue(new Error('rpc down'));
+      await resumeWith(named());
+
+      await click('Finish setup');
+
+      expect(screen.getByText(/try again/i)).toBeInTheDocument();
+      expect(screen.queryByText(/rpc down/)).toBeNull();
+      expect(
+        screen.queryByRole('button', { name: 'Continue with payment', hidden: true }),
+      ).toBeNull();
+      expect(mockMint).not.toHaveBeenCalled();
+      expect(deleteConnection).not.toHaveBeenCalled();
+    });
+  });
+
   it.each([
     ['answers 500', () => identityAnswers({}, false)],
+    [
+      'answers no connection and no error',
+      () => identityAnswers({ data: { connection: null } }),
+    ],
+    ['answers empty data', () => identityAnswers({ data: {} })],
     [
       'answers an error other than not found',
       () =>
@@ -488,6 +577,33 @@ describe('resuming a connection', () => {
     expect(deleteConnection).not.toHaveBeenCalled();
     expect(updateConnection).not.toHaveBeenCalled();
     expect(mockGrant).not.toHaveBeenCalled();
+  });
+
+  // Chain and Identity can both say nobody and the mint still lose the name: another
+  // wallet got there first, or the earlier attempt landed in between. There is no name
+  // field here, and following "choose a different name" would cost another $1.
+  it('never tells a resume to choose a different name', async () => {
+    identityHasNoSuchName();
+    mockMint.mockResolvedValue({
+      success: false,
+      nameInUse: true,
+      reason:
+        'This connection name is already taken. Please choose a different name and try again.',
+    });
+    await resumeWith(row());
+
+    await click('Finish setup');
+    await click('Continue with payment');
+
+    expect(screen.queryByText(/different name/i)).toBeNull();
+    expect(
+      screen.getByText(
+        'If your earlier attempt went through, it can take a minute to appear. Try Finish setup again shortly.',
+      ),
+    ).toBeInTheDocument();
+    expect(button('Finish setup')).toBeEnabled();
+    expect(deleteConnection).not.toHaveBeenCalled();
+    expect(updateConnection).not.toHaveBeenCalled();
   });
 
   it('leaves the row when a resumed mint throws', async () => {

@@ -17,7 +17,7 @@ import {
   type MintConnectionStep,
 } from '@/hooks/useTransactions';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
-import { findConnectionByName } from '@/services/connectionLookup';
+import { findMintedConnection } from '@/services/connectionLookup';
 import { generateConnectionWallets } from '@/services/connectionWallets';
 import {
   createConnection,
@@ -37,6 +37,8 @@ const FINISH_FROM_CONNECTIONS =
 const LOOKUP_FAILED =
   "Couldn't check whether this connection was already minted, so nothing was spent. Try again.";
 const NAME_TAKEN = "This name is taken by another wallet, so setup can't be finished.";
+const NAME_REFUSED_ON_RESUME =
+  'If your earlier attempt went through, it can take a minute to appear. Try Finish setup again shortly.';
 const LOAD_FAILED =
   "Couldn't load this connection. Go back to Connections and try again.";
 const CONNECTION_GONE =
@@ -262,7 +264,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     await recordMintAndComplete(saved.id, minted.connectionId, saved.grantees);
   };
 
-  // Only reached once Identity has said nobody holds the name.
+  // Only reached once Identity and the chain have both said nobody holds the name.
   const mintResumed = async (connection: Connection) => {
     const grantees = granteesOf(connection);
     setIsPendingPurchase(false);
@@ -271,7 +273,8 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     const minted = await mint(connection.name);
     if (!minted.success) {
       console.error('Connection minting failed', minted.reason);
-      setError(minted.reason);
+      // There's no name to change on this page, and the earlier attempt may hold it.
+      setError(minted.nameInUse ? NAME_REFUSED_ON_RESUME : minted.reason);
       return;
     }
 
@@ -301,7 +304,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     setLoadingLabel('Checking whether your connection was already minted…');
     let found;
     try {
-      found = await findConnectionByName(connection.name);
+      found = await findMintedConnection(connection.name);
     } catch (error) {
       console.error('Looking up the connection failed:', error);
       setError(LOOKUP_FAILED);
