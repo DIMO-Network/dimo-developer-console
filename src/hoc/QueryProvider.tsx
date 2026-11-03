@@ -6,11 +6,16 @@ import { isClientError } from '@/utils/httpError';
 // the same answer. Retrying one only delays the moment the UI can tell the user
 // what went wrong -- a 401 on the template editor spent four requests and
 // several seconds in loading state before any message appeared. 5xx and
-// network faults are still retried, because those do clear on their own.
+// network faults are still retried, because those do clear on their own -- once:
+// a list that is really down shows its error after two requests, not four.
+export const QUERY_RETRIES = 1;
+export const defaultQueryRetry = (failureCount: number, error: unknown): boolean =>
+  !isClientError(error) && failureCount < QUERY_RETRIES;
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: (failureCount, error) => !isClientError(error) && failureCount < 3,
+      retry: defaultQueryRetry,
     },
   },
 });

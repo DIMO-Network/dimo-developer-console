@@ -6,7 +6,8 @@ import { Title } from '@/components/Title';
 import { CopyButton } from '@/components/CopyButton';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { useQuery } from '@tanstack/react-query';
-import { getConnectionById } from '@/actions/connections';
+import type { Connection } from '@/actions/connections';
+import { fetchJson } from '@/utils/fetchJson';
 import Link from 'next/link';
 
 import './View.css';
@@ -14,7 +15,10 @@ import './View.css';
 const MainComponent = ({ connectionId }: { connectionId: string }) => {
   const { data: connection } = useQuery({
     queryKey: ['connection', connectionId],
-    queryFn: () => getConnectionById(connectionId),
+    queryFn: () =>
+      fetchJson<Connection | null>(
+        `/api/connections/${encodeURIComponent(connectionId)}`,
+      ),
   });
 
   const maskKey = () => {
@@ -91,7 +95,8 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
 
   const { isLoading, error } = useQuery({
     queryKey: ['connection', id],
-    queryFn: () => getConnectionById(id),
+    queryFn: () =>
+      fetchJson<Connection | null>(`/api/connections/${encodeURIComponent(id)}`),
   });
 
   return (

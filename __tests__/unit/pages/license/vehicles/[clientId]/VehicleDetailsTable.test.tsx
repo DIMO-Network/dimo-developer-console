@@ -1,5 +1,6 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const useQuery = jest.fn();
 jest.mock('@apollo/client/react', () => ({
@@ -7,9 +8,7 @@ jest.mock('@apollo/client/react', () => ({
   useQuery: (...args: unknown[]) => useQuery(...args),
 }));
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
-jest.mock('@/actions/simulatedVehicles', () => ({
-  getSimulatedVehicles: jest.fn().mockResolvedValue([]),
-}));
+jest.mock('@/utils/fetchJson', () => ({ fetchJson: jest.fn().mockResolvedValue([]) }));
 jest.mock('@/hooks/useRenounceVehiclePermissions', () => ({
   useRenounceVehiclePermissions: () => ({ renounce: jest.fn() }),
 }));
@@ -17,6 +16,15 @@ jest.mock('@/hooks/subjects/useSubjectQuery', () => ({
   useSubjectQuery: () => ({ isLoading: false, error: null, data: null }),
 }));
 import { VehicleDetailsTable } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable';
+
+const render = (ui: React.ReactElement) =>
+  rtlRender(
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      {ui}
+    </QueryClientProvider>,
+  );
 
 const vehicle = (sacd: unknown) => ({
   tokenId: 7,

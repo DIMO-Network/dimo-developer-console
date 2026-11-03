@@ -1,7 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getMyConnections, Connection } from '@/actions/connections';
+import type { Connection } from '@/actions/connections';
+import { fetchJson } from '@/utils/fetchJson';
 import { queryClient } from '@/hoc/QueryProvider';
 
 const getQueryKey = () => ['my-connections'];
@@ -9,7 +10,7 @@ const getQueryKey = () => ['my-connections'];
 export const useMyConnections = () => {
   return useQuery<Connection[]>({
     queryKey: getQueryKey(),
-    queryFn: getMyConnections,
+    queryFn: () => fetchJson<Connection[]>('/api/connections'),
     staleTime: 30000,
     refetchOnWindowFocus: false,
   });

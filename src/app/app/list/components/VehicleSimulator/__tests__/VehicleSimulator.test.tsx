@@ -20,13 +20,16 @@ jest.mock('@/hooks', () => ({
 }));
 
 jest.mock('@/actions/simulatedVehicles', () => ({
-  getSimulatedVehicles: jest.fn(),
   recordSimulatedVehicle: jest.fn(),
   registerVehicleWithSimulator: jest.fn(),
 }));
 
-const { getSimulatedVehicles, recordSimulatedVehicle, registerVehicleWithSimulator } =
-  jest.requireMock('@/actions/simulatedVehicles');
+jest.mock('@/utils/fetchJson', () => ({ fetchJson: jest.fn() }));
+
+const { recordSimulatedVehicle, registerVehicleWithSimulator } = jest.requireMock(
+  '@/actions/simulatedVehicles',
+);
+const getSimulatedVehicles = jest.requireMock('@/utils/fetchJson').fetchJson;
 const { useMintVehicle, useGlobalAccount } = jest.requireMock('@/hooks');
 
 const mockClientId = '0x1234567890123456789012345678901234567890' as `0x${string}`;
