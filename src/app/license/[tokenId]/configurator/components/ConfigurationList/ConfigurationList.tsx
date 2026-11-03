@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import * as Sentry from '@sentry/nextjs';
-import {
-  getConfigurationsByClientId,
-  deleteConfiguration,
-  IConfigurationListItem,
-} from '@/actions/configurations';
+import { deleteConfiguration, IConfigurationListItem } from '@/actions/configurations';
+import { fetchJson } from '@/utils/fetchJson';
 import { Button } from '@/components/Button';
 import { Table } from '@/components/Table';
 import { toast } from 'sonner';
@@ -36,24 +34,25 @@ const entryStateLabel = (entryState: string): string => {
 
 export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
   const router = useRouter();
-  // null until the first load, so "No configurations yet" isn't shown early.
-  const [configs, setConfigs] = useState<IConfigurationListItem[] | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const [loadFailed, setLoadFailed] = useState(false);
-
-  const load = async () => {
-    try {
-      setConfigs(await getConfigurationsByClientId({ client_id: clientId }));
-      setLoadFailed(false);
-    } catch (error) {
-      Sentry.captureException(error);
-      setLoadFailed(true);
-    }
-  };
+  // Same key as the license cards, so the two share one cached list.
+  const {
+    data: configs,
+    isPending,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['configurations', clientId],
+    queryFn: () =>
+      fetchJson<IConfigurationListItem[]>(
+        `/api/configurations?clientId=${encodeURIComponent(clientId)}`,
+      ),
+  });
 
   useEffect(() => {
-    void load();
-  }, [clientId]);
+    if (error) Sentry.captureException(error);
+  }, [error]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -64,10 +63,10 @@ export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
       return;
     }
     setPendingDeleteId(null);
-    await load();
+    await refetch();
   };
 
-  if (loadFailed) {
+  if (isError) {
     return (
       <p role="alert" className="py-12 text-center text-body-sm text-negative">
         Could not load configurations. Reload to try again.
@@ -75,7 +74,7 @@ export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
     );
   }
 
-  if (configs === null) {
+  if (isPending) {
     return <p className="py-12 text-center text-body-sm text-muted">Loading…</p>;
   }
 
