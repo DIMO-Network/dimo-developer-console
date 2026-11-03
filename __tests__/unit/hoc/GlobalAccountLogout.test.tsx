@@ -12,6 +12,7 @@ jest.mock('@/services/zerodev', () => ({}));
 jest.mock('@/hoc/QueryProvider', () => ({ queryClient: { clear: jest.fn() } }));
 
 import { endSession } from '@/actions/user';
+import { turnkeyClient } from '@/config/turnkey';
 import { withGlobalAccounts } from '@/hoc/GlobalAccountProvider';
 
 const Page = withGlobalAccounts(() => <p>page</p>);
@@ -26,5 +27,14 @@ describe('logout', () => {
     (endSession as jest.Mock).mockRejectedValue(new Error('unexpected response'));
     render(<Page />);
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
+  });
+
+  it("still clears the session and goes to sign-in when Turnkey's logout fails", async () => {
+    (endSession as jest.Mock).mockResolvedValue(true);
+    (turnkeyClient.logout as jest.Mock).mockRejectedValueOnce(new Error('storage'));
+    localStorage.setItem('globalAccountAddresses', '{}');
+    render(<Page />);
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
+    expect(localStorage.getItem('globalAccountAddresses')).toBeNull();
   });
 });

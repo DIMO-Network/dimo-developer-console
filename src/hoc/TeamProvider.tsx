@@ -28,6 +28,7 @@ import { getFromSession, removeFromSession, saveToSession } from '@/utils/sessio
 import { getFromLocalStorage, saveToLocalStorage } from '@/utils/localStorage';
 import { PendingInvite } from '@/components/PendingInvite';
 import { setMemberDevJwtSigner } from '@/utils/devJwt';
+import { readSession } from '@/utils/globalAccountSession';
 
 const FLASH_KEY = 'teamFlash';
 const LAST_TEAM_KEY = 'lastActiveTeam';
@@ -205,20 +206,25 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.smartContractAddress, activeTeam?.id]);
 
-  // Back on this tab: another tab may have switched team or signed out (the
-  // cookie, and so X-Team-Id, is shared), or the user was removed while away.
+  // Back on this tab: another tab may have switched team (the cookie, and so
+  // X-Team-Id, is shared), or the user was removed while away.
+  const subOrganizationId = currentUser?.subOrganizationId;
   useEffect(() => {
     if (!activeTeam || activeTeam.id === FALLBACK_TEAM_ID) return;
     const recheck = async () => {
       if (document.visibilityState === 'hidden') return;
+      // Only for the account this tab loaded. Another account's session (or
+      // none) means the account provider is already moving this tab on, and
+      // the cookie now belongs to whoever signed in.
+      if (readSession()?.subOrganizationId !== subOrganizationId) return;
       const cookieId = getActiveTeamCookie();
       // Another tab switched team: this page belongs to the old one.
       if (cookieId && cookieId !== activeTeam.id) {
         hardNavigate('/app');
         return;
       }
-      // No cookie: console-api's NOT_A_MEMBER cleared it, another tab signed
-      // out, or the browser dropped it. The team list tells which.
+      // No cookie: console-api's NOT_A_MEMBER cleared it, or the browser
+      // dropped it. The team list tells which.
       if (activeTeam.isPersonal) {
         if (!cookieId) setActiveTeamCookie(activeTeam.id);
         return;
@@ -234,7 +240,7 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
       document.removeEventListener('visibilitychange', recheck);
       window.removeEventListener('focus', recheck);
     };
-  }, [activeTeam, fetchTeams, reportRemoved]);
+  }, [activeTeam, fetchTeams, reportRemoved, subOrganizationId]);
 
   // Removed mid-session: any team-scoped query that fails with NOT_A_MEMBER.
   useEffect(
