@@ -515,10 +515,12 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     );
   };
 
-  // Check if current wallet address is listed in the signers
+  // Check if current wallet address is listed in the signers. onChainRows, not the
+  // fragment: a key just turned off is still listed until Identity catches up, and
+  // enabling it then needs the transaction.
   const isSigner = (owner: `0x${string}`) => {
-    return fragment.signers.nodes.some(
-      (signer) => signer.address.toLowerCase() === owner.toLowerCase(),
+    return onChainRows.some(
+      (signer) => String(signer.address).toLowerCase() === owner.toLowerCase(),
     );
   };
 
@@ -559,6 +561,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       if (!isSigner(privateKeyAddress)) {
         await handleEnableSigner(privateKeyAddress);
         setEnabledKey(privateKeyAddress);
+        // Enabled again after a turn-off: the list may still show it, and now rightly.
+        setPendingRemovals((prev) => {
+          const next = new Set(prev);
+          return next.delete(privateKeyAddress.toLowerCase()) ? next : prev;
+        });
         await refetch();
       }
       await recordConsoleKey(privateKeyAddress);
@@ -580,8 +587,10 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   // (turning access off) must never re-record the row as active.
   // Console key already a signer: record the registry row if it has none (so
   // members can see console access is on). A console-api write, not a transaction.
+  // Waits for the team members too: the row is recorded for the owner's user id.
   useEffect(() => {
     if (!isLicenseOwner || !consoleKey || !registry.isLoaded || registry.isError) return;
+    if (!ownerUserId) return;
     if (consoleKeyRecorded.current) return;
     consoleKeyRecorded.current = true;
     if (!consoleKeyOnChain || registry.byAddress.has(consoleKey)) return;
@@ -593,6 +602,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     registry.isLoaded,
     registry.isError,
     registry.byAddress,
+    ownerUserId,
   ]);
 
   // Console access already on: mint the owner's developer JWT as the old open

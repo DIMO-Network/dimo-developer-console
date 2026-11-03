@@ -35,17 +35,21 @@ const buildRedirectUrl = (path: string, request: NextRequest) => {
 // not only the expected ones -- an attacker can make jose throw other errors
 // (an unsupported "crit" header, say), and a failure here must never fall
 // through to the error handling below, which lets requests continue.
-const verifyToken = async (token: string) => {
+// keySetDown: the token could not be checked, which says nothing against it.
+const verifyToken = async (
+  token: string,
+): Promise<{ token: JWTPayload | null; keySetDown: boolean }> => {
   try {
-    return await decodeJwtToken(token);
+    return { token: await decodeJwtToken(token), keySetDown: false };
   } catch (error) {
     if (isKeySetFailure(error)) {
       // Not a bad token but a failure to check it: worth seeing, still no
       // session.
       Sentry.captureException(error);
       console.error('Session token could not be verified:', error);
+      return { token: null, keySetDown: true };
     }
-    return null;
+    return { token: null, keySetDown: false };
   }
 };
 
@@ -143,7 +147,11 @@ const validatePrivateSession = async (request: NextRequest, token: string) => {
   return rememberVerdict(request, response, verdict);
 };
 
-const validatePublicSession = async (request: NextRequest, token: JWTPayload | null) => {
+const validatePublicSession = async (
+  request: NextRequest,
+  token: JWTPayload | null,
+  keySetDown = false,
+) => {
   console.info('Validating public session', request.nextUrl.pathname);
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const isAPIProtected = mustBeAuthorize(request, token);
@@ -166,7 +174,8 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
   // where a login page lets it through and console-api answers 401.
   // The token is missing or did not verify, so a stale cookie goes with this
   // answer: logout()'s endSession() action lands here when the session is gone,
-  // and could not delete the cookies itself.
+  // and could not delete the cookies itself. Not when the key set was down: the
+  // token may be fine, and a brief JWKS outage must not sign the user out.
   if (!isLoginPage && request.headers.has('next-action')) {
     const response = NextResponse.json(
       {
@@ -176,8 +185,10 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
       },
       { status: 401 },
     );
-    response.cookies.delete(cookieName);
-    response.cookies.delete(SESSION_VERDICT_COOKIE);
+    if (!keySetDown) {
+      response.cookies.delete(cookieName);
+      response.cookies.delete(SESSION_VERDICT_COOKIE);
+    }
     return response;
   }
 
@@ -197,9 +208,14 @@ const handleRequest = async (request: NextRequest) => {
   const hasError = request.nextUrl.searchParams.get('error');
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   let token: JWTPayload | null = null;
+  let keySetDown = false;
   try {
     const rawToken = await getCookie(cookieName);
-    token = rawToken ? await verifyToken(rawToken) : null;
+    if (rawToken) {
+      const verified = await verifyToken(rawToken);
+      token = verified.token;
+      keySetDown = verified.keySetDown;
+    }
     // The data proxy authorizes every request itself (owners through Identity),
     // so it must not depend on console-api's /api/me answering. The session JWT
     // was verified just above.
@@ -210,13 +226,13 @@ const handleRequest = async (request: NextRequest) => {
       return await validatePrivateSession(request, rawToken);
     }
 
-    return await validatePublicSession(request, token);
+    return await validatePublicSession(request, token, keySetDown);
   } catch (error: unknown) {
     Sentry.captureException(error);
     console.error('Middleware error:', error);
     // Only a verified session may continue past a failure (the ?error= branch
     // below lets the request through). Anything else is treated as signed out.
-    if (!token) return validatePublicSession(request, null);
+    if (!token) return validatePublicSession(request, null, keySetDown);
     let path = handleConnectionError(error, isLoginPage);
     path = path ?? handleExpiredSession(error, isLoginPage);
     const redirectUrl = `${configuration.frontendUrl}${path}`;

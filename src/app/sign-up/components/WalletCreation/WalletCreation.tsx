@@ -183,7 +183,11 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
       if (!success) return giveUp();
       globalAccountSignupComplete(newWalletAddress!);
     } catch (error) {
-      if (explainSignUpRefusal(error, () => router.replace('/sign-in'))) return;
+      if (explainSignUpRefusal(error, () => router.replace('/sign-in'))) {
+        // Told why; still leave the spinner.
+        router.replace('/sign-in');
+        return;
+      }
       Sentry.captureException(error);
       giveUp();
     }

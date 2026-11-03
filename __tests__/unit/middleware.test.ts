@@ -123,6 +123,22 @@ describe('proxy without a session', () => {
     }
   });
 
+  // A key set that could not be fetched says nothing about the token: a brief JWKS
+  // outage must not sign everyone out.
+  it('keeps the session cookies when it refuses an action because the key set is down', async () => {
+    (decodeJwtToken as jest.Mock).mockRejectedValue(new TypeError('fetch failed'));
+    const res = await run(
+      request(
+        '/connections',
+        { 'session-token': TOKEN, [SESSION_VERDICT_COOKIE]: 'v' },
+        { method: 'POST', headers: { 'next-action': 'abc123' } },
+      ),
+    );
+    expect(res.status).toBe(401);
+    await expect(res.json()).resolves.toMatchObject({ code: 'SESSION_EXPIRED' });
+    expect(res.headers.get('set-cookie')).toBeNull();
+  });
+
   it('lets a server action on the sign-in page run without a session', async () => {
     const res = await run(
       request('/sign-in', {}, { method: 'POST', headers: { 'next-action': 'abc123' } }),

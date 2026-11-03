@@ -105,5 +105,20 @@ describe('WalletCreation', () => {
       ),
     );
     expect(Sentry.captureException).not.toHaveBeenCalled();
+    // The screen is a spinner: a refusal has to leave it too.
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
+  });
+
+  it.each([
+    ['EMAIL_TAKEN', EMAIL_TAKEN_MESSAGE],
+    ['UNREACHABLE', UNREACHABLE_MESSAGE],
+    ['FAILED', SIGN_UP_FAILED_MESSAGE],
+  ] as const)('explains a %s refusal and leaves the spinner', async (reason, message) => {
+    mockLogin.mockRejectedValue(new SignUpRefusedError(reason));
+    render(<WalletCreation onNext={jest.fn()} />);
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
+    expect(toast.error).toHaveBeenCalledTimes(1);
+    expect(toast.error).toHaveBeenCalledWith(message);
+    expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 });

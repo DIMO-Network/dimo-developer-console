@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { fingerprintUpstreamError } from '@/utils/sentryFingerprint';
+import { dropRequestPayload } from '@/utils/sentryScrub';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -10,8 +11,11 @@ Sentry.init({
     process.env.SENTRY_ENVIRONMENT ||
     (process.env.VERCEL_ENV ? `vercel-${process.env.VERCEL_ENV}` : process.env.NODE_ENV),
 
-  // Sentry 11 collects users' IP addresses by default; 8 didn't.
-  dataCollection: { userInfo: false },
+  // Sentry 11 collects users' IP addresses, cookies and request bodies by default;
+  // 8 didn't. A server action's body is its arguments (private keys, signed
+  // challenges, access tokens), read through the same req.on('data') Sentry hooks,
+  // so every event captured inside an action would carry them.
+  dataCollection: { userInfo: false, cookies: false, httpBodies: [] },
 
   // Set tracesSampleRate to 1.0 to capture 100%
   // of transactions for tracing.
@@ -20,8 +24,9 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
   tracesSampleRate: 1.0,
 
-  // One issue per upstream route and status, not per call site.
-  beforeSend: fingerprintUpstreamError,
+  // One issue per upstream route and status, not per call site; and never a request
+  // body or cookie, whatever attached it.
+  beforeSend: (event, hint) => fingerprintUpstreamError(dropRequestPayload(event), hint),
 
   // ...
 

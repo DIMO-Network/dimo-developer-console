@@ -32,6 +32,7 @@ describe('DeleteConfirmationModal', () => {
   });
 
   it('shows an error and stays open when confirming fails', async () => {
+    jest.spyOn(console, 'error').mockImplementationOnce(() => {});
     const onCancel = jest.fn();
     const Caller = () => {
       const [error, setError] = React.useState<string | null>(null);
@@ -61,5 +62,20 @@ describe('DeleteConfirmationModal', () => {
       expect(screen.getByRole('button', { name: 'Confirm' })).toBeEnabled(),
     );
     expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  // A caller that forgets to set `error` would otherwise fail without a trace. The
+  // message is fixed and only the error's name is logged: a message could carry
+  // anything the caller sent.
+  it('logs a rejected confirm without its message', async () => {
+    const log = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const failure = new TypeError('0xsecret');
+    renderModal({ onConfirm: jest.fn(async () => Promise.reject(failure)) });
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() =>
+      expect(log).toHaveBeenCalledWith('Delete confirmation failed:', 'TypeError'),
+    );
+    expect(JSON.stringify(log.mock.calls)).not.toContain('0xsecret');
+    log.mockRestore();
   });
 });

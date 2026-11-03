@@ -961,16 +961,26 @@ git commit -m "fix(ux): keep the Connections link, right page titles, empty list
 
 Every prod command is the user's, run from their own terminal with their own credentials; nothing here prints a credential.
 
-1. **init-db_13** (in progress, by the user). Confirm 13 and 14 are on prod, read-only:
-   `SELECT to_regclass('workspace_brand_repairs_13') IS NOT NULL AS has_13, EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'connections' AND column_name = 'status') AS has_14;` Expected: `t, t`.
-2. **Pre-check for init-db_15**, read-only (`SET default_transaction_read_only = on;` first): count only, no names:
-   `SELECT count(*) AS duplicate_names, coalesce(sum(n), 0) AS rows_involved FROM (SELECT count(*) AS n FROM connections WHERE deleted IS NOT TRUE GROUP BY company_id, lower(name) HAVING count(*) > 1) d;` Expected `0, 0`. If not zero, list the rows to decide on, without keys: `SELECT id, company_id, status, created_at FROM connections WHERE deleted IS NOT TRUE AND (company_id, lower(name)) IN (SELECT company_id, lower(name) FROM connections WHERE deleted IS NOT TRUE GROUP BY 1, 2 HAVING count(*) > 1) ORDER BY company_id, created_at;` The user decides which to rename or delete (a PENDING test row from OPS-1 is the likely one).
-3. **Ledger backfill** for what is already applied (a prod write; go-ahead needed):
-   `CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()); INSERT INTO schema_migrations (version) VALUES (13), (14) ON CONFLICT (version) DO NOTHING;` If the API's Preview environment has its own `PG_URL`, repeat steps 1–4 on that database too, or preview builds fail the check.
-4. **Apply init-db_15** before the API merge: `psql "$PG_URL" --single-transaction -v ON_ERROR_STOP=1 -f src/scripts/db/init-db_15.sql`. It records 15 itself. Verify: `SELECT version FROM schema_migrations ORDER BY version;` → 13, 14, 15.
+Every `psql` here runs with `--single-transaction -v ON_ERROR_STOP=1`, so a failing statement rolls back the whole command instead of leaving it half done.
+
+1. **Which of 13 and 14 are on prod**, read-only:
+   `psql "$PG_URL" --single-transaction -v ON_ERROR_STOP=1 -c "SET TRANSACTION READ ONLY; SELECT to_regclass('workspace_brand_repairs_13') IS NOT NULL AS has_13, EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'connections' AND column_name = 'status') AS has_14;"`
+   Note both values: step 3 records only the versions this shows as `t`. 14 is expected `t`; 13 may be `f` (its run is the user's pending decision).
+2. **Pre-check for init-db_15**, read-only, a count with no names:
+   `psql "$PG_URL" --single-transaction -v ON_ERROR_STOP=1 -c "SET TRANSACTION READ ONLY; SELECT count(*) AS duplicate_names, coalesce(sum(n), 0) AS rows_involved FROM (SELECT count(*) AS n FROM connections WHERE deleted IS NOT TRUE GROUP BY company_id, lower(name) HAVING count(*) > 1) d;"`
+   Expected `0, 0`. If not zero, list the rows to decide on, without keys:
+   `psql "$PG_URL" --single-transaction -v ON_ERROR_STOP=1 -c "SET TRANSACTION READ ONLY; SELECT id, company_id, status, created_at FROM connections WHERE deleted IS NOT TRUE AND (company_id, lower(name)) IN (SELECT company_id, lower(name) FROM connections WHERE deleted IS NOT TRUE GROUP BY 1, 2 HAVING count(*) > 1) ORDER BY company_id, created_at;"`
+   The user decides which to rename or delete (a PENDING test row from OPS-1 is the likely one).
+3. **Ledger rows for what step 1 confirmed** (a prod write; go-ahead needed). Insert only the versions step 1 showed as `t`; never record a migration that hasn't run, or the build check passes a database that lacks it. With both `t`:
+   `psql "$PG_URL" --single-transaction -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()); INSERT INTO schema_migrations (version) VALUES (13), (14) ON CONFLICT (version) DO NOTHING;"`
+   With only `has_14` `t`, the same command with `VALUES (14)` alone.
+   - **`has_13` is `f`:** don't insert 13; apply it instead, which records it: `psql "$PG_URL" --single-transaction -v ON_ERROR_STOP=1 -f src/scripts/db/init-db_13.sql` (from the API checkout). The same goes for 14 if `has_14` is `f`, with `init-db_14.sql`.
+   - **Retiring 13 instead** (never applying it) means deleting `src/scripts/db/init-db_13.sql` and `init-db_13.down.sql` in the API PR and updating `test/db/check-migrations.test.ts`, which expects 13 among the tracked migrations; otherwise every build fails the check.
+   If the API's Preview environment has its own `PG_URL`, repeat steps 1–4 on that database too, or preview builds fail the check.
+4. **Apply init-db_15** before the API merge, from the API branch checkout (`fix/wave1-hardening`: init-db_15 isn't on master yet): `psql "$PG_URL" --single-transaction -v ON_ERROR_STOP=1 -f src/scripts/db/init-db_15.sql`. It records 15 itself. Verify: `psql "$PG_URL" --single-transaction -v ON_ERROR_STOP=1 -c "SET TRANSACTION READ ONLY; SELECT version FROM schema_migrations ORDER BY version;"` → 13, 14, 15 (14, 15 if 13 was retired).
 5. **Build command.** In the console-api Vercel project (`--scope dimo-network`), check read-only that Build Command is the default (`npm run build`); an override to `next build` skips the check.
-6. **Merge and deploy the API PR.** The build log shows `check-migrations: all 3 tracked migrations are recorded`.
-7. **Verify BRAND-3:** `curl -sI "https://console-api.dimo.org/api/brand?clientId=<a branded license>"` twice: `cache-control: public, max-age=60, stale-while-revalidate=300`, `cf-cache-status: DYNAMIC`, second `x-vercel-cache: HIT`. Edit that brand in the console, then curl again: `x-vercel-cache: MISS`.
+6. **Merge and deploy the API PR.** The build log shows `check-migrations: all 3 tracked migrations are recorded` (2 if 13 was retired).
+7. **Verify BRAND-3:** `curl -sI "https://console-api.dimo.org/api/brand?clientId=<a branded license>"` twice: `cache-control: public, max-age=0, must-revalidate` (browsers keep nothing; the CDN's minute is in `Vercel-CDN-Cache-Control: max-age=60, stale-while-revalidate=300`, which Vercel may not pass on), `cf-cache-status: DYNAMIC`, second `x-vercel-cache: HIT`. Edit that brand in the console, then curl again: `x-vercel-cache: MISS`.
 8. **Merge and deploy the console PR.**
 9. **BRAND-1 cleanup** (master plan): delete QA Brand Two on #1254 and #1255 through the UI.
 10. **Sentry:** DEVELOPER-CONSOLE-HY stops growing; new server-side AxiosErrors arrive as separate issues per upstream route and status (expect a burst of new issues on day one; that is the regrouping, not new failures). DEVELOPER-CONSOLE-10 gets no events for existing accounts.

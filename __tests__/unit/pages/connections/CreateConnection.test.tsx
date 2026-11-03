@@ -281,6 +281,22 @@ describe('creating a connection', () => {
     expect(screen.queryByText(FINISH_LATER)).toBeNull();
   });
 
+  // A transport failure, or the proxy's 401 (seen here as an unexpected response),
+  // rejects instead of returning a refusal.
+  it('still shows why the mint was refused if removing the row throws', async () => {
+    mockMint.mockResolvedValue({ success: false, reason: 'Insufficient DIMO balance.' });
+    (deleteConnection as jest.Mock).mockRejectedValue(
+      new Error('An unexpected response was received from the server.'),
+    );
+    await renderPage('name=Fleet');
+
+    await buy();
+
+    expect(deleteConnection).toHaveBeenCalledWith('conn-1');
+    expect(screen.getByText('Insufficient DIMO balance.')).toBeInTheDocument();
+    expect(screen.queryByText(FINISH_LATER)).toBeNull();
+  });
+
   it('keeps the row when the mint throws: the transaction may have landed', async () => {
     mockMint.mockRejectedValue(new Error('bundler timed out'));
     await renderPage('name=Fleet');

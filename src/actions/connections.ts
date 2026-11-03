@@ -41,8 +41,8 @@ const connectionPath = (id: string) => `/api/my/connections/${encodeURIComponent
 export const createConnection = async (
   connectionData: CreateConnectionRequest,
 ): Promise<ApiResult<Connection>> => {
-  const client = await dimoDevAPIClient();
   try {
+    const client = await dimoDevAPIClient();
     const { data } = await client.post<Connection>('/api/my/connections', connectionData);
     return { ok: true, data };
   } catch (error) {
@@ -73,8 +73,8 @@ export const updateConnection = async (
 };
 
 export const deleteConnection = async (id: string): Promise<ApiResult<null>> => {
-  const client = await dimoDevAPIClient();
   try {
+    const client = await dimoDevAPIClient();
     await client.delete(connectionPath(id));
     return { ok: true, data: null };
   } catch (error) {

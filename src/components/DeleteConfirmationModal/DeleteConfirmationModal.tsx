@@ -31,8 +31,13 @@ export const DeleteConfirmationModal: FC<Props> = ({
     setIsLoading(true);
     try {
       await onConfirm();
-    } catch {
-      // The caller reports its own failure through `error`.
+    } catch (error: unknown) {
+      // The caller reports its own failure through `error`. Logged so a caller that
+      // forgets to isn't silent; only the name, since a message can carry anything.
+      console.error(
+        'Delete confirmation failed:',
+        error instanceof Error ? error.name : typeof error,
+      );
     } finally {
       setIsLoading(false);
     }

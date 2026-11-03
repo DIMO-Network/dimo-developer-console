@@ -256,12 +256,17 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
   // Only a refused mint on the first attempt deletes: nothing landed, and this row is
   // new. If the delete fails the row stays PENDING, and the list offers to finish it.
+  // A delete that throws (no answer, or the proxy's 401) must not reach runSetup, whose
+  // message would replace the refusal's.
   const removeRefusedConnection = async (id: string, reason: string) => {
     console.error('Connection minting failed', reason);
     setError(reason);
-    const removed = await deleteConnection(id);
-    if (!removed.ok) {
-      console.error('Removing the refused connection failed:', removed.status);
+    const removed = await deleteConnection(id).catch(() => null);
+    if (!removed?.ok) {
+      console.error(
+        'Removing the refused connection failed:',
+        removed?.status ?? 'threw',
+      );
       return;
     }
     await invalidateMyConnectionsQuery();

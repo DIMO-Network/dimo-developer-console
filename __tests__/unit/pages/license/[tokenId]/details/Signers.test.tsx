@@ -335,6 +335,69 @@ describe('Signers', () => {
     expect(upsertLicenseSigner).not.toHaveBeenCalled();
   });
 
+  // The turn-off transaction has confirmed but Identity still lists the key: Enable
+  // must send a transaction, not read the stale list and only re-mark the row.
+  it('sends a transaction when enabling right after turning access off', async () => {
+    mockTeam.members = [OWNER_ROW];
+    (markLicenseSignerDisabled as jest.Mock).mockResolvedValue({ ok: true, data: {} });
+    show([CONSOLE_KEY.toLowerCase()]);
+    await screen.findByText('Console (you)');
+    fireEvent.click(
+      await screen.findByRole('button', {
+        name: `Actions for ${CONSOLE_KEY.toLowerCase()}`,
+      }),
+    );
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Turn off console access' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() => expect(registry.refetch).toHaveBeenCalled());
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Enable console access' }));
+
+    await waitFor(() => expect(enableSigner).toHaveBeenCalledWith(CONSOLE_KEY));
+    expect(enableSigner).toHaveBeenCalledTimes(1);
+    expect(await screen.findByRole('button', { name: 'Copy JWT' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Enable console access' })).toBeNull();
+  });
+
+  it('records the console key row once the team members load after the registry', async () => {
+    mockTeam.members = [];
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const license = {
+      owner: OWNER,
+      clientId: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
+      tokenId: 42,
+      signers: {
+        nodes: [
+          { address: CONSOLE_KEY.toLowerCase(), enabledAt: '2026-09-01T00:00:00Z' },
+        ],
+      },
+      redirectURIs: { nodes: [{ uri: 'https://rentals.dimo.co/' }] },
+    } as never;
+    const page = () => (
+      <QueryClientProvider client={client}>
+        <Signers license={license} refetch={refetchLicense} />
+      </QueryClientProvider>
+    );
+    const view = render(page());
+    await screen.findByText('Console (you)');
+    await act(async () => {});
+    expect(upsertLicenseSigner).not.toHaveBeenCalled();
+
+    mockTeam.members = [OWNER_ROW];
+    view.rerender(page());
+    await waitFor(() => expect(upsertLicenseSigner).toHaveBeenCalledTimes(1));
+    expect(upsertLicenseSigner).toHaveBeenCalledWith(42, CONSOLE_KEY.toLowerCase(), {
+      kind: 'API_KEY',
+      note: 'Console',
+      holders: [{ userId: 'u-jane' }],
+    });
+
+    mockTeam.members = [{ ...OWNER_ROW }];
+    view.rerender(page());
+    await act(async () => {});
+    expect(upsertLicenseSigner).toHaveBeenCalledTimes(1);
+  });
+
   it('shows a failed enable on the card', async () => {
     enableSigner.mockRejectedValue({ code: 4001 });
     show();
@@ -657,6 +720,7 @@ describe('Signers', () => {
     openDelete();
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() => expect(refetchLicense).toHaveBeenCalled());
+    await waitFor(() => expect(registry.refetch).toHaveBeenCalled());
     await act(async () => {});
     // refetch resolved but the license still lists the key: stay hidden
     expect(screen.queryByRole('button', { name: `Actions for ${SIGNER}` })).toBeNull();
@@ -695,6 +759,7 @@ describe('Signers', () => {
     openDelete();
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() => expect(refetchLicense).toHaveBeenCalled());
+    await waitFor(() => expect(registry.refetch).toHaveBeenCalled());
     await act(async () => {});
     expect(screen.queryByRole('button', { name: `Actions for ${SIGNER}` })).toBeNull();
   });
@@ -717,6 +782,7 @@ describe('Signers', () => {
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith('Console access turned off.'),
     );
+    await waitFor(() => expect(registry.refetch).toHaveBeenCalled());
   });
 
   it('never covers the page with the loading modal', async () => {
@@ -726,7 +792,7 @@ describe('Signers', () => {
     openDelete();
     fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
     await waitFor(() => expect(markLicenseSignerDisabled).toHaveBeenCalled());
-    await act(async () => {});
+    await waitFor(() => expect(registry.refetch).toHaveBeenCalled());
     expect(mockSetLoadingStatus).not.toHaveBeenCalledWith(
       expect.objectContaining({ status: 'loading' }),
     );

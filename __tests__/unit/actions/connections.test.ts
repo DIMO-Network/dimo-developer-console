@@ -10,8 +10,9 @@ const mockCaptureException = jest.fn();
 jest.mock('@sentry/nextjs', () => ({
   captureException: (...args: unknown[]) => mockCaptureException(...args),
 }));
+const mockDimoDevAPIClient = jest.fn();
 jest.mock('@/services/dimoDevAPI', () => ({
-  dimoDevAPIClient: async () => mockClient,
+  dimoDevAPIClient: (...args: unknown[]) => mockDimoDevAPIClient(...args),
 }));
 import {
   createConnection,
@@ -30,6 +31,8 @@ const input = {
 };
 
 describe('connection actions', () => {
+  beforeEach(() => mockDimoDevAPIClient.mockResolvedValue(mockClient));
+
   it('create sends the status with the keys', async () => {
     mockClient.post.mockResolvedValue({ data: { id: 'conn-1' } });
 
@@ -115,6 +118,21 @@ describe('connection actions', () => {
       ok: false,
       status: 409,
       code: 'CONNECTION_NOT_PENDING',
+    });
+  });
+
+  // Building the client reads cookies; a failure there is a failure like any other,
+  // returned rather than thrown past the caller's handling.
+  it('create and delete return a failure when the client cannot be built', async () => {
+    mockDimoDevAPIClient.mockRejectedValue(new Error('cookies unavailable'));
+
+    await expect(createConnection(input)).resolves.toMatchObject({
+      ok: false,
+      status: 0,
+    });
+    await expect(deleteConnection('conn-1')).resolves.toMatchObject({
+      ok: false,
+      status: 0,
     });
   });
 
