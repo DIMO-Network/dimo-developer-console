@@ -105,9 +105,10 @@ describe('globalAccountSession', () => {
   });
 
   describe('clearSession', () => {
-    it('removes the session, the cached addresses and the old key', () => {
+    it('removes the session, the cached addresses, the signer proof mark and the old key', () => {
       mod.writeSession(session());
       localStorage.setItem(mod.RESOLVED_ACCOUNT_KEY, '{}');
+      localStorage.setItem(mod.SIGNER_PROOF_KEY, '{}');
       localStorage.setItem('GlobalAccountEmbeddedKey', '"k"');
       sessionStorage.setItem(mod.LEGACY_TAB_SESSION_KEY, '{}');
       mod.clearSession();
