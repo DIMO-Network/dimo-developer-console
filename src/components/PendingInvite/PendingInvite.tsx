@@ -5,8 +5,9 @@ import { toast } from 'sonner';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
-import { acceptPendingInvite, previewPendingInvite } from '@/actions/invites';
+import { acceptPendingInvite } from '@/actions/invites';
 import { useMixPanel } from '@/hooks/useMixPanel';
+import { fetchApiResult } from '@/utils/fetchApiResult';
 import { inviteErrorMessage } from '@/utils/inviteErrors';
 import type { InvitePreview, TeamSummary } from '@/types/team';
 
@@ -35,13 +36,16 @@ export const PendingInvite: FC<{ onJoined: (team: TeamSummary) => void }> = ({
   useEffect(() => {
     if (queryClient.getQueryData(NO_PENDING_INVITE)) return;
     void (async () => {
-      const result = await previewPendingInvite();
-      if (!result) {
+      const result = await fetchApiResult<InvitePreview | null>('/api/invites/pending');
+      if (!result.ok) {
+        explain(result.code, result.status);
+        return;
+      }
+      if (result.data === null) {
         queryClient.setQueryData(NO_PENDING_INVITE, true);
         return;
       }
-      if (result.ok) setPreview(result.data);
-      else explain(result.code, result.status);
+      setPreview(result.data);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

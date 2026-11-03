@@ -3,7 +3,7 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 
 jest.mock('@/components/PendingInvite', () => ({ PendingInvite: () => null }));
-jest.mock('@/actions/teams', () => ({ listMyTeams: jest.fn() }));
+jest.mock('@/utils/fetchApiResult', () => ({ fetchApiResult: jest.fn() }));
 jest.mock('@/utils/hardNavigate', () => ({ hardNavigate: jest.fn() }));
 jest.mock('@/hooks/useSignerRegistration', () => ({ useSignerRegistration: jest.fn() }));
 jest.mock('@/utils/devJwt', () => ({
@@ -19,7 +19,7 @@ jest.mock('@/hooks/useMixPanel', () => ({
 jest.mock('sonner', () => ({
   toast: Object.assign(jest.fn(), { success: jest.fn(), error: jest.fn() }),
 }));
-import { listMyTeams } from '@/actions/teams';
+import { fetchApiResult } from '@/utils/fetchApiResult';
 import { hardNavigate } from '@/utils/hardNavigate';
 import { toast } from 'sonner';
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
@@ -95,7 +95,7 @@ describe('TeamProvider', () => {
     document.cookie = 'active_team=; Path=/; Max-Age=0';
     sessionStorage.clear();
     localStorage.clear();
-    (listMyTeams as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: true,
       data: { teams: [PERSONAL, ACME] },
     });
@@ -130,7 +130,7 @@ describe('TeamProvider', () => {
     unmount();
     renderProvider(<Probe />, client);
     expect(probe()).toMatchObject({ loading: false, active: 'team-harness' });
-    expect(listMyTeams).toHaveBeenCalledTimes(1);
+    expect(fetchApiResult).toHaveBeenCalledTimes(1);
   });
 
   it('reloads when another tab switched team, even on the personal team', async () => {
@@ -141,7 +141,7 @@ describe('TeamProvider', () => {
       window.dispatchEvent(new Event('focus'));
     });
     expect(hardNavigate).toHaveBeenCalledWith('/app');
-    expect(listMyTeams).toHaveBeenCalledTimes(1);
+    expect(fetchApiResult).toHaveBeenCalledTimes(1);
   });
 
   it('reports a removal, with the team name, when the cookie was cleared while away', async () => {
@@ -149,7 +149,7 @@ describe('TeamProvider', () => {
     renderProvider();
     await waitFor(() => expect(probe().active).toBe('team-acme'));
     document.cookie = 'active_team=; Path=/; Max-Age=0';
-    (listMyTeams as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: true,
       data: { teams: [PERSONAL] },
     });
@@ -175,7 +175,7 @@ describe('TeamProvider', () => {
   });
 
   it('remembers for a minute that teams could not load, so remounts start on the fallback', async () => {
-    (listMyTeams as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: false,
       status: 502,
       code: null,
@@ -187,7 +187,7 @@ describe('TeamProvider', () => {
     unmount();
     renderProvider(<Probe />, client);
     expect(probe()).toMatchObject({ loading: false, active: 'personal-fallback' });
-    expect(listMyTeams).toHaveBeenCalledTimes(1);
+    expect(fetchApiResult).toHaveBeenCalledTimes(1);
     expect(toast.error).toHaveBeenCalledTimes(1);
   });
 
@@ -218,7 +218,7 @@ describe('TeamProvider', () => {
   });
 
   it('treats a user with no team as the owner of their own wallet, without a toast', async () => {
-    (listMyTeams as jest.Mock).mockResolvedValue({ ok: true, data: { teams: [] } });
+    (fetchApiResult as jest.Mock).mockResolvedValue({ ok: true, data: { teams: [] } });
     renderProvider();
     await waitFor(() => expect(probe().loading).toBe(false));
     expect(probe()).toMatchObject({
@@ -231,7 +231,7 @@ describe('TeamProvider', () => {
   });
 
   it('is not an owner while the active team has no owner wallet', async () => {
-    (listMyTeams as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: true,
       data: { teams: [{ ...PERSONAL, ownerAddress: null }] },
     });
@@ -243,7 +243,7 @@ describe('TeamProvider', () => {
   // A rejected Server Action, not { ok: false }: the network or a deploy. Nothing
   // caught it, so isLoading stayed true and license lists waited forever.
   it('falls back the same way when the teams request never answers', async () => {
-    (listMyTeams as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));
+    (fetchApiResult as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));
     renderProvider();
     await waitFor(() => expect(probe().loading).toBe(false));
     expect(probe()).toMatchObject({
@@ -258,7 +258,7 @@ describe('TeamProvider', () => {
 
   it('keeps owners working when teams cannot load', async () => {
     document.cookie = 'active_team=team-acme; Path=/';
-    (listMyTeams as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: false,
       status: 502,
       code: null,
@@ -302,7 +302,7 @@ describe('TeamProvider', () => {
     document.cookie = 'active_team=team-acme; Path=/';
     renderProvider();
     await waitFor(() => expect(probe().active).toBe('team-acme'));
-    (listMyTeams as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: true,
       data: { teams: [PERSONAL] },
     });

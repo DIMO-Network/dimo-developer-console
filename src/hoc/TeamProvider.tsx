@@ -10,7 +10,7 @@ import React, {
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { TeamContext, type Flash } from '@/context/TeamContext';
-import { listMyTeams } from '@/actions/teams';
+import { fetchApiResult } from '@/utils/fetchApiResult';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { useSignerRegistration } from '@/hooks/useSignerRegistration';
@@ -115,7 +115,7 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
 
   const fetchTeams = useCallback(async (): Promise<TeamSummary[] | null> => {
     try {
-      const result = await listMyTeams();
+      const result = await fetchApiResult<{ teams: TeamSummary[] }>('/api/teams');
       if (!result.ok) return null;
       queryClient.setQueryData(MY_TEAMS_KEY, result.data.teams);
       return result.data.teams;

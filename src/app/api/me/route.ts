@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 
-// Per-user data: never stored by Vercel, Cloudflare or the browser.
-const PRIVATE = { 'Cache-Control': 'private, no-store' };
 import { AxiosError } from 'axios';
 import { getUserByToken } from '@/services/user';
+import { PRIVATE_HEADERS } from '@/utils/routeResponses';
 
 // The signed-in user, for useUser. It used to be the getUser server action, but
 // Next runs server actions one at a time, and the header asks for the user on
@@ -11,12 +10,12 @@ import { getUserByToken } from '@/services/user';
 // alongside them.
 export const GET = async () => {
   try {
-    return NextResponse.json(await getUserByToken(), { headers: PRIVATE });
+    return NextResponse.json(await getUserByToken(), { headers: PRIVATE_HEADERS });
   } catch (error) {
     const status = error instanceof AxiosError ? (error.response?.status ?? 502) : 500;
     return NextResponse.json(
       { message: 'Could not load the user' },
-      { status, headers: PRIVATE },
+      { status, headers: PRIVATE_HEADERS },
     );
   }
 };

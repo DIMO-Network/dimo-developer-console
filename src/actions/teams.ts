@@ -7,8 +7,6 @@ import type { LicenseSignerInput, SignerProofInput } from '@/types/team';
 // console-api call goes through here with the session cookie and X-Team-Id.
 // Invite preview and acceptance live in @/actions/invites (they read the
 // HttpOnly invite cookie).
-export const listMyTeams = async () => api.fetchMyTeams();
-export const listTeamMembers = async () => api.fetchTeamMembers();
 export const inviteTeamMember = async (email: string) => api.postInvitation(email);
 export const resendTeamInvite = async (inviteId: string) =>
   api.postResendInvitation(inviteId);
