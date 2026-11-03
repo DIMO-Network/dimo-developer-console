@@ -10,6 +10,9 @@ jest.mock('@/actions/configurations', () => ({
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
+jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
+jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
+import { toast } from 'sonner';
 
 const mockConfigs = [
   { id: 'abc123', configuration_name: 'My Config', entry_state: 'VEHICLE_MANAGER' },
@@ -40,6 +43,31 @@ describe('ConfigurationList', () => {
     await waitFor(() => {
       expect(screen.getByText(/no configurations yet/i)).toBeInTheDocument();
     });
+  });
+
+  it('never reads a failed load as a license with no configurations', async () => {
+    (configurationsActions.getConfigurationsByClientId as jest.Mock).mockRejectedValue(
+      new Error('console-api is down'),
+    );
+    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Could not load configurations',
+    );
+    expect(screen.queryByText(/no configurations yet/i)).not.toBeInTheDocument();
+  });
+
+  it('says so when a delete fails, and keeps the row', async () => {
+    (configurationsActions.deleteConfiguration as jest.Mock).mockRejectedValue(
+      new Error('403'),
+    );
+    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    await screen.findByText('My Config');
+    fireEvent.click(screen.getAllByRole('button', { name: /delete/i })[0]);
+    fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith('Failed to delete the configuration'),
+    );
+    expect(screen.getByText('My Config')).toBeInTheDocument();
   });
 
   it('shows confirm UI when delete is clicked', async () => {

@@ -1,6 +1,7 @@
 'use client';
 import { FC, type ReactNode } from 'react';
 import { Button } from '@/components/Button';
+import { Anchor } from '@/components/Anchor';
 import { GenerateDevJWT } from '@/components/GenerateDevJWT';
 import { ConnectWalletButton } from '@/components/DataAccess/ConnectWalletButton';
 import {
@@ -67,6 +68,17 @@ export const AccessNotice: FC<Props> = ({
       );
     case 'removed':
       return <Card title={NO_LONGER_HAS_ACCESS} />;
+    case 'session-expired':
+      return (
+        <Card title="Your session has expired">
+          <p className="max-w-xl text-body-sm text-muted">
+            Sign in again to keep reading this vehicle.
+          </p>
+          <Anchor href="/sign-in" className="underline">
+            Sign in
+          </Anchor>
+        </Card>
+      );
     case 'reconnect':
       return (
         <Card title={`Reconnect to ${licenseLabel}`}>

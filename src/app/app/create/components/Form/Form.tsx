@@ -15,6 +15,7 @@ import { TextField } from '@/components/TextField';
 import { useGlobalAccount, usePayLicenseFee, useMintLicense, useMixPanel } from '@/hooks';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import configuration from '@/config';
+import { isLicenseAliasTooLong, LICENSE_ALIAS_TOO_LONG } from '@/utils/licenseAlias';
 
 import './Form.css';
 
@@ -111,10 +112,8 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
           placeholder="My project"
           {...register('workspace.name', {
             required: 'This field is required',
-            maxLength: {
-              value: 32,
-              message: 'The name should has maximum 32 characters',
-            },
+            validate: (name = '') =>
+              !isLicenseAliasTooLong(name) || LICENSE_ALIAS_TOO_LONG,
           })}
           role="namespace-input"
         />

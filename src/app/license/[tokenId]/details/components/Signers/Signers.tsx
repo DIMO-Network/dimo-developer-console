@@ -447,7 +447,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
 
   // Check if current wallet address is listed in the signers
   const isSigner = (owner: `0x${string}`) => {
-    return fragment.signers.nodes.some((signer) => signer.address === owner);
+    return fragment.signers.nodes.some(
+      (signer) => signer.address.toLowerCase() === owner.toLowerCase(),
+    );
   };
 
   const handleOwnerSigner = async () => {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import * as Sentry from '@sentry/nextjs';
 import {
   getConfigurationsByClientId,
   deleteConfiguration,
@@ -16,6 +17,8 @@ import { configurationLink } from '@/app/license/[tokenId]/configurator/utils/co
 interface Props {
   clientId: string;
   tokenId: number;
+  /** The license's on-chain owner: the only team owner who may change it. */
+  owner?: string;
 }
 
 const entryStateLabel = (entryState: string): string => {
@@ -31,15 +34,21 @@ const entryStateLabel = (entryState: string): string => {
   }
 };
 
-export const ConfigurationList = ({ clientId, tokenId }: Props) => {
+export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
   const router = useRouter();
   // null until the first load, so "No configurations yet" isn't shown early.
   const [configs, setConfigs] = useState<IConfigurationListItem[] | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const load = async () => {
-    const data = await getConfigurationsByClientId({ client_id: clientId });
-    setConfigs(data);
+    try {
+      setConfigs(await getConfigurationsByClientId({ client_id: clientId }));
+      setLoadFailed(false);
+    } catch (error) {
+      Sentry.captureException(error);
+      setLoadFailed(true);
+    }
   };
 
   useEffect(() => {
@@ -47,10 +56,24 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
   }, [clientId]);
 
   const handleDelete = async (id: string) => {
-    await deleteConfiguration({ id });
+    try {
+      await deleteConfiguration({ id });
+    } catch (error) {
+      Sentry.captureException(error);
+      toast.error('Failed to delete the configuration');
+      return;
+    }
     setPendingDeleteId(null);
     await load();
   };
+
+  if (loadFailed) {
+    return (
+      <p role="alert" className="py-12 text-center text-body-sm text-negative">
+        Could not load configurations. Reload to try again.
+      </p>
+    );
+  }
 
   if (configs === null) {
     return <p className="py-12 text-center text-body-sm text-muted">Loading…</p>;
@@ -60,7 +83,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted">
         <p className="mb-4">No configurations yet.</p>
-        <OwnerAction>
+        <OwnerAction licenseOwner={owner}>
           <Button onClick={() => router.push(`/license/${tokenId}/configurator/new`)}>
             Create your first configuration
           </Button>
@@ -101,7 +124,7 @@ export const ConfigurationList = ({ clientId, tokenId }: Props) => {
           >
             Copy link
           </Button>
-          <OwnerAction>
+          <OwnerAction licenseOwner={owner}>
             <Button
               variant="destructive-ghost"
               onClick={() => setPendingDeleteId(config.id)}

@@ -13,6 +13,8 @@ import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { Title } from '@/components/Title';
 import { useContractGA } from '@/hooks';
+import { isLicenseAliasTooLong, LICENSE_ALIAS_TOO_LONG } from '@/utils/licenseAlias';
+import { assertUserOperation } from '@/utils/userOperation';
 
 import configuration from '@/config';
 import DimoLicenseContract from '@/contracts/DimoLicenseContract.json';
@@ -69,7 +71,9 @@ export const WorkspaceNameModal: FC<IProps> = ({
         args: [license.tokenId, licenseAlias],
       }),
     };
-    await processTransactions([transaction], { abi: DimoLicenseContract as Abi });
+    assertUserOperation(
+      await processTransactions([transaction], { abi: DimoLicenseContract as Abi }),
+    );
   };
 
   const onSubmit = async (data: IFormInputs) => {
@@ -115,10 +119,8 @@ export const WorkspaceNameModal: FC<IProps> = ({
               <TextField
                 {...register('workspaceName', {
                   required: 'Developer license name is required',
-                  maxLength: {
-                    value: 100,
-                    message: 'Name cannot exceed 100 characters',
-                  },
+                  validate: (name) =>
+                    !isLicenseAliasTooLong(name) || LICENSE_ALIAS_TOO_LONG,
                 })}
                 id="workspaceName"
                 placeholder="Enter developer license name"

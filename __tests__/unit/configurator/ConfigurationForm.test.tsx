@@ -11,7 +11,9 @@ jest.mock('@/actions/brand', () => ({ fetchMyBrands: jest.fn().mockResolvedValue
 jest.mock('@/actions/workspace', () => ({
   getWorkspaceByTokenId: jest.fn().mockResolvedValue(null),
 }));
-jest.mock('@/hooks/useTeam', () => ({ useTeam: () => ({ isOwner: true }) }));
+jest.mock('@/hooks/useTeam', () => ({
+  useTeam: () => ({ isOwner: true, ownerAddress: '0x1' }),
+}));
 jest.mock('react-syntax-highlighter', () => ({
   Prism: ({ children }: { children: string }) => <pre>{children}</pre>,
 }));
@@ -31,7 +33,11 @@ const nextWeek = () => {
   return date.toISOString();
 };
 
-const renderForm = (values: Partial<DynamicFormProps>, submit = jest.fn()) => {
+const renderForm = (
+  values: Partial<DynamicFormProps>,
+  submit = jest.fn(),
+  forLicense: typeof license = license,
+) => {
   const Form = () => {
     const methods = useForm<DynamicFormProps>({
       defaultValues: {
@@ -44,7 +50,7 @@ const renderForm = (values: Partial<DynamicFormProps>, submit = jest.fn()) => {
     });
     return (
       <FormProvider {...methods}>
-        <ConfigurationForm license={license as never} submit={submit} />
+        <ConfigurationForm license={forLicense as never} submit={submit} />
       </FormProvider>
     );
   };
@@ -55,6 +61,14 @@ const renderForm = (values: Partial<DynamicFormProps>, submit = jest.fn()) => {
 const save = () => fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
 describe('ConfigurationForm', () => {
+  it('offers no Save on a license another wallet owns', () => {
+    renderForm({}, jest.fn(), { ...license, owner: '0x2' });
+    expect(screen.queryByRole('button', { name: 'Save' })).toBeNull();
+    expect(
+      screen.getByText('Only the team owner can change configurations.'),
+    ).toBeInTheDocument();
+  });
+
   it('needs a template ID for a template share', async () => {
     const submit = renderForm({
       component: 'ShareVehiclesWithDimo',

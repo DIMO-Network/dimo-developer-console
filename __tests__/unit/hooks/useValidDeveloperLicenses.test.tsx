@@ -43,6 +43,14 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('useValidDeveloperLicenses', () => {
+  it('reports a license left out for having no redirect URI', async () => {
+    (useTeam as jest.Mock).mockReturnValue({ ownerAddress: ACME });
+    const { result } = renderHook(() => useValidDeveloperLicenses(), { wrapper });
+    expect(result.current.hasLicenseWithoutRedirectUri).toBe(false);
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.hasLicenseWithoutRedirectUri).toBe(true);
+  });
+
   it("queries the active team owner's licenses", async () => {
     (useTeam as jest.Mock).mockReturnValue({ ownerAddress: ACME });
     const { result } = renderHook(() => useValidDeveloperLicenses(), { wrapper });

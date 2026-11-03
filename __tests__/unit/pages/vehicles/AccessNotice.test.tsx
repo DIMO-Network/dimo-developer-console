@@ -55,6 +55,26 @@ describe('AccessNotice', () => {
     ).toBeInTheDocument();
   });
 
+  it('says the session expired and links to sign-in', () => {
+    render(<AccessNotice {...base} access="session-expired" />);
+    expect(
+      screen.getByRole('heading', { name: 'Your session has expired' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute(
+      'href',
+      '/sign-in',
+    );
+    expect(
+      screen.queryByRole('button', { name: 'Generate developer JWT' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not say the session expired when the developer JWT did', () => {
+    render(<AccessNotice {...base} access="jwt-expired" />);
+    expect(screen.queryByText('Your session has expired')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument();
+  });
+
   it('shows an error with a retry for an unknown answer', () => {
     render(<AccessNotice {...base} access="error" />);
     expect(

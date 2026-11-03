@@ -75,7 +75,7 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
       </nav>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <PageSubtitle subtitle="Login with DIMO configurator" />
-        <OwnerAction>
+        <OwnerAction licenseOwner={fragment?.owner}>
           <Button
             variant="primary"
             className="shrink-0 whitespace-nowrap px-4"
@@ -98,7 +98,11 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
         </a>
       </p>
       {fragment?.clientId && tokenId && (
-        <ConfigurationList clientId={fragment.clientId} tokenId={tokenId} />
+        <ConfigurationList
+          clientId={fragment.clientId}
+          tokenId={tokenId}
+          owner={fragment.owner}
+        />
       )}
     </div>
   );

@@ -114,10 +114,15 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
   );
 
   const fetchTeams = useCallback(async (): Promise<TeamSummary[] | null> => {
-    const result = await listMyTeams();
-    if (!result.ok) return null;
-    queryClient.setQueryData(MY_TEAMS_KEY, result.data.teams);
-    return result.data.teams;
+    try {
+      const result = await listMyTeams();
+      if (!result.ok) return null;
+      queryClient.setQueryData(MY_TEAMS_KEY, result.data.teams);
+      return result.data.teams;
+    } catch {
+      // The action itself failed (the network, a deploy): same as no list.
+      return null;
+    }
   }, [queryClient]);
 
   const switchTeam = useCallback(

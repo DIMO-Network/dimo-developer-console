@@ -152,6 +152,10 @@ const validatePublicSession = async (request: NextRequest, token: JWTPayload | n
   if (isAPIProtected && isAPI) {
     return NextResponse.json(
       {
+        // `error` and `code` are what the data panels read to say the session
+        // ended; `message` stays for callers that already read it.
+        error: 'Your session has expired',
+        code: 'SESSION_EXPIRED',
         message: 'Unauthorized Access',
       },
       { status: 401 },

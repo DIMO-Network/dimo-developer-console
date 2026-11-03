@@ -1,4 +1,5 @@
 'use client';
+import { mintNotice, removalNotice } from './notices';
 import { FC, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Abi } from 'viem';
@@ -17,7 +18,12 @@ import { BubbleLoader } from '@/components/BubbleLoader';
 import { getPublicClient } from '@/services/zerodev';
 import DimoVehicleIdABI from '@/contracts/DimoVehicleIdABI.json';
 import configuration from '@/config';
-import { MAKES, VehicleMake, buildDeviceDefinitionId } from './constants';
+import {
+  MAKES,
+  SIMULATOR_GRANTEE,
+  VehicleMake,
+  buildDeviceDefinitionId,
+} from './constants';
 import './VehicleSimulator.css';
 
 const MAX_TEST_VEHICLES = 1;
@@ -145,7 +151,8 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
       console.log('[VehicleSimulator] Vehicle removed', { vehicleId, tokenId });
-      toast.success('Vehicle removed successfully');
+      const removal = removalNotice(burnResult.success);
+      toast[removal.tone](removal.message);
     } catch (e) {
       console.error('[VehicleSimulator] Delete error', e);
       toast.error(e instanceof Error ? e.message : 'Failed to remove vehicle');
@@ -185,7 +192,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         model: modelLabel,
         year: Number(selectedYear),
         powertrainType: selectedModel!.powertrainType,
-        sacdGrantee: '0x299671D2b32ED62Cc61ce65D8f2b9e4f78486B37',
+        sacdGrantees: [SIMULATOR_GRANTEE, clientId],
       });
 
       console.log('[VehicleSimulator] mintVehicle result', result);
@@ -226,7 +233,16 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       });
 
       if (!recordResult.success) {
+        // Without the record there's no row to remove the vehicle from later.
         console.warn('[VehicleSimulator] Failed to record vehicle', recordResult);
+        const notice = mintNotice({
+          tokenId: result.tokenId,
+          recorded: false,
+          registered: false,
+          shared: !result.sacdFailed,
+        });
+        toast[notice.tone](notice.message);
+        return;
       }
 
       console.log('[VehicleSimulator] Registering vehicle with simulator', {
@@ -248,7 +264,13 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
 
       console.log('[VehicleSimulator] Mint complete — tokenId', result.tokenId);
-      toast.success('Vehicle minted successfully!');
+      const notice = mintNotice({
+        tokenId: result.tokenId,
+        recorded: true,
+        registered: registration.status !== 'registration_failed',
+        shared: !result.sacdFailed,
+      });
+      toast[notice.tone](notice.message);
     } catch (e) {
       console.error('[VehicleSimulator] Mint error', e);
       toast.error(

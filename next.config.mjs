@@ -18,12 +18,17 @@ const cspHeader = `
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  serverActions: {
-    // Next.js 15 validates Origin against Host. Vercel's edge can rewrite Host
-    // to the internal deployment URL while the browser sends the custom domain
-    // as Origin — causing a 403 on all server action POSTs. Allowlist both
-    // domains so the check passes regardless of which Host the lambda sees.
-    allowedOrigins: ['console.dimo.org', 'console-staging.dimo.org'],
+  experimental: {
+    serverActions: {
+      // Next.js 15 validates Origin against Host. Vercel's edge can rewrite Host
+      // to the internal deployment URL while the browser sends the custom domain
+      // as Origin — causing a 403 on all server action POSTs. Allowlist both
+      // domains so the check passes regardless of which Host the lambda sees.
+      allowedOrigins: ['console.dimo.org', 'console-staging.dimo.org'],
+      // Brand images go through a Server Action: up to BRAND_IMAGE_MAX_BYTES (2 MB)
+      // plus multipart overhead. Next's default is 1 MB.
+      bodySizeLimit: '3mb',
+    },
   },
   transpilePackages: ['@dimo-network/data-sdk'],
   env: {

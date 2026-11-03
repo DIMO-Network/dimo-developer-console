@@ -240,6 +240,22 @@ describe('TeamProvider', () => {
     expect(probe()).toMatchObject({ active: 'team-harness', isOwner: false });
   });
 
+  // A rejected Server Action, not { ok: false }: the network or a deploy. Nothing
+  // caught it, so isLoading stayed true and license lists waited forever.
+  it('falls back the same way when the teams request never answers', async () => {
+    (listMyTeams as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));
+    renderProvider();
+    await waitFor(() => expect(probe().loading).toBe(false));
+    expect(probe()).toMatchObject({
+      active: 'personal-fallback',
+      isOwner: true,
+      unavailable: true,
+    });
+    expect(toast.error).toHaveBeenCalledWith(
+      "Couldn't load your teams. Showing your own licenses for now.",
+    );
+  });
+
   it('keeps owners working when teams cannot load', async () => {
     document.cookie = 'active_team=team-acme; Path=/';
     (listMyTeams as jest.Mock).mockResolvedValue({

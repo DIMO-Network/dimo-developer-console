@@ -158,12 +158,18 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
                 type="text"
                 placeholder="I'm building a..."
                 {...register('buildForText', {
-                  required: buildFor === buildForValues.somethingElse,
+                  required:
+                    buildFor === buildForValues.somethingElse && 'This field is required',
+                  maxLength: { value: 150, message: 'Use at most 150 characters' },
                 })}
                 role="build-for-something-else-input"
               />
             </Label>
-            {errors.buildForText && <TextError errorMessage="This field is required" />}
+            {errors.buildForText && (
+              <TextError
+                errorMessage={errors.buildForText.message || 'This field is required'}
+              />
+            )}
           </Card>
           <div className="flex flex-col items-center">
             {isDirty && !buildFor && !buildForText && (

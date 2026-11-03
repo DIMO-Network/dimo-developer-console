@@ -273,6 +273,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
         />
 
         <OwnerAction
+          licenseOwner={fragment.owner}
           fallback={
             <p className="text-body-sm text-muted">
               Only the team owner can change configurations.

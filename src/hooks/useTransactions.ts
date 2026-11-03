@@ -51,7 +51,7 @@ export const useSetRedirectUri = (tokenId: number) => {
           }),
         },
       ];
-      await processTransactions(transaction);
+      assertUserOperation(await processTransactions(transaction));
     },
     [processTransactions, tokenId, validateCurrentSession],
   );
@@ -186,7 +186,7 @@ export const usePayLicenseFee = () => {
     }
     transactions.push(...(await prepareIssueInDC(desiredTokenAmount, enoughBalance)));
     if (transactions.length) {
-      await processTransactions(transactions);
+      assertUserOperation(await processTransactions(transactions));
     }
     return { success: true };
   }, [checkEnoughBalance, getDesiredTokenAmount, mintDCX, processTransactions]);
@@ -196,7 +196,7 @@ export const useMintLicense = () => {
   const { processTransactions } = useContractGA();
   return useCallback(
     async (licenseName: string) => {
-      return processTransactions(
+      const result = await processTransactions(
         [
           {
             to: configuration.DLC_ADDRESS,
@@ -210,6 +210,8 @@ export const useMintLicense = () => {
         ],
         { abi: DimoLicenseABI as Abi },
       );
+      assertUserOperation(result);
+      return result;
     },
     [processTransactions],
   );
@@ -218,24 +220,28 @@ export const useMintLicense = () => {
 export type MintConnectionStep =
   'minting' | 'signing-agreements' | 'granting-permissions';
 
-export interface MintConnectionParams {
-  connectionName: string;
+export type MintConnectionResult =
+  | { success: true; connectionId: bigint }
+  // nameInUse: `reason` advises another name, which only helps where one can be chosen.
+  | { success: false; reason: string; nameInUse?: boolean };
+
+export interface GrantConnectionParams {
+  connectionId: bigint;
   licenseGrantee: `0x${string}`;
   deviceIssuanceGrantee: `0x${string}`;
   onStep?: (step: MintConnectionStep) => void;
 }
 
+// Two steps, so a caller can record the mint before granting: the connection costs
+// real DIMO, and whatever fails after the mint has to be finishable later.
 export const useMintConnection = () => {
-  const { validateCurrentSession, currentUser } = useGlobalAccount();
-  const { checkEnoughBalance, processTransactions } = useContractGA();
+  const { validateCurrentSession, currentUser, getCurrentDimoBalance } =
+    useGlobalAccount();
+  const { processTransactions } = useContractGA();
   const { signAndUploadPermissionSACD } = useSACD();
-  return useCallback(
-    async ({
-      connectionName,
-      licenseGrantee,
-      deviceIssuanceGrantee,
-      onStep,
-    }: MintConnectionParams) => {
+
+  const mint = useCallback(
+    async (connectionName: string): Promise<MintConnectionResult> => {
       const nameBytes = new TextEncoder().encode(connectionName).length;
       if (nameBytes > 32) {
         return {
@@ -246,7 +252,6 @@ export const useMintConnection = () => {
       }
 
       const currentSession = await validateCurrentSession();
-      const enoughBalance = await checkEnoughBalance();
 
       // Get current DIMO price and calculate required tokens for $1 USD
       const dimoPrice = await getCurrentDimoPrice();
@@ -261,7 +266,18 @@ export const useMintConnection = () => {
 
       if (!currentSession) throw new Error('Web3 connection failed');
       if (!currentUser) throw new Error('User not found');
-      if (!enoughBalance.dimo) {
+
+      let dimoBalance: number;
+      try {
+        dimoBalance = await getCurrentDimoBalance();
+      } catch (error: unknown) {
+        console.error('[useMintConnection] could not read the DIMO balance', error);
+        return {
+          success: false,
+          reason: "Couldn't check your DIMO balance. Try again.",
+        };
+      }
+      if (dimoBalance < requiredDIMO) {
         return {
           success: false,
           reason: `Insufficient DIMO balance. You need at least ${requiredDIMO.toFixed(2)} DIMO tokens (approximately $${targetUsdAmount}) to mint a connection.`,
@@ -302,10 +318,10 @@ export const useMintConnection = () => {
       ];
 
       try {
-        onStep?.('minting');
         const result = await processTransactions(transactions, {
           abi: DimoConnectionABI as Abi,
         });
+        assertUserOperation(result);
 
         // Pull connectionId out of the ConnectionMinted event so we can grant
         // permissions to the generated keys. Token IDs are full uint256 — keep
@@ -328,28 +344,80 @@ export const useMintConnection = () => {
           'uint256',
         ) as bigint;
 
-        const asset = configuration.DCC_ADDRESS;
-        const grantor = currentUser.smartContractAddress;
+        return { success: true, connectionId };
+      } catch (error: unknown) {
+        const errorMessage =
+          (error as Error)?.message || (error as Error)?.toString() || 'Unknown error';
 
-        onStep?.('signing-agreements');
-        const [deviceIssuanceSource, licenseSource] = await Promise.all([
-          signAndUploadPermissionSACD({
-            grantee: deviceIssuanceGrantee,
-            grantor,
-            asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
-            expiration: CONNECTION_SACD_EXPIRATION,
-            permissionNames: ['MintSD'],
-          }),
-          signAndUploadPermissionSACD({
-            grantee: licenseGrantee,
-            grantor,
-            asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
-            expiration: CONNECTION_SACD_EXPIRATION,
-            permissionNames: ['GenerateCertificate'],
-          }),
-        ]);
+        if (
+          errorMessage.includes('ERC20: transfer amount exceeds balance') ||
+          errorMessage.includes('transfer amount exceeds balance') ||
+          errorMessage.includes('insufficient balance')
+        ) {
+          return {
+            success: false,
+            reason: 'You do not have enough $DIMO to mint a connection.',
+          };
+        }
 
-        onStep?.('granting-permissions');
+        if (
+          errorMessage.includes('NameAlreadyInUse') ||
+          errorMessage.includes('name already in use')
+        ) {
+          return {
+            success: false,
+            nameInUse: true,
+            reason:
+              'This connection name is already taken. Please choose a different name and try again.',
+          };
+        }
+
+        if (errorMessage.includes('NameInvalidLength')) {
+          return {
+            success: false,
+            reason:
+              'Connection name is too long. Please use a name that is 32 characters or fewer.',
+          };
+        }
+
+        throw error;
+      }
+    },
+    [currentUser, getCurrentDimoBalance, processTransactions, validateCurrentSession],
+  );
+
+  const grant = useCallback(
+    async ({
+      connectionId,
+      licenseGrantee,
+      deviceIssuanceGrantee,
+      onStep,
+    }: GrantConnectionParams): Promise<void> => {
+      if (!currentUser) throw new Error('User not found');
+
+      const asset = configuration.DCC_ADDRESS;
+      const grantor = currentUser.smartContractAddress;
+
+      onStep?.('signing-agreements');
+      const [deviceIssuanceSource, licenseSource] = await Promise.all([
+        signAndUploadPermissionSACD({
+          grantee: deviceIssuanceGrantee,
+          grantor,
+          asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
+          expiration: CONNECTION_SACD_EXPIRATION,
+          permissionNames: ['MintSD'],
+        }),
+        signAndUploadPermissionSACD({
+          grantee: licenseGrantee,
+          grantor,
+          asset: `did:erc721:${Number(configuration.CONTRACT_NETWORK)}:${asset}:${connectionId.toString()}`,
+          expiration: CONNECTION_SACD_EXPIRATION,
+          permissionNames: ['GenerateCertificate'],
+        }),
+      ]);
+
+      onStep?.('granting-permissions');
+      assertUserOperation(
         await processTransactions(
           [
             {
@@ -386,52 +454,11 @@ export const useMintConnection = () => {
             },
           ],
           { abi: SacdABI as Abi },
-        );
-
-        return { ...result, connectionId };
-      } catch (error: unknown) {
-        const errorMessage =
-          (error as Error)?.message || (error as Error)?.toString() || 'Unknown error';
-
-        if (
-          errorMessage.includes('ERC20: transfer amount exceeds balance') ||
-          errorMessage.includes('transfer amount exceeds balance') ||
-          errorMessage.includes('insufficient balance')
-        ) {
-          return {
-            success: false,
-            reason: 'You do not have enough $DIMO to mint a connection.',
-          };
-        }
-
-        if (
-          errorMessage.includes('NameAlreadyInUse') ||
-          errorMessage.includes('name already in use')
-        ) {
-          return {
-            success: false,
-            reason:
-              'This connection name is already taken. Please choose a different name and try again.',
-          };
-        }
-
-        if (errorMessage.includes('NameInvalidLength')) {
-          return {
-            success: false,
-            reason:
-              'Connection name is too long. Please use a name that is 32 characters or fewer.',
-          };
-        }
-
-        throw error;
-      }
+        ),
+      );
     },
-    [
-      checkEnoughBalance,
-      currentUser,
-      processTransactions,
-      signAndUploadPermissionSACD,
-      validateCurrentSession,
-    ],
+    [currentUser, processTransactions, signAndUploadPermissionSACD],
   );
+
+  return { mint, grant };
 };

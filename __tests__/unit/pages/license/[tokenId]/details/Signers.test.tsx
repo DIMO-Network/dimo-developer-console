@@ -4,14 +4,19 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 const enableSigner = jest.fn(async () => {});
 const disableSigner = jest.fn(async () => {});
 const trackEvent = jest.fn();
+const mockOwnerKey = {
+  hasPrivateKey: false,
+  privateKeyAddress: null as string | null,
+};
+const mockPublishEvent = jest.fn();
 // The @/hooks barrel pulls Turnkey and ZeroDev; Signers only needs these.
 jest.mock('@/hooks', () => ({
   useDimoAuth: () => ({
-    hasGlobalAccountPrivateKey: async () => ({ hasPrivateKey: false }),
+    hasGlobalAccountPrivateKey: async () => mockOwnerKey,
   }),
   useDisableSigner: () => disableSigner,
   useEnableSigner: () => enableSigner,
-  useEventEmitter: () => ({ publishEvent: jest.fn() }),
+  useEventEmitter: () => ({ publishEvent: mockPublishEvent }),
   useGlobalAccount: () => ({
     currentUser: {
       smartContractAddress: '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d',
@@ -116,8 +121,20 @@ describe('Signers', () => {
     mockTeam.members = [SAM_ROW];
     (useIsLicenseOwner as jest.Mock).mockReturnValue(true);
     (upsertLicenseSigner as jest.Mock).mockReset();
+    mockOwnerKey.hasPrivateKey = false;
+    mockOwnerKey.privateKeyAddress = null;
   });
   afterEach(() => jest.useRealTimers());
+
+  // Opening the Config tab enables the owner's console key when it's missing, and
+  // every enable is a transaction. Identity checksums addresses; Turnkey need not.
+  it('does not re-enable an owner key listed in another letter case', async () => {
+    mockOwnerKey.hasPrivateKey = true;
+    mockOwnerKey.privateKeyAddress = SIGNER.toLowerCase();
+    show([SIGNER]);
+    await waitFor(() => expect(mockPublishEvent).toHaveBeenCalled());
+    expect(enableSigner).not.toHaveBeenCalled();
+  });
 
   it('asks who a new key is for, shows it once enabled, and offers Assign with the holders filled in', async () => {
     (upsertLicenseSigner as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));

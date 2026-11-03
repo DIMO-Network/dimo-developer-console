@@ -16,7 +16,7 @@ import { ACTIVE_TEAM_COOKIE, INVITE_TOKEN_COOKIE } from '@/utils/teamCookies';
 
 export const getUser = async () => {
   try {
-    return getUserByToken();
+    return await getUserByToken();
   } catch {
     return null;
   }
@@ -34,9 +34,22 @@ export const getUserInformation = async (email: string) => {
     return null;
   }
 
-  if (!existItem && organization) {
+  // A console account older than global accounts. Signing up can't help: it would
+  // create a global account, then fail on the email this row already holds.
+  if (!organization) {
     return {
-      existsOnGlobalAccount: true,
+      existsOnGlobalAccount: false as const,
+      existsOnDevConsole: true,
+      currentWalletAddress: currentWallet,
+      role,
+      hasPasskey: false,
+      subOrganizationId: undefined,
+    };
+  }
+
+  if (!existItem) {
+    return {
+      existsOnGlobalAccount: true as const,
       existsOnDevConsole: false,
       role: role,
       currentWalletAddress: currentWallet,
@@ -45,10 +58,10 @@ export const getUserInformation = async (email: string) => {
     };
   }
 
-  const { hasPasskey, subOrganizationId } = organization!;
+  const { hasPasskey, subOrganizationId } = organization;
 
   return {
-    existsOnGlobalAccount: true,
+    existsOnGlobalAccount: true as const,
     existsOnDevConsole: existItem,
     currentWalletAddress: currentWallet,
     role,

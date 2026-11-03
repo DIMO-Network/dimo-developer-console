@@ -94,6 +94,33 @@ describe('getSubjectJwt', () => {
     });
   });
 
+  // An Identity failure on HTTP 200 used to read as "this vehicle isn't shared".
+  it('answers 502 UPSTREAM when Identity answers with an error', async () => {
+    fetchMock.mockImplementationOnce(() =>
+      json(200, {
+        data: null,
+        errors: [{ message: 'boom', extensions: { code: 'INTERNAL_SERVER_ERROR' } }],
+      }),
+    );
+    await expect(getSubjectJwt(DEV, VEHICLE)).rejects.toMatchObject({
+      status: 502,
+      code: 'UPSTREAM',
+    });
+  });
+
+  it('still answers NOT_SHARED for a vehicle Identity does not know', async () => {
+    fetchMock.mockImplementationOnce(() =>
+      json(200, {
+        data: { vehicle: null },
+        errors: [{ message: 'no vehicle', extensions: { code: 'NOT_FOUND' } }],
+      }),
+    );
+    await expect(getSubjectJwt(DEV, VEHICLE)).rejects.toMatchObject({
+      status: 403,
+      code: 'NOT_SHARED',
+    });
+  });
+
   it('answers 403 NOT_SHARED when token exchange refuses', async () => {
     fetchMock.mockImplementationOnce(() => json(403, { message: 'no grant' }));
     await expect(getSubjectJwt(DEV, ACCOUNT)).rejects.toMatchObject({

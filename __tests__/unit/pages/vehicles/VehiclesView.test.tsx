@@ -57,6 +57,17 @@ describe('VehiclesView', () => {
     });
   });
 
+  it('tells someone with a license to add a redirect URI, not to create a license', () => {
+    (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
+      developerLicenses: [],
+      hasLicenseWithoutRedirectUri: true,
+      loading: false,
+    });
+    render(<VehiclesView />);
+    expect(screen.getByText(/Add a redirect URI/)).toBeInTheDocument();
+    expect(screen.queryByText(/Create a developer license/)).not.toBeInTheDocument();
+  });
+
   it('auto-selects a single license and renders its table with the extra columns', () => {
     (useValidDeveloperLicenses as jest.Mock).mockReturnValue({
       developerLicenses: [lic('0xaaa', 'Fleet Pulse')],

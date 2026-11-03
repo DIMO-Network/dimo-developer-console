@@ -170,6 +170,7 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
             </div>
             <OverviewQuickActions
               tokenId={licenseFragment.tokenId}
+              canManage={isLicenseOwner}
               onSelectTab={setActiveTab}
             />
           </>

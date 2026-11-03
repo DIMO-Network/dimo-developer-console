@@ -41,7 +41,7 @@ const useLicenses = () => {
 
 const Content = () => {
   const { isMember } = useTeam();
-  const { developerLicenses, loading } = useLicenses();
+  const { developerLicenses, hasLicenseWithoutRedirectUri, loading } = useLicenses();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -80,11 +80,17 @@ const Content = () => {
     return (
       <Section>
         {isMember ? (
-          <p className="text-body text-fg">This team has no developer licenses yet.</p>
+          <p className="text-body text-fg">
+            {hasLicenseWithoutRedirectUri
+              ? "This team's licenses need a redirect URI first."
+              : 'This team has no developer licenses yet.'}
+          </p>
         ) : (
           <>
             <p className="text-body text-fg">
-              Create a developer license to see the vehicles shared with it.
+              {hasLicenseWithoutRedirectUri
+                ? 'Add a redirect URI to your license to see the vehicles shared with it.'
+                : 'Create a developer license to see the vehicles shared with it.'}
             </p>
             <Link href="/licenses" className="text-body-sm text-ink underline">
               Go to licenses

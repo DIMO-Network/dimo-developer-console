@@ -15,6 +15,8 @@ export const accessFromError = (
       return 'ok';
     case 'NOT_SHARED':
       return 'not-shared';
+    case 'SESSION_EXPIRED':
+      return 'session-expired';
     case 'DEV_JWT_INVALID':
     case 'DEV_JWT_MISSING':
       return 'jwt-expired';

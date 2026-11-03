@@ -7,7 +7,7 @@ jest.mock('@/gql', () => ({
 }));
 
 jest.mock('@/hooks/useIsLicenseOwner', () => ({
-  useIsLicenseOwner: () => true,
+  useIsLicenseOwner: jest.fn(),
 }));
 
 jest.mock('@/actions/workspace', () => ({
@@ -20,10 +20,16 @@ jest.mock('@/actions/brand', () => ({
 }));
 
 jest.mock('sonner', () => ({ toast: { error: jest.fn() } }));
+jest.mock('@sentry/nextjs', () => ({
+  captureMessage: jest.fn(),
+  captureException: jest.fn(),
+}));
 
+import * as Sentry from '@sentry/nextjs';
 import { toast } from 'sonner';
 import { fetchMyBrands } from '@/actions/brand';
 import { getOrCreateLicenseWorkspace } from '@/actions/workspace';
+import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 
 const mockLicense = {
   alias: 'Fleet Co',
@@ -45,9 +51,10 @@ const fleetBrand = {
 };
 
 describe('Brand', () => {
-  beforeEach(() =>
-    (getOrCreateLicenseWorkspace as jest.Mock).mockResolvedValue({ id: 'ws-1' }),
-  );
+  beforeEach(() => {
+    (useIsLicenseOwner as jest.Mock).mockReturnValue(true);
+    (getOrCreateLicenseWorkspace as jest.Mock).mockResolvedValue({ id: 'ws-1' });
+  });
   afterEach(() => jest.clearAllMocks());
 
   it('gives a new license its own workspace, named after it', async () => {
@@ -73,11 +80,33 @@ describe('Brand', () => {
     );
   });
 
-  it('offers no brand form when there is no workspace to save to', async () => {
+  it('tells an owner when their workspace could not be loaded', async () => {
     (getOrCreateLicenseWorkspace as jest.Mock).mockResolvedValue(null);
     render(<Brand license={mockLicense as never} />);
-    await waitFor(() => expect(toast.error).toHaveBeenCalled());
-    await waitFor(() => expect(screen.getByText('No brand set.')).toBeInTheDocument());
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Could not load your workspace',
+    );
+    expect(toast.error).toHaveBeenCalled();
+    expect(screen.queryByText('No brand set.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add brand')).not.toBeInTheDocument();
+  });
+
+  // Only the team owner may create a workspace, so a member opening a license
+  // nobody has branded gets null. That's an empty tab, not a failure to re-login over.
+  it('shows a member an empty tab, without an error, when there is no workspace', async () => {
+    (useIsLicenseOwner as jest.Mock).mockReturnValue(false);
+    (getOrCreateLicenseWorkspace as jest.Mock).mockResolvedValue(null);
+    render(<Brand license={mockLicense as never} />);
+    expect(await screen.findByText('No brand set.')).toBeInTheDocument();
+    expect(toast.error).not.toHaveBeenCalled();
+    expect(Sentry.captureMessage).not.toHaveBeenCalled();
+  });
+
+  it('never reads a failed load as a license with no brand', async () => {
+    (fetchMyBrands as jest.Mock).mockRejectedValue(new Error('console-api is down'));
+    render(<Brand license={mockLicense as never} />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Failed to load brands');
+    expect(screen.queryByText('No brand set.')).not.toBeInTheDocument();
     expect(screen.queryByText('Add brand')).not.toBeInTheDocument();
   });
 

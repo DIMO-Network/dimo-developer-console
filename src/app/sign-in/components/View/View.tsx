@@ -81,6 +81,13 @@ export const View = () => {
         return;
       }
 
+      if (!existsOnGlobalAccount) {
+        toast.error(
+          'This account needs its wallet restored before you can sign in. Please contact developer support.',
+        );
+        return;
+      }
+
       trackEvent('Sign In Attempt', {
         'type': 'Internal Auth',
         'distinct_id': email,

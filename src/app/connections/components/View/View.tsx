@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Section } from '@/components/Section';
 import { SectionHeader } from '@/components/Section/Header';
 import { Button } from '@/components/Button';
@@ -13,6 +14,11 @@ import { toast } from 'sonner';
 
 import './View.css';
 import { OwnerAction } from '@/components/OwnerOnly';
+import type { Connection } from '@/actions/connections';
+
+// A row with no status comes from an older API and is finished.
+const isUnfinished = ({ status }: Connection) =>
+  status === 'PENDING' || status === 'MINTED';
 
 const MainComponent: React.FC = () => {
   const router = useRouter();
@@ -55,6 +61,16 @@ const MainComponent: React.FC = () => {
                 <div className="connection-public-key">
                   {connection.connection_license_public_key}
                 </div>
+                {owner && isUnfinished(connection) && (
+                  <OwnerAction>
+                    <Link
+                      href={`/connections/create/${owner}?resume=${connection.id}`}
+                      className="button primary w-full"
+                    >
+                      Finish setup
+                    </Link>
+                  </OwnerAction>
+                )}
                 <Button
                   variant="secondary"
                   className="w-full"

@@ -25,6 +25,13 @@ describe('accessFromError', () => {
     ).toBe('jwt-expired');
   });
 
+  it('says the session expired, for an owner and for a member alike', () => {
+    expect(accessFromError(error('SESSION_EXPIRED'), member)).toBe('session-expired');
+    expect(
+      accessFromError(error('SESSION_EXPIRED'), { member: false, walletIsSigner: false }),
+    ).toBe('session-expired');
+  });
+
   it('shows an error state, not the data tabs, for anything else', () => {
     expect(accessFromError(error('INVALID_CLIENT_ID'), member)).toBe('error');
     expect(accessFromError(error('ACCESS_CHECK_FAILED'), member)).toBe('error');

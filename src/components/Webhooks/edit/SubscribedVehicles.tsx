@@ -12,7 +12,7 @@ import { Button } from '@/components/Button';
 import { AddVehiclesModal } from '@/components/Webhooks/edit/AddVehiclesModal';
 import { UnsubscribeVehiclesModal } from '@/components/Webhooks/edit/UnsubscribeVehiclesModal';
 import { UnsubscribeAllModal } from '@/components/Webhooks/edit/UnsubscribeAllModal';
-import { subscribeAllVehicles, unsubscribeAllVehicles } from '@/services/webhook';
+import { subscribeAllVehicles } from '@/services/webhook';
 import { getDevJwt } from '@/utils/devJwt';
 import { toast } from 'sonner';
 import { CSV_UPLOAD_ROW_TITLE } from '@/components/CSVUpload';
@@ -39,7 +39,6 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [isUnsubscribing, setIsUnsubscribing] = useState(false);
   const [isUnsubscribeAll, setIsUnsubscribeAll] = useState(false);
-  const [unsubscribingAll, setUnsubscribingAll] = useState(false);
   const [subscribingAll, setSubscribingAll] = useState(false);
   const { data, isLoading, error } = useWebhookVehiclesById({ webhookId, clientId });
   // A new rows array on every render would send the table back to page 1.
@@ -65,20 +64,6 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
       toast.error('Failed to subscribe all vehicles');
     } finally {
       setSubscribingAll(false);
-    }
-  };
-
-  const unsubscribeAll = async () => {
-    try {
-      setUnsubscribingAll(true);
-      await unsubscribeAllVehicles({ webhookId, token: getDevJwt(clientId) ?? '' });
-      toast.success('Successfully unsubscribed all vehicles');
-      invalidateQuery({ webhookId, clientId });
-    } catch (err) {
-      captureException(err);
-      toast.error('Failed to unsubscribe all vehicles');
-    } finally {
-      setUnsubscribingAll(false);
     }
   };
 
@@ -123,12 +108,8 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
           <Button variant="secondary" onClick={subscribeAll} disabled={subscribingAll}>
             {subscribingAll ? 'Subscribing...' : 'Subscribe all vehicles'}
           </Button>
-          <Button
-            variant="secondary"
-            onClick={unsubscribeAll}
-            disabled={unsubscribingAll}
-          >
-            {unsubscribingAll ? 'Unsubscribing...' : 'Unsubscribe all vehicles'}
+          <Button variant="secondary" onClick={() => setIsUnsubscribeAll(true)}>
+            Unsubscribe all vehicles
           </Button>
         </div>
       </Section>

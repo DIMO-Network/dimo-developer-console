@@ -12,7 +12,14 @@ export const GET = async (request: NextRequest) => {
   if (!clientId) {
     return NextResponse.json({ message: 'clientId is required' }, { status: 400 });
   }
-  return NextResponse.json(await getConfigurationsByClientId({ client_id: clientId }), {
-    headers: PRIVATE,
-  });
+  try {
+    return NextResponse.json(await getConfigurationsByClientId({ client_id: clientId }), {
+      headers: PRIVATE,
+    });
+  } catch {
+    return NextResponse.json(
+      { message: 'Could not load configurations' },
+      { status: 502, headers: PRIVATE },
+    );
+  }
 };

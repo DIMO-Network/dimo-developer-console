@@ -52,6 +52,15 @@ describe('GET /api/configurations', () => {
     await expect(res.json()).resolves.toEqual([{ id: 'c1' }]);
   });
 
+  // LicenseCard says "Sharing status unavailable" only if this isn't a 200.
+  it('answers 502 when console-api could not be asked', async () => {
+    (getConfigurationsByClientId as jest.Mock).mockRejectedValue(axiosStatus(502));
+    const res = await getConfigurations(
+      new NextRequest('https://console.test/api/configurations?clientId=0xabc'),
+    );
+    expect(res.status).toBe(502);
+  });
+
   it('requires a client id', async () => {
     const res = await getConfigurations(
       new NextRequest('https://console.test/api/configurations'),

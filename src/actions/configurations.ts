@@ -1,5 +1,6 @@
 'use server';
 
+import { isAxiosError } from 'axios';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
 export interface IConfiguration {
@@ -25,8 +26,11 @@ export const getConfigurationsByClientId = async ({
       `/api/my/configurations?clientId=${encodeURIComponent(client_id)}`,
     );
     return Array.isArray(data) ? data : data ? [data] : [];
-  } catch {
-    return [];
+  } catch (error) {
+    // console-api answers 404 for a license the active team doesn't own. Anything
+    // else is a failure to find out, which must not read as "no configurations".
+    if (isAxiosError(error) && error.response?.status === 404) return [];
+    throw error;
   }
 };
 
