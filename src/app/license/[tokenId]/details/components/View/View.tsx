@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { PencilIcon } from '@heroicons/react/16/solid';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { gql, useFragment } from '@/gql';
 import { useQuery } from '@apollo/client/react';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
@@ -24,6 +25,10 @@ import './View.css';
 import { OverviewQuickActions } from './OverviewQuickActions';
 
 type Tab = 'overview' | 'config' | 'vehicles' | 'brand';
+
+const TABS: Tab[] = ['overview', 'config', 'vehicles', 'brand'];
+const tabFrom = (value: string | null): Tab =>
+  TABS.find((tab) => tab === value) ?? 'overview';
 
 const GET_DEVELOPER_LICENSE = gql(`
   query GetDeveloperLicense($tokenId: Int!) {
@@ -96,7 +101,8 @@ interface LicenseDetailsContentProps {
 }
 
 const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps) => {
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>(() => tabFrom(searchParams.get('tab')));
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const licenseFragment = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, license);
   const isLicenseOwner = useIsLicenseOwner(licenseFragment);

@@ -2,11 +2,15 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 
 const mockQuery = jest.fn();
 const mockIsOwner = jest.fn();
+let mockSearch = '';
 jest.mock('@apollo/client/react', () => ({ useQuery: () => mockQuery() }));
 jest.mock('@/hooks/useIsLicenseOwner', () => ({
   useIsLicenseOwner: () => mockIsOwner(),
 }));
-jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(mockSearch),
+}));
 jest.mock('@/gql', () => ({
   gql: (s: TemplateStringsArray) => s,
   useFragment: (_def: unknown, data: unknown) => data,
@@ -69,6 +73,10 @@ const open = async () => {
 };
 
 describe('License details', () => {
+  beforeEach(() => {
+    mockSearch = '';
+  });
+
   it('gives the license owner the quick actions', async () => {
     mockIsOwner.mockReturnValue(true);
     await open();
@@ -90,5 +98,25 @@ describe('License details', () => {
     mockIsOwner.mockReturnValue(false);
     await open();
     expect(screen.queryByText(/Configure branding/)).toBeNull();
+  });
+
+  it('opens the Config tab from ?tab=config', async () => {
+    mockIsOwner.mockReturnValue(true);
+    mockSearch = 'tab=config';
+    await open();
+    expect(screen.getByRole('tab', { name: 'Config' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+  });
+
+  it('ignores an unknown tab', async () => {
+    mockIsOwner.mockReturnValue(true);
+    mockSearch = 'tab=nope';
+    await open();
+    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
   });
 });

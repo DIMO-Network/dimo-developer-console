@@ -62,16 +62,40 @@ describe('configurator edit View', () => {
     expect(global.fetch).toHaveBeenCalledWith('/api/configurations/c1');
   });
 
-  it('tells the user when the configuration could not be loaded', async () => {
+  it('shows a loader, not empty defaults, until the saved values arrive', async () => {
+    let resolve!: (r: unknown) => void;
+    global.fetch = jest.fn().mockReturnValue(new Promise((r) => (resolve = r)));
+    const { container } = renderView();
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    expect(container.querySelector('.loader')).not.toBeNull();
+    expect(screen.queryByLabelText('name')).toBeNull();
+    resolve({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: 'c1',
+        client_id: '0xclient',
+        configuration_name: 'Saved name',
+        configuration: JSON.stringify({ component: 'LoginWithDimo' }),
+      }),
+    });
+    expect(await screen.findByLabelText('name')).toHaveValue('Saved name');
+    expect(container.querySelector('.loader')).toBeNull();
+  });
+
+  it("says when the configuration can't be loaded", async () => {
     global.fetch = jest
       .fn()
       .mockResolvedValue({ ok: false, status: 502, json: async () => ({}) });
     renderView();
-    await screen.findByText(/name:/);
-    await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith(
+    expect(
+      await screen.findByText(
         "Couldn't load this configuration. Reload the page to try again.",
       ),
+    ).toBeInTheDocument();
+    expect(screen.queryByLabelText('name')).toBeNull();
+    expect(toast.error).toHaveBeenCalledWith(
+      "Couldn't load this configuration. Reload the page to try again.",
     );
   });
 

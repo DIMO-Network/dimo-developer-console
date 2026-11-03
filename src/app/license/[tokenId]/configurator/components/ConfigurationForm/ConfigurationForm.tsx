@@ -21,6 +21,7 @@ import { OutputPrint } from '@/app/license/[tokenId]/configurator/components/Out
 import { configurationLink } from '@/app/license/[tokenId]/configurator/utils/configuration';
 import { OwnerAction } from '@/components/OwnerOnly';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 export const USER_CONFIG_FRAGMENT = gql(`
   fragment UserConfigurationFragment on DeveloperLicense {
@@ -34,6 +35,10 @@ export const USER_CONFIG_FRAGMENT = gql(`
     }
   }
 `);
+
+export const NO_REDIRECT_URI =
+  "This license has no redirect URI yet, so a configuration can't be saved. Add one on the license's Config tab.";
+export { TEMPLATE_ID_HINT } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
 
 interface Props {
   license: FragmentType<typeof USER_CONFIG_FRAGMENT>;
@@ -207,6 +212,17 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
             />
             {errors.redirectUri && (
               <TextError errorMessage={errors.redirectUri.message!} />
+            )}
+            {fragment.redirectURIs.nodes.length === 0 && (
+              <p className="text-label font-normal text-muted">
+                {NO_REDIRECT_URI}{' '}
+                <Link
+                  href={`/license/${fragment.tokenId}/details?tab=config`}
+                  className="text-ink underline"
+                >
+                  Go to the Config tab
+                </Link>
+              </p>
             )}
           </Label>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
