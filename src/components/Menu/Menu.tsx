@@ -13,8 +13,7 @@ import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { withLoadingStatus } from '@/hoc';
 import { signOut } from '@/actions/user';
 import { turnkeyClient } from '@/config/turnkey';
-import { GlobalAccountSession, removeFromSession } from '@/utils/sessionStorage';
-import { EmbeddedKey, removeFromLocalStorage } from '@/utils/localStorage';
+import { clearSession } from '@/utils/globalAccountSession';
 import { queryClient } from '@/hoc/QueryProvider';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LogoutIcon } from '@/components/Icons/LogoutIcon';
@@ -45,8 +44,8 @@ export const Menu: FC = withLoadingStatus(() => {
       await signOut();
       await turnkeyClient.logout();
       queryClient.clear();
-      removeFromSession(GlobalAccountSession);
-      removeFromLocalStorage(EmbeddedKey);
+      // Every other tab hears this and goes to sign-in.
+      clearSession();
       clearLoadingStatus();
       router.replace('/sign-in');
     } catch (err) {

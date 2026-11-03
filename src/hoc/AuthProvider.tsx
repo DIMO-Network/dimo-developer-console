@@ -7,19 +7,12 @@ import { AuthContext } from '@/context/AuthContext';
 import { initOtpLogin, otpLogin } from '@/services/globalAccount';
 import { getTurnkeyWalletAddress, getTurnkeyClient } from '@/services/turnkey';
 import { getKernelAccount } from '@/services/zerodev';
-import { IGlobalAccountSession } from '@/types/wallet';
 import {
-  removeFromLocalStorage,
-  EmbeddedKey,
-  saveToLocalStorage,
-  getFromLocalStorage,
-} from '@/utils/localStorage';
-import {
-  saveToSession,
-  GlobalAccountSession,
-  removeFromSession,
-  getFromSession,
-} from '@/utils/sessionStorage';
+  clearSession,
+  isLive,
+  readSession,
+  writeSession,
+} from '@/utils/globalAccountSession';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty } from 'lodash';
 import config from '@/config';
@@ -56,7 +49,6 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       sessionExpiration: number;
     }) => {
       await saveToken(accessToken, tokenExpiration);
-      saveToLocalStorage(EmbeddedKey, privateKey);
       // A new session starts with an empty query cache: the user and team
       // queries are not keyed by account, and a session that ended without a
       // logout (it expired) leaves the last person's data in this tab. Stored
@@ -64,12 +56,15 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       queryClient.clear();
       startConsoleSession(user!.subOrganizationId);
 
-      saveToSession<IGlobalAccountSession>(GlobalAccountSession, {
+      // One entry for every tab, the bundle with the key it was encrypted to;
+      // the other tabs hear of it.
+      writeSession({
         email: user!.email,
         role: 'owner',
         subOrganizationId: user!.subOrganizationId,
         token: credentialBundle,
         expiry: sessionExpiration,
+        eKey: privateKey,
       });
     };
 
@@ -257,12 +252,18 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
       return { success: true, newWalletAddress };
     };
 
-    // Reached when the session expired (loadUserInformation).
+    // Reached when the shared session expired (loadUserInformation).
     const logout = async () => {
-      await endSession();
+      // The proxy answers this action with a 401 once the session cookie is
+      // gone (it lives until the same expiry); the store is cleared either way.
+      try {
+        await endSession();
+      } catch {
+        // The proxy's 401 already cleared the cookies.
+      }
       await turnkeyClient.logout();
-      removeFromSession(GlobalAccountSession);
-      removeFromLocalStorage(EmbeddedKey);
+      // Every other tab hears this and goes to sign-in.
+      clearSession();
     };
 
     const handleExternalAuth = (provider: string) => {
@@ -291,18 +292,13 @@ export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) =
     };
 
     const loadUserInformation = async (): Promise<boolean> => {
-      const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-      const eKey = getFromLocalStorage<string>(EmbeddedKey);
+      const session = readSession();
 
-      if (!eKey || !session) {
+      if (!session) {
         return false;
       }
 
-      const { expiry } = session;
-
-      const nowInSeconds = Math.floor(Date.now() / 1000);
-
-      if (expiry < nowInSeconds) {
+      if (!isLive(session)) {
         await logout();
         return false;
       }

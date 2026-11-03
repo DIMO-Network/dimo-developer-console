@@ -1,7 +1,5 @@
 'use client';
 
-export const GlobalAccountSession = 'globalAccount';
-
 export const saveToSession = <T>(key: string, value: T): void => {
   const serializedValue = JSON.stringify(value);
   sessionStorage.setItem(key, serializedValue);

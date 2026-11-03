@@ -16,7 +16,8 @@ export interface StoredSession extends IGlobalAccountSession {
 }
 
 export type SessionEvent =
-  { type: 'signed-in'; subOrganizationId: string } | { type: 'signed-out' };
+  | { type: 'signed-in'; subOrganizationId: string; expiry: number }
+  | { type: 'signed-out' };
 
 interface Envelope {
   from: string;
@@ -71,7 +72,7 @@ export const migrateTabSession = (): void => {
   const raw = sessionStorage.getItem(LEGACY_TAB_SESSION_KEY);
   if (raw === null) return;
   try {
-    if (!parseSession(localStorage.getItem(SESSION_KEY))) {
+    if (!isLive(parseSession(localStorage.getItem(SESSION_KEY)))) {
       const old = JSON.parse(raw) as IGlobalAccountSession;
       const eKeyRaw = localStorage.getItem(EmbeddedKey);
       const eKey: unknown = eKeyRaw ? JSON.parse(eKeyRaw) : null;
@@ -101,7 +102,11 @@ export const readSession = (): StoredSession | null => {
 
 export const writeSession = (session: StoredSession): void => {
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  announce({ type: 'signed-in', subOrganizationId: session.subOrganizationId });
+  announce({
+    type: 'signed-in',
+    subOrganizationId: session.subOrganizationId,
+    expiry: session.expiry,
+  });
 };
 
 export const clearSession = (): void => {
@@ -112,31 +117,60 @@ export const clearSession = (): void => {
   announce({ type: 'signed-out' });
 };
 
+// A message can arrive before the write it announces is visible to this tab's
+// localStorage (the two travel separately between processes). Until the stored
+// session is the one announced, re-read for a few ms; then deliver anyway.
+const REREAD_TRIES = 10;
+const REREAD_EVERY_MS = 5;
+const untilStored = async (event: SessionEvent) => {
+  if (event.type !== 'signed-in') return;
+  for (let i = 0; i < REREAD_TRIES; i++) {
+    if (parseSession(localStorage.getItem(SESSION_KEY))?.expiry === event.expiry) return;
+    await new Promise((resolve) => setTimeout(resolve, REREAD_EVERY_MS));
+  }
+};
+
 export const onSessionChange = (
   listener: (event: SessionEvent) => void,
 ): (() => void) => {
+  if (typeof window === 'undefined') return () => {};
   const bc = getChannel();
   if (bc) {
+    let subscribed = true;
+    // Events reach the listener in the order they came, even one held back.
+    let queue = Promise.resolve();
     const handler = (e: MessageEvent) => {
       const data = e.data as Envelope | undefined;
       if (!data || data.from === tabId || !data.event) return;
-      listener(data.event);
+      const { event } = data;
+      queue = queue
+        .then(() => untilStored(event))
+        .then(() => {
+          if (subscribed) listener(event);
+        })
+        // A listener that throws is reported, and later events still arrive.
+        .catch((err) =>
+          queueMicrotask(() => {
+            throw err;
+          }),
+        );
     };
     bc.addEventListener('message', handler);
-    return () => bc.removeEventListener('message', handler);
+    return () => {
+      subscribed = false;
+      bc.removeEventListener('message', handler);
+    };
   }
 
   const handler = (e: StorageEvent) => {
     if (e.key === null) return listener({ type: 'signed-out' });
     if (e.key !== SESSION_KEY) return;
     if (e.newValue === null) return listener({ type: 'signed-out' });
-    try {
-      const { subOrganizationId } = JSON.parse(e.newValue);
-      if (typeof subOrganizationId === 'string') {
-        listener({ type: 'signed-in', subOrganizationId });
-      }
-    } catch {
-      // not a session entry we can read
+    // The storage event fires once the write is visible here: no re-read.
+    const session = parseSession(e.newValue);
+    if (session) {
+      const { subOrganizationId, expiry } = session;
+      listener({ type: 'signed-in', subOrganizationId, expiry });
     }
   };
   window.addEventListener('storage', handler);

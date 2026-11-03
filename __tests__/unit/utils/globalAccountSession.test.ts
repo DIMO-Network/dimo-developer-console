@@ -69,14 +69,15 @@ describe('globalAccountSession', () => {
       expect(localStorage.getItem('GlobalAccountEmbeddedKey')).toBeNull();
     });
 
-    it('tells other tabs who signed in', async () => {
+    it('tells other tabs who signed in, and until when', async () => {
       const other = fake.otherTab();
-      mod.writeSession(session());
+      const s = session();
+      mod.writeSession(s);
       await flush();
       expect(other.received).toEqual([
         {
           from: expect.any(String),
-          event: { type: 'signed-in', subOrganizationId: 'sub-1' },
+          event: { type: 'signed-in', subOrganizationId: 'sub-1', expiry: s.expiry },
         },
       ]);
     });
@@ -129,16 +130,71 @@ describe('globalAccountSession', () => {
       const listener = jest.fn();
       mod.onSessionChange(listener);
       const other = fake.otherTab();
+      const s = session({ subOrganizationId: 's2' });
+      localStorage.setItem(mod.SESSION_KEY, JSON.stringify(s));
       other.post({
         from: 'x',
-        event: { type: 'signed-in', subOrganizationId: 's2' },
+        event: { type: 'signed-in', subOrganizationId: 's2', expiry: s.expiry },
       });
       other.post({ from: 'x', event: { type: 'signed-out' } });
       await flush();
       expect(listener.mock.calls).toEqual([
-        [{ type: 'signed-in', subOrganizationId: 's2' }],
+        [{ type: 'signed-in', subOrganizationId: 's2', expiry: s.expiry }],
         [{ type: 'signed-out' }],
       ]);
+    });
+
+    // A BroadcastChannel message can arrive before the write it announces is
+    // visible to this tab's localStorage.
+    describe('a sign-in announced before this tab can read it', () => {
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      const announce = (other: ReturnType<typeof fake.otherTab>, expiry: number) =>
+        other.post({
+          from: 'x',
+          event: { type: 'signed-in', subOrganizationId: 'sub-1', expiry },
+        });
+
+      it('waits for the announced session before telling the listener', async () => {
+        mod.writeSession(session({ token: 'tok-1' }));
+        const tokens: (string | undefined)[] = [];
+        mod.onSessionChange(() => tokens.push(mod.readSession()?.token));
+        const other = fake.otherTab();
+        const next = session({ token: 'tok-2', expiry: future() + 60 });
+        announce(other, next.expiry);
+        await flush();
+        expect(tokens).toEqual([]);
+        localStorage.setItem(mod.SESSION_KEY, JSON.stringify(next));
+        await sleep(20);
+        expect(tokens).toEqual(['tok-2']);
+      });
+
+      it('tells the listener anyway after a few ms', async () => {
+        const listener = jest.fn();
+        mod.onSessionChange(listener);
+        announce(fake.otherTab(), future() + 60);
+        await sleep(100);
+        expect(listener).toHaveBeenCalledTimes(1);
+      });
+
+      it('keeps the order of the events it holds back', async () => {
+        const types: string[] = [];
+        mod.onSessionChange((e) => types.push(e.type));
+        const other = fake.otherTab();
+        announce(other, future() + 60);
+        other.post({ from: 'x', event: { type: 'signed-out' } });
+        await sleep(100);
+        expect(types).toEqual(['signed-in', 'signed-out']);
+      });
+
+      it('drops a held event after unsubscribe', async () => {
+        const listener = jest.fn();
+        const off = mod.onSessionChange(listener);
+        announce(fake.otherTab(), future() + 60);
+        await flush();
+        off();
+        await sleep(100);
+        expect(listener).not.toHaveBeenCalled();
+      });
     });
 
     it('stops after unsubscribe', async () => {
@@ -170,7 +226,7 @@ describe('globalAccountSession', () => {
         fire({ key: null });
         fire({ key: 'theme', newValue: 'dark' });
         expect(listener.mock.calls).toEqual([
-          [{ type: 'signed-in', subOrganizationId: 's3' }],
+          [{ type: 'signed-in', subOrganizationId: 's3', expiry: expect.any(Number) }],
           [{ type: 'signed-out' }],
           [{ type: 'signed-out' }],
         ]);
@@ -218,6 +274,16 @@ describe('globalAccountSession', () => {
     it('drops an expired old session', () => {
       seedOld({ expiry: 1 });
       expect(mod.readSession()).toBeNull();
+      expect(sessionStorage.length).toBe(0);
+    });
+
+    it('replaces a shared session that has expired', () => {
+      localStorage.setItem(
+        mod.SESSION_KEY,
+        JSON.stringify(session({ token: 'stale', eKey: 'key-0', expiry: 1 })),
+      );
+      seedOld();
+      expect(mod.readSession()).toMatchObject({ token: 'tok', eKey: 'key-1' });
       expect(sessionStorage.length).toBe(0);
     });
 

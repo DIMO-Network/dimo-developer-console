@@ -1,11 +1,9 @@
 import { ApiKeyStamper } from '@turnkey/sdk-server';
 import { turnkeyConfig } from '@/config/turnkey';
-import { getFromLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 import { TurnkeyClient } from '@turnkey/http';
 import { decryptCredentialBundle, getPublicKey } from '@turnkey/crypto';
 import { uint8ArrayToHexString, uint8ArrayFromHexString } from '@turnkey/encoding';
-import { getFromSession, GlobalAccountSession } from '@/utils/sessionStorage';
-import { IGlobalAccountSession } from '@/types/wallet';
+import { isLive, readSession } from '@/utils/globalAccountSession';
 
 export const getTurnkeyClient = ({
   authKey,
@@ -30,17 +28,12 @@ export const getTurnkeyClient = ({
   );
 };
 
+// The bundle and the key it was encrypted to come from one read of the shared
+// session, made now: a sign-in in another tab replaces both together.
 export const getSessionTurnkeyClient = (): TurnkeyClient | null => {
-  const eKey = getFromLocalStorage<string>(EmbeddedKey);
-  const session = getFromSession<IGlobalAccountSession>(GlobalAccountSession);
-
-  if (!eKey || !session) {
-    return null;
-  }
-
-  const { token } = session;
-
-  return getTurnkeyClient({ authKey: token, eKey });
+  const session = readSession();
+  if (!isLive(session)) return null;
+  return getTurnkeyClient({ authKey: session.token, eKey: session.eKey });
 };
 
 export const getTurnkeyWalletAddress = async ({
