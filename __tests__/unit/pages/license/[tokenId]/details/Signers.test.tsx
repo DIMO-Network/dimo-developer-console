@@ -1,25 +1,35 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const enableSigner = jest.fn(async () => {});
 const disableSigner = jest.fn(async () => {});
 const trackEvent = jest.fn();
+const OWNER = '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d';
+const CONSOLE_KEY = '0xC0n50Le00000000000000000000000000000Be3f';
 const mockOwnerKey = {
-  hasPrivateKey: false,
-  privateKeyAddress: null as string | null,
+  hasPrivateKey: true,
+  privateKeyAddress: CONSOLE_KEY as string | null,
 };
+const hasGlobalAccountPrivateKey = jest.fn(async () => mockOwnerKey);
+const findConsoleKeyAddress = jest.fn(async () => CONSOLE_KEY);
+const getGlobalAccountDeveloperJwt = jest.fn();
+const mockSetLoadingStatus = jest.fn();
 const mockPublishEvent = jest.fn();
 // The @/hooks barrel pulls Turnkey and ZeroDev; Signers only needs these.
 jest.mock('@/hooks', () => ({
   useDimoAuth: () => ({
-    hasGlobalAccountPrivateKey: async () => mockOwnerKey,
+    hasGlobalAccountPrivateKey,
+    findConsoleKeyAddress,
+    getGlobalAccountDeveloperJwt,
   }),
   useDisableSigner: () => disableSigner,
   useEnableSigner: () => enableSigner,
   useEventEmitter: () => ({ publishEvent: mockPublishEvent }),
   useGlobalAccount: () => ({
     currentUser: {
-      smartContractAddress: '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d',
+      smartContractAddress: OWNER,
+      subOrganizationId: 'sub-org',
       walletAddress: '0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6',
     },
   }),
@@ -27,8 +37,17 @@ jest.mock('@/hooks', () => ({
   useSetRedirectUri: () => jest.fn(),
 }));
 jest.mock('@/hoc', () => ({
-  withLoadingStatus: jest.requireActual('@/hoc/withLoadingStatus').withLoadingStatus,
+  withLoadingStatus: (Component: React.ComponentType) => Component,
 }));
+jest.mock('@/context/LoadingStatusContext', () => {
+  const { createContext } = jest.requireActual('react');
+  return {
+    LoadingStatusContext: createContext({
+      setLoadingStatus: (...a: unknown[]) => mockSetLoadingStatus(...a),
+      clearLoadingStatus: jest.fn(),
+    }),
+  };
+});
 jest.mock('@/hooks/useIsLicenseOwner', () => ({ useIsLicenseOwner: jest.fn() }));
 jest.mock('@/hooks/useMixPanel', () => ({ useMixPanel: () => ({ trackEvent }) }));
 const SAM_ROW = {
@@ -42,7 +61,12 @@ const SAM_ROW = {
 };
 const mockTeam = { members: [SAM_ROW] };
 jest.mock('@/hooks/useTeamMembers', () => ({ useTeamMembers: () => mockTeam }));
-const registry = { byAddress: new Map(), isError: false, refetch: jest.fn() };
+const registry = {
+  byAddress: new Map(),
+  isError: false,
+  isLoaded: true,
+  refetch: jest.fn(),
+};
 jest.mock('@/hooks/useLicenseSignerRegistry', () => ({
   useLicenseSignerRegistry: () => registry,
 }));
@@ -94,25 +118,38 @@ const row = (
   disabledAt: null,
   disabledBy: null,
 });
-const show = (signers: string[] = []) =>
+const refetchLicense = jest.fn(async () => {});
+const OWNER_ROW = {
+  ...SAM_ROW,
+  id: 'm-jane',
+  userId: 'u-jane',
+  name: 'Jane Developer',
+  email: 'jane@harness.dev',
+  role: 'OWNER',
+};
+const show = (signers: string[] = [], owner = OWNER) =>
   render(
-    <Signers
-      license={
-        {
-          owner: '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d',
-          clientId: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
-          tokenId: 42,
-          signers: {
-            nodes: signers.map((address) => ({
-              address,
-              enabledAt: '2026-09-01T00:00:00Z',
-            })),
-          },
-          redirectURIs: { nodes: [{ uri: 'https://rentals.dimo.co/' }] },
-        } as never
-      }
-      refetch={jest.fn(async () => {})}
-    />,
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      <Signers
+        license={
+          {
+            owner,
+            clientId: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
+            tokenId: 42,
+            signers: {
+              nodes: signers.map((address) => ({
+                address,
+                enabledAt: '2026-09-01T00:00:00Z',
+              })),
+            },
+            redirectURIs: { nodes: [{ uri: 'https://rentals.dimo.co/' }] },
+          } as never
+        }
+        refetch={refetchLicense}
+      />
+    </QueryClientProvider>,
   );
 
 describe('Signers', () => {
@@ -121,25 +158,141 @@ describe('Signers', () => {
     mockTeam.members = [SAM_ROW];
     (useIsLicenseOwner as jest.Mock).mockReturnValue(true);
     (upsertLicenseSigner as jest.Mock).mockReset();
-    mockOwnerKey.hasPrivateKey = false;
-    mockOwnerKey.privateKeyAddress = null;
+    mockOwnerKey.hasPrivateKey = true;
+    mockOwnerKey.privateKeyAddress = CONSOLE_KEY;
+    enableSigner.mockReset();
+    enableSigner.mockResolvedValue(undefined);
+    (upsertLicenseSigner as jest.Mock).mockResolvedValue({ ok: true, data: {} });
   });
   afterEach(() => jest.useRealTimers());
 
-  // Opening the Config tab enables the owner's console key when it's missing, and
-  // every enable is a transaction. Identity checksums addresses; Turnkey need not.
-  it('does not re-enable an owner key listed in another letter case', async () => {
-    mockOwnerKey.hasPrivateKey = true;
-    mockOwnerKey.privateKeyAddress = SIGNER.toLowerCase();
-    show([SIGNER]);
-    await waitFor(() => expect(mockPublishEvent).toHaveBeenCalled());
+  it('sends no transaction when the owner opens the tab', async () => {
+    mockTeam.members = [OWNER_ROW];
+    show();
+    expect(screen.getByText(/Console access lets this console/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Enable console access' })).toBeEnabled();
+    await waitFor(() => expect(findConsoleKeyAddress).toHaveBeenCalled());
     expect(enableSigner).not.toHaveBeenCalled();
+    expect(hasGlobalAccountPrivateKey).not.toHaveBeenCalled();
+    expect(mockPublishEvent).not.toHaveBeenCalled();
+  });
+
+  it('sends exactly one transaction from the button', async () => {
+    mockTeam.members = [OWNER_ROW];
+    show();
+    fireEvent.click(screen.getByRole('button', { name: 'Enable console access' }));
+    await waitFor(() =>
+      expect(mockPublishEvent).toHaveBeenCalledWith({ client_id: CONSOLE_KEY }, true),
+    );
+    expect(enableSigner).toHaveBeenCalledTimes(1);
+    expect(enableSigner).toHaveBeenCalledWith(CONSOLE_KEY);
+    expect(refetchLicense).toHaveBeenCalled();
+    expect(upsertLicenseSigner).toHaveBeenCalledWith(42, CONSOLE_KEY, {
+      kind: 'API_KEY',
+      note: 'Console',
+      holders: [{ userId: 'u-jane' }],
+    });
+  });
+
+  it('shows a member no button and triggers nothing', async () => {
+    (useIsLicenseOwner as jest.Mock).mockReturnValue(false);
+    show([SIGNER]);
+    expect(screen.queryByRole('button', { name: 'Enable console access' })).toBeNull();
+    expect(
+      screen.getByText("The license owner hasn't turned on console access yet."),
+    ).toBeInTheDocument();
+    await act(async () => {});
+    expect(findConsoleKeyAddress).not.toHaveBeenCalled();
+    expect(hasGlobalAccountPrivateKey).not.toHaveBeenCalled();
+    expect(enableSigner).not.toHaveBeenCalled();
+  });
+
+  it('tells a member nothing once console access is on', () => {
+    (useIsLicenseOwner as jest.Mock).mockReturnValue(false);
+    registry.byAddress = new Map([
+      [
+        SIGNER.toLowerCase(),
+        row(
+          SIGNER,
+          'API_KEY',
+          [{ userId: 'u-jane', name: 'Jane', email: null }],
+          'Console',
+        ),
+      ],
+    ]);
+    show([SIGNER]);
+    expect(screen.queryByText(/hasn't turned on console access/)).toBeNull();
+  });
+
+  it('labels the console key Console (you) with no Assign', async () => {
+    registry.byAddress = new Map([
+      [
+        CONSOLE_KEY.toLowerCase(),
+        row(
+          CONSOLE_KEY,
+          'API_KEY',
+          [{ userId: 'u-jane', name: 'Jane', email: null }],
+          'Console',
+        ),
+      ],
+    ]);
+    show([CONSOLE_KEY]);
+    expect(await screen.findByText('Console (you)')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Assign' })).toBeNull();
+    expect(screen.queryByText(/Unassigned/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: `Actions for ${CONSOLE_KEY}` }));
+    expect(screen.getAllByRole('menuitem').map((i) => i.textContent)).toEqual([
+      'Turn off console access',
+    ]);
+  });
+
+  it('records the registry row for a key enabled before, without a transaction', async () => {
+    mockTeam.members = [OWNER_ROW];
+    show([CONSOLE_KEY.toLowerCase()]);
+    await waitFor(() => expect(upsertLicenseSigner).toHaveBeenCalledTimes(1));
+    expect(upsertLicenseSigner).toHaveBeenCalledWith(42, CONSOLE_KEY.toLowerCase(), {
+      kind: 'API_KEY',
+      note: 'Console',
+      holders: [{ userId: 'u-jane' }],
+    });
+    expect(enableSigner).not.toHaveBeenCalled();
+  });
+
+  it('shows a failed enable on the card', async () => {
+    enableSigner.mockRejectedValue({ code: 4001 });
+    show();
+    fireEvent.click(screen.getByRole('button', { name: 'Enable console access' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'The transaction was denied',
+    );
+    expect(mockSetLoadingStatus).not.toHaveBeenCalled();
+  });
+
+  it("refuses before sending when the console wallet doesn't own the license", async () => {
+    show([], '0x1111111111111111111111111111111111111111');
+    fireEvent.click(screen.getByRole('button', { name: 'Enable console access' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "Your console wallet doesn't own this license on-chain, so it can't turn on console access.",
+    );
+    expect(enableSigner).not.toHaveBeenCalled();
+  });
+
+  it('labels the API key button for servers', () => {
+    show();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Create an API key for your server' }),
+    );
+    expect(
+      screen.getByText(/For apps that mint developer JWTs on their own servers/),
+    ).toBeInTheDocument();
   });
 
   it('asks who a new key is for, shows it once enabled, and offers Assign with the holders filled in', async () => {
     (upsertLicenseSigner as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));
     show();
-    fireEvent.click(screen.getByRole('button', { name: 'Generate key' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Create an API key for your server' }),
+    );
     fireEvent.click(screen.getByRole('checkbox', { name: 'Sam Rivera' }));
     fireEvent.change(screen.getByLabelText('Note'), {
       target: { value: 'Prod backend' },
@@ -337,7 +490,9 @@ describe('Signers', () => {
   it('is read-only for members', () => {
     (useIsLicenseOwner as jest.Mock).mockReturnValue(false);
     show([SIGNER]);
-    expect(screen.queryByRole('button', { name: 'Generate key' })).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: 'Create an API key for your server' }),
+    ).toBeNull();
     expect(screen.queryByRole('button', { name: `Actions for ${SIGNER}` })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Assign' })).toBeNull();
   });

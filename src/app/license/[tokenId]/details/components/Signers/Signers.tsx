@@ -1,5 +1,6 @@
 import { FragmentType, gql, useFragment } from '@/gql';
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useRef, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/Button';
 import { KeyIcon, TruckIcon } from '@heroicons/react/20/solid';
 import { Table } from '@/components/Table';
@@ -33,7 +34,17 @@ import { markLicenseSignerDisabled, upsertLicenseSigner } from '@/actions/teams'
 import { useLicenseSignerRegistry } from '@/hooks/useLicenseSignerRegistry';
 import { useTeamMembers } from '@/hooks/useTeamMembers';
 import { registryWrite } from '@/utils/registryWrite';
+import { txErrorStatus } from '@/utils/txErrorStatus';
 import { BelongsTo } from './BelongsTo';
+import { ConsoleAccess } from './ConsoleAccess';
+import {
+  API_KEY_BUTTON,
+  API_KEY_EXPLAINER,
+  CONSOLE_KEY_NOTE,
+  NOT_LICENSE_OWNER_ON_CHAIN,
+  TURN_OFF_CONSOLE_ACCESS,
+  isConsoleAccessOn,
+} from './consoleAccessCopy';
 import { KeyHoldersModal, type KeyHolders } from './KeyHoldersModal';
 import type { LicenseSignerRecord } from '@/types/team';
 
@@ -83,7 +94,19 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     'generate-my-developer-jwt',
   );
 
-  const { hasGlobalAccountPrivateKey } = useDimoAuth();
+  const { hasGlobalAccountPrivateKey, findConsoleKeyAddress } = useDimoAuth();
+  const queryClient = useQueryClient();
+  const [enabling, setEnabling] = useState(false);
+  const [enableError, setEnableError] = useState<string | null>(null);
+  const consoleKeyRecorded = useRef(false);
+  // Read-only Turnkey lookup (never creates a key); members never run it.
+  const consoleKeyQuery = useQuery({
+    queryKey: ['console-key', currentUser?.subOrganizationId],
+    queryFn: findConsoleKeyAddress,
+    enabled: isLicenseOwner && !!currentUser,
+    retry: false,
+  });
+  const consoleKey = consoleKeyQuery.data?.toLowerCase() ?? null;
   const setFleetRedirectUri = useSetRedirectUri(fragment.tokenId);
   const registry = useLicenseSignerRegistry(fragment.tokenId);
   const { members } = useTeamMembers();
@@ -424,10 +447,14 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     // revoked in Settings → Team, which keeps the registry in step with the chain.
     const address = String(item.address).toLowerCase();
     const wallet = memberWallets.get(address);
-    if (registry.byAddress.get(address)?.kind === 'MEMBER' || (wallet && !wallet.owner))
+    if (
+      address !== consoleKey &&
+      (registry.byAddress.get(address)?.kind === 'MEMBER' || (wallet && !wallet.owner))
+    )
       return null;
+    const isConsoleKey = address === consoleKey;
     const remove = {
-      label: 'Delete API key',
+      label: isConsoleKey ? TURN_OFF_CONSOLE_ACCESS : 'Delete API key',
       destructive: true,
       onSelect: () => setSignerToDelete(item.address),
     };
@@ -437,9 +464,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         label={`Actions for ${item.address}`}
         // The owner's own console wallet can be deleted, never assigned.
         items={
-          wallet
+          isConsoleKey
             ? [remove]
-            : [{ label: 'Assign', onSelect: () => openAssign(item.address) }, remove]
+            : wallet
+              ? [remove]
+              : [{ label: 'Assign', onSelect: () => openAssign(item.address) }, remove]
         }
       />
     );
@@ -452,25 +481,70 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     );
   };
 
-  const handleOwnerSigner = async () => {
+  const ownerUserId = members.find((m) => m.role === 'OWNER')?.userId;
+
+  // A console-api write, not a transaction; a failure is ignored like recordKey's.
+  const recordConsoleKey = async (address: `0x${string}`) => {
+    if (!ownerUserId) return;
+    await registryWrite(() =>
+      upsertLicenseSigner(fragment.tokenId, address, {
+        kind: 'API_KEY',
+        note: CONSOLE_KEY_NOTE,
+        holders: [{ userId: ownerUserId }],
+      }),
+    );
+    void registry.refetch();
+  };
+
+  const enableConsoleAccess = async () => {
+    setEnabling(true);
+    setEnableError(null);
     try {
+      if (
+        !currentUser?.smartContractAddress ||
+        fragment.owner.toLowerCase() !== currentUser.smartContractAddress.toLowerCase()
+      ) {
+        setEnableError(NOT_LICENSE_OWNER_ON_CHAIN);
+        return;
+      }
       const { hasPrivateKey, privateKeyAddress } = await hasGlobalAccountPrivateKey();
-      if (!hasPrivateKey) return;
-      if (!isSigner(privateKeyAddress!)) {
-        await handleEnableSigner(privateKeyAddress!);
+      if (!hasPrivateKey || !privateKeyAddress) {
+        setEnableError('Something went wrong');
+        return;
+      }
+      if (!isSigner(privateKeyAddress)) {
+        await handleEnableSigner(privateKeyAddress);
+        consoleKeyRecorded.current = true;
         await refetch();
       }
-      publishEvent({ client_id: privateKeyAddress! }, true);
+      await recordConsoleKey(privateKeyAddress);
+      publishEvent({ client_id: privateKeyAddress }, true);
+      await queryClient.invalidateQueries({ queryKey: ['console-key'] });
     } catch (error: unknown) {
-      handleError(error);
+      Sentry.captureException(error);
+      setEnableError(txErrorStatus(error).label ?? 'Something went wrong');
+    } finally {
+      setEnabling(false);
     }
   };
 
+  // Console key already a signer (enabled before this registry row existed):
+  // record the row once, so members can see console access is on.
   useEffect(() => {
-    if (!currentUser || !isLicenseOwner) return;
-    void handleOwnerSigner();
+    if (!isLicenseOwner || !consoleKey || !registry.isLoaded || registry.isError) return;
+    if (consoleKeyRecorded.current) return;
+    if (!isSigner(consoleKey as `0x${string}`)) return;
+    if (registry.byAddress.has(consoleKey)) return;
+    consoleKeyRecorded.current = true;
+    void recordConsoleKey(consoleKey as `0x${string}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser, isLicenseOwner]);
+  }, [
+    isLicenseOwner,
+    consoleKey,
+    registry.isLoaded,
+    registry.isError,
+    registry.byAddress,
+  ]);
 
   useEffect(() => {
     if (!isLicenseOwner) return;
@@ -486,6 +560,12 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     void handleDelete(signerToDelete);
     setSignerToDelete(undefined);
   };
+
+  const consoleOn = isConsoleAccessOn({
+    consoleKey,
+    signers: onChainRows.map((s) => String(s.address)),
+    registry: registry.byAddress,
+  });
 
   const renderEnabledAt = (item: SignerRow) =>
     item.enabledAt ? new Date(item.enabledAt).toLocaleDateString() : '—';
@@ -510,11 +590,20 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               onClick={() => setHoldersFor({ mode: 'generate' })}
             >
               <KeyIcon className="h-4 w-4" />
-              Generate key
+              {API_KEY_BUTTON}
             </Button>
           </div>
         )}
       </div>
+      <ConsoleAccess
+        isLicenseOwner={isLicenseOwner}
+        on={consoleOn}
+        enabling={enabling}
+        error={enableError}
+        onEnable={() => void enableConsoleAccess()}
+        clientId={fragment.clientId}
+        domain={fragment.redirectURIs.nodes[0]?.uri ?? undefined}
+      />
       <div>
         {!!displaySigners.length && (
           <div className="-mx-4 -mb-4">
@@ -552,10 +641,15 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                     <BelongsTo
                       record={registry.byAddress.get(String(item.address).toLowerCase())}
                       memberWallet={memberWallets.get(String(item.address).toLowerCase())}
+                      consoleKey={
+                        String(item.address).toLowerCase() === consoleKey &&
+                        !item.offChain
+                      }
                       offChain={item.offChain}
                       unavailable={registry.isError}
                       onAssign={
                         isLicenseOwner &&
+                        String(item.address).toLowerCase() !== consoleKey &&
                         !memberWallets.has(String(item.address).toLowerCase())
                           ? () => openAssign(item.address)
                           : undefined
@@ -574,6 +668,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         <KeyHoldersModal
           signer={holdersFor.mode === 'assign' ? holdersFor.signer : undefined}
           initial={holdersFor.mode === 'assign' ? holdersFor.initial : undefined}
+          explainer={holdersFor.mode === 'generate' ? API_KEY_EXPLAINER : undefined}
           submitLabel={holdersFor.mode === 'generate' ? 'Generate API key' : 'Save'}
           onSubmit={submitHolders}
           onClose={() => setHoldersFor(null)}

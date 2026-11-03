@@ -32,6 +32,7 @@ export const useLicenseSignerRegistry = (tokenId: number) => {
   );
   return {
     byAddress,
+    isLoaded: query.isSuccess,
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,
