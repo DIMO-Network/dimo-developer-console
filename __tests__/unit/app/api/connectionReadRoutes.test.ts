@@ -44,8 +44,8 @@ describe('GET /api/connections', () => {
 });
 
 describe('GET /api/connections/[id]', () => {
-  it('answers 200 null for a deleted connection', async () => {
-    (getConnectionById as jest.Mock).mockResolvedValue(null);
+  it('answers 404 for a deleted connection', async () => {
+    (getConnectionById as jest.Mock).mockRejectedValue(axiosStatus(404));
     const res = await getConnection(
       new Request('https://console.test/api/connections/x'),
       {
@@ -53,9 +53,8 @@ describe('GET /api/connections/[id]', () => {
       },
     );
     expect(getConnectionById).toHaveBeenCalledWith('x');
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(404);
     expect(res.headers.get('Cache-Control')).toBe('private, no-store');
-    await expect(res.json()).resolves.toBeNull();
   });
 });
 

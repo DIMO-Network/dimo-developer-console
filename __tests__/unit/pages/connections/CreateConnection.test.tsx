@@ -70,6 +70,8 @@ import {
   useMyConnections,
 } from '@/hooks/queries/useMyConnections';
 import { fetchJson } from '@/utils/fetchJson';
+import { HttpError } from '@/utils/httpError';
+import { KEYS_UNREADABLE_ON_RESUME, NAME_TAKEN_IN_TEAM } from '@/app/connections/copy';
 import { useTeam } from '@/hooks/useTeam';
 import ConnectionsList from '@/app/connections/components/View/View';
 import { View } from '@/app/connections/create/[owner]/components/View/View';
@@ -146,9 +148,9 @@ beforeEach(() => {
   global.fetch = jest.fn();
   chainSaysHeldBy(null);
   jest.spyOn(console, 'error').mockImplementation(() => undefined);
-  (createConnection as jest.Mock).mockResolvedValue(row());
+  (createConnection as jest.Mock).mockResolvedValue({ ok: true, data: row() });
   (updateConnection as jest.Mock).mockResolvedValue(undefined);
-  (deleteConnection as jest.Mock).mockResolvedValue(undefined);
+  (deleteConnection as jest.Mock).mockResolvedValue({ ok: true, data: null });
   mockMint.mockResolvedValue({ success: true, connectionId: BigInt(TOKEN_ID) });
   mockGrant.mockResolvedValue(undefined);
 });
@@ -162,7 +164,7 @@ describe('creating a connection', () => {
     const order: string[] = [];
     (createConnection as jest.Mock).mockImplementation(async () => {
       order.push('save');
-      return row();
+      return { ok: true, data: row() };
     });
     mockMint.mockImplementation(async () => {
       order.push('mint');
@@ -198,6 +200,42 @@ describe('creating a connection', () => {
     expect(screen.queryByText(/Server Components/)).toBeNull();
   });
 
+  it("spends nothing if the keys can't be saved (refusal)", async () => {
+    (createConnection as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 500,
+      code: null,
+      message: 'boom',
+    });
+    await renderPage('name=Fleet');
+
+    await buy();
+
+    expect(mockMint).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Couldn't save your connection keys, so nothing was minted."),
+    ).toBeInTheDocument();
+  });
+
+  it('says the team already uses the name', async () => {
+    (createConnection as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 409,
+      code: 'CONNECTION_NAME_TAKEN',
+      message: 'Your team already has a connection with this name',
+    });
+    await renderPage('name=Fleet');
+
+    await buy();
+
+    expect(screen.getByText(NAME_TAKEN_IN_TEAM)).toBeInTheDocument();
+    expect(mockMint).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText("Couldn't save your connection keys, so nothing was minted."),
+    ).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Continue with payment' })).toBeNull();
+  });
+
   it('removes the row when the mint is refused', async () => {
     mockMint.mockResolvedValue({ success: false, reason: 'Insufficient DIMO balance.' });
     await renderPage('name=Fleet');
@@ -229,7 +267,12 @@ describe('creating a connection', () => {
 
   it('still shows why the mint was refused if the row cannot be removed', async () => {
     mockMint.mockResolvedValue({ success: false, reason: 'Insufficient DIMO balance.' });
-    (deleteConnection as jest.Mock).mockRejectedValue(new Error('masked'));
+    (deleteConnection as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 500,
+      code: null,
+      message: 'masked',
+    });
     await renderPage('name=Fleet');
 
     await buy();
@@ -330,7 +373,7 @@ describe('creating a connection', () => {
 });
 
 describe('resuming a connection', () => {
-  const resumeWith = async (connection: Connection | null) => {
+  const resumeWith = async (connection: Connection) => {
     (fetchJson as jest.Mock).mockResolvedValue(connection);
     await renderPage('resume=conn-1');
   };
@@ -358,7 +401,7 @@ describe('resuming a connection', () => {
     let saved: Record<string, string> = {};
     (createConnection as jest.Mock).mockImplementation(async (input) => {
       saved = input;
-      return row(input);
+      return { ok: true, data: row(input) };
     });
     await renderPage('name=Fleet');
     await buy();
@@ -662,11 +705,19 @@ describe('resuming a connection', () => {
   });
 
   it.each([
-    ['is gone', null, /no longer exists/i],
     [
       'comes without its keys',
       row({ connection_license_private_key: null, device_issuance_key: null } as never),
       /only the team owner/i,
+    ],
+    [
+      "has keys that can't be read",
+      row({
+        keys_unreadable: true,
+        connection_license_private_key: null,
+        device_issuance_key: null,
+      }),
+      KEYS_UNREADABLE_ON_RESUME,
     ],
   ])('offers nothing when the row %s', async (_label, connection, message) => {
     await resumeWith(connection);
@@ -681,6 +732,31 @@ describe('resuming a connection', () => {
     expect(mockMint).not.toHaveBeenCalled();
     expect(mockGrant).not.toHaveBeenCalled();
     expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('stops a resume of a deleted connection as gone', async () => {
+    (fetchJson as jest.Mock).mockRejectedValue(new HttpError(404, 'gone'));
+    await renderPage('resume=conn-1');
+
+    expect(screen.getByText(/no longer exists/i)).toBeInTheDocument();
+    expect(screen.queryByText(/couldn't load this connection/i)).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: 'Finish setup', hidden: true }),
+    ).toBeNull();
+    expect(mockMint).not.toHaveBeenCalled();
+  });
+
+  it("stops a resume whose keys can't be read", async () => {
+    await resumeWith(
+      row({
+        keys_unreadable: true,
+        connection_license_private_key: null,
+        device_issuance_key: null,
+      }),
+    );
+
+    expect(screen.getByText(KEYS_UNREADABLE_ON_RESUME)).toBeInTheDocument();
+    expect(screen.queryByText(/only the team owner/i)).toBeNull();
   });
 
   it("says so when the row can't be loaded, in its own words", async () => {

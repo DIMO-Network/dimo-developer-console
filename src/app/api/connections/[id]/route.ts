@@ -5,8 +5,8 @@ import { PRIVATE_HEADERS, upstreamFailure } from '@/utils/routeResponses';
 
 // One connection, for its details page and the resume flow. The owner's keys
 // are in the body, exactly as the server action returned them, so the response
-// is private and never stored. A deleted row answers 200 with null, as
-// console-api does.
+// is private and never stored. A deleted row answers 404, which
+// upstreamFailure passes through.
 export const GET = async (
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
