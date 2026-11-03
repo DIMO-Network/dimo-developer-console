@@ -1,8 +1,8 @@
 'use client';
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { listTeamMembers } from '@/actions/teams';
 import { useTeam } from '@/hooks/useTeam';
+import { fetchApiResult } from '@/utils/fetchApiResult';
 import { unwrap } from '@/utils/teamApiError';
 import type { TeamMember } from '@/types/team';
 
@@ -24,7 +24,9 @@ export const useTeamMembers = () => {
     queryKey: key,
     enabled: !teamLoading && !!activeTeam,
     retry: false,
-    queryFn: async () => unwrap(await listTeamMembers()).members,
+    queryFn: async () =>
+      unwrap(await fetchApiResult<{ members: TeamMember[] }>('/api/team/members'))
+        .members,
   });
   const upsertMember = useCallback(
     (member: TeamMember) =>

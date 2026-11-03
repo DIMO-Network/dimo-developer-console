@@ -5,12 +5,16 @@ import { NextRequest } from 'next/server';
 import { AxiosError, AxiosHeaders } from 'axios';
 
 jest.mock('@/services/user', () => ({ getUserByToken: jest.fn() }));
-jest.mock('@/actions/configurations', () => ({ getConfigurationsByClientId: jest.fn() }));
+jest.mock('@/actions/configurations', () => ({
+  getConfigurationsByClientId: jest.fn(),
+  getConfiguration: jest.fn(),
+}));
 
 import { GET as getMe } from '@/app/api/me/route';
 import { GET as getConfigurations } from '@/app/api/configurations/route';
+import { GET as getConfigurationById } from '@/app/api/configurations/[id]/route';
 import { getUserByToken } from '@/services/user';
-import { getConfigurationsByClientId } from '@/actions/configurations';
+import { getConfigurationsByClientId, getConfiguration } from '@/actions/configurations';
 
 const axiosStatus = (status: number) =>
   new AxiosError('failed', String(status), undefined, undefined, {
@@ -67,5 +71,35 @@ describe('GET /api/configurations', () => {
     );
     expect(res.status).toBe(400);
     expect(getConfigurationsByClientId).not.toHaveBeenCalled();
+  });
+});
+
+describe('GET /api/configurations/[id]', () => {
+  const call = () =>
+    getConfigurationById(new Request('https://console.test/api/configurations/c1'), {
+      params: Promise.resolve({ id: 'c1' }),
+    });
+
+  it('returns the configuration', async () => {
+    const body = { id: 'c1', configuration_name: 'n', configuration: {} };
+    (getConfiguration as jest.Mock).mockResolvedValue(body);
+    const res = await call();
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Cache-Control')).toBe('private, no-store');
+    await expect(res.json()).resolves.toEqual(body);
+    expect(getConfiguration).toHaveBeenCalledWith({ id: 'c1' });
+  });
+
+  it("keeps console-api's 404", async () => {
+    (getConfiguration as jest.Mock).mockRejectedValue(axiosStatus(404));
+    const res = await call();
+    expect(res.status).toBe(404);
+    expect(res.headers.get('Cache-Control')).toBe('private, no-store');
+  });
+
+  it('answers 502 when console-api was not reached', async () => {
+    (getConfiguration as jest.Mock).mockRejectedValue(new AxiosError('Network Error'));
+    const res = await call();
+    expect(res.status).toBe(502);
   });
 });

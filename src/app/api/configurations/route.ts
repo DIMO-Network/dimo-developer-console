@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Per-user data: never stored by Vercel, Cloudflare or the browser.
-const PRIVATE = { 'Cache-Control': 'private, no-store' };
 import { getConfigurationsByClientId } from '@/actions/configurations';
+import { PRIVATE_HEADERS } from '@/utils/routeResponses';
 
 // A license's sharing configurations, for the license cards. As a server
 // action, one per card, they ran one after another (Next queues server
@@ -14,12 +13,12 @@ export const GET = async (request: NextRequest) => {
   }
   try {
     return NextResponse.json(await getConfigurationsByClientId({ client_id: clientId }), {
-      headers: PRIVATE,
+      headers: PRIVATE_HEADERS,
     });
   } catch {
     return NextResponse.json(
       { message: 'Could not load configurations' },
-      { status: 502, headers: PRIVATE },
+      { status: 502, headers: PRIVATE_HEADERS },
     );
   }
 };

@@ -2,7 +2,7 @@ import { queryClient } from '@/hoc/QueryProvider';
 import { HttpError } from '@/utils/httpError';
 
 // The editor's 401 was four identical rejected requests before the UI could
-// say anything, because the default policy retries every failure three times.
+// say anything, because the default policy retried every failure three times.
 describe('queryClient retry policy', () => {
   const retry = queryClient.getDefaultOptions().queries?.retry as (
     failureCount: number,
@@ -18,10 +18,9 @@ describe('queryClient retry policy', () => {
     expect(retry(0, new HttpError(404, 'not found'))).toBe(false);
   });
 
-  it('still retries a 5xx and a network fault, up to three times', () => {
+  it('still retries a 5xx and a network fault, once', () => {
     expect(retry(0, new HttpError(503, 'unavailable'))).toBe(true);
-    expect(retry(2, new HttpError(503, 'unavailable'))).toBe(true);
-    expect(retry(3, new HttpError(503, 'unavailable'))).toBe(false);
+    expect(retry(1, new HttpError(503, 'unavailable'))).toBe(false);
     expect(retry(0, new Error('Network Error'))).toBe(true);
   });
 });

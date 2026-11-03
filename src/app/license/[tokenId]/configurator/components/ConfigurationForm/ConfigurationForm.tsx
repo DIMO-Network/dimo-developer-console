@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { TextError } from '@/components/TextError';
@@ -16,8 +16,7 @@ import { SegmentedControl } from '@/components/SegmentedControl';
 import { TextField } from '@/components/TextField';
 import { Button } from '@/components/Button';
 import { DatePicker } from '@/components/DatePicker';
-import { fetchMyBrands } from '@/actions/brand';
-import { getWorkspaceByTokenId } from '@/actions/workspace';
+import { useLicenseBrands } from '@/hooks/useLicenseBrands';
 import { OutputPrint } from '@/app/license/[tokenId]/configurator/components/OutputPrint/OutputPrint';
 import { configurationLink } from '@/app/license/[tokenId]/configurator/utils/configuration';
 import { OwnerAction } from '@/components/OwnerOnly';
@@ -91,21 +90,9 @@ const startOfToday = () => {
 /** The configuration form, for the new and the edit page. */
 export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false }) => {
   const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
-  const [brandNames, setBrandNames] = useState<string[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const ws = await getWorkspaceByTokenId(fragment.tokenId);
-        if (!ws?.id) return;
-        const brands = await fetchMyBrands(ws.id);
-        setBrandNames(brands.map((b) => b.name).filter((n): n is string => !!n));
-      } catch {
-        // brand names are optional
-      }
-    };
-    void load();
-  }, [fragment.tokenId]);
+  const brandNames = (useLicenseBrands(fragment.tokenId).data?.brands ?? [])
+    .map((b) => b.name)
+    .filter((n): n is string => !!n);
 
   const {
     register,

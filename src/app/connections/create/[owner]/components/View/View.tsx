@@ -22,11 +22,11 @@ import { generateConnectionWallets } from '@/services/connectionWallets';
 import {
   createConnection,
   deleteConnection,
-  getConnectionById,
   updateConnection,
   type Connection,
   type ConnectionStatus,
 } from '@/actions/connections';
+import { fetchJson } from '@/utils/fetchJson';
 import { invalidateMyConnectionsQuery } from '@/hooks/queries/useMyConnections';
 
 // Server Actions mask what they throw in production, so every failure here is told
@@ -120,7 +120,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   useEffect(() => {
     if (!resumeId) return;
     let abandoned = false;
-    getConnectionById(resumeId).then(
+    fetchJson<Connection | null>(`/api/connections/${encodeURIComponent(resumeId)}`).then(
       (connection) => {
         if (abandoned) return;
         if (!connection) {

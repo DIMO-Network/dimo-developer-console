@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ConfigurationList } from '@/app/license/[tokenId]/configurator/components/ConfigurationList';
 import * as configurationsActions from '@/actions/configurations';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@/actions/configurations', () => ({
-  getConfigurationsByClientId: jest.fn(),
   deleteConfiguration: jest.fn(),
 }));
 
@@ -19,16 +19,47 @@ const mockConfigs = [
   { id: 'def456', configuration_name: 'Another Config', entry_state: 'EMAIL_INPUT' },
 ];
 
+const renderList = () =>
+  render(
+    <QueryClientProvider
+      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+    >
+      <ConfigurationList clientId="0xabc" tokenId={42} />
+    </QueryClientProvider>,
+  );
+
+const respond = (body: unknown, status = 200) => ({
+  ok: status >= 200 && status < 300,
+  status,
+  json: async () => body,
+});
+
 describe('ConfigurationList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (configurationsActions.getConfigurationsByClientId as jest.Mock).mockResolvedValue(
-      mockConfigs,
+    global.fetch = jest.fn().mockResolvedValue(respond(mockConfigs));
+  });
+
+  it('lists the configurations from the route', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(
+      respond([{ id: 'c1', configuration_name: 'Main', entry_state: 'EMAIL_INPUT' }]),
+    );
+    renderList();
+    expect(await screen.findByText('Main')).toBeInTheDocument();
+    expect(screen.getByText('Login with DIMO')).toBeInTheDocument();
+    expect(global.fetch).toHaveBeenCalledWith('/api/configurations?clientId=0xabc');
+  });
+
+  it('says when the list could not be loaded', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(respond({}, 502));
+    renderList();
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Could not load configurations. Reload to try again.',
     );
   });
 
   it('renders a list of configurations', async () => {
-    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    renderList();
     await waitFor(() => {
       expect(screen.getByText('My Config')).toBeInTheDocument();
       expect(screen.getByText('Another Config')).toBeInTheDocument();
@@ -36,20 +67,16 @@ describe('ConfigurationList', () => {
   });
 
   it('renders empty state when no configurations exist', async () => {
-    (configurationsActions.getConfigurationsByClientId as jest.Mock).mockResolvedValue(
-      [],
-    );
-    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    (global.fetch as jest.Mock).mockResolvedValue(respond([]));
+    renderList();
     await waitFor(() => {
       expect(screen.getByText(/no configurations yet/i)).toBeInTheDocument();
     });
   });
 
   it('never reads a failed load as a license with no configurations', async () => {
-    (configurationsActions.getConfigurationsByClientId as jest.Mock).mockRejectedValue(
-      new Error('console-api is down'),
-    );
-    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    (global.fetch as jest.Mock).mockRejectedValue(new Error('console-api is down'));
+    renderList();
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Could not load configurations',
     );
@@ -60,7 +87,7 @@ describe('ConfigurationList', () => {
     (configurationsActions.deleteConfiguration as jest.Mock).mockRejectedValue(
       new Error('403'),
     );
-    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    renderList();
     await screen.findByText('My Config');
     fireEvent.click(screen.getAllByRole('button', { name: /delete/i })[0]);
     fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
@@ -71,7 +98,7 @@ describe('ConfigurationList', () => {
   });
 
   it('shows confirm UI when delete is clicked', async () => {
-    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    renderList();
     await waitFor(() => {
       expect(screen.getByText('My Config')).toBeInTheDocument();
     });
@@ -81,12 +108,12 @@ describe('ConfigurationList', () => {
     expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
   });
 
-  it('calls deleteConfiguration and refreshes on confirm', async () => {
+  it('reloads the list after a delete', async () => {
     (configurationsActions.deleteConfiguration as jest.Mock).mockResolvedValue(undefined);
-    (configurationsActions.getConfigurationsByClientId as jest.Mock)
-      .mockResolvedValueOnce(mockConfigs)
-      .mockResolvedValueOnce([mockConfigs[1]]);
-    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    (global.fetch as jest.Mock)
+      .mockResolvedValueOnce(respond(mockConfigs))
+      .mockResolvedValueOnce(respond([mockConfigs[1]]));
+    renderList();
     await waitFor(() => {
       expect(screen.getByText('My Config')).toBeInTheDocument();
     });
@@ -98,10 +125,12 @@ describe('ConfigurationList', () => {
         id: 'abc123',
       });
     });
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByText('My Config')).not.toBeInTheDocument());
   });
 
   it('cancels delete when cancel is clicked', async () => {
-    render(<ConfigurationList clientId="0xabc" tokenId={42} />);
+    renderList();
     await waitFor(() => {
       expect(screen.getByText('My Config')).toBeInTheDocument();
     });

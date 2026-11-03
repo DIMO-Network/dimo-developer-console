@@ -20,7 +20,8 @@ npm run test:update-snap  # update snapshots
 npm run lint       # ESLint
 npm run lint:format  # Prettier check
 npm run build      # production build
-npm run compile    # TypeScript typecheck only
+npm run compile    # GraphQL codegen (graphql-codegen --config src/codegen.ts)
+npx tsc --noEmit   # TypeScript type check
 ```
 
 ## Project Structure

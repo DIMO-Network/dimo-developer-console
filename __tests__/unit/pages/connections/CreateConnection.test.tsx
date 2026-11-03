@@ -33,10 +33,10 @@ jest.mock('@/hooks/useTransactions', () => ({
 jest.mock('@/actions/connections', () => ({
   createConnection: jest.fn(),
   deleteConnection: jest.fn(),
-  getConnectionById: jest.fn(),
   updateConnection: jest.fn(),
 }));
 
+jest.mock('@/utils/fetchJson', () => ({ fetchJson: jest.fn() }));
 jest.mock('@/hooks/queries/useMyConnections', () => ({
   invalidateMyConnectionsQuery: jest.fn(),
   useMyConnections: jest.fn(),
@@ -62,7 +62,6 @@ jest.mock('sonner', () => ({ toast: { success: jest.fn() } }));
 import {
   createConnection,
   deleteConnection,
-  getConnectionById,
   updateConnection,
   type Connection,
 } from '@/actions/connections';
@@ -70,6 +69,7 @@ import {
   invalidateMyConnectionsQuery,
   useMyConnections,
 } from '@/hooks/queries/useMyConnections';
+import { fetchJson } from '@/utils/fetchJson';
 import { useTeam } from '@/hooks/useTeam';
 import ConnectionsList from '@/app/connections/components/View/View';
 import { View } from '@/app/connections/create/[owner]/components/View/View';
@@ -331,7 +331,7 @@ describe('creating a connection', () => {
 
 describe('resuming a connection', () => {
   const resumeWith = async (connection: Connection | null) => {
-    (getConnectionById as jest.Mock).mockResolvedValue(connection);
+    (fetchJson as jest.Mock).mockResolvedValue(connection);
     await renderPage('resume=conn-1');
   };
 
@@ -340,7 +340,7 @@ describe('resuming a connection', () => {
 
     await click('Finish setup');
 
-    expect(getConnectionById).toHaveBeenCalledWith('conn-1');
+    expect(fetchJson).toHaveBeenCalledWith('/api/connections/conn-1');
     expect(mockMint).not.toHaveBeenCalled();
     expect(global.fetch).not.toHaveBeenCalled();
     expect(mockGrant).toHaveBeenCalledWith(
@@ -684,7 +684,7 @@ describe('resuming a connection', () => {
   });
 
   it("says so when the row can't be loaded, in its own words", async () => {
-    (getConnectionById as jest.Mock).mockRejectedValue(new Error('masked'));
+    (fetchJson as jest.Mock).mockRejectedValue(new Error('masked'));
     await renderPage('resume=conn-1');
 
     expect(screen.getByText(/couldn't load this connection/i)).toBeInTheDocument();
@@ -695,7 +695,7 @@ describe('resuming a connection', () => {
   });
 
   it('does not offer a new purchase while the row loads', async () => {
-    (getConnectionById as jest.Mock).mockReturnValue(new Promise(() => undefined));
+    (fetchJson as jest.Mock).mockReturnValue(new Promise(() => undefined));
     await renderPage('resume=conn-1');
 
     expect(

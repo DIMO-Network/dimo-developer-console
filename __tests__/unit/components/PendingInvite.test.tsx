@@ -2,16 +2,16 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-jest.mock('@/actions/invites', () => ({
-  previewPendingInvite: jest.fn(),
-  acceptPendingInvite: jest.fn(),
-}));
+jest.mock('@/actions/invites', () => ({ acceptPendingInvite: jest.fn() }));
+jest.mock('@/utils/fetchApiResult', () => ({ fetchApiResult: jest.fn() }));
 const trackEvent = jest.fn();
 jest.mock('@/hooks/useMixPanel', () => ({ useMixPanel: () => ({ trackEvent }) }));
 jest.mock('sonner', () => ({
   toast: Object.assign(jest.fn(), { success: jest.fn(), error: jest.fn() }),
 }));
-import { acceptPendingInvite, previewPendingInvite } from '@/actions/invites';
+import { acceptPendingInvite } from '@/actions/invites';
+import { fetchApiResult } from '@/utils/fetchApiResult';
+
 import { toast } from 'sonner';
 import { PendingInvite } from '@/components/PendingInvite';
 
@@ -41,33 +41,33 @@ const renderInvite = (onJoined = jest.fn(), client = new QueryClient()) =>
 // Resolves once the component has handled preview call n (0-based): its
 // continuation was queued on the same promise before ours.
 const previewHandled = async (n: number) => {
-  await waitFor(() => expect(previewPendingInvite).toHaveBeenCalledTimes(n + 1));
+  await waitFor(() => expect(fetchApiResult).toHaveBeenCalledTimes(n + 1));
   await act(async () => {
-    await (previewPendingInvite as jest.Mock).mock.results[n].value;
+    await (fetchApiResult as jest.Mock).mock.results[n].value;
   });
 };
 
 describe('PendingInvite', () => {
   it('renders nothing without a pending invite', async () => {
-    (previewPendingInvite as jest.Mock).mockResolvedValue(null);
+    (fetchApiResult as jest.Mock).mockResolvedValue({ ok: true, data: null });
     const { container } = renderInvite();
     await previewHandled(0);
     expect(container).toBeEmptyDOMElement();
   });
 
   it('does not ask again on the next section once there was no invite', async () => {
-    (previewPendingInvite as jest.Mock).mockResolvedValue(null);
+    (fetchApiResult as jest.Mock).mockResolvedValue({ ok: true, data: null });
     const client = new QueryClient();
     const { unmount } = renderInvite(jest.fn(), client);
     await previewHandled(0);
     unmount();
     renderInvite(jest.fn(), client);
     await act(async () => {});
-    expect(previewPendingInvite).toHaveBeenCalledTimes(1);
+    expect(fetchApiResult).toHaveBeenCalledTimes(1);
   });
 
   it('asks before joining and hands the accepted team (MEMBER, not personal) to onJoined', async () => {
-    (previewPendingInvite as jest.Mock).mockResolvedValue({ ok: true, data: PREVIEW });
+    (fetchApiResult as jest.Mock).mockResolvedValue({ ok: true, data: PREVIEW });
     (acceptPendingInvite as jest.Mock).mockResolvedValue({
       ok: true,
       data: { team: TEAM },
@@ -91,7 +91,7 @@ describe('PendingInvite', () => {
   });
 
   it('closes on "Not now" without accepting', async () => {
-    (previewPendingInvite as jest.Mock).mockResolvedValue({ ok: true, data: PREVIEW });
+    (fetchApiResult as jest.Mock).mockResolvedValue({ ok: true, data: PREVIEW });
     renderInvite();
     fireEvent.click(await screen.findByRole('button', { name: 'Not now' }));
     expect(screen.queryByText('Join Acme Mobility owned by ops@acme.dev?')).toBeNull();
@@ -99,7 +99,7 @@ describe('PendingInvite', () => {
   });
 
   it('explains a terminal error and stays quiet on a network failure', async () => {
-    (previewPendingInvite as jest.Mock).mockResolvedValueOnce({
+    (fetchApiResult as jest.Mock).mockResolvedValueOnce({
       ok: false,
       status: 403,
       code: 'INVITE_EMAIL_MISMATCH',
@@ -113,7 +113,7 @@ describe('PendingInvite', () => {
     );
     unmount();
     (toast.error as jest.Mock).mockClear();
-    (previewPendingInvite as jest.Mock).mockResolvedValueOnce({
+    (fetchApiResult as jest.Mock).mockResolvedValueOnce({
       ok: false,
       status: 0,
       code: null,

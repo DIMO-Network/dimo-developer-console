@@ -1,8 +1,10 @@
 'use client';
 
 import { useQuery } from '@apollo/client/react';
+import { useQuery as useRestQuery } from '@tanstack/react-query';
+import { fetchJson } from '@/utils/fetchJson';
 import { Loader } from '@/components/Loader';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -11,7 +13,7 @@ import {
   buildConfiguration,
   toFormValues,
 } from '@/app/license/[tokenId]/configurator/utils/configuration';
-import { getConfiguration, updateConfiguration } from '@/actions/configurations';
+import { IConfiguration, updateConfiguration } from '@/actions/configurations';
 import { DEVELOPER_LICENSE_INFO } from '@/app/license/[tokenId]/configurator/components/ListView/ListView';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -51,23 +53,40 @@ export const View = ({
 
   const { reset } = methods;
 
-  useEffect(() => {
-    if (!configurationId) return;
-    const populateConfiguration = async () => {
-      try {
-        const response = await getConfiguration({ id: configurationId });
-        const raw = response.configuration;
-        const savedConfiguration: Record<string, unknown> =
-          typeof raw === 'string' ? JSON.parse(raw) : raw;
-        reset(toFormValues(savedConfiguration, response));
-      } catch (error) {
-        console.error(error);
-        toast.error("Couldn't load this configuration. Reload the page to try again.");
-      }
-    };
+  const { data: saved, error: loadError } = useRestQuery({
+    queryKey: ['configuration', configurationId],
+    enabled: !!configurationId,
+    // Fill the form once, like a one-shot load: a refetch must not reset edits.
+    staleTime: Infinity,
+    // Never reuse a past visit's record: saves don't update this cache.
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    queryFn: () =>
+      fetchJson<IConfiguration>(
+        `/api/configurations/${encodeURIComponent(configurationId!)}`,
+      ),
+  });
 
-    void populateConfiguration();
-  }, [configurationId, reset]);
+  const filledFor = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!saved || !configurationId || filledFor.current === configurationId) return;
+    filledFor.current = configurationId;
+    try {
+      const raw = saved.configuration;
+      const savedConfiguration: Record<string, unknown> =
+        typeof raw === 'string' ? JSON.parse(raw) : raw;
+      reset(toFormValues(savedConfiguration, saved));
+    } catch (error) {
+      console.error(error);
+      toast.error("Couldn't load this configuration. Reload the page to try again.");
+    }
+  }, [saved, configurationId, reset]);
+
+  useEffect(() => {
+    if (!loadError) return;
+    console.error(loadError);
+    toast.error("Couldn't load this configuration. Reload the page to try again.");
+  }, [loadError]);
 
   const submit = async (data: DynamicFormProps) => {
     try {

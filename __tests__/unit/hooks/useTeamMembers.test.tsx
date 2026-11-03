@@ -2,11 +2,11 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-jest.mock('@/actions/teams', () => ({ listTeamMembers: jest.fn() }));
+jest.mock('@/utils/fetchApiResult', () => ({ fetchApiResult: jest.fn() }));
 jest.mock('@/hooks/useTeam', () => ({
   useTeam: () => ({ activeTeam: { id: 'team-harness' }, isLoading: false }),
 }));
-import { listTeamMembers } from '@/actions/teams';
+import { fetchApiResult } from '@/utils/fetchApiResult';
 import { mergeMember, useTeamMembers } from '@/hooks/useTeamMembers';
 import { TeamApiError } from '@/utils/teamApiError';
 import type { TeamMember } from '@/types/team';
@@ -33,7 +33,7 @@ const makeWrapper = () => {
 
 describe('useTeamMembers', () => {
   it('loads the members and upserts one in place', async () => {
-    (listTeamMembers as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: true,
       data: { members: [member('m-1', 'a@harness.dev')] },
     });
@@ -46,7 +46,7 @@ describe('useTeamMembers', () => {
   });
 
   it('fails with a TeamApiError so TeamProvider can see NOT_A_MEMBER', async () => {
-    (listTeamMembers as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: false,
       status: 403,
       code: 'NOT_A_MEMBER',
@@ -54,8 +54,10 @@ describe('useTeamMembers', () => {
     });
     const { result } = renderHook(() => useTeamMembers(), { wrapper: makeWrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(fetchApiResult).toHaveBeenCalledWith('/api/team/members');
     expect(result.current.error).toBeInstanceOf(TeamApiError);
     expect((result.current.error as TeamApiError).code).toBe('NOT_A_MEMBER');
+    expect((result.current.error as TeamApiError).status).toBe(403);
   });
 
   it('mergeMember replaces by id and appends new members', () => {

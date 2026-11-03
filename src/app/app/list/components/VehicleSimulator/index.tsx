@@ -7,12 +7,13 @@ import { Button } from '@/components/Button';
 import { toast } from 'sonner';
 import { useMintVehicle, useBurnVehicle, useGlobalAccount } from '@/hooks';
 import {
-  getSimulatedVehicles,
   recordSimulatedVehicle,
   registerVehicleWithSimulator,
   deleteSimulatedVehicle,
   deregisterVehicleFromSimulator,
 } from '@/actions/simulatedVehicles';
+import type { SimulatedVehicle } from '@/actions/simulatedVehicles';
+import { fetchJson } from '@/utils/fetchJson';
 import { TrashIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { getPublicClient } from '@/services/zerodev';
@@ -53,7 +54,10 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
   const { data: storedVehicles = [] } = useQuery({
     queryKey: ['simulated-vehicles', clientId],
-    queryFn: () => getSimulatedVehicles({ clientId }),
+    queryFn: () =>
+      fetchJson<SimulatedVehicle[]>(
+        `/api/simulated-vehicles?clientId=${encodeURIComponent(clientId)}`,
+      ),
   });
 
   const { data: removedOnChain = new Set<number>() } = useQuery({

@@ -2,7 +2,6 @@
 import {
   getMyBrand,
   updateMyBrand,
-  listMyBrands,
   createMyBrand as createBrandService,
   updateMyBrandById as updateBrandByIdService,
   deleteMyBrandById,
@@ -35,9 +34,6 @@ export const saveMyBrand = async (
 ): Promise<BrandView> => updateMyBrand(workspaceId, patch);
 
 // ── multi-brand collection ────────────────────────────────────────────────
-
-export const fetchMyBrands = async (workspaceId: string): Promise<BrandView[]> =>
-  listMyBrands(workspaceId);
 
 export const createMyBrand = async (
   workspaceId: string,

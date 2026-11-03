@@ -1,9 +1,9 @@
 'use client';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { listLicenseSigners } from '@/actions/teams';
 import { useTeam } from '@/hooks/useTeam';
 import type { LicenseSignerRecord } from '@/types/team';
+import { fetchApiResult } from '@/utils/fetchApiResult';
 import { unwrap } from '@/utils/teamApiError';
 
 // Who each key on a license is for (spec: key registry). Enabled rows only,
@@ -14,7 +14,12 @@ export const useLicenseSignerRegistry = (tokenId: number) => {
     queryKey: ['license-signers', activeTeam?.id ?? null, tokenId],
     enabled: !isLoading && !!activeTeam,
     retry: false,
-    queryFn: async () => unwrap(await listLicenseSigners(tokenId)).signers,
+    queryFn: async () =>
+      unwrap(
+        await fetchApiResult<{ signers: LicenseSignerRecord[] }>(
+          `/api/licenses/${tokenId}/signers`,
+        ),
+      ).signers,
   });
   const byAddress = useMemo(
     () =>

@@ -2,11 +2,11 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-jest.mock('@/actions/teams', () => ({ listLicenseSigners: jest.fn() }));
+jest.mock('@/utils/fetchApiResult', () => ({ fetchApiResult: jest.fn() }));
 jest.mock('@/hooks/useTeam', () => ({
   useTeam: () => ({ activeTeam: { id: 'team-harness' }, isLoading: false }),
 }));
-import { listLicenseSigners } from '@/actions/teams';
+import { fetchApiResult } from '@/utils/fetchApiResult';
 import { useLicenseSignerRegistry } from '@/hooks/useLicenseSignerRegistry';
 import { TeamApiError } from '@/utils/teamApiError';
 
@@ -30,7 +30,7 @@ const makeWrapper = () => {
 
 describe('useLicenseSignerRegistry', () => {
   it('maps enabled rows by lowercase address', async () => {
-    (listLicenseSigners as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: true,
       data: {
         signers: [
@@ -46,11 +46,11 @@ describe('useLicenseSignerRegistry', () => {
     expect(
       result.current.byAddress.has('0x5b2e4f6a8c0d2e4f6a8c0d2e4f6a8c0d2e4f6a8c'),
     ).toBe(true);
-    expect(listLicenseSigners).toHaveBeenCalledWith(42);
+    expect(fetchApiResult).toHaveBeenCalledWith('/api/licenses/42/signers');
   });
 
   it('fails with a TeamApiError', async () => {
-    (listLicenseSigners as jest.Mock).mockResolvedValue({
+    (fetchApiResult as jest.Mock).mockResolvedValue({
       ok: false,
       status: 502,
       code: 'IDENTITY_UNAVAILABLE',
@@ -60,6 +60,21 @@ describe('useLicenseSignerRegistry', () => {
       wrapper: makeWrapper(),
     });
     await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error).toBeInstanceOf(TeamApiError);
+  });
+
+  it('surfaces a 403 NOT_A_MEMBER as a TeamApiError', async () => {
+    (fetchApiResult as jest.Mock).mockResolvedValue({
+      ok: false,
+      status: 403,
+      code: 'NOT_A_MEMBER',
+      message: 'gone',
+    });
+    const { result } = renderHook(() => useLicenseSignerRegistry(7), {
+      wrapper: makeWrapper(),
+    });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(fetchApiResult).toHaveBeenCalledWith('/api/licenses/7/signers');
     expect(result.current.error).toBeInstanceOf(TeamApiError);
   });
 });

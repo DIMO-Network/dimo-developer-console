@@ -1,8 +1,9 @@
 'use client';
-import { FC, useEffect, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { PaginatedTableIdentityAPI } from '@/components/Table';
 import { useQuery } from '@apollo/client/react';
+import { useQuery as useRestQuery } from '@tanstack/react-query';
 import { gql } from '@/gql';
 import { Loader } from '@/components/Loader';
 import {
@@ -11,7 +12,8 @@ import {
   type VehicleRow,
 } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable/constants';
 import { RenounceVehicleModal } from '@/app/license/vehicles/[clientId]/components/RenounceVehicleModal';
-import { getSimulatedVehicles } from '@/actions/simulatedVehicles';
+import type { SimulatedVehicle } from '@/actions/simulatedVehicles';
+import { fetchJson } from '@/utils/fetchJson';
 import { useRenounceVehiclePermissions } from '@/hooks/useRenounceVehiclePermissions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -85,16 +87,21 @@ export const VehicleDetailsTable: FC<IProps> = ({
     variables: { tokenId: tokenIdSearch ?? 0, clientId },
     skip: tokenIdSearch === null,
   });
-  const [simulatedTokenIds, setSimulatedTokenIds] = useState<Set<number>>(new Set());
   const [renouncingVehicle, setRenouncingVehicle] = useState<VehicleRow | null>(null);
   const [removedTokenIds, setRemovedTokenIds] = useState<Set<number>>(new Set());
   const { renounce } = useRenounceVehiclePermissions();
 
-  useEffect(() => {
-    getSimulatedVehicles({ clientId }).then((vehicles) => {
-      setSimulatedTokenIds(new Set(vehicles.map((v) => v.token_id)));
-    });
-  }, [clientId]);
+  const { data: simulatedVehicles } = useRestQuery({
+    queryKey: ['simulated-vehicles', clientId],
+    queryFn: () =>
+      fetchJson<SimulatedVehicle[]>(
+        `/api/simulated-vehicles?clientId=${encodeURIComponent(clientId)}`,
+      ),
+  });
+  const simulatedTokenIds = useMemo(
+    () => new Set((simulatedVehicles ?? []).map((v) => v.token_id)),
+    [simulatedVehicles],
+  );
 
   const handleRenounce = async () => {
     if (!renouncingVehicle) return;
