@@ -98,4 +98,27 @@ describe('configurator edit View', () => {
     expect(screen.getByText('name: My edit')).toBeInTheDocument();
     expect(screen.getByLabelText('name')).toHaveValue('My edit');
   });
+
+  it('loads fresh values on every visit', async () => {
+    const reply = (name: string) => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: 'c1',
+        client_id: '0xclient',
+        configuration_name: name,
+        configuration: JSON.stringify({ component: 'LoginWithDimo' }),
+      }),
+    });
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(reply('Before save'))
+      .mockResolvedValueOnce(reply('After save'));
+    const first = renderView();
+    await screen.findByText('name: Before save');
+    first.unmount();
+    renderView();
+    await screen.findByText('name: After save');
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
 });

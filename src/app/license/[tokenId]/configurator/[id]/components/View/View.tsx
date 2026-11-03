@@ -58,6 +58,8 @@ export const View = ({
     enabled: !!configurationId,
     // Fill the form once, like a one-shot load: a refetch must not reset edits.
     staleTime: Infinity,
+    // Never reuse a past visit's record: saves don't update this cache.
+    gcTime: 0,
     refetchOnWindowFocus: false,
     queryFn: () =>
       fetchJson<IConfiguration>(
