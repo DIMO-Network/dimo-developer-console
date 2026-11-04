@@ -2,30 +2,88 @@
  * @jest-environment node
  */
 import { NextRequest } from 'next/server';
+import { AxiosError, AxiosHeaders } from 'axios';
 
 jest.mock('@/actions/dimoAuth', () => ({
   getDimoChallenge: jest.fn(),
   getDimoToken: jest.fn(),
 }));
-jest.mock('@/actions/user', () => ({ saveToken: jest.fn() }));
+jest.mock('@/actions/user', () => ({ saveToken: jest.fn(), signOut: jest.fn() }));
+jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
+jest.mock('@/utils/middlewareUtils', () => ({
+  SESSION_VERDICT_COOKIE: 'session-verdict',
+}));
+const jar = { get: jest.fn(), delete: jest.fn() };
+jest.mock('next/headers', () => ({ cookies: async () => jar }));
 
+import * as Sentry from '@sentry/nextjs';
 import { getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
-import { saveToken } from '@/actions/user';
+import { saveToken, signOut } from '@/actions/user';
 import config from '@/config';
 import { POST as challenge } from '@/app/api/auth/challenge/route';
-import { POST as session } from '@/app/api/auth/session/route';
+import { DELETE as withdraw, POST as session } from '@/app/api/auth/session/route';
+import { POST as signout } from '@/app/api/auth/signout/route';
+import { SESSION_VERDICT_COOKIE } from '@/utils/middlewareUtils';
 
 const SITE = 'https://console.test';
-const post = (path: string, body: unknown, origin: string | null = SITE) =>
+const post = (
+  path: string,
+  body: unknown,
+  {
+    origin = SITE,
+    method = 'POST',
+    headers = {},
+  }: { origin?: string | null; method?: string; headers?: Record<string, string> } = {},
+) =>
   new NextRequest(`${SITE}${path}`, {
-    method: 'POST',
+    method,
     headers: {
       'Content-Type': 'application/json',
+      'host': 'console.test',
       ...(origin ? { Origin: origin } : {}),
+      ...headers,
     },
     body: JSON.stringify(body),
   });
 const ADDRESS = '0x00000000000000000000000000000000000000bb';
+const dexAnswered = (status: number) =>
+  new AxiosError('dex', 'ERR_BAD_RESPONSE', undefined, undefined, {
+    status,
+    statusText: '',
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+    data: {},
+  });
+// A session cookie's token, as DIMO issues it (only its payload matters here).
+const tokenFor = (wallet: string) =>
+  `e30.${Buffer.from(JSON.stringify({ ethereum_address: wallet })).toString('base64url')}.sig`;
+
+describe('origin check', () => {
+  it.each([
+    ['another site', { origin: 'https://evil.test' }],
+    ['no Origin header', { origin: null }],
+    ['a form post', { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }],
+  ])('refuses %s', async (_name, opts) => {
+    const res = await challenge(post('/api/auth/challenge', { address: ADDRESS }, opts));
+    expect(res.status).toBe(403);
+    expect(getDimoChallenge).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      'the forwarded host',
+      'https://console-alias.test',
+      { 'x-forwarded-host': 'console-alias.test' },
+    ],
+    ['the configured public address', new URL(config.frontendUrl).origin, {}],
+  ])('accepts %s', async (_name, origin, headers) => {
+    (getDimoChallenge as jest.Mock).mockResolvedValue({ challenge: 'c', state: 's' });
+    const res = await challenge(
+      post('/api/auth/challenge', { address: ADDRESS }, { origin, headers }),
+    );
+    expect(res.status).toBe(200);
+  });
+});
 
 describe('POST /api/auth/challenge', () => {
   it("returns DIMO's challenge for the wallet, as the sign-in page asks for it", async () => {
@@ -44,27 +102,17 @@ describe('POST /api/auth/challenge', () => {
     });
   });
 
-  it.each([
-    ['another site', 'https://evil.test'],
-    ['no Origin header', null],
-  ])('refuses a request from %s', async (_name, origin) => {
-    const res = await challenge(
-      post('/api/auth/challenge', { address: ADDRESS }, origin),
-    );
-    expect(res.status).toBe(403);
-    expect(getDimoChallenge).not.toHaveBeenCalled();
-  });
-
   it('refuses anything but a wallet address', async () => {
     const res = await challenge(post('/api/auth/challenge', { address: 'nope' }));
     expect(res.status).toBe(400);
     expect(getDimoChallenge).not.toHaveBeenCalled();
   });
 
-  it('answers 502 when DIMO auth fails', async () => {
-    (getDimoChallenge as jest.Mock).mockRejectedValue(new Error('down'));
+  it('answers 502, and reports it, when DIMO auth fails', async () => {
+    (getDimoChallenge as jest.Mock).mockRejectedValue(dexAnswered(503));
     const res = await challenge(post('/api/auth/challenge', { address: ADDRESS }));
     expect(res.status).toBe(502);
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -104,17 +152,78 @@ describe('POST /api/auth/session', () => {
     expect(saveToken).not.toHaveBeenCalled();
   });
 
-  it('refuses another site', async () => {
-    const res = await session(post('/api/auth/session', body, 'https://evil.test'));
-    expect(res.status).toBe(403);
-    expect(getDimoToken).not.toHaveBeenCalled();
+  it('answers 400, unreported and with no cookie, when DIMO auth refuses the signature', async () => {
+    (getDimoToken as jest.Mock).mockRejectedValue(dexAnswered(400));
+    const res = await session(post('/api/auth/session', body));
+    expect(res.status).toBe(400);
     expect(saveToken).not.toHaveBeenCalled();
+    expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 
-  it('sets no cookie when DIMO auth refuses the signature', async () => {
-    (getDimoToken as jest.Mock).mockRejectedValue(new Error('bad signature'));
+  it('answers 502 with no cookie when DIMO auth fails', async () => {
+    (getDimoToken as jest.Mock).mockRejectedValue(dexAnswered(500));
     const res = await session(post('/api/auth/session', body));
     expect(res.status).toBe(502);
     expect(saveToken).not.toHaveBeenCalled();
+  });
+});
+
+describe('DELETE /api/auth/session', () => {
+  const del = (wallet: unknown) =>
+    withdraw(post('/api/auth/session', { wallet }, { method: 'DELETE' }));
+
+  it("takes back the wallet's own session cookie", async () => {
+    jar.get.mockReturnValue({
+      value: tokenFor(ADDRESS.toUpperCase().replace('0X', '0x')),
+    });
+    const res = await del(ADDRESS);
+    await expect(res.json()).resolves.toEqual({ cleared: true });
+    expect(jar.delete).toHaveBeenCalledWith('session-token');
+    expect(jar.delete).toHaveBeenCalledWith(SESSION_VERDICT_COOKIE);
+  });
+
+  it('keeps a cookie another sign-in set since', async () => {
+    jar.get.mockReturnValue({
+      value: tokenFor('0x00000000000000000000000000000000000000cc'),
+    });
+    const res = await del(ADDRESS);
+    await expect(res.json()).resolves.toEqual({ cleared: false });
+    expect(jar.delete).not.toHaveBeenCalled();
+  });
+
+  it('does nothing without a cookie, or for an unreadable one', async () => {
+    jar.get.mockReturnValueOnce(undefined).mockReturnValueOnce({ value: 'garbage' });
+    await expect((await del(ADDRESS)).json()).resolves.toEqual({ cleared: false });
+    await expect((await del(ADDRESS)).json()).resolves.toEqual({ cleared: false });
+    expect(jar.delete).not.toHaveBeenCalled();
+  });
+
+  it('refuses another site, and anything but a wallet address', async () => {
+    const crossSite = await withdraw(
+      post(
+        '/api/auth/session',
+        { wallet: ADDRESS },
+        { method: 'DELETE', origin: 'https://evil.test' },
+      ),
+    );
+    expect(crossSite.status).toBe(403);
+    expect((await del('nope')).status).toBe(400);
+    expect(jar.delete).not.toHaveBeenCalled();
+  });
+});
+
+describe('POST /api/auth/signout', () => {
+  it('runs the full sign-out, with or without a session cookie', async () => {
+    const res = await signout(post('/api/auth/signout', {}));
+    expect(res.status).toBe(200);
+    expect(signOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses another site', async () => {
+    const res = await signout(
+      post('/api/auth/signout', {}, { origin: 'https://evil.test' }),
+    );
+    expect(res.status).toBe(403);
+    expect(signOut).not.toHaveBeenCalled();
   });
 });

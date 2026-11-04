@@ -5,10 +5,7 @@ import { installFakeBroadcastChannel } from '@/utils/__fixtures__/fakeBroadcastC
 const replace = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 jest.mock('@/hooks', () => ({ useMixPanel: () => ({ identifyUser: jest.fn() }) }));
-jest.mock('@/actions/user', () => ({
-  endSession: jest.fn(async () => true),
-  signOut: jest.fn(async () => true),
-}));
+jest.mock('@/actions/user', () => ({ endSession: jest.fn(async () => true) }));
 jest.mock('@/utils/consoleSession', () => ({ clearConsoleBrowserState: jest.fn() }));
 jest.mock('@/config/turnkey', () => ({
   turnkeyClient: { logout: jest.fn(async () => undefined) },
@@ -35,21 +32,24 @@ jest.mock('@/components/SessionExpiredDialog', () => ({
   SessionExpiredDialog: ({
     account,
     onRenewed,
+    onStale,
     onSignOut,
   }: {
     account: { email: string; subOrganizationId: string };
     onRenewed: () => void;
+    onStale: () => void;
     onSignOut: () => void;
   }) => (
     <div role="dialog">
       <p>{`expired: ${account.email} ${account.subOrganizationId}`}</p>
       <button onClick={onRenewed}>renewed</button>
+      <button onClick={onStale}>stale</button>
       <button onClick={onSignOut}>sign out</button>
     </div>
   ),
 }));
 
-import { endSession, signOut } from '@/actions/user';
+import { endSession } from '@/actions/user';
 import { clearConsoleBrowserState } from '@/utils/consoleSession';
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
 import { withGlobalAccounts } from '@/hoc/GlobalAccountProvider';
@@ -85,11 +85,19 @@ const store = (over = {}) => {
   return session;
 };
 const signedOut = { from: expect.any(String), event: { type: 'signed-out' } };
+// The server half of a sign-out the user chose (works with no cookie).
+const fetchMock = jest.fn<Promise<unknown>, [string, RequestInit?]>(async () => ({
+  ok: true,
+  json: async () => ({ ok: true }),
+}));
+global.fetch = fetchMock as unknown as typeof fetch;
+const signOutCalls = () =>
+  fetchMock.mock.calls.filter(([path]) => path === '/api/auth/signout');
 const expiredFor = () => `expired: a@b.co ${sub}`;
 // The session expired, and nothing signed this tab or any other out.
 const stillSignedIn = (other: { received: unknown[] }) => {
   expect(endSession).not.toHaveBeenCalled();
-  expect(signOut).not.toHaveBeenCalled();
+  expect(signOutCalls()).toHaveLength(0);
   expect(localStorage.getItem(SESSION_KEY)).not.toBeNull();
   expect(replace).not.toHaveBeenCalled();
   expect(hardNavigate).not.toHaveBeenCalled();
@@ -310,12 +318,26 @@ describe('withGlobalAccounts across tabs', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
+  it('follows the shared session when a renewal finds it changed', async () => {
+    store({ expiry: nowS() - 5 });
+    render(<Page />);
+    await screen.findByText(expiredFor());
+    localStorage.removeItem(SESSION_KEY);
+    fireEvent.click(screen.getByText('stale'));
+    await waitFor(() => expect(hardNavigate).toHaveBeenCalledWith('/sign-in'));
+  });
+
   it("the dialog's Sign out is a full sign-out, like the menu's", async () => {
     store({ expiry: nowS() - 5 });
     render(<Page />);
     fireEvent.click(await screen.findByText('sign out'));
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
-    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(signOutCalls()).toEqual([
+      [
+        '/api/auth/signout',
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' },
+      ],
+    ]);
     expect(endSession).not.toHaveBeenCalled();
     expect(clearConsoleBrowserState).toHaveBeenCalledTimes(1);
     expect(queryClient.clear).toHaveBeenCalled();
@@ -427,7 +449,7 @@ describe('withGlobalAccounts across tabs', () => {
         ([data]) => (data as { event?: { type?: string } }).event?.type === 'signed-out',
       );
       expect(announced).toBeGreaterThanOrEqual(0);
-      expect((signOut as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      expect(fetchMock.mock.invocationCallOrder[0]).toBeLessThan(
         post.mock.invocationCallOrder[announced],
       );
     } finally {
@@ -440,7 +462,7 @@ describe('withGlobalAccounts across tabs', () => {
     render(<Page />);
     fireEvent.click(await screen.findByText('sign out'));
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
-    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(signOutCalls()).toHaveLength(1);
     expect(localStorage.getItem(SESSION_KEY)).toBeNull();
     await waitFor(() => expect(other.received).toContainEqual(signedOut));
     expect(screen.getByText('nobody')).toBeInTheDocument();

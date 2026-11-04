@@ -83,6 +83,7 @@ describe('renewConsoleSession', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address: '0x00000000000000000000000000000000000000bb' }),
+      signal: expect.any(AbortSignal),
     });
     expect(signMessage).toHaveBeenCalledWith({ message: 'sign me' });
     expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/auth/session', {
@@ -93,6 +94,7 @@ describe('renewConsoleSession', () => {
         signedChallenge: '0xsigned',
         sessionSeconds: 1800,
       }),
+      signal: expect.any(AbortSignal),
     });
     expect(stored()).toEqual({
       email: ACCOUNT.email,
@@ -125,17 +127,40 @@ describe('renewConsoleSession', () => {
     expect(stored().subOrganizationId).toBe('sub-someone-else');
   });
 
-  it('writes nothing once another tab signed out while the cookie was set', async () => {
-    fetchMock.mockImplementation(async (path: string) => {
+  it('takes the cookie back when another tab signed out while it was set', async () => {
+    fetchMock.mockImplementation(async (path: string, init: { method: string }) => {
       if (path === '/api/auth/challenge')
         return answer({ challenge: 'sign me', state: 's' });
-      localStorage.removeItem(SESSION_KEY);
+      if (init.method === 'POST') localStorage.removeItem(SESSION_KEY);
       return answer({ ok: true });
     });
     await expect(
       renewConsoleSession({ account: ACCOUNT, credential: CREDENTIAL }),
     ).resolves.toBe(false);
     expect(stored()).toBeNull();
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/auth/session', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wallet: '0x00000000000000000000000000000000000000bb' }),
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  it('asks for no cookie once the dialog closed', async () => {
+    const closing = new AbortController();
+    signMessage.mockImplementationOnce(async () => {
+      closing.abort();
+      return '0xsigned';
+    });
+    await expect(
+      renewConsoleSession({
+        account: ACCOUNT,
+        credential: CREDENTIAL,
+        signal: closing.signal,
+      }),
+    ).resolves.toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(stored().token).toBe('bundle-old');
   });
 
   it('fails, writing nothing, when a route fails', async () => {

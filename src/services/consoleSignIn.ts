@@ -203,14 +203,33 @@ export const storeConsoleSession = async ({
   });
 };
 
-const postJson = async <T>(path: string, body: unknown): Promise<T> => {
-  const response = await fetch(path, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) throw new Error(`POST ${path} failed with ${response.status}`);
-  return (await response.json()) as T;
+const REQUEST_TIMEOUT_MS = 30_000;
+
+// A JSON POST to the console's own /api/auth routes. It stops on `signal` (the
+// dialog closed or the tab is leaving) or after 30 seconds: a response that
+// arrives after that is discarded, cookie and all.
+const postJson = async <T>(
+  path: string,
+  body: unknown,
+  { signal, method = 'POST' }: { signal?: AbortSignal; method?: 'POST' | 'DELETE' } = {},
+): Promise<T> => {
+  const controller = new AbortController();
+  const stop = () => controller.abort();
+  const timer = setTimeout(stop, REQUEST_TIMEOUT_MS);
+  signal?.addEventListener('abort', stop);
+  try {
+    const response = await fetch(path, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`${method} ${path} failed with ${response.status}`);
+    return (await response.json()) as T;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', stop);
+  }
 };
 
 // Starts a new session for an account whose session expired, without leaving
@@ -219,32 +238,44 @@ const postJson = async <T>(path: string, body: unknown): Promise<T> => {
 // sign-in's server actions once the cookie is gone (the proxy answers them
 // with a 401), so the server steps go through /api/auth/*, outside the proxy.
 // Returns false, writing nothing, when the shared session stopped being this
-// account's while it ran: another tab signed out, or in as someone else.
+// account's while it ran (another tab signed out, or in as someone else); a
+// cookie it set by then is taken back, unless another sign-in replaced it.
 export const renewConsoleSession = async ({
   account,
   credential,
+  signal,
 }: {
   account: ConsoleAccount;
   credential: TurnkeyCredential;
+  signal?: AbortSignal;
 }): Promise<boolean> => {
   const stillThisAccount = () =>
-    readSession()?.subOrganizationId === account.subOrganizationId;
+    !signal?.aborted && readSession()?.subOrganizationId === account.subOrganizationId;
 
   const kernelAccount = await smartWallet(account, credential);
   const { challenge, state } = await postJson<{ challenge: string; state: string }>(
     '/api/auth/challenge',
     { address: kernelAccount.address },
+    { signal },
   );
   const signedChallenge = await kernelAccount.signMessage({ message: challenge });
 
   if (!stillThisAccount()) return false;
-  await postJson('/api/auth/session', {
-    state,
-    signedChallenge,
-    sessionSeconds: credential.sessionSeconds,
-  });
+  await postJson(
+    '/api/auth/session',
+    { state, signedChallenge, sessionSeconds: credential.sessionSeconds },
+    { signal },
+  );
 
-  if (!stillThisAccount()) return false;
+  if (!stillThisAccount()) {
+    // Best effort, and not tied to `signal`: it runs because things changed.
+    await postJson(
+      '/api/auth/session',
+      { wallet: kernelAccount.address },
+      { method: 'DELETE' },
+    ).catch(() => undefined);
+    return false;
+  }
   startConsoleSession(account.subOrganizationId);
   writeSession({
     email: account.email,

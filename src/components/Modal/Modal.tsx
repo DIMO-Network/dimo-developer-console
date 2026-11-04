@@ -10,6 +10,8 @@ interface IProps {
   isOpen: boolean;
   setIsOpen: (f: boolean) => void;
   className?: string;
+  // The backdrop behind the panel; a see-through scrim unless set.
+  overlayClassName?: string;
   showClose?: boolean;
   children: ReactNode;
 }
@@ -19,11 +21,15 @@ export const Modal: FC<IProps> = ({
   isOpen,
   setIsOpen,
   className,
+  overlayClassName,
   showClose = true,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className={cn('dialog-panel', className)}>
+      <DialogContent
+        className={cn('dialog-panel', className)}
+        overlayClassName={overlayClassName}
+      >
         <DialogTitle className="sr-only">Dialog</DialogTitle>
         {showClose && (
           <div className="dialog-close-content">

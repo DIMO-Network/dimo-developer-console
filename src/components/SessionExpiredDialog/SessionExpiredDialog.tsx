@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
@@ -23,23 +23,36 @@ export const PASSKEY_FAILED =
 export const CODE_FAILED = "That code didn't work. Check it and try again.";
 export const SEND_FAILED = "Couldn't send a code. Try again.";
 export const RENEW_FAILED = "Couldn't sign you in again. Try again, or sign out.";
+export const START_AGAIN = 'That took too long. Start again.';
+
+// A proven key with less left than this is not worth renewing with: the new
+// session keeps the key's expiry.
+const MIN_KEY_SECONDS_LEFT = 60;
 
 interface Props {
   account: ConsoleAccount;
   onRenewed: () => void;
+  // The shared session changed while renewing (another tab signed out, or in
+  // as someone else): the provider checks it and follows.
+  onStale: () => void;
   onSignOut: () => void;
 }
 
 const isUsable = (
   credential: TurnkeyCredential | null,
 ): credential is TurnkeyCredential =>
-  !!credential && credential.expiry > Date.now() / 1000;
+  !!credential && credential.expiry - Date.now() / 1000 > MIN_KEY_SECONDS_LEFT;
 
 // Shown over the page when the session expires: sign in again as the same
 // account, with the passkey or an emailed code, without leaving the page.
 // Nothing is sent or prompted until the user asks: the session can expire
 // while they are away, and a passkey prompt needs a click.
-export const SessionExpiredDialog: FC<Props> = ({ account, onRenewed, onSignOut }) => {
+export const SessionExpiredDialog: FC<Props> = ({
+  account,
+  onRenewed,
+  onStale,
+  onSignOut,
+}) => {
   const [hasPasskey, setHasPasskey] = useState<boolean | null>(null);
   const [otpId, setOtpId] = useState<string | null>(null);
   const [code, setCode] = useState('');
@@ -50,6 +63,13 @@ export const SessionExpiredDialog: FC<Props> = ({ account, onRenewed, onSignOut 
   // A key the user already proved (passkey or code) whose renewal failed
   // after it: trying again reuses it, without a second prompt or a spent code.
   const [proven, setProven] = useState<TurnkeyCredential | null>(null);
+  // Stops a renewal in flight when the dialog closes (a sign-out, or the tab
+  // leaving), so its cookie isn't set behind them.
+  const closing = useRef(new AbortController());
+  useEffect(() => {
+    const controller = closing.current;
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     let current = true;
@@ -70,19 +90,20 @@ export const SessionExpiredDialog: FC<Props> = ({ account, onRenewed, onSignOut 
   }, [otpId]);
 
   const renew = async (credential: TurnkeyCredential) => {
+    const { signal } = closing.current;
     let renewed: boolean;
     try {
-      renewed = await renewConsoleSession({ account, credential });
+      renewed = await renewConsoleSession({ account, credential, signal });
     } catch (renewError) {
+      if (signal.aborted) return;
       captureException(renewError);
       setProven(credential);
       setError(RENEW_FAILED);
       return;
     }
     setProven(null);
-    // false: another tab signed out or in as someone else meanwhile, and this
-    // tab is already following it.
     if (renewed) onRenewed();
+    else onStale();
   };
 
   const run = async (step: () => Promise<void>) => {
@@ -98,7 +119,11 @@ export const SessionExpiredDialog: FC<Props> = ({ account, onRenewed, onSignOut 
   const tryAgain = () =>
     run(async () => {
       if (isUsable(proven)) return renew(proven);
+      // Too old to renew with: back to the start, without the spent code.
       setProven(null);
+      setOtpId(null);
+      setCode('');
+      setError(START_AGAIN);
     });
 
   const withPasskey = () =>
@@ -222,7 +247,13 @@ export const SessionExpiredDialog: FC<Props> = ({ account, onRenewed, onSignOut 
   };
 
   return (
-    <Modal isOpen setIsOpen={() => {}} showClose={false}>
+    // An opaque backdrop: a dialog the page had open shows nothing behind it.
+    <Modal
+      isOpen
+      setIsOpen={() => {}}
+      showClose={false}
+      overlayClassName="bg-background backdrop-blur-none"
+    >
       <div className="flex flex-col gap-4">
         <Title component="h2" className="text-panel-title text-ink">
           Your session expired

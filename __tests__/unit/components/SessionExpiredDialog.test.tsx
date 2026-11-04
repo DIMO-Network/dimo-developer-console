@@ -30,15 +30,17 @@ const CREDENTIAL = {
 
 const show = () => {
   const onRenewed = jest.fn();
+  const onStale = jest.fn();
   const onSignOut = jest.fn();
-  render(
+  const view = render(
     <SessionExpiredDialog
       account={ACCOUNT}
       onRenewed={onRenewed}
+      onStale={onStale}
       onSignOut={onSignOut}
     />,
   );
-  return { onRenewed, onSignOut };
+  return { onRenewed, onStale, onSignOut, view };
 };
 const hasPasskey = (value: boolean) =>
   (getUserSubOrganization as jest.Mock).mockResolvedValue({
@@ -74,6 +76,7 @@ describe('SessionExpiredDialog', () => {
     expect(renewConsoleSession).toHaveBeenCalledWith({
       account: ACCOUNT,
       credential: CREDENTIAL,
+      signal: expect.any(AbortSignal),
     });
     expect(onSignOut).not.toHaveBeenCalled();
   });
@@ -133,6 +136,7 @@ describe('SessionExpiredDialog', () => {
     expect(renewConsoleSession).toHaveBeenCalledWith({
       account: ACCOUNT,
       credential: CREDENTIAL,
+      signal: expect.any(AbortSignal),
     });
   });
 
@@ -210,16 +214,45 @@ describe('SessionExpiredDialog', () => {
     expect(renewConsoleSession).toHaveBeenCalledTimes(2);
   });
 
-  it('does nothing more when the shared session changed account during the renewal', async () => {
+  it('asks the provider to follow the shared session when it changed during the renewal', async () => {
     hasPasskey(true);
     (passkeyCredential as jest.Mock).mockResolvedValue(CREDENTIAL);
     (renewConsoleSession as jest.Mock).mockResolvedValue(false);
-    const { onRenewed } = show();
+    const { onRenewed, onStale } = show();
     fireEvent.click(await screen.findByRole('button', { name: 'Continue with passkey' }));
-    await waitFor(() => expect(renewConsoleSession).toHaveBeenCalledTimes(1));
-    await act(async () => {});
+    await waitFor(() => expect(onStale).toHaveBeenCalledTimes(1));
     expect(onRenewed).not.toHaveBeenCalled();
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('starts over, rather than renew with a key about to expire', async () => {
+    hasPasskey(true);
+    (passkeyCredential as jest.Mock).mockResolvedValue({
+      ...CREDENTIAL,
+      expiry: Math.floor(Date.now() / 1000) + 30,
+    });
+    (renewConsoleSession as jest.Mock).mockRejectedValue(new Error('dex down'));
+    show();
+    fireEvent.click(await screen.findByRole('button', { name: 'Continue with passkey' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Try again' }));
+    expect(
+      await screen.findByText('That took too long. Start again.'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue with passkey' })).toBeEnabled();
+    expect(renewConsoleSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops a renewal in flight when the dialog closes', async () => {
+    hasPasskey(true);
+    (passkeyCredential as jest.Mock).mockResolvedValue(CREDENTIAL);
+    (renewConsoleSession as jest.Mock).mockReturnValue(new Promise(() => {}));
+    const { view } = show();
+    fireEvent.click(await screen.findByRole('button', { name: 'Continue with passkey' }));
+    await waitFor(() => expect(renewConsoleSession).toHaveBeenCalledTimes(1));
+    const { signal } = (renewConsoleSession as jest.Mock).mock.calls[0][0];
+    expect(signal.aborted).toBe(false);
+    view.unmount();
+    expect(signal.aborted).toBe(true);
   });
 
   it('keeps Sign out available while a request hangs', async () => {

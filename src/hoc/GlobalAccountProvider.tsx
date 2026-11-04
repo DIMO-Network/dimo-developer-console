@@ -9,7 +9,7 @@ import { getKernelAccount, getPublicClient } from '@/services/zerodev';
 import { Abi } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
-import { endSession, signOut } from '@/actions/user';
+import { endSession } from '@/actions/user';
 import { clearConsoleBrowserState } from '@/utils/consoleSession';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
@@ -234,10 +234,20 @@ export const withGlobalAccounts = <P extends object>(
       leaving.current = true;
       if (explicit) clearConsoleBrowserState();
       // The cookie goes first, so a tab that hears the announcement below
-      // finds no session on the server either. The proxy answers this action
-      // with a 401 when the session is already gone; nothing below depends on it.
+      // finds no session on the server either. The proxy answers the action
+      // with a 401 when the session is already gone; nothing below depends on
+      // it. A chosen sign-out goes through /api/auth/signout, which works with
+      // no cookie and also clears the active team and a pending invite.
       try {
-        await (explicit ? signOut() : endSession());
+        if (explicit) {
+          await fetch('/api/auth/signout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: '{}',
+          });
+        } else {
+          await endSession();
+        }
       } catch {
         // The proxy's 401 already cleared the cookies.
       }
@@ -358,6 +368,7 @@ export const withGlobalAccounts = <P extends object>(
           <SessionExpiredDialog
             account={expired}
             onRenewed={renewed}
+            onStale={() => recheck.current()}
             onSignOut={() => void logout({ explicit: true })}
           />
         )}
