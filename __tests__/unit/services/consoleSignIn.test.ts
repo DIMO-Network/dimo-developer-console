@@ -31,7 +31,7 @@ jest.mock('@/services/globalAccount', () => ({
 import { getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
 import { saveToken } from '@/actions/user';
 import { completeUserData, createNewUser } from '@/app/sign-up/actions';
-import { renewConsoleSession } from '@/services/consoleSignIn';
+import { renewConsoleSession, signOutOnServer } from '@/services/consoleSignIn';
 import { SESSION_KEY } from '@/utils/globalAccountSession';
 
 const ACCOUNT = { email: 'sam@harness.dev', subOrganizationId: 'sub-sam' };
@@ -163,6 +163,39 @@ describe('renewConsoleSession', () => {
     expect(stored().token).toBe('bundle-old');
   });
 
+  it('gives the cookie only the time the key has left', async () => {
+    const left = { ...CREDENTIAL, expiry: Math.floor(Date.now() / 1000) + 600 };
+    await renewConsoleSession({ account: ACCOUNT, credential: left });
+    const [, init] = fetchMock.mock.calls[1];
+    expect(JSON.parse(init.body).sessionSeconds).toBeGreaterThan(590);
+    expect(JSON.parse(init.body).sessionSeconds).toBeLessThanOrEqual(600);
+  });
+
+  it('stops, writing and taking back nothing, when another account holds the cookie', async () => {
+    fetchMock.mockImplementation(async (path: string) =>
+      path === '/api/auth/challenge'
+        ? answer({ challenge: 'sign me', state: 's' })
+        : { ok: false, status: 409, json: async () => ({ code: 'SIGNED_IN_ELSEWHERE' }) },
+    );
+    await expect(
+      renewConsoleSession({ account: ACCOUNT, credential: CREDENTIAL }),
+    ).resolves.toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(stored().token).toBe('bundle-old');
+  });
+
+  it('sends its first request already stopped when the dialog closed before it', async () => {
+    const closing = new AbortController();
+    closing.abort();
+    await renewConsoleSession({
+      account: ACCOUNT,
+      credential: CREDENTIAL,
+      signal: closing.signal,
+    }).catch(() => undefined);
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.signal.aborted).toBe(true);
+  });
+
   it('fails, writing nothing, when a route fails', async () => {
     fetchMock.mockImplementation(async (path: string) =>
       path === '/api/auth/challenge'
@@ -173,5 +206,29 @@ describe('renewConsoleSession', () => {
       renewConsoleSession({ account: ACCOUNT, credential: CREDENTIAL }),
     ).rejects.toThrow('POST /api/auth/session failed with 502');
     expect(stored().token).toBe('bundle-old');
+  });
+});
+
+describe('signOutOnServer', () => {
+  beforeEach(() => {
+    global.fetch = fetchMock as unknown as typeof fetch;
+  });
+
+  it('runs the full sign-out on the server', async () => {
+    fetchMock.mockResolvedValue(answer({ ok: true }));
+    await signOutOnServer();
+    expect(fetchMock).toHaveBeenCalledWith('/api/auth/signout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+      signal: expect.any(AbortSignal),
+    });
+  });
+
+  it('throws when the server refused it', async () => {
+    fetchMock.mockResolvedValue({ ok: false, status: 403, json: async () => ({}) });
+    await expect(signOutOnServer()).rejects.toThrow(
+      'POST /api/auth/signout failed with 403',
+    );
   });
 });

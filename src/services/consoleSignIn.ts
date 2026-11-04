@@ -177,8 +177,22 @@ export const signIntoDimo = async ({
   return { token, newWalletAddress: kernelAccount.address };
 };
 
-// The server cookie, then the one session every tab shares (they hear of it).
-// `beforeWrite` runs between the two, for the sign-in page's cache reset.
+// The one session every tab shares (they hear of it), for an account and its
+// new key.
+const writeConsoleSession = (account: ConsoleAccount, credential: TurnkeyCredential) => {
+  startConsoleSession(account.subOrganizationId);
+  writeSession({
+    email: account.email,
+    role: 'owner',
+    subOrganizationId: account.subOrganizationId,
+    token: credential.credentialBundle,
+    expiry: credential.expiry,
+    eKey: credential.privateKey,
+  });
+};
+
+// The server cookie, then the shared session. `beforeWrite` runs between the
+// two, for the sign-in page's cache reset.
 export const storeConsoleSession = async ({
   account,
   credential,
@@ -192,30 +206,37 @@ export const storeConsoleSession = async ({
 }) => {
   await saveToken(accessToken, credential.sessionSeconds);
   beforeWrite?.();
-  startConsoleSession(account.subOrganizationId);
-  writeSession({
-    email: account.email,
-    role: 'owner',
-    subOrganizationId: account.subOrganizationId,
-    token: credential.credentialBundle,
-    expiry: credential.expiry,
-    eKey: credential.privateKey,
-  });
+  writeConsoleSession(account, credential);
 };
 
 const REQUEST_TIMEOUT_MS = 30_000;
 
-// A JSON POST to the console's own /api/auth routes. It stops on `signal` (the
-// dialog closed or the tab is leaving) or after 30 seconds: a response that
-// arrives after that is discarded, cookie and all.
+class RouteError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
+// A JSON request to the console's own /api/auth routes. It stops on `signal`
+// (the dialog closed or the tab is leaving), at once if that already happened,
+// or after `timeoutMs`: a response that arrives after that is discarded,
+// cookie and all.
 const postJson = async <T>(
   path: string,
   body: unknown,
-  { signal, method = 'POST' }: { signal?: AbortSignal; method?: 'POST' | 'DELETE' } = {},
+  {
+    signal,
+    method = 'POST',
+    timeoutMs = REQUEST_TIMEOUT_MS,
+  }: { signal?: AbortSignal; method?: 'POST' | 'DELETE'; timeoutMs?: number } = {},
 ): Promise<T> => {
   const controller = new AbortController();
   const stop = () => controller.abort();
-  const timer = setTimeout(stop, REQUEST_TIMEOUT_MS);
+  if (signal?.aborted) stop();
+  const timer = setTimeout(stop, timeoutMs);
   signal?.addEventListener('abort', stop);
   try {
     const response = await fetch(path, {
@@ -224,7 +245,12 @@ const postJson = async <T>(
       body: JSON.stringify(body),
       signal: controller.signal,
     });
-    if (!response.ok) throw new Error(`${method} ${path} failed with ${response.status}`);
+    if (!response.ok) {
+      throw new RouteError(
+        `${method} ${path} failed with ${response.status}`,
+        response.status,
+      );
+    }
     return (await response.json()) as T;
   } finally {
     clearTimeout(timer);
@@ -251,6 +277,12 @@ export const renewConsoleSession = async ({
 }): Promise<boolean> => {
   const stillThisAccount = () =>
     !signal?.aborted && readSession()?.subOrganizationId === account.subOrganizationId;
+  // The cookie lasts as long as the key, which may be part used (a retry).
+  const secondsLeft = Math.min(
+    credential.sessionSeconds,
+    credential.expiry - Math.floor(Date.now() / 1000),
+  );
+  if (secondsLeft <= 0) throw new Error('The session key has expired');
 
   const kernelAccount = await smartWallet(account, credential);
   const { challenge, state } = await postJson<{ challenge: string; state: string }>(
@@ -261,11 +293,18 @@ export const renewConsoleSession = async ({
   const signedChallenge = await kernelAccount.signMessage({ message: challenge });
 
   if (!stillThisAccount()) return false;
-  await postJson(
-    '/api/auth/session',
-    { state, signedChallenge, sessionSeconds: credential.sessionSeconds },
-    { signal },
-  );
+  try {
+    await postJson(
+      '/api/auth/session',
+      { state, signedChallenge, sessionSeconds: secondsLeft },
+      { signal },
+    );
+  } catch (error) {
+    // 409: another account's cookie is set (it signed in meanwhile) and was
+    // left alone.
+    if (error instanceof RouteError && error.status === 409) return false;
+    throw error;
+  }
 
   if (!stillThisAccount()) {
     // Best effort, and not tied to `signal`: it runs because things changed.
@@ -276,14 +315,13 @@ export const renewConsoleSession = async ({
     ).catch(() => undefined);
     return false;
   }
-  startConsoleSession(account.subOrganizationId);
-  writeSession({
-    email: account.email,
-    role: 'owner',
-    subOrganizationId: account.subOrganizationId,
-    token: credential.credentialBundle,
-    expiry: credential.expiry,
-    eKey: credential.privateKey,
-  });
+  writeConsoleSession(account, credential);
   return true;
+};
+
+// The server half of a sign-out the user chose, with or without a session
+// cookie (POST /api/auth/signout). Throws when it didn't happen, after 10 s at
+// most, so a stalled request can't hold up the sign-out.
+export const signOutOnServer = async (): Promise<void> => {
+  await postJson('/api/auth/signout', {}, { timeoutMs: 10_000 });
 };

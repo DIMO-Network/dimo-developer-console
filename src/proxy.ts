@@ -12,7 +12,7 @@ import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 import type { JWTPayload } from 'jose';
 import { cookieName, getCookie } from './services/dimoDevAPI';
@@ -72,13 +72,7 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
 
 const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
   // isSessionExpiredError, not "any 401": see src/utils/middlewareUtils.ts.
-  if (isSessionExpiredError(error)) {
-    const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
-    // Floating, and it has to not reject: an unhandled rejection here takes
-    // the middleware down on the way to the redirect that replaces it.
-    axios.post(signOutUrl).catch(() => {});
-    return 'sign-in?error=expired';
-  }
+  if (isSessionExpiredError(error)) return 'sign-in?error=expired';
   return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
 };
 

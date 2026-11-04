@@ -13,7 +13,11 @@ import { reportUnexpected } from '@/utils/upstreamErrors';
 // body is required too, which a cross-site form can't send without a preflight.
 export const refuseCrossSite = (request: NextRequest): NextResponse | null => {
   const origin = request.headers.get('origin');
-  const json = request.headers.get('content-type')?.includes('application/json');
+  // The media type itself: `text/plain; x=application/json` is a simple
+  // request, sent cross-site without a preflight.
+  const json =
+    request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() ===
+    'application/json';
   if (origin && json && fromConsole(origin, request)) return null;
   return NextResponse.json(
     { message: 'Cross-origin request refused' },

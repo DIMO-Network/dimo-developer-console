@@ -9,6 +9,9 @@ jest.mock('@/services/consoleSignIn', () => ({
 }));
 jest.mock('@/services/globalAccount', () => ({ getUserSubOrganization: jest.fn() }));
 jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
+jest.mock('@/hooks/usePasskey', () => ({
+  usePasskey: jest.fn(() => ({ isPasskeyAvailable: true })),
+}));
 
 import * as Sentry from '@sentry/nextjs';
 import {
@@ -19,6 +22,7 @@ import {
 } from '@/services/consoleSignIn';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import { SessionExpiredDialog } from '@/components/SessionExpiredDialog';
+import { usePasskey } from '@/hooks/usePasskey';
 
 const ACCOUNT = { email: 'sam@harness.dev', subOrganizationId: 'sub-sam' };
 const CREDENTIAL = {
@@ -53,7 +57,10 @@ describe('SessionExpiredDialog', () => {
     (renewConsoleSession as jest.Mock).mockResolvedValue(true);
     (sendEmailCode as jest.Mock).mockResolvedValue('otp-1');
   });
-  afterEach(() => jest.useRealTimers());
+  afterEach(() => {
+    jest.useRealTimers();
+    (usePasskey as jest.Mock).mockReturnValue({ isPasskeyAvailable: true });
+  });
 
   it('says the session expired and offers the passkey when the account has one', async () => {
     hasPasskey(true);
@@ -63,7 +70,7 @@ describe('SessionExpiredDialog', () => {
       await screen.findByRole('button', { name: 'Continue with passkey' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Email me a code instead' })).toBeEnabled();
-    expect(getUserSubOrganization).toHaveBeenCalledWith(ACCOUNT.email);
+    expect(getUserSubOrganization).toHaveBeenCalledWith(ACCOUNT.email, { timeout: 5000 });
   });
 
   it('renews the session with the passkey, for the same account', async () => {
@@ -264,6 +271,39 @@ describe('SessionExpiredDialog', () => {
     expect(signOut).toBeEnabled();
     fireEvent.click(signOut);
     expect(onSignOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers the email code first where this browser cannot use a passkey', async () => {
+    hasPasskey(true);
+    (usePasskey as jest.Mock).mockReturnValue({ isPasskeyAvailable: false });
+    show();
+    expect(await screen.findByRole('button', { name: 'Email me a code' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'Continue with passkey' })).toBeNull();
+  });
+
+  it('stops a renewal in flight when the user signs out', async () => {
+    hasPasskey(true);
+    (passkeyCredential as jest.Mock).mockResolvedValue(CREDENTIAL);
+    (renewConsoleSession as jest.Mock).mockReturnValue(new Promise(() => {}));
+    const { onSignOut } = show();
+    fireEvent.click(await screen.findByRole('button', { name: 'Continue with passkey' }));
+    await waitFor(() => expect(renewConsoleSession).toHaveBeenCalledTimes(1));
+    const { signal } = (renewConsoleSession as jest.Mock).mock.calls[0][0];
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    expect(signal.aborted).toBe(true);
+    expect(onSignOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('can start over after a failed renewal, for a new prompt or code', async () => {
+    hasPasskey(true);
+    (passkeyCredential as jest.Mock).mockResolvedValue(CREDENTIAL);
+    (renewConsoleSession as jest.Mock).mockRejectedValue(new Error('signer refused'));
+    show();
+    fireEvent.click(await screen.findByRole('button', { name: 'Continue with passkey' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Start over' }));
+    expect(screen.getByRole('button', { name: 'Continue with passkey' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Email me a code instead' })).toBeEnabled();
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('signs out when asked', async () => {

@@ -15,8 +15,11 @@ import {
   type TurnkeyCredential,
 } from '@/services/consoleSignIn';
 import { getUserSubOrganization } from '@/services/globalAccount';
+import { usePasskey } from '@/hooks/usePasskey';
 
 const RESEND_AFTER_SECONDS = 30;
+// Past this, the dialog offers the email code without waiting for the lookup.
+const LOOKUP_TIMEOUT_MS = 5_000;
 
 export const PASSKEY_FAILED =
   "Couldn't confirm your passkey. Try again, or use an email code.";
@@ -54,6 +57,8 @@ export const SessionExpiredDialog: FC<Props> = ({
   onSignOut,
 }) => {
   const [hasPasskey, setHasPasskey] = useState<boolean | null>(null);
+  // Like the sign-in page: a passkey only where this browser can use one.
+  const { isPasskeyAvailable } = usePasskey();
   const [otpId, setOtpId] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
@@ -63,17 +68,20 @@ export const SessionExpiredDialog: FC<Props> = ({
   // A key the user already proved (passkey or code) whose renewal failed
   // after it: trying again reuses it, without a second prompt or a spent code.
   const [proven, setProven] = useState<TurnkeyCredential | null>(null);
-  // Stops a renewal in flight when the dialog closes (a sign-out, or the tab
-  // leaving), so its cookie isn't set behind them.
-  const closing = useRef(new AbortController());
+  // Stops a renewal in flight when the dialog closes or the user signs out,
+  // so its cookie isn't set behind them.
+  const closing = useRef<AbortController | null>(null);
+  const closingController = () => (closing.current ??= new AbortController());
   useEffect(() => {
-    const controller = closing.current;
+    // A fresh one per mount: React's development double mount aborts the first.
+    const controller = new AbortController();
+    closing.current = controller;
     return () => controller.abort();
   }, []);
 
   useEffect(() => {
     let current = true;
-    getUserSubOrganization(account.email)
+    getUserSubOrganization(account.email, { timeout: LOOKUP_TIMEOUT_MS })
       .then((found) => current && setHasPasskey(!!found?.hasPasskey))
       // An email code works for every account.
       .catch(() => current && setHasPasskey(false));
@@ -82,15 +90,16 @@ export const SessionExpiredDialog: FC<Props> = ({
     };
   }, [account.email]);
 
-  // The resend countdown.
+  // The resend countdown, until it reaches zero.
+  const waiting = !!otpId && now - sentAt < RESEND_AFTER_SECONDS * 1000;
   useEffect(() => {
-    if (!otpId) return;
+    if (!waiting) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, [otpId]);
+  }, [waiting]);
 
   const renew = async (credential: TurnkeyCredential) => {
-    const { signal } = closing.current;
+    const { signal } = closingController();
     let renewed: boolean;
     try {
       renewed = await renewConsoleSession({ account, credential, signal });
@@ -114,6 +123,19 @@ export const SessionExpiredDialog: FC<Props> = ({
     } finally {
       setBusy(false);
     }
+  };
+
+  const signOut = () => {
+    closingController().abort();
+    onSignOut();
+  };
+
+  // Back to the choices, for another passkey prompt or a new code.
+  const startOver = () => {
+    setProven(null);
+    setOtpId(null);
+    setCode('');
+    setError(null);
   };
 
   const tryAgain = () =>
@@ -184,9 +206,14 @@ export const SessionExpiredDialog: FC<Props> = ({
   const choices = () => {
     if (proven) {
       return (
-        <Button loading={busy} onClick={() => void tryAgain()}>
-          Try again
-        </Button>
+        <>
+          <Button loading={busy} onClick={() => void tryAgain()}>
+            Try again
+          </Button>
+          <Button variant="ghost" disabled={busy} onClick={startOver}>
+            Start over
+          </Button>
+        </>
       );
     }
     if (otpId) {
@@ -226,8 +253,8 @@ export const SessionExpiredDialog: FC<Props> = ({
         </form>
       );
     }
-    if (hasPasskey === null) return null;
-    if (hasPasskey) {
+    if (hasPasskey === null || isPasskeyAvailable === null) return null;
+    if (hasPasskey && isPasskeyAvailable) {
       return (
         <>
           <Button loading={busy} onClick={() => void withPasskey()}>
@@ -271,7 +298,7 @@ export const SessionExpiredDialog: FC<Props> = ({
           </p>
         )}
         {/* Always available: a hung request must not trap the user here. */}
-        <Button variant="ghost" onClick={onSignOut}>
+        <Button variant="ghost" onClick={signOut}>
           Sign out
         </Button>
       </div>

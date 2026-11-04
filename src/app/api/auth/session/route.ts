@@ -1,13 +1,11 @@
 import { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { isEmpty } from 'lodash';
+import { jwtDecode } from 'jwt-decode';
 import config from '@/config';
 import { getDimoToken } from '@/actions/dimoAuth';
 import { saveToken } from '@/actions/user';
-import {
-  EMAIL_CODE_SESSION_SECONDS,
-  PASSKEY_SESSION_SECONDS,
-} from '@/config/sessionLengths';
+import { PASSKEY_SESSION_SECONDS } from '@/config/sessionLengths';
 import { cookieName } from '@/services/dimoDevAPI';
 import { SESSION_VERDICT_COOKIE } from '@/utils/middlewareUtils';
 import {
@@ -18,17 +16,15 @@ import {
   respond,
 } from '../sameOrigin';
 
-const SESSION_SECONDS = [PASSKEY_SESSION_SECONDS, EMAIL_CODE_SESSION_SECONDS];
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 
-// The wallet a session cookie's token names. Read, not verified: it only
-// decides whether to delete the cookie, and a forged one may go anyway.
+// The wallet a session token names. Read, not verified: it only decides
+// whether a cookie may be replaced or deleted.
 const walletOf = (token: string | undefined): string | null => {
-  const payload = token?.split('.')[1];
-  if (!payload) return null;
+  if (!token) return null;
   try {
-    const claims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
-    return typeof claims?.ethereum_address === 'string' ? claims.ethereum_address : null;
+    const wallet = jwtDecode<{ ethereum_address?: unknown }>(token).ethereum_address;
+    return typeof wallet === 'string' ? wallet.toLowerCase() : null;
   } catch {
     return null;
   }
@@ -36,7 +32,9 @@ const walletOf = (token: string | undefined): string | null => {
 
 // Trades the signed challenge for a DIMO token and stores it as the session
 // cookie, the second half of signing in again from a session-expired dialog.
-// The token never reaches the browser.
+// The token never reaches the browser. The cookie lasts `sessionSeconds`, the
+// time the session key has left (at most a passkey session). A cookie another
+// wallet holds is not replaced (409): that account signed in meanwhile.
 export const POST = async (request: NextRequest) => {
   const refused = refuseCrossSite(request);
   if (refused) return refused;
@@ -47,7 +45,9 @@ export const POST = async (request: NextRequest) => {
     typeof signedChallenge !== 'string' ||
     !signedChallenge ||
     typeof sessionSeconds !== 'number' ||
-    !SESSION_SECONDS.includes(sessionSeconds)
+    !Number.isInteger(sessionSeconds) ||
+    sessionSeconds < 1 ||
+    sessionSeconds > PASSKEY_SESSION_SECONDS
   ) {
     return badRequest('A signed challenge and a session length are required');
   }
@@ -65,6 +65,13 @@ export const POST = async (request: NextRequest) => {
   } catch (error) {
     return authFailed(error, 'Could not sign in');
   }
+  const held = walletOf((await cookies()).get(cookieName)?.value);
+  if (held && held !== walletOf(accessToken)) {
+    return respond(
+      { code: 'SIGNED_IN_ELSEWHERE', message: 'Another account signed in' },
+      409,
+    );
+  }
   await saveToken(accessToken, sessionSeconds);
   return respond({ ok: true });
 };
@@ -80,8 +87,7 @@ export const DELETE = async (request: NextRequest) => {
     return badRequest('A wallet address is required');
   }
   const jar = await cookies();
-  const owner = walletOf(jar.get(cookieName)?.value);
-  if (owner?.toLowerCase() !== wallet.toLowerCase()) {
+  if (walletOf(jar.get(cookieName)?.value) !== wallet.toLowerCase()) {
     return respond({ cleared: false });
   }
   jar.delete(cookieName);

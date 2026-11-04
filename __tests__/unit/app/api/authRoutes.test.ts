@@ -46,6 +46,11 @@ const post = (
     body: JSON.stringify(body),
   });
 const ADDRESS = '0x00000000000000000000000000000000000000bb';
+const OTHER = '0x00000000000000000000000000000000000000cc';
+beforeEach(() => {
+  jar.get.mockReset();
+  jar.delete.mockReset();
+});
 const dexAnswered = (status: number) =>
   new AxiosError('dex', 'ERR_BAD_RESPONSE', undefined, undefined, {
     status,
@@ -63,6 +68,10 @@ describe('origin check', () => {
     ['another site', { origin: 'https://evil.test' }],
     ['no Origin header', { origin: null }],
     ['a form post', { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }],
+    [
+      'a simple request dressed as JSON',
+      { headers: { 'Content-Type': 'text/plain; x=application/json' } },
+    ],
   ])('refuses %s', async (_name, opts) => {
     const res = await challenge(post('/api/auth/challenge', { address: ADDRESS }, opts));
     expect(res.status).toBe(403);
@@ -133,17 +142,36 @@ describe('POST /api/auth/session', () => {
     expect(saveToken).toHaveBeenCalledWith('jwt-1', 1800);
   });
 
-  it('accepts the email-code session length', async () => {
+  it('lets the cookie last what the session key has left', async () => {
     (getDimoToken as jest.Mock).mockResolvedValue({ access_token: 'jwt-1' });
     const res = await session(
-      post('/api/auth/session', { ...body, sessionSeconds: 900 }),
+      post('/api/auth/session', { ...body, sessionSeconds: 600 }),
     );
     expect(res.status).toBe(200);
-    expect(saveToken).toHaveBeenCalledWith('jwt-1', 900);
+    expect(saveToken).toHaveBeenCalledWith('jwt-1', 600);
+  });
+
+  it("doesn't replace another account's cookie (it signed in meanwhile)", async () => {
+    (getDimoToken as jest.Mock).mockResolvedValue({ access_token: tokenFor(ADDRESS) });
+    jar.get.mockReturnValue({ value: tokenFor(OTHER) });
+    const res = await session(post('/api/auth/session', body));
+    expect(res.status).toBe(409);
+    await expect(res.json()).resolves.toMatchObject({ code: 'SIGNED_IN_ELSEWHERE' });
+    expect(saveToken).not.toHaveBeenCalled();
+  });
+
+  it("replaces the wallet's own cookie", async () => {
+    (getDimoToken as jest.Mock).mockResolvedValue({ access_token: tokenFor(ADDRESS) });
+    jar.get.mockReturnValue({ value: tokenFor(ADDRESS) });
+    const res = await session(post('/api/auth/session', body));
+    expect(res.status).toBe(200);
+    expect(saveToken).toHaveBeenCalledWith(tokenFor(ADDRESS), 1800);
   });
 
   it.each([
-    ['a longer session', { ...body, sessionSeconds: 86_400 }],
+    ['a longer session', { ...body, sessionSeconds: 1801 }],
+    ['no time left', { ...body, sessionSeconds: 0 }],
+    ['a fractional length', { ...body, sessionSeconds: 1.5 }],
     ['no signature', { ...body, signedChallenge: '' }],
     ['no state', { ...body, state: undefined }],
   ])('refuses %s', async (_name, payload) => {
@@ -184,7 +212,7 @@ describe('DELETE /api/auth/session', () => {
 
   it('keeps a cookie another sign-in set since', async () => {
     jar.get.mockReturnValue({
-      value: tokenFor('0x00000000000000000000000000000000000000cc'),
+      value: tokenFor(OTHER),
     });
     const res = await del(ADDRESS);
     await expect(res.json()).resolves.toEqual({ cleared: false });

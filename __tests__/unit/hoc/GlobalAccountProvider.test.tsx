@@ -7,6 +7,10 @@ jest.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 jest.mock('@/hooks', () => ({ useMixPanel: () => ({ identifyUser: jest.fn() }) }));
 jest.mock('@/actions/user', () => ({ endSession: jest.fn(async () => true) }));
 jest.mock('@/utils/consoleSession', () => ({ clearConsoleBrowserState: jest.fn() }));
+jest.mock('@/services/consoleSignIn', () => ({
+  signOutOnServer: jest.fn(async () => undefined),
+}));
+jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
 jest.mock('@/config/turnkey', () => ({
   turnkeyClient: { logout: jest.fn(async () => undefined) },
   passkeyClient: {},
@@ -50,6 +54,8 @@ jest.mock('@/components/SessionExpiredDialog', () => ({
 }));
 
 import { endSession } from '@/actions/user';
+import { signOutOnServer } from '@/services/consoleSignIn';
+import * as Sentry from '@sentry/nextjs';
 import { clearConsoleBrowserState } from '@/utils/consoleSession';
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
 import { withGlobalAccounts } from '@/hoc/GlobalAccountProvider';
@@ -86,13 +92,7 @@ const store = (over = {}) => {
 };
 const signedOut = { from: expect.any(String), event: { type: 'signed-out' } };
 // The server half of a sign-out the user chose (works with no cookie).
-const fetchMock = jest.fn<Promise<unknown>, [string, RequestInit?]>(async () => ({
-  ok: true,
-  json: async () => ({ ok: true }),
-}));
-global.fetch = fetchMock as unknown as typeof fetch;
-const signOutCalls = () =>
-  fetchMock.mock.calls.filter(([path]) => path === '/api/auth/signout');
+const signOutCalls = () => (signOutOnServer as jest.Mock).mock.calls;
 const expiredFor = () => `expired: a@b.co ${sub}`;
 // The session expired, and nothing signed this tab or any other out.
 const stillSignedIn = (other: { received: unknown[] }) => {
@@ -332,12 +332,7 @@ describe('withGlobalAccounts across tabs', () => {
     render(<Page />);
     fireEvent.click(await screen.findByText('sign out'));
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
-    expect(signOutCalls()).toEqual([
-      [
-        '/api/auth/signout',
-        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' },
-      ],
-    ]);
+    expect(signOutCalls()).toHaveLength(1);
     expect(endSession).not.toHaveBeenCalled();
     expect(clearConsoleBrowserState).toHaveBeenCalledTimes(1);
     expect(queryClient.clear).toHaveBeenCalled();
@@ -438,6 +433,16 @@ describe('withGlobalAccounts across tabs', () => {
     expect(endSession).not.toHaveBeenCalled();
   });
 
+  it('signs out locally, and reports it, when the server half fails', async () => {
+    (signOutOnServer as jest.Mock).mockRejectedValueOnce(new Error('timed out'));
+    store({ expiry: nowS() - 5 });
+    render(<Page />);
+    fireEvent.click(await screen.findByText('sign out'));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
+    expect(localStorage.getItem(SESSION_KEY)).toBeNull();
+    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+  });
+
   it('ends the server session before it tells the other tabs', async () => {
     const post = jest.spyOn(BroadcastChannel.prototype, 'postMessage');
     try {
@@ -449,7 +454,7 @@ describe('withGlobalAccounts across tabs', () => {
         ([data]) => (data as { event?: { type?: string } }).event?.type === 'signed-out',
       );
       expect(announced).toBeGreaterThanOrEqual(0);
-      expect(fetchMock.mock.invocationCallOrder[0]).toBeLessThan(
+      expect((signOutOnServer as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
         post.mock.invocationCallOrder[announced],
       );
     } finally {

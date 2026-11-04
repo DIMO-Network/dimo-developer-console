@@ -24,7 +24,8 @@ import {
   RESOLVED_ACCOUNT_KEY,
 } from '@/utils/globalAccountSession';
 import { SessionExpiredDialog } from '@/components/SessionExpiredDialog';
-import type { ConsoleAccount } from '@/services/consoleSignIn';
+import { signOutOnServer, type ConsoleAccount } from '@/services/consoleSignIn';
+import * as Sentry from '@sentry/nextjs';
 
 // Resolving who is signed in costs two Turnkey calls (wallets, then the wallet
 // account) and chain RPC to derive the smart account address. Neither address
@@ -90,7 +91,13 @@ export const withGlobalAccounts = <P extends object>(
         return;
       }
       expiredRef.current = true;
-      setExpired({ email: session.email, subOrganizationId: session.subOrganizationId });
+      // Called again while the dialog is open (focus, reads): keep the same
+      // state, so the hidden page doesn't re-render for nothing.
+      setExpired((open) =>
+        open?.subOrganizationId === session.subOrganizationId
+          ? open
+          : { email: session.email, subOrganizationId: session.subOrganizationId },
+      );
     };
 
     // The session is live again for this account, from this tab or another:
@@ -238,18 +245,21 @@ export const withGlobalAccounts = <P extends object>(
       // with a 401 when the session is already gone; nothing below depends on
       // it. A chosen sign-out goes through /api/auth/signout, which works with
       // no cookie and also clears the active team and a pending invite.
-      try {
-        if (explicit) {
-          await fetch('/api/auth/signout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: '{}',
+      if (explicit) {
+        try {
+          // Ten seconds at most: a stalled request can't hold the sign-out.
+          await signOutOnServer();
+        } catch (error) {
+          Sentry.captureException(error, {
+            extra: { context: 'Sign-out: the server half failed; signing out locally' },
           });
-        } else {
-          await endSession();
         }
-      } catch {
-        // The proxy's 401 already cleared the cookies.
+      } else {
+        try {
+          await endSession();
+        } catch {
+          // The proxy's 401 already cleared the cookies.
+        }
       }
       try {
         await turnkeyClient.logout();
