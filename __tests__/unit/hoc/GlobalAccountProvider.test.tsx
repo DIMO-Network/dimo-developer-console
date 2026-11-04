@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useContext } from 'react';
 import { installFakeBroadcastChannel } from '@/utils/__fixtures__/fakeBroadcastChannel';
 
@@ -25,6 +25,26 @@ jest.mock('@/services/zerodev', () => ({
 jest.mock('@/utils/hardNavigate', () => ({ hardNavigate: jest.fn() }));
 jest.mock('@/hoc/QueryProvider', () => ({
   queryClient: { clear: jest.fn(), invalidateQueries: jest.fn() },
+}));
+// The dialog has its own tests; here it reports who it would sign in again.
+jest.mock('@/components/SessionExpiredDialog', () => ({
+  SessionExpiredDialog: ({
+    account,
+    currentWallet,
+    onRenewed,
+    onSignOut,
+  }: {
+    account: { email: string; subOrganizationId: string };
+    currentWallet: string | null;
+    onRenewed: () => void;
+    onSignOut: () => void;
+  }) => (
+    <div role="dialog">
+      <p>{`expired: ${account.email} ${account.subOrganizationId} ${currentWallet ?? 'no wallet'}`}</p>
+      <button onClick={onRenewed}>renewed</button>
+      <button onClick={onSignOut}>sign out</button>
+    </div>
+  ),
 }));
 
 import { endSession } from '@/actions/user';
@@ -62,6 +82,16 @@ const store = (over = {}) => {
   return session;
 };
 const signedOut = { from: expect.any(String), event: { type: 'signed-out' } };
+const SMART = '0x00000000000000000000000000000000000000bb';
+const expiredFor = (wallet: string = SMART) => `expired: a@b.co ${sub} ${wallet}`;
+// The session expired, and nothing signed this tab or any other out.
+const stillSignedIn = (other: { received: unknown[] }) => {
+  expect(endSession).not.toHaveBeenCalled();
+  expect(localStorage.getItem(SESSION_KEY)).not.toBeNull();
+  expect(replace).not.toHaveBeenCalled();
+  expect(hardNavigate).not.toHaveBeenCalled();
+  expect(other.received).not.toContainEqual(signedOut);
+};
 
 describe('withGlobalAccounts across tabs', () => {
   let fake: ReturnType<typeof installFakeBroadcastChannel>;
@@ -174,7 +204,7 @@ describe('withGlobalAccounts across tabs', () => {
     expect(endSession).not.toHaveBeenCalled();
   });
 
-  it('signs every tab out when the session expires', async () => {
+  it('asks to sign in again over the page when the session expires, signing no tab out', async () => {
     jest.useFakeTimers({ now: T0 });
     store({ expiry: nowS() + 60 });
     render(<Page />);
@@ -182,14 +212,75 @@ describe('withGlobalAccounts across tabs', () => {
     act(() => {
       jest.advanceTimersByTime(59_000);
     });
-    expect(endSession).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).toBeNull();
     act(() => {
       jest.advanceTimersByTime(2_000);
     });
+    expect(await screen.findByText(expiredFor())).toBeInTheDocument();
+    stillSignedIn(other);
+    expect(screen.getByText('a@b.co')).toBeInTheDocument();
+  });
+
+  it('renewing in this tab closes the dialog, refetches, and waits for the new expiry', async () => {
+    jest.useFakeTimers({ now: T0 });
+    store({ expiry: nowS() + 60 });
+    render(<Page />);
+    await screen.findByText('a@b.co');
+    act(() => {
+      jest.advanceTimersByTime(61_000);
+    });
+    await screen.findByRole('dialog');
+    // The dialog stored the new session before it reports back.
+    store({ token: 'bundle-2', eKey: 'key-2', expiry: nowS() + 1800 });
+    fireEvent.click(screen.getByText('renewed'));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(queryClient.invalidateQueries).toHaveBeenCalledTimes(1);
+    expect(queryClient.clear).not.toHaveBeenCalled();
+    stillSignedIn(other);
+    act(() => {
+      jest.advanceTimersByTime(1_799_000);
+    });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    act(() => {
+      jest.advanceTimersByTime(2_000);
+    });
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('closes the dialog and loads the account when another tab renews it', async () => {
+    store({ expiry: nowS() - 5 });
+    render(<Page />);
+    expect(await screen.findByText(expiredFor('no wallet'))).toBeInTheDocument();
+    const next = store({ token: 'bundle-2', eKey: 'key-2', expiry: nowS() + 1800 });
+    other.post({
+      from: 'tab-2',
+      event: { type: 'signed-in', subOrganizationId: sub, expiry: next.expiry },
+    });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(await screen.findByText('a@b.co')).toBeInTheDocument();
+    expect(queryClient.invalidateQueries).toHaveBeenCalled();
+    stillSignedIn(other);
+  });
+
+  it('offers the wallet it already resolved when a tab loads with an expired session', async () => {
+    store({ expiry: nowS() - 5 });
+    localStorage.setItem(
+      RESOLVED_ACCOUNT_KEY,
+      JSON.stringify({
+        subOrganizationId: sub,
+        walletAddress: '0x00000000000000000000000000000000000000aa',
+        smartContractAddress: SMART,
+      }),
+    );
+    render(<Page />);
+    expect(await screen.findByText(expiredFor())).toBeInTheDocument();
+    stillSignedIn(other);
+  });
+
+  it('a tab with no session at all goes to sign-in', async () => {
+    render(<Page />);
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
-    expect(endSession).toHaveBeenCalledTimes(1);
-    expect(localStorage.getItem(SESSION_KEY)).toBeNull();
-    await waitFor(() => expect(other.received).toContainEqual(signedOut));
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 
   it('waits for the later expiry when another tab signed in again', async () => {
@@ -205,12 +296,12 @@ describe('withGlobalAccounts across tabs', () => {
       jest.advanceTimersByTime(31_000);
     });
     await act(async () => {});
-    expect(endSession).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).toBeNull();
     act(() => {
       jest.advanceTimersByTime(540_000);
     });
-    await waitFor(() => expect(endSession).toHaveBeenCalledTimes(1));
-    expect(replace).toHaveBeenCalledWith('/sign-in');
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(endSession).not.toHaveBeenCalled();
   });
 
   // setTimeout fires at once for a delay past 2^31-1 ms (about 24.8 days).
@@ -227,18 +318,18 @@ describe('withGlobalAccounts across tabs', () => {
       act(() => {
         jest.advanceTimersByTime(MAX_DELAY);
       });
-      expect(endSession).not.toHaveBeenCalled();
+      expect(screen.queryByRole('dialog')).toBeNull();
       expect(hardNavigate).not.toHaveBeenCalled();
       // Then the rest: a second past the expiry second, as for any session.
       act(() => {
         jest.advanceTimersByTime(far.expiry * 1000 - Date.now());
       });
-      expect(endSession).not.toHaveBeenCalled();
+      expect(screen.queryByRole('dialog')).toBeNull();
       act(() => {
         jest.advanceTimersByTime(2_000);
       });
-      await waitFor(() => expect(endSession).toHaveBeenCalledTimes(1));
-      expect(replace).toHaveBeenCalledWith('/sign-in');
+      expect(await screen.findByRole('dialog')).toBeInTheDocument();
+      expect(endSession).not.toHaveBeenCalled();
     } finally {
       timers.mockRestore();
     }
@@ -253,8 +344,8 @@ describe('withGlobalAccounts across tabs', () => {
     act(() => {
       document.dispatchEvent(new Event('visibilitychange'));
     });
-    await waitFor(() => expect(endSession).toHaveBeenCalled());
-    expect(replace).toHaveBeenCalledWith('/sign-in');
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(endSession).not.toHaveBeenCalled();
   });
 
   it('goes to sign-in when the tab comes back to no session', async () => {
@@ -286,6 +377,7 @@ describe('withGlobalAccounts across tabs', () => {
     try {
       store({ expiry: nowS() - 5 });
       render(<Page />);
+      fireEvent.click(await screen.findByText('sign out'));
       await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
       const announced = post.mock.calls.findIndex(
         ([data]) => (data as { event?: { type?: string } }).event?.type === 'signed-out',
@@ -299,9 +391,10 @@ describe('withGlobalAccounts across tabs', () => {
     }
   });
 
-  it('clears an expired shared session it finds and tells the other tabs', async () => {
+  it('signs out from the dialog: clears the shared session and tells the other tabs', async () => {
     store({ expiry: nowS() - 5 });
     render(<Page />);
+    fireEvent.click(await screen.findByText('sign out'));
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
     expect(endSession).toHaveBeenCalledTimes(1);
     expect(localStorage.getItem(SESSION_KEY)).toBeNull();

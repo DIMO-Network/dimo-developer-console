@@ -20,7 +20,6 @@ interface IProps {
     code: string,
     state: string | null,
   ) => Promise<{ success: boolean; email: string }>;
-  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<IProps>({
@@ -36,5 +35,4 @@ export const AuthContext = createContext<IProps>({
   completeExternalAuth: async () => {
     return { success: false, email: '' };
   },
-  logout: async () => {},
 });

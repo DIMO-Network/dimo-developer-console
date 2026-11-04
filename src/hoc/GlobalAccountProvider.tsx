@@ -22,6 +22,8 @@ import {
   readSession,
   RESOLVED_ACCOUNT_KEY,
 } from '@/utils/globalAccountSession';
+import { SessionExpiredDialog } from '@/components/SessionExpiredDialog';
+import type { ConsoleAccount } from '@/services/consoleSignIn';
 
 // Resolving who is signed in costs two Turnkey calls (wallets, then the wallet
 // account) and chain RPC to derive the smart account address. Neither address
@@ -60,6 +62,42 @@ export const withGlobalAccounts = <P extends object>(
     // Set once this tab is on its way out (signing out or reloading): later
     // checks and events have nothing left to do.
     const leaving = useRef(false);
+    // The account whose session ran out, while SessionExpiredDialog asks to
+    // sign in again; null otherwise.
+    const [expired, setExpired] = useState<ConsoleAccount | null>(null);
+    // Checks the shared session and schedules the next expiry (set by the
+    // effect below).
+    const recheck = useRef<() => void>(() => {});
+
+    // The session ran out: ask to sign in again over this page, as the same
+    // account, instead of signing every tab out. With no session at all there
+    // is no one to ask about, so that is a sign-out.
+    const expire = () => {
+      if (leaving.current) return;
+      const session = readSession();
+      if (!session) return void logout();
+      setExpired({ email: session.email, subOrganizationId: session.subOrganizationId });
+    };
+
+    // The wallet already resolved for the expired account, so renewing doesn't
+    // complete the account again.
+    const knownWallet = (subOrganizationId: string): `0x${string}` | null => {
+      if (user?.subOrganizationId === subOrganizationId) return user.smartContractAddress;
+      const saved = getFromLocalStorage<ResolvedAccount>(RESOLVED_ACCOUNT_KEY);
+      return saved?.subOrganizationId === subOrganizationId
+        ? saved.smartContractAddress
+        : null;
+    };
+
+    // This tab signed in again (SessionExpiredDialog stored the session; the
+    // other tabs hear of it themselves).
+    const renewed = () => {
+      setExpired(null);
+      // Panels that failed while the session was gone ask again.
+      void queryClient.invalidateQueries();
+      if (!user) void loadUserInformation();
+      recheck.current();
+    };
 
     const validateCurrentSession = async (): Promise<IUserSession | null> => {
       const sessionUser = await loadUserSession();
@@ -75,7 +113,7 @@ export const withGlobalAccounts = <P extends object>(
       }
 
       if (!isLive(session)) {
-        await logout();
+        expire();
         return null;
       }
       return sessionUser;
@@ -85,7 +123,7 @@ export const withGlobalAccounts = <P extends object>(
     // the Turnkey client and kernel client a transaction would need.
     const readBalance = async (address: `0x${string}`, abi: Abi): Promise<number> => {
       if (!isLive(readSession())) {
-        await logout();
+        expire();
         return 0;
       }
 
@@ -109,8 +147,13 @@ export const withGlobalAccounts = <P extends object>(
       // The bundle and its key come from this one read.
       const session = readSession();
 
-      if (!isLive(session)) {
+      if (!session) {
         await logout();
+        return null;
+      }
+
+      if (!isLive(session)) {
+        expire();
         return null;
       }
 
@@ -171,8 +214,9 @@ export const withGlobalAccounts = <P extends object>(
       setUser(user);
     };
 
-    // Reached when the session expired or this tab has none; an explicit
-    // sign-out (the menu) also clears the team and developer JWTs.
+    // Reached when this tab has no session, or the user signs out from
+    // SessionExpiredDialog; an explicit sign-out (the menu) also clears the
+    // team and developer JWTs.
     const logout = async () => {
       if (leaving.current) return;
       leaving.current = true;
@@ -204,7 +248,7 @@ export const withGlobalAccounts = <P extends object>(
     }, []);
 
     // Every tab shares the session: follow what the other tabs do with it, and
-    // sign out when it expires.
+    // ask to sign in again when it expires.
     useEffect(() => {
       const mounted = readSession();
       const loaded = mounted?.subOrganizationId;
@@ -229,7 +273,7 @@ export const withGlobalAccounts = <P extends object>(
         const session = readSession();
         // Another tab signed out (or the browser dropped the store).
         if (!session) return leave('/sign-in');
-        if (!isLive(session)) return void logout();
+        if (!isLive(session)) return expire();
         // Another tab signed in as someone else while this one was away.
         if (session.subOrganizationId !== loaded) return leave('/app');
         // Still live, perhaps renewed by a sign-in in another tab.
@@ -240,6 +284,7 @@ export const withGlobalAccounts = <P extends object>(
         if (document.visibilityState === 'visible') check();
       };
 
+      recheck.current = check;
       if (isLive(mounted)) schedule(mounted.expiry);
       window.addEventListener('focus', check);
       document.addEventListener('visibilitychange', onVisible);
@@ -260,8 +305,15 @@ export const withGlobalAccounts = <P extends object>(
         } else {
           // The same account signed in again: the next Turnkey call reads the
           // new bundle and key together, and panels that failed while the
-          // cookie was gone ask again.
+          // cookie was gone ask again. A session-expired dialog closes, and
+          // the next expiry is scheduled.
+          setExpired(null);
           void queryClient.invalidateQueries();
+          // A tab that loaded with an expired session has no account yet.
+          if (rememberedUser?.subOrganizationId !== event.subOrganizationId) {
+            void loadUserInformation();
+          }
+          check();
         }
       });
 
@@ -286,6 +338,14 @@ export const withGlobalAccounts = <P extends object>(
         }}
       >
         <WrappedComponent {...props} />
+        {expired && (
+          <SessionExpiredDialog
+            account={expired}
+            currentWallet={knownWallet(expired.subOrganizationId)}
+            onRenewed={renewed}
+            onSignOut={() => void logout()}
+          />
+        )}
       </GlobalAccountContext.Provider>
     );
   };
