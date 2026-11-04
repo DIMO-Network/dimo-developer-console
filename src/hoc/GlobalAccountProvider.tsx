@@ -9,7 +9,8 @@ import { getKernelAccount, getPublicClient } from '@/services/zerodev';
 import { Abi } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
-import { endSession } from '@/actions/user';
+import { endSession, signOut } from '@/actions/user';
+import { clearConsoleBrowserState } from '@/utils/consoleSession';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
@@ -65,37 +66,47 @@ export const withGlobalAccounts = <P extends object>(
     // The account whose session ran out, while SessionExpiredDialog asks to
     // sign in again; null otherwise.
     const [expired, setExpired] = useState<ConsoleAccount | null>(null);
-    // Checks the shared session and schedules the next expiry (set by the
-    // effect below).
+    // For the session effect below, which is mounted once: whether the dialog
+    // is open, the user as now loaded, the account this tab loaded with, and
+    // its check of the shared session.
+    const expiredRef = useRef(false);
+    const userRef = useRef(user);
+    userRef.current = user;
+    const loadedRef = useRef<string | undefined>(undefined);
     const recheck = useRef<() => void>(() => {});
 
     // The session ran out: ask to sign in again over this page, as the same
     // account, instead of signing every tab out. With no session at all there
-    // is no one to ask about, so that is a sign-out.
+    // is no one to ask about, so that is a sign-out; someone else's session
+    // reloads into their account, as when they sign in.
     const expire = () => {
       if (leaving.current) return;
       const session = readSession();
       if (!session) return void logout();
+      const loaded = userRef.current?.subOrganizationId ?? loadedRef.current;
+      if (loaded && session.subOrganizationId !== loaded) {
+        leaving.current = true;
+        hardNavigate('/app');
+        return;
+      }
+      expiredRef.current = true;
       setExpired({ email: session.email, subOrganizationId: session.subOrganizationId });
     };
 
-    // The wallet already resolved for the expired account, so renewing doesn't
-    // complete the account again.
-    const knownWallet = (subOrganizationId: string): `0x${string}` | null => {
-      if (user?.subOrganizationId === subOrganizationId) return user.smartContractAddress;
-      const saved = getFromLocalStorage<ResolvedAccount>(RESOLVED_ACCOUNT_KEY);
-      return saved?.subOrganizationId === subOrganizationId
-        ? saved.smartContractAddress
-        : null;
+    // The session is live again for this account, from this tab or another:
+    // close the dialog, and let the panels that failed while it was gone ask
+    // again. A tab that loaded with an expired session has no account yet.
+    const resume = () => {
+      expiredRef.current = false;
+      setExpired(null);
+      void queryClient.invalidateQueries();
+      if (!userRef.current) void loadUserInformation();
     };
 
     // This tab signed in again (SessionExpiredDialog stored the session; the
-    // other tabs hear of it themselves).
+    // other tabs hear of it themselves), so it schedules the next expiry too.
     const renewed = () => {
-      setExpired(null);
-      // Panels that failed while the session was gone ask again.
-      void queryClient.invalidateQueries();
-      if (!user) void loadUserInformation();
+      resume();
       recheck.current();
     };
 
@@ -215,16 +226,18 @@ export const withGlobalAccounts = <P extends object>(
     };
 
     // Reached when this tab has no session, or the user signs out from
-    // SessionExpiredDialog; an explicit sign-out (the menu) also clears the
-    // team and developer JWTs.
-    const logout = async () => {
+    // SessionExpiredDialog. That one is a sign-out the user chose: like the
+    // menu's, it also forgets the developer JWTs, the active team and a pending
+    // invite (explicit).
+    const logout = async ({ explicit = false }: { explicit?: boolean } = {}) => {
       if (leaving.current) return;
       leaving.current = true;
+      if (explicit) clearConsoleBrowserState();
       // The cookie goes first, so a tab that hears the announcement below
       // finds no session on the server either. The proxy answers this action
       // with a 401 when the session is already gone; nothing below depends on it.
       try {
-        await endSession();
+        await (explicit ? signOut() : endSession());
       } catch {
         // The proxy's 401 already cleared the cookies.
       }
@@ -252,6 +265,7 @@ export const withGlobalAccounts = <P extends object>(
     useEffect(() => {
       const mounted = readSession();
       const loaded = mounted?.subOrganizationId;
+      loadedRef.current = loaded;
       let timer: ReturnType<typeof setTimeout> | undefined;
 
       const leave = (path: string) => {
@@ -273,10 +287,12 @@ export const withGlobalAccounts = <P extends object>(
         const session = readSession();
         // Another tab signed out (or the browser dropped the store).
         if (!session) return leave('/sign-in');
-        if (!isLive(session)) return expire();
         // Another tab signed in as someone else while this one was away.
         if (session.subOrganizationId !== loaded) return leave('/app');
-        // Still live, perhaps renewed by a sign-in in another tab.
+        if (!isLive(session)) return expire();
+        // Still live, perhaps renewed by a sign-in in another tab, whose
+        // announcement this tab may have missed.
+        if (expiredRef.current) resume();
         schedule(session.expiry);
       };
 
@@ -304,15 +320,10 @@ export const withGlobalAccounts = <P extends object>(
           leave('/app');
         } else {
           // The same account signed in again: the next Turnkey call reads the
-          // new bundle and key together, and panels that failed while the
-          // cookie was gone ask again. A session-expired dialog closes, and
-          // the next expiry is scheduled.
-          setExpired(null);
-          void queryClient.invalidateQueries();
-          // A tab that loaded with an expired session has no account yet.
-          if (rememberedUser?.subOrganizationId !== event.subOrganizationId) {
-            void loadUserInformation();
-          }
+          // new bundle and key together, panels that failed while the cookie
+          // was gone ask again, a session-expired dialog closes, and the next
+          // expiry is scheduled.
+          resume();
           check();
         }
       });
@@ -337,13 +348,17 @@ export const withGlobalAccounts = <P extends object>(
           logout,
         }}
       >
-        <WrappedComponent {...props} />
+        {/* Hidden, not unmounted, while the session is expired: an unattended
+            screen shows no account data, and the page keeps its state for
+            when the user signs in again. */}
+        <div style={{ display: expired ? 'none' : 'contents' }}>
+          <WrappedComponent {...props} />
+        </div>
         {expired && (
           <SessionExpiredDialog
             account={expired}
-            currentWallet={knownWallet(expired.subOrganizationId)}
             onRenewed={renewed}
-            onSignOut={() => void logout()}
+            onSignOut={() => void logout({ explicit: true })}
           />
         )}
       </GlobalAccountContext.Provider>

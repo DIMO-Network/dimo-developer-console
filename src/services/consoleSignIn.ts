@@ -8,7 +8,11 @@ import config from '@/config';
 import { initOtpLogin, otpLogin } from '@/services/globalAccount';
 import { getTurnkeyClient, getTurnkeyWalletAddress } from '@/services/turnkey';
 import { getKernelAccount } from '@/services/zerodev';
-import { writeSession } from '@/utils/globalAccountSession';
+import { readSession, writeSession } from '@/utils/globalAccountSession';
+import {
+  EMAIL_CODE_SESSION_SECONDS,
+  PASSKEY_SESSION_SECONDS,
+} from '@/config/sessionLengths';
 import { startConsoleSession } from '@/utils/consoleSession';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { isEmpty } from 'lodash';
@@ -16,8 +20,7 @@ import { isEmpty } from 'lodash';
 // The steps of a console sign-in, shared by the sign-in page (AuthProvider)
 // and the session-expired dialog (GlobalAccountProvider).
 
-export const PASSKEY_SESSION_SECONDS = 30 * 60;
-export const EMAIL_CODE_SESSION_SECONDS = 15 * 60;
+export { EMAIL_CODE_SESSION_SECONDS, PASSKEY_SESSION_SECONDS };
 
 export interface ConsoleAccount {
   email: string;
@@ -89,6 +92,26 @@ export const emailCodeCredential = async ({
   };
 };
 
+// The account's smart wallet, opened with the new session key.
+const smartWallet = async (
+  { subOrganizationId }: ConsoleAccount,
+  credential: Pick<TurnkeyCredential, 'credentialBundle' | 'privateKey'>,
+) => {
+  const client = getTurnkeyClient({
+    authKey: credential.credentialBundle,
+    eKey: credential.privateKey,
+  });
+  const walletAddress = await getTurnkeyWalletAddress({
+    subOrganizationId: subOrganizationId,
+    client: client,
+  });
+  return getKernelAccount({
+    subOrganizationId: subOrganizationId,
+    walletAddress: walletAddress,
+    client: client,
+  });
+};
+
 // Signs DIMO's challenge with the account's smart wallet for a DIMO token, and
 // creates or completes the console account when it needs it.
 export const signIntoDimo = async ({
@@ -102,21 +125,8 @@ export const signIntoDimo = async ({
   existsOnDevConsole: boolean;
   currentWalletValue?: `0x${string}` | null;
 }) => {
-  const { subOrganizationId, email } = account;
-  const client = getTurnkeyClient({
-    authKey: credential.credentialBundle,
-    eKey: credential.privateKey,
-  });
-  const walletAddress = await getTurnkeyWalletAddress({
-    subOrganizationId: subOrganizationId,
-    client: client,
-  });
-
-  const kernelAccount = await getKernelAccount({
-    subOrganizationId: subOrganizationId,
-    walletAddress: walletAddress,
-    client: client,
-  });
+  const { email } = account;
+  const kernelAccount = await smartWallet(account, credential);
 
   const { challenge, state } = await getDimoChallenge({
     address: kernelAccount.address,
@@ -193,22 +203,56 @@ export const storeConsoleSession = async ({
   });
 };
 
+const postJson = async <T>(path: string, body: unknown): Promise<T> => {
+  const response = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error(`POST ${path} failed with ${response.status}`);
+  return (await response.json()) as T;
+};
+
 // Starts a new session for an account whose session expired, without leaving
-// the page: the same steps as a sign-in, for the same account.
+// the page: the account exists and is linked, so it is DIMO's challenge, the
+// cookie and the shared session. A page other than /sign-in can't run the
+// sign-in's server actions once the cookie is gone (the proxy answers them
+// with a 401), so the server steps go through /api/auth/*, outside the proxy.
+// Returns false, writing nothing, when the shared session stopped being this
+// account's while it ran: another tab signed out, or in as someone else.
 export const renewConsoleSession = async ({
   account,
   credential,
-  currentWalletValue,
 }: {
   account: ConsoleAccount;
   credential: TurnkeyCredential;
-  currentWalletValue: `0x${string}` | null;
-}) => {
-  const { token } = await signIntoDimo({
-    account,
-    credential,
-    existsOnDevConsole: true,
-    currentWalletValue,
+}): Promise<boolean> => {
+  const stillThisAccount = () =>
+    readSession()?.subOrganizationId === account.subOrganizationId;
+
+  const kernelAccount = await smartWallet(account, credential);
+  const { challenge, state } = await postJson<{ challenge: string; state: string }>(
+    '/api/auth/challenge',
+    { address: kernelAccount.address },
+  );
+  const signedChallenge = await kernelAccount.signMessage({ message: challenge });
+
+  if (!stillThisAccount()) return false;
+  await postJson('/api/auth/session', {
+    state,
+    signedChallenge,
+    sessionSeconds: credential.sessionSeconds,
   });
-  await storeConsoleSession({ account, credential, accessToken: token.access_token });
+
+  if (!stillThisAccount()) return false;
+  startConsoleSession(account.subOrganizationId);
+  writeSession({
+    email: account.email,
+    role: 'owner',
+    subOrganizationId: account.subOrganizationId,
+    token: credential.credentialBundle,
+    expiry: credential.expiry,
+    eKey: credential.privateKey,
+  });
+  return true;
 };

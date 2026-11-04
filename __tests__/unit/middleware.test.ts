@@ -339,6 +339,15 @@ describe('proxy matcher', () => {
     expect(runsOn('/_next/static/chunks/main.js')).toBe(false);
   });
 
+  // A session-expired dialog signs in again through these with no cookie; the
+  // routes check the origin themselves.
+  it('skips /api/auth, and only it', () => {
+    expect(runsOn('/api/auth/challenge')).toBe(false);
+    expect(runsOn('/api/auth/session')).toBe(false);
+    expect(runsOn('/api/me')).toBe(true);
+    expect(runsOn('/api/teams')).toBe(true);
+  });
+
   it('runs on routes whose last segment looks like a file name', () => {
     expect(runsOn('/api/templates/toyota.png')).toBe(true);
     expect(runsOn('/api/webhook')).toBe(true);
