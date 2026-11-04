@@ -14,6 +14,8 @@ interface Props {
   consoleKey?: boolean;
   // A registry row whose signer the chain no longer lists.
   offChain?: boolean;
+  // An off-chain row recorded moments ago: Identity hasn't indexed the key yet.
+  syncing?: boolean;
   unavailable?: boolean;
   onAssign?: () => void;
 }
@@ -23,6 +25,7 @@ export const BelongsTo: FC<Props> = ({
   memberWallet,
   consoleKey = false,
   offChain = false,
+  syncing = false,
   unavailable = false,
   onAssign,
 }) => {
@@ -84,7 +87,11 @@ export const BelongsTo: FC<Props> = ({
   return (
     <div className="flex flex-col items-start gap-1">
       {body}
-      <StatusChip tone="off">Disabled outside the console</StatusChip>
+      {syncing ? (
+        <StatusChip tone="pending">Still syncing</StatusChip>
+      ) : (
+        <StatusChip tone="off">Disabled outside the console</StatusChip>
+      )}
     </div>
   );
 };
