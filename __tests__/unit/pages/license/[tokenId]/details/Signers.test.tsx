@@ -459,6 +459,58 @@ describe('Signers', () => {
     expect(screen.getByLabelText('Note')).toHaveValue('Prod backend');
   });
 
+  it('keeps a new key enabled when the license refetch beats Identity indexing it', async () => {
+    // The registry row lands right after the key is shown; Identity's list,
+    // refetched once, doesn't have the key yet.
+    (upsertLicenseSigner as jest.Mock).mockImplementation(async () => {
+      registry.byAddress = new Map([
+        [
+          NEW_KEY.toLowerCase(),
+          row(NEW_KEY, 'API_KEY', [{ userId: null, name: 'dimo mobile', email: null }]),
+        ],
+      ]);
+      return { ok: true, data: {} };
+    });
+    show();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Create an API key for your server' }),
+    );
+    fireEvent.change(screen.getByLabelText('Other people (comma-separated)'), {
+      target: { value: 'dimo mobile' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Generate API key' }));
+    expect(await screen.findByText('API key abc123')).toBeInTheDocument();
+    await waitFor(() => expect(upsertLicenseSigner).toHaveBeenCalled());
+    await waitFor(() => expect(refetchLicense).toHaveBeenCalled());
+    await act(async () => {});
+    expect(screen.getByText('dimo mobile')).toBeInTheDocument();
+    expect(screen.queryByText('Disabled outside the console')).toBeNull();
+    expect(
+      screen.getByRole('button', { name: `Actions for ${NEW_KEY}` }),
+    ).toBeInTheDocument();
+  });
+
+  it('says a key recorded moments ago is still syncing, not disabled', () => {
+    registry.byAddress = new Map([
+      [
+        NEW_KEY.toLowerCase(),
+        {
+          ...row(NEW_KEY, 'API_KEY', [
+            { userId: null, name: 'dimo mobile', email: null },
+          ]),
+          createdAt: new Date(Date.now() - 30_000).toISOString(),
+        },
+      ],
+      [
+        OLD.toLowerCase(),
+        row(OLD, 'EXTERNAL', [{ userId: null, name: 'Old backend', email: null }]),
+      ],
+    ]);
+    show();
+    expect(screen.getByText('Still syncing')).toBeInTheDocument();
+    expect(screen.getAllByText('Disabled outside the console')).toHaveLength(1);
+  });
+
   it('records a RentalOS key, and a registry failure never rolls the tenant back', async () => {
     jest.useFakeTimers();
     (upsertLicenseSigner as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));

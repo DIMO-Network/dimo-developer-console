@@ -53,6 +53,9 @@ const DELETE_KEY_SUBTITLE =
   'Apps using this key stop getting new developer JWTs. JWTs already issued with it keep working until they expire, up to 14 days.';
 const CONSOLE_OFF_SUBTITLE =
   'The console stops making developer JWTs for this license. JWTs it already made keep working until they expire, up to 14 days.';
+// Registry rows are written only after the chain confirms, so a row this new
+// that Identity doesn't list yet is Identity catching up, not a key turned off.
+const SYNCING_MS = 10 * 60_000;
 const RENTAL_OS_URL = 'https://rentals.dimo.co/';
 const RENTAL_OS_REGISTER_ENDPOINT = 'https://rentals.dimo.co/tenant/register';
 
@@ -238,7 +241,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         ...prev,
         { address: account.address, enabledAt: new Date().toISOString() },
       ]);
-      refetch().then(() => setOptimisticAdditions([]));
+      // The row stays until Identity lists the key: one refetch is often too soon.
+      void refetch().catch((error: unknown) => Sentry.captureException(error));
       trackEvent('API Key Generated', {
         distinct_id: fragment.owner,
         tokenId: fragment.tokenId,
@@ -392,7 +396,8 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         ...prev,
         { address: account.address, enabledAt: new Date().toISOString() },
       ]);
-      refetch().then(() => setOptimisticAdditions([]));
+      // The row stays until Identity lists the key: one refetch is often too soon.
+      void refetch().catch((error: unknown) => Sentry.captureException(error));
 
       trackEvent('RentalOS Tenant Generated', {
         distinct_id: fragment.owner,
@@ -428,6 +433,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     // the license refetch finish behind the page.
     await handleDisableSigner(signer);
     if (turningOff) setEnabledKey(null);
+    setOptimisticAdditions((prev) =>
+      prev.filter((s) => s.address.toLowerCase() !== signer.toLowerCase()),
+    );
     setPendingRemovals((prev) => new Set([...prev, signer.toLowerCase()]));
     toast.success(
       turningOff
@@ -457,13 +465,16 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     });
   }, [fragment.signers.nodes]);
 
-  type SignerRow = SignerNode & { offChain?: boolean };
+  type SignerRow = SignerNode & { offChain?: boolean; syncing?: boolean };
   const onChainRows: SignerRow[] = [
     ...fragment.signers.nodes.filter(
       (s) => !pendingRemovals.has(s.address.toLowerCase()),
     ),
     ...optimisticAdditions.filter(
-      (s) => !fragment.signers.nodes.some((n) => n.address === s.address),
+      (s) =>
+        !fragment.signers.nodes.some(
+          (n) => n.address.toLowerCase() === s.address.toLowerCase(),
+        ),
     ),
   ];
   if (
@@ -473,10 +484,17 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   )
     onChainRows.push({ address: enabledKey, enabledAt: new Date().toISOString() });
   const listed = new Set(onChainRows.map((s) => String(s.address).toLowerCase()));
-  // Registry rows the chain no longer lists (spec: "Disabled outside the console").
+  // Registry rows the chain no longer lists (spec: "Disabled outside the console"),
+  // unless the row is new enough that Identity may simply not have indexed it yet.
+  const now = Date.now();
   const offChainRows: SignerRow[] = [...registry.byAddress.values()]
     .filter((r) => !listed.has(r.signerAddress.toLowerCase()))
-    .map((r) => ({ address: r.signerAddress, enabledAt: null, offChain: true }));
+    .map((r) => ({
+      address: r.signerAddress,
+      enabledAt: null,
+      offChain: true,
+      syncing: now - Date.parse(r.createdAt) < SYNCING_MS,
+    }));
   const displaySigners = [...onChainRows, ...offChainRows];
 
   const renderRowActions = (item: SignerRow) => {
@@ -734,6 +752,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                         !item.offChain
                       }
                       offChain={item.offChain}
+                      syncing={item.syncing}
                       unavailable={registry.isError}
                       onAssign={
                         isLicenseOwner &&
