@@ -82,10 +82,17 @@ export async function readStrings(app, locale, root = process.env.DIMO_ROOT ?? '
   return new Map(await read(resolve(repoRoot, root), locale));
 }
 
+export async function readPool(dir = memoryDir) {
+  return (await readJson(join(dir, 'pool.json'))).entries;
+}
+
 export async function readMemory(locale, dir = memoryDir) {
-  const { entries } = await readJson(join(dir, 'pool.json'));
-  const translations = await readJson(join(dir, `${locale}.json`)).catch(() => ({}));
-  return { entries, translations };
+  const file = join(dir, `${locale}.json`);
+  const translations = await readJson(file).catch((err) => {
+    if (err.code === 'ENOENT') throw new Error(`Memory file not found: ${file}`);
+    throw err;
+  });
+  return { entries: await readPool(dir), translations };
 }
 
 export function parseArgs(argv) {

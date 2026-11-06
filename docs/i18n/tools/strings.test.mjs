@@ -1,5 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { readStrings } from './strings.mjs';
 
 const root = new URL('./fixtures/root', import.meta.url).pathname;
@@ -66,5 +69,21 @@ test('sheet builds sorted, quoted CSV with one column per locale', async () => {
   assert.equal(
     await buildSheet('console', ['es'], root),
     'key,en,es\na.nested.deep.key,Deep value,\na.title,Apps,Aplicaciones\n',
+  );
+});
+
+test('check-memory rethrows malformed memory JSON', async () => {
+  const { findMismatches } = await import('./check-memory.mjs');
+  const bad = await mkdtemp(join(tmpdir(), 'memory-bad-'));
+  await writeFile(join(bad, 'pool.json'), '{"entries":[]}');
+  await writeFile(join(bad, 'es.json'), '{ nope');
+  await assert.rejects(findMismatches('console', 'es', root, bad), SyntaxError);
+});
+
+test('check-memory fails when the locale memory file is missing', async () => {
+  const { findMismatches } = await import('./check-memory.mjs');
+  await assert.rejects(
+    findMismatches('console', 'fr', root, memory),
+    /Memory file not found/,
   );
 });

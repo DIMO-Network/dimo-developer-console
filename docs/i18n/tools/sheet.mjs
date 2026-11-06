@@ -1,16 +1,15 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parseArgs, readMemory, readStrings, repoRoot } from './strings.mjs';
+import { parseArgs, readMemory, readPool, readStrings, repoRoot } from './strings.mjs';
 
 const csvCell = (value = '') =>
   /[",\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
 
 async function readMemoryStrings(locale) {
   const { entries, translations } = await readMemory(locale);
-  const column = new Map(
+  return new Map(
     entries.flatMap((e) => (translations[e.id] ? [[e.id, translations[e.id].text]] : [])),
   );
-  return column;
 }
 
 async function readColumn(app, locale, root) {
@@ -20,7 +19,7 @@ async function readColumn(app, locale, root) {
 
 async function readEnglish(app, root) {
   if (app !== 'memory') return readStrings(app, 'en', root);
-  const { entries } = await readMemory('en');
+  const entries = await readPool();
   return new Map(entries.map((e) => [e.id, e.en]));
 }
 

@@ -21,7 +21,10 @@ async function main() {
   const { app, locale, root, memory } = parseArgs(process.argv.slice(2));
   if (!app || !locale)
     throw new Error('Usage: check-memory.mjs --app <app> --locale <code>');
-  const mismatches = await findMismatches(app, locale, root, memory);
+  const mismatches = await findMismatches(app, locale, root, memory).catch((err) => {
+    console.error(err.message);
+    process.exit(1);
+  });
   for (const m of mismatches) {
     console.log(
       `${m.key}\t${m.id}\texpected: ${m.expected}\tactual: ${m.actual ?? '(missing)'}`,
