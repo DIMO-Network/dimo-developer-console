@@ -2,28 +2,22 @@
 
 import React, { useEffect } from 'react';
 import { ThemeProvider } from 'next-themes';
-import { dimoFont } from '@/utils/font';
-import '@/app/globals.css';
 import QueryProvider from '@/hoc/QueryProvider';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { Toaster } from '@/components/ui/sonner';
 
-export const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+export const RootProviders = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   const { initMixPanel } = useMixPanel();
   useEffect(() => {
     initMixPanel();
   }, []);
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${dimoFont.variable} ${dimoFont.className}`}>
-        <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
-          <QueryProvider>{children}</QueryProvider>
-          <Toaster position="bottom-right" />
-        </ThemeProvider>
-      </body>
-    </html>
+    <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
+      <QueryProvider>{children}</QueryProvider>
+      <Toaster position="bottom-right" />
+    </ThemeProvider>
   );
 };
 
-export default RootLayout;
+export default RootProviders;

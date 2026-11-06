@@ -16,6 +16,7 @@ import { turnkeyClient } from '@/config/turnkey';
 import { clearSession } from '@/utils/globalAccountSession';
 import { queryClient } from '@/hoc/QueryProvider';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LogoutIcon } from '@/components/Icons/LogoutIcon';
 import { cn } from '@/lib/utils';
 
@@ -144,6 +145,9 @@ export const Menu: FC = withLoadingStatus(() => {
               isCollapsed={isSidebarCollapsed}
             />
           ))}
+          <li>
+            <LanguageSwitcher variant="menu" collapsed={isSidebarCollapsed} />
+          </li>
           <li>
             <ThemeToggle variant="menu" collapsed={isSidebarCollapsed} />
           </li>

@@ -207,8 +207,13 @@ const config: Config = {
 
 // Packages that ship ESM only, which Jest transforms alongside the ones
 // next/jest already transpiles: TanStack Table 9 with its store, and
-// refractor with its dependencies (react-syntax-highlighter 16).
+// refractor with its dependencies (react-syntax-highlighter 16), and next-intl
+// with its formatting dependencies.
 const ESM_PACKAGES = [
+  'next-intl',
+  'use-intl',
+  'intl-messageformat',
+  '@formatjs',
   '@tanstack/(?:react-table|table-core|react-store|store)',
   'refractor',
   'hastscript',
