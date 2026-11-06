@@ -9,7 +9,7 @@ import {
   type MessageFormatElement,
 } from '@formatjs/icu-messageformat-parser';
 import { LOCALES, type Locale } from '@/i18n/locale';
-import { AREAS, loadMessages } from '@/i18n/messages';
+import { AREAS, deepMerge, loadMessages } from '@/i18n/messages';
 
 const MESSAGES_DIR = join(process.cwd(), 'messages');
 
@@ -91,6 +91,22 @@ describe('loadMessages', () => {
     expect(missing).toBeDefined();
     const messages = await loadMessages('ja');
     expect(messages[missing!]).toEqual({});
+  });
+});
+
+describe('deepMerge', () => {
+  it('fills gaps in the override from the base, at any depth', () => {
+    const base = { a: { b: 'en b', c: 'en c' }, d: 'en d' };
+    const override = { a: { b: 'ja b' } };
+    expect(deepMerge(base, override)).toEqual({ a: { b: 'ja b', c: 'en c' }, d: 'en d' });
+  });
+
+  it('leaves both inputs untouched', () => {
+    const base = { a: { b: 'en' } };
+    const override = { a: { c: 'ja' } };
+    deepMerge(base, override);
+    expect(base).toEqual({ a: { b: 'en' } });
+    expect(override).toEqual({ a: { c: 'ja' } });
   });
 });
 

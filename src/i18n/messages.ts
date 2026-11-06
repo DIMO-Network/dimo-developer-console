@@ -18,6 +18,21 @@ export const AREAS = [
 ] as const;
 export type Area = (typeof AREAS)[number];
 
+type Messages = { [key: string]: unknown };
+
+const isTree = (value: unknown): value is Messages =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+// The override's values win; the base fills whatever the override lacks.
+export const deepMerge = (base: Messages, override: Messages): Messages =>
+  Object.entries(override).reduce<Messages>(
+    (merged, [key, value]) => ({
+      ...merged,
+      [key]: isTree(value) && isTree(merged[key]) ? deepMerge(merged[key], value) : value,
+    }),
+    { ...base },
+  );
+
 const isMissingModule = (error: unknown) =>
   (error as { code?: string } | null)?.code === 'MODULE_NOT_FOUND';
 
