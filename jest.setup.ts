@@ -22,23 +22,27 @@ const mockEnglishMessages = (() => {
   );
 })();
 
+// The runtime's time zone, as next-intl's server config falls back to.
+const mockTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 const mockIntl = () => {
   const { createFormatter, createTranslator } = jest.requireActual('next-intl');
   const namespaceOf = (arg?: string | { namespace?: string }) =>
     typeof arg === 'object' ? arg.namespace : arg;
   return {
+    // A key missing from messages/en fails the test instead of rendering its path.
     translator: (arg?: string | { namespace?: string }) =>
       createTranslator({
         locale: 'en',
         messages: mockEnglishMessages,
         namespace: namespaceOf(arg),
+        onError: (error: Error & { code?: string }) => {
+          if (error.code === 'MISSING_MESSAGE') throw error;
+          console.error(error);
+        },
       }),
-    // The runtime's time zone, as next-intl's server config falls back to.
     formatter: () =>
-      createFormatter({
-        locale: 'en',
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      }),
+      createFormatter({ locale: 'en', timeZone: mockTimeZone, now: new Date() }),
   };
 };
 
@@ -50,6 +54,8 @@ jest.mock('next-intl', () => {
     useLocale: () => 'en',
     useFormatter: formatter,
     useMessages: () => mockEnglishMessages,
+    useNow: () => new Date(),
+    useTimeZone: () => mockTimeZone,
     NextIntlClientProvider: ({ children }: { children: unknown }) => children,
   };
 });
@@ -57,10 +63,13 @@ jest.mock('next-intl', () => {
 jest.mock('next-intl/server', () => {
   const { translator, formatter } = mockIntl();
   return {
+    ...jest.requireActual('next-intl/server'),
     getTranslations: async (arg?: string | { namespace?: string }) => translator(arg),
     getLocale: async () => 'en',
     getFormatter: async () => formatter(),
     getMessages: async () => mockEnglishMessages,
+    getNow: async () => new Date(),
+    getTimeZone: async () => mockTimeZone,
     getRequestConfig: (createConfig: unknown) => createConfig,
   };
 });

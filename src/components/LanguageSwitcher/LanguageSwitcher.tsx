@@ -23,7 +23,9 @@ export const LanguageSwitcher: FC<IProps> = ({ variant, collapsed = false }) => 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  // Not disabled while pending: that would drop keyboard focus to the body.
   const onChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    if (isPending) return;
     const next = event.target.value as Locale;
     startTransition(async () => {
       await setLocale(next);
@@ -57,8 +59,8 @@ export const LanguageSwitcher: FC<IProps> = ({ variant, collapsed = false }) => 
         title={collapsed ? t('languageSwitcher.label') : undefined}
         value={locale}
         onChange={onChange}
-        disabled={isPending}
-        className="absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-wait"
+        aria-busy={isPending}
+        className="absolute inset-0 size-full cursor-pointer opacity-0 aria-busy:cursor-wait"
       >
         {LOCALES.map((code) => (
           <option key={code} value={code} lang={code}>

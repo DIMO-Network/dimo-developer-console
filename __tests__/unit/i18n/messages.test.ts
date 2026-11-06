@@ -68,6 +68,23 @@ describe('message files', () => {
     }
   });
 
+  it('every message is a non-empty string', () => {
+    const badLeaves = (value: unknown, path: string): string[] => {
+      if (typeof value === 'string') return value.trim() ? [] : [path];
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        return [path];
+      }
+      return Object.entries(value).flatMap(([key, child]) =>
+        badLeaves(child, `${path}.${key}`),
+      );
+    };
+    for (const locale of LOCALES) {
+      for (const area of AREAS.filter((a) => existsSync(areaPath(locale, a)))) {
+        expect(badLeaves(readArea(locale, area), `${locale}/${area}`)).toEqual([]);
+      }
+    }
+  });
+
   it('every English message parses and every plural has an other branch', () => {
     for (const area of AREAS.filter((a) => existsSync(areaPath('en', a)))) {
       for (const [key, message] of Object.entries(flatten(readArea('en', area)))) {
