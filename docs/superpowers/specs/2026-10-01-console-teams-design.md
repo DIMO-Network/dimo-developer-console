@@ -80,7 +80,7 @@ Today:
 - **One owner per team.** The owner is the user who created the team (`teams.created_by`), and the team's licenses are the ones their kernel account owns. Only that wallet can sign license transactions, so a second owner couldn't act on them anyway. A membership row saying `OWNER` for anyone else is demoted and never trusted.
 - **"Data access" to a license** means the member's EOA is a current signer on it on-chain, recorded as an enabled `MEMBER` key in the registry.
 
-## Revocation within 10 minutes (part 1: dex, token-exchange-api, vehicle-triggers-api, tesla-oracle, credit-tracker)
+## Revocation within 10 minutes (part 1: dex, token-exchange-api, vehicle-triggers-api, tesla-oracle)
 
 **Requirement:**
 
@@ -89,7 +89,7 @@ Today:
 
 **dex** (`auth.dimo.zone`): recovers the EOA from a 65-byte ERC-1271 challenge signature, the same recovery the license account performs. dex emits it as the `signer_address` claim (C1).
 
-**Every service that acts on a license** checks per C2: token-exchange-api, vehicle-triggers-api, tesla-oracle, credit-tracker.
+**Every service that acts on a license** checks per C2: token-exchange-api, vehicle-triggers-api, tesla-oracle. credit-tracker was skipped on 2026-10-02 because it isn't running; it needs the same check if it's revived.
 
 - **When:** whenever the token's `ethereum_address` is a developer license and the token carries `signer_address`, whatever its audience.
 - **How:** token-exchange-api calls `isSigner` on the license account, with a 60-second cache. The other services ask token-exchange-api over gRPC.
@@ -97,7 +97,7 @@ Today:
 
 **Operations (C10):**
 
-- A `SIGNER_CHECK_MODE` of `enforce`, `log` or `off`, plus timeouts, a metric and an alert, and an optional cutoff that refuses license tokens issued after a date without the claim.
+- A `SIGNER_CHECK_MODE` of `enforce`, `log` or `off`, plus timeouts, a metric and an alert. Tokens without the claim are never checked and never looked up, so DIMO Mobile users' token exchanges never touch Identity. (An optional cutoff that refused claimless license tokens after a date was dropped on 2026-10-02: it would have put an Identity lookup on every mobile exchange.)
 - Rollout runs in `log` mode for a week in production before `enforce`.
 
 **Existing developers:**
@@ -325,7 +325,7 @@ Exact endpoints, payloads and codes: index C4, C6 and C7.
   - screenshot harness: Team page (owner, member, empty, pending, removed or left but still a signer), team switcher, API keys with Belongs to, and member Vehicles states. Dark and light themes.
 - **Platform** (Go, testify, each repo's mocks):
   - dex end to end through `submit_challenge`;
-  - the signer check in every service (current, disabled, missing claim, mobile-audience license token, non-license, cache, timeout, log mode, off mode, cutoff);
+  - the signer check in every service (current, disabled, missing claim, mobile-audience license token, non-license, cache, timeout, log mode, off mode);
   - webhook creator and modifier fields.
 - **Live passes:**
   - **Platform** (part 1): in dev, then in production in `log` mode, then `enforce`.
