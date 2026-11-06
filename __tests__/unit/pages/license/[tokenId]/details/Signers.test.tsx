@@ -3,7 +3,6 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const enableSigner = jest.fn(async () => {});
-const setRedirectUri = jest.fn(async () => {});
 const disableSigner = jest.fn(async () => {});
 const trackEvent = jest.fn();
 const OWNER = '0x7a3c9e1f2b4d6a8c0e1f3a5b7c9d1e2f4a6b8c0d';
@@ -28,7 +27,6 @@ jest.mock('@/hooks/useDimoAuth', () => ({
 jest.mock('@/hooks/useTransactions', () => ({
   useDisableSigner: () => disableSigner,
   useEnableSigner: () => enableSigner,
-  useSetRedirectUri: () => setRedirectUri,
 }));
 jest.mock('@/hooks/useEventEmitter', () => ({
   useEventEmitter: () => ({ publishEvent: mockPublishEvent }),
@@ -83,8 +81,6 @@ jest.mock('@/actions/teams', () => ({
   upsertLicenseSigner: jest.fn(),
   markLicenseSignerDisabled: jest.fn(),
 }));
-jest.mock('@/actions/user', () => ({ getUser: jest.fn() }));
-jest.mock('@/services/dimoDev', () => ({ getDeveloperJwt: jest.fn() }));
 jest.mock('@/utils/wallet', () => ({
   generateWallet: () => ({
     address: '0xa11cE0000000000000000000000000000000Beef',
@@ -102,14 +98,8 @@ jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }))
 jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
 import { toast } from 'sonner';
 import { markLicenseSignerDisabled, upsertLicenseSigner } from '@/actions/teams';
-import { getUser } from '@/actions/user';
-import { getDeveloperJwt } from '@/services/dimoDev';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import { Signers } from '@/app/license/[tokenId]/details/components/Signers/Signers';
-import {
-  RedirectUriOverlayProvider,
-  useRedirectUris,
-} from '@/app/license/[tokenId]/details/components/redirectUriOverlay';
 
 const NEW_KEY = '0xa11cE0000000000000000000000000000000Beef';
 const SIGNER = '0x5b2E4F6A8C0D2e4f6A8C0D2e4f6a8c0D2e4F6a8c';
@@ -519,91 +509,9 @@ describe('Signers', () => {
     expect(screen.getAllByText('Disabled outside the console')).toHaveLength(1);
   });
 
-  it('records a RentalOS key, and a registry failure never rolls the tenant back', async () => {
-    jest.useFakeTimers();
-    (upsertLicenseSigner as jest.Mock).mockRejectedValue(new Error('Failed to fetch'));
-    (getDeveloperJwt as jest.Mock).mockResolvedValue({
-      headers: { Authorization: 'Bearer dev.jwt' },
-    });
-    (getUser as jest.Mock).mockResolvedValue({
-      name: 'Jane Developer',
-      email: 'jane@harness.dev',
-    });
-    global.fetch = jest.fn(async () => ({
-      ok: true,
-      status: 200,
-      text: async () => 'ok',
-    })) as never;
+  it('offers no RentalOS registration: RentalOS connects through Login with DIMO', () => {
     show();
-    fireEvent.click(screen.getByRole('button', { name: 'Register RentalOS' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Proceed' }));
-    await act(async () => {
-      await jest.advanceTimersByTimeAsync(8000);
-    });
-    await waitFor(() =>
-      expect(upsertLicenseSigner).toHaveBeenCalledWith(42, NEW_KEY, {
-        kind: 'API_KEY',
-        holders: [{ name: 'RentalOS' }],
-        note: 'RentalOS',
-      }),
-    );
-    expect(disableSigner).not.toHaveBeenCalled();
-    expect(screen.getByText('API key abc123')).toBeInTheDocument();
-  });
-
-  it('records the RentalOS URI even when the user just removed it from the list', async () => {
-    jest.useFakeTimers();
-    setRedirectUri.mockClear();
-    (getDeveloperJwt as jest.Mock).mockResolvedValue({
-      headers: { Authorization: 'Bearer dev.jwt' },
-    });
-    (getUser as jest.Mock).mockResolvedValue({ name: 'Jane', email: 'jane@harness.dev' });
-    global.fetch = jest.fn(async () => ({
-      ok: true,
-      status: 200,
-      text: async () => 'ok',
-    })) as never;
-    const Probe = () => {
-      const { uris, recordUriChange } = useRedirectUris([
-        { uri: 'https://rentals.dimo.co/' },
-      ]);
-      return (
-        <>
-          <p data-testid="uris">{uris.map((u) => u.uri).join(',')}</p>
-          <button onClick={() => recordUriChange('https://rentals.dimo.co/', false)}>
-            drop uri
-          </button>
-        </>
-      );
-    };
-    render(
-      <RedirectUriOverlayProvider refetch={async () => {}}>
-        <Probe />
-        <QueryClientProvider client={new QueryClient()}>
-          <Signers
-            license={
-              {
-                owner: OWNER,
-                clientId: '0x3e8f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f',
-                tokenId: 42,
-                signers: { nodes: [] },
-                redirectURIs: { nodes: [{ uri: 'https://rentals.dimo.co/' }] },
-              } as never
-            }
-            refetch={refetchLicense}
-          />
-        </QueryClientProvider>
-      </RedirectUriOverlayProvider>,
-    );
-    fireEvent.click(screen.getByText('drop uri'));
-    expect(screen.getByTestId('uris').textContent).toBe('');
-    fireEvent.click(screen.getByRole('button', { name: 'Register RentalOS' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Proceed' }));
-    await act(async () => {
-      await jest.advanceTimersByTimeAsync(8000);
-    });
-    expect(setRedirectUri).toHaveBeenCalledWith('https://rentals.dimo.co/', true);
-    expect(screen.getByTestId('uris').textContent).toBe('https://rentals.dimo.co/');
+    expect(screen.queryByRole('button', { name: /RentalOS/ })).toBeNull();
   });
 
   it("shows who each key belongs to, and leaves a member's key to Settings → Team", async () => {

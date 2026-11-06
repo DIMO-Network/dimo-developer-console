@@ -14,19 +14,12 @@ import { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 import type { JWTPayload } from 'jose';
 import { cookieName, getCookie } from './services/dimoDevAPI';
-import { FOCUS_QUERY_PARAM } from '@/utils/focusConstants';
 import { inviteRedirect } from '@/utils/inviteCookie';
 
 const { LOGIN_PAGES, API_PATH, UNPROTECTED_PATHS } = configuration;
 
-const buildRedirectUrl = (path: string, request: NextRequest) => {
-  const url = new URL(path, request.url);
-  const focus = request.nextUrl.searchParams.get(FOCUS_QUERY_PARAM);
-  if (focus && !url.searchParams.has(FOCUS_QUERY_PARAM)) {
-    url.searchParams.set(FOCUS_QUERY_PARAM, focus);
-  }
-  return url;
-};
+const buildRedirectUrl = (path: string, request: NextRequest) =>
+  new URL(path, request.url);
 
 // A token that does not verify is no session: the visitor is sent to sign in
 // (or gets a 401) rather than an error page. That holds for every failure,

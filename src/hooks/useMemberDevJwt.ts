@@ -19,8 +19,8 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // A member's developer JWT, signed by their own Turnkey EOA. The challenge is
 // for the license (address = clientId); dex verifies it through the license
 // account's ERC-1271 check. Only a submit_challenge 4xx is retried: right after
-// a grant dex may not have indexed the signer yet (the RentalOS flow allows the
-// same). Session and challenge errors fail at once as MemberDevJwtError; a
+// a grant dex may not have indexed the signer yet. Session and challenge
+// errors fail at once as MemberDevJwtError; a
 // signing error is rethrown unchanged. dex checks the domain.
 export const useMemberDevJwt = () => {
   const { validateCurrentSession } = useGlobalAccount();

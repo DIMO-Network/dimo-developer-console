@@ -1,6 +1,5 @@
 'use client';
-import { type FC, useEffect } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { type FC } from 'react';
 import { useUser } from '@/hooks/useUser';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,7 +7,6 @@ import './View.css';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { useTeam } from '@/hooks/useTeam';
 import { TEAM_DATA_ACCESS_ENABLED } from '@/utils/featureFlags';
-import { FOCUS_QUERY_PARAM, saveFocus } from '@/utils/focus';
 import {
   DeveloperBoardIcon,
   ConnectionsIcon,
@@ -61,20 +59,7 @@ export const visibleShortcuts = (isMember: boolean, dataAccessEnabled: boolean) 
 export const View: FC = () => {
   const { data: user, isLoading: loadingUser } = useUser();
   const { isMember } = useTeam();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const userFirstName = getFirstName(user?.name ?? '');
-
-  useEffect(() => {
-    const focus = searchParams.get(FOCUS_QUERY_PARAM);
-    if (!focus) return;
-    saveFocus(focus);
-    const next = new URLSearchParams(searchParams.toString());
-    next.delete(FOCUS_QUERY_PARAM);
-    const query = next.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
-  }, [searchParams, router, pathname]);
 
   return (
     <div className={'flex flex-1 flex-row'}>

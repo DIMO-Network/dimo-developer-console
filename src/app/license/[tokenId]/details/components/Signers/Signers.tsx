@@ -2,22 +2,16 @@ import { FragmentType, gql, useFragment } from '@/gql';
 import React, { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/Button';
-import { KeyIcon, TruckIcon } from '@heroicons/react/20/solid';
+import { KeyIcon } from '@heroicons/react/20/solid';
 import { Table } from '@/components/Table';
-import { Modal } from '@/components/Modal';
 import { SignerFragmentFragment } from '@/gql/graphql';
 import * as Sentry from '@sentry/nextjs';
 import { get } from 'lodash';
 import { useDimoAuth } from '@/hooks/useDimoAuth';
-import {
-  useDisableSigner,
-  useEnableSigner,
-  useSetRedirectUri,
-} from '@/hooks/useTransactions';
+import { useDisableSigner, useEnableSigner } from '@/hooks/useTransactions';
 import { useEventEmitter } from '@/hooks/useEventEmitter';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useMixPanel } from '@/hooks/useMixPanel';
-import { getDeveloperJwt } from '@/services/dimoDev';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/[tokenId]/details/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
@@ -26,8 +20,6 @@ import { withLoadingStatus } from '@/hoc/withLoadingStatus';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
-import { getUser } from '@/actions/user';
-import { FOCUS_RENTALS_OS_SIGNUP, clearFocus, getFocus } from '@/utils/focus';
 import { toast } from 'sonner';
 import { RowActionsMenu } from '@/components/RowActionsMenu';
 import { markLicenseSignerDisabled, upsertLicenseSigner } from '@/actions/teams';
@@ -56,8 +48,6 @@ const CONSOLE_OFF_SUBTITLE =
 // Registry rows are written only after the chain confirms, so a row this new
 // that Identity doesn't list yet is Identity catching up, not a key turned off.
 const SYNCING_MS = 10 * 60_000;
-const RENTAL_OS_URL = 'https://rentals.dimo.co/';
-const RENTAL_OS_REGISTER_ENDPOINT = 'https://rentals.dimo.co/tenant/register';
 
 const SIGNERS_FRAGMENT = gql(`
   fragment SignerFragment on DeveloperLicense {
@@ -93,7 +83,6 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [optimisticAdditions, setOptimisticAdditions] = useState<SignerNode[]>([]);
   const [pendingRemovals, setPendingRemovals] = useState<Set<string>>(new Set());
-  const [showRentalOSConfirm, setShowRentalOSConfirm] = useState(false);
   const { trackEvent } = useMixPanel();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const handleDisableSigner = useDisableSigner(fragment.tokenId);
@@ -119,10 +108,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     retry: false,
   });
   const consoleKey = (consoleKeyQuery.data ?? enabledKey)?.toLowerCase() ?? null;
-  const setFleetRedirectUri = useSetRedirectUri(fragment.tokenId);
-  const { uris: redirectUris, recordUriChange } = useRedirectUris(
-    fragment.redirectURIs.nodes,
-  );
+  const { uris: redirectUris } = useRedirectUris(fragment.redirectURIs.nodes);
   const registry = useLicenseSignerRegistry(fragment.tokenId);
   const { members } = useTeamMembers();
   // Verified wallets of the team (the owner's console wallet included): console
@@ -250,178 +236,6 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       });
       await recordKey(account.address, holders);
     } catch (error: unknown) {
-      handleError(error);
-    }
-  };
-
-  const handleGenerateRentalOSTenant = async () => {
-    let addedRedirectUri = false;
-    let enabledSignerAddress: string | undefined;
-    let lastError: unknown;
-
-    try {
-      const hasFleetUri = redirectUris.some((n) => n.uri === RENTAL_OS_URL);
-      if (!hasFleetUri) {
-        setLoadingStatus({
-          status: 'loading',
-          label: 'Adding RentalOS as an authorized redirect URI...',
-        });
-        await setFleetRedirectUri(RENTAL_OS_URL, true);
-        recordUriChange(RENTAL_OS_URL, true);
-        addedRedirectUri = true;
-      }
-
-      setLoadingStatus({
-        status: 'loading',
-        label: 'Generating API key for RentalOS...',
-      });
-      const account = generateWallet();
-      await handleEnableSigner(account.address);
-      enabledSignerAddress = account.address;
-
-      // Wait for on-chain state to propagate to the auth servers before
-      // requesting a JWT — without this delay the server rejects the request
-      // because it hasn't indexed the new signer / redirect URI yet.
-      setLoadingStatus({
-        status: 'loading',
-        label: 'Waiting for on-chain confirmation...',
-      });
-      await new Promise((resolve) => setTimeout(resolve, 8000));
-
-      // Retry JWT generation up to 3 times with 5 s between attempts.
-      // Use the newly generated API key (signer private key) to sign the
-      // Developer JWT — not the Global Account key.
-      const JWT_RETRIES = 3;
-      const JWT_RETRY_DELAY_MS = 5000;
-      let devJwt: string | null = null;
-      for (let attempt = 1; attempt <= JWT_RETRIES; attempt++) {
-        setLoadingStatus({
-          status: 'loading',
-          label:
-            attempt === 1
-              ? 'Generating developer JWT...'
-              : `Generating developer JWT (attempt ${attempt}/${JWT_RETRIES})...`,
-        });
-        try {
-          const result = await getDeveloperJwt({
-            client_id: fragment.clientId,
-            domain: RENTAL_OS_URL,
-            private_key: account.privateKey.replace('0x', ''),
-          });
-          console.log('[RentalOS] getDeveloperJwt attempt', attempt, 'result:', result);
-          if (result?.headers?.Authorization) {
-            devJwt = result.headers.Authorization.split(' ')[1];
-            break;
-          } else {
-            console.warn(
-              '[RentalOS] getDeveloperJwt attempt',
-              attempt,
-              '— no Authorization header in response',
-            );
-          }
-        } catch (err) {
-          console.error('[RentalOS] getDeveloperJwt attempt', attempt, 'threw:', err);
-          lastError = err;
-        }
-        if (attempt < JWT_RETRIES) {
-          await new Promise((resolve) => setTimeout(resolve, JWT_RETRY_DELAY_MS));
-        }
-      }
-      if (!devJwt) throw lastError ?? new Error('Failed to generate developer JWT');
-      console.log('[RentalOS] Developer JWT obtained, length:', devJwt.length);
-
-      setLoadingStatus({ status: 'loading', label: 'Registering RentalOS tenant...' });
-      const user = await getUser();
-      if (!user) throw new Error('Failed to retrieve user profile');
-      const nameParts = (user.name ?? '').trim().split(/\s+/);
-      const firstName = nameParts[0] ?? '';
-      const lastName = nameParts.slice(1).join(' ');
-
-      const registrationBody = {
-        clientId: fragment.clientId,
-        apiKey: account.privateKey.replace('0x', ''),
-        wallet: currentUser?.smartContractAddress,
-        redirectUri: RENTAL_OS_URL,
-        email: user.email,
-        ...(firstName && { first_name: firstName }),
-        ...(lastName && { last_name: lastName }),
-        ...(user.company?.name && { business_name: user.company.name.trim() }),
-      };
-      console.log('[RentalOS] Registration body (key redacted):', {
-        ...registrationBody,
-        apiKey: '[redacted]',
-      });
-
-      // Retry the registration call up to 3 times in case the auth server is
-      // still catching up.
-      const REG_RETRIES = 3;
-      const REG_RETRY_DELAY_MS = 5000;
-      let response: Response | undefined;
-      for (let attempt = 1; attempt <= REG_RETRIES; attempt++) {
-        if (attempt > 1) {
-          setLoadingStatus({
-            status: 'loading',
-            label: `Registering RentalOS tenant (attempt ${attempt}/${REG_RETRIES})...`,
-          });
-          await new Promise((resolve) => setTimeout(resolve, REG_RETRY_DELAY_MS));
-        }
-        try {
-          response = await fetch(RENTAL_OS_REGISTER_ENDPOINT, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${devJwt}`,
-            },
-            body: JSON.stringify(registrationBody),
-          });
-          const responseText = await response.text();
-          console.log(
-            `[RentalOS] /tenant/register attempt ${attempt} — status: ${response.status}, body: ${responseText}`,
-          );
-          if (response.ok) break;
-          lastError = new Error(
-            `RentalOS registration failed (${response.status}): ${responseText}`,
-          );
-        } catch (err) {
-          console.error('[RentalOS] /tenant/register attempt', attempt, 'threw:', err);
-          lastError = err;
-        }
-      }
-      if (!response?.ok) throw lastError ?? new Error('RentalOS registration failed');
-
-      clearLoadingStatus();
-      setApiKey(account.privateKey);
-      setOptimisticAdditions((prev) => [
-        ...prev,
-        { address: account.address, enabledAt: new Date().toISOString() },
-      ]);
-      // The row stays until Identity lists the key: one refetch is often too soon.
-      void refetch().catch((error: unknown) => Sentry.captureException(error));
-
-      trackEvent('RentalOS Tenant Generated', {
-        distinct_id: fragment.owner,
-        tokenId: fragment.tokenId,
-        signerAddress: account.address,
-      });
-      // registryWrite never throws, so this can't reach the rollback below.
-      await recordKey(account.address as `0x${string}`, {
-        holders: [{ name: 'RentalOS' }],
-        note: 'RentalOS',
-      });
-    } catch (error: unknown) {
-      if (enabledSignerAddress || addedRedirectUri) {
-        setLoadingStatus({ status: 'loading', label: 'Rolling back changes...' });
-        await Promise.allSettled([
-          enabledSignerAddress
-            ? handleDisableSigner(enabledSignerAddress)
-            : Promise.resolve(),
-          addedRedirectUri
-            ? setFleetRedirectUri(RENTAL_OS_URL, false).then(() =>
-                recordUriChange(RENTAL_OS_URL, false),
-              )
-            : Promise.resolve(),
-        ]);
-      }
       handleError(error);
     }
   };
@@ -641,13 +455,6 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLicenseOwner, consoleKey]);
 
-  useEffect(() => {
-    if (!isLicenseOwner) return;
-    if (getFocus() !== FOCUS_RENTALS_OS_SIGNUP) return;
-    clearFocus();
-    setShowRentalOSConfirm(true);
-  }, [isLicenseOwner]);
-
   const onConfirmDelete = async () => {
     if (!signerToDelete) {
       throw new Error('No signer to delete');
@@ -677,14 +484,6 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         <h2 className="text-card-title text-ink">API keys</h2>
         {isLicenseOwner && (
           <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              className="px-4"
-              onClick={() => setShowRentalOSConfirm(true)}
-            >
-              <TruckIcon className="h-4 w-4" />
-              Register RentalOS
-            </Button>
             <Button
               variant="secondary"
               className="px-4"
@@ -806,43 +605,6 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         apiKey={String(apiKey)?.replace('0x', '') ?? ''}
         onClose={() => setApiKey(undefined)}
       />
-      <Modal isOpen={showRentalOSConfirm} setIsOpen={setShowRentalOSConfirm}>
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-3">
-            <h2 className="text-panel-title text-ink">Register RentalOS</h2>
-            <p className="text-body-sm text-muted">
-              Clicking <strong>Proceed</strong> will:
-            </p>
-            <ul className="flex list-disc flex-col gap-1 pl-5 text-body-sm text-muted">
-              <li>Add RentalOS as an authorized redirect URI</li>
-              <li>Generate and register a new API key</li>
-              <li>Register your tenant with RentalOS</li>
-            </ul>
-            <p className="text-body-sm text-muted">
-              You&apos;ll need to approve transactions. Don&apos;t close this window once
-              started.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              className="flex-1"
-              onClick={() => {
-                setShowRentalOSConfirm(false);
-                void handleGenerateRentalOSTenant();
-              }}
-            >
-              Proceed
-            </Button>
-            <Button
-              variant="secondary"
-              className="flex-1"
-              onClick={() => setShowRentalOSConfirm(false)}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };
