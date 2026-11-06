@@ -3,7 +3,6 @@
  */
 const mockPost = jest.fn();
 const mockGet = jest.fn();
-const mockGetDeveloperJwt = jest.fn();
 jest.mock('axios', () => {
   const actual = jest.requireActual('axios');
   const client = { post: (...args: unknown[]) => mockPost(...args) };
@@ -25,17 +24,11 @@ jest.mock('@/services/user', () => ({
   getUserByToken: jest.fn(),
 }));
 jest.mock('@/services/globalAccount', () => ({}));
-jest.mock('@dimo-network/data-sdk', () => ({
-  DIMO: jest.fn().mockImplementation(() => ({
-    auth: { getDeveloperJwt: (...args: unknown[]) => mockGetDeveloperJwt(...args) },
-  })),
-}));
 import * as Sentry from '@sentry/nextjs';
 import { AxiosError, type AxiosResponse } from 'axios';
-import { submitDexChallenge } from '@/actions/dimoAuth';
+import { requestDexChallenge, submitDexChallenge } from '@/actions/dimoAuth';
 import { getSimulatedVehicles } from '@/actions/simulatedVehicles';
 import { getUser } from '@/actions/user';
-import { getDeveloperJwt } from '@/services/dimoDev';
 import { getUserByToken } from '@/services/user';
 
 const INPUT = {
@@ -44,17 +37,6 @@ const INPUT = {
   clientId: '0xaaa',
   domain: 'https://x',
 };
-const TOKEN = { client_id: '0xabc', domain: 'https://x', private_key: 'private-key-1' };
-
-// The SDK rethrows axios failures as DimoError (statusCode from the body's code), and a
-// TypeError when there was no response at all. Built with the real class.
-const { DimoError } = jest.requireActual('@dimo-network/data-sdk');
-const sdkRefused = (statusCode: number) =>
-  new DimoError({
-    message: 'API call error: nope',
-    statusCode,
-    body: { code: statusCode },
-  });
 
 const refused = (status: number, data?: string) =>
   new AxiosError(
@@ -73,7 +55,13 @@ const cases: [string, () => Promise<unknown>, jest.Mock, (s: number) => unknown]
     mockGet,
     () => [],
   ],
-  ['getDeveloperJwt', () => getDeveloperJwt(TOKEN), mockGetDeveloperJwt, () => null],
+  [
+    'requestDexChallenge',
+    () =>
+      requestDexChallenge({ address: '0xaaa', clientId: '0xaaa', domain: 'https://x' }),
+    mockPost,
+    (status) => ({ ok: false, status }),
+  ],
   [
     'submitDexChallenge',
     () => submitDexChallenge(INPUT),
@@ -112,28 +100,12 @@ describe('swallowed failures', () => {
     },
   );
 
-  it("reports getDeveloperJwt's failure without its request body", async () => {
-    mockGetDeveloperJwt.mockRejectedValue(refused(500, 'private-key-1'));
-    await getDeveloperJwt(TOKEN);
+  it('reports a failed challenge submission without its body (the signature)', async () => {
+    mockPost.mockRejectedValue(refused(500, 'signature=0xs'));
+    await submitDexChallenge(INPUT);
     const captured = (Sentry.captureException as jest.Mock).mock.calls[0][0];
     expect(captured.config.data).toBeUndefined();
-    expect(JSON.stringify(captured.response.config)).not.toContain('private-key-1');
-  });
-
-  it('treats the SDK DimoError by its status', async () => {
-    mockGetDeveloperJwt.mockRejectedValue(sdkRefused(401));
-    await expect(getDeveloperJwt(TOKEN)).resolves.toBeNull();
-    expect(Sentry.captureException).not.toHaveBeenCalled();
-
-    mockGetDeveloperJwt.mockRejectedValue(sdkRefused(502));
-    await expect(getDeveloperJwt(TOKEN)).resolves.toBeNull();
-    expect(Sentry.captureException).toHaveBeenCalledTimes(1);
-
-    mockGetDeveloperJwt.mockRejectedValue(
-      new TypeError("Cannot read properties of undefined (reading 'data')"),
-    );
-    await expect(getDeveloperJwt(TOKEN)).resolves.toBeNull();
-    expect(Sentry.captureException).toHaveBeenCalledTimes(2);
+    expect(JSON.stringify(captured.response.config)).not.toContain('0xs');
   });
 
   it('stays quiet when a visitor without a session asks for the user', async () => {

@@ -2,7 +2,7 @@
 import { getSessionTurnkeyClient } from '@/services/turnkey';
 import { useGlobalAccount } from './useGlobalAccount';
 import { saveDevJwt } from '@/utils/devJwt';
-import { getDeveloperJwt } from '@/services/dimoDev';
+import { getDeveloperJwt } from '@/services/developerJwt';
 import { decryptExportBundle, generateP256KeyPair } from '@turnkey/crypto';
 
 export const useDimoAuth = () => {

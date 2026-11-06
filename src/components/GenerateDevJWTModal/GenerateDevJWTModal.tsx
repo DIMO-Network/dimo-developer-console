@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { CopyableRow } from '@/components/CopyableRow';
 import { saveDevJwt } from '@/utils/devJwt';
-import { getDeveloperJwt } from '@/services/dimoDev';
+import { getDeveloperJwt } from '@/services/developerJwt';
 import { captureException } from '@sentry/nextjs';
 
 interface IProps {
