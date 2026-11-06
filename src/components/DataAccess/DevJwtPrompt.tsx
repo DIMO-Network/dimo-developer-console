@@ -6,8 +6,9 @@ import { askForAccess, DATA_ACCESS_UNAVAILABLE } from '@/config/teamCopy';
 import type { LicenseDataAccess } from '@/hooks/useLicenseDataAccess';
 import type { LocalDeveloperLicense } from '@/types/webhook';
 
-// What a page shows when it needs a developer JWT for a license: owners use an
-// API key, members their own wallet, members without access whom to ask.
+// What a page shows when it needs a developer JWT for a license: owners get one
+// with console access, or use an API key; members use their own wallet;
+// members without access are told whom to ask.
 export const DevJwtPrompt: FC<{
   license: LocalDeveloperLicense;
   access: LicenseDataAccess;
@@ -16,12 +17,7 @@ export const DevJwtPrompt: FC<{
 }> = ({ license, access, onSuccess, message }) => {
   if (access.kind === 'owner') {
     return (
-      <GenerateDevJWTSection
-        clientId={license.clientId}
-        redirectUri={license.firstRedirectURI}
-        onSuccess={onSuccess}
-        message={message}
-      />
+      <GenerateDevJWTSection license={license} onSuccess={onSuccess} message={message} />
     );
   }
   if (access.kind === 'member-unavailable') {

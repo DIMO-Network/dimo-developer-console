@@ -1,6 +1,10 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
+const consoleAccess = jest.fn(() => 'off');
+jest.mock('@/hooks/useConsoleAccessJwt', () => ({
+  useConsoleAccessJwt: () => consoleAccess(),
+}));
 jest.mock('@/components/GenerateDevJWT', () => ({
   GenerateDevJWT: () => <button>Generate developer JWT</button>,
 }));
@@ -28,6 +32,13 @@ describe('DevJwtPrompt', () => {
     expect(
       screen.getByRole('button', { name: 'Generate developer JWT' }),
     ).toBeInTheDocument();
+  });
+
+  it('gets owners a JWT with console access when it is on, without a button', () => {
+    consoleAccess.mockReturnValueOnce('minting');
+    show({ kind: 'owner' });
+    expect(screen.getByRole('status')).toHaveTextContent('console access');
+    expect(screen.queryByRole('button')).toBeNull();
   });
 
   it('offers members with access their wallet', () => {

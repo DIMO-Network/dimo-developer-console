@@ -52,11 +52,7 @@ const MainComponent = () => {
         (isAuthenticatedAsDev ? (
           <WebhooksTableSection clientId={selectedDeveloperLicense.clientId} />
         ) : (
-          <GenerateDevJWTSection
-            clientId={selectedDeveloperLicense.clientId}
-            redirectUri={selectedDeveloperLicense.firstRedirectURI}
-            onSuccess={refetch}
-          />
+          <GenerateDevJWTSection license={selectedDeveloperLicense} onSuccess={refetch} />
         ))}
     </>
   );

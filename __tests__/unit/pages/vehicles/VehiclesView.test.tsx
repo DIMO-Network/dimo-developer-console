@@ -18,6 +18,8 @@ jest.mock('@/app/license/vehicles/[clientId]/components/VehicleDetailsTable', ()
 }));
 jest.mock('@/hooks/useGlobalAccount', () => ({ useGlobalAccount: jest.fn() }));
 jest.mock('@/hooks/useGetDevJwts', () => ({ useGetDevJwts: jest.fn() }));
+// An owner without console access: the API key prompt (GenerateDevJWTSection tests the rest).
+jest.mock('@/hooks/useConsoleAccessJwt', () => ({ useConsoleAccessJwt: () => 'off' }));
 jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn(() => ({ isMember: false })) }));
 // Mutable test state lives in a holder (Global Constraints, Commits).
 const mockFlags = { dataAccess: true };
