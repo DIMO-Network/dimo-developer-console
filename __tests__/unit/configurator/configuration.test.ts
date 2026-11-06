@@ -80,6 +80,18 @@ describe('buildConfiguration', () => {
     );
   });
 
+  it.each(['zh-Hans', 'zh-Hant'] as const)(
+    'keeps %s through saving, loading and the snippet',
+    (language) => {
+      const saved = buildConfiguration(share({ language }));
+      expect(saved).toMatchObject({ language });
+      expect(toFormValues(saved, meta).language).toBe(language);
+      expect(buildSnippet(share({ language }), '0xclient')).toContain(
+        `    language: '${language}',`,
+      );
+    },
+  );
+
   it('saves the template id when the mode was never touched', () => {
     const saved = buildConfiguration(
       share({ permissionsMode: undefined, permissionTemplateId: '1' }),

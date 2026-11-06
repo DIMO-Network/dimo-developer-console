@@ -17,6 +17,8 @@ const LANGUAGE_OPTIONS: { value: LoginLanguage; label: string }[] = [
   { value: 'en', label: 'English' },
   { value: 'ja', label: '日本語' },
   { value: 'es', label: 'Español' },
+  { value: 'zh-Hans', label: '简体中文' },
+  { value: 'zh-Hant', label: '繁體中文' },
 ];
 
 const EMAIL_OPTIONS: { value: EmailRequest; label: string }[] = [
@@ -47,9 +49,9 @@ export const SignInWindowFields: FC<IFormProps> = ({ control }) => {
           role="language-segmented"
         />
         <p className="text-label font-normal text-muted">
-          When matching, browsers set to Japanese or Spanish get that language, the Japan
-          time zone gets Japanese, and everyone else gets English. Users can always
-          switch.
+          When matching, browsers set to Japanese, Spanish or Chinese get that language.
+          Japan, China, Taiwan and Hong Kong time zones get theirs, and everyone else gets
+          English. Users can always switch.
         </p>
       </div>
       <div className="flex flex-col gap-2">
