@@ -123,6 +123,25 @@ describe('proxy without a session', () => {
     }
   });
 
+  // An action that left with no cookie and is answered late must not delete the
+  // cookie a session-expired dialog set since (/api/auth/session).
+  it('deletes no session cookie it was not sent when it refuses an action', async () => {
+    const res = await run(
+      request(
+        '/connections',
+        {},
+        { method: 'POST', headers: { 'next-action': 'abc123' } },
+      ),
+    );
+    expect(res.status).toBe(401);
+    const cookies = (
+      res as unknown as {
+        cookies: { get: (n: string) => { value: string } | undefined };
+      }
+    ).cookies;
+    expect(cookies.get('session-token')).toBeUndefined();
+  });
+
   // A key set that could not be fetched says nothing about the token: a brief JWKS
   // outage must not sign everyone out.
   it('keeps the session cookies when it refuses an action because the key set is down', async () => {
@@ -337,6 +356,17 @@ describe('proxy matcher', () => {
     expect(runsOn('/icon.png')).toBe(false);
     expect(runsOn('/icon.pngs/anything')).toBe(true);
     expect(runsOn('/_next/static/chunks/main.js')).toBe(false);
+  });
+
+  // A session-expired dialog signs in again through these with no cookie; the
+  // routes check the origin themselves.
+  it('skips /api/auth/, and only it', () => {
+    expect(runsOn('/api/auth/challenge')).toBe(false);
+    expect(runsOn('/api/auth/session')).toBe(false);
+    expect(runsOn('/api/auth/signout')).toBe(false);
+    expect(runsOn('/api/authorizations')).toBe(true);
+    expect(runsOn('/api/me')).toBe(true);
+    expect(runsOn('/api/teams')).toBe(true);
   });
 
   it('runs on routes whose last segment looks like a file name', () => {

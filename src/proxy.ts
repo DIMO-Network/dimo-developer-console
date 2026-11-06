@@ -12,7 +12,7 @@ import { getUserByToken } from './services/user';
 import { LoggedUser } from '@/utils/loggedUser';
 import configuration from '@/config';
 import { getUserSubOrganization } from '@/services/globalAccount';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 import type { JWTPayload } from 'jose';
 import { cookieName, getCookie } from './services/dimoDevAPI';
@@ -72,13 +72,7 @@ const handleConnectionError = (error: unknown, isLoginPage: boolean) => {
 
 const handleExpiredSession = (error: unknown, isLoginPage: boolean) => {
   // isSessionExpiredError, not "any 401": see src/utils/middlewareUtils.ts.
-  if (isSessionExpiredError(error)) {
-    const signOutUrl = `${configuration.frontendUrl}api/auth/signout`;
-    // Floating, and it has to not reject: an unhandled rejection here takes
-    // the middleware down on the way to the redirect that replaces it.
-    axios.post(signOutUrl).catch(() => {});
-    return 'sign-in?error=expired';
-  }
+  if (isSessionExpiredError(error)) return 'sign-in?error=expired';
   return isLoginPage ? 'sign-in?error=true' : 'app?error=true';
 };
 
@@ -151,6 +145,7 @@ const validatePublicSession = async (
   request: NextRequest,
   token: JWTPayload | null,
   keySetDown = false,
+  hadCookie = false,
 ) => {
   console.info('Validating public session', request.nextUrl.pathname);
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
@@ -185,8 +180,11 @@ const validatePublicSession = async (
       },
       { status: 401 },
     );
+    // Only the cookie this request carried: an action that left without one
+    // and is answered late must not delete the one a session-expired dialog
+    // has set since (/api/auth/session).
     if (!keySetDown) {
-      response.cookies.delete(cookieName);
+      if (hadCookie) response.cookies.delete(cookieName);
       response.cookies.delete(SESSION_VERDICT_COOKIE);
     }
     return response;
@@ -209,8 +207,10 @@ const handleRequest = async (request: NextRequest) => {
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   let token: JWTPayload | null = null;
   let keySetDown = false;
+  let hadCookie = false;
   try {
     const rawToken = await getCookie(cookieName);
+    hadCookie = !!rawToken;
     if (rawToken) {
       const verified = await verifyToken(rawToken);
       token = verified.token;
@@ -226,13 +226,13 @@ const handleRequest = async (request: NextRequest) => {
       return await validatePrivateSession(request, rawToken);
     }
 
-    return await validatePublicSession(request, token, keySetDown);
+    return await validatePublicSession(request, token, keySetDown, hadCookie);
   } catch (error: unknown) {
     Sentry.captureException(error);
     console.error('Middleware error:', error);
     // Only a verified session may continue past a failure (the ?error= branch
     // below lets the request through). Anything else is treated as signed out.
-    if (!token) return validatePublicSession(request, null, keySetDown);
+    if (!token) return validatePublicSession(request, null, keySetDown, hadCookie);
     let path = handleConnectionError(error, isLoginPage);
     path = path ?? handleExpiredSession(error, isLoginPage);
     const redirectUrl = `${configuration.frontendUrl}${path}`;
@@ -259,5 +259,5 @@ export const proxy = Sentry.wrapMiddlewareWithSentry(
 export const config = {
   // icon.png is the app icon: it needs no session. Excluded by name, not by
   // extension -- a dynamic route (/api/templates/[id]) can end in ".png" too.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon\\.png$|images|api/auth).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon\\.png$|images|api/auth/).*)'],
 };

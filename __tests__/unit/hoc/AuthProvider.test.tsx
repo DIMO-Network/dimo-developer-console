@@ -53,7 +53,7 @@ jest.mock('@/hoc/QueryProvider', () => ({ queryClient: { clear: jest.fn() } }));
 
 import { endSession } from '@/actions/user';
 import { createNewUser, completeUserData } from '@/app/sign-up/actions';
-import { passkeyClient, turnkeyClient } from '@/config/turnkey';
+import { passkeyClient } from '@/config/turnkey';
 import { AuthContext } from '@/context/AuthContext';
 import { withAuth } from '@/hoc/AuthProvider';
 import { readSession, SESSION_KEY } from '@/utils/globalAccountSession';
@@ -150,40 +150,19 @@ describe('withAuth and the shared session', () => {
     expect(endSession).not.toHaveBeenCalled();
   });
 
-  it('clears an expired shared session on the sign-in page and tells the other tabs', async () => {
+  // Tabs still open on the console offer to sign in again with it
+  // (SessionExpiredDialog); a sign-in here replaces it.
+  it('leaves an expired shared session alone on the sign-in page', async () => {
     store({ expiry: nowS() - 5 });
     render(<IdlePage />);
-    await waitFor(() => expect(localStorage.getItem(SESSION_KEY)).toBeNull());
-    await waitFor(() =>
-      expect(other.received).toContainEqual({
-        from: expect.any(String),
-        event: { type: 'signed-out' },
-      }),
-    );
-    expect(endSession).toHaveBeenCalledTimes(1);
+    await act(async () => {});
+    expect(localStorage.getItem(SESSION_KEY)).not.toBeNull();
+    expect(other.received).not.toContainEqual({
+      from: expect.any(String),
+      event: { type: 'signed-out' },
+    });
+    expect(endSession).not.toHaveBeenCalled();
     expect(replace).not.toHaveBeenCalledWith('/app');
-  });
-
-  // The proxy answers endSession with a 401 once the session cookie is gone.
-  it('clears an expired shared session even when the server refuses endSession', async () => {
-    (endSession as jest.Mock).mockRejectedValueOnce(new Error('unexpected response'));
-    store({ expiry: nowS() - 5 });
-    render(<IdlePage />);
-    await waitFor(() => expect(localStorage.getItem(SESSION_KEY)).toBeNull());
-    expect(replace).not.toHaveBeenCalledWith('/app');
-  });
-
-  it("clears an expired shared session even when Turnkey's logout fails", async () => {
-    (turnkeyClient.logout as jest.Mock).mockRejectedValueOnce(new Error('storage'));
-    store({ expiry: nowS() - 5 });
-    render(<IdlePage />);
-    await waitFor(() => expect(localStorage.getItem(SESSION_KEY)).toBeNull());
-    await waitFor(() =>
-      expect(other.received).toContainEqual({
-        from: expect.any(String),
-        event: { type: 'signed-out' },
-      }),
-    );
   });
 
   // Turnkey reads expirationSeconds as a window, not a point in time.

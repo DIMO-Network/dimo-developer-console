@@ -7,7 +7,10 @@ export const VALIDATION_PAGES = ['/valid-tzd', '/verify-email'];
 
 export const API_PATH = '/api';
 
-export const UNPROTECTED_PATHS = ['/api/auth'];
+// Outside the proxy (its matcher skips them): signing in again from a
+// session-expired dialog. The trailing slash keeps /api/authorizations and the
+// like inside it.
+export const UNPROTECTED_PATHS = ['/api/auth/'];
 
 export const REGIONS = [
   'North America',

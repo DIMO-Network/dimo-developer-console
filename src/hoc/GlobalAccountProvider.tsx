@@ -10,6 +10,7 @@ import { Abi } from 'viem';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import { endSession } from '@/actions/user';
+import { clearConsoleBrowserState } from '@/utils/consoleSession';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks';
@@ -22,6 +23,9 @@ import {
   readSession,
   RESOLVED_ACCOUNT_KEY,
 } from '@/utils/globalAccountSession';
+import { SessionExpiredDialog } from '@/components/SessionExpiredDialog';
+import { signOutOnServer, type ConsoleAccount } from '@/services/consoleSignIn';
+import * as Sentry from '@sentry/nextjs';
 
 // Resolving who is signed in costs two Turnkey calls (wallets, then the wallet
 // account) and chain RPC to derive the smart account address. Neither address
@@ -60,6 +64,58 @@ export const withGlobalAccounts = <P extends object>(
     // Set once this tab is on its way out (signing out or reloading): later
     // checks and events have nothing left to do.
     const leaving = useRef(false);
+    // The account whose session ran out, while SessionExpiredDialog asks to
+    // sign in again; null otherwise.
+    const [expired, setExpired] = useState<ConsoleAccount | null>(null);
+    // For the session effect below, which is mounted once: whether the dialog
+    // is open, the user as now loaded, the account this tab loaded with, and
+    // its check of the shared session.
+    const expiredRef = useRef(false);
+    const userRef = useRef(user);
+    userRef.current = user;
+    const loadedRef = useRef<string | undefined>(undefined);
+    const recheck = useRef<() => void>(() => {});
+
+    // The session ran out: ask to sign in again over this page, as the same
+    // account, instead of signing every tab out. With no session at all there
+    // is no one to ask about, so that is a sign-out; someone else's session
+    // reloads into their account, as when they sign in.
+    const expire = () => {
+      if (leaving.current) return;
+      const session = readSession();
+      if (!session) return void logout();
+      const loaded = userRef.current?.subOrganizationId ?? loadedRef.current;
+      if (loaded && session.subOrganizationId !== loaded) {
+        leaving.current = true;
+        hardNavigate('/app');
+        return;
+      }
+      expiredRef.current = true;
+      // Called again while the dialog is open (focus, reads): keep the same
+      // state, so the hidden page doesn't re-render for nothing.
+      setExpired((open) =>
+        open?.subOrganizationId === session.subOrganizationId
+          ? open
+          : { email: session.email, subOrganizationId: session.subOrganizationId },
+      );
+    };
+
+    // The session is live again for this account, from this tab or another:
+    // close the dialog, and let the panels that failed while it was gone ask
+    // again. A tab that loaded with an expired session has no account yet.
+    const resume = () => {
+      expiredRef.current = false;
+      setExpired(null);
+      void queryClient.invalidateQueries();
+      if (!userRef.current) void loadUserInformation();
+    };
+
+    // This tab signed in again (SessionExpiredDialog stored the session; the
+    // other tabs hear of it themselves), so it schedules the next expiry too.
+    const renewed = () => {
+      resume();
+      recheck.current();
+    };
 
     const validateCurrentSession = async (): Promise<IUserSession | null> => {
       const sessionUser = await loadUserSession();
@@ -75,7 +131,7 @@ export const withGlobalAccounts = <P extends object>(
       }
 
       if (!isLive(session)) {
-        await logout();
+        expire();
         return null;
       }
       return sessionUser;
@@ -85,7 +141,7 @@ export const withGlobalAccounts = <P extends object>(
     // the Turnkey client and kernel client a transaction would need.
     const readBalance = async (address: `0x${string}`, abi: Abi): Promise<number> => {
       if (!isLive(readSession())) {
-        await logout();
+        expire();
         return 0;
       }
 
@@ -109,8 +165,13 @@ export const withGlobalAccounts = <P extends object>(
       // The bundle and its key come from this one read.
       const session = readSession();
 
-      if (!isLive(session)) {
+      if (!session) {
         await logout();
+        return null;
+      }
+
+      if (!isLive(session)) {
+        expire();
         return null;
       }
 
@@ -171,18 +232,34 @@ export const withGlobalAccounts = <P extends object>(
       setUser(user);
     };
 
-    // Reached when the session expired or this tab has none; an explicit
-    // sign-out (the menu) also clears the team and developer JWTs.
-    const logout = async () => {
+    // Reached when this tab has no session, or the user signs out from
+    // SessionExpiredDialog. That one is a sign-out the user chose: like the
+    // menu's, it also forgets the developer JWTs, the active team and a pending
+    // invite (explicit).
+    const logout = async ({ explicit = false }: { explicit?: boolean } = {}) => {
       if (leaving.current) return;
       leaving.current = true;
+      if (explicit) clearConsoleBrowserState();
       // The cookie goes first, so a tab that hears the announcement below
-      // finds no session on the server either. The proxy answers this action
-      // with a 401 when the session is already gone; nothing below depends on it.
-      try {
-        await endSession();
-      } catch {
-        // The proxy's 401 already cleared the cookies.
+      // finds no session on the server either. The proxy answers the action
+      // with a 401 when the session is already gone; nothing below depends on
+      // it. A chosen sign-out goes through /api/auth/signout, which works with
+      // no cookie and also clears the active team and a pending invite.
+      if (explicit) {
+        try {
+          // Ten seconds at most: a stalled request can't hold the sign-out.
+          await signOutOnServer();
+        } catch (error) {
+          Sentry.captureException(error, {
+            extra: { context: 'Sign-out: the server half failed; signing out locally' },
+          });
+        }
+      } else {
+        try {
+          await endSession();
+        } catch {
+          // The proxy's 401 already cleared the cookies.
+        }
       }
       try {
         await turnkeyClient.logout();
@@ -204,10 +281,11 @@ export const withGlobalAccounts = <P extends object>(
     }, []);
 
     // Every tab shares the session: follow what the other tabs do with it, and
-    // sign out when it expires.
+    // ask to sign in again when it expires.
     useEffect(() => {
       const mounted = readSession();
       const loaded = mounted?.subOrganizationId;
+      loadedRef.current = loaded;
       let timer: ReturnType<typeof setTimeout> | undefined;
 
       const leave = (path: string) => {
@@ -229,10 +307,12 @@ export const withGlobalAccounts = <P extends object>(
         const session = readSession();
         // Another tab signed out (or the browser dropped the store).
         if (!session) return leave('/sign-in');
-        if (!isLive(session)) return void logout();
         // Another tab signed in as someone else while this one was away.
         if (session.subOrganizationId !== loaded) return leave('/app');
-        // Still live, perhaps renewed by a sign-in in another tab.
+        if (!isLive(session)) return expire();
+        // Still live, perhaps renewed by a sign-in in another tab, whose
+        // announcement this tab may have missed.
+        if (expiredRef.current) resume();
         schedule(session.expiry);
       };
 
@@ -240,6 +320,7 @@ export const withGlobalAccounts = <P extends object>(
         if (document.visibilityState === 'visible') check();
       };
 
+      recheck.current = check;
       if (isLive(mounted)) schedule(mounted.expiry);
       window.addEventListener('focus', check);
       document.addEventListener('visibilitychange', onVisible);
@@ -259,14 +340,19 @@ export const withGlobalAccounts = <P extends object>(
           leave('/app');
         } else {
           // The same account signed in again: the next Turnkey call reads the
-          // new bundle and key together, and panels that failed while the
-          // cookie was gone ask again.
-          void queryClient.invalidateQueries();
+          // new bundle and key together, panels that failed while the cookie
+          // was gone ask again, a session-expired dialog closes, and the next
+          // expiry is scheduled.
+          resume();
+          check();
         }
       });
 
       return () => {
         clearTimeout(timer);
+        // A renewal that ends after this must not schedule a timer here that
+        // nothing would clear.
+        recheck.current = () => {};
         window.removeEventListener('focus', check);
         document.removeEventListener('visibilitychange', onVisible);
         off();
@@ -285,7 +371,20 @@ export const withGlobalAccounts = <P extends object>(
           logout,
         }}
       >
-        <WrappedComponent {...props} />
+        {/* Hidden, not unmounted, while the session is expired: an unattended
+            screen shows no account data, and the page keeps its state for
+            when the user signs in again. */}
+        <div style={{ display: expired ? 'none' : 'contents' }}>
+          <WrappedComponent {...props} />
+        </div>
+        {expired && (
+          <SessionExpiredDialog
+            account={expired}
+            onRenewed={renewed}
+            onStale={() => recheck.current()}
+            onSignOut={() => void logout({ explicit: true })}
+          />
+        )}
       </GlobalAccountContext.Provider>
     );
   };
