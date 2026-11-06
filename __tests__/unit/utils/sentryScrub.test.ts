@@ -5,6 +5,7 @@ import {
   dropRequestPayload,
   scrubEmails,
   scrubEmailsDeep,
+  scrubRecordingEvent,
   scrubSpan,
 } from '@/utils/sentryScrub';
 
@@ -136,5 +137,40 @@ describe('sentryScrub', () => {
       request: { url: '/x', data: '{"key":"secret"}', cookies: { session: 'jwt' } },
     } as unknown as ErrorEvent;
     expect(dropRequestPayload(event).request).toEqual({ url: '/x' });
+  });
+
+  describe('scrubRecordingEvent', () => {
+    it("scrubs a replay's page URL and its request spans", () => {
+      const meta = {
+        type: 4,
+        timestamp: 1,
+        data: { href: 'https://console.dimo.org/sign-up?email=ada%40example.com' },
+      };
+      const span = {
+        type: 5,
+        timestamp: 2,
+        data: {
+          tag: 'performanceSpan',
+          payload: {
+            description: 'https://accounts.dimo.org/api/account/ada%40example.com',
+          },
+        },
+      };
+      expect(scrubRecordingEvent(meta).data.href).toBe(
+        'https://console.dimo.org/sign-up?email=[email]',
+      );
+      expect(scrubRecordingEvent(span).data.payload.description).toBe(
+        'https://accounts.dimo.org/api/account/[email]',
+      );
+    });
+
+    it("leaves DOM snapshots to Replay's own masking", () => {
+      const snapshot = {
+        type: 2,
+        timestamp: 3,
+        data: { node: { textContent: 'ada@example.com' } },
+      };
+      expect(scrubRecordingEvent(snapshot)).toBe(snapshot);
+    });
   });
 });

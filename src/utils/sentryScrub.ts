@@ -66,3 +66,11 @@ export const scrubSpan = (span: StreamedSpanJSON): StreamedSpanJSON => ({
   name: scrubEmails(span.name),
   attributes: scrubEmailsDeep(span.attributes),
 });
+
+// rrweb's meta (4: the page's href) and custom (5: breadcrumbs, request and
+// navigation spans) events: where a replay records URLs. The DOM snapshots
+// are masked by Replay itself (text and inputs).
+const REPLAY_EVENTS_WITH_URLS = new Set([4, 5]);
+
+export const scrubRecordingEvent = <T extends { type: number }>(event: T): T =>
+  REPLAY_EVENTS_WITH_URLS.has(event.type) ? scrubEmailsDeep(event) : event;
