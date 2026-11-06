@@ -1,7 +1,7 @@
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
 import { IUserSession } from '@/types/user';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
-import { utils } from 'web3';
+import { fromWei } from '@/utils/wei';
 import configuration from '@/config';
 import { getTurnkeyClient, getTurnkeyWalletAddress } from '@/services/turnkey';
 import { getFromLocalStorage, saveToLocalStorage } from '@/utils/localStorage';
@@ -152,7 +152,7 @@ export const withGlobalAccounts = <P extends object>(
         args: [user!.smartContractAddress],
       });
 
-      return Number(utils.fromWei(currentBalanceOnWei as bigint, 'ether'));
+      return fromWei(currentBalanceOnWei as bigint);
     };
 
     const getCurrentDimoBalance = (): Promise<number> =>

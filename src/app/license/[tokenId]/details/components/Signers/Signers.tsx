@@ -248,8 +248,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         tokenId: fragment.tokenId,
         signerAddress: account.address,
       });
-      // web3's account.address is typed string; it's always 0x-prefixed.
-      await recordKey(account.address as `0x${string}`, holders);
+      await recordKey(account.address, holders);
     } catch (error: unknown) {
       handleError(error);
     }
