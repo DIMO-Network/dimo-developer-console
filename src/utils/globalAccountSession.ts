@@ -1,5 +1,4 @@
 'use client';
-import { decryptCredentialBundle } from '@turnkey/crypto';
 import { IGlobalAccountSession } from '@/types/wallet';
 import { EmbeddedKey } from '@/utils/localStorage';
 
@@ -71,36 +70,19 @@ export const isLive = (
   nowSeconds = Math.floor(Date.now() / 1000),
 ): session is StoredSession => !!session && session.expiry >= nowSeconds;
 
-export const migrateTabSession = (): void => {
+// Before the shared store (2026-11-03) each tab kept its own session in
+// sessionStorage. Those lasted 30 minutes at most, so none is live any more:
+// a tab still holding one only has the old entries to drop.
+export const dropTabSession = (): void => {
   if (typeof window === 'undefined') return;
-  const raw = sessionStorage.getItem(LEGACY_TAB_SESSION_KEY);
-  if (raw === null) return;
-  try {
-    if (!isLive(parseSession(localStorage.getItem(SESSION_KEY)))) {
-      const old = JSON.parse(raw) as IGlobalAccountSession;
-      const eKeyRaw = localStorage.getItem(EmbeddedKey);
-      const eKey: unknown = eKeyRaw ? JSON.parse(eKeyRaw) : null;
-      if (
-        typeof eKey === 'string' &&
-        typeof old?.token === 'string' &&
-        typeof old.expiry === 'number' &&
-        isLive({ ...old, eKey })
-      ) {
-        decryptCredentialBundle(old.token, eKey);
-        localStorage.setItem(SESSION_KEY, JSON.stringify({ ...old, eKey }));
-      }
-    }
-  } catch {
-    // The bundle no longer matches the key (or is unreadable): drop it.
-  } finally {
-    sessionStorage.removeItem(LEGACY_TAB_SESSION_KEY);
-    sessionStorage.removeItem(RESOLVED_ACCOUNT_KEY);
-  }
+  if (sessionStorage.getItem(LEGACY_TAB_SESSION_KEY) === null) return;
+  sessionStorage.removeItem(LEGACY_TAB_SESSION_KEY);
+  sessionStorage.removeItem(RESOLVED_ACCOUNT_KEY);
 };
 
 export const readSession = (): StoredSession | null => {
   if (typeof window === 'undefined') return null;
-  migrateTabSession();
+  dropTabSession();
   return parseSession(localStorage.getItem(SESSION_KEY));
 };
 

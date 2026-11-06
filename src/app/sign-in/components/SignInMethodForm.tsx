@@ -90,7 +90,13 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
           <div className="flex flex-row">
             <p className="terms-caption">
               Lost your passkey?{' '}
-              <Anchor href="/email-recovery" target="_self" className="grey underline">
+              {/* Rarely used: not worth a prefetch while sign-in loads. */}
+              <Anchor
+                href="/email-recovery"
+                prefetch={false}
+                target="_self"
+                className="grey underline"
+              >
                 Reset with your email
               </Anchor>
             </p>

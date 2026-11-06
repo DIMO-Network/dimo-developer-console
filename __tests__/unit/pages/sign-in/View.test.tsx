@@ -14,8 +14,8 @@ jest.mock('@/hooks/useErrorHandler', () => ({
 jest.mock('@/hooks/useMixPanel', () => ({
   useMixPanel: () => ({ trackEvent: jest.fn() }),
 }));
-jest.mock('@/hooks/usePasskey', () => ({
-  usePasskey: () => ({ isPasskeyAvailable: true }),
+jest.mock('@/hooks/usePasskeyAvailability', () => ({
+  usePasskeyAvailability: () => ({ isPasskeyAvailable: true }),
 }));
 jest.mock('@/actions/user', () => ({ getUserInformation: jest.fn() }));
 jest.mock('sonner', () => ({ toast: { error: jest.fn() } }));

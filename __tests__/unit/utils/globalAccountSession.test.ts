@@ -1,11 +1,7 @@
 import { installFakeBroadcastChannel } from '@/utils/__fixtures__/fakeBroadcastChannel';
-import { decryptCredentialBundle } from '@turnkey/crypto';
-
-jest.mock('@turnkey/crypto', () => ({ decryptCredentialBundle: jest.fn() }));
 
 type Mod = typeof import('@/utils/globalAccountSession');
 
-const decrypt = decryptCredentialBundle as jest.Mock;
 const future = () => Math.floor(Date.now() / 1000) + 600;
 const session = (over = {}) => ({
   email: 'a@b.co',
@@ -33,7 +29,6 @@ describe('globalAccountSession', () => {
   beforeEach(() => {
     localStorage.clear();
     sessionStorage.clear();
-    decrypt.mockReset();
     fake = installFakeBroadcastChannel();
     load();
   });
@@ -247,62 +242,28 @@ describe('globalAccountSession', () => {
     });
   });
 
-  describe('migrateTabSession', () => {
-    const old = () => {
-      const rest: Partial<ReturnType<typeof session>> = session();
-      delete rest.eKey;
-      return rest;
-    };
-    const seedOld = (over = {}) => {
-      sessionStorage.setItem(
-        mod.LEGACY_TAB_SESSION_KEY,
-        JSON.stringify({ ...old(), ...over }),
-      );
+  describe('dropTabSession', () => {
+    const seedOld = () => {
+      const old: Partial<ReturnType<typeof session>> = session();
+      delete old.eKey;
+      sessionStorage.setItem(mod.LEGACY_TAB_SESSION_KEY, JSON.stringify(old));
       sessionStorage.setItem(mod.RESOLVED_ACCOUNT_KEY, '{}');
-      localStorage.setItem('GlobalAccountEmbeddedKey', '"key-1"');
     };
 
-    it("moves a tab's old session into the shared store, without announcing it", async () => {
+    it("drops a tab's old session without taking it or announcing anything", async () => {
       const other = fake.otherTab();
       seedOld();
-      expect(mod.readSession()).toMatchObject({ eKey: 'key-1', token: 'tok' });
-      expect(decrypt).toHaveBeenCalledWith('tok', 'key-1');
+      expect(mod.readSession()).toBeNull();
       expect(sessionStorage.length).toBe(0);
       await flush();
       expect(other.received).toEqual([]);
     });
 
-    it('drops an old session whose key another sign-in replaced', () => {
-      decrypt.mockImplementation(() => {
-        throw new Error('invalid ghash tag');
-      });
-      seedOld();
-      expect(mod.readSession()).toBeNull();
-      expect(sessionStorage.length).toBe(0);
-    });
-
-    it('drops an expired old session', () => {
-      seedOld({ expiry: 1 });
-      expect(mod.readSession()).toBeNull();
-      expect(sessionStorage.length).toBe(0);
-    });
-
-    it('replaces a shared session that has expired', () => {
-      localStorage.setItem(
-        mod.SESSION_KEY,
-        JSON.stringify(session({ token: 'stale', eKey: 'key-0', expiry: 1 })),
-      );
-      seedOld();
-      expect(mod.readSession()).toMatchObject({ token: 'tok', eKey: 'key-1' });
-      expect(sessionStorage.length).toBe(0);
-    });
-
-    it('keeps the shared session when there already is one', () => {
+    it('keeps the shared session', () => {
       const shared = session({ token: 'shared' });
       mod.writeSession(shared);
       seedOld();
       expect(mod.readSession()).toEqual(shared);
-      expect(decrypt).not.toHaveBeenCalled();
       expect(sessionStorage.length).toBe(0);
     });
   });
