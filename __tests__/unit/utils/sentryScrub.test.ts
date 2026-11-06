@@ -1,6 +1,7 @@
 import type { ErrorEvent, NodeOptions } from '@sentry/nextjs';
 import {
   EMAIL_PLACEHOLDER,
+  TRUNCATED,
   dropRequestPayload,
   scrubEmails,
   scrubEmailsDeep,
@@ -25,6 +26,15 @@ describe('sentryScrub', () => {
         'POST https://console.dimo.org/sign-up?email=[email]&hasGlobalAccount=true',
       ],
       ['a@example.com wrote to b@example.org', '[email] wrote to [email]'],
+      // Encoded twice: an email inside a URL inside a query string. Encoded
+      // separators read as part of the address, so what's next to it goes too.
+      [
+        '/next?redirect=%2Fsign-up%3Femail%3Dada%2540example.com',
+        '/next?redirect=[email]',
+      ],
+      ["o'neil+dev@example.io", '[email]'],
+      ['jürgen@exämple.de', '[email]'],
+      ['ada@xn--80ak6aa92e.xn--p1ai', '[email]'],
     ])('replaces the email in %s', (text, expected) => {
       expect(scrubEmails(text)).toBe(expected);
     });
@@ -72,7 +82,28 @@ describe('sentryScrub', () => {
     it('returns on a cycle instead of looping', () => {
       const looped: Record<string, unknown> = { email: 'ada@example.com' };
       looped.self = looped;
-      expect(scrubEmailsDeep(looped)).toMatchObject({ email: EMAIL_PLACEHOLDER });
+      const scrubbed = scrubEmailsDeep(looped);
+      expect(scrubbed).toMatchObject({ email: EMAIL_PLACEHOLDER });
+      expect(scrubbed.self).toBe(scrubbed);
+    });
+
+    it('scrubs an object every place it appears, not only the first', () => {
+      const shared = { url: '/sign-up?email=ada%40example.com' };
+      const scrubbed = scrubEmailsDeep({ first: shared, second: [shared] });
+      expect(scrubbed.first).toEqual({ url: '/sign-up?email=[email]' });
+      expect(scrubbed.second[0]).toBe(scrubbed.first);
+      expect(shared.url).toBe('/sign-up?email=ada%40example.com');
+    });
+
+    it('drops anything nested deeper than it goes', () => {
+      let deep: unknown = { email: 'ada@example.com' };
+      for (let level = 0; level < 20; level += 1) deep = { deep };
+      expect(JSON.stringify(scrubEmailsDeep(deep))).not.toContain('ada');
+      expect(JSON.stringify(scrubEmailsDeep(deep))).toContain(TRUNCATED);
+    });
+
+    it('scrubs keys', () => {
+      expect(scrubEmailsDeep({ 'ada@example.com': 1 })).toEqual({ '[email]': 1 });
     });
   });
 

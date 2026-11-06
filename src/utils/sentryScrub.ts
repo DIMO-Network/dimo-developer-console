@@ -17,32 +17,47 @@ export const dropRequestPayload = (event: ErrorEvent): ErrorEvent => {
 // Emails reach Sentry inside URLs: the accounts lookup
 // (accounts.dimo.org/api/account/<email>), /sign-up?email= and the passkey
 // recovery link. They name span groups, so every user's address ended up in
-// Sentry's span tables. Plain or URL-encoded (%40); the bounds keep a long
-// string without one cheap to scan.
-const EMAIL = /[A-Za-z0-9._%+-]{1,64}(?:@|%40)[A-Za-z0-9.-]{1,253}\.[A-Za-z]{2,24}/g;
+// Sentry's span tables. The @ may be plain or URL-encoded once or more (%40,
+// %2540). The local part takes RFC 5322's characters except a URL's / ? & = #,
+// so a path or query before it is kept. The bounds keep a long string without
+// an email cheap to scan.
+const EMAIL =
+  /[\p{L}\p{N}._%+!$'*^`{|}~-]{1,64}(?:@|%(?:25)*40)[\p{L}\p{N}.%-]{1,253}\.\p{L}[\p{L}\p{N}-]{1,62}/gu;
+const HAS_AT = /@|%(?:25)*40/;
 export const EMAIL_PLACEHOLDER = '[email]';
+// What replaces anything nested deeper than the scrubber goes.
+export const TRUNCATED = '[truncated]';
 
 export const scrubEmails = (text: string): string =>
-  text.includes('@') || text.includes('%40')
-    ? text.replace(EMAIL, EMAIL_PLACEHOLDER)
-    : text;
+  HAS_AT.test(text) ? text.replace(EMAIL, EMAIL_PLACEHOLDER) : text;
 
 // Deep enough for an event's request, contexts, breadcrumbs and span data.
 const MAX_DEPTH = 12;
 
-const scrub = (value: unknown, depth: number, seen: WeakSet<object>): unknown => {
+// Fails closed: past MAX_DEPTH nothing goes through, and an object met twice
+// (shared or in a cycle) gets the same scrubbed copy, never the original.
+const scrub = (value: unknown, depth: number, copies: Map<object, unknown>): unknown => {
   if (typeof value === 'string') return scrubEmails(value);
-  if (typeof value !== 'object' || value === null || depth > MAX_DEPTH) return value;
-  if (seen.has(value)) return value;
-  seen.add(value);
-  if (Array.isArray(value)) return value.map((item) => scrub(item, depth + 1, seen));
-  return Object.fromEntries(
-    Object.entries(value).map(([key, item]) => [key, scrub(item, depth + 1, seen)]),
-  );
+  if (typeof value !== 'object' || value === null) return value;
+  if (depth > MAX_DEPTH) return TRUNCATED;
+  const known = copies.get(value);
+  if (known !== undefined) return known;
+  if (Array.isArray(value)) {
+    const copy: unknown[] = [];
+    copies.set(value, copy);
+    value.forEach((item) => copy.push(scrub(item, depth + 1, copies)));
+    return copy;
+  }
+  const copy: Record<string, unknown> = {};
+  copies.set(value, copy);
+  for (const [key, item] of Object.entries(value)) {
+    copy[scrubEmails(key)] = scrub(item, depth + 1, copies);
+  }
+  return copy;
 };
 
-// Every string in it, keys aside.
-export const scrubEmailsDeep = <T>(value: T): T => scrub(value, 0, new WeakSet()) as T;
+// Every string in it, keys included.
+export const scrubEmailsDeep = <T>(value: T): T => scrub(value, 0, new Map()) as T;
 
 // Spans are streamed (Sentry 11's default), so they never pass through an
 // event hook: they're scrubbed one by one.
