@@ -172,7 +172,7 @@ const config: Config = {
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   // next/jest adds /node_modules/ and /.next/. Git worktrees under .worktrees/
   // hold other branches' copies of every test.
-  testPathIgnorePatterns: ['<rootDir>/.worktrees/'],
+  testPathIgnorePatterns: ['<rootDir>/.worktrees/', '/docs/'],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
