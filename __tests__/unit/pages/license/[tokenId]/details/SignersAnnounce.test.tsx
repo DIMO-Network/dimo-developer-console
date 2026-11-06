@@ -46,7 +46,7 @@ jest.mock('@/actions/teams', () => ({
   markLicenseSignerDisabled: jest.fn(),
 }));
 jest.mock('@/actions/user', () => ({ getUser: jest.fn() }));
-jest.mock('@/services/dimoDev', () => ({ getDeveloperJwt: jest.fn() }));
+jest.mock('@/services/developerJwt', () => ({ getDeveloperJwt: jest.fn() }));
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
 import { useEventEmitter } from '@/hooks/useEventEmitter';

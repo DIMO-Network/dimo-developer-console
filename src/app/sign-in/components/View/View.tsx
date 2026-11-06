@@ -11,7 +11,6 @@ import * as Sentry from '@sentry/nextjs';
 import { OtpInputForm, PasskeyLogin, SignInMethodForm } from '@/app/sign-in/components';
 import { getUserInformation } from '@/actions/user';
 import { isEmpty, isNull } from 'lodash';
-import { FOCUS_QUERY_PARAM, saveFocus } from '@/utils/focus';
 
 import './View.css';
 
@@ -152,16 +151,6 @@ export const View = () => {
     if (!router) return;
     router.prefetch('/app');
   }, [router]);
-
-  useEffect(() => {
-    const focus = searchParams.get(FOCUS_QUERY_PARAM);
-    if (!focus) return;
-    saveFocus(focus);
-    const next = new URLSearchParams(searchParams.toString());
-    next.delete(FOCUS_QUERY_PARAM);
-    const query = next.toString();
-    router.replace(query ? `/sign-in?${query}` : '/sign-in', { scroll: false });
-  }, [searchParams, router]);
 
   useEffect(() => {
     if (isNull(isPasskeyAvailable)) return;

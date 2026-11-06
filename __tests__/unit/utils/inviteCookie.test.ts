@@ -9,15 +9,13 @@ const TOKEN = 'Qm9vdHN0cmFwX3Rva2VuX2Zvcl90ZXN0aW5nXzEyMzQ1Ng';
 describe('inviteRedirect', () => {
   it('keeps a well-formed token in an HttpOnly cookie and strips it from the URL', () => {
     const res = inviteRedirect(
-      new NextRequest(
-        `http://console.test/sign-in?invite=${TOKEN}&focus=rentals_os_signup`,
-      ),
+      new NextRequest(`http://console.test/sign-in?invite=${TOKEN}&utm_source=docs`),
     )!;
     expect(res.status).toBe(307);
     const location = new URL(res.headers.get('location')!);
     expect(location.pathname).toBe('/sign-in');
     expect(location.searchParams.get('invite')).toBeNull();
-    expect(location.searchParams.get('focus')).toBe('rentals_os_signup');
+    expect(location.searchParams.get('utm_source')).toBe('docs');
     const cookie = res.cookies.get('invite_token')!;
     expect(cookie.value).toBe(TOKEN);
     expect(cookie).toMatchObject({
