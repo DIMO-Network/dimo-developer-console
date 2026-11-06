@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import { scrubEmailsDeep, scrubSpan } from '@/utils/sentryScrub';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -11,6 +12,10 @@ Sentry.init({
 
   // Sentry 11 collects users' IP addresses by default; 8 didn't.
   dataCollection: { userInfo: false },
+  // No user's email in an event or a span: see sentryScrub. The proxy looks
+  // accounts up by email.
+  beforeSend: (event) => scrubEmailsDeep(event),
+  beforeSendSpan: scrubSpan,
 
   // Set tracesSampleRate to 1.0 to capture 100%
   // of transactions for tracing.

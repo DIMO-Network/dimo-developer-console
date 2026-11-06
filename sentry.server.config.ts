@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { fingerprintUpstreamError } from '@/utils/sentryFingerprint';
-import { dropRequestPayload } from '@/utils/sentryScrub';
+import { dropRequestPayload, scrubEmailsDeep, scrubSpan } from '@/utils/sentryScrub';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -24,9 +24,12 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
   tracesSampleRate: 1.0,
 
-  // One issue per upstream route and status, not per call site; and never a request
-  // body or cookie, whatever attached it.
-  beforeSend: (event, hint) => fingerprintUpstreamError(dropRequestPayload(event), hint),
+  // One issue per upstream route and status, not per call site; never a request
+  // body or cookie, whatever attached it; and no user's email, the route's
+  // included (the accounts lookup is by email).
+  beforeSend: (event, hint) =>
+    scrubEmailsDeep(fingerprintUpstreamError(dropRequestPayload(event), hint)),
+  beforeSendSpan: scrubSpan,
 
   // ...
 

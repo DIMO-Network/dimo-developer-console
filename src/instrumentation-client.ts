@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import { scrubEmailsDeep, scrubSpan } from '@/utils/sentryScrub';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -9,6 +10,9 @@ Sentry.init({
     : process.env.NODE_ENV,
   // Sentry 11 collects users' IP addresses by default; 8 didn't.
   dataCollection: { userInfo: false },
+  // No user's email in an event or a span: see sentryScrub.
+  beforeSend: (event) => scrubEmailsDeep(event),
+  beforeSendSpan: scrubSpan,
   // Replay may only be enabled for the client-side
   integrations: [Sentry.replayIntegration()],
 
