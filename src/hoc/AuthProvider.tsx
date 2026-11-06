@@ -13,7 +13,7 @@ import config from '@/config';
 import React, { ComponentType, useEffect, useRef, useState } from 'react';
 import { decodeJwtToken } from '@/utils/middlewareUtils';
 import { useRouter } from 'next/navigation';
-import { useMixPanel } from '@/hooks';
+import { useMixPanel } from '@/hooks/useMixPanel';
 import { queryClient } from '@/hoc/QueryProvider';
 import { createOAuthState, takeOAuthState } from '@/utils/oauthState';
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {

@@ -47,7 +47,7 @@ jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({ currentUser: mockUser }),
 }));
 // The Connections list reads the same account through the barrel, which pulls Turnkey.
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({ currentUser: mockUser }),
 }));
 

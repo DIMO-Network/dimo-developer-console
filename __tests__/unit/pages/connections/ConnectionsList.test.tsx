@@ -6,7 +6,7 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({
     currentUser: { walletAddress: '0xowner', smartContractAddress: '0xwallet' },
   }),

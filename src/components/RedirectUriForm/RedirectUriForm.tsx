@@ -2,7 +2,7 @@ import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
 import { useState, type FC } from 'react';
-import { isURL } from 'validator';
+import isURL from 'validator/lib/isURL';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
 
@@ -11,7 +11,8 @@ import { Label } from '@/components/Label';
 import { toast } from 'sonner';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
-import { useMixPanel, useSetRedirectUri } from '@/hooks';
+import { useMixPanel } from '@/hooks/useMixPanel';
+import { useSetRedirectUri } from '@/hooks/useTransactions';
 
 import './RedirectUriForm.css';
 

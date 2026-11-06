@@ -7,9 +7,13 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => params,
 }));
 const mockLogin = jest.fn();
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ setUser: jest.fn(), loginWithPasskey: mockLogin }),
+}));
+jest.mock('@/hooks/useMixPanel', () => ({
   useMixPanel: () => ({ trackEvent: jest.fn() }),
+}));
+jest.mock('@/hooks/usePasskey', () => ({
   usePasskey: () => ({
     isPasskeyAvailable: true,
     getNewUserPasskey: async () => ({ encodedChallenge: 'c', attestation: {} }),

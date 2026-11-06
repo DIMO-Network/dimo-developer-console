@@ -3,11 +3,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { RedirectUriList } from '@/components/RedirectUriList';
 import { appListMock } from '@/mocks/appList';
 
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useTransactions', () => ({
   useSetRedirectUri: () => jest.fn(),
 }));
-
-jest.mock('@/hoc', () => jest.requireActual('@/hoc/withLoadingStatus'));
 
 const [app] = appListMock;
 

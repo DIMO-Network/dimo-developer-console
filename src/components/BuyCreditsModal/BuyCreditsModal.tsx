@@ -11,7 +11,9 @@ import { MoneyField } from '@/components/MoneyField';
 import { useForm } from 'react-hook-form';
 
 import { TextError } from '@/components/TextError';
-import { useContractGA, useGlobalAccount, useUser } from '@/hooks';
+import { useContractGA } from '@/hooks/useContractGA';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
+import { useUser } from '@/hooks/useUser';
 import { useSACD } from '@/hooks/useSACD';
 import { Toggle } from '@/components/Toggle';
 import SacdAbi from '@/contracts/Sacd.json';

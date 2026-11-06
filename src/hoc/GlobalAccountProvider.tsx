@@ -13,7 +13,7 @@ import { endSession } from '@/actions/user';
 import { clearConsoleBrowserState } from '@/utils/consoleSession';
 import { turnkeyClient } from '@/config/turnkey';
 import { useRouter } from 'next/navigation';
-import { useMixPanel } from '@/hooks';
+import { useMixPanel } from '@/hooks/useMixPanel';
 import { queryClient } from '@/hoc/QueryProvider';
 import { hardNavigate } from '@/utils/hardNavigate';
 import {

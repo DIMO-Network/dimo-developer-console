@@ -2,7 +2,8 @@
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { TokenBalance } from '@/components/TokenBalance';
 import config from '@/config';
-import { useGlobalAccount, useLoading } from '@/hooks';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
+import { useLoading } from '@/hooks/useLoading';
 import * as Sentry from '@sentry/nextjs';
 import useCryptoPricing from '@/hooks/useCryptoPricing';
 import { useContext, useEffect, useState } from 'react';

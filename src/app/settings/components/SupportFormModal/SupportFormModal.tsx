@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Title } from '@/components/Title';
 
 import './SupportFormModal.css';
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 
 interface SupportFormModalProps {
   isOpen: boolean;

@@ -1,6 +1,6 @@
 'use client';
 import { getSessionTurnkeyClient } from '@/services/turnkey';
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from './useGlobalAccount';
 import { saveDevJwt } from '@/utils/devJwt';
 import { getDeveloperJwt } from '@/services/dimoDev';
 import { decryptExportBundle, generateP256KeyPair } from '@turnkey/crypto';

@@ -5,7 +5,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Abi } from 'viem';
 import { Button } from '@/components/Button';
 import { toast } from 'sonner';
-import { useMintVehicle, useBurnVehicle, useGlobalAccount } from '@/hooks';
+import { useMintVehicle } from '@/hooks/useMintVehicle';
+import { useBurnVehicle } from '@/hooks/useBurnVehicle';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import {
   recordSimulatedVehicle,
   registerVehicleWithSimulator,

@@ -7,7 +7,7 @@ import { ValueInput } from '@/components/Webhooks/fields/CELBuilder/ValueInput';
 import { WebhookServiceField } from '@/components/Webhooks/fields/Service';
 import { WebhookFormInput } from '@/types/webhook';
 
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({ currentUser: { email: 'jane@example.com' } }),
 }));
 

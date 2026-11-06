@@ -1,6 +1,6 @@
 import React, { ComponentType } from 'react';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
-import { useAccountInformation } from '@/hooks';
+import { useAccountInformation } from '@/hooks/useAccountInformation';
 import { AccountInformationModal } from '@/components/AccountInformationModal';
 
 export const withAccountInformation = <P extends object>(

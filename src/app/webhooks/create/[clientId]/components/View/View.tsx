@@ -6,7 +6,7 @@ import { FormStepTracker } from '@/app/webhooks/create/[clientId]/components/For
 import { NewWebhookForm } from '@/components/Webhooks/NewWebhookForm';
 import { useRouter } from 'next/navigation';
 import { getDevJwt } from '@/utils/devJwt';
-import { FormStepContextProvider } from '@/hoc';
+import { FormStepContextProvider } from '@/hoc/FormStepContextProvider';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 import Link from 'next/link';
 

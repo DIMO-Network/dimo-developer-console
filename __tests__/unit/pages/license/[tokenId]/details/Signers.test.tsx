@@ -18,15 +18,22 @@ const getGlobalAccountDeveloperJwt = jest.fn();
 const mockSetLoadingStatus = jest.fn();
 const mockPublishEvent = jest.fn();
 // The @/hooks barrel pulls Turnkey and ZeroDev; Signers only needs these.
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useDimoAuth', () => ({
   useDimoAuth: () => ({
     hasGlobalAccountPrivateKey,
     findConsoleKeyAddress,
     getGlobalAccountDeveloperJwt,
   }),
+}));
+jest.mock('@/hooks/useTransactions', () => ({
   useDisableSigner: () => disableSigner,
   useEnableSigner: () => enableSigner,
+  useSetRedirectUri: () => setRedirectUri,
+}));
+jest.mock('@/hooks/useEventEmitter', () => ({
   useEventEmitter: () => ({ publishEvent: mockPublishEvent }),
+}));
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({
     currentUser: {
       smartContractAddress: OWNER,
@@ -34,10 +41,11 @@ jest.mock('@/hooks', () => ({
       walletAddress: '0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6',
     },
   }),
-  useMixPanel: () => ({ trackEvent }),
-  useSetRedirectUri: () => setRedirectUri,
 }));
-jest.mock('@/hoc', () => ({
+jest.mock('@/hooks/useMixPanel', () => ({
+  useMixPanel: () => ({ trackEvent }),
+}));
+jest.mock('@/hoc/withLoadingStatus', () => ({
   withLoadingStatus: (Component: React.ComponentType) => Component,
 }));
 jest.mock('@/context/LoadingStatusContext', () => {

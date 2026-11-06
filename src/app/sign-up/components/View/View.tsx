@@ -8,7 +8,7 @@ import { completeUserData } from '@/app/sign-up/actions';
 import { explainSignUpRefusal, SignUpRefusedError } from '@/app/sign-up/signUpResult';
 import { IAuth } from '@/types/auth';
 import { toast } from 'sonner';
-import { useErrorHandler } from '@/hooks';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { getUser } from '@/actions/user';
 import { Anchor } from '@/components/Anchor';
 

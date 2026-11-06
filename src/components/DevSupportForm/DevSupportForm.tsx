@@ -1,7 +1,7 @@
 import { type FC, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { Button } from '@/components/Button';
 import { inquiryOptions, IDevSupportForm } from '@/types/support';
 import { Label } from '@/components/Label';

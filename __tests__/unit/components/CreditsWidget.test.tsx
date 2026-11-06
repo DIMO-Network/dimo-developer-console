@@ -3,11 +3,6 @@ import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn() }));
-// The @/hooks barrel loads modules jsdom can't run (next/cache, ESM-only wallet libraries);
-// CreditsWidget needs only useGlobalAccount, which reads the context below.
-jest.mock('@/hooks', () => ({
-  useGlobalAccount: jest.requireActual('@/hooks/useGlobalAccount').useGlobalAccount,
-}));
 jest.mock('@/components/AccountInfoButton', () => ({
   AccountInfoButton: () => <button>Account info</button>,
 }));

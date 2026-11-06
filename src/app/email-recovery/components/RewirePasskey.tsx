@@ -1,6 +1,6 @@
 import { FC, useEffect } from 'react';
 import { BubbleLoader } from '@/components/BubbleLoader';
-import { usePasskey } from '@/hooks';
+import { usePasskey } from '@/hooks/usePasskey';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';

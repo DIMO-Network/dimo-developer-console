@@ -2,8 +2,10 @@ import { renderHook } from '@testing-library/react';
 
 const mockProcess = jest.fn();
 // The @/hooks barrel pulls Turnkey; these two hooks only need these.
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useContractGA', () => ({
   useContractGA: () => ({ processTransactions: mockProcess }),
+}));
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({
     validateCurrentSession: async () => ({ walletAddress: '0x1' }),
   }),

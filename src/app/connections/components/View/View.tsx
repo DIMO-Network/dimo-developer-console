@@ -7,7 +7,7 @@ import { SectionHeader } from '@/components/Section/Header';
 import { Button } from '@/components/Button';
 import { PlusIcon } from '@/components/Icons';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useMyConnections } from '@/hooks/queries/useMyConnections';
 import { ChipIcon } from '@/components/Icons';
 import { toast } from 'sonner';

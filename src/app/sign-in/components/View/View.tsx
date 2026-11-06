@@ -2,7 +2,10 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Anchor } from '@/components/Anchor';
-import { useAuth, useErrorHandler, useMixPanel, usePasskey } from '@/hooks';
+import { useAuth } from '@/hooks/useAuth';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { useMixPanel } from '@/hooks/useMixPanel';
+import { usePasskey } from '@/hooks/usePasskey';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 import { OtpInputForm, PasskeyLogin, SignInMethodForm } from '@/app/sign-in/components';

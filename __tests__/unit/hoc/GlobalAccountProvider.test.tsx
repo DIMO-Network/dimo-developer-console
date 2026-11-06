@@ -4,7 +4,9 @@ import { installFakeBroadcastChannel } from '@/utils/__fixtures__/fakeBroadcastC
 
 const replace = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
-jest.mock('@/hooks', () => ({ useMixPanel: () => ({ identifyUser: jest.fn() }) }));
+jest.mock('@/hooks/useMixPanel', () => ({
+  useMixPanel: () => ({ identifyUser: jest.fn() }),
+}));
 jest.mock('@/actions/user', () => ({ endSession: jest.fn(async () => true) }));
 jest.mock('@/utils/consoleSession', () => ({ clearConsoleBrowserState: jest.fn() }));
 jest.mock('@/services/consoleSignIn', () => ({

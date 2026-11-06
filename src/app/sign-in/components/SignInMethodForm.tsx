@@ -6,8 +6,8 @@ import { Button } from '@/components/Button';
 import { isEmpty } from 'lodash';
 import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useAuth } from '@/hooks';
-import { isEmail } from 'validator';
+import { useAuth } from '@/hooks/useAuth';
+import isEmail from 'validator/lib/isEmail';
 
 interface IProps {
   handleLogin: (email: string) => Promise<void>;

@@ -11,7 +11,9 @@ import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { CopyButton } from '@/components/CopyButton';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useRedirectUris } from '../redirectUriOverlay';
-import { useEventEmitter, useIsLicenseOwner, useDimoAuth } from '@/hooks';
+import { useEventEmitter } from '@/hooks/useEventEmitter';
+import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
+import { useDimoAuth } from '@/hooks/useDimoAuth';
 
 export const DEVELOPER_JWTS_FRAGMENT = gql(`
   fragment DeveloperJwtsFragment on DeveloperLicense {

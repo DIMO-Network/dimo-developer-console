@@ -7,7 +7,7 @@ const STRANGER = '0x8888888888888888888888888888888888888888';
 jest.mock('@/actions/connections', () => ({ deleteConnection: jest.fn() }));
 jest.mock('@/services/connectionLookup', () => ({ findMintedConnection: jest.fn() }));
 let mockUser: { smartContractAddress?: string } | undefined;
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({ currentUser: mockUser }),
 }));
 jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn() }));

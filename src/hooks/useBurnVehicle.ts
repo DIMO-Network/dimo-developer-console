@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { Abi, encodeFunctionData } from 'viem';
-import { useContractGA } from '@/hooks';
+import { useContractGA } from './useContractGA';
 import configuration from '@/config';
 import DimoVehicleIdABI from '@/contracts/DimoVehicleIdABI.json';
 

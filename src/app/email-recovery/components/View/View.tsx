@@ -1,6 +1,6 @@
 'use client';
 import './View.css';
-import { useErrorHandler } from '@/hooks';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import {
   CheckEmail,
   EmailRecoveryForm,

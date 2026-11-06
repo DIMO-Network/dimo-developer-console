@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
-import { useCreditTracker, useEventEmitter } from '@/hooks';
+import { useCreditTracker } from '@/hooks/useCreditTracker';
+import { useEventEmitter } from '@/hooks/useEventEmitter';
 import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import Link from 'next/link';

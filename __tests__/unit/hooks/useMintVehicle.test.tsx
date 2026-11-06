@@ -7,8 +7,10 @@ import { ALL_VEHICLE_PERMISSIONS } from '@/utils/sacdPermissions';
 const mockProcess = jest.fn();
 const mockSign = jest.fn();
 // The @/hooks barrel pulls Turnkey; this hook only needs these.
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useContractGA', () => ({
   useContractGA: () => ({ processTransactions: mockProcess }),
+}));
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({ currentUser: { smartContractAddress: WALLET } }),
 }));
 jest.mock('@/hooks/useSACD', () => ({

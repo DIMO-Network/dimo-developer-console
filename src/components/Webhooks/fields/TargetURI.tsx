@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
-import { isURL } from 'validator';
+import isURL from 'validator/lib/isURL';
 import { Label } from '@/components/Label';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';

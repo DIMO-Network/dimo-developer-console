@@ -5,10 +5,16 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ push, prefetch: jest.fn() }),
   useSearchParams: () => new URLSearchParams(''),
 }));
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ setUser: jest.fn(), completeExternalAuth: jest.fn() }),
+}));
+jest.mock('@/hooks/useErrorHandler', () => ({
   useErrorHandler: jest.fn(),
+}));
+jest.mock('@/hooks/useMixPanel', () => ({
   useMixPanel: () => ({ trackEvent: jest.fn() }),
+}));
+jest.mock('@/hooks/usePasskey', () => ({
   usePasskey: () => ({ isPasskeyAvailable: true }),
 }));
 jest.mock('@/actions/user', () => ({ getUserInformation: jest.fn() }));

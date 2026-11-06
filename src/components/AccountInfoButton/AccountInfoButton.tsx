@@ -1,5 +1,5 @@
 import { UserAvatar } from '@/components/UserAvatar';
-import { useUser } from '@/hooks';
+import { useUser } from '@/hooks/useUser';
 import { FC, useContext } from 'react';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
 import { Button } from '@/components/Button';

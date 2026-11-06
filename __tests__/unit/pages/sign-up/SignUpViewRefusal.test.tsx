@@ -5,7 +5,9 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ replace }),
   useSearchParams: () => new URLSearchParams('flow=company-information'),
 }));
-jest.mock('@/hooks', () => ({ useErrorHandler: jest.fn() }));
+jest.mock('@/hooks/useErrorHandler', () => ({
+  useErrorHandler: jest.fn(),
+}));
 jest.mock('@/actions/user', () => ({ getUser: jest.fn(async () => ({})) }));
 jest.mock('@/app/sign-up/actions', () => ({ completeUserData: jest.fn() }));
 jest.mock('sonner', () => ({ toast: { error: jest.fn() } }));

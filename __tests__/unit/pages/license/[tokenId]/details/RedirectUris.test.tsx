@@ -2,9 +2,13 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 
 jest.mock('@/hooks/useIsLicenseOwner', () => ({ useIsLicenseOwner: () => true }));
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useDimoAuth', () => ({
   useDimoAuth: () => ({ getGlobalAccountDeveloperJwt: jest.fn() }),
+}));
+jest.mock('@/hooks/useEventEmitter', () => ({
   useEventEmitter: () => ({ publishEvent: jest.fn(), eventData: undefined }),
+}));
+jest.mock('@/hooks/useIsLicenseOwner', () => ({
   useIsLicenseOwner: () => true,
 }));
 jest.mock('@/hooks/useGetDevJwts', () => ({

@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'classnames';
 import { CheckIcon } from '@/components/Icons';
-import { useWebhookCreateFormContext } from '@/hoc';
+import { useWebhookCreateFormContext } from '@/hoc/FormStepContextProvider';
 
 export const FormStepTracker = () => {
   const { steps, stepIndex } = useWebhookCreateFormContext();

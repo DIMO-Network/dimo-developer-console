@@ -1,14 +1,12 @@
 'use client';
 import React, { useContext } from 'react';
 import { MenuButton } from '@/components/Menu/MenuButton';
-import {
-  withCredits,
-  withGlobalAccounts,
-  withApollo,
-  withAccountInformation,
-  withLayout,
-  withTeams,
-} from '@/hoc';
+import { withCredits } from '@/hoc/withCredits';
+import { withGlobalAccounts } from '@/hoc/GlobalAccountProvider';
+import { withApollo } from '@/hoc/withApollo';
+import { withAccountInformation } from '@/hoc/withAccountInformation';
+import { withLayout } from '@/hoc/withLayout';
+import { withTeams } from '@/hoc/TeamProvider';
 import { Header } from '@/components/Header';
 import { Menu } from '@/components/Menu';
 import { FullScreenMenu } from '@/components/Menu/FullScreenMenu';

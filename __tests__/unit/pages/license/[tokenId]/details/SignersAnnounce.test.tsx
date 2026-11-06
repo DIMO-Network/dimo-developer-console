@@ -8,22 +8,27 @@ const findConsoleKeyAddress = jest.fn(async () => CONSOLE_KEY);
 const enableSigner = jest.fn(async () => {});
 
 // The REAL useEventEmitter: the publish must reach a sibling listener.
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useDimoAuth', () => ({
   useDimoAuth: () => ({
     hasGlobalAccountPrivateKey: jest.fn(),
     findConsoleKeyAddress,
     getGlobalAccountDeveloperJwt: jest.fn(),
   }),
+}));
+jest.mock('@/hooks/useTransactions', () => ({
   useDisableSigner: () => jest.fn(),
   useEnableSigner: () => enableSigner,
-  useEventEmitter: jest.requireActual('@/hooks/useEventEmitter').useEventEmitter,
+  useSetRedirectUri: () => jest.fn(),
+}));
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({
     currentUser: { smartContractAddress: OWNER, subOrganizationId: 'sub-org' },
   }),
-  useMixPanel: () => ({ trackEvent: jest.fn() }),
-  useSetRedirectUri: () => jest.fn(),
 }));
-jest.mock('@/hoc', () => ({
+jest.mock('@/hooks/useMixPanel', () => ({
+  useMixPanel: () => ({ trackEvent: jest.fn() }),
+}));
+jest.mock('@/hoc/withLoadingStatus', () => ({
   withLoadingStatus: (Component: React.ComponentType) => Component,
 }));
 jest.mock('@/hooks/useIsLicenseOwner', () => ({ useIsLicenseOwner: () => true }));

@@ -3,7 +3,8 @@ import { type FC, useState } from 'react';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 import { Button } from '@/components/Button';
-import { useDimoAuth, useEventEmitter } from '@/hooks';
+import { useDimoAuth } from '@/hooks/useDimoAuth';
+import { useEventEmitter } from '@/hooks/useEventEmitter';
 import { getDevJwt } from '@/utils/devJwt';
 import {
   CONSOLE_ACCESS_EXPLAINER,

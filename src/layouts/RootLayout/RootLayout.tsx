@@ -5,7 +5,7 @@ import { ThemeProvider } from 'next-themes';
 import { dimoFont } from '@/utils/font';
 import '@/app/globals.css';
 import QueryProvider from '@/hoc/QueryProvider';
-import { useMixPanel } from '@/hooks';
+import { useMixPanel } from '@/hooks/useMixPanel';
 import { Toaster } from '@/components/ui/sonner';
 
 export const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {

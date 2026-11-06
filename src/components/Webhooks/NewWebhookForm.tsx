@@ -9,7 +9,7 @@ import { WebhookSubscribeVehiclesStep } from '@/components/Webhooks/create/Subsc
 import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
 import { WebhookConfigStep } from '@/components/Webhooks/create/Configuration';
 import Footer from './Footer';
-import { useWebhookCreateFormContext } from '@/hoc';
+import { useWebhookCreateFormContext } from '@/hoc/FormStepContextProvider';
 
 const FormStepComponent = () => {
   const { getCurrentStep } = useWebhookCreateFormContext();

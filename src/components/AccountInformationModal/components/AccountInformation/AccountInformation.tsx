@@ -1,6 +1,6 @@
 import { Label } from '@/components/Label';
 import { get } from 'lodash';
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { CopyableRow } from '@/components/CopyableRow';
 
 import '../../shared/AccountInformationModal.css';
