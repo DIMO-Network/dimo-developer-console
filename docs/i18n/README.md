@@ -2,7 +2,7 @@
 
 ## Purpose
 
-These are the shared localization rules for every DIMO app: dimo-login, the developer console, dimo-org, fleet-lite, parentos and the login-with-dimo SDK. Each repo's own i18n doc links here for locale codes, tag matching, language labels, fonts and writing rules, and to the master glossary and translation memory that live next to this file. When a repo doc and this file disagree, this file wins.
+These are the shared localization rules for every DIMO app: dimo-login, the developer console, dimo-org, fleet-lite, parentos and the login-with-dimo SDK. Each repo's own i18n doc links here for locale codes, tag matching, language labels, fonts and writing rules, and to the master glossary and translation memory that live next to this file.
 
 ## Locale codes
 
