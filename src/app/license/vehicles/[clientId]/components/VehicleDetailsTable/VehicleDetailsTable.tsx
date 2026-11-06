@@ -203,7 +203,12 @@ export const VehicleDetailsTable: FC<IProps> = ({
           },
           { showSources, showLastSeen, clientId, canRenounce: isOwner },
         )}
-        onPaginationChange={refetch}
+        onPaginationChange={(page) =>
+          refetch(page).catch((error: unknown) => {
+            toast.error("Couldn't load that page. Try again.");
+            throw error;
+          })
+        }
         rowCount={visibleCount}
         pageInfo={data.vehicles.pageInfo}
         pageSize={PAGE_SIZE}

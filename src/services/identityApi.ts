@@ -22,6 +22,27 @@ export class IdentityGraphQLError extends Error {
 
 export type IdentityErrorPolicy = 'none' | 'ignore';
 
+// Identity answers in about 0.2 s (p95 1.3 s). A request still open after
+// this never will: it fails, so nothing waits on it forever (a page turn
+// keeps its buttons disabled until its request settles).
+export const IDENTITY_TIMEOUT_MS = 15_000;
+
+// Aborts on the caller's signal or after `ms`, whichever comes first.
+const withTimeout = (signal: AbortSignal | undefined, ms: number) => {
+  const controller = new AbortController();
+  const stop = () => controller.abort();
+  const timer = setTimeout(stop, ms);
+  if (signal?.aborted) stop();
+  signal?.addEventListener('abort', stop);
+  return {
+    signal: controller.signal,
+    done: () => {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', stop);
+    },
+  };
+};
+
 interface GraphQLResponse<TResult> {
   data?: TResult | null;
   errors?: GraphQLErrorEntry[];
@@ -41,16 +62,22 @@ export const fetchIdentity = async <TResult, TVariables>(
     signal,
     errorPolicy = 'none',
   }: { signal?: AbortSignal; errorPolicy?: IdentityErrorPolicy } = {},
-): Promise<TResult> => {
-  const response = await fetch(config.identityApiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ query: query.toString(), variables: variables ?? {} }),
-    signal,
-  });
-  const body = (await response
-    .json()
-    .catch(() => null)) as GraphQLResponse<TResult> | null;
+  // null only with errorPolicy 'ignore', when Identity sent errors and no data.
+): Promise<TResult | null> => {
+  const request = withTimeout(signal, IDENTITY_TIMEOUT_MS);
+  let response: Response;
+  let body: GraphQLResponse<TResult> | null;
+  try {
+    response = await fetch(config.identityApiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ query: query.toString(), variables: variables ?? {} }),
+      signal: request.signal,
+    });
+    body = (await response.json().catch(() => null)) as GraphQLResponse<TResult> | null;
+  } finally {
+    request.done();
+  }
 
   if (!response.ok) {
     throw new HttpError(
@@ -64,5 +91,6 @@ export const fetchIdentity = async <TResult, TVariables>(
   if (!body || (body.data == null && errorPolicy !== 'ignore')) {
     throw new HttpError(response.status, 'Identity API answered without data');
   }
-  return (body.data ?? undefined) as TResult;
+  // TanStack Query refuses undefined: no data is null.
+  return body.data ?? null;
 };

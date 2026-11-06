@@ -79,8 +79,31 @@ const scrub = (value: unknown, depth: number, copies: Map<object, unknown>): unk
   }
   const copy: Record<string, unknown> = {};
   copies.set(value, copy);
+  // Two keys that scrub alike ('a@x.com', 'b@y.com') both stay: [email],
+  // [email] 2. Counted per name, and only the copy's own keys count.
+  let collisions: Map<string, number> | undefined;
   for (const [key, item] of Object.entries(value)) {
-    copy[scrubEmails(key)] = scrub(item, depth + 1, copies);
+    const name = scrubEmails(key);
+    let scrubbed = name;
+    if (Object.hasOwn(copy, name)) {
+      collisions ??= new Map();
+      let n = collisions.get(name) ?? 1;
+      do scrubbed = `${name} ${(n += 1)}`;
+      while (Object.hasOwn(copy, scrubbed));
+      collisions.set(name, n);
+    }
+    const scrubbedItem = scrub(item, depth + 1, copies);
+    // Assigned, a key named __proto__ would set the prototype instead.
+    if (scrubbed === '__proto__') {
+      Object.defineProperty(copy, scrubbed, {
+        value: scrubbedItem,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    } else {
+      copy[scrubbed] = scrubbedItem;
+    }
   }
   return copy;
 };

@@ -9,21 +9,18 @@ import { useRouter } from 'next/navigation';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { queryClient } from '@/hoc/QueryProvider';
 import { createOAuthState, takeOAuthState } from '@/utils/oauthState';
+import { whenIdle } from '@/utils/whenIdle';
 
 // The sign-in steps bring the wallet stack (Turnkey, ZeroDev, viem: about 300 KB
 // gzipped), which the sign-in and sign-up pages don't need to show themselves.
 // They load once the page is idle; a step asked for sooner waits for them.
 const signInSteps = () => import('@/services/consoleSignIn');
 
-const preloadWhenIdle = () => {
-  const preload = () => void signInSteps().catch(() => undefined);
-  if (typeof window.requestIdleCallback === 'function') {
-    const id = window.requestIdleCallback(preload, { timeout: 2_000 });
-    return () => window.cancelIdleCallback(id);
-  }
-  const timer = setTimeout(preload, 1_000);
-  return () => clearTimeout(timer);
-};
+const preloadWhenIdle = () =>
+  whenIdle(() => void signInSteps().catch(() => undefined), {
+    timeout: 2_000,
+    fallback: 1_000,
+  });
 
 export const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   const HOC: React.FC<P> = (props) => {

@@ -254,4 +254,74 @@ describe('useIdentityQuery', () => {
     await waitFor(() => expect(b.result.current.data).toEqual(count(4).data));
     expect(identity.requests).toHaveLength(2);
   });
+
+  it("doesn't bring an old page back when the caller's variables return to before", async () => {
+    const identity = mockIdentityApi(({ variables }) =>
+      page(variables.after ? 'p2' : 'p1'),
+    );
+    const OTHER = '0x00000000000000000000000000000000000000bb';
+    const { result, rerender } = renderHook(
+      ({ owner }: { owner: string | null }) =>
+        useIdentityQuery(GetVehiclesByClientIdDocument, {
+          variables: { clientId: CLIENT, owner, first: 1 },
+        }),
+      {
+        wrapper: queryClientWrapper().Wrapper,
+        initialProps: { owner: null as string | null },
+      },
+    );
+    await waitFor(() => expect(result.current.data).toEqual(page('p1').data));
+    await act(async () => {
+      await result.current.refetch({ after: 'p1' });
+    });
+    await waitFor(() => expect(result.current.data).toEqual(page('p2').data));
+    rerender({ owner: OTHER });
+    await waitFor(() => expect(identity.requests).toHaveLength(3));
+    rerender({ owner: null });
+    // Page 1 for the first filter again, from the cache: not page 2.
+    await waitFor(() => expect(result.current.data).toEqual(page('p1').data));
+    expect(
+      identity.requests.every(
+        ({ variables }) => variables.after !== 'p1' || variables.owner === null,
+      ),
+    ).toBe(true);
+    expect(identity.requests).toHaveLength(3);
+  });
+
+  it('keeps the current page when the next one fails, and rejects', async () => {
+    const identity = mockIdentityApi(({ variables }) =>
+      variables.after ? { errors: [{ message: 'page gone' }] } : page('p1'),
+    );
+    const { result } = render(() =>
+      useIdentityQuery(GetVehiclesByClientIdDocument, {
+        variables: { clientId: CLIENT, owner: null, first: 1 },
+      }),
+    );
+    await waitFor(() => expect(result.current.data).toEqual(page('p1').data));
+    await act(async () => {
+      await expect(result.current.refetch({ after: 'p1' })).rejects.toThrow('page gone');
+    });
+    expect(result.current.data).toEqual(page('p1').data);
+    expect(result.current.error).toBeUndefined();
+    expect(result.current.loading).toBe(false);
+    // Asked once, not again on a move to the failed page.
+    expect(identity.requests).toHaveLength(2);
+  });
+
+  it("returns no data and no error when errorPolicy 'ignore' meets errors and no data", async () => {
+    const identity = mockIdentityApi(() => ({
+      data: null,
+      errors: [{ message: 'no such license' }],
+    }));
+    const { result } = render(() =>
+      useIdentityQuery(GetVehicleCountByClientIdDocument, {
+        variables: { clientId: CLIENT },
+        errorPolicy: 'ignore',
+      }),
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.error).toBeUndefined();
+    expect(identity.requests).toHaveLength(1);
+  });
 });

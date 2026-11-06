@@ -106,6 +106,39 @@ describe('sentryScrub', () => {
     it('scrubs keys', () => {
       expect(scrubEmailsDeep({ 'ada@example.com': 1 })).toEqual({ '[email]': 1 });
     });
+
+    it("leaves ordinary keys alone, Object.prototype's names and __proto__ included", () => {
+      const scrubbed = scrubEmailsDeep(
+        JSON.parse(
+          '{"constructor":1,"toString":"x","hasOwnProperty":true,"__proto__":{"a":1}}',
+        ),
+      );
+      expect(Object.keys(scrubbed)).toEqual([
+        'constructor',
+        'toString',
+        'hasOwnProperty',
+        '__proto__',
+      ]);
+      expect(Object.getPrototypeOf(scrubbed)).toBe(Object.prototype);
+    });
+
+    it('numbers many colliding keys without rescanning them', () => {
+      const many = Object.fromEntries(
+        Array.from({ length: 2_000 }, (_, i) => [`user${i}@example.com`, i]),
+      );
+      const started = Date.now();
+      const scrubbed = scrubEmailsDeep(many);
+      expect(Date.now() - started).toBeLessThan(500);
+      expect(Object.keys(scrubbed)).toHaveLength(2_000);
+      expect(scrubbed['[email] 2000']).toBe(1_999);
+    });
+
+    it('keeps both values when two keys scrub to the same', () => {
+      expect(scrubEmailsDeep({ 'ada@example.com': 1, 'bob@example.org': 2 })).toEqual({
+        '[email]': 1,
+        '[email] 2': 2,
+      });
+    });
   });
 
   it('scrubs a span name and its attributes', () => {

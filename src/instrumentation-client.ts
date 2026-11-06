@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { scrubEmailsDeep, scrubRecordingEvent, scrubSpan } from '@/utils/sentryScrub';
+import { whenIdle } from '@/utils/whenIdle';
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -53,14 +54,12 @@ const loadReplay = () =>
     // Without Replay the page and the rest of Sentry work as before.
     .catch(() => undefined);
 
-const whenIdle = (run: () => void) =>
-  typeof window.requestIdleCallback === 'function'
-    ? window.requestIdleCallback(run, { timeout: 5_000 })
-    : setTimeout(run, 2_000);
+const loadReplayWhenIdle = () =>
+  whenIdle(loadReplay, { timeout: 5_000, fallback: 2_000 });
 
 if (typeof window !== 'undefined') {
-  if (document.readyState === 'complete') whenIdle(loadReplay);
-  else window.addEventListener('load', () => whenIdle(loadReplay), { once: true });
+  if (document.readyState === 'complete') loadReplayWhenIdle();
+  else window.addEventListener('load', loadReplayWhenIdle, { once: true });
 }
 
 // Traces App Router navigations.

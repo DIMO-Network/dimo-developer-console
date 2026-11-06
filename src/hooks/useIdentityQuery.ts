@@ -31,6 +31,16 @@ export interface IdentityQueryResult<TResult, TVariables> {
 }
 
 const OPERATION_NAME = /\b(?:query|mutation)\s+(\w+)/;
+// Each document is read once: its name is the same every render.
+const operationNames = new WeakMap<object, string>();
+const nameIn = (text: string) => OPERATION_NAME.exec(text)?.[1] ?? text;
+const operationName = (query: TypedDocumentString<unknown, unknown>) => {
+  // Generated documents are objects; a plain string cast to one isn't cached.
+  if (typeof query !== 'object') return nameIn(String(query));
+  const name = operationNames.get(query) ?? nameIn(query.toString());
+  operationNames.set(query, name);
+  return name;
+};
 
 export const identityQueryKey = (
   query: TypedDocumentString<unknown, unknown>,
@@ -38,7 +48,7 @@ export const identityQueryKey = (
   errorPolicy: IdentityErrorPolicy = 'none',
 ) => [
   'identity',
-  OPERATION_NAME.exec(query.toString())?.[1] ?? query.toString(),
+  operationName(query),
   variables ?? {},
   ...(errorPolicy === 'none' ? [] : [errorPolicy]),
 ];
@@ -70,10 +80,13 @@ export const useIdentityQuery = <TResult, TVariables>(
 ): IdentityQueryResult<TResult, TVariables> => {
   const queryClient = useQueryClient();
   // Variables a refetch moved to, for as long as the caller's stay the same.
+  // New caller variables start over (a new filter is page 1), and going back
+  // to the old ones doesn't bring their old page back.
   const base = JSON.stringify(variables ?? {});
   const [moved, setMoved] = useState<{ from: string; to: Partial<TVariables> } | null>(
     null,
   );
+  if (moved && moved.from !== base) setMoved(null);
   const current = (
     moved?.from === base ? { ...variables, ...moved.to } : variables
   ) as TVariables;
@@ -105,19 +118,18 @@ export const useIdentityQuery = <TResult, TVariables>(
         (async () => {
           const target = { ...current, ...next } as TVariables;
           if (next && JSON.stringify(target) !== JSON.stringify(current)) {
-            try {
-              const data = await queryClient.fetchQuery(optionsFor(target));
-              return { data };
-            } finally {
-              setMoved({
-                from: base,
-                to: { ...(moved?.from === base ? moved.to : {}), ...next },
-              });
-            }
+            // Moves only once the new data is in: a failure leaves the
+            // current data on screen and rejects.
+            const data = await queryClient.fetchQuery(optionsFor(target));
+            setMoved({
+              from: base,
+              to: { ...(moved?.from === base ? moved.to : {}), ...next },
+            });
+            return { data: data ?? undefined };
           }
           const outcome = await refetchCurrent();
           if (outcome.error) throw outcome.error;
-          return { data: outcome.data };
+          return { data: outcome.data ?? undefined };
         })(),
       ),
     // optionsFor reads query and errorPolicy, both part of these.
@@ -127,7 +139,8 @@ export const useIdentityQuery = <TResult, TVariables>(
 
   if (skip) return { data: undefined, loading: false, error: undefined, refetch };
   return {
-    data: result.data,
+    // errorPolicy 'ignore' can leave no data: null in the cache, none here.
+    data: result.data ?? undefined,
     loading: result.isLoading,
     error: (result.error as Error | null) ?? undefined,
     refetch,

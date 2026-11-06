@@ -16,10 +16,24 @@ export type SessionCheck =
 // What a session token must pass before the proxy remembers it
 // (SESSION_VERDICT_COOKIE): console-api knows its user, the user has a global
 // account, and onboarding is done. Without a token, the session cookie's.
-export const checkSession = async (token?: string): Promise<SessionCheck> => {
-  const user = await getUserByToken(token);
+// `budgetMs` is one deadline for both lookups, which run one after the other;
+// without it, each has its own (the proxy waits up to 25 s for accounts).
+export const checkSession = async (
+  token?: string,
+  budgetMs?: number,
+): Promise<SessionCheck> => {
+  const deadline = budgetMs === undefined ? undefined : Date.now() + budgetMs;
+  // Past the deadline nothing more is sent: a request bound to fail at once
+  // is only load on the service.
+  const left = () => {
+    if (deadline === undefined) return undefined;
+    const ms = deadline - Date.now();
+    if (ms <= 0) throw new Error('The session check ran out of time');
+    return ms;
+  };
+  const user = await getUserByToken(token, left());
   const subOrganization = await getUserSubOrganization(user.email, {
-    timeout: ACCOUNT_LOOKUP_TIMEOUT_MS,
+    timeout: left() ?? ACCOUNT_LOOKUP_TIMEOUT_MS,
   });
   if (!subOrganization) return { status: 'no-account' };
   const loggedUser = new LoggedUser(user, subOrganization);

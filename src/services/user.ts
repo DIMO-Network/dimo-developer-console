@@ -2,8 +2,8 @@ import { IUser } from '@/types/user';
 import { dimoDevAPIClient } from '@/services/dimoDevAPI';
 
 // The session cookie's user, or the given token's.
-export const getUserByToken = async (token?: string) => {
-  const client = await dimoDevAPIClient(undefined, token);
+export const getUserByToken = async (token?: string, timeout?: number) => {
+  const client = await dimoDevAPIClient(timeout, token);
   const { data } = await client.get<IUser>('/api/me');
   return data;
 };

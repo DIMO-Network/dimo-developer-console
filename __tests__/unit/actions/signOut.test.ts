@@ -60,9 +60,15 @@ describe('saveToken', () => {
   });
 
   it('remembers a session that passes the proxy check, so the next pages skip it', async () => {
-    // A 30-minute session; the verdict lasts the proxy's 15 minutes.
-    await saveToken('jwt', 1_800);
-    expect(checkSession).toHaveBeenCalledWith('jwt');
+    // A 30-minute session; the verdict lasts the proxy's 15 minutes. The clock
+    // stands still, so the whole 3 s budget reaches the lookups.
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(50_000);
+    try {
+      await saveToken('jwt', 1_800);
+    } finally {
+      clock.mockRestore();
+    }
+    expect(checkSession).toHaveBeenCalledWith('jwt', 3_000);
     expect(verdictSet()).toEqual([
       'session-verdict',
       await sessionVerdictFor('jwt'),
@@ -105,6 +111,21 @@ describe('saveToken', () => {
       expect(verdictSet()).toBeUndefined();
     },
   );
+
+  it('counts the token check against the same 3 seconds', async () => {
+    let now = 50_000;
+    const clock = jest.spyOn(Date, 'now').mockImplementation(() => now);
+    (decodeJwtToken as jest.Mock).mockImplementation(async () => {
+      now += 2_500; // fetching the key set took 2.5 s
+      return { sub: 'user' };
+    });
+    try {
+      await saveToken('jwt', 1_800);
+      expect(checkSession).toHaveBeenCalledWith('jwt', 500);
+    } finally {
+      clock.mockRestore();
+    }
+  });
 
   it('does not check an unverified token with console-api', async () => {
     (decodeJwtToken as jest.Mock).mockRejectedValue(new Error('bad signature'));

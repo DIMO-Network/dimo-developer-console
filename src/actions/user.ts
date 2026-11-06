@@ -119,9 +119,12 @@ const passesSessionCheck = async (token: string): Promise<boolean> => {
   const outOfTime = new Promise<boolean>((resolve) => {
     timer = setTimeout(() => resolve(false), SIGN_IN_CHECK_BUDGET_MS);
   });
+  // One deadline from the start: the token check (which may fetch the key
+  // set) and both lookups all come out of the same 3 s.
+  const deadline = Date.now() + SIGN_IN_CHECK_BUDGET_MS;
   const check = (async () => {
     await decodeJwtToken(token);
-    return (await checkSession(token)).status === 'ok';
+    return (await checkSession(token, deadline - Date.now())).status === 'ok';
   })().catch(() => false);
   try {
     return await Promise.race([check, outOfTime]);
