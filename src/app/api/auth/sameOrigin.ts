@@ -32,8 +32,13 @@ const fromConsole = (origin: string, request: NextRequest) => {
   } catch {
     return false;
   }
-  const requestHost =
-    request.headers.get('x-forwarded-host') ?? request.headers.get('host');
+  // A chain of proxies lists every host it passed; the first is the client's,
+  // as Next's own check reads it.
+  const requestHost = (
+    request.headers.get('x-forwarded-host') ?? request.headers.get('host')
+  )
+    ?.split(',')[0]
+    .trim();
   return host === requestHost || host === hostOf(config.frontendUrl);
 };
 

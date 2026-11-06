@@ -31,7 +31,11 @@ jest.mock('@/services/globalAccount', () => ({
 import { getDimoChallenge, getDimoToken } from '@/actions/dimoAuth';
 import { saveToken } from '@/actions/user';
 import { completeUserData, createNewUser } from '@/app/sign-up/actions';
-import { renewConsoleSession, signOutOnServer } from '@/services/consoleSignIn';
+import {
+  renewConsoleSession,
+  SignedInElsewhereError,
+  signOutOnServer,
+} from '@/services/consoleSignIn';
 import { SESSION_KEY } from '@/utils/globalAccountSession';
 
 const ACCOUNT = { email: 'sam@harness.dev', subOrganizationId: 'sub-sam' };
@@ -55,12 +59,18 @@ const storeSessionFor = (subOrganizationId: string) =>
   );
 const stored = () => JSON.parse(localStorage.getItem(SESSION_KEY) ?? 'null');
 
+const realFetch = global.fetch;
+afterAll(() => {
+  global.fetch = realFetch;
+});
 const fetchMock = jest.fn();
 const answer = (body: unknown, ok = true) => ({
   ok,
   status: ok ? 200 : 502,
   json: async () => body,
 });
+// POST /api/auth/session names the cookie it set, for taking it back.
+const COOKIE = 'f'.repeat(64);
 
 describe('renewConsoleSession', () => {
   beforeEach(() => {
@@ -70,7 +80,7 @@ describe('renewConsoleSession', () => {
     fetchMock.mockImplementation(async (path: string) =>
       path === '/api/auth/challenge'
         ? answer({ challenge: 'sign me', state: 'state-1' })
-        : answer({ ok: true }),
+        : answer({ ok: true, cookie: COOKIE }),
     );
   });
 
@@ -132,16 +142,18 @@ describe('renewConsoleSession', () => {
       if (path === '/api/auth/challenge')
         return answer({ challenge: 'sign me', state: 's' });
       if (init.method === 'POST') localStorage.removeItem(SESSION_KEY);
-      return answer({ ok: true });
+      return answer({ ok: true, cookie: COOKIE });
     });
     await expect(
       renewConsoleSession({ account: ACCOUNT, credential: CREDENTIAL }),
     ).resolves.toBe(false);
     expect(stored()).toBeNull();
+    // That exact cookie, not any of the wallet's: one another sign-in of the
+    // same account set since stays.
     expect(fetchMock).toHaveBeenLastCalledWith('/api/auth/session', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ wallet: '0x00000000000000000000000000000000000000bb' }),
+      body: JSON.stringify({ cookie: COOKIE }),
       signal: expect.any(AbortSignal),
     });
   });
@@ -171,15 +183,51 @@ describe('renewConsoleSession', () => {
     expect(JSON.parse(init.body).sessionSeconds).toBeLessThanOrEqual(600);
   });
 
-  it('stops, writing and taking back nothing, when another account holds the cookie', async () => {
+  it('counts the time left when it asks for the cookie, after the slow steps', async () => {
+    const start = Date.now();
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(start);
+    const left = { ...CREDENTIAL, expiry: Math.floor(start / 1000) + 600 };
+    signMessage.mockImplementationOnce(async () => {
+      // Signing took 15 seconds.
+      clock.mockReturnValue(start + 15_000);
+      return '0xsigned';
+    });
+    try {
+      await renewConsoleSession({ account: ACCOUNT, credential: left });
+    } finally {
+      clock.mockRestore();
+    }
+    const [, init] = fetchMock.mock.calls[1];
+    expect(JSON.parse(init.body).sessionSeconds).toBeLessThanOrEqual(585);
+  });
+
+  const cookieHeldElsewhere = () =>
     fetchMock.mockImplementation(async (path: string) =>
       path === '/api/auth/challenge'
         ? answer({ challenge: 'sign me', state: 's' })
         : { ok: false, status: 409, json: async () => ({ code: 'SIGNED_IN_ELSEWHERE' }) },
     );
+
+  it('stops, writing and taking back nothing, when the account that holds the cookie signed in meanwhile', async () => {
+    fetchMock.mockImplementation(async (path: string) => {
+      if (path === '/api/auth/challenge')
+        return answer({ challenge: 'sign me', state: 's' });
+      // That account's sign-in stored its shared session too.
+      storeSessionFor('sub-someone-else');
+      return { ok: false, status: 409, json: async () => ({}) };
+    });
     await expect(
       renewConsoleSession({ account: ACCOUNT, credential: CREDENTIAL }),
     ).resolves.toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(stored().subOrganizationId).toBe('sub-someone-else');
+  });
+
+  it("says so when another account holds the cookie while the shared session is still this one's", async () => {
+    cookieHeldElsewhere();
+    await expect(
+      renewConsoleSession({ account: ACCOUNT, credential: CREDENTIAL }),
+    ).rejects.toBeInstanceOf(SignedInElsewhereError);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(stored().token).toBe('bundle-old');
   });

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { isEmpty } from 'lodash';
@@ -16,10 +17,14 @@ import {
   respond,
 } from '../sameOrigin';
 
-const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
+const FINGERPRINT = /^[0-9a-f]{64}$/;
+
+// Names one exact session token without giving it to the browser: the renewal
+// that set a cookie can later take back that cookie, and no other.
+const fingerprintOf = (token: string) => createHash('sha256').update(token).digest('hex');
 
 // The wallet a session token names. Read, not verified: it only decides
-// whether a cookie may be replaced or deleted.
+// whether a cookie may be replaced.
 const walletOf = (token: string | undefined): string | null => {
   if (!token) return null;
   try {
@@ -32,9 +37,10 @@ const walletOf = (token: string | undefined): string | null => {
 
 // Trades the signed challenge for a DIMO token and stores it as the session
 // cookie, the second half of signing in again from a session-expired dialog.
-// The token never reaches the browser. The cookie lasts `sessionSeconds`, the
-// time the session key has left (at most a passkey session). A cookie another
-// wallet holds is not replaced (409): that account signed in meanwhile.
+// The token never reaches the browser, only its fingerprint, for taking the
+// cookie back. The cookie lasts `sessionSeconds`, the time the session key has
+// left (at most a passkey session). A cookie another wallet holds is not
+// replaced (409): that account signed in meanwhile.
 export const POST = async (request: NextRequest) => {
   const refused = refuseCrossSite(request);
   if (refused) return refused;
@@ -73,21 +79,23 @@ export const POST = async (request: NextRequest) => {
     );
   }
   await saveToken(accessToken, sessionSeconds);
-  return respond({ ok: true });
+  return respond({ ok: true, cookie: fingerprintOf(accessToken) });
 };
 
 // Takes back the cookie a renewal just set, when the shared session stopped
-// being that wallet's while it ran (another tab signed out, or in as someone
-// else). Only that wallet's cookie goes: one another sign-in set since stays.
+// being that account's while it ran (another tab signed out, or in as someone
+// else). Only that exact cookie goes, named by the fingerprint POST returned:
+// one another sign-in set since stays, even for the same account.
 export const DELETE = async (request: NextRequest) => {
   const refused = refuseCrossSite(request);
   if (refused) return refused;
-  const { wallet } = await readJson(request);
-  if (typeof wallet !== 'string' || !ADDRESS.test(wallet)) {
-    return badRequest('A wallet address is required');
+  const { cookie } = await readJson(request);
+  if (typeof cookie !== 'string' || !FINGERPRINT.test(cookie)) {
+    return badRequest("A session cookie's fingerprint is required");
   }
   const jar = await cookies();
-  if (walletOf(jar.get(cookieName)?.value) !== wallet.toLowerCase()) {
+  const held = jar.get(cookieName)?.value;
+  if (!held || fingerprintOf(held) !== cookie) {
     return respond({ cleared: false });
   }
   jar.delete(cookieName);

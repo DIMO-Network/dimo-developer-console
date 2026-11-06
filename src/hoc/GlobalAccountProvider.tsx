@@ -350,6 +350,9 @@ export const withGlobalAccounts = <P extends object>(
 
       return () => {
         clearTimeout(timer);
+        // A renewal that ends after this must not schedule a timer here that
+        // nothing would clear.
+        recheck.current = () => {};
         window.removeEventListener('focus', check);
         document.removeEventListener('visibilitychange', onVisible);
         off();

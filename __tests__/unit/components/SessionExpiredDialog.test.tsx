@@ -1,11 +1,13 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { AxiosError, AxiosHeaders } from 'axios';
 
 jest.mock('@/services/consoleSignIn', () => ({
   passkeyCredential: jest.fn(),
   sendEmailCode: jest.fn(),
   emailCodeCredential: jest.fn(),
   renewConsoleSession: jest.fn(),
+  SignedInElsewhereError: class SignedInElsewhereError extends Error {},
 }));
 jest.mock('@/services/globalAccount', () => ({ getUserSubOrganization: jest.fn() }));
 jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
@@ -19,6 +21,7 @@ import {
   passkeyCredential,
   renewConsoleSession,
   sendEmailCode,
+  SignedInElsewhereError,
 } from '@/services/consoleSignIn';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import { SessionExpiredDialog } from '@/components/SessionExpiredDialog';
@@ -46,6 +49,15 @@ const show = () => {
   );
   return { onRenewed, onStale, onSignOut, view };
 };
+// How Global Accounts answers a code check: refused (4xx) or failed (5xx).
+const otpAnswered = (status: number) =>
+  new AxiosError('otp', 'ERR_BAD_REQUEST', undefined, undefined, {
+    status,
+    statusText: '',
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+    data: {},
+  });
 const hasPasskey = (value: boolean) =>
   (getUserSubOrganization as jest.Mock).mockResolvedValue({
     subOrganizationId: ACCOUNT.subOrganizationId,
@@ -149,7 +161,7 @@ describe('SessionExpiredDialog', () => {
 
   it('says when a code is wrong and stays open', async () => {
     hasPasskey(false);
-    (emailCodeCredential as jest.Mock).mockRejectedValue(new Error('invalid otp'));
+    (emailCodeCredential as jest.Mock).mockRejectedValue(otpAnswered(400));
     const { onRenewed } = show();
     fireEvent.click(await screen.findByRole('button', { name: 'Email me a code' }));
     fireEvent.change(await screen.findByLabelText('Code'), {
@@ -159,8 +171,31 @@ describe('SessionExpiredDialog', () => {
     expect(
       await screen.findByText("That code didn't work. Check it and try again."),
     ).toBeInTheDocument();
+    expect(Sentry.captureException).not.toHaveBeenCalled();
     expect(onRenewed).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ['fails', () => otpAnswered(503)],
+    ['gets no answer', () => new Error('Network Error')],
+  ])(
+    "doesn't blame the code when checking it %s, and reports it",
+    async (_name, failure) => {
+      hasPasskey(false);
+      (emailCodeCredential as jest.Mock).mockRejectedValue(failure());
+      const { onRenewed } = show();
+      fireEvent.click(await screen.findByRole('button', { name: 'Email me a code' }));
+      fireEvent.change(await screen.findByLabelText('Code'), {
+        target: { value: '123456' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+      expect(
+        await screen.findByText("Couldn't check that code. Try again."),
+      ).toBeInTheDocument();
+      expect(Sentry.captureException).toHaveBeenCalledTimes(1);
+      expect(onRenewed).not.toHaveBeenCalled();
+    },
+  );
 
   it('lets the user ask for a new code after 30 seconds', async () => {
     jest.useFakeTimers();
@@ -230,6 +265,41 @@ describe('SessionExpiredDialog', () => {
     await waitFor(() => expect(onStale).toHaveBeenCalledTimes(1));
     expect(onRenewed).not.toHaveBeenCalled();
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('says another account holds the session, instead of offering a retry that would meet it again', async () => {
+    hasPasskey(true);
+    (passkeyCredential as jest.Mock).mockResolvedValue(CREDENTIAL);
+    (renewConsoleSession as jest.Mock).mockRejectedValue(new SignedInElsewhereError());
+    const { onRenewed, onStale } = show();
+    fireEvent.click(await screen.findByRole('button', { name: 'Continue with passkey' }));
+    expect(
+      await screen.findByText(
+        'Another account is signed in on this browser. Sign out to switch accounts.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull();
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+    expect(onRenewed).not.toHaveBeenCalled();
+    expect(onStale).not.toHaveBeenCalled();
+  });
+
+  it('tells the provider nothing about a renewal that ends after the dialog closed', async () => {
+    hasPasskey(true);
+    (passkeyCredential as jest.Mock).mockResolvedValue(CREDENTIAL);
+    let finish: (renewed: boolean) => void = () => {};
+    (renewConsoleSession as jest.Mock).mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        finish = resolve;
+      }),
+    );
+    const { onRenewed, onStale, view } = show();
+    fireEvent.click(await screen.findByRole('button', { name: 'Continue with passkey' }));
+    await waitFor(() => expect(renewConsoleSession).toHaveBeenCalledTimes(1));
+    view.unmount();
+    await act(async () => finish(false));
+    expect(onStale).not.toHaveBeenCalled();
+    expect(onRenewed).not.toHaveBeenCalled();
   });
 
   it('starts over, rather than renew with a key about to expire', async () => {
@@ -304,6 +374,19 @@ describe('SessionExpiredDialog', () => {
     expect(screen.getByRole('button', { name: 'Continue with passkey' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Email me a code instead' })).toBeEnabled();
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('starts nothing else once the user signs out', async () => {
+    hasPasskey(true);
+    show();
+    await screen.findByRole('button', { name: 'Continue with passkey' });
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    expect(screen.getByRole('button', { name: 'Continue with passkey' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Email me a code instead' }),
+    ).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Email me a code instead' }));
+    expect(sendEmailCode).not.toHaveBeenCalled();
   });
 
   it('signs out when asked', async () => {

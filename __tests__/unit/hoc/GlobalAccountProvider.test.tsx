@@ -31,7 +31,9 @@ jest.mock('@/utils/hardNavigate', () => ({ hardNavigate: jest.fn() }));
 jest.mock('@/hoc/QueryProvider', () => ({
   queryClient: { clear: jest.fn(), invalidateQueries: jest.fn() },
 }));
-// The dialog has its own tests; here it reports who it would sign in again.
+// The dialog has its own tests; here it reports who it would sign in again,
+// and keeps its callbacks for a renewal that ends after the page is gone.
+const mockDialog: { onStale?: () => void; onRenewed?: () => void } = {};
 jest.mock('@/components/SessionExpiredDialog', () => ({
   SessionExpiredDialog: ({
     account,
@@ -43,14 +45,17 @@ jest.mock('@/components/SessionExpiredDialog', () => ({
     onRenewed: () => void;
     onStale: () => void;
     onSignOut: () => void;
-  }) => (
-    <div role="dialog">
-      <p>{`expired: ${account.email} ${account.subOrganizationId}`}</p>
-      <button onClick={onRenewed}>renewed</button>
-      <button onClick={onStale}>stale</button>
-      <button onClick={onSignOut}>sign out</button>
-    </div>
-  ),
+  }) => {
+    Object.assign(mockDialog, { onStale, onRenewed });
+    return (
+      <div role="dialog">
+        <p>{`expired: ${account.email} ${account.subOrganizationId}`}</p>
+        <button onClick={onRenewed}>renewed</button>
+        <button onClick={onStale}>stale</button>
+        <button onClick={onSignOut}>sign out</button>
+      </div>
+    );
+  },
 }));
 
 import { endSession } from '@/actions/user';
@@ -325,6 +330,28 @@ describe('withGlobalAccounts across tabs', () => {
     localStorage.removeItem(SESSION_KEY);
     fireEvent.click(screen.getByText('stale'));
     await waitFor(() => expect(hardNavigate).toHaveBeenCalledWith('/sign-in'));
+  });
+
+  it('ignores a renewal that ends after the page unmounted', async () => {
+    jest.useFakeTimers({ now: T0 });
+    store({ expiry: nowS() - 5 });
+    const view = render(<Page />);
+    await screen.findByText(expiredFor());
+    const { onStale, onRenewed } = mockDialog;
+    view.unmount();
+    // Another tab renewed meanwhile; a dead check would schedule a timer
+    // nothing clears. Then it signed out; that check would leave for /sign-in.
+    store({ expiry: nowS() + 60 });
+    act(() => {
+      onRenewed!();
+      onStale!();
+    });
+    localStorage.removeItem(SESSION_KEY);
+    act(() => {
+      jest.advanceTimersByTime(120_000);
+    });
+    expect(hardNavigate).not.toHaveBeenCalled();
+    expect(jest.getTimerCount()).toBe(0);
   });
 
   it("the dialog's Sign out is a full sign-out, like the menu's", async () => {

@@ -220,6 +220,16 @@ class RouteError extends Error {
   }
 }
 
+// The session cookie belongs to another account, though this tab's shared
+// session is still this account's (that sign-in stopped before storing its
+// session). Renewing can't fix it; signing out can.
+export class SignedInElsewhereError extends Error {
+  constructor() {
+    super('Another account holds the session cookie');
+    this.name = 'SignedInElsewhereError';
+  }
+}
+
 // A JSON request to the console's own /api/auth routes. It stops on `signal`
 // (the dialog closed or the tab is leaving), at once if that already happened,
 // or after `timeoutMs`: a response that arrives after that is discarded,
@@ -266,6 +276,8 @@ const postJson = async <T>(
 // Returns false, writing nothing, when the shared session stopped being this
 // account's while it ran (another tab signed out, or in as someone else); a
 // cookie it set by then is taken back, unless another sign-in replaced it.
+// Throws SignedInElsewhereError when another account holds the cookie while
+// the shared session is still this account's.
 export const renewConsoleSession = async ({
   account,
   credential,
@@ -278,11 +290,14 @@ export const renewConsoleSession = async ({
   const stillThisAccount = () =>
     !signal?.aborted && readSession()?.subOrganizationId === account.subOrganizationId;
   // The cookie lasts as long as the key, which may be part used (a retry).
-  const secondsLeft = Math.min(
-    credential.sessionSeconds,
-    credential.expiry - Math.floor(Date.now() / 1000),
-  );
-  if (secondsLeft <= 0) throw new Error('The session key has expired');
+  // Counted when the cookie is asked for, after the slow steps, so it can't
+  // outlive the key.
+  const secondsLeft = () =>
+    Math.min(
+      credential.sessionSeconds,
+      credential.expiry - Math.floor(Date.now() / 1000),
+    );
+  if (secondsLeft() <= 0) throw new Error('The session key has expired');
 
   const kernelAccount = await smartWallet(account, credential);
   const { challenge, state } = await postJson<{ challenge: string; state: string }>(
@@ -293,26 +308,31 @@ export const renewConsoleSession = async ({
   const signedChallenge = await kernelAccount.signMessage({ message: challenge });
 
   if (!stillThisAccount()) return false;
+  const sessionSeconds = secondsLeft();
+  if (sessionSeconds <= 0) throw new Error('The session key has expired');
+  let cookie: string;
   try {
-    await postJson(
+    ({ cookie } = await postJson<{ cookie: string }>(
       '/api/auth/session',
-      { state, signedChallenge, sessionSeconds: secondsLeft },
+      { state, signedChallenge, sessionSeconds },
       { signal },
-    );
+    ));
   } catch (error) {
-    // 409: another account's cookie is set (it signed in meanwhile) and was
-    // left alone.
-    if (error instanceof RouteError && error.status === 409) return false;
+    // 409: another account's cookie is set and was left alone. Expected when
+    // that account signed in meanwhile and the shared session says so.
+    if (error instanceof RouteError && error.status === 409) {
+      if (!stillThisAccount()) return false;
+      throw new SignedInElsewhereError();
+    }
     throw error;
   }
 
   if (!stillThisAccount()) {
     // Best effort, and not tied to `signal`: it runs because things changed.
-    await postJson(
-      '/api/auth/session',
-      { wallet: kernelAccount.address },
-      { method: 'DELETE' },
-    ).catch(() => undefined);
+    // Only this exact cookie: one another sign-in set since stays.
+    await postJson('/api/auth/session', { cookie }, { method: 'DELETE' }).catch(
+      () => undefined,
+    );
     return false;
   }
   writeConsoleSession(account, credential);

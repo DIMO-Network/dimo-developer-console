@@ -1,6 +1,7 @@
 /**
  * @jest-environment node
  */
+import { createHash } from 'node:crypto';
 import { NextRequest } from 'next/server';
 import { AxiosError, AxiosHeaders } from 'axios';
 
@@ -60,8 +61,9 @@ const dexAnswered = (status: number) =>
     data: {},
   });
 // A session cookie's token, as DIMO issues it (only its payload matters here).
-const tokenFor = (wallet: string) =>
-  `e30.${Buffer.from(JSON.stringify({ ethereum_address: wallet })).toString('base64url')}.sig`;
+const tokenFor = (wallet: string, sig = 'sig') =>
+  `e30.${Buffer.from(JSON.stringify({ ethereum_address: wallet })).toString('base64url')}.${sig}`;
+const fingerprint = (token: string) => createHash('sha256').update(token).digest('hex');
 
 describe('origin check', () => {
   it.each([
@@ -83,6 +85,11 @@ describe('origin check', () => {
       'the forwarded host',
       'https://console-alias.test',
       { 'x-forwarded-host': 'console-alias.test' },
+    ],
+    [
+      'the first of a chain of forwarded hosts',
+      'https://console-alias.test',
+      { 'x-forwarded-host': 'console-alias.test, edge.vercel.test' },
     ],
     ['the configured public address', new URL(config.frontendUrl).origin, {}],
   ])('accepts %s', async (_name, origin, headers) => {
@@ -132,7 +139,8 @@ describe('POST /api/auth/session', () => {
     (getDimoToken as jest.Mock).mockResolvedValue({ access_token: 'jwt-1' });
     const res = await session(post('/api/auth/session', body));
     expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toEqual({ ok: true });
+    // The token's fingerprint, for taking the cookie back; never the token.
+    await expect(res.json()).resolves.toEqual({ ok: true, cookie: fingerprint('jwt-1') });
     expect(getDimoToken).toHaveBeenCalledWith({
       state: 's1',
       signedChallenge: '0xsigned',
@@ -197,45 +205,48 @@ describe('POST /api/auth/session', () => {
 });
 
 describe('DELETE /api/auth/session', () => {
-  const del = (wallet: unknown) =>
-    withdraw(post('/api/auth/session', { wallet }, { method: 'DELETE' }));
+  const del = (cookie: unknown) =>
+    withdraw(post('/api/auth/session', { cookie }, { method: 'DELETE' }));
+  const mine = tokenFor(ADDRESS);
 
-  it("takes back the wallet's own session cookie", async () => {
-    jar.get.mockReturnValue({
-      value: tokenFor(ADDRESS.toUpperCase().replace('0X', '0x')),
-    });
-    const res = await del(ADDRESS);
+  it('takes back the exact session cookie it names', async () => {
+    jar.get.mockReturnValue({ value: mine });
+    const res = await del(fingerprint(mine));
     await expect(res.json()).resolves.toEqual({ cleared: true });
     expect(jar.delete).toHaveBeenCalledWith('session-token');
     expect(jar.delete).toHaveBeenCalledWith(SESSION_VERDICT_COOKIE);
   });
 
-  it('keeps a cookie another sign-in set since', async () => {
-    jar.get.mockReturnValue({
-      value: tokenFor(OTHER),
-    });
-    const res = await del(ADDRESS);
+  it.each([
+    ['another account', tokenFor(OTHER)],
+    ['the same account, signed in again', tokenFor(ADDRESS, 'newer')],
+  ])('keeps a cookie a sign-in of %s set since', async (_name, since) => {
+    jar.get.mockReturnValue({ value: since });
+    const res = await del(fingerprint(mine));
     await expect(res.json()).resolves.toEqual({ cleared: false });
     expect(jar.delete).not.toHaveBeenCalled();
   });
 
-  it('does nothing without a cookie, or for an unreadable one', async () => {
-    jar.get.mockReturnValueOnce(undefined).mockReturnValueOnce({ value: 'garbage' });
-    await expect((await del(ADDRESS)).json()).resolves.toEqual({ cleared: false });
-    await expect((await del(ADDRESS)).json()).resolves.toEqual({ cleared: false });
+  it('does nothing without a cookie', async () => {
+    jar.get.mockReturnValue(undefined);
+    await expect((await del(fingerprint(mine))).json()).resolves.toEqual({
+      cleared: false,
+    });
     expect(jar.delete).not.toHaveBeenCalled();
   });
 
-  it('refuses another site, and anything but a wallet address', async () => {
+  it("refuses another site, and anything but a cookie's fingerprint", async () => {
+    jar.get.mockReturnValue({ value: mine });
     const crossSite = await withdraw(
       post(
         '/api/auth/session',
-        { wallet: ADDRESS },
+        { cookie: fingerprint(mine) },
         { method: 'DELETE', origin: 'https://evil.test' },
       ),
     );
     expect(crossSite.status).toBe(403);
     expect((await del('nope')).status).toBe(400);
+    expect((await del(ADDRESS)).status).toBe(400);
     expect(jar.delete).not.toHaveBeenCalled();
   });
 });

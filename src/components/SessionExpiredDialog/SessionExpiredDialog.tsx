@@ -11,11 +11,13 @@ import {
   passkeyCredential,
   renewConsoleSession,
   sendEmailCode,
+  SignedInElsewhereError,
   type ConsoleAccount,
   type TurnkeyCredential,
 } from '@/services/consoleSignIn';
 import { getUserSubOrganization } from '@/services/globalAccount';
 import { usePasskey } from '@/hooks/usePasskey';
+import { isUnexpectedFailure, reportUnexpected } from '@/utils/upstreamErrors';
 
 const RESEND_AFTER_SECONDS = 30;
 // Past this, the dialog offers the email code without waiting for the lookup.
@@ -24,9 +26,12 @@ const LOOKUP_TIMEOUT_MS = 5_000;
 export const PASSKEY_FAILED =
   "Couldn't confirm your passkey. Try again, or use an email code.";
 export const CODE_FAILED = "That code didn't work. Check it and try again.";
+export const CODE_CHECK_FAILED = "Couldn't check that code. Try again.";
 export const SEND_FAILED = "Couldn't send a code. Try again.";
 export const RENEW_FAILED = "Couldn't sign you in again. Try again, or sign out.";
 export const START_AGAIN = 'That took too long. Start again.';
+export const SIGNED_IN_ELSEWHERE =
+  'Another account is signed in on this browser. Sign out to switch accounts.';
 
 // A proven key with less left than this is not worth renewing with: the new
 // session keeps the key's expiry.
@@ -62,6 +67,9 @@ export const SessionExpiredDialog: FC<Props> = ({
   const [otpId, setOtpId] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
+  // Once the user signs out, nothing else may start: no code is emailed and
+  // no passkey prompt opens for an account on its way out.
+  const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sentAt, setSentAt] = useState(0);
   const [now, setNow] = useState(() => Date.now());
@@ -105,11 +113,20 @@ export const SessionExpiredDialog: FC<Props> = ({
       renewed = await renewConsoleSession({ account, credential, signal });
     } catch (renewError) {
       if (signal.aborted) return;
+      if (renewError instanceof SignedInElsewhereError) {
+        // Trying again would meet the same cookie.
+        setProven(null);
+        setError(SIGNED_IN_ELSEWHERE);
+        return;
+      }
       captureException(renewError);
       setProven(credential);
       setError(RENEW_FAILED);
       return;
     }
+    // Closed or signing out meanwhile: the provider that asked is gone or
+    // leaving, and has nothing left to hear.
+    if (signal.aborted) return;
     setProven(null);
     if (renewed) onRenewed();
     else onStale();
@@ -126,6 +143,7 @@ export const SessionExpiredDialog: FC<Props> = ({
   };
 
   const signOut = () => {
+    setSigningOut(true);
     closingController().abort();
     onSignOut();
   };
@@ -190,8 +208,14 @@ export const SessionExpiredDialog: FC<Props> = ({
           otpId,
           otp: code,
         });
-      } catch {
-        // A wrong or used code; nothing to report.
+      } catch (codeError) {
+        // A refusal is a wrong or used code, nothing to report. Anything else
+        // (no answer, a 5xx) is not the code's fault: say so, and report it.
+        if (isUnexpectedFailure(codeError)) {
+          reportUnexpected(codeError);
+          setError(CODE_CHECK_FAILED);
+          return;
+        }
         credential = null;
       }
       if (!credential) {
@@ -207,10 +231,10 @@ export const SessionExpiredDialog: FC<Props> = ({
     if (proven) {
       return (
         <>
-          <Button loading={busy} onClick={() => void tryAgain()}>
+          <Button loading={busy} disabled={signingOut} onClick={() => void tryAgain()}>
             Try again
           </Button>
-          <Button variant="ghost" disabled={busy} onClick={startOver}>
+          <Button variant="ghost" disabled={busy || signingOut} onClick={startOver}>
             Start over
           </Button>
         </>
@@ -238,14 +262,15 @@ export const SessionExpiredDialog: FC<Props> = ({
             inputMode="numeric"
             autoComplete="one-time-code"
             autoFocus
+            disabled={signingOut}
           />
-          <Button type="submit" loading={busy} disabled={code.length !== 6}>
+          <Button type="submit" loading={busy} disabled={code.length !== 6 || signingOut}>
             Continue
           </Button>
           <Button
             type="button"
             variant="ghost"
-            disabled={busy || resendIn > 0}
+            disabled={busy || signingOut || resendIn > 0}
             onClick={() => void sendCode()}
           >
             {resendIn > 0 ? `Send a new code in ${resendIn}s` : 'Send a new code'}
@@ -257,17 +282,21 @@ export const SessionExpiredDialog: FC<Props> = ({
     if (hasPasskey && isPasskeyAvailable) {
       return (
         <>
-          <Button loading={busy} onClick={() => void withPasskey()}>
+          <Button loading={busy} disabled={signingOut} onClick={() => void withPasskey()}>
             Continue with passkey
           </Button>
-          <Button variant="ghost" disabled={busy} onClick={() => void sendCode()}>
+          <Button
+            variant="ghost"
+            disabled={busy || signingOut}
+            onClick={() => void sendCode()}
+          >
             Email me a code instead
           </Button>
         </>
       );
     }
     return (
-      <Button loading={busy} onClick={() => void sendCode()}>
+      <Button loading={busy} disabled={signingOut} onClick={() => void sendCode()}>
         Email me a code
       </Button>
     );
@@ -298,7 +327,7 @@ export const SessionExpiredDialog: FC<Props> = ({
           </p>
         )}
         {/* Always available: a hung request must not trap the user here. */}
-        <Button variant="ghost" onClick={signOut}>
+        <Button variant="ghost" loading={signingOut} onClick={signOut}>
           Sign out
         </Button>
       </div>
