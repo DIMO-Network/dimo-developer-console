@@ -1,0 +1,15 @@
+{
+  "entries": [
+    {
+      "id": "tm.0001",
+      "en": "Language",
+      "uses": [{ "app": "dimo-login", "key": "app.language" }]
+    },
+    { "id": "tm.0002", "en": "Apps", "uses": [{ "app": "console", "key": "a.title" }] },
+    {
+      "id": "tm.0003",
+      "en": "Save, now",
+      "uses": [{ "app": "dimo-login", "key": "vehicles.count_one" }]
+    }
+  ]
+}
