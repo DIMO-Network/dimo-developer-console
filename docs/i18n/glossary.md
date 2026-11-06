@@ -11,9 +11,9 @@ Shared terminology for every DIMO app that ships `es`, `ja`, `zh-Hans` or `zh-Ha
 - Placeholders such as `{app}` or `{date}` in this table stand for the real `{{param}}` or ICU syntax, which stays byte-identical.
 - Japanese copy was written without a native speaker's review, and every zh column is a proposal until James signs it off.
 
-## Open questions for sign-off
+## Sign-off decisions
 
-Answer "yes" to accept the default, or give a different choice.
+James signed off all eight defaults below on 2026-11-06. Each "Default" is now the rule.
 
 1. **zh form of address, 你 or 您.** Default: 您 for the console and dimo.org (B2B, OEM audience) and 你 for dimo-login and the fleet apps (consumer, matching es _tú_). The zh cells that address the user (关于你 / 關於你) come from dimo-login and use 你; console and dimo.org copy uses 您. Alternative: one form everywhere.
 2. **Spacing between CJK and Latin letters or digits.** Default: no space in zh (`API密钥`, `API金鑰`), as in shipped ja (`APIキー`). Taiwan practice often adds a space (`API 金鑰`).
