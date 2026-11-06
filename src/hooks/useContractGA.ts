@@ -1,7 +1,7 @@
 'use client';
 
 import { Abi, Call, getContract, HttpRequestError } from 'viem';
-import { utils } from 'web3';
+import { fromWei, toWei } from '@/utils/wei';
 import * as Sentry from '@sentry/nextjs';
 import useGlobalAccount from '@/hooks/useGlobalAccount';
 import LicenseABI from '@/contracts/DimoLicenseContract.json';
@@ -188,7 +188,7 @@ export const useContractGA = () => {
         configuration.DLC_ADDRESS,
       ]);
 
-      return Number(utils.fromWei(currentAllowanceOnWei as bigint, 'ether'));
+      return fromWei(currentAllowanceOnWei as bigint);
     } catch (e: unknown) {
       Sentry.captureException(e);
       console.error(e);
@@ -229,7 +229,7 @@ export const useContractGA = () => {
         configuration.DCX_ADDRESS,
       ]);
 
-      return Number(utils.fromWei(currentAllowanceOnWei as bigint, 'ether'));
+      return fromWei(currentAllowanceOnWei as bigint);
     } catch (e: unknown) {
       Sentry.captureException(e);
       console.error(e);
@@ -267,7 +267,7 @@ export const useContractGA = () => {
       },
     });
 
-    const dimoInWei = utils.toWei(amount, 'ether');
+    const dimoInWei = toWei(amount);
     await dimoContract.write.approve([addressToAllow, dimoInWei]);
   };
 
@@ -299,11 +299,9 @@ export const useContractGA = () => {
         },
       });
 
-      const quote = await contract.read.getQuoteDc([
-        BigInt(utils.toWei(amount, 'ether')),
-      ]);
+      const quote = await contract.read.getQuoteDc([toWei(amount)]);
 
-      return BigInt(Math.ceil(Number(utils.fromWei(quote as bigint, 'ether'))));
+      return BigInt(Math.ceil(fromWei(quote as bigint)));
     } catch (e) {
       Sentry.captureException(e);
       const errorReason = handleOnChainError(e as HttpRequestError);

@@ -1,12 +1,12 @@
 import { wagmiAbi } from '@/contracts/wagmi';
 import { Abi, decodeErrorResult, HttpRequestError } from 'viem';
-import Web3 from 'web3';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 
+// A new key pair, for an API key: the private key goes to the user, the
+// address is enabled as the license's signer.
 export const generateWallet = () => {
-  const web3 = new Web3(window.ethereum);
-  const account = web3.eth.accounts.create();
-  const [wallet] = web3.eth.accounts.wallet.add(account);
-  return wallet;
+  const privateKey = generatePrivateKey();
+  return { address: privateKeyToAccount(privateKey).address, privateKey };
 };
 
 export const handleOnChainError = (

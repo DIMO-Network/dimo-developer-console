@@ -3,7 +3,7 @@
 import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks';
+import { useAuth } from '@/hooks/useAuth';
 import { FC, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { useRouter } from 'next/navigation';
@@ -62,7 +62,13 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
           <div className="flex flex-row">
             <p className="terms-caption">
               Lost your passkey?{' '}
-              <Anchor href="/email-recovery" target="_self" className="grey underline">
+              {/* Rarely used: not worth a prefetch while sign-in loads. */}
+              <Anchor
+                href="/email-recovery"
+                prefetch={false}
+                target="_self"
+                className="grey underline"
+              >
                 Recover with your email
               </Anchor>
             </p>

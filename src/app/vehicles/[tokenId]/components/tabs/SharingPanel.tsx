@@ -1,6 +1,6 @@
 'use client';
 import { FC } from 'react';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { ACCOUNT_SACDS, LICENSE_ALIAS } from '../../queries';
 import type { VehicleDetail } from '@/services/subjects/graph';
 import { permissionLabels } from '@/utils/sacdPermissions';
@@ -29,7 +29,7 @@ const Expiry: FC<{ iso: string }> = ({ iso }) => {
 };
 
 const useAlias = (grantee: string): string | undefined => {
-  const { data } = useQuery(LICENSE_ALIAS, {
+  const { data } = useIdentityQuery(LICENSE_ALIAS, {
     variables: { clientId: grantee },
     errorPolicy: 'ignore',
   });
@@ -154,7 +154,9 @@ export const SharingPanel: FC<{
   vehicle: VehicleDetail;
   clientId: string;
 }> = ({ vehicle, clientId }) => {
-  const account = useQuery(ACCOUNT_SACDS, { variables: { address: vehicle.owner } });
+  const account = useIdentityQuery(ACCOUNT_SACDS, {
+    variables: { address: vehicle.owner },
+  });
   const accountStatus = account.loading
     ? { message: 'Loading…' }
     : account.error

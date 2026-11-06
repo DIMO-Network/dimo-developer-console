@@ -2,8 +2,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { RedirectUriForm } from '@/components/RedirectUriForm';
 
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useMixPanel', () => ({
   useMixPanel: () => ({ trackEvent: jest.fn() }),
+}));
+jest.mock('@/hooks/useTransactions', () => ({
   useSetRedirectUri: () => jest.fn(),
 }));
 

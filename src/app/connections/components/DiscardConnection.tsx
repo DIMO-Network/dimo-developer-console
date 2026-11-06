@@ -5,7 +5,7 @@ import { Button } from '@/components/Button';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { OwnerAction } from '@/components/OwnerOnly';
 import { deleteConnection, type Connection } from '@/actions/connections';
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { invalidateMyConnectionsQuery } from '@/hooks/queries/useMyConnections';
 import { findMintedConnection } from '@/services/connectionLookup';
 import {

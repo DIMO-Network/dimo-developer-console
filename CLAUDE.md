@@ -5,9 +5,9 @@ Next.js developer console app. Powers console.dimo.org — manages developer lic
 ## Stack
 
 - Next.js (App Router), TypeScript, Tailwind CSS
-- Apollo Client (GraphQL), TanStack Query, TanStack Table
+- TanStack Query (console-api reads, and Identity API GraphQL through `useIdentityQuery`), TanStack Table
 - Auth: Google + GitHub OAuth via NextAuth
-- Wallet/crypto: Turnkey, ZeroDev, web3
+- Wallet/crypto: Turnkey, ZeroDev, viem
 - Testing: Jest + React Testing Library
 - Error tracking: Sentry
 
@@ -61,4 +61,5 @@ src/
 
 - App Router only — no Pages Router
 - Wallet interactions require browser environment; don't SSR crypto logic
-- GraphQL types are auto-generated — edit `.graphql` files, not generated output
+- GraphQL types are auto-generated (`npm run compile`): queries live in `gql()` calls in the code; never edit `src/gql/` by hand. Queries are typed strings run by `useIdentityQuery`; there is no Apollo
+- Don't import from a folder barrel (`@/hooks`, `@/hoc`): import the module. A barrel pulls its whole folder, wallet stack included, into every page that uses it

@@ -1,7 +1,7 @@
 'use client';
 import React, { type ReactNode } from 'react';
 
-import { withAuth } from '@/hoc';
+import { withAuth } from '@/hoc/AuthProvider';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
 

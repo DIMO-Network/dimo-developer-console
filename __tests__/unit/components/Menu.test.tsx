@@ -6,7 +6,9 @@ import { installFakeBroadcastChannel } from '@/utils/__fixtures__/fakeBroadcastC
 
 const mockLicenses = jest.fn();
 const mockTeam = jest.fn();
-jest.mock('@/hooks', () => ({ useHasDeveloperLicenses: () => mockLicenses() }));
+jest.mock('@/hooks/useHasDeveloperLicenses', () => ({
+  useHasDeveloperLicenses: () => mockLicenses(),
+}));
 jest.mock('@/hooks/useTeam', () => ({ useTeam: () => mockTeam() }));
 const replace = jest.fn();
 jest.mock('next/navigation', () => ({
@@ -14,7 +16,9 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ replace }),
 }));
 jest.mock('@/components/TeamSwitcher', () => ({ TeamSwitcher: () => null }));
-jest.mock('@/hoc', () => ({ withLoadingStatus: (c: unknown) => c }));
+jest.mock('@/hoc/withLoadingStatus', () => ({
+  withLoadingStatus: (c: unknown) => c,
+}));
 jest.mock('@/actions/user', () => ({ signOut: jest.fn() }));
 jest.mock('@/config/turnkey', () => ({
   turnkeyClient: { logout: jest.fn(async () => undefined) },

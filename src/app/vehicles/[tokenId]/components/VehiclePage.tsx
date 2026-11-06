@@ -1,6 +1,6 @@
 'use client';
 import { FC, useEffect, useMemo } from 'react';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import configuration from '@/config';
 import { VEHICLE_DETAIL } from '../queries';
 import { buildVehicleGraph } from '@/services/subjects/graph';
@@ -28,7 +28,9 @@ import './VehiclePage.css';
 const CHAIN_ID = Number(configuration.CONTRACT_NETWORK);
 
 export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
-  const { data, loading, error } = useQuery(VEHICLE_DETAIL, { variables: { tokenId } });
+  const { data, loading, error } = useIdentityQuery(VEHICLE_DETAIL, {
+    variables: { tokenId },
+  });
   const { currentUser } = useGlobalAccount();
   const { developerLicenses, loading: licenseQueryLoading } = useValidDeveloperLicenses();
   // The license query is skipped until the user's address is known, which

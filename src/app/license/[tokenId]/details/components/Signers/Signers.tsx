@@ -8,21 +8,21 @@ import { Modal } from '@/components/Modal';
 import { SignerFragmentFragment } from '@/gql/graphql';
 import * as Sentry from '@sentry/nextjs';
 import { get } from 'lodash';
+import { useDimoAuth } from '@/hooks/useDimoAuth';
 import {
-  useDimoAuth,
   useDisableSigner,
   useEnableSigner,
-  useEventEmitter,
-  useGlobalAccount,
-  useMixPanel,
   useSetRedirectUri,
-} from '@/hooks';
+} from '@/hooks/useTransactions';
+import { useEventEmitter } from '@/hooks/useEventEmitter';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
+import { useMixPanel } from '@/hooks/useMixPanel';
 import { getDeveloperJwt } from '@/services/dimoDev';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { APIKeyModal } from '@/app/license/[tokenId]/details/components/Signers/components/APIKeyModal';
 import { generateWallet } from '@/utils/wallet';
 
-import { withLoadingStatus } from '@/hoc';
+import { withLoadingStatus } from '@/hoc/withLoadingStatus';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
@@ -248,8 +248,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         tokenId: fragment.tokenId,
         signerAddress: account.address,
       });
-      // web3's account.address is typed string; it's always 0x-prefixed.
-      await recordKey(account.address as `0x${string}`, holders);
+      await recordKey(account.address, holders);
     } catch (error: unknown) {
       handleError(error);
     }

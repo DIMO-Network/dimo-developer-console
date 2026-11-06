@@ -1,7 +1,9 @@
 'use client';
 import { IAuth } from '@/types/auth';
 import { FC, ReactNode, useEffect, useState } from 'react';
-import { useAuth, useMixPanel, usePasskey } from '@/hooks';
+import { useAuth } from '@/hooks/useAuth';
+import { useMixPanel } from '@/hooks/useMixPanel';
+import { usePasskey } from '@/hooks/usePasskey';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 

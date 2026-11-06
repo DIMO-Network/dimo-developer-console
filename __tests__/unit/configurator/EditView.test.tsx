@@ -8,8 +8,8 @@ jest.mock('@/gql', () => ({
   gql: (s: unknown) => s,
   useFragment: (_d: unknown, f: unknown) => f,
 }));
-jest.mock('@apollo/client/react', () => ({
-  useQuery: () => ({
+jest.mock('@/hooks/useIdentityQuery', () => ({
+  useIdentityQuery: () => ({
     data: { developerLicense: { tokenId: 42, clientId: '0xclient' } },
     loading: false,
     error: undefined,

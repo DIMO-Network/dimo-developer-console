@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { useQuery as useRestQuery } from '@tanstack/react-query';
 import { fetchJson } from '@/utils/fetchJson';
 import { Loader } from '@/components/Loader';
@@ -25,7 +25,7 @@ export const View = ({
 }) => {
   const [tokenId, setTokenId] = useState<number>();
   const [configurationId, setConfigurationId] = useState<string>();
-  const { data, loading, error } = useQuery(DEVELOPER_LICENSE_INFO, {
+  const { data, loading, error } = useIdentityQuery(DEVELOPER_LICENSE_INFO, {
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
   });

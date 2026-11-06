@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 const mockProcess = jest.fn();
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useContractGA', () => ({
   useContractGA: () => ({ processTransactions: mockProcess }),
 }));
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));

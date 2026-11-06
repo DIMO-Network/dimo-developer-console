@@ -3,8 +3,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 const getGlobalAccountDeveloperJwt = jest.fn();
 const publishEvent = jest.fn();
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useDimoAuth', () => ({
   useDimoAuth: () => ({ getGlobalAccountDeveloperJwt }),
+}));
+jest.mock('@/hooks/useEventEmitter', () => ({
   useEventEmitter: () => ({ publishEvent }),
 }));
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));

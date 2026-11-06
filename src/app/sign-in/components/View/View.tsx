@@ -2,7 +2,10 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Anchor } from '@/components/Anchor';
-import { useAuth, useErrorHandler, useMixPanel, usePasskey } from '@/hooks';
+import { useAuth } from '@/hooks/useAuth';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { useMixPanel } from '@/hooks/useMixPanel';
+import { usePasskeyAvailability } from '@/hooks/usePasskeyAvailability';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 import { OtpInputForm, PasskeyLogin, SignInMethodForm } from '@/app/sign-in/components';
@@ -50,7 +53,7 @@ export const View = () => {
   useErrorHandler();
   const { setUser, completeExternalAuth } = useAuth();
   const { trackEvent } = useMixPanel();
-  const { isPasskeyAvailable } = usePasskey();
+  const { isPasskeyAvailable } = usePasskeyAvailability();
   const searchParams = useSearchParams();
   const router = useRouter();
   const authCode = searchParams.get('code') ?? '';

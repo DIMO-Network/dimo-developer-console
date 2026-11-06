@@ -13,9 +13,13 @@ jest.mock('@/services/zerodev', () => ({
   getPublicClient: jest.fn(),
 }));
 
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useMintVehicle', () => ({
   useMintVehicle: jest.fn(() => jest.fn()),
+}));
+jest.mock('@/hooks/useBurnVehicle', () => ({
   useBurnVehicle: jest.fn(() => jest.fn()),
+}));
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: jest.fn(() => ({ currentUser: null })),
 }));
 
@@ -30,7 +34,8 @@ const { recordSimulatedVehicle, registerVehicleWithSimulator } = jest.requireMoc
   '@/actions/simulatedVehicles',
 );
 const getSimulatedVehicles = jest.requireMock('@/utils/fetchJson').fetchJson;
-const { useMintVehicle, useGlobalAccount } = jest.requireMock('@/hooks');
+const { useMintVehicle } = jest.requireMock('@/hooks/useMintVehicle');
+const { useGlobalAccount } = jest.requireMock('@/hooks/useGlobalAccount');
 
 const mockClientId = '0x1234567890123456789012345678901234567890' as `0x${string}`;
 

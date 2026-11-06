@@ -6,11 +6,13 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/app',
 }));
 
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({
     currentUser: { role: 'OWNER' },
     getCurrentDcxBalance: jest.fn().mockResolvedValue(0),
   }),
+}));
+jest.mock('@/hooks/useUser', () => ({
   useUser: () => ({ data: { name: 'John Doe' } }),
 }));
 

@@ -3,14 +3,15 @@ import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
 import { useCallback } from 'react';
 import { assertUserOperation } from '@/utils/userOperation';
-import { useContractGA, useGlobalAccount } from '@/hooks';
-import { useSACD } from '@/hooks/useSACD';
+import { useContractGA } from './useContractGA';
+import { useGlobalAccount } from './useGlobalAccount';
+import { useSACD } from './useSACD';
 import DimoABI from '@/contracts/DimoTokenContract.json';
 import DimoCreditsABI from '@/contracts/DimoCreditABI.json';
 import DimoConnectionABI from '@/contracts/DimoConnectionABI.json';
 import SacdABI from '@/contracts/Sacd.json';
 import { IDesiredTokenAmount, ITokenBalance } from '@/types/wallet';
-import { utils } from 'web3';
+import { toWei } from '@/utils/wei';
 import { getCurrentDimoPrice } from '@/services/pricing';
 import { decodeHex } from '@/utils/formatHex';
 
@@ -114,7 +115,7 @@ const useMintDcx = () => {
             functionName: 'approve',
             args: [
               configuration.DCX_ADDRESS,
-              BigInt(utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether')),
+              toWei(Math.ceil(Number(desiredTokenAmount.dimo))),
             ],
           }),
         });
@@ -135,10 +136,7 @@ const useMintDcx = () => {
           functionName: CONTRACT_METHODS.MINT_IN_DIMO,
           args: [
             currentUser!.smartContractAddress,
-            utils.toWei(
-              Math.ceil(missingAmount / Number(desiredTokenAmount.dimoCost)),
-              'ether',
-            ),
+            toWei(Math.ceil(missingAmount / Number(desiredTokenAmount.dimoCost))),
           ],
         }),
       });
@@ -167,7 +165,7 @@ export const usePayLicenseFee = () => {
           functionName: 'approve',
           args: [
             configuration.DLC_ADDRESS,
-            BigInt(utils.toWei(Math.ceil(Number(desiredTokenAmount.dimo)), 'ether')),
+            toWei(Math.ceil(Number(desiredTokenAmount.dimo))),
           ],
         }),
       },
@@ -262,7 +260,7 @@ export const useMintConnection = () => {
       // Calculate required DIMO tokens: $1 / DIMO price + 5% buffer for price flux.
       const baseDimoAmount = targetUsdAmount / dimoPrice;
       const requiredDIMO = baseDimoAmount * (1 + bufferPercentage);
-      const requiredDIMOInWei = BigInt(utils.toWei(requiredDIMO.toString(), 'ether'));
+      const requiredDIMOInWei = toWei(requiredDIMO.toString());
 
       if (!currentSession) throw new Error('Web3 connection failed');
       if (!currentUser) throw new Error('User not found');

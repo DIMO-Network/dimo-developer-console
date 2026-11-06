@@ -2,7 +2,7 @@
 import { FC, useMemo, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { PaginatedTableIdentityAPI } from '@/components/Table';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { useQuery as useRestQuery } from '@tanstack/react-query';
 import { gql } from '@/gql';
 import { Loader } from '@/components/Loader';
@@ -79,11 +79,11 @@ export const VehicleDetailsTable: FC<IProps> = ({
 }) => {
   const router = useRouter();
   const { isOwner } = useTeam();
-  const { data, refetch, loading, error } = useQuery(VEHICLES_BY_CLIENT_ID, {
+  const { data, refetch, loading, error } = useIdentityQuery(VEHICLES_BY_CLIENT_ID, {
     variables: { clientId, owner: owner || null, first: PAGE_SIZE },
     skip: tokenIdSearch !== null,
   });
-  const single = useQuery(VEHICLE_FOR_LICENSE, {
+  const single = useIdentityQuery(VEHICLE_FOR_LICENSE, {
     variables: { tokenId: tokenIdSearch ?? 0, clientId },
     skip: tokenIdSearch === null,
   });
@@ -203,7 +203,12 @@ export const VehicleDetailsTable: FC<IProps> = ({
           },
           { showSources, showLastSeen, clientId, canRenounce: isOwner },
         )}
-        onPaginationChange={refetch}
+        onPaginationChange={(page) =>
+          refetch(page).catch((error: unknown) => {
+            toast.error("Couldn't load that page. Try again.");
+            throw error;
+          })
+        }
         rowCount={visibleCount}
         pageInfo={data.vehicles.pageInfo}
         pageSize={PAGE_SIZE}

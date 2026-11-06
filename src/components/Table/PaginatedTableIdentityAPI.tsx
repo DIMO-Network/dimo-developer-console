@@ -17,7 +17,7 @@ import { paginationSummary } from './paginationSummary';
 import { Column } from './Column';
 import { Cell } from './Cell';
 import './Table.css';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 declare module '@tanstack/react-table' {
   // A column's className lands on its <th> and every <td>.
@@ -39,12 +39,14 @@ const columnClass = (def: { meta?: { className?: string } }) => def.meta?.classN
 interface PaginatedTableProps<TData extends RowData> {
   columns: LegacyColumnDef<TData>[];
   data: TData[];
+  // May return a promise: the page number moves when it resolves, and stays
+  // when it rejects.
   onPaginationChange: (pageChangeArgs: {
     first?: number | null;
     last?: number | null;
     before?: string | null;
     after?: string | null;
-  }) => void;
+  }) => void | Promise<unknown>;
   rowCount: number;
   loading?: boolean;
   pageInfo: { startCursor?: string | null; endCursor?: string | null };
@@ -73,24 +75,41 @@ export const PaginatedTableIdentityAPI = <TData extends RowData>({
     pageIndex: 0,
     pageSize,
   });
+  // A page turns when its rows are in. Until then the buttons do nothing (a
+  // second click would ask for the same cursor and count a page twice), and
+  // a page that fails to load leaves the table where it was.
+  // The ref stops a second click in the same tick, before React re-renders;
+  // the state disables the buttons.
+  const turning = useRef(false);
+  const [isTurning, setIsTurning] = useState(false);
   const handlePaginationChange: OnChangeFn<PaginationState> = (updater) => {
+    if (turning.current) return;
     const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
-    if (newPagination.pageIndex > pagination.pageIndex) {
-      onPaginationChange({
-        after: pageInfo.endCursor,
-        first: pageSize,
-        last: null,
-        before: null,
-      });
-    } else if (newPagination.pageIndex < pagination.pageIndex) {
-      onPaginationChange({
-        before: pageInfo.startCursor,
-        last: pageSize,
-        after: null,
-        first: null,
-      });
+    const forward = newPagination.pageIndex > pagination.pageIndex;
+    const back = newPagination.pageIndex < pagination.pageIndex;
+    if (!forward && !back) {
+      setPagination(newPagination);
+      return;
     }
-    setPagination(newPagination);
+    turning.current = true;
+    setIsTurning(true);
+    // Called inside the chain, so a handler that throws is a failure too.
+    Promise.resolve()
+      .then(() =>
+        onPaginationChange(
+          forward
+            ? { after: pageInfo.endCursor, first: pageSize, last: null, before: null }
+            : { before: pageInfo.startCursor, last: pageSize, after: null, first: null },
+        ),
+      )
+      .then(
+        () => setPagination(newPagination),
+        () => undefined,
+      )
+      .finally(() => {
+        turning.current = false;
+        setIsTurning(false);
+      });
   };
   const table = useLegacyTable({
     data,
@@ -151,7 +170,7 @@ export const PaginatedTableIdentityAPI = <TData extends RowData>({
           <Button
             variant="secondary"
             size="icon"
-            disabled={!table.getCanPreviousPage() || loading}
+            disabled={!table.getCanPreviousPage() || loading || isTurning}
             onClick={() => table.previousPage()}
           >
             <ChevronLeftIcon className={'w-4 h-4'} />
@@ -160,7 +179,7 @@ export const PaginatedTableIdentityAPI = <TData extends RowData>({
           <Button
             variant="secondary"
             size="icon"
-            disabled={!table.getCanNextPage() || loading}
+            disabled={!table.getCanNextPage() || loading || isTurning}
             onClick={() => table.nextPage()}
           >
             <ChevronRightIcon className={'w-4 h-4'} />

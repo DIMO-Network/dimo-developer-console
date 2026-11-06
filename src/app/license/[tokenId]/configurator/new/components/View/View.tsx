@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { Loader } from '@/components/Loader';
 import { useEffect, useState } from 'react';
 import { PageSubtitle } from '@/components/PageSubtitle';
@@ -16,7 +16,7 @@ import Link from 'next/link';
 
 export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   const [tokenId, setTokenId] = useState<number>();
-  const { data, loading, error } = useQuery(DEVELOPER_LICENSE_INFO, {
+  const { data, loading, error } = useIdentityQuery(DEVELOPER_LICENSE_INFO, {
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
   });

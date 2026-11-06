@@ -10,7 +10,7 @@ import { Modal } from '@/components/Modal';
 import { toast } from 'sonner';
 import { Title } from '@/components/Title';
 import { TokenInput } from '@/components/TokenInput';
-import { useContractGA } from '@/hooks';
+import { useContractGA } from '@/hooks/useContractGA';
 import * as Sentry from '@sentry/nextjs';
 
 import configuration from '@/config';

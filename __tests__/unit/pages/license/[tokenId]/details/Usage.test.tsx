@@ -1,8 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 
-jest.mock('@/hooks', () => ({
-  ...jest.requireActual('@/hooks/useCreditTracker'),
-  useCreditTracker: jest.requireActual('@/hooks/useCreditTracker').useCreditTracker,
+jest.mock('@/hooks/useEventEmitter', () => ({
   useEventEmitter: () => ({ eventData: null }),
 }));
 jest.mock('@/hooks/useGetDevJwts', () => ({

@@ -12,9 +12,8 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/vehicles/190231',
   useSearchParams: () => params,
 }));
-jest.mock('@apollo/client/react', () => ({
-  ...jest.requireActual('@apollo/client/react'),
-  useQuery: jest.fn(),
+jest.mock('@/hooks/useIdentityQuery', () => ({
+  useIdentityQuery: jest.fn(),
 }));
 jest.mock('@/components/Webhooks/hooks/useValidDeveloperLicenses', () => ({
   useValidDeveloperLicenses: jest.fn(),
@@ -32,7 +31,7 @@ jest.mock('@/components/GenerateDevJWT', () => ({
   GenerateDevJWT: () => <button>Generate developer JWT</button>,
 }));
 
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery as useQuery } from '@/hooks/useIdentityQuery';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';

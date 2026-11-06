@@ -3,11 +3,11 @@ import * as Sentry from '@sentry/nextjs';
 import React, { useState, type FC, useContext } from 'react';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { Table } from '@/components/Table';
-import { useSetRedirectUri } from '@/hooks';
+import { useSetRedirectUri } from '@/hooks/useTransactions';
 import { Button } from '@/components/Button';
 import { DeleteConfirmationModal } from '../DeleteConfirmationModal';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
-import { withLoadingStatus } from '@/hoc';
+import { withLoadingStatus } from '@/hoc/withLoadingStatus';
 import { CopyButton } from '@/components/CopyButton';
 
 import '@/components/Button/Button.css';

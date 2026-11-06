@@ -1,7 +1,7 @@
 'use client';
 import { type FC, useEffect } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useUser } from '@/hooks';
+import { useUser } from '@/hooks/useUser';
 import Image from 'next/image';
 import Link from 'next/link';
 import './View.css';

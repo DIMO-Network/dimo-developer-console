@@ -3,7 +3,7 @@ import { renderHook } from '@testing-library/react';
 const mockProcess = jest.fn();
 const mockBalance = jest.fn();
 // The @/hooks barrel pulls Turnkey; these hooks only need these.
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useContractGA', () => ({
   useContractGA: () => ({
     processTransactions: mockProcess,
     checkEnoughBalance: mockBalance,
@@ -14,6 +14,8 @@ jest.mock('@/hooks', () => ({
       dimoCost: 1,
     }),
   }),
+}));
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({
     currentUser: { smartContractAddress: '0x1' },
     getCurrentDcxBalance: async () => 0,

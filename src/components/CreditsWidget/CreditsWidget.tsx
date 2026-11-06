@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { FC, useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useGlobalAccount } from '@/hooks';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useTeam } from '@/hooks/useTeam';
 import { formatToCurrency } from '@/utils/formatBalance';
 import * as Sentry from '@sentry/nextjs';

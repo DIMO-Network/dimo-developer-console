@@ -8,10 +8,8 @@ import {
   SESSION_VERDICT_MAX_AGE,
   sessionVerdictFor,
 } from '@/utils/middlewareUtils';
-import { getUserByToken } from './services/user';
-import { LoggedUser } from '@/utils/loggedUser';
+import { checkSession } from '@/services/sessionCheck';
 import configuration from '@/config';
-import { getUserSubOrganization } from '@/services/globalAccount';
 import { AxiosError } from 'axios';
 import * as Sentry from '@sentry/nextjs';
 import type { JWTPayload } from 'jose';
@@ -91,10 +89,6 @@ const rememberVerdict = (
   return response;
 };
 
-// Navigations without a fresh session verdict wait on this lookup. Edge stopped the
-// middleware at about 25 seconds; a Node function would wait out the client's minutes.
-const ACCOUNT_LOOKUP_TIMEOUT_MS = 25_000;
-
 const validatePrivateSession = async (request: NextRequest, token: string) => {
   const isLoginPage = LOGIN_PAGES.includes(request.nextUrl.pathname);
   const verdict = await sessionVerdictFor(token);
@@ -108,26 +102,18 @@ const validatePrivateSession = async (request: NextRequest, token: string) => {
   }
 
   console.info('Validating private session', request.nextUrl.pathname);
-  const user = await getUserByToken();
-  // Every console user signs in with their own global account; team members
-  // are no longer represented by the company owner's account.
-  const subOrganization = await getUserSubOrganization(user.email, {
-    timeout: ACCOUNT_LOOKUP_TIMEOUT_MS,
-  });
-  if (!subOrganization) {
+  const check = await checkSession();
+  if (check.status === 'no-account') {
     Sentry.captureMessage('Suborganization not found');
     return NextResponse.redirect(new URL('/sign-in', request.url), {
       status: 307,
     });
   }
 
-  const loggedUser = new LoggedUser(user, subOrganization);
-  const flow = request.nextUrl.searchParams.get('flow');
-
-  if (!loggedUser.isCompliant) {
-    if (flow) return NextResponse.next();
+  if (check.status === 'unfinished') {
+    if (request.nextUrl.searchParams.get('flow')) return NextResponse.next();
     return NextResponse.redirect(
-      buildRedirectUrl(`/sign-up?flow=${loggedUser.missingFlow}`, request),
+      buildRedirectUrl(`/sign-up?flow=${check.missingFlow}`, request),
       {
         status: 307,
       },

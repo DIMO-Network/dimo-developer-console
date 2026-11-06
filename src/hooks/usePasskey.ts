@@ -3,38 +3,10 @@ import config from '@/config';
 import { turnkeyConfig } from '@/config/turnkey';
 import { IPasskeyAttestation } from '@/types/wallet';
 import { getWebAuthnAttestation } from '@turnkey/http';
-import { useCallback, useLayoutEffect, useState } from 'react';
-import * as Sentry from '@sentry/nextjs';
+import { usePasskeyAvailability } from './usePasskeyAvailability';
 
 export const usePasskey = () => {
-  const [isPasskeyAvailable, setIsPasskeyAvailable] = useState<boolean | null>(null);
-
-  const validatePasskeyAvailability = useCallback(async (): Promise<boolean> => {
-    // Availability of "window.PublicKeyCredential" means WebAuthn is usable.
-    if (typeof window === 'undefined' || !window.PublicKeyCredential) return false;
-    try {
-      // "isUserVerifyingPlatformAuthenticatorAvailable" means the feature detection is usable.
-      if (!PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)
-        return false;
-
-      // "isConditionalMediationAvailable" means the feature detection is usable.
-      if (!PublicKeyCredential.isConditionalMediationAvailable) return false;
-
-      // Check if user verifying platform authenticator is available.
-      const results = await Promise.allSettled([
-        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable?.(),
-        PublicKeyCredential.isConditionalMediationAvailable?.(),
-      ]);
-
-      return results.every(
-        (result: PromiseSettledResult<boolean>) =>
-          result.status === 'fulfilled' && result.value,
-      );
-    } catch (e: unknown) {
-      Sentry.captureException(e);
-      return false;
-    }
-  }, []);
+  const { isPasskeyAvailable } = usePasskeyAvailability();
 
   const generateRandomBuffer = (): ArrayBuffer => {
     const arr = new Uint8Array(32);
@@ -100,12 +72,6 @@ export const usePasskey = () => {
 
     return { attestation, encodedChallenge };
   };
-
-  useLayoutEffect(() => {
-    validatePasskeyAvailability().then((isAvailable) => {
-      setIsPasskeyAvailable(isAvailable);
-    });
-  }, []);
 
   return { isPasskeyAvailable, getNewUserPasskey };
 };

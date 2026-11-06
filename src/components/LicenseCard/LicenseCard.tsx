@@ -3,7 +3,7 @@ import { Card } from '@/components/Card';
 import classNames from 'classnames';
 import { Anchor } from '@/components/Anchor';
 import Link from 'next/link';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { useQuery as useRestQuery } from '@tanstack/react-query';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { ContentCopyIcon, WarningAmberIcon } from '@/components/Icons';
@@ -36,7 +36,7 @@ export const LicenseCard = (props: {
 }) => {
   const license = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, props.license);
   const router = useRouter();
-  const { data: vehicleData, loading: vehicleLoading } = useQuery(
+  const { data: vehicleData, loading: vehicleLoading } = useIdentityQuery(
     GET_VEHICLE_COUNT_BY_CLIENT_ID,
     {
       variables: { clientId: license.clientId },

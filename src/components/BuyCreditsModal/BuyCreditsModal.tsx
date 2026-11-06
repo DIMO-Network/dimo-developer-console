@@ -11,15 +11,16 @@ import { MoneyField } from '@/components/MoneyField';
 import { useForm } from 'react-hook-form';
 
 import { TextError } from '@/components/TextError';
-import { useContractGA, useGlobalAccount, useUser } from '@/hooks';
+import { useContractGA } from '@/hooks/useContractGA';
+import { useGlobalAccount } from '@/hooks/useGlobalAccount';
+import { useUser } from '@/hooks/useUser';
 import { useSACD } from '@/hooks/useSACD';
 import { Toggle } from '@/components/Toggle';
 import SacdAbi from '@/contracts/Sacd.json';
 import config from '@/config';
 
 import './BuyCreditsModal.css';
-import { Abi, encodeFunctionData, zeroAddress } from 'viem';
-import { ethers } from 'ethers';
+import { Abi, encodeFunctionData, stringToHex, zeroAddress } from 'viem';
 
 import { TextField } from '@/components/TextField';
 import { isValidAddress } from '@ethereumjs/util';
@@ -90,7 +91,7 @@ export const BuyCreditsModal: FC = () => {
       }
 
       const fiveMinutesFromNow = Date.now() + 5 * 60 * 1000;
-      const encodedCurrency = ethers.encodeBytes32String('USD').slice(0, 8);
+      const encodedCurrency = stringToHex('USD', { size: 32 }).slice(0, 8);
 
       const sacdTransaction = {
         to: config.DIMO_SACD_ADDRESS,

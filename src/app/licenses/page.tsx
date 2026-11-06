@@ -1,6 +1,6 @@
 'use client';
 import { Suspense } from 'react';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { gql } from '@/gql';
 import { useTeam } from '@/hooks/useTeam';
 import { Loader } from '@/components/Loader';
@@ -16,7 +16,7 @@ const GET_ALL_LICENSES = gql(`
 
 const LicensesView = () => {
   const { ownerAddress } = useTeam();
-  const { data, loading } = useQuery(GET_ALL_LICENSES, {
+  const { data, loading } = useIdentityQuery(GET_ALL_LICENSES, {
     variables: { owner: ownerAddress ?? '' },
     skip: !ownerAddress,
   });

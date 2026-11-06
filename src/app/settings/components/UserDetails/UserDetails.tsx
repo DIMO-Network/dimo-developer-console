@@ -1,7 +1,7 @@
 import React, { type FC } from 'react';
 import { Section } from '@/components/Section';
 import { SectionHeader } from '@/components/Section/Header';
-import { useUser } from '@/hooks';
+import { useUser } from '@/hooks/useUser';
 
 import './UserDetails.css';
 

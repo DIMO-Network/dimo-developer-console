@@ -2,7 +2,9 @@ import { render, waitFor } from '@testing-library/react';
 
 const replace = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
-jest.mock('@/hooks', () => ({ useMixPanel: () => ({ identifyUser: jest.fn() }) }));
+jest.mock('@/hooks/useMixPanel', () => ({
+  useMixPanel: () => ({ identifyUser: jest.fn() }),
+}));
 jest.mock('@/actions/user', () => ({ endSession: jest.fn() }));
 jest.mock('@/config/turnkey', () => ({
   turnkeyClient: { logout: jest.fn(async () => undefined) },

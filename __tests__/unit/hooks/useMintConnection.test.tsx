@@ -8,8 +8,10 @@ const mockProcess = jest.fn();
 const mockDimoBalance = jest.fn();
 const mockSign = jest.fn();
 // The @/hooks barrel pulls Turnkey; this hook only needs these.
-jest.mock('@/hooks', () => ({
+jest.mock('@/hooks/useContractGA', () => ({
   useContractGA: () => ({ processTransactions: mockProcess }),
+}));
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({
     currentUser: { smartContractAddress: WALLET },
     getCurrentDimoBalance: mockDimoBalance,

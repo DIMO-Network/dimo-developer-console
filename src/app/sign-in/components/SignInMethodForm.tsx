@@ -6,8 +6,8 @@ import { Button } from '@/components/Button';
 import { isEmpty } from 'lodash';
 import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useAuth } from '@/hooks';
-import { isEmail } from 'validator';
+import { useAuth } from '@/hooks/useAuth';
+import isEmail from 'validator/lib/isEmail';
 
 interface IProps {
   handleLogin: (email: string) => Promise<void>;
@@ -90,7 +90,13 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
           <div className="flex flex-row">
             <p className="terms-caption">
               Lost your passkey?{' '}
-              <Anchor href="/email-recovery" target="_self" className="grey underline">
+              {/* Rarely used: not worth a prefetch while sign-in loads. */}
+              <Anchor
+                href="/email-recovery"
+                prefetch={false}
+                target="_self"
+                className="grey underline"
+              >
                 Reset with your email
               </Anchor>
             </p>

@@ -1,6 +1,6 @@
 import { Anchor } from '@/components/Anchor';
 import { TextField } from '@/components/TextField';
-import { useAuth } from '@/hooks';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/Button';
 import { useState, useRef, useEffect, FC } from 'react';
 import { captureException } from '@sentry/nextjs';

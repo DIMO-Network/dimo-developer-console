@@ -2,7 +2,7 @@
 import React, { ComponentType } from 'react';
 
 import { CreditsContext } from '@/context/creditsContext';
-import { useCredits } from '@/hooks';
+import { useCredits } from '@/hooks/useCredits';
 import { BuyCreditsModal } from '@/components/BuyCreditsModal';
 
 export const withCredits = <P extends object>(WrappedComponent: ComponentType<P>) => {

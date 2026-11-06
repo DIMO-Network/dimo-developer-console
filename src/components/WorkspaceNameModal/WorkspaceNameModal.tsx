@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { Title } from '@/components/Title';
-import { useContractGA } from '@/hooks';
+import { useContractGA } from '@/hooks/useContractGA';
 import { isLicenseAliasTooLong, LICENSE_ALIAS_TOO_LONG } from '@/utils/licenseAlias';
 import { assertUserOperation } from '@/utils/userOperation';
 

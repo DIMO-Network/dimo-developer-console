@@ -2,7 +2,9 @@ import { render, waitFor } from '@testing-library/react';
 
 let params = new URLSearchParams();
 jest.mock('next/navigation', () => ({ useSearchParams: () => params }));
-jest.mock('@/hooks', () => ({ usePasskey: () => ({ getNewUserPasskey: jest.fn() }) }));
+jest.mock('@/hooks/usePasskey', () => ({
+  usePasskey: () => ({ getNewUserPasskey: jest.fn() }),
+}));
 jest.mock('@/actions/user', () => ({
   getUserInformation: jest.fn(async () => {
     throw new Error('stop after the lookup');

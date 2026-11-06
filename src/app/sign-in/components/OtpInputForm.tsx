@@ -3,7 +3,7 @@
 import { Anchor } from '@/components/Anchor';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
-import { useAuth } from '@/hooks';
+import { useAuth } from '@/hooks/useAuth';
 import { FC, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { captureException } from '@sentry/nextjs';

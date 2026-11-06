@@ -7,7 +7,8 @@ import {
   Control,
   UseFormRegister,
 } from 'react-hook-form';
-import { isURL, isEmpty } from 'validator';
+import isURL from 'validator/lib/isURL';
+import isEmpty from 'validator/lib/isEmpty';
 
 import { Button } from '@/components/Button';
 import { DEVELOPER_TYPES, REGIONS } from '@/config/default';

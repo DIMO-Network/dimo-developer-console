@@ -6,7 +6,9 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
-jest.mock('@/hooks', () => ({ useGlobalAccount: () => ({ currentUser: undefined }) }));
+jest.mock('@/hooks/useGlobalAccount', () => ({
+  useGlobalAccount: () => ({ currentUser: undefined }),
+}));
 jest.mock('sonner', () => ({ toast: { success: jest.fn() } }));
 
 import ConnectionsList from '@/app/connections/components/View/View';
