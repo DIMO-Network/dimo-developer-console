@@ -1,6 +1,6 @@
 'use client';
 import { useMemo } from 'react';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { DEVELOPER_LICENSES_FOR_WEBHOOKS } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useTeam } from '@/hooks/useTeam';
 import type { DeveloperLicenseForWebhook } from '@/types/webhook';
@@ -27,10 +27,13 @@ const toTeamLicense = (node: DeveloperLicenseForWebhook): TeamLicense => ({
 // useValidDeveloperLicenses, so one refetch updates both.
 export const useTeamLicenses = () => {
   const { ownerAddress } = useTeam();
-  const { data, loading, error, refetch } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
-    variables: { owner: ownerAddress ?? '' },
-    skip: !ownerAddress,
-  });
+  const { data, loading, error, refetch } = useIdentityQuery(
+    DEVELOPER_LICENSES_FOR_WEBHOOKS,
+    {
+      variables: { owner: ownerAddress ?? '' },
+      skip: !ownerAddress,
+    },
+  );
   const licenses = useMemo(
     () => (error ? [] : (data?.developerLicenses.nodes ?? []).map(toTeamLicense)),
     [data, error],

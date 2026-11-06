@@ -2,7 +2,7 @@
 
 import { ReactNode, use } from 'react';
 import { gql } from '@/gql';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { Header } from '@/app/license/vehicles/[clientId]/components/Header';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { Loader } from '@/components/Loader';
@@ -26,9 +26,12 @@ export default function DeveloperLicenseDetailsPageLayout({
   params: Promise<{ clientId: string }>;
 }) {
   const { clientId } = use(params);
-  const { data, loading, error } = useQuery(DEVELOPER_LICENSE_BY_CLIENT_ID_SUMMARY, {
-    variables: { clientId },
-  });
+  const { data, loading, error } = useIdentityQuery(
+    DEVELOPER_LICENSE_BY_CLIENT_ID_SUMMARY,
+    {
+      variables: { clientId },
+    },
+  );
   const router = useRouter();
 
   const onBack = () => {

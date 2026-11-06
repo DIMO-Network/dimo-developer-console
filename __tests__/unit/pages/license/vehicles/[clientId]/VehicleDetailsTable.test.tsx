@@ -3,9 +3,8 @@ import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const useQuery = jest.fn();
-jest.mock('@apollo/client/react', () => ({
-  ...jest.requireActual('@apollo/client/react'),
-  useQuery: (...args: unknown[]) => useQuery(...args),
+jest.mock('@/hooks/useIdentityQuery', () => ({
+  useIdentityQuery: (...args: unknown[]) => useQuery(...args),
 }));
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
 jest.mock('@/utils/fetchJson', () => ({ fetchJson: jest.fn().mockResolvedValue([]) }));

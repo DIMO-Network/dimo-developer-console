@@ -6,8 +6,8 @@ import { CodeFileLoader } from '@graphql-tools/code-file-loader';
 import codegenConfig from '@/codegen';
 
 // graphql-codegen validates every document it finds against Identity's schema. A
-// test's own query (src/hoc/__tests__/withApollo.test.tsx has one) fails that check,
-// and `npm run compile`, which `npm run dev` runs first, exits without generating.
+// test's own made-up query fails that check, and `npm run compile`, which
+// `npm run dev` runs first, exits without generating.
 describe('codegen documents', () => {
   it('reads app code only, never test files', async () => {
     const sources = await loadDocuments(codegenConfig.documents as string[], {

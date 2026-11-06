@@ -1,11 +1,10 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 
-jest.mock('@apollo/client/react', () => ({
-  ...jest.requireActual('@apollo/client/react'),
-  useQuery: jest.fn(),
+jest.mock('@/hooks/useIdentityQuery', () => ({
+  useIdentityQuery: jest.fn(),
 }));
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery as useQuery } from '@/hooks/useIdentityQuery';
 import { SharingPanel } from '@/app/vehicles/[tokenId]/components/tabs/SharingPanel';
 import type { VehicleDetail } from '@/services/subjects/graph';
 

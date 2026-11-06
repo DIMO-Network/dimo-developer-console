@@ -1,13 +1,10 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { MockedProvider } from '@apollo/client/testing/react';
+import { mockIdentityApi, queryClientWrapper } from '@/utils/__fixtures__/identityApi';
 
 jest.mock('@/hooks/useTeam', () => ({ useTeam: jest.fn() }));
 import { useTeam } from '@/hooks/useTeam';
-import {
-  DEVELOPER_LICENSES_FOR_WEBHOOKS,
-  useValidDeveloperLicenses,
-} from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
+import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 
 const ACME = '0x2b6e1c4f8a0d3e5b7c9a1d2e3f4a5b6c7d8e9f0a';
 const node = (tokenId: number, uris: string[], signers: string[]) => ({
@@ -25,22 +22,18 @@ const node = (tokenId: number, uris: string[], signers: string[]) => ({
     nodes: signers.map((address) => ({ __typename: 'Signer', address })),
   },
 });
-const mocks = [
-  {
-    request: { query: DEVELOPER_LICENSES_FOR_WEBHOOKS, variables: { owner: ACME } },
-    result: {
-      data: {
-        developerLicenses: {
-          __typename: 'DeveloperLicenseConnection',
-          nodes: [node(42, ['https://x'], ['0xABC']), node(43, [], [])],
-        },
-      },
+const answer = () => ({
+  data: {
+    developerLicenses: {
+      nodes: [node(42, ['https://x'], ['0xABC']), node(43, [], [])],
     },
   },
-];
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <MockedProvider mocks={mocks}>{children}</MockedProvider>
-);
+});
+let wrapper: React.FC<{ children: React.ReactNode }>;
+beforeEach(() => {
+  mockIdentityApi(answer);
+  wrapper = queryClientWrapper().Wrapper;
+});
 
 describe('useValidDeveloperLicenses', () => {
   it('reports a license left out for having no redirect URI', async () => {

@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react';
 
 const mockQuery = jest.fn();
-jest.mock('@apollo/client/react', () => ({ useQuery: () => mockQuery() }));
+jest.mock('@/hooks/useIdentityQuery', () => ({ useIdentityQuery: () => mockQuery() }));
 jest.mock('@/hooks/useTeam', () => ({
   useTeam: () => ({ isOwner: true, ownerAddress: '0xABC' }),
 }));

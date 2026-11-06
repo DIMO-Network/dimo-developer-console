@@ -16,8 +16,11 @@ const config: CodegenConfig = {
       },
       // client-preset 6 types custom scalars (Address, BigInt, Time…) as
       // unknown; keep them as before.
+      // Documents as typed strings, sent as they are (fetchIdentity), as the
+      // mobile app does: no GraphQL client or parser in the browser.
       config: {
         defaultScalarType: 'any',
+        documentMode: 'string',
       },
     },
   },

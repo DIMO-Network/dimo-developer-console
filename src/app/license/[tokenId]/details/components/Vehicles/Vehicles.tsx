@@ -1,7 +1,7 @@
 'use client';
 import React, { FC } from 'react';
 import { FragmentType, gql, useFragment } from '@/gql';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { Loader } from '@/components/Loader';
 import Link from 'next/link';
 import { Button } from '@/components/Button';
@@ -32,7 +32,7 @@ interface IProps {
 
 export const Vehicles: FC<IProps> = ({ license }) => {
   const fragment = useFragment(DEVELOPER_LICENSE_VEHICLES_FRAGMENT, license);
-  const { data, loading, error } = useQuery(GET_VEHICLE_COUNT_BY_CLIENT_ID, {
+  const { data, loading, error } = useIdentityQuery(GET_VEHICLE_COUNT_BY_CLIENT_ID, {
     variables: { clientId: fragment.clientId },
   });
   const router = useRouter();

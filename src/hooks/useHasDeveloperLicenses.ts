@@ -1,9 +1,9 @@
 'use client';
 
-import { DocumentNode } from '@apollo/client';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { useTeam } from '@/hooks/useTeam';
 import { gql } from '@/gql';
+import type { TypedDocumentString } from '@/gql/graphql';
 
 // Query to check if user has any developer licenses
 export const CHECK_HAS_DEVELOPER_LICENSES = gql(`
@@ -19,12 +19,16 @@ export const useHasDeveloperLicenses = () => {
   const hasAddress = !!ownerAddress;
 
   // Read past the fragment's masking: only the count is needed here.
-  const { data, loading, error } = useQuery<{
-    developerLicenses?: { totalCount?: number };
-  }>(CHECK_HAS_DEVELOPER_LICENSES as DocumentNode, {
-    variables: { owner: ownerAddress ?? '' },
-    skip: !hasAddress,
-  });
+  const { data, loading, error } = useIdentityQuery(
+    CHECK_HAS_DEVELOPER_LICENSES as unknown as TypedDocumentString<
+      { developerLicenses?: { totalCount?: number } },
+      { owner: string }
+    >,
+    {
+      variables: { owner: ownerAddress ?? '' },
+      skip: !hasAddress,
+    },
+  );
 
   // null means unknown: no owner yet, still loading, a failed query or no data.
   // A failed request leaves data undefined, which must not read as "no licenses".

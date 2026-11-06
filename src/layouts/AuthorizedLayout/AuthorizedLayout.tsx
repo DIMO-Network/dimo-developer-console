@@ -3,7 +3,6 @@ import React, { useContext } from 'react';
 import { MenuButton } from '@/components/Menu/MenuButton';
 import { withCredits } from '@/hoc/withCredits';
 import { withGlobalAccounts } from '@/hoc/GlobalAccountProvider';
-import { withApollo } from '@/hoc/withApollo';
 import { withAccountInformation } from '@/hoc/withAccountInformation';
 import { withLayout } from '@/hoc/withLayout';
 import { withTeams } from '@/hoc/TeamProvider';
@@ -18,11 +17,9 @@ const Providers = withGlobalAccounts(
   withTeams(
     withLayout(
       withCredits(
-        withApollo(
-          withAccountInformation(({ children }: { children: React.ReactNode }) => (
-            <>{children}</>
-          )),
-        ),
+        withAccountInformation(({ children }: { children: React.ReactNode }) => (
+          <>{children}</>
+        )),
       ),
     ),
   ),

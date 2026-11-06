@@ -4,7 +4,7 @@ import { Section, SectionHeader } from '@/components/Section';
 import { VehicleDetailsTable } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable';
 import { use } from 'react';
 import { gql } from '@/gql';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { Title } from '@/components/Title';
 import configuration from '@/config';
 import Link from 'next/link';
@@ -24,10 +24,10 @@ const DEVELOPER_LICENSE_VEHICLE_DETAILS = gql(`
 
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const { clientId } = use(params);
-  const { data } = useQuery(DEVELOPER_LICENSE_VEHICLE_DETAILS, {
+  const { data } = useIdentityQuery(DEVELOPER_LICENSE_VEHICLE_DETAILS, {
     variables: { clientId },
   });
-  const { data: defsData } = useQuery(VEHICLES_BY_CLIENT_ID, {
+  const { data: defsData } = useIdentityQuery(VEHICLES_BY_CLIENT_ID, {
     variables: { clientId, first: 100 },
     skip: !IS_TESTNET,
   });

@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 const mockQuery = jest.fn();
 const mockIsOwner = jest.fn();
 let mockSearch = '';
-jest.mock('@apollo/client/react', () => ({ useQuery: () => mockQuery() }));
+jest.mock('@/hooks/useIdentityQuery', () => ({ useIdentityQuery: () => mockQuery() }));
 jest.mock('@/hooks/useIsLicenseOwner', () => ({
   useIsLicenseOwner: () => mockIsOwner(),
 }));

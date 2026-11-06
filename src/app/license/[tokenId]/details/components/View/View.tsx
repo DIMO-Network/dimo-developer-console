@@ -4,7 +4,7 @@ import { PencilIcon } from '@heroicons/react/16/solid';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { gql, useFragment } from '@/gql';
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import { CopyableRow } from '@/components/CopyableRow';
 import { WorkspaceNameModal } from '@/components/WorkspaceNameModal';
@@ -45,7 +45,7 @@ const GET_DEVELOPER_LICENSE = gql(`
 
 export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   const [tokenId, setTokenId] = useState<number>();
-  const { data, loading, refetch, error } = useQuery(GET_DEVELOPER_LICENSE, {
+  const { data, loading, refetch, error } = useIdentityQuery(GET_DEVELOPER_LICENSE, {
     variables: { tokenId: tokenId as number },
     skip: !tokenId,
   });
@@ -216,7 +216,7 @@ const VehicleCountStat = ({
   clientId: string;
   onViewVehicles: () => void;
 }) => {
-  const { data, loading } = useQuery(GET_VEHICLE_COUNT_BY_CLIENT_ID, {
+  const { data, loading } = useIdentityQuery(GET_VEHICLE_COUNT_BY_CLIENT_ID, {
     variables: { clientId },
   });
 

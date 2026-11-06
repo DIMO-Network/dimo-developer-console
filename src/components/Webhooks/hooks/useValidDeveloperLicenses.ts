@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client/react';
+import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { DeveloperLicenseForWebhook, LocalDeveloperLicense } from '@/types/webhook';
 import { gql } from '@/gql';
 import { useTeam } from '@/hooks/useTeam';
@@ -29,7 +29,7 @@ export const DEVELOPER_LICENSES_FOR_WEBHOOKS = gql(`
 // The active team's licenses (its owner's wallet), usable for a developer JWT.
 export const useValidDeveloperLicenses = () => {
   const { ownerAddress } = useTeam();
-  const { data, loading, ...rest } = useQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
+  const { data, loading, ...rest } = useIdentityQuery(DEVELOPER_LICENSES_FOR_WEBHOOKS, {
     variables: { owner: ownerAddress ?? '' },
     skip: !ownerAddress,
   });
