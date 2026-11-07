@@ -13,17 +13,14 @@ import { IPasskeyRecoveryState } from '@/types/auth';
 const emailRecoveryFlows = {
   'email-form': {
     Component: EmailRecoveryForm,
-    title: 'Enter your email',
     order: 1,
   },
   'check-email': {
     Component: CheckEmail,
-    title: 'Click the link in your email',
     order: 2,
   },
   'rewire-passkey': {
     Component: RewirePasskey,
-    title: "Let's get you back in",
     order: 3,
   },
 };

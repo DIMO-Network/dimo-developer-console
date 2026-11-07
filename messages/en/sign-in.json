@@ -1,0 +1,36 @@
+{
+  "metadataTitle": "Sign In | {appName}",
+  "metadataDescription": "Welcome to DIMO Developer Console Sign In. Access your developer dashboard securely to manage applications, and explore advanced the DIMO tools. Start coding and optimizing today!",
+  "view": {
+    "termsAgreement": "By signing in, you are agreeing to our <terms>terms of service</terms> and <privacy>privacy policy</privacy>",
+    "walletRestoreNeeded": "This account needs its wallet restored before you can sign in. Please contact developer support.",
+    "genericError": "Something went wrong please try again",
+    "externalLoginFailed": "Failed to login with external provider"
+  },
+  "methodForm": {
+    "title": "Build with car data",
+    "emailPlaceholder": "email@address.com",
+    "maxLength": "The name should has maximum 120 characters",
+    "invalidEmail": "Not a valid email address",
+    "or": "or",
+    "lostPasskey": "Lost your passkey? <reset>Reset with your email</reset>",
+    "troubleLoggingIn": "Trouble logging in? <support>Get support</support>"
+  },
+  "otp": {
+    "title": "Welcome back!",
+    "enterCode": "Enter the code sent to <strong>{email}</strong>",
+    "signIn": "Sign In",
+    "resendCode": "Resend Code",
+    "invalidCode": "Invalid OTP code",
+    "loginFailed": "Failed to login with OTP",
+    "resent": "New OTP code sent to your email",
+    "resendFailed": "Failed to resend OTP code",
+    "troubleLoggingIn": "Trouble logging in? <support>Get support</support>"
+  },
+  "passkey": {
+    "title": "Continue with passkey",
+    "loginFailed": "Failed to login with passkey",
+    "lostPasskey": "Lost your passkey? <recover>Recover with your email</recover>",
+    "troubleLoggingIn": "Trouble logging in? <support>Get support</support>"
+  }
+}

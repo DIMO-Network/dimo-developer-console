@@ -7,6 +7,7 @@ import {
   Control,
   UseFormRegister,
 } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 import isURL from 'validator/lib/isURL';
 import isEmpty from 'validator/lib/isEmpty';
 
@@ -49,18 +50,20 @@ interface IFormProps {
 }
 
 const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
+  const t = useTranslations('sign-up');
+  const tCommon = useTranslations('common');
   return (
     <>
       <Label htmlFor="name">
-        Company name *
+        {t('company.business.nameLabel')}
         <TextField
           type="text"
-          placeholder="ACME"
+          placeholder={t('company.business.namePlaceholder')}
           {...register('name', {
-            required: 'This field is required',
+            required: tCommon('validation.required'),
             maxLength: {
               value: 120,
-              message: 'The name should has maximum 120 characters',
+              message: t('company.maxLength'),
             },
           })}
           role="company-name-input"
@@ -68,15 +71,15 @@ const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
       </Label>
       {errors.name && <TextError errorMessage={errors?.name?.message ?? ''} />}
       <Label htmlFor="website">
-        Company website
+        {t('company.business.websiteLabel')}
         <TextField
           type="text"
-          placeholder="www.acme.zone"
+          placeholder={t('company.business.websitePlaceholder')}
           {...register('website', {
             required: false,
             maxLength: {
               value: 120,
-              message: 'The name should has maximum 120 characters',
+              message: t('company.maxLength'),
             },
             validate: {
               isURL: (str: string = '') => isEmpty(str) || isURL(str),
@@ -85,17 +88,15 @@ const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
           role="company-website-input"
         />
       </Label>
-      {errors.website && (
-        <TextError errorMessage="This field must be a valid URL with maximum 120 characters" />
-      )}
+      {errors.website && <TextError errorMessage={t('company.invalidUrl')} />}
       <Label htmlFor="region">
-        Main operating region *
+        {t('company.business.regionLabel')}
         <SelectField
           name="region"
-          rules={{ required: 'This field is required' }}
+          rules={{ required: tCommon('validation.required') }}
           options={regionOptions}
           control={control}
-          placeholder="Select"
+          placeholder={t('company.select')}
           role="company-region"
         />
       </Label>
@@ -104,18 +105,20 @@ const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
   );
 };
 const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNode => {
+  const t = useTranslations('sign-up');
+  const tCommon = useTranslations('common');
   return (
     <>
       <Label htmlFor="name">
-        Name *
+        {t('company.personal.nameLabel')}
         <TextField
           type="text"
-          placeholder="Bruce Wayne"
+          placeholder={t('company.personal.namePlaceholder')}
           {...register('name', {
-            required: 'This field is required',
+            required: tCommon('validation.required'),
             maxLength: {
               value: 120,
-              message: 'The name should has maximum 120 characters',
+              message: t('company.maxLength'),
             },
           })}
           role="company-name-input"
@@ -123,15 +126,15 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
       </Label>
       {errors.name && <TextError errorMessage={errors?.name?.message ?? ''} />}
       <Label htmlFor="website">
-        Social URL
+        {t('company.personal.websiteLabel')}
         <TextField
           type="text"
-          placeholder="https://instagram.com/batman"
+          placeholder={t('company.personal.websitePlaceholder')}
           {...register('website', {
             required: false,
             maxLength: {
               value: 120,
-              message: 'The name should has maximum 120 characters',
+              message: t('company.maxLength'),
             },
             validate: {
               isURL: (str: string = '') => isEmpty(str) || isURL(str),
@@ -140,17 +143,15 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
           role="company-website-input"
         />
       </Label>
-      {errors.website && (
-        <TextError errorMessage="This field must be a valid URL with maximum 120 characters" />
-      )}
+      {errors.website && <TextError errorMessage={t('company.invalidUrl')} />}
       <Label htmlFor="region">
-        Region *
+        {t('company.personal.regionLabel')}
         <SelectField
           name="region"
-          rules={{ required: 'This field is required' }}
+          rules={{ required: tCommon('validation.required') }}
           options={regionOptions}
           control={control}
-          placeholder="Select"
+          placeholder={t('company.select')}
           role="company-region"
         />
       </Label>
@@ -160,6 +161,8 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
 };
 
 export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
+  const t = useTranslations('sign-up');
+  const tCommon = useTranslations('common');
   const {
     control,
     register,
@@ -191,20 +194,20 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className="text-title text-ink">Final stretch</p>
+          <p className="text-title text-ink">{t('company.title')}</p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 w-full max-w-sm pt-4"
         >
           <Label htmlFor="type">
-            Business/developer type *
+            {t('company.typeLabel')}
             <SelectField
               name="type"
-              rules={{ required: 'This field is required' }}
+              rules={{ required: tCommon('validation.required') }}
               options={typeOptions}
               control={control}
-              placeholder="Select"
+              placeholder={t('company.select')}
               role="company-type"
             />
           </Label>
@@ -223,7 +226,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
               role="finish-button"
               loading={isLoading}
             >
-              Finish sign up
+              {t('company.finish')}
             </Button>
           </div>
         </form>

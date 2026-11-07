@@ -6,6 +6,7 @@ import { useState, useRef, useEffect, FC } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { explainSignUpRefusal } from '@/app/sign-up/signUpResult';
 
 interface IProps {
@@ -14,6 +15,8 @@ interface IProps {
 }
 
 export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
+  const t = useTranslations('sign-up');
+  const tCommon = useTranslations('common');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRequestingNewOtp, setIsRequestingNewOtp] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
@@ -90,14 +93,14 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
       });
 
       if (!success) {
-        toast.error('Invalid OTP code');
+        toast.error(t('otp.invalidCode'));
         return;
       }
 
       handleSignupComplete(newWalletAddress!);
     } catch (error: unknown) {
-      if (explainSignUpRefusal(error, () => router.replace('/sign-in'))) return;
-      toast.error('Something went wrong');
+      if (explainSignUpRefusal(error, () => router.replace('/sign-in'), t)) return;
+      toast.error(tCommon('errors.somethingWentWrong'));
       captureException(error);
     } finally {
       setIsLoading(false);
@@ -126,10 +129,10 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
       const newOtpId = await beginOtpLogin();
       setOtpId(newOtpId);
       setOtp(Array(6).fill(''));
-      toast.success('New OTP code sent to your email');
+      toast.success(t('otp.resent'));
     } catch (error) {
       captureException(error);
-      toast.error('Failed to resend OTP code');
+      toast.error(t('otp.resendFailed'));
     } finally {
       setIsRequestingNewOtp(false);
     }
@@ -139,11 +142,14 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className="text-title text-ink">Welcome back!</p>
+          <p className="text-title text-ink">{t('otp.title')}</p>
         </div>
         <div className="otp-login-text">
           <p>
-            Enter the code sent to <strong>{email}</strong>
+            {t.rich('otp.enterCode', {
+              email: email,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </p>
         </div>
         <div className="otp-inputs">
@@ -174,7 +180,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
             loading={isLoading}
             disabled={otp.some((digit) => !digit)}
           >
-            Sign In
+            {t('otp.signIn')}
           </Button>
           <Button
             variant="secondary"
@@ -183,16 +189,22 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
             loading={isRequestingNewOtp}
             onClick={handleResendCode}
           >
-            Resend Code
+            {t('otp.resendCode')}
           </Button>
         </div>
         <div className="sign-up__extra-links">
           <div className="flex flex-row">
             <p className="terms-caption">
-              Trouble logging in?{' '}
-              <Anchor href="mailto:developer-support@dimo.org" className="grey underline">
-                Get support
-              </Anchor>
+              {t.rich('otp.troubleLoggingIn', {
+                support: (chunks) => (
+                  <Anchor
+                    href="mailto:developer-support@dimo.org"
+                    className="grey underline"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+              })}
             </p>
           </div>
         </div>

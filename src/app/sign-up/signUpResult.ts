@@ -17,40 +17,38 @@ export class SignUpRefusedError extends Error {
   }
 }
 
-export const ACCOUNT_EXISTS_MESSAGE = 'This account already exists — sign in instead.';
-export const EMAIL_TAKEN_MESSAGE =
-  'This email is already used by another console account. Sign in with that account, or use a different email.';
-export const EMAIL_NOT_PROVEN_MESSAGE =
-  "We couldn't confirm that this email belongs to your DIMO account.";
-export const UNREACHABLE_MESSAGE = "Couldn't reach the console, try again.";
-export const SIGN_UP_FAILED_MESSAGE =
-  'Something went wrong while creating your account. Try again.';
+type Translate = (key: string) => string;
 
-const explain = (reason: SignUpRefusal, goToSignIn: () => void) => {
+const explain = (reason: SignUpRefusal, goToSignIn: () => void, t: Translate) => {
   switch (reason) {
     case 'ACCOUNT_EXISTS':
-      toast.error(ACCOUNT_EXISTS_MESSAGE, {
-        action: { label: 'Sign in', onClick: goToSignIn },
+      toast.error(t('refusal.accountExists'), {
+        action: { label: t('refusal.signIn'), onClick: goToSignIn },
       });
       return;
     case 'EMAIL_TAKEN':
-      toast.error(EMAIL_TAKEN_MESSAGE);
+      toast.error(t('refusal.emailTaken'));
       return;
     case 'EMAIL_NOT_PROVEN':
-      toast.error(EMAIL_NOT_PROVEN_MESSAGE);
+      toast.error(t('refusal.emailNotProven'));
       return;
     case 'UNREACHABLE':
-      toast.error(UNREACHABLE_MESSAGE);
+      toast.error(t('refusal.unreachable'));
       return;
     case 'FAILED':
-      toast.error(SIGN_UP_FAILED_MESSAGE);
+      toast.error(t('refusal.failed'));
   }
 };
 
 // True when the error was a refusal and the user has been told; the caller then
 // skips its own report and generic toast.
-export const explainSignUpRefusal = (error: unknown, goToSignIn: () => void): boolean => {
+// `t` is the `sign-up` translator.
+export const explainSignUpRefusal = (
+  error: unknown,
+  goToSignIn: () => void,
+  t: Translate,
+): boolean => {
   if (!(error instanceof SignUpRefusedError)) return false;
-  explain(error.reason, goToSignIn);
+  explain(error.reason, goToSignIn, t);
   return true;
 };

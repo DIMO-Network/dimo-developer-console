@@ -31,8 +31,10 @@ jest.mock('@/app/sign-up/components', () => ({
 
 import { toast } from 'sonner';
 import { completeUserData } from '@/app/sign-up/actions';
-import { EMAIL_NOT_PROVEN_MESSAGE } from '@/app/sign-up/signUpResult';
 import View from '@/app/sign-up/components/View/View';
+
+const EMAIL_NOT_PROVEN_MESSAGE =
+  "We couldn't confirm that this email belongs to your DIMO account.";
 
 describe('sign-up View', () => {
   afterEach(() => jest.clearAllMocks());
