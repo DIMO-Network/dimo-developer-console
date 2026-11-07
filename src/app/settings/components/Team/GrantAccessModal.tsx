@@ -2,13 +2,13 @@
 import { type FC, useContext, useMemo, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { toast } from 'sonner';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
 import { CheckboxField } from '@/components/CheckboxField';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { upsertLicenseSigner } from '@/actions/teams';
-import { formatList, grantWarning } from '@/config/teamCopy';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { useSetLicenseSigners, type SignerChange } from '@/hooks/useSetLicenseSigners';
 import type { TeamLicense } from '@/hooks/useTeamLicenses';
@@ -27,6 +27,9 @@ interface Props {
 }
 
 export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGranted }) => {
+  const t = useTranslations('settings');
+  const tCommon = useTranslations('common');
+  const format = useFormatter();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const setLicenseSigners = useSetLicenseSigners();
   const { trackEvent } = useMixPanel();
@@ -48,7 +51,7 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     [candidates],
   );
   const labelsOf = (tokenIds: number[]) =>
-    formatList(tokenIds.map((id) => labels.get(id) ?? `License #${id}`));
+    format.list(tokenIds.map((id) => labels.get(id) ?? `License #${id}`));
 
   const toggle = (tokenId: number, checked: boolean) =>
     setSelected((prev) =>
@@ -88,7 +91,7 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
       return;
     }
     toast.success(
-      `${name} now has data access to ${labelsOf(all.map((c) => c.tokenId))}.`,
+      t('grant.success', { name, licenses: labelsOf(all.map((c) => c.tokenId)) }),
     );
     onClose();
   };
@@ -113,7 +116,7 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     const signer = member.signerAddress!;
     const changes = selected.map((tokenId) => ({ tokenId, signer }));
     setBusy(true);
-    setLoadingStatus({ status: 'loading', label: `Granting ${name} data access` });
+    setLoadingStatus({ status: 'loading', label: t('grant.loading', { name }) });
     // Every chosen key, even one Identity already lists: its index trails the
     // chain, and enableSigner is idempotent.
     try {
@@ -121,7 +124,7 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     } catch (error) {
       Sentry.captureException(error);
       setBusy(false);
-      setLoadingStatus(txErrorStatus(error));
+      setLoadingStatus(txErrorStatus(error, tCommon));
       return;
     }
     trackEvent('Data Access Granted', { memberId: member.id, tokenIds: selected });
@@ -167,11 +170,9 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     <Modal isOpen setIsOpen={(open) => !open && !busy && onClose()} showClose={!busy}>
       <div className="flex flex-col gap-4">
         <Title component="h2" className="text-panel-title text-ink">
-          {`Grant ${name} data access`}
+          {t('grant.title', { name })}
         </Title>
-        <p className="text-body-sm text-muted">
-          Choose the licenses {name} can read in Vehicles.
-        </p>
+        <p className="text-body-sm text-muted">{t('grant.description', { name })}</p>
         <ul className="flex flex-col gap-2">
           {candidates.map(({ license }) => (
             <li key={license.tokenId} className="flex items-center gap-2">
@@ -192,44 +193,52 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
         </ul>
         {selected.length > 0 && (
           <p className="rounded-control bg-control p-3 text-body-sm text-fg">
-            {grantWarning(name, labelsOf(selected))}
+            {tCommon('teamCopy.grantWarning', { name, license: labelsOf(selected) })}
           </p>
         )}
         {unrecorded ? (
           <div role="alert" className="flex flex-col items-start gap-2">
             {unrecorded.retryable.length > 0 && (
               <p className="text-body-sm text-negative">
-                {`Data access is on, but we couldn't record it for ${labelsOf(unrecorded.retryable.map((c) => c.tokenId))}, so ${name} can't use it yet.`}
+                {t('grant.notRecorded', {
+                  licenses: labelsOf(unrecorded.retryable.map((c) => c.tokenId)),
+                  name,
+                })}
               </p>
             )}
             {unrecorded.refused.map(({ tokenId, message }) => (
               <p key={tokenId} className="text-body-sm text-negative">
-                {`${labelsOf([tokenId])}: ${message}`}
+                {t('grant.refused', { licenses: labelsOf([tokenId]), message })}
               </p>
             ))}
             {unrecorded.refused.length > 0 &&
               (rolledBack ? (
                 <p className="text-body-sm text-muted">
-                  {`${name} doesn't have data access to ${labelsOf(unrecorded.refused.map((r) => r.tokenId))}.`}
+                  {t('grant.rolledBack', {
+                    name,
+                    licenses: labelsOf(unrecorded.refused.map((r) => r.tokenId)),
+                  })}
                 </p>
               ) : (
                 <p className="text-body-sm text-muted">
-                  {`Those keys are still enabled on-chain and nothing lists them. Delete them under API keys on the Config tab of ${labelsOf(unrecorded.refused.map((r) => r.tokenId))}.`}
+                  {t('grant.notRolledBack', {
+                    licenses: labelsOf(unrecorded.refused.map((r) => r.tokenId)),
+                  })}
                 </p>
               ))}
             {unrecorded.retryable.length > 0 ? (
               <Button variant="secondary" loading={busy} onClick={retry}>
-                Try again
+                {tCommon('actions.retry')}
               </Button>
             ) : (
               <Button variant="secondary" onClick={onClose}>
-                Done
+                {tCommon('actions.done')}
               </Button>
             )}
           </div>
         ) : (
           <Button loading={busy} disabled={!selected.length} onClick={grant}>
-            Grant data access
+            {t('grant.confirm')}
           </Button>
         )}
       </div>

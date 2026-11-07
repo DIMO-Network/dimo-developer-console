@@ -1,4 +1,5 @@
 import { type FC } from 'react';
+import { useTranslations } from 'next-intl';
 
 import * as Sentry from '@sentry/nextjs';
 
@@ -19,6 +20,7 @@ interface SupportFormModalProps {
 }
 
 export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen }) => {
+  const t = useTranslations('settings');
   const { currentUser } = useGlobalAccount();
 
   const handleSubmit = async (data: IDevSupportForm) => {
@@ -34,11 +36,11 @@ export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen 
       };
       await handleSupportRequest(supportRequest);
       setIsOpen(false);
-      toast.success('Support request submitted successfully. We will be in touch soon.');
+      toast.success(t('supportModal.success'));
     } catch (error) {
       console.error('Failed to submit support request:', error);
       Sentry.captureException(error);
-      toast.error('Failed to submit support request');
+      toast.error(t('supportModal.failure'));
     }
   };
 
@@ -51,11 +53,9 @@ export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen 
       <div className="support-form-content">
         <div className="support-form-header">
           <Title className="text-panel-title" component="h3">
-            Contact developer support
+            {t('supportModal.title')}
           </Title>
-          <p className="description">
-            Get in touch with our team to answer your questions.
-          </p>
+          <p className="description">{t('supportModal.description')}</p>
         </div>
         <DevSupportForm onSubmit={handleSubmit} onCancel={onCancel} />
       </div>

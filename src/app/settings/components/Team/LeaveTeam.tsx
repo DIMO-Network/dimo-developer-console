@@ -1,10 +1,10 @@
 'use client';
 import { type FC, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Button } from '@/components/Button';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { leaveTeam } from '@/actions/teams';
-import { leaveConfirm } from '@/config/teamCopy';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { useTeam } from '@/hooks/useTeam';
 import { hardNavigate } from '@/utils/hardNavigate';
@@ -13,6 +13,8 @@ import { clearActiveTeamCookie, setActiveTeamCookie } from '@/utils/teamCookies'
 // Members only. Leaving keeps any data access until the owner revokes it
 // (spec: the C8 confirm says so).
 export const LeaveTeam: FC = () => {
+  const t = useTranslations('settings');
+  const tCommon = useTranslations('common');
   const { activeTeam, teams, reportRemoved, flashAfterReload } = useTeam();
   const { trackEvent } = useMixPanel();
   const [open, setOpen] = useState(false);
@@ -21,7 +23,7 @@ export const LeaveTeam: FC = () => {
   const leave = async () => {
     const result = await leaveTeam().catch(() => null);
     if (!result) {
-      toast.error("We couldn't reach the console. Try again.");
+      toast.error(t('leave.unreachable'));
       return;
     }
     if (!result.ok) {
@@ -34,7 +36,10 @@ export const LeaveTeam: FC = () => {
       return;
     }
     trackEvent('Team Left', { teamId: activeTeam.id });
-    flashAfterReload({ tone: 'success', message: `You left ${activeTeam.name}.` });
+    flashAfterReload({
+      tone: 'success',
+      message: t('leave.left', { teamName: activeTeam.name }),
+    });
     const personal = teams.find((t) => t.isPersonal);
     if (personal) setActiveTeamCookie(personal.id);
     else clearActiveTeamCookie();
@@ -44,11 +49,14 @@ export const LeaveTeam: FC = () => {
   return (
     <div className="flex">
       <Button variant="destructive-ghost" onClick={() => setOpen(true)}>
-        Leave team
+        {t('leave.button')}
       </Button>
       <DeleteConfirmationModal
         isOpen={open}
-        title={leaveConfirm(activeTeam.name, activeTeam.ownerEmail)}
+        title={tCommon('teamCopy.leaveConfirm', {
+          teamName: activeTeam.name,
+          ownerEmail: activeTeam.ownerEmail,
+        })}
         onConfirm={leave}
         onCancel={() => setOpen(false)}
       />

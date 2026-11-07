@@ -24,7 +24,6 @@ import { generateMetadata as create } from '@/app/license/[tokenId]/configurator
 import { generateMetadata as edit } from '@/app/license/[tokenId]/configurator/[id]/page';
 import { generateMetadata as vehicles } from '@/app/license/vehicles/[clientId]/page';
 import { generateMetadata as licenses } from '@/app/licenses/layout';
-import { metadata as webhooks } from '@/app/webhooks/layout';
 import { metadata as templates } from '@/app/templates/page';
 import { metadata as newTemplate } from '@/app/templates/new/page';
 
@@ -35,7 +34,6 @@ describe('page titles', () => {
     ['edit configuration', edit, 'Edit configuration'],
     ['licensed vehicles', vehicles, 'Licensed vehicles'],
     ['licenses', licenses, 'Licenses'],
-    ['webhooks', webhooks, 'Webhooks'],
     ['templates', templates, 'Templates'],
     ['new template', newTemplate, 'New template'],
   ])('%s', async (_name, metadata, title) => {

@@ -1,9 +1,11 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import configuration from '@/config';
 import { View } from './components/View';
 
-export const metadata: Metadata = {
-  title: `Edit webhook | ${configuration.appName}`,
+export const generateMetadata = async (): Promise<Metadata> => {
+  const t = await getTranslations('webhooks');
+  return { title: t('metadata.edit', { appName: configuration.appName }) };
 };
 
 const EditWebhookPage = ({

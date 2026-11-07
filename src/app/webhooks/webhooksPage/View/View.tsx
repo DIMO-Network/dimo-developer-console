@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { DevLicenseSelector } from '@/components/Webhooks/components/DeveloperLicenseSelector';
 import { Header } from '@/app/webhooks/webhooksPage/Header';
@@ -10,6 +11,7 @@ import { QueryPageWrapper } from '@/components/QueryPageWrapper';
 import { LocalDeveloperLicense } from '@/types/webhook';
 
 const MainComponent = () => {
+  const t = useTranslations('webhooks');
   const [selectedDeveloperLicense, setSelectedDeveloperLicense] =
     useState<LocalDeveloperLicense>();
   const { developerLicenses, hasLicenseWithoutRedirectUri, loading } =
@@ -31,11 +33,11 @@ const MainComponent = () => {
       <div className="flex flex-col gap-2">
         <p className="text-body text-fg">
           {hasLicenseWithoutRedirectUri
-            ? 'Add a redirect URI to your license to set up webhooks.'
-            : 'Create a developer license to set up webhooks.'}
+            ? t('page.addRedirectUri')
+            : t('page.createLicense')}
         </p>
         <Link href="/licenses" className="text-body-sm text-ink underline">
-          Go to licenses
+          {t('page.goToLicenses')}
         </Link>
       </div>
     );
@@ -59,6 +61,7 @@ const MainComponent = () => {
 };
 
 export const WebhooksPage = () => {
+  const t = useTranslations('webhooks');
   const { loading, error } = useValidDeveloperLicenses();
   return (
     <div className="flex flex-col gap-6">
@@ -66,7 +69,7 @@ export const WebhooksPage = () => {
       <QueryPageWrapper
         loading={loading}
         error={error}
-        customErrorMessage={'There was a problem fetching your Developer Licenses'}
+        customErrorMessage={t('page.fetchLicensesError')}
       >
         <MainComponent />
       </QueryPageWrapper>

@@ -1,20 +1,26 @@
+import type { Translate } from './translate';
+
 type Failure = { status: number; code: string | null; message: string };
 
 // Invite and resend failures (C7). Rate limits and NOT_A_MEMBER ("Finish
 // setting up your team first") carry console-api's own message.
-export const inviteSendError = (failure: Failure, email: string): string => {
+export const inviteSendError = (
+  failure: Failure,
+  email: string,
+  t: Translate,
+): string => {
   switch (failure.code) {
     case 'EMAIL_FAILED':
-      return `We couldn't email ${email}. Try again.`;
+      return t('inviteError.emailFailed', { email });
     case 'RATE_LIMITED':
-      return failure.message || 'Too many invites right now. Try again in a while.';
+      return failure.message || t('inviteError.rateLimited');
     case 'ALREADY_MEMBER':
-      return `${email} is already in this team.`;
+      return t('inviteError.alreadyMember', { email });
     case 'ALREADY_INVITED':
-      return `${email} already has a pending invite. Resend it from the list.`;
+      return t('inviteError.alreadyInvited', { email });
     case 'INVALID_EMAIL':
-      return 'Enter a valid email address.';
+      return t('inviteError.invalidEmail');
     default:
-      return failure.message || "We couldn't send the invite. Try again.";
+      return failure.message || t('inviteError.default');
   }
 };

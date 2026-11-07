@@ -3,6 +3,7 @@
 import React, { use, useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { privateKeyToAddress } from 'viem/accounts';
 import { Title } from '@/components/Title';
 import { TextField } from '@/components/TextField';
@@ -28,34 +29,15 @@ import {
 } from '@/actions/connections';
 import { fetchJson } from '@/utils/fetchJson';
 import { HttpError } from '@/utils/httpError';
-import { KEYS_UNREADABLE_ON_RESUME, NAME_TAKEN_IN_TEAM } from '@/app/connections/copy';
 import { invalidateMyConnectionsQuery } from '@/hooks/queries/useMyConnections';
 
 // Server Actions mask what they throw in production, so every failure here is told
-// in the page's own words, never with error.message.
-const KEYS_NOT_SAVED = "Couldn't save your connection keys, so nothing was minted.";
-const FINISH_FROM_CONNECTIONS =
-  "Your connection keys are saved, but setup didn't finish. You can finish setup from Connections.";
-const LOOKUP_FAILED =
-  "Couldn't check whether this connection was already minted, so nothing was spent. Try again.";
-const NAME_TAKEN = "This name is taken by another wallet, so setup can't be finished.";
-const NAME_REFUSED_ON_RESUME =
-  'If your earlier attempt went through, it can take a minute to appear. Try Finish setup again shortly.';
-const LOAD_FAILED =
-  "Couldn't load this connection. Go back to Connections and try again.";
-const CONNECTION_GONE =
-  'This connection no longer exists, so there is nothing to finish.';
-const OWNER_ONLY = 'Only the team owner can finish setting up this connection.';
-
-const stepLabel = (step: MintConnectionStep): string => {
-  switch (step) {
-    case 'minting':
-      return 'Approve the mint to create your connection on-chain. This costs ~$1 of $DIMO.';
-    case 'signing-agreements':
-      return 'Signing permission agreements for the Device Issuance Key (mint synthetic devices) and the Connection License Key (generate certificates).';
-    case 'granting-permissions':
-      return 'Approve the on-chain transaction granting both keys their permissions on this connection.';
-  }
+// in the page's own words, never with error.message. State that holds a message
+// for the page keeps its key in the connections area and is translated on render.
+const STEP_KEYS: Record<MintConnectionStep, string> = {
+  'minting': 'create.steps.minting',
+  'signing-agreements': 'create.steps.signingAgreements',
+  'granting-permissions': 'create.steps.grantingPermissions',
 };
 
 type Grantees = Pick<GrantConnectionParams, 'licenseGrantee' | 'deviceIssuanceGrantee'>;
@@ -72,6 +54,8 @@ const granteesOf = (connection: Connection): Grantees => ({
 
 export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   const { owner } = use(params);
+  const t = useTranslations('connections');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -80,12 +64,13 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   const [connectionName, setConnectionName] = useState(initialConnectionName);
   const [isPendingPurchase, setIsPendingPurchase] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [loadingLabel, setLoadingLabel] = useState('Creating connection, please wait...');
+  const [loadingLabel, setLoadingLabel] = useState(() => t('create.creating'));
   const [error, setError] = useState<string | null>(null);
   const [nameValidationError, setNameValidationError] = useState<string | null>(null);
   // The connection being resumed, once it's known to be finishable.
   const [resumable, setResumable] = useState<Connection | null>(null);
-  // Set when this page has nothing left to offer: only Connections goes on from here.
+  // The key of the message shown when this page has nothing left to offer: only
+  // Connections goes on from here.
   const [stopped, setStopped] = useState<string | null>(null);
 
   const { currentUser } = useGlobalAccount();
@@ -94,7 +79,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   const validateConnectionName = useCallback((name: string) => {
     const nameBytes = new TextEncoder().encode(name).length;
     if (nameBytes > 32) {
-      return 'Connection name is too long. Please use a name that is 32 characters or fewer.';
+      return 'create.nameTooLong';
     }
     return null;
   }, []);
@@ -128,12 +113,12 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         if (connection.status !== 'PENDING' && connection.status !== 'MINTED') {
           router.replace('/connections');
         } else if (connection.keys_unreadable) {
-          setStopped(KEYS_UNREADABLE_ON_RESUME);
+          setStopped('create.keysUnreadableOnResume');
         } else if (
           !connection.connection_license_private_key ||
           !connection.device_issuance_key
         ) {
-          setStopped(OWNER_ONLY);
+          setStopped('create.ownerOnly');
         } else {
           setResumable(connection);
         }
@@ -142,8 +127,8 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         if (abandoned) return;
         setStopped(
           error instanceof HttpError && error.status === 404
-            ? CONNECTION_GONE
-            : LOAD_FAILED,
+            ? 'create.gone'
+            : 'create.loadFailed',
         );
       },
     );
@@ -157,9 +142,9 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     setError(null);
   };
 
-  const stop = (message: string) => {
+  const stop = (messageKey: string) => {
     setIsPendingPurchase(false);
-    setStopped(message);
+    setStopped(messageKey);
   };
 
   const saveProgress = async (
@@ -178,10 +163,10 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     await grant({
       connectionId,
       ...grantees,
-      onStep: (step) => setLoadingLabel(stepLabel(step)),
+      onStep: (step) => setLoadingLabel(t(STEP_KEYS[step])),
     });
 
-    setLoadingLabel('Saving your connection…');
+    setLoadingLabel(t('create.saving'));
     await saveProgress(id, { status: 'READY' });
 
     setIsPendingPurchase(false);
@@ -193,7 +178,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     connectionId: bigint,
     grantees: Grantees,
   ) => {
-    setLoadingLabel('Saving your connection…');
+    setLoadingLabel(t('create.saving'));
     await saveProgress(id, { status: 'MINTED', token_id: connectionId.toString() });
     await grantAndComplete(id, connectionId, grantees);
   };
@@ -208,7 +193,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       await setup();
     } catch (error) {
       console.error('Connection setup stopped:', error);
-      stop(FINISH_FROM_CONNECTIONS);
+      stop('create.finishFromConnections');
     } finally {
       setIsProcessingPayment(false);
     }
@@ -218,10 +203,10 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
   // undone, and keys lost after it are gone for good.
   const saveNewKeys = async () => {
     try {
-      setLoadingLabel('Generating your connection keys…');
+      setLoadingLabel(t('create.generatingKeys'));
       const wallets = await generateConnectionWallets();
 
-      setLoadingLabel('Saving your connection keys…');
+      setLoadingLabel(t('create.savingKeys'));
       const created = await createConnection({
         name: connectionName,
         connection_license_public_key: wallets.connectionLicense.publicKey,
@@ -232,10 +217,10 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       if (!created.ok) {
         if (created.code === 'CONNECTION_NAME_TAKEN') {
           setIsPendingPurchase(false);
-          setNameValidationError(NAME_TAKEN_IN_TEAM);
+          setNameValidationError('create.nameTakenInTeam');
         } else {
           console.error('Saving the connection keys failed:', created.status);
-          setError(KEYS_NOT_SAVED);
+          setError(t('create.keysNotSaved'));
         }
         return null;
       }
@@ -249,7 +234,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       };
     } catch (error) {
       console.error('Saving the connection keys failed:', error);
-      setError(KEYS_NOT_SAVED);
+      setError(t('create.keysNotSaved'));
       return null;
     }
   };
@@ -277,7 +262,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     if (!saved) return;
     await invalidateMyConnectionsQuery();
 
-    setLoadingLabel(stepLabel('minting'));
+    setLoadingLabel(t(STEP_KEYS.minting));
     const minted = await mint(connectionName);
     if (!minted.success) {
       await removeRefusedConnection(saved.id, minted.reason);
@@ -292,12 +277,12 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     const grantees = granteesOf(connection);
     setIsPendingPurchase(false);
 
-    setLoadingLabel(stepLabel('minting'));
+    setLoadingLabel(t(STEP_KEYS.minting));
     const minted = await mint(connection.name);
     if (!minted.success) {
       console.error('Connection minting failed', minted.reason);
       // There's no name to change on this page, and the earlier attempt may hold it.
-      setError(minted.nameInUse ? NAME_REFUSED_ON_RESUME : minted.reason);
+      setError(minted.nameInUse ? t('create.nameRefusedOnResume') : minted.reason);
       return;
     }
 
@@ -320,17 +305,17 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     // smart account: useMintConnection mints to it, and it sends the transaction.
     const wallet = currentUser?.smartContractAddress?.toLowerCase();
     if (!wallet) {
-      setError(LOOKUP_FAILED);
+      setError(t('create.lookupFailed'));
       return;
     }
 
-    setLoadingLabel('Checking whether your connection was already minted…');
+    setLoadingLabel(t('create.checkingMinted'));
     let found;
     try {
       found = await findMintedConnection(connection.name);
     } catch (error) {
       console.error('Looking up the connection failed:', error);
-      setError(LOOKUP_FAILED);
+      setError(t('create.lookupFailed'));
       return;
     }
 
@@ -343,7 +328,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
         granteesOf(connection),
       );
     } else {
-      stop(NAME_TAKEN);
+      stop('create.nameTaken');
     }
   };
 
@@ -356,7 +341,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     setError(null);
   }, []);
 
-  const pageTitle = resumeId ? 'Finish setup' : 'New connection';
+  const pageTitle = resumeId ? t('create.titleFinish') : t('create.titleNew');
   const errorNote = error && (
     <p className="rounded-control bg-negative-soft p-3 text-body-sm text-negative">
       {error}
@@ -368,10 +353,10 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       return (
         <div className="space-y-6">
           <p className="rounded-control bg-negative-soft p-3 text-body-sm text-negative">
-            {stopped}
+            {t(stopped)}
           </p>
           <Link href="/connections" className="button secondary">
-            Back to Connections
+            {t('breadcrumb.back')}
           </Link>
         </div>
       );
@@ -379,13 +364,17 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
 
     if (resumeId) {
       if (!resumable) {
-        return <p className="text-body-sm text-muted">Loading your connection…</p>;
+        return <p className="text-body-sm text-muted">{t('create.loading')}</p>;
       }
       return (
         <div className="space-y-6">
           <p className="text-body-sm text-muted">
-            <span className="font-semibold text-ink">{resumable.name}</span> isn&apos;t
-            finished yet. Its keys are saved, so setup can pick up where it stopped.
+            {t.rich('create.resumeNote', {
+              name: resumable.name,
+              strong: (chunks) => (
+                <span className="font-semibold text-ink">{chunks}</span>
+              ),
+            })}
           </p>
           {errorNote}
           <Button
@@ -393,7 +382,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
             onClick={() => runSetup(() => resumeSetup(resumable))}
             disabled={isProcessingPayment}
           >
-            Finish setup
+            {t('create.finishSetup')}
           </Button>
         </div>
       );
@@ -402,18 +391,18 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     return (
       <div className="space-y-6">
         <div>
-          <Label htmlFor="connectionName">Connection name</Label>
+          <Label htmlFor="connectionName">{t('create.nameLabel')}</Label>
           <TextField
             id="connectionName"
             type="text"
-            placeholder="Connection name"
+            placeholder={t('create.namePlaceholder')}
             className="mt-1"
             value={connectionName}
             onChange={handleConnectionNameChange}
           />
           {nameValidationError && (
             <div className="mt-2">
-              <TextError errorMessage={nameValidationError} />
+              <TextError errorMessage={t(nameValidationError)} />
             </div>
           )}
         </div>
@@ -423,7 +412,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
           onClick={handlePurchaseAlert}
           disabled={!!nameValidationError}
         >
-          Purchase connection license
+          {t('create.purchase')}
         </Button>
       </div>
     );
@@ -433,7 +422,7 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
     <>
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link href="/connections" className="transition-colors hover:text-ink">
-          Connections
+          {t('breadcrumb.connections')}
         </Link>
         <span>/</span>
         <span className="text-ink">{pageTitle}</span>
@@ -462,20 +451,17 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
       >
         <div>
           <Title className="pr-8 text-panel-title" component="h3">
-            Purchase connection license
+            {t('create.modal.title')}
           </Title>
           <div className="pt-4 text-body-sm font-normal leading-relaxed text-muted">
             <p className="mb-4">
-              <span className="font-semibold text-ink">Warning!</span> By proceeding, you
-              are agreeing to approve payment of{' '}
-              <span className="font-semibold text-ink">$1 in</span> credits for your DIMO
-              Connection License. If you do not have enough credits in your account, you
-              will be unable to create a Connection License.
+              {t.rich('create.modal.warning', {
+                strong: (chunks) => (
+                  <span className="font-semibold text-ink">{chunks}</span>
+                ),
+              })}
             </p>
-            <p>
-              You only need to purchase a license if you are planning on hosting a DIMO
-              Oracle.
-            </p>
+            <p>{t('create.modal.oracleOnly')}</p>
           </div>
 
           {error && <div className="pt-4">{errorNote}</div>}
@@ -486,10 +472,10 @@ export const View = ({ params }: { params: Promise<{ owner: string }> }) => {
               onClick={handleCancelPayment}
               disabled={isProcessingPayment}
             >
-              Cancel
+              {tCommon('actions.cancel')}
             </Button>
             <Button onClick={handleContinuePayment} disabled={isProcessingPayment}>
-              Continue with payment
+              {t('create.continuePayment')}
             </Button>
           </div>
         </div>
