@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Webhook } from '@/types/webhook';
 import { useWebhookTableContext } from '@/components/Webhooks/providers/WebhookTableContextProvider';
 import { flexRender } from '@tanstack/react-table';
@@ -22,26 +23,33 @@ const PHONE_HIDDEN = 'hidden md:table-cell';
 const getColumnClassName = (columnDef: LegacyColumnDef<Webhook>) =>
   (columnDef.meta as { className?: string } | undefined)?.className;
 
-const getColumns = (clientId: string): LegacyColumnDef<Webhook>[] => {
+const getColumns = (
+  clientId: string,
+  t: ReturnType<typeof useTranslations>,
+): LegacyColumnDef<Webhook>[] => {
   return [
-    { header: 'Description', accessorKey: 'description' },
+    { header: t('webhooks.table.description'), accessorKey: 'description' },
     {
-      header: 'Display name',
+      header: t('webhooks.table.displayName'),
       meta: { className: PHONE_HIDDEN },
       cell: ({ row }) => row.original.displayName || '-',
     },
-    { header: 'Service', accessorKey: 'service', meta: { className: PHONE_HIDDEN } },
     {
-      header: 'Cooldown',
+      header: t('webhooks.table.service'),
+      accessorKey: 'service',
+      meta: { className: PHONE_HIDDEN },
+    },
+    {
+      header: t('webhooks.table.cooldown'),
       meta: { className: PHONE_HIDDEN },
       cell: ({ row }) => `${row.original.coolDownPeriod}s`,
     },
     {
-      header: 'Vehicles',
+      header: t('webhooks.table.vehicles'),
       cell: ({ row }) => <VehicleCount webhookId={row.original.id} clientId={clientId} />,
     },
     {
-      header: 'Errors',
+      header: t('webhooks.table.errors'),
       accessorKey: 'failure_count',
       cell: ({ row }) => {
         const count = row.original.failure_count;
@@ -49,7 +57,7 @@ const getColumns = (clientId: string): LegacyColumnDef<Webhook>[] => {
       },
     },
     {
-      header: 'Status',
+      header: t('webhooks.table.status'),
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
     },
   ];
@@ -61,10 +69,11 @@ export const WebhooksTable = ({
   webhooks: Webhook[];
   clientId: string;
 }) => {
+  const t = useTranslations('common');
   const { toggleExpandedWebhookId, expandedWebhook } = useWebhookTableContext();
   const table = useLegacyTable({
     data: webhooks,
-    columns: getColumns(clientId),
+    columns: getColumns(clientId, t),
     getCoreRowModel: getCoreRowModel(),
   });
   return (

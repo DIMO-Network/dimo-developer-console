@@ -1,15 +1,14 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { type FC, useEffect, useRef, useState } from 'react';
 import { ChevronUpDownIcon } from '@heroicons/react/20/solid';
 import { useTeam } from '@/hooks/useTeam';
-import type { TeamRole } from '@/types/team';
 import { cn } from '@/lib/utils';
-
-const ROLE_LABEL: Record<TeamRole, string> = { OWNER: 'Owner', MEMBER: 'Member' };
 
 // Sidebar team picker. Only rendered when the user belongs to more than one
 // team; picking another team reloads into Home (TeamProvider.switchTeam).
 export const TeamSwitcher: FC<{ collapsed?: boolean }> = ({ collapsed = false }) => {
+  const t = useTranslations('common');
   const { teams, activeTeam, switchTeam } = useTeam();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -36,7 +35,7 @@ export const TeamSwitcher: FC<{ collapsed?: boolean }> = ({ collapsed = false })
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={`Team: ${activeTeam.name}. Switch team`}
+        aria-label={t('team.switchLabel', { name: activeTeam.name })}
         title={collapsed ? activeTeam.name : undefined}
         onClick={() => setOpen((value) => !value)}
         className={cn(
@@ -56,7 +55,9 @@ export const TeamSwitcher: FC<{ collapsed?: boolean }> = ({ collapsed = false })
               <span className="truncate text-body-sm font-medium text-ink">
                 {activeTeam.name}
               </span>
-              <span className="text-label text-muted">{ROLE_LABEL[activeTeam.role]}</span>
+              <span className="text-label text-muted">
+                {t(`team.roles.${activeTeam.role}`)}
+              </span>
             </span>
             <ChevronUpDownIcon
               aria-hidden="true"
@@ -68,7 +69,7 @@ export const TeamSwitcher: FC<{ collapsed?: boolean }> = ({ collapsed = false })
       {open && (
         <ul
           role="listbox"
-          aria-label="Teams"
+          aria-label={t('team.switcher')}
           className="absolute left-0 top-full z-20 mt-1 flex w-[220px] flex-col gap-0.5 rounded-control border border-outline bg-overlay p-1 shadow-float"
         >
           {teams.map((team) => {
@@ -95,7 +96,7 @@ export const TeamSwitcher: FC<{ collapsed?: boolean }> = ({ collapsed = false })
                       selected ? 'text-selected-fg/75' : 'text-muted',
                     )}
                   >
-                    {ROLE_LABEL[team.role]}
+                    {t(`team.roles.${team.role}`)}
                   </span>
                 </button>
               </li>

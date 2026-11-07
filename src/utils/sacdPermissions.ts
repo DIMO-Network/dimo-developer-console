@@ -36,8 +36,17 @@ export const PERMISSION_LABELS: Record<number, string> = {
   8: 'Approximate location',
 };
 
-export const permissionLabels = (hex: string): string[] =>
-  decodeSacdPermissions(hex).map((id) => PERMISSION_LABELS[id] ?? `Privilege ${id}`);
+// Pass the common-namespace `t` to translate the labels (`permissions.<id>`).
+export const permissionLabels = (
+  hex: string,
+  t?: (key: string, values?: Record<string, number>) => string,
+): string[] =>
+  decodeSacdPermissions(hex).map((id) => {
+    if (!t) return PERMISSION_LABELS[id] ?? `Privilege ${id}`;
+    return PERMISSION_LABELS[id]
+      ? t(`permissions.${id}`)
+      : t('permissions.unknown', { id });
+  });
 
 export const permissionNames = (hex: string): string[] =>
   decodeSacdPermissions(hex)

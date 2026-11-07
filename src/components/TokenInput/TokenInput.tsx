@@ -1,8 +1,8 @@
+import { useFormatter, useLocale } from 'next-intl';
 import { MinusIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 
 import './TokenInput.css';
-import { formatSimpleBalanceWithDigits } from '@/utils/formatBalance';
 
 interface ISuggestion {
   label: string | number;
@@ -27,13 +27,19 @@ export const TokenInput = <T extends FieldValues>({
   showControls = false,
   description = '',
 }: IProps<T>) => {
+  const format = useFormatter();
+  const locale = useLocale();
+  const groupSeparator =
+    new Intl.NumberFormat(locale).formatToParts(1000).find((p) => p.type === 'group')
+      ?.value ?? ',';
+
   const handleChange = (newValue: number) => {
     if (newValue < 0) return 0;
     return newValue;
   };
 
   const formatValue = (value: number) => {
-    return formatSimpleBalanceWithDigits(value, 0);
+    return format.number(value, { maximumFractionDigits: 0 });
   };
 
   return (
@@ -58,7 +64,9 @@ export const TokenInput = <T extends FieldValues>({
                 type="text"
                 value={formatValue(currentValue)}
                 onChange={(e) => {
-                  const textValue = (e.target.value || '0').replace(/,/g, '');
+                  const textValue = (e.target.value || '0')
+                    .split(groupSeparator)
+                    .join('');
                   const newValue = handleChange(parseInt(textValue, 10));
                   onChange(newValue);
                 }}

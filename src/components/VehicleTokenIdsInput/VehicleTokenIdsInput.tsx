@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { useState, useCallback, useMemo } from 'react';
 import { TextArea } from '@/components/TextArea';
 import { Label } from '@/components/Label';
@@ -15,11 +16,12 @@ interface VehicleTokenIdsInputProps {
 export const VehicleTokenIdsInput: React.FC<VehicleTokenIdsInputProps> = ({
   vehicleTokenIds,
   onChange,
-  placeholder = 'Enter vehicle token IDs, one per line or comma-separated',
-  label = 'Vehicle Token IDs',
+  placeholder,
+  label,
   error,
   disabled = false,
 }) => {
+  const t = useTranslations('common');
   const [inputValue, setInputValue] = useState(vehicleTokenIds.join('\n'));
   const [validationError, setValidationError] = useState<string>('');
 
@@ -35,21 +37,24 @@ export const VehicleTokenIdsInput: React.FC<VehicleTokenIdsInputProps> = ({
     return Array.from(new Set(ids)); // Remove duplicates
   }, []);
 
-  const validateTokenIds = useCallback((ids: string[]): string => {
-    if (ids.length === 0) return '';
+  const validateTokenIds = useCallback(
+    (ids: string[]): string => {
+      if (ids.length === 0) return '';
 
-    for (const id of ids) {
-      if (!/^\d+$/.test(id)) {
-        return `Invalid token ID: "${id}". All token IDs must be numeric.`;
+      for (const id of ids) {
+        if (!/^\d+$/.test(id)) {
+          return t('vehicleTokenIds.invalid', { id });
+        }
       }
-    }
 
-    if (ids.length > 1000) {
-      return 'Too many token IDs. Maximum of 1000 IDs allowed.';
-    }
+      if (ids.length > 1000) {
+        return t('vehicleTokenIds.tooMany');
+      }
 
-    return '';
-  }, []);
+      return '';
+    },
+    [t],
+  );
 
   const handleInputChange = useCallback(
     (value: string) => {
@@ -79,11 +84,11 @@ export const VehicleTokenIdsInput: React.FC<VehicleTokenIdsInputProps> = ({
 
   return (
     <div className="flex flex-col gap-2.5">
-      <Label>{label}</Label>
+      <Label>{label ?? t('vehicleTokenIds.label')}</Label>
       <TextArea
         value={inputValue}
         onChange={(e) => handleInputChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('vehicleTokenIds.placeholder')}
         disabled={disabled}
         rows={6}
         className={displayError ? 'border-negative' : ''}
@@ -91,19 +96,23 @@ export const VehicleTokenIdsInput: React.FC<VehicleTokenIdsInputProps> = ({
 
       {stats.total > 0 && (
         <div className="text-sm text-muted">
-          {stats.total} token ID{stats.total !== 1 ? 's' : ''} entered
-          {stats.unique !== stats.total && ` (${stats.unique} unique)`}
+          {stats.unique !== stats.total
+            ? t('vehicleTokenIds.enteredUnique', {
+                count: stats.total,
+                unique: stats.unique,
+              })
+            : t('vehicleTokenIds.entered', { count: stats.total })}
         </div>
       )}
 
       {displayError && <TextError errorMessage={displayError} />}
 
       <div className="text-sm text-muted">
-        <p>You can enter vehicle token IDs in the following ways:</p>
+        <p>{t('vehicleTokenIds.helpIntro')}</p>
         <ul className="list-disc list-inside mt-1 space-y-1">
-          <li>One per line: 12345, 67890, 11111</li>
-          <li>Comma-separated: 12345, 67890, 11111</li>
-          <li>Mixed format is also supported</li>
+          <li>{t('vehicleTokenIds.helpPerLine')}</li>
+          <li>{t('vehicleTokenIds.helpComma')}</li>
+          <li>{t('vehicleTokenIds.helpMixed')}</li>
         </ul>
       </div>
     </div>

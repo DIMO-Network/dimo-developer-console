@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import { Label } from '@/components/Label';
@@ -6,6 +7,7 @@ import { TextError } from '@/components/TextError';
 import React from 'react';
 
 export const WebhookDisplayNameField = () => {
+  const t = useTranslations('common');
   const {
     register,
     formState: { errors },
@@ -13,10 +15,10 @@ export const WebhookDisplayNameField = () => {
 
   return (
     <div className={'flex flex-col gap-2.5'}>
-      <Label>Display name</Label>
+      <Label>{t('webhooks.fields.displayName.label')}</Label>
       <TextField
         {...register('displayName')}
-        placeholder="Enter a display name for your webhook (optional)"
+        placeholder={t('webhooks.fields.displayName.placeholder')}
       />
       {errors.displayName && (
         <TextError

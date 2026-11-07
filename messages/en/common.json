@@ -1,5 +1,714 @@
 {
   "languageSwitcher": {
     "label": "Language"
+  },
+  "actions": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "copy": "Copy",
+    "saveChanges": "Save changes",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "continue": "Continue",
+    "done": "Done",
+    "submit": "Submit",
+    "retry": "Try again",
+    "remove": "Remove",
+    "add": "Add",
+    "create": "Create",
+    "download": "Download",
+    "learnMore": "Learn more",
+    "signOut": "Sign out",
+    "refresh": "Refresh"
+  },
+  "accountInfo": {
+    "button": "Account info",
+    "title": "Account Information",
+    "modalTitle": "Account information",
+    "ownerEmail": "Owner email",
+    "walletAddress": "Organization wallet address",
+    "walletCopied": "Wallet address copied to clipboard",
+    "balancesError": "Error while loading balances",
+    "balancesLoading": "Loading your balances..."
+  },
+  "appCard": {
+    "details": "App Details"
+  },
+  "brand": {
+    "dimoLogoAlt": "DIMO"
+  },
+  "copyButton": {
+    "copied": "Value copied to clipboard",
+    "failed": "Failed to copy value"
+  },
+  "createAppModal": {
+    "title": "Create a new developer license"
+  },
+  "creditsWidget": {
+    "currentBalance": "Current Balance"
+  },
+  "support": {
+    "developerSupport": "Developer support"
+  },
+  "buyCredits": {
+    "title": "Buy DCX",
+    "pricing": "The base price to accessing one vehicle is $1.25 per month.",
+    "learnMore": "Learn more.",
+    "amountLabel": "Purchase amount",
+    "amountPositive": "Amount must be greater than 0",
+    "amountMin": "Minimum amount is $10.00",
+    "forAnotherAccount": "Purchase for another account",
+    "accountAddress": "Account address",
+    "invalidAddress": "Invalid Ethereum address",
+    "proceed": "Proceed to payment"
+  },
+  "csvUpload": {
+    "oneFileOnly": "Only one file can be uploaded at a time",
+    "duplicate": "Duplicate file upload",
+    "tooLarge": "File exceeds 50MB limit.",
+    "onlyCsv": "Only .csv files are supported.",
+    "invalidFormat": "Invalid CSV format.",
+    "numericTokenId": "Each row must have a numeric tokenId.",
+    "parseFailed": "Failed to parse CSV.",
+    "listTitle": "List of vehicles",
+    "vehicleCount": "{count, plural, one {# vehicle} other {# vehicles}}",
+    "addVehicles": "Add vehicles",
+    "dropPrompt": "Drag and drop or upload CSV with a list of vehicle IDs",
+    "formatHint": "Please format your CSV with a single column and the header <code>tokenId</code>.",
+    "accepts": "Accepts .csv file types",
+    "maxSize": "Maximum file size 50 MB.",
+    "upload": "Upload"
+  },
+  "datePicker": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "weekdays": {
+      "sun": "Su",
+      "mon": "Mo",
+      "tue": "Tu",
+      "wed": "We",
+      "thu": "Th",
+      "fri": "Fr",
+      "sat": "Sa"
+    }
+  },
+  "devSupportForm": {
+    "userName": "User name",
+    "inquiryType": "Inquiry type",
+    "inquiryPlaceholder": "Select inquiry",
+    "message": "Message",
+    "messagePlaceholder": "Let us know how we can help...",
+    "messageTooLong": "The message should have a maximum of 500 characters",
+    "submit": "Submit"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidUrl": "Please enter a valid URL",
+    "invalidNumber": "Please enter a valid number"
+  },
+  "generateJwt": {
+    "button": "Generate developer JWT",
+    "apiKeyRequired": "Please enter a valid API key",
+    "failed": "Failed to generate developer JWT",
+    "titleDone": "JWT generated",
+    "titleNew": "Generate new JWT",
+    "subtitle": "Test an API key you created for your server: this makes a developer JWT from it and the license's first redirect URI. To get a JWT without an API key, turn on console access and use Copy JWT.",
+    "generating": "Generating JWT...",
+    "apiKeyLabel": "API key",
+    "apiKeyPlaceholder": "Enter your API key here",
+    "done": "Done",
+    "generate": "Generate",
+    "expires": "Expires in 14 days.",
+    "copied": "JWT copied!"
+  },
+  "jsonBlock": {
+    "download": "Download JSON",
+    "copied": "JSON copied",
+    "copyLabel": "Copy JSON"
+  },
+  "licenseCard": {
+    "vehiclesConnected": "Vehicles connected",
+    "noVehicles": "No vehicles connected",
+    "sharingUnavailable": "Sharing status unavailable",
+    "configurations": "{count, plural, one {# configuration} other {# configurations}} →",
+    "sharingCopied": "Sharing link copied",
+    "sharingLink": "Vehicle sharing link",
+    "notConfigured": "Not configured — set up vehicle sharing →",
+    "details": "License details"
+  },
+  "menu": {
+    "logout": "Logout",
+    "signingOut": "Signing out",
+    "open": "Open menu",
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar"
+  },
+  "onboarding": {
+    "title": "Getting Started",
+    "intro": "You're on the way to building with DIMO!",
+    "createAccount": "Create account",
+    "confirmDetails": "Confirm your details",
+    "createLicense": "Create your first license",
+    "createLicenseHint": "Now that your account is set up, it's time to create your first license."
+  },
+  "navigation": {
+    "sections": {
+      "workspace": "Workspace",
+      "resources": "Resources"
+    },
+    "items": {
+      "home": "Home",
+      "licenses": "Licenses",
+      "vehicles": "Vehicles",
+      "webhooks": "Webhooks",
+      "templates": "Templates",
+      "connections": "Connections",
+      "documentation": "Documentation",
+      "apiStatus": "API status",
+      "settings": "Settings"
+    },
+    "pageTitles": {
+      "home": "Home",
+      "licenses": "Licenses",
+      "webhooks": "Webhooks",
+      "templates": "Vehicle templates",
+      "connections": "Connections",
+      "settings": "Settings",
+      "vehicles": "Vehicles",
+      "support": "Support",
+      "vehicle": "Vehicle",
+      "licenseDetails": "License details",
+      "sdkConfigurator": "SDK configurator",
+      "licensedVehicles": "Licensed vehicles",
+      "createWebhook": "Create a webhook",
+      "editWebhook": "Edit webhook",
+      "createConnection": "Create a connection",
+      "connectionDetails": "Connection details",
+      "newTemplate": "New template",
+      "editTemplate": "Edit template"
+    }
+  },
+  "paymentMethod": {
+    "dimo": "Buy with DIMO",
+    "usd": "Buy with USD"
+  },
+  "pendingInvite": {
+    "alreadyMember": "You're already a member of this team.",
+    "title": "Join {teamName} owned by {ownerEmail}?",
+    "description": "You'll see the team's licenses. The owner decides whether you also get data access.",
+    "join": "Join team",
+    "notNow": "Not now",
+    "errors": {
+      "INVITE_INVALID": "This invite link isn't valid any more. Ask the team owner for a new one.",
+      "INVITE_EXPIRED": "This invite has expired. Ask the team owner to resend it.",
+      "INVITE_EMAIL_MISMATCH": "This invite was sent to a different email address. Sign in with that address, then open the invite link again.",
+      "fallback": "We couldn't accept this invite. Open the link again."
+    }
+  },
+  "queryActions": {
+    "copied": "Query copied",
+    "copyFailed": "Could not copy the query",
+    "copy": "Copy query",
+    "download": "Download JSON"
+  },
+  "redirectUri": {
+    "added": "Successfully added the redirect URI.",
+    "createFailed": "Something went wrong while creating the redirect URI",
+    "invalidUrl": "Please enter a valid URL, must include http:// or https://",
+    "duplicate": "The URL is already in the list",
+    "required": "Please enter the redirect URI",
+    "tooLong": "The name should has maximum 150 characters",
+    "add": "Add URI",
+    "deleting": "Deleting the selected redirect URI",
+    "deleted": "Redirect URI deleted",
+    "copied": "Redirect URI copied!",
+    "deleteTitle": "Delete redirect URI",
+    "authorized": "Authorized URIs",
+    "confirmTitle": "Are you sure you want to delete this Redirect URI?",
+    "confirmSubtitle": "You will no longer be able to use this redirect URI in your app."
+  },
+  "errors": {
+    "transactionDenied": "The transaction was denied",
+    "somethingWentWrong": "Something went wrong",
+    "emailRegistered": "The email is already registered",
+    "sessionExpired": "The session has expired please sign in again",
+    "tryAgain": "Please try again",
+    "transactionFailedOnChain": "The transaction failed on-chain, so nothing changed",
+    "generic": "Something went wrong. Please try again.",
+    "unknown": "Unknown error",
+    "notFound": "Not found",
+    "loadFailed": "Could not load this. Please try again.",
+    "copyFailed": "Failed to copy to clipboard"
+  },
+  "sessionExpired": {
+    "errors": {
+      "passkeyFailed": "Couldn't confirm your passkey. Try again, or use an email code.",
+      "codeFailed": "That code didn't work. Check it and try again.",
+      "codeCheckFailed": "Couldn't check that code. Try again.",
+      "sendFailed": "Couldn't send a code. Try again.",
+      "renewFailed": "Couldn't sign you in again. Try again, or sign out.",
+      "startAgain": "That took too long. Start again.",
+      "signedInElsewhere": "Another account is signed in on this browser. Sign out to switch accounts."
+    },
+    "tryAgain": "Try again",
+    "startOver": "Start over",
+    "codeSent": "We sent a 6-digit code to {email}.",
+    "codeLabel": "Code",
+    "continue": "Continue",
+    "resendIn": "Send a new code in {seconds}s",
+    "resend": "Send a new code",
+    "withPasskey": "Continue with passkey",
+    "emailInstead": "Email me a code instead",
+    "emailCode": "Email me a code",
+    "title": "Your session expired",
+    "description": "Sign in again as {email} to keep working. You'll stay on this page.",
+    "signOut": "Sign out"
+  },
+  "spendingLimit": {
+    "failed": "Something went wrong while confirming the transaction",
+    "title": "Set spending limit",
+    "description": "Approve the Developer License to spend $DIMO on your connected wallet, we recommend approving more than $100 USD worth of $DIMO"
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
+  },
+  "team": {
+    "switcher": "Teams",
+    "switchLabel": "Team: {name}. Switch team",
+    "roles": {
+      "OWNER": "Owner",
+      "MEMBER": "Member"
+    },
+    "fallbackName": "Your team",
+    "unavailable": "Couldn't load your teams. Showing your own licenses for now."
+  },
+  "templateEditor": {
+    "divergence": {
+      "setPerTrim": "Set per trim",
+      "shared": "shared",
+      "moveToShared": "Move to shared"
+    },
+    "trim": {
+      "nameLabel": "Trim name",
+      "remove": "Remove trim",
+      "manufacturerCode": "Manufacturer code",
+      "styleName": "Style name",
+      "vinPattern": "VIN pattern",
+      "selectorMissing": "A template with more than one trim cannot have a selector-less trim: it would match every signal and make every decode for this model-year ambiguous. Give this trim a manufacturer code, a style name or a VIN pattern."
+    },
+    "entitlement": {
+      "create": "You can create this template",
+      "licensed": "You can edit this template",
+      "manufacturer": "You can edit this template",
+      "curator": "You can edit anything here",
+      "license-required": "A developer license is needed",
+      "unavailable": "Access couldn't be checked",
+      "readOnly": "{title} — read only",
+      "hardwareLocked": "Which hardware ships with a car is DIMO's call, so the hardware template field stays locked."
+    },
+    "normalisation": {
+      "title": "What the editor changed that you didn't type",
+      "dismiss": "Dismiss"
+    },
+    "notes": {
+      "cleared": "cleared — the attribute is removed, not stored empty",
+      "storedAsNumber": "stored as the number {value}, not the text {text}",
+      "whitespace": "surrounding whitespace removed"
+    },
+    "where": {
+      "template": "template",
+      "trim": "trim {name}"
+    },
+    "grid": {
+      "attribute": "Attribute",
+      "values": "Values",
+      "noSelector": "no selector"
+    }
+  },
+  "toggle": {
+    "label": "toggle"
+  },
+  "timeRange": {
+    "range": "Range",
+    "presets": {
+      "24h": "24 h",
+      "7d": "7 days",
+      "30d": "30 days",
+      "custom": "Custom"
+    },
+    "from": "From (UTC)",
+    "to": "To (UTC)",
+    "invalid": "Start must be before end."
+  },
+  "signIn": {
+    "acceptTerms": "You must accept terms of service and privacy policy"
+  },
+  "vehicleTokenIds": {
+    "placeholder": "Enter vehicle token IDs, one per line or comma-separated",
+    "label": "Vehicle Token IDs",
+    "invalid": "Invalid token ID: \"{id}\". All token IDs must be numeric.",
+    "tooMany": "Too many token IDs. Maximum of 1000 IDs allowed.",
+    "entered": "{count, plural, one {# token ID} other {# token IDs}} entered",
+    "enteredUnique": "{count, plural, one {# token ID} other {# token IDs}} entered ({unique} unique)",
+    "helpIntro": "You can enter vehicle token IDs in the following ways:",
+    "helpPerLine": "One per line: 12345, 67890, 11111",
+    "helpComma": "Comma-separated: 12345, 67890, 11111",
+    "helpMixed": "Mixed format is also supported"
+  },
+  "assetDids": {
+    "placeholder": "Enter vehicle DIDs, one per line or comma-separated",
+    "label": "Asset DIDs",
+    "empty": "Asset DIDs cannot be empty.",
+    "tooLong": "Asset DID too long: \"{id}\". Maximum length is 200 characters.",
+    "tooMany": "Too many vehicle DIDs. Maximum of 1000 DIDs allowed.",
+    "entered": "{count, plural, one {# asset DID} other {# asset DIDs}} entered",
+    "enteredUnique": "{count, plural, one {# asset DID} other {# asset DIDs}} entered ({unique} unique)",
+    "helpIntro": "You can enter vehicle DIDs in the following ways:",
+    "helpPerLine": "One per line:",
+    "helpComma": "Comma-separated:"
+  },
+  "workspaceName": {
+    "updated": "Developer license name updated successfully. Refresh to see your changes.",
+    "inUse": "Developer License name already in use. Please try again using a different name.",
+    "failed": "Failed to update developer license name",
+    "title": "Edit developer license name",
+    "label": "Developer license name",
+    "required": "Developer license name is required",
+    "placeholder": "Enter developer license name",
+    "description": "This is the namespace used across all your apps. It is a public name visible to other developers and users in the ecosystem."
+  },
+  "licenseAlias": {
+    "tooLong": "Use at most 32 characters. Accented letters and emoji count as more than one."
+  },
+  "dataAccess": {
+    "connectWallet": "Connect with your wallet",
+    "connectFailed": "Couldn't connect your wallet. Try again.",
+    "connectPrompt": "Connect with your wallet to read {license}. The team owner gave your wallet access, and the token stays in this browser."
+  },
+  "memberJwt": {
+    "sessionExpired": "Your session has expired. Sign in again.",
+    "challengeFailed": "Couldn't start connecting to this license ({status}). Try again.",
+    "connectFailed": "Couldn't connect your wallet ({status}). Try again.",
+    "noAnswer": "no answer",
+    "propagating": "Access is still propagating — try again in a minute"
+  },
+  "teamCopy": {
+    "grantWarning": "Data access lets {name} use every permission vehicles have granted {license}, including commands, through the DIMO APIs — not only what the console shows. Their queries spend {license}'s DCX credits.",
+    "askForAccess": "Ask {ownerEmail} for data access to {license}.",
+    "noLongerHasAccess": "You no longer have access to this license.",
+    "dataAccessUnavailable": "Data access for team members isn't available yet.",
+    "removedFromTeam": "You're no longer a member of {teamName}.",
+    "removedFromThatTeam": "You're no longer a member of that team.",
+    "signerLocked": "Your access is tied to another wallet. Ask {ownerEmail} to revoke it first.",
+    "signerLockedNoOwner": "Your access is tied to another wallet. Ask the team owner to revoke it first.",
+    "leaveConfirm": "Leave {teamName}? {ownerEmail} will be asked to revoke your data access.",
+    "signerInUse": "This wallet is already recorded as someone else's key, so it can't be used for data access. Contact DIMO support."
+  },
+  "webhooks": {
+    "table": {
+      "fetchError": "There was an error fetching your webhooks",
+      "empty": "You haven’t created any webhooks yet.",
+      "description": "Description",
+      "displayName": "Display name",
+      "service": "Service",
+      "cooldown": "Cooldown",
+      "vehicles": "Vehicles",
+      "errors": "Errors",
+      "status": "Status"
+    },
+    "form": {
+      "genericError": "Something went wrong completing the operation",
+      "cancel": "Cancel",
+      "previous": "Previous",
+      "finish": "Finish",
+      "next": "Next"
+    },
+    "edit": {
+      "title": "Edit webhook",
+      "updated": "Webhook updated successfully",
+      "updateFailed": "Error updating webhook",
+      "saveFirst": "Please save or discard your changes before proceeding",
+      "vehiclesFetchError": "Error fetching subscribed vehicles",
+      "subscribedVehicles": "Subscribed vehicles",
+      "vehicleCount": "{count, plural, one {# vehicle} other {# vehicles}}",
+      "enterAssetDid": "Please enter at least one asset DID.",
+      "unsubscribeFailed": "Failed to unsubscribe vehicles. Please try again.",
+      "unsubscribedCount": "{count, plural, one {Successfully unsubscribed # vehicle} other {Successfully unsubscribed # vehicles}}",
+      "removeTitle": "Remove vehicles",
+      "removeDidsLabel": "Asset DIDs to unsubscribe",
+      "removeDidsPlaceholder": "Enter asset DIDs to unsubscribe from this webhook",
+      "removing": "Removing...",
+      "removeCount": "{count, plural, one {Remove # vehicle} other {Remove # vehicles}}",
+      "subscribeFailed": "Failed to subscribe vehicles. Please try again.",
+      "subscribedCount": "{count, plural, one {Successfully subscribed # vehicle} other {Successfully subscribed # vehicles}}",
+      "addTitle": "Add vehicles",
+      "addDidsLabel": "Asset DIDs to subscribe",
+      "addDidsPlaceholder": "Enter asset DIDs to subscribe to this webhook",
+      "adding": "Adding...",
+      "addCount": "{count, plural, one {Add # vehicle} other {Add # vehicles}}",
+      "vehicleTokenId": "Vehicle token ID",
+      "fetchWebhookError": "Error fetching webhook",
+      "notFound": "No webhook found",
+      "subscribedAll": "Successfully subscribed all vehicles",
+      "subscribeAllFailed": "Failed to subscribe all vehicles",
+      "whoToSubscribe": "Who do you want to subscribe?",
+      "manualControls": "Manual controls",
+      "manualControlsHint": "Manually subscribe or unsubscribe all vehicles linked to this webhook.",
+      "subscribing": "Subscribing...",
+      "subscribeAll": "Subscribe all vehicles",
+      "unsubscribeAll": "Unsubscribe all vehicles",
+      "downloadCsv": "Download CSV",
+      "unsubscribeVehicles": "Unsubscribe vehicles",
+      "unsubscribedAll": "Successfully unsubscribed all vehicles.",
+      "unsubscribeAllFailed": "An error occurred while unsubscribing all vehicles.",
+      "unsubscribeAllConfirm": "Are you sure you want to unsubscribe all the subscribed vehicles? This action cannot be undone.",
+      "unsubscribing": "Unsubscribing...",
+      "unsubscribeAllButton": "Unsubscribe all",
+      "button": "Edit"
+    },
+    "delete": {
+      "mustUnsubscribe": "All vehicles must be unsubscribed before deleting",
+      "deleted": "Successfully deleted webhook",
+      "error": "There was an error deleting your webhook",
+      "deleting": "Deleting webhook...",
+      "success": "Success",
+      "title": "Delete webhook",
+      "successBody": "Webhook successfully deleted",
+      "confirm": "Are you sure you want to delete this webhook? This action cannot be undone.",
+      "done": "Done",
+      "button": "Delete"
+    },
+    "test": {
+      "triggered": "Webhook triggered successfully.",
+      "axiosError": "An error occurred testing the webhook",
+      "error": "There was an error testing your webhook",
+      "sending": "Sending a test...",
+      "title": "Test webhook",
+      "confirm": "Would you like to test this webhook? A test will be sent to the specified Target URI.",
+      "send": "Send a test"
+    },
+    "licenseSelector": {
+      "placeholder": "Select developer license",
+      "label": "Select a developer license"
+    },
+    "details": {
+      "description": "Description",
+      "displayName": "Display name",
+      "service": "Service",
+      "cooldownPeriod": "Cooldown period",
+      "url": "Webhook URL",
+      "status": "Status",
+      "cooldown": "Cooldown",
+      "cooldownSeconds": "{seconds}s"
+    },
+    "generateJwt": {
+      "message": "Please generate a Developer JWT to view your webhook configurations.",
+      "consoleAccessPending": "Getting a developer JWT with console access…",
+      "consoleAccessFailed": "Couldn't get a developer JWT with console access. Use an API key instead."
+    },
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "failed": "Failed"
+    },
+    "statusToggle": {
+      "label": "Status"
+    },
+    "section": {
+      "title": "Webhooks",
+      "create": "+ Create a webhook"
+    },
+    "url": {
+      "label": "Webhook URL"
+    },
+    "toggle": {
+      "updating": "Updating webhook status to {status}",
+      "updated": "Successfully updated webhook status",
+      "failed": "Failed to update webhook status",
+      "enabled": "enabled",
+      "disabled": "disabled"
+    },
+    "fields": {
+      "description": {
+        "label": "Webhook description",
+        "required": "Please enter a webhook description",
+        "placeholder": "Enter a description for your webhook"
+      },
+      "displayName": {
+        "label": "Display name",
+        "placeholder": "Enter a display name for your webhook (optional)"
+      },
+      "cooldown": {
+        "label": "Cooldown",
+        "required": "Please enter a cooldown period in seconds",
+        "invalidNumber": "Please enter a valid number",
+        "negative": "Cooldown must be 0 or greater",
+        "tooLong": "Cooldown cannot exceed 86400 seconds (24 hours)",
+        "placeholder": "Enter cooldown period in seconds (e.g., 30)",
+        "hint": "Minimum time between webhook calls for the same event (0 for realtime)"
+      },
+      "service": {
+        "label": "Service",
+        "placeholder": "Choose a service",
+        "required": "Please select a webhook service"
+      },
+      "targetUrl": {
+        "label": "Webhook URL",
+        "invalid": "Please enter a valid URL",
+        "needsProtocol": "Please enter a valid URL, must include http:// or https://",
+        "placeholder": "Enter the URL where you want to receive events",
+        "hint": "Enter a public, SSL-enabled URL where you will receive events"
+      },
+      "verification": {
+        "label": "Verification token",
+        "required": "Please enter a valid string",
+        "placeholder": "Enter a verification token",
+        "hint": "Choose any unique string to verify ownership of your webhook URL. When we send a verification request, your server must respond with this exact string in plain text. This ensures you control the destination URL."
+      },
+      "subscribe": {
+        "question": "Who do you want to subscribe?",
+        "all": "Subscribe all existing vehicles",
+        "specificLabel": "Select specific vehicles",
+        "specificPlaceholder": "Enter the asset DIDs of vehicles you want to subscribe to this webhook"
+      }
+    },
+    "celBuilder": {
+      "selectEvent": "Select an event",
+      "buildConditions": "Build the conditions",
+      "selectAttribute": "Select attribute",
+      "selectEventPlaceholder": "Select event",
+      "selectOperator": "Select operator",
+      "enterNumber": "Enter a number",
+      "selectValue": "Select value",
+      "generate": "Generate CEL",
+      "true": "True",
+      "false": "False",
+      "operators": {
+        "equal": "is equal to",
+        "greater": "is greater than",
+        "less": "is less than"
+      }
+    },
+    "validation": {
+      "valueRequired": "Value is required",
+      "selectEvent": "Please select an event name",
+      "oneCondition": "Must have exactly one CEL condition",
+      "completeConditions": "Please complete all condition fields before saving."
+    },
+    "events": {
+      "harshBraking": "Harsh Braking",
+      "extremeBraking": "Extreme Braking",
+      "harshAcceleration": "Harsh Acceleration",
+      "harshCornering": "Harsh Cornering",
+      "collision": "Collision"
+    },
+    "conditions": {
+      "speed": "Speed",
+      "obdIsPluggedIn": "Device Plugged In",
+      "isIgnitionOn": "Is Ignition On",
+      "batteryCurrentPower": "Battery current power",
+      "batteryIsCharging": "Battery is charging",
+      "odometer": "Odometer",
+      "chargeLevel": "Charge level",
+      "fuelRelative": "Fuel System Relative Level",
+      "fuelAbsolute": "Fuel System Absolute Level",
+      "tireFrontLeft": "Tire pressure (front left)",
+      "tireFrontRight": "Tire pressure (front right)",
+      "tireBackLeft": "Tire pressure (back left)",
+      "tireBackRight": "Tire pressure (back right)",
+      "engineSpeed": "Engine Speed",
+      "throttlePosition": "Throttle Position"
+    },
+    "steps": {
+      "configure": "Configure",
+      "delivery": "Specify delivery",
+      "vehicles": "Specify vehicles"
+    },
+    "create": {
+      "created": "Webhook created successfully",
+      "noVehicles": "No vehicles subscribed",
+      "subscribedCount": "{count, plural, one {Successfully subscribed # vehicle} other {Successfully subscribed # vehicles}}"
+    },
+    "service": {
+      "signals": "VSS Signals",
+      "events": "Events"
+    }
+  },
+  "freshness": {
+    "never": "Never",
+    "justNow": "just now",
+    "minutesAgo": "{count, number} min ago",
+    "hoursAgo": "{count, number} h ago",
+    "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
+    "absolute": "{date}, {time} UTC",
+    "noDate": "—"
+  },
+  "loadingModal": {
+    "processing": "Processing"
+  },
+  "modal": {
+    "dialog": "Dialog"
+  },
+  "table": {
+    "showingNone": "Showing 0 of 0",
+    "showing": "Showing {first}–{last} of {total}",
+    "label": "Table"
+  },
+  "transactions": {
+    "insufficientBalance": "Insufficient DIMO or DCX balance",
+    "connectionNameTooLong": "Connection name is too long. Please use a name that is 32 characters or fewer.",
+    "balanceCheckFailed": "Couldn't check your DIMO balance. Try again.",
+    "insufficientDimo": "Insufficient DIMO balance. You need at least {required} DIMO tokens (approximately ${usd}) to mint a connection.",
+    "notEnoughDimo": "You do not have enough $DIMO to mint a connection.",
+    "connectionNameTaken": "This connection name is already taken. Please choose a different name and try again."
+  },
+  "signals": {
+    "speed": "Speed",
+    "powertrainTransmissionTravelledDistance": "Odometer",
+    "powertrainCombustionEngineSpeed": "Engine speed",
+    "powertrainFuelSystemRelativeLevel": "Fuel level",
+    "powertrainRange": "Range",
+    "powertrainTractionBatteryStateOfChargeCurrent": "Battery charge",
+    "powertrainTractionBatteryChargingIsCharging": "Charging",
+    "currentLocationCoordinates": "Location",
+    "currentLocationApproximateCoordinates": "Approximate location",
+    "currentLocationLatitude": "Latitude",
+    "currentLocationLongitude": "Longitude",
+    "obdDTCList": "Diagnostic codes",
+    "obdEngineLoad": "Engine load",
+    "obdRunTime": "Engine run time",
+    "lowVoltageBatteryCurrentVoltage": "12V battery voltage",
+    "exteriorAirTemperature": "Outside air temperature",
+    "isIgnitionOn": "Ignition on"
+  },
+  "permissions": {
+    "1": "Non-location data",
+    "2": "Commands",
+    "3": "Current location",
+    "4": "All-time location",
+    "5": "VIN credential",
+    "6": "Live data",
+    "7": "Raw data",
+    "8": "Approximate location",
+    "unknown": "Privilege {id}"
+  },
+  "status": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "success": "Success",
+    "copied": "Copied"
+  },
+  "pagination": {
+    "previous": "Previous page",
+    "next": "Next page",
+    "page": "Page {page}"
   }
 }

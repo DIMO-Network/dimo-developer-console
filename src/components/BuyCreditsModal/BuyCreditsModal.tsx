@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useContext, useState, type FC } from 'react';
 import { CreditsContext } from '@/context/creditsContext';
 import { Modal } from '@/components/Modal';
@@ -32,6 +33,7 @@ interface IForm {
 }
 
 export const BuyCreditsModal: FC = () => {
+  const t = useTranslations('common');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { isOpen, setIsOpen } = useContext(CreditsContext);
   const { currentUser } = useGlobalAccount();
@@ -136,32 +138,30 @@ export const BuyCreditsModal: FC = () => {
         >
           <div className="buy-credits-header">
             <Title className="text-panel-title" component="h3">
-              Buy DCX
+              {t('buyCredits.title')}
             </Title>
           </div>
           <div className="buy-credits-description">
-            <p className="description">
-              The base price to accessing one vehicle is $1.25 per month.
-            </p>
+            <p className="description">{t('buyCredits.pricing')}</p>
             <a
               href="https://dimo.org/pricing"
               target="_blank"
               className="text-ink underline underline-offset-2"
             >
-              Learn more.
+              {t('buyCredits.learnMore')}
             </a>
           </div>
           <div className="w-full gap-y-4">
             <label htmlFor="amount" className="text-label text-muted">
-              Purchase amount
+              {t('buyCredits.amountLabel')}
               <MoneyField
                 placeholder="0.00"
                 {...register('amount', {
                   required: true,
                   validate: {
                     positive: (value) =>
-                      Number(value) > 0 || 'Amount must be greater than 0',
-                    min: (value) => Number(value) >= 10 || `Minimum amount is $10.00`,
+                      Number(value) > 0 || t('buyCredits.amountPositive'),
+                    min: (value) => Number(value) >= 10 || t('buyCredits.amountMin'),
                   },
                 })}
               />
@@ -175,20 +175,20 @@ export const BuyCreditsModal: FC = () => {
                 onToggle={(checked) => setIsForAnotherAccount(checked)}
               />
               <label className="text-body-sm text-fg ml-2">
-                Purchase for another account
+                {t('buyCredits.forAnotherAccount')}
               </label>
             </div>
             {isForAnotherAccount ? (
               <>
                 <label className="text-label text-muted">
-                  Account address
+                  {t('buyCredits.accountAddress')}
                   <TextField
                     placeholder="0x123..."
                     {...register('externalTargetWallet', {
                       required: isForAnotherAccount,
                       validate: {
                         validAddress: (value) => {
-                          return isValidAddress(value) || 'Invalid Ethereum address';
+                          return isValidAddress(value) || t('buyCredits.invalidAddress');
                         },
                       },
                     })}
@@ -204,7 +204,7 @@ export const BuyCreditsModal: FC = () => {
           </div>
           <div className="credits-action w-full mt-4">
             <Button type="submit" className="h-9! w-full" loading={isLoading}>
-              Proceed to payment
+              {t('buyCredits.proceed')}
             </Button>
           </div>
         </form>

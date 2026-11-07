@@ -1,5 +1,9 @@
 // Copy shared with the other console-teams parts (contracts index C8). Change
 // it there first.
+// English only. The same sentences are common.json's `teamCopy.*` messages,
+// which components render with useTranslations('common'); these functions
+// stay for callers that have not moved over (services, the settings and
+// vehicles pages). `formatList` becomes useFormatter().list(names).
 export const formatList = (names: string[]): string => {
   if (names.length <= 1) return names[0] ?? '';
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;

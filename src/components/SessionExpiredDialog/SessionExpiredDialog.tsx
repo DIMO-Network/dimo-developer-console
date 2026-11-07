@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { FC, useEffect, useRef, useState } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { Modal } from '@/components/Modal';
@@ -23,15 +24,15 @@ const RESEND_AFTER_SECONDS = 30;
 // Past this, the dialog offers the email code without waiting for the lookup.
 const LOOKUP_TIMEOUT_MS = 5_000;
 
-export const PASSKEY_FAILED =
-  "Couldn't confirm your passkey. Try again, or use an email code.";
-export const CODE_FAILED = "That code didn't work. Check it and try again.";
-export const CODE_CHECK_FAILED = "Couldn't check that code. Try again.";
-export const SEND_FAILED = "Couldn't send a code. Try again.";
-export const RENEW_FAILED = "Couldn't sign you in again. Try again, or sign out.";
-export const START_AGAIN = 'That took too long. Start again.';
-export const SIGNED_IN_ELSEWHERE =
-  'Another account is signed in on this browser. Sign out to switch accounts.';
+// Message keys in the common namespace; the error state holds one and the
+// dialog translates it.
+export const PASSKEY_FAILED = 'sessionExpired.errors.passkeyFailed';
+export const CODE_FAILED = 'sessionExpired.errors.codeFailed';
+export const CODE_CHECK_FAILED = 'sessionExpired.errors.codeCheckFailed';
+export const SEND_FAILED = 'sessionExpired.errors.sendFailed';
+export const RENEW_FAILED = 'sessionExpired.errors.renewFailed';
+export const START_AGAIN = 'sessionExpired.errors.startAgain';
+export const SIGNED_IN_ELSEWHERE = 'sessionExpired.errors.signedInElsewhere';
 
 // A proven key with less left than this is not worth renewing with: the new
 // session keeps the key's expiry.
@@ -61,6 +62,7 @@ export const SessionExpiredDialog: FC<Props> = ({
   onStale,
   onSignOut,
 }) => {
+  const t = useTranslations('common');
   const [hasPasskey, setHasPasskey] = useState<boolean | null>(null);
   // Like the sign-in page: a passkey only where this browser can use one.
   const { isPasskeyAvailable } = usePasskey();
@@ -232,10 +234,10 @@ export const SessionExpiredDialog: FC<Props> = ({
       return (
         <>
           <Button loading={busy} disabled={signingOut} onClick={() => void tryAgain()}>
-            Try again
+            {t('sessionExpired.tryAgain')}
           </Button>
           <Button variant="ghost" disabled={busy || signingOut} onClick={startOver}>
-            Start over
+            {t('sessionExpired.startOver')}
           </Button>
         </>
       );
@@ -249,9 +251,11 @@ export const SessionExpiredDialog: FC<Props> = ({
             void withCode();
           }}
         >
-          <p className="text-muted">We sent a 6-digit code to {account.email}.</p>
+          <p className="text-muted">
+            {t('sessionExpired.codeSent', { email: account.email })}
+          </p>
           <label htmlFor="session-expired-code" className="text-body-sm text-fg">
-            Code
+            {t('sessionExpired.codeLabel')}
           </label>
           <TextField
             id="session-expired-code"
@@ -265,7 +269,7 @@ export const SessionExpiredDialog: FC<Props> = ({
             disabled={signingOut}
           />
           <Button type="submit" loading={busy} disabled={code.length !== 6 || signingOut}>
-            Continue
+            {t('sessionExpired.continue')}
           </Button>
           <Button
             type="button"
@@ -273,7 +277,9 @@ export const SessionExpiredDialog: FC<Props> = ({
             disabled={busy || signingOut || resendIn > 0}
             onClick={() => void sendCode()}
           >
-            {resendIn > 0 ? `Send a new code in ${resendIn}s` : 'Send a new code'}
+            {resendIn > 0
+              ? t('sessionExpired.resendIn', { seconds: resendIn })
+              : t('sessionExpired.resend')}
           </Button>
         </form>
       );
@@ -283,21 +289,21 @@ export const SessionExpiredDialog: FC<Props> = ({
       return (
         <>
           <Button loading={busy} disabled={signingOut} onClick={() => void withPasskey()}>
-            Continue with passkey
+            {t('sessionExpired.withPasskey')}
           </Button>
           <Button
             variant="ghost"
             disabled={busy || signingOut}
             onClick={() => void sendCode()}
           >
-            Email me a code instead
+            {t('sessionExpired.emailInstead')}
           </Button>
         </>
       );
     }
     return (
       <Button loading={busy} disabled={signingOut} onClick={() => void sendCode()}>
-        Email me a code
+        {t('sessionExpired.emailCode')}
       </Button>
     );
   };
@@ -312,23 +318,22 @@ export const SessionExpiredDialog: FC<Props> = ({
     >
       <div className="flex flex-col gap-4">
         <Title component="h2" className="text-panel-title text-ink">
-          Your session expired
+          {t('sessionExpired.title')}
         </Title>
         {!otpId && !proven && (
           <p className="text-muted">
-            Sign in again as {account.email} to keep working. You&apos;ll stay on this
-            page.
+            {t('sessionExpired.description', { email: account.email })}
           </p>
         )}
         {choices()}
         {error && (
           <p role="alert" className="text-body-sm text-negative">
-            {error}
+            {t(error)}
           </p>
         )}
         {/* Always available: a hung request must not trap the user here. */}
         <Button variant="ghost" loading={signingOut} onClick={signOut}>
-          Sign out
+          {t('sessionExpired.signOut')}
         </Button>
       </div>
     </Modal>

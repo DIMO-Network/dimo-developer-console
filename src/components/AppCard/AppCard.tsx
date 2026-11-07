@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { type FC } from 'react';
 import { cn } from '@/lib/utils';
 import { DeveloperBoardIcon } from '@/components/Icons';
@@ -12,6 +13,7 @@ interface IProps extends Partial<IApp> {
 }
 
 export const AppCard: FC<IProps> = ({ name, description = '', className = '', id }) => {
+  const t = useTranslations('common');
   return (
     <div className={cn('app-card', className)}>
       <div className="content">
@@ -22,7 +24,7 @@ export const AppCard: FC<IProps> = ({ name, description = '', className = '', id
         {description && <p className="app-card-description">{description}</p>}
         <Anchor href={`/app/details/${id}`}>
           <Button variant="secondary" className="w-full h-9!">
-            App Details
+            {t('appCard.details')}
           </Button>
         </Anchor>
       </div>

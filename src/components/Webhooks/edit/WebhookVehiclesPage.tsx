@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { EditWebhookFormState, Webhook } from '@/types/webhook';
 import { useEditWebhookContext } from '@/hoc/EditWebhookProvider';
 import { BackButton as BasicBackButton } from '@/components/BackButton';
@@ -26,10 +27,11 @@ export const WebhookVehiclesPage = ({
 };
 
 const BackButton = ({ onBack }: { onBack: () => void }) => {
+  const t = useTranslations('common');
   return (
     <div className="flex items-center gap-2">
       <BasicBackButton onBack={onBack} />
-      Edit webhook
+      {t('webhooks.edit.title')}
     </div>
   );
 };

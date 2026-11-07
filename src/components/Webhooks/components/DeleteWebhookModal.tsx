@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { useCallback, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { deleteWebhook } from '@/services/webhook';
@@ -27,12 +28,13 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
   onSuccess,
   clientId,
 }) => {
+  const t = useTranslations('common');
   const [isDeleted, setIsDeleted] = useState(false);
   const hasSubscribedVehicles = useHasSubscribedVehicles(webhook.id, clientId);
 
   const onDelete = () => {
     if (hasSubscribedVehicles) {
-      throw new Error('All vehicles must be unsubscribed before deleting');
+      throw new Error(t('webhooks.delete.mustUnsubscribe'));
     }
     return deleteWebhook({ webhookId: webhook.id, token: getDevJwt(clientId) ?? '' });
   };
@@ -47,12 +49,12 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
   const { mutate, isPending } = useMutation({
     mutationFn: onDelete,
     onSuccess: () => {
-      toast.success('Successfully deleted webhook');
+      toast.success(t('webhooks.delete.deleted'));
       setIsDeleted(true);
       onSuccess?.();
     },
     onError: (err) => {
-      let errorMessage = 'There was an error deleting your webhook';
+      let errorMessage = t('webhooks.delete.error');
       if (err instanceof Error) {
         errorMessage = err.message ?? errorMessage;
       }
@@ -64,9 +66,9 @@ export const DeleteWebhookModal: React.FC<IProps> = ({
   const modalState = isPending ? 'loading' : isDeleted ? 'success' : 'confirm';
 
   const titleMap = {
-    loading: 'Deleting webhook...',
-    success: 'Success',
-    confirm: 'Delete webhook',
+    loading: t('webhooks.delete.deleting'),
+    success: t('webhooks.delete.success'),
+    confirm: t('webhooks.delete.title'),
   };
 
   return (
@@ -88,6 +90,7 @@ const DeleteWebhookBody: React.FC<{ modalState: string; webhook: Webhook }> = ({
   modalState,
   webhook,
 }) => {
+  const t = useTranslations('common');
   if (modalState === 'loading') {
     return (
       <div className="flex flex-1 justify-center items-center">
@@ -96,11 +99,11 @@ const DeleteWebhookBody: React.FC<{ modalState: string; webhook: Webhook }> = ({
     );
   }
   if (modalState === 'success') {
-    return <p>Webhook successfully deleted</p>;
+    return <p>{t('webhooks.delete.successBody')}</p>;
   }
   return (
     <div className="flex flex-col gap-4">
-      <p>Are you sure you want to delete this webhook? This action cannot be undone.</p>
+      <p>{t('webhooks.delete.confirm')}</p>
       <WebhookDetailsCard webhook={webhook} />
     </div>
   );
@@ -111,21 +114,22 @@ const DeleteWebhookFooter: React.FC<{
   onClose: () => void;
   onDelete: () => void;
 }> = ({ modalState, onClose, onDelete }) => {
+  const t = useTranslations('common');
   if (modalState === 'loading') return null;
   if (modalState === 'success') {
     return (
       <Button onClick={onClose} variant="secondary">
-        Done
+        {t('webhooks.delete.done')}
       </Button>
     );
   }
   return (
     <div className="flex flex-col gap-4">
       <Button onClick={onDelete} variant="destructive">
-        Delete webhook
+        {t('webhooks.delete.title')}
       </Button>
       <Button variant="secondary" onClick={onClose}>
-        Cancel
+        {t('actions.cancel')}
       </Button>
     </div>
   );

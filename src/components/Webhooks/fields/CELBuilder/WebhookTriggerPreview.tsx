@@ -1,11 +1,14 @@
+import { useTranslations } from 'next-intl';
 import { WebhookFormInput } from '@/types/webhook';
 import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { formatAndGenerateCEL, validateCel } from '@/utils/webhook';
+import { errorText } from '@/utils/localizedError';
 import { captureException } from '@sentry/nextjs';
 import { Button } from '@/components/Button';
 
 export const WebhookTriggerPreview = ({ cel }: { cel: WebhookFormInput['cel'] }) => {
+  const t = useTranslations('common');
   const [generatedCEL, setGeneratedCEL] = useState<string>();
 
   const generateCelExpression = useCallback(() => {
@@ -18,7 +21,7 @@ export const WebhookTriggerPreview = ({ cel }: { cel: WebhookFormInput['cel'] })
       generateCelExpression();
     } catch (err) {
       captureException(err);
-      toast.error((err as Error).message);
+      toast.error(errorText(t, err, (err as Error).message));
     }
   };
 
@@ -37,7 +40,7 @@ export const WebhookTriggerPreview = ({ cel }: { cel: WebhookFormInput['cel'] })
           variant="secondary"
           className="self-start"
         >
-          Generate CEL
+          {t('webhooks.celBuilder.generate')}
         </Button>
       </div>
       {!!generatedCEL && (

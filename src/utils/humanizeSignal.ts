@@ -20,9 +20,11 @@ const OVERRIDES: Record<string, string> = {
   isIgnitionOn: 'Ignition on',
 };
 
-export const humanizeSignal = (name: string): string => {
+// Pass the common-namespace `t` to translate the named overrides (`signals.<name>`);
+// the generic split of other names is English only.
+export const humanizeSignal = (name: string, t?: (key: string) => string): string => {
   const override = OVERRIDES[name];
-  if (override) return override;
+  if (override) return t ? t(`signals.${name}`) : override;
   const words = name
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/([A-Za-z])(\d)/g, '$1 $2')

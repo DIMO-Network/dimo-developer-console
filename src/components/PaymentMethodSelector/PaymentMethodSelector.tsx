@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { type FC } from 'react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 
@@ -20,6 +21,7 @@ export const PaymentMethodSelector = <T extends FieldValues>({
   name,
   control,
 }: IProps<T>) => {
+  const t = useTranslations('common');
   return (
     <Controller
       name={name as Path<T>}
@@ -32,7 +34,7 @@ export const PaymentMethodSelector = <T extends FieldValues>({
                 selected: currentValue?.type === 'wallet',
               })}
               selected={currentValue?.type === 'wallet'}
-              method="Buy with DIMO"
+              method={t('paymentMethod.dimo')}
               Icon={WalletIcon}
               onClick={() => {
                 onChange({ type: 'wallet' });
@@ -43,7 +45,7 @@ export const PaymentMethodSelector = <T extends FieldValues>({
                 selected: currentValue?.type === 'usd',
               })}
               selected={currentValue?.type === 'usd'}
-              method="Buy with USD"
+              method={t('paymentMethod.usd')}
               onClick={() => {
                 onChange({ type: 'usd' });
               }}

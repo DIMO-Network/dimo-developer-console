@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { useCallback } from 'react';
 import { requestDexChallenge, submitDexChallenge } from '@/actions/dimoAuth';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
@@ -23,12 +24,12 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // errors fail at once as MemberDevJwtError; a
 // signing error is rethrown unchanged. dex checks the domain.
 export const useMemberDevJwt = () => {
+  const t = useTranslations('common');
   const { validateCurrentSession } = useGlobalAccount();
   return useCallback(
     async ({ clientId, domain }: { clientId: string; domain: string }) => {
       const session = await validateCurrentSession();
-      if (!session)
-        throw new MemberDevJwtError('Your session has expired. Sign in again.');
+      if (!session) throw new MemberDevJwtError(t('memberJwt.sessionExpired'));
       // Lazy: @/services/turnkeyAccount pulls the Turnkey config, which needs env.
       const { getSessionEoaAccount } = await import('@/services/turnkeyAccount');
       const account = await getSessionEoaAccount(session);
@@ -40,7 +41,9 @@ export const useMemberDevJwt = () => {
         });
         if (!challenge.ok) {
           throw new MemberDevJwtError(
-            `Couldn't start connecting to this license (${challenge.status || 'no answer'}). Try again.`,
+            t('memberJwt.challengeFailed', {
+              status: challenge.status || t('memberJwt.noAnswer'),
+            }),
           );
         }
         const signedChallenge = await account.signMessage({
@@ -59,13 +62,13 @@ export const useMemberDevJwt = () => {
         const status = token.ok ? 0 : token.status;
         if (status < 400 || status >= 500) {
           throw new MemberDevJwtError(
-            `Couldn't connect your wallet (${status || 'no answer'}). Try again.`,
+            t('memberJwt.connectFailed', { status: status || t('memberJwt.noAnswer') }),
           );
         }
         if (attempt < MEMBER_JWT_ATTEMPTS) await wait(MEMBER_JWT_RETRY_MS);
       }
-      throw new MemberDevJwtError('Access is still propagating — try again in a minute');
+      throw new MemberDevJwtError(t('memberJwt.propagating'));
     },
-    [validateCurrentSession],
+    [validateCurrentSession, t],
   );
 };

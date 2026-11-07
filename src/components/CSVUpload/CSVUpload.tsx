@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 import Papa from 'papaparse';
 import { ArrowUpTrayIcon } from '@heroicons/react/20/solid';
@@ -24,25 +25,26 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
   showTitle = true,
   onFileUpload,
 }) => {
+  const t = useTranslations('common');
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFile = (file: File) => {
     if (fileInfo.length > 0) {
-      return toast.error('Only one file can be uploaded at a time');
+      return toast.error(t('csvUpload.oneFileOnly'));
     }
 
     if (fileInfo.some((f) => f.name === file.name)) {
-      return toast.error('Duplicate file upload');
+      return toast.error(t('csvUpload.duplicate'));
     }
 
     if (file.size > 50 * 1024 * 1024) {
-      setError('File exceeds 50MB limit.');
+      setError(t('csvUpload.tooLarge'));
       return;
     }
 
     if (!file.name.endsWith('.csv')) {
-      setError('Only .csv files are supported.');
+      setError(t('csvUpload.onlyCsv'));
       return;
     }
 
@@ -54,7 +56,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
         const { data, errors } = results;
 
         if (errors.length) {
-          setError('Invalid CSV format.');
+          setError(t('csvUpload.invalidFormat'));
           return;
         }
 
@@ -62,7 +64,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
         for (const row of data as Record<string, string>[]) {
           const id = row[CSV_UPLOAD_ROW_TITLE];
           if (!id || isNaN(Number(id))) {
-            setError('Each row must have a numeric tokenId.');
+            setError(t('csvUpload.numericTokenId'));
             return;
           }
           ids.push(id);
@@ -73,7 +75,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
         onChange([...vehicleTokenIds, ...ids]);
         onFileUpload(file);
       },
-      error: () => setError('Failed to parse CSV.'),
+      error: () => setError(t('csvUpload.parseFailed')),
     });
   };
 
@@ -108,7 +110,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
     <>
       {fileInfo.length > 0 && (
         <div className="space-y-2 text-left mb-6">
-          <Title className="text-card-title">List of vehicles</Title>
+          <Title className="text-card-title">{t('csvUpload.listTitle')}</Title>
           {fileInfo.map((f, idx) => (
             <div
               key={idx}
@@ -116,7 +118,9 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
             >
               <span className="text-body-sm">{f.name}</span>
               <div className="flex items-center gap-4 text-body-sm">
-                <span className="text-muted">{f.count} vehicles</span>
+                <span className="text-muted">
+                  {t('csvUpload.vehicleCount', { count: f.count })}
+                </span>
                 <button
                   onClick={() => handleDelete(idx)}
                   className="text-muted transition-colors hover:text-negative"
@@ -128,7 +132,9 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           ))}
         </div>
       )}
-      {showTitle && <Title className="text-card-title">Add vehicles</Title>}
+      {showTitle && (
+        <Title className="text-card-title">{t('csvUpload.addVehicles')}</Title>
+      )}
       <div
         onDragOver={(e) => e.preventDefault()}
         onDragEnter={() => setIsDragging(true)}
@@ -138,17 +144,16 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           isDragging ? 'border-outline-strong bg-highest' : 'border-outline'
         }`}
       >
-        <p className="text-body font-medium text-ink">
-          Drag and drop or upload CSV with a list of vehicle IDs
+        <p className="text-body font-medium text-ink">{t('csvUpload.dropPrompt')}</p>
+        <p className="text-body-sm text-muted mt-4">
+          {t.rich('csvUpload.formatHint', {
+            code: (chunks) => <code className="font-mono text-code">{chunks}</code>,
+          })}
         </p>
         <p className="text-body-sm text-muted mt-4">
-          Please format your CSV with a single column and the header{' '}
-          <code className="font-mono text-code">tokenId</code>.
-        </p>
-        <p className="text-body-sm text-muted mt-4">
-          Accepts .csv file types
+          {t('csvUpload.accepts')}
           <br />
-          Maximum file size 50 MB.
+          {t('csvUpload.maxSize')}
         </p>
 
         {/* sr-only (not display:none) keeps the file input in the tab order;
@@ -157,7 +162,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
           <span>
             <ArrowUpTrayIcon className={'w-5 h-5'} />
           </span>
-          Upload
+          {t('csvUpload.upload')}
           <input
             type="file"
             accept=".csv"

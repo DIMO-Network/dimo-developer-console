@@ -6,6 +6,9 @@ export interface Normalisation {
   /** null means the attribute was removed. */
   to: AttributeValue | null;
   reason: string;
+  /** The same reason as a common-namespace message; the panel shows it when set. */
+  reasonKey?: string;
+  reasonValues?: Record<string, string | number>;
 }
 
 export type CoerceResult =
@@ -33,6 +36,7 @@ export function coerce(def: AttributeDef, raw: string, where = 'template'): Coer
         from: raw,
         to: null,
         reason: 'cleared — the attribute is removed, not stored empty',
+        reasonKey: 'templateEditor.notes.cleared',
       },
     };
   }
@@ -84,6 +88,8 @@ export function coerce(def: AttributeDef, raw: string, where = 'template'): Coer
               from: raw,
               to: n,
               reason: `stored as the number ${n}, not the text ${JSON.stringify(raw.trim())}`,
+              reasonKey: 'templateEditor.notes.storedAsNumber',
+              reasonValues: { value: n, text: JSON.stringify(raw.trim()) },
             },
           };
     }
@@ -104,6 +110,7 @@ export function coerce(def: AttributeDef, raw: string, where = 'template'): Coer
               from: raw,
               to: trimmed,
               reason: 'surrounding whitespace removed',
+              reasonKey: 'templateEditor.notes.whitespace',
             },
           };
   }

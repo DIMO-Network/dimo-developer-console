@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import { Label } from '@/components/Label';
@@ -6,6 +7,7 @@ import { TextError } from '@/components/TextError';
 import React from 'react';
 
 export const WebhookVerificationTokenField = () => {
+  const t = useTranslations('common');
   const {
     register,
     formState: { errors },
@@ -13,19 +15,15 @@ export const WebhookVerificationTokenField = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      <Label>Verification token</Label>
+      <Label>{t('webhooks.fields.verification.label')}</Label>
       <TextField
         className="font-mono text-code"
         {...register('verificationToken', {
-          required: 'Please enter a valid string',
+          required: t('webhooks.fields.verification.required'),
         })}
-        placeholder="Enter a verification token"
+        placeholder={t('webhooks.fields.verification.placeholder')}
       />
-      <p className="text-body-sm text-muted">
-        Choose any unique string to verify ownership of your webhook URL. When we send a
-        verification request, your server must respond with this exact string in plain
-        text. This ensures you control the destination URL.
-      </p>
+      <p className="text-body-sm text-muted">{t('webhooks.fields.verification.hint')}</p>
       {errors.verificationToken && (
         <TextError
           errorMessage={

@@ -5,6 +5,7 @@ import {
   WebhookFormInput,
 } from '@/types/webhook';
 import { RegisterOptions } from 'react-hook-form';
+import { LocalizedError } from '@/utils/localizedError';
 
 export const extractCELFromWebhook = (webhook: Webhook): WebhookFormInput['cel'] => {
   const { metricName, condition } = webhook;
@@ -31,124 +32,128 @@ export type InputType = 'number' | 'boolean';
 
 interface ConditionConfig {
   field: string;
-  label: string;
+  labelKey: string;
   inputType: InputType;
   validation: RegisterOptions;
 }
 
 const numericValidation: RegisterOptions = {
-  required: 'Value is required',
+  required: 'webhooks.validation.valueRequired',
   validate: (val: string) => !isNaN(Number(val)),
 };
 
 const booleanValidation: RegisterOptions = {
-  required: 'Value is required',
+  required: 'webhooks.validation.valueRequired',
   validate: (value: string) => {
     const parsedValue = Number(value);
     return parsedValue === 1 || parsedValue === 0;
   },
 };
 
-export const eventNamesByService: Record<string, { value: string; label: string }[]> = {
-  events: [
-    { value: 'behavior.harshBraking', label: 'Harsh Braking' },
-    { value: 'behavior.extremeBraking', label: 'Extreme Braking' },
-    { value: 'behavior.harshAcceleration', label: 'Harsh Acceleration' },
-    { value: 'behavior.harshCornering', label: 'Harsh Cornering' },
-    { value: 'safety.collision', label: 'Collision' },
-  ],
-};
+export const eventNamesByService: Record<string, { value: string; labelKey: string }[]> =
+  {
+    events: [
+      { value: 'behavior.harshBraking', labelKey: 'webhooks.events.harshBraking' },
+      { value: 'behavior.extremeBraking', labelKey: 'webhooks.events.extremeBraking' },
+      {
+        value: 'behavior.harshAcceleration',
+        labelKey: 'webhooks.events.harshAcceleration',
+      },
+      { value: 'behavior.harshCornering', labelKey: 'webhooks.events.harshCornering' },
+      { value: 'safety.collision', labelKey: 'webhooks.events.collision' },
+    ],
+  };
 
 export const isEventService = (service: string): boolean => service === 'events';
 
 export const conditionsConfig: ConditionConfig[] = [
   {
     field: 'vss.speed',
-    label: 'Speed',
+    labelKey: 'webhooks.conditions.speed',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.obdIsPluggedIn',
-    label: 'Device Plugged In',
+    labelKey: 'webhooks.conditions.obdIsPluggedIn',
     inputType: 'boolean',
     validation: booleanValidation,
   },
   {
     field: 'vss.isIgnitionOn',
-    label: 'Is Ignition On',
+    labelKey: 'webhooks.conditions.isIgnitionOn',
     inputType: 'boolean',
     validation: booleanValidation,
   },
   {
     field: 'vss.powertrainTractionBatteryCurrentPower',
-    label: 'Battery current power',
+    labelKey: 'webhooks.conditions.batteryCurrentPower',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.powertrainTractionBatteryChargingIsCharging',
-    label: 'Battery is charging',
+    labelKey: 'webhooks.conditions.batteryIsCharging',
     inputType: 'boolean',
     validation: booleanValidation,
   },
   {
     field: 'vss.powertrainTransmissionTravelledDistance',
-    label: 'Odometer',
+    labelKey: 'webhooks.conditions.odometer',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.powertrainTractionBatteryStateOfChargeCurrent',
-    label: 'Charge level',
+    labelKey: 'webhooks.conditions.chargeLevel',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.powertrainFuelSystemRelativeLevel',
-    label: 'Fuel System Relative Level',
+    labelKey: 'webhooks.conditions.fuelRelative',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.powertrainFuelSystemAbsoluteLevel',
-    label: 'Fuel System Absolute Level',
+    labelKey: 'webhooks.conditions.fuelAbsolute',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.chassisAxleRow1WheelLeftTirePressure',
-    label: 'Tire pressure (front left)',
+    labelKey: 'webhooks.conditions.tireFrontLeft',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.chassisAxleRow1WheelRightTirePressure',
-    label: 'Tire pressure (front right)',
+    labelKey: 'webhooks.conditions.tireFrontRight',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.chassisAxleRow2WheelLeftTirePressure',
-    label: 'Tire pressure (back left)',
+    labelKey: 'webhooks.conditions.tireBackLeft',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.chassisAxleRow2WheelRightTirePressure',
-    label: 'Tire pressure (back right)',
+    labelKey: 'webhooks.conditions.tireBackRight',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.powertrainCombustionEngineSpeed',
-    label: 'Engine Speed',
+    labelKey: 'webhooks.conditions.engineSpeed',
     inputType: 'number',
     validation: numericValidation,
   },
   {
     field: 'vss.obdThrottlePosition',
-    label: 'Throttle Position',
+    labelKey: 'webhooks.conditions.throttlePosition',
     inputType: 'number',
     validation: numericValidation,
   },
@@ -160,7 +165,10 @@ export const formatWebhookFormData = (
   if (isEventService(webhookFormData.service)) {
     const metricName = webhookFormData.cel.conditions[0]?.field;
     if (!metricName) {
-      throw new Error('Please select an event name');
+      throw new LocalizedError(
+        'webhooks.validation.selectEvent',
+        'Please select an event name',
+      );
     }
     return {
       ...webhookFormData,
@@ -180,13 +188,19 @@ export const formatWebhookFormData = (
 
 export const validateCel = (cel: { conditions: Condition[] }) => {
   if (cel.conditions.length !== 1) {
-    return 'Must have exactly one CEL condition';
+    return new LocalizedError(
+      'webhooks.validation.oneCondition',
+      'Must have exactly one CEL condition',
+    );
   }
   const hasInvalidCondition = cel.conditions.some(
     (cond) => !cond.field || !cond.operator || !cond.value,
   );
   if (hasInvalidCondition) {
-    return 'Please complete all condition fields before saving.';
+    return new LocalizedError(
+      'webhooks.validation.completeConditions',
+      'Please complete all condition fields before saving.',
+    );
   }
 };
 
@@ -202,9 +216,9 @@ const getValueType = (condition: Condition) => {
 };
 
 export const formatAndGenerateCEL = (cel: { conditions: Condition[] }) => {
-  const errorMessage = validateCel(cel);
-  if (errorMessage) {
-    throw new Error(errorMessage);
+  const error = validateCel(cel);
+  if (error) {
+    throw error;
   }
   const condition = cel.conditions[0];
   const valueType = getValueType(condition);

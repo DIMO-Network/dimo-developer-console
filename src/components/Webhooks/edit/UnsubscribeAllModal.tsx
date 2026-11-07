@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { FC, useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
 import { toast } from 'sonner';
@@ -15,6 +16,7 @@ export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
   clientId,
   onSuccess,
 }) => {
+  const t = useTranslations('common');
   const [loading, setLoading] = useState(false);
   const devJwt = getDevJwt(clientId);
 
@@ -22,12 +24,12 @@ export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
     try {
       setLoading(true);
       await unsubscribeAllVehicles({ webhookId, token: devJwt ?? '' });
-      toast.success('Successfully unsubscribed all vehicles.');
+      toast.success(t('webhooks.edit.unsubscribedAll'));
       onSuccess?.();
       setIsOpen(false);
     } catch (err) {
       captureException(err);
-      toast.error('An error occurred while unsubscribing all vehicles.');
+      toast.error(t('webhooks.edit.unsubscribeAllFailed'));
     } finally {
       setLoading(false);
     }
@@ -36,19 +38,18 @@ export const UnsubscribeAllModal: FC<SubscribeVehiclesActionModalProps> = ({
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <div className="flex w-full flex-col gap-12">
-        <Title className={'text-panel-title'}>Unsubscribe all vehicles</Title>
+        <Title className={'text-panel-title'}>{t('webhooks.edit.unsubscribeAll')}</Title>
         <div className="flex flex-col gap-4">
-          <p>
-            Are you sure you want to unsubscribe all the subscribed vehicles? This action
-            cannot be undone.
-          </p>
+          <p>{t('webhooks.edit.unsubscribeAllConfirm')}</p>
         </div>
         <div className="flex flex-col w-full gap-4 pt-4">
           <Button onClick={handleSubmit} variant="destructive" disabled={loading}>
-            {loading ? 'Unsubscribing...' : 'Unsubscribe all'}
+            {loading
+              ? t('webhooks.edit.unsubscribing')
+              : t('webhooks.edit.unsubscribeAllButton')}
           </Button>
           <Button onClick={() => setIsOpen(false)} variant="secondary">
-            Cancel
+            {t('actions.cancel')}
           </Button>
         </div>
       </div>

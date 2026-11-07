@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { type FC } from 'react';
 import type { Trim } from '@/types/template';
 import { hasEffectiveSelector } from '@/utils/templateGrid';
@@ -15,6 +16,7 @@ interface Props {
  * discovery at save.
  */
 export const TrimHeader: FC<Props> = ({ trim, multiTrim }) => {
+  const t = useTranslations('common');
   const code = trim.selectors?.manufacturerCode?.find((c) => c.trim().length > 0);
   const style = trim.selectors?.styleName?.find((s) => s.trim().length > 0);
   const missing = multiTrim && !hasEffectiveSelector(trim.selectors);
@@ -23,7 +25,9 @@ export const TrimHeader: FC<Props> = ({ trim, multiTrim }) => {
     <div className="flex min-w-36 flex-col gap-0.5 px-3 py-2 text-left">
       <span className="text-body-sm font-medium text-ink">{trim.name}</span>
       {missing ? (
-        <span className="text-label text-negative">no selector</span>
+        <span className="text-label text-negative">
+          {t('templateEditor.grid.noSelector')}
+        </span>
       ) : (
         <span className="break-all font-mono text-code text-muted">
           {code ?? style ?? trim.selectors?.vinPattern}

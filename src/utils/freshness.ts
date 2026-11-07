@@ -33,19 +33,49 @@ const dateLabel = (t: number) =>
     timeZone: 'UTC',
   });
 
+export type RelativeTimeParts =
+  | { kind: 'never' }
+  | { kind: 'justNow' }
+  | { kind: 'minutes' | 'hours' | 'days'; count: number }
+  | { kind: 'date'; at: number };
+
+// The thresholds, shared by the English helper below and the translated hook.
+export const relativeTimeParts = (
+  iso: string | null | undefined,
+  now = Date.now(),
+): RelativeTimeParts => {
+  const t = parse(iso);
+  if (t === null) return { kind: 'never' };
+  const age = Math.max(0, now - t);
+  if (age < MIN) return { kind: 'justNow' };
+  if (age < HOUR) return { kind: 'minutes', count: Math.floor(age / MIN) };
+  if (age < DAY) return { kind: 'hours', count: Math.floor(age / HOUR) };
+  const days = Math.floor(age / DAY);
+  if (days < 60) return { kind: 'days', count: days };
+  return { kind: 'date', at: t };
+};
+
+// English only. Components use useFreshnessText, which translates; this stays
+// for callers that have not moved to it.
 export const relativeTime = (
   iso: string | null | undefined,
   now = Date.now(),
 ): string => {
-  const t = parse(iso);
-  if (t === null) return 'Never';
-  const age = Math.max(0, now - t);
-  if (age < MIN) return 'just now';
-  if (age < HOUR) return `${Math.floor(age / MIN)} min ago`;
-  if (age < DAY) return `${Math.floor(age / HOUR)} h ago`;
-  const days = Math.floor(age / DAY);
-  if (days < 60) return `${days} day${days === 1 ? '' : 's'} ago`;
-  return dateLabel(t);
+  const parts = relativeTimeParts(iso, now);
+  switch (parts.kind) {
+    case 'never':
+      return 'Never';
+    case 'justNow':
+      return 'just now';
+    case 'minutes':
+      return `${parts.count} min ago`;
+    case 'hours':
+      return `${parts.count} h ago`;
+    case 'days':
+      return `${parts.count} day${parts.count === 1 ? '' : 's'} ago`;
+    case 'date':
+      return dateLabel(parts.at);
+  }
 };
 
 export const absoluteTime = (iso: string | null | undefined): string => {

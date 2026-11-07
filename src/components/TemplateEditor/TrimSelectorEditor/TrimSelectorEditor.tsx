@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { useState, type FC } from 'react';
 import type { Template, TrimSelectors } from '@/types/template';
 import { Label } from '@/components/Label';
@@ -80,6 +81,7 @@ export const TrimSelectorEditor: FC<Props> = ({
   readOnly,
   onChange,
 }) => {
+  const t = useTranslations('common');
   const trim = template.trims[trimIndex];
   const multiTrim = template.trims.length > 1;
   const missing = multiTrim && !hasEffectiveSelector(trim.selectors);
@@ -92,7 +94,7 @@ export const TrimSelectorEditor: FC<Props> = ({
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1">
           <TextField
-            aria-label="Trim name"
+            aria-label={t('templateEditor.trim.nameLabel')}
             value={trim.name}
             readOnly={readOnly}
             onChange={(e) => onChange(renameTrim(template, trimIndex, e.target.value))}
@@ -104,28 +106,28 @@ export const TrimSelectorEditor: FC<Props> = ({
             onClick={() => onChange(removeTrim(template, trimIndex))}
             className="rounded-full border border-outline px-3 py-1 text-label text-muted hover:border-outline-strong hover:text-fg"
           >
-            Remove trim
+            {t('templateEditor.trim.remove')}
           </button>
         )}
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
         <SelectorField
-          label="Manufacturer code"
+          label={t('templateEditor.trim.manufacturerCode')}
           stored={fromList(trim.selectors?.manufacturerCode)}
           readOnly={readOnly}
           placeholder="2532, 2546"
           onCommit={(raw) => update({ manufacturerCode: toList(raw) })}
         />
         <SelectorField
-          label="Style name"
+          label={t('templateEditor.trim.styleName')}
           stored={fromList(trim.selectors?.styleName)}
           readOnly={readOnly}
           placeholder="Hybrid LE"
           onCommit={(raw) => update({ styleName: toList(raw) })}
         />
         <SelectorField
-          label="VIN pattern"
+          label={t('templateEditor.trim.vinPattern')}
           stored={trim.selectors?.vinPattern ?? ''}
           readOnly={readOnly}
           placeholder="^4T1B11HK.*$"
@@ -135,9 +137,7 @@ export const TrimSelectorEditor: FC<Props> = ({
 
       {missing && (
         <p role="alert" className="text-body-sm text-negative">
-          A template with more than one trim cannot have a selector-less trim: it would
-          match every signal and make every decode for this model-year ambiguous. Give
-          this trim a manufacturer code, a style name or a VIN pattern.
+          {t('templateEditor.trim.selectorMissing')}
         </p>
       )}
     </section>

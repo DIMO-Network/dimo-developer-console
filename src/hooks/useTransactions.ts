@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import configuration from '@/config';
 import { Abi, encodeFunctionData, keccak256, toBytes } from 'viem';
 import DimoLicenseABI from '@/contracts/DimoLicenseContract.json';
@@ -147,6 +148,7 @@ const useMintDcx = () => {
 };
 
 export const usePayLicenseFee = () => {
+  const t = useTranslations('common');
   const { checkEnoughBalance, getDesiredTokenAmount, processTransactions } =
     useContractGA();
   const mintDCX = useMintDcx();
@@ -177,7 +179,7 @@ export const usePayLicenseFee = () => {
     const enoughBalance = await checkEnoughBalance();
     const transactions = [];
     if (!enoughBalance.dcx && !enoughBalance.dimo) {
-      return { success: false, reason: 'Insufficient DIMO or DCX balance' };
+      return { success: false, reason: t('transactions.insufficientBalance') };
     }
     if (!enoughBalance.dcx) {
       transactions.push(...(await mintDCX(desiredTokenAmount, enoughBalance)));
@@ -187,7 +189,7 @@ export const usePayLicenseFee = () => {
       assertUserOperation(await processTransactions(transactions));
     }
     return { success: true };
-  }, [checkEnoughBalance, getDesiredTokenAmount, mintDCX, processTransactions]);
+  }, [checkEnoughBalance, getDesiredTokenAmount, mintDCX, processTransactions, t]);
 };
 
 export const useMintLicense = () => {
@@ -233,6 +235,7 @@ export interface GrantConnectionParams {
 // Two steps, so a caller can record the mint before granting: the connection costs
 // real DIMO, and whatever fails after the mint has to be finishable later.
 export const useMintConnection = () => {
+  const t = useTranslations('common');
   const { validateCurrentSession, currentUser, getCurrentDimoBalance } =
     useGlobalAccount();
   const { processTransactions } = useContractGA();
@@ -244,8 +247,7 @@ export const useMintConnection = () => {
       if (nameBytes > 32) {
         return {
           success: false,
-          reason:
-            'Connection name is too long. Please use a name that is 32 characters or fewer.',
+          reason: t('transactions.connectionNameTooLong'),
         };
       }
 
@@ -272,13 +274,16 @@ export const useMintConnection = () => {
         console.error('[useMintConnection] could not read the DIMO balance', error);
         return {
           success: false,
-          reason: "Couldn't check your DIMO balance. Try again.",
+          reason: t('transactions.balanceCheckFailed'),
         };
       }
       if (dimoBalance < requiredDIMO) {
         return {
           success: false,
-          reason: `Insufficient DIMO balance. You need at least ${requiredDIMO.toFixed(2)} DIMO tokens (approximately $${targetUsdAmount}) to mint a connection.`,
+          reason: t('transactions.insufficientDimo', {
+            required: requiredDIMO.toFixed(2),
+            usd: targetUsdAmount,
+          }),
         };
       }
 
@@ -354,7 +359,7 @@ export const useMintConnection = () => {
         ) {
           return {
             success: false,
-            reason: 'You do not have enough $DIMO to mint a connection.',
+            reason: t('transactions.notEnoughDimo'),
           };
         }
 
@@ -365,23 +370,21 @@ export const useMintConnection = () => {
           return {
             success: false,
             nameInUse: true,
-            reason:
-              'This connection name is already taken. Please choose a different name and try again.',
+            reason: t('transactions.connectionNameTaken'),
           };
         }
 
         if (errorMessage.includes('NameInvalidLength')) {
           return {
             success: false,
-            reason:
-              'Connection name is too long. Please use a name that is 32 characters or fewer.',
+            reason: t('transactions.connectionNameTooLong'),
           };
         }
 
         throw error;
       }
     },
-    [currentUser, getCurrentDimoBalance, processTransactions, validateCurrentSession],
+    [currentUser, getCurrentDimoBalance, processTransactions, validateCurrentSession, t],
   );
 
   const grant = useCallback(
