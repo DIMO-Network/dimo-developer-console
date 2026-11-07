@@ -12,7 +12,7 @@ const HOURS: Record<Exclude<RangePreset, 'custom'>, number> = {
   '7d': 7 * 24,
   '30d': 30 * 24,
 };
-const PRESETS: RangePreset[] = ['24h', '7d', '30d', 'custom'];
+export const PRESETS: RangePreset[] = ['24h', '7d', '30d', 'custom'];
 
 export const resolveRange = (
   preset: Exclude<RangePreset, 'custom'>,

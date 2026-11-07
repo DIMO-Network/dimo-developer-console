@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
-const ERROR_KEYS: Record<string, string> = {
+export const ERROR_KEYS: Record<string, string> = {
   unique_email: 'errors.emailRegistered',
   expired: 'errors.sessionExpired',
 };

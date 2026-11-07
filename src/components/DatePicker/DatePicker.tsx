@@ -14,7 +14,7 @@ interface IProps {
   min?: Date;
 }
 
-const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+export const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 
 const getDaysInMonth = (month: number, year: number): Date[] => {
   const date = new Date(year, month, 1);
