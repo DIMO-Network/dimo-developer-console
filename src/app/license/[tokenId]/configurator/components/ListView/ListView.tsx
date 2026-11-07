@@ -3,6 +3,7 @@
 import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { Loader } from '@/components/Loader';
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { PageSubtitle } from '@/components/PageSubtitle';
 import { ConfigurationList } from '@/app/license/[tokenId]/configurator/components/ConfigurationList';
 import { useFragment } from '@/gql';
@@ -27,6 +28,7 @@ export const DEVELOPER_LICENSE_INFO = gql(`
 `);
 
 export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) => {
+  const t = useTranslations('configurator');
   const [tokenId, setTokenId] = useState<number>();
   const router = useRouter();
 
@@ -56,7 +58,7 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
   if (error) {
     return (
       <div className="license-details-page">
-        <p>There was an error fetching the license details</p>
+        <p>{t('list.loadError')}</p>
       </div>
     );
   }
@@ -68,34 +70,36 @@ export const ListView = ({ params }: { params: Promise<{ tokenId: string }> }) =
           href={`/license/${tokenId}/details`}
           className="transition-colors hover:text-ink"
         >
-          License details
+          {t('breadcrumb.licenseDetails')}
         </Link>
         <span>/</span>
-        <span className="text-ink">SDK configurator</span>
+        <span className="text-ink">{t('breadcrumb.sdkConfigurator')}</span>
       </nav>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <PageSubtitle subtitle="Login with DIMO configurator" />
+        <PageSubtitle subtitle={t('list.subtitle')} />
         <OwnerAction licenseOwner={fragment?.owner}>
           <Button
             variant="primary"
             className="shrink-0 whitespace-nowrap px-4"
             onClick={() => router.push(`/license/${tokenId}/configurator/new`)}
           >
-            New configuration
+            {t('list.newConfiguration')}
           </Button>
         </OwnerAction>
       </div>
       <p className="mb-4 text-body-sm text-muted">
-        A vehicle sharing link is required for vehicle owners to grant data permissions to
-        your application.{' '}
-        <a
-          href="https://www.dimo.org/docs/build/building-with-tools/client-sdk-dimo-connect"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-ink underline underline-offset-2"
-        >
-          Learn how to use the configurationId with LIWD
-        </a>
+        {t.rich('list.intro', {
+          docsLink: (chunks) => (
+            <a
+              href="https://www.dimo.org/docs/build/building-with-tools/client-sdk-dimo-connect"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-ink underline underline-offset-2"
+            >
+              {chunks}
+            </a>
+          ),
+        })}
       </p>
       {fragment?.clientId && tokenId && (
         <ConfigurationList

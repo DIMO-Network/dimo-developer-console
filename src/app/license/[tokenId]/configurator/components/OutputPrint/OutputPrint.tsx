@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Button } from '@/components/Button';
 import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
@@ -16,6 +17,7 @@ interface IOutputPrintProps {
 
 /** The saved configuration's link, or the SDK code for the current values. */
 export const OutputPrint: FC<IOutputPrintProps> = ({ clientId }) => {
+  const t = useTranslations('configurator');
   const [viewMode, setViewMode] = useState<'code' | 'url'>('url');
   const { watch } = useFormContext<DynamicFormProps>();
   const values = watch();
@@ -29,12 +31,12 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ clientId }) => {
     <>
       {/* Toggle */}
       <div className="pt-4">
-        <label className="mb-1 block text-label text-muted">View as:</label>
+        <label className="mb-1 block text-label text-muted">{t('output.viewAs')}</label>
         <SegmentedControl
           value={viewMode}
           options={[
-            { value: 'code', label: 'Code' },
-            { value: 'url', label: 'URL' },
+            { value: 'code', label: t('output.code') },
+            { value: 'url', label: t('output.url') },
           ]}
           onChange={(value) => setViewMode(value)}
         />
@@ -42,7 +44,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ clientId }) => {
 
       {/* Output */}
       <div className="pt-4 relative">
-        <h3 className="mb-2 text-card-title text-ink">Generated code</h3>
+        <h3 className="mb-2 text-card-title text-ink">{t('output.generatedCode')}</h3>
         {viewMode === 'code' ? (
           <SyntaxHighlighter
             language="tsx"
@@ -72,7 +74,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ clientId }) => {
             )
           }
         >
-          Copy
+          {t('output.copy')}
         </Button>
       </div>
     </>

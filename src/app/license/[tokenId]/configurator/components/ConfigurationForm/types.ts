@@ -58,81 +58,62 @@ export const PERMISSIONS = [
   {
     key: 'NONLOCATION_TELEMETRY',
     enum: 'Permissions.GetNonLocationHistory',
-    title: 'Non Location Telemetry',
-    description: 'Access to non-location vehicle telemetry',
   },
   {
     key: 'COMMANDS',
     enum: 'Permissions.ExecuteCommands',
-    title: 'Commands',
-    description: 'Execute vehicle commands',
   },
   {
     key: 'CURRENT_LOCATION',
     enum: 'Permissions.GetCurrentLocation',
-    title: 'Current Location',
-    description: 'Access to current vehicle location',
   },
   {
     key: 'ALLTIME_LOCATION',
     enum: 'Permissions.GetLocationHistory',
-    title: 'All Time Location',
-    description: 'Access to historical location data',
   },
   {
     key: 'CREDENTIALS',
     enum: 'Permissions.GetVINCredential',
-    title: 'Credentials',
-    description: 'Access to VIN credentials',
   },
   {
     key: 'STREAMS',
     enum: 'Permissions.GetLiveData',
-    title: 'Streams',
-    description: 'Access to live data streams',
   },
   {
     key: 'RAW_DATA',
     enum: 'Permissions.GetRawData',
-    title: 'Raw Data',
-    description: 'Access to raw vehicle data',
   },
   {
     key: 'APPROXIMATE_LOCATION',
     enum: 'Permissions.GetApproximateLocation',
-    title: 'Approximate Location',
-    description: 'Access to approximate location data',
   },
 ];
 
 /**
  * Documents a vehicle share can include, as the cloudevent patterns DIMO
  * login signs and names to the user (the SDK's DocumentAccess enum).
+ * `messageKey` names the title and description in messages/en/configurator.json.
  */
 export const DOCUMENT_OPTIONS = [
   {
     value: 'dimo.document.vehicle.*',
+    messageKey: 'vehicle',
     enum: 'DocumentAccess.VehicleDocuments',
-    title: 'Vehicle documents',
-    description: 'Registration, insurance, service records and other vehicle documents.',
   },
   {
     value: 'dimo.document.driver.*',
+    messageKey: 'driver',
     enum: 'DocumentAccess.DriverDocuments',
-    title: 'Driver documents',
-    description: "The owner's driver's license and other driver documents.",
   },
   {
     value: 'dimo.raw.vehicle.*',
+    messageKey: 'rawVehicle',
     enum: 'DocumentAccess.RawVehicleDocuments',
-    title: 'Original vehicle files',
-    description: 'The photos and PDFs behind the vehicle documents.',
   },
   {
     value: 'dimo.raw.driver.*',
+    messageKey: 'rawDriver',
     enum: 'DocumentAccess.RawDriverDocuments',
-    title: 'Original driver files',
-    description: 'The photos and PDFs behind the driver documents.',
   },
 ] as const;
 

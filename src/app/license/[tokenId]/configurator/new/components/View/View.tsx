@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { Loader } from '@/components/Loader';
 import { useEffect, useState } from 'react';
@@ -15,6 +16,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
+  const t = useTranslations('configurator');
   const [tokenId, setTokenId] = useState<number>();
   const { data, loading, error } = useIdentityQuery(DEVELOPER_LICENSE_INFO, {
     variables: { tokenId: tokenId as number },
@@ -51,12 +53,12 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
 
       const { id } = await saveConfiguration(body);
 
-      toast.success('Configuration successfully created');
+      toast.success(t('new.created'));
 
       router.replace(`/license/${tokenId}/configurator/${id}`);
     } catch (error) {
       console.log(error);
-      toast.error('Failed to create configuration. Please try again.');
+      toast.error(t('new.createFailed'));
     }
   };
 
@@ -71,7 +73,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   if (error) {
     return (
       <div className="license-details-page">
-        <p>There was an error fetching the license details</p>
+        <p>{t('list.loadError')}</p>
       </div>
     );
   }
@@ -83,19 +85,19 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
           href={`/license/${tokenId}/details`}
           className="transition-colors hover:text-ink"
         >
-          License details
+          {t('breadcrumb.licenseDetails')}
         </Link>
         <span>/</span>
         <Link
           href={`/license/${tokenId}/configurator`}
           className="transition-colors hover:text-ink"
         >
-          SDK configurator
+          {t('breadcrumb.sdkConfigurator')}
         </Link>
         <span>/</span>
-        <span className="text-ink">New configuration</span>
+        <span className="text-ink">{t('breadcrumb.newConfiguration')}</span>
       </nav>
-      <PageSubtitle subtitle="New configuration" />
+      <PageSubtitle subtitle={t('new.subtitle')} />
       {data?.developerLicense && (
         <FormProvider {...methods}>
           <ConfigurationForm license={data?.developerLicense} submit={submit} />

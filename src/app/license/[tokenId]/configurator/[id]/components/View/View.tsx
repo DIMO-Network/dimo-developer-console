@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { useQuery as useRestQuery } from '@tanstack/react-query';
 import { fetchJson } from '@/utils/fetchJson';
@@ -23,6 +24,7 @@ export const View = ({
 }: {
   params: Promise<{ tokenId: string; id: string }>;
 }) => {
+  const t = useTranslations('configurator');
   const [tokenId, setTokenId] = useState<number>();
   const [configurationId, setConfigurationId] = useState<string>();
   const { data, loading, error } = useIdentityQuery(DEVELOPER_LICENSE_INFO, {
@@ -82,15 +84,15 @@ export const View = ({
     } catch (error) {
       console.error(error);
       setFillFailed(true);
-      toast.error("Couldn't load this configuration. Reload the page to try again.");
+      toast.error(t('edit.loadFailed'));
     }
-  }, [saved, configurationId, reset]);
+  }, [saved, configurationId, reset, t]);
 
   useEffect(() => {
     if (!loadError) return;
     console.error(loadError);
-    toast.error("Couldn't load this configuration. Reload the page to try again.");
-  }, [loadError]);
+    toast.error(t('edit.loadFailed'));
+  }, [loadError, t]);
 
   const submit = async (data: DynamicFormProps) => {
     try {
@@ -103,10 +105,10 @@ export const View = ({
 
       await updateConfiguration(body);
 
-      toast.success('Configuration successfully updated');
+      toast.success(t('edit.updated'));
     } catch (error) {
       console.error(error);
-      toast.error('Failed to update configuration. Please try again.');
+      toast.error(t('edit.updateFailed'));
     }
   };
 
@@ -121,7 +123,7 @@ export const View = ({
   if (error) {
     return (
       <div className="license-details-page">
-        <p>There was an error fetching the license details</p>
+        <p>{t('list.loadError')}</p>
       </div>
     );
   }
@@ -133,22 +135,20 @@ export const View = ({
           href={`/license/${tokenId}/details`}
           className="transition-colors hover:text-ink"
         >
-          License details
+          {t('breadcrumb.licenseDetails')}
         </Link>
         <span>/</span>
         <Link
           href={`/license/${tokenId}/configurator`}
           className="transition-colors hover:text-ink"
         >
-          SDK configurator
+          {t('breadcrumb.sdkConfigurator')}
         </Link>
         <span>/</span>
-        <span className="text-ink">Edit configuration</span>
+        <span className="text-ink">{t('breadcrumb.editConfiguration')}</span>
       </nav>
-      <PageSubtitle subtitle="Edit configuration" />
-      {(loadError || fillFailed) && (
-        <p>Couldn&apos;t load this configuration. Reload the page to try again.</p>
-      )}
+      <PageSubtitle subtitle={t('edit.subtitle')} />
+      {(loadError || fillFailed) && <p>{t('edit.loadFailed')}</p>}
       {!loadError && !fillFailed && !filled && <Loader isLoading />}
       {data?.developerLicense && filled && (
         <FormProvider {...methods}>

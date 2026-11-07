@@ -1,10 +1,12 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 import { View } from './components/View';
 import configuration from '@/config';
 
-export const metadata: Metadata = {
-  title: `Edit configuration | ${configuration.appName}`,
+export const generateMetadata = async (): Promise<Metadata> => {
+  const t = await getTranslations('configurator');
+  return { title: t('metadata.editTitle', { appName: configuration.appName }) };
 };
 
 const EditLIWDConfiguratorPage = ({

@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { TextField } from '@/components/TextField';
 import { TextError } from '@/components/TextError';
 import { Label } from '@/components/Label';
@@ -38,6 +39,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
 }: IFormProps) => {
   // A useWatch defaultValue would win over the form's own initial value, so
   // fall back only when the form has none.
+  const t = useTranslations('configurator');
   const permissionsMode = useWatch({ control, name: 'permissionsMode' }) ?? 'template';
   const { errors } = useFormState({ control });
   const shareErrors = errors as Partial<
@@ -48,11 +50,11 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
     <>
       {/* Vehicle permissions */}
       <div className="rounded-card bg-card p-4 flex flex-col gap-4">
-        <h3 className="text-card-title text-ink">Vehicle permissions</h3>
+        <h3 className="text-card-title text-ink">{t('form.share.permissionsTitle')}</h3>
         <SegmentedControl
           options={[
-            { value: 'template', label: 'Use permission template' },
-            { value: 'custom', label: 'Custom permissions' },
+            { value: 'template', label: t('form.share.useTemplate') },
+            { value: 'custom', label: t('form.share.customPermissions') },
           ]}
           control={control}
           name="permissionsMode"
@@ -61,18 +63,20 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
         {/* A share without permissions fails in the login (or grants nothing). */}
         {permissionsMode === 'template' && (
           <Label>
-            Permissions template ID
+            {t('form.share.templateId')}
             <TextField
               type="text"
               {...register('permissionTemplateId', {
-                required: 'Enter a permissions template ID',
+                required: t('form.share.templateIdRequired'),
               })}
               role="company-website-input"
             />
             {shareErrors.permissionTemplateId?.message && (
               <TextError errorMessage={shareErrors.permissionTemplateId.message} />
             )}
-            <p className="text-label font-normal text-muted">{TEMPLATE_ID_HINT}</p>
+            <p className="text-label font-normal text-muted">
+              {t('form.share.templateIdHint')}
+            </p>
           </Label>
         )}
         {permissionsMode === 'custom' && (
@@ -82,8 +86,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             defaultValue={[]}
             rules={{
               validate: (value) =>
-                (Array.isArray(value) && value.length > 0) ||
-                'Choose at least one permission',
+                (Array.isArray(value) && value.length > 0) || t('form.share.chooseOne'),
             }}
             render={({ field }) => (
               <div className="flex flex-col gap-2">
@@ -91,8 +94,8 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
                   {PERMISSIONS.map((p) => (
                     <ToggleCard
                       key={p.key}
-                      title={p.title}
-                      description={p.description}
+                      title={t(`permissions.${p.key}.title`)}
+                      description={t(`permissions.${p.key}.description`)}
                       selected={!!field.value?.includes(p.key)}
                       onToggle={() => field.onChange(toggled(field.value, p.key))}
                     />
@@ -111,10 +114,9 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
       {/* Documents */}
       <div className="rounded-card bg-card p-4 flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h3 className="text-card-title text-ink">Documents</h3>
+          <h3 className="text-card-title text-ink">{t('form.share.documentsTitle')}</h3>
           <p className="text-label font-normal text-muted">
-            Documents your app can read for each shared vehicle. Users see them in the
-            request before they share.
+            {t('form.share.documentsHint')}
           </p>
         </div>
         <Controller
@@ -126,8 +128,8 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
               {DOCUMENT_OPTIONS.map((d) => (
                 <ToggleCard
                   key={d.value}
-                  title={d.title}
-                  description={d.description}
+                  title={t(`documents.${d.messageKey}.title`)}
+                  description={t(`documents.${d.messageKey}.description`)}
                   selected={!!field.value?.includes(d.value)}
                   onToggle={() => field.onChange(toggled(field.value, d.value))}
                 />
@@ -140,16 +142,14 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
       {/* Which vehicles */}
       <div className="rounded-card bg-card p-4 flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <h3 className="text-card-title text-ink">Which vehicles</h3>
+          <h3 className="text-card-title text-ink">{t('form.share.vehiclesTitle')}</h3>
           <p className="text-label font-normal text-muted">
-            Leave blank to let users share any of their vehicles. Others are listed as
-            &quot;Can&apos;t be shared&quot;, with the reason. Separate values with
-            commas.
+            {t('form.share.vehiclesHint')}
           </p>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Label>
-            Vehicle token IDs
+            {t('form.share.vehicleTokenIds')}
             <TextField
               type="text"
               placeholder="1, 2, 3"
@@ -158,7 +158,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             />
           </Label>
           <Label>
-            Vehicle makes
+            {t('form.share.vehicleMakes')}
             <TextField
               type="text"
               placeholder="Toyota, Mazda"
@@ -167,7 +167,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
             />
           </Label>
           <Label>
-            Powertrain types
+            {t('form.share.powertrainTypes')}
             <TextField
               type="text"
               placeholder="BEV, HEV"
@@ -178,10 +178,7 @@ export const ShareVehiclesWithDimoConfiguration: FC<IFormProps> = ({
         </div>
       </div>
 
-      <LegalLinksCard
-        register={register}
-        shownTo="vehicle owners before they grant permissions"
-      />
+      <LegalLinksCard register={register} shownTo="vehicleOwners" />
     </>
   );
 };

@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Label } from '@/components/Label';
 import { TextError } from '@/components/TextError';
@@ -94,6 +95,7 @@ const startOfToday = () => {
 
 /** The configuration form, for the new and the edit page. */
 export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false }) => {
+  const t = useTranslations('configurator');
   const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
   const brandNames = (useLicenseBrands(fragment.tokenId).data?.brands ?? [])
     .map((b) => b.name)
@@ -113,11 +115,11 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
 
   const handleCopyConfigurationLink = () => {
     if (!configurationId) {
-      toast.error('Configuration ID is not available');
+      toast.error(t('form.basics.idUnavailable'));
       return;
     }
     void navigator.clipboard.writeText(configurationLink(configurationId));
-    toast.success('Configuration link copied to clipboard');
+    toast.success(t('form.basics.linkCopied'));
   };
 
   return (
@@ -126,10 +128,10 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit(submit)}>
         {/* Basics */}
         <div className="rounded-card bg-card p-4 flex flex-col gap-4">
-          <h3 className="text-card-title text-ink">Basics</h3>
+          <h3 className="text-card-title text-ink">{t('form.basics.title')}</h3>
           {editing && (
             <Label className="w-full">
-              Configuration ID
+              {t('form.basics.configurationId')}
               <div className="flex gap-2 items-center">
                 <div className="flex-1 min-w-0">
                   <TextField
@@ -146,19 +148,19 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
                   className="shrink-0"
                   onClick={handleCopyConfigurationLink}
                 >
-                  Copy link
+                  {t('form.basics.copyLink')}
                 </Button>
               </div>
             </Label>
           )}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Label>
-              Configuration name
+              {t('form.basics.name')}
               <TextField
                 type="text"
-                placeholder="e.g. My App – Production"
+                placeholder={t('form.basics.namePlaceholder')}
                 {...register('configuration_name', {
-                  required: 'Configuration name is required',
+                  required: t('form.basics.nameRequired'),
                 })}
                 role="company-website-input"
               />
@@ -167,7 +169,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
               )}
             </Label>
             <Label>
-              Client ID
+              {t('form.basics.clientId')}
               <TextField
                 type="text"
                 readOnly
@@ -182,12 +184,15 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
 
         {/* Component */}
         <div className="rounded-card bg-card p-4 flex flex-col gap-4">
-          <h3 className="text-card-title text-ink">Component</h3>
+          <h3 className="text-card-title text-ink">{t('form.component.title')}</h3>
           <SegmentedControl
             name="component"
             options={[
-              { value: 'LoginWithDimo', label: '🔑  Login with DIMO' },
-              { value: 'ShareVehiclesWithDimo', label: '🚗  Share vehicles with DIMO' },
+              { value: 'LoginWithDimo', label: `🔑  ${t('form.component.login')}` },
+              {
+                value: 'ShareVehiclesWithDimo',
+                label: `🚗  ${t('form.component.share')}`,
+              },
             ]}
             role="component-segmented"
             control={control}
@@ -196,18 +201,18 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
 
         {/* Connection */}
         <div className="rounded-card bg-card p-4 flex flex-col gap-4">
-          <h3 className="text-card-title text-ink">Connection</h3>
+          <h3 className="text-card-title text-ink">{t('form.connection.title')}</h3>
           <Label htmlFor="redirectUri">
-            Redirect URI
+            {t('form.connection.redirectUri')}
             <SelectField
               name="redirectUri"
-              rules={{ required: 'Redirect URI is required' }}
+              rules={{ required: t('form.connection.redirectUriRequired') }}
               options={fragment.redirectURIs.nodes.map((node) => ({
                 value: node.uri,
                 text: node.uri,
               }))}
               control={control}
-              placeholder="Select"
+              placeholder={t('form.connection.select')}
               role="redirectUri-select"
             />
             {errors.redirectUri && (
@@ -215,28 +220,33 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
             )}
             {fragment.redirectURIs.nodes.length === 0 && (
               <p className="text-label font-normal text-muted">
-                {NO_REDIRECT_URI}{' '}
+                {t('form.connection.noRedirectUri')}{' '}
                 <Link
                   href={`/license/${fragment.tokenId}/details?tab=config`}
                   className="text-ink underline"
                 >
-                  Go to the Config tab
+                  {t('form.connection.goToConfigTab')}
                 </Link>
               </p>
             )}
           </Label>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Label>
-              {needsEndDate ? 'Expiration date' : 'Expiration date (sharing only)'}
+              {needsEndDate
+                ? t('form.connection.expirationDate')
+                : t('form.connection.expirationDateSharingOnly')}
               <Controller
                 control={control}
                 name="expirationDate"
                 rules={{
                   validate: (value) => {
                     if (!value)
-                      return needsEndDate ? 'Expiration date is required' : true;
+                      return needsEndDate
+                        ? t('form.connection.expirationDateRequired')
+                        : true;
                     return (
-                      new Date(value) >= startOfToday() || 'Pick today or a later date'
+                      new Date(value) >= startOfToday() ||
+                      t('form.connection.expirationDateTooEarly')
                     );
                   },
                 }}
@@ -253,7 +263,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
               )}
             </Label>
             <Label>
-              UTM
+              {t('form.connection.utm')}
               <TextField
                 type="text"
                 placeholder="utm_source=myapp"
@@ -277,14 +287,10 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
 
         <OwnerAction
           licenseOwner={fragment.owner}
-          fallback={
-            <p className="text-body-sm text-muted">
-              Only the team owner can change configurations.
-            </p>
-          }
+          fallback={<p className="text-body-sm text-muted">{t('form.ownerOnly')}</p>}
         >
           <Button type="submit" className="w-full">
-            {editing ? 'Update' : 'Save'}
+            {editing ? t('form.update') : t('form.save')}
           </Button>
         </OwnerAction>
       </form>
@@ -294,7 +300,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
         {editing ? (
           <div className="overflow-hidden rounded-card bg-card">
             <div className="px-4 pt-3">
-              <p className="text-label text-muted">Generated output</p>
+              <p className="text-label text-muted">{t('form.preview.generatedOutput')}</p>
             </div>
             <div className="p-4">
               <OutputPrint clientId={fragment.clientId} />
@@ -303,14 +309,16 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
         ) : (
           <div className="flex flex-col items-center justify-center gap-3 rounded-card bg-card p-6 text-center">
             <p className="text-body-sm font-medium text-ink">
-              Save to generate your link
+              {t('form.preview.saveToGenerate')}
             </p>
             <p className="text-label font-normal text-muted">
-              After saving, you&apos;ll get a short{' '}
-              <code className="rounded-chip bg-control px-1.5 py-0.5 font-mono text-code text-fg">
-                configurationId
-              </code>{' '}
-              link you can share directly with users.
+              {t.rich('form.preview.afterSaving', {
+                code: (chunks) => (
+                  <code className="rounded-chip bg-control px-1.5 py-0.5 font-mono text-code text-fg">
+                    {chunks}
+                  </code>
+                ),
+              })}
             </p>
           </div>
         )}

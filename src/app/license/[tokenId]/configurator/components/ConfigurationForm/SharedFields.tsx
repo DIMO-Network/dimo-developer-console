@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { Control, UseFormRegister } from 'react-hook-form';
 import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
@@ -47,57 +48,60 @@ export const BrandSelect: FC<FieldProps & { brandNames: string[] }> = ({
   register,
   control,
   brandNames,
-}) =>
-  brandNames.length > 1 ? (
+}) => {
+  const t = useTranslations('configurator');
+  return brandNames.length > 1 ? (
     <Label htmlFor="brandName" className="w-full">
-      Brand
-      <p className="text-label font-normal text-muted">
-        Which brand the button and the sign-in window show. Leave as &quot;Default&quot;
-        to use your workspace default brand.
-      </p>
+      {t('form.brand.label')}
+      <p className="text-label font-normal text-muted">{t('form.brand.hint')}</p>
       <SelectField
         {...register('brandName', { required: false })}
         options={[
-          { value: '', text: 'Default' },
+          { value: '', text: t('form.brand.default') },
           ...brandNames.map((name) => ({ value: name, text: name })),
         ]}
         control={control}
-        placeholder="Default"
+        placeholder={t('form.brand.default')}
         role="brandName-select"
       />
     </Label>
   ) : null;
+};
 
 /** Your privacy policy and terms, linked from the sign-in window. */
-export const LegalLinksCard: FC<Pick<FieldProps, 'register'> & { shownTo: string }> = ({
-  register,
-  shownTo,
-}) => (
-  <div className="rounded-card bg-card p-4 flex flex-col gap-4">
-    <h3 className="text-card-title text-ink">Privacy policy &amp; terms of service</h3>
-    <Label>
-      Privacy policy URL
-      <TextField
-        type="url"
-        placeholder="https://yourapp.com/privacy"
-        {...register('privacyPolicyUrl', { required: false })}
-        role="privacy-policy-url-input"
-      />
-      <p className="text-label font-normal text-muted">
-        Displayed to {shownTo}. Leave blank to skip.
-      </p>
-    </Label>
-    <Label>
-      Terms of service URL
-      <TextField
-        type="url"
-        placeholder="https://yourapp.com/terms"
-        {...register('tosUrl', { required: false })}
-        role="tos-url-input"
-      />
-      <p className="text-label font-normal text-muted">
-        Displayed to {shownTo}. Leave blank to skip.
-      </p>
-    </Label>
-  </div>
-);
+export const LegalLinksCard: FC<
+  Pick<FieldProps, 'register'> & { shownTo: 'vehicleOwners' | 'users' }
+> = ({ register, shownTo }) => {
+  const t = useTranslations('configurator');
+  const shown = t(
+    shownTo === 'vehicleOwners'
+      ? 'form.legal.shownToVehicleOwners'
+      : 'form.legal.shownToUsers',
+  );
+
+  return (
+    <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+      <h3 className="text-card-title text-ink">{t('form.legal.title')}</h3>
+      <Label>
+        {t('form.legal.privacyPolicyUrl')}
+        <TextField
+          type="url"
+          placeholder="https://yourapp.com/privacy"
+          {...register('privacyPolicyUrl', { required: false })}
+          role="privacy-policy-url-input"
+        />
+        <p className="text-label font-normal text-muted">{shown}</p>
+      </Label>
+      <Label>
+        {t('form.legal.termsUrl')}
+        <TextField
+          type="url"
+          placeholder="https://yourapp.com/terms"
+          {...register('tosUrl', { required: false })}
+          role="tos-url-input"
+        />
+        <p className="text-label font-normal text-muted">{shown}</p>
+      </Label>
+    </div>
+  );
+};

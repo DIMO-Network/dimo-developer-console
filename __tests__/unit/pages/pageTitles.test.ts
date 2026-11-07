@@ -19,11 +19,11 @@ jest.mock('@/app/templates/new/components/PresetView', () => ({
   PresetView: () => null,
 }));
 
-import { metadata as list } from '@/app/license/[tokenId]/configurator/page';
-import { metadata as create } from '@/app/license/[tokenId]/configurator/new/page';
-import { metadata as edit } from '@/app/license/[tokenId]/configurator/[id]/page';
+import { generateMetadata as list } from '@/app/license/[tokenId]/configurator/page';
+import { generateMetadata as create } from '@/app/license/[tokenId]/configurator/new/page';
+import { generateMetadata as edit } from '@/app/license/[tokenId]/configurator/[id]/page';
 import { generateMetadata as vehicles } from '@/app/license/vehicles/[clientId]/page';
-import { metadata as licenses } from '@/app/licenses/layout';
+import { generateMetadata as licenses } from '@/app/licenses/layout';
 import { metadata as webhooks } from '@/app/webhooks/layout';
 import { metadata as templates } from '@/app/templates/page';
 import { metadata as newTemplate } from '@/app/templates/new/page';
