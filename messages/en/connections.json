@@ -48,7 +48,7 @@
     "saving": "Saving your connection…",
     "checkingMinted": "Checking whether your connection was already minted…",
     "loading": "Loading your connection…",
-    "resumeNote": "<name>{name}</name> isn't finished yet. Its keys are saved, so setup can pick up where it stopped.",
+    "resumeNote": "<strong>{name}</strong> isn't finished yet. Its keys are saved, so setup can pick up where it stopped.",
     "finishSetup": "Finish setup",
     "nameLabel": "Connection name",
     "namePlaceholder": "Connection name",
