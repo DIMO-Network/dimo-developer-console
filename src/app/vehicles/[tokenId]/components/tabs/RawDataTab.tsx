@@ -3,6 +3,7 @@ import { FC, useMemo, useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { ChevronDownIcon } from '@heroicons/react/16/solid';
+import { useFormatter, useTranslations } from 'next-intl';
 import type { Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
 import { useSubjectQuery, subjectQueryKey } from '@/hooks/subjects/useSubjectQuery';
@@ -26,7 +27,6 @@ import { JsonBlock } from '@/components/JsonBlock';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { shortDid } from '@/services/subjects/did';
-import { absoluteTime } from '@/utils/freshness';
 import { safeHttpUrl } from '@/utils/safeHttpUrl';
 
 type Mode = 'events' | 'latest' | 'index';
@@ -49,16 +49,8 @@ type Result = {
   latestIndex?: Event | null;
 };
 
-const MODES: { id: Mode; label: string }[] = [
-  { id: 'events', label: 'Events' },
-  { id: 'latest', label: 'Latest' },
-  { id: 'index', label: 'Index only' },
-];
-
-const SCOPES: { id: Scope; label: string }[] = [
-  { id: 'vehicle', label: 'Vehicle data' },
-  { id: 'device', label: 'Device status' },
-];
+const MODE_IDS: Mode[] = ['events', 'latest', 'index'];
+const SCOPE_IDS: Scope[] = ['vehicle', 'device'];
 
 function Pills<T extends string>({
   label,
@@ -133,6 +125,10 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   subject,
   ctx,
 }) => {
+  const t = useTranslations('vehicles');
+  const format = useFormatter();
+  const modes = MODE_IDS.map((id) => ({ id, label: t(`raw.modes.${id}`) }));
+  const scopes = SCOPE_IDS.map((id) => ({ id, label: t(`raw.scopes.${id}`) }));
   const [mode, setMode] = useState<Mode>('events');
   const [range, setRange] = useState<TimeRange>({ preset: '7d', ...resolveRange('7d') });
   const [form, setForm] = useState({
@@ -257,8 +253,10 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     ctx.graph.all.find((s) => s.did === did)?.label ?? shortDid(did);
   const title =
     spec.mode === 'latest'
-      ? 'Latest cloud event'
-      : `${rows.length} ${spec.mode === 'index' ? 'index entries' : 'cloud events'}`;
+      ? t('raw.latestTitle')
+      : t(spec.mode === 'index' ? 'raw.indexTitle' : 'raw.eventsTitle', {
+          count: rows.length,
+        });
   // A page fails whole (thrown) or on its root field (partial data).
   const pageError = (p: (typeof pages)[number] | null) =>
     p ? (p.error?.message ?? fieldError(p.data?.errors, ROOT[spec.mode])) : null;
@@ -275,15 +273,15 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           <div className="flex flex-wrap items-center gap-2">
             {subject.ownFetchDid && (
               <Pills
-                label="Scope"
-                options={SCOPES}
+                label={t('raw.scopeLabel')}
+                options={scopes}
                 value={spec.scope}
                 onPick={(id) => run(mode, id)}
               />
             )}
             <Pills
-              label="Query"
-              options={MODES}
+              label={t('raw.queryLabel')}
+              options={modes}
               value={mode}
               onPick={(id) => {
                 setMode(id);
@@ -295,12 +293,12 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         </div>
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1.5 text-label text-muted">
-            Type
+            {t('raw.type')}
             <TextField
               list="cloud-event-types"
               wrapperClassName="w-44"
               value={form.type}
-              placeholder="Any type"
+              placeholder={t('raw.anyType')}
               onChange={(e) => setForm({ ...form, type: e.target.value })}
             />
             <datalist id="cloud-event-types">
@@ -310,16 +308,16 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             </datalist>
           </label>
           <label className="flex flex-col gap-1.5 text-label text-muted">
-            Data version
+            {t('raw.dataVersion')}
             <TextField
               wrapperClassName="w-36"
               value={form.dataversion}
-              placeholder="Any version"
+              placeholder={t('raw.anyVersion')}
               onChange={(e) => setForm({ ...form, dataversion: e.target.value })}
             />
           </label>
           <label className="flex flex-col gap-1.5 text-label text-muted">
-            Limit
+            {t('raw.limit')}
             <TextField
               type="number"
               min={1}
@@ -336,12 +334,12 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                 className="rounded-chip bg-highest px-2 py-0.5 text-label text-fg"
                 title={lockedProducer}
               >
-                Producer: {producerLabel(lockedProducer)}
+                {t('raw.producer', { name: producerLabel(lockedProducer) })}
               </span>
             </span>
           )}
           <Button variant="ghost" onClick={() => setMore((m) => !m)}>
-            {more ? 'Fewer filters' : 'More filters'}
+            {more ? t('raw.fewerFilters') : t('raw.moreFilters')}
           </Button>
           <label className="flex h-10 items-center gap-2 text-body-sm text-fg">
             <input
@@ -350,33 +348,33 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               onChange={(e) => setForm({ ...form, withUrl: e.target.checked })}
               className="size-4 accent-accent"
             />
-            Include data URL
+            {t('raw.includeDataUrl')}
           </label>
           <div className="grow" />
           <Button disabled={!valid} onClick={() => run()}>
-            Run query
+            {t('raw.runQuery')}
           </Button>
         </div>
         {more && (
           <div className="flex flex-wrap items-end gap-3">
             <TextField
-              placeholder="Event ID"
-              aria-label="Event ID"
+              placeholder={t('raw.eventId')}
+              aria-label={t('raw.eventId')}
               value={form.id}
               onChange={(e) => setForm({ ...form, id: e.target.value })}
               wrapperClassName="w-56"
             />
             <TextField
-              placeholder="Source address"
-              aria-label="Source"
+              placeholder={t('raw.sourceAddress')}
+              aria-label={t('raw.sourceLabel')}
               value={form.source}
               onChange={(e) => setForm({ ...form, source: e.target.value })}
               wrapperClassName="w-72"
             />
             {!lockedProducer && (
               <TextField
-                placeholder="Producer DID"
-                aria-label="Producer"
+                placeholder={t('raw.producerDid')}
+                aria-label={t('raw.producerLabel')}
                 value={form.producer}
                 onChange={(e) => setForm({ ...form, producer: e.target.value })}
                 wrapperClassName="w-96"
@@ -387,18 +385,9 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       </div>
 
       {subject.kind === 'vehicle' && (
-        <p className="px-1 text-body-sm text-muted">
-          Cloud events for the vehicle DID from every device. Pick a device on the left to
-          see only that device, or its Device status for what it files under its own DID,
-          such as firmware.
-        </p>
+        <p className="px-1 text-body-sm text-muted">{t('raw.vehicleHelp')}</p>
       )}
-      {own && (
-        <p className="px-1 text-body-sm text-muted">
-          Status events filed under the device itself rather than the vehicle, such as its
-          firmware version.
-        </p>
-      )}
+      {own && <p className="px-1 text-body-sm text-muted">{t('raw.deviceHelp')}</p>}
 
       <div className="flex flex-col rounded-card bg-card">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
@@ -415,15 +404,15 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           />
         </div>
         <div className="grid grid-cols-[116px_minmax(0,1fr)_32px] md:grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
-          <span>Time (UTC) ↓</span>
-          <span>Type</span>
-          <span className="hidden md:block">Data version</span>
-          <span className="hidden md:block">Producer</span>
+          <span>{t('raw.timeColumn')}</span>
+          <span>{t('raw.type')}</span>
+          <span className="hidden md:block">{t('raw.dataVersion')}</span>
+          <span className="hidden md:block">{t('raw.producerLabel')}</span>
           <span />
         </div>
         {base.isLoading && (
           <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
-            Loading…
+            {t('raw.loading')}
           </p>
         )}
         {baseError && (
@@ -433,14 +422,18 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         )}
         {!base.isLoading && !baseError && rows.length === 0 && (
           <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
-            No events match. Widen the range or clear a filter.
+            {t('raw.noMatch')}
           </p>
         )}
         {rows.map((r, i) => {
           const open = expanded === undefined ? i === 0 : expanded === r.header.id;
           const payloadUrl = safeHttpUrl(r.dataUrl);
           const [date, time] = [
-            absoluteTime(r.header.time).split(',')[0],
+            format.dateTime(Date.parse(r.header.time), {
+              month: 'short',
+              day: 'numeric',
+              timeZone: 'UTC',
+            }),
             r.header.time.slice(11, 19),
           ];
           return (
@@ -481,7 +474,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                       target="_blank"
                       rel="noreferrer"
                     >
-                      Download payload
+                      {t('raw.downloadPayload')}
                     </a>
                   )}
                 </div>
@@ -491,10 +484,12 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         })}
         {spec.mode !== 'latest' && rows.length > 0 && (
           <div className="flex flex-col items-center gap-2 border-t border-outline p-3">
-            {olderPage?.isLoading && <p className="text-body-sm text-muted">Loading…</p>}
+            {olderPage?.isLoading && (
+              <p className="text-body-sm text-muted">{t('raw.loading')}</p>
+            )}
             {olderError && <p className="text-body-sm text-negative">{olderError}</p>}
             {exhausted ? (
-              <p className="text-body-sm text-muted">No older events.</p>
+              <p className="text-body-sm text-muted">{t('raw.noOlder')}</p>
             ) : (
               <Button
                 variant="secondary"
@@ -508,7 +503,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                   ])
                 }
               >
-                Load older
+                {t('raw.loadOlder')}
               </Button>
             )}
           </div>

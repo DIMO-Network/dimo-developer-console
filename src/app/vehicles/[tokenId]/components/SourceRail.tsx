@@ -1,6 +1,7 @@
 'use client';
 import { FC } from 'react';
 import classNames from 'classnames';
+import { useTranslations } from 'next-intl';
 import type { SubjectGraph, Subject } from '@/services/subjects/graph';
 import type { LatestIndexHeader } from '@/hooks/subjects/useSubjectFreshness';
 import { FreshnessDot } from '@/components/FreshnessDot';
@@ -33,23 +34,23 @@ interface Props {
   now?: number;
 }
 
-const ACCESS_LABEL: Record<Exclude<Access, 'ok'>, string> = {
-  'not-shared': 'No access',
-  'no-jwt': 'Needs a developer JWT',
-  'jwt-expired': 'Needs a new developer JWT',
-  'session-expired': 'Session expired',
-  'no-access': 'No data access',
-  'removed': 'No data access',
-  'reconnect': 'Reconnect your wallet',
-  'unavailable': 'Not available yet',
-  'error': "Couldn't check access",
-  'loading': 'Checking…',
+const ACCESS_KEY: Record<Exclude<Access, 'ok'>, string> = {
+  'not-shared': 'notShared',
+  'no-jwt': 'noJwt',
+  'jwt-expired': 'jwtExpired',
+  'session-expired': 'sessionExpired',
+  'no-access': 'noAccess',
+  'removed': 'removed',
+  'reconnect': 'reconnect',
+  'unavailable': 'unavailable',
+  'error': 'error',
+  'loading': 'loading',
 };
-const ACCOUNT_LABEL: Record<AccountState, string> = {
-  'unknown': '—',
-  'loading': 'Checking…',
-  'shared': 'Shared',
-  'not-shared': 'Not shared',
+const ACCOUNT_KEY: Record<AccountState, string> = {
+  'unknown': 'unknown',
+  'loading': 'loading',
+  'shared': 'shared',
+  'not-shared': 'notShared',
 };
 
 const Item: FC<{
@@ -89,15 +90,16 @@ export const SourceRail: FC<Props> = ({
   accountState,
   now,
 }) => {
+  const t = useTranslations('vehicles');
+  const accessLabel = (a: Exclude<Access, 'ok'>) => t(`rail.access.${ACCESS_KEY[a]}`);
   const fresh = (s: Subject) => {
-    if (access !== 'ok')
-      return <span className="text-muted">{ACCESS_LABEL[access]}</span>;
-    if (freshnessLoading) return <span className="text-muted">Checking…</span>;
+    if (access !== 'ok') return <span className="text-muted">{accessLabel(access)}</span>;
+    if (freshnessLoading) return <span className="text-muted">{t('rail.checking')}</span>;
     const failed = freshnessErrors[s.did];
     if (failed)
       return (
         <span className="text-muted" title={failed}>
-          Unavailable
+          {t('rail.unavailable')}
         </span>
       );
     return (
@@ -112,7 +114,7 @@ export const SourceRail: FC<Props> = ({
 
   const options = [
     ...graph.all.map((s) => ({ value: s.did, label: `${s.label} · ${s.sublabel}` })),
-    { value: 'sharing', label: 'Sharing' },
+    { value: 'sharing', label: t('rail.sharing') },
   ];
 
   return (
@@ -126,10 +128,12 @@ export const SourceRail: FC<Props> = ({
         />
       </div>
       <nav
-        aria-label="Data sources"
+        aria-label={t('rail.dataSources')}
         className="hidden flex-col gap-0.5 rounded-card bg-card p-2 md:flex"
       >
-        <span className="px-2.5 pb-1 pt-2 text-label text-muted">Data sources</span>
+        <span className="px-2.5 pb-1 pt-2 text-label text-muted">
+          {t('rail.dataSources')}
+        </span>
         <Item
           subject={graph.vehicle}
           selected={selected === graph.vehicle.did}
@@ -152,14 +156,16 @@ export const SourceRail: FC<Props> = ({
             ))}
           </div>
         )}
-        <span className="px-2.5 pb-1 pt-3 text-label text-muted">Owner</span>
+        <span className="px-2.5 pb-1 pt-3 text-label text-muted">{t('rail.owner')}</span>
         <Item
           subject={graph.account}
           selected={selected === graph.account.did}
           onSelect={() => onSelect(graph.account.did)}
         >
           <span className={accountState === 'shared' ? 'text-fg' : 'text-muted'}>
-            {access === 'ok' ? ACCOUNT_LABEL[accountState] : ACCESS_LABEL[access]}
+            {access === 'ok'
+              ? t(`rail.account.${ACCOUNT_KEY[accountState]}`)
+              : accessLabel(access)}
           </span>
         </Item>
         <div className="mx-1 my-1.5 h-px bg-outline" />
@@ -172,8 +178,8 @@ export const SourceRail: FC<Props> = ({
             selected === 'sharing' && 'bg-control shadow-selected',
           )}
         >
-          <span className="text-body-sm font-medium text-ink">Sharing</span>
-          <span className="text-label text-muted">Apps with access</span>
+          <span className="text-body-sm font-medium text-ink">{t('rail.sharing')}</span>
+          <span className="text-label text-muted">{t('rail.appsWithAccess')}</span>
         </button>
       </nav>
     </>

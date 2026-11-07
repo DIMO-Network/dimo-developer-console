@@ -4,14 +4,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { SubjectCapability } from '@/services/subjects/graph';
 
 export type VehicleTab = SubjectCapability;
-export const TAB_LABELS: Record<VehicleTab, string> = {
-  summary: 'Summary',
-  signals: 'Signals',
-  raw: 'Raw data',
-  trips: 'Trips',
-  documents: 'Documents',
-};
-const TABS = new Set<string>(Object.keys(TAB_LABELS));
+const TABS = new Set<string>(['summary', 'signals', 'raw', 'trips', 'documents']);
 
 type Patch = Partial<{ license: string; subject: string; tab: VehicleTab }>;
 

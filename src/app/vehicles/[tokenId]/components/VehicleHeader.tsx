@@ -1,11 +1,12 @@
 'use client';
 import { FC } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { shortAddress } from '@/services/subjects/did';
 import { SelectWithChevron } from '@/components/SelectWithChevron';
 import type { LocalDeveloperLicense } from '@/types/webhook';
 import type { VehicleDetail } from '@/services/subjects/graph';
-import { utcDate } from '@/utils/freshness';
+import { useFreshnessText } from '@/hooks/useFreshnessText';
 
 export const VehicleHeader: FC<{
   vehicle: VehicleDetail;
@@ -13,18 +14,20 @@ export const VehicleHeader: FC<{
   selected?: LocalDeveloperLicense;
   onSelectLicense: (clientId: string) => void;
 }> = ({ vehicle, licenses, selected, onSelectLicense }) => {
+  const t = useTranslations('vehicles');
+  const { utcDate } = useFreshnessText();
   const name =
     [vehicle.definition?.make, vehicle.definition?.model, vehicle.definition?.year]
       .filter(Boolean)
-      .join(' ') || `Vehicle ${vehicle.tokenId}`;
+      .join(' ') || t('header.fallbackName', { tokenId: String(vehicle.tokenId) });
   return (
     <div className="flex flex-col gap-3">
       <nav
         className="flex items-center gap-1.5 text-label text-muted"
-        aria-label="Breadcrumb"
+        aria-label={t('header.breadcrumb')}
       >
         <Link href="/vehicles" className="transition-colors hover:text-ink">
-          Vehicles
+          {t('header.vehicles')}
         </Link>
         <span>/</span>
         <span className="text-ink">{vehicle.tokenId}</span>
@@ -39,17 +42,19 @@ export const VehicleHeader: FC<{
           </div>
           <div className="flex flex-wrap items-center gap-4 text-label text-muted">
             <span>
-              Owner{' '}
-              <span className="font-mono text-code text-fg">
-                {shortAddress(vehicle.owner)}
-              </span>
+              {t.rich('header.owner', {
+                short: shortAddress(vehicle.owner),
+                address: (chunks) => (
+                  <span className="font-mono text-code text-fg">{chunks}</span>
+                ),
+              })}
             </span>
-            <span>Minted {utcDate(vehicle.mintedAt)}</span>
+            <span>{t('header.minted', { date: utcDate(vehicle.mintedAt) })}</span>
           </div>
         </div>
         {licenses.length > 0 && (
           <div className="flex items-center gap-2.5">
-            <span className="text-label text-muted">License</span>
+            <span className="text-label text-muted">{t('header.license')}</span>
             <SelectWithChevron
               name="license"
               className="min-w-[210px]"

@@ -1,6 +1,7 @@
 'use client';
 import { FC } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import type { Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
@@ -11,16 +12,16 @@ import {
 } from '@/services/subjects/queries';
 import { documentSharingUrl } from '@/utils/documentSharingUrl';
 import { humanizeSignal } from '@/utils/humanizeSignal';
-import { relativeTime } from '@/utils/freshness';
+import { useFreshnessText } from '@/hooks/useFreshnessText';
 import { safeHttpUrl } from '@/utils/safeHttpUrl';
 import { Button } from '@/components/Button';
 
-export const DOCUMENT_TITLES: Record<string, string> = {
-  'dimo.document.driver.license': "Driver's license",
-  'dimo.document.driver.insurance': 'Insurance card',
-  'dimo.document.driver.id': 'ID card',
-  'dimo.document.driver.membership': 'Membership card',
-  'dimo.document.driver.other': 'Other document',
+const DOCUMENT_TITLE_KEYS: Record<string, string> = {
+  'dimo.document.driver.license': 'driverLicense',
+  'dimo.document.driver.insurance': 'insurance',
+  'dimo.document.driver.id': 'idCard',
+  'dimo.document.driver.membership': 'membership',
+  'dimo.document.driver.other': 'other',
 };
 type Types = {
   availableCloudEventTypes: { type: string; count: number; lastSeen: string }[] | null;
@@ -47,6 +48,8 @@ const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> 
   subject,
   ctx,
 }) => {
+  const t = useTranslations('vehicles');
+  const { relativeTime } = useFreshnessText();
   const q = useSubjectQuery<Doc>({
     api: 'fetch',
     asset: subject.asset,
@@ -65,13 +68,15 @@ const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> 
       <div className="flex items-start justify-between gap-3">
         <span className="flex flex-col gap-0.5">
           <span className="text-card-title text-ink">
-            {DOCUMENT_TITLES[type] ?? humanizeSignal(type.split('.').at(-1) ?? type)}
+            {DOCUMENT_TITLE_KEYS[type]
+              ? t(`documents.titles.${DOCUMENT_TITLE_KEYS[type]}`)
+              : humanizeSignal(type.split('.').at(-1) ?? type)}
           </span>
           <span className="font-mono text-code text-muted">{type}</span>
         </span>
         {doc && (
           <span className="whitespace-nowrap text-label text-muted">
-            Updated {relativeTime(doc.header.time)}
+            {t('documents.updated', { time: relativeTime(doc.header.time) })}
           </span>
         )}
       </div>
@@ -85,20 +90,18 @@ const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> 
             </span>
           ))}
           {fields(doc.data).length === 0 && (
-            <span className="text-body-sm text-muted">
-              No extracted fields; open the raw event.
-            </span>
+            <span className="text-body-sm text-muted">{t('documents.noFields')}</span>
           )}
         </div>
       )}
       <div className="flex items-center gap-1">
         {scanUrl && (
           <a href={scanUrl} target="_blank" rel="noreferrer" className="button secondary">
-            Open scan
+            {t('documents.openScan')}
           </a>
         )}
         <Button variant="ghost" onClick={() => ctx.onBrowseRaw(subject.did)}>
-          View raw event
+          {t('documents.viewRawEvent')}
         </Button>
       </div>
     </div>
@@ -109,34 +112,38 @@ const SharingLinkCard: FC<{ ctx: SubjectContext; title: string; body: string }> 
   ctx,
   title,
   body,
-}) => (
-  <div className="flex flex-col items-start gap-3 rounded-card bg-card p-5 md:flex-row md:items-center md:justify-between">
-    <span className="flex flex-col gap-0.5">
-      <span className="text-body-sm font-medium text-ink">{title}</span>
-      <span className="text-body-sm text-muted">{body}</span>
-    </span>
-    <Button
-      variant="secondary"
-      onClick={() => {
-        const url = documentSharingUrl({
-          clientId: ctx.clientId,
-          redirectUri: ctx.license.firstRedirectURI,
-        });
-        navigator.clipboard
-          .writeText(url)
-          .then(() => toast.success('Sharing link copied'))
-          .catch(() => toast.error('Could not copy the link'));
-      }}
-    >
-      Copy sharing link
-    </Button>
-  </div>
-);
+}) => {
+  const t = useTranslations('vehicles');
+  return (
+    <div className="flex flex-col items-start gap-3 rounded-card bg-card p-5 md:flex-row md:items-center md:justify-between">
+      <span className="flex flex-col gap-0.5">
+        <span className="text-body-sm font-medium text-ink">{title}</span>
+        <span className="text-body-sm text-muted">{body}</span>
+      </span>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          const url = documentSharingUrl({
+            clientId: ctx.clientId,
+            redirectUri: ctx.license.firstRedirectURI,
+          });
+          navigator.clipboard
+            .writeText(url)
+            .then(() => toast.success(t('documents.linkCopied')))
+            .catch(() => toast.error(t('documents.linkCopyFailed')));
+        }}
+      >
+        {t('documents.copyLink')}
+      </Button>
+    </div>
+  );
+};
 
 export const DocumentsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   subject,
   ctx,
 }) => {
+  const t = useTranslations('vehicles');
   const types = useSubjectQuery<Types>({
     api: 'fetch',
     asset: subject.asset,
@@ -144,8 +151,8 @@ export const DocumentsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     request: availableCloudEventTypesQuery(subject.fetchDid, subject.fetchFilter),
   });
   const docTypes = (types.data?.data?.availableCloudEventTypes ?? [])
-    .map((t) => t.type)
-    .filter((t) => t.startsWith('dimo.document.'));
+    .map((row) => row.type)
+    .filter((type) => type.startsWith('dimo.document.'));
   const label = ctx.license.label;
   const typesError =
     types.error?.message ?? fieldError(types.data?.errors, 'availableCloudEventTypes');
@@ -154,34 +161,32 @@ export const DocumentsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     return (
       <SharingLinkCard
         ctx={ctx}
-        title={`The owner hasn't shared documents with ${label}`}
-        body="Send them this link. It opens DIMO sign-in and asks them to share their documents with your license."
+        title={t('documents.notSharedTitle', { license: label })}
+        body={t('documents.notSharedBody')}
       />
     );
   }
   return (
     <div className="flex flex-col gap-3">
       <p className="px-1 text-body-sm text-muted">
-        Documents the owner shared with {label} from the DIMO app. Each one is a cloud
-        event on the owner&apos;s account DID, with the extracted fields as data and the
-        scan behind a signed link.
+        {t('documents.intro', { license: label })}
       </p>
       {typesError && <p className="px-1 text-body-sm text-negative">{typesError}</p>}
-      {types.isLoading && <p className="px-1 text-body-sm text-muted">Loading…</p>}
+      {types.isLoading && (
+        <p className="px-1 text-body-sm text-muted">{t('documents.loading')}</p>
+      )}
       {!types.isLoading && !typesError && docTypes.length === 0 && (
-        <p className="px-1 text-body-sm text-muted">
-          The owner hasn&apos;t uploaded any documents yet.
-        </p>
+        <p className="px-1 text-body-sm text-muted">{t('documents.noneUploaded')}</p>
       )}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {docTypes.map((t) => (
-          <DocumentCard key={t} type={t} subject={subject} ctx={ctx} />
+        {docTypes.map((type) => (
+          <DocumentCard key={type} type={type} subject={subject} ctx={ctx} />
         ))}
       </div>
       <SharingLinkCard
         ctx={ctx}
-        title="Need another document?"
-        body="Send the owner a link that asks them to share documents with your license. It opens DIMO sign-in."
+        title={t('documents.needAnotherTitle')}
+        body={t('documents.needAnotherBody')}
       />
     </div>
   );

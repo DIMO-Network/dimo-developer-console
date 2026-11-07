@@ -1,14 +1,10 @@
 'use client';
 import { FC, type ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import { Anchor } from '@/components/Anchor';
 import { GenerateDevJWT } from '@/components/GenerateDevJWT';
 import { ConnectWalletButton } from '@/components/DataAccess/ConnectWalletButton';
-import {
-  askForAccess,
-  DATA_ACCESS_UNAVAILABLE,
-  NO_LONGER_HAS_ACCESS,
-} from '@/config/teamCopy';
 import type { Access } from './SourceRail';
 
 interface Props {
@@ -41,8 +37,10 @@ export const AccessNotice: FC<Props> = ({
   onViewSharing,
   onRetry,
   member = false,
-  ownerEmail = 'the team owner',
+  ownerEmail,
 }) => {
+  const t = useTranslations('vehicles');
+  const tCommon = useTranslations('common');
   const wallet = (label?: string) =>
     clientId && redirectUri ? (
       <ConnectWalletButton
@@ -57,43 +55,45 @@ export const AccessNotice: FC<Props> = ({
     case 'loading':
       return null;
     case 'unavailable':
-      return <Card title={DATA_ACCESS_UNAVAILABLE} />;
+      return <Card title={tCommon('teamCopy.dataAccessUnavailable')} />;
     case 'no-access':
       return (
-        <Card title={`You don't have data access to ${licenseLabel}`}>
+        <Card title={t('accessNotice.noAccessTitle', { license: licenseLabel })}>
           <p className="max-w-xl text-body-sm text-muted">
-            {askForAccess(ownerEmail, licenseLabel)}
+            {ownerEmail
+              ? tCommon('teamCopy.askForAccess', { ownerEmail, license: licenseLabel })
+              : t('accessNotice.noAccessBody', { license: licenseLabel })}
           </p>
         </Card>
       );
     case 'removed':
-      return <Card title={NO_LONGER_HAS_ACCESS} />;
+      return <Card title={tCommon('teamCopy.noLongerHasAccess')} />;
     case 'session-expired':
       return (
-        <Card title="Your session has expired">
+        <Card title={t('accessNotice.sessionExpiredTitle')}>
           <p className="max-w-xl text-body-sm text-muted">
-            Sign in again to keep reading this vehicle.
+            {t('accessNotice.sessionExpiredBody')}
           </p>
           <Anchor href="/sign-in" className="underline">
-            Sign in
+            {t('accessNotice.signIn')}
           </Anchor>
         </Card>
       );
     case 'reconnect':
       return (
-        <Card title={`Reconnect to ${licenseLabel}`}>
+        <Card title={t('accessNotice.reconnectTitle', { license: licenseLabel })}>
           <p className="max-w-xl text-body-sm text-muted">
-            The developer JWT in this browser was not signed by your current wallet.
+            {t('accessNotice.reconnectBody')}
           </p>
-          {wallet('Reconnect with your wallet')}
+          {wallet(t('accessNotice.reconnectWallet'))}
         </Card>
       );
     case 'error':
       return (
-        <Card title={`We couldn't check your access to ${licenseLabel}.`}>
+        <Card title={t('accessNotice.errorTitle', { license: licenseLabel })}>
           {onRetry && (
             <Button variant="secondary" onClick={onRetry}>
-              Try again
+              {tCommon('actions.retry')}
             </Button>
           )}
         </Card>
@@ -103,19 +103,17 @@ export const AccessNotice: FC<Props> = ({
         <Card
           title={
             clientId
-              ? `This vehicle isn't shared with ${licenseLabel}`
-              : "This vehicle isn't shared with any of your licenses"
+              ? t('accessNotice.notSharedTitleLicense', { license: licenseLabel })
+              : t('accessNotice.notSharedTitleAny')
           }
         >
           <p className="max-w-xl text-body-sm text-muted">
             {clientId
-              ? "The owner hasn't granted this license access"
-              : "The owner hasn't granted any of your licenses access"}
-            , so its data can&apos;t be read here. You can still see which apps it is
-            shared with.
+              ? t('accessNotice.notSharedBodyLicense')
+              : t('accessNotice.notSharedBodyAny')}
           </p>
           <Button variant="secondary" onClick={onViewSharing}>
-            View sharing
+            {t('accessNotice.viewSharing')}
           </Button>
         </Card>
       );
@@ -126,13 +124,12 @@ export const AccessNotice: FC<Props> = ({
       <Card
         title={
           expired
-            ? `Your connection to ${licenseLabel} has expired`
-            : 'Connect your wallet to read this vehicle'
+            ? t('accessNotice.memberExpiredTitle', { license: licenseLabel })
+            : t('accessNotice.memberConnectTitle')
         }
       >
         <p className="max-w-xl text-body-sm text-muted">
-          Your wallet signs a developer JWT for {licenseLabel}; the token stays in this
-          browser.
+          {t('accessNotice.memberBody', { license: licenseLabel })}
         </p>
         {wallet()}
       </Card>
@@ -142,19 +139,14 @@ export const AccessNotice: FC<Props> = ({
     <Card
       title={
         expired
-          ? `Your developer JWT for ${licenseLabel} has expired`
-          : 'Generate a developer JWT to read this vehicle'
+          ? t('accessNotice.jwtExpiredTitle', { license: licenseLabel })
+          : t('accessNotice.jwtMissingTitle')
       }
     >
       <p className="max-w-xl text-body-sm text-muted">
-        {expired ? (
-          'Generate a new one to keep reading this vehicle.'
-        ) : (
-          <>
-            {licenseLabel} has no developer JWT in this browser yet. Generating one uses
-            the license&apos;s API key, and the token stays in this browser.
-          </>
-        )}
+        {expired
+          ? t('accessNotice.jwtExpiredBody')
+          : t('accessNotice.jwtMissingBody', { license: licenseLabel })}
       </p>
       {clientId && redirectUri && (
         <GenerateDevJWT
