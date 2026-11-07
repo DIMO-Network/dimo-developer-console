@@ -132,6 +132,35 @@ describe('Brand', () => {
     );
   });
 
+  it('sends the API the English fallback name, whatever the locale', async () => {
+    // A localized name would be persisted as the workspace name.
+    const intl = jest.requireMock('next-intl');
+    const englishTranslations = intl.useTranslations;
+    const { createTranslator } = jest.requireActual('next-intl');
+    intl.useTranslations = (namespace: string) => {
+      const english = englishTranslations(namespace);
+      const zh = createTranslator({
+        locale: 'zh-Hans',
+        messages: { details: { fallbackName: '许可证 #{tokenId}' } },
+      });
+      return Object.assign(
+        (key: string, values?: never) =>
+          key === 'details.fallbackName' ? zh(key, values) : english(key, values),
+        english,
+      );
+    };
+    try {
+      routeReturns(null, []);
+      renderBrand({ ...mockLicense, alias: null });
+      await waitFor(() => expect(screen.getByText('No brand set.')).toBeInTheDocument());
+      expect(getOrCreateLicenseWorkspace).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'License #42' }),
+      );
+    } finally {
+      intl.useTranslations = englishTranslations;
+    }
+  });
+
   it('tells an owner when their workspace could not be loaded', async () => {
     routeReturns(null, []);
     (getOrCreateLicenseWorkspace as jest.Mock).mockResolvedValue(null);

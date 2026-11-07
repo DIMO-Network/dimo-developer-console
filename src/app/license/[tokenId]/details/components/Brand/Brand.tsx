@@ -64,7 +64,8 @@ export const Brand: FC<Props> = ({ license }) => {
     const create = async () => {
       try {
         const ws = await getOrCreateLicenseWorkspace({
-          name: fragment.alias ?? t('details.fallbackName', { tokenId: licenseTokenId }),
+          // Persisted as the workspace name, so it stays English in every locale.
+          name: fragment.alias ?? `License #${licenseTokenId}`,
           token_id: licenseTokenId,
           client_id: fragment.clientId,
           owner: fragment.owner,
