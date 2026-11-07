@@ -1,6 +1,7 @@
 'use client';
 import { mintNotice, removalNotice } from './notices';
 import { FC, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Abi } from 'viem';
 import { Button } from '@/components/Button';
@@ -42,6 +43,7 @@ const MakeIcon: FC<{ path: string }> = ({ path }) => (
 );
 
 export const VehicleSimulator: FC<Props> = ({ clientId }) => {
+  const t = useTranslations('app');
   const mintVehicle = useMintVehicle();
   const burnVehicle = useBurnVehicle();
   const { currentUser } = useGlobalAccount();
@@ -108,8 +110,8 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
   };
 
   const selectionPreview = (() => {
-    if (!selectedRegion) return 'No vehicle configured';
-    const regionLabel = selectedRegion === 'japan' ? 'Japan' : 'USA';
+    if (!selectedRegion) return t('simulator.noVehicle');
+    const regionLabel = t(`simulator.regions.${selectedRegion}.label`);
     if (!selectedMakeSlug) return regionLabel;
     const makeName = selectedMake?.label ?? selectedMakeSlug;
     const modelLabel =
@@ -145,7 +147,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           status: deleteResult.status,
           message: deleteResult.message,
         });
-        toast.error(deleteResult.message ?? 'Failed to remove vehicle record');
+        toast.error(deleteResult.message ?? t('simulator.removeRecordFailed'));
         return;
       }
       if (deleteResult.status === 404) {
@@ -158,10 +160,10 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       await queryClient.invalidateQueries({ queryKey: ['simulated-vehicles', clientId] });
       console.log('[VehicleSimulator] Vehicle removed', { vehicleId, tokenId });
       const removal = removalNotice(burnResult.success);
-      toast[removal.tone](removal.message);
+      toast[removal.tone](t(removal.key));
     } catch (e) {
       console.error('[VehicleSimulator] Delete error', e);
-      toast.error(e instanceof Error ? e.message : 'Failed to remove vehicle');
+      toast.error(e instanceof Error ? e.message : t('simulator.removeFailed'));
     } finally {
       setDeletingId(null);
     }
@@ -205,7 +207,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
       if (!result.success) {
         console.warn('[VehicleSimulator] Mint failed', { reason: result.reason });
-        toast.error(result.reason ?? 'Minting failed');
+        toast.error(result.reason ?? t('simulator.mintFailed'));
         return;
       }
 
@@ -216,9 +218,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
             logs: result.logs,
           },
         );
-        toast.error(
-          'Mint succeeded but vehicle token ID could not be read. Please try again.',
-        );
+        toast.error(t('simulator.mintTokenUnreadable'));
         return;
       }
 
@@ -247,7 +247,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           registered: false,
           shared: !result.sacdFailed,
         });
-        toast[notice.tone](notice.message);
+        toast[notice.tone](t(notice.key, notice.values));
         return;
       }
 
@@ -276,19 +276,17 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
         registered: registration.status !== 'registration_failed',
         shared: !result.sacdFailed,
       });
-      toast[notice.tone](notice.message);
+      toast[notice.tone](t(notice.key, notice.values));
     } catch (e) {
       console.error('[VehicleSimulator] Mint error', e);
-      toast.error(
-        e instanceof Error ? e.message : 'Something went wrong while minting the vehicle',
-      );
+      toast.error(e instanceof Error ? e.message : t('simulator.mintError'));
     } finally {
       setIsLoading(false);
     }
   };
 
   const isBusy = isLoading || deletingId !== null;
-  const busyLabel = isLoading ? 'Minting vehicle...' : 'Removing vehicle...';
+  const busyLabel = isLoading ? t('simulator.minting') : t('simulator.removing');
 
   return (
     <div className="license-list-content w-full relative">
@@ -302,8 +300,8 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       {/* Header */}
       <div className="vehicle-sim-header">
         <div className="vehicle-sim-header-text">
-          <p className="title">Vehicle simulator</p>
-          <p className="text-body-sm text-muted">Mint simulated test vehicles.</p>
+          <p className="title">{t('simulator.title')}</p>
+          <p className="text-body-sm text-muted">{t('simulator.subtitle')}</p>
         </div>
       </div>
 
@@ -311,25 +309,28 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       <div className="vehicle-sim-steps">
         {/* Step 01 — Region */}
         <div className="vehicle-sim-step">
-          <span className="vehicle-sim-step-label">01 — Region</span>
-          <div className="vehicle-sim-pill-group" role="group" aria-label="Select region">
-            {(
-              [
-                { value: 'usa', label: 'USA', sub: 'New York routes' },
-                { value: 'japan', label: 'Japan', sub: 'Honshu circuit' },
-              ] as const
-            ).map((region) => (
+          <span className="vehicle-sim-step-label">{t('simulator.steps.region')}</span>
+          <div
+            className="vehicle-sim-pill-group"
+            role="group"
+            aria-label={t('simulator.selectRegion')}
+          >
+            {(['usa', 'japan'] as const).map((region) => (
               <button
-                key={region.value}
+                key={region}
                 type="button"
-                aria-pressed={selectedRegion === region.value}
-                aria-label={region.label}
+                aria-pressed={selectedRegion === region}
+                aria-label={t(`simulator.regions.${region}.label`)}
                 disabled={isLoading}
-                onClick={() => setSelectedRegion(region.value)}
-                className={`vehicle-sim-region-card${selectedRegion === region.value ? ' selected' : ''}`}
+                onClick={() => setSelectedRegion(region)}
+                className={`vehicle-sim-region-card${selectedRegion === region ? ' selected' : ''}`}
               >
-                <span className="vehicle-sim-region-label">{region.label}</span>
-                <span className="vehicle-sim-region-sub">{region.sub}</span>
+                <span className="vehicle-sim-region-label">
+                  {t(`simulator.regions.${region}.label`)}
+                </span>
+                <span className="vehicle-sim-region-sub">
+                  {t(`simulator.regions.${region}.sub`)}
+                </span>
               </button>
             ))}
           </div>
@@ -337,8 +338,12 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
         {/* Step 02 — Make */}
         <div className={`vehicle-sim-step${!selectedRegion ? ' locked' : ''}`}>
-          <span className="vehicle-sim-step-label">02 — Make</span>
-          <div className="vehicle-sim-make-grid" role="group" aria-label="Select make">
+          <span className="vehicle-sim-step-label">{t('simulator.steps.make')}</span>
+          <div
+            className="vehicle-sim-make-grid"
+            role="group"
+            aria-label={t('simulator.selectMake')}
+          >
             {MAKES.map((make) => (
               <button
                 key={make.slug}
@@ -358,8 +363,12 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
         {/* Step 03 — Model */}
         <div className={`vehicle-sim-step${!selectedMakeSlug ? ' locked' : ''}`}>
-          <span className="vehicle-sim-step-label">03 — Model</span>
-          <div className="vehicle-sim-pill-group" role="group" aria-label="Select model">
+          <span className="vehicle-sim-step-label">{t('simulator.steps.model')}</span>
+          <div
+            className="vehicle-sim-pill-group"
+            role="group"
+            aria-label={t('simulator.selectModel')}
+          >
             {(selectedMake?.models ?? []).map((model) => (
               <button
                 key={model.slug}
@@ -378,7 +387,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
                 className="vehicle-sim-pill"
                 style={{ opacity: 0.3, pointerEvents: 'none' }}
               >
-                Select a make first
+                {t('simulator.selectMakeFirst')}
               </span>
             )}
           </div>
@@ -386,8 +395,12 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
 
         {/* Step 04 — Year */}
         <div className={`vehicle-sim-step${!selectedModelSlug ? ' locked' : ''}`}>
-          <span className="vehicle-sim-step-label">04 — Year</span>
-          <div className="vehicle-sim-pill-group" role="group" aria-label="Select year">
+          <span className="vehicle-sim-step-label">{t('simulator.steps.year')}</span>
+          <div
+            className="vehicle-sim-pill-group"
+            role="group"
+            aria-label={t('simulator.selectYear')}
+          >
             {availableYears.map((year) => (
               <button
                 key={year}
@@ -410,7 +423,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       <div className="vehicle-sim-mint-row">
         <span className="vehicle-sim-selection-preview" aria-live="polite">
           {atLimit
-            ? `Limit reached — only ${MAX_TEST_VEHICLES} per account`
+            ? t('simulator.limitReached', { max: MAX_TEST_VEHICLES })
             : selectionPreview}
         </span>
         <Button
@@ -419,7 +432,7 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
           loading={isLoading}
           onClick={handleMint}
         >
-          Mint vehicle
+          {t('simulator.mint')}
         </Button>
       </div>
 
@@ -427,9 +440,9 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
       {storedVehicles.length > 0 && (
         <div className="vehicle-sim-fleet">
           <div className="vehicle-sim-fleet-header">
-            <span className="vehicle-sim-step-label">Simulated fleet</span>
+            <span className="vehicle-sim-step-label">{t('simulator.fleet.title')}</span>
             <span className="vehicle-sim-fleet-count">
-              {storedVehicles.length} vehicle{storedVehicles.length !== 1 ? 's' : ''}
+              {t('simulator.fleet.count', { count: storedVehicles.length })}
             </span>
           </div>
           <div className="vehicle-sim-fleet-list">
@@ -447,18 +460,20 @@ export const VehicleSimulator: FC<Props> = ({ clientId }) => {
                     {isRemovedOnChain ? (
                       <span className="vehicle-sim-card-stale-badge">
                         <ExclamationTriangleIcon className="h-3 w-3" />
-                        Removed on-chain
+                        {t('simulator.fleet.removedOnChain')}
                       </span>
                     ) : (
                       <span className="vehicle-sim-card-network">Polygon</span>
                     )}
                   </div>
                   <div className="vehicle-sim-card-right">
-                    <span className="vehicle-sim-card-token-label">Token ID</span>
+                    <span className="vehicle-sim-card-token-label">
+                      {t('simulator.fleet.tokenId')}
+                    </span>
                     <span className="vehicle-sim-card-token-id">#{vehicle.token_id}</span>
                     <button
                       type="button"
-                      aria-label="Remove vehicle"
+                      aria-label={t('simulator.fleet.remove')}
                       disabled={deletingId === vehicle.id}
                       onClick={() => handleDelete(vehicle.id, vehicle.token_id)}
                       className="vehicle-sim-delete-btn"

@@ -1,0 +1,63 @@
+{
+  "metadata": {
+    "listTitle": "Templates | {appName}",
+    "newTitle": "New template | {appName}"
+  },
+  "loading": "Loading...",
+  "unavailable": {
+    "title": "Vehicle templates are coming soon",
+    "description": "The template editor isn't available yet. Check back soon."
+  },
+  "header": {
+    "description": "Search the catalog by make, model and year to edit what a car is",
+    "newTemplate": "New template"
+  },
+  "search": {
+    "fields": {
+      "make": "Make",
+      "model": "Model",
+      "year": "Year"
+    },
+    "submit": "Search",
+    "failed": "Something went wrong searching the catalog",
+    "noMake": "No make matched that name. Try the brand as it is spelled on the car.",
+    "versionTrims": "v{version} · {trims, plural, one {# trim} other {# trims}}",
+    "open": "Open",
+    "create": "Create",
+    "status": {
+      "ok": "Template",
+      "missing": "No template yet",
+      "invalidId": "Id needs fixing first"
+    },
+    "hints": {
+      "missing": "This model year exists, but nobody has written a template for it yet.",
+      "invalidId": "This id is not in the make_model_year shape a template needs, so there is nothing to edit until the id itself is corrected."
+    }
+  },
+  "new": {
+    "title": "New template",
+    "description": "A template is one model year and the trims it shipped in. Creating it publishes straight away, under your name. No cars use it yet, so nothing on the road changes.",
+    "manufacturer": "Manufacturer",
+    "model": "Model",
+    "year": "Year",
+    "firstTrim": "First trim",
+    "exists": "A template with this id already exists.",
+    "openIt": "Open it",
+    "create": "Create template",
+    "createFailed": "Could not create this template"
+  },
+  "editor": {
+    "loadFailed": "Could not load this template",
+    "loadFailedDetail": "Could not load this template: {message} ({status})",
+    "lastPublishedBy": "last published by {author}",
+    "addTrim": "Add trim",
+    "publish": "Publish",
+    "publishFailed": "Publish failed",
+    "published": "Published version {version}.",
+    "conflict": {
+      "moved": "This template moved to version {actual} while you were editing version {expected}.",
+      "kept": "Your draft has not been discarded and nothing was published. Reload to see the current version, then re-apply your changes.",
+      "reload": "Reload"
+    }
+  }
+}

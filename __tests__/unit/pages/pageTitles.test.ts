@@ -24,8 +24,8 @@ import { generateMetadata as create } from '@/app/license/[tokenId]/configurator
 import { generateMetadata as edit } from '@/app/license/[tokenId]/configurator/[id]/page';
 import { generateMetadata as vehicles } from '@/app/license/vehicles/[clientId]/page';
 import { generateMetadata as licenses } from '@/app/licenses/layout';
-import { metadata as templates } from '@/app/templates/page';
-import { metadata as newTemplate } from '@/app/templates/new/page';
+import { generateMetadata as templates } from '@/app/templates/page';
+import { generateMetadata as newTemplate } from '@/app/templates/new/page';
 
 describe('page titles', () => {
   it.each([

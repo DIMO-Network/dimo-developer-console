@@ -1,12 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export const Header = () => {
+  const t = useTranslations('templates');
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-body-sm text-muted">
-        Search the catalog by make, model and year to edit what a car is
-      </p>
+      <p className="text-body-sm text-muted">{t('header.description')}</p>
       {/*
         The only reliable way into the create form. The per-row "Create" button
         below depends on a result coming back with status 'missing', and that
@@ -20,7 +20,7 @@ export const Header = () => {
         result. /templates/new takes no preset and the form handles its absence.
       */}
       <Link href="/templates/new" className="button primary">
-        New template
+        {t('header.newTemplate')}
       </Link>
     </div>
   );

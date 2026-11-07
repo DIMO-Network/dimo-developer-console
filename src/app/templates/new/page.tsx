@@ -1,18 +1,23 @@
-import React, { Suspense, type FC } from 'react';
+import React, { Suspense } from 'react';
 import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 import configuration from '@/config';
 
 import { PresetView } from './components/PresetView';
 
-export const metadata: Metadata = {
-  title: `New template | ${configuration.appName}`,
+export const generateMetadata = async (): Promise<Metadata> => {
+  const t = await getTranslations('templates');
+  return { title: t('metadata.newTitle', { appName: configuration.appName }) };
 };
 
-const NewTemplatePage: FC = () => (
-  <Suspense fallback={<div>Loading...</div>}>
-    <PresetView />
-  </Suspense>
-);
+const NewTemplatePage = async () => {
+  const t = await getTranslations('templates');
+  return (
+    <Suspense fallback={<div>{t('loading')}</div>}>
+      <PresetView />
+    </Suspense>
+  );
+};
 
 export default NewTemplatePage;

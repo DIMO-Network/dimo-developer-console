@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "title": "Home | {appName}"
+  },
+  "home": {
+    "welcomeNamed": "Welcome, {name}",
+    "welcome": "Welcome!",
+    "wavingHandAlt": "Waving hand",
+    "shortcuts": {
+      "licenses": {
+        "label": "Licenses",
+        "description": "View and manage your developer licenses"
+      },
+      "connections": {
+        "label": "Connections",
+        "description": "Configure connections to bring your own data"
+      },
+      "webhooks": {
+        "label": "Webhooks",
+        "description": "Create and manage webhook event subscriptions"
+      },
+      "vehicles": {
+        "label": "Vehicles",
+        "description": "See what data each shared vehicle sends and browse its raw events"
+      }
+    }
+  },
+  "list": {
+    "createLicense": "Create a license",
+    "addCredits": "Add credits",
+    "empty": {
+      "title": "You haven't created any developer licenses yet",
+      "description": "Use your developer license credentials to integrate with DIMO"
+    },
+    "dcx": {
+      "title": "What's DCX?",
+      "description": "DCX is an abbreviation for DIMO Credits. DIMO Credits cost $0.001 per credit and API calls and other DIMO fees are priced in DCX.",
+      "learnMore": "Learn more."
+    }
+  },
+  "create": {
+    "preparing": "Preparing to create the developer license",
+    "creating": "Creating developer license...",
+    "loading": "Loading",
+    "created": "Developer license created! Refresh the page to see your changes.",
+    "nameInUse": "Developer License name already in use. Please try again using a different name.",
+    "failed": "Something went wrong while confirming the transaction",
+    "nameLabel": "Developer license name",
+    "namePlaceholder": "My project",
+    "nameHelp": "This is the namespace used across all your apps. It is a public name visible to other developers and users in the ecosystem."
+  },
+  "simulator": {
+    "open": "Vehicle simulator",
+    "title": "Vehicle simulator",
+    "subtitle": "Mint simulated test vehicles.",
+    "minting": "Minting vehicle...",
+    "removing": "Removing vehicle...",
+    "mintFailed": "Minting failed",
+    "mintTokenUnreadable": "Mint succeeded but vehicle token ID could not be read. Please try again.",
+    "mintError": "Something went wrong while minting the vehicle",
+    "removeRecordFailed": "Failed to remove vehicle record",
+    "removeFailed": "Failed to remove vehicle",
+    "noVehicle": "No vehicle configured",
+    "limitReached": "Limit reached — only {max} per account",
+    "mint": "Mint vehicle",
+    "steps": {
+      "region": "01 — Region",
+      "make": "02 — Make",
+      "model": "03 — Model",
+      "year": "04 — Year"
+    },
+    "selectRegion": "Select region",
+    "selectMake": "Select make",
+    "selectModel": "Select model",
+    "selectYear": "Select year",
+    "selectMakeFirst": "Select a make first",
+    "regions": {
+      "usa": {
+        "label": "USA",
+        "sub": "New York routes"
+      },
+      "japan": {
+        "label": "Japan",
+        "sub": "Honshu circuit"
+      }
+    },
+    "fleet": {
+      "title": "Simulated fleet",
+      "count": "{count, plural, one {# vehicle} other {# vehicles}}",
+      "removedOnChain": "Removed on-chain",
+      "tokenId": "Token ID",
+      "remove": "Remove vehicle"
+    },
+    "notices": {
+      "notRecorded": "Vehicle #{tokenId} was minted, but it couldn't be saved to this license.",
+      "notShared": "Vehicle #{tokenId} was minted, but neither the simulator nor this license was granted access to it. Remove the vehicle and mint again to fix this.",
+      "notRegistered": "Vehicle #{tokenId} was minted, but the simulator couldn't start it.",
+      "minted": "Vehicle minted successfully!",
+      "removed": "Vehicle removed successfully",
+      "removedNotBurned": "Vehicle removed from the simulator, but its NFT could not be burned."
+    }
+  },
+  "error": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "home": "Go back home",
+    "retry": "Retry"
+  },
+  "notFound": {
+    "metadataTitle": "404 | {appName}",
+    "title": "Page not found",
+    "description": "Sorry, we couldn’t find the page you’re looking for.",
+    "home": "Go back home"
+  }
+}

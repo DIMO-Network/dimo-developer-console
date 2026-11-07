@@ -1,4 +1,5 @@
 import { FC, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 
 import * as Sentry from '@sentry/nextjs';
@@ -17,7 +18,7 @@ import { usePayLicenseFee, useMintLicense } from '@/hooks/useTransactions';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import configuration from '@/config';
-import { isLicenseAliasTooLong, LICENSE_ALIAS_TOO_LONG } from '@/utils/licenseAlias';
+import { isLicenseAliasTooLong, LICENSE_ALIAS_TOO_LONG_KEY } from '@/utils/licenseAlias';
 
 import './Form.css';
 
@@ -27,6 +28,8 @@ interface IProps {
 }
 
 export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
+  const t = useTranslations('app');
+  const tCommon = useTranslations('common');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { trackEvent } = useMixPanel();
   const { currentUser } = useGlobalAccount();
@@ -48,7 +51,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
     try {
       setIsLoading(true);
       setLoadingStatus({
-        label: 'Preparing to create the developer license',
+        label: t('create.preparing'),
         status: 'loading',
       });
       const { reason } = await payLicenseFee();
@@ -57,7 +60,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
       }
       const { workspace } = getValues();
       await createDeveloperLicense(workspace);
-      toast.success('Developer license created! Refresh the page to see your changes.');
+      toast.success(t('create.created'));
 
       trackEvent('Developer License Created', {
         distinct_id: currentUser!.smartContractAddress!,
@@ -69,13 +72,12 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
       if (error instanceof Error) {
         if (error.message === 'AliasAlreadyInUse') {
           setError('workspace.name', {
-            message:
-              'Developer License name already in use. Please try again using a different name.',
+            message: t('create.nameInUse'),
           });
         }
       }
       Sentry.captureException(error);
-      toast.error('Something went wrong while confirming the transaction');
+      toast.error(t('create.failed'));
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +86,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
   const createDeveloperLicense = async (workspaceData: Partial<IWorkspace>) => {
     if (!currentUser) throw new Error('User session is invalid');
     setLoadingStatus({
-      label: 'Creating developer license...',
+      label: t('create.creating'),
       status: 'loading',
     });
     const { logs } = await mintLicense(workspaceData?.name ?? '');
@@ -100,7 +102,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
       <div className={'flex flex-col flex-1 items-center gap-2'}>
         <BubbleLoader isLoading={true} />
         <p className={'text-center text-body font-medium text-ink'}>
-          {loadingStatus?.label ?? 'Loading'}
+          {loadingStatus?.label ?? t('create.loading')}
         </p>
       </div>
     );
@@ -108,28 +110,25 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
   return (
     <form className="create-app-form" onSubmit={handleSubmit(onSubmit)}>
       <Label htmlFor="namespace">
-        Developer license name
+        {t('create.nameLabel')}
         <TextField
           type="text"
-          placeholder="My project"
+          placeholder={t('create.namePlaceholder')}
           {...register('workspace.name', {
-            required: 'This field is required',
+            required: tCommon('validation.required'),
             validate: (name = '') =>
-              !isLicenseAliasTooLong(name) || LICENSE_ALIAS_TOO_LONG,
+              !isLicenseAliasTooLong(name) || tCommon(LICENSE_ALIAS_TOO_LONG_KEY),
           })}
           role="namespace-input"
         />
         {errors?.workspace?.name && (
           <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
         )}
-        <p className="text-body-sm font-normal text-muted">
-          This is the namespace used across all your apps. It is a public name visible to
-          other developers and users in the ecosystem.
-        </p>
+        <p className="text-body-sm font-normal text-muted">{t('create.nameHelp')}</p>
       </Label>
       <div className="flex flex-col gap-2 pt-4">
         <Button type="submit" role="continue-button" loading={isLoading}>
-          Create
+          {tCommon('actions.create')}
         </Button>
         <Button
           type="reset"
@@ -138,7 +137,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
           loading={isLoading}
           onClick={onClose}
         >
-          Cancel
+          {tCommon('actions.cancel')}
         </Button>
       </div>
     </form>
