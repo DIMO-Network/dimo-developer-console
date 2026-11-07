@@ -1,8 +1,8 @@
-import { useFormatter, useTranslations } from 'next-intl';
+import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { relativeTimeParts } from '@/utils/freshness';
 
-// "Mar 4, 2024" is shown in UTC under every locale, like the English helpers
-// in utils/freshness: the zone is part of what the label says.
+// "Mar 4, 2024" is shown in UTC under every locale: the zone is part of what
+// the label says.
 const UTC_DATE = {
   month: 'short',
   day: 'numeric',
@@ -19,13 +19,15 @@ const parse = (iso: string | null | undefined): number | null => {
 export const useFreshnessText = () => {
   const t = useTranslations('common');
   const format = useFormatter();
+  // Re-renders every minute, so "5 min ago" moves on.
+  const tick = useNow({ updateInterval: 60_000 });
 
   const utcDate = (iso?: string | null): string => {
     const at = parse(iso);
     return at === null ? t('freshness.noDate') : format.dateTime(at, UTC_DATE);
   };
 
-  const relativeTime = (iso: string | null | undefined, now = Date.now()): string => {
+  const relativeTime = (iso: string | null | undefined, now = tick.getTime()): string => {
     const parts = relativeTimeParts(iso, now);
     switch (parts.kind) {
       case 'never':

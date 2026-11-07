@@ -25,21 +25,13 @@ export const freshnessOf = (
   return 'inactive';
 };
 
-const dateLabel = (t: number) =>
-  new Date(t).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
-
 export type RelativeTimeParts =
   | { kind: 'never' }
   | { kind: 'justNow' }
   | { kind: 'minutes' | 'hours' | 'days'; count: number }
   | { kind: 'date'; at: number };
 
-// The thresholds, shared by the English helper below and the translated hook.
+// The thresholds; useFreshnessText words them.
 export const relativeTimeParts = (
   iso: string | null | undefined,
   now = Date.now(),
@@ -55,45 +47,9 @@ export const relativeTimeParts = (
   return { kind: 'date', at: t };
 };
 
-// English only. Components use useFreshnessText, which translates; this stays
-// for callers that have not moved to it.
-export const relativeTime = (
-  iso: string | null | undefined,
-  now = Date.now(),
-): string => {
-  const parts = relativeTimeParts(iso, now);
-  switch (parts.kind) {
-    case 'never':
-      return 'Never';
-    case 'justNow':
-      return 'just now';
-    case 'minutes':
-      return `${parts.count} min ago`;
-    case 'hours':
-      return `${parts.count} h ago`;
-    case 'days':
-      return `${parts.count} day${parts.count === 1 ? '' : 's'} ago`;
-    case 'date':
-      return dateLabel(parts.at);
-  }
-};
-
-export const absoluteTime = (iso: string | null | undefined): string => {
-  const t = parse(iso);
-  if (t === null) return '';
-  const d = new Date(t);
-  return `${dateLabel(t)}, ${d.toISOString().slice(11, 19)} UTC`;
-};
-
 export const FRESHNESS_TONE: Record<Freshness, StatusTone> = {
   live: 'live',
   stale: 'pending',
   inactive: 'error',
   none: 'off',
-};
-
-// "Mar 4, 2024" in UTC; an em dash for a missing or invalid timestamp.
-export const utcDate = (iso?: string | null): string => {
-  const t = parse(iso);
-  return t === null ? '—' : dateLabel(t);
 };
