@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import configuration from '@/config';
 import { parseErc721Did, parseEthrDid } from '@/services/subjects/did';
 import { decodeSacdPermissions, PERMISSION_NAMES } from '@/utils/sacdPermissions';
-import { NO_LONGER_HAS_ACCESS } from '@/config/teamCopy';
+import common from '../../messages/en/common.json';
 import { BoundedCache } from '@/utils/boundedCache';
 
 export type SubjectJwtCode = 'DEV_JWT_INVALID' | 'NOT_SHARED' | 'NO_ACCESS' | 'UPSTREAM';
@@ -177,7 +177,7 @@ const exchangeFor = async (
     const reason = await res.text();
     // Token exchange refuses a disabled signer with this exact message (C2).
     if (reason.includes('signer no longer authorized for this license')) {
-      throw new SubjectJwtError(403, 'NO_ACCESS', NO_LONGER_HAS_ACCESS);
+      throw new SubjectJwtError(403, 'NO_ACCESS', common.teamCopy.noLongerHasAccess);
     }
     throw new SubjectJwtError(
       403,
