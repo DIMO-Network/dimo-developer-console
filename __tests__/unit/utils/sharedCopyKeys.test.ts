@@ -16,10 +16,6 @@ describe('shared copy that can be translated', () => {
     expect(txErrorStatus(new Error('x'), key).label).toBe('errors.somethingWentWrong');
   });
 
-  it('keeps English without a translator', () => {
-    expect(txErrorStatus({ code: 4001 }).label).toBe('The transaction was denied');
-  });
-
   it('translates the named signals, and splits the rest', () => {
     expect(humanizeSignal('speed', key)).toBe('signals.speed');
     expect(humanizeSignal('someOtherSignal', key)).toBe('Some other signal');

@@ -39,6 +39,7 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   ctx,
 }) => {
   const t = useTranslations('vehicles');
+  const tCommon = useTranslations('common');
   const format = useFormatter();
   const { relativeTime, absoluteTime, utcDate } = useFreshnessText();
   const [filter, setFilter] = useState('');
@@ -197,7 +198,9 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] items-center gap-4 border-t border-outline px-5 py-2 text-body-sm text-fg"
           >
             <span className="flex flex-col">
-              <span className="font-medium text-ink">{humanizeSignal(e.name)}</span>
+              <span className="font-medium text-ink">
+                {humanizeSignal(e.name, tCommon)}
+              </span>
               <span className="font-mono text-code text-muted">{e.name}</span>
             </span>
             <span className="text-right">{format.number(e.numberOfEvents)}</span>

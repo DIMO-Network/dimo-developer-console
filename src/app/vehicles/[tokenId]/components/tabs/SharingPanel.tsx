@@ -98,8 +98,9 @@ type Grant = {
 // One SACD grant: app, decoded permissions, terms, granted, expires.
 const SacdRow: FC<{ grant: Grant; mine: boolean }> = ({ grant, mine }) => {
   const t = useTranslations('vehicles');
+  const tCommon = useTranslations('common');
   const { utcDate } = useFreshnessText();
-  const labels = permissionLabels(grant.permissions);
+  const labels = permissionLabels(grant.permissions, tCommon);
   return (
     <div className={`grid ${COLS} items-start gap-4 border-t border-outline px-5 py-3.5`}>
       <AppName grantee={grant.grantee} mine={mine} />

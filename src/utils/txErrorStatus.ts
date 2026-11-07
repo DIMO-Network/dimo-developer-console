@@ -4,22 +4,14 @@ import { UserOperationFailedError } from '@/utils/userOperation';
 
 type Translate = (key: string) => string;
 
-const ENGLISH: Record<string, string> = {
-  'errors.transactionDenied': 'The transaction was denied',
-  'errors.transactionFailedOnChain':
-    'The transaction failed on-chain, so nothing changed',
-  'errors.somethingWentWrong': 'Something went wrong',
-};
-
 // Signers.tsx's mapping: 4001 is the user rejecting the user operation.
-// Pass the common-namespace `t` to translate the label; without it the label
-// stays English, for callers that have not moved over.
-export const txErrorStatus = (error: unknown, t?: Translate): LoadingProps => {
+// Pass the common-namespace `t`.
+export const txErrorStatus = (error: unknown, t: Translate): LoadingProps => {
   const key =
     get(error, 'code', null) === 4001
       ? 'errors.transactionDenied'
       : error instanceof UserOperationFailedError
         ? 'errors.transactionFailedOnChain'
         : 'errors.somethingWentWrong';
-  return { status: 'error', label: t ? t(key) : ENGLISH[key] };
+  return { status: 'error', label: t(key) };
 };

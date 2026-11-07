@@ -34,13 +34,13 @@ type Doc = {
   } | null;
 };
 
-const fields = (data: unknown): [string, string][] =>
+const fields = (data: unknown, tCommon: (key: string) => string): [string, string][] =>
   data && typeof data === 'object' && !Array.isArray(data)
     ? Object.entries(data as Record<string, unknown>)
         .filter(
           ([, v]) => v === null || ['string', 'number', 'boolean'].includes(typeof v),
         )
-        .map(([k, v]) => [humanizeSignal(k), v === null ? '—' : String(v)])
+        .map(([k, v]) => [humanizeSignal(k, tCommon), v === null ? '—' : String(v)])
     : [];
 
 const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> = ({
@@ -49,6 +49,7 @@ const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> 
   ctx,
 }) => {
   const t = useTranslations('vehicles');
+  const tCommon = useTranslations('common');
   const { relativeTime } = useFreshnessText();
   const q = useSubjectQuery<Doc>({
     api: 'fetch',
@@ -70,7 +71,7 @@ const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> 
           <span className="text-card-title text-ink">
             {DOCUMENT_TITLE_KEYS[type]
               ? t(`documents.titles.${DOCUMENT_TITLE_KEYS[type]}`)
-              : humanizeSignal(type.split('.').at(-1) ?? type)}
+              : humanizeSignal(type.split('.').at(-1) ?? type, tCommon)}
           </span>
           <span className="font-mono text-code text-muted">{type}</span>
         </span>
@@ -83,13 +84,13 @@ const DocumentCard: FC<{ type: string; subject: Subject; ctx: SubjectContext }> 
       {error && <p className="text-body-sm text-negative">{error}</p>}
       {doc && (
         <div className="grid grid-cols-1 gap-x-5 gap-y-2.5 md:grid-cols-2">
-          {fields(doc.data).map(([k, v]) => (
+          {fields(doc.data, tCommon).map(([k, v]) => (
             <span key={k} className="flex flex-col gap-0.5 border-b border-outline pb-2">
               <span className="text-label text-muted">{k}</span>
               <span className="text-body-sm text-fg">{v}</span>
             </span>
           ))}
-          {fields(doc.data).length === 0 && (
+          {fields(doc.data, tCommon).length === 0 && (
             <span className="text-body-sm text-muted">{t('documents.noFields')}</span>
           )}
         </div>
