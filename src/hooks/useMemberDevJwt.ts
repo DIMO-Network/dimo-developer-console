@@ -5,6 +5,9 @@ import { requestDexChallenge, submitDexChallenge } from '@/actions/dimoAuth';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { saveDevJwt } from '@/utils/devJwt';
 
+// An HTTP status for the message's select; 0 or none means dex never answered.
+const statusOf = (status?: number) => (status ? String(status) : 'none');
+
 export const MEMBER_JWT_ATTEMPTS = 3;
 export const MEMBER_JWT_RETRY_MS = 5000;
 
@@ -41,9 +44,7 @@ export const useMemberDevJwt = () => {
         });
         if (!challenge.ok) {
           throw new MemberDevJwtError(
-            t('memberJwt.challengeFailed', {
-              status: challenge.status || t('memberJwt.noAnswer'),
-            }),
+            t('memberJwt.challengeFailed', { status: statusOf(challenge.status) }),
           );
         }
         const signedChallenge = await account.signMessage({
@@ -62,7 +63,7 @@ export const useMemberDevJwt = () => {
         const status = token.ok ? 0 : token.status;
         if (status < 400 || status >= 500) {
           throw new MemberDevJwtError(
-            t('memberJwt.connectFailed', { status: status || t('memberJwt.noAnswer') }),
+            t('memberJwt.connectFailed', { status: statusOf(status) }),
           );
         }
         if (attempt < MEMBER_JWT_ATTEMPTS) await wait(MEMBER_JWT_RETRY_MS);

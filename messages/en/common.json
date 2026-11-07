@@ -409,9 +409,8 @@
   },
   "memberJwt": {
     "sessionExpired": "Your session has expired. Sign in again.",
-    "challengeFailed": "Couldn't start connecting to this license ({status}). Try again.",
-    "connectFailed": "Couldn't connect your wallet ({status}). Try again.",
-    "noAnswer": "no answer",
+    "challengeFailed": "{status, select, none {Couldn't start connecting to this license (no answer). Try again.} other {Couldn't start connecting to this license ({status}). Try again.}}",
+    "connectFailed": "{status, select, none {Couldn't connect your wallet (no answer). Try again.} other {Couldn't connect your wallet ({status}). Try again.}}",
     "propagating": "Access is still propagating — try again in a minute"
   },
   "teamCopy": {
