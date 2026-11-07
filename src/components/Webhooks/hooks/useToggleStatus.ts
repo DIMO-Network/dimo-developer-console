@@ -23,9 +23,7 @@ export const useToggleStatus = (webhook: Webhook, clientId: string) => {
   };
 
   const toggleStatusWithConnectedUI = async () => {
-    toast.info(
-      t('webhooks.toggle.updating', { status: t(`webhooks.toggle.${nextStatus}`) }),
-    );
+    toast.info(t('webhooks.toggle.updating', { status: nextStatus }));
     try {
       await toggleStatus();
       toast.success(t('webhooks.toggle.updated'));

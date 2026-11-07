@@ -530,11 +530,9 @@
       "label": "Webhook URL"
     },
     "toggle": {
-      "updating": "Updating webhook status to {status}",
+      "updating": "{status, select, enabled {Updating webhook status to enabled} other {Updating webhook status to disabled}}",
       "updated": "Successfully updated webhook status",
-      "failed": "Failed to update webhook status",
-      "enabled": "enabled",
-      "disabled": "disabled"
+      "failed": "Failed to update webhook status"
     },
     "fields": {
       "description": {
