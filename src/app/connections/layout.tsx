@@ -5,7 +5,7 @@ import { OwnerOnly } from '@/components/OwnerOnly';
 export default function ConnectionsLayout({ children }: { children: ReactNode }) {
   return (
     <AuthorizedLayout>
-      <OwnerOnly feature="Connections">{children}</OwnerOnly>
+      <OwnerOnly feature="connections">{children}</OwnerOnly>
     </AuthorizedLayout>
   );
 }

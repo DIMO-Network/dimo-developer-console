@@ -10,7 +10,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 };
 
 const NewConfiguratorPage = ({ params }: { params: Promise<{ tokenId: string }> }) => (
-  <OwnerOnly feature="Configurations">
+  <OwnerOnly feature="configurations">
     <View params={params} />
   </OwnerOnly>
 );

@@ -722,5 +722,19 @@
     "previous": "Previous page",
     "next": "Next page",
     "page": "Page {page}"
+  },
+  "ownerOnly": {
+    "webhooks": {
+      "title": "Webhooks are managed by the team owner",
+      "body": "{ownerEmail} manages webhooks for {team}. Switch to your own team to manage webhooks for your licenses."
+    },
+    "connections": {
+      "title": "Connections are managed by the team owner",
+      "body": "{ownerEmail} manages connections for {team}. Switch to your own team to manage connections for your licenses."
+    },
+    "configurations": {
+      "title": "Configurations are managed by the team owner",
+      "body": "{ownerEmail} manages configurations for {team}. Switch to your own team to manage configurations for your licenses."
+    }
   }
 }

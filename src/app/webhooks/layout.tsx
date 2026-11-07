@@ -14,7 +14,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
 export default function WebhooksLayout({ children }: { children: ReactNode }) {
   return (
     <AuthorizedLayout>
-      <OwnerOnly feature="Webhooks">{children}</OwnerOnly>
+      <OwnerOnly feature="webhooks">{children}</OwnerOnly>
     </AuthorizedLayout>
   );
 }
