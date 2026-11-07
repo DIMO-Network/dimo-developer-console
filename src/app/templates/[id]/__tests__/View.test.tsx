@@ -3,6 +3,7 @@ import camry from '@/utils/__fixtures__/toyota_camry_2020.json';
 import { vehicleVocab } from '@/utils/__fixtures__/vehicleVocab';
 import { TemplateEditorView } from '../components/View';
 import type { Template } from '@/types/template';
+import type { Entitlement } from '@/services/templateEntitlement';
 
 const t = camry as unknown as Template;
 
@@ -21,6 +22,7 @@ let bundle: {
     canSetHardwareTemplateId: boolean;
     mintedVehicles: number;
     reason: string;
+    reasonDetail: Entitlement['reasonDetail'];
   };
 };
 
@@ -29,7 +31,7 @@ jest.mock('@/hooks/queries/useTemplate', () => ({
   usePublishTemplate: () => ({ mutateAsync: publish, isPending: false }),
 }));
 
-const authorBundle = () => ({
+const authorBundle = (): typeof bundle => ({
   template: t,
   vocabulary: vehicleVocab,
   entitlement: {
@@ -39,6 +41,7 @@ const authorBundle = () => ({
     mintedVehicles: 0,
     reason:
       "You hold DIMO developer license #472, DEMO App, and that's all it takes to publish changes here. No cars use it yet.",
+    reasonDetail: { key: 'licensed', via: 'owner', tokenId: 472, alias: 'DEMO App' },
   },
 });
 
@@ -258,6 +261,7 @@ describe('TemplateEditorView', () => {
         canSetHardwareTemplateId: false,
         mintedVehicles: 4212,
         reason: 'Creating or editing a template takes a DIMO developer license.',
+        reasonDetail: { key: 'licenseRequired' },
       },
     };
     render(<TemplateEditorView id={t.id} />);

@@ -312,7 +312,21 @@
       "license-required": "A developer license is needed",
       "unavailable": "Access couldn't be checked",
       "readOnly": "{title} — read only",
-      "hardwareLocked": "Which hardware ships with a car is DIMO's call, so the hardware template field stays locked."
+      "hardwareLocked": "Which hardware ships with a car is DIMO's call, so the hardware template field stays locked.",
+      "reason": {
+        "curator": "You're a DIMO curator, so nothing here is locked for you.",
+        "licenseUnavailable": "We couldn't check your DIMO developer license just now, so nothing is editable. Reload in a moment and it should clear.",
+        "create": "{via, select, owner {You hold DIMO developer license {license}. Nothing has been published for this model year yet, so you're writing the first one.} other {You sign for DIMO developer license {license}. Nothing has been published for this model year yet, so you're writing the first one.}}",
+        "licensed": "{via, select, owner {You hold DIMO developer license {license}, and that's all it takes to publish changes here.} other {You sign for DIMO developer license {license}, and that's all it takes to publish changes here.}}",
+        "manufacturerUnavailable": "We couldn't check who holds the Manufacturer NFT for this make just now. Reload in a moment and it should clear.",
+        "manufacturer": "You hold the {make} Manufacturer NFT (#{tokenId}), so this make is yours to edit.",
+        "licenseRequired": "Editing a template takes a DIMO developer license, and this account doesn't hold one or sign for one. Create one under Developer licenses, then reload this page.",
+        "license": "#{tokenId}",
+        "licenseWithAlias": "#{tokenId}, {alias}",
+        "vehicles": "{count, plural, =0 {No cars use it yet.} =1 {One car already uses it, so publishing changes how that car is described.} other {# cars already use it, so publishing changes how all of them are described.}}",
+        "vehiclesUnknown": "We couldn't check how many cars use this definition, so assume some are already on the road.",
+        "withVehicles": "{reason} {vehicles}"
+      }
     },
     "normalisation": {
       "title": "What the editor changed that you didn't type",

@@ -140,7 +140,11 @@ describe('TrimSelectorEditor', () => {
 });
 
 describe('EntitlementBanner', () => {
-  it('explains a missing developer license and names the vehicle count', () => {
+  // `reason` is the API's English; the banner builds its text from reasonDetail
+  // so it can be translated, and never shows `reason` itself.
+  const API_ENGLISH = 'the English the API answers with';
+
+  it('explains a missing developer license', () => {
     render(
       <EntitlementBanner
         entitlement={{
@@ -148,18 +152,21 @@ describe('EntitlementBanner', () => {
           canPublish: false,
           canSetHardwareTemplateId: false,
           mintedVehicles: 4212,
-          reason:
-            'Editing a template takes a DIMO developer license. 4,212 cars already use it.',
+          reason: API_ENGLISH,
+          reasonDetail: { key: 'licenseRequired' },
         }}
       />,
     );
     expect(screen.getByRole('status')).toHaveTextContent('A developer license is needed');
-    expect(screen.getByRole('status')).toHaveTextContent('4,212 cars already use it.');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      "Editing a template takes a DIMO developer license, and this account doesn't hold one or sign for one.",
+    );
     expect(screen.getByRole('status')).toHaveTextContent('read only');
+    expect(screen.getByRole('status')).not.toHaveTextContent(API_ENGLISH);
     expect(screen.getByTestId('read-only-warning')).toBeInTheDocument();
   });
 
-  it('reads as read only, and says why, when the vehicle count could not be verified', () => {
+  it('reads as read only, and says why, when the license could not be verified', () => {
     render(
       <EntitlementBanner
         entitlement={{
@@ -167,8 +174,8 @@ describe('EntitlementBanner', () => {
           canPublish: false,
           canSetHardwareTemplateId: false,
           mintedVehicles: null,
-          reason:
-            "We couldn't check your DIMO developer license just now. Reload in a moment and it should clear.",
+          reason: API_ENGLISH,
+          reasonDetail: { key: 'licenseUnavailable' },
         }}
       />,
     );
@@ -178,20 +185,27 @@ describe('EntitlementBanner', () => {
     expect(screen.getByTestId('read-only-warning')).toBeInTheDocument();
   });
 
-  it('says nothing loud when the caller may publish', () => {
+  it('names the license and the vehicle count when the caller may publish', () => {
     render(
       <EntitlementBanner
         entitlement={{
           kind: 'licensed',
           canPublish: true,
           canSetHardwareTemplateId: false,
-          mintedVehicles: 0,
-          reason:
-            "You hold DIMO developer license #472, DEMO App, and that's all it takes to publish changes here. No cars use it yet.",
+          mintedVehicles: 4212,
+          reason: API_ENGLISH,
+          reasonDetail: {
+            key: 'licensed',
+            via: 'owner',
+            tokenId: 472,
+            alias: 'DEMO App',
+          },
         }}
       />,
     );
-    expect(screen.getByRole('status')).toHaveTextContent('No cars use it yet.');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      "You hold DIMO developer license #472, DEMO App, and that's all it takes to publish changes here. 4,212 cars already use it, so publishing changes how all of them are described.",
+    );
     expect(screen.queryByTestId('read-only-warning')).not.toBeInTheDocument();
     expect(screen.getByRole('status')).not.toHaveTextContent('read only');
   });

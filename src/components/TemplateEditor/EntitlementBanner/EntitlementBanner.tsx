@@ -5,6 +5,7 @@ import { WarningAmberIcon } from '@/components/Icons';
 // through getUserByToken, and pulling it into a client component would break the
 // build. The type is erased; the module is never bundled.
 import type { Entitlement } from '@/services/templateEntitlement';
+import { entitlementReasonText } from '@/utils/entitlementReason';
 
 // Each title says what the reader can do, not what they are. The reason line
 // below says why. Nothing here repeats "read only" -- that is appended once,
@@ -25,7 +26,9 @@ export const EntitlementBanner: FC<{ entitlement: Entitlement }> = ({ entitlemen
             ? title
             : t('templateEditor.entitlement.readOnly', { title })}
         </span>
-        <span className="text-body-sm text-muted">{entitlement.reason}</span>
+        <span className="text-body-sm text-muted">
+          {entitlementReasonText(entitlement.reasonDetail, entitlement.mintedVehicles, t)}
+        </span>
         {!entitlement.canSetHardwareTemplateId && (
           <span className="text-body-sm text-muted">
             {t('templateEditor.entitlement.hardwareLocked')}
