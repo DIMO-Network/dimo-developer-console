@@ -84,7 +84,8 @@
     "refused": "{licenses}: {message}",
     "rolledBack": "{name} doesn't have data access to {licenses}.",
     "notRolledBack": "Those keys are still enabled on-chain and nothing lists them. Delete them under API keys on the Config tab of {licenses}.",
-    "confirm": "Grant data access"
+    "confirm": "Grant data access",
+    "licenseFallback": "License #{tokenId}"
   },
   "revoke": {
     "title": "Revoke {name}'s data access?",

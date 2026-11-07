@@ -51,7 +51,11 @@ export const GrantAccessModal: FC<Props> = ({ member, licenses, onClose, onGrant
     [candidates],
   );
   const labelsOf = (tokenIds: number[]) =>
-    format.list(tokenIds.map((id) => labels.get(id) ?? `License #${id}`));
+    format.list(
+      tokenIds.map(
+        (id) => labels.get(id) ?? t('grant.licenseFallback', { tokenId: String(id) }),
+      ),
+    );
 
   const toggle = (tokenId: number, checked: boolean) =>
     setSelected((prev) =>
