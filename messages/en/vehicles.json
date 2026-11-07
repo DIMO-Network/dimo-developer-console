@@ -295,5 +295,40 @@
     "now": "Now",
     "inProgress": "In progress",
     "noTrips": "No trips in this range."
+  },
+  "subjects": {
+    "vehicle": {
+      "label": "Vehicle",
+      "sublabel": "All sources combined"
+    },
+    "aftermarketDevice": {
+      "label": "Aftermarket device",
+      "sublabel": "Aftermarket device"
+    },
+    "syntheticDevice": {
+      "label": "Synthetic device",
+      "sublabel": "Synthetic device"
+    },
+    "account": {
+      "label": "Documents",
+      "sublabel": "Owner account"
+    },
+    "option": "{label} · {sublabel}",
+    "unknown": "Unknown",
+    "details": {
+      "makeModelYear": "Make, model, year",
+      "definitionId": "Definition ID",
+      "owner": "Owner",
+      "minted": "Minted",
+      "vehicleDid": "Vehicle DID",
+      "manufacturer": "Manufacturer",
+      "serial": "Serial",
+      "deviceAddress": "Device address",
+      "paired": "Paired",
+      "deviceDid": "Device DID",
+      "connection": "Connection",
+      "connectionAddress": "Connection address",
+      "accountDid": "Account DID"
+    }
   }
 }

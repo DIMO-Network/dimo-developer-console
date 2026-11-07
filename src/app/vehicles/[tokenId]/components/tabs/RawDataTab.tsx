@@ -4,7 +4,7 @@ import { useQueries } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { ChevronDownIcon } from '@heroicons/react/16/solid';
 import { useFormatter, useTranslations } from 'next-intl';
-import type { Subject } from '@/services/subjects/graph';
+import { subjectLabel, type Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
 import { useSubjectQuery, subjectQueryKey } from '@/hooks/subjects/useSubjectQuery';
 import { fieldError, postSubjectQuery } from '@/services/subjects/client';
@@ -249,8 +249,10 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   const base = pages[0];
   const last = pages[pages.length - 1];
   const olderPage = pages.length > 1 ? last : null;
-  const producerLabel = (did: string) =>
-    ctx.graph.all.find((s) => s.did === did)?.label ?? shortDid(did);
+  const producerLabel = (did: string) => {
+    const s = ctx.graph.all.find((s) => s.did === did);
+    return s ? subjectLabel(s, t) : shortDid(did);
+  };
   const title =
     spec.mode === 'latest'
       ? t('raw.latestTitle')
@@ -400,7 +402,7 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           <QueryActions
             request={request}
             result={base.data?.data}
-            filename={`${subject.label.toLowerCase()}-${own ? 'device-status' : 'cloud-events'}.json`}
+            filename={`${subject.fileStem}-${own ? 'device-status' : 'cloud-events'}.json`}
           />
         </div>
         <div className="grid grid-cols-[116px_minmax(0,1fr)_32px] md:grid-cols-[150px_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)_32px] gap-4 border-t border-outline px-5 py-2 text-label text-muted">

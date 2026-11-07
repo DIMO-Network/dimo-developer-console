@@ -2,7 +2,12 @@
 import { FC } from 'react';
 import classNames from 'classnames';
 import { useTranslations } from 'next-intl';
-import type { SubjectGraph, Subject } from '@/services/subjects/graph';
+import {
+  subjectLabel,
+  subjectSublabel,
+  type SubjectGraph,
+  type Subject,
+} from '@/services/subjects/graph';
 import type { LatestIndexHeader } from '@/hooks/subjects/useSubjectFreshness';
 import { FreshnessDot } from '@/components/FreshnessDot';
 import { SelectWithChevron } from '@/components/SelectWithChevron';
@@ -59,22 +64,27 @@ const Item: FC<{
   nested?: boolean;
   onSelect: () => void;
   children: React.ReactNode;
-}> = ({ subject, selected, nested, onSelect, children }) => (
-  <button
-    type="button"
-    onClick={onSelect}
-    aria-current={selected ? 'true' : undefined}
-    data-nested={nested ? '' : undefined}
-    className={classNames(
-      'flex w-full flex-col gap-1 rounded-control px-3 py-2.5 text-left transition-colors hover:bg-control',
-      selected && 'bg-control shadow-selected',
-    )}
-  >
-    <span className="text-body-sm font-medium text-ink">{subject.label}</span>
-    <span className="text-label text-muted">{subject.sublabel}</span>
-    <span className="pt-0.5 text-label text-fg">{children}</span>
-  </button>
-);
+}> = ({ subject, selected, nested, onSelect, children }) => {
+  const t = useTranslations('vehicles');
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-current={selected ? 'true' : undefined}
+      data-nested={nested ? '' : undefined}
+      className={classNames(
+        'flex w-full flex-col gap-1 rounded-control px-3 py-2.5 text-left transition-colors hover:bg-control',
+        selected && 'bg-control shadow-selected',
+      )}
+    >
+      <span className="text-body-sm font-medium text-ink">
+        {subjectLabel(subject, t)}
+      </span>
+      <span className="text-label text-muted">{subjectSublabel(subject, t)}</span>
+      <span className="pt-0.5 text-label text-fg">{children}</span>
+    </button>
+  );
+};
 
 // The rail: the vehicle, its devices nested under it, the owner's documents,
 // then Sharing. Freshness comes from one aliased latestIndex call (the page
@@ -113,7 +123,13 @@ export const SourceRail: FC<Props> = ({
   };
 
   const options = [
-    ...graph.all.map((s) => ({ value: s.did, label: `${s.label} · ${s.sublabel}` })),
+    ...graph.all.map((s) => ({
+      value: s.did,
+      label: t('subjects.option', {
+        label: subjectLabel(s, t),
+        sublabel: subjectSublabel(s, t),
+      }),
+    })),
     { value: 'sharing', label: t('rail.sharing') },
   ];
 

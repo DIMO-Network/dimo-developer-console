@@ -1,11 +1,13 @@
 'use client';
 import { useQueries } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { useSubjectQuery, subjectQueryKey } from './useSubjectQuery';
 import { dataSummaryQuery } from '@/services/subjects/queries';
 import { fieldError, postSubjectQuery } from '@/services/subjects/client';
 import {
   isDevice,
   resolveTelemetrySource,
+  subjectLabel,
   type Subject,
 } from '@/services/subjects/graph';
 import type { SubjectContext } from '@/app/vehicles/[tokenId]/components/SubjectView';
@@ -40,6 +42,7 @@ export const useTelemetrySource = (subject: Subject, ctx: SubjectContext) =>
   );
 
 export const useDataSummary = (subject: Subject, ctx: SubjectContext) => {
+  const t = useTranslations('vehicles');
   const source = useTelemetrySource(subject, ctx);
   const tokenId = subject.tokenId ?? 0;
   const q = useSubjectQuery<Data>({
@@ -89,7 +92,7 @@ export const useDataSummary = (subject: Subject, ctx: SubjectContext) => {
   const fromBySignal: Record<string, string[]> = {};
   perDevice.forEach((pq, i) => {
     for (const s of pq.data?.data?.dataSummary?.signalDataSummary ?? []) {
-      (fromBySignal[s.name] ??= []).push(deviceSources[i].d.label);
+      (fromBySignal[s.name] ??= []).push(subjectLabel(deviceSources[i].d, t));
     }
   });
 

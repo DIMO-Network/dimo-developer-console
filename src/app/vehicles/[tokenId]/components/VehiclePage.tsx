@@ -4,7 +4,11 @@ import { useTranslations } from 'next-intl';
 import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import configuration from '@/config';
 import { VEHICLE_DETAIL } from '../queries';
-import { buildVehicleGraph } from '@/services/subjects/graph';
+import {
+  buildVehicleGraph,
+  subjectLabel,
+  subjectSublabel,
+} from '@/services/subjects/graph';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
@@ -169,9 +173,11 @@ export const VehiclePage: FC<{ tokenId: number }> = ({ tokenId }) => {
               <>
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2.5">
-                    <h2 className="text-card-title text-ink">{subject.label}</h2>
+                    <h2 className="text-card-title text-ink">
+                      {subjectLabel(subject, t)}
+                    </h2>
                     <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
-                      {subject.sublabel}
+                      {subjectSublabel(subject, t)}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">

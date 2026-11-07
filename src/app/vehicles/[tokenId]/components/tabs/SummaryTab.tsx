@@ -1,7 +1,7 @@
 'use client';
 import { FC, useState } from 'react';
 import { useFormatter, useTranslations } from 'next-intl';
-import type { Subject } from '@/services/subjects/graph';
+import { subjectLabel, type Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
 import { useDataSummary } from '@/hooks/subjects/useDataSummary';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
@@ -66,7 +66,8 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   const latestType =
     latest.data?.data?.latestCloudEvent?.header?.type ?? ctx.freshness[subject.did]?.type;
   const producer = latest.data?.data?.latestCloudEvent?.header?.producer;
-  const producerLabel = ctx.graph.all.find((s) => s.did === producer)?.label;
+  const producerSubject = ctx.graph.all.find((s) => s.did === producer);
+  const producerLabel = producerSubject && subjectLabel(producerSubject, t);
   const typeRows = types.data?.data?.availableCloudEventTypes ?? [];
   const typesError =
     types.error?.message ?? fieldError(types.data?.errors, 'availableCloudEventTypes');
@@ -276,10 +277,12 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         <div className="grid grid-cols-1 gap-x-8 gap-y-3 px-6 pb-5 pt-1 md:grid-cols-2">
           {subject.details.map((d) => (
             <div
-              key={d.label}
+              key={d.key}
               className="flex flex-col gap-0.5 border-b border-outline pb-2.5"
             >
-              <span className="text-label text-muted">{d.label}</span>
+              <span className="text-label text-muted">
+                {t(`subjects.details.${d.key}`)}
+              </span>
               <span
                 className={
                   d.mono
@@ -287,7 +290,7 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                     : 'text-body-sm text-fg'
                 }
               >
-                {d.value}
+                {d.date ? utcDate(d.value) : (d.value ?? t('subjects.unknown'))}
               </span>
             </div>
           ))}

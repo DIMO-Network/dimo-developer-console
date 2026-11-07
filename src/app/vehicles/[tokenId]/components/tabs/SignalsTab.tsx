@@ -231,7 +231,7 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               <QueryActions
                 request={request}
                 result={series.data?.data}
-                filename={`${subject.label.toLowerCase()}-signals.json`}
+                filename={`${subject.fileStem}-signals.json`}
               />
             </div>
           </div>
@@ -288,7 +288,7 @@ export const SignalsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             <QueryActions
               request={latestRequest}
               result={latest.data?.data}
-              filename={`${subject.label.toLowerCase()}-latest.json`}
+              filename={`${subject.fileStem}-latest.json`}
             />
           }
         >
