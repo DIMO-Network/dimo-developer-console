@@ -23,8 +23,6 @@ import {
   toggled,
 } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/SharedFields';
 
-export const TEMPLATE_ID_HINT = 'The number of a permissions template, for example 1.';
-
 interface IFormProps {
   register: UseFormRegister<DynamicFormProps>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

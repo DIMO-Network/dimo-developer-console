@@ -1,10 +1,7 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ConfigurationForm } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm';
-import {
-  NO_REDIRECT_URI,
-  TEMPLATE_ID_HINT,
-} from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ConfigurationForm';
+import messages from '../../../messages/en/configurator.json';
 import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 
 jest.mock('@/gql', () => ({
@@ -149,7 +146,7 @@ describe('ConfigurationForm', () => {
       tokenId: 1254,
       redirectURIs: { nodes: [] },
     });
-    expect(screen.getByText(NO_REDIRECT_URI)).toBeInTheDocument();
+    expect(screen.getByText(messages.form.connection.noRedirectUri)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Go to the Config tab' })).toHaveAttribute(
       'href',
       '/license/1254/details?tab=config',
@@ -158,7 +155,7 @@ describe('ConfigurationForm', () => {
 
   it('shows no notice when the license has a redirect URI', () => {
     renderForm({});
-    expect(screen.queryByText(NO_REDIRECT_URI)).toBeNull();
+    expect(screen.queryByText(messages.form.connection.noRedirectUri)).toBeNull();
   });
 
   it('leaves the template ID empty with a hint', () => {
@@ -166,6 +163,6 @@ describe('ConfigurationForm', () => {
     const input = screen.getByLabelText(/Permissions template ID/);
     expect(input).not.toHaveAttribute('placeholder');
     expect(input).toHaveValue('');
-    expect(screen.getByText(TEMPLATE_ID_HINT)).toBeInTheDocument();
+    expect(screen.getByText(messages.form.share.templateIdHint)).toBeInTheDocument();
   });
 });

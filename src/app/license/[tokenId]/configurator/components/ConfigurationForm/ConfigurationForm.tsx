@@ -37,10 +37,6 @@ export const USER_CONFIG_FRAGMENT = gql(`
   }
 `);
 
-export const NO_REDIRECT_URI =
-  "This license has no redirect URI yet, so a configuration can't be saved. Add one on the license's Config tab.";
-export { TEMPLATE_ID_HINT } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/ShareVehiclesWithDimoConfiguration';
-
 interface Props {
   license: FragmentType<typeof USER_CONFIG_FRAGMENT>;
   submit: (data: DynamicFormProps) => void;
