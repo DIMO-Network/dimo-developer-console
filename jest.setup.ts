@@ -30,14 +30,17 @@ const mockIntl = () => {
   const namespaceOf = (arg?: string | { namespace?: string }) =>
     typeof arg === 'object' ? arg.namespace : arg;
   return {
-    // A key missing from messages/en fails the test instead of rendering its path.
+    // A key missing from messages/en, or a message that cannot be formatted (a
+    // tag with no handler, a wrong argument type), fails the test instead of
+    // rendering its path.
     translator: (arg?: string | { namespace?: string }) =>
       createTranslator({
         locale: 'en',
         messages: mockEnglishMessages,
         namespace: namespaceOf(arg),
         onError: (error: Error & { code?: string }) => {
-          if (error.code === 'MISSING_MESSAGE') throw error;
+          if (error.code === 'MISSING_MESSAGE' || error.code === 'FORMATTING_ERROR')
+            throw error;
           console.error(error);
         },
       }),
