@@ -1,4 +1,4 @@
-import { useFormatter, useLocale } from 'next-intl';
+import { useFormatter } from 'next-intl';
 import { MinusIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 
@@ -28,10 +28,6 @@ export const TokenInput = <T extends FieldValues>({
   description = '',
 }: IProps<T>) => {
   const format = useFormatter();
-  const locale = useLocale();
-  const groupSeparator =
-    new Intl.NumberFormat(locale).formatToParts(1000).find((p) => p.type === 'group')
-      ?.value ?? ',';
 
   const handleChange = (newValue: number) => {
     if (newValue < 0) return 0;
@@ -64,9 +60,8 @@ export const TokenInput = <T extends FieldValues>({
                 type="text"
                 value={formatValue(currentValue)}
                 onChange={(e) => {
-                  const textValue = (e.target.value || '0')
-                    .split(groupSeparator)
-                    .join('');
+                  // Integers only: dropping every separator works for any locale's grouping.
+                  const textValue = (e.target.value || '0').replace(/[^\d-]/g, '');
                   const newValue = handleChange(parseInt(textValue, 10));
                   onChange(newValue);
                 }}
