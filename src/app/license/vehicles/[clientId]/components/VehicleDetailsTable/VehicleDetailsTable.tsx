@@ -17,6 +17,7 @@ import { fetchJson } from '@/utils/fetchJson';
 import { useRenounceVehiclePermissions } from '@/hooks/useRenounceVehiclePermissions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { GetVehiclesByClientIdQuery } from '@/gql/graphql';
 import { useTeam } from '@/hooks/useTeam';
 
@@ -78,6 +79,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
   showLastSeen = false,
 }) => {
   const router = useRouter();
+  const t = useTranslations('license');
   const { isOwner } = useTeam();
   const { data, refetch, loading, error } = useIdentityQuery(VEHICLES_BY_CLIENT_ID, {
     variables: { clientId, owner: owner || null, first: PAGE_SIZE },
@@ -111,13 +113,13 @@ export const VehicleDetailsTable: FC<IProps> = ({
       // Optimistic removal
       setRemovedTokenIds((prev) => new Set([...prev, tokenId]));
       setRenouncingVehicle(null);
-      toast.success('Access renounced');
+      toast.success(t('vehicleTable.renounced'));
       // Background sync
       if (tokenIdSearch !== null) single.refetch();
       else refetch();
     } catch (e: unknown) {
       Sentry.captureException(e);
-      toast.error('Failed to renounce access');
+      toast.error(t('vehicleTable.renounceFailed'));
       throw e; // let modal display the inline error
     }
   };
@@ -127,7 +129,10 @@ export const VehicleDetailsTable: FC<IProps> = ({
     if (single.error) {
       return (
         <p className="text-body-sm text-negative">
-          Couldn&apos;t look up vehicle {tokenIdSearch}: {single.error.message}
+          {t('vehicleTable.lookupFailed', {
+            tokenId: tokenIdSearch,
+            message: single.error.message,
+          })}
         </p>
       );
     }
@@ -135,22 +140,25 @@ export const VehicleDetailsTable: FC<IProps> = ({
     if (!v) {
       return (
         <p className="text-body-sm text-muted">
-          No vehicle has token ID {tokenIdSearch}.
+          {t('vehicleTable.noVehicle', { tokenId: tokenIdSearch })}
         </p>
       );
     }
     if (!v.sacd) {
       return (
         <p className="text-body-sm text-muted">
-          Vehicle {v.tokenId} ({v.definition?.make} {v.definition?.model}) isn&apos;t
-          shared with this license.
+          {t('vehicleTable.notShared', {
+            tokenId: v.tokenId,
+            make: v.definition?.make ?? '',
+            model: v.definition?.model ?? '',
+          })}
         </p>
       );
     }
     return (
       <>
         <PaginatedTableIdentityAPI
-          label="Shared vehicles"
+          label={t('vehicleTable.label')}
           data={[v]}
           columns={buildColumns(simulatedTokenIds, () => setRenouncingVehicle(v), {
             showSources,
@@ -175,7 +183,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
     );
   }
   if (error) {
-    return <p>Error: {error.message}</p>;
+    return <p>{t('vehicleTable.error', { message: error.message })}</p>;
   }
   if (loading) {
     return <Loader isLoading />;
@@ -192,7 +200,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
   return (
     <>
       <PaginatedTableIdentityAPI
-        label="Shared vehicles"
+        label={t('vehicleTable.label')}
         data={visibleNodes}
         columns={buildColumns(
           simulatedTokenIds,

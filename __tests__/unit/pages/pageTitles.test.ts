@@ -22,7 +22,7 @@ jest.mock('@/app/templates/new/components/PresetView', () => ({
 import { metadata as list } from '@/app/license/[tokenId]/configurator/page';
 import { metadata as create } from '@/app/license/[tokenId]/configurator/new/page';
 import { metadata as edit } from '@/app/license/[tokenId]/configurator/[id]/page';
-import { metadata as vehicles } from '@/app/license/vehicles/[clientId]/page';
+import { generateMetadata as vehicles } from '@/app/license/vehicles/[clientId]/page';
 import { metadata as licenses } from '@/app/licenses/layout';
 import { metadata as webhooks } from '@/app/webhooks/layout';
 import { metadata as templates } from '@/app/templates/page';
@@ -38,7 +38,8 @@ describe('page titles', () => {
     ['webhooks', webhooks, 'Webhooks'],
     ['templates', templates, 'Templates'],
     ['new template', newTemplate, 'New template'],
-  ])('%s', (_name, metadata, title) => {
-    expect(metadata.title).toBe(`${title} | ${configuration.appName}`);
+  ])('%s', async (_name, metadata, title) => {
+    const resolved = typeof metadata === 'function' ? await metadata() : metadata;
+    expect(resolved.title).toBe(`${title} | ${configuration.appName}`);
   });
 });

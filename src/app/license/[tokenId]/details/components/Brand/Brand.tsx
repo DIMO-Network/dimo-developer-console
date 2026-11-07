@@ -2,6 +2,7 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Sentry from '@sentry/nextjs';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/Button';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
@@ -26,16 +27,12 @@ const BRAND_FRAGMENT = gql(`
   }
 `);
 
-const BRAND_DELETE =
-  "Sites that ask for this brand by name get DIMO's own look instead. Pages already open can take a few minutes to change.";
-const LAST_BRAND_DELETE =
-  "Login with DIMO goes back to DIMO's own look for this license. Pages already open can take a few minutes to change.";
-
 interface Props {
   license: FragmentType<typeof BRAND_FRAGMENT>;
 }
 
 export const Brand: FC<Props> = ({ license }) => {
+  const t = useTranslations('license');
   const fragment = useFragment(BRAND_FRAGMENT, license);
   const isOwner = useIsLicenseOwner(fragment);
   const { currentUser } = useGlobalAccount();
@@ -52,9 +49,7 @@ export const Brand: FC<Props> = ({ license }) => {
 
   const workspaceId = query.data?.workspace?.id ?? null;
   const brands = query.data?.brands ?? [];
-  const loadError = query.isError
-    ? 'Failed to load brands. Check your connection and reload.'
-    : createError;
+  const loadError = query.isError ? t('brand.loadFailed') : createError;
   const loading = query.isLoading || creating;
 
   // Only the owner can create the workspace; for anyone else a license with
@@ -69,7 +64,7 @@ export const Brand: FC<Props> = ({ license }) => {
     const create = async () => {
       try {
         const ws = await getOrCreateLicenseWorkspace({
-          name: fragment.alias ?? `License #${licenseTokenId}`,
+          name: fragment.alias ?? t('details.fallbackName', { tokenId: licenseTokenId }),
           token_id: licenseTokenId,
           client_id: fragment.clientId,
           owner: fragment.owner,
@@ -78,7 +73,7 @@ export const Brand: FC<Props> = ({ license }) => {
           Sentry.captureMessage('[Brand] no workspace resolved for license', {
             extra: { license: licenseTokenId, workspace: ws },
           });
-          setCreateError('Could not load your workspace. Re-login and try again.');
+          setCreateError(t('brand.workspaceFailed'));
           return;
         }
         // An earlier refetch landing after this write would restore workspace: null.
@@ -89,7 +84,7 @@ export const Brand: FC<Props> = ({ license }) => {
         });
       } catch (error) {
         Sentry.captureException(error);
-        setCreateError('Failed to load brands. Check your connection and reload.');
+        setCreateError(t('brand.loadFailed'));
       } finally {
         setCreating(false);
       }
@@ -139,7 +134,7 @@ export const Brand: FC<Props> = ({ license }) => {
       closeDelete();
     } catch (error) {
       Sentry.captureException(error);
-      setDeleteError('Failed to delete brand. Try again.');
+      setDeleteError(t('brand.deleteFailed'));
     }
   };
 
@@ -156,16 +151,16 @@ export const Brand: FC<Props> = ({ license }) => {
   return (
     <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
       <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
-        <h2 className="text-card-title text-ink">Brand</h2>
+        <h2 className="text-card-title text-ink">{t('brand.title')}</h2>
         {isOwner && workspaceId && !loadError && !editing && (
           <Button type="button" variant="secondary" onClick={() => setEditing('new')}>
-            Add brand
+            {t('brand.add')}
           </Button>
         )}
       </div>
       <div>
         {loading ? (
-          <div className="text-muted">Loading brands…</div>
+          <div className="text-muted">{t('brand.loading')}</div>
         ) : editing ? (
           <BrandForm
             brand={editing === 'new' ? null : editing}
@@ -182,7 +177,7 @@ export const Brand: FC<Props> = ({ license }) => {
         ) : (
           <div className="flex flex-col">
             {brands.length === 0 ? (
-              <p className="text-body-sm text-muted">No brand set.</p>
+              <p className="text-body-sm text-muted">{t('brand.none')}</p>
             ) : (
               brands.map((brand) => (
                 <BrandRow
@@ -198,12 +193,13 @@ export const Brand: FC<Props> = ({ license }) => {
             {brands.length > 0 && (
               <div className="mt-6 rounded-control bg-control p-4">
                 <p className="mb-2 text-body-sm font-medium text-ink">
-                  Using multiple brands with Login with DIMO
+                  {t('brand.multipleTitle')}
                 </p>
                 <pre className="overflow-x-auto font-mono text-code text-muted">{`<LoginWithDimo\n  mode={DimoSDKModes.POPUP}\n  brandOverride={{ name: 'Fleet App' }}\n  onSuccess={…}\n  onError={…}\n/>`}</pre>
                 <p className="mt-1 text-label text-muted">
-                  Every Login with DIMO button takes <code>brandOverride</code>. Omit it
-                  to use your default brand.
+                  {t.rich('brand.multipleHint', {
+                    code: (chunks) => <code>{chunks}</code>,
+                  })}
                 </p>
               </div>
             )}
@@ -212,9 +208,9 @@ export const Brand: FC<Props> = ({ license }) => {
       </div>
       <DeleteConfirmationModal
         isOpen={!!deleting}
-        title={`Delete ${deleting?.name ?? ''}?`}
-        subtitle={brands.length === 1 ? LAST_BRAND_DELETE : BRAND_DELETE}
-        loadingLabel="Deleting brand…"
+        title={t('brand.deleteTitle', { name: deleting?.name ?? '' })}
+        subtitle={brands.length === 1 ? t('brand.deleteLast') : t('brand.deleteOne')}
+        loadingLabel={t('brand.deleteLoading')}
         error={deleteError}
         onConfirm={() => handleDelete(deleting!.id)}
         onCancel={closeDelete}

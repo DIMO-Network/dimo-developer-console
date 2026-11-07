@@ -1,5 +1,6 @@
 'use client';
 import { FC, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
@@ -20,15 +21,19 @@ interface Props {
   onClose: () => void;
 }
 
-function vehicleName(vehicle: Vehicle): string {
+type Translate = (key: string, values?: Record<string, string | number>) => string;
+
+function vehicleName(vehicle: Vehicle, t: Translate): string {
   const { make, model, year } = vehicle.definition ?? {};
   if (make || model || year) {
     return [make, model, year].filter(Boolean).join(' ');
   }
-  return `Token #${vehicle.tokenId}`;
+  return t('renounce.tokenFallback', { tokenId: vehicle.tokenId });
 }
 
 export const RenounceVehicleModal: FC<Props> = ({ vehicle, onConfirm, onClose }) => {
+  const t = useTranslations('license');
+  const tCommon = useTranslations('common');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +43,7 @@ export const RenounceVehicleModal: FC<Props> = ({ vehicle, onConfirm, onClose })
     try {
       await onConfirm();
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Transaction failed');
+      setError(e instanceof Error ? e.message : t('renounce.failed'));
     } finally {
       setIsLoading(false);
     }
@@ -54,21 +59,20 @@ export const RenounceVehicleModal: FC<Props> = ({ vehicle, onConfirm, onClose })
         <div className="flex items-center gap-3">
           <WarningAmberIcon className="h-6 w-6 shrink-0 text-warning" />
           <Title component="h2" className="text-panel-title">
-            Renounce vehicle access?
+            {t('renounce.title')}
           </Title>
         </div>
 
         {vehicle && (
           <div className="flex flex-col gap-1">
-            <p className="font-medium text-ink">{vehicleName(vehicle)}</p>
-            <p className="text-body-sm text-muted">Token ID: {vehicle.tokenId}</p>
+            <p className="font-medium text-ink">{vehicleName(vehicle, t)}</p>
+            <p className="text-body-sm text-muted">
+              {t('renounce.tokenId', { tokenId: vehicle.tokenId })}
+            </p>
           </div>
         )}
 
-        <p className="text-muted">
-          You will lose all data access to this vehicle. The vehicle owner would need to
-          re-grant access.
-        </p>
+        <p className="text-muted">{t('renounce.warning')}</p>
 
         {error && <p className="text-body-sm text-negative">{error}</p>}
 
@@ -79,7 +83,7 @@ export const RenounceVehicleModal: FC<Props> = ({ vehicle, onConfirm, onClose })
             loading={isLoading}
             onClick={handleConfirm}
           >
-            Renounce access
+            {t('renounce.action')}
           </Button>
           <Button
             variant="secondary"
@@ -87,7 +91,7 @@ export const RenounceVehicleModal: FC<Props> = ({ vehicle, onConfirm, onClose })
             disabled={isLoading}
             onClick={onClose}
           >
-            Cancel
+            {tCommon('actions.cancel')}
           </Button>
         </div>
       </div>

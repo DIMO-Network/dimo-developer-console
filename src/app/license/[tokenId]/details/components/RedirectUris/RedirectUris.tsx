@@ -1,5 +1,6 @@
 import { FragmentType, gql, useFragment } from '@/gql';
 import React, { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { RedirectUriList } from '@/components/RedirectUriList';
 import { RedirectUriForm } from '@/components/RedirectUriForm';
 
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export const RedirectUris: FC<Props> = ({ license, refetch }) => {
+  const t = useTranslations('license');
   const fragment = useFragment(REDIRECT_URIS_FRAGMENT, license);
   const isLicenseOwner = useIsLicenseOwner(fragment);
   const { uris: displayUris, recordUriChange } = useRedirectUris(
@@ -33,7 +35,7 @@ export const RedirectUris: FC<Props> = ({ license, refetch }) => {
   return (
     <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
       <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
-        <h2 className="text-card-title text-ink">Authorized redirect URIs</h2>
+        <h2 className="text-card-title text-ink">{t('redirectUris.title')}</h2>
       </div>
       <div className="flex flex-col gap-4">
         {isLicenseOwner && (

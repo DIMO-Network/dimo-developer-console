@@ -21,6 +21,7 @@ import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { useIsLicenseOwner } from '@/hooks/useIsLicenseOwner';
 import Column from '@/components/Table/Column';
 import { toast } from 'sonner';
+import { useFormatter, useTranslations } from 'next-intl';
 import { RowActionsMenu } from '@/components/RowActionsMenu';
 import { markLicenseSignerDisabled, upsertLicenseSigner } from '@/actions/teams';
 import { useLicenseSignerRegistry } from '@/hooks/useLicenseSignerRegistry';
@@ -29,22 +30,11 @@ import { registryWrite } from '@/utils/registryWrite';
 import { txErrorStatus } from '@/utils/txErrorStatus';
 import { BelongsTo } from './BelongsTo';
 import { ConsoleAccess } from './ConsoleAccess';
-import {
-  API_KEY_BUTTON,
-  API_KEY_EXPLAINER,
-  CONSOLE_KEY_NOTE,
-  NOT_LICENSE_OWNER_ON_CHAIN,
-  TURN_OFF_CONSOLE_ACCESS,
-  isConsoleAccessOn,
-} from './consoleAccessCopy';
+import { CONSOLE_KEY_NOTE, isConsoleAccessOn } from './consoleAccessCopy';
 import { KeyHoldersModal, type KeyHolders } from './KeyHoldersModal';
 import type { LicenseSignerRecord } from '@/types/team';
 import { useRedirectUris } from '../redirectUriOverlay';
 
-const DELETE_KEY_SUBTITLE =
-  'Apps using this key stop getting new developer JWTs. JWTs already issued with it keep working until they expire, up to 14 days.';
-const CONSOLE_OFF_SUBTITLE =
-  'The console stops making developer JWTs for this license. JWTs it already made keep working until they expire, up to 14 days.';
 // Registry rows are written only after the chain confirms, so a row this new
 // that Identity doesn't list yet is Identity catching up, not a key turned off.
 const SYNCING_MS = 10 * 60_000;
@@ -76,6 +66,9 @@ interface Props {
 type SignerNode = SignerFragmentFragment['signers']['nodes'][0];
 
 const SignersComponent: FC<Props> = ({ license, refetch }) => {
+  const t = useTranslations('license');
+  const tCommon = useTranslations('common');
+  const format = useFormatter();
   const { currentUser } = useGlobalAccount();
   const fragment = useFragment(SIGNERS_FRAGMENT, license);
   const [apiKey, setApiKey] = useState<string>();
@@ -158,9 +151,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     );
     void registry.refetch();
     if (!result.ok) {
-      toast.error("The key works, but we couldn't record who it's for.", {
+      toast.error(t('signers.recordFailed'), {
         action: {
-          label: 'Assign',
+          label: t('signers.assign'),
           onClick: () =>
             setHoldersFor({
               mode: 'assign',
@@ -185,10 +178,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       upsertLicenseSigner(fragment.tokenId, signer, { kind, ...value }),
     );
     if (!result.ok) {
-      if (result.code === 'SIGNER_IN_USE')
-        return "This address is a team member's wallet. Record it with Grant in Settings → Team.";
+      if (result.code === 'SIGNER_IN_USE') return t('signers.signerInUse');
       return result.status === 0 || result.status >= 500
-        ? "We couldn't save this. Try again."
+        ? t('signers.saveFailed')
         : result.message;
     }
     trackEvent('API Key Assigned', {
@@ -196,7 +188,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       signerAddress: signer,
       holders: value.holders.length,
     });
-    toast.success('Saved who this key is for.');
+    toast.success(t('signers.saved'));
     void registry.refetch();
     setHoldersFor(null);
     return null;
@@ -207,17 +199,18 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     const code = get(error, 'code', null);
     if (code === 4001)
       setLoadingStatus({
-        label: 'The transaction was denied',
+        label: tCommon('errors.transactionDenied'),
         status: 'error',
       });
-    else setLoadingStatus({ label: 'Something went wrong', status: 'error' });
+    else
+      setLoadingStatus({ label: tCommon('errors.somethingWentWrong'), status: 'error' });
   };
 
   const handleGenerateSigner = async (holders: KeyHolders) => {
     try {
       setLoadingStatus({
         status: 'loading',
-        label: 'Generating an API key for your developer license',
+        label: t('signers.generating'),
       });
       const account = generateWallet();
       await handleEnableSigner(account.address);
@@ -251,9 +244,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     );
     setPendingRemovals((prev) => new Set([...prev, signer.toLowerCase()]));
     toast.success(
-      turningOff
-        ? 'Console access turned off.'
-        : 'API key deleted. JWTs already issued with it work until they expire (up to 14 days).',
+      turningOff ? t('signers.consoleOffToast') : t('signers.keyDeletedToast'),
     );
     void (async () => {
       try {
@@ -323,7 +314,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       return null;
     const isConsoleKey = address === consoleKey;
     const remove = {
-      label: isConsoleKey ? TURN_OFF_CONSOLE_ACCESS : 'Delete API key',
+      label: isConsoleKey ? t('signers.turnOffConsole') : t('signers.deleteKey'),
       destructive: true,
       onSelect: () => {
         setDeleteError(null);
@@ -333,14 +324,20 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
     return (
       <RowActionsMenu
         key={`actions-${item.address}`}
-        label={`Actions for ${item.address}`}
+        label={t('signers.actionsFor', { address: String(item.address) })}
         // The owner's own console wallet can be deleted, never assigned.
         items={
           isConsoleKey
             ? [remove]
             : wallet
               ? [remove]
-              : [{ label: 'Assign', onSelect: () => openAssign(item.address) }, remove]
+              : [
+                  {
+                    label: t('signers.assign'),
+                    onSelect: () => openAssign(item.address),
+                  },
+                  remove,
+                ]
         }
       />
     );
@@ -378,12 +375,12 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         !currentUser?.smartContractAddress ||
         fragment.owner.toLowerCase() !== currentUser.smartContractAddress.toLowerCase()
       ) {
-        setEnableError(NOT_LICENSE_OWNER_ON_CHAIN);
+        setEnableError(t('consoleAccess.notOwnerOnChain'));
         return;
       }
       const { hasPrivateKey, privateKeyAddress } = await hasGlobalAccountPrivateKey();
       if (!hasPrivateKey || !privateKeyAddress) {
-        setEnableError('Something went wrong');
+        setEnableError(tCommon('errors.somethingWentWrong'));
         return;
       }
       // Enable handles the row and the event itself; the open-time effects stand down.
@@ -404,7 +401,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       await queryClient.invalidateQueries({ queryKey: ['console-key'] });
     } catch (error: unknown) {
       Sentry.captureException(error);
-      setEnableError(txErrorStatus(error).label ?? 'Something went wrong');
+      setEnableError(
+        txErrorStatus(error, tCommon).label ?? tCommon('errors.somethingWentWrong'),
+      );
     } finally {
       setEnabling(false);
     }
@@ -465,7 +464,9 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
       setSignerToDelete(undefined);
     } catch (error: unknown) {
       Sentry.captureException(error);
-      setDeleteError(txErrorStatus(error).label ?? 'Something went wrong');
+      setDeleteError(
+        txErrorStatus(error, tCommon).label ?? tCommon('errors.somethingWentWrong'),
+      );
     }
   };
 
@@ -476,12 +477,14 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   });
 
   const renderEnabledAt = (item: SignerRow) =>
-    item.enabledAt ? new Date(item.enabledAt).toLocaleDateString() : '—';
+    item.enabledAt
+      ? format.dateTime(new Date(item.enabledAt), { dateStyle: 'medium' })
+      : '—';
 
   return (
     <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
       <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
-        <h2 className="text-card-title text-ink">API keys</h2>
+        <h2 className="text-card-title text-ink">{t('signers.title')}</h2>
         {isLicenseOwner && (
           <div className="flex gap-2">
             <Button
@@ -490,13 +493,13 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               onClick={() => setHoldersFor({ mode: 'generate' })}
             >
               <KeyIcon className="h-4 w-4" />
-              {API_KEY_BUTTON}
+              {t('signers.apiKeyButton')}
             </Button>
           </div>
         )}
       </div>
       {isLicenseOwner && consoleKeyQuery.isLoading ? (
-        <p className="text-body-sm text-muted">Checking console access…</p>
+        <p className="text-body-sm text-muted">{t('signers.checkingConsole')}</p>
       ) : (
         <ConsoleAccess
           isLicenseOwner={isLicenseOwner}
@@ -515,7 +518,7 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
               columns={[
                 {
                   name: 'address',
-                  label: 'Signer address',
+                  label: t('signers.signerAddress'),
                   CustomHeader: <SignerAddressHeader key="header-addr" />,
                   render: (item: SignerRow) => (
                     <div className="flex items-center gap-2">
@@ -533,13 +536,13 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
                 },
                 {
                   name: 'enabledAt',
-                  label: 'Enabled on',
+                  label: t('signers.enabledOn'),
                   className: 'hidden md:table-cell',
                   render: renderEnabledAt,
                 },
                 {
                   name: 'belongsTo',
-                  label: 'Belongs to',
+                  label: t('signers.belongsTo'),
                   className: 'hidden md:table-cell',
                   render: (item: SignerRow) => (
                     <BelongsTo
@@ -573,8 +576,14 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         <KeyHoldersModal
           signer={holdersFor.mode === 'assign' ? holdersFor.signer : undefined}
           initial={holdersFor.mode === 'assign' ? holdersFor.initial : undefined}
-          explainer={holdersFor.mode === 'generate' ? API_KEY_EXPLAINER : undefined}
-          submitLabel={holdersFor.mode === 'generate' ? 'Generate API key' : 'Save'}
+          explainer={
+            holdersFor.mode === 'generate' ? t('signers.apiKeyExplainer') : undefined
+          }
+          submitLabel={
+            holdersFor.mode === 'generate'
+              ? t('signers.generateApiKey')
+              : tCommon('actions.save')
+          }
           onSubmit={submitHolders}
           onClose={() => setHoldersFor(null)}
         />
@@ -583,15 +592,15 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
         isOpen={!!signerToDelete}
         title={
           signerToDelete?.toLowerCase() === consoleKey
-            ? 'Turn off console access?'
-            : 'Are you sure you want to delete this API key?'
+            ? t('signers.turnOffTitle')
+            : t('signers.deleteTitle')
         }
         subtitle={
           signerToDelete?.toLowerCase() === consoleKey
-            ? CONSOLE_OFF_SUBTITLE
-            : DELETE_KEY_SUBTITLE
+            ? t('signers.consoleOffSubtitle')
+            : t('signers.deleteKeySubtitle')
         }
-        loadingLabel="Waiting for the network to confirm…"
+        loadingLabel={t('signers.deleteLoading')}
         error={deleteError}
         onConfirm={onConfirmDelete}
         onCancel={() => {
@@ -609,14 +618,16 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
   );
 };
 
-const SignerAddressHeader = () => (
-  <Column key={'signer-address-header'}>
-    <div>Signer address</div>
-    <p className={'max-w-[360px] text-label font-normal text-muted'}>
-      *This is not your API key. If you have lost your API key, you will need to generate
-      a new one.
-    </p>
-  </Column>
-);
+const SignerAddressHeader = () => {
+  const t = useTranslations('license');
+  return (
+    <Column key={'signer-address-header'}>
+      <div>{t('signers.signerAddress')}</div>
+      <p className={'max-w-[360px] text-label font-normal text-muted'}>
+        {t('signers.signerAddressNote')}
+      </p>
+    </Column>
+  );
+};
 
 export const Signers = withLoadingStatus(SignersComponent);

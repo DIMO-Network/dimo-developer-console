@@ -1,5 +1,6 @@
 'use client';
 import { type FC, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
@@ -36,6 +37,7 @@ export const KeyHoldersModal: FC<Props> = ({
   onSubmit,
   onClose,
 }) => {
+  const t = useTranslations('license');
   const { members } = useTeamMembers();
   const people = members.filter((m) => m.status === 'ACCEPTED' && m.userId);
   const [userIds, setUserIds] = useState<string[]>(() =>
@@ -58,11 +60,11 @@ export const KeyHoldersModal: FC<Props> = ({
         .map((name) => ({ name })),
     ];
     if (!holders.length) {
-      setError('Choose at least one person, or type a name.');
+      setError(t('keyHolders.chooseOne'));
       return;
     }
     if (note.trim().length > NOTE_MAX) {
-      setError(`Keep the note under ${NOTE_MAX} characters.`);
+      setError(t('keyHolders.noteTooLong', { max: NOTE_MAX }));
       return;
     }
     setBusy(true);
@@ -76,7 +78,7 @@ export const KeyHoldersModal: FC<Props> = ({
     <Modal isOpen setIsOpen={(open) => !open && !busy && onClose()} showClose={!busy}>
       <div className="flex flex-col gap-4">
         <Title component="h2" className="text-panel-title text-ink">
-          {explainer ? 'Create an API key for your server' : 'Who is this key for?'}
+          {explainer ? t('signers.apiKeyButton') : t('keyHolders.title')}
         </Title>
         {explainer && <p className="text-body-sm text-muted">{explainer}</p>}
         {signer && (
@@ -84,7 +86,9 @@ export const KeyHoldersModal: FC<Props> = ({
         )}
         {people.length > 0 && (
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-label text-muted">Team members</legend>
+            <legend className="mb-1 text-label text-muted">
+              {t('keyHolders.teamMembers')}
+            </legend>
             {people.map((m) => (
               <div key={m.id} className="flex items-center gap-2">
                 <CheckboxField
@@ -106,7 +110,7 @@ export const KeyHoldersModal: FC<Props> = ({
           </fieldset>
         )}
         <label htmlFor="holder-others" className="text-label text-muted">
-          Other people (comma-separated)
+          {t('keyHolders.others')}
         </label>
         <TextField
           id="holder-others"
@@ -114,7 +118,7 @@ export const KeyHoldersModal: FC<Props> = ({
           onChange={(e) => setOthers(e.target.value)}
         />
         <label htmlFor="holder-note" className="text-label text-muted">
-          Note
+          {t('keyHolders.note')}
         </label>
         <TextField
           id="holder-note"

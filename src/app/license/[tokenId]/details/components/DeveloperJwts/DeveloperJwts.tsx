@@ -5,6 +5,7 @@ import { Table } from '@/components/Table';
 import { removeDevJwt } from '@/utils/devJwt';
 import { GenerateDevJWT } from '@/components/GenerateDevJWT';
 import { jwtDecode } from 'jwt-decode';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
@@ -32,6 +33,8 @@ interface Props {
 }
 
 export const DeveloperJwts: FC<Props> = ({ license }) => {
+  const t = useTranslations('license');
+  const format = useFormatter();
   const fragment = useFragment(DEVELOPER_JWTS_FRAGMENT, license);
   const { uris: redirectUris } = useRedirectUris(fragment.redirectURIs.nodes);
   const { devJwts, refetch } = useGetDevJwts(fragment.clientId);
@@ -60,7 +63,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
     <CopyButton
       key={`item_${item.token}_copy_button`}
       value={item.token}
-      onCopySuccessMessage="JWT copied!"
+      onCopySuccessMessage={t('jwts.copied')}
       size="icon"
     />
   );
@@ -70,7 +73,7 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
       key={`item_${item.token}_delete_button`}
       variant="secondary"
       size="icon"
-      title="Delete JWT"
+      title={t('jwts.deleteLabel')}
       type="button"
       onClick={() => setJwtToDelete(item.token)}
     >
@@ -78,10 +81,13 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
     </Button>
   );
 
+  const formatDateTime = (value: number) =>
+    format.dateTime(new Date(value), { dateStyle: 'medium', timeStyle: 'short' });
+
   const columns = [
     {
       name: 'token',
-      label: 'JWT',
+      label: t('jwts.columns.jwt'),
       render: (item: { token: string }) => {
         const visibleStart = item.token.slice(0, 16);
         const visibleEnd = item.token.slice(-4);
@@ -93,23 +99,23 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
     },
     {
       name: 'createdAt',
-      label: 'Created at',
+      label: t('jwts.columns.createdAt'),
       render: (item: { createdAt: number }) => (
-        <span>{new Date(item.createdAt).toLocaleString()}</span>
+        <span>{formatDateTime(item.createdAt)}</span>
       ),
     },
     {
       name: 'expiresAt',
-      label: 'Expires at',
+      label: t('jwts.columns.expiresAt'),
       render: (item: { token: string }) => {
         try {
           const { exp } = jwtDecode<{ exp?: number }>(item.token);
           if (exp) {
-            return <span>{new Date(exp * 1000).toLocaleString()}</span>;
+            return <span>{formatDateTime(exp * 1000)}</span>;
           }
-          return <span>Unknown</span>;
+          return <span>{t('jwts.unknownExpiry')}</span>;
         } catch {
-          return <span>Invalid</span>;
+          return <span>{t('jwts.invalidToken')}</span>;
         }
       },
     },
@@ -142,11 +148,11 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
   return (
     <div className="flex flex-col gap-4 rounded-card bg-card p-4 text-fg">
       <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0">
-        <h2 className="text-card-title text-ink">Developer JWTs</h2>
+        <h2 className="text-card-title text-ink">{t('jwts.title')}</h2>
         <GenerateDevJWT
           clientId={fragment.clientId}
           domain={redirectUris[0]?.uri ?? undefined}
-          buttonText="Generate new JWT"
+          buttonText={t('jwts.generateNew')}
           onSuccess={handleGenerateSuccess}
         />
       </div>
@@ -160,11 +166,11 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
             />
           </div>
         ) : (
-          <p className="text-muted">No developer JWTs found</p>
+          <p className="text-muted">{t('jwts.empty')}</p>
         )}
         <DeleteConfirmationModal
           isOpen={!!jwtToDelete}
-          title="Are you sure you want to delete this JWT?"
+          title={t('jwts.deleteTitle')}
           subtitle=""
           onConfirm={() => {
             if (jwtToDelete) {
