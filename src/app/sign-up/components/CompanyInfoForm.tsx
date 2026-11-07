@@ -26,15 +26,46 @@ interface CompanyInfoInputs {
   type: string;
 }
 
-const regionOptions = REGIONS.map((regionName) => ({
-  value: regionName,
-  text: regionName,
-})) as { value: string; text: string }[];
+// The values are sent to the API (and 'Personal Developer' picks the form), so
+// they stay English; only the labels are translated. Keyed by the exact value,
+// trailing space included.
+const REGION_KEYS: Record<string, string> = {
+  'North America': 'northAmerica',
+  'Latin America & Caribbean': 'latinAmericaCaribbean',
+  'Oceania': 'oceania',
+  'Northern & Western Europe': 'northernWesternEurope',
+  'Africa': 'africa',
+  'East & Southeast Asia': 'eastSoutheastAsia',
+  'Middle East & Central Asia ': 'middleEastCentralAsia',
+  'South Asia': 'southAsia',
+  'Eastern Europe': 'easternEurope',
+};
 
-const typeOptions = DEVELOPER_TYPES.map((type) => ({
-  value: type,
-  text: type,
-})) as { value: string; text: string }[];
+const DEVELOPER_TYPE_KEYS: Record<string, string> = {
+  'Personal Developer': 'personalDeveloper',
+  'OEM': 'oem',
+  'Insurance': 'insurance',
+  'Maintenance': 'maintenance',
+  'Fleet Management': 'fleetManagement',
+  'Vehicle Sales': 'vehicleSales',
+  'Utilities': 'utilities',
+  'Financing': 'financing',
+  'EV': 'ev',
+  'DePIN': 'depin',
+  'Data': 'data',
+  'Others': 'others',
+};
+
+type Translate = (key: string) => string;
+
+const regionOptions = (t: Translate) =>
+  REGIONS.map((value) => ({ value, text: t(`company.regions.${REGION_KEYS[value]}`) }));
+
+const typeOptions = (t: Translate) =>
+  DEVELOPER_TYPES.map((value) => ({
+    value,
+    text: t(`company.developerTypes.${DEVELOPER_TYPE_KEYS[value]}`),
+  }));
 
 interface IProps {
   auth?: Partial<IAuth>;
@@ -94,7 +125,7 @@ const CompanyForm = ({ control, register, errors }: IFormProps): ReactNode => {
         <SelectField
           name="region"
           rules={{ required: tCommon('validation.required') }}
-          options={regionOptions}
+          options={regionOptions(t)}
           control={control}
           placeholder={t('company.select')}
           role="company-region"
@@ -149,7 +180,7 @@ const SingleDeveloperForm = ({ control, register, errors }: IFormProps): ReactNo
         <SelectField
           name="region"
           rules={{ required: tCommon('validation.required') }}
-          options={regionOptions}
+          options={regionOptions(t)}
           control={control}
           placeholder={t('company.select')}
           role="company-region"
@@ -205,7 +236,7 @@ export const CompanyInfoForm: FC<IProps> = ({ onNext, auth, isLoading }) => {
             <SelectField
               name="type"
               rules={{ required: tCommon('validation.required') }}
-              options={typeOptions}
+              options={typeOptions(t)}
               control={control}
               placeholder={t('company.select')}
               role="company-type"

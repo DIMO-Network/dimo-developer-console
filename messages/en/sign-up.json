@@ -79,6 +79,31 @@
       "websiteLabel": "Social URL",
       "websitePlaceholder": "https://instagram.com/batman",
       "regionLabel": "Region *"
+    },
+    "developerTypes": {
+      "personalDeveloper": "Personal Developer",
+      "oem": "OEM",
+      "insurance": "Insurance",
+      "maintenance": "Maintenance",
+      "fleetManagement": "Fleet Management",
+      "vehicleSales": "Vehicle Sales",
+      "utilities": "Utilities",
+      "financing": "Financing",
+      "ev": "EV",
+      "depin": "DePIN",
+      "data": "Data",
+      "others": "Others"
+    },
+    "regions": {
+      "northAmerica": "North America",
+      "latinAmericaCaribbean": "Latin America & Caribbean",
+      "oceania": "Oceania",
+      "northernWesternEurope": "Northern & Western Europe",
+      "africa": "Africa",
+      "eastSoutheastAsia": "East & Southeast Asia",
+      "middleEastCentralAsia": "Middle East & Central Asia",
+      "southAsia": "South Asia",
+      "easternEurope": "Eastern Europe"
     }
   }
 }
