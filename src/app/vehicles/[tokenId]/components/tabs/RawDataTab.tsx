@@ -304,8 +304,8 @@ export const RawDataTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
               onChange={(e) => setForm({ ...form, type: e.target.value })}
             />
             <datalist id="cloud-event-types">
-              {knownTypes.map((t) => (
-                <option key={t.type} value={t.type} />
+              {knownTypes.map((row) => (
+                <option key={row.type} value={row.type} />
               ))}
             </datalist>
           </label>
