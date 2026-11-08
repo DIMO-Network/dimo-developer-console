@@ -130,10 +130,17 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
                 {draft.manufacturer.name} {draft.model} {draft.year}
               </Title>
               <span className="text-body-sm text-muted">
-                <span className="break-all font-mono text-code">{draft.id}</span> · v
-                {loadedVersion}
-                {data.template?.author &&
-                  ` · ${t('editor.lastPublishedBy', { author: data.template.author })}`}
+                {t.rich(
+                  data.template?.author ? 'editor.headerWithAuthor' : 'editor.header',
+                  {
+                    code: (chunks) => (
+                      <span className="break-all font-mono text-code">{chunks}</span>
+                    ),
+                    id: draft.id,
+                    version: loadedVersion ?? '',
+                    author: data.template?.author ?? '',
+                  },
+                )}
               </span>
             </div>
             {!readOnly && (

@@ -61,7 +61,17 @@ describe('TemplateEditorView', () => {
 
   it('shows the current version and the author of the version it loaded', () => {
     render(<TemplateEditorView id={t.id} />);
-    expect(screen.getByText(new RegExp(`v${t.version}`))).toBeInTheDocument();
+    const id = screen.getByText(t.id, { selector: '.font-mono' });
+    expect(id.parentElement).toHaveTextContent(
+      `${t.id} · v${t.version} · last published by ${t.author}`,
+    );
+  });
+
+  it('leaves the author out when the template has none', () => {
+    bundle = { ...authorBundle(), template: { ...t, author: undefined } };
+    render(<TemplateEditorView id={t.id} />);
+    const id = screen.getByText(t.id, { selector: '.font-mono' });
+    expect(id.parentElement?.textContent).toBe(`${t.id} · v${t.version}`);
   });
 
   it('leaves publish disabled until something actually changed', () => {
