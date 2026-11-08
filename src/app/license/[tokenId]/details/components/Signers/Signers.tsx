@@ -478,7 +478,11 @@ const SignersComponent: FC<Props> = ({ license, refetch }) => {
 
   const renderEnabledAt = (item: SignerRow) =>
     item.enabledAt
-      ? format.dateTime(new Date(item.enabledAt), { dateStyle: 'medium' })
+      ? format.dateTime(new Date(item.enabledAt), {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+        })
       : '—';
 
   return (

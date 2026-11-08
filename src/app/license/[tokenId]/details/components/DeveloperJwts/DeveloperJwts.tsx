@@ -81,8 +81,16 @@ export const DeveloperJwts: FC<Props> = ({ license }) => {
     </Button>
   );
 
+  // The numeric date and time toLocaleString() gave: "1/5/2026, 3:04:05 PM" in English.
   const formatDateTime = (value: number) =>
-    format.dateTime(new Date(value), { dateStyle: 'medium', timeStyle: 'short' });
+    format.dateTime(new Date(value), {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+    });
 
   const columns = [
     {

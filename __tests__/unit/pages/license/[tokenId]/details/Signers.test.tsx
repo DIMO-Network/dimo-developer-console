@@ -170,6 +170,14 @@ describe('Signers', () => {
   });
   afterEach(() => jest.useRealTimers());
 
+  it('dates each key as toLocaleDateString did', async () => {
+    show([CONSOLE_KEY.toLowerCase()]);
+    await screen.findByText('Console (you)');
+    expect(
+      screen.getByText(new Date('2026-09-01T00:00:00Z').toLocaleDateString('en-US')),
+    ).toBeInTheDocument();
+  });
+
   it('sends no transaction when the owner opens the tab', async () => {
     mockTeam.members = [OWNER_ROW];
     show();
