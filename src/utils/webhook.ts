@@ -37,6 +37,8 @@ interface ConditionConfig {
   validation: RegisterOptions;
 }
 
+// `required` holds a common message key, not text: nothing renders these rule
+// messages today, and anything that does must translate it.
 const numericValidation: RegisterOptions = {
   required: 'webhooks.validation.valueRequired',
   validate: (val: string) => !isNaN(Number(val)),

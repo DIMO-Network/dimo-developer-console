@@ -3,6 +3,8 @@ import { StatusBadge } from '@/components/Webhooks/components/StatusBadge';
 import React, { FC } from 'react';
 import { Webhook } from '@/types/webhook';
 
+const KNOWN_SERVICES = ['signals', 'events'];
+
 interface IProps {
   webhook: Webhook;
 }
@@ -20,7 +22,14 @@ export const WebhookDetailsCard: FC<IProps> = ({ webhook }) => {
           value={webhook.displayName}
         />
       )}
-      <WebhookDetailRow label={t('webhooks.details.service')} value={webhook.service} />
+      <WebhookDetailRow
+        label={t('webhooks.details.service')}
+        value={
+          KNOWN_SERVICES.includes(webhook.service)
+            ? t(`webhooks.service.${webhook.service}`)
+            : webhook.service
+        }
+      />
       <WebhookDetailRow
         label={t('webhooks.details.cooldownPeriod')}
         value={t('webhooks.details.cooldownSeconds', { seconds: webhook.coolDownPeriod })}
