@@ -86,7 +86,7 @@
   },
   "summary": {
     "latestPayload": "Latest payload",
-    "latestCaption": "{time}{hasType, select, yes { · {type}} other {}}{hasProducer, select, yes { from {producer}} other {}}",
+    "latestCaption": "{hasType, select, yes {{hasProducer, select, yes {{time} · {type} from {producer}} other {{time} · {type}}}} other {{hasProducer, select, yes {{time} from {producer}} other {{time}}}}}",
     "unavailable": "Unavailable",
     "noPayloadYet": "No payload yet",
     "firstSeen": "First seen",
