@@ -142,14 +142,18 @@ export const BuyCreditsModal: FC = () => {
             </Title>
           </div>
           <div className="buy-credits-description">
-            <p className="description">{t('buyCredits.pricing')}</p>
-            <a
-              href="https://dimo.org/pricing"
-              target="_blank"
-              className="text-ink underline underline-offset-2"
-            >
-              {t('buyCredits.learnMore')}
-            </a>
+            {t.rich('buyCredits.pricing', {
+              description: (chunks) => <p className="description">{chunks}</p>,
+              link: (chunks) => (
+                <a
+                  href="https://dimo.org/pricing"
+                  target="_blank"
+                  className="text-ink underline underline-offset-2"
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
           </div>
           <div className="w-full gap-y-4">
             <label htmlFor="amount" className="text-label text-muted">

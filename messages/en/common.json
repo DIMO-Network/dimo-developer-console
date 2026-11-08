@@ -57,8 +57,7 @@
   },
   "buyCredits": {
     "title": "Buy DCX",
-    "pricing": "The base price to accessing one vehicle is $1.25 per month.",
-    "learnMore": "Learn more.",
+    "pricing": "<description>The base price to accessing one vehicle is $1.25 per month.</description><link>Learn more.</link>",
     "amountLabel": "Purchase amount",
     "amountPositive": "Amount must be greater than 0",
     "amountMin": "Minimum amount is $10.00",
