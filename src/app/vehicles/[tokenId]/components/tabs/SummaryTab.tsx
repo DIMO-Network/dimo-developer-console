@@ -119,7 +119,11 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         />
         <StatCard
           label={t('summary.dataPoints')}
-          value={summary ? compact(summary.numberOfSignals) : '—'}
+          value={
+            summary
+              ? format.number(summary.numberOfSignals, compact(summary.numberOfSignals))
+              : '—'
+          }
           caption={
             summary
               ? t('summary.acrossSignals', { count: summary.availableSignals.length })
