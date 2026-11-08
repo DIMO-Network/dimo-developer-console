@@ -16,21 +16,20 @@ export type Point = { t: string; v: number | null };
 
 const DAY_MS = 86_400_000;
 
-// Short ranges need the time of day; long ones read better as a date. UTC.
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const pad = (n: number) => String(n).padStart(2, '0');
 
-// `weekday` names the day for the viewer's locale; the English names are the default.
-export const formatTick = (
-  iso: string,
-  spanMs: number,
-  weekday: (d: Date) => string = (d) => WEEKDAYS[d.getUTCDay()],
-) => {
-  const d = new Date(iso);
-  const day = `${weekday(d)} ${d.getUTCDate()}`;
-  return spanMs < 2 * DAY_MS
-    ? `${day} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`
-    : day;
+// "Tue 29": short ranges add the time of day, long ones read better as a date. UTC.
+export const useTickFormat = () => {
+  const t = useTranslations('vehicles');
+  const format = useFormatter();
+  return (iso: string, spanMs: number) => {
+    const d = new Date(iso);
+    return t(spanMs < 2 * DAY_MS ? 'signals.tickWithTime' : 'signals.tick', {
+      weekday: format.dateTime(d, { weekday: 'short', timeZone: 'UTC' }),
+      day: d.getUTCDate(),
+      time: `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`,
+    });
+  };
 };
 
 export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number }> = ({
@@ -40,7 +39,7 @@ export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number
 }) => {
   const t = useTranslations('vehicles');
   const tCommon = useTranslations('common');
-  const format = useFormatter();
+  const formatTick = useTickFormat();
   const signalName = humanizeSignal(name, tCommon);
   const vals = points.flatMap((p) => (p.v === null ? [] : [p.v]));
   const description = vals.length
@@ -51,7 +50,6 @@ export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number
         max: Math.max(...vals),
       })
     : t('signals.chartDescriptionNoValues', { name: signalName, count: points.length });
-  const weekday = (d: Date) => format.dateTime(d, { weekday: 'short', timeZone: 'UTC' });
   const spanMs =
     points.length > 1
       ? Date.parse(points[points.length - 1].t) - Date.parse(points[0].t)
@@ -79,7 +77,7 @@ export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number
             <CartesianGrid stroke="rgb(var(--outline))" vertical={false} />
             <XAxis
               dataKey="t"
-              tickFormatter={(tick: string) => formatTick(tick, spanMs, weekday)}
+              tickFormatter={(tick: string) => formatTick(tick, spanMs)}
               stroke="rgb(var(--muted))"
               tick={{ fontSize: 11 }}
               minTickGap={72}

@@ -61,10 +61,9 @@ const MAX_RANGE_DAYS = 31;
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 // The API returns one record per calendar day, in order, starting at the UTC day of `from`.
-const dayLabel = (from: string, i: number, weekday: (d: Date) => string) => {
+const dayOf = (from: string, i: number) => {
   const d = new Date(from);
-  const day = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + i));
-  return `${weekday(day)} ${day.getUTCDate()}`;
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + i));
 };
 
 export const fmtDuration = (seconds: number, t: Translate) => {
@@ -91,7 +90,14 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
 }) => {
   const t = useTranslations('vehicles');
   const format = useFormatter();
-  const weekday = (d: Date) => format.dateTime(d, { weekday: 'short', timeZone: 'UTC' });
+  // "Tue 29", in UTC.
+  const dayLabel = (from: string, i: number) => {
+    const day = dayOf(from, i);
+    return t('trips.day', {
+      weekday: format.dateTime(day, { weekday: 'short', timeZone: 'UTC' }),
+      day: day.getUTCDate(),
+    });
+  };
   // "Mar 4, 2024, 10:00" in UTC.
   const short = (iso: string) =>
     format.dateTime(Date.parse(iso), {
@@ -247,7 +253,7 @@ export const TripsTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                     />
                   </div>
                   <span className="text-body-sm font-medium text-ink">
-                    {dayLabel(dayFrom, i, weekday)}
+                    {dayLabel(dayFrom, i)}
                   </span>
                   <span className="text-label text-muted">
                     {t('trips.dayCaption', {

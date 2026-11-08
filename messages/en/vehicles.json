@@ -254,7 +254,9 @@
     },
     "chartDescription": "{name}, {count, plural, one {# point} other {# points}}, {min, number}–{max, number}",
     "chartDescriptionNoValues": "{name}, {count, plural, one {# point} other {# points}}, no values",
-    "chartTooltipTime": "{time} UTC"
+    "chartTooltipTime": "{time} UTC",
+    "tick": "{weekday} {day}",
+    "tickWithTime": "{weekday} {day} {time}"
   },
   "trips": {
     "mechanisms": {
@@ -294,7 +296,8 @@
     "topSpeed": "Top speed",
     "now": "Now",
     "inProgress": "In progress",
-    "noTrips": "No trips in this range."
+    "noTrips": "No trips in this range.",
+    "day": "{weekday} {day}"
   },
   "subjects": {
     "vehicle": {
