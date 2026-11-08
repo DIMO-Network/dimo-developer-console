@@ -4,7 +4,7 @@ import { useEventEmitter } from '@/hooks/useEventEmitter';
 import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import './Usage.css';
 
@@ -14,6 +14,7 @@ interface Props {
 
 export const Usage: FC<Props> = ({ license }) => {
   const t = useTranslations('license');
+  const format = useFormatter();
   const { getUsageByLicense } = useCreditTracker();
   // null until known: a failed lookup must not read as no usage.
   const [credits, setCredits] = useState<number | null>(null);
@@ -45,7 +46,7 @@ export const Usage: FC<Props> = ({ license }) => {
   return (
     <div className="overview-stat-card">
       <p className="overview-stat-card__number">
-        {isAuthenticatedAsDev ? (credits ?? '—') : '—'}
+        {isAuthenticatedAsDev && credits !== null ? format.number(credits) : '—'}
       </p>
       <p className="overview-stat-card__label">{t('usage.creditsUsed')}</p>
       {!isAuthenticatedAsDev && (

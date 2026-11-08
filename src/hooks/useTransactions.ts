@@ -281,7 +281,7 @@ export const useMintConnection = () => {
         return {
           success: false,
           reason: t('transactions.insufficientDimo', {
-            required: requiredDIMO.toFixed(2),
+            required: requiredDIMO,
             usd: targetUsdAmount,
           }),
         };

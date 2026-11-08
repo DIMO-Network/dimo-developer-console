@@ -3,7 +3,7 @@
 import { Section, SectionHeader } from '@/components/Section';
 import { VehicleDetailsTable } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable';
 import { use } from 'react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { gql } from '@/gql';
 import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { Title } from '@/components/Title';
@@ -26,6 +26,7 @@ const DEVELOPER_LICENSE_VEHICLE_DETAILS = gql(`
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
   const { clientId } = use(params);
   const t = useTranslations('license');
+  const format = useFormatter();
   const { data } = useIdentityQuery(DEVELOPER_LICENSE_VEHICLE_DETAILS, {
     variables: { clientId },
   });
@@ -52,7 +53,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
       </nav>
       <Section>
         <div className={'flex flex-row items-center gap-2.5 pb-4 md:pb-0'}>
-          <Title className={'text-metric'}>{totalCount}</Title>
+          <Title className={'text-metric'}>{format.number(totalCount)}</Title>
           <p className={'text-card-title font-normal text-muted'}>
             {t('vehicles.connectedVehicles')}
             {testVehicleCount > 0 && (

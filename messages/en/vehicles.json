@@ -252,7 +252,7 @@
       "noMatch": "No signals match.",
       "filter": "Filter signals"
     },
-    "chartDescription": "{name}, {count, plural, one {# point} other {# points}}, {min}–{max}",
+    "chartDescription": "{name}, {count, plural, one {# point} other {# points}}, {min, number}–{max, number}",
     "chartDescriptionNoValues": "{name}, {count, plural, one {# point} other {# points}}, no values",
     "chartTooltipTime": "{time} UTC"
   },

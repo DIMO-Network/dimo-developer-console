@@ -47,8 +47,8 @@ export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number
     ? t('signals.chartDescription', {
         name: signalName,
         count: points.length,
-        min: String(Math.min(...vals)),
-        max: String(Math.max(...vals)),
+        min: Math.min(...vals),
+        max: Math.max(...vals),
       })
     : t('signals.chartDescriptionNoValues', { name: signalName, count: points.length });
   const weekday = (d: Date) => format.dateTime(d, { weekday: 'short', timeZone: 'UTC' });

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { PencilIcon } from '@heroicons/react/16/solid';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { gql, useFragment } from '@/gql';
 import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
@@ -221,6 +221,7 @@ const VehicleCountStat = ({
   onViewVehicles: () => void;
 }) => {
   const t = useTranslations('license');
+  const format = useFormatter();
   const { data, loading } = useIdentityQuery(GET_VEHICLE_COUNT_BY_CLIENT_ID, {
     variables: { clientId },
   });
@@ -233,7 +234,7 @@ const VehicleCountStat = ({
         onClick={onViewVehicles}
         className="overview-stat-card__number text-left transition-opacity hover:opacity-80"
       >
-        {data?.vehicles.totalCount ?? '—'}
+        {data ? format.number(data.vehicles.totalCount) : '—'}
       </button>
       <p className="overview-stat-card__label">{t('details.vehiclesConnected')}</p>
       <button onClick={onViewVehicles} className="overview-stat-card__link">

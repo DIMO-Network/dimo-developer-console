@@ -6,7 +6,7 @@ import { Loader } from '@/components/Loader';
 import Link from 'next/link';
 import { Button } from '@/components/Button';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { VehicleSimulatorModal } from '@/app/app/list/components/VehicleSimulator/VehicleSimulatorModal';
 import './Vehicles.css';
 import { OwnerAction } from '@/components/OwnerOnly';
@@ -38,6 +38,7 @@ export const Vehicles: FC<IProps> = ({ license }) => {
   });
   const router = useRouter();
   const t = useTranslations('license');
+  const format = useFormatter();
 
   return (
     <div className="flex flex-col gap-4">
@@ -52,7 +53,9 @@ export const Vehicles: FC<IProps> = ({ license }) => {
               href={`/license/vehicles/${fragment.clientId}`}
               className="transition-opacity hover:opacity-80"
             >
-              <p className="vehicles-stat__number">{data.vehicles.totalCount}</p>
+              <p className="vehicles-stat__number">
+                {format.number(data.vehicles.totalCount)}
+              </p>
             </Link>
             <p className="vehicles-stat__label">{t('vehiclesTab.connectedVehicles')}</p>
             <Link

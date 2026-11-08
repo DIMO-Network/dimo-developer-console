@@ -669,14 +669,14 @@
   },
   "table": {
     "showingNone": "Showing 0 of 0",
-    "showing": "Showing {first}–{last} of {total}",
+    "showing": "Showing {first, number}–{last, number} of {total, number}",
     "label": "Table"
   },
   "transactions": {
     "insufficientBalance": "Insufficient DIMO or DCX balance",
     "connectionNameTooLong": "Connection name is too long. Please use a name that is 32 characters or fewer.",
     "balanceCheckFailed": "Couldn't check your DIMO balance. Try again.",
-    "insufficientDimo": "Insufficient DIMO balance. You need at least {required} DIMO tokens (approximately ${usd}) to mint a connection.",
+    "insufficientDimo": "Insufficient DIMO balance. You need at least {required, number, ::.00} DIMO tokens (approximately ${usd, number}) to mint a connection.",
     "notEnoughDimo": "You do not have enough $DIMO to mint a connection.",
     "connectionNameTaken": "This connection name is already taken. Please choose a different name and try again."
   },
