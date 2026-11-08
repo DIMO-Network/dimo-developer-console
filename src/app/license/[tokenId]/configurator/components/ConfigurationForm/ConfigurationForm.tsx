@@ -184,10 +184,10 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
           <SegmentedControl
             name="component"
             options={[
-              { value: 'LoginWithDimo', label: `🔑  ${t('form.component.login')}` },
+              { value: 'LoginWithDimo', label: t('form.component.login') },
               {
                 value: 'ShareVehiclesWithDimo',
-                label: `🚗  ${t('form.component.share')}`,
+                label: t('form.component.share'),
               },
             ]}
             role="component-segmented"

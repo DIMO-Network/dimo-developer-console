@@ -59,8 +59,8 @@
     },
     "component": {
       "title": "Component",
-      "login": "Login with DIMO",
-      "share": "Share vehicles with DIMO"
+      "login": "🔑  Login with DIMO",
+      "share": "🚗  Share vehicles with DIMO"
     },
     "connection": {
       "title": "Connection",
