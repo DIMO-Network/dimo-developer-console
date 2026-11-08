@@ -337,8 +337,8 @@
       "whitespace": "surrounding whitespace removed"
     },
     "where": {
-      "template": "template",
-      "trim": "trim {name}"
+      "templateCell": "template {label}",
+      "trimCell": "trim {name} {label}"
     },
     "grid": {
       "attribute": "Attribute",

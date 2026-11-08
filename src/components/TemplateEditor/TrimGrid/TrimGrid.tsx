@@ -108,8 +108,9 @@ export const TrimGrid: FC<TrimGridProps> = ({
                         def={row.def}
                         value={row.cells[i]}
                         where={`trim ${trim.name || '?'}`}
-                        whereLabel={t('templateEditor.where.trim', {
+                        ariaLabel={t('templateEditor.where.trimCell', {
                           name: trim.name || '?',
+                          label: row.def.label,
                         })}
                         emphasised={row.distinct > 1}
                         readOnly={readOnly}
@@ -135,7 +136,9 @@ export const TrimGrid: FC<TrimGridProps> = ({
                       def={row.def}
                       value={row.shared}
                       where="template"
-                      whereLabel={t('templateEditor.where.template')}
+                      ariaLabel={t('templateEditor.where.templateCell', {
+                        label: row.def.label,
+                      })}
                       emphasised={false}
                       readOnly={readOnly}
                       testId={`shared-${row.def.name}`}
