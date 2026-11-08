@@ -14,13 +14,11 @@ export const useErrorHandler = () => {
   const t = useTranslations('common');
   const searchParams = useSearchParams();
   const error = searchParams.get('error') ?? '';
+  const message = error ? t(ERROR_KEYS[error] ?? 'errors.tryAgain') : null;
 
   useEffect(() => {
-    if (error) {
-      toast.error(t(ERROR_KEYS[error] ?? 'errors.tryAgain'));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
+    if (message) toast.error(message);
+  }, [message]);
 };
 
 export default useErrorHandler;
