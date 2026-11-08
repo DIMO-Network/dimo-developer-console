@@ -64,7 +64,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
         for (const row of data as Record<string, string>[]) {
           const id = row[CSV_UPLOAD_ROW_TITLE];
           if (!id || isNaN(Number(id))) {
-            setError(t('csvUpload.numericTokenId'));
+            setError(t('csvUpload.numericTokenId', { header: CSV_UPLOAD_ROW_TITLE }));
             return;
           }
           ids.push(id);
@@ -147,6 +147,7 @@ export const CSVUpload: React.FC<CSVUploadProps> = ({
         <p className="text-body font-medium text-ink">{t('csvUpload.dropPrompt')}</p>
         <p className="text-body-sm text-muted mt-4">
           {t.rich('csvUpload.formatHint', {
+            header: CSV_UPLOAD_ROW_TITLE,
             code: (chunks) => <code className="font-mono text-code">{chunks}</code>,
           })}
         </p>
