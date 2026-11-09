@@ -21,7 +21,15 @@ const columnHelper = legacyCreateColumnHelper<VehicleRow>();
 
 // Column headers and chips are built outside a component, so each one is a
 // small component that reads its own text.
-const Text = ({ id }: { id: string }) => {
+export const TEXT_KEYS = [
+  'vehicleTable.columns.tokenDid',
+  'vehicleTable.columns.mmy',
+  'vehicleTable.simulated',
+  'vehicleTable.columns.sources',
+  'vehicleTable.columns.lastSeen',
+] as const;
+
+const Text = ({ id }: { id: (typeof TEXT_KEYS)[number] }) => {
   const t = useTranslations('license');
   return <>{t(id)}</>;
 };

@@ -24,6 +24,7 @@ import {
   type SubjectKind,
 } from '@/services/subjects/graph';
 import type { TeamRole } from '@/types/team';
+import { TEXT_KEYS } from '@/app/license/vehicles/[clientId]/components/VehicleDetailsTable/constants';
 
 // A typo in a key renders the raw key in production, so every key the code can
 // ask for must exist in messages/en. Literal keys are found by scanning the
@@ -245,5 +246,11 @@ describe('vehicles keys from tables', () => {
     for (const key of Object.keys(details)) {
       expect(has('vehicles', `subjects.details.${key}`)).toBe(true);
     }
+  });
+});
+
+describe('license keys from tables', () => {
+  it.each(TEXT_KEYS.map((key) => [key]))('vehicle table %s', (key) => {
+    expect(has('license', key)).toBe(true);
   });
 });
