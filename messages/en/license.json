@@ -197,6 +197,7 @@
     "label": "Shared vehicles",
     "renounced": "Access renounced",
     "renounceFailed": "Failed to renounce access",
+    "pageLoadFailed": "Couldn't load that page. Try again.",
     "lookupFailed": "Couldn't look up vehicle {tokenId}: {message}",
     "noVehicle": "No vehicle has token ID {tokenId}.",
     "notShared": "Vehicle {tokenId} ({make} {model}) isn't shared with this license.",

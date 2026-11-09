@@ -213,7 +213,7 @@ export const VehicleDetailsTable: FC<IProps> = ({
         )}
         onPaginationChange={(page) =>
           refetch(page).catch((error: unknown) => {
-            toast.error("Couldn't load that page. Try again.");
+            toast.error(t('vehicleTable.pageLoadFailed'));
             throw error;
           })
         }
