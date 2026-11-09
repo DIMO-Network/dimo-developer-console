@@ -17,8 +17,8 @@ interface IProps {
 }
 
 export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
-  const t = useTranslations('sign-in');
   const tSignUp = useTranslations('sign-up');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRequestingNewOtp, setIsRequestingNewOtp] = useState<boolean>(false);
@@ -95,7 +95,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
       });
 
       if (!success) {
-        toast.error(t('otp.invalidCode'));
+        toast.error(tCommon('otp.invalidCode'));
         return;
       }
 
@@ -103,7 +103,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     } catch (error) {
       if (explainSignUpRefusal(error, () => router.replace('/sign-in'), tSignUp)) return;
       captureException(error);
-      toast.error(t('otp.loginFailed'));
+      toast.error(tCommon('otp.loginFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -131,10 +131,10 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
       const newOtpId = await beginOtpLogin();
       setOtpId(newOtpId);
       setOtp(Array(6).fill(''));
-      toast.success(t('otp.resent'));
+      toast.success(tCommon('otp.resent'));
     } catch (error) {
       captureException(error);
-      toast.error(t('otp.resendFailed'));
+      toast.error(tCommon('otp.resendFailed'));
     } finally {
       setIsRequestingNewOtp(false);
     }
@@ -144,11 +144,11 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
     <>
       <div className="sign-in__form">
         <div className="sign-in__header">
-          <p className="text-title text-ink">{t('otp.title')}</p>
+          <p className="text-title text-ink">{tCommon('otp.title')}</p>
         </div>
         <div className="otp-login-text">
           <p>
-            {t.rich('otp.enterCode', {
+            {tCommon.rich('otp.enterCode', {
               email: currentEmail,
               strong: (chunks) => <strong>{chunks}</strong>,
             })}
@@ -182,7 +182,7 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
             disabled={otp.some((digit) => !digit)}
             loading={isLoading}
           >
-            {t('otp.signIn')}
+            {tCommon('otp.signIn')}
           </Button>
           <Button
             variant="secondary"
@@ -192,13 +192,13 @@ export const OtpInputForm: FC<IProps> = ({ currentEmail, currentWallet }) => {
             loading={isRequestingNewOtp}
             disabled={false}
           >
-            {t('otp.resendCode')}
+            {tCommon('otp.resendCode')}
           </Button>
         </div>
         <div className="sign-in__extra-links">
           <div className="flex flex-row">
             <p className="terms-caption">
-              {t.rich('otp.troubleLoggingIn', {
+              {tCommon.rich('otp.troubleLoggingIn', {
                 support: (chunks) => (
                   <Anchor
                     href="mailto:developer-support@dimo.org"

@@ -93,7 +93,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
       });
 
       if (!success) {
-        toast.error(t('otp.invalidCode'));
+        toast.error(tCommon('otp.invalidCode'));
         return;
       }
 
@@ -129,10 +129,10 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
       const newOtpId = await beginOtpLogin();
       setOtpId(newOtpId);
       setOtp(Array(6).fill(''));
-      toast.success(t('otp.resent'));
+      toast.success(tCommon('otp.resent'));
     } catch (error) {
       captureException(error);
-      toast.error(t('otp.resendFailed'));
+      toast.error(tCommon('otp.resendFailed'));
     } finally {
       setIsRequestingNewOtp(false);
     }
@@ -142,11 +142,11 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className="text-title text-ink">{t('otp.title')}</p>
+          <p className="text-title text-ink">{tCommon('otp.title')}</p>
         </div>
         <div className="otp-login-text">
           <p>
-            {t.rich('otp.enterCode', {
+            {tCommon.rich('otp.enterCode', {
               email: email,
               strong: (chunks) => <strong>{chunks}</strong>,
             })}
@@ -180,7 +180,7 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
             loading={isLoading}
             disabled={otp.some((digit) => !digit)}
           >
-            {t('otp.signIn')}
+            {tCommon('otp.signIn')}
           </Button>
           <Button
             variant="secondary"
@@ -189,13 +189,13 @@ export const OtpSignup: FC<IProps> = ({ email, handleSignupComplete }) => {
             loading={isRequestingNewOtp}
             onClick={handleResendCode}
           >
-            {t('otp.resendCode')}
+            {tCommon('otp.resendCode')}
           </Button>
         </div>
         <div className="sign-up__extra-links">
           <div className="flex flex-row">
             <p className="terms-caption">
-              {t.rich('otp.troubleLoggingIn', {
+              {tCommon.rich('otp.troubleLoggingIn', {
                 support: (chunks) => (
                   <Anchor
                     href="mailto:developer-support@dimo.org"

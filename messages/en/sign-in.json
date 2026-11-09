@@ -16,17 +16,6 @@
     "lostPasskey": "Lost your passkey? <reset>Reset with your email</reset>",
     "troubleLoggingIn": "Trouble logging in? <support>Get support</support>"
   },
-  "otp": {
-    "title": "Welcome back!",
-    "enterCode": "Enter the code sent to <strong>{email}</strong>",
-    "signIn": "Sign In",
-    "resendCode": "Resend Code",
-    "invalidCode": "Invalid OTP code",
-    "loginFailed": "Failed to login with OTP",
-    "resent": "New OTP code sent to your email",
-    "resendFailed": "Failed to resend OTP code",
-    "troubleLoggingIn": "Trouble logging in? <support>Get support</support>"
-  },
   "passkey": {
     "title": "Continue with passkey",
     "loginFailed": "Failed to login with passkey",

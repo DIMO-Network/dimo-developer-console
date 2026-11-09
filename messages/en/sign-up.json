@@ -29,16 +29,6 @@
       "body": "You already have a DIMO account. Please validate your identity to continue."
     }
   },
-  "otp": {
-    "title": "Welcome back!",
-    "enterCode": "Enter the code sent to <strong>{email}</strong>",
-    "signIn": "Sign In",
-    "resendCode": "Resend Code",
-    "invalidCode": "Invalid OTP code",
-    "resent": "New OTP code sent to your email",
-    "resendFailed": "Failed to resend OTP code",
-    "troubleLoggingIn": "Trouble logging in? <support>Get support</support>"
-  },
   "buildFor": {
     "title": "What are you building?",
     "prompt": "What you are looking to launch with DIMO?",
