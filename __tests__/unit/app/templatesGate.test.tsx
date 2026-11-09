@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react';
 
 // The authorized layout pulls in wallet and session providers; the gate only
 // decides what goes inside it, so render children as-is.
-jest.mock('@/layouts/AuthorizedLayout', () => ({
-  AuthorizedLayout: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('@/layouts/AuthorizedLayout/AuthorizedRouteLayout', () => ({
+  AuthorizedRouteLayout: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 type Loaded = {

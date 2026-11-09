@@ -2,17 +2,17 @@ import { Suspense } from 'react';
 
 import { generateMetadata as homeMetadata } from '@/app/app/page';
 import { View } from '@/app/View';
-import { AuthorizedLayout } from '@/layouts/AuthorizedLayout';
+import { AuthorizedRouteLayout } from '@/layouts/AuthorizedLayout/AuthorizedRouteLayout';
 
 export const generateMetadata = homeMetadata;
 
 const MainPage = () => {
   return (
-    <AuthorizedLayout>
+    <AuthorizedRouteLayout>
       <Suspense>
         <View />
       </Suspense>
-    </AuthorizedLayout>
+    </AuthorizedRouteLayout>
   );
 };
 

@@ -1,3 +1,3 @@
-import { AuthorizedLayout } from '@/layouts/AuthorizedLayout';
+import { AuthorizedRouteLayout } from '@/layouts/AuthorizedLayout/AuthorizedRouteLayout';
 
-export default AuthorizedLayout;
+export default AuthorizedRouteLayout;

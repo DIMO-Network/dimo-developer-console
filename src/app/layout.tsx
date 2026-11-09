@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
+import { pickMessages, ROOT_MESSAGES } from '@/i18n/messages';
 import { RootProviders } from '@/layouts/RootLayout';
 import { dimoFont } from '@/utils/font';
 import './globals.css';
@@ -18,7 +19,7 @@ const RootLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
   return (
     <html lang={locale} className={dimoFont.variable} suppressHydrationWarning>
       <body>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={pickMessages(messages, ROOT_MESSAGES)}>
           <RootProviders>{children}</RootProviders>
         </NextIntlClientProvider>
       </body>

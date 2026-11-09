@@ -9,7 +9,15 @@ import {
   type MessageFormatElement,
 } from '@formatjs/icu-messageformat-parser';
 import { LOCALES, type Locale } from '@/i18n/locale';
-import { AREAS, deepMerge, loadMessages } from '@/i18n/messages';
+import {
+  AREAS,
+  deepMerge,
+  GUEST_AREAS,
+  loadMessages,
+  pickMessages,
+  ROOT_MESSAGES,
+  SIGNED_IN_AREAS,
+} from '@/i18n/messages';
 
 const MESSAGES_DIR = join(process.cwd(), 'messages');
 
@@ -124,6 +132,42 @@ describe('deepMerge', () => {
     deepMerge(base, override);
     expect(base).toEqual({ a: { b: 'en' } });
     expect(override).toEqual({ a: { c: 'ja' } });
+  });
+});
+
+describe('pickMessages', () => {
+  const messages = {
+    common: { a: 'a' },
+    app: { error: { title: 't' }, list: 'l' },
+    x: 'x',
+  };
+
+  it('keeps whole areas and subtrees of one, nothing else', () => {
+    expect(pickMessages(messages, ['common', 'app.error'])).toEqual({
+      common: { a: 'a' },
+      app: { error: { title: 't' } },
+    });
+  });
+
+  it('skips paths that are not there', () => {
+    expect(pickMessages(messages, ['vehicles', 'app.missing'])).toEqual({});
+  });
+});
+
+describe('message areas per part of the app', () => {
+  it('hands every area to the signed-in pages, and only guest areas to the guest pages', () => {
+    const root = ROOT_MESSAGES.filter((path) => !path.includes('.'));
+    expect([...root, ...GUEST_AREAS, ...SIGNED_IN_AREAS].sort()).toEqual(
+      [...AREAS].sort(),
+    );
+    expect(GUEST_AREAS.filter((area) => SIGNED_IN_AREAS.includes(area))).toEqual([]);
+  });
+
+  it('gives the error page, outside every route layout, the copy it shows', () => {
+    expect(pickMessages(readArea('en', 'app'), ['error'])).toEqual({
+      error: readArea('en', 'app').error,
+    });
+    expect(ROOT_MESSAGES).toContain('app.error');
   });
 });
 

@@ -18,6 +18,15 @@ export const AREAS = [
 ] as const;
 export type Area = (typeof AREAS)[number];
 
+// What each part of the app hands the browser. Every page gets common and the
+// error page's copy; the guest pages add theirs and the signed-in pages add
+// the rest, so sign-in doesn't download the console's copy.
+export const ROOT_MESSAGES = ['common', 'app.error'];
+export const GUEST_AREAS: Area[] = ['sign-in', 'sign-up', 'email-recovery'];
+export const SIGNED_IN_AREAS: Area[] = AREAS.filter(
+  (area) => area !== 'common' && !GUEST_AREAS.includes(area),
+);
+
 type Messages = { [key: string]: unknown };
 
 const isTree = (value: unknown): value is Messages =>
@@ -31,6 +40,22 @@ export const deepMerge = (base: Messages, override: Messages): Messages =>
       [key]: isTree(value) && isTree(merged[key]) ? deepMerge(merged[key], value) : value,
     }),
     { ...base },
+  );
+
+const pickPath = (messages: Messages, [key, ...rest]: string[]): Messages => {
+  const value = messages[key];
+  if (value === undefined) return {};
+  if (rest.length === 0) return { [key]: value };
+  if (!isTree(value)) return {};
+  const picked = pickPath(value, rest);
+  return Object.keys(picked).length ? { [key]: picked } : {};
+};
+
+// Paths are areas ('common') or subtrees of one ('app.error').
+export const pickMessages = (messages: Messages, paths: readonly string[]): Messages =>
+  paths.reduce<Messages>(
+    (picked, path) => deepMerge(picked, pickPath(messages, path.split('.'))),
+    {},
   );
 
 const isMissingModule = (error: unknown) =>

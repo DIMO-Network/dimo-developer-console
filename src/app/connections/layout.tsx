@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react';
-import { AuthorizedLayout } from '@/layouts/AuthorizedLayout';
+import { AuthorizedRouteLayout } from '@/layouts/AuthorizedLayout/AuthorizedRouteLayout';
 import { OwnerOnly } from '@/components/OwnerOnly';
 
 export default function ConnectionsLayout({ children }: { children: ReactNode }) {
   return (
-    <AuthorizedLayout>
+    <AuthorizedRouteLayout>
       <OwnerOnly feature="connections">{children}</OwnerOnly>
-    </AuthorizedLayout>
+    </AuthorizedRouteLayout>
   );
 }
