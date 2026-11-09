@@ -46,7 +46,7 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     <div className={'flex flex-col gap-6'}>
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link href="/licenses" className="transition-colors hover:text-ink">
-          {t('vehicles.breadcrumbLicenses')}
+          {t('breadcrumbLicenses')}
         </Link>
         <span>/</span>
         <span className="text-ink">{t('vehicles.breadcrumbVehicles')}</span>

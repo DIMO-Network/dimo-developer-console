@@ -121,7 +121,7 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
     <div className="license-details-page">
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link href="/licenses" className="transition-colors hover:text-ink">
-          {t('details.breadcrumbLicenses')}
+          {t('breadcrumbLicenses')}
         </Link>
         <span>/</span>
         <span className="text-ink">{t('details.breadcrumbDetails')}</span>

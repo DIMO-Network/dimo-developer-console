@@ -6,9 +6,9 @@
     "teamEmptyTitle": "This team has no developer licenses yet",
     "teamEmptyBody": "Licenses the team owner creates show up here."
   },
+  "breadcrumbLicenses": "Licenses",
   "details": {
     "metadataTitle": "License Details | {appName}",
-    "breadcrumbLicenses": "Licenses",
     "breadcrumbDetails": "License details",
     "loadError": "There was an error fetching the license details",
     "fallbackName": "License #{tokenId}",
@@ -180,7 +180,6 @@
   "vehicles": {
     "metadataTitle": "Licensed vehicles | {appName}",
     "loadError": "Something went wrong fetching the vehicle details",
-    "breadcrumbLicenses": "Licenses",
     "breadcrumbVehicles": "Vehicles",
     "connectedVehicles": "Connected vehicles",
     "testVehicles": "({count, plural, one {# test vehicle} other {# test vehicles}})",
