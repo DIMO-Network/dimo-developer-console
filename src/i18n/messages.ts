@@ -24,7 +24,7 @@ type MessagePath = Area | `${Area}.${string}`;
 // What each part of the app hands the browser. Every page gets common and the
 // error page's copy; the guest pages add theirs, and each signed-in section
 // adds what its own pages read, so a move between sections sends only the
-// copy of the section it lands on. areaMessages.test checks every list
+// copy of the section it lands on. routeMessages.test checks every list
 // against the code.
 export const ROOT_MESSAGES: MessagePath[] = ['common', 'app.error'];
 export const GUEST_AREAS: Area[] = ['sign-in', 'sign-up', 'email-recovery'];
