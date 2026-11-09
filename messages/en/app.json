@@ -45,9 +45,7 @@
     "created": "Developer license created! Refresh the page to see your changes.",
     "nameInUse": "Developer License name already in use. Please try again using a different name.",
     "failed": "Something went wrong while confirming the transaction",
-    "nameLabel": "Developer license name",
-    "namePlaceholder": "My project",
-    "nameHelp": "This is the namespace used across all your apps. It is a public name visible to other developers and users in the ecosystem."
+    "namePlaceholder": "My project"
   },
   "simulator": {
     "open": "Vehicle simulator",

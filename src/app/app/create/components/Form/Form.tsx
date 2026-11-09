@@ -110,7 +110,7 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
   return (
     <form className="create-app-form" onSubmit={handleSubmit(onSubmit)}>
       <Label htmlFor="namespace">
-        {t('create.nameLabel')}
+        {tCommon('workspaceName.label')}
         <TextField
           type="text"
           placeholder={t('create.namePlaceholder')}
@@ -124,7 +124,9 @@ export const Form: FC<IProps> = ({ onSuccess, onClose }) => {
         {errors?.workspace?.name && (
           <TextError errorMessage={errors?.workspace?.name?.message ?? ''} />
         )}
-        <p className="text-body-sm font-normal text-muted">{t('create.nameHelp')}</p>
+        <p className="text-body-sm font-normal text-muted">
+          {tCommon('workspaceName.description')}
+        </p>
       </Label>
       <div className="flex flex-col gap-2 pt-4">
         <Button type="submit" role="continue-button" loading={isLoading}>
