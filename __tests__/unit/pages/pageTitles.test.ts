@@ -13,7 +13,9 @@ jest.mock('@/app/license/vehicles/[clientId]/components/View/View', () => ({
   View: () => null,
 }));
 jest.mock('@/components/OwnerOnly', () => ({ OwnerOnly: () => null }));
-jest.mock('@/layouts/AuthorizedLayout', () => ({ AuthorizedLayout: () => null }));
+jest.mock('@/layouts/AuthorizedLayout/AuthorizedLayout', () => ({
+  AuthorizedLayout: () => null,
+}));
 jest.mock('@/app/templates/templatesPage/View', () => ({ TemplatesPage: () => null }));
 jest.mock('@/app/templates/new/components/PresetView', () => ({
   PresetView: () => null,

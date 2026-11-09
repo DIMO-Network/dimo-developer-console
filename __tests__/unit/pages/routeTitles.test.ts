@@ -1,7 +1,9 @@
 import configuration from '@/config';
 
 jest.mock('@/components/OwnerOnly', () => ({ OwnerOnly: () => null }));
-jest.mock('@/layouts/AuthorizedLayout', () => ({ AuthorizedLayout: () => null }));
+jest.mock('@/layouts/AuthorizedLayout/AuthorizedLayout', () => ({
+  AuthorizedLayout: () => null,
+}));
 jest.mock('@/app/settings/components/View', () => ({ View: () => null }));
 jest.mock('@/app/connections/components/View', () => ({ View: () => null }));
 jest.mock('@/app/connections/create/[owner]/components/View', () => ({
