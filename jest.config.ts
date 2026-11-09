@@ -99,6 +99,8 @@ const config: Config = {
     // Jest 30 loads this file as ESM, where `require` doesn't exist.
     '^axios$': '<rootDir>/node_modules/axios/dist/node/axios.cjs',
     '^@/(.*)$': '<rootDir>/src/$1',
+    // Next resolves server-only itself; the package isn't installed.
+    '^server-only$': '<rootDir>/node_modules/next/dist/compiled/server-only/empty.js',
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader

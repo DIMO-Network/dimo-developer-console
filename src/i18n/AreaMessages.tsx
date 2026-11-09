@@ -1,10 +1,10 @@
+import 'server-only';
 import type { ReactNode } from 'react';
 import { useMessages } from 'next-intl';
 import { pickMessages } from './messages';
 import { MergeMessages } from './MergeMessages';
 
-// Server components only: it reads the request's messages and sends the
-// browser just these areas.
+// Reads the request's messages and sends the browser just these areas.
 export const AreaMessages = ({
   areas,
   children,
