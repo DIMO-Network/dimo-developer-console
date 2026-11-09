@@ -1,4 +1,4 @@
-import type { Translate } from './translate';
+import type { Translate } from '@/i18n/translate';
 
 type Failure = { status: number; code: string | null; message: string };
 

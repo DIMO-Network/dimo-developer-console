@@ -9,7 +9,7 @@ import type { TeamMember } from '@/types/team';
 import { actionableKeys, grantCandidates, memberLicenseKeys } from './memberKeys';
 import { memberStatus } from './memberStatus';
 import { RowActionsMenu, type RowAction } from '@/components/RowActionsMenu';
-import type { Translate } from './translate';
+import type { Translate } from '@/i18n/translate';
 
 export type MemberAction = 'grant' | 'revoke' | 'remove' | 'resend' | 'cancel';
 export type MemberActionHandlers = Partial<

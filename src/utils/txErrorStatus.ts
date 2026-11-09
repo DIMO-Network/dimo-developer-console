@@ -1,8 +1,7 @@
 import { get } from 'lodash';
 import type { LoadingProps } from '@/components/LoadingModal';
 import { UserOperationFailedError } from '@/utils/userOperation';
-
-type Translate = (key: string) => string;
+import type { Translate } from '@/i18n/translate';
 
 // Signers.tsx's mapping: 4001 is the user rejecting the user operation.
 // Pass the common-namespace `t`.

@@ -1,3 +1,5 @@
+import type { Translate } from '@/i18n/translate';
+
 // Why a caller may or may not edit a template, as facts rather than English, so
 // the banner can translate it. The service renders the same facts in English
 // for the API's refusal message.
@@ -15,7 +17,6 @@ export type EntitlementReason =
   | { key: 'manufacturer'; make: string; tokenId: number };
 
 type Values = Record<string, string | number>;
-type Translate = (key: string, values?: Values) => string;
 
 const PREFIX = 'templateEditor.entitlement.reason';
 

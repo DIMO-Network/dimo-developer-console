@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
 import type { IUser } from '@/types/user';
+import type { Translate } from '@/i18n/translate';
 
 // What a sign-up step can be refused for. The server actions return these
 // instead of throwing: a thrown error reaches the browser without its status or
@@ -16,8 +17,6 @@ export class SignUpRefusedError extends Error {
     this.name = 'SignUpRefusedError';
   }
 }
-
-type Translate = (key: string) => string;
 
 const explain = (reason: SignUpRefusal, goToSignIn: () => void, t: Translate) => {
   switch (reason) {

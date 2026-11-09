@@ -18,6 +18,7 @@ import { Label } from '@/components/Label';
 import { SelectField } from '@/components/SelectField';
 import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
+import type { Translate } from '@/i18n/translate';
 
 interface CompanyInfoInputs {
   name: string;
@@ -55,8 +56,6 @@ const DEVELOPER_TYPE_KEYS: Record<string, string> = {
   'Data': 'data',
   'Others': 'others',
 };
-
-type Translate = (key: string) => string;
 
 const regionOptions = (t: Translate) =>
   REGIONS.map((value) => ({ value, text: t(`company.regions.${REGION_KEYS[value]}`) }));

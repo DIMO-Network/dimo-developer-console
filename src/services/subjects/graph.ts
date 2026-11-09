@@ -1,5 +1,6 @@
 import type { GetVehicleDetailQuery } from '@/gql/graphql';
 import { accountDid, sourceDid } from './did';
+import type { Translate } from '@/i18n/translate';
 
 export type VehicleDetail = NonNullable<GetVehicleDetailQuery['vehicle']>;
 
@@ -156,8 +157,6 @@ export const buildVehicleGraph = (v: VehicleDetail, chainId: number): SubjectGra
 
   return { vehicle, devices, account, all: [vehicle, ...devices, account] };
 };
-
-type Translate = (key: string) => string;
 
 const KIND_KEY: Record<SubjectKind, string> = {
   'vehicle': 'vehicle',

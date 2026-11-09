@@ -4,7 +4,7 @@ import { txErrorStatus } from '@/utils/txErrorStatus';
 import { UserOperationFailedError } from '@/utils/userOperation';
 import { inviteErrorKey } from '@/utils/inviteErrors';
 
-const key = (k: string, values?: Record<string, number>) =>
+const key = (k: string, values?: Record<string, string | number>) =>
   values ? `${k}:${JSON.stringify(values)}` : k;
 
 describe('shared copy that can be translated', () => {

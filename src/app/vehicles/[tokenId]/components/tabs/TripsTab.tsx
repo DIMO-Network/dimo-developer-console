@@ -23,6 +23,7 @@ import { fieldError } from '@/services/subjects/client';
 import { Button } from '@/components/Button';
 import { NativeSelect } from '@/components/NativeSelect';
 import { TextField } from '@/components/TextField';
+import type { Translate } from '@/i18n/translate';
 
 const MECHANISMS: { value: DetectionMechanism; daily: boolean }[] = [
   { value: 'ignitionDetection', daily: true },
@@ -58,7 +59,6 @@ type Segment = {
 type Day = { segmentCount: number; duration: number };
 
 const MAX_RANGE_DAYS = 31;
-type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 // The API returns one record per calendar day, in order, starting at the UTC day of `from`.
 const dayOf = (from: string, i: number) => {

@@ -5,6 +5,7 @@ import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
 import { WarningAmberIcon } from '@/components/Icons';
+import type { Translate } from '@/i18n/translate';
 
 interface Vehicle {
   tokenId: number;
@@ -20,8 +21,6 @@ interface Props {
   onConfirm: () => Promise<void>;
   onClose: () => void;
 }
-
-type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 function vehicleName(vehicle: Vehicle, t: Translate): string {
   const { make, model, year } = vehicle.definition ?? {};
