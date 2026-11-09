@@ -18,6 +18,7 @@ interface IOutputPrintProps {
 /** The saved configuration's link, or the SDK code for the current values. */
 export const OutputPrint: FC<IOutputPrintProps> = ({ clientId }) => {
   const t = useTranslations('configurator');
+  const tCommon = useTranslations('common');
   const [viewMode, setViewMode] = useState<'code' | 'url'>('url');
   const { watch } = useFormContext<DynamicFormProps>();
   const values = watch();
@@ -74,7 +75,7 @@ export const OutputPrint: FC<IOutputPrintProps> = ({ clientId }) => {
             )
           }
         >
-          {t('output.copy')}
+          {tCommon('actions.copy')}
         </Button>
       </div>
     </>

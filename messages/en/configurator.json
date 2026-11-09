@@ -18,9 +18,9 @@
   "list": {
     "subtitle": "Login with DIMO configurator",
     "newConfiguration": "New configuration",
-    "intro": "A vehicle sharing link is required for vehicle owners to grant data permissions to your application. <docsLink>Learn how to use the configurationId with LIWD</docsLink>",
-    "loadError": "There was an error fetching the license details"
+    "intro": "A vehicle sharing link is required for vehicle owners to grant data permissions to your application. <docsLink>Learn how to use the configurationId with LIWD</docsLink>"
   },
+  "licenseLoadError": "There was an error fetching the license details",
   "table": {
     "loading": "Loading…",
     "loadError": "Could not load configurations. Reload to try again.",
@@ -77,7 +77,6 @@
     },
     "ownerOnly": "Only the team owner can change configurations.",
     "update": "Update",
-    "save": "Save",
     "preview": {
       "generatedOutput": "Generated output",
       "saveToGenerate": "Save to generate your link",
@@ -191,7 +190,6 @@
     "viewAs": "View as:",
     "code": "Code",
     "url": "URL",
-    "generatedCode": "Generated code",
-    "copy": "Copy"
+    "generatedCode": "Generated code"
   }
 }

@@ -92,6 +92,7 @@ const startOfToday = () => {
 /** The configuration form, for the new and the edit page. */
 export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false }) => {
   const t = useTranslations('configurator');
+  const tCommon = useTranslations('common');
   const fragment = useFragment(USER_CONFIG_FRAGMENT, license);
   const brandNames = (useLicenseBrands(fragment.tokenId).data?.brands ?? [])
     .map((b) => b.name)
@@ -286,7 +287,7 @@ export const ConfigurationForm: FC<Props> = ({ license, submit, editing = false 
           fallback={<p className="text-body-sm text-muted">{t('form.ownerOnly')}</p>}
         >
           <Button type="submit" className="w-full">
-            {editing ? t('form.update') : t('form.save')}
+            {editing ? t('form.update') : tCommon('actions.save')}
           </Button>
         </OwnerAction>
       </form>

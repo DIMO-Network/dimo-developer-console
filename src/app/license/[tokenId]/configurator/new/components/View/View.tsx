@@ -73,7 +73,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   if (error) {
     return (
       <div className="license-details-page">
-        <p>{t('list.loadError')}</p>
+        <p>{t('licenseLoadError')}</p>
       </div>
     );
   }
