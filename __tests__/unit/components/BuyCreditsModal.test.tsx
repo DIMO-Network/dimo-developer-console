@@ -2,11 +2,11 @@ import { render, screen } from '@testing-library/react';
 import { CreditsContext } from '@/context/creditsContext';
 import { BuyCreditsModal } from '@/components/BuyCreditsModal/BuyCreditsModal';
 
-jest.mock('@/hooks', () => ({
-  useContractGA: () => ({}),
+jest.mock('@/hooks/useContractGA', () => ({ useContractGA: () => ({}) }));
+jest.mock('@/hooks/useGlobalAccount', () => ({
   useGlobalAccount: () => ({ currentUser: null }),
-  useUser: () => ({ data: null }),
 }));
+jest.mock('@/hooks/useUser', () => ({ useUser: () => ({ data: null }) }));
 jest.mock('@/hooks/useSACD', () => ({ useSACD: () => ({}) }));
 jest.mock('@/services/token', () => ({ generatePaymentLink: jest.fn() }));
 jest.mock('@ethereumjs/util', () => ({ isValidAddress: () => true }));

@@ -3,7 +3,9 @@ import { NextIntlClientProvider, useFormatter } from 'next-intl';
 import { RootProviders } from '@/layouts/RootLayout';
 
 jest.unmock('next-intl');
-jest.mock('@/hooks', () => ({ useMixPanel: () => ({ initMixPanel: jest.fn() }) }));
+jest.mock('@/hooks/useMixPanel', () => ({
+  useMixPanel: () => ({ initMixPanel: jest.fn() }),
+}));
 jest.mock('@/hoc/QueryProvider', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => children,
