@@ -1,14 +1,15 @@
 import type { ReactNode } from 'react';
 import { AreaMessages } from '@/i18n/AreaMessages';
-import { SIGNED_IN_AREAS } from '@/i18n/messages';
-import { AuthorizedLayout } from '@/layouts/AuthorizedLayout';
+import { SECTION_MESSAGES, SHELL_MESSAGES, type Section } from '@/i18n/messages';
+import { AuthorizedLayout } from '@/layouts/AuthorizedLayout/AuthorizedLayout';
 
-export const AuthorizedRouteLayout = ({
-  children,
-}: Readonly<{ children: ReactNode }>) => (
-  <AreaMessages areas={SIGNED_IN_AREAS}>
-    <AuthorizedLayout>{children}</AuthorizedLayout>
-  </AreaMessages>
-);
-
-export default AuthorizedRouteLayout;
+// The layout of one signed-in section, with that section's copy.
+export const authorizedRouteLayout = (section: Section) => {
+  const areas = [...SHELL_MESSAGES, ...SECTION_MESSAGES[section]];
+  const AuthorizedRouteLayout = ({ children }: Readonly<{ children: ReactNode }>) => (
+    <AreaMessages areas={areas}>
+      <AuthorizedLayout>{children}</AuthorizedLayout>
+    </AreaMessages>
+  );
+  return AuthorizedRouteLayout;
+};

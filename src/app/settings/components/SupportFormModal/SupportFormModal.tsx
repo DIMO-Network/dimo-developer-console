@@ -20,7 +20,7 @@ interface SupportFormModalProps {
 }
 
 export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen }) => {
-  const t = useTranslations('settings');
+  const t = useTranslations('settings.supportModal');
   const { currentUser } = useGlobalAccount();
 
   const handleSubmit = async (data: IDevSupportForm) => {
@@ -36,11 +36,11 @@ export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen 
       };
       await handleSupportRequest(supportRequest);
       setIsOpen(false);
-      toast.success(t('supportModal.success'));
+      toast.success(t('success'));
     } catch (error) {
       console.error('Failed to submit support request:', error);
       Sentry.captureException(error);
-      toast.error(t('supportModal.failure'));
+      toast.error(t('failure'));
     }
   };
 
@@ -53,9 +53,9 @@ export const SupportFormModal: FC<SupportFormModalProps> = ({ isOpen, setIsOpen 
       <div className="support-form-content">
         <div className="support-form-header">
           <Title className="text-panel-title" component="h3">
-            {t('supportModal.title')}
+            {t('title')}
           </Title>
-          <p className="description">{t('supportModal.description')}</p>
+          <p className="description">{t('description')}</p>
         </div>
         <DevSupportForm onSubmit={handleSubmit} onCancel={onCancel} />
       </div>

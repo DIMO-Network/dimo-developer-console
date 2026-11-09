@@ -18,14 +18,32 @@ export const AREAS = [
 ] as const;
 export type Area = (typeof AREAS)[number];
 
+// An area ('common') or a subtree of one ('app.error').
+type MessagePath = Area | `${Area}.${string}`;
+
 // What each part of the app hands the browser. Every page gets common and the
-// error page's copy; the guest pages add theirs and the signed-in pages add
-// the rest, so sign-in doesn't download the console's copy.
-export const ROOT_MESSAGES = ['common', 'app.error'];
+// error page's copy; the guest pages add theirs, and each signed-in section
+// adds what its own pages read, so a move between sections sends only the
+// copy of the section it lands on. areaMessages.test checks every list
+// against the code.
+export const ROOT_MESSAGES: MessagePath[] = ['common', 'app.error'];
 export const GUEST_AREAS: Area[] = ['sign-in', 'sign-up', 'email-recovery'];
-export const SIGNED_IN_AREAS: Area[] = AREAS.filter(
-  (area) => area !== 'common' && !GUEST_AREAS.includes(area),
-);
+// The signed-in chrome (menu, header) that every section renders.
+export const SHELL_MESSAGES: MessagePath[] = ['settings.supportModal'];
+export const SECTION_MESSAGES = {
+  '/': ['app'],
+  '/app': ['app'],
+  '/connections': ['connections'],
+  '/license/[tokenId]': ['app', 'configurator', 'license'],
+  '/license/vehicles': ['license'],
+  '/licenses': ['app', 'license', 'licenses'],
+  '/settings': ['settings'],
+  '/support': ['support'],
+  '/templates': ['templates'],
+  '/vehicles': ['license', 'vehicles'],
+  '/webhooks': ['webhooks'],
+} satisfies Record<string, MessagePath[]>;
+export type Section = keyof typeof SECTION_MESSAGES;
 
 type Messages = { [key: string]: unknown };
 

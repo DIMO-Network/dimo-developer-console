@@ -16,7 +16,8 @@ import {
   loadMessages,
   pickMessages,
   ROOT_MESSAGES,
-  SIGNED_IN_AREAS,
+  SECTION_MESSAGES,
+  SHELL_MESSAGES,
 } from '@/i18n/messages';
 
 const MESSAGES_DIR = join(process.cwd(), 'messages');
@@ -155,12 +156,14 @@ describe('pickMessages', () => {
 });
 
 describe('message areas per part of the app', () => {
-  it('hands every area to the signed-in pages, and only guest areas to the guest pages', () => {
-    const root = ROOT_MESSAGES.filter((path) => !path.includes('.'));
-    expect([...root, ...GUEST_AREAS, ...SIGNED_IN_AREAS].sort()).toEqual(
-      [...AREAS].sort(),
-    );
-    expect(GUEST_AREAS.filter((area) => SIGNED_IN_AREAS.includes(area))).toEqual([]);
+  it('hands every area to some part of the app', () => {
+    const handed = [
+      ...ROOT_MESSAGES,
+      ...GUEST_AREAS,
+      ...SHELL_MESSAGES,
+      ...Object.values(SECTION_MESSAGES).flat(),
+    ].filter((path) => !path.includes('.'));
+    expect([...new Set(handed)].sort()).toEqual([...AREAS].sort());
   });
 
   it('gives the error page, outside every route layout, the copy it shows', () => {

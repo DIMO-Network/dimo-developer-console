@@ -39,12 +39,17 @@ const messages: Record<string, unknown> = Object.fromEntries(
   ]),
 );
 
-const has = (area: string, key: string): boolean =>
-  typeof key.split('.').reduce<unknown>((node, part) => {
-    return node && typeof node === 'object'
-      ? (node as Record<string, unknown>)[part]
-      : undefined;
-  }, messages[area]) === 'string';
+// The namespace is an area or a subtree of one ('settings.supportModal').
+const has = (namespace: string, key: string): boolean => {
+  const [area, ...path] = namespace.split('.');
+  return (
+    typeof [...path, ...key.split('.')].reduce<unknown>((node, part) => {
+      return node && typeof node === 'object'
+        ? (node as Record<string, unknown>)[part]
+        : undefined;
+    }, messages[area]) === 'string'
+  );
+};
 
 const sourceFiles = (dir: string): string[] =>
   readdirSync(dir).flatMap((name) => {
@@ -56,7 +61,7 @@ const sourceFiles = (dir: string): string[] =>
   });
 
 const BINDING =
-  /\bconst\s+(\w+)\s*=\s*(?:await\s+)?(?:useTranslations|getTranslations)\(\s*'([\w-]+)'\s*\)/g;
+  /\bconst\s+(\w+)\s*=\s*(?:await\s+)?(?:useTranslations|getTranslations)\(\s*'([\w.-]+)'\s*\)/g;
 
 // Every literal `t('key')`, `t.rich('key')` and `t.markup('key')`, for each
 // translator a file binds, checked against that translator's area. A name bound
