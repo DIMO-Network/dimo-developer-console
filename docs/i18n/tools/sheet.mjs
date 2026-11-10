@@ -29,11 +29,16 @@ export async function buildSheet(app, locales, root) {
     ...locales.map((l) => readColumn(app, l, root)),
   ]);
   const keys = [...new Set([en, ...columns].flatMap((m) => [...m.keys()]))].sort();
-  const rows = keys.map((key) => [key, en.get(key), ...columns.map((c) => c.get(key))]);
-  return (
-    [['key', 'en', ...locales], ...rows].map((r) => r.map(csvCell).join(',')).join('\n') +
-    '\n'
-  );
+  const notes =
+    app === 'memory' && new Map((await readPool()).map((e) => [e.id, e.note]));
+  const rows = keys.map((key) => [
+    key,
+    en.get(key),
+    ...(notes ? [notes.get(key)] : []),
+    ...columns.map((c) => c.get(key)),
+  ]);
+  const header = ['key', 'en', ...(notes ? ['note'] : []), ...locales];
+  return [header, ...rows].map((r) => r.map(csvCell).join(',')).join('\n') + '\n';
 }
 
 async function main() {

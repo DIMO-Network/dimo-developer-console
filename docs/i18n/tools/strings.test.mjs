@@ -105,3 +105,10 @@ test('check-memory fails when the locale memory file is missing', async () => {
     /Memory file not found/,
   );
 });
+
+test('memory sheet carries each entry note after the English', async () => {
+  const { buildSheet } = await import('./sheet.mjs');
+  const [header, first] = (await buildSheet('memory', ['zh-Hans'])).split('\n');
+  assert.equal(header, 'key,en,note,zh-Hans');
+  assert.match(first, /^tm\.0001,[^,]+,[^,]+,/);
+});
