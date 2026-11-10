@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readStrings } from './strings.mjs';
@@ -30,6 +30,24 @@ test('dimo-org merges code, navbar and footer ids', async () => {
     'homepage.title': 'Build with DIMO',
     'navbar.item.docs': 'Docs',
     'footer.link.terms': 'Terms',
+  });
+});
+
+test('dimo-org skips theme files Docusaurus did not write', async () => {
+  const base = await mkdtemp(join(tmpdir(), 'org-'));
+  const dir = join(base, 'dimo-org/i18n/en');
+  await mkdir(join(dir, 'docusaurus-theme-classic'), { recursive: true });
+  await writeFile(
+    join(dir, 'code.json'),
+    JSON.stringify({ 'footer.body.learnMore': { message: 'Learn more' } }),
+  );
+  await writeFile(
+    join(dir, 'docusaurus-theme-classic/navbar.json'),
+    JSON.stringify({ 'item.docs': { message: 'Docs' } }),
+  );
+  assert.deepEqual(Object.fromEntries(await readStrings('dimo-org', 'en', base)), {
+    'footer.body.learnMore': 'Learn more',
+    'navbar.item.docs': 'Docs',
   });
 });
 

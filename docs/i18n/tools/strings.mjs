@@ -40,9 +40,13 @@ async function readOrg(base, locale) {
     ['footer.', join(dir, 'docusaurus-theme-classic/footer.json')],
   ];
   const perFile = await Promise.all(
-    sources.map(async ([prefix, path]) =>
-      Object.entries(await readJson(path)).map(([id, v]) => [prefix + id, v.message]),
-    ),
+    sources.map(async ([prefix, path]) => {
+      const json = await readJson(path).catch((err) => {
+        if (err.code === 'ENOENT' && prefix) return {};
+        throw err;
+      });
+      return Object.entries(json).map(([id, v]) => [prefix + id, v.message]);
+    }),
   );
   return perFile.flat();
 }
