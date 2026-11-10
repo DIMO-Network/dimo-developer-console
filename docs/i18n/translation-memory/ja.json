@@ -1,0 +1,152 @@
+{
+  "tm.0039": {
+    "text": "おおよその位置",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0045": {
+    "text": "戻る",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0050": {
+    "text": "キャンセル",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0060": {
+    "text": "閉じる",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0076": {
+    "text": "続行",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0080": {
+    "text": "コピーしました",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0091": {
+    "text": "証明情報",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0092": {
+    "text": "現在地",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0120": {
+    "text": "完了",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0125": {
+    "text": "運転者の書類",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0135": {
+    "text": "メールアドレス",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0136": {
+    "text": "メールアドレス",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0137": {
+    "text": "代わりにメールでコードを受け取る",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0211": {
+    "text": "言語",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0224": {
+    "text": "リアルタイムデータ",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0235": {
+    "text": "ログアウト",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0249": {
+    "text": "次へ",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0275": {
+    "text": "なし",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0298": {
+    "text": "前へ",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0306": {
+    "text": "生データ",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0318": {
+    "text": "必須",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0337": {
+    "text": "選択してください",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0340": {
+    "text": "コードを再送信",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0344": {
+    "text": "共有中",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0346": {
+    "text": "共有しています…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0349": {
+    "text": "DIMOでサインイン",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0394": {
+    "text": "再試行",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0407": {
+    "text": "車両データ",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0408": {
+    "text": "車両の書類",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0436": {
+    "text": "または",
+    "source": "shipped",
+    "approved": false
+  }
+}

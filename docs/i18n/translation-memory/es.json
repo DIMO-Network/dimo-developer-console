@@ -1,0 +1,1772 @@
+{
+  "tm.0001": {
+    "text": "Dirección de wallet 0x…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0002": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/> Registro<x id=\"1\" equiv-text=\"${count === 1 ? '' : 's'}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0003": {
+    "text": "<x id=\"0\" equiv-text=\"${d.tripCount}\"/> viajes · <x id=\"1\" equiv-text=\"${hrs.value} ${hrs.unit}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0004": {
+    "text": "<x id=\"0\" equiv-text=\"${this.drawCount}\"/> punto(s): haz clic en el mapa para añadir y en el primer punto para terminar.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0005": {
+    "text": "<x id=\"0\" equiv-text=\"${this.memberIds.size}\"/> de <x id=\"1\" equiv-text=\"${this.vehicles.length}\"/> vehículos asignados.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0006": {
+    "text": "<x id=\"0\" equiv-text=\"${this.results.length}\"/> de <x id=\"1\" equiv-text=\"${this.total}\"/> vehículos atravesaron · <x id=\"2\" equiv-text=\"${passCount}\"/> pasos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0007": {
+    "text": "<x id=\"0\" equiv-text=\"${this.visibleCards().length}\"/> vehículos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0008": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;\"/> eventos desde <x id=\"1\" equiv-text=\"${this.fmtDate(first)}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0009": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;\"/> recorridos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0010": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;\"/> de conducción",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0011": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;b&gt;${trips}&lt;/b&gt;\"/> viajes",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0012": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;p&gt;\"/>Configure <x id=\"1\" equiv-text=\"&lt;code&gt;\"/>DIMO_AUTH_CLIENT_ID<x id=\"2\" equiv-text=\"&lt;/code&gt;\"/> en el <x id=\"3\" equiv-text=\"&lt;code&gt;\"/>settings.yaml<x id=\"4\" equiv-text=\"&lt;/code&gt;\"/> de la API y registre\n                    <x id=\"5\" equiv-text=\"&lt;code&gt;${location.origin}\"/>/login.html<x id=\"6\" equiv-text=\"&lt;/code&gt;\"/> como URI de redirección en la\n                    <x id=\"7\" equiv-text=\"&lt;a href=&quot;https://console.dimo.org&quot;&gt;\"/>DIMO Developer Console<x id=\"8\" equiv-text=\"&lt;/a&gt;\"/>.<x id=\"9\" equiv-text=\"&lt;/p&gt;\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0014": {
+    "text": "Cuenta",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0015": {
+    "text": "Adquisición",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0016": {
+    "text": "Adquisición y depreciación",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0017": {
+    "text": "Activa",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0018": {
+    "text": "Actividad",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0019": {
+    "text": "Agregar <x id=\"0\" equiv-text=\"${categoryLabel(t).toLowerCase()}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0020": {
+    "text": "Agregar un documento",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0021": {
+    "text": "Añade al menos 3 puntos para crear un área.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0022": {
+    "text": "Agregar por dirección de Wallet 0x",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0023": {
+    "text": "Agregar documento",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0024": {
+    "text": "Agregar miembro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0025": {
+    "text": "Añadir a la geocerca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0026": {
+    "text": "Agregado por",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0027": {
+    "text": "Agregado desde otra aplicación de DIMO. Puede verlo y descargarlo aquí; solo la aplicación que lo agregó puede eliminarlo.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0028": {
+    "text": "Agregando…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0029": {
+    "text": "Dispositivo de posventa #<x id=\"0\" equiv-text=\"${this.vehicle.aftermarketDevice.tokenId}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0031": {
+    "text": "Todos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0032": {
+    "text": "Todos los vehículos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0033": {
+    "text": "Todos los vehículos de esta cuenta están ocultos.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0035": {
+    "text": "Monto",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0036": {
+    "text": "Monto (opcional)",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0037": {
+    "text": "Aplica a",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0038": {
+    "text": "Aplica a todos los vehículos de esta flota.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0039": {
+    "text": "Ubicación aproximada",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0040": {
+    "text": "Área",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0041": {
+    "text": "Automático",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0042": {
+    "text": "Promedio",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0043": {
+    "text": "Promedio por día",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0044": {
+    "text": "Vel. prom.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0045": {
+    "text": "Atrás",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0046": {
+    "text": "Volver a en vivo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0047": {
+    "text": "Batería",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0048": {
+    "text": "Voltaje de la batería",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0050": {
+    "text": "Cancelar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0051": {
+    "text": "Categoría",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0052": {
+    "text": "Centrar mapa",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0053": {
+    "text": "Punto de cambio",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0054": {
+    "text": "Carga",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0055": {
+    "text": "Revisar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0056": {
+    "text": "Comprobando geocercas…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0058": {
+    "text": "Haz clic para terminar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0059": {
+    "text": "Se requieren Client ID y API key.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0060": {
+    "text": "Cerrar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0061": {
+    "text": "Cerrar búsqueda",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0062": {
+    "text": "Contraer panel",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0063": {
+    "text": "Contraer barra lateral",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0064": {
+    "text": "Color",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0065": {
+    "text": "Vista amplia",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0067": {
+    "text": "Vista compacta",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0070": {
+    "text": "Confirmar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0076": {
+    "text": "Continuar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0077": {
+    "text": "Refrigerante",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0078": {
+    "text": "Temperatura del refrigerante",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0080": {
+    "text": "Copiado",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0081": {
+    "text": "Copiar API key",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0082": {
+    "text": "Copiar dirección de wallet",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0083": {
+    "text": "No se pudo agregar el miembro.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0084": {
+    "text": "No se pudo cargar la configuración de DIMO. Ingrese las credenciales manualmente.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0085": {
+    "text": "No se pudieron cargar los miembros.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0086": {
+    "text": "No se pudo quitar el miembro.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0087": {
+    "text": "No se pudo reenviar la invitación.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0088": {
+    "text": "No se pudo revocar la invitación.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0089": {
+    "text": "Crear geocerca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0090": {
+    "text": "Creando…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0091": {
+    "text": "Credenciales",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0092": {
+    "text": "Ubicación actual",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0093": {
+    "text": "Color personalizado",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0095": {
+    "text": "DIMO API key",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0096": {
+    "text": "DIMO client ID",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0097": {
+    "text": "Se requieren permisos de DIMO para leer los documentos de este vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0100": {
+    "text": "DTCs",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0101": {
+    "text": "Modo oscuro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0102": {
+    "text": "Fecha",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0104": {
+    "text": "Eliminar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0105": {
+    "text": "Error al eliminar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0106": {
+    "text": "¿Eliminar este documento? Se quitará de su lista. El archivo en sí permanece almacenado en la infraestructura de DIMO.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0107": {
+    "text": "¿Eliminar “<x id=\"0\" equiv-text=\"${g.name}\"/>”?",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0108": {
+    "text": "Eliminando…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0110": {
+    "text": "Depreciación a la fecha",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0111": {
+    "text": "Descripción",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0112": {
+    "text": "VIN detectado <x id=\"0\" equiv-text=\"&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0113": {
+    "text": "Diagnósticos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0115": {
+    "text": "Distancia",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0116": {
+    "text": "Distancia · 7d",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0117": {
+    "text": "ID del documento",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0120": {
+    "text": "Listo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0121": {
+    "text": "Descargar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0122": {
+    "text": "Error al descargar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0123": {
+    "text": "Descargando…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0124": {
+    "text": "Primero dibuja el área de la geocerca en el mapa.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0125": {
+    "text": "Documentos de conductor",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0126": {
+    "text": "Comportamiento de conducción",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0127": {
+    "text": "Eventos de conducción",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0128": {
+    "text": "Tiempo de conducción",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0129": {
+    "text": "Suelte un archivo aquí, o <x id=\"0\" equiv-text=\"&lt;strong&gt;\"/>haga clic para elegir<x id=\"1\" equiv-text=\"&lt;/strong&gt;\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0130": {
+    "text": "Duración",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0132": {
+    "text": "Editar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0133": {
+    "text": "Editar geocerca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0135": {
+    "text": "Correo electrónico",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0136": {
+    "text": "Correo electrónico",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0137": {
+    "text": "Enviarme un código por correo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0138": {
+    "text": "Fin",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0139": {
+    "text": "Terminó",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0140": {
+    "text": "Tiempo motor",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0141": {
+    "text": "Introduce una dirección de correo electrónico válida.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0142": {
+    "text": "Ingrese una dirección de wallet válida (0x…, 40 caracteres hexadecimales).",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0143": {
+    "text": "Ingrese un monto mayor que 0",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0144": {
+    "text": "Códigos de error",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0146": {
+    "text": "Eventos por día",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0147": {
+    "text": "Expandir panel",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0148": {
+    "text": "Expandir barra lateral",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0149": {
+    "text": "Exportar CSV",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0150": {
+    "text": "Exportando…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0151": {
+    "text": "Error al extraer",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0152": {
+    "text": "Preguntas Frecuentes",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0153": {
+    "text": "No se pudo eliminar la geocerca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0154": {
+    "text": "No se pudieron cargar los datos GPS",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0155": {
+    "text": "No se pudieron cargar los vehículos asignados",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0156": {
+    "text": "No se pudo cargar el comportamiento de conducción — revise la consola para más detalles.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0157": {
+    "text": "No se pudieron cargar las geocercas",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0158": {
+    "text": "No se pudieron cargar los viajes — revise la consola para más detalles.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0159": {
+    "text": "No se pudo cargar el detalle del vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0160": {
+    "text": "No se pudieron cargar los vehículos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0161": {
+    "text": "No se pudo guardar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0162": {
+    "text": "No se pudo guardar la geocerca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0163": {
+    "text": "Error al escanear la actividad de la geocerca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0164": {
+    "text": "No se pudo actualizar la asignación",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0165": {
+    "text": "Favorito",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0166": {
+    "text": "Campos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0167": {
+    "text": "ID del archivo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0168": {
+    "text": "Terminar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0170": {
+    "text": "Ajustar todos los vehículos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0172": {
+    "text": "Miembros de la Flota",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0174": {
+    "text": "Centrar en el mapa",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0175": {
+    "text": "Frecuencia",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0176": {
+    "text": "Combustible",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0177": {
+    "text": "Nivel de combustible",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0178": {
+    "text": "Detalles completos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0179": {
+    "text": "Pocos datos GPS — solo se muestran el inicio y el fin",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0180": {
+    "text": "Geocercas",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0181": {
+    "text": "Geocercas atravesadas",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0185": {
+    "text": "Obtener credenciales de DIMO",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0186": {
+    "text": "Guantera",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0187": {
+    "text": "Otorgue permisos de DIMO en este vehículo para ver la reproducción del viaje.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0188": {
+    "text": "Otorgue permisos DIMO para ver el comportamiento de conducción de este vehículo.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0189": {
+    "text": "Otorgue permisos de DIMO para ver telemetría en vivo de este vehículo.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0190": {
+    "text": "Otorgue permisos de DIMO a este vehículo para incluir sus documentos en el costo operativo. La adquisición y la depreciación de abajo no cambian.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0191": {
+    "text": "Otorgue permisos de DIMO para ver documentos de este vehículo.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0192": {
+    "text": "Aceleración brusca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0193": {
+    "text": "Frenada brusca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0194": {
+    "text": "Giro brusco",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0195": {
+    "text": "Ocultar vehículos ocultos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0196": {
+    "text": "Ocultar vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0200": {
+    "text": "Ralentí",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0201": {
+    "text": "Encendido",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0206": {
+    "text": "Invitación reenviada.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0207": {
+    "text": "Invitar por correo electrónico",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0208": {
+    "text": "Invitar miembro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0211": {
+    "text": "Idioma",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0212": {
+    "text": "Últimas 2 semanas",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0213": {
+    "text": "Últimas 24 horas",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0214": {
+    "text": "Últimos 3 días",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0215": {
+    "text": "Últimos 7 días",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0216": {
+    "text": "Últimos <x id=\"0\" equiv-text=\"${DAYS}\"/> días",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0217": {
+    "text": "Última ubicación",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0218": {
+    "text": "Último inicio de sesión <x id=\"0\" equiv-text=\"${new Date(m.lastLoginAt).toLocaleDateString()}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0222": {
+    "text": "Modo claro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0223": {
+    "text": "Partidas",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0224": {
+    "text": "Datos en vivo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0226": {
+    "text": "Cargando datos GPS…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0227": {
+    "text": "Cargando vehículos asignados…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0228": {
+    "text": "Cargando documentos…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0229": {
+    "text": "Cargando geocercas…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0230": {
+    "text": "Cargando miembros…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0231": {
+    "text": "Cargando telemetría…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0232": {
+    "text": "Cargando viajes…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0233": {
+    "text": "Cargando vehículos…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0234": {
+    "text": "Cargando…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0235": {
+    "text": "Cerrar sesión",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0237": {
+    "text": "Marcar como favorito",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0238": {
+    "text": "Administrar Suscripción",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0239": {
+    "text": "Vel. máx.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0240": {
+    "text": "Unidades de Medida",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0241": {
+    "text": "Miembro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0242": {
+    "text": "Faltantes",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0243": {
+    "text": "Montos faltantes",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0244": {
+    "text": "Nombre",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0245": {
+    "text": "Nombra el área que dibujaste y elige a qué vehículos aplica.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0247": {
+    "text": "Nueva geocerca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0249": {
+    "text": "Siguiente",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0250": {
+    "text": "No hay Client ID configurado",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0251": {
+    "text": "Aún no hay integración con DIMO",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0252": {
+    "text": "Sin integración DIMO — vincule un dispositivo para transmitir telemetría",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0253": {
+    "text": "No se detectó VIN — seleccione el vehículo manualmente.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0254": {
+    "text": "Sin acceso",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0255": {
+    "text": "Aún no hay documentos de costos registrados para este vehículo.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0256": {
+    "text": "Sin datos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0257": {
+    "text": "Sin distancia",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0258": {
+    "text": "Sin datos de distancia",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0259": {
+    "text": "Ninguna geocerca coincide con su búsqueda.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0260": {
+    "text": "Aún no hay geocercas. Haz clic en «Nueva geocerca» y dibuja un área en el mapa.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0261": {
+    "text": "Sin acceso a la ubicación",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0262": {
+    "text": "Aún no hay miembros.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0263": {
+    "text": "Aún no hay registros.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0264": {
+    "text": "No se extrajeron campos estructurados",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0265": {
+    "text": "Sin acceso a la telemetría",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0266": {
+    "text": "Aún no se han reportado datos de telemetría.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0267": {
+    "text": "Sin viajes",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0268": {
+    "text": "No hay viajes en las últimas 2 semanas.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0269": {
+    "text": "No hay viajes en este período.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0270": {
+    "text": "No se encontraron vehículos.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0271": {
+    "text": "Ningún vehículo coincide con su búsqueda.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0272": {
+    "text": "Ningún vehículo coincide.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0273": {
+    "text": "No hay vehículos en esta cuenta.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0274": {
+    "text": "Ningún vehículo pasó por aquí en este período.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0275": {
+    "text": "Ninguno",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0276": {
+    "text": "Normal",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0277": {
+    "text": "No ha iniciado sesión.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0278": {
+    "text": "Aún no conectado",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0280": {
+    "text": "Odómetro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0281": {
+    "text": "En curso",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0282": {
+    "text": "Abriendo DIMO…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0283": {
+    "text": "Costo operativo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0284": {
+    "text": "Resumen",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0285": {
+    "text": "Propietario",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0286": {
+    "text": "PDF · JPG · PNG, máx 25 MB",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0287": {
+    "text": "PDF, JPG o PNG. Leeremos el VIN y otros datos automáticamente, luego guardaremos el documento de forma segura en DIMO.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0288": {
+    "text": "Pausar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0289": {
+    "text": "Máximo <x id=\"0\" equiv-text=\"${max}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0290": {
+    "text": "Invitaciones pendientes",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0291": {
+    "text": "Elija un vehículo de la lista",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0292": {
+    "text": "Elija a qué vehículo pertenece y confirme la categoría.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0294": {
+    "text": "Reproducir",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0295": {
+    "text": "Velocidad de reproducción",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0296": {
+    "text": "Introduce un nombre para la geocerca.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0298": {
+    "text": "Anterior",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0300": {
+    "text": "Privacidad y Cuenta",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0303": {
+    "text": "Extrayendo el VIN y otros datos.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0304": {
+    "text": "Fecha de compra",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0305": {
+    "text": "Precio de compra",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0306": {
+    "text": "Datos sin procesar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0308": {
+    "text": "Leyendo documento…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0309": {
+    "text": "Recarga",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0310": {
+    "text": "Actualizar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0311": {
+    "text": "Actualizar estado del vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0312": {
+    "text": "Repostaje",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0314": {
+    "text": "Quitar de favoritos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0315": {
+    "text": "Quitar de la geocerca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0316": {
+    "text": "Quitar miembro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0317": {
+    "text": "Reproducir viaje",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0318": {
+    "text": "Obligatorio",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0319": {
+    "text": "Reenviar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0320": {
+    "text": "Reiniciar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0323": {
+    "text": "Revocar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0324": {
+    "text": "Rol",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0326": {
+    "text": "Guardar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0327": {
+    "text": "Guardar documento",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0328": {
+    "text": "Guarda primero y luego asigna vehículos específicos con el botón «Vehículos».",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0329": {
+    "text": "Guarde su API key ahora: no se podrá recuperar después de este paso.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0330": {
+    "text": "Guardado",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0331": {
+    "text": "Guardando documento…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0332": {
+    "text": "Guardando…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0333": {
+    "text": "Escaneando <x id=\"0\" equiv-text=\"${this.scanned}\"/> de <x id=\"1\" equiv-text=\"${this.total}\"/> vehículos…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0334": {
+    "text": "Buscar geocercas…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0335": {
+    "text": "Buscar vehículos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0336": {
+    "text": "Buscar vehículos…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0337": {
+    "text": "Seleccionar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0338": {
+    "text": "Seleccione un vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0339": {
+    "text": "Seleccione un vehículo…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0340": {
+    "text": "Enviar un código nuevo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0341": {
+    "text": "Enviar invitación",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0343": {
+    "text": "Configuración",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0344": {
+    "text": "Compartido",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0346": {
+    "text": "Compartiendo…",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0347": {
+    "text": "Mostrar vehículos ocultos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0348": {
+    "text": "Mostrando <x id=\"0\" equiv-text=\"${page * TCOView.PAGE_SIZE + 1}\"/>–<x id=\"1\" equiv-text=\"${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}\"/> de <x id=\"2\" equiv-text=\"${visible.length}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0349": {
+    "text": "Iniciar sesión con DIMO",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0351": {
+    "text": "Cerrar sesión",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0353": {
+    "text": "Firmando y almacenando su documento de forma segura con DIMO.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0355": {
+    "text": "Algo salió mal",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0357": {
+    "text": "Específicos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0358": {
+    "text": "Vehículos específicos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0359": {
+    "text": "Velocidad",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0360": {
+    "text": "Límite de velocidad (opcional)",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0361": {
+    "text": "Inicio",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0364": {
+    "text": "Estado",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0365": {
+    "text": "Soporte",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0366": {
+    "text": "Cambiar a modo oscuro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0367": {
+    "text": "Cambiar a modo claro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0368": {
+    "text": "Dispositivo sintético #<x id=\"0\" equiv-text=\"${this.vehicle.syntheticDevice.tokenId}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0369": {
+    "text": "TCO",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0370": {
+    "text": "Esa wallet ya es miembro.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0371": {
+    "text": "Estos documentos no tienen un monto registrado. Agregue uno para incluirlos en los totales de este vehículo.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0372": {
+    "text": "Esta geocerca aplica a muchos vehículos — escaneando los primeros <x id=\"0\" equiv-text=\"${this.total}\"/>.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0376": {
+    "text": "Este vehículo se compartió con usted. Puede ver, descargar y agregar documentos, pero no eliminarlos.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0377": {
+    "text": "La conexión de este vehículo no reporta eventos de conducción.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0378": {
+    "text": "Entrada",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0379": {
+    "text": "Salida",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0380": {
+    "text": "Token",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0381": {
+    "text": "Token #<x id=\"0\" equiv-text=\"${this.tokenId}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0382": {
+    "text": "Máxima",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0383": {
+    "text": "Total",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0384": {
+    "text": "Costo total de propiedad",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0385": {
+    "text": "TCO total",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0386": {
+    "text": "Seguir vencimiento",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0387": {
+    "text": "Seguir próxima inspección",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0388": {
+    "text": "Seguir renovaciones",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0389": {
+    "text": "Reproducción del viaje",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0390": {
+    "text": "Método de detección de viajes",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0392": {
+    "text": "Viajes",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0394": {
+    "text": "Intentar de nuevo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0397": {
+    "text": "Error desconocido",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0398": {
+    "text": "Actualiza los detalles de la geocerca. Para cambiar el área, elimínala y vuelve a crearla.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0399": {
+    "text": "Error al subir",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0401": {
+    "text": "Usa el botón «Vehículos» de la geocerca para asignar vehículos específicos.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0402": {
+    "text": "Vida útil (años)",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0403": {
+    "text": "Perfil de usuario",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0404": {
+    "text": "Vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0405": {
+    "text": "Vehículo #<x id=\"0\" equiv-text=\"${v.tokenId}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0407": {
+    "text": "Datos del vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0408": {
+    "text": "Documentos del vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0410": {
+    "text": "Estado del vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0411": {
+    "text": "Vehículos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0413": {
+    "text": "Ver documentos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0420": {
+    "text": "Usted",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0423": {
+    "text": "Sus autos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0424": {
+    "text": "Su documento se ha guardado en DIMO. La lista se actualizará.",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0425": {
+    "text": "Acercar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0426": {
+    "text": "Alejar",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0427": {
+    "text": "Acercar al vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0428": {
+    "text": "todos los <x id=\"0\" equiv-text=\"${visible.length}\"/>",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0430": {
+    "text": "API key de desarrollador",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0432": {
+    "text": "p. ej. 50",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0433": {
+    "text": "p. ej. Depósito Centro",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0434": {
+    "text": "tiempo con el motor encendido durante el paso",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0435": {
+    "text": "km/h",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0436": {
+    "text": "o",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0437": {
+    "text": "o ingréselas manualmente",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0440": {
+    "text": "tiempo dentro de la geocerca",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0441": {
+    "text": "vehículo",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0443": {
+    "text": "vehículos",
+    "source": "shipped",
+    "approved": false
+  },
+  "tm.0445": {
+    "text": "— suba lo que sea: recibo, pdf del seguro, tarjeta de registro",
+    "source": "shipped",
+    "approved": false
+  }
+}
