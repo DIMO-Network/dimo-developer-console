@@ -17,16 +17,16 @@
     },
     {
       "id": "tm.0002",
-      "en": "<x id=\"0\" equiv-text=\"${count}\"/> Record<x id=\"1\" equiv-text=\"${count === 1 ? '' : 's'}\"/>",
-      "note": "glovebox record count under the selected vehicle; the plural s is a separate param",
+      "en": "<x id=\"0\" equiv-text=\"${count}\"/> Record",
+      "note": "glovebox record count under the selected vehicle, singular (count is 1)",
       "uses": [
         {
           "app": "fleet-lite",
-          "key": "s558c3d600c58d654"
+          "key": "s7f3a12c30425de42"
         },
         {
           "app": "parentos",
-          "key": "s558c3d600c58d654"
+          "key": "s7f3a12c30425de42"
         }
       ]
     },
@@ -7908,6 +7908,21 @@
         {
           "app": "parentos",
           "key": "s13dec33091fe72ca"
+        }
+      ]
+    },
+    {
+      "id": "tm.0446",
+      "en": "<x id=\"0\" equiv-text=\"${count}\"/> Records",
+      "note": "glovebox record count under the selected vehicle, plural",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s558c12600c588d43"
+        },
+        {
+          "app": "parentos",
+          "key": "s558c12600c588d43"
         }
       ]
     }

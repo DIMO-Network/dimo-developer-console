@@ -2223,5 +2223,10 @@
     "text": "— 領収書、保険証券のPDF、車検証など、何でもアップロードできます",
     "source": "new",
     "approved": true
+  },
+  "tm.0446": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/>件の記録",
+    "source": "new",
+    "approved": true
   }
 }

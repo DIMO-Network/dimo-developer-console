@@ -5,8 +5,8 @@
     "approved": true
   },
   "tm.0002": {
-    "text": "<x id=\"0\" equiv-text=\"${count}\"/> Registro<x id=\"1\" equiv-text=\"${count === 1 ? '' : 's'}\"/>",
-    "source": "shipped",
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/> Registro",
+    "source": "new",
     "approved": true
   },
   "tm.0003": {
@@ -2222,6 +2222,11 @@
   "tm.0445": {
     "text": "— suba lo que sea: recibo, pdf del seguro, tarjeta de registro",
     "source": "shipped",
+    "approved": true
+  },
+  "tm.0446": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/> Registros",
+    "source": "new",
     "approved": true
   }
 }

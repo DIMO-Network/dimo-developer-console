@@ -2223,5 +2223,10 @@
     "text": "上傳任何文件皆可：收據、保單PDF、行照",
     "source": "new",
     "approved": false
+  },
+  "tm.0446": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/>筆記錄",
+    "source": "new",
+    "approved": false
   }
 }

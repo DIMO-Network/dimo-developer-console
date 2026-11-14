@@ -1,6 +1,6 @@
 key,en,note,zh-Hans,zh-Hant
 tm.0001,0x… wallet address,"placeholder in the add-member wallet address input, fleet members panel",0x…钱包地址,0x…錢包地址
-tm.0002,"<x id=""0"" equiv-text=""${count}""/> Record<x id=""1"" equiv-text=""${count === 1 ? '' : 's'}""/>",glovebox record count under the selected vehicle; the plural s is a separate param,"<x id=""0"" equiv-text=""${count}""/>条记录","<x id=""0"" equiv-text=""${count}""/>筆記錄"
+tm.0002,"<x id=""0"" equiv-text=""${count}""/> Record","glovebox record count under the selected vehicle, singular (count is 1)","<x id=""0"" equiv-text=""${count}""/>条记录","<x id=""0"" equiv-text=""${count}""/>筆記錄"
 tm.0003,"<x id=""0"" equiv-text=""${d.tripCount}""/> trips · <x id=""1"" equiv-text=""${hrs.value} ${hrs.unit}""/>",driving behaviour panel summary: trip count and driving hours,"<x id=""0"" equiv-text=""${d.tripCount}""/>次行程 · <x id=""1"" equiv-text=""${hrs.value} ${hrs.unit}""/>","<x id=""0"" equiv-text=""${d.tripCount}""/>趟行程 · <x id=""1"" equiv-text=""${hrs.value} ${hrs.unit}""/>"
 tm.0004,"<x id=""0"" equiv-text=""${this.drawCount}""/> point(s) — click the map to add, the first point to finish.","hint while drawing a geofence on the map, with the point count","<x id=""0"" equiv-text=""${this.drawCount}""/>个点——点击地图添加，点击第一个点完成。","已放置<x id=""0"" equiv-text=""${this.drawCount}""/>個點，點選地圖即可新增，點選第一個點即可完成。"
 tm.0005,"<x id=""0"" equiv-text=""${this.memberIds.size}""/> of <x id=""1"" equiv-text=""${this.vehicles.length}""/> vehicles assigned.",assigned-vehicle count in the manage geofence vehicles dialog,"已分配<x id=""0"" equiv-text=""${this.memberIds.size}""/>/<x id=""1"" equiv-text=""${this.vehicles.length}""/>辆车。","已指派<x id=""0"" equiv-text=""${this.memberIds.size}""/>輛車（共<x id=""1"" equiv-text=""${this.vehicles.length}""/>輛）。"
@@ -446,3 +446,4 @@ tm.0442,vehicle session infrastructure,dimo.org inline link text in body copy,�
 tm.0443,vehicles,unit after a count other than one on group and geofence rows,辆车,輛車
 tm.0444,"{count, plural, one {# vehicle} other {# vehicles}}",vehicle count with ICU plural,"{count, plural, other {#辆车}}","{count, plural, other {#輛車}}"
 tm.0445,"— upload anything: receipt, insurance pdf, reg card",glovebox empty state hint,——可上传任何文件：收据、保险单PDF、行驶证,上傳任何文件皆可：收據、保單PDF、行照
+tm.0446,"<x id=""0"" equiv-text=""${count}""/> Records","glovebox record count under the selected vehicle, plural","<x id=""0"" equiv-text=""${count}""/>条记录","<x id=""0"" equiv-text=""${count}""/>筆記錄"
