@@ -1,0 +1,17 @@
+{
+  "metadataTitle": "サポート | {appName}",
+  "subtitle": "サポートチームが問題に対応できるよう、以下からオプションを選択してください。",
+  "reportIssue": {
+    "title": "問題を報告",
+    "description": "DIMO APIで予期しない問題が発生している場合は、こちらからお問い合わせください。",
+    "statusNote": "既知の問題や障害は<statusLink>ステータスページ</statusLink>で確認できます"
+  },
+  "faqs": {
+    "title": "よくある質問",
+    "description": "よくある質問や発生している可能性のある問題については、FAQをご確認ください。"
+  },
+  "featureRequest": {
+    "title": "機能リクエスト",
+    "description": "DIMO APIで現在サポートされていないアイデア、リクエスト、ニーズがあれば、ぜひお聞かせください。"
+  }
+}

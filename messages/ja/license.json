@@ -1,0 +1,216 @@
+{
+  "list": {
+    "teamLicenses": "{teamName}のライセンス",
+    "teamFallbackName": "チーム",
+    "yourLicenses": "あなたの開発者ライセンス",
+    "teamEmptyTitle": "このチームにはまだ開発者ライセンスがありません",
+    "teamEmptyBody": "チームのオーナーが作成したライセンスがここに表示されます。"
+  },
+  "breadcrumbLicenses": "ライセンス",
+  "details": {
+    "metadataTitle": "ライセンスの詳細 | {appName}",
+    "breadcrumbDetails": "ライセンスの詳細",
+    "loadError": "ライセンスの詳細の取得中にエラーが発生しました",
+    "fallbackName": "ライセンス#{tokenId}",
+    "rename": "名前を変更",
+    "clientIdCopied": "クライアントIDをコピーしました",
+    "tabs": {
+      "overview": "概要",
+      "config": "構成",
+      "vehicles": "車両",
+      "brand": "ブランド"
+    },
+    "vehiclesConnected": "接続済みの車両",
+    "viewVehicles": "車両を表示 →"
+  },
+  "quickActions": {
+    "label": "クイックアクション",
+    "generateApiKey": "🔑 APIキーを生成",
+    "configureBranding": "🪪 ブランドを設定",
+    "setupSharing": "⚙️ 車両の共有を設定",
+    "docs": "📖 ドキュメント"
+  },
+  "usage": {
+    "creditsUsed": "使用済みクレジット",
+    "generateJwtHint": "使用状況を確認するにはJWTを生成してください",
+    "unavailable": "現在、使用状況を表示できません",
+    "learnAboutCredits": "クレジットについて →"
+  },
+  "vehiclesTab": {
+    "loadError": "車両の読み込み中にエラーが発生しました",
+    "connectedVehicles": "接続済みの車両",
+    "viewList": "車両一覧を表示 →",
+    "vehicleList": "車両一覧",
+    "configureSharing": "共有を設定"
+  },
+  "jwts": {
+    "title": "開発者JWT",
+    "generateNew": "新しいJWTを生成",
+    "empty": "開発者JWTが見つかりません",
+    "copied": "JWTをコピーしました",
+    "deleteLabel": "JWTを削除",
+    "deleteTitle": "このJWTを削除してもよろしいですか？",
+    "columns": {
+      "jwt": "JWT",
+      "createdAt": "作成日時",
+      "expiresAt": "有効期限"
+    },
+    "unknownExpiry": "不明",
+    "invalidToken": "無効"
+  },
+  "redirectUris": {
+    "title": "承認済みのリダイレクトURI"
+  },
+  "brand": {
+    "title": "ブランド",
+    "add": "ブランドを追加",
+    "loading": "ブランドを読み込んでいます…",
+    "none": "ブランドが設定されていません。",
+    "loadFailed": "ブランドを読み込めませんでした。ネットワーク接続を確認して、再読み込みしてください。",
+    "workspaceFailed": "ワークスペースを読み込めませんでした。再度ログインして、もう一度お試しください。",
+    "deleteFailed": "ブランドを削除できませんでした。もう一度お試しください。",
+    "deleteTitle": "{name}を削除しますか？",
+    "deleteLoading": "ブランドを削除しています…",
+    "deleteLast": "このライセンスのLogin with DIMOは、DIMO標準のデザインに戻ります。すでに開いているページに反映されるまで数分かかることがあります。",
+    "deleteOne": "このブランドを名前で指定しているサイトには、代わりにDIMO標準のデザインが表示されます。すでに開いているページに反映されるまで数分かかることがあります。",
+    "multipleTitle": "Login with DIMOで複数のブランドを使用する",
+    "multipleHint": "すべてのLogin with DIMOボタンで<code>brandOverride</code>を指定できます。省略すると、デフォルトのブランドが使用されます。"
+  },
+  "brandRow": {
+    "default": "デフォルト",
+    "edit": "ブランドを編集",
+    "delete": "ブランドを削除",
+    "setDefaultFirst": "このブランドを削除する前に、別のブランドをデフォルトに設定してください"
+  },
+  "brandForm": {
+    "displayName": "表示名",
+    "displayNameRequired": "表示名は必須です。",
+    "displayNameMax": "100文字以内",
+    "displayNamePlaceholder": "例：Fleet App",
+    "nameTaken": "この名前のブランドはすでに存在します",
+    "renameWarning": "名前を変更すると、この名前を使用している既存のLogin with DIMOの呼び出しが動作しなくなります",
+    "logo": "ロゴ",
+    "logoHint": "Login with DIMOボタンとサインインウィンドウの上部に表示される横長のブランドマークです。PNG、JPEG、WebP、またはSVG。",
+    "icon": "アイコン",
+    "iconHint": "正方形のマークです。Login with DIMOではまだ表示されません。PNG、JPEG、WebP、またはSVG。",
+    "primaryColor": "プライマリカラー",
+    "primaryColorHint": "Login with DIMOボタンとサインインウィンドウ内の主要なボタンの色です。文字色は読みやすさを保つため、自動的に黒または白になります。7文字の16進数で指定します（例：<code>{example}</code>）。空欄の場合はDIMOのデフォルトが使用されます。",
+    "pickColor": "プライマリカラーを選択",
+    "colorInvalid": "#RRGGBB形式の16進数で入力してください",
+    "lowContrast": "この色のボタンは、サインインウィンドウの{modes, select, light {ライト} dark {ダーク} other {ライトとダーク}}モードでは見えにくくなります。このまま保存することもできます。",
+    "saveFailed": "ブランドを保存できませんでした",
+    "imageRefused": "その画像は受け付けられませんでした。2 MB以下のPNG、JPEG、WebP、またはSVGを使用してください。",
+    "saved": "ブランドを保存しました",
+    "defaultUpdated": "デフォルトのブランドを更新しました",
+    "defaultFailed": "デフォルトのブランドを設定できませんでした",
+    "save": "ブランドを保存",
+    "setDefault": "デフォルトに設定"
+  },
+  "imagePicker": {
+    "unsupportedType": "サポートされていないファイル形式です（{type}）。PNG、JPEG、WebP、またはSVGを使用してください。",
+    "tooLarge": "ファイルが大きすぎます（{size} KB）。最大2 MBです。",
+    "replace": "画像を置き換え",
+    "choose": "画像を選択",
+    "orDrop": "またはここにドロップ",
+    "previewAlt": "ブランドのプレビュー",
+    "crop": "切り抜き"
+  },
+  "signers": {
+    "title": "APIキー",
+    "apiKeyButton": "サーバー用のAPIキーを作成",
+    "apiKeyExplainer": "自社サーバーで開発者JWTを発行するアプリ向けです。コンソールからテストする場合は「JWTをコピー」を使用してください。",
+    "generateApiKey": "APIキーを生成",
+    "checkingConsole": "コンソールアクセスを確認しています…",
+    "signerAddress": "署名者アドレス",
+    "signerAddressNote": "*これはAPIキーではありません。APIキーを紛失した場合は、新しいキーを生成する必要があります。",
+    "enabledOn": "有効化日",
+    "belongsTo": "割り当て先",
+    "assign": "割り当て",
+    "turnOffConsole": "コンソールアクセスをオフにする",
+    "deleteKey": "APIキーを削除",
+    "actionsFor": "{address}の操作",
+    "recordFailed": "キーは機能していますが、割り当て先を記録できませんでした。",
+    "saved": "このキーの割り当て先を保存しました。",
+    "signerInUse": "このアドレスはチームメンバーのウォレットです。「設定 → チーム」の「付与」で記録してください。",
+    "saveFailed": "保存できませんでした。もう一度お試しください。",
+    "generating": "開発者ライセンスのAPIキーを生成しています",
+    "consoleOffToast": "コンソールアクセスをオフにしました。",
+    "keyDeletedToast": "APIキーを削除しました。このキーで発行済みのJWTは、有効期限まで（最大14日間）使用できます。",
+    "turnOffTitle": "コンソールアクセスをオフにしますか？",
+    "deleteTitle": "このAPIキーを削除してもよろしいですか？",
+    "deleteKeySubtitle": "このキーを使用しているアプリは、新しい開発者JWTを取得できなくなります。このキーで発行済みのJWTは、有効期限（最大14日間）まで引き続き使用できます。",
+    "consoleOffSubtitle": "コンソールはこのライセンスの開発者JWTを作成しなくなります。作成済みのJWTは、有効期限（最大14日間）まで引き続き使用できます。",
+    "deleteLoading": "ネットワークでの確認を待っています…"
+  },
+  "consoleAccess": {
+    "explainer": "コンソールアクセスを有効にすると、このコンソールでこのライセンスの開発者JWTを作成できるため、APIキーを作成せずにテストできます。オンにすると、1回のトランザクションでコンソールキーが署名者として追加されます。",
+    "enable": "コンソールアクセスを有効にする",
+    "enabling": "コンソールアクセスをオンにしています…",
+    "memberOff": "ライセンスのオーナーがまだコンソールアクセスをオンにしていません。",
+    "notOwnerOnChain": "コンソールウォレットはブロックチェーン上でこのライセンスを所有していないため、コンソールアクセスをオンにできません。",
+    "copyJwt": "JWTをコピー",
+    "noRedirectUri": "開発者JWTを作成するには、下でリダイレクトURIを追加してください。",
+    "jwtCopied": "JWTをコピーしました",
+    "jwtFailed": "JWTを作成できませんでした。もう一度お試しください。"
+  },
+  "belongsTo": {
+    "consoleYou": "コンソール（あなた）",
+    "consoleWallet": "コンソールウォレット",
+    "notRecorded": "未記録",
+    "unassigned": "未割り当て",
+    "assign": "割り当て",
+    "teamMember": "チームメンバー",
+    "unknown": "不明",
+    "stillSyncing": "同期中",
+    "disabledOutside": "コンソール外で無効化済み"
+  },
+  "keyHolders": {
+    "title": "このキーは誰が使用しますか？",
+    "teamMembers": "チームメンバー",
+    "others": "その他のユーザー（カンマ区切り）",
+    "note": "メモ",
+    "chooseOne": "1人以上を選択するか、名前を入力してください。",
+    "noteTooLong": "メモは{max}文字未満にしてください。"
+  },
+  "apiKeyModal": {
+    "title": "APIキーを生成しました",
+    "warning": "APIキーは二度と表示されないため、今すぐコピーしてください。",
+    "copied": "APIキーをコピーしました"
+  },
+  "vehicles": {
+    "metadataTitle": "ライセンス対象の車両 | {appName}",
+    "loadError": "車両の詳細の取得中に問題が発生しました",
+    "breadcrumbVehicles": "車両",
+    "connectedVehicles": "接続済みの車両",
+    "testVehicles": "（{count, plural, other {テスト車両#台}}）",
+    "vehicleDetails": "車両の詳細"
+  },
+  "renounce": {
+    "title": "車両へのアクセスを放棄しますか？",
+    "tokenFallback": "トークン#{tokenId}",
+    "tokenId": "トークンID：{tokenId}",
+    "warning": "この車両のデータへのアクセスがすべて失われます。再度アクセスするには、車両の所有者が改めてアクセスを許可する必要があります。",
+    "action": "アクセスを放棄",
+    "failed": "トランザクションに失敗しました"
+  },
+  "vehicleTable": {
+    "label": "共有された車両",
+    "renounced": "アクセスを放棄しました",
+    "renounceFailed": "アクセスを放棄できませんでした",
+    "pageLoadFailed": "そのページを読み込めませんでした。もう一度お試しください。",
+    "lookupFailed": "車両{tokenId}を検索できませんでした：{message}",
+    "noVehicle": "トークンIDが{tokenId}の車両はありません。",
+    "notShared": "車両{tokenId}（{make} {model}）はこのライセンスと共有されていません。",
+    "error": "エラー：{message}",
+    "rowActions": "行の操作",
+    "simulated": "シミュレーション",
+    "columns": {
+      "tokenDid": "車両トークンDID",
+      "mmy": "メーカー/車種/年式",
+      "sources": "ソース",
+      "lastSeen": "最終通信"
+    },
+    "needsJwt": "開発者JWTが必要",
+    "unavailable": "利用できません"
+  }
+}

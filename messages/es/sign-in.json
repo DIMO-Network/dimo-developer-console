@@ -1,0 +1,25 @@
+{
+  "metadataTitle": "Iniciar sesión | {appName}",
+  "metadataDescription": "Inicia sesión en DIMO Developer Console. Accede de forma segura a tu panel de desarrollador para administrar aplicaciones y explorar las herramientas avanzadas de DIMO. ¡Empieza hoy!",
+  "view": {
+    "termsAgreement": "Al iniciar sesión, aceptas nuestros <terms>términos del servicio</terms> y nuestra <privacy>política de privacidad</privacy>",
+    "walletRestoreNeeded": "Esta cuenta necesita que se restaure su wallet antes de que puedas iniciar sesión. Contacta al soporte para desarrolladores.",
+    "genericError": "Algo salió mal. Inténtalo de nuevo.",
+    "externalLoginFailed": "No se pudo iniciar sesión con el proveedor externo"
+  },
+  "methodForm": {
+    "title": "Desarrolla con datos de autos",
+    "emailPlaceholder": "email@address.com",
+    "maxLength": "El nombre debe tener como máximo 120 caracteres",
+    "invalidEmail": "No es una dirección de correo electrónico válida",
+    "or": "o",
+    "lostPasskey": "¿Perdiste tu clave de acceso? <reset>Restablécela con tu correo</reset>",
+    "troubleLoggingIn": "¿Problemas para iniciar sesión? <support>Obtén ayuda</support>"
+  },
+  "passkey": {
+    "title": "Continuar con clave de acceso",
+    "loginFailed": "No se pudo iniciar sesión con la clave de acceso",
+    "lostPasskey": "¿Perdiste tu clave de acceso? <recover>Recupérala con tu correo</recover>",
+    "troubleLoggingIn": "¿Problemas para iniciar sesión? <support>Obtén ayuda</support>"
+  }
+}

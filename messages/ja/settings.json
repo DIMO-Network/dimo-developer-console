@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "title": "設定 | {appName}"
+  },
+  "userDetails": {
+    "title": "ユーザー情報",
+    "name": "名前",
+    "email": "メールアドレス"
+  },
+  "supportModal": {
+    "title": "開発者サポートに問い合わせる",
+    "description": "ご質問には当チームがお答えします。お気軽にお問い合わせください。",
+    "success": "サポートリクエストを送信しました。追ってご連絡します。",
+    "failure": "サポートリクエストを送信できませんでした"
+  },
+  "team": {
+    "title": "チーム",
+    "inviteMember": "メンバーを招待",
+    "loadError": "チームを読み込めませんでした。",
+    "ownerEmpty": "チームメイトを招待して、このチームのライセンスを共有しましょう。データアクセスを付与する相手はあなたが選択します。",
+    "licensesLoadError": "このチームのライセンスを読み込めなかったため、現在データアクセスを変更できません。",
+    "loadLicensesAgain": "ライセンスを再読み込み",
+    "resent": "{email}に招待を再送信しました",
+    "resendFailed": "招待を再送信できませんでした。もう一度お試しください。",
+    "cancelled": "{email}への招待をキャンセルしました",
+    "cancelFailed": "招待をキャンセルできませんでした。もう一度お試しください。"
+  },
+  "inviteError": {
+    "emailFailed": "{email}にメールを送信できませんでした。もう一度お試しください。",
+    "rateLimited": "現在、招待の数が多すぎます。しばらくしてからもう一度お試しください。",
+    "alreadyMember": "{email}はすでにこのチームのメンバーです。",
+    "alreadyInvited": "{email}にはすでに保留中の招待があります。一覧から再送信してください。",
+    "invalidEmail": "有効なメールアドレスを入力してください。",
+    "default": "招待を送信できませんでした。もう一度お試しください。"
+  },
+  "inviteModal": {
+    "title": "チームメンバーを招待",
+    "description": "招待されたメンバーは、コンソールでこのチームのライセンスを確認できます。データアクセスを付与する相手は別途選択します。",
+    "emailLabel": "メールアドレス",
+    "send": "招待を送信",
+    "sent": "{email}に招待を送信しました"
+  },
+  "grantBanner": {
+    "message": "{name}が参加しました。データアクセスを付与しますか？",
+    "grant": "付与"
+  },
+  "members": {
+    "columns": {
+      "member": "メンバー",
+      "role": "ロール",
+      "status": "ステータス",
+      "dataAccess": "データアクセス"
+    },
+    "status": {
+      "expired": "招待の期限切れ",
+      "invited": "招待済み",
+      "active": "アクティブ",
+      "removed": "削除済み",
+      "left": "退出済み"
+    },
+    "dataAccess": {
+      "stillSigner": "{licenses}の署名者のまま",
+      "notRecorded": "未記録",
+      "revokeUnfinished": "取り消しが未完了",
+      "needsSignIn": "一度サインインが必要",
+      "none": "なし"
+    },
+    "actions": {
+      "label": "{email}の操作",
+      "resend": "再送信",
+      "cancelInvite": "招待をキャンセル",
+      "grant": "付与",
+      "retry": "再試行",
+      "revoke": "取り消す",
+      "remove": "削除"
+    }
+  },
+  "grant": {
+    "title": "{name}にデータアクセスを付与",
+    "description": "{name}が「車両」で読み取れるライセンスを選択してください。",
+    "loading": "{name}にデータアクセスを付与しています",
+    "success": "{name}に{licenses}へのデータアクセスを付与しました。",
+    "notRecorded": "データアクセスはオンになりましたが、{licenses}について記録できなかったため、{name}はまだ使用できません。",
+    "refused": "{licenses}：{message}",
+    "rolledBack": "{name}には{licenses}へのデータアクセスがありません。",
+    "notRolledBack": "これらのキーはブロックチェーン上でまだ有効で、どこにも一覧表示されていません。{licenses}の「構成」タブにある「APIキー」から削除してください。",
+    "confirm": "データアクセスを付与",
+    "licenseFallback": "ライセンス#{tokenId}"
+  },
+  "revoke": {
+    "title": "{name}のデータアクセスを取り消しますか？",
+    "description": "選択したライセンスから、このメンバーのウォレットがブロックチェーン上で削除されます。すでに保持しているトークンは約10分以内に使用できなくなります。",
+    "loading": "{name}のデータアクセスを取り消しています",
+    "success": "{name}のデータアクセスを取り消しました。",
+    "notRecorded": "データアクセスはオフになりましたが、{licenses}についてその記録ができませんでした。",
+    "retry": "再試行",
+    "confirm": "データアクセスを取り消す"
+  },
+  "remove": {
+    "title": "{name}を{teamName}から削除しますか？",
+    "descriptionWithKeys": "このメンバーはコンソールでこのチームにアクセスできなくなり、ウォレットはブロックチェーン上で{licenses}から削除されます。",
+    "description": "このメンバーはコンソールでこのチームにアクセスできなくなります。",
+    "confirm": "チームから削除",
+    "loading": "{name}を削除しています",
+    "failedFallback": "削除できませんでした。もう一度お試しください。",
+    "keptOnTeam": "{name}は引き続き{teamName}のメンバーです。ブロックチェーン上で{licenses}からウォレットを削除できませんでした。もう一度お試しください。",
+    "removedStillSigner": "{name}を削除しましたが、まだ{licenses}の署名者です。その行の「再試行」を使用してください。",
+    "removed": "{name}を{teamName}から削除しました。",
+    "notRecorded": "{licenses}について、取り消したアクセスを記録できませんでした。完了するには、その行の「再試行」を使用してください。"
+  },
+  "webhookReview": {
+    "heading": "確認が必要なWebhook",
+    "description": "{name}が抜けた後も、Webhookは車両データを送信し続けます。このメンバーが作成または変更したWebhookを確認してください。",
+    "checking": "{license}を確認しています…",
+    "needsJwt": "{license}のWebhookを確認するには、開発者JWTが必要です。",
+    "loadFailed": "{license}のWebhookを読み込めませんでした。",
+    "pasteLabel": "{license}の開発者JWTを貼り付け",
+    "wrongLicense": "その開発者JWTは別のライセンス用です。",
+    "check": "Webhookを確認",
+    "none": "{license}には、{name}が作成または変更したWebhookはありません。",
+    "createdAndChanged": "このメンバーが作成・最終変更",
+    "created": "このメンバーが作成",
+    "changed": "このメンバーが最終変更"
+  },
+  "leave": {
+    "button": "チームを退出",
+    "unreachable": "コンソールに接続できませんでした。もう一度お試しください。",
+    "left": "{teamName}から退出しました。"
+  }
+}

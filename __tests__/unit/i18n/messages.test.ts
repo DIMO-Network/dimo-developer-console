@@ -113,10 +113,8 @@ describe('loadMessages', () => {
   });
 
   it('treats an area without a file as empty', async () => {
-    const missing = AREAS.find((area) => !existsSync(areaPath('ja', area)));
-    expect(missing).toBeDefined();
-    const messages = await loadMessages('ja');
-    expect(messages[missing!]).toEqual({});
+    const messages = await loadMessages('xx' as Locale);
+    expect(messages.common).toEqual({});
   });
 });
 
