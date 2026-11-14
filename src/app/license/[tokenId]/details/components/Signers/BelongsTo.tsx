@@ -1,7 +1,6 @@
 import type { FC } from 'react';
+import { useFormatter, useTranslations } from 'next-intl';
 import { StatusChip } from '@/components/StatusChip';
-import { formatList } from '@/config/teamCopy';
-import { CONSOLE_KEY_LABEL } from './consoleAccessCopy';
 import type { LicenseSignerRecord } from '@/types/team';
 
 interface Props {
@@ -29,10 +28,12 @@ export const BelongsTo: FC<Props> = ({
   unavailable = false,
   onAssign,
 }) => {
+  const t = useTranslations('license');
+  const format = useFormatter();
   if (unavailable) return <span className="text-body-sm text-muted">—</span>;
   let body;
   if (consoleKey) {
-    body = <span className="text-body-sm text-fg">{CONSOLE_KEY_LABEL}</span>;
+    body = <span className="text-body-sm text-fg">{t('belongsTo.consoleYou')}</span>;
   } else if (!record && memberWallet) {
     body = (
       <div className="flex flex-col items-start gap-1">
@@ -40,22 +41,22 @@ export const BelongsTo: FC<Props> = ({
         <span className="break-all text-label text-muted">{memberWallet.email}</span>
         {memberWallet.owner ? (
           <span className="rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
-            Console wallet
+            {t('belongsTo.consoleWallet')}
           </span>
         ) : (
-          <StatusChip tone="pending">Not recorded</StatusChip>
+          <StatusChip tone="pending">{t('belongsTo.notRecorded')}</StatusChip>
         )}
       </div>
     );
   } else if (!record) {
     body = (
       <span className="text-body-sm text-muted">
-        Unassigned
+        {t('belongsTo.unassigned')}
         {onAssign && (
           <>
             {' · '}
             <button type="button" className="text-ink underline" onClick={onAssign}>
-              Assign
+              {t('belongsTo.assign')}
             </button>
           </>
         )}
@@ -66,7 +67,7 @@ export const BelongsTo: FC<Props> = ({
     body = (
       <div className="flex flex-col">
         <span className="text-body-sm text-fg">
-          {holder?.name ?? holder?.email ?? 'Team member'}
+          {holder?.name ?? holder?.email ?? t('belongsTo.teamMember')}
         </span>
         {holder?.email && (
           <span className="break-all text-label text-muted">{holder.email}</span>
@@ -77,7 +78,9 @@ export const BelongsTo: FC<Props> = ({
     body = (
       <div className="flex flex-col">
         <span className="text-body-sm text-fg">
-          {formatList(record.holders.map((h) => h.name ?? h.email ?? 'Unknown'))}
+          {format.list(
+            record.holders.map((h) => h.name ?? h.email ?? t('belongsTo.unknown')),
+          )}
         </span>
         {record.note && <span className="text-label text-muted">{record.note}</span>}
       </div>
@@ -88,9 +91,9 @@ export const BelongsTo: FC<Props> = ({
     <div className="flex flex-col items-start gap-1">
       {body}
       {syncing ? (
-        <StatusChip tone="pending">Still syncing</StatusChip>
+        <StatusChip tone="pending">{t('belongsTo.stillSyncing')}</StatusChip>
       ) : (
-        <StatusChip tone="off">Disabled outside the console</StatusChip>
+        <StatusChip tone="off">{t('belongsTo.disabledOutside')}</StatusChip>
       )}
     </div>
   );

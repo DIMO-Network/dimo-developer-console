@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { FC, useState } from 'react';
 import Button from '@/components/Button/Button';
 import { GenerateDevJWTModal } from '@/components/GenerateDevJWTModal';
@@ -14,9 +15,10 @@ export const GenerateDevJWT: FC<GenerateDevJWTProps> = ({
   clientId,
   domain,
   onSuccess,
-  buttonText = 'Generate developer JWT',
+  buttonText,
   buttonClassName,
 }) => {
+  const t = useTranslations('common');
   const [showGenerateJwtModal, setShowGenerateJwtModal] = useState(false);
   const isDisabled = !clientId || !domain;
 
@@ -27,7 +29,7 @@ export const GenerateDevJWT: FC<GenerateDevJWTProps> = ({
         onClick={() => setShowGenerateJwtModal(true)}
         disabled={isDisabled}
       >
-        {buttonText}
+        {buttonText ?? t('generateJwt.button')}
       </Button>
       <GenerateDevJWTModal
         isOpen={showGenerateJwtModal}

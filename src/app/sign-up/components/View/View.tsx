@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import * as Sentry from '@sentry/nextjs';
 
 import { BuildForForm, CompanyInfoForm, WalletCreation } from '@/app/sign-up/components';
@@ -17,22 +18,21 @@ import './View.css';
 const signUpFlows = {
   'wallet-creation': {
     Component: WalletCreation,
-    title: 'Continue with passkey',
     order: 1,
   },
   'build-for': {
     Component: BuildForForm,
-    title: 'What are you building?',
     order: 2,
   },
   'company-information': {
     Component: CompanyInfoForm,
-    title: 'Final strecht',
     order: 3,
   },
 };
 
 const View = () => {
+  const t = useTranslations('sign-up');
+  const tCommon = useTranslations('common');
   useErrorHandler();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -48,8 +48,10 @@ const View = () => {
     setIsLoading(true);
     const result = await completeUserData(auth);
     if (!result.ok) {
-      explainSignUpRefusal(new SignUpRefusedError(result.reason), () =>
-        router.replace('/sign-in'),
+      explainSignUpRefusal(
+        new SignUpRefusedError(result.reason),
+        () => router.replace('/sign-in'),
+        t,
       );
       setIsLoading(false);
       return;
@@ -92,7 +94,7 @@ const View = () => {
     } catch (error) {
       console.error('Something went wrong while the completing user information', error);
       Sentry.captureException(error);
-      toast.error('Something went wrong');
+      toast.error(tCommon('errors.somethingWentWrong'));
     } finally {
       setIsLoading(false);
     }
@@ -107,22 +109,26 @@ const View = () => {
         <div className="sign-up__extra-links mt-6">
           <div className="flex flex-row">
             <p className="terms-caption">
-              By signing in, you are agreeing to our{' '}
-              <Anchor
-                href="https://dimo.org/terms"
-                className="grey underline"
-                target="_blank"
-              >
-                terms of service
-              </Anchor>{' '}
-              and{' '}
-              <Anchor
-                href="https://dimo.org/privacy"
-                className="grey underline"
-                target="_blank"
-              >
-                privacy policy
-              </Anchor>
+              {t.rich('view.termsAgreement', {
+                terms: (chunks) => (
+                  <Anchor
+                    href="https://dimo.org/terms"
+                    className="grey underline"
+                    target="_blank"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+                privacy: (chunks) => (
+                  <Anchor
+                    href="https://dimo.org/privacy"
+                    className="grey underline"
+                    target="_blank"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+              })}
             </p>
           </div>
         </div>

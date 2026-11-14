@@ -99,6 +99,8 @@ const config: Config = {
     // Jest 30 loads this file as ESM, where `require` doesn't exist.
     '^axios$': '<rootDir>/node_modules/axios/dist/node/axios.cjs',
     '^@/(.*)$': '<rootDir>/src/$1',
+    // Next resolves server-only itself; the package isn't installed.
+    '^server-only$': '<rootDir>/node_modules/next/dist/compiled/server-only/empty.js',
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
@@ -172,7 +174,7 @@ const config: Config = {
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   // next/jest adds /node_modules/ and /.next/. Git worktrees under .worktrees/
   // hold other branches' copies of every test.
-  testPathIgnorePatterns: ['<rootDir>/.worktrees/'],
+  testPathIgnorePatterns: ['<rootDir>/.worktrees/', '<rootDir>/docs/'],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
@@ -207,8 +209,13 @@ const config: Config = {
 
 // Packages that ship ESM only, which Jest transforms alongside the ones
 // next/jest already transpiles: TanStack Table 9 with its store, and
-// refractor with its dependencies (react-syntax-highlighter 16).
+// refractor with its dependencies (react-syntax-highlighter 16), and next-intl
+// with its formatting dependencies.
 const ESM_PACKAGES = [
+  'next-intl',
+  'use-intl',
+  'intl-messageformat',
+  '@formatjs',
   '@tanstack/(?:react-table|table-core|react-store|store)',
   'refractor',
   'hastscript',

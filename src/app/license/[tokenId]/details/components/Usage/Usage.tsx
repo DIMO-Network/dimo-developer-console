@@ -4,6 +4,7 @@ import { useEventEmitter } from '@/hooks/useEventEmitter';
 import { FragmentType, useFragment } from '@/gql';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
 import Link from 'next/link';
+import { useFormatter, useTranslations } from 'next-intl';
 import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import './Usage.css';
 
@@ -12,6 +13,8 @@ interface Props {
 }
 
 export const Usage: FC<Props> = ({ license }) => {
+  const t = useTranslations('license');
+  const format = useFormatter();
   const { getUsageByLicense } = useCreditTracker();
   // null until known: a failed lookup must not read as no usage.
   const [credits, setCredits] = useState<number | null>(null);
@@ -43,21 +46,21 @@ export const Usage: FC<Props> = ({ license }) => {
   return (
     <div className="overview-stat-card">
       <p className="overview-stat-card__number">
-        {isAuthenticatedAsDev ? (credits ?? '—') : '—'}
+        {isAuthenticatedAsDev && credits !== null ? format.number(credits) : '—'}
       </p>
-      <p className="overview-stat-card__label">Credits used</p>
+      <p className="overview-stat-card__label">{t('usage.creditsUsed')}</p>
       {!isAuthenticatedAsDev && (
-        <p className="overview-stat-card__hint">Generate a JWT to see usage</p>
+        <p className="overview-stat-card__hint">{t('usage.generateJwtHint')}</p>
       )}
       {isAuthenticatedAsDev && unavailable && (
-        <p className="overview-stat-card__hint">Usage unavailable right now</p>
+        <p className="overview-stat-card__hint">{t('usage.unavailable')}</p>
       )}
       <Link
         href="https://dimo.org/pricing"
         target="_blank"
         className="overview-stat-card__link"
       >
-        Learn about credits →
+        {t('usage.learnAboutCredits')}
       </Link>
     </div>
   );

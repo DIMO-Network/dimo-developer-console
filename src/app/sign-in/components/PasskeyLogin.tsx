@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { FC, useEffect } from 'react';
 import { captureException } from '@sentry/nextjs';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { explainSignUpRefusal } from '@/app/sign-up/signUpResult';
 
 interface IProps {
@@ -15,6 +16,8 @@ interface IProps {
 }
 
 export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet }) => {
+  const t = useTranslations('sign-in');
+  const tSignUp = useTranslations('sign-up');
   const router = useRouter();
   const { loginWithPasskey } = useAuth();
 
@@ -26,13 +29,13 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
       });
 
       if (!success) {
-        toast.error('Failed to login with passkey');
+        toast.error(t('passkey.loginFailed'));
         return;
       }
 
       router.replace('/app');
     } catch (error: unknown) {
-      if (explainSignUpRefusal(error, () => router.replace('/sign-in'))) {
+      if (explainSignUpRefusal(error, () => router.replace('/sign-in'), tSignUp)) {
         handlePasskeyRejected(false);
         return;
       }
@@ -44,7 +47,7 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
       }
       handlePasskeyRejected(false);
       captureException(error);
-      toast.error('Failed to login with passkey');
+      toast.error(t('passkey.loginFailed'));
     }
   };
 
@@ -55,30 +58,39 @@ export const PasskeyLogin: FC<IProps> = ({ handlePasskeyRejected, currentWallet 
     <>
       <div className="sign-in__form">
         <div className="sign-in__header">
-          <p className="text-title text-ink">Continue with passkey</p>
+          <p className="text-title text-ink">{t('passkey.title')}</p>
         </div>
         <BubbleLoader isLoading={true} />
         <div className="sign-in__extra-links">
           <div className="flex flex-row">
             <p className="terms-caption">
-              Lost your passkey?{' '}
               {/* Rarely used: not worth a prefetch while sign-in loads. */}
-              <Anchor
-                href="/email-recovery"
-                prefetch={false}
-                target="_self"
-                className="grey underline"
-              >
-                Recover with your email
-              </Anchor>
+              {t.rich('passkey.lostPasskey', {
+                recover: (chunks) => (
+                  <Anchor
+                    href="/email-recovery"
+                    prefetch={false}
+                    target="_self"
+                    className="grey underline"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+              })}
             </p>
           </div>
           <div className="flex flex-row">
             <p className="terms-caption">
-              Trouble logging in?{' '}
-              <Anchor href="mailto:developer-support@dimo.org" className="grey underline">
-                Get support
-              </Anchor>
+              {t.rich('passkey.troubleLoggingIn', {
+                support: (chunks) => (
+                  <Anchor
+                    href="mailto:developer-support@dimo.org"
+                    className="grey underline"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+              })}
             </p>
           </div>
         </div>

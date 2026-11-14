@@ -1,0 +1,2232 @@
+{
+  "tm.0001": {
+    "text": "0x…钱包地址",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0002": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/>条记录",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0003": {
+    "text": "<x id=\"0\" equiv-text=\"${d.tripCount}\"/>次行程 · <x id=\"1\" equiv-text=\"${hrs.value} ${hrs.unit}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0004": {
+    "text": "<x id=\"0\" equiv-text=\"${this.drawCount}\"/>个点——点击地图添加，点击第一个点完成。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0005": {
+    "text": "已分配<x id=\"0\" equiv-text=\"${this.memberIds.size}\"/>/<x id=\"1\" equiv-text=\"${this.vehicles.length}\"/>辆车。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0006": {
+    "text": "<x id=\"0\" equiv-text=\"${this.results.length}\"/>/<x id=\"1\" equiv-text=\"${this.total}\"/>辆车经过 · 共<x id=\"2\" equiv-text=\"${passCount}\"/>次通过",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0007": {
+    "text": "<x id=\"0\" equiv-text=\"${this.visibleCards().length}\"/>辆车",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0008": {
+    "text": "自<x id=\"1\" equiv-text=\"${this.fmtDate(first)}\"/>以来共<x id=\"0\" equiv-text=\"&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;\"/>个事件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0009": {
+    "text": "已行驶<x id=\"0\" equiv-text=\"&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0010": {
+    "text": "驾驶时长<x id=\"0\" equiv-text=\"&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0011": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;b&gt;${trips}&lt;/b&gt;\"/>次行程",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0012": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;p&gt;\"/>请设置<x id=\"1\" equiv-text=\"&lt;code&gt;\"/>DIMO_AUTH_CLIENT_ID<x id=\"2\" equiv-text=\"&lt;/code&gt;\"/>（位于API的<x id=\"3\" equiv-text=\"&lt;code&gt;\"/>settings.yaml<x id=\"4\" equiv-text=\"&lt;/code&gt;\"/>中），并将<x id=\"5\" equiv-text=\"&lt;code&gt;${location.origin}\"/>/login.html<x id=\"6\" equiv-text=\"&lt;/code&gt;\"/>注册为<x id=\"7\" equiv-text=\"&lt;a href=&quot;https://console.dimo.org&quot;&gt;\"/>DIMO Developer Console<x id=\"8\" equiv-text=\"&lt;/a&gt;\"/>中的重定向URI。<x id=\"9\" equiv-text=\"&lt;/p&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0013": {
+    "text": "正在接受邀请，请稍候。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0014": {
+    "text": "账号",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0015": {
+    "text": "购置成本",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0016": {
+    "text": "购置与折旧",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0017": {
+    "text": "已激活",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0018": {
+    "text": "活动",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0019": {
+    "text": "添加<x id=\"0\" equiv-text=\"${categoryLabel(t).toLowerCase()}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0020": {
+    "text": "添加文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0021": {
+    "text": "至少添加3个点才能构成区域。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0022": {
+    "text": "通过钱包地址添加",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0023": {
+    "text": "添加文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0024": {
+    "text": "添加成员",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0025": {
+    "text": "添加到地理围栏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0026": {
+    "text": "添加者",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0027": {
+    "text": "此文件由其他DIMO应用添加。你可以在此查看和下载，但只有添加它的应用才能删除。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0028": {
+    "text": "正在添加…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0029": {
+    "text": "后装设备#<x id=\"0\" equiv-text=\"${this.vehicle.aftermarketDevice.tokenId}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0030": {
+    "text": "智能体体验",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0031": {
+    "text": "全部",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0032": {
+    "text": "所有车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0033": {
+    "text": "此账号下的所有车辆均已隐藏。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0034": {
+    "text": "马上就好",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0035": {
+    "text": "金额",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0036": {
+    "text": "金额（可选）",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0037": {
+    "text": "适用范围",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0038": {
+    "text": "适用于此车队的所有车辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0039": {
+    "text": "大致位置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0040": {
+    "text": "面积",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0041": {
+    "text": "自动",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0042": {
+    "text": "平均值",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0043": {
+    "text": "日均",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0044": {
+    "text": "平均速度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0045": {
+    "text": "返回",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0046": {
+    "text": "返回实时位置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0047": {
+    "text": "电池",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0048": {
+    "text": "电池电压",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0049": {
+    "text": "品牌",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0050": {
+    "text": "取消",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0051": {
+    "text": "类别",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0052": {
+    "text": "地图居中",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0053": {
+    "text": "变点检测",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0054": {
+    "text": "电量",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0055": {
+    "text": "需检查",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0056": {
+    "text": "正在检查地理围栏…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0057": {
+    "text": "检查中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0058": {
+    "text": "点击完成",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0059": {
+    "text": "客户端ID和API密钥为必填项。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0060": {
+    "text": "关闭",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0061": {
+    "text": "关闭搜索",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0062": {
+    "text": "收起面板",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0063": {
+    "text": "收起侧边栏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0064": {
+    "text": "颜色",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0065": {
+    "text": "宽松视图",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0066": {
+    "text": "常见问题",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0067": {
+    "text": "紧凑视图",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0068": {
+    "text": "对比",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0069": {
+    "text": "合规",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0070": {
+    "text": "确认",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0071": {
+    "text": "网联汽车",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0072": {
+    "text": "连接详情",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0073": {
+    "text": "连接",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0074": {
+    "text": "消费者应用",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0075": {
+    "text": "联系销售",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0076": {
+    "text": "继续",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0077": {
+    "text": "冷却液",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0078": {
+    "text": "冷却液温度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0079": {
+    "text": "冷却时间",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0080": {
+    "text": "已复制",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0081": {
+    "text": "复制API密钥",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0082": {
+    "text": "复制钱包地址",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0083": {
+    "text": "无法添加成员。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0084": {
+    "text": "无法加载DIMO设置，请手动输入凭证。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0085": {
+    "text": "无法加载成员。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0086": {
+    "text": "无法移除成员。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0087": {
+    "text": "无法重新发送邀请。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0088": {
+    "text": "无法撤销邀请。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0089": {
+    "text": "创建地理围栏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0090": {
+    "text": "正在创建…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0091": {
+    "text": "凭证",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0092": {
+    "text": "当前位置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0093": {
+    "text": "自定义颜色",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0094": {
+    "text": "客户案例",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0095": {
+    "text": "DIMO API密钥",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0096": {
+    "text": "DIMO客户端ID",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0097": {
+    "text": "需要DIMO权限才能读取此车辆的文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0098": {
+    "text": "DIMO与Smartcar对比",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0099": {
+    "text": "DIMO | 面向会话经济的车辆平台",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0100": {
+    "text": "个故障码",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0101": {
+    "text": "深色模式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0102": {
+    "text": "日期",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0103": {
+    "text": "汽车经销商",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0104": {
+    "text": "删除",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0105": {
+    "text": "删除失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0106": {
+    "text": "要删除此文件吗？它将从你的列表中移除，但文件本身仍保存在DIMO的基础设施上。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0107": {
+    "text": "删除“<x id=\"0\" equiv-text=\"${g.name}\"/>”？",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0108": {
+    "text": "正在删除…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0109": {
+    "text": "配送服务商",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0110": {
+    "text": "累计折旧",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0111": {
+    "text": "描述",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0112": {
+    "text": "检测到VIN：<x id=\"0\" equiv-text=\"&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0113": {
+    "text": "诊断",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0114": {
+    "text": "显示名称",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0115": {
+    "text": "距离",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0116": {
+    "text": "距离 · 7天",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0117": {
+    "text": "文件ID",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0118": {
+    "text": "文档",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0119": {
+    "text": "文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0120": {
+    "text": "完成",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0121": {
+    "text": "下载",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0122": {
+    "text": "下载失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0123": {
+    "text": "正在下载…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0124": {
+    "text": "请先在地图上绘制地理围栏区域。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0125": {
+    "text": "驾驶员文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0126": {
+    "text": "驾驶行为",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0127": {
+    "text": "驾驶事件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0128": {
+    "text": "驾驶时长",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0129": {
+    "text": "将文件拖放到此处，或<x id=\"0\" equiv-text=\"&lt;strong&gt;\"/>点击选择<x id=\"1\" equiv-text=\"&lt;/strong&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0130": {
+    "text": "时长",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0131": {
+    "text": "欧盟《数据法案》",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0132": {
+    "text": "编辑",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0133": {
+    "text": "编辑地理围栏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0134": {
+    "text": "编辑Webhook",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0135": {
+    "text": "邮箱",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0136": {
+    "text": "邮箱地址",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0137": {
+    "text": "改为通过邮件接收验证码",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0138": {
+    "text": "终点",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0139": {
+    "text": "结束时间",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0140": {
+    "text": "发动机运行时间",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0141": {
+    "text": "请输入有效的邮箱地址。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0142": {
+    "text": "请输入有效的钱包地址（0x开头，40位十六进制字符）。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0143": {
+    "text": "请输入大于0的金额",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0144": {
+    "text": "故障码",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0145": {
+    "text": "事件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0146": {
+    "text": "每日事件数",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0147": {
+    "text": "展开面板",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0148": {
+    "text": "展开侧边栏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0149": {
+    "text": "导出CSV",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0150": {
+    "text": "正在导出…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0151": {
+    "text": "提取失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0152": {
+    "text": "常见问题",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0153": {
+    "text": "删除地理围栏失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0154": {
+    "text": "加载GPS数据失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0155": {
+    "text": "加载已分配车辆失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0156": {
+    "text": "加载驾驶行为失败，请查看控制台了解详情。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0157": {
+    "text": "加载地理围栏失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0158": {
+    "text": "加载行程失败，请查看控制台了解详情。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0159": {
+    "text": "加载车辆详情失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0160": {
+    "text": "加载车辆失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0161": {
+    "text": "保存失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0162": {
+    "text": "保存地理围栏失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0163": {
+    "text": "扫描地理围栏活动失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0164": {
+    "text": "更新分配失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0165": {
+    "text": "收藏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0166": {
+    "text": "字段",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0167": {
+    "text": "原始文件ID",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0168": {
+    "text": "完成",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0169": {
+    "text": "完成设置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0170": {
+    "text": "显示所有车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0171": {
+    "text": "车队智能",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0172": {
+    "text": "车队成员",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0173": {
+    "text": "车队",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0174": {
+    "text": "在地图上定位",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0175": {
+    "text": "频率分析",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0176": {
+    "text": "燃油",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0177": {
+    "text": "燃油量",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0178": {
+    "text": "完整详情",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0179": {
+    "text": "GPS数据稀疏，仅显示起点和终点",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0180": {
+    "text": "地理围栏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0181": {
+    "text": "经过的地理围栏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0182": {
+    "text": "获取API密钥",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0183": {
+    "text": "获取API密钥",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0184": {
+    "text": "开始使用",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0185": {
+    "text": "从DIMO获取凭证",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0186": {
+    "text": "手套箱",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0187": {
+    "text": "请为此车辆授予DIMO权限以查看行程回放。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0188": {
+    "text": "请授予DIMO权限以查看此车辆的驾驶行为。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0189": {
+    "text": "请授予DIMO权限以查看此车辆的实时遥测数据。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0190": {
+    "text": "请为此车辆授予DIMO权限，以将其文件计入运营成本。下方的购置成本和折旧不受影响。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0191": {
+    "text": "请授予DIMO权限以查看此车辆的文件。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0192": {
+    "text": "急加速",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0193": {
+    "text": "急刹车",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0194": {
+    "text": "急转弯",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0195": {
+    "text": "不显示已隐藏车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0196": {
+    "text": "隐藏车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0197": {
+    "text": "首页",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0198": {
+    "text": "工作原理",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0199": {
+    "text": "混合",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0200": {
+    "text": "怠速",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0201": {
+    "text": "点火",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0202": {
+    "text": "行业",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0203": {
+    "text": "基础设施",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0204": {
+    "text": "已接受邀请，正在进入车队。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0205": {
+    "text": "邀请出现问题",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0206": {
+    "text": "邀请已重新发送。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0207": {
+    "text": "通过邮箱邀请",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0208": {
+    "text": "邀请成员",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0209": {
+    "text": "JWT已复制！",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0210": {
+    "text": "正在加入…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0211": {
+    "text": "语言",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0212": {
+    "text": "最近2周",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0213": {
+    "text": "最近24小时",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0214": {
+    "text": "最近3天",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0215": {
+    "text": "最近7天",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0216": {
+    "text": "最近<x id=\"0\" equiv-text=\"${DAYS}\"/>天",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0217": {
+    "text": "最后位置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0218": {
+    "text": "上次登录：<x id=\"0\" equiv-text=\"${new Date(m.lastLoginAt).toLocaleDateString()}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0219": {
+    "text": "最后在线",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0220": {
+    "text": "许可证详情",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0221": {
+    "text": "许可证",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0222": {
+    "text": "浅色模式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0223": {
+    "text": "明细",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0224": {
+    "text": "实时数据",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0225": {
+    "text": "实时遥测",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0226": {
+    "text": "正在加载GPS数据…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0227": {
+    "text": "正在加载已分配车辆…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0228": {
+    "text": "正在加载文件…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0229": {
+    "text": "正在加载地理围栏…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0230": {
+    "text": "正在加载成员…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0231": {
+    "text": "正在加载遥测数据…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0232": {
+    "text": "正在加载行程…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0233": {
+    "text": "正在加载车辆…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0234": {
+    "text": "加载中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0235": {
+    "text": "退出登录",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0236": {
+    "text": "维修保养",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0237": {
+    "text": "加入收藏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0238": {
+    "text": "管理订阅",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0239": {
+    "text": "最高速度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0240": {
+    "text": "计量单位",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0241": {
+    "text": "成员",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0242": {
+    "text": "缺失",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0243": {
+    "text": "缺失金额",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0244": {
+    "text": "名称",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0245": {
+    "text": "为你绘制的区域命名，然后选择其适用的车辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0246": {
+    "text": "新建配置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0247": {
+    "text": "新建地理围栏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0248": {
+    "text": "新建模板",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0249": {
+    "text": "下一步",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0250": {
+    "text": "未配置客户端ID",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0251": {
+    "text": "尚未接入DIMO",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0252": {
+    "text": "未接入DIMO，请配对设备以传输遥测数据",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0253": {
+    "text": "未检测到VIN，请手动选择车辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0254": {
+    "text": "无访问权限",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0255": {
+    "text": "此车辆尚无成本文件。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0256": {
+    "text": "无数据",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0257": {
+    "text": "无距离",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0258": {
+    "text": "无距离数据",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0259": {
+    "text": "没有符合搜索条件的地理围栏。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0260": {
+    "text": "还没有地理围栏。点击“新建地理围栏”，然后在地图上绘制区域。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0261": {
+    "text": "无位置访问权限",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0262": {
+    "text": "还没有成员。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0263": {
+    "text": "还没有记录。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0264": {
+    "text": "未提取到结构化字段",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0265": {
+    "text": "无遥测访问权限",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0266": {
+    "text": "尚未上报遥测数据。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0267": {
+    "text": "无行程",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0268": {
+    "text": "最近2周内无行程。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0269": {
+    "text": "此期间内无行程。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0270": {
+    "text": "未找到车辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0271": {
+    "text": "没有符合搜索条件的车辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0272": {
+    "text": "没有匹配的车辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0273": {
+    "text": "此账号下没有车辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0274": {
+    "text": "此时间段内没有车辆经过。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0275": {
+    "text": "无",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0276": {
+    "text": "正常",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0277": {
+    "text": "未登录。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0278": {
+    "text": "暂未接入",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0279": {
+    "text": "OEM",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0280": {
+    "text": "里程表",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0281": {
+    "text": "进行中",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0282": {
+    "text": "正在打开DIMO…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0283": {
+    "text": "运营成本",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0284": {
+    "text": "概览",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0285": {
+    "text": "所有者",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0286": {
+    "text": "PDF · JPG · PNG，最大25 MB",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0287": {
+    "text": "PDF、JPG或PNG。我们会自动读取VIN及其他信息，然后将文件安全保存到DIMO。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0288": {
+    "text": "暂停",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0289": {
+    "text": "峰值<x id=\"0\" equiv-text=\"${max}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0290": {
+    "text": "待接受的邀请",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0291": {
+    "text": "从列表中选择车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0292": {
+    "text": "选择该文件所属的车辆并确认类别。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0293": {
+    "text": "平台功能",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0294": {
+    "text": "播放",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0295": {
+    "text": "播放速度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0296": {
+    "text": "请输入地理围栏名称。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0297": {
+    "text": "请输入有效的邮箱地址。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0298": {
+    "text": "上一步",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0299": {
+    "text": "价格",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0300": {
+    "text": "隐私与账号",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0301": {
+    "text": "产品功能",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0302": {
+    "text": "产品",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0303": {
+    "text": "正在提取VIN及其他信息。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0304": {
+    "text": "购买日期",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0305": {
+    "text": "购买价格",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0306": {
+    "text": "原始数据",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0307": {
+    "text": "阅读文档",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0308": {
+    "text": "正在读取文件…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0309": {
+    "text": "充电",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0310": {
+    "text": "刷新",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0311": {
+    "text": "刷新车辆状态",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0312": {
+    "text": "加油",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0313": {
+    "text": "移除",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0314": {
+    "text": "取消收藏",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0315": {
+    "text": "从地理围栏中移除",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0316": {
+    "text": "移除成员",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0317": {
+    "text": "回放行程",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0318": {
+    "text": "必需",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0319": {
+    "text": "重新发送",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0320": {
+    "text": "重置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0321": {
+    "text": "资源",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0322": {
+    "text": "重试",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0323": {
+    "text": "撤销",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0324": {
+    "text": "角色",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0325": {
+    "text": "运行查询",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0326": {
+    "text": "保存",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0327": {
+    "text": "保存文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0328": {
+    "text": "请先保存，然后使用“车辆”按钮分配指定车辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0329": {
+    "text": "请立即保存你的API密钥，此步骤之后将无法再次获取。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0330": {
+    "text": "已保存",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0331": {
+    "text": "正在保存文件…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0332": {
+    "text": "正在保存…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0333": {
+    "text": "正在扫描<x id=\"0\" equiv-text=\"${this.scanned}\"/>/<x id=\"1\" equiv-text=\"${this.total}\"/>辆车…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0334": {
+    "text": "搜索地理围栏…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0335": {
+    "text": "搜索车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0336": {
+    "text": "搜索车辆…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0337": {
+    "text": "请选择",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0338": {
+    "text": "选择车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0339": {
+    "text": "选择车辆…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0340": {
+    "text": "发送新验证码",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0341": {
+    "text": "发送邀请",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0342": {
+    "text": "服务",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0343": {
+    "text": "设置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0344": {
+    "text": "共享中",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0345": {
+    "text": "共享链接已复制",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0346": {
+    "text": "正在共享…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0347": {
+    "text": "显示已隐藏车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0348": {
+    "text": "显示第<x id=\"0\" equiv-text=\"${page * TCOView.PAGE_SIZE + 1}\"/>–<x id=\"1\" equiv-text=\"${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}\"/>项，共<x id=\"2\" equiv-text=\"${visible.length}\"/>项",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0349": {
+    "text": "使用DIMO登录",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0350": {
+    "text": "使用你的DIMO账号登录以加入此车队。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0351": {
+    "text": "退出登录",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0352": {
+    "text": "信号",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0353": {
+    "text": "正在签名并将你的文件安全存储到DIMO。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0354": {
+    "text": "解决方案",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0355": {
+    "text": "出了点问题",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0356": {
+    "text": "出了点问题，请重试。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0357": {
+    "text": "指定",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0358": {
+    "text": "指定车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0359": {
+    "text": "速度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0360": {
+    "text": "限速（可选）",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0361": {
+    "text": "起点",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0362": {
+    "text": "开始构建",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0363": {
+    "text": "立即开始构建",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0364": {
+    "text": "状态",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0365": {
+    "text": "支持",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0366": {
+    "text": "切换到深色模式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0367": {
+    "text": "切换到浅色模式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0368": {
+    "text": "合成设备#<x id=\"0\" equiv-text=\"${this.vehicle.syntheticDevice.tokenId}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0369": {
+    "text": "TCO",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0370": {
+    "text": "该钱包已是成员。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0371": {
+    "text": "这些文件没有记录成本金额。添加金额后即可计入此车辆的总计。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0372": {
+    "text": "此地理围栏适用于大量车辆，仅扫描前<x id=\"0\" equiv-text=\"${this.total}\"/>辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0373": {
+    "text": "此邀请无效、已被使用或已过期。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0374": {
+    "text": "此邀请链接缺少令牌。请让发送者重新发送邀请。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0375": {
+    "text": "本页内容仅供学习参考，不构成法律建议。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0376": {
+    "text": "此车辆由他人共享给你。你可以查看、下载和添加文件，但无法删除。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0377": {
+    "text": "此车辆的连接不上报驾驶事件。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0378": {
+    "text": "进入时间",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0379": {
+    "text": "离开时间",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0380": {
+    "text": "Token",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0381": {
+    "text": "Token #<x id=\"0\" equiv-text=\"${this.tokenId}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0382": {
+    "text": "最高",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0383": {
+    "text": "总计",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0384": {
+    "text": "总拥有成本",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0385": {
+    "text": "TCO总计",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0386": {
+    "text": "跟踪到期日",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0387": {
+    "text": "跟踪下次检验",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0388": {
+    "text": "跟踪续保",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0389": {
+    "text": "行程回放",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0390": {
+    "text": "行程检测方法",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0391": {
+    "text": "行程历史",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0392": {
+    "text": "行程",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0393": {
+    "text": "登录遇到问题？<support>获取支持</support>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0394": {
+    "text": "重试",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0395": {
+    "text": "不可用",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0396": {
+    "text": "未知",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0397": {
+    "text": "未知错误",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0398": {
+    "text": "更新地理围栏详情。如需重新绘制区域，请删除后重新创建。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0399": {
+    "text": "上传失败",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0400": {
+    "text": "应用场景",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0401": {
+    "text": "使用地理围栏上的“车辆”按钮分配指定车辆。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0402": {
+    "text": "使用年限（年）",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0403": {
+    "text": "用户头像",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0404": {
+    "text": "车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0405": {
+    "text": "车辆#<x id=\"0\" equiv-text=\"${v.tokenId}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0406": {
+    "text": "车辆商务",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0407": {
+    "text": "车辆数据",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0408": {
+    "text": "车辆文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0409": {
+    "text": "车辆列表",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0410": {
+    "text": "车辆状态",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0411": {
+    "text": "车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0412": {
+    "text": "查看文档",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0413": {
+    "text": "查看文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0414": {
+    "text": "我们无法接受此邀请。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0415": {
+    "text": "我们无法从你的DIMO账号获取邮箱。请添加邮箱以完成登录。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0416": {
+    "text": "我们无法验证此次登录，请重新登录。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0417": {
+    "text": "Webhook URL",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0418": {
+    "text": "Webhook",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0419": {
+    "text": "你将获得",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0420": {
+    "text": "你",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0421": {
+    "text": "你已加入",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0422": {
+    "text": "你收到了邀请",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0423": {
+    "text": "你的车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0424": {
+    "text": "你的文件已保存到DIMO，列表将自动刷新。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0425": {
+    "text": "放大",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0426": {
+    "text": "缩小",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0427": {
+    "text": "缩放到车辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0428": {
+    "text": "全部<x id=\"0\" equiv-text=\"${visible.length}\"/>辆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0429": {
+    "text": "所有合规主题",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0430": {
+    "text": "开发者API密钥",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0431": {
+    "text": "开发者文档",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0432": {
+    "text": "例如：50",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0433": {
+    "text": "例如：市中心车场",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0434": {
+    "text": "通过期间的发动机运行时间",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0435": {
+    "text": "km/h",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0436": {
+    "text": "或",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0437": {
+    "text": "或手动输入",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0438": {
+    "text": "租车运营",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0439": {
+    "text": "会话级同意",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0440": {
+    "text": "在地理围栏内的时长",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0441": {
+    "text": "辆车",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0442": {
+    "text": "车辆会话基础设施",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0443": {
+    "text": "辆车",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0444": {
+    "text": "{count, plural, other {#辆车}}",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0445": {
+    "text": "——可上传任何文件：收据、保险单PDF、行驶证",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0446": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/>条记录",
+    "source": "new",
+    "approved": false
+  }
+}

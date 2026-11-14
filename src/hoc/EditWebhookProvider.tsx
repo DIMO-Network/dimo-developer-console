@@ -1,3 +1,4 @@
+import { LocalizedError } from '@/utils/localizedError';
 import React, { createContext, useContext, useState } from 'react';
 import { EditWebhookFormState, Webhook, WebhookFormInput } from '@/types/webhook';
 import { useRouter } from 'next/navigation';
@@ -47,7 +48,10 @@ export const EditWebhookContextProvider: React.FC<React.PropsWithChildren> = ({
     if (isEventService(formData.service)) {
       const metricName = formData.cel.conditions[0]?.field;
       if (!metricName) {
-        throw new Error('Please select an event name');
+        throw new LocalizedError(
+          'webhooks.validation.selectEvent',
+          'Please select an event name',
+        );
       }
       await updateWebhook(
         webhook.id,

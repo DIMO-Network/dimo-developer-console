@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState, type FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import { Title } from '@/components/Title';
 import { QueryPageWrapper } from '@/components/QueryPageWrapper';
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export const TemplateEditorView: FC<Props> = ({ id }) => {
+  const t = useTranslations('templates');
   const { data, isLoading, error, refetch } = useTemplate(id);
   const publish = usePublishTemplate(id);
 
@@ -101,7 +103,8 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
     } catch (err) {
       const failure = err as PublishFailure;
       if (failure.status === 409 && failure.conflict) setConflict(failure.conflict);
-      else setServerErrors(failure.errors ?? [failure.message ?? 'Publish failed']);
+      else
+        setServerErrors(failure.errors ?? [failure.message ?? t('editor.publishFailed')]);
     }
   };
 
@@ -115,8 +118,8 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
       // server's own wording is carried through when there is one.
       customErrorMessage={
         error instanceof HttpError
-          ? `Could not load this template: ${error.message} (${error.status})`
-          : 'Could not load this template'
+          ? t('editor.loadFailedDetail', { message: error.message, status: error.status })
+          : t('editor.loadFailed')
       }
     >
       {draft && data && (
@@ -127,22 +130,30 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
                 {draft.manufacturer.name} {draft.model} {draft.year}
               </Title>
               <span className="text-body-sm text-muted">
-                <span className="break-all font-mono text-code">{draft.id}</span> · v
-                {loadedVersion}
-                {data.template?.author && ` · last published by ${data.template.author}`}
+                {t.rich(
+                  data.template?.author ? 'editor.headerWithAuthor' : 'editor.header',
+                  {
+                    code: (chunks) => (
+                      <span className="break-all font-mono text-code">{chunks}</span>
+                    ),
+                    id: draft.id,
+                    version: loadedVersion ?? '',
+                    author: data.template?.author ?? '',
+                  },
+                )}
               </span>
             </div>
             {!readOnly && (
               <div className="flex items-center gap-2">
                 <Button variant="secondary" onClick={() => setDraft(addTrim(draft, ''))}>
-                  Add trim
+                  {t('editor.addTrim')}
                 </Button>
                 <Button
                   onClick={onPublish}
                   loading={publish.isPending}
                   disabled={localErrors.length > 0 || !dirty}
                 >
-                  Publish
+                  {t('editor.publish')}
                 </Button>
               </div>
             )}
@@ -151,7 +162,9 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
           <EntitlementBanner entitlement={data.entitlement} />
 
           {published !== null && (
-            <p className="text-body-sm text-fg">Published version {published}.</p>
+            <p className="text-body-sm text-fg">
+              {t('editor.published', { version: published })}
+            </p>
           )}
 
           {conflict && (
@@ -160,16 +173,15 @@ export const TemplateEditorView: FC<Props> = ({ id }) => {
               className="flex flex-col gap-2 rounded-card bg-negative-soft p-4"
             >
               <span className="text-body-sm text-negative">
-                This template moved to version {conflict.actual} while you were editing
-                version {conflict.expected}.
+                {t('editor.conflict.moved', {
+                  actual: conflict.actual,
+                  expected: conflict.expected ?? '',
+                })}
               </span>
-              <span className="text-body-sm text-fg">
-                Your draft has not been discarded and nothing was published. Reload to see
-                the current version, then re-apply your changes.
-              </span>
+              <span className="text-body-sm text-fg">{t('editor.conflict.kept')}</span>
               <div>
                 <Button variant="secondary" loading={reloading} onClick={onReload}>
-                  Reload
+                  {t('editor.conflict.reload')}
                 </Button>
               </div>
             </div>

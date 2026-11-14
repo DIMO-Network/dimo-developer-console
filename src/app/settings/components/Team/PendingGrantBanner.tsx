@@ -1,5 +1,6 @@
 'use client';
 import type { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import type { TeamLicense } from '@/hooks/useTeamLicenses';
 import type { TeamMember } from '@/types/team';
@@ -21,6 +22,7 @@ export const PendingGrantBanner: FC<Props> = ({
   licensesLoading,
   onGrant,
 }) => {
+  const t = useTranslations('settings');
   if (licensesLoading) return null;
   const waiting = members.filter((m) => grantCandidates(m, licenses).length > 0);
   if (!waiting.length) return null;
@@ -32,9 +34,11 @@ export const PendingGrantBanner: FC<Props> = ({
           role="status"
           className="flex flex-col gap-2 rounded-control bg-control p-3 md:flex-row md:items-center md:justify-between"
         >
-          <p className="text-body-sm text-fg">{`${displayName(member)} joined. Grant data access?`}</p>
+          <p className="text-body-sm text-fg">
+            {t('grantBanner.message', { name: displayName(member) })}
+          </p>
           <Button variant="secondary" onClick={() => onGrant(member)}>
-            Grant
+            {t('grantBanner.grant')}
           </Button>
         </div>
       ))}

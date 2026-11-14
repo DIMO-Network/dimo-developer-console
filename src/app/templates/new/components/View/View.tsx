@@ -3,6 +3,7 @@
 import React, { useMemo, useState, type FC } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import { Title } from '@/components/Title';
 import { Label } from '@/components/Label';
@@ -21,6 +22,7 @@ const EMPTY_VOCAB: DeviceType = { id: 'vehicle', name: 'Vehicle', attributes: []
 
 /** `presetId` comes from the browse page's Create link, e.g. toyota_supra_2020. */
 export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
+  const t = useTranslations('templates');
   const router = useRouter();
   // The slug is DERIVED from the name, never typed. The two always had to
   // agree -- the worker refuses an id its own body could not have produced --
@@ -88,27 +90,20 @@ export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
     } catch (err) {
       const failure = err as PublishFailure;
       if (failure.status === 409) setExists(true);
-      else
-        setErrors(
-          failure.errors ?? [failure.message ?? 'Could not create this template'],
-        );
+      else setErrors(failure.errors ?? [failure.message ?? t('new.createFailed')]);
     }
   };
 
   return (
     <div className="flex flex-col gap-6">
-      <Title>New template</Title>
-      <p className="text-body-sm text-muted">
-        A template is one model year and the trims it shipped in. Creating it publishes
-        straight away, under your name. No cars use it yet, so nothing on the road
-        changes.
-      </p>
+      <Title>{t('new.title')}</Title>
+      <p className="text-body-sm text-muted">{t('new.description')}</p>
 
       <div className="grid gap-3 md:grid-cols-2">
-        {field('manufacturerName', 'Manufacturer', 'INEOS')}
-        {field('modelName', 'Model', 'Grenadier')}
-        {field('year', 'Year', '2024')}
-        {field('trimName', 'First trim', 'Trialmaster')}
+        {field('manufacturerName', t('new.manufacturer'), 'INEOS')}
+        {field('modelName', t('new.model'), 'Grenadier')}
+        {field('year', t('new.year'), '2024')}
+        {field('trimName', t('new.firstTrim'), 'Trialmaster')}
       </div>
 
       <p className="break-all font-mono text-code text-muted" data-testid="derived-id">
@@ -130,18 +125,16 @@ export const NewTemplateView: FC<{ presetId?: string }> = ({ presetId }) => {
           role="alert"
           className="flex flex-wrap items-center gap-3 rounded-card bg-negative-soft p-4"
         >
-          <span className="text-body-sm text-negative">
-            A template with this id already exists.
-          </span>
+          <span className="text-body-sm text-negative">{t('new.exists')}</span>
           <Link href={`/templates/${id}`} className="button secondary">
-            Open it
+            {t('new.openIt')}
           </Link>
         </div>
       )}
 
       <div>
         <Button onClick={onCreate} loading={publish.isPending}>
-          Create template
+          {t('new.create')}
         </Button>
       </div>
     </div>

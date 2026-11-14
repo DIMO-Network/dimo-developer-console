@@ -1,3 +1,8 @@
+/**
+ * @jest-environment node
+ */
+// node: the next-intl plugin resolves itself from a file path, which jsdom
+// turns into an http:// URL.
 import { configSchema } from 'next/dist/server/config-schema';
 
 import { BRAND_IMAGE_MAX_BYTES } from '@/utils/brandImage';
@@ -28,6 +33,12 @@ describe('next.config', () => {
   it('accepts Server Actions from the console domains', () => {
     expect(serverActions.allowedOrigins).toEqual(
       expect.arrayContaining(['console.dimo.org', 'console-staging.dimo.org']),
+    );
+  });
+
+  it('points next-intl at the request config', () => {
+    expect(nextConfig.turbopack?.resolveAlias).toEqual(
+      expect.objectContaining({ 'next-intl/config': './src/i18n/request.ts' }),
     );
   });
 });

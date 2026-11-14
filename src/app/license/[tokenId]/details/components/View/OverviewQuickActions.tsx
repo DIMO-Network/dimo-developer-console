@@ -2,6 +2,7 @@
 import type { FC } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export const OverviewQuickActions: FC<{
   tokenId: number;
@@ -9,9 +10,10 @@ export const OverviewQuickActions: FC<{
   onSelectTab: (tab: 'config' | 'brand') => void;
 }> = ({ tokenId, canManage, onSelectTab }) => {
   const router = useRouter();
+  const t = useTranslations('license');
   return (
     <div className="overview-quick-actions">
-      <p className="overview-quick-actions__label">Quick actions</p>
+      <p className="overview-quick-actions__label">{t('quickActions.label')}</p>
       <div className="overview-quick-actions__grid">
         {canManage && (
           <>
@@ -19,19 +21,19 @@ export const OverviewQuickActions: FC<{
               className="overview-quick-action"
               onClick={() => onSelectTab('config')}
             >
-              🔑 Generate API key
+              {t('quickActions.generateApiKey')}
             </button>
             <button
               className="overview-quick-action"
               onClick={() => onSelectTab('brand')}
             >
-              🪪 Configure branding
+              {t('quickActions.configureBranding')}
             </button>
             <button
               className="overview-quick-action"
               onClick={() => router.push(`/license/${tokenId}/configurator`)}
             >
-              ⚙️ Setup vehicle sharing
+              {t('quickActions.setupSharing')}
             </button>
           </>
         )}
@@ -40,7 +42,7 @@ export const OverviewQuickActions: FC<{
           target="_blank"
           className="overview-quick-action"
         >
-          📖 Docs
+          {t('quickActions.docs')}
         </Link>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { useState, type FC } from 'react';
 import type { DeviceType, Template } from '@/types/template';
 import type { Normalisation } from '@/utils/templateCoerce';
@@ -29,6 +30,7 @@ export const TrimGrid: FC<TrimGridProps> = ({
   onChange,
   onNormalise,
 }) => {
+  const t = useTranslations('common');
   const grid = buildGrid(template, vocab);
   const multiTrim = template.trims.length > 1;
 
@@ -57,10 +59,10 @@ export const TrimGrid: FC<TrimGridProps> = ({
               scope="col"
               className="sticky left-0 z-10 bg-card px-3 pb-3 text-left text-label text-muted"
             >
-              Attribute
+              {t('templateEditor.grid.attribute')}
             </th>
             <th scope="col" className="px-3 pb-3 text-left text-label text-muted">
-              Values
+              {t('templateEditor.grid.values')}
             </th>
             {template.trims.map((trim, i) => (
               <th
@@ -106,6 +108,10 @@ export const TrimGrid: FC<TrimGridProps> = ({
                         def={row.def}
                         value={row.cells[i]}
                         where={`trim ${trim.name || '?'}`}
+                        ariaLabel={t('templateEditor.where.trimCell', {
+                          name: trim.name || '?',
+                          label: row.def.label,
+                        })}
                         emphasised={row.distinct > 1}
                         readOnly={readOnly}
                         testId={`cell-${row.def.name}-${i}`}
@@ -130,6 +136,9 @@ export const TrimGrid: FC<TrimGridProps> = ({
                       def={row.def}
                       value={row.shared}
                       where="template"
+                      ariaLabel={t('templateEditor.where.templateCell', {
+                        label: row.def.label,
+                      })}
                       emphasised={false}
                       readOnly={readOnly}
                       testId={`shared-${row.def.name}`}

@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { type FC, useEffect, useState } from 'react';
 import { MoonIcon, SunIcon } from '@heroicons/react/24/outline';
 import { useTheme } from 'next-themes';
@@ -10,6 +11,7 @@ interface IProps {
 }
 
 export const ThemeToggle: FC<IProps> = ({ variant, collapsed = false }) => {
+  const t = useTranslations('common');
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -26,14 +28,14 @@ export const ThemeToggle: FC<IProps> = ({ variant, collapsed = false }) => {
   const isDark = theme !== 'light';
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark');
   const Icon = isDark ? SunIcon : MoonIcon;
-  const label = isDark ? 'Light mode' : 'Dark mode';
+  const label = isDark ? t('theme.light') : t('theme.dark');
 
   if (variant === 'icon') {
     return (
       <button
         type="button"
         onClick={toggleTheme}
-        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        aria-label={isDark ? t('theme.switchToLight') : t('theme.switchToDark')}
         className="flex size-10 items-center justify-center rounded-full text-muted hover:bg-control hover:text-ink"
       >
         <Icon className="size-5" />

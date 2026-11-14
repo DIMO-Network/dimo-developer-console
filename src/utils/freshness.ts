@@ -25,34 +25,26 @@ export const freshnessOf = (
   return 'inactive';
 };
 
-const dateLabel = (t: number) =>
-  new Date(t).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+export type RelativeTimeParts =
+  | { kind: 'never' }
+  | { kind: 'justNow' }
+  | { kind: 'minutes' | 'hours' | 'days'; count: number }
+  | { kind: 'date'; at: number };
 
-export const relativeTime = (
+// The thresholds; useFreshnessText words them.
+export const relativeTimeParts = (
   iso: string | null | undefined,
   now = Date.now(),
-): string => {
+): RelativeTimeParts => {
   const t = parse(iso);
-  if (t === null) return 'Never';
+  if (t === null) return { kind: 'never' };
   const age = Math.max(0, now - t);
-  if (age < MIN) return 'just now';
-  if (age < HOUR) return `${Math.floor(age / MIN)} min ago`;
-  if (age < DAY) return `${Math.floor(age / HOUR)} h ago`;
+  if (age < MIN) return { kind: 'justNow' };
+  if (age < HOUR) return { kind: 'minutes', count: Math.floor(age / MIN) };
+  if (age < DAY) return { kind: 'hours', count: Math.floor(age / HOUR) };
   const days = Math.floor(age / DAY);
-  if (days < 60) return `${days} day${days === 1 ? '' : 's'} ago`;
-  return dateLabel(t);
-};
-
-export const absoluteTime = (iso: string | null | undefined): string => {
-  const t = parse(iso);
-  if (t === null) return '';
-  const d = new Date(t);
-  return `${dateLabel(t)}, ${d.toISOString().slice(11, 19)} UTC`;
+  if (days < 60) return { kind: 'days', count: days };
+  return { kind: 'date', at: t };
 };
 
 export const FRESHNESS_TONE: Record<Freshness, StatusTone> = {
@@ -60,10 +52,4 @@ export const FRESHNESS_TONE: Record<Freshness, StatusTone> = {
   stale: 'pending',
   inactive: 'error',
   none: 'off',
-};
-
-// "Mar 4, 2024" in UTC; an em dash for a missing or invalid timestamp.
-export const utcDate = (iso?: string | null): string => {
-  const t = parse(iso);
-  return t === null ? '—' : dateLabel(t);
 };

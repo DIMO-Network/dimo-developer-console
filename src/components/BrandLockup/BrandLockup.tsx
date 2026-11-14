@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { type FC, useEffect, useLayoutEffect, useRef } from 'react';
 import Image from 'next/image';
 import './BrandLockup.css';
@@ -15,6 +16,7 @@ const useIsomorphicLayoutEffect =
 // can make the name wider than the lockup's box. The lockup then scales down
 // as a whole to fit: it never wraps and never runs past its container.
 export const BrandLockup: FC<IProps> = ({ product }) => {
+  const t = useTranslations('common');
   const ref = useRef<HTMLDivElement>(null);
 
   useIsomorphicLayoutEffect(() => {
@@ -39,7 +41,7 @@ export const BrandLockup: FC<IProps> = ({ product }) => {
     <div ref={ref} className="brand-lockup">
       <Image
         src="/images/dimo-wordmark.svg"
-        alt="DIMO"
+        alt={t('brand.dimoLogoAlt')}
         width={80}
         height={18}
         className="wordmark"

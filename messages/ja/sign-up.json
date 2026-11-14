@@ -1,0 +1,99 @@
+{
+  "metadataTitle": "新規登録 | {appName}",
+  "metadataDescription": "DIMO Developer Consoleに今すぐ新規登録！アカウントを作成して強力な開発者ツールを活用し、アプリケーションを簡単に管理しましょう。今すぐ始めて、開発体験をさらに高めましょう！",
+  "view": {
+    "termsAgreement": "サインインすると、<terms>利用規約</terms>と<privacy>プライバシーポリシー</privacy>に同意したものとみなされます"
+  },
+  "refusal": {
+    "accountExists": "このアカウントはすでに存在します。代わりにサインインしてください。",
+    "signIn": "サインイン",
+    "emailTaken": "このメールアドレスは別のコンソールアカウントで使用されています。そのアカウントでサインインするか、別のメールアドレスを使用してください。",
+    "emailNotProven": "このメールアドレスがあなたのDIMOアカウントのものであることを確認できませんでした。",
+    "unreachable": "コンソールに接続できませんでした。もう一度お試しください。",
+    "failed": "アカウントの作成中に問題が発生しました。もう一度お試しください。"
+  },
+  "wallet": {
+    "createFailed": "ユーザーウォレットの作成中に問題が発生しました",
+    "lostPasskey": "パスキーを紛失しましたか？<recover>メールで復旧</recover>",
+    "troubleLoggingIn": "ログインでお困りですか？<support>サポートに問い合わせる</support>",
+    "passkey": {
+      "title": "パスキーでアカウントを作成しています",
+      "body": "DIMOアカウントを作成しています。数秒かかる場合があります。"
+    },
+    "noPasskey": {
+      "title": "パスキーなしでアカウントを作成しています",
+      "body": "パスキーなしでDIMOアカウントを作成しています。受信トレイに届く6桁のワンタイムパスワード（OTP）を確認してください。"
+    },
+    "accountFound": {
+      "title": "DIMOアカウントが見つかりました",
+      "body": "すでにDIMOアカウントをお持ちです。続行するには本人確認を行ってください。"
+    }
+  },
+  "buildFor": {
+    "title": "何を開発していますか？",
+    "prompt": "DIMOで何をリリースする予定ですか？",
+    "mobileApp": {
+      "title": "モバイルアプリ",
+      "description": "Apple App StoreまたはGoogle Play Storeで公開するアプリ"
+    },
+    "webApp": {
+      "title": "Webアプリケーション",
+      "description": "ユーザー管理機能のあるWebアプリ"
+    },
+    "personalProject": {
+      "title": "個人プロジェクト",
+      "description": "車両データにアクセスする個人プロジェクト"
+    },
+    "somethingElse": "その他",
+    "somethingElsePlaceholder": "開発しているのは...",
+    "maxLength": "150文字以内で入力してください",
+    "selectOption": "続行するにはオプションを選択してください"
+  },
+  "company": {
+    "title": "あと少しです",
+    "typeLabel": "事業/開発者の種類 *",
+    "select": "選択してください",
+    "maxLength": "名前は120文字以内で入力してください",
+    "invalidUrl": "120文字以内の有効なURLを入力してください",
+    "finish": "登録を完了",
+    "business": {
+      "nameLabel": "会社名 *",
+      "namePlaceholder": "ACME",
+      "websiteLabel": "会社のWebサイト",
+      "websitePlaceholder": "www.acme.zone",
+      "regionLabel": "主な事業地域 *"
+    },
+    "personal": {
+      "nameLabel": "名前 *",
+      "namePlaceholder": "Bruce Wayne",
+      "websiteLabel": "SNSのURL",
+      "websitePlaceholder": "https://instagram.com/batman",
+      "regionLabel": "地域 *"
+    },
+    "developerTypes": {
+      "personalDeveloper": "個人開発者",
+      "oem": "OEM",
+      "insurance": "保険",
+      "maintenance": "メンテナンス",
+      "fleetManagement": "フリート管理",
+      "vehicleSales": "車両販売",
+      "utilities": "公益事業",
+      "financing": "ファイナンス",
+      "ev": "EV",
+      "depin": "DePIN",
+      "data": "データ",
+      "others": "その他"
+    },
+    "regions": {
+      "northAmerica": "北米",
+      "latinAmericaCaribbean": "中南米・カリブ海地域",
+      "oceania": "オセアニア",
+      "northernWesternEurope": "北欧・西欧",
+      "africa": "アフリカ",
+      "eastSoutheastAsia": "東アジア・東南アジア",
+      "middleEastCentralAsia": "中東・中央アジア",
+      "southAsia": "南アジア",
+      "easternEurope": "東欧"
+    }
+  }
+}

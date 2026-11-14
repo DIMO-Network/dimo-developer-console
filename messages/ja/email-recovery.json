@@ -1,0 +1,24 @@
+{
+  "metadataTitle": "メールで復旧 | {appName}",
+  "metadataDescription": "DIMO Developer Consoleのサインインへようこそ。開発者ダッシュボードに安全にアクセスして、アプリケーションを管理し、DIMOの高度なツールを活用しましょう。今すぐ開発と最適化を始めましょう！",
+  "form": {
+    "title": "パスキーをリセット",
+    "warning": "リセットが完了すると、以前のパスキーは使用できなくなります",
+    "emailLabel": "メールアドレス",
+    "emailPlaceholder": "email@address.com",
+    "sendFailed": "メールの送信中に問題が発生しました"
+  },
+  "checkEmail": {
+    "title": "メールに記載されたリンクをクリックしてください",
+    "hint": "メールが届きませんか？迷惑メールフォルダを確認するか、コードを再送信してください。",
+    "resend": "コードを再送信",
+    "resent": "復旧コードを再送信しました。",
+    "resendFailed": "復旧コードの送信中に問題が発生しました。"
+  },
+  "rewire": {
+    "title": "アカウントへのアクセスを取り戻しましょう",
+    "body": "パスキーは、DIMOに最も速く安全にサインインできる方法です。",
+    "progress": "パスキーを再設定しています...",
+    "success": "パスキーを再設定しました"
+  }
+}

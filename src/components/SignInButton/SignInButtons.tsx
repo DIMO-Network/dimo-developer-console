@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import type { FC } from 'react';
 
 import React from 'react';
@@ -14,8 +15,9 @@ interface SignInButtonProps {
 }
 
 export const SignInButtons: FC<SignInButtonProps> = ({ disabled, onCTA }) => {
+  const t = useTranslations('common');
   const handlerLogin = (app: string) => {
-    if (disabled) toast.error('You must accept terms of service and privacy policy');
+    if (disabled) toast.error(t('signIn.acceptTerms'));
     else onCTA(app);
   };
 

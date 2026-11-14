@@ -8,6 +8,7 @@ import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useAuth';
 import isEmail from 'validator/lib/isEmail';
+import { useTranslations } from 'next-intl';
 
 interface IProps {
   handleLogin: (email: string) => Promise<void>;
@@ -18,6 +19,8 @@ interface EmailLoginFormInputs {
 }
 
 export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
+  const t = useTranslations('sign-in');
+  const tCommon = useTranslations('common');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { handleExternalAuth } = useAuth();
   const {
@@ -46,26 +49,26 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
     <>
       <div className="sign-in__form">
         <div className="sign-in__header">
-          <p className="text-title text-ink">Build with car data</p>
+          <p className="text-title text-ink">{t('methodForm.title')}</p>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="sign-in__input">
           <TextField
             {...register('email', {
-              required: 'This field is required',
+              required: tCommon('validation.required'),
               maxLength: {
                 value: 120,
-                message: 'The name should has maximum 120 characters',
+                message: t('methodForm.maxLength'),
               },
               validate: {
                 isEmail: (str: string) => {
                   if (str && isEmail(str)) return true;
-                  return 'Not a valid email address';
+                  return t('methodForm.invalidEmail');
                 },
               },
             })}
             role="email-input"
             type="text"
-            placeholder="email@address.com"
+            placeholder={t('methodForm.emailPlaceholder')}
           />
           {errors.email && <TextError errorMessage={errors.email?.message ?? ''} />}
           <Button
@@ -75,12 +78,12 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
             role="continue-button"
             loading={isLoading}
           >
-            Continue
+            {tCommon('actions.continue')}
           </Button>
         </form>
         <div className="sign-in__divider">
           <div className="divider"></div>
-          <p className="divider-caption">or</p>
+          <p className="divider-caption">{t('methodForm.or')}</p>
           <div className="divider"></div>
         </div>
         <div className="sign-in__buttons">
@@ -89,24 +92,33 @@ export const SignInMethodForm: FC<IProps> = ({ handleLogin }) => {
         <div className="sign-in__extra-links">
           <div className="flex flex-row">
             <p className="terms-caption">
-              Lost your passkey?{' '}
               {/* Rarely used: not worth a prefetch while sign-in loads. */}
-              <Anchor
-                href="/email-recovery"
-                prefetch={false}
-                target="_self"
-                className="grey underline"
-              >
-                Reset with your email
-              </Anchor>
+              {t.rich('methodForm.lostPasskey', {
+                reset: (chunks) => (
+                  <Anchor
+                    href="/email-recovery"
+                    prefetch={false}
+                    target="_self"
+                    className="grey underline"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+              })}
             </p>
           </div>
           <div className="flex flex-row">
             <p className="terms-caption">
-              Trouble logging in?{' '}
-              <Anchor href="mailto:developer-support@dimo.org" className="grey underline">
-                Get support
-              </Anchor>
+              {t.rich('methodForm.troubleLoggingIn', {
+                support: (chunks) => (
+                  <Anchor
+                    href="mailto:developer-support@dimo.org"
+                    className="grey underline"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+              })}
             </p>
           </div>
         </div>

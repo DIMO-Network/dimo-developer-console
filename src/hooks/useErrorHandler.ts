@@ -1,24 +1,24 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
-const ERROR_CODES = {
-  unique_email: 'The email is already registered',
-  expired: 'The session has expired please sign in again',
+export const ERROR_KEYS: Record<string, string> = {
+  unique_email: 'errors.emailRegistered',
+  expired: 'errors.sessionExpired',
 };
 
 export const useErrorHandler = () => {
+  const t = useTranslations('common');
   const searchParams = useSearchParams();
   const error = searchParams.get('error') ?? '';
+  const message = error ? t(ERROR_KEYS[error] ?? 'errors.tryAgain') : null;
 
   useEffect(() => {
-    const message = ERROR_CODES[error as keyof typeof ERROR_CODES] ?? 'Please try again';
-    if (error) {
-      toast.error(message);
-    }
-  }, [error]);
+    if (message) toast.error(message);
+  }, [message]);
 };
 
 export default useErrorHandler;

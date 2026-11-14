@@ -34,6 +34,16 @@ describe('TrimGrid', () => {
     vehicleVocab.attributes.forEach((a, i) => expect(rows[i]).toContain(a.label));
   });
 
+  it('names each field by where it is and what it holds', () => {
+    renderGrid();
+    expect(
+      within(screen.getByTestId('cell-mpg_city-0')).getByRole('textbox'),
+    ).toHaveAccessibleName('trim LE MPG city');
+    expect(
+      within(screen.getByTestId('shared-number_of_doors')).getByRole('textbox'),
+    ).toHaveAccessibleName('template Doors');
+  });
+
   it('mutes agreement and advances difference', () => {
     renderGrid();
     // powertrain_type differs across the Camry's ten trims: full contrast.

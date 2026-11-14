@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { useTranslations } from 'next-intl';
 import React, { FC } from 'react';
 import './OnboardingBanner.css';
 import CreateAppButton from '@/app/app/list/components/CreateAppButton';
@@ -24,6 +25,7 @@ export const OnboardingBanner: FC<Props> = ({
   isLoading,
   licenseConnection,
 }) => {
+  const t = useTranslations('common');
   const fragment = useFragment(GET_TOTAL_LICENSE_COUNT, licenseConnection);
 
   if (isLoading || balance > 0) return <></>;
@@ -40,18 +42,16 @@ export const OnboardingBanner: FC<Props> = ({
   return (
     <div className="banner-content">
       <div>
-        <p className="font-black text-xl">Getting Started</p>
-        <p className="text-muted text-sm mt-1">
-          You&apos;re on the way to building with DIMO!
-        </p>
+        <p className="font-black text-xl">{t('onboarding.title')}</p>
+        <p className="text-muted text-sm mt-1">{t('onboarding.intro')}</p>
       </div>
       <div className={'flex flex-col flex-1 gap-4 w-full'}>
-        <ActionCompletedRow text={'Create account'} />
-        <ActionCompletedRow text={'Confirm your details'} />
+        <ActionCompletedRow text={t('onboarding.createAccount')} />
+        <ActionCompletedRow text={t('onboarding.confirmDetails')} />
         <CTARow
           isComplete={fragment.totalCount > 0}
-          text={'Create your first license'}
-          subtitle="Now that your account is set up, it's time to create your first license."
+          text={t('onboarding.createLicense')}
+          subtitle={t('onboarding.createLicenseHint')}
           CTA={<CreateAppButton />}
         />
       </div>

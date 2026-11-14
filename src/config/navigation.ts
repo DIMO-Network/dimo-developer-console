@@ -26,34 +26,37 @@ const CONNECTION_DETAILS_REGEX = /^\/connections\/[^/]+$/;
 export const getPageTitle = (path: string) => {
   const staticPageTitle = pageTitles[path];
   if (staticPageTitle) return staticPageTitle;
-  if (VEHICLE_DETAIL_REGEX.test(path)) return 'Vehicle';
-  if (LICENSE_DETAILS_REGEX.test(path)) return 'License details';
-  if (LICENSE_CONFIGURATOR_REGEX.test(path)) return 'SDK configurator';
-  if (LICENSED_VEHICLES_REGEX.test(path)) return 'Licensed vehicles';
-  if (CREATE_WEBHOOK_REGEX.test(path)) return 'Create a webhook';
-  if (EDIT_WEBHOOK_REGEX.test(path)) return 'Edit webhook';
-  if (CREATE_CONNECTION_REGEX.test(path)) return 'Create a connection';
-  if (CONNECTION_DETAILS_REGEX.test(path)) return 'Connection details';
+  if (VEHICLE_DETAIL_REGEX.test(path)) return 'navigation.pageTitles.vehicle';
+  if (LICENSE_DETAILS_REGEX.test(path)) return 'navigation.pageTitles.licenseDetails';
+  if (LICENSE_CONFIGURATOR_REGEX.test(path))
+    return 'navigation.pageTitles.sdkConfigurator';
+  if (LICENSED_VEHICLES_REGEX.test(path)) return 'navigation.pageTitles.licensedVehicles';
+  if (CREATE_WEBHOOK_REGEX.test(path)) return 'navigation.pageTitles.createWebhook';
+  if (EDIT_WEBHOOK_REGEX.test(path)) return 'navigation.pageTitles.editWebhook';
+  if (CREATE_CONNECTION_REGEX.test(path)) return 'navigation.pageTitles.createConnection';
+  if (CONNECTION_DETAILS_REGEX.test(path))
+    return 'navigation.pageTitles.connectionDetails';
   // Ordered before TEMPLATE_EDIT_REGEX, which would otherwise match
   // /templates/new and title the create page "Edit template".
-  if (path === '/templates/new') return 'New template';
-  if (TEMPLATE_EDIT_REGEX.test(path)) return 'Edit template';
+  if (path === '/templates/new') return 'navigation.pageTitles.newTemplate';
+  if (TEMPLATE_EDIT_REGEX.test(path)) return 'navigation.pageTitles.editTemplate';
 };
 
+// Message keys in the common namespace; the header translates them.
 const pageTitles: Record<string, string> = {
-  '/': 'Home',
-  '/app': 'Home',
-  '/licenses': 'Licenses',
-  '/webhooks': 'Webhooks',
-  '/templates': 'Vehicle templates',
-  '/connections': 'Connections',
-  '/settings': 'Settings',
-  '/vehicles': 'Vehicles',
-  '/support': 'Support',
+  '/': 'navigation.pageTitles.home',
+  '/app': 'navigation.pageTitles.home',
+  '/licenses': 'navigation.pageTitles.licenses',
+  '/webhooks': 'navigation.pageTitles.webhooks',
+  '/templates': 'navigation.pageTitles.templates',
+  '/connections': 'navigation.pageTitles.connections',
+  '/settings': 'navigation.pageTitles.settings',
+  '/vehicles': 'navigation.pageTitles.vehicles',
+  '/support': 'navigation.pageTitles.support',
 };
 
 export type NavItem = {
-  label: string;
+  labelKey: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: React.FC<any>;
   iconClassName: string;
@@ -64,13 +67,13 @@ export type NavItem = {
 };
 
 export type NavSection = {
-  label: string;
+  labelKey: string;
   items: NavItem[];
 };
 
 export const bottomMenu: NavItem[] = [
   {
-    label: 'Settings',
+    labelKey: 'navigation.items.settings',
     icon: SettingsIcon,
     iconClassName: 'h-5 w-5',
     link: '/settings',
@@ -87,10 +90,10 @@ export const getNavSections = (
   }: { isMember?: boolean; dataAccessEnabled?: boolean } = {},
 ): NavSection[] => [
   {
-    label: 'Workspace',
+    labelKey: 'navigation.sections.workspace',
     items: [
       {
-        label: 'Home',
+        labelKey: 'navigation.items.home',
         icon: HomeIcon,
         iconClassName: 'h-4 w-4',
         link: '/app',
@@ -98,7 +101,7 @@ export const getNavSections = (
         disabled: false,
       },
       {
-        label: 'Licenses',
+        labelKey: 'navigation.items.licenses',
         icon: DeveloperBoardIcon,
         iconClassName: 'h-4 w-4',
         link: '/licenses',
@@ -106,7 +109,7 @@ export const getNavSections = (
         disabled: false,
       },
       {
-        label: 'Vehicles',
+        labelKey: 'navigation.items.vehicles',
         icon: CarIcon,
         iconClassName: 'h-4 w-4',
         link: '/vehicles',
@@ -117,7 +120,7 @@ export const getNavSections = (
         hidden: isMember && !dataAccessEnabled,
       },
       {
-        label: 'Webhooks',
+        labelKey: 'navigation.items.webhooks',
         icon: IntegrationIcon,
         iconClassName: 'h-4 w-4',
         link: '/webhooks',
@@ -128,7 +131,7 @@ export const getNavSections = (
         hidden: isMember,
       },
       {
-        label: 'Templates',
+        labelKey: 'navigation.items.templates',
         icon: CarRentalIcon,
         iconClassName: 'h-4 w-4',
         link: '/templates',
@@ -138,7 +141,7 @@ export const getNavSections = (
       ...(includeConnections
         ? [
             {
-              label: 'Connections',
+              labelKey: 'navigation.items.connections',
               icon: ConnectionsIcon,
               iconClassName: 'h-4 w-4',
               link: '/connections',
@@ -153,10 +156,10 @@ export const getNavSections = (
     ],
   },
   {
-    label: 'Resources',
+    labelKey: 'navigation.sections.resources',
     items: [
       {
-        label: 'Documentation',
+        labelKey: 'navigation.items.documentation',
         icon: SummarizeIcon,
         iconClassName: 'h-4 w-4',
         link: 'https://dimo.org/docs',
@@ -164,7 +167,7 @@ export const getNavSections = (
         disabled: false,
       },
       {
-        label: 'API status',
+        labelKey: 'navigation.items.apiStatus',
         icon: MonitorHeartIcon,
         iconClassName: 'h-4 w-4',
         link: 'https://stats.uptimerobot.com/snU0rkEEah',

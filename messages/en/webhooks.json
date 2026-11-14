@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "list": "Webhooks | {appName}",
+    "create": "Create a Webhook | {appName}",
+    "edit": "Edit webhook | {appName}"
+  },
+  "page": {
+    "description": "Receive real-time updates from events",
+    "addRedirectUri": "Add a redirect URI to your license to set up webhooks.",
+    "createLicense": "Create a developer license to set up webhooks.",
+    "goToLicenses": "Go to licenses",
+    "fetchLicensesError": "There was a problem fetching your Developer Licenses"
+  },
+  "breadcrumb": {
+    "webhooks": "Webhooks",
+    "newWebhook": "New webhook",
+    "editWebhook": "Edit webhook"
+  },
+  "edit": {
+    "fetchError": "There was an error fetching your webhook",
+    "notFound": "no webhook found"
+  },
+  "discardChanges": {
+    "title": "Discard changes",
+    "message": "Are you sure you want to discard your changes? This action cannot be undone."
+  }
+}

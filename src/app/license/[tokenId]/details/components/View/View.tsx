@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { PencilIcon } from '@heroicons/react/16/solid';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useFormatter, useTranslations } from 'next-intl';
 import { gql, useFragment } from '@/gql';
 import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { DEVELOPER_LICENSE_SUMMARY_FRAGMENT } from '@/components/LicenseCard';
@@ -44,6 +45,7 @@ const GET_DEVELOPER_LICENSE = gql(`
 `);
 
 export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
+  const t = useTranslations('license');
   const [tokenId, setTokenId] = useState<number>();
   const { data, loading, refetch, error } = useIdentityQuery(GET_DEVELOPER_LICENSE, {
     variables: { tokenId: tokenId as number },
@@ -78,7 +80,7 @@ export const View = ({ params }: { params: Promise<{ tokenId: string }> }) => {
   if (error) {
     return (
       <div className="license-details-page">
-        <p>There was an error fetching the license details</p>
+        <p>{t('details.loadError')}</p>
       </div>
     );
   }
@@ -101,6 +103,7 @@ interface LicenseDetailsContentProps {
 }
 
 const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps) => {
+  const t = useTranslations('license');
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>(() => tabFrom(searchParams.get('tab')));
   const [isRenameOpen, setIsRenameOpen] = useState(false);
@@ -108,34 +111,35 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
   const isLicenseOwner = useIsLicenseOwner(licenseFragment);
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'config', label: 'Config' },
-    { id: 'vehicles', label: 'Vehicles' },
-    { id: 'brand', label: 'Brand' },
+    { id: 'overview', label: t('details.tabs.overview') },
+    { id: 'config', label: t('details.tabs.config') },
+    { id: 'vehicles', label: t('details.tabs.vehicles') },
+    { id: 'brand', label: t('details.tabs.brand') },
   ];
 
   return (
     <div className="license-details-page">
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link href="/licenses" className="transition-colors hover:text-ink">
-          Licenses
+          {t('breadcrumbLicenses')}
         </Link>
         <span>/</span>
-        <span className="text-ink">License details</span>
+        <span className="text-ink">{t('details.breadcrumbDetails')}</span>
       </nav>
       {/* Persistent header */}
       <div className="license-header">
         <div className="license-header__top">
           <div className="license-header__identity">
             <span className="license-header__name">
-              {licenseFragment.alias ?? `License #${licenseFragment.tokenId}`}
+              {licenseFragment.alias ??
+                t('details.fallbackName', { tokenId: licenseFragment.tokenId })}
             </span>
             <span className="license-header__token-id">#{licenseFragment.tokenId}</span>
             {isLicenseOwner && (
               <button
                 className="license-header__rename-btn"
                 onClick={() => setIsRenameOpen(true)}
-                title="Rename"
+                title={t('details.rename')}
               >
                 <PencilIcon className="h-4 w-4" />
               </button>
@@ -145,7 +149,7 @@ const LicenseDetailsContent = ({ license, refetch }: LicenseDetailsContentProps)
         <div className="license-header__client-id">
           <CopyableRow
             value={licenseFragment.clientId}
-            onCopySuccessMessage="Client ID copied!"
+            onCopySuccessMessage={t('details.clientIdCopied')}
           />
         </div>
         <nav className="license-tabs" role="tablist">
@@ -216,6 +220,8 @@ const VehicleCountStat = ({
   clientId: string;
   onViewVehicles: () => void;
 }) => {
+  const t = useTranslations('license');
+  const format = useFormatter();
   const { data, loading } = useIdentityQuery(GET_VEHICLE_COUNT_BY_CLIENT_ID, {
     variables: { clientId },
   });
@@ -228,11 +234,11 @@ const VehicleCountStat = ({
         onClick={onViewVehicles}
         className="overview-stat-card__number text-left transition-opacity hover:opacity-80"
       >
-        {data?.vehicles.totalCount ?? '—'}
+        {data ? format.number(data.vehicles.totalCount) : '—'}
       </button>
-      <p className="overview-stat-card__label">Vehicles connected</p>
+      <p className="overview-stat-card__label">{t('details.vehiclesConnected')}</p>
       <button onClick={onViewVehicles} className="overview-stat-card__link">
-        View vehicles →
+        {t('details.viewVehicles')}
       </button>
     </>
   );

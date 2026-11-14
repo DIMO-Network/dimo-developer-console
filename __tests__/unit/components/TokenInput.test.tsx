@@ -68,4 +68,24 @@ describe('TokenInput', () => {
     fireEvent.click(screen.getByText('1M'));
     expect(screen.getByRole('token-value-input')).toHaveValue('1,000,000');
   });
+
+  it('keeps every digit of amounts of 10000 and more in es', () => {
+    const intl = jest.requireMock('next-intl');
+    const { useFormatter } = intl;
+    const { createFormatter } = jest.requireActual('next-intl');
+    intl.useFormatter = () => createFormatter({ locale: 'es', timeZone: 'UTC' });
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      renderWithForm(<TokenInput name="dcx" control={null as any} />, {
+        defaultValues: { dcx: 10000 },
+      });
+      const input = screen.getByRole('token-value-input');
+      expect(input).toHaveValue('10.000');
+
+      fireEvent.change(input, { target: { value: '10.0005' } });
+      expect(input).toHaveValue('100.005');
+    } finally {
+      intl.useFormatter = useFormatter;
+    }
+  });
 });

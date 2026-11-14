@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { FC, useState } from 'react';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
@@ -25,6 +26,7 @@ export const DeleteConfirmationModal: FC<Props> = ({
   onConfirm,
   onCancel,
 }) => {
+  const t = useTranslations('common');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {
@@ -62,7 +64,7 @@ export const DeleteConfirmationModal: FC<Props> = ({
             loading={isLoading}
             onClick={handleConfirm}
           >
-            Confirm
+            {t('actions.confirm')}
           </Button>
           <Button
             variant="secondary"
@@ -70,7 +72,7 @@ export const DeleteConfirmationModal: FC<Props> = ({
             disabled={isLoading}
             onClick={onCancel}
           >
-            Cancel
+            {t('actions.cancel')}
           </Button>
           {isLoading && !!loadingLabel && (
             <p className={'text-center text-body-sm text-muted'}>{loadingLabel}</p>

@@ -1,0 +1,749 @@
+{
+  "languageSwitcher": {
+    "label": "Idioma"
+  },
+  "actions": {
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "copy": "Copiar",
+    "saveChanges": "Guardar cambios",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "continue": "Continuar",
+    "done": "Listo",
+    "submit": "Enviar",
+    "retry": "Intentar de nuevo",
+    "remove": "Quitar",
+    "add": "Agregar",
+    "create": "Crear",
+    "download": "Descargar",
+    "learnMore": "Más información",
+    "signOut": "Cerrar sesión",
+    "refresh": "Actualizar"
+  },
+  "accountInfo": {
+    "button": "Datos de la cuenta",
+    "title": "Información de la cuenta",
+    "modalTitle": "Información de la cuenta",
+    "ownerEmail": "Correo del propietario",
+    "walletAddress": "Dirección de wallet de la organización",
+    "walletCopied": "Dirección de wallet copiada al portapapeles",
+    "balancesError": "Error al cargar los saldos",
+    "balancesLoading": "Cargando tus saldos…"
+  },
+  "appCard": {
+    "details": "Detalles de la app"
+  },
+  "brand": {
+    "dimoLogoAlt": "DIMO"
+  },
+  "copyButton": {
+    "copied": "Valor copiado al portapapeles",
+    "failed": "No se pudo copiar el valor"
+  },
+  "createAppModal": {
+    "title": "Crear una nueva licencia de desarrollador"
+  },
+  "creditsWidget": {
+    "currentBalance": "Saldo actual"
+  },
+  "support": {
+    "developerSupport": "Soporte para desarrolladores"
+  },
+  "buyCredits": {
+    "title": "Comprar DCX",
+    "pricing": "<description>El precio base para acceder a un vehículo es de $1.25 al mes.</description><link>Más información.</link>",
+    "amountLabel": "Monto de la compra",
+    "amountPositive": "El monto debe ser mayor que 0",
+    "amountMin": "El monto mínimo es $10.00",
+    "forAnotherAccount": "Comprar para otra cuenta",
+    "accountAddress": "Dirección de la cuenta",
+    "invalidAddress": "Dirección de Ethereum no válida",
+    "proceed": "Continuar al pago"
+  },
+  "csvUpload": {
+    "oneFileOnly": "Solo puedes subir un archivo a la vez",
+    "duplicate": "Archivo duplicado",
+    "tooLarge": "El archivo supera el límite de 50MB.",
+    "onlyCsv": "Solo se admiten archivos .csv.",
+    "invalidFormat": "Formato CSV no válido.",
+    "numericTokenId": "Cada fila debe tener un {header} numérico.",
+    "parseFailed": "No se pudo analizar el CSV.",
+    "listTitle": "Lista de vehículos",
+    "vehicleCount": "{count, plural, one {# vehículo} other {# vehículos}}",
+    "addVehicles": "Agregar vehículos",
+    "dropPrompt": "Arrastra y suelta o sube un CSV con una lista de ID de vehículos",
+    "formatHint": "Dale formato a tu CSV con una sola columna y el encabezado <code>{header}</code>.",
+    "accepts": "Acepta archivos .csv",
+    "maxSize": "Tamaño máximo del archivo: 50 MB.",
+    "upload": "Subir"
+  },
+  "datePicker": {
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "weekdays": {
+      "sun": "Do",
+      "mon": "Lu",
+      "tue": "Ma",
+      "wed": "Mi",
+      "thu": "Ju",
+      "fri": "Vi",
+      "sat": "Sá"
+    }
+  },
+  "devSupportForm": {
+    "userName": "Nombre de usuario",
+    "inquiryType": "Tipo de consulta",
+    "inquiryPlaceholder": "Selecciona una consulta",
+    "message": "Mensaje",
+    "messagePlaceholder": "Cuéntanos cómo podemos ayudarte…",
+    "messageTooLong": "El mensaje debe tener como máximo 500 caracteres",
+    "submit": "Enviar"
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "invalidUrl": "Ingresa una URL válida",
+    "invalidNumber": "Ingresa un número válido"
+  },
+  "generateJwt": {
+    "button": "Generar JWT de desarrollador",
+    "apiKeyRequired": "Ingresa una clave de API válida",
+    "failed": "No se pudo generar el JWT de desarrollador",
+    "titleDone": "JWT generado",
+    "titleNew": "Generar un JWT nuevo",
+    "subtitle": "Prueba una clave de API que creaste para tu servidor: con ella y la primera URI de redirección de la licencia se genera un JWT de desarrollador. Para obtener un JWT sin clave de API, activa el acceso desde la consola y usa Copiar JWT.",
+    "generating": "Generando el JWT…",
+    "apiKeyLabel": "Clave de API",
+    "apiKeyPlaceholder": "Ingresa aquí tu clave de API",
+    "done": "Listo",
+    "generate": "Generar",
+    "expires": "Vence en 14 días.",
+    "copied": "¡JWT copiado!"
+  },
+  "jsonBlock": {
+    "download": "Descargar JSON",
+    "copied": "JSON copiado",
+    "copyLabel": "Copiar JSON"
+  },
+  "licenseCard": {
+    "vehiclesConnected": "Vehículos conectados",
+    "noVehicles": "No hay vehículos conectados",
+    "sharingUnavailable": "Estado de uso compartido no disponible",
+    "configurations": "{count, plural, one {# configuración} other {# configuraciones}} →",
+    "sharingCopied": "Enlace para compartir copiado",
+    "sharingLink": "Enlace para compartir vehículos",
+    "notConfigured": "Sin configurar — configura el uso compartido de vehículos →",
+    "details": "Detalles de la licencia"
+  },
+  "menu": {
+    "logout": "Cerrar sesión",
+    "signingOut": "Cerrando sesión",
+    "open": "Abrir menú",
+    "expand": "Expandir barra lateral",
+    "collapse": "Contraer barra lateral"
+  },
+  "onboarding": {
+    "title": "Primeros pasos",
+    "intro": "¡Ya estás en camino de crear con DIMO!",
+    "createAccount": "Crear cuenta",
+    "confirmDetails": "Confirma tus datos",
+    "createLicense": "Crea tu primera licencia",
+    "createLicenseHint": "Ahora que tu cuenta está lista, es momento de crear tu primera licencia."
+  },
+  "navigation": {
+    "sections": {
+      "workspace": "Espacio de trabajo",
+      "resources": "Recursos"
+    },
+    "items": {
+      "home": "Inicio",
+      "licenses": "Licencias",
+      "vehicles": "Vehículos",
+      "webhooks": "Webhooks",
+      "templates": "Plantillas",
+      "connections": "Conexiones",
+      "documentation": "Documentación",
+      "apiStatus": "Estado de la API",
+      "settings": "Configuración"
+    },
+    "pageTitles": {
+      "home": "Inicio",
+      "licenses": "Licencias",
+      "webhooks": "Webhooks",
+      "templates": "Plantillas de vehículos",
+      "connections": "Conexiones",
+      "settings": "Configuración",
+      "vehicles": "Vehículos",
+      "support": "Soporte",
+      "vehicle": "Vehículo",
+      "licenseDetails": "Detalles de la licencia",
+      "sdkConfigurator": "Configurador del SDK",
+      "licensedVehicles": "Vehículos con licencia",
+      "createWebhook": "Crear un webhook",
+      "editWebhook": "Editar webhook",
+      "createConnection": "Crear una conexión",
+      "connectionDetails": "Detalles de la conexión",
+      "newTemplate": "Nueva plantilla",
+      "editTemplate": "Editar plantilla"
+    }
+  },
+  "paymentMethod": {
+    "dimo": "Comprar con DIMO",
+    "usd": "Comprar con USD"
+  },
+  "pendingInvite": {
+    "alreadyMember": "Ya eres miembro de este equipo.",
+    "title": "¿Unirte a {teamName}, propiedad de {ownerEmail}?",
+    "description": "Verás las licencias del equipo. El propietario decide si también tendrás acceso a datos.",
+    "join": "Unirme al equipo",
+    "notNow": "Ahora no",
+    "errors": {
+      "INVITE_INVALID": "Este enlace de invitación ya no es válido. Pídele uno nuevo al propietario del equipo.",
+      "INVITE_EXPIRED": "Esta invitación venció. Pídele al propietario del equipo que la vuelva a enviar.",
+      "INVITE_EMAIL_MISMATCH": "Esta invitación se envió a otro correo electrónico. Inicia sesión con esa dirección y vuelve a abrir el enlace de invitación.",
+      "fallback": "No pudimos aceptar esta invitación. Vuelve a abrir el enlace."
+    }
+  },
+  "queryActions": {
+    "copied": "Consulta copiada",
+    "copyFailed": "No se pudo copiar la consulta",
+    "copy": "Copiar consulta",
+    "download": "Descargar JSON"
+  },
+  "redirectUri": {
+    "added": "URI de redirección agregada correctamente.",
+    "createFailed": "Algo salió mal al crear la URI de redirección",
+    "invalidUrl": "Ingresa una URL válida, debe incluir http:// o https://",
+    "duplicate": "La URL ya está en la lista",
+    "required": "Ingresa la URI de redirección",
+    "tooLong": "Debe tener como máximo 150 caracteres",
+    "add": "Agregar URI",
+    "deleting": "Eliminando la URI de redirección seleccionada",
+    "deleted": "URI de redirección eliminada",
+    "copied": "¡URI de redirección copiada!",
+    "deleteTitle": "Eliminar URI de redirección",
+    "authorized": "URI autorizadas",
+    "confirmTitle": "¿Seguro que quieres eliminar esta URI de redirección?",
+    "confirmSubtitle": "Ya no podrás usar esta URI de redirección en tu app."
+  },
+  "errors": {
+    "transactionDenied": "Se rechazó la transacción",
+    "somethingWentWrong": "Algo salió mal",
+    "emailRegistered": "El correo electrónico ya está registrado",
+    "sessionExpired": "La sesión venció. Vuelve a iniciar sesión",
+    "tryAgain": "Inténtalo de nuevo",
+    "transactionFailedOnChain": "La transacción falló en la blockchain, así que no se cambió nada",
+    "generic": "Algo salió mal. Inténtalo de nuevo.",
+    "unknown": "Error desconocido",
+    "notFound": "No encontrado",
+    "loadFailed": "No se pudo cargar. Inténtalo de nuevo.",
+    "copyFailed": "No se pudo copiar al portapapeles"
+  },
+  "sessionExpired": {
+    "errors": {
+      "passkeyFailed": "No se pudo confirmar tu clave de acceso. Inténtalo de nuevo o usa un código por correo.",
+      "codeFailed": "Ese código no funcionó. Revísalo e inténtalo de nuevo.",
+      "codeCheckFailed": "No se pudo verificar ese código. Inténtalo de nuevo.",
+      "sendFailed": "No se pudo enviar un código. Inténtalo de nuevo.",
+      "renewFailed": "No se pudo volver a iniciar tu sesión. Inténtalo de nuevo o cierra sesión.",
+      "startAgain": "Tardó demasiado. Empieza de nuevo.",
+      "signedInElsewhere": "Hay otra cuenta con la sesión iniciada en este navegador. Cierra sesión para cambiar de cuenta."
+    },
+    "tryAgain": "Intentar de nuevo",
+    "startOver": "Empezar de nuevo",
+    "codeSent": "Enviamos un código de 6 dígitos a {email}.",
+    "codeLabel": "Código",
+    "continue": "Continuar",
+    "resendIn": "Enviar un código nuevo en {seconds} s",
+    "resend": "Enviar un código nuevo",
+    "withPasskey": "Continuar con clave de acceso",
+    "emailInstead": "Enviarme un código por correo",
+    "emailCode": "Enviarme un código por correo",
+    "title": "Tu sesión venció",
+    "description": "Vuelve a iniciar sesión como {email} para seguir trabajando. Te quedarás en esta página.",
+    "signOut": "Cerrar sesión"
+  },
+  "spendingLimit": {
+    "failed": "Algo salió mal al confirmar la transacción",
+    "title": "Definir límite de gasto",
+    "description": "Aprueba que la licencia de desarrollador gaste $DIMO de tu wallet conectada. Te recomendamos aprobar más de $100 USD en $DIMO"
+  },
+  "theme": {
+    "light": "Modo claro",
+    "dark": "Modo oscuro",
+    "switchToLight": "Cambiar a modo claro",
+    "switchToDark": "Cambiar a modo oscuro"
+  },
+  "team": {
+    "switcher": "Equipos",
+    "switchLabel": "Equipo: {name}. Cambiar de equipo",
+    "roles": {
+      "OWNER": "Propietario",
+      "MEMBER": "Miembro"
+    },
+    "fallbackName": "Tu equipo",
+    "unavailable": "No se pudieron cargar tus equipos. Por ahora se muestran tus propias licencias."
+  },
+  "templateEditor": {
+    "divergence": {
+      "setPerTrim": "Definir por versión",
+      "shared": "compartido",
+      "moveToShared": "Pasar a compartido"
+    },
+    "trim": {
+      "nameLabel": "Nombre de la versión",
+      "remove": "Quitar versión",
+      "manufacturerCode": "Código del fabricante",
+      "styleName": "Nombre del estilo",
+      "vinPattern": "Patrón de VIN",
+      "selectorMissing": "Una plantilla con más de una versión no puede tener una versión sin selector: coincidiría con todas las señales y haría ambigua cada decodificación de este año de modelo. Asigna a esta versión un código del fabricante, un nombre de estilo o un patrón de VIN."
+    },
+    "entitlement": {
+      "create": "Puedes crear esta plantilla",
+      "licensed": "Puedes editar esta plantilla",
+      "manufacturer": "Puedes editar esta plantilla",
+      "curator": "Puedes editar todo aquí",
+      "license-required": "Se necesita una licencia de desarrollador",
+      "unavailable": "No se pudo verificar el acceso",
+      "readOnly": "{title} — solo lectura",
+      "hardwareLocked": "Qué hardware viene con un auto lo decide DIMO, por eso el campo de plantilla de hardware está bloqueado.",
+      "reason": {
+        "curator": "Eres curador de DIMO, así que aquí no hay nada bloqueado para ti.",
+        "licenseUnavailable": "No pudimos verificar tu licencia de desarrollador de DIMO en este momento, así que no se puede editar nada. Vuelve a cargar en un momento y debería resolverse.",
+        "create": "{via, select, owner {Tienes la licencia de desarrollador de DIMO {license}. Todavía no se ha publicado nada para este año de modelo, así que tú escribes la primera.} other {Firmas por la licencia de desarrollador de DIMO {license}. Todavía no se ha publicado nada para este año de modelo, así que tú escribes la primera.}}",
+        "licensed": "{via, select, owner {Tienes la licencia de desarrollador de DIMO {license}, y eso es todo lo que necesitas para publicar cambios aquí.} other {Firmas por la licencia de desarrollador de DIMO {license}, y eso es todo lo que necesitas para publicar cambios aquí.}}",
+        "manufacturerUnavailable": "No pudimos verificar quién tiene el Manufacturer NFT de esta marca en este momento. Vuelve a cargar en un momento y debería resolverse.",
+        "manufacturer": "Tienes el Manufacturer NFT de {make} (#{tokenId}), así que puedes editar esta marca.",
+        "licenseRequired": "Para editar una plantilla se necesita una licencia de desarrollador de DIMO, y esta cuenta no tiene ninguna ni firma por ninguna. Crea una en Licencias de desarrollador y vuelve a cargar esta página.",
+        "license": "#{tokenId}",
+        "licenseWithAlias": "#{tokenId}, {alias}",
+        "vehicles": "{count, plural, =0 {Todavía no la usa ningún auto.} =1 {Ya la usa un auto, así que publicar cambia cómo se describe ese auto.} other {Ya la usan # autos, así que publicar cambia cómo se describen todos.}}",
+        "vehiclesUnknown": "No pudimos verificar cuántos autos usan esta definición, así que supón que algunos ya están circulando.",
+        "withVehicles": "{reason} {vehicles}"
+      }
+    },
+    "normalisation": {
+      "title": "Lo que el editor cambió y tú no escribiste",
+      "dismiss": "Descartar"
+    },
+    "notes": {
+      "cleared": "borrado — el atributo se elimina, no se guarda vacío",
+      "storedAsNumber": "guardado como el número {value}, no como el texto {text}",
+      "whitespace": "se quitaron los espacios al inicio y al final"
+    },
+    "where": {
+      "templateCell": "plantilla {label}",
+      "trimCell": "versión {name} {label}"
+    },
+    "grid": {
+      "attribute": "Atributo",
+      "values": "Valores",
+      "noSelector": "sin selector"
+    }
+  },
+  "toggle": {
+    "label": "interruptor"
+  },
+  "timeRange": {
+    "range": "Rango",
+    "presets": {
+      "24h": "24 h",
+      "7d": "7 días",
+      "30d": "30 días",
+      "custom": "Personalizado"
+    },
+    "from": "Desde (UTC)",
+    "to": "Hasta (UTC)",
+    "invalid": "El inicio debe ser anterior al fin."
+  },
+  "signIn": {
+    "acceptTerms": "Debes aceptar los términos del servicio y la política de privacidad"
+  },
+  "vehicleTokenIds": {
+    "placeholder": "Ingresa los ID de token de los vehículos, uno por línea o separados por comas",
+    "label": "ID de token de vehículos",
+    "invalid": "ID de token no válido: \"{id}\". Todos los ID de token deben ser numéricos.",
+    "tooMany": "Demasiados ID de token. Se permite un máximo de 1000.",
+    "entered": "{count, plural, one {# ID de token ingresado} other {# ID de token ingresados}}",
+    "enteredUnique": "{count, plural, one {# ID de token ingresado} other {# ID de token ingresados}} ({unique} únicos)",
+    "helpIntro": "Puedes ingresar los ID de token de los vehículos de estas formas:",
+    "helpPerLine": "Uno por línea: 12345, 67890, 11111",
+    "helpComma": "Separados por comas: 12345, 67890, 11111",
+    "helpMixed": "También se admite un formato mixto"
+  },
+  "assetDids": {
+    "placeholder": "Ingresa los DID de los vehículos, uno por línea o separados por comas",
+    "label": "DID de activos",
+    "empty": "Los DID de activos no pueden estar vacíos.",
+    "tooLong": "DID de activo demasiado largo: \"{id}\". La longitud máxima es de 200 caracteres.",
+    "tooMany": "Demasiados DID de vehículos. Se permite un máximo de 1000 DID.",
+    "entered": "{count, plural, one {# DID de activo ingresado} other {# DID de activos ingresados}}",
+    "enteredUnique": "{count, plural, one {# DID de activo ingresado} other {# DID de activos ingresados}} ({unique} únicos)",
+    "helpIntro": "Puedes ingresar los DID de los vehículos de estas formas:",
+    "helpPerLine": "Uno por línea:",
+    "helpComma": "Separados por comas:"
+  },
+  "workspaceName": {
+    "updated": "El nombre de la licencia de desarrollador se actualizó correctamente. Actualiza la página para ver los cambios.",
+    "inUse": "El nombre de la licencia de desarrollador ya está en uso. Inténtalo de nuevo con otro nombre.",
+    "failed": "No se pudo actualizar el nombre de la licencia de desarrollador",
+    "title": "Editar el nombre de la licencia de desarrollador",
+    "label": "Nombre de la licencia de desarrollador",
+    "required": "El nombre de la licencia de desarrollador es obligatorio",
+    "placeholder": "Ingresa el nombre de la licencia de desarrollador",
+    "description": "Este es el espacio de nombres que se usa en todas tus apps. Es un nombre público, visible para otros desarrolladores y usuarios del ecosistema."
+  },
+  "licenseAlias": {
+    "tooLong": "Usa como máximo 32 caracteres. Las letras con acento y los emojis cuentan como más de uno."
+  },
+  "dataAccess": {
+    "connectWallet": "Conectar con tu wallet",
+    "connectFailed": "No se pudo conectar tu wallet. Inténtalo de nuevo.",
+    "connectPrompt": "Conéctate con tu wallet para leer {license}. El propietario del equipo le dio acceso a tu wallet, y el token se queda en este navegador."
+  },
+  "memberJwt": {
+    "sessionExpired": "Tu sesión venció. Vuelve a iniciar sesión.",
+    "challengeFailed": "{status, select, none {No se pudo empezar a conectar con esta licencia (sin respuesta). Inténtalo de nuevo.} other {No se pudo empezar a conectar con esta licencia ({status}). Inténtalo de nuevo.}}",
+    "connectFailed": "{status, select, none {No se pudo conectar tu wallet (sin respuesta). Inténtalo de nuevo.} other {No se pudo conectar tu wallet ({status}). Inténtalo de nuevo.}}",
+    "propagating": "El acceso todavía se está propagando — inténtalo de nuevo en un minuto"
+  },
+  "teamCopy": {
+    "grantWarning": "El acceso a datos permite que {name} use todos los permisos que los vehículos le otorgaron a {license}, incluidos los comandos, a través de las API de DIMO — no solo lo que muestra la consola. Sus consultas gastan los créditos DCX de {license}.",
+    "askForAccess": "Pídele a {ownerEmail} acceso a datos para {license}.",
+    "noLongerHasAccess": "Ya no tienes acceso a esta licencia.",
+    "dataAccessUnavailable": "El acceso a datos para miembros del equipo todavía no está disponible.",
+    "removedFromTeam": "Ya no eres miembro de {teamName}.",
+    "removedFromThatTeam": "Ya no eres miembro de ese equipo.",
+    "signerLocked": "Tu acceso está vinculado a otra wallet. Pídele a {ownerEmail} que primero lo revoque.",
+    "signerLockedNoOwner": "Tu acceso está vinculado a otra wallet. Pídele al propietario del equipo que primero lo revoque.",
+    "leaveConfirm": "¿Salir de {teamName}? Se le pedirá a {ownerEmail} que revoque tu acceso a datos.",
+    "signerInUse": "Esta wallet ya está registrada como la clave de otra persona, así que no se puede usar para el acceso a datos. Comunícate con el soporte de DIMO."
+  },
+  "webhooks": {
+    "table": {
+      "fetchError": "Hubo un error al obtener tus webhooks",
+      "empty": "Todavía no has creado ningún webhook.",
+      "description": "Descripción",
+      "displayName": "Nombre visible",
+      "service": "Servicio",
+      "cooldown": "Período de espera",
+      "vehicles": "Vehículos",
+      "errors": "Errores",
+      "status": "Estado"
+    },
+    "form": {
+      "genericError": "Algo salió mal al completar la operación",
+      "cancel": "Cancelar",
+      "previous": "Anterior",
+      "finish": "Terminar",
+      "next": "Siguiente"
+    },
+    "edit": {
+      "title": "Editar webhook",
+      "updated": "Webhook actualizado correctamente",
+      "updateFailed": "Error al actualizar el webhook",
+      "saveFirst": "Guarda o descarta tus cambios antes de continuar",
+      "vehiclesFetchError": "Error al obtener los vehículos suscritos",
+      "subscribedVehicles": "Vehículos suscritos",
+      "vehicleCount": "{count, plural, one {# vehículo} other {# vehículos}}",
+      "enterAssetDid": "Ingresa al menos un DID de activo.",
+      "unsubscribeFailed": "No se pudo cancelar la suscripción de los vehículos. Inténtalo de nuevo.",
+      "unsubscribedCount": "{count, plural, one {Se canceló la suscripción de # vehículo} other {Se canceló la suscripción de # vehículos}}",
+      "removeTitle": "Quitar vehículos",
+      "removeDidsLabel": "DID de activos para cancelar la suscripción",
+      "removeDidsPlaceholder": "Ingresa los DID de activos cuya suscripción a este webhook quieres cancelar",
+      "removing": "Quitando…",
+      "removeCount": "{count, plural, one {Quitar # vehículo} other {Quitar # vehículos}}",
+      "subscribeFailed": "No se pudo suscribir los vehículos. Inténtalo de nuevo.",
+      "subscribedCount": "{count, plural, one {Se suscribió # vehículo} other {Se suscribieron # vehículos}}",
+      "addTitle": "Agregar vehículos",
+      "addDidsLabel": "DID de activos para suscribir",
+      "addDidsPlaceholder": "Ingresa los DID de activos que quieres suscribir a este webhook",
+      "adding": "Agregando…",
+      "addCount": "{count, plural, one {Agregar # vehículo} other {Agregar # vehículos}}",
+      "vehicleTokenId": "ID de token del vehículo",
+      "fetchWebhookError": "Error al obtener el webhook",
+      "notFound": "No se encontró el webhook",
+      "subscribedAll": "Se suscribieron todos los vehículos",
+      "subscribeAllFailed": "No se pudo suscribir todos los vehículos",
+      "whoToSubscribe": "¿A quién quieres suscribir?",
+      "manualControls": "Controles manuales",
+      "manualControlsHint": "Suscribe o cancela manualmente la suscripción de todos los vehículos vinculados a este webhook.",
+      "subscribing": "Suscribiendo…",
+      "subscribeAll": "Suscribir todos los vehículos",
+      "unsubscribeAll": "Cancelar la suscripción de todos",
+      "downloadCsv": "Descargar CSV",
+      "unsubscribeVehicles": "Cancelar suscripción de vehículos",
+      "unsubscribedAll": "Se canceló la suscripción de todos los vehículos.",
+      "unsubscribeAllFailed": "Ocurrió un error al cancelar la suscripción de todos los vehículos.",
+      "unsubscribeAllConfirm": "¿Seguro que quieres cancelar la suscripción de todos los vehículos suscritos? Esta acción no se puede deshacer.",
+      "unsubscribing": "Cancelando la suscripción…",
+      "unsubscribeAllButton": "Cancelar suscripciones",
+      "button": "Editar"
+    },
+    "delete": {
+      "mustUnsubscribe": "Debes cancelar la suscripción de todos los vehículos antes de eliminarlo",
+      "deleted": "Webhook eliminado correctamente",
+      "error": "Hubo un error al eliminar tu webhook",
+      "deleting": "Eliminando el webhook…",
+      "success": "Listo",
+      "title": "Eliminar webhook",
+      "successBody": "Webhook eliminado correctamente",
+      "confirm": "¿Seguro que quieres eliminar este webhook? Esta acción no se puede deshacer.",
+      "done": "Listo",
+      "button": "Eliminar"
+    },
+    "test": {
+      "triggered": "Webhook activado correctamente.",
+      "axiosError": "Ocurrió un error al probar el webhook",
+      "error": "Hubo un error al probar tu webhook",
+      "sending": "Enviando una prueba…",
+      "title": "Probar webhook",
+      "confirm": "¿Quieres probar este webhook? Se enviará una prueba a la URI de destino especificada.",
+      "send": "Enviar una prueba"
+    },
+    "licenseSelector": {
+      "placeholder": "Selecciona una licencia de desarrollador",
+      "label": "Selecciona una licencia de desarrollador"
+    },
+    "details": {
+      "description": "Descripción",
+      "displayName": "Nombre visible",
+      "service": "Servicio",
+      "cooldownPeriod": "Período de espera",
+      "url": "URL del webhook",
+      "status": "Estado",
+      "cooldown": "Período de espera",
+      "cooldownSeconds": "{seconds} s"
+    },
+    "generateJwt": {
+      "message": "Genera un JWT de desarrollador para ver la configuración de tus webhooks.",
+      "consoleAccessPending": "Obteniendo un JWT de desarrollador con acceso desde la consola…",
+      "consoleAccessFailed": "No se pudo obtener un JWT de desarrollador con acceso desde la consola. Usa una clave de API."
+    },
+    "status": {
+      "enabled": "Activado",
+      "disabled": "Desactivado",
+      "failed": "Fallido"
+    },
+    "statusToggle": {
+      "label": "Estado"
+    },
+    "section": {
+      "title": "Webhooks",
+      "create": "+ Crear un webhook"
+    },
+    "url": {
+      "label": "URL del webhook"
+    },
+    "toggle": {
+      "updating": "{status, select, enabled {Cambiando el estado del webhook a activado} other {Cambiando el estado del webhook a desactivado}}",
+      "updated": "Estado del webhook actualizado correctamente",
+      "failed": "No se pudo actualizar el estado del webhook"
+    },
+    "fields": {
+      "description": {
+        "label": "Descripción del webhook",
+        "required": "Ingresa una descripción para el webhook",
+        "placeholder": "Ingresa una descripción para tu webhook"
+      },
+      "displayName": {
+        "label": "Nombre visible",
+        "placeholder": "Ingresa un nombre visible para tu webhook (opcional)"
+      },
+      "cooldown": {
+        "label": "Período de espera",
+        "required": "Ingresa un período de espera en segundos",
+        "invalidNumber": "Ingresa un número válido",
+        "negative": "El período de espera debe ser 0 o mayor",
+        "tooLong": "El período de espera no puede superar los 86400 segundos (24 horas)",
+        "placeholder": "Ingresa el período de espera en segundos (p. ej., 30)",
+        "hint": "Tiempo mínimo entre llamadas al webhook para el mismo evento (0 para tiempo real)"
+      },
+      "service": {
+        "label": "Servicio",
+        "placeholder": "Elige un servicio",
+        "required": "Selecciona un servicio de webhook"
+      },
+      "targetUrl": {
+        "label": "URL del webhook",
+        "invalid": "Ingresa una URL válida",
+        "needsProtocol": "Ingresa una URL válida, debe incluir http:// o https://",
+        "placeholder": "Ingresa la URL donde quieres recibir los eventos",
+        "hint": "Ingresa una URL pública con SSL donde recibirás los eventos"
+      },
+      "verification": {
+        "label": "Token de verificación",
+        "required": "Ingresa una cadena válida",
+        "placeholder": "Ingresa un token de verificación",
+        "hint": "Elige cualquier cadena única para verificar que la URL de tu webhook es tuya. Cuando enviemos una solicitud de verificación, tu servidor debe responder con esta misma cadena en texto plano. Así se comprueba que controlas la URL de destino."
+      },
+      "subscribe": {
+        "question": "¿A quién quieres suscribir?",
+        "all": "Suscribir todos los vehículos existentes",
+        "specificLabel": "Seleccionar vehículos específicos",
+        "specificPlaceholder": "Ingresa los DID de activos de los vehículos que quieres suscribir a este webhook"
+      }
+    },
+    "celBuilder": {
+      "selectEvent": "Selecciona un evento",
+      "buildConditions": "Define las condiciones",
+      "selectAttribute": "Selecciona un atributo",
+      "selectEventPlaceholder": "Elige un evento",
+      "selectOperator": "Selecciona un operador",
+      "enterNumber": "Ingresa un número",
+      "selectValue": "Selecciona un valor",
+      "generate": "Generar CEL",
+      "true": "Verdadero",
+      "false": "Falso",
+      "operators": {
+        "equal": "es igual a",
+        "greater": "es mayor que",
+        "less": "es menor que"
+      }
+    },
+    "validation": {
+      "valueRequired": "El valor es obligatorio",
+      "selectEvent": "Selecciona un nombre de evento",
+      "oneCondition": "Debe haber exactamente una condición CEL",
+      "completeConditions": "Completa todos los campos de la condición antes de guardar."
+    },
+    "events": {
+      "harshBraking": "Frenada brusca",
+      "extremeBraking": "Frenada extrema",
+      "harshAcceleration": "Aceleración brusca",
+      "harshCornering": "Giro brusco",
+      "collision": "Colisión"
+    },
+    "conditions": {
+      "speed": "Velocidad",
+      "obdIsPluggedIn": "Dispositivo conectado",
+      "isIgnitionOn": "Encendido activado",
+      "batteryCurrentPower": "Potencia actual de la batería",
+      "batteryIsCharging": "Batería cargando",
+      "odometer": "Odómetro",
+      "chargeLevel": "Nivel de carga",
+      "fuelRelative": "Nivel relativo de combustible",
+      "fuelAbsolute": "Nivel absoluto de combustible",
+      "tireFrontLeft": "Presión de llanta (del. izq.)",
+      "tireFrontRight": "Presión de llanta (del. der.)",
+      "tireBackLeft": "Presión de llanta (tras. izq.)",
+      "tireBackRight": "Presión de llanta (tras. der.)",
+      "engineSpeed": "Velocidad del motor",
+      "throttlePosition": "Posición del acelerador"
+    },
+    "steps": {
+      "configure": "Configurar",
+      "delivery": "Definir la entrega",
+      "vehicles": "Definir vehículos"
+    },
+    "create": {
+      "created": "Webhook creado correctamente",
+      "noVehicles": "No hay vehículos suscritos",
+      "subscribedCount": "{count, plural, one {Se suscribió # vehículo} other {Se suscribieron # vehículos}}"
+    },
+    "service": {
+      "signals": "Señales VSS",
+      "events": "Eventos"
+    }
+  },
+  "freshness": {
+    "never": "Nunca",
+    "justNow": "justo ahora",
+    "minutesAgo": "hace {count, number} min",
+    "hoursAgo": "hace {count, number} h",
+    "daysAgo": "{count, plural, one {hace # día} other {hace # días}}",
+    "absolute": "{date}, {time} UTC",
+    "noDate": "—"
+  },
+  "loadingModal": {
+    "processing": "Procesando"
+  },
+  "modal": {
+    "dialog": "Diálogo"
+  },
+  "table": {
+    "showingNone": "Mostrando 0 de 0",
+    "showing": "Mostrando {first, number}–{last, number} de {total, number}",
+    "label": "Tabla"
+  },
+  "transactions": {
+    "insufficientBalance": "Saldo de DIMO o DCX insuficiente",
+    "connectionNameTooLong": "El nombre de la conexión es demasiado largo. Usa un nombre de 32 caracteres o menos.",
+    "balanceCheckFailed": "No se pudo verificar tu saldo de DIMO. Inténtalo de nuevo.",
+    "insufficientDimo": "Saldo de DIMO insuficiente. Necesitas al menos {required, number, ::.00} tokens DIMO (aproximadamente ${usd, number}) para acuñar una conexión.",
+    "notEnoughDimo": "No tienes suficientes $DIMO para acuñar una conexión.",
+    "connectionNameTaken": "Este nombre de conexión ya está en uso. Elige otro nombre e inténtalo de nuevo."
+  },
+  "signals": {
+    "speed": "Velocidad",
+    "powertrainTransmissionTravelledDistance": "Odómetro",
+    "powertrainCombustionEngineSpeed": "Velocidad del motor",
+    "powertrainFuelSystemRelativeLevel": "Nivel de combustible",
+    "powertrainRange": "Autonomía",
+    "powertrainTractionBatteryStateOfChargeCurrent": "Carga de la batería",
+    "powertrainTractionBatteryChargingIsCharging": "Cargando",
+    "currentLocationCoordinates": "Ubicación",
+    "currentLocationApproximateCoordinates": "Ubicación aproximada",
+    "currentLocationLatitude": "Latitud",
+    "currentLocationLongitude": "Longitud",
+    "obdDTCList": "Códigos de diagnóstico",
+    "obdEngineLoad": "Carga del motor",
+    "obdRunTime": "Tiempo de motor encendido",
+    "lowVoltageBatteryCurrentVoltage": "Voltaje de batería de 12 V",
+    "exteriorAirTemperature": "Temperatura exterior",
+    "isIgnitionOn": "Encendido"
+  },
+  "permissions": {
+    "1": "Datos sin ubicación",
+    "2": "Comandos",
+    "3": "Ubicación actual",
+    "4": "Historial de ubicaciones",
+    "5": "Credencial de VIN",
+    "6": "Datos en vivo",
+    "7": "Datos sin procesar",
+    "8": "Ubicación aproximada",
+    "unknown": "Privilegio {id}"
+  },
+  "status": {
+    "loading": "Cargando…",
+    "saving": "Guardando…",
+    "success": "Listo",
+    "copied": "Copiado"
+  },
+  "pagination": {
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "page": "Página {page}"
+  },
+  "ownerOnly": {
+    "webhooks": {
+      "title": "El propietario del equipo administra los webhooks",
+      "body": "{ownerEmail} administra los webhooks de {team}. Cambia a tu propio equipo para administrar los webhooks de tus licencias."
+    },
+    "connections": {
+      "title": "El propietario del equipo administra las conexiones",
+      "body": "{ownerEmail} administra las conexiones de {team}. Cambia a tu propio equipo para administrar las conexiones de tus licencias."
+    },
+    "configurations": {
+      "title": "El propietario del equipo administra las configuraciones",
+      "body": "{ownerEmail} administra las configuraciones de {team}. Cambia a tu propio equipo para administrar las configuraciones de tus licencias."
+    }
+  },
+  "otp": {
+    "title": "¡Hola de nuevo!",
+    "enterCode": "Ingresa el código que enviamos a <strong>{email}</strong>",
+    "signIn": "Iniciar sesión",
+    "resendCode": "Reenviar código",
+    "invalidCode": "Código OTP no válido",
+    "loginFailed": "No se pudo iniciar sesión con OTP",
+    "resent": "Enviamos un nuevo código OTP a tu correo",
+    "resendFailed": "No se pudo reenviar el código OTP",
+    "troubleLoggingIn": "¿Problemas para iniciar sesión? <support>Obtén ayuda</support>"
+  }
+}

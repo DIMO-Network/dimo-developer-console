@@ -1,0 +1,195 @@
+{
+  "metadata": {
+    "listTitle": "SDK configurator | {appName}",
+    "newTitle": "New configuration | {appName}",
+    "editTitle": "Edit configuration | {appName}"
+  },
+  "breadcrumb": {
+    "licenseDetails": "License details",
+    "sdkConfigurator": "SDK configurator",
+    "newConfiguration": "New configuration",
+    "editConfiguration": "Edit configuration"
+  },
+  "components": {
+    "LoginWithDimo": "Login with DIMO",
+    "ShareVehiclesWithDimo": "Share vehicles with DIMO",
+    "ExecuteAdvancedTransactionWithDimo": "Execute advanced transaction"
+  },
+  "list": {
+    "subtitle": "Login with DIMO configurator",
+    "newConfiguration": "New configuration",
+    "intro": "A vehicle sharing link is required for vehicle owners to grant data permissions to your application. <docsLink>Learn how to use the configurationId with LIWD</docsLink>"
+  },
+  "licenseLoadError": "There was an error fetching the license details",
+  "table": {
+    "loading": "Loading…",
+    "loadError": "Could not load configurations. Reload to try again.",
+    "empty": "No configurations yet.",
+    "createFirst": "Create your first configuration",
+    "name": "Name",
+    "component": "Component",
+    "actions": "Actions",
+    "untitled": "(untitled)",
+    "copyLink": "Copy link",
+    "linkCopied": "Sharing link copied",
+    "deleteFailed": "Failed to delete the configuration"
+  },
+  "new": {
+    "subtitle": "New configuration",
+    "created": "Configuration successfully created",
+    "createFailed": "Failed to create configuration. Please try again."
+  },
+  "edit": {
+    "subtitle": "Edit configuration",
+    "updated": "Configuration successfully updated",
+    "updateFailed": "Failed to update configuration. Please try again.",
+    "loadFailed": "Couldn't load this configuration. Reload the page to try again."
+  },
+  "form": {
+    "basics": {
+      "title": "Basics",
+      "configurationId": "Configuration ID",
+      "copyLink": "Copy link",
+      "idUnavailable": "Configuration ID is not available",
+      "linkCopied": "Configuration link copied to clipboard",
+      "name": "Configuration name",
+      "namePlaceholder": "e.g. My App – Production",
+      "nameRequired": "Configuration name is required",
+      "clientId": "Client ID"
+    },
+    "component": {
+      "title": "Component",
+      "login": "🔑  Login with DIMO",
+      "share": "🚗  Share vehicles with DIMO"
+    },
+    "connection": {
+      "title": "Connection",
+      "redirectUri": "Redirect URI",
+      "redirectUriRequired": "Redirect URI is required",
+      "select": "Select",
+      "noRedirectUri": "This license has no redirect URI yet, so a configuration can't be saved. Add one on the license's Config tab.",
+      "goToConfigTab": "Go to the Config tab",
+      "expirationDate": "Expiration date",
+      "expirationDateSharingOnly": "Expiration date (sharing only)",
+      "expirationDateRequired": "Expiration date is required",
+      "expirationDateTooEarly": "Pick today or a later date",
+      "utm": "UTM"
+    },
+    "ownerOnly": "Only the team owner can change configurations.",
+    "update": "Update",
+    "preview": {
+      "generatedOutput": "Generated output",
+      "saveToGenerate": "Save to generate your link",
+      "afterSaving": "After saving, you'll get a short <code>configurationId</code> link you can share directly with users."
+    },
+    "signIn": {
+      "title": "Sign-in window",
+      "language": "Language",
+      "matchBrowser": "Match the user's browser",
+      "languageHint": "When matching, browsers set to Japanese, Spanish or Chinese get that language. Japan, China, Taiwan and Hong Kong time zones get theirs, and everyone else gets English. Users can always switch.",
+      "email": "Email address",
+      "emailOptions": {
+        "none": "Don't ask",
+        "optional": "Optional",
+        "required": "Required"
+      },
+      "emailHints": {
+        "none": "Users aren't asked, and your app doesn't get their email.",
+        "optional": "After signing in, users choose whether to share their email with your app.",
+        "required": "After signing in, users must share their email with your app to continue."
+      }
+    },
+    "brand": {
+      "label": "Brand",
+      "hint": "Which brand the button and the sign-in window show. Leave as \"Default\" to use your workspace default brand.",
+      "default": "Default"
+    },
+    "legal": {
+      "title": "Privacy policy & terms of service",
+      "privacyPolicyUrl": "Privacy policy URL",
+      "termsUrl": "Terms of service URL",
+      "shownToVehicleOwners": "Displayed to vehicle owners before they grant permissions. Leave blank to skip.",
+      "shownToUsers": "Displayed to users before they log in. Leave blank to skip."
+    },
+    "login": {
+      "settings": "Login settings"
+    },
+    "share": {
+      "permissionsTitle": "Vehicle permissions",
+      "useTemplate": "Use permission template",
+      "customPermissions": "Custom permissions",
+      "templateId": "Permissions template ID",
+      "templateIdRequired": "Enter a permissions template ID",
+      "templateIdHint": "The number of a permissions template, for example 1.",
+      "chooseOne": "Choose at least one permission",
+      "documentsTitle": "Documents",
+      "documentsHint": "Documents your app can read for each shared vehicle. Users see them in the request before they share.",
+      "vehiclesTitle": "Which vehicles",
+      "vehiclesHint": "Leave blank to let users share any of their vehicles. Others are listed as \"Can't be shared\", with the reason. Separate values with commas.",
+      "vehicleTokenIds": "Vehicle token IDs",
+      "vehicleMakes": "Vehicle makes",
+      "powertrainTypes": "Powertrain types"
+    },
+    "transaction": {
+      "vehicles": "Vehicles"
+    }
+  },
+  "permissions": {
+    "NONLOCATION_TELEMETRY": {
+      "title": "Non Location Telemetry",
+      "description": "Access to non-location vehicle telemetry"
+    },
+    "COMMANDS": {
+      "title": "Commands",
+      "description": "Execute vehicle commands"
+    },
+    "CURRENT_LOCATION": {
+      "title": "Current Location",
+      "description": "Access to current vehicle location"
+    },
+    "ALLTIME_LOCATION": {
+      "title": "All Time Location",
+      "description": "Access to historical location data"
+    },
+    "CREDENTIALS": {
+      "title": "Credentials",
+      "description": "Access to VIN credentials"
+    },
+    "STREAMS": {
+      "title": "Streams",
+      "description": "Access to live data streams"
+    },
+    "RAW_DATA": {
+      "title": "Raw Data",
+      "description": "Access to raw vehicle data"
+    },
+    "APPROXIMATE_LOCATION": {
+      "title": "Approximate Location",
+      "description": "Access to approximate location data"
+    }
+  },
+  "documents": {
+    "vehicle": {
+      "title": "Vehicle documents",
+      "description": "Registration, insurance, service records and other vehicle documents."
+    },
+    "driver": {
+      "title": "Driver documents",
+      "description": "The owner's driver's license and other driver documents."
+    },
+    "rawVehicle": {
+      "title": "Original vehicle files",
+      "description": "The photos and PDFs behind the vehicle documents."
+    },
+    "rawDriver": {
+      "title": "Original driver files",
+      "description": "The photos and PDFs behind the driver documents."
+    }
+  },
+  "output": {
+    "viewAs": "View as:",
+    "code": "Code",
+    "url": "URL",
+    "generatedCode": "Generated code"
+  }
+}

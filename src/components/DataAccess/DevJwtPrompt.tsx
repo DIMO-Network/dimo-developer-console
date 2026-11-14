@@ -1,8 +1,8 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import type { FC } from 'react';
 import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
 import { ConnectWalletButton } from '@/components/DataAccess/ConnectWalletButton';
-import { askForAccess, DATA_ACCESS_UNAVAILABLE } from '@/config/teamCopy';
 import type { LicenseDataAccess } from '@/hooks/useLicenseDataAccess';
 import type { LocalDeveloperLicense } from '@/types/webhook';
 
@@ -15,26 +15,31 @@ export const DevJwtPrompt: FC<{
   onSuccess: () => void;
   message: string;
 }> = ({ license, access, onSuccess, message }) => {
+  const t = useTranslations('common');
   if (access.kind === 'owner') {
     return (
       <GenerateDevJWTSection license={license} onSuccess={onSuccess} message={message} />
     );
   }
   if (access.kind === 'member-unavailable') {
-    return <p className="text-body-sm text-muted">{DATA_ACCESS_UNAVAILABLE}</p>;
+    return (
+      <p className="text-body-sm text-muted">{t('teamCopy.dataAccessUnavailable')}</p>
+    );
   }
   if (access.kind === 'member-no-access') {
     return (
       <p className="text-body-sm text-muted">
-        {askForAccess(access.ownerEmail, license.label)}
+        {t('teamCopy.askForAccess', {
+          ownerEmail: access.ownerEmail,
+          license: license.label,
+        })}
       </p>
     );
   }
   return (
     <div>
       <p className="text-body-sm text-muted">
-        Connect with your wallet to read {license.label}. The team owner gave your wallet
-        access, and the token stays in this browser.
+        {t('dataAccess.connectPrompt', { license: license.label })}
       </p>
       <div className="mt-2">
         <ConnectWalletButton

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { type FC } from 'react';
 import classnames from 'classnames';
 import type { GridRow } from '@/utils/templateGrid';
@@ -24,10 +25,11 @@ const RAIL_BUTTON =
  * not something a value typed into a spanning cell could ever express.
  */
 export const DivergenceRail: FC<Props> = ({ row, readOnly, onLift, onSplit }) => {
+  const t = useTranslations('common');
   const split =
     onSplit && row.canSplit && !readOnly ? (
       <button type="button" onClick={() => onSplit(row.def.name)} className={RAIL_BUTTON}>
-        Set per trim
+        {t('templateEditor.divergence.setPerTrim')}
       </button>
     ) : null;
 
@@ -42,7 +44,9 @@ export const DivergenceRail: FC<Props> = ({ row, readOnly, onLift, onSplit }) =>
   if (row.scope === 'shared') {
     return (
       <span className="flex items-center gap-2">
-        <span className="text-label text-muted">shared</span>
+        <span className="text-label text-muted">
+          {t('templateEditor.divergence.shared')}
+        </span>
         {split}
       </span>
     );
@@ -64,7 +68,7 @@ export const DivergenceRail: FC<Props> = ({ row, readOnly, onLift, onSplit }) =>
           onClick={() => onLift(row.def.name)}
           className={RAIL_BUTTON}
         >
-          Move to shared
+          {t('templateEditor.divergence.moveToShared')}
         </button>
       )}
     </span>

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, {
   createContext,
   FC,
@@ -20,12 +21,6 @@ import {
   subscribeVehicles,
 } from '@/services/webhook';
 
-const steps = [
-  new FormStep(WebhookFormStepName.CONFIGURE, 'Configure'),
-  new FormStep(WebhookFormStepName.DELIVERY, 'Specify delivery'),
-  new FormStep(WebhookFormStepName.SPECIFY_VEHICLES, 'Specify vehicles'),
-];
-
 interface ContextProps {
   steps: FormStep[];
   stepIndex: number;
@@ -47,6 +42,18 @@ interface ContextProps {
 export const FormStepContext = createContext<ContextProps | undefined>(undefined);
 
 export const FormStepContextProvider: FC<PropsWithChildren> = ({ children }) => {
+  const t = useTranslations('common');
+  const configureTitle = t('webhooks.steps.configure');
+  const deliveryTitle = t('webhooks.steps.delivery');
+  const vehiclesTitle = t('webhooks.steps.vehicles');
+  const steps = useMemo(
+    () => [
+      new FormStep(WebhookFormStepName.CONFIGURE, configureTitle),
+      new FormStep(WebhookFormStepName.DELIVERY, deliveryTitle),
+      new FormStep(WebhookFormStepName.SPECIFY_VEHICLES, vehiclesTitle),
+    ],
+    [configureTitle, deliveryTitle, vehiclesTitle],
+  );
   const [stepIndex, setStepIndex] = useState(0);
   const [createdWebhook, setCreatedWebhook] = useState<Webhook>();
   const isLastStep = stepIndex === steps.length - 1;
@@ -68,7 +75,7 @@ export const FormStepContextProvider: FC<PropsWithChildren> = ({ children }) => 
 
   const getCurrentStep = useCallback(() => {
     return steps[stepIndex];
-  }, [stepIndex]);
+  }, [steps, stepIndex]);
 
   const updateCreatedWebhook = (webhook: Webhook) => setCreatedWebhook(webhook);
 
@@ -76,7 +83,7 @@ export const FormStepContextProvider: FC<PropsWithChildren> = ({ children }) => 
     const formattedData = formatWebhookFormData(webhookData);
     const newWebhook = await createWebhook(formattedData, token);
     setCreatedWebhook(newWebhook);
-    return { message: 'Webhook created successfully' };
+    return { message: t('webhooks.create.created') };
   };
 
   const handleSubscribeVehicles = async (
@@ -98,10 +105,12 @@ export const FormStepContextProvider: FC<PropsWithChildren> = ({ children }) => 
       return {
         message:
           response.message ||
-          `Successfully subscribed ${webhookData.subscribe.assetDIDs.length} vehicle${webhookData.subscribe.assetDIDs.length !== 1 ? 's' : ''}`,
+          t('webhooks.create.subscribedCount', {
+            count: webhookData.subscribe.assetDIDs.length,
+          }),
       };
     } else {
-      return { message: 'No vehicles subscribed' };
+      return { message: t('webhooks.create.noVehicles') };
     }
   };
 

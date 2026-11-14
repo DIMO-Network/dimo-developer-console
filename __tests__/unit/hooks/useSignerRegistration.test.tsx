@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { GlobalAccountContext } from '@/context/GlobalAccountContext';
 import { useSignerRegistration } from '@/hooks/useSignerRegistration';
 import { SESSION_KEY, SIGNER_PROOF_KEY } from '@/utils/globalAccountSession';
-import { SIGNER_IN_USE_MESSAGE } from '@/config/teamCopy';
+import common from '../../../messages/en/common.json';
 
 const SESSION = {
   email: 'sam@harness.dev',
@@ -145,7 +145,9 @@ describe('useSignerRegistration', () => {
   it('explains SIGNER_IN_USE', async () => {
     (registerSigner as jest.Mock).mockResolvedValue(refused('SIGNER_IN_USE'));
     renderHook(() => useSignerRegistration(null), { wrapper });
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(SIGNER_IN_USE_MESSAGE));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(common.teamCopy.signerInUse),
+    );
   });
 
   it('retries on a later sign-in after any other refusal', async () => {

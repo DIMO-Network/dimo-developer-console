@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { type FC, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Abi, encodeFunctionData } from 'viem';
@@ -13,7 +14,7 @@ import { TextError } from '@/components/TextError';
 import { TextField } from '@/components/TextField';
 import { Title } from '@/components/Title';
 import { useContractGA } from '@/hooks/useContractGA';
-import { isLicenseAliasTooLong, LICENSE_ALIAS_TOO_LONG } from '@/utils/licenseAlias';
+import { isLicenseAliasTooLong, LICENSE_ALIAS_TOO_LONG_KEY } from '@/utils/licenseAlias';
 import { assertUserOperation } from '@/utils/userOperation';
 
 import configuration from '@/config';
@@ -38,6 +39,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
   license,
   onSuccess,
 }) => {
+  const t = useTranslations('common');
   const [isLoading, setIsLoading] = useState(false);
   const { processTransactions } = useContractGA();
   const {
@@ -80,9 +82,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
     setIsLoading(true);
     try {
       await setLicenseAlias(data);
-      toast.success(
-        'Developer license name updated successfully. Refresh to see your changes.',
-      );
+      toast.success(t('workspaceName.updated'));
       if (onSuccess) {
         await onSuccess();
       }
@@ -94,12 +94,11 @@ export const WorkspaceNameModal: FC<IProps> = ({
       if (error instanceof Error) {
         if (error.message === 'AliasAlreadyInUse') {
           setError('workspaceName', {
-            message:
-              'Developer License name already in use. Please try again using a different name.',
+            message: t('workspaceName.inUse'),
           });
         }
       }
-      toast.error('Failed to update developer license name');
+      toast.error(t('workspaceName.failed'));
       Sentry.captureException(error);
     }
   };
@@ -109,28 +108,25 @@ export const WorkspaceNameModal: FC<IProps> = ({
       <form className="workspace-name-content" onSubmit={handleSubmit(onSubmit)}>
         <div className="workspace-name-header">
           <Title className="text-panel-title" component="h3">
-            Edit developer license name
+            {t('workspaceName.title')}
           </Title>
         </div>
         <div className="fields-container">
           <div className="field">
             <Label htmlFor="workspaceName">
-              Developer license name
+              {t('workspaceName.label')}
               <TextField
                 {...register('workspaceName', {
-                  required: 'Developer license name is required',
+                  required: t('workspaceName.required'),
                   validate: (name) =>
-                    !isLicenseAliasTooLong(name) || LICENSE_ALIAS_TOO_LONG,
+                    !isLicenseAliasTooLong(name) || t(LICENSE_ALIAS_TOO_LONG_KEY),
                 })}
                 id="workspaceName"
-                placeholder="Enter developer license name"
+                placeholder={t('workspaceName.placeholder')}
                 defaultValue={license.alias ?? ''}
                 className="field"
               />
-              <p className={'font-normal text-muted'}>
-                This is the namespace used across all your apps. It is a public name
-                visible to other developers and users in the ecosystem.
-              </p>
+              <p className={'font-normal text-muted'}>{t('workspaceName.description')}</p>
               {errors?.workspaceName && (
                 <TextError errorMessage={errors.workspaceName.message!} />
               )}
@@ -144,7 +140,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
             className="save-button"
             loading={isLoading}
           >
-            Save changes
+            {t('actions.saveChanges')}
           </Button>
           <Button
             type="reset"
@@ -153,7 +149,7 @@ export const WorkspaceNameModal: FC<IProps> = ({
             disabled={isLoading}
             onClick={() => setIsOpen(false)}
           >
-            Cancel
+            {t('actions.cancel')}
           </Button>
         </div>
       </form>

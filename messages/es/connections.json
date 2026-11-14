@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "list": "Conexiones | {appName}",
+    "create": "Crear una conexión | {appName}"
+  },
+  "breadcrumb": {
+    "connections": "Conexiones",
+    "back": "Volver a Conexiones"
+  },
+  "list": {
+    "title": "Conexiones",
+    "empty": "Todavía no has creado ninguna conexión.",
+    "keysUnreadable": "No se pueden leer las claves",
+    "finishSetup": "Completar configuración",
+    "details": "Detalles de la conexión",
+    "create": "Crear una conexión",
+    "created": "Conexión creada correctamente",
+    "loadError": "Hubo un problema al obtener tus conexiones"
+  },
+  "details": {
+    "title": "Detalles de la conexión",
+    "environment": "Producción",
+    "licenseSection": "Licencia de conexión",
+    "publicKey": "Clave pública de la licencia de conexión",
+    "privateKey": "Clave privada de la licencia de conexión",
+    "issuanceAddress": "Dirección de emisión de dispositivos",
+    "issuanceKey": "Clave de emisión de dispositivos",
+    "gone": "Esta conexión ya no existe.",
+    "keysUnreadable": "No se pueden leer las claves de esta conexión. Comunícate con el soporte para desarrolladores.",
+    "loadError": "Hubo un problema al cargar los detalles de la conexión"
+  },
+  "discard": {
+    "button": "Descartar",
+    "title": "¿Descartar {name}?",
+    "subtitle": "Sus claves guardadas se eliminan para siempre. Descarta solo una conexión que nunca se acuñó durante la configuración.",
+    "minted": "Esta conexión ya se acuñó. Usa Completar configuración en su lugar.",
+    "lookupFailed": "No se pudo verificar si esta conexión se acuñó, así que no se descartó nada. Inténtalo de nuevo.",
+    "notPending": "Esta conexión ya pasó la configuración, así que no se puede descartar.",
+    "failed": "No se pudo descartar la conexión. Inténtalo de nuevo.",
+    "done": "Conexión descartada"
+  },
+  "create": {
+    "titleNew": "Nueva conexión",
+    "titleFinish": "Completar configuración",
+    "creating": "Creando la conexión, espera…",
+    "generatingKeys": "Generando las claves de tu conexión…",
+    "savingKeys": "Guardando las claves de tu conexión…",
+    "saving": "Guardando tu conexión…",
+    "checkingMinted": "Comprobando si tu conexión ya se acuñó…",
+    "loading": "Cargando tu conexión…",
+    "resumeNote": "<strong>{name}</strong> aún no está terminada. Sus claves están guardadas, así que la configuración puede continuar donde se detuvo.",
+    "finishSetup": "Completar configuración",
+    "nameLabel": "Nombre de la conexión",
+    "namePlaceholder": "Nombre de la conexión",
+    "nameTooLong": "El nombre de la conexión es demasiado largo. Usa un nombre de 32 caracteres o menos.",
+    "nameTakenInTeam": "Tu equipo ya tiene una conexión con este nombre. Elige otro.",
+    "purchase": "Comprar licencia de conexión",
+    "continuePayment": "Continuar con el pago",
+    "keysUnreadableOnResume": "No se pueden leer las claves de esta conexión, así que la configuración no puede continuar. Contacta al soporte para desarrolladores.",
+    "keysNotSaved": "No se pudieron guardar las claves de tu conexión, así que no se acuñó nada.",
+    "finishFromConnections": "Las claves de tu conexión están guardadas, pero la configuración no terminó. Puedes completar la configuración desde Conexiones.",
+    "lookupFailed": "No se pudo comprobar si esta conexión ya se acuñó, así que no se gastó nada. Inténtalo de nuevo.",
+    "nameTaken": "Otra wallet ya usa este nombre, así que no se puede completar la configuración.",
+    "nameRefusedOnResume": "Si tu intento anterior se completó, puede tardar un minuto en aparecer. Vuelve a probar Completar configuración en un momento.",
+    "loadFailed": "No se pudo cargar esta conexión. Vuelve a Conexiones e inténtalo de nuevo.",
+    "gone": "Esta conexión ya no existe, así que no hay nada que completar.",
+    "ownerOnly": "Solo el propietario del equipo puede completar la configuración de esta conexión.",
+    "steps": {
+      "minting": "Aprueba la acuñación para crear tu conexión en la blockchain. Cuesta ~$1 en $DIMO.",
+      "signingAgreements": "Firmando acuerdos de permisos para la Device Issuance Key (acuñar dispositivos sintéticos) y la Connection License Key (generar certificados).",
+      "grantingPermissions": "Aprueba la transacción en la blockchain que otorga a ambas claves sus permisos en esta conexión."
+    },
+    "modal": {
+      "title": "Comprar licencia de conexión",
+      "warning": "<strong>¡Advertencia!</strong> Al continuar, aceptas aprobar el pago de <strong>$1 en</strong> créditos por tu licencia de conexión de DIMO. Si no tienes suficientes créditos en tu cuenta, no podrás crear una licencia de conexión.",
+      "oracleOnly": "Solo necesitas comprar una licencia si planeas alojar un DIMO Oracle."
+    }
+  }
+}

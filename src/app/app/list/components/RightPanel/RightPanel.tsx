@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { RightPanel } from '@/components/RightPanel';
 import { CreditsWidget } from '@/components/CreditsWidget';
 
@@ -12,15 +13,13 @@ export const AppListRightPanel: FC = () => {
 };
 
 const WhatsDCX = () => {
+  const t = useTranslations('app');
   return (
     <div className={'bg-control rounded-2xl p-4 w-full flex flex-col gap-2.5'}>
-      <p className={'text-sm font-black'}>What&#39;s DCX?</p>
-      <p className={'text-muted'}>
-        DCX is an abbreviation for DIMO Credits. DIMO Credits cost $0.001 per credit and
-        API calls and other DIMO fees are priced in DCX.
-      </p>
+      <p className={'text-sm font-black'}>{t('list.dcx.title')}</p>
+      <p className={'text-muted'}>{t('list.dcx.description')}</p>
       <a target="_blank" href={'https://dimo.org/pricing'} className={'underline'}>
-        Learn more.
+        {t('list.dcx.learnMore')}
       </a>
     </div>
   );

@@ -1,0 +1,2232 @@
+{
+  "tm.0001": {
+    "text": "ウォレットアドレス（0x…）",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0002": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/>件の記録",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0003": {
+    "text": "<x id=\"0\" equiv-text=\"${d.tripCount}\"/>回の走行 · <x id=\"1\" equiv-text=\"${hrs.value} ${hrs.unit}\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0004": {
+    "text": "<x id=\"0\" equiv-text=\"${this.drawCount}\"/>個のポイント。地図をクリックして追加し、最初のポイントをクリックすると完了します。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0005": {
+    "text": "<x id=\"1\" equiv-text=\"${this.vehicles.length}\"/>台中<x id=\"0\" equiv-text=\"${this.memberIds.size}\"/>台の車両が割り当て済みです。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0006": {
+    "text": "<x id=\"1\" equiv-text=\"${this.total}\"/>台中<x id=\"0\" equiv-text=\"${this.results.length}\"/>台が通過 · 通過<x id=\"2\" equiv-text=\"${passCount}\"/>回",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0007": {
+    "text": "<x id=\"0\" equiv-text=\"${this.visibleCards().length}\"/>台の車両",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0008": {
+    "text": "<x id=\"1\" equiv-text=\"${this.fmtDate(first)}\"/>以降のイベント<x id=\"0\" equiv-text=\"&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;\"/>件",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0009": {
+    "text": "走行距離<x id=\"0\" equiv-text=\"&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0010": {
+    "text": "運転時間<x id=\"0\" equiv-text=\"&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0011": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;b&gt;${trips}&lt;/b&gt;\"/>回の走行",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0012": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;p&gt;\"/>APIの<x id=\"3\" equiv-text=\"&lt;code&gt;\"/>settings.yaml<x id=\"4\" equiv-text=\"&lt;/code&gt;\"/>で<x id=\"1\" equiv-text=\"&lt;code&gt;\"/>DIMO_AUTH_CLIENT_ID<x id=\"2\" equiv-text=\"&lt;/code&gt;\"/>を設定し、<x id=\"5\" equiv-text=\"&lt;code&gt;${location.origin}\"/>/login.html<x id=\"6\" equiv-text=\"&lt;/code&gt;\"/>をリダイレクトURIとして<x id=\"7\" equiv-text=\"&lt;a href=&quot;https://console.dimo.org&quot;&gt;\"/>DIMO Developer Console<x id=\"8\" equiv-text=\"&lt;/a&gt;\"/>に登録してください。<x id=\"9\" equiv-text=\"&lt;/p&gt;\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0013": {
+    "text": "招待を承諾しています。しばらくお待ちください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0014": {
+    "text": "アカウント",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0015": {
+    "text": "取得費用",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0016": {
+    "text": "取得費用と減価償却",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0017": {
+    "text": "アクティブ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0018": {
+    "text": "アクティビティ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0019": {
+    "text": "<x id=\"0\" equiv-text=\"${categoryLabel(t).toLowerCase()}\"/>を追加",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0020": {
+    "text": "書類を追加",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0021": {
+    "text": "エリアを作成するには、3つ以上のポイントを追加してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0022": {
+    "text": "ウォレットアドレスで追加",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0023": {
+    "text": "書類を追加",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0024": {
+    "text": "メンバーを追加",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0025": {
+    "text": "ジオフェンスに追加",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0026": {
+    "text": "追加者",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0027": {
+    "text": "別のDIMOアプリから追加された書類です。ここで表示とダウンロードはできますが、削除できるのは追加したアプリだけです。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0028": {
+    "text": "追加中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0029": {
+    "text": "アフターマーケットデバイス#<x id=\"0\" equiv-text=\"${this.vehicle.aftermarketDevice.tokenId}\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0030": {
+    "text": "エージェンティック体験",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0031": {
+    "text": "すべて",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0032": {
+    "text": "すべての車両",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0033": {
+    "text": "このアカウントの車両はすべて非表示になっています。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0034": {
+    "text": "あと少しです",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0035": {
+    "text": "金額",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0036": {
+    "text": "金額（任意）",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0037": {
+    "text": "適用対象",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0038": {
+    "text": "このフリートのすべての車両に適用されます。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0039": {
+    "text": "おおよその位置",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0040": {
+    "text": "面積",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0041": {
+    "text": "自動",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0042": {
+    "text": "平均",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0043": {
+    "text": "1日平均",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0044": {
+    "text": "平均速度",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0045": {
+    "text": "戻る",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0046": {
+    "text": "現在位置に戻る",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0047": {
+    "text": "バッテリー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0048": {
+    "text": "バッテリー電圧",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0049": {
+    "text": "ブランド",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0050": {
+    "text": "キャンセル",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0051": {
+    "text": "カテゴリ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0052": {
+    "text": "地図を中央に表示",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0053": {
+    "text": "変化点",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0054": {
+    "text": "充電",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0055": {
+    "text": "要確認",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0056": {
+    "text": "ジオフェンスを確認中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0057": {
+    "text": "確認中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0058": {
+    "text": "クリックして完了",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0059": {
+    "text": "クライアントIDとAPIキーは必須です。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0060": {
+    "text": "閉じる",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0061": {
+    "text": "検索を閉じる",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0062": {
+    "text": "パネルを折りたたむ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0063": {
+    "text": "サイドバーを折りたたむ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0064": {
+    "text": "色",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0065": {
+    "text": "標準表示",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0066": {
+    "text": "よくある質問",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0067": {
+    "text": "コンパクト表示",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0068": {
+    "text": "比較",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0069": {
+    "text": "コンプライアンス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0070": {
+    "text": "確認",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0071": {
+    "text": "コネクテッドカー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0072": {
+    "text": "接続の詳細",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0073": {
+    "text": "接続",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0074": {
+    "text": "コンシューマー向けアプリ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0075": {
+    "text": "営業に問い合わせる",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0076": {
+    "text": "続行",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0077": {
+    "text": "冷却水",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0078": {
+    "text": "冷却水温",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0079": {
+    "text": "クールダウン",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0080": {
+    "text": "コピーしました",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0081": {
+    "text": "APIキーをコピー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0082": {
+    "text": "ウォレットアドレスをコピー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0083": {
+    "text": "メンバーを追加できませんでした。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0084": {
+    "text": "DIMOの設定を読み込めませんでした。認証情報を手動で入力してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0085": {
+    "text": "メンバーを読み込めませんでした。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0086": {
+    "text": "メンバーを削除できませんでした。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0087": {
+    "text": "招待を再送信できませんでした。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0088": {
+    "text": "招待を取り消せませんでした。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0089": {
+    "text": "ジオフェンスを作成",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0090": {
+    "text": "作成中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0091": {
+    "text": "証明情報",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0092": {
+    "text": "現在地",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0093": {
+    "text": "カスタムカラー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0094": {
+    "text": "導入事例",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0095": {
+    "text": "DIMO APIキー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0096": {
+    "text": "DIMOクライアントID",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0097": {
+    "text": "この車両の書類を読み取るにはDIMOの権限が必要です",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0098": {
+    "text": "DIMO vs Smartcar",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0099": {
+    "text": "DIMO | セッションベース経済のための車両プラットフォーム",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0100": {
+    "text": "DTC",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0101": {
+    "text": "ダークモード",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0102": {
+    "text": "日付",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0103": {
+    "text": "ディーラー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0104": {
+    "text": "削除",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0105": {
+    "text": "削除できませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0106": {
+    "text": "この書類を削除しますか？リストからは削除されますが、ファイル自体はDIMOのインフラに保存されたままです。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0107": {
+    "text": "「<x id=\"0\" equiv-text=\"${g.name}\"/>」を削除しますか？",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0108": {
+    "text": "削除中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0109": {
+    "text": "配送サービス事業者",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0110": {
+    "text": "現在までの減価償却",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0111": {
+    "text": "説明",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0112": {
+    "text": "検出されたVIN：<x id=\"0\" equiv-text=\"&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0113": {
+    "text": "診断",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0114": {
+    "text": "表示名",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0115": {
+    "text": "距離",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0116": {
+    "text": "距離 · 7日間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0117": {
+    "text": "書類ID",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0118": {
+    "text": "ドキュメント",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0119": {
+    "text": "書類",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0120": {
+    "text": "完了",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0121": {
+    "text": "ダウンロード",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0122": {
+    "text": "ダウンロードできませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0123": {
+    "text": "ダウンロード中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0124": {
+    "text": "先に地図上でジオフェンスのエリアを描いてください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0125": {
+    "text": "運転者の書類",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0126": {
+    "text": "運転行動",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0127": {
+    "text": "運転イベント",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0128": {
+    "text": "運転時間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0129": {
+    "text": "ここにファイルをドロップするか、<x id=\"0\" equiv-text=\"&lt;strong&gt;\"/>クリックして選択<x id=\"1\" equiv-text=\"&lt;/strong&gt;\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0130": {
+    "text": "所要時間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0131": {
+    "text": "EUデータ法",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0132": {
+    "text": "編集",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0133": {
+    "text": "ジオフェンスを編集",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0134": {
+    "text": "Webhookを編集",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0135": {
+    "text": "メールアドレス",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0136": {
+    "text": "メールアドレス",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0137": {
+    "text": "代わりにメールでコードを受け取る",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0138": {
+    "text": "終点",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0139": {
+    "text": "終了",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0140": {
+    "text": "エンジン稼働時間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0141": {
+    "text": "有効なメールアドレスを入力してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0142": {
+    "text": "有効なウォレットアドレスを入力してください（0x…、16進数40文字）。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0143": {
+    "text": "0より大きい金額を入力してください",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0144": {
+    "text": "エラーコード",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0145": {
+    "text": "イベント",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0146": {
+    "text": "1日あたりのイベント数",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0147": {
+    "text": "パネルを展開",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0148": {
+    "text": "サイドバーを展開",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0149": {
+    "text": "CSVをエクスポート",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0150": {
+    "text": "エクスポート中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0151": {
+    "text": "抽出できませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0152": {
+    "text": "よくある質問",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0153": {
+    "text": "ジオフェンスを削除できませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0154": {
+    "text": "GPSデータを読み込めませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0155": {
+    "text": "割り当て済みの車両を読み込めませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0156": {
+    "text": "運転行動を読み込めませんでした。詳細はコンソールを確認してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0157": {
+    "text": "ジオフェンスを読み込めませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0158": {
+    "text": "走行履歴を読み込めませんでした。詳細はコンソールを確認してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0159": {
+    "text": "車両の詳細を読み込めませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0160": {
+    "text": "車両を読み込めませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0161": {
+    "text": "保存できませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0162": {
+    "text": "ジオフェンスを保存できませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0163": {
+    "text": "ジオフェンスのアクティビティをスキャンできませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0164": {
+    "text": "割り当てを更新できませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0165": {
+    "text": "お気に入り",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0166": {
+    "text": "項目",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0167": {
+    "text": "ファイルID",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0168": {
+    "text": "完了",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0169": {
+    "text": "セットアップを完了",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0170": {
+    "text": "すべての車両を表示",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0171": {
+    "text": "フリートインテリジェンス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0172": {
+    "text": "フリートメンバー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0173": {
+    "text": "フリート",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0174": {
+    "text": "地図で表示",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0175": {
+    "text": "頻度",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0176": {
+    "text": "燃料",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0177": {
+    "text": "燃料残量",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0178": {
+    "text": "詳細を見る",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0179": {
+    "text": "GPSデータが少ないため、始点と終点のみ表示しています",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0180": {
+    "text": "ジオフェンス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0181": {
+    "text": "通過したジオフェンス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0182": {
+    "text": "APIキーを取得",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0183": {
+    "text": "APIキーを取得",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0184": {
+    "text": "はじめる",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0185": {
+    "text": "DIMOから認証情報を取得",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0186": {
+    "text": "グローブボックス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0187": {
+    "text": "走行リプレイを表示するには、この車両にDIMOの権限を付与してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0188": {
+    "text": "この車両の運転行動を表示するには、DIMOの権限を付与してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0189": {
+    "text": "この車両のリアルタイムテレメトリを表示するには、DIMOの権限を付与してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0190": {
+    "text": "この車両の書類を運用コストに含めるには、DIMOの権限を付与してください。下の取得費用と減価償却には影響しません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0191": {
+    "text": "この車両の書類を表示するには、DIMOの権限を付与してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0192": {
+    "text": "急加速",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0193": {
+    "text": "急ブレーキ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0194": {
+    "text": "急ハンドル",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0195": {
+    "text": "非表示の車両を隠す",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0196": {
+    "text": "車両を非表示",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0197": {
+    "text": "ホーム",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0198": {
+    "text": "仕組み",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0199": {
+    "text": "ハイブリッド",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0200": {
+    "text": "アイドリング",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0201": {
+    "text": "イグニッション",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0202": {
+    "text": "業界",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0203": {
+    "text": "インフラ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0204": {
+    "text": "招待を承諾しました。フリートに移動します。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0205": {
+    "text": "招待に問題があります",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0206": {
+    "text": "招待を再送信しました。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0207": {
+    "text": "メールで招待",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0208": {
+    "text": "メンバーを招待",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0209": {
+    "text": "JWTをコピーしました",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0210": {
+    "text": "参加中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0211": {
+    "text": "言語",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0212": {
+    "text": "過去2週間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0213": {
+    "text": "過去24時間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0214": {
+    "text": "過去3日間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0215": {
+    "text": "過去7日間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0216": {
+    "text": "過去<x id=\"0\" equiv-text=\"${DAYS}\"/>日間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0217": {
+    "text": "最終位置",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0218": {
+    "text": "最終ログイン：<x id=\"0\" equiv-text=\"${new Date(m.lastLoginAt).toLocaleDateString()}\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0219": {
+    "text": "最終通信",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0220": {
+    "text": "ライセンスの詳細",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0221": {
+    "text": "ライセンス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0222": {
+    "text": "ライトモード",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0223": {
+    "text": "明細",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0224": {
+    "text": "リアルタイムデータ",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0225": {
+    "text": "リアルタイムテレメトリ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0226": {
+    "text": "GPSデータを読み込み中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0227": {
+    "text": "割り当て済みの車両を読み込み中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0228": {
+    "text": "書類を読み込み中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0229": {
+    "text": "ジオフェンスを読み込み中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0230": {
+    "text": "メンバーを読み込み中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0231": {
+    "text": "テレメトリを読み込み中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0232": {
+    "text": "走行履歴を読み込み中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0233": {
+    "text": "車両を読み込み中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0234": {
+    "text": "読み込み中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0235": {
+    "text": "ログアウト",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0236": {
+    "text": "メンテナンス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0237": {
+    "text": "お気に入りに追加",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0238": {
+    "text": "サブスクリプションを管理",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0239": {
+    "text": "最高速度",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0240": {
+    "text": "単位系",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0241": {
+    "text": "メンバー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0242": {
+    "text": "未登録",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0243": {
+    "text": "金額未入力",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0244": {
+    "text": "名前",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0245": {
+    "text": "描いたエリアに名前を付けて、適用する車両を選んでください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0246": {
+    "text": "新しい構成",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0247": {
+    "text": "新しいジオフェンス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0248": {
+    "text": "新しいテンプレート",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0249": {
+    "text": "次へ",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0250": {
+    "text": "クライアントIDが設定されていません",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0251": {
+    "text": "DIMOとの連携はまだありません",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0252": {
+    "text": "DIMO連携なし。テレメトリを送信するにはデバイスをペアリングしてください",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0253": {
+    "text": "VINが検出されませんでした。車両を手動で選んでください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0254": {
+    "text": "アクセス権なし",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0255": {
+    "text": "この車両のコスト書類はまだありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0256": {
+    "text": "データなし",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0257": {
+    "text": "距離なし",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0258": {
+    "text": "距離データがありません",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0259": {
+    "text": "検索に一致するジオフェンスはありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0260": {
+    "text": "ジオフェンスはまだありません。「新しいジオフェンス」をクリックして、地図上にエリアを描いてください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0261": {
+    "text": "位置情報へのアクセス権なし",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0262": {
+    "text": "メンバーはまだいません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0263": {
+    "text": "記録はまだありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0264": {
+    "text": "抽出された項目はありません",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0265": {
+    "text": "テレメトリへのアクセス権なし",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0266": {
+    "text": "テレメトリデータはまだ届いていません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0267": {
+    "text": "走行なし",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0268": {
+    "text": "過去2週間の走行はありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0269": {
+    "text": "この期間の走行はありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0270": {
+    "text": "車両が見つかりません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0271": {
+    "text": "検索に一致する車両はありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0272": {
+    "text": "一致する車両はありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0273": {
+    "text": "このアカウントには車両がありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0274": {
+    "text": "この期間に通過した車両はありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0275": {
+    "text": "なし",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0276": {
+    "text": "正常",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0277": {
+    "text": "サインインしていません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0278": {
+    "text": "準備中",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0279": {
+    "text": "OEM",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0280": {
+    "text": "走行距離",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0281": {
+    "text": "走行中",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0282": {
+    "text": "DIMOを開いています…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0283": {
+    "text": "運用コスト",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0284": {
+    "text": "概要",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0285": {
+    "text": "オーナー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0286": {
+    "text": "PDF · JPG · PNG、最大25MB",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0287": {
+    "text": "PDF、JPG、PNGに対応しています。VINなどの情報を自動で読み取り、書類をDIMOに安全に保存します。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0288": {
+    "text": "一時停止",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0289": {
+    "text": "ピーク<x id=\"0\" equiv-text=\"${max}\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0290": {
+    "text": "保留中の招待",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0291": {
+    "text": "リストから車両を選んでください",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0292": {
+    "text": "この書類の対象車両を選び、カテゴリを確認してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0293": {
+    "text": "プラットフォームの機能",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0294": {
+    "text": "再生",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0295": {
+    "text": "再生速度",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0296": {
+    "text": "ジオフェンスの名前を入力してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0297": {
+    "text": "有効なメールアドレスを入力してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0298": {
+    "text": "前へ",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0299": {
+    "text": "料金",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0300": {
+    "text": "プライバシーとアカウント",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0301": {
+    "text": "製品の機能",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0302": {
+    "text": "製品",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0303": {
+    "text": "VINなどの情報を読み取っています。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0304": {
+    "text": "購入日",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0305": {
+    "text": "購入価格",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0306": {
+    "text": "生データ",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0307": {
+    "text": "ドキュメントを読む",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0308": {
+    "text": "書類を読み取り中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0309": {
+    "text": "充電",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0310": {
+    "text": "更新",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0311": {
+    "text": "車両の状態を更新",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0312": {
+    "text": "給油",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0313": {
+    "text": "削除",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0314": {
+    "text": "お気に入りから削除",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0315": {
+    "text": "ジオフェンスから外す",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0316": {
+    "text": "メンバーを削除",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0317": {
+    "text": "走行を再生",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0318": {
+    "text": "必須",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0319": {
+    "text": "再送信",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0320": {
+    "text": "リセット",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0321": {
+    "text": "リソース",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0322": {
+    "text": "再試行",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0323": {
+    "text": "取り消す",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0324": {
+    "text": "ロール",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0325": {
+    "text": "クエリを実行",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0326": {
+    "text": "保存",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0327": {
+    "text": "書類を保存",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0328": {
+    "text": "先に保存してから、「車両」ボタンで対象の車両を割り当ててください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0329": {
+    "text": "今すぐAPIキーを保存してください。この手順の後は再取得できません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0330": {
+    "text": "保存しました",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0331": {
+    "text": "書類を保存中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0332": {
+    "text": "保存中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0333": {
+    "text": "<x id=\"1\" equiv-text=\"${this.total}\"/>台中<x id=\"0\" equiv-text=\"${this.scanned}\"/>台をスキャン中…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0334": {
+    "text": "ジオフェンスを検索…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0335": {
+    "text": "車両を検索",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0336": {
+    "text": "車両を検索…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0337": {
+    "text": "選択してください",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0338": {
+    "text": "車両を選択",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0339": {
+    "text": "車両を選択…",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0340": {
+    "text": "コードを再送信",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0341": {
+    "text": "招待を送信",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0342": {
+    "text": "サービス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0343": {
+    "text": "設定",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0344": {
+    "text": "共有中",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0345": {
+    "text": "共有リンクをコピーしました",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0346": {
+    "text": "共有しています…",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0347": {
+    "text": "非表示の車両を表示",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0348": {
+    "text": "<x id=\"2\" equiv-text=\"${visible.length}\"/>件中<x id=\"0\" equiv-text=\"${page * TCOView.PAGE_SIZE + 1}\"/>–<x id=\"1\" equiv-text=\"${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}\"/>件を表示",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0349": {
+    "text": "DIMOでサインイン",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0350": {
+    "text": "このフリートに参加するには、DIMOアカウントでサインインしてください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0351": {
+    "text": "サインアウト",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0352": {
+    "text": "シグナル",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0353": {
+    "text": "書類に署名し、DIMOに安全に保存しています。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0354": {
+    "text": "ソリューション",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0355": {
+    "text": "問題が発生しました",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0356": {
+    "text": "問題が発生しました。もう一度お試しください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0357": {
+    "text": "個別",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0358": {
+    "text": "個別の車両",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0359": {
+    "text": "速度",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0360": {
+    "text": "制限速度（任意）",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0361": {
+    "text": "始点",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0362": {
+    "text": "開発を始める",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0363": {
+    "text": "今日から開発を始めましょう",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0364": {
+    "text": "ステータス",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0365": {
+    "text": "サポート",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0366": {
+    "text": "ダークモードに切り替え",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0367": {
+    "text": "ライトモードに切り替え",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0368": {
+    "text": "シンセティックデバイス#<x id=\"0\" equiv-text=\"${this.vehicle.syntheticDevice.tokenId}\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0369": {
+    "text": "TCO",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0370": {
+    "text": "このウォレットはすでにメンバーです。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0371": {
+    "text": "これらの書類にはコストの金額が登録されていません。金額を追加すると、この車両の合計に含まれます。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0372": {
+    "text": "このジオフェンスは多くの車両に適用されています。最初の<x id=\"0\" equiv-text=\"${this.total}\"/>台をスキャンします。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0373": {
+    "text": "この招待は無効か、使用済みか、期限切れです。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0374": {
+    "text": "この招待リンクにはトークンがありません。送信者に招待の再送信を依頼してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0375": {
+    "text": "このページは教育目的の情報であり、法的助言ではありません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0376": {
+    "text": "この車両はあなたと共有されています。書類の表示、ダウンロード、追加はできますが、削除はできません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0377": {
+    "text": "この車両の接続では運転イベントを取得できません。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0378": {
+    "text": "進入時刻",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0379": {
+    "text": "退出時刻",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0380": {
+    "text": "トークン",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0381": {
+    "text": "トークン#<x id=\"0\" equiv-text=\"${this.tokenId}\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0382": {
+    "text": "最大",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0383": {
+    "text": "合計",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0384": {
+    "text": "総保有コスト",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0385": {
+    "text": "TCO合計",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0386": {
+    "text": "有効期限を管理",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0387": {
+    "text": "次回の点検を管理",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0388": {
+    "text": "更新時期を管理",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0389": {
+    "text": "走行リプレイ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0390": {
+    "text": "走行検出方法",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0391": {
+    "text": "走行履歴",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0392": {
+    "text": "走行履歴",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0393": {
+    "text": "ログインでお困りですか？<support>サポートに問い合わせる</support>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0394": {
+    "text": "再試行",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0395": {
+    "text": "利用できません",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0396": {
+    "text": "不明",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0397": {
+    "text": "不明なエラー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0398": {
+    "text": "ジオフェンスの詳細を更新します。エリアを描き直すには、削除して作り直してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0399": {
+    "text": "アップロードできませんでした",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0400": {
+    "text": "ユースケース",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0401": {
+    "text": "ジオフェンスの「車両」ボタンで、対象の車両を割り当ててください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0402": {
+    "text": "耐用年数（年）",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0403": {
+    "text": "ユーザープロフィール",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0404": {
+    "text": "車両",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0405": {
+    "text": "車両#<x id=\"0\" equiv-text=\"${v.tokenId}\"/>",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0406": {
+    "text": "車両コマース",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0407": {
+    "text": "車両データ",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0408": {
+    "text": "車両の書類",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0409": {
+    "text": "車両一覧",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0410": {
+    "text": "車両の状態",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0411": {
+    "text": "車両",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0412": {
+    "text": "ドキュメントを見る",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0413": {
+    "text": "書類を見る",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0414": {
+    "text": "この招待を承諾できませんでした。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0415": {
+    "text": "DIMOアカウントからメールアドレスを取得できませんでした。サインインを完了するには、メールアドレスを追加してください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0416": {
+    "text": "サインインを確認できませんでした。もう一度サインインしてください。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0417": {
+    "text": "Webhook URL",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0418": {
+    "text": "Webhook",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0419": {
+    "text": "主な機能",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0420": {
+    "text": "あなた",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0421": {
+    "text": "参加しました",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0422": {
+    "text": "招待が届いています",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0423": {
+    "text": "あなたの車両",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0424": {
+    "text": "書類をDIMOに保存しました。リストが更新されます。",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0425": {
+    "text": "拡大",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0426": {
+    "text": "縮小",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0427": {
+    "text": "車両にズーム",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0428": {
+    "text": "全<x id=\"0\" equiv-text=\"${visible.length}\"/>台",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0429": {
+    "text": "すべてのコンプライアンストピック",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0430": {
+    "text": "開発者APIキー",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0431": {
+    "text": "開発者向けドキュメント",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0432": {
+    "text": "例：50",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0433": {
+    "text": "例：中央営業所",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0434": {
+    "text": "通過中のエンジン稼働時間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0435": {
+    "text": "km/h",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0436": {
+    "text": "または",
+    "source": "shipped",
+    "approved": true
+  },
+  "tm.0437": {
+    "text": "または手動で入力",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0438": {
+    "text": "レンタル事業",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0439": {
+    "text": "セッション単位の同意",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0440": {
+    "text": "ジオフェンス内の滞在時間",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0441": {
+    "text": "台",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0442": {
+    "text": "車両セッションインフラ",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0443": {
+    "text": "台",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0444": {
+    "text": "{count, plural, other {#台の車両}}",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0445": {
+    "text": "— 領収書、保険証券のPDF、車検証など、何でもアップロードできます",
+    "source": "new",
+    "approved": true
+  },
+  "tm.0446": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/>件の記録",
+    "source": "new",
+    "approved": true
+  }
+}

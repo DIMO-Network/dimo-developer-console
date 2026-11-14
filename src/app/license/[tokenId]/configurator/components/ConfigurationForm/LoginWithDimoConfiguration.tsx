@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { Control, UseFormRegister } from 'react-hook-form';
 import { DynamicFormProps } from '@/app/license/[tokenId]/configurator/components/ConfigurationForm/types';
 import {
@@ -17,14 +18,17 @@ export const LoginWithDimoConfiguration: FC<IFormProps> = ({
   register,
   control,
   brandNames = [],
-}: IFormProps) => (
-  <>
-    {brandNames.length > 1 && (
-      <div className="rounded-card bg-card p-4 flex flex-col gap-4">
-        <h3 className="text-card-title text-ink">Login settings</h3>
-        <BrandSelect register={register} control={control} brandNames={brandNames} />
-      </div>
-    )}
-    <LegalLinksCard register={register} shownTo="users before they log in" />
-  </>
-);
+}: IFormProps) => {
+  const t = useTranslations('configurator');
+  return (
+    <>
+      {brandNames.length > 1 && (
+        <div className="rounded-card bg-card p-4 flex flex-col gap-4">
+          <h3 className="text-card-title text-ink">{t('form.login.settings')}</h3>
+          <BrandSelect register={register} control={control} brandNames={brandNames} />
+        </div>
+      )}
+      <LegalLinksCard register={register} shownTo="users" />
+    </>
+  );
+};

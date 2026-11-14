@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Webhook } from '@/types/webhook';
 import { useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
@@ -7,6 +8,7 @@ import { captureException } from '@sentry/nextjs';
 import { toast } from 'sonner';
 
 export const useToggleStatus = (webhook: Webhook, clientId: string) => {
+  const t = useTranslations('common');
   const [status, setStatus] = useState<string>(webhook.status);
 
   const nextStatus = status === 'enabled' ? 'disabled' : 'enabled';
@@ -21,14 +23,14 @@ export const useToggleStatus = (webhook: Webhook, clientId: string) => {
   };
 
   const toggleStatusWithConnectedUI = async () => {
-    toast.info(`Updating webhook status to ${nextStatus}`);
+    toast.info(t('webhooks.toggle.updating', { status: nextStatus }));
     try {
       await toggleStatus();
-      toast.success('Successfully updated webhook status');
+      toast.success(t('webhooks.toggle.updated'));
       invalidateQuery(clientId);
     } catch (error) {
       captureException(error);
-      toast.error('Failed to update webhook status');
+      toast.error(t('webhooks.toggle.failed'));
     }
   };
 

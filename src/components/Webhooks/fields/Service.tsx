@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import { Label } from '@/components/Label';
@@ -6,6 +7,7 @@ import { TextError } from '@/components/TextError';
 import React, { useEffect, useRef } from 'react';
 
 export const WebhookServiceField = () => {
+  const t = useTranslations('common');
   const {
     control,
     formState: { errors },
@@ -27,15 +29,15 @@ export const WebhookServiceField = () => {
 
   return (
     <div className={'flex flex-col gap-2.5'}>
-      <Label>Service</Label>
+      <Label>{t('webhooks.fields.service.label')}</Label>
       <SelectField
         value={getValues('service')}
-        placeholder={'Choose a service'}
+        placeholder={t('webhooks.fields.service.placeholder')}
         name="service"
-        rules={{ required: 'Please select a webhook service' }}
+        rules={{ required: t('webhooks.fields.service.required') }}
         options={[
-          { value: 'signals', text: 'VSS Signals' },
-          { value: 'events', text: 'Events' },
+          { value: 'signals', text: t('webhooks.service.signals') },
+          { value: 'events', text: t('webhooks.service.events') },
         ]}
         control={control}
       />

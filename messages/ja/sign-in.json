@@ -1,0 +1,25 @@
+{
+  "metadataTitle": "サインイン | {appName}",
+  "metadataDescription": "DIMO Developer Consoleのサインインへようこそ。開発者ダッシュボードに安全にアクセスして、アプリケーションを管理し、DIMOの高度なツールを活用しましょう。今すぐ開発と最適化を始めましょう！",
+  "view": {
+    "termsAgreement": "サインインすると、<terms>利用規約</terms>と<privacy>プライバシーポリシー</privacy>に同意したものとみなされます",
+    "walletRestoreNeeded": "このアカウントでサインインするには、ウォレットの復元が必要です。開発者サポートにお問い合わせください。",
+    "genericError": "問題が発生しました。もう一度お試しください。",
+    "externalLoginFailed": "外部プロバイダーでのログインに失敗しました"
+  },
+  "methodForm": {
+    "title": "車のデータで開発しよう",
+    "emailPlaceholder": "email@address.com",
+    "maxLength": "名前は120文字以内で入力してください",
+    "invalidEmail": "有効なメールアドレスではありません",
+    "or": "または",
+    "lostPasskey": "パスキーを紛失しましたか？<reset>メールでリセット</reset>",
+    "troubleLoggingIn": "ログインでお困りですか？<support>サポートに問い合わせる</support>"
+  },
+  "passkey": {
+    "title": "パスキーで続行",
+    "loginFailed": "パスキーでのログインに失敗しました",
+    "lostPasskey": "パスキーを紛失しましたか？<recover>メールで復旧</recover>",
+    "troubleLoggingIn": "ログインでお困りですか？<support>サポートに問い合わせる</support>"
+  }
+}

@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/nextjs';
 import { createUserGlobalAccount } from '@/actions/user';
 import { PasskeySignup } from '@/app/sign-up/components/WalletCreation/PasskeySignup';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { IPasskeyAttestation } from '@/types/wallet';
 import { OtpSignup } from './OtpSignup';
 import { isNull } from 'lodash';
@@ -52,6 +53,7 @@ const WalletCreationForm = ({
 };
 
 export const WalletCreation: FC<IProps> = ({ onNext }) => {
+  const t = useTranslations('sign-up');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { trackEvent } = useMixPanel();
@@ -67,7 +69,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
   // This screen is a spinner: a failure has to leave it. Sign-in picks up an
   // account that got as far as a global account.
   const giveUp = () => {
-    toast.error('Something went wrong while creating the user wallet');
+    toast.error(t('wallet.createFailed'));
     router.replace('/sign-in');
   };
 
@@ -111,7 +113,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
 
       const userInformation = await getUserSubOrganization(email);
       if (!userInformation) {
-        toast.error('Something went wrong while creating the user wallet');
+        toast.error(t('wallet.createFailed'));
         return;
       }
       const { subOrganizationId, hasPasskey } = userInformation;
@@ -185,7 +187,7 @@ export const WalletCreation: FC<IProps> = ({ onNext }) => {
       if (!success) return giveUp();
       globalAccountSignupComplete(newWalletAddress!);
     } catch (error) {
-      if (explainSignUpRefusal(error, () => router.replace('/sign-in'))) {
+      if (explainSignUpRefusal(error, () => router.replace('/sign-in'), t)) {
         // Told why; still leave the spinner.
         router.replace('/sign-in');
         return;

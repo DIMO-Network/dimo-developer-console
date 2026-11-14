@@ -2,6 +2,7 @@ import { FC, useEffect } from 'react';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { usePasskey } from '@/hooks/usePasskey';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
 import { EmbeddedKey, getFromLocalStorage } from '@/utils/localStorage';
@@ -15,6 +16,8 @@ interface IProps {
 }
 
 export const RewirePasskey: FC<IProps> = ({ onNext }) => {
+  const t = useTranslations('email-recovery');
+  const tCommon = useTranslations('common');
   const params = useSearchParams();
   const { getNewUserPasskey } = usePasskey();
 
@@ -83,11 +86,11 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
   }) => {
     try {
       await registerNewPasskey({ recoveryKey, email });
-      toast.success('Passkey rewired successfully');
+      toast.success(t('rewire.success'));
       onNext('rewire-passkey');
     } catch (error) {
       console.error('Error while rewiring passkey', error);
-      toast.error('Something went wrong');
+      toast.error(tCommon('errors.somethingWentWrong'));
       Sentry.captureException(error);
     }
   };
@@ -103,14 +106,14 @@ export const RewirePasskey: FC<IProps> = ({ onNext }) => {
   return (
     <div className="email-recovery__form">
       <div className="email-recovery__header">
-        <p className="text-title text-ink">Let&apos;s get you back in</p>
+        <p className="text-title text-ink">{t('rewire.title')}</p>
       </div>
       <div className="email-recovery__input">
         <div className="otp-login-text">
-          <p>A passkey is the fastest and most secure way to sign in to DIMO.</p>
+          <p>{t('rewire.body')}</p>
         </div>
         <BubbleLoader isLoading={true} />
-        <p className="text-center text-body-sm text-muted">Rewriting your passkey...</p>
+        <p className="text-center text-body-sm text-muted">{t('rewire.progress')}</p>
       </div>
     </div>
   );

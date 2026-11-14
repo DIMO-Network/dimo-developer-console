@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useState, type FC } from 'react';
 import { Switch } from '@/components/ui/switch';
 
@@ -7,6 +8,7 @@ interface IProps {
 }
 
 export const Toggle: FC<IProps> = ({ checked = false, onToggle = () => {} }) => {
+  const t = useTranslations('common');
   const [enabled, setEnabled] = useState(checked);
 
   const handleToggle = (value: boolean) => {
@@ -14,7 +16,13 @@ export const Toggle: FC<IProps> = ({ checked = false, onToggle = () => {} }) => 
     onToggle(value);
   };
 
-  return <Switch checked={enabled} onCheckedChange={handleToggle} aria-label="toggle" />;
+  return (
+    <Switch
+      checked={enabled}
+      onCheckedChange={handleToggle}
+      aria-label={t('toggle.label')}
+    />
+  );
 };
 
 export default Toggle;

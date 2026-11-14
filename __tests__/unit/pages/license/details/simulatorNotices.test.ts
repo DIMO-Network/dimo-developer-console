@@ -1,7 +1,21 @@
+import { getTranslations } from 'next-intl/server';
 import {
-  mintNotice,
-  removalNotice,
+  mintNotice as mintKey,
+  removalNotice as removalKey,
+  type Notice,
 } from '@/app/app/list/components/VehicleSimulator/notices';
+
+// The notices carry message keys; the toast translates them. Resolve them here
+// so the assertions stay on the English text the user reads.
+let say: (notice: Notice) => { tone: Notice['tone']; message: string };
+
+beforeAll(async () => {
+  const t = await getTranslations('app');
+  say = ({ tone, key, values }) => ({ tone, message: t(key, values) });
+});
+
+const mintNotice = (args: Parameters<typeof mintKey>[0]) => say(mintKey(args));
+const removalNotice = (burned: boolean) => say(removalKey(burned));
 
 describe('mintNotice', () => {
   it('reports a vehicle that is saved and running as a success', () => {

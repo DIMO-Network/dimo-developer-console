@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { get } from 'lodash';
 
 import { useState, type FC } from 'react';
@@ -34,6 +35,7 @@ export const SpendingLimitModal: FC<IProps> = ({
   onSubmit = () => {},
   addressToAllow = configuration.DLC_ADDRESS,
 }) => {
+  const t = useTranslations('common');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { approveNewSpendingLimit } = useContractGA();
   const { control, handleSubmit, getValues } = useForm<IForm>({
@@ -54,8 +56,8 @@ export const SpendingLimitModal: FC<IProps> = ({
     } catch (error: unknown) {
       Sentry.captureException(error);
       const code = get(error, 'code', null);
-      if (code === 4001) toast.error('The transaction was denied');
-      else toast.error('Something went wrong while confirming the transaction');
+      if (code === 4001) toast.error(t('errors.transactionDenied'));
+      else toast.error(t('spendingLimit.failed'));
     } finally {
       setIsLoading(false);
     }
@@ -66,17 +68,14 @@ export const SpendingLimitModal: FC<IProps> = ({
       <form className="buy-credits-content" onSubmit={handleSubmit(setSpendingLimit)}>
         <div className="buy-credits-header">
           <Title className="text-2xl" component="h3">
-            Set spending limit
+            {t('spendingLimit.title')}
           </Title>
-          <p className="description">
-            Approve the Developer License to spend $DIMO on your connected wallet, we
-            recommend approving more than $100 USD worth of $DIMO
-          </p>
+          <p className="description">{t('spendingLimit.description')}</p>
         </div>
         <TokenInput control={control} name="credits" description="$DIMO" />
         <div className="credit-action">
           <Button className="h-9!" loading={isLoading}>
-            Confirm
+            {t('actions.confirm')}
           </Button>
         </div>
       </form>

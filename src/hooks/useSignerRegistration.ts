@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { getAddress } from 'viem';
 import * as Sentry from '@sentry/nextjs';
@@ -7,7 +8,6 @@ import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { registerSigner } from '@/actions/teams';
 import { buildSignerProofMessage } from '@/utils/signerProof';
 import { readSession, SIGNER_PROOF_KEY } from '@/utils/globalAccountSession';
-import { SIGNER_IN_USE_MESSAGE, signerLocked } from '@/config/teamCopy';
 
 interface ProofMark {
   wallet: string;
@@ -42,6 +42,7 @@ const markProven = (wallet: string, state: ProofMark['state']): void => {
 // can grant it data access. Once per sign-in per wallet, shared by every tab; a
 // refusal other than the two 409s is retried on the next sign-in.
 export const useSignerRegistration = (lockOwnerEmail: string | null): void => {
+  const t = useTranslations('common');
   const { currentUser, validateCurrentSession } = useGlobalAccount();
   const wallet = currentUser?.walletAddress;
   // The teams load after this starts; read the owner at toast time.
@@ -74,8 +75,10 @@ export const useSignerRegistration = (lockOwnerEmail: string | null): void => {
           markProven(wallet, 'blocked');
           toast.error(
             result.code === 'SIGNER_LOCKED'
-              ? signerLocked(lockOwner.current ?? 'the team owner')
-              : SIGNER_IN_USE_MESSAGE,
+              ? lockOwner.current
+                ? t('teamCopy.signerLocked', { ownerEmail: lockOwner.current })
+                : t('teamCopy.signerLockedNoOwner')
+              : t('teamCopy.signerInUse'),
           );
           return;
         }

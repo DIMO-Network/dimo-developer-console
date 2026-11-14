@@ -1,18 +1,22 @@
 import type { ReactNode } from 'react';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import configuration from '@/config';
-import { AuthorizedLayout } from '@/layouts/AuthorizedLayout';
+import { authorizedRouteLayout } from '@/layouts/AuthorizedLayout/AuthorizedRouteLayout';
 import { OwnerOnly } from '@/components/OwnerOnly';
 
 // The create and edit pages set their own titles.
-export const metadata: Metadata = {
-  title: `Webhooks | ${configuration.appName}`,
+export const generateMetadata = async (): Promise<Metadata> => {
+  const t = await getTranslations('webhooks');
+  return { title: t('metadata.list', { appName: configuration.appName }) };
 };
+
+const SectionLayout = authorizedRouteLayout('/webhooks');
 
 export default function WebhooksLayout({ children }: { children: ReactNode }) {
   return (
-    <AuthorizedLayout>
-      <OwnerOnly feature="Webhooks">{children}</OwnerOnly>
-    </AuthorizedLayout>
+    <SectionLayout>
+      <OwnerOnly feature="webhooks">{children}</OwnerOnly>
+    </SectionLayout>
   );
 }

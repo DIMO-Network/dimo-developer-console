@@ -1,18 +1,13 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { ListView } from './components/ListView';
 import configuration from '@/config';
 
-// The page is a client shell with no server data. Rendering each path once and
-// serving it from cache spares a function invocation (and its cold start) on
-// every visit; the middleware still checks the session first.
-export const generateStaticParams = async () => [];
-
-export const metadata: Metadata = {
-  title: `SDK configurator | ${configuration.appName}`,
+export const generateMetadata = async (): Promise<Metadata> => {
+  const t = await getTranslations('configurator');
+  return { title: t('metadata.listTitle', { appName: configuration.appName }) };
 };
 
-// Only params, not searchParams: handing the client view every prop would keep
-// the route dynamic, and generateStaticParams could not cache it.
 const ConfiguratorListPage = ({ params }: { params: Promise<{ tokenId: string }> }) => (
   <ListView params={params} />
 );

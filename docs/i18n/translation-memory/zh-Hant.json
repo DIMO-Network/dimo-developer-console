@@ -1,0 +1,2232 @@
+{
+  "tm.0001": {
+    "text": "0x…錢包地址",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0002": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/>筆記錄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0003": {
+    "text": "<x id=\"0\" equiv-text=\"${d.tripCount}\"/>趟行程 · <x id=\"1\" equiv-text=\"${hrs.value} ${hrs.unit}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0004": {
+    "text": "已放置<x id=\"0\" equiv-text=\"${this.drawCount}\"/>個點，點選地圖即可新增，點選第一個點即可完成。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0005": {
+    "text": "已指派<x id=\"0\" equiv-text=\"${this.memberIds.size}\"/>輛車（共<x id=\"1\" equiv-text=\"${this.vehicles.length}\"/>輛）。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0006": {
+    "text": "<x id=\"1\" equiv-text=\"${this.total}\"/>輛車中有<x id=\"0\" equiv-text=\"${this.results.length}\"/>輛經過 · 共<x id=\"2\" equiv-text=\"${passCount}\"/>次通過",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0007": {
+    "text": "<x id=\"0\" equiv-text=\"${this.visibleCards().length}\"/>輛車",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0008": {
+    "text": "自<x id=\"1\" equiv-text=\"${this.fmtDate(first)}\"/>以來共<x id=\"0\" equiv-text=\"&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;\"/>個事件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0009": {
+    "text": "已行駛<x id=\"0\" equiv-text=\"&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0010": {
+    "text": "駕駛時間<x id=\"0\" equiv-text=\"&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0011": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;b&gt;${trips}&lt;/b&gt;\"/>趟行程",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0012": {
+    "text": "<x id=\"0\" equiv-text=\"&lt;p&gt;\"/>請在API的<x id=\"3\" equiv-text=\"&lt;code&gt;\"/>settings.yaml<x id=\"4\" equiv-text=\"&lt;/code&gt;\"/>中設定<x id=\"1\" equiv-text=\"&lt;code&gt;\"/>DIMO_AUTH_CLIENT_ID<x id=\"2\" equiv-text=\"&lt;/code&gt;\"/>，並在<x id=\"7\" equiv-text=\"&lt;a href=&quot;https://console.dimo.org&quot;&gt;\"/>DIMO Developer Console<x id=\"8\" equiv-text=\"&lt;/a&gt;\"/>中將<x id=\"5\" equiv-text=\"&lt;code&gt;${location.origin}\"/>/login.html<x id=\"6\" equiv-text=\"&lt;/code&gt;\"/>註冊為重新導向URI。<x id=\"9\" equiv-text=\"&lt;/p&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0013": {
+    "text": "正在接受邀請，請稍候。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0014": {
+    "text": "帳號",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0015": {
+    "text": "購置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0016": {
+    "text": "購置與折舊",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0017": {
+    "text": "使用中",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0018": {
+    "text": "活動",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0019": {
+    "text": "新增<x id=\"0\" equiv-text=\"${categoryLabel(t).toLowerCase()}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0020": {
+    "text": "新增文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0021": {
+    "text": "請至少新增3個點以構成區域。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0022": {
+    "text": "透過錢包地址新增",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0023": {
+    "text": "新增文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0024": {
+    "text": "新增成員",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0025": {
+    "text": "加入地理圍欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0026": {
+    "text": "新增者",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0027": {
+    "text": "此文件是透過其他DIMO應用程式新增的。你可以在這裡檢視及下載，但只有新增它的應用程式才能將其移除。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0028": {
+    "text": "新增中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0029": {
+    "text": "後裝裝置#<x id=\"0\" equiv-text=\"${this.vehicle.aftermarketDevice.tokenId}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0030": {
+    "text": "代理式體驗",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0031": {
+    "text": "全部",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0032": {
+    "text": "所有車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0033": {
+    "text": "此帳號的所有車輛皆已隱藏。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0034": {
+    "text": "快完成了",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0035": {
+    "text": "金額",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0036": {
+    "text": "金額（選填）",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0037": {
+    "text": "適用對象",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0038": {
+    "text": "適用於此車隊的所有車輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0039": {
+    "text": "概略位置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0040": {
+    "text": "面積",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0041": {
+    "text": "自動",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0042": {
+    "text": "平均",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0043": {
+    "text": "每日平均",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0044": {
+    "text": "平均速度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0045": {
+    "text": "返回",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0046": {
+    "text": "返回即時位置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0047": {
+    "text": "電池",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0048": {
+    "text": "電池電壓",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0049": {
+    "text": "品牌",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0050": {
+    "text": "取消",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0051": {
+    "text": "類別",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0052": {
+    "text": "地圖置中",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0053": {
+    "text": "變點偵測",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0054": {
+    "text": "電量",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0055": {
+    "text": "需檢查",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0056": {
+    "text": "正在檢查地理圍欄…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0057": {
+    "text": "檢查中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0058": {
+    "text": "點選以完成",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0059": {
+    "text": "必須填寫用戶端ID和API金鑰。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0060": {
+    "text": "關閉",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0061": {
+    "text": "關閉搜尋",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0062": {
+    "text": "收合面板",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0063": {
+    "text": "收合側邊欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0064": {
+    "text": "顏色",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0065": {
+    "text": "舒適檢視",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0066": {
+    "text": "常見問題",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0067": {
+    "text": "精簡檢視",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0068": {
+    "text": "比較",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0069": {
+    "text": "法規遵循",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0070": {
+    "text": "確認",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0071": {
+    "text": "聯網汽車",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0072": {
+    "text": "連線詳細資訊",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0073": {
+    "text": "連線",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0074": {
+    "text": "消費者應用",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0075": {
+    "text": "聯絡業務團隊",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0076": {
+    "text": "繼續",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0077": {
+    "text": "冷卻液",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0078": {
+    "text": "冷卻液溫度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0079": {
+    "text": "冷卻時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0080": {
+    "text": "已複製",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0081": {
+    "text": "複製API金鑰",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0082": {
+    "text": "複製錢包地址",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0083": {
+    "text": "無法新增成員。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0084": {
+    "text": "無法載入DIMO設定，請手動輸入憑證。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0085": {
+    "text": "無法載入成員。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0086": {
+    "text": "無法移除成員。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0087": {
+    "text": "無法重新傳送邀請。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0088": {
+    "text": "無法撤銷邀請。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0089": {
+    "text": "建立地理圍欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0090": {
+    "text": "建立中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0091": {
+    "text": "憑證",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0092": {
+    "text": "目前位置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0093": {
+    "text": "自訂顏色",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0094": {
+    "text": "客戶案例",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0095": {
+    "text": "DIMO API金鑰",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0096": {
+    "text": "DIMO用戶端ID",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0097": {
+    "text": "需要DIMO權限才能讀取此車輛的文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0098": {
+    "text": "DIMO vs Smartcar",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0099": {
+    "text": "DIMO | 為工作階段經濟打造的車輛平台",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0100": {
+    "text": "個故障碼",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0101": {
+    "text": "深色模式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0102": {
+    "text": "日期",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0103": {
+    "text": "汽車經銷商",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0104": {
+    "text": "刪除",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0105": {
+    "text": "刪除失敗",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0106": {
+    "text": "要刪除此文件嗎？文件會從你的清單中移除，但檔案本身仍會保存在DIMO的基礎架構上。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0107": {
+    "text": "要刪除「<x id=\"0\" equiv-text=\"${g.name}\"/>」嗎？",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0108": {
+    "text": "刪除中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0109": {
+    "text": "配送服務業者",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0110": {
+    "text": "迄今折舊",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0111": {
+    "text": "說明",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0112": {
+    "text": "偵測到的VIN：<x id=\"0\" equiv-text=\"&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0113": {
+    "text": "診斷",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0114": {
+    "text": "顯示名稱",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0115": {
+    "text": "距離",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0116": {
+    "text": "距離 · 7天",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0117": {
+    "text": "文件ID",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0118": {
+    "text": "說明文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0119": {
+    "text": "文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0120": {
+    "text": "完成",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0121": {
+    "text": "下載",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0122": {
+    "text": "下載失敗",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0123": {
+    "text": "下載中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0124": {
+    "text": "請先在地圖上繪製地理圍欄區域。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0125": {
+    "text": "駕駛人文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0126": {
+    "text": "駕駛行為",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0127": {
+    "text": "駕駛事件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0128": {
+    "text": "駕駛時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0129": {
+    "text": "將檔案拖放到這裡，或<x id=\"0\" equiv-text=\"&lt;strong&gt;\"/>點選以選擇<x id=\"1\" equiv-text=\"&lt;/strong&gt;\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0130": {
+    "text": "持續時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0131": {
+    "text": "歐盟資料法",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0132": {
+    "text": "編輯",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0133": {
+    "text": "編輯地理圍欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0134": {
+    "text": "編輯Webhook",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0135": {
+    "text": "電子郵件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0136": {
+    "text": "電子郵件地址",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0137": {
+    "text": "改用電子郵件接收驗證碼",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0138": {
+    "text": "終點",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0139": {
+    "text": "結束時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0140": {
+    "text": "引擎運轉時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0141": {
+    "text": "請輸入有效的電子郵件地址。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0142": {
+    "text": "請輸入有效的錢包地址（0x開頭，40個十六進位字元）。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0143": {
+    "text": "請輸入大於0的金額",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0144": {
+    "text": "故障碼",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0145": {
+    "text": "事件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0146": {
+    "text": "每日事件數",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0147": {
+    "text": "展開面板",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0148": {
+    "text": "展開側邊欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0149": {
+    "text": "匯出CSV",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0150": {
+    "text": "匯出中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0151": {
+    "text": "擷取失敗",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0152": {
+    "text": "常見問題",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0153": {
+    "text": "無法刪除地理圍欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0154": {
+    "text": "無法載入GPS資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0155": {
+    "text": "無法載入已指派的車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0156": {
+    "text": "無法載入駕駛行為，詳情請查看主控台。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0157": {
+    "text": "無法載入地理圍欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0158": {
+    "text": "無法載入行程，詳情請查看主控台。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0159": {
+    "text": "無法載入車輛詳細資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0160": {
+    "text": "無法載入車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0161": {
+    "text": "無法儲存",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0162": {
+    "text": "無法儲存地理圍欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0163": {
+    "text": "無法掃描地理圍欄活動",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0164": {
+    "text": "無法更新指派",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0165": {
+    "text": "最愛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0166": {
+    "text": "欄位",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0167": {
+    "text": "檔案ID",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0168": {
+    "text": "完成",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0169": {
+    "text": "完成設定",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0170": {
+    "text": "顯示所有車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0171": {
+    "text": "車隊智慧",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0172": {
+    "text": "車隊成員",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0173": {
+    "text": "車隊",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0174": {
+    "text": "在地圖上聚焦",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0175": {
+    "text": "頻率",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0176": {
+    "text": "燃油",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0177": {
+    "text": "油量",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0178": {
+    "text": "完整詳細資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0179": {
+    "text": "GPS資料稀疏，僅顯示起點和終點",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0180": {
+    "text": "地理圍欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0181": {
+    "text": "經過的地理圍欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0182": {
+    "text": "取得API金鑰",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0183": {
+    "text": "取得API金鑰",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0184": {
+    "text": "開始使用",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0185": {
+    "text": "從DIMO取得憑證",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0186": {
+    "text": "手套箱",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0187": {
+    "text": "對此車輛授予DIMO權限，即可查看行程重播。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0188": {
+    "text": "對此車輛授予DIMO權限，即可查看駕駛行為。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0189": {
+    "text": "對此車輛授予DIMO權限，即可查看即時遙測。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0190": {
+    "text": "對此車輛授予DIMO權限，即可將其文件計入營運成本。下方的購置與折舊不受影響。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0191": {
+    "text": "對此車輛授予DIMO權限，即可檢視其文件。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0192": {
+    "text": "急加速",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0193": {
+    "text": "急煞車",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0194": {
+    "text": "急轉彎",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0195": {
+    "text": "不顯示已隱藏的車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0196": {
+    "text": "隱藏車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0197": {
+    "text": "首頁",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0198": {
+    "text": "運作方式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0199": {
+    "text": "混合型",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0200": {
+    "text": "怠速",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0201": {
+    "text": "點火",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0202": {
+    "text": "產業",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0203": {
+    "text": "基礎架構",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0204": {
+    "text": "已接受邀請，正在帶你前往車隊。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0205": {
+    "text": "邀請發生問題",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0206": {
+    "text": "已重新傳送邀請。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0207": {
+    "text": "透過電子郵件邀請",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0208": {
+    "text": "邀請成員",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0209": {
+    "text": "已複製JWT！",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0210": {
+    "text": "正在加入…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0211": {
+    "text": "語言",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0212": {
+    "text": "過去2週",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0213": {
+    "text": "過去24小時",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0214": {
+    "text": "過去3天",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0215": {
+    "text": "過去7天",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0216": {
+    "text": "過去<x id=\"0\" equiv-text=\"${DAYS}\"/>天",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0217": {
+    "text": "最後位置",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0218": {
+    "text": "上次登入：<x id=\"0\" equiv-text=\"${new Date(m.lastLoginAt).toLocaleDateString()}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0219": {
+    "text": "最後回報時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0220": {
+    "text": "授權詳細資訊",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0221": {
+    "text": "授權",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0222": {
+    "text": "淺色模式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0223": {
+    "text": "明細項目",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0224": {
+    "text": "即時資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0225": {
+    "text": "即時遙測",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0226": {
+    "text": "正在載入GPS資料…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0227": {
+    "text": "正在載入已指派的車輛…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0228": {
+    "text": "正在載入文件…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0229": {
+    "text": "正在載入地理圍欄…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0230": {
+    "text": "正在載入成員…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0231": {
+    "text": "正在載入遙測資料…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0232": {
+    "text": "正在載入行程…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0233": {
+    "text": "正在載入車輛…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0234": {
+    "text": "載入中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0235": {
+    "text": "登出",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0236": {
+    "text": "維修保養",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0237": {
+    "text": "設為最愛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0238": {
+    "text": "管理訂閱",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0239": {
+    "text": "最高速度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0240": {
+    "text": "度量單位",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0241": {
+    "text": "成員",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0242": {
+    "text": "缺少",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0243": {
+    "text": "缺少金額",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0244": {
+    "text": "名稱",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0245": {
+    "text": "為你繪製的區域命名，然後選擇適用的車輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0246": {
+    "text": "新增組態",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0247": {
+    "text": "新增地理圍欄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0248": {
+    "text": "新增範本",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0249": {
+    "text": "下一步",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0250": {
+    "text": "未設定用戶端ID",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0251": {
+    "text": "尚未整合DIMO",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0252": {
+    "text": "尚未整合DIMO，請配對裝置以串流傳輸遙測資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0253": {
+    "text": "未偵測到VIN，請手動選擇車輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0254": {
+    "text": "無存取權限",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0255": {
+    "text": "此車輛尚無成本文件。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0256": {
+    "text": "無資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0257": {
+    "text": "無距離資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0258": {
+    "text": "無距離資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0259": {
+    "text": "沒有符合搜尋條件的地理圍欄。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0260": {
+    "text": "尚無地理圍欄。請點選「新增地理圍欄」並在地圖上繪製區域。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0261": {
+    "text": "無位置存取權限",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0262": {
+    "text": "尚無成員。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0263": {
+    "text": "尚無記錄。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0264": {
+    "text": "未擷取到結構化欄位",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0265": {
+    "text": "無遙測存取權限",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0266": {
+    "text": "尚未回報任何遙測資料。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0267": {
+    "text": "無行程",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0268": {
+    "text": "過去2週內沒有行程。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0269": {
+    "text": "此期間沒有行程。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0270": {
+    "text": "找不到車輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0271": {
+    "text": "沒有符合搜尋條件的車輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0272": {
+    "text": "沒有相符的車輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0273": {
+    "text": "此帳號沒有車輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0274": {
+    "text": "此時段內沒有車輛經過。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0275": {
+    "text": "無",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0276": {
+    "text": "正常",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0277": {
+    "text": "尚未登入。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0278": {
+    "text": "尚未串接",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0279": {
+    "text": "OEM",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0280": {
+    "text": "里程表",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0281": {
+    "text": "進行中",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0282": {
+    "text": "正在開啟DIMO…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0283": {
+    "text": "營運成本",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0284": {
+    "text": "總覽",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0285": {
+    "text": "擁有者",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0286": {
+    "text": "PDF · JPG · PNG，上限25 MB",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0287": {
+    "text": "支援PDF、JPG或PNG。我們會自動讀取VIN和其他詳細資料，再將文件安全地儲存到DIMO。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0288": {
+    "text": "暫停",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0289": {
+    "text": "峰值<x id=\"0\" equiv-text=\"${max}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0290": {
+    "text": "待處理的邀請",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0291": {
+    "text": "從清單中選擇車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0292": {
+    "text": "選擇此文件所屬的車輛，並確認類別。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0293": {
+    "text": "平台功能",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0294": {
+    "text": "播放",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0295": {
+    "text": "播放速度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0296": {
+    "text": "請輸入地理圍欄名稱。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0297": {
+    "text": "請輸入有效的電子郵件地址。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0298": {
+    "text": "上一步",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0299": {
+    "text": "價格方案",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0300": {
+    "text": "隱私權與帳號",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0301": {
+    "text": "產品功能",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0302": {
+    "text": "產品",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0303": {
+    "text": "正在擷取VIN和其他詳細資料。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0304": {
+    "text": "購買日期",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0305": {
+    "text": "購買價格",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0306": {
+    "text": "原始資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0307": {
+    "text": "閱讀說明文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0308": {
+    "text": "正在讀取文件…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0309": {
+    "text": "充電",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0310": {
+    "text": "重新整理",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0311": {
+    "text": "重新整理車輛狀態",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0312": {
+    "text": "加油",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0313": {
+    "text": "移除",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0314": {
+    "text": "從最愛中移除",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0315": {
+    "text": "從地理圍欄中移除",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0316": {
+    "text": "移除成員",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0317": {
+    "text": "重播行程",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0318": {
+    "text": "必要",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0319": {
+    "text": "重新傳送",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0320": {
+    "text": "重設",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0321": {
+    "text": "資源",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0322": {
+    "text": "重試",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0323": {
+    "text": "撤銷",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0324": {
+    "text": "角色",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0325": {
+    "text": "執行查詢",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0326": {
+    "text": "儲存",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0327": {
+    "text": "儲存文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0328": {
+    "text": "請先儲存，再使用「車輛」按鈕指派特定車輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0329": {
+    "text": "請立即儲存你的API金鑰，完成此步驟後將無法再次取得。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0330": {
+    "text": "已儲存",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0331": {
+    "text": "正在儲存文件…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0332": {
+    "text": "儲存中…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0333": {
+    "text": "正在掃描第<x id=\"0\" equiv-text=\"${this.scanned}\"/>輛車，共<x id=\"1\" equiv-text=\"${this.total}\"/>輛…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0334": {
+    "text": "搜尋地理圍欄…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0335": {
+    "text": "搜尋車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0336": {
+    "text": "搜尋車輛…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0337": {
+    "text": "請選擇",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0338": {
+    "text": "選擇車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0339": {
+    "text": "選擇車輛…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0340": {
+    "text": "傳送新的驗證碼",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0341": {
+    "text": "傳送邀請",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0342": {
+    "text": "服務",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0343": {
+    "text": "設定",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0344": {
+    "text": "共享中",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0345": {
+    "text": "已複製共享連結",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0346": {
+    "text": "正在共享…",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0347": {
+    "text": "顯示已隱藏的車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0348": {
+    "text": "顯示第<x id=\"0\" equiv-text=\"${page * TCOView.PAGE_SIZE + 1}\"/>–<x id=\"1\" equiv-text=\"${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}\"/>筆，共<x id=\"2\" equiv-text=\"${visible.length}\"/>筆",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0349": {
+    "text": "使用DIMO登入",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0350": {
+    "text": "使用你的DIMO帳號登入以加入此車隊。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0351": {
+    "text": "登出",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0352": {
+    "text": "訊號",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0353": {
+    "text": "正在簽署文件，並安全地儲存到DIMO。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0354": {
+    "text": "解決方案",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0355": {
+    "text": "發生錯誤",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0356": {
+    "text": "發生錯誤，請再試一次。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0357": {
+    "text": "特定",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0358": {
+    "text": "特定車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0359": {
+    "text": "速度",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0360": {
+    "text": "速限（選填）",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0361": {
+    "text": "起點",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0362": {
+    "text": "開始開發",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0363": {
+    "text": "立即開始開發",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0364": {
+    "text": "狀態",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0365": {
+    "text": "支援",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0366": {
+    "text": "切換至深色模式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0367": {
+    "text": "切換至淺色模式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0368": {
+    "text": "合成裝置#<x id=\"0\" equiv-text=\"${this.vehicle.syntheticDevice.tokenId}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0369": {
+    "text": "TCO",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0370": {
+    "text": "此錢包已經是成員。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0371": {
+    "text": "這些文件尚未登錄成本金額。新增金額即可將其計入此車輛的總計。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0372": {
+    "text": "此地理圍欄適用的車輛眾多，僅掃描前<x id=\"0\" equiv-text=\"${this.total}\"/>輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0373": {
+    "text": "此邀請無效、已使用或已過期。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0374": {
+    "text": "此邀請連結缺少權杖。請要求寄件者重新傳送邀請。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0375": {
+    "text": "本頁內容僅供教育參考，不構成法律建議。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0376": {
+    "text": "此車輛是與你共享的。你可以檢視、下載及新增文件，但無法刪除。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0377": {
+    "text": "此車輛的連線不會回報駕駛事件。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0378": {
+    "text": "進入時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0379": {
+    "text": "離開時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0380": {
+    "text": "Token",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0381": {
+    "text": "Token #<x id=\"0\" equiv-text=\"${this.tokenId}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0382": {
+    "text": "最高",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0383": {
+    "text": "總計",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0384": {
+    "text": "總擁有成本",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0385": {
+    "text": "TCO總計",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0386": {
+    "text": "追蹤到期日",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0387": {
+    "text": "追蹤下次檢驗",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0388": {
+    "text": "追蹤續保",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0389": {
+    "text": "行程重播",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0390": {
+    "text": "行程偵測方式",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0391": {
+    "text": "行程記錄",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0392": {
+    "text": "行程",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0393": {
+    "text": "登入時遇到問題？<support>取得支援</support>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0394": {
+    "text": "重試",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0395": {
+    "text": "無法使用",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0396": {
+    "text": "未知",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0397": {
+    "text": "未知錯誤",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0398": {
+    "text": "更新地理圍欄詳細資料。如要重新繪製區域，請刪除後重新建立。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0399": {
+    "text": "上傳失敗",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0400": {
+    "text": "使用案例",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0401": {
+    "text": "請使用地理圍欄上的「車輛」按鈕指派特定車輛。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0402": {
+    "text": "使用年限（年）",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0403": {
+    "text": "使用者個人資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0404": {
+    "text": "車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0405": {
+    "text": "車輛#<x id=\"0\" equiv-text=\"${v.tokenId}\"/>",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0406": {
+    "text": "車輛商務",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0407": {
+    "text": "車輛資料",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0408": {
+    "text": "車輛文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0409": {
+    "text": "車輛清單",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0410": {
+    "text": "車輛狀態",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0411": {
+    "text": "車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0412": {
+    "text": "查看說明文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0413": {
+    "text": "檢視文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0414": {
+    "text": "我們無法接受此邀請。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0415": {
+    "text": "我們無法從你的DIMO帳號取得電子郵件地址。請新增電子郵件地址以完成登入。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0416": {
+    "text": "我們無法驗證此次登入，請重新登入。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0417": {
+    "text": "Webhook URL",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0418": {
+    "text": "Webhook",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0419": {
+    "text": "你將獲得",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0420": {
+    "text": "你",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0421": {
+    "text": "你已加入",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0422": {
+    "text": "你已獲邀",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0423": {
+    "text": "你的車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0424": {
+    "text": "你的文件已儲存到DIMO，清單將會重新整理。",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0425": {
+    "text": "放大",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0426": {
+    "text": "縮小",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0427": {
+    "text": "縮放至車輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0428": {
+    "text": "全部<x id=\"0\" equiv-text=\"${visible.length}\"/>輛",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0429": {
+    "text": "所有法規遵循主題",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0430": {
+    "text": "開發者API金鑰",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0431": {
+    "text": "開發者說明文件",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0432": {
+    "text": "例如：50",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0433": {
+    "text": "例如：市中心車庫",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0434": {
+    "text": "通過期間的引擎運轉時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0435": {
+    "text": "km/h",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0436": {
+    "text": "或",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0437": {
+    "text": "或手動輸入",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0438": {
+    "text": "租賃營運",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0439": {
+    "text": "限定工作階段的同意",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0440": {
+    "text": "在地理圍欄內的時間",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0441": {
+    "text": "輛車",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0442": {
+    "text": "車輛工作階段基礎架構",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0443": {
+    "text": "輛車",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0444": {
+    "text": "{count, plural, other {#輛車}}",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0445": {
+    "text": "上傳任何文件皆可：收據、保單PDF、行照",
+    "source": "new",
+    "approved": false
+  },
+  "tm.0446": {
+    "text": "<x id=\"0\" equiv-text=\"${count}\"/>筆記錄",
+    "source": "new",
+    "approved": false
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "title": "ホーム | {appName}"
+  },
+  "home": {
+    "welcomeNamed": "ようこそ、{name}さん",
+    "welcome": "ようこそ！",
+    "wavingHandAlt": "手を振る手",
+    "shortcuts": {
+      "licenses": {
+        "label": "ライセンス",
+        "description": "開発者ライセンスの表示と管理"
+      },
+      "connections": {
+        "label": "接続",
+        "description": "接続を設定して独自のデータを取り込む"
+      },
+      "webhooks": {
+        "label": "Webhook",
+        "description": "Webhookイベントの登録を作成・管理"
+      },
+      "vehicles": {
+        "label": "車両",
+        "description": "共有された各車両が送信するデータを確認し、生のイベントを閲覧"
+      }
+    }
+  },
+  "list": {
+    "createLicense": "ライセンスを作成",
+    "addCredits": "クレジットを追加",
+    "empty": {
+      "title": "まだ開発者ライセンスを作成していません",
+      "description": "開発者ライセンスの認証情報を使ってDIMOと連携します"
+    },
+    "dcx": {
+      "title": "DCXとは？",
+      "description": "DCXはDIMO Creditsの略称です。DIMO Creditsは1クレジットあたり$0.001で、API呼び出しやその他のDIMO手数料はDCX建てで価格設定されています。",
+      "learnMore": "詳細はこちら。"
+    }
+  },
+  "create": {
+    "preparing": "開発者ライセンスの作成を準備中",
+    "creating": "開発者ライセンスを作成中...",
+    "loading": "読み込み中",
+    "created": "開発者ライセンスを作成しました！変更を確認するにはページを更新してください。",
+    "nameInUse": "この開発者ライセンス名はすでに使用されています。別の名前でもう一度お試しください。",
+    "failed": "トランザクションの確認中に問題が発生しました",
+    "namePlaceholder": "マイプロジェクト"
+  },
+  "simulator": {
+    "open": "車両シミュレーター",
+    "title": "車両シミュレーター",
+    "subtitle": "シミュレーション用のテスト車両を発行します。",
+    "minting": "車両を発行中...",
+    "removing": "車両を削除中...",
+    "mintFailed": "発行できませんでした",
+    "mintTokenUnreadable": "発行は成功しましたが、車両のトークンIDを読み取れませんでした。もう一度お試しください。",
+    "mintError": "車両の発行中に問題が発生しました",
+    "removeRecordFailed": "車両の記録を削除できませんでした",
+    "removeFailed": "車両を削除できませんでした",
+    "noVehicle": "車両が設定されていません",
+    "limitReached": "上限に達しました。1アカウントにつき{max}台までです",
+    "mint": "車両を発行",
+    "steps": {
+      "region": "01 — 地域",
+      "make": "02 — メーカー",
+      "model": "03 — 車種",
+      "year": "04 — 年式"
+    },
+    "selectRegion": "地域を選択",
+    "selectMake": "メーカーを選択",
+    "selectModel": "車種を選択",
+    "selectYear": "年式を選択",
+    "selectMakeFirst": "先にメーカーを選択してください",
+    "regions": {
+      "usa": {
+        "label": "アメリカ",
+        "sub": "ニューヨークのルート"
+      },
+      "japan": {
+        "label": "日本",
+        "sub": "本州周回ルート"
+      }
+    },
+    "fleet": {
+      "title": "シミュレーションフリート",
+      "count": "{count, plural, other {#台の車両}}",
+      "removedOnChain": "ブロックチェーン上で削除済み",
+      "tokenId": "トークンID",
+      "remove": "車両を削除"
+    },
+    "notices": {
+      "notRecorded": "車両#{tokenId}は発行されましたが、このライセンスに保存できませんでした。",
+      "notShared": "車両#{tokenId}は発行されましたが、シミュレーターにもこのライセンスにもアクセス権が付与されませんでした。解決するには、車両を削除してもう一度発行してください。",
+      "notRegistered": "車両#{tokenId}は発行されましたが、シミュレーターで起動できませんでした。",
+      "minted": "車両を発行しました！",
+      "removed": "車両を削除しました",
+      "removedNotBurned": "車両はシミュレーターから削除されましたが、NFTをバーンできませんでした。"
+    }
+  },
+  "error": {
+    "title": "問題が発生しました",
+    "description": "予期しないエラーが発生しました。もう一度お試しください。",
+    "home": "ホームに戻る",
+    "retry": "再試行"
+  },
+  "notFound": {
+    "metadataTitle": "404 | {appName}",
+    "title": "ページが見つかりません",
+    "description": "申し訳ありませんが、お探しのページが見つかりませんでした。",
+    "home": "ホームに戻る"
+  }
+}

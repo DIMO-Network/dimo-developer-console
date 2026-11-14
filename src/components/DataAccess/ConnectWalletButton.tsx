@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { type FC, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { toast } from 'sonner';
@@ -11,7 +12,8 @@ export const ConnectWalletButton: FC<{
   domain: string;
   onSuccess: () => void;
   label?: string;
-}> = ({ clientId, domain, onSuccess, label = 'Connect with your wallet' }) => {
+}> = ({ clientId, domain, onSuccess, label }) => {
+  const t = useTranslations('common');
   const getMemberDevJwt = useMemberDevJwt();
   const { trackEvent } = useMixPanel();
   const [busy, setBusy] = useState(false);
@@ -27,7 +29,7 @@ export const ConnectWalletButton: FC<{
       toast.error(
         error instanceof MemberDevJwtError
           ? error.message
-          : "Couldn't connect your wallet. Try again.",
+          : t('dataAccess.connectFailed'),
       );
     } finally {
       setBusy(false);
@@ -36,7 +38,7 @@ export const ConnectWalletButton: FC<{
 
   return (
     <Button onClick={connect} loading={busy}>
-      {label}
+      {label ?? t('dataAccess.connectWallet')}
     </Button>
   );
 };

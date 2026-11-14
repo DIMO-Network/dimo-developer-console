@@ -41,15 +41,22 @@ jest.mock('@/app/sign-up/components/WalletCreation/AccountFound', () => ({
 import * as Sentry from '@sentry/nextjs';
 import { toast } from 'sonner';
 import { WalletCreation } from '@/app/sign-up/components/WalletCreation/WalletCreation';
-import {
-  ACCOUNT_EXISTS_MESSAGE,
-  EMAIL_NOT_PROVEN_MESSAGE,
-  EMAIL_TAKEN_MESSAGE,
-  explainSignUpRefusal,
-  SIGN_UP_FAILED_MESSAGE,
-  SignUpRefusedError,
-  UNREACHABLE_MESSAGE,
-} from '@/app/sign-up/signUpResult';
+import { getTranslations } from 'next-intl/server';
+import { explainSignUpRefusal, SignUpRefusedError } from '@/app/sign-up/signUpResult';
+
+const ACCOUNT_EXISTS_MESSAGE = 'This account already exists — sign in instead.';
+const EMAIL_TAKEN_MESSAGE =
+  'This email is already used by another console account. Sign in with that account, or use a different email.';
+const EMAIL_NOT_PROVEN_MESSAGE =
+  "We couldn't confirm that this email belongs to your DIMO account.";
+const UNREACHABLE_MESSAGE = "Couldn't reach the console, try again.";
+const SIGN_UP_FAILED_MESSAGE =
+  'Something went wrong while creating your account. Try again.';
+
+let t: Awaited<ReturnType<typeof getTranslations>>;
+beforeAll(async () => {
+  t = await getTranslations('sign-up');
+});
 
 afterEach(() => jest.clearAllMocks());
 
@@ -57,9 +64,8 @@ describe('explainSignUpRefusal', () => {
   it('offers sign-in for an account that exists', () => {
     const goToSignIn = jest.fn();
     expect(
-      explainSignUpRefusal(new SignUpRefusedError('ACCOUNT_EXISTS'), goToSignIn),
+      explainSignUpRefusal(new SignUpRefusedError('ACCOUNT_EXISTS'), goToSignIn, t),
     ).toBe(true);
-    expect(ACCOUNT_EXISTS_MESSAGE).toBe('This account already exists — sign in instead.');
     const [message, options] = (toast.error as jest.Mock).mock.calls[0];
     expect(message).toBe(ACCOUNT_EXISTS_MESSAGE);
     expect(options.action.label).toBe('Sign in');
@@ -73,25 +79,12 @@ describe('explainSignUpRefusal', () => {
     ['UNREACHABLE', UNREACHABLE_MESSAGE],
     ['FAILED', SIGN_UP_FAILED_MESSAGE],
   ] as const)('says %s', (reason, message) => {
-    expect(explainSignUpRefusal(new SignUpRefusedError(reason), jest.fn())).toBe(true);
+    expect(explainSignUpRefusal(new SignUpRefusedError(reason), jest.fn(), t)).toBe(true);
     expect(toast.error).toHaveBeenCalledWith(message);
   });
 
-  it('has the agreed copy', () => {
-    expect(EMAIL_TAKEN_MESSAGE).toBe(
-      'This email is already used by another console account. Sign in with that account, or use a different email.',
-    );
-    expect(EMAIL_NOT_PROVEN_MESSAGE).toBe(
-      "We couldn't confirm that this email belongs to your DIMO account.",
-    );
-    expect(UNREACHABLE_MESSAGE).toBe("Couldn't reach the console, try again.");
-    expect(SIGN_UP_FAILED_MESSAGE).toBe(
-      'Something went wrong while creating your account. Try again.',
-    );
-  });
-
   it('leaves other errors to the caller', () => {
-    expect(explainSignUpRefusal(new Error('x'), jest.fn())).toBe(false);
+    expect(explainSignUpRefusal(new Error('x'), jest.fn(), t)).toBe(false);
     expect(toast.error).not.toHaveBeenCalled();
   });
 });

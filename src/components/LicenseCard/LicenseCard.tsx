@@ -1,3 +1,4 @@
+import { useFormatter, useTranslations } from 'next-intl';
 import { FragmentType, gql, useFragment } from '@/gql';
 import { Card } from '@/components/Card';
 import classNames from 'classnames';
@@ -36,6 +37,8 @@ export const LicenseCard = (props: {
 }) => {
   const license = useFragment(DEVELOPER_LICENSE_SUMMARY_FRAGMENT, props.license);
   const router = useRouter();
+  const t = useTranslations('common');
+  const format = useFormatter();
   const { data: vehicleData, loading: vehicleLoading } = useIdentityQuery(
     GET_VEHICLE_COUNT_BY_CLIENT_ID,
     {
@@ -80,7 +83,9 @@ export const LicenseCard = (props: {
         {/* Stats */}
         <div className="flex flex-row flex-wrap items-end justify-between gap-x-4 gap-y-2">
           <div className="flex flex-col gap-1">
-            <span className="text-label text-muted">Vehicles connected</span>
+            <span className="text-label text-muted">
+              {t('licenseCard.vehiclesConnected')}
+            </span>
             {vehicleLoading ? (
               <BubbleLoader isLoading isSmall />
             ) : (
@@ -89,7 +94,7 @@ export const LicenseCard = (props: {
                 className="license-card-metric"
                 onClick={(e) => e.stopPropagation()}
               >
-                {vehicleCount.toLocaleString()}
+                {format.number(vehicleCount)}
               </Anchor>
             )}
           </div>
@@ -97,7 +102,7 @@ export const LicenseCard = (props: {
           {!vehicleLoading && !hasVehicles && (
             <div className="flex flex-row items-center gap-1.5 pb-1 text-label text-muted">
               <WarningAmberIcon className="h-4 w-4 text-warning" />
-              No vehicles connected
+              {t('licenseCard.noVehicles')}
             </div>
           )}
         </div>
@@ -106,27 +111,29 @@ export const LicenseCard = (props: {
         {sharingLinkLoading ? (
           <BubbleLoader isLoading isSmall />
         ) : sharingLinkFailed ? (
-          <span className="text-label text-muted">Sharing status unavailable</span>
+          <span className="text-label text-muted">
+            {t('licenseCard.sharingUnavailable')}
+          </span>
         ) : configCount !== null && configCount > 1 ? (
           <Anchor
             href={`/license/${license.tokenId}/configurator`}
             className="license-card-link"
             onClick={(e) => e.stopPropagation()}
           >
-            {configCount} configurations →
+            {t('licenseCard.configurations', { count: configCount })}
           </Anchor>
         ) : sharingLink ? (
           <button
             onClick={(e) => {
               e.stopPropagation();
               navigator.clipboard.writeText(sharingLink);
-              toast.success('Sharing link copied');
+              toast.success(t('licenseCard.sharingCopied'));
             }}
             className="license-card-link"
             title={sharingLink}
           >
             <ContentCopyIcon className="h-4 w-4 shrink-0" />
-            Vehicle sharing link
+            {t('licenseCard.sharingLink')}
           </button>
         ) : (
           <Anchor
@@ -134,7 +141,7 @@ export const LicenseCard = (props: {
             className="license-card-link"
             onClick={(e) => e.stopPropagation()}
           >
-            Not configured — set up vehicle sharing →
+            {t('licenseCard.notConfigured')}
           </Anchor>
         )}
 
@@ -144,7 +151,7 @@ export const LicenseCard = (props: {
           className="button secondary w-full"
           onClick={(e) => e.stopPropagation()}
         >
-          <span className="content">License details</span>
+          <span className="content">{t('licenseCard.details')}</span>
         </Link>
       </div>
     </Card>

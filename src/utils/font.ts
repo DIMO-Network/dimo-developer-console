@@ -25,6 +25,7 @@ export const dimoFont = localFont({
     },
   ],
   display: 'swap',
+  // No fallback here: --font-sans in globals.css carries it, so a language can
+  // put its own faces after Euclid and before the generic families.
   variable: '--font-dimo',
-  fallback: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
 });

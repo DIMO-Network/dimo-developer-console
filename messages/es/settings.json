@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "title": "Configuración | {appName}"
+  },
+  "userDetails": {
+    "title": "Datos del usuario",
+    "name": "Nombre",
+    "email": "Correo electrónico"
+  },
+  "supportModal": {
+    "title": "Contactar al soporte para desarrolladores",
+    "description": "Ponte en contacto con nuestro equipo para resolver tus dudas.",
+    "success": "Solicitud de soporte enviada correctamente. Nos pondremos en contacto pronto.",
+    "failure": "No se pudo enviar la solicitud de soporte"
+  },
+  "team": {
+    "title": "Equipo",
+    "inviteMember": "Invitar miembro",
+    "loadError": "No se pudo cargar tu equipo.",
+    "ownerEmpty": "Invita a compañeros para compartir con ellos las licencias de este equipo. Tú decides quién obtiene acceso a datos.",
+    "licensesLoadError": "No se pudieron cargar las licencias de este equipo, así que el acceso a datos no se puede cambiar por ahora.",
+    "loadLicensesAgain": "Volver a cargar licencias",
+    "resent": "Invitación reenviada a {email}",
+    "resendFailed": "No pudimos reenviar la invitación. Inténtalo de nuevo.",
+    "cancelled": "Invitación a {email} cancelada",
+    "cancelFailed": "No pudimos cancelar la invitación. Inténtalo de nuevo."
+  },
+  "inviteError": {
+    "emailFailed": "No pudimos enviar el correo a {email}. Inténtalo de nuevo.",
+    "rateLimited": "Demasiadas invitaciones en este momento. Inténtalo de nuevo más tarde.",
+    "alreadyMember": "{email} ya está en este equipo.",
+    "alreadyInvited": "{email} ya tiene una invitación pendiente. Reenvíala desde la lista.",
+    "invalidEmail": "Introduce una dirección de correo electrónico válida.",
+    "default": "No pudimos enviar la invitación. Inténtalo de nuevo."
+  },
+  "inviteModal": {
+    "title": "Invitar a un miembro del equipo",
+    "description": "Verá las licencias de este equipo en la consola. Tú decides por separado quién obtiene acceso a datos.",
+    "emailLabel": "Correo electrónico",
+    "send": "Enviar invitación",
+    "sent": "Invitación enviada a {email}"
+  },
+  "grantBanner": {
+    "message": "{name} se unió. ¿Otorgar acceso a datos?",
+    "grant": "Otorgar"
+  },
+  "members": {
+    "columns": {
+      "member": "Miembro",
+      "role": "Rol",
+      "status": "Estado",
+      "dataAccess": "Acceso a datos"
+    },
+    "status": {
+      "expired": "Invitación vencida",
+      "invited": "Invitado",
+      "active": "Activa",
+      "removed": "Eliminado",
+      "left": "Salió"
+    },
+    "dataAccess": {
+      "stillSigner": "Sigue siendo firmante en {licenses}",
+      "notRecorded": "Sin registrar",
+      "revokeUnfinished": "Revocación sin terminar",
+      "needsSignIn": "Debe iniciar sesión una vez",
+      "none": "Ninguno"
+    },
+    "actions": {
+      "label": "Acciones para {email}",
+      "resend": "Reenviar",
+      "cancelInvite": "Cancelar invitación",
+      "grant": "Otorgar",
+      "retry": "Reintentar",
+      "revoke": "Revocar",
+      "remove": "Quitar"
+    }
+  },
+  "grant": {
+    "title": "Otorgar acceso a datos a {name}",
+    "description": "Elige las licencias que {name} puede leer en Vehículos.",
+    "loading": "Otorgando acceso a datos a {name}",
+    "success": "{name} ahora tiene acceso a datos de {licenses}.",
+    "notRecorded": "El acceso a datos está activado, pero no pudimos registrarlo para {licenses}, así que {name} aún no puede usarlo.",
+    "refused": "{licenses}: {message}",
+    "rolledBack": "{name} no tiene acceso a datos de {licenses}.",
+    "notRolledBack": "Esas claves siguen habilitadas en la blockchain y ninguna lista las muestra. Elimínalas en Claves de API, en la pestaña Ajustes de {licenses}.",
+    "confirm": "Otorgar acceso a datos",
+    "licenseFallback": "Licencia #{tokenId}"
+  },
+  "revoke": {
+    "title": "¿Revocar el acceso a datos de {name}?",
+    "description": "Su wallet se quita de las licencias elegidas en la blockchain. Los tokens que ya tiene dejan de funcionar en unos 10 minutos.",
+    "loading": "Revocando el acceso a datos de {name}",
+    "success": "Se revocó el acceso a datos de {name}.",
+    "notRecorded": "El acceso a datos está desactivado, pero no pudimos registrarlo para {licenses}.",
+    "retry": "Reintentar",
+    "confirm": "Revocar acceso a datos"
+  },
+  "remove": {
+    "title": "¿Quitar a {name} de {teamName}?",
+    "descriptionWithKeys": "Pierde el acceso a este equipo en la consola, y su wallet se quita de {licenses} en la blockchain.",
+    "description": "Pierde el acceso a este equipo en la consola.",
+    "confirm": "Quitar del equipo",
+    "loading": "Quitando a {name}",
+    "failedFallback": "No pudimos completar la eliminación. Inténtalo de nuevo.",
+    "keptOnTeam": "{name} sigue en {teamName}: no pudimos quitar su wallet de {licenses} en la blockchain. Inténtalo de nuevo.",
+    "removedStillSigner": "Se quitó a {name}, pero sigue siendo firmante en {licenses}. Usa Reintentar en su fila.",
+    "removed": "Se quitó a {name} de {teamName}.",
+    "notRecorded": "No pudimos registrar el acceso revocado para {licenses}. Usa Reintentar en su fila para terminar."
+  },
+  "webhookReview": {
+    "heading": "Webhooks para revisar",
+    "description": "Los webhooks siguen enviando datos de vehículos después de que {name} se va. Revisa los que creó o modificó.",
+    "checking": "Revisando {license}…",
+    "needsJwt": "Necesitamos un JWT de desarrollador para {license} para revisar sus webhooks.",
+    "loadFailed": "No se pudieron cargar los webhooks de {license}.",
+    "pasteLabel": "Pega un JWT de desarrollador para {license}",
+    "wrongLicense": "Ese JWT de desarrollador es de otra licencia.",
+    "check": "Revisar webhooks",
+    "none": "{name} no creó ni modificó ningún webhook en {license}.",
+    "createdAndChanged": "Lo creó y lo modificó por última vez",
+    "created": "Lo creó",
+    "changed": "Lo modificó por última vez"
+  },
+  "leave": {
+    "button": "Salir del equipo",
+    "unreachable": "No pudimos conectar con la consola. Inténtalo de nuevo.",
+    "left": "Saliste de {teamName}."
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "metadataTitle": "Sign Up | {appName}",
+  "metadataDescription": "Join DIMO Developer Console - Sign Up Today! Create your account to unlock powerful developer tools, and manage applications with ease. Get started and elevate your development experience now!",
+  "view": {
+    "termsAgreement": "By signing in, you are agreeing to our <terms>terms of service</terms> and <privacy>privacy policy</privacy>"
+  },
+  "refusal": {
+    "accountExists": "This account already exists — sign in instead.",
+    "signIn": "Sign in",
+    "emailTaken": "This email is already used by another console account. Sign in with that account, or use a different email.",
+    "emailNotProven": "We couldn't confirm that this email belongs to your DIMO account.",
+    "unreachable": "Couldn't reach the console, try again.",
+    "failed": "Something went wrong while creating your account. Try again."
+  },
+  "wallet": {
+    "createFailed": "Something went wrong while creating the user wallet",
+    "lostPasskey": "Lost your passkey? <recover>Recover with your email</recover>",
+    "troubleLoggingIn": "Trouble logging in? <support>Get support</support>",
+    "passkey": {
+      "title": "Creating account with passkey",
+      "body": "Your DIMO account is being created. This may take a few seconds."
+    },
+    "noPasskey": {
+      "title": "Creating account without passkey",
+      "body": "Your DIMO account is being created without a passkey, please check your inbox for a 6-digit OTP."
+    },
+    "accountFound": {
+      "title": "DIMO account found",
+      "body": "You already have a DIMO account. Please validate your identity to continue."
+    }
+  },
+  "buildFor": {
+    "title": "What are you building?",
+    "prompt": "What you are looking to launch with DIMO?",
+    "mobileApp": {
+      "title": "Mobile app",
+      "description": "App on the Apple App Store or Google Play Store"
+    },
+    "webApp": {
+      "title": "Web application",
+      "description": "Web app with user management"
+    },
+    "personalProject": {
+      "title": "Personal project",
+      "description": "Personal project to access vehicle data"
+    },
+    "somethingElse": "Something else",
+    "somethingElsePlaceholder": "I'm building a...",
+    "maxLength": "Use at most 150 characters",
+    "selectOption": "Select an option to continue"
+  },
+  "company": {
+    "title": "Final stretch",
+    "typeLabel": "Business/developer type *",
+    "select": "Select",
+    "maxLength": "The name should has maximum 120 characters",
+    "invalidUrl": "This field must be a valid URL with maximum 120 characters",
+    "finish": "Finish sign up",
+    "business": {
+      "nameLabel": "Company name *",
+      "namePlaceholder": "ACME",
+      "websiteLabel": "Company website",
+      "websitePlaceholder": "www.acme.zone",
+      "regionLabel": "Main operating region *"
+    },
+    "personal": {
+      "nameLabel": "Name *",
+      "namePlaceholder": "Bruce Wayne",
+      "websiteLabel": "Social URL",
+      "websitePlaceholder": "https://instagram.com/batman",
+      "regionLabel": "Region *"
+    },
+    "developerTypes": {
+      "personalDeveloper": "Personal Developer",
+      "oem": "OEM",
+      "insurance": "Insurance",
+      "maintenance": "Maintenance",
+      "fleetManagement": "Fleet Management",
+      "vehicleSales": "Vehicle Sales",
+      "utilities": "Utilities",
+      "financing": "Financing",
+      "ev": "EV",
+      "depin": "DePIN",
+      "data": "Data",
+      "others": "Others"
+    },
+    "regions": {
+      "northAmerica": "North America",
+      "latinAmericaCaribbean": "Latin America & Caribbean",
+      "oceania": "Oceania",
+      "northernWesternEurope": "Northern & Western Europe",
+      "africa": "Africa",
+      "eastSoutheastAsia": "East & Southeast Asia",
+      "middleEastCentralAsia": "Middle East & Central Asia",
+      "southAsia": "South Asia",
+      "easternEurope": "Eastern Europe"
+    }
+  }
+}

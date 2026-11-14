@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "title": "Inicio | {appName}"
+  },
+  "home": {
+    "welcomeNamed": "Te damos la bienvenida, {name}",
+    "welcome": "¡Te damos la bienvenida!",
+    "wavingHandAlt": "Mano saludando",
+    "shortcuts": {
+      "licenses": {
+        "label": "Licencias",
+        "description": "Consulta y administra tus licencias de desarrollador"
+      },
+      "connections": {
+        "label": "Conexiones",
+        "description": "Configura conexiones para traer tus propios datos"
+      },
+      "webhooks": {
+        "label": "Webhooks",
+        "description": "Crea y administra suscripciones a eventos de webhook"
+      },
+      "vehicles": {
+        "label": "Vehículos",
+        "description": "Mira qué datos envía cada vehículo compartido y explora sus eventos sin procesar"
+      }
+    }
+  },
+  "list": {
+    "createLicense": "Crear una licencia",
+    "addCredits": "Agregar créditos",
+    "empty": {
+      "title": "Todavía no has creado ninguna licencia de desarrollador",
+      "description": "Usa las credenciales de tu licencia de desarrollador para integrarte con DIMO"
+    },
+    "dcx": {
+      "title": "¿Qué es DCX?",
+      "description": "DCX es la abreviatura de DIMO Credits. Cada DIMO Credit cuesta $0.001, y las llamadas a la API y otras tarifas de DIMO se cobran en DCX.",
+      "learnMore": "Más información."
+    }
+  },
+  "create": {
+    "preparing": "Preparando la creación de la licencia de desarrollador",
+    "creating": "Creando la licencia de desarrollador…",
+    "loading": "Cargando",
+    "created": "¡Licencia de desarrollador creada! Actualiza la página para ver los cambios.",
+    "nameInUse": "El nombre de la licencia de desarrollador ya está en uso. Inténtalo de nuevo con otro nombre.",
+    "failed": "Algo salió mal al confirmar la transacción",
+    "namePlaceholder": "Mi proyecto"
+  },
+  "simulator": {
+    "open": "Simulador de vehículos",
+    "title": "Simulador de vehículos",
+    "subtitle": "Acuña vehículos de prueba simulados.",
+    "minting": "Acuñando el vehículo…",
+    "removing": "Quitando el vehículo…",
+    "mintFailed": "No se pudo acuñar",
+    "mintTokenUnreadable": "El vehículo se acuñó, pero no se pudo leer su ID de token. Inténtalo de nuevo.",
+    "mintError": "Algo salió mal al acuñar el vehículo",
+    "removeRecordFailed": "No se pudo quitar el registro del vehículo",
+    "removeFailed": "No se pudo quitar el vehículo",
+    "noVehicle": "No hay ningún vehículo configurado",
+    "limitReached": "Límite alcanzado — solo {max} por cuenta",
+    "mint": "Acuñar vehículo",
+    "steps": {
+      "region": "01 — Región",
+      "make": "02 — Marca",
+      "model": "03 — Modelo",
+      "year": "04 — Año"
+    },
+    "selectRegion": "Selecciona una región",
+    "selectMake": "Selecciona una marca",
+    "selectModel": "Selecciona un modelo",
+    "selectYear": "Selecciona un año",
+    "selectMakeFirst": "Primero selecciona una marca",
+    "regions": {
+      "usa": {
+        "label": "EE. UU.",
+        "sub": "Rutas de Nueva York"
+      },
+      "japan": {
+        "label": "Japón",
+        "sub": "Circuito de Honshu"
+      }
+    },
+    "fleet": {
+      "title": "Flota simulada",
+      "count": "{count, plural, one {# vehículo} other {# vehículos}}",
+      "removedOnChain": "Quitado en la blockchain",
+      "tokenId": "ID de token",
+      "remove": "Quitar vehículo"
+    },
+    "notices": {
+      "notRecorded": "El vehículo #{tokenId} se acuñó, pero no se pudo guardar en esta licencia.",
+      "notShared": "El vehículo #{tokenId} se acuñó, pero ni el simulador ni esta licencia recibieron acceso a él. Quita el vehículo y vuelve a acuñarlo para solucionarlo.",
+      "notRegistered": "El vehículo #{tokenId} se acuñó, pero el simulador no pudo iniciarlo.",
+      "minted": "¡Vehículo acuñado correctamente!",
+      "removed": "Vehículo quitado correctamente",
+      "removedNotBurned": "El vehículo se quitó del simulador, pero no se pudo quemar su NFT."
+    }
+  },
+  "error": {
+    "title": "Algo salió mal",
+    "description": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "home": "Volver al inicio",
+    "retry": "Reintentar"
+  },
+  "notFound": {
+    "metadataTitle": "404 | {appName}",
+    "title": "Página no encontrada",
+    "description": "Lo sentimos, no encontramos la página que buscas.",
+    "home": "Volver al inicio"
+  }
+}

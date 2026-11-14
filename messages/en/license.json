@@ -1,0 +1,216 @@
+{
+  "list": {
+    "teamLicenses": "{teamName} licenses",
+    "teamFallbackName": "Team",
+    "yourLicenses": "Your developer licenses",
+    "teamEmptyTitle": "This team has no developer licenses yet",
+    "teamEmptyBody": "Licenses the team owner creates show up here."
+  },
+  "breadcrumbLicenses": "Licenses",
+  "details": {
+    "metadataTitle": "License Details | {appName}",
+    "breadcrumbDetails": "License details",
+    "loadError": "There was an error fetching the license details",
+    "fallbackName": "License #{tokenId}",
+    "rename": "Rename",
+    "clientIdCopied": "Client ID copied!",
+    "tabs": {
+      "overview": "Overview",
+      "config": "Config",
+      "vehicles": "Vehicles",
+      "brand": "Brand"
+    },
+    "vehiclesConnected": "Vehicles connected",
+    "viewVehicles": "View vehicles →"
+  },
+  "quickActions": {
+    "label": "Quick actions",
+    "generateApiKey": "🔑 Generate API key",
+    "configureBranding": "🪪 Configure branding",
+    "setupSharing": "⚙️ Setup vehicle sharing",
+    "docs": "📖 Docs"
+  },
+  "usage": {
+    "creditsUsed": "Credits used",
+    "generateJwtHint": "Generate a JWT to see usage",
+    "unavailable": "Usage unavailable right now",
+    "learnAboutCredits": "Learn about credits →"
+  },
+  "vehiclesTab": {
+    "loadError": "Error loading vehicles",
+    "connectedVehicles": "Connected vehicles",
+    "viewList": "View vehicle list →",
+    "vehicleList": "Vehicle list",
+    "configureSharing": "Configure sharing"
+  },
+  "jwts": {
+    "title": "Developer JWTs",
+    "generateNew": "Generate new JWT",
+    "empty": "No developer JWTs found",
+    "copied": "JWT copied!",
+    "deleteLabel": "Delete JWT",
+    "deleteTitle": "Are you sure you want to delete this JWT?",
+    "columns": {
+      "jwt": "JWT",
+      "createdAt": "Created at",
+      "expiresAt": "Expires at"
+    },
+    "unknownExpiry": "Unknown",
+    "invalidToken": "Invalid"
+  },
+  "redirectUris": {
+    "title": "Authorized redirect URIs"
+  },
+  "brand": {
+    "title": "Brand",
+    "add": "Add brand",
+    "loading": "Loading brands…",
+    "none": "No brand set.",
+    "loadFailed": "Failed to load brands. Check your connection and reload.",
+    "workspaceFailed": "Could not load your workspace. Re-login and try again.",
+    "deleteFailed": "Failed to delete brand. Try again.",
+    "deleteTitle": "Delete {name}?",
+    "deleteLoading": "Deleting brand…",
+    "deleteLast": "Login with DIMO goes back to DIMO's own look for this license. Pages already open can take a few minutes to change.",
+    "deleteOne": "Sites that ask for this brand by name get DIMO's own look instead. Pages already open can take a few minutes to change.",
+    "multipleTitle": "Using multiple brands with Login with DIMO",
+    "multipleHint": "Every Login with DIMO button takes <code>brandOverride</code>. Omit it to use your default brand."
+  },
+  "brandRow": {
+    "default": "Default",
+    "edit": "Edit brand",
+    "delete": "Delete brand",
+    "setDefaultFirst": "Set another brand as default before deleting this one"
+  },
+  "brandForm": {
+    "displayName": "Display name",
+    "displayNameRequired": "Display name is required.",
+    "displayNameMax": "Max 100 characters",
+    "displayNamePlaceholder": "e.g. Fleet App",
+    "nameTaken": "A brand with this name already exists",
+    "renameWarning": "Renaming breaks existing Login with DIMO calls using this name",
+    "logo": "Logo",
+    "logoHint": "Wide brand mark shown on the Login with DIMO button and at the top of the sign-in window. PNG, JPEG, WebP, or SVG.",
+    "icon": "Icon",
+    "iconHint": "Square mark. Login with DIMO doesn't show it yet. PNG, JPEG, WebP, or SVG.",
+    "primaryColor": "Primary color",
+    "primaryColorHint": "Colors the Login with DIMO button and the main buttons in the sign-in window; their text turns black or white to stay readable. 7-char hex, e.g. <code>{example}</code>. Leave blank for DIMO defaults.",
+    "pickColor": "Pick primary color",
+    "colorInvalid": "Must be #RRGGBB hex",
+    "lowContrast": "Buttons in this color are hard to see in the sign-in window's {modes, select, light {light} dark {dark} other {light and dark}} mode. You can still save it.",
+    "saveFailed": "Failed to save brand",
+    "imageRefused": "That image was refused. Use a PNG, JPEG, WebP, or SVG up to 2 MB.",
+    "saved": "Brand saved",
+    "defaultUpdated": "Default brand updated",
+    "defaultFailed": "Failed to set default brand",
+    "save": "Save brand",
+    "setDefault": "Set as default"
+  },
+  "imagePicker": {
+    "unsupportedType": "Unsupported file type {type}. Use PNG, JPEG, WebP, or SVG.",
+    "tooLarge": "File too large ({size} KB). Max 2 MB.",
+    "replace": "Replace image",
+    "choose": "Choose image",
+    "orDrop": "or drop here",
+    "previewAlt": "brand preview",
+    "crop": "Crop"
+  },
+  "signers": {
+    "title": "API keys",
+    "apiKeyButton": "Create an API key for your server",
+    "apiKeyExplainer": "For apps that mint developer JWTs on their own servers. To test from the console, use Copy JWT.",
+    "generateApiKey": "Generate API key",
+    "checkingConsole": "Checking console access…",
+    "signerAddress": "Signer address",
+    "signerAddressNote": "*This is not your API key. If you have lost your API key, you will need to generate a new one.",
+    "enabledOn": "Enabled on",
+    "belongsTo": "Belongs to",
+    "assign": "Assign",
+    "turnOffConsole": "Turn off console access",
+    "deleteKey": "Delete API key",
+    "actionsFor": "Actions for {address}",
+    "recordFailed": "The key works, but we couldn't record who it's for.",
+    "saved": "Saved who this key is for.",
+    "signerInUse": "This address is a team member's wallet. Record it with Grant in Settings → Team.",
+    "saveFailed": "We couldn't save this. Try again.",
+    "generating": "Generating an API key for your developer license",
+    "consoleOffToast": "Console access turned off.",
+    "keyDeletedToast": "API key deleted. JWTs already issued with it work until they expire (up to 14 days).",
+    "turnOffTitle": "Turn off console access?",
+    "deleteTitle": "Are you sure you want to delete this API key?",
+    "deleteKeySubtitle": "Apps using this key stop getting new developer JWTs. JWTs already issued with it keep working until they expire, up to 14 days.",
+    "consoleOffSubtitle": "The console stops making developer JWTs for this license. JWTs it already made keep working until they expire, up to 14 days.",
+    "deleteLoading": "Waiting for the network to confirm…"
+  },
+  "consoleAccess": {
+    "explainer": "Console access lets this console make developer JWTs for this license, so you can test without creating an API key. Turning it on adds your console key as a signer, in one transaction.",
+    "enable": "Enable console access",
+    "enabling": "Turning on console access…",
+    "memberOff": "The license owner hasn't turned on console access yet.",
+    "notOwnerOnChain": "Your console wallet doesn't own this license on-chain, so it can't turn on console access.",
+    "copyJwt": "Copy JWT",
+    "noRedirectUri": "Add a redirect URI below to make developer JWTs.",
+    "jwtCopied": "JWT copied!",
+    "jwtFailed": "Couldn't make a JWT. Try again."
+  },
+  "belongsTo": {
+    "consoleYou": "Console (you)",
+    "consoleWallet": "Console wallet",
+    "notRecorded": "Not recorded",
+    "unassigned": "Unassigned",
+    "assign": "Assign",
+    "teamMember": "Team member",
+    "unknown": "Unknown",
+    "stillSyncing": "Still syncing",
+    "disabledOutside": "Disabled outside the console"
+  },
+  "keyHolders": {
+    "title": "Who is this key for?",
+    "teamMembers": "Team members",
+    "others": "Other people (comma-separated)",
+    "note": "Note",
+    "chooseOne": "Choose at least one person, or type a name.",
+    "noteTooLong": "Keep the note under {max} characters."
+  },
+  "apiKeyModal": {
+    "title": "API key generated",
+    "warning": "Make sure to copy your API key now as you will not be able to see this again.",
+    "copied": "API key copied!"
+  },
+  "vehicles": {
+    "metadataTitle": "Licensed vehicles | {appName}",
+    "loadError": "Something went wrong fetching the vehicle details",
+    "breadcrumbVehicles": "Vehicles",
+    "connectedVehicles": "Connected vehicles",
+    "testVehicles": "({count, plural, one {# test vehicle} other {# test vehicles}})",
+    "vehicleDetails": "Vehicle details"
+  },
+  "renounce": {
+    "title": "Renounce vehicle access?",
+    "tokenFallback": "Token #{tokenId}",
+    "tokenId": "Token ID: {tokenId}",
+    "warning": "You will lose all data access to this vehicle. The vehicle owner would need to re-grant access.",
+    "action": "Renounce access",
+    "failed": "Transaction failed"
+  },
+  "vehicleTable": {
+    "label": "Shared vehicles",
+    "renounced": "Access renounced",
+    "renounceFailed": "Failed to renounce access",
+    "pageLoadFailed": "Couldn't load that page. Try again.",
+    "lookupFailed": "Couldn't look up vehicle {tokenId}: {message}",
+    "noVehicle": "No vehicle has token ID {tokenId}.",
+    "notShared": "Vehicle {tokenId} ({make} {model}) isn't shared with this license.",
+    "error": "Error: {message}",
+    "rowActions": "Row actions",
+    "simulated": "Simulated",
+    "columns": {
+      "tokenDid": "Vehicle token DID",
+      "mmy": "Vehicle MMY",
+      "sources": "Sources",
+      "lastSeen": "Last seen"
+    },
+    "needsJwt": "Needs a developer JWT",
+    "unavailable": "Unavailable"
+  }
+}

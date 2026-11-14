@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 import React, { useState, type FC, useContext } from 'react';
@@ -31,6 +32,7 @@ const RedirectUriListComponent: FC<IProps> = ({
   isOwner,
   onRemoved,
 }) => {
+  const t = useTranslations('common');
   const { setLoadingStatus } = useContext(LoadingStatusContext);
   const [uriToDelete, setUriToDelete] = useState<string>();
 
@@ -41,22 +43,22 @@ const RedirectUriListComponent: FC<IProps> = ({
     const code = get(error, 'code', null);
     if (code === 4001)
       setLoadingStatus({
-        label: 'The transaction was denied',
+        label: t('errors.transactionDenied'),
         status: 'error',
       });
-    else setLoadingStatus({ label: 'Something went wrong', status: 'error' });
+    else setLoadingStatus({ label: t('errors.somethingWentWrong'), status: 'error' });
   };
 
   const handleDelete = async (uri: string) => {
     try {
       setLoadingStatus({
-        label: 'Deleting the selected redirect URI',
+        label: t('redirectUri.deleting'),
         status: 'loading',
       });
       await setRedirectUri(uri, false);
       if (onRemoved) onRemoved(uri);
       else void refreshData();
-      setLoadingStatus({ label: 'Redirect URI deleted', status: 'success' });
+      setLoadingStatus({ label: t('redirectUri.deleted'), status: 'success' });
     } catch (error: unknown) {
       handleError(error);
     }
@@ -75,7 +77,7 @@ const RedirectUriListComponent: FC<IProps> = ({
       <CopyButton
         key={`copy-action-${index}`}
         value={uri}
-        onCopySuccessMessage={'Redirect URI copied!'}
+        onCopySuccessMessage={t('redirectUri.copied')}
         size="icon"
       />
     );
@@ -87,7 +89,7 @@ const RedirectUriListComponent: FC<IProps> = ({
         <Button
           variant="secondary"
           size="icon"
-          title="Delete redirect URI"
+          title={t('redirectUri.deleteTitle')}
           type="button"
           onClick={() => setUriToDelete(uri)}
           key={`delete-action-${index}`}
@@ -101,14 +103,14 @@ const RedirectUriListComponent: FC<IProps> = ({
   return (
     <>
       <Table
-        columns={[{ name: 'uri', label: 'Authorized URIs' }]}
+        columns={[{ name: 'uri', label: t('redirectUri.authorized') }]}
         data={redirectUris}
         actions={[renderCopyRedirectUriAction, renderDeleteRedirectUriAction]}
       />
       <DeleteConfirmationModal
         isOpen={!!uriToDelete}
-        title={'Are you sure you want to delete this Redirect URI?'}
-        subtitle={'You will no longer be able to use this redirect URI in your app.'}
+        title={t('redirectUri.confirmTitle')}
+        subtitle={t('redirectUri.confirmSubtitle')}
         onConfirm={onConfirmDelete}
         onCancel={() => {
           setUriToDelete(undefined);

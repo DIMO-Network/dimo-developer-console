@@ -1,5 +1,6 @@
 'use client';
 
+import { useFormatter, useTranslations } from 'next-intl';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import './DatePicker.css';
@@ -12,6 +13,8 @@ interface IProps {
   /** Days before this one can't be picked. */
   min?: Date;
 }
+
+export const WEEKDAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
 
 const getDaysInMonth = (month: number, year: number): Date[] => {
   const date = new Date(year, month, 1);
@@ -26,6 +29,8 @@ const getDaysInMonth = (month: number, year: number): Date[] => {
 };
 
 export const DatePicker: FC<IProps> = ({ value, onChange, placeholder, min }) => {
+  const t = useTranslations('common');
+  const format = useFormatter();
   const [show, setShow] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const today = new Date();
@@ -71,7 +76,7 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder, min }) =>
                 wrapping <label> doesn't reopen the picker. */}
             <button
               type="button"
-              aria-label="Previous month"
+              aria-label={t('datePicker.previousMonth')}
               onClick={() => {
                 if (month === 0) {
                   setMonth(11);
@@ -85,14 +90,14 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder, min }) =>
               ‹
             </button>
             <div className="font-medium">
-              {new Date(year, month).toLocaleString('default', {
+              {format.dateTime(new Date(year, month), {
                 month: 'long',
                 year: 'numeric',
               })}
             </div>
             <button
               type="button"
-              aria-label="Next month"
+              aria-label={t('datePicker.nextMonth')}
               onClick={() => {
                 if (month === 11) {
                   setMonth(0);
@@ -108,9 +113,9 @@ export const DatePicker: FC<IProps> = ({ value, onChange, placeholder, min }) =>
           </div>
 
           <div className="grid grid-cols-7 text-center text-sm text-muted border-t border-outline pt-2">
-            {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+            {WEEKDAY_KEYS.map((day) => (
               <div key={day} className="font-semibold">
-                {day}
+                {t(`datePicker.weekdays.${day}`)}
               </div>
             ))}
           </div>

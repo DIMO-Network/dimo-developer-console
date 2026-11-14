@@ -1,6 +1,7 @@
 'use client';
 import { FC, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import * as Sentry from '@sentry/nextjs';
 
 import { Button } from '@/components/Button';
@@ -11,6 +12,7 @@ interface IProps {
 }
 
 const ErrorPage: FC<IProps> = ({ error, reset }) => {
+  const t = useTranslations('app.error');
   useEffect(() => {
     Sentry.captureException(error);
     console.error({ error });
@@ -20,16 +22,14 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
     <main className="grid min-h-full place-items-center px-6 py-24 sm:py-32 lg:px-8">
       <div className="text-center">
         <p className="text-label text-muted">500</p>
-        <h1 className="mt-4 text-title text-ink">Something went wrong</h1>
-        <p className="mt-6 text-body text-muted">
-          An unexpected error occurred. Please try again.
-        </p>
+        <h1 className="mt-4 text-title text-ink">{t('title')}</h1>
+        <p className="mt-6 text-body text-muted">{t('description')}</p>
         <div className="mt-10 flex items-center justify-center gap-x-4">
           <Link href="/" className="button primary">
-            Go back home
+            {t('home')}
           </Link>
           <Button variant="secondary" onClick={reset}>
-            Retry
+            {t('retry')}
           </Button>
         </div>
       </div>

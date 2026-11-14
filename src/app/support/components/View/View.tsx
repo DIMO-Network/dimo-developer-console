@@ -1,5 +1,6 @@
 'use client';
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { ContactCard } from '@/app/support/components/ContactCard';
 import { LightBulb, MenuBook, WarningAmberIcon } from '@/components/Icons';
@@ -9,34 +10,37 @@ import { Anchor } from '@/components/Anchor';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 const View: FC = () => {
+  const t = useTranslations('support');
+
   return (
     <div className="support-page">
-      <p className="subtitle">
-        Please select an option below so our support team can address your issue.
-      </p>
+      <p className="subtitle">{t('subtitle')}</p>
       <div className="contact-cards">
         <div className="report-issue">
           <ContactCard
-            title="Report an issue"
-            description="If you're experiencing unexpected issues with the DIMO API please contact us here."
+            title={t('reportIssue.title')}
+            description={t('reportIssue.description')}
             Icon={WarningAmberIcon}
           />
           <p className="status-action">
-            Known issues and outages can be found on our{' '}
-            <Anchor href={'https://status.dimo.org/'} className="primary">
-              status page
-              <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-            </Anchor>
+            {t.rich('reportIssue.statusNote', {
+              statusLink: (chunks) => (
+                <Anchor href={'https://status.dimo.org/'} className="primary">
+                  {chunks}
+                  <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                </Anchor>
+              ),
+            })}
           </p>
         </div>
         <ContactCard
-          title="FAQs"
-          description="Check our FAQs for common questions and issues you may be experiencing."
+          title={t('faqs.title')}
+          description={t('faqs.description')}
           Icon={MenuBook}
         />
         <ContactCard
-          title="Feature request"
-          description="If you have ideas, requests, or needs which are not currently supported by the DIMO API, we’d love to hear from you."
+          title={t('featureRequest.title')}
+          description={t('featureRequest.description')}
           Icon={LightBulb}
         />
       </div>

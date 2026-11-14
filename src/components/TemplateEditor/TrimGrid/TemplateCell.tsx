@@ -6,7 +6,10 @@ import { coerce, type Normalisation } from '@/utils/templateCoerce';
 interface Props {
   def: AttributeDef;
   value: AttributeValue | undefined;
+  /** Mirrors the worker's wording in validation messages, so it stays English. */
   where: string;
+  /** The field's accessible name: where it is and which attribute it holds. */
+  ariaLabel: string;
   emphasised: boolean;
   readOnly?: boolean;
   testId: string;
@@ -27,6 +30,7 @@ export const TemplateCell: FC<Props> = ({
   def,
   value,
   where,
+  ariaLabel,
   emphasised,
   readOnly,
   testId,
@@ -71,7 +75,7 @@ export const TemplateCell: FC<Props> = ({
     <div data-testid={testId} className={classnames('px-2 py-1.5', tone)}>
       {def.type === 'enum' || def.type === 'boolean' ? (
         <select
-          aria-label={`${where} ${def.label}`}
+          aria-label={ariaLabel}
           value={draft}
           onChange={(e) => {
             setDraft(e.target.value);
@@ -90,7 +94,7 @@ export const TemplateCell: FC<Props> = ({
         <input
           type="text"
           inputMode={def.type === 'string' ? 'text' : 'decimal'}
-          aria-label={`${where} ${def.label}`}
+          aria-label={ariaLabel}
           placeholder={NOT_SET}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}

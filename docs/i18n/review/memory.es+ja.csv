@@ -1,0 +1,451 @@
+key,en,note,es,ja
+tm.0001,0x… wallet address,"placeholder in the add-member wallet address input, fleet members panel",Dirección de wallet 0x…,ウォレットアドレス（0x…）
+tm.0002,"<x id=""0"" equiv-text=""${count}""/> Record","glovebox record count under the selected vehicle, singular (count is 1)","<x id=""0"" equiv-text=""${count}""/> Registro","<x id=""0"" equiv-text=""${count}""/>件の記録"
+tm.0003,"<x id=""0"" equiv-text=""${d.tripCount}""/> trips · <x id=""1"" equiv-text=""${hrs.value} ${hrs.unit}""/>",driving behaviour panel summary: trip count and driving hours,"<x id=""0"" equiv-text=""${d.tripCount}""/> viajes · <x id=""1"" equiv-text=""${hrs.value} ${hrs.unit}""/>","<x id=""0"" equiv-text=""${d.tripCount}""/>回の走行 · <x id=""1"" equiv-text=""${hrs.value} ${hrs.unit}""/>"
+tm.0004,"<x id=""0"" equiv-text=""${this.drawCount}""/> point(s) — click the map to add, the first point to finish.","hint while drawing a geofence on the map, with the point count","<x id=""0"" equiv-text=""${this.drawCount}""/> punto(s): haz clic en el mapa para añadir y en el primer punto para terminar.","<x id=""0"" equiv-text=""${this.drawCount}""/>個のポイント。地図をクリックして追加し、最初のポイントをクリックすると完了します。"
+tm.0005,"<x id=""0"" equiv-text=""${this.memberIds.size}""/> of <x id=""1"" equiv-text=""${this.vehicles.length}""/> vehicles assigned.",assigned-vehicle count in the manage geofence vehicles dialog,"<x id=""0"" equiv-text=""${this.memberIds.size}""/> de <x id=""1"" equiv-text=""${this.vehicles.length}""/> vehículos asignados.","<x id=""1"" equiv-text=""${this.vehicles.length}""/>台中<x id=""0"" equiv-text=""${this.memberIds.size}""/>台の車両が割り当て済みです。"
+tm.0006,"<x id=""0"" equiv-text=""${this.results.length}""/> of <x id=""1"" equiv-text=""${this.total}""/> vehicles passed through · <x id=""2"" equiv-text=""${passCount}""/> passes",geofence activity dialog summary: vehicles that passed through and pass count,"<x id=""0"" equiv-text=""${this.results.length}""/> de <x id=""1"" equiv-text=""${this.total}""/> vehículos atravesaron · <x id=""2"" equiv-text=""${passCount}""/> pasos","<x id=""1"" equiv-text=""${this.total}""/>台中<x id=""0"" equiv-text=""${this.results.length}""/>台が通過 · 通過<x id=""2"" equiv-text=""${passCount}""/>回"
+tm.0007,"<x id=""0"" equiv-text=""${this.visibleCards().length}""/> vehicles",vehicle count above the fleet vehicle list,"<x id=""0"" equiv-text=""${this.visibleCards().length}""/> vehículos","<x id=""0"" equiv-text=""${this.visibleCards().length}""/>台の車両"
+tm.0008,"<x id=""0"" equiv-text=""&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;""/> events since <x id=""1"" equiv-text=""${this.fmtDate(first)}""/>",driving behaviour panel: bold event total and the first event date,"<x id=""0"" equiv-text=""&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;""/> eventos desde <x id=""1"" equiv-text=""${this.fmtDate(first)}""/>","<x id=""1"" equiv-text=""${this.fmtDate(first)}""/>以降のイベント<x id=""0"" equiv-text=""&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;""/>件"
+tm.0009,"<x id=""0"" equiv-text=""&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;""/> driven",driving behaviour panel: bold distance driven,"<x id=""0"" equiv-text=""&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;""/> recorridos","走行距離<x id=""0"" equiv-text=""&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;""/>"
+tm.0010,"<x id=""0"" equiv-text=""&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;""/> driving time",driving behaviour panel: bold driving time,"<x id=""0"" equiv-text=""&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;""/> de conducción","運転時間<x id=""0"" equiv-text=""&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;""/>"
+tm.0011,"<x id=""0"" equiv-text=""&lt;b&gt;${trips}&lt;/b&gt;""/> trips",driving behaviour panel: bold trip count,"<x id=""0"" equiv-text=""&lt;b&gt;${trips}&lt;/b&gt;""/> viajes","<x id=""0"" equiv-text=""&lt;b&gt;${trips}&lt;/b&gt;""/>回の走行"
+tm.0012,"<x id=""0"" equiv-text=""&lt;p&gt;""/>Set <x id=""1"" equiv-text=""&lt;code&gt;""/>DIMO_AUTH_CLIENT_ID<x id=""2"" equiv-text=""&lt;/code&gt;""/> in the API <x id=""3"" equiv-text=""&lt;code&gt;""/>settings.yaml<x id=""4"" equiv-text=""&lt;/code&gt;""/> and register
+                    <x id=""5"" equiv-text=""&lt;code&gt;${location.origin}""/>/login.html<x id=""6"" equiv-text=""&lt;/code&gt;""/> as a redirect URI in the
+                    <x id=""7"" equiv-text=""&lt;a href=&quot;https://console.dimo.org&quot;&gt;""/>DIMO Developer Console<x id=""8"" equiv-text=""&lt;/a&gt;""/>.<x id=""9"" equiv-text=""&lt;/p&gt;""/>",developer setup message on the login screen when no client ID is configured; keep code tags and config names,"<x id=""0"" equiv-text=""&lt;p&gt;""/>Configure <x id=""1"" equiv-text=""&lt;code&gt;""/>DIMO_AUTH_CLIENT_ID<x id=""2"" equiv-text=""&lt;/code&gt;""/> en el <x id=""3"" equiv-text=""&lt;code&gt;""/>settings.yaml<x id=""4"" equiv-text=""&lt;/code&gt;""/> de la API y registre
+                    <x id=""5"" equiv-text=""&lt;code&gt;${location.origin}""/>/login.html<x id=""6"" equiv-text=""&lt;/code&gt;""/> como URI de redirección en la
+                    <x id=""7"" equiv-text=""&lt;a href=&quot;https://console.dimo.org&quot;&gt;""/>DIMO Developer Console<x id=""8"" equiv-text=""&lt;/a&gt;""/>.<x id=""9"" equiv-text=""&lt;/p&gt;""/>","<x id=""0"" equiv-text=""&lt;p&gt;""/>APIの<x id=""3"" equiv-text=""&lt;code&gt;""/>settings.yaml<x id=""4"" equiv-text=""&lt;/code&gt;""/>で<x id=""1"" equiv-text=""&lt;code&gt;""/>DIMO_AUTH_CLIENT_ID<x id=""2"" equiv-text=""&lt;/code&gt;""/>を設定し、<x id=""5"" equiv-text=""&lt;code&gt;${location.origin}""/>/login.html<x id=""6"" equiv-text=""&lt;/code&gt;""/>をリダイレクトURIとして<x id=""7"" equiv-text=""&lt;a href=&quot;https://console.dimo.org&quot;&gt;""/>DIMO Developer Console<x id=""8"" equiv-text=""&lt;/a&gt;""/>に登録してください。<x id=""9"" equiv-text=""&lt;/p&gt;""/>"
+tm.0013,"Accepting your invitation, one moment.",loading message on the accept invitation page,"Aceptando tu invitación, un momento.",招待を承諾しています。しばらくお待ちください。
+tm.0014,Account,section heading on the account settings page,Cuenta,アカウント
+tm.0015,Acquisition,TCO cost breakdown label and table column for acquisition cost,Adquisición,取得費用
+tm.0016,Acquisition &amp; depreciation,section label in the TCO vehicle detail,Adquisición y depreciación,取得費用と減価償却
+tm.0017,Active,member status label in a team members table (active member),Activa,アクティブ
+tm.0018,Activity,"button opening geofence activity, geofences page; short, next to an icon",Actividad,アクティビティ
+tm.0019,"Add <x id=""0"" equiv-text=""${categoryLabel(t).toLowerCase()}""/>","glovebox quick-add menu item, category name in lowercase","Agregar <x id=""0"" equiv-text=""${categoryLabel(t).toLowerCase()}""/>","<x id=""0"" equiv-text=""${categoryLabel(t).toLowerCase()}""/>を追加"
+tm.0020,Add a document,upload document dialog heading and add-document button tooltip in the glovebox,Agregar un documento,書類を追加
+tm.0021,Add at least 3 points to make an area.,error when finishing a geofence drawing with fewer than 3 points,Añade al menos 3 puntos para crear un área.,エリアを作成するには、3つ以上のポイントを追加してください。
+tm.0022,Add by wallet address,section label in the fleet members panel for adding a member by wallet,Agregar por dirección de cartera,ウォレットアドレスで追加
+tm.0023,Add document,primary button in the glovebox that opens the upload dialog,Agregar documento,書類を追加
+tm.0024,Add member,button that adds a member in the fleet or family members panel,Agregar miembro,メンバーを追加
+tm.0025,Add to geofence,tooltip on the toggle that adds a vehicle to a geofence,Añadir a la geocerca,ジオフェンスに追加
+tm.0026,Added by,field label in the document detail dialog (uploader),Agregado por,追加者
+tm.0027,Added through another DIMO app. You can view and download it here; only the app that added it can remove it.,notice in the document detail dialog for a document added by another app,Agregado desde otra aplicación de DIMO. Puede verlo y descargarlo aquí; solo la aplicación que lo agregó puede eliminarlo.,別のDIMOアプリから追加された書類です。ここで表示とダウンロードはできますが、削除できるのは追加したアプリだけです。
+tm.0028,Adding…,add-member button label while the request runs,Agregando…,追加中…
+tm.0029,"Aftermarket device #<x id=""0"" equiv-text=""${this.vehicle.aftermarketDevice.tokenId}""/>",vehicle detail connection row naming an aftermarket device by token number,"Dispositivo de posventa #<x id=""0"" equiv-text=""${this.vehicle.aftermarketDevice.tokenId}""/>","アフターマーケットデバイス#<x id=""0"" equiv-text=""${this.vehicle.aftermarketDevice.tokenId}""/>"
+tm.0030,Agentic Experiences,"dimo.org solution name: navbar link, page meta name and breadcrumb",Experiencias agénticas,エージェンティック体験
+tm.0031,All,"filter pill showing all documents in the glovebox, followed by a count",Todos,すべて
+tm.0032,All vehicles,geofence scope option and scope label meaning the geofence covers every vehicle,Todos los vehículos,すべての車両
+tm.0033,All vehicles on this account are hidden.,empty state in the TCO view when every vehicle is hidden,Todos los vehículos de esta cuenta están ocultos.,このアカウントの車両はすべて非表示になっています。
+tm.0034,Almost there,heading of the missing email step on the login page,Casi listo,あと少しです
+tm.0035,Amount,"table column header for a cost amount, TCO view",Monto,金額
+tm.0036,Amount (optional),field label in the upload document dialog,Monto (opcional),金額（任意）
+tm.0037,Applies to,field label for geofence scope in the create geofence dialog,Aplica a,適用対象
+tm.0038,Applies to every vehicle in this fleet.,hint under the geofence scope option for all vehicles,Aplica a todos los vehículos de esta flota.,このフリートのすべての車両に適用されます。
+tm.0039,Approximate location,permission name for approximate location access (sharing permissions list),Ubicación aproximada,おおよその位置
+tm.0040,Area,"label before the drawn geofence area size, create geofence dialog",Área,面積
+tm.0041,Auto,trip detection method option (automatic),Automático,自動
+tm.0042,Average,statistic label for an average value: signal aggregation option in the console and stat label on vehicle detail,Promedio,平均
+tm.0043,Avg per day,stat label on the vehicle detail utilization card,Promedio por día,1日平均
+tm.0044,Avg speed,stat label in the trip replay dialog,Vel. prom.,平均速度
+tm.0045,Back,accessible label or tooltip of a back navigation button,Atrás,戻る
+tm.0046,Back to live,button in the trips panel that returns the map to the live position,Volver a en vivo,現在位置に戻る
+tm.0047,Battery,quick view telemetry row for the 12 V battery voltage; short label,Batería,バッテリー
+tm.0048,Battery voltage,chart heading on the vehicle detail page,Voltaje de la batería,バッテリー電圧
+tm.0049,Brand,"tab, section title and form label for a developer license brand (name and logo)",Marca,ブランド
+tm.0050,Cancel,secondary button that closes a dialog or leaves a form without saving,Cancelar,キャンセル
+tm.0051,Category,"table column header or field label for a category (document category, signal category)",Categoría,カテゴリ
+tm.0052,Center map,map control tooltip that recenters the map,Centrar mapa,地図を中央に表示
+tm.0053,Change point,trip detection method option (change point detection),Punto de cambio,変化点
+tm.0054,Charge,quick view telemetry row for EV state of charge; short label,Carga,充電
+tm.0055,Check,status pill on the vehicle detail diagnostics card meaning a value needs checking; very short,Revisar,要確認
+tm.0056,Checking geofences…,progress message in the trips panel while geofence crossings load,Comprobando geocercas…,ジオフェンスを確認中…
+tm.0057,Checking…,loading status in the vehicle source rail while access or account state is checked,Comprobando…,確認中…
+tm.0058,Click to finish,map tooltip on the first drawn point while drawing a geofence,Haz clic para terminar,クリックして完了
+tm.0059,Client ID and API key are required.,validation error on the onboard fleet form,Se requieren Client ID y API key.,クライアントIDとAPIキーは必須です。
+tm.0060,Close,"button or accessible label that closes a dialog, sheet or modal",Cerrar,閉じる
+tm.0061,Close search,map toolbar tooltip on the search toggle when search is open,Cerrar búsqueda,検索を閉じる
+tm.0062,Collapse panel,tooltip on the overview panel toggle,Contraer panel,パネルを折りたたむ
+tm.0063,Collapse sidebar,accessible label or tooltip on the sidebar collapse toggle,Contraer barra lateral,サイドバーを折りたたむ
+tm.0064,Color,field label for the geofence color picker,Color,色
+tm.0065,Comfortable view,tooltip on the vehicle card density toggle,Vista amplia,標準表示
+tm.0066,Common questions,dimo.org FAQ section heading on compare and compliance pages,Preguntas frecuentes,よくある質問
+tm.0067,Compact view,tooltip on the vehicle card density toggle,Vista compacta,コンパクト表示
+tm.0068,Compare,dimo.org breadcrumb item for the compare section,Comparar,比較
+tm.0069,Compliance,"dimo.org breadcrumb item and section name for compliance, and a feature category tag",Cumplimiento,コンプライアンス
+tm.0070,Confirm,heading of the confirm step in the upload document dialog,Confirmar,確認
+tm.0071,Connected Vehicles,dimo.org industry page stat label under a number,Vehículos conectados,コネクテッドカー
+tm.0072,Connection details,"console page title, breadcrumb and link for one connection detail page",Detalles de la conexión,接続の詳細
+tm.0073,Connections,"console navigation item, page title, breadcrumb and home shortcut for connections",Conexiones,接続
+tm.0074,Consumer Applications,"dimo.org solution name: navbar link, page meta name and breadcrumb",Aplicaciones para consumidores,コンシューマー向けアプリ
+tm.0075,Contact Sales,dimo.org call-to-action button on industry pages,Contactar con ventas,営業に問い合わせる
+tm.0076,Continue,primary button that continues to the next step,Continuar,続行
+tm.0077,Coolant,quick view telemetry row for coolant temperature; short label,Refrigerante,冷却水
+tm.0078,Coolant temperature,chart heading on the vehicle detail page,Temperatura del refrigerante,冷却水温
+tm.0079,Cooldown,"webhook cooldown setting: table column, detail label and form field label",Período de espera,クールダウン
+tm.0080,Copied,confirmation shown after copying text to the clipboard; short,Copiado,コピーしました
+tm.0081,Copy API key,"tooltip on the copy API key button, onboard fleet page",Copiar API key,APIキーをコピー
+tm.0082,Copy wallet address,"tooltip on the copy wallet address button, account settings",Copiar dirección de wallet,ウォレットアドレスをコピー
+tm.0083,Could not add member.,error in the members panel when adding a member fails,No se pudo agregar el miembro.,メンバーを追加できませんでした。
+tm.0084,Could not load DIMO settings. Please enter credentials manually.,error on the onboard fleet page when DIMO settings fail to load,No se pudo cargar la configuración de DIMO. Ingrese las credenciales manualmente.,DIMOの設定を読み込めませんでした。認証情報を手動で入力してください。
+tm.0085,Could not load members.,error in the members panel when members fail to load,No se pudieron cargar los miembros.,メンバーを読み込めませんでした。
+tm.0086,Could not remove member.,error in the members panel when removing a member fails,No se pudo quitar el miembro.,メンバーを削除できませんでした。
+tm.0087,Could not resend invitation.,error in the members panel when resending an invitation fails,No se pudo reenviar la invitación.,招待を再送信できませんでした。
+tm.0088,Could not revoke invitation.,error in the members panel when revoking an invitation fails,No se pudo revocar la invitación.,招待を取り消せませんでした。
+tm.0089,Create geofence,submit button in the create geofence dialog,Crear geocerca,ジオフェンスを作成
+tm.0090,Creating…,onboard fleet submit button while the fleet is being created,Creando…,作成中…
+tm.0091,Credentials,permission name for VIN credential access (sharing permissions list and configurator),Credenciales,証明情報
+tm.0092,Current location,permission name for current location access (sharing permissions list),Ubicación actual,現在地
+tm.0093,Custom color,tooltip on the custom color swatch in the create geofence dialog,Color personalizado,カスタムカラー
+tm.0094,Customer Stories,dimo.org navbar link and breadcrumb for customer stories,Historias de clientes,導入事例
+tm.0095,DIMO API key,field label on the onboard fleet page,DIMO API key,DIMO APIキー
+tm.0096,DIMO client ID,field label on the onboard fleet page,DIMO client ID,DIMOクライアントID
+tm.0097,DIMO permissions required to read this vehicle’s documents,tooltip on the no-permission badge in the TCO vehicle list,Se requieren permisos de DIMO para leer los documentos de este vehículo,この車両の書類を読み取るにはDIMOの権限が必要です
+tm.0098,DIMO vs Smartcar,dimo.org link text and heading comparing DIMO with Smartcar; names stay English,DIMO vs. Smartcar,DIMO vs Smartcar
+tm.0099,DIMO | Vehicle Platform for the Session-Based Economy,"dimo.org home page title, Open Graph title and Twitter title",DIMO | Plataforma vehicular para la economía basada en sesiones,DIMO | セッションベース経済のための車両プラットフォーム
+tm.0100,DTCs,"unit label after the diagnostic trouble code count, vehicle detail",DTCs,DTC
+tm.0101,Dark mode,theme toggle label that switches to dark mode,Modo oscuro,ダークモード
+tm.0102,Date,table column header in the TCO line items,Fecha,日付
+tm.0103,Dealerships,"dimo.org industry name: navbar link, page meta name and breadcrumb",Concesionarios,ディーラー
+tm.0104,Delete,button that deletes an item,Eliminar,削除
+tm.0105,Delete failed,error in the document detail dialog when deleting fails,Error al eliminar,削除できませんでした
+tm.0106,Delete this document? It will be removed from your list. The file itself stays stored on DIMO's infrastructure.,browser confirm prompt before deleting a glovebox document,¿Eliminar este documento? Se quitará de su lista. El archivo en sí permanece almacenado en la infraestructura de DIMO.,この書類を削除しますか？リストからは削除されますが、ファイル自体はDIMOのインフラに保存されたままです。
+tm.0107,"Delete “<x id=""0"" equiv-text=""${g.name}""/>”?",inline confirmation before deleting a named group or geofence,"¿Eliminar “<x id=""0"" equiv-text=""${g.name}""/>”?","「<x id=""0"" equiv-text=""${g.name}""/>」を削除しますか？"
+tm.0108,Deleting…,"delete button label while the request runs, document detail dialog",Eliminando…,削除中…
+tm.0109,Delivery Service Providers,"dimo.org industry name: navbar link, page meta name and schema audience type",Proveedores de servicios de entrega,配送サービス事業者
+tm.0110,Depreciation to date,TCO cost breakdown label,Depreciación a la fecha,現在までの減価償却
+tm.0111,Description,table column header or detail label for a description,Descripción,説明
+tm.0112,"Detected VIN <x id=""0"" equiv-text=""&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;""/>",upload document dialog line showing the VIN read from the file,"VIN detectado <x id=""0"" equiv-text=""&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;""/>","検出されたVIN：<x id=""0"" equiv-text=""&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;""/>"
+tm.0113,Diagnostics,section link on the vehicle detail page for diagnostics,Diagnósticos,診断
+tm.0114,Display name,"field label, column header or detail label for a display name",Nombre visible,表示名
+tm.0115,Distance,trip distance column header or stat label,Distancia,距離
+tm.0116,Distance · 7d,chart heading on the vehicle detail page for distance over 7 days,Distancia · 7d,距離 · 7日間
+tm.0117,Document ID,field label in the document detail dialog,ID del documento,書類ID
+tm.0118,Documentation,navigation link to the developer documentation,Documentación,ドキュメント
+tm.0119,Documents,"tab, section title or label for vehicle documents",Documentos,書類
+tm.0120,Done,button that closes a finished flow or dialog,Listo,完了
+tm.0121,Download,button that downloads a file,Descargar,ダウンロード
+tm.0122,Download failed,error in the document detail dialog when downloading fails,Error al descargar,ダウンロードできませんでした
+tm.0123,Downloading…,download button label while the file downloads,Descargando…,ダウンロード中…
+tm.0124,Draw the geofence area on the map first.,error in the create geofence dialog when no area is drawn,Primero dibuja el área de la geocerca en el mapa.,先に地図上でジオフェンスのエリアを描いてください。
+tm.0125,Driver documents,document type name for driver documents (sharing and configurator),Documentos de conductor,運転者の書類
+tm.0126,Driving behaviour,"heading of the driving behaviour panel, vehicle detail",Comportamiento de conducción,運転行動
+tm.0127,Driving events,section label in the trips panel for driving events,Eventos de conducción,運転イベント
+tm.0128,Driving time,chart heading on the vehicle detail page,Tiempo de conducción,運転時間
+tm.0129,"Drop a file here, or <x id=""0"" equiv-text=""&lt;strong&gt;""/>click to choose<x id=""1"" equiv-text=""&lt;/strong&gt;""/>",file drop zone text in the upload document dialog; keep the strong tags,"Suelte un archivo aquí, o <x id=""0"" equiv-text=""&lt;strong&gt;""/>haga clic para elegir<x id=""1"" equiv-text=""&lt;/strong&gt;""/>","ここにファイルをドロップするか、<x id=""0"" equiv-text=""&lt;strong&gt;""/>クリックして選択<x id=""1"" equiv-text=""&lt;/strong&gt;""/>"
+tm.0130,Duration,trip duration column header or stat label,Duración,所要時間
+tm.0131,EU Data Act,"dimo.org link text, heading and breadcrumb for the EU Data Act regulation",Ley de Datos de la UE,EUデータ法
+tm.0132,Edit,button or icon button label that edits an item,Editar,編集
+tm.0133,Edit geofence,heading of the geofence dialog in edit mode,Editar geocerca,ジオフェンスを編集
+tm.0134,Edit webhook,"console page title, heading and breadcrumb for editing a webhook",Editar webhook,Webhookを編集
+tm.0135,Email,field label for an email address input,Correo electrónico,メールアドレス
+tm.0136,Email address,label for the email address field or the email address data item being shared,Correo electrónico,メールアドレス
+tm.0137,Email me a code instead,link button that switches sign-in to an emailed one-time code,Enviarme un código por correo,代わりにメールでコードを受け取る
+tm.0138,End,map popup on the trip end marker in trip replay,Fin,終点
+tm.0139,Ended,table column header for the end time of a trip or charging session,Terminó,終了
+tm.0140,Engine runtime,legend label in the geofence activity dialog,Tiempo motor,エンジン稼働時間
+tm.0141,Enter a valid email address.,validation error for an invalid email in the invite member form,Introduce una dirección de correo electrónico válida.,有効なメールアドレスを入力してください。
+tm.0142,"Enter a valid wallet address (0x…, 40 hex characters).",validation error for the add-by-wallet input in the members panel,"Ingrese una dirección de wallet válida (0x…, 40 caracteres hexadecimales).",有効なウォレットアドレスを入力してください（0x…、16進数40文字）。
+tm.0143,Enter an amount greater than 0,validation error for a missing amount in the TCO backfill table,Ingrese un monto mayor que 0,0より大きい金額を入力してください
+tm.0144,Error codes,card heading on the vehicle detail page for diagnostic trouble codes,Códigos de error,エラーコード
+tm.0145,Events,"label for vehicle events: webhook service option, summary card, raw data mode and API capability",Eventos,イベント
+tm.0146,Events per day,chart label in the driving behaviour panel,Eventos por día,1日あたりのイベント数
+tm.0147,Expand panel,tooltip on the overview panel toggle,Expandir panel,パネルを展開
+tm.0148,Expand sidebar,accessible label or tooltip on the sidebar expand toggle,Expandir barra lateral,サイドバーを展開
+tm.0149,Export CSV,button in the TCO view that exports a CSV file,Exportar CSV,CSVをエクスポート
+tm.0150,Exporting…,export button label while the CSV is generated,Exportando…,エクスポート中…
+tm.0151,Extract failed,error in the upload document dialog when field extraction fails,Error al extraer,抽出できませんでした
+tm.0152,FAQ,account settings menu item linking to the FAQ,Preguntas Frecuentes,よくある質問
+tm.0153,Failed to delete geofence,error on the geofences page when deleting fails,No se pudo eliminar la geocerca,ジオフェンスを削除できませんでした
+tm.0154,Failed to load GPS data,error in the trip replay dialog when GPS points fail to load,No se pudieron cargar los datos GPS,GPSデータを読み込めませんでした
+tm.0155,Failed to load assigned vehicles,error in the manage geofence vehicles dialog,No se pudieron cargar los vehículos asignados,割り当て済みの車両を読み込めませんでした
+tm.0156,Failed to load driving behaviour — check console for details.,error in the driving behaviour panel,No se pudo cargar el comportamiento de conducción — revise la consola para más detalles.,運転行動を読み込めませんでした。詳細はコンソールを確認してください。
+tm.0157,Failed to load geofences,error on the geofences page when the list fails to load,No se pudieron cargar las geocercas,ジオフェンスを読み込めませんでした
+tm.0158,Failed to load trips — check console for details.,error in the trips panel,No se pudieron cargar los viajes — revise la consola para más detalles.,走行履歴を読み込めませんでした。詳細はコンソールを確認してください。
+tm.0159,Failed to load vehicle detail,error in the TCO vehicle detail,No se pudo cargar el detalle del vehículo,車両の詳細を読み込めませんでした
+tm.0160,Failed to load vehicles,error when the vehicle list fails to load,No se pudieron cargar los vehículos,車両を読み込めませんでした
+tm.0161,Failed to save,error when saving TCO settings fails,No se pudo guardar,保存できませんでした
+tm.0162,Failed to save geofence,error in the create geofence dialog when saving fails,No se pudo guardar la geocerca,ジオフェンスを保存できませんでした
+tm.0163,Failed to scan geofence activity,error in the geofence activity dialog,Error al escanear la actividad de la geocerca,ジオフェンスのアクティビティをスキャンできませんでした
+tm.0164,Failed to update assignment,error in the manage geofence vehicles dialog when assignment fails,No se pudo actualizar la asignación,割り当てを更新できませんでした
+tm.0165,Favorite,tooltip on the favorite star in the vehicle quick view,Favorito,お気に入り
+tm.0166,Fields,field label in the document detail dialog for extracted fields,Campos,項目
+tm.0167,File ID,field label in the document detail dialog,ID del archivo,ファイルID
+tm.0168,Finish,primary button that completes a multi-step form or a geofence drawing,Terminar,完了
+tm.0169,Finish setup,"console button, link and page title for finishing a connection setup",Completar configuración,セットアップを完了
+tm.0170,Fit all vehicles,map control tooltip that fits every vehicle in view,Ajustar todos los vehículos,すべての車両を表示
+tm.0171,Fleet Intelligence,"dimo.org solution name: navbar link, page meta name and breadcrumb",Inteligencia de flotas,フリートインテリジェンス
+tm.0172,Fleet Members,section heading on the account settings page,Miembros de la Flota,フリートメンバー
+tm.0173,Fleets,dimo.org use case category tag for fleet use cases,Flotas,フリート
+tm.0174,Focus on map,tooltip on a geofence name in the trips panel that focuses it on the map,Centrar en el mapa,地図で表示
+tm.0175,Frequency,trip detection method option (frequency analysis),Frecuencia,頻度
+tm.0176,Fuel,quick view telemetry row for fuel level; short label,Combustible,燃料
+tm.0177,Fuel level,name of the fuel level signal or chart heading,Nivel de combustible,燃料残量
+tm.0178,Full details,link in the vehicle quick view to the vehicle detail page,Detalles completos,詳細を見る
+tm.0179,GPS data sparse — showing start and end only,notice in the trip replay dialog when GPS data is sparse,Pocos datos GPS — solo se muestran el inicio y el fin,GPSデータが少ないため、始点と終点のみ表示しています
+tm.0180,Geofences,side navigation item for the geofences page,Geocercas,ジオフェンス
+tm.0181,Geofences crossed,section label in the trips panel,Geocercas atravesadas,通過したジオフェンス
+tm.0182,Get API Keys,dimo.org call-to-action button (title case),Obtener claves de API,APIキーを取得
+tm.0183,Get API keys,dimo.org link or button in body copy (sentence case),Obtener claves de API,APIキーを取得
+tm.0184,Get Started,"dimo.org call-to-action button on hero, pricing and product pages",Comenzar,はじめる
+tm.0185,Get credentials from DIMO,button on the onboard fleet page that opens DIMO to provision credentials,Obtener credenciales de DIMO,DIMOから認証情報を取得
+tm.0186,Glovebox,side navigation item for the glovebox documents page,Guantera,グローブボックス
+tm.0187,Grant DIMO permissions on this vehicle to see trip replay.,error in the trip replay dialog when the vehicle lacks permissions,Otorgue permisos de DIMO en este vehículo para ver la reproducción del viaje.,走行リプレイを表示するには、この車両にDIMOの権限を付与してください。
+tm.0188,Grant DIMO permissions to see driving behaviour on this vehicle.,notice in the driving behaviour panel when the vehicle lacks permissions,Otorgue permisos DIMO para ver el comportamiento de conducción de este vehículo.,この車両の運転行動を表示するには、DIMOの権限を付与してください。
+tm.0189,Grant DIMO permissions to see live telemetry on this vehicle.,notice in the trips panel when the vehicle lacks permissions,Otorgue permisos de DIMO para ver telemetría en vivo de este vehículo.,この車両のリアルタイムテレメトリを表示するには、DIMOの権限を付与してください。
+tm.0190,Grant DIMO permissions to this vehicle to include its documents in operating cost. Acquisition and depreciation below are unaffected.,notice in the TCO view when a vehicle lacks document permissions,Otorgue permisos de DIMO a este vehículo para incluir sus documentos en el costo operativo. La adquisición y la depreciación de abajo no cambian.,この車両の書類を運用コストに含めるには、DIMOの権限を付与してください。下の取得費用と減価償却には影響しません。
+tm.0191,Grant DIMO permissions to view documents on this vehicle.,notice in the glovebox when a vehicle lacks document permissions,Otorgue permisos de DIMO para ver documentos de este vehículo.,この車両の書類を表示するには、DIMOの権限を付与してください。
+tm.0192,Harsh acceleration,driving behaviour event type label and legend,Aceleración brusca,急加速
+tm.0193,Harsh braking,driving behaviour event type label and legend,Frenada brusca,急ブレーキ
+tm.0194,Harsh cornering,driving behaviour event type label and legend,Giro brusco,急ハンドル
+tm.0195,Hide hidden vehicles,toggle that hides vehicles the user has hidden,Ocultar vehículos ocultos,非表示の車両を隠す
+tm.0196,Hide vehicle,tooltip on the hide button of a vehicle row,Ocultar vehículo,車両を非表示
+tm.0197,Home,"navigation item, page title or breadcrumb root for the home page",Inicio,ホーム
+tm.0198,How It Works,"dimo.org section heading on industry, solution and customer story pages",Cómo funciona,仕組み
+tm.0199,Hybrid,dimo.org use case category tag (mixed fleet and consumer); not the powertrain type,Mixto,ハイブリッド
+tm.0200,Idling,trip detection method option (idling),Ralentí,アイドリング
+tm.0201,Ignition,trip detection method option (ignition),Encendido,イグニッション
+tm.0202,Industries,dimo.org navbar menu and breadcrumb item for industries,Industrias,業界
+tm.0203,Infrastructure,dimo.org feature or use case category tag,Infraestructura,インフラ
+tm.0204,Invitation accepted — taking you to the fleet.,success message on the accept invitation page,Invitación aceptada: redirigiendo a la flota.,招待を承諾しました。フリートに移動します。
+tm.0205,Invitation problem,error heading on the accept invitation page,Problema con la invitación,招待に問題があります
+tm.0206,Invitation re-sent.,confirmation in the members panel after resending an invitation,Invitación reenviada.,招待を再送信しました。
+tm.0207,Invite by email,section label in the members panel for inviting by email,Invitar por correo electrónico,メールで招待
+tm.0208,Invite member,button or dialog heading for inviting a team member,Invitar miembro,メンバーを招待
+tm.0209,JWT copied!,toast after copying a developer JWT,¡JWT copiado!,JWTをコピーしました
+tm.0210,Joining…,loading heading on the accept invitation page,Uniéndote…,参加中…
+tm.0211,Language,label of the language switcher or language setting,Idioma,言語
+tm.0212,Last 2 weeks,trips panel range label for the first page (last 2 weeks),Últimas 2 semanas,過去2週間
+tm.0213,Last 24 hours,time window option in the geofence activity dialog,Últimas 24 horas,過去24時間
+tm.0214,Last 3 days,time window option in the geofence activity dialog,Últimos 3 días,過去3日間
+tm.0215,Last 7 days,section label on the vehicle detail page,Últimos 7 días,過去7日間
+tm.0216,"Last <x id=""0"" equiv-text=""${DAYS}""/> days",range label in the driving behaviour panel,"Últimos <x id=""0"" equiv-text=""${DAYS}""/> días","過去<x id=""0"" equiv-text=""${DAYS}""/>日間"
+tm.0217,Last Location,table column header in the vehicle list,Última ubicación,最終位置
+tm.0218,"Last login <x id=""0"" equiv-text=""${new Date(m.lastLoginAt).toLocaleDateString()}""/>",last login date of a member in the members panel,"Último inicio de sesión <x id=""0"" equiv-text=""${new Date(m.lastLoginAt).toLocaleDateString()}""/>","最終ログイン：<x id=""0"" equiv-text=""${new Date(m.lastLoginAt).toLocaleDateString()}""/>"
+tm.0219,Last seen,column header or label for when a vehicle last reported data,Última actividad,最終通信
+tm.0220,License details,"console link, page title and breadcrumb for a developer license detail page",Detalles de la licencia,ライセンスの詳細
+tm.0221,Licenses,"console navigation item, page title, breadcrumb and home shortcut for licenses",Licencias,ライセンス
+tm.0222,Light mode,theme toggle label that switches to light mode,Modo claro,ライトモード
+tm.0223,Line items,section label in the TCO vehicle detail,Partidas,明細
+tm.0224,Live data,permission name for live data access (sharing permissions list),Datos en vivo,リアルタイムデータ
+tm.0225,Live telemetry,feature bullet on the login page,Telemetría en vivo,リアルタイムテレメトリ
+tm.0226,Loading GPS data…,loading message in the trip replay map,Cargando datos GPS…,GPSデータを読み込み中…
+tm.0227,Loading assigned vehicles…,loading message in the manage geofence vehicles dialog,Cargando vehículos asignados…,割り当て済みの車両を読み込み中…
+tm.0228,Loading documents…,loading message in the glovebox,Cargando documentos…,書類を読み込み中…
+tm.0229,Loading geofences…,loading message on the geofences page,Cargando geocercas…,ジオフェンスを読み込み中…
+tm.0230,Loading members…,loading message in the members panel,Cargando miembros…,メンバーを読み込み中…
+tm.0231,Loading telemetry…,loading message in the vehicle quick view,Cargando telemetría…,テレメトリを読み込み中…
+tm.0232,Loading trips…,loading message in the trips panel,Cargando viajes…,走行履歴を読み込み中…
+tm.0233,Loading vehicles…,loading message for the vehicle list,Cargando vehículos…,車両を読み込み中…
+tm.0234,Loading…,"generic loading message in a panel, list or table",Cargando…,読み込み中…
+tm.0235,Log out,button or menu item that logs the user out,Cerrar sesión,ログアウト
+tm.0236,Maintenance,business type for vehicle maintenance: sign-up developer type option and dimo.org industry breadcrumb,Mantenimiento,メンテナンス
+tm.0237,Make Favorite,button on the vehicle detail page that marks the vehicle as a favorite,Marcar como favorito,お気に入りに追加
+tm.0238,Manage Subscription,account settings menu item,Administrar Suscripción,サブスクリプションを管理
+tm.0239,Max speed,stat label in the trip replay dialog,Vel. máx.,最高速度
+tm.0240,Measurement Units,account settings field label for metric or imperial units,Unidades de Medida,単位系
+tm.0241,Member,team role name for a member (not owner),Miembro,メンバー
+tm.0242,Missing,glovebox section heading for missing document types,Faltantes,未登録
+tm.0243,Missing amounts,section label in the TCO vehicle detail,Montos faltantes,金額未入力
+tm.0244,Name,field label or column header for a name,Nombre,名前
+tm.0245,"Name the area you drew, then choose which vehicles it applies to.",subtitle of the create geofence dialog,Nombra el área que dibujaste y elige a qué vehículos aplica.,描いたエリアに名前を付けて、適用する車両を選んでください。
+tm.0246,New configuration,"console button, breadcrumb and subtitle for creating a new license configuration",Nueva configuración,新しい構成
+tm.0247,New geofence,heading of the geofence dialog in create mode,Nueva geocerca,新しいジオフェンス
+tm.0248,New template,"console page title, button and heading for creating a permission template",Nueva plantilla,新しいテンプレート
+tm.0249,Next,button that goes to the next page or step,Siguiente,次へ
+tm.0250,No Client ID configured,heading on the login screen when no client ID is configured,No hay Client ID configurado,クライアントIDが設定されていません
+tm.0251,No DIMO integration yet,vehicle detail notice when the vehicle has no DIMO connection,Aún no hay integración con DIMO,DIMOとの連携はまだありません
+tm.0252,No DIMO integration — pair a device to stream telemetry,vehicle list row notice when the vehicle has no DIMO connection,Sin integración DIMO — vincule un dispositivo para transmitir telemetría,DIMO連携なし。テレメトリを送信するにはデバイスをペアリングしてください
+tm.0253,No VIN detected — pick the vehicle manually.,notice in the upload document dialog when no VIN was found,No se detectó VIN — seleccione el vehículo manualmente.,VINが検出されませんでした。車両を手動で選んでください。
+tm.0254,No access,status label when the app has no access to a vehicle,Sin acceso,アクセス権なし
+tm.0255,No cost documents on file for this vehicle yet.,empty state in the TCO vehicle detail,Aún no hay documentos de costos registrados para este vehículo.,この車両のコスト書類はまだありません。
+tm.0256,No data,"chart tooltip for a day without data, vehicle detail",Sin datos,データなし
+tm.0257,No distance,driving behaviour panel fallback when distance is missing,Sin distancia,距離なし
+tm.0258,No distance data,driving behaviour panel chart empty state,Sin datos de distancia,距離データがありません
+tm.0259,No geofences match your search.,empty state on the geofences page when search finds nothing,Ninguna geocerca coincide con su búsqueda.,検索に一致するジオフェンスはありません。
+tm.0260,No geofences yet. Click “New geofence” and draw an area on the map.,empty state on the geofences page,Aún no hay geocercas. Haz clic en «Nueva geocerca» y dibuja un área en el mapa.,ジオフェンスはまだありません。「新しいジオフェンス」をクリックして、地図上にエリアを描いてください。
+tm.0261,No location access,map overlay when the vehicle lacks location permission,Sin acceso a la ubicación,位置情報へのアクセス権なし
+tm.0262,No members yet.,empty state in the members panel,Aún no hay miembros.,メンバーはまだいません。
+tm.0263,No records yet.,glovebox empty state heading,Aún no hay registros.,記録はまだありません。
+tm.0264,No structured fields extracted,empty value in the document detail dialog,No se extrajeron campos estructurados,抽出された項目はありません
+tm.0265,No telemetry access,vehicle list cell when the vehicle lacks telemetry permission,Sin acceso a la telemetría,テレメトリへのアクセス権なし
+tm.0266,No telemetry data reported yet.,empty state in the vehicle quick view,Aún no se han reportado datos de telemetría.,テレメトリデータはまだ届いていません。
+tm.0267,No trips,driving behaviour panel fallback when there are no trips,Sin viajes,走行なし
+tm.0268,No trips in the last 2 weeks.,empty state in the vehicle quick view,No hay viajes en las últimas 2 semanas.,過去2週間の走行はありません。
+tm.0269,No trips in this period.,empty state in the trips panel,No hay viajes en este período.,この期間の走行はありません。
+tm.0270,No vehicles found.,empty state for the vehicle list,No se encontraron vehículos.,車両が見つかりません。
+tm.0271,No vehicles match your search.,empty state for the vehicle list when search finds nothing,Ningún vehículo coincide con su búsqueda.,検索に一致する車両はありません。
+tm.0272,No vehicles match.,empty state in the manage geofence vehicles dialog search,Ningún vehículo coincide.,一致する車両はありません。
+tm.0273,No vehicles on this account.,empty state in the TCO view,No hay vehículos en esta cuenta.,このアカウントには車両がありません。
+tm.0274,No vehicles passed through in this window.,empty state in the geofence activity dialog,Ningún vehículo pasó por aquí en este período.,この期間に通過した車両はありません。
+tm.0275,None,placeholder value when a field has nothing to show,Ninguno,なし
+tm.0276,Normal,status pill on the vehicle detail diagnostics card meaning a value is normal; very short,Normal,正常
+tm.0277,Not signed in.,empty state on the account settings page,No ha iniciado sesión.,サインインしていません。
+tm.0278,Not yet wired,"placeholder stat label for a metric that is not connected yet, vehicle detail",Aún no conectado,準備中
+tm.0279,OEM,business type for car manufacturers: sign-up developer type option and dimo.org industry breadcrumb,OEM,OEM
+tm.0280,Odometer,"odometer signal name, webhook condition or telemetry row label",Odómetro,走行距離
+tm.0281,Ongoing,badge on a trip that is still in progress,En curso,走行中
+tm.0282,Opening DIMO…,onboard fleet button label while DIMO opens,Abriendo DIMO…,DIMOを開いています…
+tm.0283,Operating cost,TCO cost breakdown label,Costo operativo,運用コスト
+tm.0284,Overview,tab or section link for an overview,Resumen,概要
+tm.0285,Owner,team or fleet role name for the owner; fleet apps also label the vehicle owner row in the share dialog,Propietario,オーナー
+tm.0286,"PDF · JPG · PNG, max 25 MB",file type and size hint in the upload document dialog,"PDF · JPG · PNG, máx 25 MB",PDF · JPG · PNG、最大25MB
+tm.0287,"PDF, JPG, or PNG. We'll read the VIN and other details automatically, then securely save the document to DIMO.",subtitle of the upload document dialog,"PDF, JPG o PNG. Leeremos el VIN y otros datos automáticamente, luego guardaremos el documento de forma segura en DIMO.",PDF、JPG、PNGに対応しています。VINなどの情報を自動で読み取り、書類をDIMOに安全に保存します。
+tm.0288,Pause,tooltip on the trip replay play/pause button,Pausar,一時停止
+tm.0289,"Peak <x id=""0"" equiv-text=""${max}""/>",chart label in the driving behaviour panel showing the peak value,"Máximo <x id=""0"" equiv-text=""${max}""/>","ピーク<x id=""0"" equiv-text=""${max}""/>"
+tm.0290,Pending invitations,section label in the members panel,Invitaciones pendientes,保留中の招待
+tm.0291,Pick a vehicle from the list,glovebox placeholder when no vehicle is selected,Elija un vehículo de la lista,リストから車両を選んでください
+tm.0292,Pick which vehicle this belongs to and confirm the category.,subtitle of the confirm step in the upload document dialog,Elija a qué vehículo pertenece y confirme la categoría.,この書類の対象車両を選び、カテゴリを確認してください。
+tm.0293,Platform Features,dimo.org section heading on industry and solution pages,Funciones de la plataforma,プラットフォームの機能
+tm.0294,Play,tooltip on the trip replay play/pause button,Reproducir,再生
+tm.0295,Playback speed,tooltip on the trip replay speed selector,Velocidad de reproducción,再生速度
+tm.0296,Please enter a geofence name.,validation error in the create geofence dialog,Introduce un nombre para la geocerca.,ジオフェンスの名前を入力してください。
+tm.0297,Please enter a valid email address.,validation error for an invalid email address,Ingresa una dirección de correo electrónico válida.,有効なメールアドレスを入力してください。
+tm.0298,Previous,button that goes to the previous page or step,Anterior,前へ
+tm.0299,Pricing,dimo.org navbar link and page section heading for pricing,Precios,料金
+tm.0300,Privacy &amp; Account,section heading on the account settings page,Privacidad y Cuenta,プライバシーとアカウント
+tm.0301,Product Features,dimo.org section heading on product pages,Funciones del producto,製品の機能
+tm.0302,Products,dimo.org navbar menu and breadcrumb item for products,Productos,製品
+tm.0303,Pulling out the VIN and other details.,status detail in the upload document dialog while reading,Extrayendo el VIN y otros datos.,VINなどの情報を読み取っています。
+tm.0304,Purchase date,field label in the TCO acquisition settings,Fecha de compra,購入日
+tm.0305,Purchase price,field label in the TCO acquisition settings,Precio de compra,購入価格
+tm.0306,Raw data,raw data: permission name in the sharing permissions list and console vehicle tab,Datos sin procesar,生データ
+tm.0307,Read the Docs,dimo.org button linking to the developer docs,Leer la documentación,ドキュメントを読む
+tm.0308,Reading document…,status heading in the upload document dialog,Leyendo documento…,書類を読み取り中…
+tm.0309,Recharge,trip detection method option (recharge),Recarga,充電
+tm.0310,Refresh,button or tooltip that reloads data,Actualizar,更新
+tm.0311,Refresh vehicle state,map toolbar tooltip that reloads vehicle state,Actualizar estado del vehículo,車両の状態を更新
+tm.0312,Refuel,trip detection method option (refuel),Repostaje,給油
+tm.0313,Remove,button that removes an item or member,Quitar,削除
+tm.0314,Remove from Favorites,button on the vehicle detail page that unmarks the favorite,Quitar de favoritos,お気に入りから削除
+tm.0315,Remove from geofence,tooltip on the toggle that removes a vehicle from a geofence,Quitar de la geocerca,ジオフェンスから外す
+tm.0316,Remove member,tooltip on the remove member button,Quitar miembro,メンバーを削除
+tm.0317,Replay trip,tooltip on the trip replay button in the trips panel,Reproducir viaje,走行を再生
+tm.0318,Required,chip or option marking an item as required,Obligatorio,必須
+tm.0319,Resend,action that resends a pending invitation,Reenviar,再送信
+tm.0320,Reset,tooltip on the trip replay reset button,Reiniciar,リセット
+tm.0321,Resources,navigation or footer section heading for resources,Recursos,リソース
+tm.0322,Retry,button that retries a failed action,Reintentar,再試行
+tm.0323,Revoke,action that revokes an invitation or shared access,Revocar,取り消す
+tm.0324,Role,field label or column header for a member role,Rol,ロール
+tm.0325,Run query,console button on vehicle data tabs that runs the query,Ejecutar consulta,クエリを実行
+tm.0326,Save,primary button that saves changes,Guardar,保存
+tm.0327,Save document,primary button in the upload document dialog,Guardar documento,書類を保存
+tm.0328,"Save first, then assign specific vehicles with the “Vehicles” button.",hint in the create geofence dialog for specific vehicles,Guarda primero y luego asigna vehículos específicos con el botón «Vehículos».,先に保存してから、「車両」ボタンで対象の車両を割り当ててください。
+tm.0329,Save your API key now — it cannot be retrieved after this step.,warning on the onboard fleet page,Guarde su API key ahora: no se podrá recuperar después de este paso.,今すぐAPIキーを保存してください。この手順の後は再取得できません。
+tm.0330,Saved,heading of the upload document dialog after saving,Guardado,保存しました
+tm.0331,Saving document…,status heading in the upload document dialog,Guardando documento…,書類を保存中…
+tm.0332,Saving…,save button label while saving,Guardando…,保存中…
+tm.0333,"Scanning <x id=""0"" equiv-text=""${this.scanned}""/> of <x id=""1"" equiv-text=""${this.total}""/> vehicles…",progress in the geofence activity dialog,"Escaneando <x id=""0"" equiv-text=""${this.scanned}""/> de <x id=""1"" equiv-text=""${this.total}""/> vehículos…","<x id=""1"" equiv-text=""${this.total}""/>台中<x id=""0"" equiv-text=""${this.scanned}""/>台をスキャン中…"
+tm.0334,Search geofences…,search input placeholder on the geofences page,Buscar geocercas…,ジオフェンスを検索…
+tm.0335,Search vehicles,accessible label or tooltip for vehicle search,Buscar vehículos,車両を検索
+tm.0336,Search vehicles…,search input placeholder in the manage geofence vehicles dialog,Buscar vehículos…,車両を検索…
+tm.0337,Select,select input placeholder before a choice is made,Seleccionar,選択してください
+tm.0338,Select a vehicle,glovebox heading placeholder before a vehicle is chosen,Seleccione un vehículo,車両を選択
+tm.0339,Select a vehicle…,empty option in the vehicle select of the upload document dialog,Seleccione un vehículo…,車両を選択…
+tm.0340,Send a new code,button that sends a new one-time sign-in code,Enviar un código nuevo,コードを再送信
+tm.0341,Send invite,submit button of the invite member form,Enviar invitación,招待を送信
+tm.0342,Service,"webhook service: table column, detail label and form field label",Servicio,サービス
+tm.0343,Settings,navigation item or page title for settings,Configuración,設定
+tm.0344,Shared,status label meaning a vehicle is shared with the app,Compartido,共有中
+tm.0345,Sharing link copied,console toast after copying a sharing link,Enlace para compartir copiado,共有リンクをコピーしました
+tm.0346,Sharing…,share button label while sharing runs,Compartiendo…,共有しています…
+tm.0347,Show hidden vehicles,toggle that shows vehicles the user has hidden,Mostrar vehículos ocultos,非表示の車両を表示
+tm.0348,"Showing <x id=""0"" equiv-text=""${page * TCOView.PAGE_SIZE + 1}""/>–<x id=""1"" equiv-text=""${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}""/> of <x id=""2"" equiv-text=""${visible.length}""/>",pagination summary in the TCO view,"Mostrando <x id=""0"" equiv-text=""${page * TCOView.PAGE_SIZE + 1}""/>–<x id=""1"" equiv-text=""${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}""/> de <x id=""2"" equiv-text=""${visible.length}""/>","<x id=""2"" equiv-text=""${visible.length}""/>件中<x id=""0"" equiv-text=""${page * TCOView.PAGE_SIZE + 1}""/>–<x id=""1"" equiv-text=""${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}""/>件を表示"
+tm.0349,Sign in with DIMO,sign-in page heading (dimo-login) or sign-in button (fleet apps),Iniciar sesión con DIMO,DIMOでサインイン
+tm.0350,Sign in with your DIMO account to join this fleet.,body text on the accept invitation page before sign-in,Inicia sesión con tu cuenta de DIMO para unirte a esta flota.,このフリートに参加するには、DIMOアカウントでサインインしてください。
+tm.0351,Sign out,button or tooltip that signs the user out,Cerrar sesión,サインアウト
+tm.0352,Signals,"tab, card label or column header for vehicle signals",Señales,シグナル
+tm.0353,Signing and securely storing your document with DIMO.,status detail in the upload document dialog while saving,Firmando y almacenando su documento de forma segura con DIMO.,書類に署名し、DIMOに安全に保存しています。
+tm.0354,Solutions,dimo.org navbar menu and breadcrumb item for solutions,Soluciones,ソリューション
+tm.0355,Something went wrong,error heading or toast for an unexpected failure,Algo salió mal,問題が発生しました
+tm.0356,Something went wrong. Please try again.,error message for an unexpected failure with a retry hint,Algo salió mal. Inténtalo de nuevo.,問題が発生しました。もう一度お試しください。
+tm.0357,Specific,"geofence scope option for specific vehicles, create geofence dialog; short",Específicos,個別
+tm.0358,Specific vehicles,geofence scope label on the geofences page,Vehículos específicos,個別の車両
+tm.0359,Speed,"speed signal name, webhook condition or telemetry row label",Velocidad,速度
+tm.0360,Speed limit (optional),field label in the create geofence dialog,Límite de velocidad (opcional),制限速度（任意）
+tm.0361,Start,map popup on the trip start marker in trip replay,Inicio,始点
+tm.0362,Start Building,dimo.org call-to-action button on hero and pricing sections,Empezar a desarrollar,開発を始める
+tm.0363,Start Building Today,dimo.org call-to-action heading on industry pages,Empieza a desarrollar hoy,今日から開発を始めましょう
+tm.0364,Status,column header or label for a status,Estado,ステータス
+tm.0365,Support,navigation item or page title for support,Soporte,サポート
+tm.0366,Switch to dark mode,accessible label or tooltip on the theme toggle,Cambiar a modo oscuro,ダークモードに切り替え
+tm.0367,Switch to light mode,accessible label or tooltip on the theme toggle,Cambiar a modo claro,ライトモードに切り替え
+tm.0368,"Synthetic device #<x id=""0"" equiv-text=""${this.vehicle.syntheticDevice.tokenId}""/>",vehicle detail connection row naming a synthetic device by token number,"Dispositivo sintético #<x id=""0"" equiv-text=""${this.vehicle.syntheticDevice.tokenId}""/>","シンセティックデバイス#<x id=""0"" equiv-text=""${this.vehicle.syntheticDevice.tokenId}""/>"
+tm.0369,TCO,side navigation item for the total cost of ownership page (abbreviation),TCO,TCO
+tm.0370,That wallet is already a member.,validation error in the members panel,Esa wallet ya es miembro.,このウォレットはすでにメンバーです。
+tm.0371,These documents don’t have a cost amount on file. Add one to include them in this vehicle’s totals.,notice in the TCO view about documents without amounts,Estos documentos no tienen un monto registrado. Agregue uno para incluirlos en los totales de este vehículo.,これらの書類にはコストの金額が登録されていません。金額を追加すると、この車両の合計に含まれます。
+tm.0372,"This geofence applies to many vehicles — scanning the first <x id=""0"" equiv-text=""${this.total}""/>.",notice in the geofence activity dialog when the scan is capped,"Esta geocerca aplica a muchos vehículos — escaneando los primeros <x id=""0"" equiv-text=""${this.total}""/>.","このジオフェンスは多くの車両に適用されています。最初の<x id=""0"" equiv-text=""${this.total}""/>台をスキャンします。"
+tm.0373,"This invitation is invalid, already used, or expired.",error on the accept invitation page,"Esta invitación no es válida, ya se usó o venció.",この招待は無効か、使用済みか、期限切れです。
+tm.0374,This invitation link is missing its token. Ask the sender to re-send the invite.,error on the accept invitation page when the link has no token,A este enlace de invitación le falta el token. Pide al remitente que vuelva a enviar la invitación.,この招待リンクにはトークンがありません。送信者に招待の再送信を依頼してください。
+tm.0375,"This page is educational, not legal advice.",dimo.org disclaimer at the end of compliance pages,Esta página tiene fines educativos y no constituye asesoramiento legal.,このページは教育目的の情報であり、法的助言ではありません。
+tm.0376,"This vehicle is shared with you. You can view, download and add documents, but not delete them.",notice in the document detail dialog for a shared vehicle,"Este vehículo se compartió con usted. Puede ver, descargar y agregar documentos, pero no eliminarlos.",この車両はあなたと共有されています。書類の表示、ダウンロード、追加はできますが、削除はできません。
+tm.0377,This vehicle's connection doesn't report driving events.,notice in the driving behaviour panel,La conexión de este vehículo no reporta eventos de conducción.,この車両の接続では運転イベントを取得できません。
+tm.0378,Time in,table column header in the geofence activity dialog (entry time),Entrada,進入時刻
+tm.0379,Time out,table column header in the geofence activity dialog (exit time),Salida,退出時刻
+tm.0380,Token,vehicle list column header for the vehicle token ID,Token,トークン
+tm.0381,"Token #<x id=""0"" equiv-text=""${this.tokenId}""/>",vehicle token number shown under the vehicle name,"Token #<x id=""0"" equiv-text=""${this.tokenId}""/>","トークン#<x id=""0"" equiv-text=""${this.tokenId}""/>"
+tm.0382,Top,stat label on the vehicle detail utilization card (top value),Máxima,最大
+tm.0383,Total,stat label on the vehicle detail utilization card (total value),Total,合計
+tm.0384,Total Cost of Ownership,heading of the TCO page,Costo total de propiedad,総保有コスト
+tm.0385,Total TCO,TCO cost breakdown label for the total,TCO total,TCO合計
+tm.0386,Track expiration,glovebox hint for a registration document type,Seguir vencimiento,有効期限を管理
+tm.0387,Track next inspection,glovebox hint for an inspection document type,Seguir próxima inspección,次回の点検を管理
+tm.0388,Track renewals,glovebox hint for an insurance document type,Seguir renovaciones,更新時期を管理
+tm.0389,Trip Replay,title of the trip replay dialog,Reproducción del viaje,走行リプレイ
+tm.0390,Trip detection method,tooltip on the trip detection method selector,Método de detección de viajes,走行検出方法
+tm.0391,Trip history,feature bullet on the login page,Historial de viajes,走行履歴
+tm.0392,Trips,"tab, panel title or heading for trips",Viajes,走行履歴
+tm.0393,Trouble logging in? <support>Get support</support>,help line under sign-in forms; keep the support tags,¿Problemas para iniciar sesión? <support>Obtén ayuda</support>,ログインでお困りですか？<support>サポートに問い合わせる</support>
+tm.0394,Try again,button that retries after an error,Intentar de nuevo,再試行
+tm.0395,Unavailable,console fallback when a value or source cannot be loaded,No disponible,利用できません
+tm.0396,Unknown,console fallback when a value is unknown,Desconocido,不明
+tm.0397,Unknown error,fallback error message when no detail is available,Error desconocido,不明なエラー
+tm.0398,Update the geofence details. Redraw the area by deleting and recreating it.,subtitle of the geofence dialog in edit mode,"Actualiza los detalles de la geocerca. Para cambiar el área, elimínala y vuelve a crearla.",ジオフェンスの詳細を更新します。エリアを描き直すには、削除して作り直してください。
+tm.0399,Upload failed,error in the upload document dialog,Error al subir,アップロードできませんでした
+tm.0400,Use Cases,dimo.org section heading on industry pages,Casos de uso,ユースケース
+tm.0401,Use the “Vehicles” button on the geofence to assign specific vehicles.,hint in the create geofence dialog in edit mode,Usa el botón «Vehículos» de la geocerca para asignar vehículos específicos.,ジオフェンスの「車両」ボタンで、対象の車両を割り当ててください。
+tm.0402,Useful life (years),field label in the TCO acquisition settings,Vida útil (años),耐用年数（年）
+tm.0403,User profile,"alt text of the profile image, account settings",Perfil de usuario,ユーザープロフィール
+tm.0404,Vehicle,"field label, page title or subject label for a vehicle",Vehículo,車両
+tm.0405,"Vehicle #<x id=""0"" equiv-text=""${v.tokenId}""/>",fallback vehicle name with its token number,"Vehículo #<x id=""0"" equiv-text=""${v.tokenId}""/>","車両#<x id=""0"" equiv-text=""${v.tokenId}""/>"
+tm.0406,Vehicle Commerce,"dimo.org solution name: navbar link, page meta name and breadcrumb",Comercio vehicular,車両コマース
+tm.0407,Vehicle data,vehicle data: permission name for non-location history and console raw data scope option,Datos del vehículo,車両データ
+tm.0408,Vehicle documents,document type name for vehicle documents (sharing and configurator),Documentos del vehículo,車両の書類
+tm.0409,Vehicle list,section heading or side navigation item for a vehicle list,Lista de vehículos,車両一覧
+tm.0410,Vehicle status,section heading on the vehicle detail page,Estado del vehículo,車両の状態
+tm.0411,Vehicles,"navigation item, page title, tab, breadcrumb or column header for vehicles",Vehículos,車両
+tm.0412,View Documentation,dimo.org button linking to the developer docs on hero and CTA sections,Ver documentación,ドキュメントを見る
+tm.0413,View documents,glovebox vehicle row subtitle before the record count loads,Ver documentos,書類を見る
+tm.0414,We could not accept this invitation.,error on the accept invitation page,No pudimos aceptar esta invitación.,この招待を承諾できませんでした。
+tm.0415,We couldn't get your email from your DIMO account. Add it to finish signing in.,body text of the missing email step on the login page,No pudimos obtener tu correo electrónico de tu cuenta de DIMO. Agrégalo para terminar de iniciar sesión.,DIMOアカウントからメールアドレスを取得できませんでした。サインインを完了するには、メールアドレスを追加してください。
+tm.0416,We couldn't verify that sign-in. Please sign in again.,error on the login page,No pudimos verificar ese inicio de sesión. Vuelve a iniciar sesión.,サインインを確認できませんでした。もう一度サインインしてください。
+tm.0417,Webhook URL,webhook target URL: detail label and form field label,URL del webhook,Webhook URL
+tm.0418,Webhooks,"console navigation item, page title, section title and breadcrumb for webhooks",Webhooks,Webhook
+tm.0419,What you get,accessible label of the feature list on the login page,Lo que obtienes,主な機能
+tm.0420,You,badge next to your own row in the members panel,Usted,あなた
+tm.0421,You're in,success heading on the accept invitation page,Ya estás dentro,参加しました
+tm.0422,You've been invited,heading on the accept invitation page before sign-in,Has recibido una invitación,招待が届いています
+tm.0423,Your cars,heading of the vehicle panel on the overview map page,Sus autos,あなたの車両
+tm.0424,Your document has been saved to DIMO. The list will refresh.,subtitle of the upload document dialog after saving,Su documento se ha guardado en DIMO. La lista se actualizará.,書類をDIMOに保存しました。リストが更新されます。
+tm.0425,Zoom in,map control tooltip,Acercar,拡大
+tm.0426,Zoom out,map control tooltip,Alejar,縮小
+tm.0427,Zoom to vehicle,tooltip on the zoom button of a vehicle card,Acercar al vehículo,車両にズーム
+tm.0428,"all <x id=""0"" equiv-text=""${visible.length}""/>","count in parentheses after the fleet total row, TCO view","todos los <x id=""0"" equiv-text=""${visible.length}""/>","全<x id=""0"" equiv-text=""${visible.length}""/>台"
+tm.0429,all compliance topics,dimo.org link text at the end of compliance pages,todos los temas de cumplimiento,すべてのコンプライアンストピック
+tm.0430,developer API key,API key input placeholder on the onboard fleet page,API key de desarrollador,開発者APIキー
+tm.0431,developer docs,dimo.org inline link text in body copy,documentación para desarrolladores,開発者向けドキュメント
+tm.0432,e.g. 50,speed limit input placeholder in the create geofence dialog,p. ej. 50,例：50
+tm.0433,e.g. Downtown Depot,geofence name input placeholder in the create geofence dialog,p. ej. Depósito Centro,例：中央営業所
+tm.0434,engine-on time during the pass,"legend explanation after Engine runtime, geofence activity dialog",tiempo con el motor encendido durante el paso,通過中のエンジン稼働時間
+tm.0435,km/h,"speed unit after the speed limit field; a unit, keep it short",km/h,km/h
+tm.0436,or,divider between sign-in options,o,または
+tm.0437,or enter manually,divider text on the onboard fleet page before manual fields,o ingréselas manualmente,または手動で入力
+tm.0438,rental operations,dimo.org inline link text in body copy,operaciones de alquiler,レンタル事業
+tm.0439,session-scoped consent,dimo.org inline link text in body copy,consentimiento por sesión,セッション単位の同意
+tm.0440,time inside the geofence,"legend explanation after Duration, geofence activity dialog",tiempo dentro de la geocerca,ジオフェンス内の滞在時間
+tm.0441,vehicle,unit after a count of one on group and geofence rows,vehículo,台
+tm.0442,vehicle session infrastructure,dimo.org inline link text in body copy,infraestructura de sesiones vehiculares,車両セッションインフラ
+tm.0443,vehicles,unit after a count other than one on group and geofence rows,vehículos,台
+tm.0444,"{count, plural, one {# vehicle} other {# vehicles}}",vehicle count with ICU plural,"{count, plural, one {# vehículo} other {# vehículos}}","{count, plural, other {#台の車両}}"
+tm.0445,"— upload anything: receipt, insurance pdf, reg card",glovebox empty state hint,"— suba lo que sea: recibo, pdf del seguro, tarjeta de registro",— 領収書、保険証券のPDF、車検証など、何でもアップロードできます
+tm.0446,"<x id=""0"" equiv-text=""${count}""/> Records","glovebox record count under the selected vehicle, plural","<x id=""0"" equiv-text=""${count}""/> Registros","<x id=""0"" equiv-text=""${count}""/>件の記録"

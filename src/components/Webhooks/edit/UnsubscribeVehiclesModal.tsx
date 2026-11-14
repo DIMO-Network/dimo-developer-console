@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { FC, useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
   clientId,
   onSuccess,
 }) => {
+  const t = useTranslations('common');
   const [assetDIDs, setAssetDIDs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputError, setInputError] = useState<string>('');
@@ -23,7 +25,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
 
   const handleSubmit = async () => {
     if (assetDIDs.length === 0) {
-      setInputError('Please enter at least one asset DID.');
+      setInputError(t('webhooks.edit.enterAssetDid'));
       return;
     }
 
@@ -39,7 +41,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
 
       toast.success(
         response?.message ??
-          `Successfully unsubscribed ${assetDIDs.length} vehicle${assetDIDs.length !== 1 ? 's' : ''}`,
+          t('webhooks.edit.unsubscribedCount', { count: assetDIDs.length }),
       );
       onSuccess?.();
       setIsOpen(false);
@@ -47,7 +49,7 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
     } catch (err) {
       captureException(err);
       console.error('Vehicle unsubscription error:', err);
-      toast.error('Failed to unsubscribe vehicles. Please try again.');
+      toast.error(t('webhooks.edit.unsubscribeFailed'));
     } finally {
       setLoading(false);
     }
@@ -61,14 +63,14 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
-      <Title className={'text-panel-title'}>Remove vehicles</Title>
+      <Title className={'text-panel-title'}>{t('webhooks.edit.removeTitle')}</Title>
       <div className={'py-6'}>
         <AssetDIDsInput
           assetDIDs={assetDIDs}
           onChange={setAssetDIDs}
-          label="Asset DIDs to unsubscribe"
+          label={t('webhooks.edit.removeDidsLabel')}
           error={inputError}
-          placeholder="Enter asset DIDs to unsubscribe from this webhook"
+          placeholder={t('webhooks.edit.removeDidsPlaceholder')}
           disabled={loading}
         />
       </div>
@@ -79,11 +81,11 @@ export const UnsubscribeVehiclesModal: FC<SubscribeVehiclesActionModalProps> = (
           disabled={assetDIDs.length === 0 || loading}
         >
           {loading
-            ? 'Removing...'
-            : `Remove ${assetDIDs.length} vehicle${assetDIDs.length !== 1 ? 's' : ''}`}
+            ? t('webhooks.edit.removing')
+            : t('webhooks.edit.removeCount', { count: assetDIDs.length })}
         </Button>
         <Button onClick={handleClose} variant="secondary">
-          Cancel
+          {t('actions.cancel')}
         </Button>
       </div>
     </Modal>

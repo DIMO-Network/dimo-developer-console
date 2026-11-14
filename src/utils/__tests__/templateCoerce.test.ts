@@ -13,6 +13,8 @@ describe('coerce', () => {
         from: '15.800000',
         to: 15.8,
         reason: 'stored as the number 15.8, not the text "15.800000"',
+        reasonKey: 'templateEditor.notes.storedAsNumber',
+        reasonValues: { value: 15.8, text: '"15.800000"' },
       },
     });
   });
@@ -30,6 +32,7 @@ describe('coerce', () => {
           from: raw,
           to: null,
           reason: 'cleared — the attribute is removed, not stored empty',
+          reasonKey: 'templateEditor.notes.cleared',
         },
       });
     }
@@ -73,6 +76,7 @@ describe('coerce', () => {
         from: '  2532 ',
         to: '2532',
         reason: 'surrounding whitespace removed',
+        reasonKey: 'templateEditor.notes.whitespace',
       },
     });
   });

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { type FC, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -18,6 +19,7 @@ interface IProps {
 }
 
 export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
+  const t = useTranslations('common');
   const [isLoading, setIsLoading] = useState(false);
   const memoizedInquiryOptions = useMemo(() => inquiryOptions, []);
   const { currentUser } = useGlobalAccount();
@@ -53,7 +55,7 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
       <div className="fields">
         <div className="field">
           <Label htmlFor="userName">
-            User name
+            {t('devSupportForm.userName')}
             <TextField
               type="text"
               value={currentUser?.email}
@@ -64,13 +66,13 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
         </div>
         <div className="field">
           <Label htmlFor="inquiryType">
-            Inquiry type
+            {t('devSupportForm.inquiryType')}
             <SelectField
               name="inquiryType"
-              rules={{ required: 'This field is required' }}
+              rules={{ required: t('validation.required') }}
               options={memoizedInquiryOptions}
               control={control}
-              placeholder="Select inquiry"
+              placeholder={t('devSupportForm.inquiryPlaceholder')}
               role="inquiry-type-select"
             />
             {errors.inquiryType && (
@@ -80,15 +82,15 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
         </div>
         <div className="field">
           <Label htmlFor="message">
-            Message
+            {t('devSupportForm.message')}
             <TextArea
-              placeholder="Let us know how we can help..."
+              placeholder={t('devSupportForm.messagePlaceholder')}
               rows={5}
               {...register('message', {
-                required: 'This field is required',
+                required: t('validation.required'),
                 maxLength: {
                   value: 500,
-                  message: 'The message should have a maximum of 500 characters',
+                  message: t('devSupportForm.messageTooLong'),
                 },
               })}
               role="message-input"
@@ -100,10 +102,10 @@ export const DevSupportForm: FC<IProps> = ({ onSubmit, onCancel }) => {
       </div>
       <div className="actions">
         <Button className="w-full" loading={isLoading}>
-          Submit
+          {t('devSupportForm.submit')}
         </Button>
         <Button variant="secondary" className="w-full" onClick={handleCancel}>
-          Cancel
+          {t('actions.cancel')}
         </Button>
       </div>
     </form>

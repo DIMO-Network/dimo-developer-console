@@ -1,10 +1,11 @@
 'use client';
 import { FC, useMemo, useState } from 'react';
 import classNames from 'classnames';
+import { useFormatter, useTranslations } from 'next-intl';
 import { TextField } from '@/components/TextField';
 import { FreshnessDot } from '@/components/FreshnessDot';
 import { humanizeSignal } from '@/utils/humanizeSignal';
-import { utcDate } from '@/utils/freshness';
+import { useFreshnessText } from '@/hooks/useFreshnessText';
 
 export type SignalRow = {
   name: string;
@@ -20,6 +21,11 @@ export const SignalTable: FC<{
   showFrom: boolean;
   filter: string;
 }> = ({ rows, showFrom, filter }) => {
+  const t = useTranslations('vehicles');
+  const tCommon = useTranslations('common');
+  const format = useFormatter();
+  const { utcDate } = useFreshnessText();
+  const label = (name: string) => humanizeSignal(name, tCommon);
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({
     key: 'lastSeen',
     dir: -1,
@@ -30,19 +36,19 @@ export const SignalTable: FC<{
       (r) =>
         !f ||
         r.name.toLowerCase().includes(f) ||
-        humanizeSignal(r.name).toLowerCase().includes(f),
+        humanizeSignal(r.name, tCommon).toLowerCase().includes(f),
     );
     const val = (r: SignalRow) =>
       sort.key === 'name'
-        ? humanizeSignal(r.name)
+        ? humanizeSignal(r.name, tCommon)
         : sort.key === 'count'
           ? r.count
           : Date.parse(r[sort.key]);
     return [...list].sort((a, b) =>
       val(a) > val(b) ? sort.dir : val(a) < val(b) ? -sort.dir : 0,
     );
-  }, [rows, filter, sort]);
-  const head = (key: SortKey, label: string, right = false) => (
+  }, [rows, filter, sort, tCommon]);
+  const head = (key: SortKey, text: string, right = false) => (
     <button
       type="button"
       onClick={() =>
@@ -53,7 +59,7 @@ export const SignalTable: FC<{
         right ? 'text-right' : 'text-left',
       )}
     >
-      {label}
+      {text}
       {sort.key === key ? (sort.dir === -1 ? ' ↓' : ' ↑') : ''}
     </button>
   );
@@ -69,11 +75,17 @@ export const SignalTable: FC<{
           cols,
         )}
       >
-        {head('name', 'Signal')}
-        {head('count', 'Data points', true)}
-        <span className="hidden md:block">{head('firstSeen', 'First seen')}</span>
-        {head('lastSeen', 'Last seen')}
-        {showFrom && <span className="hidden text-label text-muted md:block">From</span>}
+        {head('name', t('signals.table.signal'))}
+        {head('count', t('signals.table.dataPoints'), true)}
+        <span className="hidden md:block">
+          {head('firstSeen', t('signals.table.firstSeen'))}
+        </span>
+        {head('lastSeen', t('signals.table.lastSeen'))}
+        {showFrom && (
+          <span className="hidden text-label text-muted md:block">
+            {t('signals.table.from')}
+          </span>
+        )}
       </div>
       {shown.map((r) => (
         <div
@@ -84,13 +96,11 @@ export const SignalTable: FC<{
           )}
         >
           <span className="flex min-w-0 flex-col">
-            <span className="text-body-sm font-medium text-ink">
-              {humanizeSignal(r.name)}
-            </span>
+            <span className="text-body-sm font-medium text-ink">{label(r.name)}</span>
             <span className="truncate font-mono text-code text-muted">{r.name}</span>
           </span>
           <span className="text-right text-body-sm text-fg">
-            {r.count.toLocaleString('en-US')}
+            {format.number(r.count)}
           </span>
           <span className="hidden text-body-sm text-fg md:block">
             {utcDate(r.firstSeen)}
@@ -112,7 +122,7 @@ export const SignalTable: FC<{
       ))}
       {shown.length === 0 && (
         <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
-          No signals match.
+          {t('signals.table.noMatch')}
         </p>
       )}
     </div>
@@ -122,12 +132,15 @@ export const SignalTable: FC<{
 export const SignalFilter: FC<{ value: string; onChange: (v: string) => void }> = ({
   value,
   onChange,
-}) => (
-  <TextField
-    placeholder="Filter signals"
-    aria-label="Filter signals"
-    value={value}
-    onChange={(e) => onChange(e.target.value)}
-    wrapperClassName="w-60"
-  />
-);
+}) => {
+  const t = useTranslations('vehicles');
+  return (
+    <TextField
+      placeholder={t('signals.table.filter')}
+      aria-label={t('signals.table.filter')}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      wrapperClassName="w-60"
+    />
+  );
+};

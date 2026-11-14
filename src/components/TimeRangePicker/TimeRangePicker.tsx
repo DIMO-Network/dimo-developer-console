@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { FC } from 'react';
 import classNames from 'classnames';
 import { TextField } from '@/components/TextField';
@@ -11,12 +12,7 @@ const HOURS: Record<Exclude<RangePreset, 'custom'>, number> = {
   '7d': 7 * 24,
   '30d': 30 * 24,
 };
-const LABELS: Record<RangePreset, string> = {
-  '24h': '24 h',
-  '7d': '7 days',
-  '30d': '30 days',
-  'custom': 'Custom',
-};
+export const PRESETS: RangePreset[] = ['24h', '7d', '30d', 'custom'];
 
 export const resolveRange = (
   preset: Exclude<RangePreset, 'custom'>,
@@ -44,7 +40,8 @@ interface Props {
 }
 
 export const TimeRangePicker: FC<Props> = ({ value, onChange, maxDays, now }) => {
-  const presets = (Object.keys(LABELS) as RangePreset[]).filter(
+  const t = useTranslations('common');
+  const presets = PRESETS.filter(
     (p) => p === 'custom' || !maxDays || HOURS[p] / 24 <= maxDays,
   );
   const pick = (p: RangePreset) =>
@@ -56,10 +53,10 @@ export const TimeRangePicker: FC<Props> = ({ value, onChange, maxDays, now }) =>
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div className="flex flex-col gap-1.5">
-        <span className="text-label text-muted">Range</span>
+        <span className="text-label text-muted">{t('timeRange.range')}</span>
         <div
           role="radiogroup"
-          aria-label="Range"
+          aria-label={t('timeRange.range')}
           className="flex w-fit gap-0.5 rounded-full bg-control p-[3px]"
         >
           {presets.map((p) => (
@@ -76,7 +73,7 @@ export const TimeRangePicker: FC<Props> = ({ value, onChange, maxDays, now }) =>
                   : 'text-muted hover:text-fg',
               )}
             >
-              {LABELS[p]}
+              {t(`timeRange.presets.${p}`)}
             </button>
           ))}
         </div>
@@ -84,7 +81,7 @@ export const TimeRangePicker: FC<Props> = ({ value, onChange, maxDays, now }) =>
       {value.preset === 'custom' && (
         <>
           <label className="flex flex-col gap-1.5 text-label text-muted">
-            From (UTC)
+            {t('timeRange.from')}
             <TextField
               type="datetime-local"
               value={toLocalInput(value.from)}
@@ -94,7 +91,7 @@ export const TimeRangePicker: FC<Props> = ({ value, onChange, maxDays, now }) =>
             />
           </label>
           <label className="flex flex-col gap-1.5 text-label text-muted">
-            To (UTC)
+            {t('timeRange.to')}
             <TextField
               type="datetime-local"
               value={toLocalInput(value.to)}
@@ -104,7 +101,7 @@ export const TimeRangePicker: FC<Props> = ({ value, onChange, maxDays, now }) =>
         </>
       )}
       {value.preset === 'custom' && !isRangeValid(value) && (
-        <p className="w-full text-label text-negative">Start must be before end.</p>
+        <p className="w-full text-label text-negative">{t('timeRange.invalid')}</p>
       )}
     </div>
   );
