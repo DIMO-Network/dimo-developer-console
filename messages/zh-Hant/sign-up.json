@@ -1,0 +1,99 @@
+{
+  "metadataTitle": "註冊 | {appName}",
+  "metadataDescription": "加入DIMO Developer Console，立即註冊！建立帳號即可使用強大的開發者工具，輕鬆管理應用程式。現在就開始，提升您的開發體驗！",
+  "view": {
+    "termsAgreement": "登入即表示您同意我們的<terms>服務條款</terms>和<privacy>隱私權政策</privacy>"
+  },
+  "refusal": {
+    "accountExists": "此帳號已存在，請改為登入。",
+    "signIn": "登入",
+    "emailTaken": "此電子郵件已被其他主控台帳號使用。請使用該帳號登入，或改用其他電子郵件。",
+    "emailNotProven": "我們無法確認此電子郵件屬於您的DIMO帳號。",
+    "unreachable": "無法連線至主控台，請再試一次。",
+    "failed": "建立帳號時發生錯誤。請再試一次。"
+  },
+  "wallet": {
+    "createFailed": "建立使用者錢包時發生錯誤",
+    "lostPasskey": "遺失密碼金鑰了嗎？<recover>使用電子郵件復原</recover>",
+    "troubleLoggingIn": "登入時遇到問題？<support>取得支援</support>",
+    "passkey": {
+      "title": "正在使用密碼金鑰建立帳號",
+      "body": "正在建立您的DIMO帳號，這可能需要幾秒鐘。"
+    },
+    "noPasskey": {
+      "title": "正在建立不使用密碼金鑰的帳號",
+      "body": "正在建立不使用密碼金鑰的DIMO帳號，請到收件匣查看6位數的一次性驗證碼。"
+    },
+    "accountFound": {
+      "title": "已找到DIMO帳號",
+      "body": "您已經有DIMO帳號。請驗證您的身分以繼續。"
+    }
+  },
+  "buildFor": {
+    "title": "您正在開發什麼？",
+    "prompt": "您希望透過DIMO推出什麼？",
+    "mobileApp": {
+      "title": "行動應用程式",
+      "description": "在Apple App Store或Google Play商店上架的應用程式"
+    },
+    "webApp": {
+      "title": "網頁應用程式",
+      "description": "具備使用者管理功能的網頁應用程式"
+    },
+    "personalProject": {
+      "title": "個人專案",
+      "description": "用於存取車輛資料的個人專案"
+    },
+    "somethingElse": "其他",
+    "somethingElsePlaceholder": "我正在開發...",
+    "maxLength": "最多150個字元",
+    "selectOption": "請選擇一個選項以繼續"
+  },
+  "company": {
+    "title": "最後一步",
+    "typeLabel": "企業／開發者類型 *",
+    "select": "請選擇",
+    "maxLength": "名稱最多120個字元",
+    "invalidUrl": "此欄位必須是有效的URL，且最多120個字元",
+    "finish": "完成註冊",
+    "business": {
+      "nameLabel": "公司名稱 *",
+      "namePlaceholder": "ACME",
+      "websiteLabel": "公司網站",
+      "websitePlaceholder": "www.acme.zone",
+      "regionLabel": "主要營運地區 *"
+    },
+    "personal": {
+      "nameLabel": "名稱 *",
+      "namePlaceholder": "Bruce Wayne",
+      "websiteLabel": "社群網站URL",
+      "websitePlaceholder": "https://instagram.com/batman",
+      "regionLabel": "地區 *"
+    },
+    "developerTypes": {
+      "personalDeveloper": "個人開發者",
+      "oem": "OEM",
+      "insurance": "保險",
+      "maintenance": "維修保養",
+      "fleetManagement": "車隊管理",
+      "vehicleSales": "車輛銷售",
+      "utilities": "公用事業",
+      "financing": "融資",
+      "ev": "電動車",
+      "depin": "DePIN",
+      "data": "資料",
+      "others": "其他"
+    },
+    "regions": {
+      "northAmerica": "北美洲",
+      "latinAmericaCaribbean": "拉丁美洲與加勒比海地區",
+      "oceania": "大洋洲",
+      "northernWesternEurope": "北歐與西歐",
+      "africa": "非洲",
+      "eastSoutheastAsia": "東亞與東南亞",
+      "middleEastCentralAsia": "中東與中亞",
+      "southAsia": "南亞",
+      "easternEurope": "東歐"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "metadataTitle": "支援 | {appName}",
+  "subtitle": "請選擇下方選項，以便我們的客服團隊處理您的問題。",
+  "reportIssue": {
+    "title": "回報問題",
+    "description": "如果您在使用DIMO API時遇到非預期的問題，請在此與我們聯絡。",
+    "statusNote": "已知問題與服務中斷資訊請見我們的<statusLink>狀態頁面</statusLink>"
+  },
+  "faqs": {
+    "title": "常見問題",
+    "description": "查看常見問題，了解您可能遇到的一般疑問與問題。"
+  },
+  "featureRequest": {
+    "title": "功能建議",
+    "description": "如果您有DIMO API目前尚未支援的想法、需求或要求，我們很樂意聽取您的意見。"
+  }
+}

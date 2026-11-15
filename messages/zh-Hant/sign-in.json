@@ -1,0 +1,25 @@
+{
+  "metadataTitle": "登入 | {appName}",
+  "metadataDescription": "歡迎登入DIMO Developer Console。安全存取您的開發者儀表板，管理應用程式並探索進階DIMO工具。立即開始開發與最佳化！",
+  "view": {
+    "termsAgreement": "登入即表示您同意我們的<terms>服務條款</terms>和<privacy>隱私權政策</privacy>",
+    "walletRestoreNeeded": "此帳號必須先還原錢包才能登入。請聯絡開發者支援團隊。",
+    "genericError": "發生錯誤，請再試一次。",
+    "externalLoginFailed": "無法透過外部服務登入"
+  },
+  "methodForm": {
+    "title": "運用汽車資料進行開發",
+    "emailPlaceholder": "email@address.com",
+    "maxLength": "名稱最多120個字元",
+    "invalidEmail": "電子郵件地址無效",
+    "or": "或",
+    "lostPasskey": "遺失密碼金鑰了嗎？<reset>使用電子郵件重設</reset>",
+    "troubleLoggingIn": "登入時遇到問題？<support>取得支援</support>"
+  },
+  "passkey": {
+    "title": "使用密碼金鑰繼續",
+    "loginFailed": "無法使用密碼金鑰登入",
+    "lostPasskey": "遺失密碼金鑰了嗎？<recover>使用電子郵件復原</recover>",
+    "troubleLoggingIn": "登入時遇到問題？<support>取得支援</support>"
+  }
+}

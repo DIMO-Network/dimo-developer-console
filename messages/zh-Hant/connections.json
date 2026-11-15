@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "list": "連線 | {appName}",
+    "create": "建立連線 | {appName}"
+  },
+  "breadcrumb": {
+    "connections": "連線",
+    "back": "返回連線"
+  },
+  "list": {
+    "title": "連線",
+    "empty": "您尚未建立任何連線。",
+    "keysUnreadable": "無法讀取金鑰",
+    "finishSetup": "完成設定",
+    "details": "連線詳細資訊",
+    "create": "建立連線",
+    "created": "已成功建立連線",
+    "loadError": "擷取您的連線時發生問題"
+  },
+  "details": {
+    "title": "連線詳細資訊",
+    "environment": "正式環境",
+    "licenseSection": "連線授權",
+    "publicKey": "連線授權公鑰",
+    "privateKey": "連線授權私鑰",
+    "issuanceAddress": "裝置發行地址",
+    "issuanceKey": "裝置發行金鑰",
+    "gone": "此連線已不存在。",
+    "keysUnreadable": "無法讀取此連線的金鑰，請聯絡開發者支援。",
+    "loadError": "載入連線詳細資訊時發生問題"
+  },
+  "discard": {
+    "button": "捨棄",
+    "title": "要捨棄{name}嗎？",
+    "subtitle": "其已儲存的金鑰將永久刪除。請只捨棄在設定過程中從未鑄造的連線。",
+    "minted": "此連線已鑄造，請改用「完成設定」。",
+    "lookupFailed": "無法確認此連線是否已鑄造，因此未捨棄任何內容。請再試一次。",
+    "notPending": "此連線已完成設定階段，因此無法捨棄。",
+    "failed": "無法捨棄連線，請再試一次。",
+    "done": "已捨棄連線"
+  },
+  "create": {
+    "titleNew": "新增連線",
+    "titleFinish": "完成設定",
+    "creating": "正在建立連線，請稍候…",
+    "generatingKeys": "正在產生您的連線金鑰…",
+    "savingKeys": "正在儲存您的連線金鑰…",
+    "saving": "正在儲存您的連線…",
+    "checkingMinted": "正在檢查您的連線是否已鑄造…",
+    "loading": "正在載入您的連線…",
+    "resumeNote": "<strong>{name}</strong>尚未完成設定。其金鑰已儲存，因此可從中斷處繼續設定。",
+    "finishSetup": "完成設定",
+    "nameLabel": "連線名稱",
+    "namePlaceholder": "連線名稱",
+    "nameTooLong": "連線名稱過長，請使用32個字元以內的名稱。",
+    "nameTakenInTeam": "您的團隊已有同名的連線，請選擇其他名稱。",
+    "purchase": "購買連線授權",
+    "continuePayment": "繼續付款",
+    "keysUnreadableOnResume": "無法讀取此連線的金鑰，因此無法繼續設定。請聯絡開發者支援。",
+    "keysNotSaved": "無法儲存您的連線金鑰，因此未鑄造任何內容。",
+    "finishFromConnections": "您的連線金鑰已儲存，但設定尚未完成。您可以從「連線」頁面完成設定。",
+    "lookupFailed": "無法確認此連線是否已鑄造，因此未扣除任何費用。請再試一次。",
+    "nameTaken": "此名稱已被其他錢包使用，因此無法完成設定。",
+    "nameRefusedOnResume": "如果您先前的嘗試已成功，可能需要一分鐘才會顯示。請稍後再試一次「完成設定」。",
+    "loadFailed": "無法載入此連線。請返回「連線」頁面後再試一次。",
+    "gone": "此連線已不存在，因此沒有需要完成的設定。",
+    "ownerOnly": "只有團隊擁有者可以完成此連線的設定。",
+    "steps": {
+      "minting": "請核准鑄造，以在鏈上建立您的連線。費用約為價值$1的$DIMO。",
+      "signingAgreements": "正在為裝置發行金鑰（鑄造合成裝置）和連線授權金鑰（產生證書）簽署權限協議。",
+      "grantingPermissions": "請核准鏈上交易，將此連線的權限授予這兩組金鑰。"
+    },
+    "modal": {
+      "title": "購買連線授權",
+      "warning": "<strong>警告！</strong>繼續操作即表示您同意為您的DIMO連線授權支付<strong>價值$1的</strong>點數。如果您的帳號點數不足，將無法建立連線授權。",
+      "oracleOnly": "只有在您打算託管DIMO Oracle時，才需要購買授權。"
+    }
+  }
+}

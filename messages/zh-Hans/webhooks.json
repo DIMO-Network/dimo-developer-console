@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "list": "Webhook | {appName}",
+    "create": "创建Webhook | {appName}",
+    "edit": "编辑Webhook | {appName}"
+  },
+  "page": {
+    "description": "接收事件的实时更新",
+    "addRedirectUri": "为您的许可证添加重定向URI，即可设置Webhook。",
+    "createLicense": "创建开发者许可证，即可设置Webhook。",
+    "goToLicenses": "前往许可证",
+    "fetchLicensesError": "获取您的开发者许可证时出现问题"
+  },
+  "breadcrumb": {
+    "webhooks": "Webhook",
+    "newWebhook": "新建Webhook",
+    "editWebhook": "编辑Webhook"
+  },
+  "edit": {
+    "fetchError": "获取您的Webhook时出错",
+    "notFound": "未找到Webhook"
+  },
+  "discardChanges": {
+    "title": "放弃更改",
+    "message": "确定要放弃更改吗？此操作无法撤销。"
+  }
+}

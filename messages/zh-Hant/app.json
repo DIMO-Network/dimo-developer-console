@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "title": "首頁 | {appName}"
+  },
+  "home": {
+    "welcomeNamed": "歡迎，{name}",
+    "welcome": "歡迎！",
+    "wavingHandAlt": "揮手",
+    "shortcuts": {
+      "licenses": {
+        "label": "授權",
+        "description": "檢視及管理您的開發者授權"
+      },
+      "connections": {
+        "label": "連線",
+        "description": "設定連線，接入您自己的資料"
+      },
+      "webhooks": {
+        "label": "Webhook",
+        "description": "建立及管理Webhook事件訂閱"
+      },
+      "vehicles": {
+        "label": "車輛",
+        "description": "查看每輛共享車輛傳送的資料，並瀏覽其原始事件"
+      }
+    }
+  },
+  "list": {
+    "createLicense": "建立授權",
+    "addCredits": "加值點數",
+    "empty": {
+      "title": "您尚未建立任何開發者授權",
+      "description": "使用您的開發者授權憑證與DIMO整合"
+    },
+    "dcx": {
+      "title": "什麼是DCX？",
+      "description": "DCX是DIMO Credits的縮寫。DIMO Credits每點$0.001，API呼叫和其他DIMO費用皆以DCX計價。",
+      "learnMore": "瞭解詳情。"
+    }
+  },
+  "create": {
+    "preparing": "正在準備建立開發者授權",
+    "creating": "正在建立開發者授權…",
+    "loading": "載入中",
+    "created": "開發者授權已建立！請重新整理頁面以查看變更。",
+    "nameInUse": "此開發者授權名稱已被使用，請改用其他名稱再試一次。",
+    "failed": "確認交易時發生錯誤",
+    "namePlaceholder": "我的專案"
+  },
+  "simulator": {
+    "open": "車輛模擬器",
+    "title": "車輛模擬器",
+    "subtitle": "鑄造模擬測試車輛。",
+    "minting": "正在鑄造車輛…",
+    "removing": "正在移除車輛…",
+    "mintFailed": "鑄造失敗",
+    "mintTokenUnreadable": "鑄造成功，但無法讀取車輛Token ID。請再試一次。",
+    "mintError": "鑄造車輛時發生錯誤",
+    "removeRecordFailed": "無法移除車輛記錄",
+    "removeFailed": "無法移除車輛",
+    "noVehicle": "尚未設定車輛",
+    "limitReached": "已達上限，每個帳號僅限{max}輛",
+    "mint": "鑄造車輛",
+    "steps": {
+      "region": "01 — 地區",
+      "make": "02 — 廠牌",
+      "model": "03 — 車型",
+      "year": "04 — 年份"
+    },
+    "selectRegion": "選擇地區",
+    "selectMake": "選擇廠牌",
+    "selectModel": "選擇車型",
+    "selectYear": "選擇年份",
+    "selectMakeFirst": "請先選擇廠牌",
+    "regions": {
+      "usa": {
+        "label": "美國",
+        "sub": "紐約路線"
+      },
+      "japan": {
+        "label": "日本",
+        "sub": "本州環線"
+      }
+    },
+    "fleet": {
+      "title": "模擬車隊",
+      "count": "{count, plural, other {#輛車}}",
+      "removedOnChain": "已在鏈上移除",
+      "tokenId": "Token ID",
+      "remove": "移除車輛"
+    },
+    "notices": {
+      "notRecorded": "車輛#{tokenId}已鑄造，但無法儲存到此授權。",
+      "notShared": "車輛#{tokenId}已鑄造，但模擬器和此授權都未獲得其存取權限。請移除該車輛並重新鑄造以修正此問題。",
+      "notRegistered": "車輛#{tokenId}已鑄造，但模擬器無法啟動它。",
+      "minted": "車輛鑄造成功！",
+      "removed": "車輛已成功移除",
+      "removedNotBurned": "車輛已從模擬器移除，但無法銷毀其NFT。"
+    }
+  },
+  "error": {
+    "title": "發生錯誤",
+    "description": "發生未預期的錯誤，請再試一次。",
+    "home": "返回首頁",
+    "retry": "重試"
+  },
+  "notFound": {
+    "metadataTitle": "404 | {appName}",
+    "title": "找不到頁面",
+    "description": "抱歉，我們找不到您要尋找的頁面。",
+    "home": "返回首頁"
+  }
+}

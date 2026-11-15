@@ -1,0 +1,195 @@
+{
+  "metadata": {
+    "listTitle": "SDK組態工具 | {appName}",
+    "newTitle": "新增組態 | {appName}",
+    "editTitle": "編輯組態 | {appName}"
+  },
+  "breadcrumb": {
+    "licenseDetails": "授權詳細資訊",
+    "sdkConfigurator": "SDK組態工具",
+    "newConfiguration": "新增組態",
+    "editConfiguration": "編輯組態"
+  },
+  "components": {
+    "LoginWithDimo": "Login with DIMO",
+    "ShareVehiclesWithDimo": "與DIMO共享車輛",
+    "ExecuteAdvancedTransactionWithDimo": "執行進階交易"
+  },
+  "list": {
+    "subtitle": "Login with DIMO組態工具",
+    "newConfiguration": "新增組態",
+    "intro": "車主需要透過車輛共享連結，才能將資料權限授予您的應用程式。<docsLink>了解如何搭配LIWD使用configurationId</docsLink>"
+  },
+  "licenseLoadError": "擷取授權詳細資訊時發生錯誤",
+  "table": {
+    "loading": "載入中…",
+    "loadError": "無法載入組態，請重新載入以再試一次。",
+    "empty": "尚無組態。",
+    "createFirst": "建立您的第一個組態",
+    "name": "名稱",
+    "component": "元件",
+    "actions": "操作",
+    "untitled": "（未命名）",
+    "copyLink": "複製連結",
+    "linkCopied": "已複製共享連結",
+    "deleteFailed": "無法刪除組態"
+  },
+  "new": {
+    "subtitle": "新增組態",
+    "created": "已成功建立組態",
+    "createFailed": "無法建立組態，請再試一次。"
+  },
+  "edit": {
+    "subtitle": "編輯組態",
+    "updated": "已成功更新組態",
+    "updateFailed": "無法更新組態，請再試一次。",
+    "loadFailed": "無法載入此組態，請重新載入頁面以再試一次。"
+  },
+  "form": {
+    "basics": {
+      "title": "基本資訊",
+      "configurationId": "組態ID",
+      "copyLink": "複製連結",
+      "idUnavailable": "無法取得組態ID",
+      "linkCopied": "已將組態連結複製到剪貼簿",
+      "name": "組態名稱",
+      "namePlaceholder": "例如：我的應用程式 – 正式環境",
+      "nameRequired": "必須填寫組態名稱",
+      "clientId": "用戶端ID"
+    },
+    "component": {
+      "title": "元件",
+      "login": "🔑  Login with DIMO",
+      "share": "🚗  與DIMO共享車輛"
+    },
+    "connection": {
+      "title": "連線",
+      "redirectUri": "重新導向URI",
+      "redirectUriRequired": "必須填寫重新導向URI",
+      "select": "請選擇",
+      "noRedirectUri": "此授權尚未設定重新導向URI，因此無法儲存組態。請在授權的「設定檔」分頁中新增。",
+      "goToConfigTab": "前往「設定檔」分頁",
+      "expirationDate": "到期日",
+      "expirationDateSharingOnly": "到期日（僅限共享）",
+      "expirationDateRequired": "必須填寫到期日",
+      "expirationDateTooEarly": "請選擇今天或之後的日期",
+      "utm": "UTM"
+    },
+    "ownerOnly": "只有團隊擁有者可以變更組態。",
+    "update": "更新",
+    "preview": {
+      "generatedOutput": "產生的輸出",
+      "saveToGenerate": "儲存後即可產生您的連結",
+      "afterSaving": "儲存後，您會取得一個簡短的<code>configurationId</code>連結，可直接提供給使用者。"
+    },
+    "signIn": {
+      "title": "登入視窗",
+      "language": "語言",
+      "matchBrowser": "與使用者的瀏覽器相同",
+      "languageHint": "配合瀏覽器時，瀏覽器語言為日文、西班牙文或中文的使用者會看到該語言；位於日本、中國、台灣和香港時區的使用者會看到對應的語言，其他人則會看到英文。使用者隨時可以切換語言。",
+      "email": "電子郵件地址",
+      "emailOptions": {
+        "none": "不詢問",
+        "optional": "選填",
+        "required": "必要"
+      },
+      "emailHints": {
+        "none": "不會詢問使用者，您的應用程式也不會取得其電子郵件地址。",
+        "optional": "使用者登入後，可選擇是否與您的應用程式共享電子郵件地址。",
+        "required": "使用者登入後，必須與您的應用程式共享電子郵件地址才能繼續。"
+      }
+    },
+    "brand": {
+      "label": "品牌",
+      "hint": "按鈕和登入視窗要顯示的品牌。保留為「預設」即可使用您工作區的預設品牌。",
+      "default": "預設"
+    },
+    "legal": {
+      "title": "隱私權政策與服務條款",
+      "privacyPolicyUrl": "隱私權政策URL",
+      "termsUrl": "服務條款URL",
+      "shownToVehicleOwners": "在車主授予權限前顯示。留空即可略過。",
+      "shownToUsers": "在使用者登入前顯示。留空即可略過。"
+    },
+    "login": {
+      "settings": "登入設定"
+    },
+    "share": {
+      "permissionsTitle": "車輛權限",
+      "useTemplate": "使用權限範本",
+      "customPermissions": "自訂權限",
+      "templateId": "權限範本ID",
+      "templateIdRequired": "請輸入權限範本ID",
+      "templateIdHint": "權限範本的編號，例如1。",
+      "chooseOne": "請至少選擇一項權限",
+      "documentsTitle": "文件",
+      "documentsHint": "您的應用程式可讀取每輛共享車輛的這些文件。使用者在共享前會先在請求中看到這些文件。",
+      "vehiclesTitle": "適用車輛",
+      "vehiclesHint": "留空即可讓使用者共享其任何車輛。不符合條件的車輛會列為「無法共享的車輛」，並附上原因。多個值請以逗號分隔。",
+      "vehicleTokenIds": "車輛Token ID",
+      "vehicleMakes": "車輛廠牌",
+      "powertrainTypes": "動力系統類型"
+    },
+    "transaction": {
+      "vehicles": "車輛"
+    }
+  },
+  "permissions": {
+    "NONLOCATION_TELEMETRY": {
+      "title": "非位置遙測",
+      "description": "存取非位置的車輛遙測資料"
+    },
+    "COMMANDS": {
+      "title": "指令",
+      "description": "執行車輛指令"
+    },
+    "CURRENT_LOCATION": {
+      "title": "目前位置",
+      "description": "存取車輛的目前位置"
+    },
+    "ALLTIME_LOCATION": {
+      "title": "全時段位置",
+      "description": "存取歷史位置資料"
+    },
+    "CREDENTIALS": {
+      "title": "憑證",
+      "description": "存取VIN憑證"
+    },
+    "STREAMS": {
+      "title": "串流",
+      "description": "存取即時資料串流"
+    },
+    "RAW_DATA": {
+      "title": "原始資料",
+      "description": "存取原始車輛資料"
+    },
+    "APPROXIMATE_LOCATION": {
+      "title": "概略位置",
+      "description": "存取概略位置資料"
+    }
+  },
+  "documents": {
+    "vehicle": {
+      "title": "車輛文件",
+      "description": "行照、保險、維修記錄及其他車輛文件。"
+    },
+    "driver": {
+      "title": "駕駛人文件",
+      "description": "車主的駕照及其他駕駛人文件。"
+    },
+    "rawVehicle": {
+      "title": "原始車輛檔案",
+      "description": "車輛文件所依據的相片和PDF檔。"
+    },
+    "rawDriver": {
+      "title": "原始駕駛人檔案",
+      "description": "駕駛人文件所依據的相片和PDF檔。"
+    }
+  },
+  "output": {
+    "viewAs": "檢視方式：",
+    "code": "程式碼",
+    "url": "URL",
+    "generatedCode": "產生的程式碼"
+  }
+}

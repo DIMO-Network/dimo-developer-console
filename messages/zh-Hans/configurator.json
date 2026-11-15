@@ -1,0 +1,195 @@
+{
+  "metadata": {
+    "listTitle": "SDK配置器 | {appName}",
+    "newTitle": "新建配置 | {appName}",
+    "editTitle": "编辑配置 | {appName}"
+  },
+  "breadcrumb": {
+    "licenseDetails": "许可证详情",
+    "sdkConfigurator": "SDK配置器",
+    "newConfiguration": "新建配置",
+    "editConfiguration": "编辑配置"
+  },
+  "components": {
+    "LoginWithDimo": "Login with DIMO",
+    "ShareVehiclesWithDimo": "与DIMO共享车辆",
+    "ExecuteAdvancedTransactionWithDimo": "执行高级交易"
+  },
+  "list": {
+    "subtitle": "Login with DIMO配置器",
+    "newConfiguration": "新建配置",
+    "intro": "车主需要通过车辆共享链接向您的应用授予数据权限。<docsLink>了解如何在LIWD中使用configurationId</docsLink>"
+  },
+  "licenseLoadError": "获取许可证详情时出错",
+  "table": {
+    "loading": "加载中…",
+    "loadError": "无法加载配置，请刷新页面重试。",
+    "empty": "暂无配置。",
+    "createFirst": "创建您的第一个配置",
+    "name": "名称",
+    "component": "组件",
+    "actions": "操作",
+    "untitled": "（未命名）",
+    "copyLink": "复制链接",
+    "linkCopied": "共享链接已复制",
+    "deleteFailed": "删除配置失败"
+  },
+  "new": {
+    "subtitle": "新建配置",
+    "created": "配置创建成功",
+    "createFailed": "创建配置失败，请重试。"
+  },
+  "edit": {
+    "subtitle": "编辑配置",
+    "updated": "配置更新成功",
+    "updateFailed": "更新配置失败，请重试。",
+    "loadFailed": "无法加载此配置，请刷新页面重试。"
+  },
+  "form": {
+    "basics": {
+      "title": "基本信息",
+      "configurationId": "配置ID",
+      "copyLink": "复制链接",
+      "idUnavailable": "配置ID不可用",
+      "linkCopied": "配置链接已复制到剪贴板",
+      "name": "配置名称",
+      "namePlaceholder": "例如：我的应用 – 生产环境",
+      "nameRequired": "配置名称为必填项",
+      "clientId": "客户端ID"
+    },
+    "component": {
+      "title": "组件",
+      "login": "🔑  Login with DIMO",
+      "share": "🚗  与DIMO共享车辆"
+    },
+    "connection": {
+      "title": "连接",
+      "redirectUri": "重定向URI",
+      "redirectUriRequired": "重定向URI为必填项",
+      "select": "请选择",
+      "noRedirectUri": "此许可证尚无重定向URI，因此无法保存配置。请在许可证的“配置”标签页中添加。",
+      "goToConfigTab": "前往“配置”标签页",
+      "expirationDate": "到期日期",
+      "expirationDateSharingOnly": "到期日期（仅限共享）",
+      "expirationDateRequired": "到期日期为必填项",
+      "expirationDateTooEarly": "请选择今天或之后的日期",
+      "utm": "UTM"
+    },
+    "ownerOnly": "只有团队所有者可以更改配置。",
+    "update": "更新",
+    "preview": {
+      "generatedOutput": "生成结果",
+      "saveToGenerate": "保存后即可生成链接",
+      "afterSaving": "保存后，您将获得一个简短的<code>configurationId</code>链接，可直接分享给用户。"
+    },
+    "signIn": {
+      "title": "登录窗口",
+      "language": "语言",
+      "matchBrowser": "跟随用户的浏览器",
+      "languageHint": "选择跟随浏览器时，浏览器语言设为日语、西班牙语或中文的用户会看到对应语言；日本、中国、台湾和香港时区的用户会看到各自的语言，其他用户则看到英语。用户随时可以切换。",
+      "email": "邮箱地址",
+      "emailOptions": {
+        "none": "不询问",
+        "optional": "可选",
+        "required": "必需"
+      },
+      "emailHints": {
+        "none": "不会询问用户，您的应用也不会获得其邮箱。",
+        "optional": "用户登录后可自行选择是否与您的应用共享邮箱。",
+        "required": "用户登录后必须与您的应用共享邮箱才能继续。"
+      }
+    },
+    "brand": {
+      "label": "品牌",
+      "hint": "按钮和登录窗口所显示的品牌。保留“默认”即可使用您工作区的默认品牌。",
+      "default": "默认"
+    },
+    "legal": {
+      "title": "隐私政策和服务条款",
+      "privacyPolicyUrl": "隐私政策URL",
+      "termsUrl": "服务条款URL",
+      "shownToVehicleOwners": "在车主授予权限前显示。留空则跳过。",
+      "shownToUsers": "在用户登录前显示。留空则跳过。"
+    },
+    "login": {
+      "settings": "登录设置"
+    },
+    "share": {
+      "permissionsTitle": "车辆权限",
+      "useTemplate": "使用权限模板",
+      "customPermissions": "自定义权限",
+      "templateId": "权限模板ID",
+      "templateIdRequired": "请输入权限模板ID",
+      "templateIdHint": "权限模板的编号，例如1。",
+      "chooseOne": "请至少选择一项权限",
+      "documentsTitle": "文件",
+      "documentsHint": "您的应用可读取每辆共享车辆的这些文件。用户在共享前会在请求中看到它们。",
+      "vehiclesTitle": "哪些车辆",
+      "vehiclesHint": "留空则允许用户共享其任意车辆。不符合条件的车辆会列在“无法共享的车辆”下，并注明原因。多个值请用逗号分隔。",
+      "vehicleTokenIds": "车辆Token ID",
+      "vehicleMakes": "车辆品牌",
+      "powertrainTypes": "动力类型"
+    },
+    "transaction": {
+      "vehicles": "车辆"
+    }
+  },
+  "permissions": {
+    "NONLOCATION_TELEMETRY": {
+      "title": "非位置遥测数据",
+      "description": "访问非位置类车辆遥测数据"
+    },
+    "COMMANDS": {
+      "title": "命令",
+      "description": "执行车辆命令"
+    },
+    "CURRENT_LOCATION": {
+      "title": "当前位置",
+      "description": "访问车辆当前位置"
+    },
+    "ALLTIME_LOCATION": {
+      "title": "全部历史位置",
+      "description": "访问历史位置数据"
+    },
+    "CREDENTIALS": {
+      "title": "凭证",
+      "description": "访问VIN凭证"
+    },
+    "STREAMS": {
+      "title": "数据流",
+      "description": "访问实时数据流"
+    },
+    "RAW_DATA": {
+      "title": "原始数据",
+      "description": "访问车辆原始数据"
+    },
+    "APPROXIMATE_LOCATION": {
+      "title": "大致位置",
+      "description": "访问大致位置数据"
+    }
+  },
+  "documents": {
+    "vehicle": {
+      "title": "车辆文件",
+      "description": "行驶证、保险、维修保养记录及其他车辆文件。"
+    },
+    "driver": {
+      "title": "驾驶员文件",
+      "description": "车主的驾驶证及其他驾驶员文件。"
+    },
+    "rawVehicle": {
+      "title": "车辆原始文件",
+      "description": "车辆文件所依据的照片和PDF。"
+    },
+    "rawDriver": {
+      "title": "驾驶员原始文件",
+      "description": "驾驶员文件所依据的照片和PDF。"
+    }
+  },
+  "output": {
+    "viewAs": "查看方式：",
+    "code": "代码",
+    "url": "URL",
+    "generatedCode": "生成的代码"
+  }
+}

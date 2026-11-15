@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "listTitle": "模板 | {appName}",
+    "newTitle": "新建模板 | {appName}"
+  },
+  "loading": "加载中…",
+  "unavailable": {
+    "title": "车辆模板即将推出",
+    "description": "模板编辑器暂不可用，请稍后再来查看。"
+  },
+  "header": {
+    "description": "按品牌、车型和年款搜索目录，编辑车辆的定义",
+    "newTemplate": "新建模板"
+  },
+  "search": {
+    "fields": {
+      "make": "品牌",
+      "model": "车型",
+      "year": "年款"
+    },
+    "submit": "搜索",
+    "failed": "搜索目录时出了点问题",
+    "noMake": "没有与该名称匹配的品牌。请尝试使用车身上标注的品牌拼写。",
+    "versionTrims": "v{version} · {trims, plural, other {#个车款}}",
+    "open": "打开",
+    "create": "创建",
+    "status": {
+      "ok": "已有模板",
+      "missing": "暂无模板",
+      "invalidId": "需先修正ID"
+    },
+    "hints": {
+      "missing": "此年款存在，但还没有人为其编写模板。",
+      "invalidId": "此ID不符合模板所需的make_model_year格式，因此在修正ID本身之前没有可编辑的内容。"
+    }
+  },
+  "new": {
+    "title": "新建模板",
+    "description": "一个模板对应一个年款及其上市时提供的车款。创建后将立即以您的名义发布。目前还没有车辆使用它，因此不会影响任何上路车辆。",
+    "manufacturer": "制造商",
+    "model": "车型",
+    "year": "年款",
+    "firstTrim": "首个车款",
+    "exists": "已存在使用此ID的模板。",
+    "openIt": "打开该模板",
+    "create": "创建模板",
+    "createFailed": "无法创建此模板"
+  },
+  "editor": {
+    "loadFailed": "无法加载此模板",
+    "loadFailedDetail": "无法加载此模板：{message}（{status}）",
+    "header": "<code>{id}</code> · v{version}",
+    "headerWithAuthor": "<code>{id}</code> · v{version} · 最后由{author}发布",
+    "addTrim": "添加车款",
+    "publish": "发布",
+    "publishFailed": "发布失败",
+    "published": "已发布版本{version}。",
+    "conflict": {
+      "moved": "在您编辑版本{expected}期间，此模板已更新至版本{actual}。",
+      "kept": "您的草稿未被丢弃，也没有发布任何内容。请重新加载以查看当前版本，然后重新应用您的更改。",
+      "reload": "重新加载"
+    }
+  }
+}
