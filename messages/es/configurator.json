@@ -1,0 +1,195 @@
+{
+  "metadata": {
+    "listTitle": "Configurador del SDK | {appName}",
+    "newTitle": "Nueva configuración | {appName}",
+    "editTitle": "Editar configuración | {appName}"
+  },
+  "breadcrumb": {
+    "licenseDetails": "Detalles de la licencia",
+    "sdkConfigurator": "Configurador del SDK",
+    "newConfiguration": "Nueva configuración",
+    "editConfiguration": "Editar configuración"
+  },
+  "components": {
+    "LoginWithDimo": "Login with DIMO",
+    "ShareVehiclesWithDimo": "Compartir vehículos con DIMO",
+    "ExecuteAdvancedTransactionWithDimo": "Ejecutar transacción avanzada"
+  },
+  "list": {
+    "subtitle": "Configurador de Login with DIMO",
+    "newConfiguration": "Nueva configuración",
+    "intro": "Los propietarios de vehículos necesitan un enlace para compartir vehículos para otorgar permisos de datos a tu aplicación. <docsLink>Aprende a usar el configurationId con LIWD</docsLink>"
+  },
+  "licenseLoadError": "Hubo un error al obtener los detalles de la licencia",
+  "table": {
+    "loading": "Cargando…",
+    "loadError": "No se pudieron cargar las configuraciones. Vuelve a cargar la página para intentarlo de nuevo.",
+    "empty": "Todavía no hay configuraciones.",
+    "createFirst": "Crea tu primera configuración",
+    "name": "Nombre",
+    "component": "Componente",
+    "actions": "Acciones",
+    "untitled": "(sin título)",
+    "copyLink": "Copiar enlace",
+    "linkCopied": "Enlace para compartir copiado",
+    "deleteFailed": "No se pudo eliminar la configuración"
+  },
+  "new": {
+    "subtitle": "Nueva configuración",
+    "created": "Configuración creada correctamente",
+    "createFailed": "No se pudo crear la configuración. Inténtalo de nuevo."
+  },
+  "edit": {
+    "subtitle": "Editar configuración",
+    "updated": "Configuración actualizada correctamente",
+    "updateFailed": "No se pudo actualizar la configuración. Inténtalo de nuevo.",
+    "loadFailed": "No se pudo cargar esta configuración. Vuelve a cargar la página para intentarlo de nuevo."
+  },
+  "form": {
+    "basics": {
+      "title": "Datos básicos",
+      "configurationId": "ID de configuración",
+      "copyLink": "Copiar enlace",
+      "idUnavailable": "El ID de configuración no está disponible",
+      "linkCopied": "Enlace de la configuración copiado al portapapeles",
+      "name": "Nombre de la configuración",
+      "namePlaceholder": "p. ej., Mi app – Producción",
+      "nameRequired": "El nombre de la configuración es obligatorio",
+      "clientId": "ID de cliente"
+    },
+    "component": {
+      "title": "Componente",
+      "login": "🔑  Login with DIMO",
+      "share": "🚗  Compartir vehículos con DIMO"
+    },
+    "connection": {
+      "title": "Conexión",
+      "redirectUri": "URI de redirección",
+      "redirectUriRequired": "La URI de redirección es obligatoria",
+      "select": "Seleccionar",
+      "noRedirectUri": "Esta licencia todavía no tiene una URI de redirección, así que no se puede guardar una configuración. Agrega una en la pestaña Ajustes de la licencia.",
+      "goToConfigTab": "Ir a la pestaña Ajustes",
+      "expirationDate": "Fecha de vencimiento",
+      "expirationDateSharingOnly": "Fecha de vencimiento (solo para compartir)",
+      "expirationDateRequired": "La fecha de vencimiento es obligatoria",
+      "expirationDateTooEarly": "Elige hoy o una fecha posterior",
+      "utm": "UTM"
+    },
+    "ownerOnly": "Solo el propietario del equipo puede cambiar las configuraciones.",
+    "update": "Actualizar",
+    "preview": {
+      "generatedOutput": "Resultado generado",
+      "saveToGenerate": "Guarda para generar tu enlace",
+      "afterSaving": "Después de guardar, obtendrás un enlace corto con <code>configurationId</code> que puedes compartir directamente con los usuarios."
+    },
+    "signIn": {
+      "title": "Ventana de inicio de sesión",
+      "language": "Idioma",
+      "matchBrowser": "Usar el idioma del navegador",
+      "languageHint": "Al usar el idioma del navegador, los navegadores configurados en japonés, español o chino reciben ese idioma. Las zonas horarias de Japón, China, Taiwán y Hong Kong reciben el suyo, y todos los demás reciben inglés. Los usuarios siempre pueden cambiarlo.",
+      "email": "Correo electrónico",
+      "emailOptions": {
+        "none": "No preguntar",
+        "optional": "Opcional",
+        "required": "Obligatorio"
+      },
+      "emailHints": {
+        "none": "No se les pregunta a los usuarios, y tu app no recibe su correo electrónico.",
+        "optional": "Después de iniciar sesión, los usuarios eligen si comparten su correo electrónico con tu app.",
+        "required": "Después de iniciar sesión, los usuarios deben compartir su correo electrónico con tu app para continuar."
+      }
+    },
+    "brand": {
+      "label": "Marca",
+      "hint": "La marca que muestran el botón y la ventana de inicio de sesión. Déjalo en \"Predeterminada\" para usar la marca predeterminada de tu espacio de trabajo.",
+      "default": "Predeterminada"
+    },
+    "legal": {
+      "title": "Política de privacidad y términos del servicio",
+      "privacyPolicyUrl": "URL de la política de privacidad",
+      "termsUrl": "URL de los términos del servicio",
+      "shownToVehicleOwners": "Se muestra a los propietarios de vehículos antes de que otorguen permisos. Déjalo en blanco para omitirlo.",
+      "shownToUsers": "Se muestra a los usuarios antes de que inicien sesión. Déjalo en blanco para omitirlo."
+    },
+    "login": {
+      "settings": "Opciones de inicio de sesión"
+    },
+    "share": {
+      "permissionsTitle": "Permisos del vehículo",
+      "useTemplate": "Usar plantilla de permisos",
+      "customPermissions": "Permisos personalizados",
+      "templateId": "ID de plantilla de permisos",
+      "templateIdRequired": "Ingresa un ID de plantilla de permisos",
+      "templateIdHint": "El número de una plantilla de permisos, por ejemplo 1.",
+      "chooseOne": "Elige al menos un permiso",
+      "documentsTitle": "Documentos",
+      "documentsHint": "Documentos que tu app puede leer de cada vehículo compartido. Los usuarios los ven en la solicitud antes de compartir.",
+      "vehiclesTitle": "Qué vehículos",
+      "vehiclesHint": "Déjalo en blanco para que los usuarios puedan compartir cualquiera de sus vehículos. Los demás aparecen como \"No se pueden compartir\", con el motivo. Separa los valores con comas.",
+      "vehicleTokenIds": "ID de token de vehículos",
+      "vehicleMakes": "Marcas de vehículos",
+      "powertrainTypes": "Tipos de tren motriz"
+    },
+    "transaction": {
+      "vehicles": "Vehículos"
+    }
+  },
+  "permissions": {
+    "NONLOCATION_TELEMETRY": {
+      "title": "Telemetría sin ubicación",
+      "description": "Acceso a la telemetría del vehículo sin ubicación"
+    },
+    "COMMANDS": {
+      "title": "Comandos",
+      "description": "Ejecutar comandos en el vehículo"
+    },
+    "CURRENT_LOCATION": {
+      "title": "Ubicación actual",
+      "description": "Acceso a la ubicación actual del vehículo"
+    },
+    "ALLTIME_LOCATION": {
+      "title": "Historial de ubicaciones",
+      "description": "Acceso a datos históricos de ubicación"
+    },
+    "CREDENTIALS": {
+      "title": "Credenciales",
+      "description": "Acceso a las credenciales de VIN"
+    },
+    "STREAMS": {
+      "title": "Transmisiones",
+      "description": "Acceso a transmisiones de datos en vivo"
+    },
+    "RAW_DATA": {
+      "title": "Datos sin procesar",
+      "description": "Acceso a datos sin procesar del vehículo"
+    },
+    "APPROXIMATE_LOCATION": {
+      "title": "Ubicación aproximada",
+      "description": "Acceso a datos de ubicación aproximada"
+    }
+  },
+  "documents": {
+    "vehicle": {
+      "title": "Documentos del vehículo",
+      "description": "Registro, seguro, historial de servicio y otros documentos del vehículo."
+    },
+    "driver": {
+      "title": "Documentos de conductor",
+      "description": "La licencia de conducir del propietario y otros documentos del conductor."
+    },
+    "rawVehicle": {
+      "title": "Archivos originales del vehículo",
+      "description": "Las fotos y los PDF en los que se basan los documentos del vehículo."
+    },
+    "rawDriver": {
+      "title": "Archivos originales del conductor",
+      "description": "Las fotos y los PDF en los que se basan los documentos del conductor."
+    }
+  },
+  "output": {
+    "viewAs": "Ver como:",
+    "code": "Código",
+    "url": "URL",
+    "generatedCode": "Código generado"
+  }
+}

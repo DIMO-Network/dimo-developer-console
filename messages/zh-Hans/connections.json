@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "list": "连接 | {appName}",
+    "create": "创建连接 | {appName}"
+  },
+  "breadcrumb": {
+    "connections": "连接",
+    "back": "返回连接"
+  },
+  "list": {
+    "title": "连接",
+    "empty": "您尚未创建任何连接。",
+    "keysUnreadable": "无法读取密钥",
+    "finishSetup": "完成设置",
+    "details": "连接详情",
+    "create": "创建连接",
+    "created": "连接创建成功",
+    "loadError": "获取您的连接时出现问题"
+  },
+  "details": {
+    "title": "连接详情",
+    "environment": "生产环境",
+    "licenseSection": "连接许可证",
+    "publicKey": "连接许可证公钥",
+    "privateKey": "连接许可证私钥",
+    "issuanceAddress": "设备签发地址",
+    "issuanceKey": "设备签发密钥",
+    "gone": "此连接已不存在。",
+    "keysUnreadable": "无法读取此连接的密钥，请联系开发者支持。",
+    "loadError": "加载连接详情时出现问题"
+  },
+  "discard": {
+    "button": "舍弃",
+    "title": "舍弃{name}？",
+    "subtitle": "其已保存的密钥将被永久删除。仅可舍弃在设置过程中从未铸造的连接。",
+    "minted": "此连接已铸造，请改用“完成设置”。",
+    "lookupFailed": "无法确认此连接是否已铸造，因此未舍弃任何内容。请重试。",
+    "notPending": "此连接已完成设置阶段，无法舍弃。",
+    "failed": "无法舍弃该连接，请重试。",
+    "done": "连接已舍弃"
+  },
+  "create": {
+    "titleNew": "新建连接",
+    "titleFinish": "完成设置",
+    "creating": "正在创建连接，请稍候…",
+    "generatingKeys": "正在生成您的连接密钥…",
+    "savingKeys": "正在保存您的连接密钥…",
+    "saving": "正在保存您的连接…",
+    "checkingMinted": "正在检查您的连接是否已铸造…",
+    "loading": "正在加载您的连接…",
+    "resumeNote": "<strong>{name}</strong>尚未完成。其密钥已保存，因此可以从中断处继续设置。",
+    "finishSetup": "完成设置",
+    "nameLabel": "连接名称",
+    "namePlaceholder": "连接名称",
+    "nameTooLong": "连接名称过长，请使用不超过32个字符的名称。",
+    "nameTakenInTeam": "您的团队已有同名连接，请换一个名称。",
+    "purchase": "购买连接许可证",
+    "continuePayment": "继续付款",
+    "keysUnreadableOnResume": "无法读取此连接的密钥，因此无法继续设置。请联系开发者支持。",
+    "keysNotSaved": "无法保存您的连接密钥，因此未进行铸造。",
+    "finishFromConnections": "您的连接密钥已保存，但设置未完成。您可以在“连接”页面完成设置。",
+    "lookupFailed": "无法确认此连接是否已铸造，因此未产生任何费用。请重试。",
+    "nameTaken": "此名称已被其他钱包占用，因此无法完成设置。",
+    "nameRefusedOnResume": "如果您之前的尝试已成功，可能需要一分钟左右才会显示。请稍后再次点击“完成设置”。",
+    "loadFailed": "无法加载此连接。请返回“连接”页面重试。",
+    "gone": "此连接已不存在，无需完成设置。",
+    "ownerOnly": "只有团队所有者才能完成此连接的设置。",
+    "steps": {
+      "minting": "请批准铸造，以在链上创建您的连接。此操作约需价值$1的$DIMO。",
+      "signingAgreements": "正在为设备签发密钥（用于铸造合成设备）和连接许可证密钥（用于生成证书）签署权限协议。",
+      "grantingPermissions": "请批准链上交易，为两个密钥授予此连接的权限。"
+    },
+    "modal": {
+      "title": "购买连接许可证",
+      "warning": "<strong>警告！</strong>继续操作即表示您同意为您的DIMO连接许可证批准支付<strong>价值$1的</strong>点数。如果您账户中的点数不足，将无法创建连接许可证。",
+      "oracleOnly": "仅当您计划托管DIMO Oracle时，才需要购买许可证。"
+    }
+  }
+}

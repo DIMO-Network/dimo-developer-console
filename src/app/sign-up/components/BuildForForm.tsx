@@ -2,6 +2,7 @@
 import { FC, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import classnames from 'classnames';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -25,22 +26,19 @@ enum buildForValues {
 
 const buildForList = [
   {
-    title: 'Mobile app',
-    description: 'App on the Apple App Store or Google Play Store',
+    key: 'mobileApp',
     Icon: PhoneIcon,
     iconClassName: 'w-4 h-5',
     value: buildForValues.mobileApp,
   },
   {
-    title: 'Web application',
-    description: 'Web app with user management',
+    key: 'webApp',
     Icon: ComputerIcon,
     iconClassName: 'w-5 h-5',
     value: buildForValues.webApp,
   },
   {
-    title: 'Personal project',
-    description: 'Personal project to access vehicle data',
+    key: 'personalProject',
     Icon: UserIcon,
     iconClassName: 'w-4 h-5',
     value: buildForValues.personalProject,
@@ -54,6 +52,8 @@ interface IProps {
 }
 
 export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
+  const t = useTranslations('sign-up');
+  const tCommon = useTranslations('common');
   const [isDirty, setIsDirty] = useState<boolean>(false);
   const {
     register,
@@ -98,14 +98,14 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className="text-title text-ink">What are you building?</p>
+          <p className="text-title text-ink">{t('buildFor.title')}</p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 w-full max-w-sm pt-4"
         >
           <div id="build-for-prompt" className="ml-1 text-body-sm text-muted">
-            What you are looking to launch with DIMO?
+            {t('buildFor.prompt')}
           </div>
           {/* Resting card on the sheet; hover is a half step toward the selected
               fill (control/70 over the sheet), selected = control + ink edge. */}
@@ -114,7 +114,7 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
             aria-labelledby="build-for-prompt"
             className="flex flex-col gap-4"
           >
-            {buildForList.map(({ title, description, value, Icon, iconClassName }) => {
+            {buildForList.map(({ key, value, Icon, iconClassName }) => {
               const isSelected = buildFor === value;
               return (
                 <Card
@@ -132,8 +132,10 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
                   key={value}
                 >
                   <div>
-                    <p className="text-body font-medium">{title}</p>
-                    <p className="text-body-sm text-muted">{description}</p>
+                    <p className="text-body font-medium">{t(`buildFor.${key}.title`)}</p>
+                    <p className="text-body-sm text-muted">
+                      {t(`buildFor.${key}.description`)}
+                    </p>
                   </div>
                   <Icon className={iconClassName} />
                 </Card>
@@ -153,27 +155,30 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
             onClick={() => handleSelection(buildForValues.somethingElse)}
           >
             <Label htmlFor="buildForText">
-              Something else
+              {t('buildFor.somethingElse')}
               <TextField
                 type="text"
-                placeholder="I'm building a..."
+                placeholder={t('buildFor.somethingElsePlaceholder')}
                 {...register('buildForText', {
                   required:
-                    buildFor === buildForValues.somethingElse && 'This field is required',
-                  maxLength: { value: 150, message: 'Use at most 150 characters' },
+                    buildFor === buildForValues.somethingElse &&
+                    tCommon('validation.required'),
+                  maxLength: { value: 150, message: t('buildFor.maxLength') },
                 })}
                 role="build-for-something-else-input"
               />
             </Label>
             {errors.buildForText && (
               <TextError
-                errorMessage={errors.buildForText.message || 'This field is required'}
+                errorMessage={
+                  errors.buildForText.message || tCommon('validation.required')
+                }
               />
             )}
           </Card>
           <div className="flex flex-col items-center">
             {isDirty && !buildFor && !buildForText && (
-              <TextError errorMessage="Select an option to continue" />
+              <TextError errorMessage={t('buildFor.selectOption')} />
             )}
           </div>
           <div className="flex flex-col pt-4">
@@ -183,7 +188,7 @@ export const BuildForForm: FC<IProps> = ({ auth, onNext, isLoading }) => {
               loading={isLoading}
               role="continue-button"
             >
-              Continue
+              {tCommon('actions.continue')}
             </Button>
           </div>
         </form>

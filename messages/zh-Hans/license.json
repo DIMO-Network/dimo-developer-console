@@ -1,0 +1,216 @@
+{
+  "list": {
+    "teamLicenses": "{teamName}的许可证",
+    "teamFallbackName": "团队",
+    "yourLicenses": "您的开发者许可证",
+    "teamEmptyTitle": "此团队还没有开发者许可证",
+    "teamEmptyBody": "团队所有者创建的许可证会显示在这里。"
+  },
+  "breadcrumbLicenses": "许可证",
+  "details": {
+    "metadataTitle": "许可证详情 | {appName}",
+    "breadcrumbDetails": "许可证详情",
+    "loadError": "获取许可证详情时出错",
+    "fallbackName": "许可证#{tokenId}",
+    "rename": "重命名",
+    "clientIdCopied": "客户端ID已复制！",
+    "tabs": {
+      "overview": "概览",
+      "config": "配置",
+      "vehicles": "车辆",
+      "brand": "品牌"
+    },
+    "vehiclesConnected": "已连接车辆",
+    "viewVehicles": "查看车辆 →"
+  },
+  "quickActions": {
+    "label": "快捷操作",
+    "generateApiKey": "🔑 生成API密钥",
+    "configureBranding": "🪪 配置品牌",
+    "setupSharing": "⚙️ 设置车辆共享",
+    "docs": "📖 文档"
+  },
+  "usage": {
+    "creditsUsed": "已用点数",
+    "generateJwtHint": "生成JWT以查看用量",
+    "unavailable": "暂时无法获取用量",
+    "learnAboutCredits": "了解点数 →"
+  },
+  "vehiclesTab": {
+    "loadError": "加载车辆时出错",
+    "connectedVehicles": "已连接车辆",
+    "viewList": "查看车辆列表 →",
+    "vehicleList": "车辆列表",
+    "configureSharing": "配置共享"
+  },
+  "jwts": {
+    "title": "开发者JWT",
+    "generateNew": "生成新JWT",
+    "empty": "未找到开发者JWT",
+    "copied": "JWT已复制！",
+    "deleteLabel": "删除JWT",
+    "deleteTitle": "确定要删除此JWT吗？",
+    "columns": {
+      "jwt": "JWT",
+      "createdAt": "创建时间",
+      "expiresAt": "过期时间"
+    },
+    "unknownExpiry": "未知",
+    "invalidToken": "无效"
+  },
+  "redirectUris": {
+    "title": "已授权的重定向URI"
+  },
+  "brand": {
+    "title": "品牌",
+    "add": "添加品牌",
+    "loading": "正在加载品牌…",
+    "none": "未设置品牌。",
+    "loadFailed": "加载品牌失败，请检查网络连接后刷新页面。",
+    "workspaceFailed": "无法加载您的工作区，请重新登录后重试。",
+    "deleteFailed": "删除品牌失败，请重试。",
+    "deleteTitle": "删除{name}？",
+    "deleteLoading": "正在删除品牌…",
+    "deleteLast": "此许可证的Login with DIMO将恢复为DIMO自身的外观。已打开的页面可能需要几分钟才会更新。",
+    "deleteOne": "按名称请求此品牌的网站将改为显示DIMO自身的外观。已打开的页面可能需要几分钟才会更新。",
+    "multipleTitle": "在Login with DIMO中使用多个品牌",
+    "multipleHint": "每个Login with DIMO按钮都支持<code>brandOverride</code>参数。省略该参数即使用您的默认品牌。"
+  },
+  "brandRow": {
+    "default": "默认",
+    "edit": "编辑品牌",
+    "delete": "删除品牌",
+    "setDefaultFirst": "请先将其他品牌设为默认，再删除此品牌"
+  },
+  "brandForm": {
+    "displayName": "显示名称",
+    "displayNameRequired": "显示名称为必填项。",
+    "displayNameMax": "最多100个字符",
+    "displayNamePlaceholder": "例如：车队应用",
+    "nameTaken": "已存在同名品牌",
+    "renameWarning": "重命名会导致使用此名称的现有Login with DIMO调用失效",
+    "logo": "标志",
+    "logoHint": "显示在Login with DIMO按钮上和登录窗口顶部的横版品牌标志。支持PNG、JPEG、WebP或SVG。",
+    "icon": "图标",
+    "iconHint": "方形标志。Login with DIMO目前尚未显示该图标。支持PNG、JPEG、WebP或SVG。",
+    "primaryColor": "主色",
+    "primaryColorHint": "用于Login with DIMO按钮和登录窗口中的主要按钮；按钮文字会自动变为黑色或白色，以保持清晰可读。请使用7个字符的十六进制色值，例如<code>{example}</code>。留空则使用DIMO默认颜色。",
+    "pickColor": "选择主色",
+    "colorInvalid": "必须为#RRGGBB十六进制格式",
+    "lowContrast": "此颜色的按钮在登录窗口的{modes, select, light {浅色} dark {深色} other {浅色和深色}}模式下难以看清。您仍然可以保存。",
+    "saveFailed": "保存品牌失败",
+    "imageRefused": "该图片被拒绝。请使用不超过2 MB的PNG、JPEG、WebP或SVG图片。",
+    "saved": "品牌已保存",
+    "defaultUpdated": "默认品牌已更新",
+    "defaultFailed": "设置默认品牌失败",
+    "save": "保存品牌",
+    "setDefault": "设为默认"
+  },
+  "imagePicker": {
+    "unsupportedType": "不支持的文件类型{type}。请使用PNG、JPEG、WebP或SVG。",
+    "tooLarge": "文件过大（{size} KB）。最大2 MB。",
+    "replace": "更换图片",
+    "choose": "选择图片",
+    "orDrop": "或拖放到此处",
+    "previewAlt": "品牌预览",
+    "crop": "裁剪"
+  },
+  "signers": {
+    "title": "API密钥",
+    "apiKeyButton": "为您的服务器创建API密钥",
+    "apiKeyExplainer": "适用于在自己的服务器上签发开发者JWT的应用。如需在控制台中测试，请使用“复制JWT”。",
+    "generateApiKey": "生成API密钥",
+    "checkingConsole": "正在检查控制台访问权限…",
+    "signerAddress": "签名者地址",
+    "signerAddressNote": "*这不是您的API密钥。如果您丢失了API密钥，需要重新生成一个。",
+    "enabledOn": "启用时间",
+    "belongsTo": "归属",
+    "assign": "分配",
+    "turnOffConsole": "关闭控制台访问权限",
+    "deleteKey": "删除API密钥",
+    "actionsFor": "{address}的操作",
+    "recordFailed": "密钥可以使用，但无法记录它的使用者。",
+    "saved": "已保存此密钥的使用者。",
+    "signerInUse": "此地址是团队成员的钱包。请在“设置 → 团队”中通过“授予”进行记录。",
+    "saveFailed": "无法保存，请重试。",
+    "generating": "正在为您的开发者许可证生成API密钥",
+    "consoleOffToast": "控制台访问权限已关闭。",
+    "keyDeletedToast": "API密钥已删除。已用它签发的JWT在过期前仍可使用（最长14天）。",
+    "turnOffTitle": "关闭控制台访问权限？",
+    "deleteTitle": "确定要删除此API密钥吗？",
+    "deleteKeySubtitle": "使用此密钥的应用将无法再获取新的开发者JWT。已用它签发的JWT在过期前仍可使用，最长14天。",
+    "consoleOffSubtitle": "控制台将停止为此许可证生成开发者JWT。已生成的JWT在过期前仍可使用，最长14天。",
+    "deleteLoading": "正在等待网络确认…"
+  },
+  "consoleAccess": {
+    "explainer": "控制台访问权限可让此控制台为该许可证生成开发者JWT，因此您无需创建API密钥即可进行测试。开启后，系统会通过一笔交易将您的控制台密钥添加为签名者。",
+    "enable": "开启控制台访问权限",
+    "enabling": "正在开启控制台访问权限…",
+    "memberOff": "许可证所有者尚未开启控制台访问权限。",
+    "notOwnerOnChain": "您的控制台钱包在链上并不拥有此许可证，因此无法开启控制台访问权限。",
+    "copyJwt": "复制JWT",
+    "noRedirectUri": "请在下方添加重定向URI，以生成开发者JWT。",
+    "jwtCopied": "JWT已复制！",
+    "jwtFailed": "无法生成JWT，请重试。"
+  },
+  "belongsTo": {
+    "consoleYou": "控制台（您）",
+    "consoleWallet": "控制台钱包",
+    "notRecorded": "未记录",
+    "unassigned": "未分配",
+    "assign": "分配",
+    "teamMember": "团队成员",
+    "unknown": "未知",
+    "stillSyncing": "仍在同步",
+    "disabledOutside": "已在控制台外停用"
+  },
+  "keyHolders": {
+    "title": "此密钥供谁使用？",
+    "teamMembers": "团队成员",
+    "others": "其他人（以逗号分隔）",
+    "note": "备注",
+    "chooseOne": "请至少选择一个人，或输入一个名字。",
+    "noteTooLong": "请将备注控制在{max}个字符以内。"
+  },
+  "apiKeyModal": {
+    "title": "API密钥已生成",
+    "warning": "请务必立即复制您的API密钥，之后将无法再次查看。",
+    "copied": "API密钥已复制！"
+  },
+  "vehicles": {
+    "metadataTitle": "已授权车辆 | {appName}",
+    "loadError": "获取车辆详情时出错",
+    "breadcrumbVehicles": "车辆",
+    "connectedVehicles": "已连接车辆",
+    "testVehicles": "（{count, plural, other {#辆测试车辆}}）",
+    "vehicleDetails": "车辆详情"
+  },
+  "renounce": {
+    "title": "放弃车辆访问权限？",
+    "tokenFallback": "Token #{tokenId}",
+    "tokenId": "Token ID：{tokenId}",
+    "warning": "您将失去对此车辆的所有数据访问权限。车主需要重新授予访问权限。",
+    "action": "放弃访问权限",
+    "failed": "交易失败"
+  },
+  "vehicleTable": {
+    "label": "共享车辆",
+    "renounced": "已放弃访问权限",
+    "renounceFailed": "放弃访问权限失败",
+    "pageLoadFailed": "无法加载该页面，请重试。",
+    "lookupFailed": "无法查询车辆{tokenId}：{message}",
+    "noVehicle": "没有Token ID为{tokenId}的车辆。",
+    "notShared": "车辆{tokenId}（{make} {model}）未与此许可证共享。",
+    "error": "错误：{message}",
+    "rowActions": "行操作",
+    "simulated": "模拟",
+    "columns": {
+      "tokenDid": "车辆Token DID",
+      "mmy": "品牌/车型/年款",
+      "sources": "来源",
+      "lastSeen": "最后在线"
+    },
+    "needsJwt": "需要开发者JWT",
+    "unavailable": "不可用"
+  }
+}

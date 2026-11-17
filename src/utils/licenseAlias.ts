@@ -2,8 +2,8 @@
 // AliasExceedsMaxLength, so what counts is bytes, not letters.
 const MAX_ALIAS_BYTES = 32;
 
-export const LICENSE_ALIAS_TOO_LONG =
-  'Use at most 32 characters. Accented letters and emoji count as more than one.';
+// Message key in the common namespace; callers translate it.
+export const LICENSE_ALIAS_TOO_LONG_KEY = 'licenseAlias.tooLong';
 
 export const isLicenseAliasTooLong = (alias: string) =>
   new TextEncoder().encode(alias).length > MAX_ALIAS_BYTES;

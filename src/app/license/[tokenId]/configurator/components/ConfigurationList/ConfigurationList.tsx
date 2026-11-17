@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import * as Sentry from '@sentry/nextjs';
 import { deleteConfiguration, IConfigurationListItem } from '@/actions/configurations';
 import { fetchJson } from '@/utils/fetchJson';
@@ -19,20 +20,15 @@ interface Props {
   owner?: string;
 }
 
-const entryStateLabel = (entryState: string): string => {
-  switch (entryState) {
-    case 'EMAIL_INPUT':
-      return 'Login with DIMO';
-    case 'VEHICLE_MANAGER':
-      return 'Share vehicles with DIMO';
-    case 'ADVANCED_TRANSACTION':
-      return 'Execute advanced transaction';
-    default:
-      return entryState;
-  }
+const ENTRY_STATE_COMPONENTS: Record<string, string> = {
+  EMAIL_INPUT: 'LoginWithDimo',
+  VEHICLE_MANAGER: 'ShareVehiclesWithDimo',
+  ADVANCED_TRANSACTION: 'ExecuteAdvancedTransactionWithDimo',
 };
 
 export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
+  const t = useTranslations('configurator');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   // Same key as the license cards, so the two share one cached list.
@@ -59,7 +55,7 @@ export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
       await deleteConfiguration({ id });
     } catch (error) {
       Sentry.captureException(error);
-      toast.error('Failed to delete the configuration');
+      toast.error(t('table.deleteFailed'));
       return;
     }
     setPendingDeleteId(null);
@@ -69,27 +65,34 @@ export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
   if (isError) {
     return (
       <p role="alert" className="py-12 text-center text-body-sm text-negative">
-        Could not load configurations. Reload to try again.
+        {t('table.loadError')}
       </p>
     );
   }
 
   if (isPending) {
-    return <p className="py-12 text-center text-body-sm text-muted">Loading…</p>;
+    return (
+      <p className="py-12 text-center text-body-sm text-muted">{t('table.loading')}</p>
+    );
   }
 
   if (configs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted">
-        <p className="mb-4">No configurations yet.</p>
+        <p className="mb-4">{t('table.empty')}</p>
         <OwnerAction licenseOwner={owner}>
           <Button onClick={() => router.push(`/license/${tokenId}/configurator/new`)}>
-            Create your first configuration
+            {t('table.createFirst')}
           </Button>
         </OwnerAction>
       </div>
     );
   }
+
+  const entryStateLabel = (entryState: string): string => {
+    const component = ENTRY_STATE_COMPONENTS[entryState];
+    return component ? t(`components.${component}`) : entryState;
+  };
 
   // The actions column re-renders with pendingDeleteId, so the inline delete
   // confirm swaps in per row. break-normal/nowrap undo the cell's break-all so
@@ -99,10 +102,10 @@ export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
       {pendingDeleteId === config.id ? (
         <>
           <Button variant="destructive" onClick={() => void handleDelete(config.id)}>
-            Confirm
+            {tCommon('actions.confirm')}
           </Button>
           <Button variant="secondary" onClick={() => setPendingDeleteId(null)}>
-            Cancel
+            {tCommon('actions.cancel')}
           </Button>
         </>
       ) : (
@@ -111,24 +114,24 @@ export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
             variant="secondary"
             onClick={() => router.push(`/license/${tokenId}/configurator/${config.id}`)}
           >
-            Edit
+            {tCommon('actions.edit')}
           </Button>
           <Button
             variant="secondary"
             onClick={() => {
               const url = configurationLink(config.id);
               navigator.clipboard.writeText(url);
-              toast.success('Sharing link copied');
+              toast.success(t('table.linkCopied'));
             }}
           >
-            Copy link
+            {t('table.copyLink')}
           </Button>
           <OwnerAction licenseOwner={owner}>
             <Button
               variant="destructive-ghost"
               onClick={() => setPendingDeleteId(config.id)}
             >
-              Delete
+              {tCommon('actions.delete')}
             </Button>
           </OwnerAction>
         </>
@@ -143,24 +146,24 @@ export const ConfigurationList = ({ clientId, tokenId, owner }: Props) => {
         // component labels wrap at words, with a gutter before the next column.
         columns={[
           {
-            label: 'Name',
+            label: t('table.name'),
             name: 'configuration_name',
             className: 'pr-4',
             render: (config: IConfigurationListItem) => (
               <span className="break-normal">
-                {config.configuration_name || '(untitled)'}
+                {config.configuration_name || t('table.untitled')}
               </span>
             ),
           },
           {
-            label: 'Component',
+            label: t('table.component'),
             name: 'entry_state',
             className: 'pr-4 text-muted',
             render: (config: IConfigurationListItem) => (
               <span className="break-normal">{entryStateLabel(config.entry_state)}</span>
             ),
           },
-          { label: 'Actions', name: 'id', render: renderActions },
+          { label: t('table.actions'), name: 'id', render: renderActions },
         ]}
         data={configs}
       />

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import { Label } from '@/components/Label';
@@ -6,6 +7,7 @@ import { TextError } from '@/components/TextError';
 import React from 'react';
 
 export const WebhookDescriptionField = () => {
+  const t = useTranslations('common');
   const {
     register,
     formState: { errors },
@@ -13,12 +15,12 @@ export const WebhookDescriptionField = () => {
 
   return (
     <div className={'flex flex-col gap-2.5'}>
-      <Label>Webhook description</Label>
+      <Label>{t('webhooks.fields.description.label')}</Label>
       <TextField
         {...register('description', {
-          required: 'Please enter a webhook description',
+          required: t('webhooks.fields.description.required'),
         })}
-        placeholder="Enter a description for your webhook"
+        placeholder={t('webhooks.fields.description.placeholder')}
       />
       {errors.description && (
         <TextError

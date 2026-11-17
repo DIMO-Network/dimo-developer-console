@@ -1,0 +1,24 @@
+{
+  "metadataTitle": "Email Recovery | {appName}",
+  "metadataDescription": "Welcome to DIMO Developer Console Sign In. Access your developer dashboard securely to manage applications, and explore advanced the DIMO tools. Start coding and optimizing today!",
+  "form": {
+    "title": "Reset passkeys",
+    "warning": "Your old passkeys will not longer work after the reset is complete",
+    "emailLabel": "Email",
+    "emailPlaceholder": "email@address.com",
+    "sendFailed": "Something went wrong while sending the email"
+  },
+  "checkEmail": {
+    "title": "Click the link in your email",
+    "hint": "Not seeing an email? Check your spam folder or resend code.",
+    "resend": "Resend code",
+    "resent": "Recovery code successfully resent.",
+    "resendFailed": "Something went wrong while sending the recovery code."
+  },
+  "rewire": {
+    "title": "Let's get you back in",
+    "body": "A passkey is the fastest and most secure way to sign in to DIMO.",
+    "progress": "Rewriting your passkey...",
+    "success": "Passkey rewired successfully"
+  }
+}

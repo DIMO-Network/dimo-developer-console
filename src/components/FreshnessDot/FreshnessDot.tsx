@@ -1,6 +1,7 @@
 import React, { type FC } from 'react';
 import classNames from 'classnames';
-import { freshnessOf, relativeTime, absoluteTime } from '@/utils/freshness';
+import { freshnessOf } from '@/utils/freshness';
+import { useFreshnessText } from '@/hooks/useFreshnessText';
 
 // The rail, KPI and table freshness idiom: the StatusChip's 6px dot without the
 // chip, followed by the relative time. Live glows; stale is warning; older is
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export const FreshnessDot: FC<Props> = ({ at, now, label = true, className }) => {
+  const { relativeTime, absoluteTime } = useFreshnessText();
   const freshness = freshnessOf(at, now);
   return (
     <span

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import React from 'react';
 import { Webhook, WebhookFormInput } from '@/types/webhook';
@@ -29,17 +30,18 @@ export const EditWebhookForm = ({
     reset,
     formState: { isDirty, isValid, isSubmitting },
   } = useFormContext<WebhookFormInput>();
+  const t = useTranslations('common');
   const { onCancel, submitForm } = useEditWebhookContext();
 
   const onSubmit = async (formData: WebhookFormInput) => {
     try {
       await submitForm(formData, webhook, getDevJwt(clientId) ?? '');
-      toast.success('Webhook updated successfully');
+      toast.success(t('webhooks.edit.updated'));
       invalidateQuery(clientId);
       reset(formData);
     } catch (err) {
       captureException(err);
-      toast.error('Error updating webhook');
+      toast.error(t('webhooks.edit.updateFailed'));
     }
   };
 
@@ -73,6 +75,7 @@ const Footer = ({
   isSubmitting: boolean;
   onCancel: () => void;
 }) => {
+  const t = useTranslations('common');
   return (
     <div className="flex w-full gap-4">
       <Button
@@ -82,7 +85,7 @@ const Footer = ({
         onClick={onCancel}
         disabled={!isDirty}
       >
-        Cancel
+        {t('actions.cancel')}
       </Button>
       <Button
         type="submit"
@@ -90,7 +93,7 @@ const Footer = ({
         disabled={!isDirty || !isValid}
         loading={isSubmitting}
       >
-        Save changes
+        {t('actions.saveChanges')}
       </Button>
     </div>
   );

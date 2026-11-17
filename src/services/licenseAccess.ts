@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import axios, { AxiosError } from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import configuration from '@/config';
-import { NO_LONGER_HAS_ACCESS } from '@/config/teamCopy';
+import common from '../../messages/en/common.json';
 import { TEAM_DATA_ACCESS_ENABLED } from '@/utils/featureFlags';
 import { BoundedCache } from '@/utils/boundedCache';
 import type { LicenseAccess } from '@/types/team';
@@ -227,7 +227,7 @@ export const authorizeLicenseAccess = async (
     code: 'NO_ACCESS',
     message: access.memberOfTeam
       ? "You don't have data access to this license."
-      : NO_LONGER_HAS_ACCESS,
+      : common.teamCopy.noLongerHasAccess,
     memberOfTeam: access.memberOfTeam,
   };
 };

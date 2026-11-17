@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "title": "设置 | {appName}"
+  },
+  "userDetails": {
+    "title": "用户详情",
+    "name": "名称",
+    "email": "邮箱"
+  },
+  "supportModal": {
+    "title": "联系开发者支持",
+    "description": "联系我们的团队，为您解答疑问。",
+    "success": "支持请求已成功提交，我们会尽快与您联系。",
+    "failure": "提交支持请求失败"
+  },
+  "team": {
+    "title": "团队",
+    "inviteMember": "邀请成员",
+    "loadError": "无法加载您的团队。",
+    "ownerEmpty": "邀请团队成员，与他们共享此团队的许可证。由您决定谁可以获得数据访问权限。",
+    "licensesLoadError": "无法加载此团队的许可证，因此目前无法更改数据访问权限。",
+    "loadLicensesAgain": "重新加载许可证",
+    "resent": "已重新向{email}发送邀请",
+    "resendFailed": "无法重新发送邀请，请重试。",
+    "cancelled": "已取消发送给{email}的邀请",
+    "cancelFailed": "无法取消邀请，请重试。"
+  },
+  "inviteError": {
+    "emailFailed": "无法向{email}发送邮件，请重试。",
+    "rateLimited": "当前邀请过多，请稍后再试。",
+    "alreadyMember": "{email}已在此团队中。",
+    "alreadyInvited": "{email}已有待处理的邀请，请从列表中重新发送。",
+    "invalidEmail": "请输入有效的邮箱地址。",
+    "default": "无法发送邀请，请重试。"
+  },
+  "inviteModal": {
+    "title": "邀请团队成员",
+    "description": "对方将能在控制台中看到此团队的许可证。数据访问权限的授予对象由您另行选择。",
+    "emailLabel": "邮箱",
+    "send": "发送邀请",
+    "sent": "邀请已发送至{email}"
+  },
+  "grantBanner": {
+    "message": "{name}已加入。是否授予数据访问权限？",
+    "grant": "授予"
+  },
+  "members": {
+    "columns": {
+      "member": "成员",
+      "role": "角色",
+      "status": "状态",
+      "dataAccess": "数据访问权限"
+    },
+    "status": {
+      "expired": "邀请已过期",
+      "invited": "已邀请",
+      "active": "已激活",
+      "removed": "已移除",
+      "left": "已离开"
+    },
+    "dataAccess": {
+      "stillSigner": "仍是{licenses}的签名者",
+      "notRecorded": "未记录",
+      "revokeUnfinished": "撤销未完成",
+      "needsSignIn": "需登录一次",
+      "none": "无"
+    },
+    "actions": {
+      "label": "{email}的操作",
+      "resend": "重新发送",
+      "cancelInvite": "取消邀请",
+      "grant": "授予",
+      "retry": "重试",
+      "revoke": "撤销",
+      "remove": "移除"
+    }
+  },
+  "grant": {
+    "title": "授予{name}数据访问权限",
+    "description": "选择{name}可在“车辆”中读取的许可证。",
+    "loading": "正在授予{name}数据访问权限",
+    "success": "{name}现已拥有{licenses}的数据访问权限。",
+    "notRecorded": "数据访问权限已开启，但我们无法为{licenses}记录此权限，因此{name}暂时还无法使用。",
+    "refused": "{licenses}：{message}",
+    "rolledBack": "{name}没有{licenses}的数据访问权限。",
+    "notRolledBack": "这些密钥在链上仍处于启用状态，且未在任何地方列出。请前往{licenses}的“配置”标签页，在“API密钥”下将其删除。",
+    "confirm": "授予数据访问权限",
+    "licenseFallback": "许可证#{tokenId}"
+  },
+  "revoke": {
+    "title": "要撤销{name}的数据访问权限吗？",
+    "description": "其钱包将在链上从所选许可证中移除。其已持有的令牌将在约10分钟内失效。",
+    "loading": "正在撤销{name}的数据访问权限",
+    "success": "{name}的数据访问权限已撤销。",
+    "notRecorded": "数据访问权限已关闭，但我们无法为{licenses}记录此变更。",
+    "retry": "重试",
+    "confirm": "撤销数据访问权限"
+  },
+  "remove": {
+    "title": "要将{name}从{teamName}中移除吗？",
+    "descriptionWithKeys": "对方将无法再在控制台中访问此团队，其钱包也将在链上从{licenses}中移除。",
+    "description": "对方将无法再在控制台中访问此团队。",
+    "confirm": "从团队中移除",
+    "loading": "正在移除{name}",
+    "failedFallback": "无法移除该成员，请重试。",
+    "keptOnTeam": "{name}仍在{teamName}中：我们无法在链上将其钱包从{licenses}中移除。请重试。",
+    "removedStillSigner": "{name}已被移除，但仍是{licenses}的签名者。请在其所在行点击“重试”。",
+    "removed": "{name}已从{teamName}中移除。",
+    "notRecorded": "我们无法为{licenses}记录已撤销的访问权限。请在其所在行点击“重试”以完成操作。"
+  },
+  "webhookReview": {
+    "heading": "待检查的Webhook",
+    "description": "{name}离开后，Webhook仍会继续发送车辆数据。请检查其创建或修改过的Webhook。",
+    "checking": "正在检查{license}…",
+    "needsJwt": "我们需要{license}的开发者JWT才能检查其Webhook。",
+    "loadFailed": "无法加载{license}的Webhook。",
+    "pasteLabel": "粘贴{license}的开发者JWT",
+    "wrongLicense": "该开发者JWT属于其他许可证。",
+    "check": "检查Webhook",
+    "none": "{license}上没有由{name}创建或修改的Webhook。",
+    "createdAndChanged": "由其创建并最后修改",
+    "created": "由其创建",
+    "changed": "由其最后修改"
+  },
+  "leave": {
+    "button": "离开团队",
+    "unreachable": "无法连接到控制台，请重试。",
+    "left": "您已离开{teamName}。"
+  }
+}

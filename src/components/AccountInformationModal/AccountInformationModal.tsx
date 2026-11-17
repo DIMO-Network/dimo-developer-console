@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useContext, type FC } from 'react';
 import { Modal } from '@/components/Modal';
 import { AccountInformationContext } from '@/context/AccountInformationContext';
@@ -11,6 +12,7 @@ import './shared/AccountInformationModal.css';
 import { Balances } from '@/components/AccountInformationModal/components/Balances';
 
 export const AccountInformationModal: FC = () => {
+  const t = useTranslations('common');
   const { showAccountInformation, setShowAccountInformation } = useContext(
     AccountInformationContext,
   );
@@ -23,7 +25,7 @@ export const AccountInformationModal: FC = () => {
       <div className="account-information-content">
         <div className="account-information-header">
           <Title className="text-panel-title" component="h3">
-            Account information
+            {t('accountInfo.modalTitle')}
           </Title>
         </div>
         <div className="account-information-body">
@@ -31,7 +33,7 @@ export const AccountInformationModal: FC = () => {
           <Balances shouldFetchBalances={showAccountInformation} />
         </div>
         <Button variant="secondary" onClick={() => setShowAccountInformation(false)}>
-          Close
+          {t('actions.close')}
         </Button>
       </div>
     </Modal>

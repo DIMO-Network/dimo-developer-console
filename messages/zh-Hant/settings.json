@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "title": "設定 | {appName}"
+  },
+  "userDetails": {
+    "title": "使用者詳細資料",
+    "name": "名稱",
+    "email": "電子郵件"
+  },
+  "supportModal": {
+    "title": "聯絡開發者支援",
+    "description": "與我們的團隊聯繫，讓我們為您解答問題。",
+    "success": "已成功提交支援請求，我們會盡快與您聯繫。",
+    "failure": "無法提交支援請求"
+  },
+  "team": {
+    "title": "團隊",
+    "inviteMember": "邀請成員",
+    "loadError": "無法載入您的團隊。",
+    "ownerEmpty": "邀請隊友，與他們共享此團隊的授權。由您決定誰可取得資料存取權限。",
+    "licensesLoadError": "無法載入此團隊的授權，因此目前無法變更資料存取權限。",
+    "loadLicensesAgain": "重新載入授權",
+    "resent": "已重新傳送邀請給{email}",
+    "resendFailed": "我們無法重新傳送邀請，請再試一次。",
+    "cancelled": "已取消傳送給{email}的邀請",
+    "cancelFailed": "我們無法取消邀請，請再試一次。"
+  },
+  "inviteError": {
+    "emailFailed": "我們無法傳送電子郵件給{email}，請再試一次。",
+    "rateLimited": "目前邀請次數過多，請稍後再試。",
+    "alreadyMember": "{email}已在此團隊中。",
+    "alreadyInvited": "{email}已有待處理的邀請，請從清單中重新傳送。",
+    "invalidEmail": "請輸入有效的電子郵件地址。",
+    "default": "我們無法傳送邀請，請再試一次。"
+  },
+  "inviteModal": {
+    "title": "邀請團隊成員",
+    "description": "對方會在主控台中看到此團隊的授權。資料存取權限由您另行指定。",
+    "emailLabel": "電子郵件",
+    "send": "傳送邀請",
+    "sent": "已傳送邀請至{email}"
+  },
+  "grantBanner": {
+    "message": "{name}已加入。要授予資料存取權限嗎？",
+    "grant": "授予"
+  },
+  "members": {
+    "columns": {
+      "member": "成員",
+      "role": "角色",
+      "status": "狀態",
+      "dataAccess": "資料存取權限"
+    },
+    "status": {
+      "expired": "邀請已過期",
+      "invited": "已邀請",
+      "active": "使用中",
+      "removed": "已移除",
+      "left": "已離開"
+    },
+    "dataAccess": {
+      "stillSigner": "仍是{licenses}的簽署者",
+      "notRecorded": "未記錄",
+      "revokeUnfinished": "撤銷未完成",
+      "needsSignIn": "需登入一次",
+      "none": "無"
+    },
+    "actions": {
+      "label": "{email}的操作",
+      "resend": "重新傳送",
+      "cancelInvite": "取消邀請",
+      "grant": "授予",
+      "retry": "重試",
+      "revoke": "撤銷",
+      "remove": "移除"
+    }
+  },
+  "grant": {
+    "title": "授予{name}資料存取權限",
+    "description": "選擇{name}可在「車輛」中讀取的授權。",
+    "loading": "正在授予{name}資料存取權限",
+    "success": "{name}現在擁有{licenses}的資料存取權限。",
+    "notRecorded": "資料存取權限已開啟，但我們無法為{licenses}記錄此變更，因此{name}暫時無法使用。",
+    "refused": "{licenses}：{message}",
+    "rolledBack": "{name}沒有{licenses}的資料存取權限。",
+    "notRolledBack": "這些金鑰仍在鏈上啟用，且沒有任何地方列出它們。請前往{licenses}的「設定檔」分頁，在「API金鑰」下刪除。",
+    "confirm": "授予資料存取權限",
+    "licenseFallback": "授權#{tokenId}"
+  },
+  "revoke": {
+    "title": "要撤銷{name}的資料存取權限嗎？",
+    "description": "對方的錢包會在鏈上從所選授權中移除。對方已持有的權杖會在約10分鐘內失效。",
+    "loading": "正在撤銷{name}的資料存取權限",
+    "success": "已撤銷{name}的資料存取權限。",
+    "notRecorded": "資料存取權限已關閉，但我們無法為{licenses}記錄此變更。",
+    "retry": "重試",
+    "confirm": "撤銷資料存取權限"
+  },
+  "remove": {
+    "title": "要將{name}從{teamName}移除嗎？",
+    "descriptionWithKeys": "對方將無法在主控台中存取此團隊，其錢包也會在鏈上從{licenses}中移除。",
+    "description": "對方將無法在主控台中存取此團隊。",
+    "confirm": "從團隊移除",
+    "loading": "正在移除{name}",
+    "failedFallback": "我們無法移除對方。請再試一次。",
+    "keptOnTeam": "{name}仍在{teamName}中：我們無法在鏈上將其錢包從{licenses}中移除。請再試一次。",
+    "removedStillSigner": "已移除{name}，但對方仍是{licenses}的簽署者。請在該列使用「重試」。",
+    "removed": "已將{name}從{teamName}移除。",
+    "notRecorded": "我們無法為{licenses}記錄已撤銷的存取權限。請在該列使用「重試」完成。"
+  },
+  "webhookReview": {
+    "heading": "待檢查的Webhook",
+    "description": "{name}離開後，Webhook仍會持續傳送車輛資料。請檢查對方建立或變更過的Webhook。",
+    "checking": "正在檢查{license}…",
+    "needsJwt": "我們需要{license}的開發者JWT才能檢查其Webhook。",
+    "loadFailed": "無法載入{license}的Webhook。",
+    "pasteLabel": "貼上{license}的開發者JWT",
+    "wrongLicense": "此開發者JWT屬於其他授權。",
+    "check": "檢查Webhook",
+    "none": "{license}上沒有{name}建立或變更過的Webhook。",
+    "createdAndChanged": "由對方建立並最後變更",
+    "created": "由對方建立",
+    "changed": "由對方最後變更"
+  },
+  "leave": {
+    "button": "離開團隊",
+    "unreachable": "無法連線至主控台。請再試一次。",
+    "left": "您已離開{teamName}。"
+  }
+}

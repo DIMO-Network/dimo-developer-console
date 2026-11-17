@@ -3,6 +3,7 @@ import camry from '@/utils/__fixtures__/toyota_camry_2020.json';
 import { vehicleVocab } from '@/utils/__fixtures__/vehicleVocab';
 import { TemplateEditorView } from '../components/View';
 import type { Template } from '@/types/template';
+import type { Entitlement } from '@/services/templateEntitlement';
 
 const t = camry as unknown as Template;
 
@@ -21,6 +22,7 @@ let bundle: {
     canSetHardwareTemplateId: boolean;
     mintedVehicles: number;
     reason: string;
+    reasonDetail: Entitlement['reasonDetail'];
   };
 };
 
@@ -29,7 +31,7 @@ jest.mock('@/hooks/queries/useTemplate', () => ({
   usePublishTemplate: () => ({ mutateAsync: publish, isPending: false }),
 }));
 
-const authorBundle = () => ({
+const authorBundle = (): typeof bundle => ({
   template: t,
   vocabulary: vehicleVocab,
   entitlement: {
@@ -39,6 +41,7 @@ const authorBundle = () => ({
     mintedVehicles: 0,
     reason:
       "You hold DIMO developer license #472, DEMO App, and that's all it takes to publish changes here. No cars use it yet.",
+    reasonDetail: { key: 'licensed', via: 'owner', tokenId: 472, alias: 'DEMO App' },
   },
 });
 
@@ -58,7 +61,17 @@ describe('TemplateEditorView', () => {
 
   it('shows the current version and the author of the version it loaded', () => {
     render(<TemplateEditorView id={t.id} />);
-    expect(screen.getByText(new RegExp(`v${t.version}`))).toBeInTheDocument();
+    const id = screen.getByText(t.id, { selector: '.font-mono' });
+    expect(id.parentElement).toHaveTextContent(
+      `${t.id} · v${t.version} · last published by ${t.author}`,
+    );
+  });
+
+  it('leaves the author out when the template has none', () => {
+    bundle = { ...authorBundle(), template: { ...t, author: undefined } };
+    render(<TemplateEditorView id={t.id} />);
+    const id = screen.getByText(t.id, { selector: '.font-mono' });
+    expect(id.parentElement?.textContent).toBe(`${t.id} · v${t.version}`);
   });
 
   it('leaves publish disabled until something actually changed', () => {
@@ -258,6 +271,7 @@ describe('TemplateEditorView', () => {
         canSetHardwareTemplateId: false,
         mintedVehicles: 4212,
         reason: 'Creating or editing a template takes a DIMO developer license.',
+        reasonDetail: { key: 'licenseRequired' },
       },
     };
     render(<TemplateEditorView id={t.id} />);

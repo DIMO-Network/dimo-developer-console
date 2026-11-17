@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { useTranslations } from 'next-intl';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { TokenBalance } from '@/components/TokenBalance';
 import config from '@/config';
@@ -24,6 +25,7 @@ interface IProps {
 }
 
 export const Balances = ({ shouldFetchBalances }: IProps) => {
+  const t = useTranslations('common');
   const [balance, setBalance] = useState<Balance>({
     dcxBalance: 0,
     dimoBalance: 0,
@@ -50,7 +52,7 @@ export const Balances = ({ shouldFetchBalances }: IProps) => {
     } catch (error: unknown) {
       Sentry.captureException(error);
       console.error('Error while loading balances', error);
-      toast.error('Error while loading balances');
+      toast.error(t('accountInfo.balancesError'));
     }
   };
 
@@ -67,7 +69,7 @@ export const Balances = ({ shouldFetchBalances }: IProps) => {
       {isLoadingBalances && (
         <>
           <BubbleLoader isLoading={isLoadingBalances} />
-          <p className="loading-text">Loading your balances...</p>
+          <p className="loading-text">{t('accountInfo.balancesLoading')}</p>
         </>
       )}
       {!isLoadingBalances && (

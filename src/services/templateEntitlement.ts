@@ -2,6 +2,16 @@ import config from '@/config';
 import { fetchWithTimeout, isTimeout } from '@/utils/fetchWithTimeout';
 import type { Template } from '@/types/template';
 import { getUserByToken } from '@/services/user';
+import { createTranslator } from 'next-intl';
+import common from '../../messages/en/common.json';
+import { entitlementReasonText, type EntitlementReason } from '@/utils/entitlementReason';
+
+// The API answers in English, from the same messages the banner translates.
+const english = createTranslator({
+  locale: 'en',
+  messages: { common },
+  namespace: 'common',
+}) as unknown as (key: string, values?: Record<string, string | number>) => string;
 
 export type EntitlementKind =
   | 'create'
@@ -26,7 +36,9 @@ export interface Entitlement {
    * many cars a publish re-describes.
    */
   mintedVehicles: number | null;
+  /** English, for the API's refusal message. The banner translates reasonDetail. */
   reason: string;
+  reasonDetail: EntitlementReason;
 }
 
 /** identity-api did not give a usable answer: transport, GraphQL or an empty body. */
@@ -370,29 +382,21 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
     mintedVehicles = null;
   }
 
-  const vehicles = (): string => {
-    if (mintedVehicles === null) {
-      return "We couldn't check how many cars use this definition, so assume some are already on the road.";
-    }
-    if (mintedVehicles === 0) return 'No cars use it yet.';
-    if (mintedVehicles === 1) {
-      return 'One car already uses it, so publishing changes how that car is described.';
-    }
-    return (
-      `${mintedVehicles.toLocaleString()} cars already use it, so publishing changes ` +
-      'how all of them are described.'
-    );
-  };
+  const entitled = (
+    kind: EntitlementKind,
+    canPublish: boolean,
+    reasonDetail: EntitlementReason,
+    canSetHardwareTemplateId = false,
+  ): Entitlement => ({
+    kind,
+    canPublish,
+    canSetHardwareTemplateId,
+    mintedVehicles,
+    reason: entitlementReasonText(reasonDetail, mintedVehicles, english),
+    reasonDetail,
+  });
 
-  if (isCurator) {
-    return {
-      kind: 'curator',
-      canPublish: true,
-      canSetHardwareTemplateId: true,
-      mintedVehicles,
-      reason: `You're a DIMO curator, so nothing here is locked for you. ${vehicles()}`,
-    };
-  }
+  if (isCurator) return entitled('curator', true, { key: 'curator' }, true);
 
   // Fails closed, like every other identity question here: "we could not check
   // your license" is not "you have no license".
@@ -400,46 +404,14 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
   try {
     license = await args.developerLicense(caller);
   } catch {
-    return {
-      kind: 'unavailable',
-      canPublish: false,
-      canSetHardwareTemplateId: false,
-      mintedVehicles,
-      reason:
-        "We couldn't check your DIMO developer license just now, so nothing is editable. Reload in a moment and it should clear.",
-    };
+    return entitled('unavailable', false, { key: 'licenseUnavailable' });
   }
 
   if (license.kind === 'held') {
-    const named = license.alias
-      ? `#${license.tokenId}, ${license.alias}`
-      : `#${license.tokenId}`;
-    const held =
-      license.via === 'owner'
-        ? `You hold DIMO developer license ${named}`
-        : `You sign for DIMO developer license ${named}`;
-    if (template === null) {
-      return {
-        kind: 'create',
-        canPublish: true,
-        canSetHardwareTemplateId: false,
-        mintedVehicles,
-        // The count is skipped at zero here and only here: "nothing has been
-        // published yet" and "no cars use it yet" are the same fact told twice.
-        // A non-zero count, or one that could not be read, still has to be said
-        // -- a definition can have cars on it with no template written for it.
-        reason:
-          `${held}. Nothing has been published for this model year yet, so you're ` +
-          `writing the first one.${mintedVehicles === 0 ? '' : ` ${vehicles()}`}`,
-      };
-    }
-    return {
-      kind: 'licensed',
-      canPublish: true,
-      canSetHardwareTemplateId: false,
-      mintedVehicles,
-      reason: `${held}, and that's all it takes to publish changes here. ${vehicles()}`,
-    };
+    const { tokenId, alias, via } = license;
+    return template === null
+      ? entitled('create', true, { key: 'create', via, tokenId, alias })
+      : entitled('licensed', true, { key: 'licensed', via, tokenId, alias });
   }
 
   // Kept below the license rather than removed. Holding the Manufacturer NFT for
@@ -451,33 +423,16 @@ export async function resolveEntitlement(args: EntitlementArgs): Promise<Entitle
   try {
     held = await args.manufacturerOwner(slug);
   } catch {
-    return {
-      kind: 'unavailable',
-      canPublish: false,
-      canSetHardwareTemplateId: false,
-      mintedVehicles,
-      reason:
-        "We couldn't check who holds the Manufacturer NFT for this make just now. Reload in a moment and it should clear.",
-    };
+    return entitled('unavailable', false, { key: 'manufacturerUnavailable' });
   }
   if (held.kind === 'found' && eq(held.owner, caller)) {
-    return {
-      kind: 'manufacturer',
-      canPublish: true,
-      canSetHardwareTemplateId: false,
-      mintedVehicles,
-      reason: `You hold the ${template?.manufacturer.name ?? slug} Manufacturer NFT (#${held.tokenId}), so this make is yours to edit. ${vehicles()}`,
-    };
+    const make = template?.manufacturer.name ?? slug;
+    return entitled('manufacturer', true, {
+      key: 'manufacturer',
+      make,
+      tokenId: held.tokenId,
+    });
   }
 
-  return {
-    kind: 'license-required',
-    canPublish: false,
-    canSetHardwareTemplateId: false,
-    mintedVehicles,
-    reason:
-      "Editing a template takes a DIMO developer license, and this account doesn't " +
-      'hold one or sign for one. Create one under Developer licenses, then reload ' +
-      'this page.',
-  };
+  return entitled('license-required', false, { key: 'licenseRequired' });
 }

@@ -13,6 +13,7 @@ import { emailRecovery } from '@/actions/user';
 import { isEmpty } from 'lodash';
 import { useRouter } from 'next/navigation';
 import { IPasskeyRecoveryState } from '@/types/auth';
+import { useTranslations } from 'next-intl';
 
 interface EmailRecoveryFormInputs {
   email: string;
@@ -23,6 +24,8 @@ interface IProps {
 }
 
 export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
+  const t = useTranslations('email-recovery');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
@@ -48,7 +51,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
         });
       }
     } catch (error) {
-      toast.error('Something went wrong while sending the email');
+      toast.error(t('form.sendFailed'));
       captureException(error);
     } finally {
       setIsLoading(false);
@@ -58,24 +61,22 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
   return (
     <div className="email-recovery__form">
       <div className="email-recovery__header">
-        <p className="text-title text-ink">Reset passkeys</p>
+        <p className="text-title text-ink">{t('form.title')}</p>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="email-recovery__input">
-        <p className="text-body-sm text-muted">
-          Your old passkeys will not longer work after the reset is complete
-        </p>
+        <p className="text-body-sm text-muted">{t('form.warning')}</p>
         <Label htmlFor="email">
-          Email
+          {t('form.emailLabel')}
           <TextField
             type="text"
-            placeholder="email@address.com"
+            placeholder={t('form.emailPlaceholder')}
             {...register('email', {
               required: true,
             })}
             role="email-input"
           />
         </Label>
-        {errors.email && <TextError errorMessage="This field is required" />}
+        {errors.email && <TextError errorMessage={tCommon('validation.required')} />}
         <Button
           variant="brand"
           type="submit"
@@ -83,7 +84,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
           loading={isLoading}
           role="continue-button"
         >
-          Continue
+          {tCommon('actions.continue')}
         </Button>
         <Button
           type="button"
@@ -91,7 +92,7 @@ export const EmailRecoveryForm: FC<IProps> = ({ onNext }) => {
           role="cancel-button"
           onClick={() => router.back()}
         >
-          Cancel
+          {tCommon('actions.cancel')}
         </Button>
       </form>
     </div>

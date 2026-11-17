@@ -9,12 +9,13 @@ import { useQuery } from '@tanstack/react-query';
 import type { Connection } from '@/actions/connections';
 import { fetchJson } from '@/utils/fetchJson';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { HttpError } from '@/utils/httpError';
-import { CONNECTION_GONE_DETAIL, KEYS_UNREADABLE_DETAIL } from '@/app/connections/copy';
 
 import './View.css';
 
 const MainComponent = ({ connectionId }: { connectionId: string }) => {
+  const t = useTranslations('connections');
   const { data: connection } = useQuery({
     queryKey: ['connection', connectionId],
     queryFn: () =>
@@ -37,20 +38,20 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
       <div className="connection-details-header">
         <div className="connection-title-section">
           <h1 className="connection-title">{connection.name}</h1>
-          <span className="environment-badge">Production</span>
+          <span className="environment-badge">{t('details.environment')}</span>
         </div>
       </div>
 
       <div className="connection-license-section">
         <div className="section-header">
           <Title component="h2" className="section-title">
-            Connection license
+            {t('details.licenseSection')}
           </Title>
         </div>
 
         <div className="license-fields">
           <div className="field-row">
-            <label className="field-label">Connection license public key</label>
+            <label className="field-label">{t('details.publicKey')}</label>
             <div className="field-value-container">
               <span className="field-value">
                 {connection.connection_license_public_key}
@@ -60,11 +61,11 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
           </div>
 
           {connection.keys_unreadable ? (
-            <p className="text-body-sm text-negative">{KEYS_UNREADABLE_DETAIL}</p>
+            <p className="text-body-sm text-negative">{t('details.keysUnreadable')}</p>
           ) : (
             <>
               <div className="field-row">
-                <label className="field-label">Connection license private key</label>
+                <label className="field-label">{t('details.privateKey')}</label>
                 <div className="field-value-container">
                   <span className="field-value">{maskKey()}</span>
                   <CopyButton value={connection.connection_license_private_key ?? ''} />
@@ -73,7 +74,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
 
               {deviceIssuanceAddress && (
                 <div className="field-row">
-                  <label className="field-label">Device issuance address</label>
+                  <label className="field-label">{t('details.issuanceAddress')}</label>
                   <div className="field-value-container">
                     <span className="field-value">{deviceIssuanceAddress}</span>
                     <CopyButton value={deviceIssuanceAddress} />
@@ -82,7 +83,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
               )}
 
               <div className="field-row">
-                <label className="field-label">Device issuance key</label>
+                <label className="field-label">{t('details.issuanceKey')}</label>
                 <div className="field-value-container">
                   <span className="field-value">{maskKey()}</span>
                   <CopyButton value={connection.device_issuance_key ?? ''} />
@@ -97,6 +98,7 @@ const MainComponent = ({ connectionId }: { connectionId: string }) => {
 };
 
 export const View = ({ params }: { params: Promise<{ id: string }> }) => {
+  const t = useTranslations('connections');
   const { id } = use(params);
 
   const { isLoading, error } = useQuery({
@@ -110,21 +112,21 @@ export const View = ({ params }: { params: Promise<{ id: string }> }) => {
     <>
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link href="/connections" className="transition-colors hover:text-ink">
-          Connections
+          {t('breadcrumb.connections')}
         </Link>
         <span>/</span>
-        <span className="text-ink">Connection details</span>
+        <span className="text-ink">{t('details.title')}</span>
       </nav>
       <QueryPageWrapper
         loading={isLoading}
         error={error && !isGone ? error : undefined}
-        customErrorMessage={'There was a problem loading the connection details'}
+        customErrorMessage={t('details.loadError')}
       >
         {isGone ? (
           <div className="space-y-6">
-            <p className="text-body-sm text-muted">{CONNECTION_GONE_DETAIL}</p>
+            <p className="text-body-sm text-muted">{t('details.gone')}</p>
             <Link href="/connections" className="button secondary">
-              Back to Connections
+              {t('breadcrumb.back')}
             </Link>
           </div>
         ) : (

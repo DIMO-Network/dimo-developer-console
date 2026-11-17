@@ -6,12 +6,14 @@ import { useWebhookById } from '@/hooks/queries/useWebhookById';
 import { Loader } from '@/components/Loader';
 import { EditWebhookContextProvider } from '@/hoc/EditWebhookProvider';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export const View = ({
   params,
 }: {
   params: Promise<{ webhookId: string; clientId: string }>;
 }) => {
+  const t = useTranslations('webhooks');
   const { webhookId, clientId } = use(params);
   const { data, isLoading, error } = useWebhookById({ webhookId, clientId });
 
@@ -19,20 +21,20 @@ export const View = ({
     return <Loader isLoading />;
   }
   if (error) {
-    return <p>There was an error fetching your webhook</p>;
+    return <p>{t('edit.fetchError')}</p>;
   }
   if (!data) {
-    return <p>no webhook found</p>;
+    return <p>{t('edit.notFound')}</p>;
   }
 
   return (
     <>
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link href="/webhooks" className="transition-colors hover:text-ink">
-          Webhooks
+          {t('breadcrumb.webhooks')}
         </Link>
         <span>/</span>
-        <span className="text-ink">Edit webhook</span>
+        <span className="text-ink">{t('breadcrumb.editWebhook')}</span>
       </nav>
       <EditWebhookContextProvider>
         <div className="mt-2">

@@ -17,12 +17,6 @@ export const StatCard: FC<{
   </div>
 );
 
-export const compact = (n: number): string => {
-  const m = (v: number) => `${(v / 1_000_000).toFixed(2).replace(/\.?0+$/, '')}M`;
-  if (n >= 1_000_000) return m(n);
-  if (n >= 1_000) {
-    const k = Number((n / 1_000).toFixed(1));
-    return k >= 1000 ? m(n) : `${String(k)}K`;
-  }
-  return String(n);
-};
+// For format.number: "1.2K", "1.24M" in English, the locale's own units elsewhere.
+export const compact = (n: number) =>
+  ({ notation: 'compact', maximumFractionDigits: n >= 1_000_000 ? 2 : 1 }) as const;

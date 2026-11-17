@@ -1,0 +1,749 @@
+{
+  "languageSwitcher": {
+    "label": "語言"
+  },
+  "actions": {
+    "close": "關閉",
+    "cancel": "取消",
+    "confirm": "確認",
+    "copy": "複製",
+    "saveChanges": "儲存變更",
+    "save": "儲存",
+    "delete": "刪除",
+    "edit": "編輯",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "continue": "繼續",
+    "done": "完成",
+    "submit": "送出",
+    "retry": "重試",
+    "remove": "移除",
+    "add": "新增",
+    "create": "建立",
+    "download": "下載",
+    "learnMore": "瞭解詳情",
+    "signOut": "登出",
+    "refresh": "重新整理"
+  },
+  "accountInfo": {
+    "button": "帳號資訊",
+    "title": "帳號資訊",
+    "modalTitle": "帳號資訊",
+    "ownerEmail": "擁有者電子郵件",
+    "walletAddress": "組織錢包地址",
+    "walletCopied": "已將錢包地址複製到剪貼簿",
+    "balancesError": "載入餘額時發生錯誤",
+    "balancesLoading": "正在載入您的餘額…"
+  },
+  "appCard": {
+    "details": "應用程式詳細資訊"
+  },
+  "brand": {
+    "dimoLogoAlt": "DIMO"
+  },
+  "copyButton": {
+    "copied": "已將內容複製到剪貼簿",
+    "failed": "無法複製內容"
+  },
+  "createAppModal": {
+    "title": "建立新的開發者授權"
+  },
+  "creditsWidget": {
+    "currentBalance": "目前餘額"
+  },
+  "support": {
+    "developerSupport": "開發者支援"
+  },
+  "buyCredits": {
+    "title": "購買DCX",
+    "pricing": "<description>存取一輛車的基本價格為每月$1.25。</description><link>瞭解詳情。</link>",
+    "amountLabel": "購買金額",
+    "amountPositive": "金額必須大於0",
+    "amountMin": "最低金額為$10.00",
+    "forAnotherAccount": "為其他帳號購買",
+    "accountAddress": "帳號地址",
+    "invalidAddress": "無效的Ethereum地址",
+    "proceed": "前往付款"
+  },
+  "csvUpload": {
+    "oneFileOnly": "一次只能上傳一個檔案",
+    "duplicate": "檔案重複上傳",
+    "tooLarge": "檔案超過50MB上限。",
+    "onlyCsv": "僅支援.csv檔案。",
+    "invalidFormat": "CSV格式無效。",
+    "numericTokenId": "每一列都必須有數字格式的{header}。",
+    "parseFailed": "無法解析CSV。",
+    "listTitle": "車輛清單",
+    "vehicleCount": "{count, plural, other {#輛車}}",
+    "addVehicles": "新增車輛",
+    "dropPrompt": "拖放或上傳包含車輛ID清單的CSV",
+    "formatHint": "請將CSV設為單一欄位，並使用標頭<code>{header}</code>。",
+    "accepts": "接受.csv檔案類型",
+    "maxSize": "檔案大小上限為50 MB。",
+    "upload": "上傳"
+  },
+  "datePicker": {
+    "previousMonth": "上個月",
+    "nextMonth": "下個月",
+    "weekdays": {
+      "sun": "日",
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六"
+    }
+  },
+  "devSupportForm": {
+    "userName": "使用者名稱",
+    "inquiryType": "詢問類型",
+    "inquiryPlaceholder": "選擇詢問類型",
+    "message": "訊息",
+    "messagePlaceholder": "請告訴我們如何協助您…",
+    "messageTooLong": "訊息最多500個字元",
+    "submit": "送出"
+  },
+  "validation": {
+    "required": "此欄位為必填",
+    "invalidUrl": "請輸入有效的URL",
+    "invalidNumber": "請輸入有效的數字"
+  },
+  "generateJwt": {
+    "button": "產生開發者JWT",
+    "apiKeyRequired": "請輸入有效的API金鑰",
+    "failed": "無法產生開發者JWT",
+    "titleDone": "JWT已產生",
+    "titleNew": "產生新的JWT",
+    "subtitle": "測試您為伺服器建立的API金鑰：系統會使用該金鑰和此授權的第一個重新導向URI產生開發者JWT。若要在沒有API金鑰的情況下取得JWT，請開啟主控台存取權限，並使用「複製JWT」。",
+    "generating": "正在產生JWT…",
+    "apiKeyLabel": "API金鑰",
+    "apiKeyPlaceholder": "在此輸入您的API金鑰",
+    "done": "完成",
+    "generate": "產生",
+    "expires": "14天後到期。",
+    "copied": "已複製JWT！"
+  },
+  "jsonBlock": {
+    "download": "下載JSON",
+    "copied": "已複製JSON",
+    "copyLabel": "複製JSON"
+  },
+  "licenseCard": {
+    "vehiclesConnected": "已連線車輛",
+    "noVehicles": "沒有已連線的車輛",
+    "sharingUnavailable": "無法取得共享狀態",
+    "configurations": "{count, plural, other {#個組態}} →",
+    "sharingCopied": "已複製共享連結",
+    "sharingLink": "車輛共享連結",
+    "notConfigured": "尚未設定，立即設定車輛共享 →",
+    "details": "授權詳細資訊"
+  },
+  "menu": {
+    "logout": "登出",
+    "signingOut": "正在登出",
+    "open": "開啟選單",
+    "expand": "展開側邊欄",
+    "collapse": "收合側邊欄"
+  },
+  "onboarding": {
+    "title": "開始使用",
+    "intro": "您已踏上使用DIMO開發的旅程！",
+    "createAccount": "建立帳號",
+    "confirmDetails": "確認您的詳細資料",
+    "createLicense": "建立您的第一個授權",
+    "createLicenseHint": "您的帳號已設定完成，現在來建立您的第一個授權吧。"
+  },
+  "navigation": {
+    "sections": {
+      "workspace": "工作區",
+      "resources": "資源"
+    },
+    "items": {
+      "home": "首頁",
+      "licenses": "授權",
+      "vehicles": "車輛",
+      "webhooks": "Webhook",
+      "templates": "範本",
+      "connections": "連線",
+      "documentation": "說明文件",
+      "apiStatus": "API狀態",
+      "settings": "設定"
+    },
+    "pageTitles": {
+      "home": "首頁",
+      "licenses": "授權",
+      "webhooks": "Webhook",
+      "templates": "車輛範本",
+      "connections": "連線",
+      "settings": "設定",
+      "vehicles": "車輛",
+      "support": "支援",
+      "vehicle": "車輛",
+      "licenseDetails": "授權詳細資訊",
+      "sdkConfigurator": "SDK設定工具",
+      "licensedVehicles": "已授權車輛",
+      "createWebhook": "建立Webhook",
+      "editWebhook": "編輯Webhook",
+      "createConnection": "建立連線",
+      "connectionDetails": "連線詳細資訊",
+      "newTemplate": "新增範本",
+      "editTemplate": "編輯範本"
+    }
+  },
+  "paymentMethod": {
+    "dimo": "使用DIMO購買",
+    "usd": "使用美元購買"
+  },
+  "pendingInvite": {
+    "alreadyMember": "您已經是此團隊的成員。",
+    "title": "要加入{ownerEmail}擁有的{teamName}嗎？",
+    "description": "您將可查看團隊的授權。擁有者會決定您是否也能取得資料存取權限。",
+    "join": "加入團隊",
+    "notNow": "稍後再說",
+    "errors": {
+      "INVITE_INVALID": "此邀請連結已失效。請向團隊擁有者索取新的連結。",
+      "INVITE_EXPIRED": "此邀請已過期。請要求團隊擁有者重新傳送。",
+      "INVITE_EMAIL_MISMATCH": "此邀請已寄送至其他電子郵件地址。請使用該地址登入，然後再次開啟邀請連結。",
+      "fallback": "我們無法接受此邀請。請再次開啟連結。"
+    }
+  },
+  "queryActions": {
+    "copied": "已複製查詢",
+    "copyFailed": "無法複製查詢",
+    "copy": "複製查詢",
+    "download": "下載JSON"
+  },
+  "redirectUri": {
+    "added": "已成功新增重新導向URI。",
+    "createFailed": "建立重新導向URI時發生錯誤",
+    "invalidUrl": "請輸入有效的URL，必須包含http://或https://",
+    "duplicate": "此URL已在清單中",
+    "required": "請輸入重新導向URI",
+    "tooLong": "名稱最多150個字元",
+    "add": "新增URI",
+    "deleting": "正在刪除所選的重新導向URI",
+    "deleted": "已刪除重新導向URI",
+    "copied": "已複製重新導向URI！",
+    "deleteTitle": "刪除重新導向URI",
+    "authorized": "已授權的URI",
+    "confirmTitle": "確定要刪除此重新導向URI嗎？",
+    "confirmSubtitle": "您將無法再於應用程式中使用此重新導向URI。"
+  },
+  "errors": {
+    "transactionDenied": "交易已被拒絕",
+    "somethingWentWrong": "發生錯誤",
+    "emailRegistered": "此電子郵件已註冊",
+    "sessionExpired": "工作階段已過期，請重新登入",
+    "tryAgain": "請再試一次",
+    "transactionFailedOnChain": "交易在鏈上失敗，因此未做任何變更",
+    "generic": "發生錯誤，請再試一次。",
+    "unknown": "未知錯誤",
+    "notFound": "找不到",
+    "loadFailed": "無法載入此內容，請再試一次。",
+    "copyFailed": "無法複製到剪貼簿"
+  },
+  "sessionExpired": {
+    "errors": {
+      "passkeyFailed": "無法確認您的密碼金鑰。請再試一次，或改用電子郵件驗證碼。",
+      "codeFailed": "該驗證碼無效。請檢查後再試一次。",
+      "codeCheckFailed": "無法檢查該驗證碼。請再試一次。",
+      "sendFailed": "無法傳送驗證碼。請再試一次。",
+      "renewFailed": "無法讓您重新登入。請再試一次，或登出。",
+      "startAgain": "等待時間過長，請重新開始。",
+      "signedInElsewhere": "此瀏覽器已登入另一個帳號。請登出以切換帳號。"
+    },
+    "tryAgain": "重試",
+    "startOver": "重新開始",
+    "codeSent": "我們已將6位數驗證碼傳送至{email}。",
+    "codeLabel": "驗證碼",
+    "continue": "繼續",
+    "resendIn": "{seconds}秒後可傳送新的驗證碼",
+    "resend": "傳送新的驗證碼",
+    "withPasskey": "使用密碼金鑰繼續",
+    "emailInstead": "改用電子郵件接收驗證碼",
+    "emailCode": "以電子郵件傳送驗證碼給我",
+    "title": "您的工作階段已過期",
+    "description": "請以{email}重新登入以繼續作業。您會停留在此頁面。",
+    "signOut": "登出"
+  },
+  "spendingLimit": {
+    "failed": "確認交易時發生錯誤",
+    "title": "設定支出上限",
+    "description": "核准開發者授權動用您已連結錢包中的$DIMO。建議核准價值超過$100 USD的$DIMO"
+  },
+  "theme": {
+    "light": "淺色模式",
+    "dark": "深色模式",
+    "switchToLight": "切換至淺色模式",
+    "switchToDark": "切換至深色模式"
+  },
+  "team": {
+    "switcher": "團隊",
+    "switchLabel": "團隊：{name}。切換團隊",
+    "roles": {
+      "OWNER": "擁有者",
+      "MEMBER": "成員"
+    },
+    "fallbackName": "您的團隊",
+    "unavailable": "無法載入您的團隊。目前先顯示您自己的授權。"
+  },
+  "templateEditor": {
+    "divergence": {
+      "setPerTrim": "依車款個別設定",
+      "shared": "共用",
+      "moveToShared": "移至共用"
+    },
+    "trim": {
+      "nameLabel": "車款名稱",
+      "remove": "移除車款",
+      "manufacturerCode": "製造商代碼",
+      "styleName": "樣式名稱",
+      "vinPattern": "VIN模式",
+      "selectorMissing": "包含多個車款的範本不能有缺少選擇器的車款：它會符合所有訊號，讓此車型年份的每次解碼都無法判定。請為此車款提供製造商代碼、樣式名稱或VIN模式。"
+    },
+    "entitlement": {
+      "create": "您可以建立此範本",
+      "licensed": "您可以編輯此範本",
+      "manufacturer": "您可以編輯此範本",
+      "curator": "您可以編輯此處的所有內容",
+      "license-required": "需要開發者授權",
+      "unavailable": "無法檢查存取權限",
+      "readOnly": "{title} — 唯讀",
+      "hardwareLocked": "車輛出廠搭載哪種硬體由DIMO決定，因此硬體範本欄位維持鎖定。",
+      "reason": {
+        "curator": "您是DIMO內容管理員，因此這裡的所有內容都不會對您鎖定。",
+        "licenseUnavailable": "我們目前無法檢查您的DIMO開發者授權，因此無法編輯任何內容。請稍後重新載入，問題應會排除。",
+        "create": "{via, select, owner {您持有DIMO開發者授權{license}。此車型年份尚未發布任何內容，因此您將撰寫第一份。} other {您代表DIMO開發者授權{license}簽署。此車型年份尚未發布任何內容，因此您將撰寫第一份。}}",
+        "licensed": "{via, select, owner {您持有DIMO開發者授權{license}，這就足以在此發布變更。} other {您代表DIMO開發者授權{license}簽署，這就足以在此發布變更。}}",
+        "manufacturerUnavailable": "我們目前無法檢查誰持有此廠牌的製造商NFT。請稍後重新載入，問題應會排除。",
+        "manufacturer": "您持有{make}製造商NFT（#{tokenId}），因此您可以編輯此廠牌。",
+        "licenseRequired": "編輯範本需要DIMO開發者授權，但此帳號並未持有授權，也未代表任何授權簽署。請在「開發者授權」下建立一個，然後重新載入此頁面。",
+        "license": "#{tokenId}",
+        "licenseWithAlias": "#{tokenId}（{alias}）",
+        "vehicles": "{count, plural, =0 {目前尚無車輛使用此範本。} =1 {已有一輛車使用此範本，因此發布會改變該車輛的描述方式。} other {已有#輛車使用此範本，因此發布會改變所有這些車輛的描述方式。}}",
+        "vehiclesUnknown": "我們無法檢查有多少車輛使用此定義，因此請假設已有部分車輛在路上行駛。",
+        "withVehicles": "{reason}{vehicles}"
+      }
+    },
+    "normalisation": {
+      "title": "編輯器在您輸入之外所做的變更",
+      "dismiss": "關閉"
+    },
+    "notes": {
+      "cleared": "已清除，此屬性會被移除，而不是儲存為空值",
+      "storedAsNumber": "已儲存為數字{value}，而非文字{text}",
+      "whitespace": "已移除前後空白"
+    },
+    "where": {
+      "templateCell": "範本的{label}",
+      "trimCell": "車款{name}的{label}"
+    },
+    "grid": {
+      "attribute": "屬性",
+      "values": "值",
+      "noSelector": "無選擇器"
+    }
+  },
+  "toggle": {
+    "label": "切換"
+  },
+  "timeRange": {
+    "range": "範圍",
+    "presets": {
+      "24h": "24小時",
+      "7d": "7天",
+      "30d": "30天",
+      "custom": "自訂"
+    },
+    "from": "開始（UTC）",
+    "to": "結束（UTC）",
+    "invalid": "開始時間必須早於結束時間。"
+  },
+  "signIn": {
+    "acceptTerms": "您必須接受服務條款和隱私權政策"
+  },
+  "vehicleTokenIds": {
+    "placeholder": "輸入車輛Token ID，每行一個或以逗號分隔",
+    "label": "車輛Token ID",
+    "invalid": "無效的Token ID：「{id}」。所有Token ID都必須是數字。",
+    "tooMany": "Token ID過多。最多允許1000個ID。",
+    "entered": "已輸入{count, plural, other {#個Token ID}}",
+    "enteredUnique": "已輸入{count, plural, other {#個Token ID}}（{unique}個不重複）",
+    "helpIntro": "您可以透過以下方式輸入車輛Token ID：",
+    "helpPerLine": "每行一個：12345, 67890, 11111",
+    "helpComma": "以逗號分隔：12345, 67890, 11111",
+    "helpMixed": "也支援混合格式"
+  },
+  "assetDids": {
+    "placeholder": "輸入車輛DID，每行一個或以逗號分隔",
+    "label": "資產DID",
+    "empty": "資產DID不能為空。",
+    "tooLong": "資產DID過長：「{id}」。長度上限為200個字元。",
+    "tooMany": "車輛DID過多。最多允許1000個DID。",
+    "entered": "已輸入{count, plural, other {#個資產DID}}",
+    "enteredUnique": "已輸入{count, plural, other {#個資產DID}}（{unique}個不重複）",
+    "helpIntro": "您可以透過以下方式輸入車輛DID：",
+    "helpPerLine": "每行一個：",
+    "helpComma": "以逗號分隔："
+  },
+  "workspaceName": {
+    "updated": "開發者授權名稱已成功更新。請重新整理以查看變更。",
+    "inUse": "此開發者授權名稱已被使用，請改用其他名稱再試一次。",
+    "failed": "無法更新開發者授權名稱",
+    "title": "編輯開發者授權名稱",
+    "label": "開發者授權名稱",
+    "required": "必須填寫開發者授權名稱",
+    "placeholder": "輸入開發者授權名稱",
+    "description": "這是您所有應用程式共用的命名空間。這是公開名稱，生態系中的其他開發者和使用者都能看到。"
+  },
+  "licenseAlias": {
+    "tooLong": "最多可使用32個字元。重音字母和表情符號會計為多個字元。"
+  },
+  "dataAccess": {
+    "connectWallet": "連結您的錢包",
+    "connectFailed": "無法連結您的錢包。請再試一次。",
+    "connectPrompt": "連結您的錢包以讀取{license}。團隊擁有者已授予您的錢包存取權限，且權杖會保留在此瀏覽器中。"
+  },
+  "memberJwt": {
+    "sessionExpired": "您的工作階段已過期。請重新登入。",
+    "challengeFailed": "{status, select, none {無法開始連線至此授權（無回應）。請再試一次。} other {無法開始連線至此授權（{status}）。請再試一次。}}",
+    "connectFailed": "{status, select, none {無法連結您的錢包（無回應）。請再試一次。} other {無法連結您的錢包（{status}）。請再試一次。}}",
+    "propagating": "存取權限仍在生效中，請一分鐘後再試"
+  },
+  "teamCopy": {
+    "grantWarning": "資料存取權限可讓{name}透過DIMO API使用車輛授予{license}的所有權限（包括指令），而不僅是主控台顯示的內容。其查詢會花費{license}的DCX點數。",
+    "askForAccess": "請向{ownerEmail}申請{license}的資料存取權限。",
+    "noLongerHasAccess": "您已無法存取此授權。",
+    "dataAccessUnavailable": "團隊成員目前尚無法使用資料存取權限。",
+    "removedFromTeam": "您已不再是{teamName}的成員。",
+    "removedFromThatTeam": "您已不再是該團隊的成員。",
+    "signerLocked": "您的存取權限已綁定至另一個錢包。請先要求{ownerEmail}撤銷該權限。",
+    "signerLockedNoOwner": "您的存取權限已綁定至另一個錢包。請先要求團隊擁有者撤銷該權限。",
+    "leaveConfirm": "要離開{teamName}嗎？系統會請{ownerEmail}撤銷您的資料存取權限。",
+    "signerInUse": "此錢包已被登記為其他人的金鑰，因此無法用於資料存取。請聯絡DIMO客服團隊。"
+  },
+  "webhooks": {
+    "table": {
+      "fetchError": "擷取您的Webhook時發生錯誤",
+      "empty": "您尚未建立任何Webhook。",
+      "description": "說明",
+      "displayName": "顯示名稱",
+      "service": "服務",
+      "cooldown": "冷卻時間",
+      "vehicles": "車輛",
+      "errors": "錯誤",
+      "status": "狀態"
+    },
+    "form": {
+      "genericError": "完成操作時發生錯誤",
+      "cancel": "取消",
+      "previous": "上一步",
+      "finish": "完成",
+      "next": "下一步"
+    },
+    "edit": {
+      "title": "編輯Webhook",
+      "updated": "Webhook已成功更新",
+      "updateFailed": "更新Webhook時發生錯誤",
+      "saveFirst": "請先儲存或捨棄您的變更再繼續",
+      "vehiclesFetchError": "擷取已訂閱車輛時發生錯誤",
+      "subscribedVehicles": "已訂閱的車輛",
+      "vehicleCount": "{count, plural, other {#輛車}}",
+      "enterAssetDid": "請至少輸入一個資產DID。",
+      "unsubscribeFailed": "無法取消訂閱車輛。請再試一次。",
+      "unsubscribedCount": "{count, plural, other {已成功取消訂閱#輛車}}",
+      "removeTitle": "移除車輛",
+      "removeDidsLabel": "要取消訂閱的資產DID",
+      "removeDidsPlaceholder": "輸入要從此Webhook取消訂閱的資產DID",
+      "removing": "正在移除…",
+      "removeCount": "{count, plural, other {移除#輛車}}",
+      "subscribeFailed": "無法訂閱車輛。請再試一次。",
+      "subscribedCount": "{count, plural, other {已成功訂閱#輛車}}",
+      "addTitle": "新增車輛",
+      "addDidsLabel": "要訂閱的資產DID",
+      "addDidsPlaceholder": "輸入要訂閱此Webhook的資產DID",
+      "adding": "正在新增…",
+      "addCount": "{count, plural, other {新增#輛車}}",
+      "vehicleTokenId": "車輛Token ID",
+      "fetchWebhookError": "擷取Webhook時發生錯誤",
+      "notFound": "找不到Webhook",
+      "subscribedAll": "已成功訂閱所有車輛",
+      "subscribeAllFailed": "無法訂閱所有車輛",
+      "whoToSubscribe": "您要訂閱哪些車輛？",
+      "manualControls": "手動控制",
+      "manualControlsHint": "手動訂閱或取消訂閱與此Webhook連結的所有車輛。",
+      "subscribing": "正在訂閱…",
+      "subscribeAll": "訂閱所有車輛",
+      "unsubscribeAll": "取消訂閱所有車輛",
+      "downloadCsv": "下載CSV",
+      "unsubscribeVehicles": "取消訂閱車輛",
+      "unsubscribedAll": "已成功取消訂閱所有車輛。",
+      "unsubscribeAllFailed": "取消訂閱所有車輛時發生錯誤。",
+      "unsubscribeAllConfirm": "確定要取消訂閱所有已訂閱的車輛嗎？此動作無法復原。",
+      "unsubscribing": "正在取消訂閱…",
+      "unsubscribeAllButton": "全部取消訂閱",
+      "button": "編輯"
+    },
+    "delete": {
+      "mustUnsubscribe": "刪除前必須先取消訂閱所有車輛",
+      "deleted": "已成功刪除Webhook",
+      "error": "刪除您的Webhook時發生錯誤",
+      "deleting": "正在刪除Webhook…",
+      "success": "成功",
+      "title": "刪除Webhook",
+      "successBody": "Webhook已成功刪除",
+      "confirm": "確定要刪除此Webhook嗎？此動作無法復原。",
+      "done": "完成",
+      "button": "刪除"
+    },
+    "test": {
+      "triggered": "已成功觸發Webhook。",
+      "axiosError": "測試Webhook時發生錯誤",
+      "error": "測試您的Webhook時發生錯誤",
+      "sending": "正在傳送測試…",
+      "title": "測試Webhook",
+      "confirm": "要測試此Webhook嗎？系統會將測試傳送至指定的目標URI。",
+      "send": "傳送測試"
+    },
+    "licenseSelector": {
+      "placeholder": "選擇開發者授權",
+      "label": "選擇開發者授權"
+    },
+    "details": {
+      "description": "說明",
+      "displayName": "顯示名稱",
+      "service": "服務",
+      "cooldownPeriod": "冷卻時間",
+      "url": "Webhook URL",
+      "status": "狀態",
+      "cooldown": "冷卻時間",
+      "cooldownSeconds": "{seconds}秒"
+    },
+    "generateJwt": {
+      "message": "請產生開發者JWT以檢視您的Webhook設定。",
+      "consoleAccessPending": "正在透過主控台存取權限取得開發者JWT…",
+      "consoleAccessFailed": "無法透過主控台存取權限取得開發者JWT。請改用API金鑰。"
+    },
+    "status": {
+      "enabled": "已啟用",
+      "disabled": "已停用",
+      "failed": "失敗"
+    },
+    "statusToggle": {
+      "label": "狀態"
+    },
+    "section": {
+      "title": "Webhook",
+      "create": "+ 建立Webhook"
+    },
+    "url": {
+      "label": "Webhook URL"
+    },
+    "toggle": {
+      "updating": "{status, select, enabled {正在將Webhook狀態更新為已啟用} other {正在將Webhook狀態更新為已停用}}",
+      "updated": "已成功更新Webhook狀態",
+      "failed": "無法更新Webhook狀態"
+    },
+    "fields": {
+      "description": {
+        "label": "Webhook說明",
+        "required": "請輸入Webhook說明",
+        "placeholder": "輸入Webhook的說明"
+      },
+      "displayName": {
+        "label": "顯示名稱",
+        "placeholder": "輸入Webhook的顯示名稱（選填）"
+      },
+      "cooldown": {
+        "label": "冷卻時間",
+        "required": "請輸入以秒為單位的冷卻時間",
+        "invalidNumber": "請輸入有效的數字",
+        "negative": "冷卻時間必須大於或等於0",
+        "tooLong": "冷卻時間不能超過86400秒（24小時）",
+        "placeholder": "輸入以秒為單位的冷卻時間（例如：30）",
+        "hint": "同一事件兩次Webhook呼叫之間的最短間隔（0表示即時）"
+      },
+      "service": {
+        "label": "服務",
+        "placeholder": "選擇服務",
+        "required": "請選擇Webhook服務"
+      },
+      "targetUrl": {
+        "label": "Webhook URL",
+        "invalid": "請輸入有效的URL",
+        "needsProtocol": "請輸入有效的URL，必須包含http://或https://",
+        "placeholder": "輸入您要接收事件的URL",
+        "hint": "輸入可公開存取且已啟用SSL的URL，用來接收事件"
+      },
+      "verification": {
+        "label": "驗證權杖",
+        "required": "請輸入有效的字串",
+        "placeholder": "輸入驗證權杖",
+        "hint": "請選擇任一唯一字串，用來驗證您對Webhook URL的擁有權。當我們傳送驗證要求時，您的伺服器必須以純文字回應這個完全相同的字串，藉此確認目標URL由您掌控。"
+      },
+      "subscribe": {
+        "question": "您要訂閱哪些車輛？",
+        "all": "訂閱所有現有車輛",
+        "specificLabel": "選擇特定車輛",
+        "specificPlaceholder": "輸入您要訂閱此Webhook的車輛資產DID"
+      }
+    },
+    "celBuilder": {
+      "selectEvent": "選擇事件",
+      "buildConditions": "建立條件",
+      "selectAttribute": "選擇屬性",
+      "selectEventPlaceholder": "選擇事件",
+      "selectOperator": "選擇運算子",
+      "enterNumber": "輸入數字",
+      "selectValue": "選擇值",
+      "generate": "產生CEL",
+      "true": "是",
+      "false": "否",
+      "operators": {
+        "equal": "等於",
+        "greater": "大於",
+        "less": "小於"
+      }
+    },
+    "validation": {
+      "valueRequired": "必須填寫值",
+      "selectEvent": "請選擇事件名稱",
+      "oneCondition": "必須剛好有一個CEL條件",
+      "completeConditions": "儲存前請完成所有條件欄位。"
+    },
+    "events": {
+      "harshBraking": "急煞車",
+      "extremeBraking": "緊急煞車",
+      "harshAcceleration": "急加速",
+      "harshCornering": "急轉彎",
+      "collision": "碰撞"
+    },
+    "conditions": {
+      "speed": "速度",
+      "obdIsPluggedIn": "裝置已插入",
+      "isIgnitionOn": "點火是否開啟",
+      "batteryCurrentPower": "電池目前功率",
+      "batteryIsCharging": "電池充電中",
+      "odometer": "里程表",
+      "chargeLevel": "電量",
+      "fuelRelative": "燃油系統相對油位",
+      "fuelAbsolute": "燃油系統絕對油位",
+      "tireFrontLeft": "胎壓（左前）",
+      "tireFrontRight": "胎壓（右前）",
+      "tireBackLeft": "胎壓（左後）",
+      "tireBackRight": "胎壓（右後）",
+      "engineSpeed": "引擎轉速",
+      "throttlePosition": "節氣門位置"
+    },
+    "steps": {
+      "configure": "設定",
+      "delivery": "指定傳送方式",
+      "vehicles": "指定車輛"
+    },
+    "create": {
+      "created": "已成功建立Webhook",
+      "noVehicles": "未訂閱任何車輛",
+      "subscribedCount": "{count, plural, other {已成功訂閱#輛車}}"
+    },
+    "service": {
+      "signals": "VSS訊號",
+      "events": "事件"
+    }
+  },
+  "freshness": {
+    "never": "從未",
+    "justNow": "剛剛",
+    "minutesAgo": "{count, number}分鐘前",
+    "hoursAgo": "{count, number}小時前",
+    "daysAgo": "{count, plural, other {#天前}}",
+    "absolute": "{date} {time} UTC",
+    "noDate": "—"
+  },
+  "loadingModal": {
+    "processing": "處理中"
+  },
+  "modal": {
+    "dialog": "對話方塊"
+  },
+  "table": {
+    "showingNone": "顯示0筆，共0筆",
+    "showing": "顯示第{first, number}–{last, number}筆，共{total, number}筆",
+    "label": "表格"
+  },
+  "transactions": {
+    "insufficientBalance": "DIMO或DCX餘額不足",
+    "connectionNameTooLong": "連線名稱過長，請使用32個字元以內的名稱。",
+    "balanceCheckFailed": "無法檢查您的DIMO餘額，請再試一次。",
+    "insufficientDimo": "DIMO餘額不足。您至少需要{required, number, ::.00}個DIMO代幣（約${usd, number}）才能鑄造連線。",
+    "notEnoughDimo": "您的$DIMO不足，無法鑄造連線。",
+    "connectionNameTaken": "此連線名稱已被使用，請選擇其他名稱後再試一次。"
+  },
+  "signals": {
+    "speed": "速度",
+    "powertrainTransmissionTravelledDistance": "里程表",
+    "powertrainCombustionEngineSpeed": "引擎轉速",
+    "powertrainFuelSystemRelativeLevel": "油量",
+    "powertrainRange": "續航里程",
+    "powertrainTractionBatteryStateOfChargeCurrent": "電池電量",
+    "powertrainTractionBatteryChargingIsCharging": "充電中",
+    "currentLocationCoordinates": "位置",
+    "currentLocationApproximateCoordinates": "概略位置",
+    "currentLocationLatitude": "緯度",
+    "currentLocationLongitude": "經度",
+    "obdDTCList": "診斷碼",
+    "obdEngineLoad": "引擎負載",
+    "obdRunTime": "引擎運轉時間",
+    "lowVoltageBatteryCurrentVoltage": "12V電池電壓",
+    "exteriorAirTemperature": "車外氣溫",
+    "isIgnitionOn": "點火開啟"
+  },
+  "permissions": {
+    "1": "非位置資料",
+    "2": "指令",
+    "3": "目前位置",
+    "4": "全時段位置",
+    "5": "VIN憑證",
+    "6": "即時資料",
+    "7": "原始資料",
+    "8": "概略位置",
+    "unknown": "權限{id}"
+  },
+  "status": {
+    "loading": "載入中…",
+    "saving": "儲存中…",
+    "success": "成功",
+    "copied": "已複製"
+  },
+  "pagination": {
+    "previous": "上一頁",
+    "next": "下一頁",
+    "page": "第{page}頁"
+  },
+  "ownerOnly": {
+    "webhooks": {
+      "title": "Webhook由團隊擁有者管理",
+      "body": "{ownerEmail}負責管理{team}的Webhook。請切換到您自己的團隊，以管理您授權的Webhook。"
+    },
+    "connections": {
+      "title": "連線由團隊擁有者管理",
+      "body": "{ownerEmail}負責管理{team}的連線。請切換到您自己的團隊，以管理您授權的連線。"
+    },
+    "configurations": {
+      "title": "組態由團隊擁有者管理",
+      "body": "{ownerEmail}負責管理{team}的組態。請切換到您自己的團隊，以管理您授權的組態。"
+    }
+  },
+  "otp": {
+    "title": "歡迎回來！",
+    "enterCode": "請輸入傳送至<strong>{email}</strong>的驗證碼",
+    "signIn": "登入",
+    "resendCode": "重新傳送驗證碼",
+    "invalidCode": "OTP驗證碼無效",
+    "loginFailed": "無法使用OTP登入",
+    "resent": "新的OTP驗證碼已傳送至您的電子郵件",
+    "resendFailed": "無法重新傳送OTP驗證碼",
+    "troubleLoggingIn": "登入時遇到問題？<support>取得支援</support>"
+  }
+}

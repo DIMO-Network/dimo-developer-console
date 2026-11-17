@@ -4,6 +4,7 @@ import React, { type ReactNode } from 'react';
 import { withAuth } from '@/hoc/AuthProvider';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 import './GuestLayout.css';
 
@@ -12,7 +13,8 @@ const Providers = withAuth(({ children }: { children: ReactNode }) => <>{childre
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <main className="guest-layout">
-      <div className="guest-theme-toggle">
+      <div className="guest-controls">
+        <LanguageSwitcher variant="icon" />
         <ThemeToggle variant="icon" />
       </div>
       <div className="guest-panel">

@@ -1,0 +1,216 @@
+{
+  "list": {
+    "teamLicenses": "{teamName}的授權",
+    "teamFallbackName": "團隊",
+    "yourLicenses": "您的開發者授權",
+    "teamEmptyTitle": "此團隊尚無開發者授權",
+    "teamEmptyBody": "團隊擁有者建立的授權會顯示在這裡。"
+  },
+  "breadcrumbLicenses": "授權",
+  "details": {
+    "metadataTitle": "授權詳細資訊 | {appName}",
+    "breadcrumbDetails": "授權詳細資訊",
+    "loadError": "擷取授權詳細資訊時發生錯誤",
+    "fallbackName": "授權#{tokenId}",
+    "rename": "重新命名",
+    "clientIdCopied": "已複製用戶端ID！",
+    "tabs": {
+      "overview": "總覽",
+      "config": "設定檔",
+      "vehicles": "車輛",
+      "brand": "品牌"
+    },
+    "vehiclesConnected": "已連接的車輛",
+    "viewVehicles": "檢視車輛 →"
+  },
+  "quickActions": {
+    "label": "快速動作",
+    "generateApiKey": "🔑 產生API金鑰",
+    "configureBranding": "🪪 設定品牌",
+    "setupSharing": "⚙️ 設定車輛共享",
+    "docs": "📖 說明文件"
+  },
+  "usage": {
+    "creditsUsed": "已使用點數",
+    "generateJwtHint": "產生JWT即可查看用量",
+    "unavailable": "目前無法取得用量",
+    "learnAboutCredits": "了解點數 →"
+  },
+  "vehiclesTab": {
+    "loadError": "載入車輛時發生錯誤",
+    "connectedVehicles": "已連接的車輛",
+    "viewList": "檢視車輛清單 →",
+    "vehicleList": "車輛清單",
+    "configureSharing": "設定共享"
+  },
+  "jwts": {
+    "title": "開發者JWT",
+    "generateNew": "產生新的JWT",
+    "empty": "找不到開發者JWT",
+    "copied": "已複製JWT！",
+    "deleteLabel": "刪除JWT",
+    "deleteTitle": "確定要刪除此JWT嗎？",
+    "columns": {
+      "jwt": "JWT",
+      "createdAt": "建立時間",
+      "expiresAt": "到期時間"
+    },
+    "unknownExpiry": "未知",
+    "invalidToken": "無效"
+  },
+  "redirectUris": {
+    "title": "已授權的重新導向URI"
+  },
+  "brand": {
+    "title": "品牌",
+    "add": "新增品牌",
+    "loading": "正在載入品牌…",
+    "none": "尚未設定品牌。",
+    "loadFailed": "無法載入品牌，請檢查您的網路連線並重新載入。",
+    "workspaceFailed": "無法載入您的工作區，請重新登入後再試一次。",
+    "deleteFailed": "無法刪除品牌，請再試一次。",
+    "deleteTitle": "要刪除{name}嗎？",
+    "deleteLoading": "正在刪除品牌…",
+    "deleteLast": "此授權的Login with DIMO將恢復為DIMO的預設外觀。已開啟的頁面可能需要幾分鐘才會更新。",
+    "deleteOne": "依名稱要求此品牌的網站將改為顯示DIMO的預設外觀。已開啟的頁面可能需要幾分鐘才會更新。",
+    "multipleTitle": "在Login with DIMO中使用多個品牌",
+    "multipleHint": "每個Login with DIMO按鈕都接受<code>brandOverride</code>。省略即可使用您的預設品牌。"
+  },
+  "brandRow": {
+    "default": "預設",
+    "edit": "編輯品牌",
+    "delete": "刪除品牌",
+    "setDefaultFirst": "請先將其他品牌設為預設，再刪除此品牌"
+  },
+  "brandForm": {
+    "displayName": "顯示名稱",
+    "displayNameRequired": "必須填寫顯示名稱。",
+    "displayNameMax": "最多100個字元",
+    "displayNamePlaceholder": "例如：Fleet App",
+    "nameTaken": "已有同名的品牌",
+    "renameWarning": "重新命名會使使用此名稱的現有Login with DIMO呼叫失效",
+    "logo": "標誌",
+    "logoHint": "顯示在Login with DIMO按鈕和登入視窗頂端的寬版品牌標誌。支援PNG、JPEG、WebP或SVG。",
+    "icon": "圖示",
+    "iconHint": "方形標誌。Login with DIMO目前尚未顯示此圖示。支援PNG、JPEG、WebP或SVG。",
+    "primaryColor": "主要顏色",
+    "primaryColorHint": "用於Login with DIMO按鈕和登入視窗中的主要按鈕；按鈕文字會自動變為黑色或白色，以保持清晰易讀。請使用7個字元的十六進位色碼，例如<code>{example}</code>。留空即使用DIMO預設值。",
+    "pickColor": "選擇主要顏色",
+    "colorInvalid": "必須為#RRGGBB十六進位格式",
+    "lowContrast": "在登入視窗的{modes, select, light {淺色} dark {深色} other {淺色和深色}}模式下，此顏色的按鈕不易辨識。您仍然可以儲存。",
+    "saveFailed": "無法儲存品牌",
+    "imageRefused": "此圖片遭到拒絕。請使用2 MB以內的PNG、JPEG、WebP或SVG。",
+    "saved": "已儲存品牌",
+    "defaultUpdated": "已更新預設品牌",
+    "defaultFailed": "無法設定預設品牌",
+    "save": "儲存品牌",
+    "setDefault": "設為預設"
+  },
+  "imagePicker": {
+    "unsupportedType": "不支援的檔案類型{type}。請使用PNG、JPEG、WebP或SVG。",
+    "tooLarge": "檔案過大（{size} KB），上限為2 MB。",
+    "replace": "更換圖片",
+    "choose": "選擇圖片",
+    "orDrop": "或拖放到這裡",
+    "previewAlt": "品牌預覽",
+    "crop": "裁切"
+  },
+  "signers": {
+    "title": "API金鑰",
+    "apiKeyButton": "為您的伺服器建立API金鑰",
+    "apiKeyExplainer": "適用於在自家伺服器上產生開發者JWT的應用程式。如要從主控台測試，請使用「複製JWT」。",
+    "generateApiKey": "產生API金鑰",
+    "checkingConsole": "正在檢查主控台存取權限…",
+    "signerAddress": "簽署者地址",
+    "signerAddressNote": "*這不是您的API金鑰。如果您遺失了API金鑰，需要重新產生一組。",
+    "enabledOn": "啟用日期",
+    "belongsTo": "所屬對象",
+    "assign": "指派",
+    "turnOffConsole": "關閉主控台存取權限",
+    "deleteKey": "刪除API金鑰",
+    "actionsFor": "{address}的操作",
+    "recordFailed": "金鑰可以正常使用，但我們無法記錄其使用對象。",
+    "saved": "已儲存此金鑰的使用對象。",
+    "signerInUse": "此地址是團隊成員的錢包。請前往「設定 → 團隊」，使用「授予」記錄。",
+    "saveFailed": "我們無法儲存，請再試一次。",
+    "generating": "正在為您的開發者授權產生API金鑰",
+    "consoleOffToast": "已關閉主控台存取權限。",
+    "keyDeletedToast": "已刪除API金鑰。已透過此金鑰核發的JWT在到期前仍可使用（最長14天）。",
+    "turnOffTitle": "要關閉主控台存取權限嗎？",
+    "deleteTitle": "確定要刪除此API金鑰嗎？",
+    "deleteKeySubtitle": "使用此金鑰的應用程式將無法再取得新的開發者JWT。已透過此金鑰核發的JWT在到期前仍可使用，最長14天。",
+    "consoleOffSubtitle": "主控台將停止為此授權產生開發者JWT。主控台已產生的JWT在到期前仍可使用，最長14天。",
+    "deleteLoading": "正在等待網路確認…"
+  },
+  "consoleAccess": {
+    "explainer": "主控台存取權限可讓此主控台為此授權產生開發者JWT，讓您無須建立API金鑰即可測試。開啟後，您的主控台金鑰會透過一筆交易新增為簽署者。",
+    "enable": "啟用主控台存取權限",
+    "enabling": "正在開啟主控台存取權限…",
+    "memberOff": "授權擁有者尚未開啟主控台存取權限。",
+    "notOwnerOnChain": "您的主控台錢包在鏈上並未擁有此授權，因此無法開啟主控台存取權限。",
+    "copyJwt": "複製JWT",
+    "noRedirectUri": "請在下方新增重新導向URI，以產生開發者JWT。",
+    "jwtCopied": "已複製JWT！",
+    "jwtFailed": "無法產生JWT，請再試一次。"
+  },
+  "belongsTo": {
+    "consoleYou": "主控台（您）",
+    "consoleWallet": "主控台錢包",
+    "notRecorded": "未記錄",
+    "unassigned": "未指派",
+    "assign": "指派",
+    "teamMember": "團隊成員",
+    "unknown": "未知",
+    "stillSyncing": "仍在同步",
+    "disabledOutside": "已在主控台外停用"
+  },
+  "keyHolders": {
+    "title": "此金鑰的使用對象是誰？",
+    "teamMembers": "團隊成員",
+    "others": "其他人（以逗號分隔）",
+    "note": "備註",
+    "chooseOne": "請至少選擇一位人員，或輸入名稱。",
+    "noteTooLong": "備註請少於{max}個字元。"
+  },
+  "apiKeyModal": {
+    "title": "已產生API金鑰",
+    "warning": "請務必立即複製您的API金鑰，之後將無法再次查看。",
+    "copied": "已複製API金鑰！"
+  },
+  "vehicles": {
+    "metadataTitle": "授權車輛 | {appName}",
+    "loadError": "擷取車輛詳細資料時發生錯誤",
+    "breadcrumbVehicles": "車輛",
+    "connectedVehicles": "已連接的車輛",
+    "testVehicles": "（{count, plural, other {#輛測試車輛}}）",
+    "vehicleDetails": "車輛詳細資料"
+  },
+  "renounce": {
+    "title": "要放棄車輛存取權限嗎？",
+    "tokenFallback": "Token #{tokenId}",
+    "tokenId": "Token ID：{tokenId}",
+    "warning": "您將失去此車輛的所有資料存取權限。車主需要重新授予存取權限。",
+    "action": "放棄存取權限",
+    "failed": "交易失敗"
+  },
+  "vehicleTable": {
+    "label": "共享的車輛",
+    "renounced": "已放棄存取權限",
+    "renounceFailed": "無法放棄存取權限",
+    "pageLoadFailed": "無法載入該頁面，請再試一次。",
+    "lookupFailed": "無法查詢車輛{tokenId}：{message}",
+    "noVehicle": "沒有Token ID為{tokenId}的車輛。",
+    "notShared": "車輛{tokenId}（{make} {model}）未與此授權共享。",
+    "error": "錯誤：{message}",
+    "rowActions": "列操作",
+    "simulated": "模擬",
+    "columns": {
+      "tokenDid": "車輛Token DID",
+      "mmy": "廠牌/車型/年份",
+      "sources": "來源",
+      "lastSeen": "最後回報時間"
+    },
+    "needsJwt": "需要開發者JWT",
+    "unavailable": "無法使用"
+  }
+}

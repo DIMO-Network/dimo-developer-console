@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Label } from '@/components/Label';
 import React, { FC } from 'react';
 import { useWebhookVehiclesById } from '@/hooks/queries/useWebhookVehiclesById';
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export const WebhookVehicles: FC<Props> = ({ clientId, webhookId }) => {
+  const t = useTranslations('common');
   const {
     formState: { isDirty },
   } = useFormContext<WebhookFormInput>();
@@ -25,16 +27,16 @@ export const WebhookVehicles: FC<Props> = ({ clientId, webhookId }) => {
 
   const goToSubscribedVehicles = () => {
     if (isDirty) {
-      return toast.error('Please save or discard your changes before proceeding');
+      return toast.error(t('webhooks.edit.saveFirst'));
     }
     setFormState(EditWebhookFormState.SUBSCRIBE_VEHICLES);
   };
 
-  const errorMsg = error ? 'Error fetching subscribed vehicles' : undefined;
+  const errorMsg = error ? t('webhooks.edit.vehiclesFetchError') : undefined;
 
   return (
     <div className={'flex flex-col gap-2.5'}>
-      <Label>Subscribed vehicles</Label>
+      <Label>{t('webhooks.edit.subscribedVehicles')}</Label>
       <div className={'h-14 bg-control flex items-center px-4 rounded-control'}>
         <WebhookVehiclesNumber
           isLoading={isLoading}
@@ -53,6 +55,7 @@ const WebhookVehiclesNumber: FC<{
   numVehicles: number;
   onEdit: () => void;
 }> = ({ isLoading, error, numVehicles, onEdit }) => {
+  const t = useTranslations('common');
   if (isLoading) {
     return <BubbleLoader isLoading isSmall />;
   }
@@ -61,7 +64,9 @@ const WebhookVehiclesNumber: FC<{
   }
   return (
     <div className={'flex flex-1 justify-between'}>
-      <p className={'text-body-sm text-fg'}>{numVehicles} vehicles</p>
+      <p className={'text-body-sm text-fg'}>
+        {t('webhooks.edit.vehicleCount', { count: numVehicles })}
+      </p>
       <button onClick={onEdit} type={'button'} className={'text-muted hover:text-ink'}>
         <EditIcon />
       </button>

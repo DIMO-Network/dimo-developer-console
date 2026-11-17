@@ -1,5 +1,6 @@
 'use client';
 import { FC, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/Modal';
 import { Button } from '@/components/Button';
 import { BeakerIcon } from '@heroicons/react/24/outline';
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export const VehicleSimulatorModal: FC<Props> = ({ clientId }) => {
+  const t = useTranslations('app');
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -21,7 +23,7 @@ export const VehicleSimulatorModal: FC<Props> = ({ clientId }) => {
         onClick={() => setIsOpen(true)}
       >
         <BeakerIcon className="h-4 w-4" />
-        Vehicle simulator
+        {t('simulator.open')}
       </Button>
       <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
         <VehicleSimulator clientId={clientId} />

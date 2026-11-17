@@ -1,5 +1,6 @@
 'use client';
 import { type FC, type FormEvent, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export const InviteMemberModal: FC<Props> = ({ isOpen, onClose, teamId, onInvited }) => {
+  const t = useTranslations('settings');
   const { trackEvent } = useMixPanel();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -39,16 +41,16 @@ export const InviteMemberModal: FC<Props> = ({ isOpen, onClose, teamId, onInvite
     try {
       const result = await inviteTeamMember(address);
       if (!result.ok) {
-        setError(inviteSendError(result, address));
+        setError(inviteSendError(result, address, t));
         return;
       }
       onInvited(result.data.member);
       trackEvent('Team Invite Sent', { teamId });
-      toast.success(`Invite sent to ${address}`);
+      toast.success(t('inviteModal.sent', { email: address }));
       setEmail('');
       onClose();
     } catch {
-      setError("We couldn't send the invite. Try again.");
+      setError(t('inviteError.default'));
     } finally {
       setBusy(false);
     }
@@ -58,14 +60,11 @@ export const InviteMemberModal: FC<Props> = ({ isOpen, onClose, teamId, onInvite
     <Modal isOpen={isOpen} setIsOpen={(open) => !open && close()} showClose={!busy}>
       <form className="flex flex-col gap-4" onSubmit={submit}>
         <Title component="h2" className="text-panel-title text-ink">
-          Invite a team member
+          {t('inviteModal.title')}
         </Title>
-        <p className="text-body-sm text-muted">
-          They&apos;ll see this team&apos;s licenses in the console. You choose separately
-          who gets data access.
-        </p>
+        <p className="text-body-sm text-muted">{t('inviteModal.description')}</p>
         <label htmlFor="invite-email" className="text-label text-muted">
-          Email
+          {t('inviteModal.emailLabel')}
         </label>
         <TextField
           id="invite-email"
@@ -80,7 +79,7 @@ export const InviteMemberModal: FC<Props> = ({ isOpen, onClose, teamId, onInvite
           </p>
         )}
         <Button type="submit" loading={busy} disabled={!email.trim()}>
-          Send invite
+          {t('inviteModal.send')}
         </Button>
       </form>
     </Modal>

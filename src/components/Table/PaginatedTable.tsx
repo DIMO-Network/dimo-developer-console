@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { flexRender, RowData } from '@tanstack/react-table';
 import {
@@ -21,6 +22,7 @@ export function PaginatedTable<T extends RowData>({
   data,
   columns,
 }: PaginatedTableProps<T>) {
+  const t = useTranslations('common');
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -36,6 +38,12 @@ export function PaginatedTable<T extends RowData>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  const summary = paginationSummary(
+    pagination.pageIndex,
+    pagination.pageSize,
+    data.length,
+  );
 
   return (
     <>
@@ -68,7 +76,7 @@ export function PaginatedTable<T extends RowData>({
         </table>
       </div>
       <div className="flex items-center justify-between text-sm text-muted">
-        <p>{paginationSummary(pagination.pageIndex, pagination.pageSize, data.length)}</p>
+        <p>{t(summary.key, summary.values)}</p>
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"

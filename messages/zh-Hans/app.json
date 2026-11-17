@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "title": "首页 | {appName}"
+  },
+  "home": {
+    "welcomeNamed": "欢迎，{name}",
+    "welcome": "欢迎！",
+    "wavingHandAlt": "挥手",
+    "shortcuts": {
+      "licenses": {
+        "label": "许可证",
+        "description": "查看和管理您的开发者许可证"
+      },
+      "connections": {
+        "label": "连接",
+        "description": "配置连接以接入您自己的数据"
+      },
+      "webhooks": {
+        "label": "Webhook",
+        "description": "创建和管理Webhook事件订阅"
+      },
+      "vehicles": {
+        "label": "车辆",
+        "description": "查看每辆共享车辆发送的数据并浏览其原始事件"
+      }
+    }
+  },
+  "list": {
+    "createLicense": "创建许可证",
+    "addCredits": "添加点数",
+    "empty": {
+      "title": "您还没有创建任何开发者许可证",
+      "description": "使用您的开发者许可证凭证与DIMO集成"
+    },
+    "dcx": {
+      "title": "什么是DCX？",
+      "description": "DCX是DIMO Credits（DIMO点数）的缩写。每个DIMO点数价格为$0.001，API调用及其他DIMO费用均以DCX计价。",
+      "learnMore": "了解更多。"
+    }
+  },
+  "create": {
+    "preparing": "正在准备创建开发者许可证",
+    "creating": "正在创建开发者许可证…",
+    "loading": "加载中",
+    "created": "开发者许可证已创建！请刷新页面查看更改。",
+    "nameInUse": "开发者许可证名称已被使用。请换一个名称重试。",
+    "failed": "确认交易时出了点问题",
+    "namePlaceholder": "我的项目"
+  },
+  "simulator": {
+    "open": "车辆模拟器",
+    "title": "车辆模拟器",
+    "subtitle": "铸造模拟测试车辆。",
+    "minting": "正在铸造车辆…",
+    "removing": "正在移除车辆…",
+    "mintFailed": "铸造失败",
+    "mintTokenUnreadable": "铸造成功，但无法读取车辆Token ID。请重试。",
+    "mintError": "铸造车辆时出了点问题",
+    "removeRecordFailed": "移除车辆记录失败",
+    "removeFailed": "移除车辆失败",
+    "noVehicle": "未配置车辆",
+    "limitReached": "已达上限 — 每个账号最多{max}辆",
+    "mint": "铸造车辆",
+    "steps": {
+      "region": "01 — 地区",
+      "make": "02 — 品牌",
+      "model": "03 — 车型",
+      "year": "04 — 年款"
+    },
+    "selectRegion": "选择地区",
+    "selectMake": "选择品牌",
+    "selectModel": "选择车型",
+    "selectYear": "选择年款",
+    "selectMakeFirst": "请先选择品牌",
+    "regions": {
+      "usa": {
+        "label": "美国",
+        "sub": "纽约路线"
+      },
+      "japan": {
+        "label": "日本",
+        "sub": "本州环线"
+      }
+    },
+    "fleet": {
+      "title": "模拟车队",
+      "count": "{count, plural, other {#辆车}}",
+      "removedOnChain": "已在链上移除",
+      "tokenId": "Token ID",
+      "remove": "移除车辆"
+    },
+    "notices": {
+      "notRecorded": "车辆#{tokenId}已铸造，但无法保存到此许可证。",
+      "notShared": "车辆#{tokenId}已铸造，但模拟器和此许可证均未获得其访问权限。请移除该车辆并重新铸造以解决此问题。",
+      "notRegistered": "车辆#{tokenId}已铸造，但模拟器无法启动它。",
+      "minted": "车辆铸造成功！",
+      "removed": "车辆已成功移除",
+      "removedNotBurned": "车辆已从模拟器中移除，但其NFT无法销毁。"
+    }
+  },
+  "error": {
+    "title": "出了点问题",
+    "description": "发生意外错误。请重试。",
+    "home": "返回首页",
+    "retry": "重试"
+  },
+  "notFound": {
+    "metadataTitle": "404 | {appName}",
+    "title": "页面未找到",
+    "description": "抱歉，我们找不到您要访问的页面。",
+    "home": "返回首页"
+  }
+}

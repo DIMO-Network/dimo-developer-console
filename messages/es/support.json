@@ -1,0 +1,17 @@
+{
+  "metadataTitle": "Soporte | {appName}",
+  "subtitle": "Selecciona una opción para que nuestro equipo de soporte pueda atender tu problema.",
+  "reportIssue": {
+    "title": "Reportar un problema",
+    "description": "Si tienes problemas inesperados con la DIMO API, contáctanos aquí.",
+    "statusNote": "Puedes consultar los problemas conocidos y las interrupciones en nuestra <statusLink>página de estado</statusLink>"
+  },
+  "faqs": {
+    "title": "Preguntas frecuentes",
+    "description": "Consulta nuestras preguntas frecuentes sobre dudas y problemas comunes que podrías tener."
+  },
+  "featureRequest": {
+    "title": "Solicitar una función",
+    "description": "Si tienes ideas, solicitudes o necesidades que la DIMO API aún no admite, nos encantaría saber de ti."
+  }
+}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { FormProvider, useForm } from 'react-hook-form';
 import React from 'react';
 import { WebhookFormInput, WebhookFormStepName } from '@/types/webhook';
@@ -10,6 +11,7 @@ import { WebhookDeliveryStep } from '@/components/Webhooks/create/Delivery';
 import { WebhookConfigStep } from '@/components/Webhooks/create/Configuration';
 import Footer from './Footer';
 import { useWebhookCreateFormContext } from '@/hoc/FormStepContextProvider';
+import { errorText } from '@/utils/localizedError';
 
 const FormStepComponent = () => {
   const { getCurrentStep } = useWebhookCreateFormContext();
@@ -35,6 +37,7 @@ export const NewWebhookForm = ({
   getToken: () => string;
   onExit: () => void;
 }) => {
+  const t = useTranslations('common');
   const {
     onPrevious,
     onNext,
@@ -70,11 +73,7 @@ export const NewWebhookForm = ({
       onNext();
     } catch (err) {
       captureException(err);
-      let msg = 'Something went wrong completing the operation';
-      if (err instanceof Error) {
-        msg = err.message || msg;
-      }
-      toast.error(msg);
+      toast.error(errorText(t, err, t('webhooks.form.genericError')));
     }
   });
 
@@ -96,8 +95,12 @@ export const NewWebhookForm = ({
           shouldSubmit={shouldSubmit}
           isValid={methods.formState.isValid}
           isSubmitting={methods.formState.isSubmitting}
-          prevButtonText={isFirstStep ? 'Cancel' : 'Previous'}
-          nextButtonText={isLastStep ? 'Finish' : 'Next'}
+          prevButtonText={
+            isFirstStep ? t('webhooks.form.cancel') : t('webhooks.form.previous')
+          }
+          nextButtonText={
+            isLastStep ? t('webhooks.form.finish') : t('webhooks.form.next')
+          }
         />
       </form>
     </FormProvider>

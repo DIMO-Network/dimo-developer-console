@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import React, {
   type ComponentType,
   type PropsWithChildren,
@@ -14,7 +15,6 @@ import { fetchApiResult } from '@/utils/fetchApiResult';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { useSignerRegistration } from '@/hooks/useSignerRegistration';
-import { removedFromTeam } from '@/config/teamCopy';
 import type { TeamSummary } from '@/types/team';
 import type { IUserSession } from '@/types/user';
 import { TeamApiError } from '@/utils/teamApiError';
@@ -42,8 +42,6 @@ export const MY_TEAMS_KEY = ['my-teams'];
 // instead of each waiting out the request again.
 const TEAMS_UNAVAILABLE_KEY = ['my-teams-unavailable'];
 const UNAVAILABLE_FOR_MS = 60_000;
-export const TEAMS_UNAVAILABLE =
-  "Couldn't load your teams. Showing your own licenses for now.";
 
 const flashAfterReload = (flash: Flash) => saveToSession(FLASH_KEY, flash);
 
@@ -54,9 +52,9 @@ const pickActive = (teams: TeamSummary[], cookieId: string | null) =>
   null;
 
 // Owners must not regress when console-api is down: their own wallet's licenses.
-const fallbackTeam = (user: IUserSession): TeamSummary => ({
+const fallbackTeam = (user: IUserSession, name: string): TeamSummary => ({
   id: FALLBACK_TEAM_ID,
-  name: 'Your team',
+  name,
   companyName: null,
   role: 'OWNER',
   ownerUserId: '',
@@ -66,6 +64,8 @@ const fallbackTeam = (user: IUserSession): TeamSummary => ({
 });
 
 export const TeamProvider = ({ children }: PropsWithChildren) => {
+  const t = useTranslations('common');
+  const fallbackName = t('team.fallbackName');
   const { currentUser } = useGlobalAccount();
   const { identifyUser, trackEvent } = useMixPanel();
   const queryClient = useQueryClient();
@@ -95,9 +95,9 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
     // No list (console-api down) or an empty one: the user's own wallet, as
     // before teams existed, so license lists don't wait for an owner forever.
     if (teamsUnavailable || (!isLoading && teams.length === 0))
-      return currentUser ? fallbackTeam(currentUser) : null;
+      return currentUser ? fallbackTeam(currentUser, fallbackName) : null;
     return teams.find((t) => t.id === activeId) ?? null;
-  }, [teams, activeId, teamsUnavailable, isLoading, currentUser]);
+  }, [teams, activeId, teamsUnavailable, isLoading, currentUser, fallbackName]);
 
   // Before children render: they read stored developer JWTs during this render
   // and in effects that run before the provider's own effects.
@@ -138,11 +138,14 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
   const reportRemoved = useCallback(() => {
     if (!activeTeam || activeTeam.isPersonal) return;
     const personal = teams.find((t) => t.isPersonal);
-    flashAfterReload({ tone: 'error', message: removedFromTeam(activeTeam.name) });
+    flashAfterReload({
+      tone: 'error',
+      message: t('teamCopy.removedFromTeam', { teamName: activeTeam.name }),
+    });
     if (personal) setActiveTeamCookie(personal.id);
     else clearActiveTeamCookie();
     hardNavigate('/app');
-  }, [activeTeam, teams]);
+  }, [activeTeam, teams, t]);
 
   // First load: the flash from the previous page, then the teams.
   useEffect(() => {
@@ -163,7 +166,7 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
         clearActiveTeamCookie();
         setTeamsUnavailable(true);
         setIsLoading(false);
-        toast.error(TEAMS_UNAVAILABLE);
+        toast.error(t('team.unavailable'));
         return;
       }
       setTeams(loaded);
@@ -175,7 +178,10 @@ export const TeamProvider = ({ children }: PropsWithChildren) => {
         const last = getFromLocalStorage<{ id: string; name: string }>(LAST_TEAM_KEY);
         flashAfterReload({
           tone: 'error',
-          message: removedFromTeam(last?.id === cookieId ? last.name : 'that team'),
+          message:
+            last?.id === cookieId
+              ? t('teamCopy.removedFromTeam', { teamName: last.name })
+              : t('teamCopy.removedFromThatTeam'),
         });
         if (active) setActiveTeamCookie(active.id);
         else clearActiveTeamCookie();

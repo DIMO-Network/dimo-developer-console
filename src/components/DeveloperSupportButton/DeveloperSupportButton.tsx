@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import { SupportAgentIcon } from '@/components/Icons';
 import { FC, useState } from 'react';
@@ -26,10 +27,11 @@ export const DeveloperSupportButton: FC<IProps> = ({ variant = 'small' }) => {
 };
 
 const SupportAgentWithTextButton: FC<{ onClick: () => void }> = ({ onClick }) => {
+  const t = useTranslations('common');
   return (
     <Button variant="secondary" onClick={onClick}>
       <SupportAgentIcon className="h-5 w-5" color="currentColor" />
-      Developer support
+      {t('support.developerSupport')}
     </Button>
   );
 };

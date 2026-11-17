@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { type FC } from 'react';
 import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Modal } from '@/components/Modal';
@@ -19,9 +20,10 @@ interface IProps extends LoadingProps {
 export const LoadingModal: FC<IProps> = ({
   isOpen,
   setIsOpen,
-  label = 'Processing',
+  label,
   status = 'loading',
 }) => {
+  const t = useTranslations('common');
   return (
     <Modal
       isOpen={isOpen}
@@ -33,7 +35,7 @@ export const LoadingModal: FC<IProps> = ({
         {status === 'loading' && <BubbleLoader isLoading />}
         {status === 'success' && <CheckIcon className="h-8 w-8 text-positive" />}
         {status === 'error' && <XMarkIcon className="h-8 w-8 text-negative" />}
-        <p className="description">{label}</p>
+        <p className="description">{label ?? t('loadingModal.processing')}</p>
       </div>
     </Modal>
   );

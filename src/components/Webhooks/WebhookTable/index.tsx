@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React from 'react';
 import { useWebhooks } from '@/hooks/queries/useWebhooks';
 import { Loader } from '@/components/Loader';
@@ -11,6 +12,7 @@ interface WebhookTableProps {
 }
 
 export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
+  const t = useTranslations('common');
   const { data, isLoading, error } = useWebhooks(clientId);
 
   if (isLoading) {
@@ -18,13 +20,11 @@ export const WebhookTable: React.FC<WebhookTableProps> = ({ clientId }) => {
   }
 
   if (error) {
-    return <p>There was an error fetching your webhooks</p>;
+    return <p>{t('webhooks.table.fetchError')}</p>;
   }
 
   if (!data || data.length === 0) {
-    return (
-      <p className="text-muted text-center pb-4">You haven’t created any webhooks yet.</p>
-    );
+    return <p className="text-muted text-center pb-4">{t('webhooks.table.empty')}</p>;
   }
 
   return (

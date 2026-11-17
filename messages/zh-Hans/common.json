@@ -1,0 +1,749 @@
+{
+  "languageSwitcher": {
+    "label": "语言"
+  },
+  "actions": {
+    "close": "关闭",
+    "cancel": "取消",
+    "confirm": "确认",
+    "copy": "复制",
+    "saveChanges": "保存更改",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "continue": "继续",
+    "done": "完成",
+    "submit": "提交",
+    "retry": "重试",
+    "remove": "移除",
+    "add": "添加",
+    "create": "创建",
+    "download": "下载",
+    "learnMore": "了解更多",
+    "signOut": "退出登录",
+    "refresh": "刷新"
+  },
+  "accountInfo": {
+    "button": "账号信息",
+    "title": "账号信息",
+    "modalTitle": "账号信息",
+    "ownerEmail": "所有者邮箱",
+    "walletAddress": "组织钱包地址",
+    "walletCopied": "钱包地址已复制到剪贴板",
+    "balancesError": "加载余额时出错",
+    "balancesLoading": "正在加载您的余额…"
+  },
+  "appCard": {
+    "details": "应用详情"
+  },
+  "brand": {
+    "dimoLogoAlt": "DIMO"
+  },
+  "copyButton": {
+    "copied": "已复制到剪贴板",
+    "failed": "复制失败"
+  },
+  "createAppModal": {
+    "title": "创建新的开发者许可证"
+  },
+  "creditsWidget": {
+    "currentBalance": "当前余额"
+  },
+  "support": {
+    "developerSupport": "开发者支持"
+  },
+  "buyCredits": {
+    "title": "购买DCX",
+    "pricing": "<description>访问一辆车的基础价格为每月$1.25。</description><link>了解更多。</link>",
+    "amountLabel": "购买金额",
+    "amountPositive": "金额必须大于0",
+    "amountMin": "最低金额为$10.00",
+    "forAnotherAccount": "为其他账号购买",
+    "accountAddress": "账号地址",
+    "invalidAddress": "无效的以太坊地址",
+    "proceed": "前往支付"
+  },
+  "csvUpload": {
+    "oneFileOnly": "一次只能上传一个文件",
+    "duplicate": "重复上传文件",
+    "tooLarge": "文件超过50MB限制。",
+    "onlyCsv": "仅支持.csv文件。",
+    "invalidFormat": "CSV格式无效。",
+    "numericTokenId": "每一行都必须包含数字格式的{header}。",
+    "parseFailed": "CSV解析失败。",
+    "listTitle": "车辆列表",
+    "vehicleCount": "{count, plural, other {#辆车}}",
+    "addVehicles": "添加车辆",
+    "dropPrompt": "拖放或上传包含车辆ID列表的CSV文件",
+    "formatHint": "请将CSV设置为单列格式，表头为<code>{header}</code>。",
+    "accepts": "支持.csv文件类型",
+    "maxSize": "文件大小上限为50 MB。",
+    "upload": "上传"
+  },
+  "datePicker": {
+    "previousMonth": "上个月",
+    "nextMonth": "下个月",
+    "weekdays": {
+      "sun": "日",
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六"
+    }
+  },
+  "devSupportForm": {
+    "userName": "用户名",
+    "inquiryType": "咨询类型",
+    "inquiryPlaceholder": "选择咨询类型",
+    "message": "消息",
+    "messagePlaceholder": "请告诉我们如何为您提供帮助…",
+    "messageTooLong": "消息最多500个字符",
+    "submit": "提交"
+  },
+  "validation": {
+    "required": "此字段为必填项",
+    "invalidUrl": "请输入有效的URL",
+    "invalidNumber": "请输入有效的数字"
+  },
+  "generateJwt": {
+    "button": "生成开发者JWT",
+    "apiKeyRequired": "请输入有效的API密钥",
+    "failed": "生成开发者JWT失败",
+    "titleDone": "JWT已生成",
+    "titleNew": "生成新JWT",
+    "subtitle": "测试您为服务器创建的API密钥：系统会用它和该许可证的第一个重定向URI生成开发者JWT。如需在没有API密钥的情况下获取JWT，请开启控制台访问并使用“复制JWT”。",
+    "generating": "正在生成JWT…",
+    "apiKeyLabel": "API密钥",
+    "apiKeyPlaceholder": "在此输入您的API密钥",
+    "done": "完成",
+    "generate": "生成",
+    "expires": "14天后过期。",
+    "copied": "JWT已复制！"
+  },
+  "jsonBlock": {
+    "download": "下载JSON",
+    "copied": "JSON已复制",
+    "copyLabel": "复制JSON"
+  },
+  "licenseCard": {
+    "vehiclesConnected": "已连接车辆",
+    "noVehicles": "没有已连接的车辆",
+    "sharingUnavailable": "共享状态不可用",
+    "configurations": "{count, plural, other {#个配置}} →",
+    "sharingCopied": "共享链接已复制",
+    "sharingLink": "车辆共享链接",
+    "notConfigured": "未配置 — 设置车辆共享 →",
+    "details": "许可证详情"
+  },
+  "menu": {
+    "logout": "退出登录",
+    "signingOut": "正在退出登录",
+    "open": "打开菜单",
+    "expand": "展开侧边栏",
+    "collapse": "收起侧边栏"
+  },
+  "onboarding": {
+    "title": "快速入门",
+    "intro": "您即将开始使用DIMO进行开发！",
+    "createAccount": "创建账号",
+    "confirmDetails": "确认您的信息",
+    "createLicense": "创建您的第一个许可证",
+    "createLicenseHint": "您的账号已设置完毕，现在来创建您的第一个许可证吧。"
+  },
+  "navigation": {
+    "sections": {
+      "workspace": "工作区",
+      "resources": "资源"
+    },
+    "items": {
+      "home": "首页",
+      "licenses": "许可证",
+      "vehicles": "车辆",
+      "webhooks": "Webhook",
+      "templates": "模板",
+      "connections": "连接",
+      "documentation": "文档",
+      "apiStatus": "API状态",
+      "settings": "设置"
+    },
+    "pageTitles": {
+      "home": "首页",
+      "licenses": "许可证",
+      "webhooks": "Webhook",
+      "templates": "车辆模板",
+      "connections": "连接",
+      "settings": "设置",
+      "vehicles": "车辆",
+      "support": "支持",
+      "vehicle": "车辆",
+      "licenseDetails": "许可证详情",
+      "sdkConfigurator": "SDK配置器",
+      "licensedVehicles": "已授权车辆",
+      "createWebhook": "创建Webhook",
+      "editWebhook": "编辑Webhook",
+      "createConnection": "创建连接",
+      "connectionDetails": "连接详情",
+      "newTemplate": "新建模板",
+      "editTemplate": "编辑模板"
+    }
+  },
+  "paymentMethod": {
+    "dimo": "使用DIMO购买",
+    "usd": "使用美元购买"
+  },
+  "pendingInvite": {
+    "alreadyMember": "您已经是该团队的成员。",
+    "title": "加入{ownerEmail}拥有的{teamName}？",
+    "description": "您将能看到该团队的许可证。是否同时获得数据访问权限由所有者决定。",
+    "join": "加入团队",
+    "notNow": "以后再说",
+    "errors": {
+      "INVITE_INVALID": "此邀请链接已失效。请向团队所有者索取新链接。",
+      "INVITE_EXPIRED": "此邀请已过期。请让团队所有者重新发送。",
+      "INVITE_EMAIL_MISMATCH": "此邀请发送到了其他邮箱地址。请使用该地址登录，然后重新打开邀请链接。",
+      "fallback": "我们无法接受此邀请。请重新打开链接。"
+    }
+  },
+  "queryActions": {
+    "copied": "查询已复制",
+    "copyFailed": "无法复制查询",
+    "copy": "复制查询",
+    "download": "下载JSON"
+  },
+  "redirectUri": {
+    "added": "已成功添加重定向URI。",
+    "createFailed": "创建重定向URI时出了点问题",
+    "invalidUrl": "请输入有效的URL，必须包含http://或https://",
+    "duplicate": "该URL已在列表中",
+    "required": "请输入重定向URI",
+    "tooLong": "名称最多150个字符",
+    "add": "添加URI",
+    "deleting": "正在删除所选重定向URI",
+    "deleted": "重定向URI已删除",
+    "copied": "重定向URI已复制！",
+    "deleteTitle": "删除重定向URI",
+    "authorized": "已授权的URI",
+    "confirmTitle": "确定要删除此重定向URI吗？",
+    "confirmSubtitle": "您将无法再在应用中使用此重定向URI。"
+  },
+  "errors": {
+    "transactionDenied": "交易已被拒绝",
+    "somethingWentWrong": "出了点问题",
+    "emailRegistered": "该邮箱已注册",
+    "sessionExpired": "会话已过期，请重新登录",
+    "tryAgain": "请重试",
+    "transactionFailedOnChain": "交易在链上失败，未做任何更改",
+    "generic": "出了点问题，请重试。",
+    "unknown": "未知错误",
+    "notFound": "未找到",
+    "loadFailed": "无法加载此内容。请重试。",
+    "copyFailed": "复制到剪贴板失败"
+  },
+  "sessionExpired": {
+    "errors": {
+      "passkeyFailed": "无法确认您的通行密钥。请重试，或使用邮箱验证码。",
+      "codeFailed": "验证码无效。请检查后重试。",
+      "codeCheckFailed": "无法验证该验证码。请重试。",
+      "sendFailed": "无法发送验证码。请重试。",
+      "renewFailed": "无法为您重新登录。请重试，或退出登录。",
+      "startAgain": "耗时过长。请重新开始。",
+      "signedInElsewhere": "此浏览器上已登录另一个账号。请退出登录以切换账号。"
+    },
+    "tryAgain": "重试",
+    "startOver": "重新开始",
+    "codeSent": "我们已向{email}发送了6位验证码。",
+    "codeLabel": "验证码",
+    "continue": "继续",
+    "resendIn": "{seconds}秒后可发送新验证码",
+    "resend": "发送新验证码",
+    "withPasskey": "使用通行密钥继续",
+    "emailInstead": "改为通过邮件接收验证码",
+    "emailCode": "通过邮件发送验证码",
+    "title": "您的会话已过期",
+    "description": "请以{email}重新登录以继续操作。您将停留在此页面。",
+    "signOut": "退出登录"
+  },
+  "spendingLimit": {
+    "failed": "确认交易时出了点问题",
+    "title": "设置支出限额",
+    "description": "批准开发者许可证使用您所连接钱包中的$DIMO，我们建议批准价值超过$100美元的$DIMO"
+  },
+  "theme": {
+    "light": "浅色模式",
+    "dark": "深色模式",
+    "switchToLight": "切换到浅色模式",
+    "switchToDark": "切换到深色模式"
+  },
+  "team": {
+    "switcher": "团队",
+    "switchLabel": "团队：{name}。切换团队",
+    "roles": {
+      "OWNER": "所有者",
+      "MEMBER": "成员"
+    },
+    "fallbackName": "您的团队",
+    "unavailable": "无法加载您的团队。暂时显示您自己的许可证。"
+  },
+  "templateEditor": {
+    "divergence": {
+      "setPerTrim": "按车款设置",
+      "shared": "通用",
+      "moveToShared": "改为通用"
+    },
+    "trim": {
+      "nameLabel": "车款名称",
+      "remove": "移除车款",
+      "manufacturerCode": "制造商代码",
+      "styleName": "款式名称",
+      "vinPattern": "VIN模式",
+      "selectorMissing": "包含多个车款的模板中不能有缺少选择器的车款：它会匹配所有信号，导致此车型年款的每次解码都无法确定。请为此车款指定制造商代码、款式名称或VIN模式。"
+    },
+    "entitlement": {
+      "create": "您可以创建此模板",
+      "licensed": "您可以编辑此模板",
+      "manufacturer": "您可以编辑此模板",
+      "curator": "您可以编辑此处的所有内容",
+      "license-required": "需要开发者许可证",
+      "unavailable": "无法检查访问权限",
+      "readOnly": "{title} — 只读",
+      "hardwareLocked": "车辆随附哪种硬件由DIMO决定，因此硬件模板字段保持锁定。",
+      "reason": {
+        "curator": "您是DIMO审核员，因此这里的所有内容都不会对您锁定。",
+        "licenseUnavailable": "我们暂时无法检查您的DIMO开发者许可证，因此所有内容均不可编辑。请稍后重新加载，问题应会消除。",
+        "create": "{via, select, owner {您持有DIMO开发者许可证{license}。此车型年款尚未发布任何内容，您将编写第一个版本。} other {您是DIMO开发者许可证{license}的签名者。此车型年款尚未发布任何内容，您将编写第一个版本。}}",
+        "licensed": "{via, select, owner {您持有DIMO开发者许可证{license}，这样即可在此发布更改。} other {您是DIMO开发者许可证{license}的签名者，这样即可在此发布更改。}}",
+        "manufacturerUnavailable": "我们暂时无法检查谁持有该品牌的制造商NFT。请稍后重新加载，问题应会消除。",
+        "manufacturer": "您持有{make}制造商NFT（#{tokenId}），因此您可以编辑该品牌。",
+        "licenseRequired": "编辑模板需要DIMO开发者许可证，而此账号既未持有许可证，也不是任何许可证的签名者。请在“开发者许可证”下创建一个，然后重新加载此页面。",
+        "license": "#{tokenId}",
+        "licenseWithAlias": "#{tokenId}，{alias}",
+        "vehicles": "{count, plural, =0 {尚无车辆使用它。} =1 {已有一辆车在使用它，因此发布将改变对该车辆的描述。} other {已有#辆车在使用它，因此发布将改变对所有这些车辆的描述。}}",
+        "vehiclesUnknown": "我们无法检查有多少车辆使用此定义，因此请假定已有部分车辆在使用。",
+        "withVehicles": "{reason}{vehicles}"
+      }
+    },
+    "normalisation": {
+      "title": "编辑器自动做出的更改",
+      "dismiss": "关闭"
+    },
+    "notes": {
+      "cleared": "已清除：该属性已被移除，而不是存储为空值",
+      "storedAsNumber": "已存储为数字{value}，而非文本{text}",
+      "whitespace": "已移除首尾空白"
+    },
+    "where": {
+      "templateCell": "模板{label}",
+      "trimCell": "车款{name}的{label}"
+    },
+    "grid": {
+      "attribute": "属性",
+      "values": "值",
+      "noSelector": "无选择器"
+    }
+  },
+  "toggle": {
+    "label": "切换"
+  },
+  "timeRange": {
+    "range": "范围",
+    "presets": {
+      "24h": "24小时",
+      "7d": "7天",
+      "30d": "30天",
+      "custom": "自定义"
+    },
+    "from": "开始（UTC）",
+    "to": "结束（UTC）",
+    "invalid": "开始时间必须早于结束时间。"
+  },
+  "signIn": {
+    "acceptTerms": "您必须接受服务条款和隐私政策"
+  },
+  "vehicleTokenIds": {
+    "placeholder": "输入车辆Token ID，每行一个或用逗号分隔",
+    "label": "车辆Token ID",
+    "invalid": "无效的Token ID：“{id}”。所有Token ID都必须为数字。",
+    "tooMany": "Token ID过多。最多允许1000个ID。",
+    "entered": "已输入{count, plural, other {#个Token ID}}",
+    "enteredUnique": "已输入{count, plural, other {#个Token ID}}（{unique}个不重复）",
+    "helpIntro": "您可以通过以下方式输入车辆Token ID：",
+    "helpPerLine": "每行一个：12345, 67890, 11111",
+    "helpComma": "逗号分隔：12345, 67890, 11111",
+    "helpMixed": "也支持混合格式"
+  },
+  "assetDids": {
+    "placeholder": "输入车辆DID，每行一个或用逗号分隔",
+    "label": "资产DID",
+    "empty": "资产DID不能为空。",
+    "tooLong": "资产DID过长：“{id}”。最大长度为200个字符。",
+    "tooMany": "车辆DID过多。最多允许1000个DID。",
+    "entered": "已输入{count, plural, other {#个资产DID}}",
+    "enteredUnique": "已输入{count, plural, other {#个资产DID}}（{unique}个不重复）",
+    "helpIntro": "您可以通过以下方式输入车辆DID：",
+    "helpPerLine": "每行一个：",
+    "helpComma": "逗号分隔："
+  },
+  "workspaceName": {
+    "updated": "开发者许可证名称已成功更新。请刷新以查看更改。",
+    "inUse": "开发者许可证名称已被使用。请换一个名称重试。",
+    "failed": "更新开发者许可证名称失败",
+    "title": "编辑开发者许可证名称",
+    "label": "开发者许可证名称",
+    "required": "开发者许可证名称为必填项",
+    "placeholder": "输入开发者许可证名称",
+    "description": "这是您所有应用共用的命名空间。它是一个公开名称，生态系统中的其他开发者和用户都可以看到。"
+  },
+  "licenseAlias": {
+    "tooLong": "最多使用32个字符。带重音符号的字母和表情符号会占用多个字符。"
+  },
+  "dataAccess": {
+    "connectWallet": "连接您的钱包",
+    "connectFailed": "无法连接您的钱包。请重试。",
+    "connectPrompt": "连接您的钱包以读取{license}。团队所有者已授予您的钱包访问权限，令牌仅保存在此浏览器中。"
+  },
+  "memberJwt": {
+    "sessionExpired": "您的会话已过期。请重新登录。",
+    "challengeFailed": "{status, select, none {无法开始连接此许可证（无响应）。请重试。} other {无法开始连接此许可证（{status}）。请重试。}}",
+    "connectFailed": "{status, select, none {无法连接您的钱包（无响应）。请重试。} other {无法连接您的钱包（{status}）。请重试。}}",
+    "propagating": "访问权限仍在生效中 — 请一分钟后重试"
+  },
+  "teamCopy": {
+    "grantWarning": "数据访问权限允许{name}通过DIMO API使用车辆授予{license}的所有权限，包括车辆指令 — 而不仅仅是控制台中显示的内容。其查询将消耗{license}的DCX点数。",
+    "askForAccess": "请向{ownerEmail}申请{license}的数据访问权限。",
+    "noLongerHasAccess": "您已不再拥有此许可证的访问权限。",
+    "dataAccessUnavailable": "团队成员的数据访问功能暂不可用。",
+    "removedFromTeam": "您已不再是{teamName}的成员。",
+    "removedFromThatTeam": "您已不再是该团队的成员。",
+    "signerLocked": "您的访问权限已绑定到另一个钱包。请先让{ownerEmail}撤销它。",
+    "signerLockedNoOwner": "您的访问权限已绑定到另一个钱包。请先让团队所有者撤销它。",
+    "leaveConfirm": "要离开{teamName}吗？系统将请{ownerEmail}撤销您的数据访问权限。",
+    "signerInUse": "此钱包已被记录为他人的密钥，因此无法用于数据访问。请联系DIMO支持。"
+  },
+  "webhooks": {
+    "table": {
+      "fetchError": "获取您的Webhook时出错",
+      "empty": "您还没有创建任何Webhook。",
+      "description": "描述",
+      "displayName": "显示名称",
+      "service": "服务",
+      "cooldown": "冷却时间",
+      "vehicles": "车辆",
+      "errors": "错误",
+      "status": "状态"
+    },
+    "form": {
+      "genericError": "完成操作时出了点问题",
+      "cancel": "取消",
+      "previous": "上一步",
+      "finish": "完成",
+      "next": "下一步"
+    },
+    "edit": {
+      "title": "编辑Webhook",
+      "updated": "Webhook已成功更新",
+      "updateFailed": "更新Webhook时出错",
+      "saveFirst": "请先保存或放弃您的更改，然后再继续",
+      "vehiclesFetchError": "获取已订阅车辆时出错",
+      "subscribedVehicles": "已订阅车辆",
+      "vehicleCount": "{count, plural, other {#辆车}}",
+      "enterAssetDid": "请至少输入一个资产DID。",
+      "unsubscribeFailed": "取消订阅车辆失败。请重试。",
+      "unsubscribedCount": "{count, plural, other {已成功取消订阅#辆车}}",
+      "removeTitle": "移除车辆",
+      "removeDidsLabel": "要取消订阅的资产DID",
+      "removeDidsPlaceholder": "输入要从此Webhook取消订阅的资产DID",
+      "removing": "正在移除…",
+      "removeCount": "{count, plural, other {移除#辆车}}",
+      "subscribeFailed": "订阅车辆失败。请重试。",
+      "subscribedCount": "{count, plural, other {已成功订阅#辆车}}",
+      "addTitle": "添加车辆",
+      "addDidsLabel": "要订阅的资产DID",
+      "addDidsPlaceholder": "输入要订阅此Webhook的资产DID",
+      "adding": "正在添加…",
+      "addCount": "{count, plural, other {添加#辆车}}",
+      "vehicleTokenId": "车辆Token ID",
+      "fetchWebhookError": "获取Webhook时出错",
+      "notFound": "未找到Webhook",
+      "subscribedAll": "已成功订阅所有车辆",
+      "subscribeAllFailed": "订阅所有车辆失败",
+      "whoToSubscribe": "您想订阅哪些车辆？",
+      "manualControls": "手动控制",
+      "manualControlsHint": "手动订阅或取消订阅与此Webhook关联的所有车辆。",
+      "subscribing": "正在订阅…",
+      "subscribeAll": "订阅所有车辆",
+      "unsubscribeAll": "取消订阅所有车辆",
+      "downloadCsv": "下载CSV",
+      "unsubscribeVehicles": "取消订阅车辆",
+      "unsubscribedAll": "已成功取消订阅所有车辆。",
+      "unsubscribeAllFailed": "取消订阅所有车辆时出错。",
+      "unsubscribeAllConfirm": "确定要取消订阅所有已订阅的车辆吗？此操作无法撤消。",
+      "unsubscribing": "正在取消订阅…",
+      "unsubscribeAllButton": "全部取消订阅",
+      "button": "编辑"
+    },
+    "delete": {
+      "mustUnsubscribe": "删除前必须取消订阅所有车辆",
+      "deleted": "已成功删除Webhook",
+      "error": "删除您的Webhook时出错",
+      "deleting": "正在删除Webhook…",
+      "success": "成功",
+      "title": "删除Webhook",
+      "successBody": "Webhook已成功删除",
+      "confirm": "确定要删除此Webhook吗？此操作无法撤消。",
+      "done": "完成",
+      "button": "删除"
+    },
+    "test": {
+      "triggered": "Webhook已成功触发。",
+      "axiosError": "测试Webhook时出错",
+      "error": "测试您的Webhook时出错",
+      "sending": "正在发送测试…",
+      "title": "测试Webhook",
+      "confirm": "要测试此Webhook吗？系统将向指定的目标URI发送一次测试。",
+      "send": "发送测试"
+    },
+    "licenseSelector": {
+      "placeholder": "选择开发者许可证",
+      "label": "选择开发者许可证"
+    },
+    "details": {
+      "description": "描述",
+      "displayName": "显示名称",
+      "service": "服务",
+      "cooldownPeriod": "冷却时间",
+      "url": "Webhook URL",
+      "status": "状态",
+      "cooldown": "冷却时间",
+      "cooldownSeconds": "{seconds}秒"
+    },
+    "generateJwt": {
+      "message": "请生成开发者JWT以查看您的Webhook配置。",
+      "consoleAccessPending": "正在通过控制台访问获取开发者JWT…",
+      "consoleAccessFailed": "无法通过控制台访问获取开发者JWT。请改用API密钥。"
+    },
+    "status": {
+      "enabled": "已启用",
+      "disabled": "已停用",
+      "failed": "失败"
+    },
+    "statusToggle": {
+      "label": "状态"
+    },
+    "section": {
+      "title": "Webhook",
+      "create": "+ 创建Webhook"
+    },
+    "url": {
+      "label": "Webhook URL"
+    },
+    "toggle": {
+      "updating": "{status, select, enabled {正在将Webhook状态更新为已启用} other {正在将Webhook状态更新为已停用}}",
+      "updated": "已成功更新Webhook状态",
+      "failed": "更新Webhook状态失败"
+    },
+    "fields": {
+      "description": {
+        "label": "Webhook描述",
+        "required": "请输入Webhook描述",
+        "placeholder": "输入Webhook的描述"
+      },
+      "displayName": {
+        "label": "显示名称",
+        "placeholder": "输入Webhook的显示名称（可选）"
+      },
+      "cooldown": {
+        "label": "冷却时间",
+        "required": "请输入以秒为单位的冷却时间",
+        "invalidNumber": "请输入有效的数字",
+        "negative": "冷却时间必须大于或等于0",
+        "tooLong": "冷却时间不能超过86400秒（24小时）",
+        "placeholder": "输入以秒为单位的冷却时间（例如30）",
+        "hint": "同一事件两次Webhook调用之间的最短间隔（0表示实时）"
+      },
+      "service": {
+        "label": "服务",
+        "placeholder": "选择服务",
+        "required": "请选择Webhook服务"
+      },
+      "targetUrl": {
+        "label": "Webhook URL",
+        "invalid": "请输入有效的URL",
+        "needsProtocol": "请输入有效的URL，必须包含http://或https://",
+        "placeholder": "输入您希望接收事件的URL",
+        "hint": "输入一个公开且启用SSL的URL，用于接收事件"
+      },
+      "verification": {
+        "label": "验证令牌",
+        "required": "请输入有效的字符串",
+        "placeholder": "输入验证令牌",
+        "hint": "任意选择一个唯一字符串，用于验证您对Webhook URL的所有权。我们发送验证请求时，您的服务器必须以纯文本形式原样返回此字符串。这可确保目标URL由您控制。"
+      },
+      "subscribe": {
+        "question": "您想订阅哪些车辆？",
+        "all": "订阅所有现有车辆",
+        "specificLabel": "选择特定车辆",
+        "specificPlaceholder": "输入要订阅此Webhook的车辆资产DID"
+      }
+    },
+    "celBuilder": {
+      "selectEvent": "选择事件",
+      "buildConditions": "构建条件",
+      "selectAttribute": "选择属性",
+      "selectEventPlaceholder": "选择事件",
+      "selectOperator": "选择运算符",
+      "enterNumber": "输入数字",
+      "selectValue": "选择值",
+      "generate": "生成CEL",
+      "true": "是",
+      "false": "否",
+      "operators": {
+        "equal": "等于",
+        "greater": "大于",
+        "less": "小于"
+      }
+    },
+    "validation": {
+      "valueRequired": "值为必填项",
+      "selectEvent": "请选择事件名称",
+      "oneCondition": "必须恰好有一个CEL条件",
+      "completeConditions": "保存前请填写所有条件字段。"
+    },
+    "events": {
+      "harshBraking": "急刹车",
+      "extremeBraking": "急刹车",
+      "harshAcceleration": "急加速",
+      "harshCornering": "急转弯",
+      "collision": "碰撞"
+    },
+    "conditions": {
+      "speed": "速度",
+      "obdIsPluggedIn": "设备已插入",
+      "isIgnitionOn": "点火开关是否开启",
+      "batteryCurrentPower": "电池当前功率",
+      "batteryIsCharging": "电池正在充电",
+      "odometer": "里程表",
+      "chargeLevel": "电量",
+      "fuelRelative": "燃油系统相对液位",
+      "fuelAbsolute": "燃油系统绝对液位",
+      "tireFrontLeft": "胎压（左前）",
+      "tireFrontRight": "胎压（右前）",
+      "tireBackLeft": "胎压（左后）",
+      "tireBackRight": "胎压（右后）",
+      "engineSpeed": "发动机转速",
+      "throttlePosition": "节气门位置"
+    },
+    "steps": {
+      "configure": "配置",
+      "delivery": "设置投递方式",
+      "vehicles": "指定车辆"
+    },
+    "create": {
+      "created": "Webhook创建成功",
+      "noVehicles": "未订阅任何车辆",
+      "subscribedCount": "{count, plural, other {已成功订阅#辆车}}"
+    },
+    "service": {
+      "signals": "VSS信号",
+      "events": "事件"
+    }
+  },
+  "freshness": {
+    "never": "从未",
+    "justNow": "刚刚",
+    "minutesAgo": "{count, number}分钟前",
+    "hoursAgo": "{count, number}小时前",
+    "daysAgo": "{count, plural, other {#天前}}",
+    "absolute": "{date} {time} UTC",
+    "noDate": "—"
+  },
+  "loadingModal": {
+    "processing": "处理中"
+  },
+  "modal": {
+    "dialog": "对话框"
+  },
+  "table": {
+    "showingNone": "显示0项，共0项",
+    "showing": "显示第{first, number}–{last, number}项，共{total, number}项",
+    "label": "表格"
+  },
+  "transactions": {
+    "insufficientBalance": "DIMO或DCX余额不足",
+    "connectionNameTooLong": "连接名称过长，请使用不超过32个字符的名称。",
+    "balanceCheckFailed": "无法检查您的DIMO余额，请重试。",
+    "insufficientDimo": "DIMO余额不足。铸造连接至少需要{required, number, ::.00}个DIMO代币（约${usd, number}）。",
+    "notEnoughDimo": "您的$DIMO不足，无法铸造连接。",
+    "connectionNameTaken": "此连接名称已被占用，请换一个名称后重试。"
+  },
+  "signals": {
+    "speed": "速度",
+    "powertrainTransmissionTravelledDistance": "里程表",
+    "powertrainCombustionEngineSpeed": "发动机转速",
+    "powertrainFuelSystemRelativeLevel": "燃油量",
+    "powertrainRange": "续航里程",
+    "powertrainTractionBatteryStateOfChargeCurrent": "电池电量",
+    "powertrainTractionBatteryChargingIsCharging": "充电中",
+    "currentLocationCoordinates": "位置",
+    "currentLocationApproximateCoordinates": "大致位置",
+    "currentLocationLatitude": "纬度",
+    "currentLocationLongitude": "经度",
+    "obdDTCList": "故障诊断码",
+    "obdEngineLoad": "发动机负荷",
+    "obdRunTime": "发动机运行时间",
+    "lowVoltageBatteryCurrentVoltage": "12V电池电压",
+    "exteriorAirTemperature": "车外气温",
+    "isIgnitionOn": "点火开关开启"
+  },
+  "permissions": {
+    "1": "非位置数据",
+    "2": "命令",
+    "3": "当前位置",
+    "4": "全部历史位置",
+    "5": "VIN凭证",
+    "6": "实时数据",
+    "7": "原始数据",
+    "8": "大致位置",
+    "unknown": "权限{id}"
+  },
+  "status": {
+    "loading": "加载中…",
+    "saving": "保存中…",
+    "success": "成功",
+    "copied": "已复制"
+  },
+  "pagination": {
+    "previous": "上一页",
+    "next": "下一页",
+    "page": "第{page}页"
+  },
+  "ownerOnly": {
+    "webhooks": {
+      "title": "Webhook由团队所有者管理",
+      "body": "{ownerEmail}负责管理{team}的Webhook。切换到您自己的团队，即可管理您许可证的Webhook。"
+    },
+    "connections": {
+      "title": "连接由团队所有者管理",
+      "body": "{ownerEmail}负责管理{team}的连接。切换到您自己的团队，即可管理您许可证的连接。"
+    },
+    "configurations": {
+      "title": "配置由团队所有者管理",
+      "body": "{ownerEmail}负责管理{team}的配置。切换到您自己的团队，即可管理您许可证的配置。"
+    }
+  },
+  "otp": {
+    "title": "欢迎回来！",
+    "enterCode": "请输入发送至<strong>{email}</strong>的验证码",
+    "signIn": "登录",
+    "resendCode": "重新发送验证码",
+    "invalidCode": "验证码无效",
+    "loginFailed": "使用验证码登录失败",
+    "resent": "新验证码已发送至您的邮箱",
+    "resendFailed": "重新发送验证码失败",
+    "troubleLoggingIn": "登录遇到问题？<support>获取支持</support>"
+  }
+}

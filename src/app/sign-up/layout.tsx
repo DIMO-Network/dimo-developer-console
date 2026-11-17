@@ -1,3 +1,3 @@
-import { GuestLayout } from '@/layouts/GuestLayout';
+import { GuestRouteLayout } from '@/layouts/GuestLayout/GuestRouteLayout';
 
-export default GuestLayout;
+export default GuestRouteLayout;

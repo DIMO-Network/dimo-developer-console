@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import { Label } from '@/components/Label';
@@ -6,6 +7,7 @@ import { TextError } from '@/components/TextError';
 import React from 'react';
 
 export const WebhookCooldownField = () => {
+  const t = useTranslations('common');
   const {
     register,
     formState: { errors },
@@ -13,37 +15,35 @@ export const WebhookCooldownField = () => {
 
   const validateCooldown = (value: number) => {
     if (value === undefined || value === null) {
-      return 'Please enter a cooldown period in seconds';
+      return t('webhooks.fields.cooldown.required');
     }
     if (isNaN(value)) {
-      return 'Please enter a valid number';
+      return t('webhooks.fields.cooldown.invalidNumber');
     }
     if (value < 0) {
-      return 'Cooldown must be 0 or greater';
+      return t('webhooks.fields.cooldown.negative');
     }
     if (value > 86400) {
-      return 'Cooldown cannot exceed 86400 seconds (24 hours)';
+      return t('webhooks.fields.cooldown.tooLong');
     }
     return true;
   };
 
   return (
     <div className={'flex flex-col gap-2.5'}>
-      <Label>Cooldown</Label>
+      <Label>{t('webhooks.fields.cooldown.label')}</Label>
       <TextField
         type="number"
         min="0"
         max="86400"
         {...register('coolDownPeriod', {
-          required: 'Please enter a cooldown period in seconds',
+          required: t('webhooks.fields.cooldown.required'),
           validate: validateCooldown,
           valueAsNumber: true,
         })}
-        placeholder="Enter cooldown period in seconds (e.g., 30)"
+        placeholder={t('webhooks.fields.cooldown.placeholder')}
       />
-      <p className="text-body-sm text-muted">
-        Minimum time between webhook calls for the same event (0 for realtime)
-      </p>
+      <p className="text-body-sm text-muted">{t('webhooks.fields.cooldown.hint')}</p>
       {errors.coolDownPeriod && (
         <TextError errorMessage={(errors.coolDownPeriod.message as string) ?? ''} />
       )}

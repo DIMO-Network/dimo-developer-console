@@ -1,0 +1,195 @@
+{
+  "metadata": {
+    "listTitle": "SDKコンフィギュレーター | {appName}",
+    "newTitle": "新しい構成 | {appName}",
+    "editTitle": "構成を編集 | {appName}"
+  },
+  "breadcrumb": {
+    "licenseDetails": "ライセンスの詳細",
+    "sdkConfigurator": "SDKコンフィギュレーター",
+    "newConfiguration": "新しい構成",
+    "editConfiguration": "構成を編集"
+  },
+  "components": {
+    "LoginWithDimo": "Login with DIMO",
+    "ShareVehiclesWithDimo": "DIMOで車両を共有",
+    "ExecuteAdvancedTransactionWithDimo": "高度なトランザクションを実行"
+  },
+  "list": {
+    "subtitle": "Login with DIMOコンフィギュレーター",
+    "newConfiguration": "新しい構成",
+    "intro": "車両オーナーがアプリケーションにデータの権限を付与するには、車両共有リンクが必要です。<docsLink>LIWDでconfigurationIdを使用する方法を見る</docsLink>"
+  },
+  "licenseLoadError": "ライセンスの詳細の取得中にエラーが発生しました",
+  "table": {
+    "loading": "読み込み中…",
+    "loadError": "構成を読み込めませんでした。再読み込みしてもう一度お試しください。",
+    "empty": "構成はまだありません。",
+    "createFirst": "最初の構成を作成",
+    "name": "名前",
+    "component": "コンポーネント",
+    "actions": "操作",
+    "untitled": "（無題）",
+    "copyLink": "リンクをコピー",
+    "linkCopied": "共有リンクをコピーしました",
+    "deleteFailed": "構成を削除できませんでした"
+  },
+  "new": {
+    "subtitle": "新しい構成",
+    "created": "構成を作成しました",
+    "createFailed": "構成を作成できませんでした。もう一度お試しください。"
+  },
+  "edit": {
+    "subtitle": "構成を編集",
+    "updated": "構成を更新しました",
+    "updateFailed": "構成を更新できませんでした。もう一度お試しください。",
+    "loadFailed": "この構成を読み込めませんでした。ページを再読み込みしてもう一度お試しください。"
+  },
+  "form": {
+    "basics": {
+      "title": "基本情報",
+      "configurationId": "構成ID",
+      "copyLink": "リンクをコピー",
+      "idUnavailable": "構成IDを取得できません",
+      "linkCopied": "構成リンクをクリップボードにコピーしました",
+      "name": "構成名",
+      "namePlaceholder": "例：マイアプリ – 本番",
+      "nameRequired": "構成名は必須です",
+      "clientId": "クライアントID"
+    },
+    "component": {
+      "title": "コンポーネント",
+      "login": "🔑  Login with DIMO",
+      "share": "🚗  DIMOで車両を共有"
+    },
+    "connection": {
+      "title": "接続",
+      "redirectUri": "リダイレクトURI",
+      "redirectUriRequired": "リダイレクトURIは必須です",
+      "select": "選択してください",
+      "noRedirectUri": "このライセンスにはまだリダイレクトURIがないため、構成を保存できません。ライセンスの「構成」タブで追加してください。",
+      "goToConfigTab": "「構成」タブに移動",
+      "expirationDate": "有効期限",
+      "expirationDateSharingOnly": "有効期限（共有のみ）",
+      "expirationDateRequired": "有効期限は必須です",
+      "expirationDateTooEarly": "今日以降の日付を選択してください",
+      "utm": "UTM"
+    },
+    "ownerOnly": "構成を変更できるのはチームのオーナーのみです。",
+    "update": "更新",
+    "preview": {
+      "generatedOutput": "生成された出力",
+      "saveToGenerate": "保存するとリンクが生成されます",
+      "afterSaving": "保存すると、ユーザーと直接共有できる短い<code>configurationId</code>リンクが発行されます。"
+    },
+    "signIn": {
+      "title": "サインインウィンドウ",
+      "language": "言語",
+      "matchBrowser": "ユーザーのブラウザに合わせる",
+      "languageHint": "ブラウザに合わせる場合、日本語、スペイン語、中国語に設定されたブラウザではその言語で表示されます。日本、中国、台湾、香港のタイムゾーンではそれぞれの言語で表示され、それ以外は英語になります。ユーザーはいつでも言語を切り替えられます。",
+      "email": "メールアドレス",
+      "emailOptions": {
+        "none": "尋ねない",
+        "optional": "任意",
+        "required": "必須"
+      },
+      "emailHints": {
+        "none": "ユーザーには尋ねず、アプリはメールアドレスを取得しません。",
+        "optional": "サインイン後、ユーザーはアプリとメールアドレスを共有するかどうかを選択します。",
+        "required": "サインイン後、続行するにはユーザーがアプリとメールアドレスを共有する必要があります。"
+      }
+    },
+    "brand": {
+      "label": "ブランド",
+      "hint": "ボタンとサインインウィンドウに表示するブランドです。ワークスペースのデフォルトブランドを使用するには「デフォルト」のままにしてください。",
+      "default": "デフォルト"
+    },
+    "legal": {
+      "title": "プライバシーポリシーと利用規約",
+      "privacyPolicyUrl": "プライバシーポリシーのURL",
+      "termsUrl": "利用規約のURL",
+      "shownToVehicleOwners": "車両オーナーが権限を付与する前に表示されます。省略する場合は空欄のままにしてください。",
+      "shownToUsers": "ユーザーがログインする前に表示されます。省略する場合は空欄のままにしてください。"
+    },
+    "login": {
+      "settings": "ログイン設定"
+    },
+    "share": {
+      "permissionsTitle": "車両の権限",
+      "useTemplate": "権限テンプレートを使用",
+      "customPermissions": "カスタム権限",
+      "templateId": "権限テンプレートID",
+      "templateIdRequired": "権限テンプレートIDを入力してください",
+      "templateIdHint": "権限テンプレートの番号です（例：1）。",
+      "chooseOne": "権限を1つ以上選択してください",
+      "documentsTitle": "書類",
+      "documentsHint": "共有された各車両についてアプリが読み取れる書類です。ユーザーは共有する前にリクエスト内でこれらを確認できます。",
+      "vehiclesTitle": "対象車両",
+      "vehiclesHint": "空欄のままにすると、ユーザーは自分のどの車両でも共有できます。それ以外の車両は理由とともに「共有できない車両」として表示されます。値はカンマで区切ってください。",
+      "vehicleTokenIds": "車両のトークンID",
+      "vehicleMakes": "車両メーカー",
+      "powertrainTypes": "パワートレインの種類"
+    },
+    "transaction": {
+      "vehicles": "車両"
+    }
+  },
+  "permissions": {
+    "NONLOCATION_TELEMETRY": {
+      "title": "位置情報以外のテレメトリ",
+      "description": "位置情報以外の車両テレメトリへのアクセス"
+    },
+    "COMMANDS": {
+      "title": "コマンド",
+      "description": "車両コマンドの実行"
+    },
+    "CURRENT_LOCATION": {
+      "title": "現在地",
+      "description": "車両の現在地へのアクセス"
+    },
+    "ALLTIME_LOCATION": {
+      "title": "全期間の位置情報",
+      "description": "過去の位置情報データへのアクセス"
+    },
+    "CREDENTIALS": {
+      "title": "証明情報",
+      "description": "VIN証明情報へのアクセス"
+    },
+    "STREAMS": {
+      "title": "ストリーム",
+      "description": "リアルタイムデータストリームへのアクセス"
+    },
+    "RAW_DATA": {
+      "title": "生データ",
+      "description": "車両の生データへのアクセス"
+    },
+    "APPROXIMATE_LOCATION": {
+      "title": "おおよその位置",
+      "description": "おおよその位置情報データへのアクセス"
+    }
+  },
+  "documents": {
+    "vehicle": {
+      "title": "車両の書類",
+      "description": "車検証、保険、整備記録などの車両書類。"
+    },
+    "driver": {
+      "title": "運転者の書類",
+      "description": "オーナーの運転免許証などの運転者書類。"
+    },
+    "rawVehicle": {
+      "title": "車両書類の元ファイル",
+      "description": "車両書類の元になった写真やPDF。"
+    },
+    "rawDriver": {
+      "title": "運転者書類の元ファイル",
+      "description": "運転者書類の元になった写真やPDF。"
+    }
+  },
+  "output": {
+    "viewAs": "表示形式：",
+    "code": "コード",
+    "url": "URL",
+    "generatedCode": "生成されたコード"
+  }
+}

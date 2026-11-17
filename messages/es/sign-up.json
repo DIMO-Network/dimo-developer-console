@@ -1,0 +1,99 @@
+{
+  "metadataTitle": "Registrarse | {appName}",
+  "metadataDescription": "Únete a DIMO Developer Console. Crea tu cuenta para desbloquear potentes herramientas para desarrolladores y administrar aplicaciones con facilidad. ¡Empieza hoy!",
+  "view": {
+    "termsAgreement": "Al iniciar sesión, aceptas nuestros <terms>términos del servicio</terms> y nuestra <privacy>política de privacidad</privacy>"
+  },
+  "refusal": {
+    "accountExists": "Esta cuenta ya existe. Inicia sesión.",
+    "signIn": "Iniciar sesión",
+    "emailTaken": "Otra cuenta de la consola ya usa este correo. Inicia sesión con esa cuenta o usa otro correo.",
+    "emailNotProven": "No pudimos confirmar que este correo pertenece a tu cuenta de DIMO.",
+    "unreachable": "No pudimos conectar con la consola. Inténtalo de nuevo.",
+    "failed": "Algo salió mal al crear tu cuenta. Inténtalo de nuevo."
+  },
+  "wallet": {
+    "createFailed": "Algo salió mal al crear la wallet del usuario",
+    "lostPasskey": "¿Perdiste tu clave de acceso? <recover>Recupérala con tu correo</recover>",
+    "troubleLoggingIn": "¿Problemas para iniciar sesión? <support>Obtén ayuda</support>",
+    "passkey": {
+      "title": "Creando cuenta con clave de acceso",
+      "body": "Se está creando tu cuenta de DIMO. Esto puede tardar unos segundos."
+    },
+    "noPasskey": {
+      "title": "Creando cuenta sin clave de acceso",
+      "body": "Se está creando tu cuenta de DIMO sin clave de acceso. Revisa tu bandeja de entrada para encontrar un código OTP de 6 dígitos."
+    },
+    "accountFound": {
+      "title": "Se encontró una cuenta de DIMO",
+      "body": "Ya tienes una cuenta de DIMO. Valida tu identidad para continuar."
+    }
+  },
+  "buildFor": {
+    "title": "¿Qué estás creando?",
+    "prompt": "¿Qué quieres lanzar con DIMO?",
+    "mobileApp": {
+      "title": "App móvil",
+      "description": "App en Apple App Store o Google Play Store"
+    },
+    "webApp": {
+      "title": "Aplicación web",
+      "description": "App web con administración de usuarios"
+    },
+    "personalProject": {
+      "title": "Proyecto personal",
+      "description": "Proyecto personal para acceder a datos de vehículos"
+    },
+    "somethingElse": "Otra cosa",
+    "somethingElsePlaceholder": "Estoy creando...",
+    "maxLength": "Usa 150 caracteres como máximo",
+    "selectOption": "Selecciona una opción para continuar"
+  },
+  "company": {
+    "title": "Último paso",
+    "typeLabel": "Tipo de empresa/desarrollador *",
+    "select": "Seleccionar",
+    "maxLength": "El nombre debe tener como máximo 120 caracteres",
+    "invalidUrl": "Este campo debe ser una URL válida de 120 caracteres como máximo",
+    "finish": "Completar registro",
+    "business": {
+      "nameLabel": "Nombre de la empresa *",
+      "namePlaceholder": "ACME",
+      "websiteLabel": "Sitio web de la empresa",
+      "websitePlaceholder": "www.acme.zone",
+      "regionLabel": "Región principal de operación *"
+    },
+    "personal": {
+      "nameLabel": "Nombre *",
+      "namePlaceholder": "Bruce Wayne",
+      "websiteLabel": "URL de red social",
+      "websitePlaceholder": "https://instagram.com/batman",
+      "regionLabel": "Región *"
+    },
+    "developerTypes": {
+      "personalDeveloper": "Desarrollador personal",
+      "oem": "OEM",
+      "insurance": "Seguros",
+      "maintenance": "Mantenimiento",
+      "fleetManagement": "Gestión de flotas",
+      "vehicleSales": "Venta de vehículos",
+      "utilities": "Servicios públicos",
+      "financing": "Financiamiento",
+      "ev": "Vehículos eléctricos",
+      "depin": "DePIN",
+      "data": "Datos",
+      "others": "Otros"
+    },
+    "regions": {
+      "northAmerica": "América del Norte",
+      "latinAmericaCaribbean": "América Latina y el Caribe",
+      "oceania": "Oceanía",
+      "northernWesternEurope": "Europa del Norte y Occidental",
+      "africa": "África",
+      "eastSoutheastAsia": "Asia Oriental y Sudoriental",
+      "middleEastCentralAsia": "Medio Oriente y Asia Central",
+      "southAsia": "Asia del Sur",
+      "easternEurope": "Europa del Este"
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import {
   decodeSacdPermissions,
   permissionLabels,
@@ -14,8 +15,8 @@ describe('sacd permissions', () => {
     expect(decodeSacdPermissions('0x0')).toEqual([]);
     expect(decodeSacdPermissions('zz')).toEqual([]);
   });
-  it('labels them for people and names them for token exchange', () => {
-    expect(permissionLabels(HEX)).toEqual([
+  it('labels them for people and names them for token exchange', async () => {
+    expect(permissionLabels(HEX, await getTranslations('common'))).toEqual([
       'Non-location data',
       'Current location',
       'All-time location',
@@ -28,9 +29,11 @@ describe('sacd permissions', () => {
       'privilege:GetRawData',
     ]);
   });
-  it('shows unknown ids as their number', () => {
+  it('shows unknown ids as their number', async () => {
     const odd = '0x' + (3n << 40n).toString(16);
-    expect(permissionLabels(odd)).toEqual(['Privilege 20']);
+    expect(permissionLabels(odd, await getTranslations('common'))).toEqual([
+      'Privilege 20',
+    ]);
   });
 });
 

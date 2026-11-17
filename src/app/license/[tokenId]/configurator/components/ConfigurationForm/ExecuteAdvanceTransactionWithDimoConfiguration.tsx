@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { TextField } from '@/components/TextField';
 import { Label } from '@/components/Label';
 import { Control, UseFormRegister } from 'react-hook-form';
@@ -13,10 +14,11 @@ interface IFormProps {
 export const ExecuteAdvanceTransactionWithDimoConfiguration: FC<IFormProps> = ({
   register,
 }: IFormProps) => {
+  const t = useTranslations('configurator');
   return (
     <div>
       <Label htmlFor="vehicles">
-        Vehicles
+        {t('form.transaction.vehicles')}
         <TextField
           type="text"
           placeholder="1,2,3"

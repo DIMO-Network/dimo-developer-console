@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { FC, useState } from 'react';
 import { getDevJwt } from '@/utils/devJwt';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
   clientId,
   onSuccess,
 }) => {
+  const t = useTranslations('common');
   const [assetDIDs, setAssetDIDs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputError, setInputError] = useState<string>('');
@@ -23,7 +25,7 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
 
   const handleSubmit = async () => {
     if (assetDIDs.length === 0) {
-      setInputError('Please enter at least one asset DID.');
+      setInputError(t('webhooks.edit.enterAssetDid'));
       return;
     }
 
@@ -39,7 +41,7 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
 
       toast.success(
         response?.message ??
-          `Successfully subscribed ${assetDIDs.length} vehicle${assetDIDs.length !== 1 ? 's' : ''}`,
+          t('webhooks.edit.subscribedCount', { count: assetDIDs.length }),
       );
       onSuccess?.();
       setIsOpen(false);
@@ -47,7 +49,7 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
     } catch (err) {
       captureException(err);
       console.error('Vehicle subscription error:', err);
-      toast.error('Failed to subscribe vehicles. Please try again.');
+      toast.error(t('webhooks.edit.subscribeFailed'));
     } finally {
       setLoading(false);
     }
@@ -61,25 +63,25 @@ export const AddVehiclesModal: FC<SubscribeVehiclesActionModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
-      <Title className={'text-panel-title'}>Add vehicles</Title>
+      <Title className={'text-panel-title'}>{t('webhooks.edit.addTitle')}</Title>
       <div className={'py-6'}>
         <AssetDIDsInput
           assetDIDs={assetDIDs}
           onChange={setAssetDIDs}
-          label="Asset DIDs to subscribe"
+          label={t('webhooks.edit.addDidsLabel')}
           error={inputError}
-          placeholder="Enter asset DIDs to subscribe to this webhook"
+          placeholder={t('webhooks.edit.addDidsPlaceholder')}
           disabled={loading}
         />
       </div>
       <div className="flex flex-col w-full gap-4 pt-4">
         <Button onClick={handleSubmit} disabled={assetDIDs.length === 0 || loading}>
           {loading
-            ? 'Adding...'
-            : `Add ${assetDIDs.length} vehicle${assetDIDs.length !== 1 ? 's' : ''}`}
+            ? t('webhooks.edit.adding')
+            : t('webhooks.edit.addCount', { count: assetDIDs.length })}
         </Button>
         <Button onClick={handleClose} variant="secondary">
-          Cancel
+          {t('actions.cancel')}
         </Button>
       </div>
     </Modal>

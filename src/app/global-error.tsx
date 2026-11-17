@@ -36,11 +36,11 @@ const ErrorPage: FC<IProps> = ({ error, reset }) => {
   return (
     <html
       lang="en"
-      className="h-full"
+      className={`h-full ${dimoFont.variable}`}
       data-theme={DEFAULT_THEME}
       suppressHydrationWarning
     >
-      <body className={`${dimoFont.variable} ${dimoFont.className} h-full`}>
+      <body className="h-full">
         <main className="grid min-h-full place-items-center px-6 py-24 sm:py-32 lg:px-8">
           <div className="text-center">
             <p className="text-label text-muted">500</p>

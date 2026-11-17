@@ -1,6 +1,7 @@
 'use client';
 import { ReactNode, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Anchor } from '@/components/Anchor';
 import { useAuth } from '@/hooks/useAuth';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
@@ -49,6 +50,7 @@ const SignInForm = ({
 };
 
 export const View = () => {
+  const t = useTranslations('sign-in');
   useErrorHandler();
   const { setUser, completeExternalAuth } = useAuth();
   const { trackEvent } = useMixPanel();
@@ -84,9 +86,7 @@ export const View = () => {
       }
 
       if (!existsOnGlobalAccount) {
-        toast.error(
-          'This account needs its wallet restored before you can sign in. Please contact developer support.',
-        );
+        toast.error(t('view.walletRestoreNeeded'));
         return;
       }
 
@@ -118,7 +118,7 @@ export const View = () => {
       }
     } catch (error) {
       Sentry.captureException(error);
-      toast.error('Something went wrong please try again');
+      toast.error(t('view.genericError'));
     }
   };
 
@@ -136,14 +136,14 @@ export const View = () => {
         searchParams.get('state'),
       );
       if (!success) {
-        toast.error('Failed to login with external provider');
+        toast.error(t('view.externalLoginFailed'));
         return;
       }
 
       await handleLogin(email);
     } catch (error) {
       Sentry.captureException(error);
-      toast.error('Failed to login with external provider');
+      toast.error(t('view.externalLoginFailed'));
     }
   };
 
@@ -171,22 +171,26 @@ export const View = () => {
         <div className="sign-in__extra-links mt-6">
           <div className="flex flex-row">
             <p className="terms-caption">
-              By signing in, you are agreeing to our{' '}
-              <Anchor
-                href="https://dimo.org/terms"
-                className="grey underline"
-                target="_blank"
-              >
-                terms of service
-              </Anchor>{' '}
-              and{' '}
-              <Anchor
-                href="https://dimo.org/privacy"
-                className="grey underline"
-                target="_blank"
-              >
-                privacy policy
-              </Anchor>
+              {t.rich('view.termsAgreement', {
+                terms: (chunks) => (
+                  <Anchor
+                    href="https://dimo.org/terms"
+                    className="grey underline"
+                    target="_blank"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+                privacy: (chunks) => (
+                  <Anchor
+                    href="https://dimo.org/privacy"
+                    className="grey underline"
+                    target="_blank"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+              })}
             </p>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React from 'react';
 import { Toggle } from '@/components/Toggle';
 
@@ -8,9 +9,12 @@ export const StatusToggle = ({
   isActive: boolean;
   onToggleStatus: () => void;
 }) => {
+  const t = useTranslations('common');
   return (
     <div className="flex items-center gap-2">
-      <span className="text-body-sm font-medium text-fg">Status</span>
+      <span className="text-body-sm font-medium text-fg">
+        {t('webhooks.statusToggle.label')}
+      </span>
       <Toggle checked={isActive} onToggle={onToggleStatus} />
     </div>
   );

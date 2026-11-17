@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "title": "Settings | {appName}"
+  },
+  "userDetails": {
+    "title": "User details",
+    "name": "Name",
+    "email": "Email"
+  },
+  "supportModal": {
+    "title": "Contact developer support",
+    "description": "Get in touch with our team to answer your questions.",
+    "success": "Support request submitted successfully. We will be in touch soon.",
+    "failure": "Failed to submit support request"
+  },
+  "team": {
+    "title": "Team",
+    "inviteMember": "Invite member",
+    "loadError": "Couldn't load your team.",
+    "ownerEmpty": "Invite teammates to share this team's licenses with them. You choose who gets data access.",
+    "licensesLoadError": "Couldn't load this team's licenses, so data access can't be changed right now.",
+    "loadLicensesAgain": "Load licenses again",
+    "resent": "Invite resent to {email}",
+    "resendFailed": "We couldn't resend the invite. Try again.",
+    "cancelled": "Invite to {email} cancelled",
+    "cancelFailed": "We couldn't cancel the invite. Try again."
+  },
+  "inviteError": {
+    "emailFailed": "We couldn't email {email}. Try again.",
+    "rateLimited": "Too many invites right now. Try again in a while.",
+    "alreadyMember": "{email} is already in this team.",
+    "alreadyInvited": "{email} already has a pending invite. Resend it from the list.",
+    "invalidEmail": "Enter a valid email address.",
+    "default": "We couldn't send the invite. Try again."
+  },
+  "inviteModal": {
+    "title": "Invite a team member",
+    "description": "They'll see this team's licenses in the console. You choose separately who gets data access.",
+    "emailLabel": "Email",
+    "send": "Send invite",
+    "sent": "Invite sent to {email}"
+  },
+  "grantBanner": {
+    "message": "{name} joined. Grant data access?",
+    "grant": "Grant"
+  },
+  "members": {
+    "columns": {
+      "member": "Member",
+      "role": "Role",
+      "status": "Status",
+      "dataAccess": "Data access"
+    },
+    "status": {
+      "expired": "Invite expired",
+      "invited": "Invited",
+      "active": "Active",
+      "removed": "Removed",
+      "left": "Left"
+    },
+    "dataAccess": {
+      "stillSigner": "Still a signer on {licenses}",
+      "notRecorded": "Not recorded",
+      "revokeUnfinished": "Revoke unfinished",
+      "needsSignIn": "Needs to sign in once",
+      "none": "None"
+    },
+    "actions": {
+      "label": "Actions for {email}",
+      "resend": "Resend",
+      "cancelInvite": "Cancel invite",
+      "grant": "Grant",
+      "retry": "Retry",
+      "revoke": "Revoke",
+      "remove": "Remove"
+    }
+  },
+  "grant": {
+    "title": "Grant {name} data access",
+    "description": "Choose the licenses {name} can read in Vehicles.",
+    "loading": "Granting {name} data access",
+    "success": "{name} now has data access to {licenses}.",
+    "notRecorded": "Data access is on, but we couldn't record it for {licenses}, so {name} can't use it yet.",
+    "refused": "{licenses}: {message}",
+    "rolledBack": "{name} doesn't have data access to {licenses}.",
+    "notRolledBack": "Those keys are still enabled on-chain and nothing lists them. Delete them under API keys on the Config tab of {licenses}.",
+    "confirm": "Grant data access",
+    "licenseFallback": "License #{tokenId}"
+  },
+  "revoke": {
+    "title": "Revoke {name}'s data access?",
+    "description": "Their wallet is removed from the chosen licenses on-chain. Tokens they already hold stop working within about 10 minutes.",
+    "loading": "Revoking {name}'s data access",
+    "success": "{name}'s data access is revoked.",
+    "notRecorded": "Data access is off, but we couldn't record that for {licenses}.",
+    "retry": "Retry",
+    "confirm": "Revoke data access"
+  },
+  "remove": {
+    "title": "Remove {name} from {teamName}?",
+    "descriptionWithKeys": "They lose access to this team in the console, and their wallet is removed from {licenses} on-chain.",
+    "description": "They lose access to this team in the console.",
+    "confirm": "Remove from team",
+    "loading": "Removing {name}",
+    "failedFallback": "We couldn't remove them. Try again.",
+    "keptOnTeam": "{name} is still on {teamName}: we couldn't remove their wallet from {licenses} on-chain. Try again.",
+    "removedStillSigner": "{name} was removed, but is still a signer on {licenses}. Use Retry on their row.",
+    "removed": "{name} was removed from {teamName}.",
+    "notRecorded": "We couldn't record the revoked access for {licenses}. Use Retry on their row to finish."
+  },
+  "webhookReview": {
+    "heading": "Webhooks to review",
+    "description": "Webhooks keep sending vehicle data after {name} goes. Check the ones they created or changed.",
+    "checking": "Checking {license}…",
+    "needsJwt": "We need a developer JWT for {license} to check its webhooks.",
+    "loadFailed": "Couldn't load the webhooks for {license}.",
+    "pasteLabel": "Paste a developer JWT for {license}",
+    "wrongLicense": "That developer JWT is for another license.",
+    "check": "Check webhooks",
+    "none": "No webhooks on {license} were created or changed by {name}.",
+    "createdAndChanged": "Created and last changed by them",
+    "created": "Created by them",
+    "changed": "Last changed by them"
+  },
+  "leave": {
+    "button": "Leave team",
+    "unreachable": "We couldn't reach the console. Try again.",
+    "left": "You left {teamName}."
+  }
+}

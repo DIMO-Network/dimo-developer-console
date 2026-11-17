@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { get } from 'lodash';
 import * as Sentry from '@sentry/nextjs';
 
@@ -35,6 +36,7 @@ export const RedirectUriForm: FC<IProps> = ({
   owner,
   onAdded,
 }) => {
+  const t = useTranslations('common');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { trackEvent } = useMixPanel();
   const {
@@ -56,7 +58,7 @@ export const RedirectUriForm: FC<IProps> = ({
       await setRedirectUri(uri, true);
       if (onAdded) onAdded(uri);
       else void refreshData();
-      toast.success('Successfully added the redirect URI.');
+      toast.success(t('redirectUri.added'));
 
       trackEvent('Redirect URI added', {
         distinct_id: owner,
@@ -67,8 +69,8 @@ export const RedirectUriForm: FC<IProps> = ({
     } catch (error: unknown) {
       Sentry.captureException(error);
       const code = get(error, 'code', null);
-      if (code === 4001) toast.error('The transaction was denied');
-      else toast.error('Something went wrong while creating the redirect URI');
+      if (code === 4001) toast.error(t('errors.transactionDenied'));
+      else toast.error(t('redirectUri.createFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -84,8 +86,8 @@ export const RedirectUriForm: FC<IProps> = ({
 
     const isUnique = !redirectUris?.find(({ uri }) => uri === str);
 
-    if (!isValidUrl) return 'Please enter a valid URL, must include http:// or https://';
-    if (!isUnique) return 'The URL is already in the list';
+    if (!isValidUrl) return t('redirectUri.invalidUrl');
+    if (!isUnique) return t('redirectUri.duplicate');
     return true;
   };
 
@@ -96,10 +98,10 @@ export const RedirectUriForm: FC<IProps> = ({
           <Label htmlFor="uri">
             <TextField
               {...register('uri', {
-                required: 'Please enter the redirect URI',
+                required: t('redirectUri.required'),
                 maxLength: {
                   value: 150,
-                  message: 'The name should has maximum 150 characters',
+                  message: t('redirectUri.tooLong'),
                 },
                 validate: {
                   url: validateUrl,
@@ -114,7 +116,7 @@ export const RedirectUriForm: FC<IProps> = ({
         <div className="cta flex-[0.2]">
           <Button className="px-4" loading={isLoading} disabled={!!errors.uri}>
             <PlusIcon className="w-5 h-5" />
-            Add URI
+            {t('redirectUri.add')}
           </Button>
         </div>
       </form>

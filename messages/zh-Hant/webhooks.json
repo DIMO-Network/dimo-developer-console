@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "list": "Webhook | {appName}",
+    "create": "建立Webhook | {appName}",
+    "edit": "編輯Webhook | {appName}"
+  },
+  "page": {
+    "description": "接收事件的即時更新",
+    "addRedirectUri": "請為您的授權新增重新導向URI，即可設定Webhook。",
+    "createLicense": "請建立開發者授權，即可設定Webhook。",
+    "goToLicenses": "前往授權",
+    "fetchLicensesError": "擷取您的開發者授權時發生問題"
+  },
+  "breadcrumb": {
+    "webhooks": "Webhook",
+    "newWebhook": "新增Webhook",
+    "editWebhook": "編輯Webhook"
+  },
+  "edit": {
+    "fetchError": "擷取您的Webhook時發生錯誤",
+    "notFound": "找不到Webhook"
+  },
+  "discardChanges": {
+    "title": "捨棄變更",
+    "message": "確定要捨棄您的變更嗎？此動作無法復原。"
+  }
+}

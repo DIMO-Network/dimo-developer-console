@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { useFormatter } from 'next-intl';
 import './TokenBalance.css';
-import {
-  formatSimpleBalance,
-  formatSimpleBalanceWithDigits,
-} from '@/utils/formatBalance';
 import classNames from 'classnames';
 import { Button } from '@/components/Button';
 
@@ -24,6 +21,12 @@ export const TokenBalance = ({
   openBuyModal: _openBuyModal,
   iconClassName,
 }: IProps) => {
+  const format = useFormatter();
+  const fixed = (value: number, digits: number) =>
+    format.number(value, {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    });
   return (
     <div className="token-balance">
       {/* Buy DCX disabled
@@ -39,13 +42,10 @@ export const TokenBalance = ({
         </div>
         <div className="token-balance__balance">
           <BalanceDisplay
-            balance={formatSimpleBalanceWithDigits(balance, 3)}
+            balance={fixed(balance, 3)}
             unitsDisplay={token.toUpperCase()}
           />
-          <BalanceDisplay
-            balance={formatSimpleBalance(balance * basePrice)}
-            unitsDisplay={'USD'}
-          />
+          <BalanceDisplay balance={fixed(balance * basePrice, 2)} unitsDisplay={'USD'} />
         </div>
       </div>
     </div>

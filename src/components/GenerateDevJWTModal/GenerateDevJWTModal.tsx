@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { FC, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
@@ -24,6 +25,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
   tokenParams,
   onSuccess,
 }) => {
+  const t = useTranslations('common');
   const [text, setText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [generatedKey, setGeneratedKey] = useState('');
@@ -50,7 +52,7 @@ export const GenerateDevJWTModal: FC<IProps> = ({
 
   const handleGenerate = useCallback(async () => {
     if (!text) {
-      return toast.error('Please enter a valid API key');
+      return toast.error(t('generateJwt.apiKeyRequired'));
     }
     // Lock synchronously before the async work and before React re-renders.
     lockedRef.current = true;
@@ -69,30 +71,32 @@ export const GenerateDevJWTModal: FC<IProps> = ({
       onSuccess?.();
     } catch (err) {
       captureException(err);
-      toast.error('Failed to generate developer JWT');
+      toast.error(t('generateJwt.failed'));
       // Unlock on failure so the user can cancel or try again.
       lockedRef.current = false;
     } finally {
       setIsLoading(false);
     }
-  }, [onSuccess, text, tokenParams.client_id, tokenParams.domain]);
+  }, [onSuccess, t, text, tokenParams.client_id, tokenParams.domain]);
 
   const title = useMemo(() => {
-    if (generatedKey) return 'JWT generated';
-    return 'Generate new JWT';
-  }, [generatedKey]);
+    if (generatedKey) return t('generateJwt.titleDone');
+    return t('generateJwt.titleNew');
+  }, [generatedKey, t]);
 
   const subtitle = useMemo(() => {
     if (generatedKey) return '';
-    return "Test an API key you created for your server: this makes a developer JWT from it and the license's first redirect URI. To get a JWT without an API key, turn on console access and use Copy JWT.";
-  }, [generatedKey]);
+    return t('generateJwt.subtitle');
+  }, [generatedKey, t]);
 
   const MainComponent = useMemo(() => {
     if (isLoading) {
       return (
         <div className={'flex flex-col items-center'}>
           <BubbleLoader isLoading />
-          <p className={'pt-3.5 text-card-title text-ink'}>Generating JWT...</p>
+          <p className={'pt-3.5 text-card-title text-ink'}>
+            {t('generateJwt.generating')}
+          </p>
         </div>
       );
     }
@@ -101,34 +105,34 @@ export const GenerateDevJWTModal: FC<IProps> = ({
     }
     return (
       <>
-        <Label className={'mb-2'}>API key</Label>
+        <Label className={'mb-2'}>{t('generateJwt.apiKeyLabel')}</Label>
         <TextField
           onChange={(e) => setText(e.target.value)}
-          placeholder={'Enter your API key here'}
+          placeholder={t('generateJwt.apiKeyPlaceholder')}
         />
       </>
     );
-  }, [generatedKey, isLoading]);
+  }, [generatedKey, isLoading, t]);
 
   const Buttons = useMemo(() => {
     if (generatedKey) {
       return (
         <Button variant="secondary" onClick={() => setIsOpen(false)}>
-          Done
+          {t('generateJwt.done')}
         </Button>
       );
     }
     return (
       <>
         <Button loading={isLoading} onClick={handleGenerate}>
-          Generate
+          {t('generateJwt.generate')}
         </Button>
         <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isLoading}>
-          Cancel
+          {t('actions.cancel')}
         </Button>
       </>
     );
-  }, [generatedKey, handleGenerate, isLoading, setIsOpen]);
+  }, [generatedKey, handleGenerate, isLoading, setIsOpen, t]);
 
   const isDismissible = !isLoading && !generatedKey;
 
@@ -149,16 +153,17 @@ export const GenerateDevJWTModal: FC<IProps> = ({
 };
 
 const SuccessRow = ({ token }: { token: string }) => {
+  const t = useTranslations('common');
   const visiblePart = token.slice(0, 16);
   const maskedPart = '*'.repeat(32);
   const displayText = `${visiblePart}${maskedPart}`;
   return (
     <div className={'flex flex-col gap-2 rounded-control bg-positive/10 px-4 py-3'}>
-      <p className={'text-body-sm text-fg'}>Expires in 14 days.</p>
+      <p className={'text-body-sm text-fg'}>{t('generateJwt.expires')}</p>
       <CopyableRow
         value={token}
         displayText={displayText}
-        onCopySuccessMessage={'JWT copied!'}
+        onCopySuccessMessage={t('generateJwt.copied')}
       />
     </div>
   );

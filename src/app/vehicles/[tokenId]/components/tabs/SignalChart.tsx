@@ -1,5 +1,6 @@
 'use client';
 import { FC } from 'react';
+import { useFormatter, useTranslations } from 'next-intl';
 import {
   LineChart,
   Line,
@@ -15,24 +16,20 @@ export type Point = { t: string; v: number | null };
 
 const DAY_MS = 86_400_000;
 
-// Short ranges need the time of day; long ones read better as a date. UTC.
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const pad = (n: number) => String(n).padStart(2, '0');
 
-export const formatTick = (iso: string, spanMs: number) => {
-  const d = new Date(iso);
-  const day = `${WEEKDAYS[d.getUTCDay()]} ${d.getUTCDate()}`;
-  return spanMs < 2 * DAY_MS
-    ? `${day} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`
-    : day;
-};
-
-const describe = (name: string, points: Point[]) => {
-  const vals = points.flatMap((p) => (p.v === null ? [] : [p.v]));
-  const head = `${humanizeSignal(name)}, ${points.length} points`;
-  return vals.length
-    ? `${head}, ${Math.min(...vals)}\u2013${Math.max(...vals)}`
-    : `${head}, no values`;
+// "Tue 29": short ranges add the time of day, long ones read better as a date. UTC.
+export const useTickFormat = () => {
+  const t = useTranslations('vehicles');
+  const format = useFormatter();
+  return (iso: string, spanMs: number) => {
+    const d = new Date(iso);
+    return t(spanMs < 2 * DAY_MS ? 'signals.tickWithTime' : 'signals.tick', {
+      weekday: format.dateTime(d, { weekday: 'short', timeZone: 'UTC' }),
+      day: d.getUTCDate(),
+      time: `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`,
+    });
+  };
 };
 
 export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number }> = ({
@@ -40,6 +37,19 @@ export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number
   points,
   colorIndex,
 }) => {
+  const t = useTranslations('vehicles');
+  const tCommon = useTranslations('common');
+  const formatTick = useTickFormat();
+  const signalName = humanizeSignal(name, tCommon);
+  const vals = points.flatMap((p) => (p.v === null ? [] : [p.v]));
+  const description = vals.length
+    ? t('signals.chartDescription', {
+        name: signalName,
+        count: points.length,
+        min: Math.min(...vals),
+        max: Math.max(...vals),
+      })
+    : t('signals.chartDescriptionNoValues', { name: signalName, count: points.length });
   const spanMs =
     points.length > 1
       ? Date.parse(points[points.length - 1].t) - Date.parse(points[0].t)
@@ -52,12 +62,10 @@ export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number
           className="h-[3px] w-2.5 self-center rounded-sm"
           style={{ background: color }}
         />
-        <span className="text-body-sm font-semibold text-ink">
-          {humanizeSignal(name)}
-        </span>
+        <span className="text-body-sm font-semibold text-ink">{signalName}</span>
         <span className="font-mono text-code text-muted">{name}</span>
       </div>
-      <div className="h-40 w-full" role="img" aria-label={describe(name, points)}>
+      <div className="h-40 w-full" role="img" aria-label={description}>
         <ResponsiveContainer width="100%" height="100%">
           {/* Recharts 3 turns its keyboard layer on by default; the wrapper is
               the accessible image, so the chart itself stays out of the tab order. */}
@@ -69,14 +77,18 @@ export const SignalChart: FC<{ name: string; points: Point[]; colorIndex: number
             <CartesianGrid stroke="rgb(var(--outline))" vertical={false} />
             <XAxis
               dataKey="t"
-              tickFormatter={(t: string) => formatTick(t, spanMs)}
+              tickFormatter={(tick: string) => formatTick(tick, spanMs)}
               stroke="rgb(var(--muted))"
               tick={{ fontSize: 11 }}
               minTickGap={72}
             />
             <YAxis stroke="rgb(var(--muted))" tick={{ fontSize: 11 }} width={44} />
             <Tooltip
-              labelFormatter={(l) => String(l).replace('T', ' ').slice(0, 16) + ' UTC'}
+              labelFormatter={(l) =>
+                t('signals.chartTooltipTime', {
+                  time: String(l).replace('T', ' ').slice(0, 16),
+                })
+              }
               contentStyle={{
                 background: 'rgb(var(--overlay))',
                 border: '1px solid rgb(var(--outline))',

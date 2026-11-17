@@ -2,6 +2,7 @@
 import React, { FC, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as Sentry from '@sentry/nextjs';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
@@ -63,6 +64,8 @@ export const BrandForm: FC<Props> = ({
   onCancel,
   onSetDefault,
 }) => {
+  const t = useTranslations('license');
+  const tCommon = useTranslations('common');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [logoCid, setLogoCid] = useState<string | null>(brand?.logoCid ?? null);
@@ -97,17 +100,17 @@ export const BrandForm: FC<Props> = ({
     Sentry.captureException(
       new Error(`Saving a brand failed (${failure.status}): ${failure.message}`),
     );
-    toast.error('Failed to save brand');
+    toast.error(t('brandForm.saveFailed'));
   };
 
   const imageRefused = (failure: Failure) => {
     if (failure.status !== 400) return saveFailed(failure);
-    toast.error('That image was refused. Use a PNG, JPEG, WebP, or SVG up to 2 MB.');
+    toast.error(t('brandForm.imageRefused'));
   };
 
   const brandRefused = (failure: Failure) => {
     if (failure.code !== 'BRAND_NAME_TAKEN') return saveFailed(failure);
-    setError('name', { message: 'A brand with this name already exists' });
+    setError('name', { message: t('brandForm.nameTaken') });
   };
 
   const onSubmit = async ({ name, primaryColor }: FormInputs) => {
@@ -144,11 +147,11 @@ export const BrandForm: FC<Props> = ({
       setIconCid(updated.iconCid);
       setLogoFile(null);
       setIconFile(null);
-      toast.success('Brand saved');
+      toast.success(t('brandForm.saved'));
     } catch (error) {
       // The action itself failed: the network, a deploy, or a body over the limit.
       Sentry.captureException(error);
-      toast.error('Failed to save brand');
+      toast.error(t('brandForm.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -160,10 +163,10 @@ export const BrandForm: FC<Props> = ({
     try {
       await setDefaultBrand(workspaceId, brand.id);
       onSetDefault();
-      toast.success('Default brand updated');
+      toast.success(t('brandForm.defaultUpdated'));
     } catch (error) {
       Sentry.captureException(error);
-      toast.error('Failed to set default brand');
+      toast.error(t('brandForm.defaultFailed'));
     } finally {
       setSettingDefault(false);
     }
@@ -177,28 +180,26 @@ export const BrandForm: FC<Props> = ({
     <form className="flex flex-col gap-6 pt-4 pb-2" onSubmit={handleSubmit(onSubmit)}>
       <div className="field">
         <Label htmlFor="brand-name">
-          Display name
+          {t('brandForm.displayName')}
           <TextField
             {...register('name', {
-              required: 'Display name is required.',
-              maxLength: { value: 100, message: 'Max 100 characters' },
+              required: t('brandForm.displayNameRequired'),
+              maxLength: { value: 100, message: t('brandForm.displayNameMax') },
             })}
             id="brand-name"
-            placeholder="e.g. Fleet App"
+            placeholder={t('brandForm.displayNamePlaceholder')}
             disabled={!isOwner || saving}
           />
           {showRenameWarning && (
-            <p className="mt-1 text-label text-warning">
-              Renaming breaks existing Login with DIMO calls using this name
-            </p>
+            <p className="mt-1 text-label text-warning">{t('brandForm.renameWarning')}</p>
           )}
           {errors.name && <TextError errorMessage={errors.name.message!} />}
         </Label>
       </div>
 
       <ImagePicker
-        label="Logo"
-        hint="Wide brand mark shown on the Login with DIMO button and at the top of the sign-in window. PNG, JPEG, WebP, or SVG."
+        label={t('brandForm.logo')}
+        hint={t('brandForm.logoHint')}
         currentUrl={logoCid ? (brand?.logoUrl ?? null) : null}
         file={logoFile}
         onFile={setLogoFile}
@@ -211,8 +212,8 @@ export const BrandForm: FC<Props> = ({
       />
 
       <ImagePicker
-        label="Icon"
-        hint="Square mark. Login with DIMO doesn't show it yet. PNG, JPEG, WebP, or SVG."
+        label={t('brandForm.icon')}
+        hint={t('brandForm.iconHint')}
         currentUrl={iconCid ? (brand?.iconUrl ?? null) : null}
         file={iconFile}
         onFile={setIconFile}
@@ -226,17 +227,17 @@ export const BrandForm: FC<Props> = ({
 
       <div className="field">
         <Label>
-          Primary color
+          {t('brandForm.primaryColor')}
           <p className="font-normal text-muted">
-            Colors the Login with DIMO button and the main buttons in the sign-in window;
-            their text turns black or white to stay readable. 7-char hex, e.g.{' '}
-            <code className="font-mono text-code">{EXAMPLE_PRIMARY_COLOR}</code>. Leave
-            blank for DIMO defaults.
+            {t.rich('brandForm.primaryColorHint', {
+              example: EXAMPLE_PRIMARY_COLOR,
+              code: (chunks) => <code className="font-mono text-code">{chunks}</code>,
+            })}
           </p>
           <div className="flex flex-row items-center gap-3 mt-2">
             <input
               type="color"
-              aria-label="Pick primary color"
+              aria-label={t('brandForm.pickColor')}
               value={
                 watchedColor && HEX_COLOR_RE.test(watchedColor)
                   ? watchedColor
@@ -250,7 +251,8 @@ export const BrandForm: FC<Props> = ({
             />
             <TextField
               {...register('primaryColor', {
-                validate: (v) => !v || HEX_COLOR_RE.test(v) || 'Must be #RRGGBB hex',
+                validate: (v) =>
+                  !v || HEX_COLOR_RE.test(v) || t('brandForm.colorInvalid'),
               })}
               placeholder={EXAMPLE_PRIMARY_COLOR}
               disabled={!isOwner || saving}
@@ -269,8 +271,9 @@ export const BrandForm: FC<Props> = ({
           )}
           {hardToSeeIn.length > 0 && (
             <p className="text-label font-normal text-warning" role="status">
-              Buttons in this color are hard to see in the sign-in window&apos;s{' '}
-              {hardToSeeIn.join(' and ')} mode. You can still save it.
+              {t('brandForm.lowContrast', {
+                modes: hardToSeeIn.length > 1 ? 'both' : hardToSeeIn[0],
+              })}
             </p>
           )}
         </Label>
@@ -279,7 +282,7 @@ export const BrandForm: FC<Props> = ({
       {isOwner && (
         <div className="flex flex-row gap-3 pt-2">
           <Button type="submit" variant="primary" disabled={!dirty} loading={saving}>
-            Save brand
+            {t('brandForm.save')}
           </Button>
           {isExisting && !brand.isDefault && (
             <Button
@@ -288,7 +291,7 @@ export const BrandForm: FC<Props> = ({
               onClick={handleSetDefault}
               loading={settingDefault}
             >
-              Set as default
+              {t('brandForm.setDefault')}
             </Button>
           )}
           <Button
@@ -297,7 +300,7 @@ export const BrandForm: FC<Props> = ({
             onClick={onCancel}
             disabled={saving || settingDefault}
           >
-            Cancel
+            {tCommon('actions.cancel')}
           </Button>
         </div>
       )}

@@ -33,6 +33,7 @@ export const memberLicenseKeys = (
     const license = byToken.get(tokenId);
     keys.set(id, {
       tokenId,
+      // Never shown: every view of a key filters on licenseKnown first.
       licenseLabel: license?.label ?? `License #${tokenId}`,
       signer,
       onChain: !!license?.signers.includes(signer.toLowerCase()),

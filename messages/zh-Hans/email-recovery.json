@@ -1,0 +1,24 @@
+{
+  "metadataTitle": "邮箱恢复 | {appName}",
+  "metadataDescription": "欢迎登录DIMO Developer Console。安全访问您的开发者仪表盘，管理应用并探索DIMO的高级工具。立即开始编码和优化！",
+  "form": {
+    "title": "重置通行密钥",
+    "warning": "重置完成后，您的旧通行密钥将无法再使用",
+    "emailLabel": "邮箱",
+    "emailPlaceholder": "email@address.com",
+    "sendFailed": "发送邮件时出错"
+  },
+  "checkEmail": {
+    "title": "请点击邮件中的链接",
+    "hint": "没有收到邮件？请检查垃圾邮件文件夹或重新发送验证码。",
+    "resend": "重新发送验证码",
+    "resent": "恢复验证码已重新发送。",
+    "resendFailed": "发送恢复验证码时出错。"
+  },
+  "rewire": {
+    "title": "帮您重新登录",
+    "body": "通行密钥是登录DIMO最快速、最安全的方式。",
+    "progress": "正在重新设置您的通行密钥…",
+    "success": "通行密钥已重新设置"
+  }
+}

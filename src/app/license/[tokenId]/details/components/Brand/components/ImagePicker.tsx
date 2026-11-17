@@ -1,6 +1,7 @@
 'use client';
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/Button';
 import { Label } from '@/components/Label';
@@ -39,6 +40,8 @@ export const ImagePicker: FC<Props> = ({
   aspect,
   disabled,
 }) => {
+  const t = useTranslations('license');
+  const tCommon = useTranslations('common');
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,11 +58,11 @@ export const ImagePicker: FC<Props> = ({
     setError(null);
     if (!picked) return;
     if (!ALLOWED_TYPES.includes(picked.type)) {
-      setError(`Unsupported file type ${picked.type}. Use PNG, JPEG, WebP, or SVG.`);
+      setError(t('imagePicker.unsupportedType', { type: picked.type }));
       return;
     }
     if (picked.size > BRAND_IMAGE_MAX_BYTES) {
-      setError(`File too large (${Math.round(picked.size / 1024)} KB). Max 2 MB.`);
+      setError(t('imagePicker.tooLarge', { size: Math.round(picked.size / 1024) }));
       return;
     }
     onFile(picked);
@@ -90,7 +93,7 @@ export const ImagePicker: FC<Props> = ({
                 }}
                 className="text-label text-muted underline underline-offset-2 transition-colors hover:text-ink"
               >
-                Remove
+                {tCommon('actions.remove')}
               </button>
             )}
           </div>
@@ -128,6 +131,7 @@ const DropZone: FC<{
   onFiles: (files: File[]) => void;
   onClick: () => void;
 }> = ({ disabled, hasExisting, onFiles, onClick }) => {
+  const t = useTranslations('license');
   const [dragOver, setDragOver] = useState(false);
   return (
     <button
@@ -150,9 +154,9 @@ const DropZone: FC<{
         ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-control-border-hover'}`}
     >
       <span className="font-medium text-ink">
-        {hasExisting ? 'Replace image' : 'Choose image'}
+        {hasExisting ? t('imagePicker.replace') : t('imagePicker.choose')}
       </span>
-      <span className="ml-2 text-muted">or drop here</span>
+      <span className="ml-2 text-muted">{t('imagePicker.orDrop')}</span>
     </button>
   );
 };
@@ -166,6 +170,7 @@ const PreviewBox: FC<{
   /** Called with a cropped File when the user confirms the square crop. */
   onCropped: (file: File) => void;
 }> = ({ src, aspect, file, onCropped }) => {
+  const t = useTranslations('license');
   // Square crop only kicks in when the user has just picked a non-SVG file.
   // SVGs are already vector — crop them with a CSS object-fit on the consumer
   // side instead of rasterising.
@@ -178,7 +183,11 @@ const PreviewBox: FC<{
           ${aspect === 'square' ? 'h-24 w-24' : 'h-16 w-32'}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="brand preview" className="w-full h-full object-contain" />
+        <img
+          src={src}
+          alt={t('imagePicker.previewAlt')}
+          className="w-full h-full object-contain"
+        />
       </div>
     );
   }
@@ -193,6 +202,7 @@ const SquareCropper: FC<{
   file: File;
   onCropped: (cropped: File) => void;
 }> = ({ src, file, onCropped }) => {
+  const t = useTranslations('license');
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [pixels, setPixels] = useState<Area | null>(null);
@@ -243,7 +253,7 @@ const SquareCropper: FC<{
           disabled={!pixels}
           loading={pending}
         >
-          Crop
+          {t('imagePicker.crop')}
         </Button>
       </div>
     </div>

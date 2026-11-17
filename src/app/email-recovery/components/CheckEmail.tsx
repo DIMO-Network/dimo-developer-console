@@ -7,12 +7,14 @@ import { saveToLocalStorage, EmbeddedKey } from '@/utils/localStorage';
 import { generateP256KeyPair } from '@turnkey/crypto';
 import { toast } from 'sonner';
 import { captureException } from '@sentry/nextjs';
+import { useTranslations } from 'next-intl';
 
 interface IProps {
   state?: Partial<IPasskeyRecoveryState>;
 }
 
 export const CheckEmail: FC<IProps> = ({ state }) => {
+  const t = useTranslations('email-recovery');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleResendCode = async () => {
@@ -25,10 +27,10 @@ export const CheckEmail: FC<IProps> = ({ state }) => {
       saveToLocalStorage(EmbeddedKey, key.privateKey);
       const success = await emailRecovery(email, targetPublicKey);
       if (success) {
-        toast.success('Recovery code successfully resent.');
+        toast.success(t('checkEmail.resent'));
       }
     } catch (error) {
-      toast.error('Something went wrong while sending the recovery code.');
+      toast.error(t('checkEmail.resendFailed'));
       captureException(error);
     } finally {
       setIsLoading(false);
@@ -37,12 +39,10 @@ export const CheckEmail: FC<IProps> = ({ state }) => {
   return (
     <div className="email-recovery__form">
       <div className="email-recovery__header">
-        <p className="text-title text-ink">Click the link in your email</p>
+        <p className="text-title text-ink">{t('checkEmail.title')}</p>
       </div>
       <div className="email-recovery__input">
-        <p className="text-body-sm text-muted">
-          Not seeing an email? Check your spam folder or resend code.
-        </p>
+        <p className="text-body-sm text-muted">{t('checkEmail.hint')}</p>
         <Button
           type="button"
           onClick={handleResendCode}
@@ -51,7 +51,7 @@ export const CheckEmail: FC<IProps> = ({ state }) => {
           variant="secondary"
           role="cancel-button"
         >
-          Resend code
+          {t('checkEmail.resend')}
         </Button>
       </div>
     </div>

@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "list": "Webhook | {appName}",
+    "create": "Webhookを作成 | {appName}",
+    "edit": "Webhookを編集 | {appName}"
+  },
+  "page": {
+    "description": "イベントのリアルタイム更新を受信します",
+    "addRedirectUri": "Webhookを設定するには、ライセンスにリダイレクトURIを追加してください。",
+    "createLicense": "Webhookを設定するには、開発者ライセンスを作成してください。",
+    "goToLicenses": "ライセンスへ移動",
+    "fetchLicensesError": "開発者ライセンスの取得中に問題が発生しました"
+  },
+  "breadcrumb": {
+    "webhooks": "Webhook",
+    "newWebhook": "新しいWebhook",
+    "editWebhook": "Webhookを編集"
+  },
+  "edit": {
+    "fetchError": "Webhookの取得中にエラーが発生しました",
+    "notFound": "Webhookが見つかりません"
+  },
+  "discardChanges": {
+    "title": "変更を破棄",
+    "message": "変更を破棄してもよろしいですか？この操作は元に戻せません。"
+  }
+}

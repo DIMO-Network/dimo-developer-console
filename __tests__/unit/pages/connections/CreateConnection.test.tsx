@@ -394,6 +394,16 @@ describe('resuming a connection', () => {
     await renderPage('resume=conn-1');
   };
 
+  it('says which connection is unfinished, with its name in bold', async () => {
+    await resumeWith(row());
+
+    const name = await screen.findByText('Fleet');
+    expect(name).toHaveClass('font-semibold');
+    expect(name.parentElement).toHaveTextContent(
+      "Fleet isn't finished yet. Its keys are saved, so setup can pick up where it stopped.",
+    );
+  });
+
   it('resumes a minted connection without minting again', async () => {
     await resumeWith(row({ status: 'MINTED', token_id: TOKEN_ID }));
 

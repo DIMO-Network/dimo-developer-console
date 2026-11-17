@@ -104,4 +104,21 @@ describe('useMemberDevJwt', () => {
     await expect(run()).rejects.toThrow('Turnkey said no');
     expect(submitDexChallenge).toHaveBeenCalledTimes(1);
   });
+
+  it('says whether dex answered, in one sentence', async () => {
+    (requestDexChallenge as jest.Mock).mockResolvedValueOnce({ ok: false, status: 0 });
+    await expect(run()).rejects.toThrow(
+      "Couldn't start connecting to this license (no answer). Try again.",
+    );
+    (requestDexChallenge as jest.Mock).mockResolvedValueOnce({ ok: false, status: 400 });
+    await expect(run()).rejects.toThrow(
+      "Couldn't start connecting to this license (400). Try again.",
+    );
+    (submitDexChallenge as jest.Mock).mockResolvedValueOnce({ ok: true, data: {} });
+    await expect(run()).rejects.toThrow(
+      "Couldn't connect your wallet (no answer). Try again.",
+    );
+    (submitDexChallenge as jest.Mock).mockResolvedValueOnce({ ok: false, status: 503 });
+    await expect(run()).rejects.toThrow("Couldn't connect your wallet (503). Try again.");
+  });
 });

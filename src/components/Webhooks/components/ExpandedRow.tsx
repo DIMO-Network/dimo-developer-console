@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Webhook } from '@/types/webhook';
 import React from 'react';
 import '../Webhooks.css';
@@ -18,6 +19,7 @@ export const ExpandedRow = ({
   clientId: string;
   colSpan: number;
 }) => {
+  const t = useTranslations('common');
   const { status, handleChangeStatus } = useToggleStatus(webhook, clientId);
   const handleDeletePress = useHandleDeletePress();
 
@@ -30,9 +32,17 @@ export const ExpandedRow = ({
         */}
         <div className="expanded-content space-y-4 md:pt-4">
           <dl className="grid grid-cols-3 gap-3 md:hidden">
-            <MetaItem label="Display name" value={webhook.displayName || '-'} />
-            <MetaItem label="Service" value={webhook.service} />
-            <MetaItem label="Cooldown" value={`${webhook.coolDownPeriod}s`} />
+            <MetaItem
+              label={t('webhooks.details.displayName')}
+              value={webhook.displayName || '-'}
+            />
+            <MetaItem label={t('webhooks.details.service')} value={webhook.service} />
+            <MetaItem
+              label={t('webhooks.details.cooldown')}
+              value={t('webhooks.details.cooldownSeconds', {
+                seconds: webhook.coolDownPeriod,
+              })}
+            />
           </dl>
           <WebhookUrlDisplay url={webhook.targetURL} />
           <Actions

@@ -2,19 +2,11 @@
 import { type FC, useState } from 'react';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/nextjs';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import { useDimoAuth } from '@/hooks/useDimoAuth';
 import { useEventEmitter } from '@/hooks/useEventEmitter';
 import { getDevJwt } from '@/utils/devJwt';
-import {
-  CONSOLE_ACCESS_EXPLAINER,
-  COPY_JWT,
-  ENABLE_CONSOLE_ACCESS,
-  ENABLING_CONSOLE_ACCESS,
-  JWT_FAILED,
-  MEMBER_CONSOLE_OFF,
-  NO_REDIRECT_URI_FOR_JWT,
-} from './consoleAccessCopy';
 
 interface Props {
   isLicenseOwner: boolean;
@@ -35,6 +27,7 @@ export const ConsoleAccess: FC<Props> = ({
   clientId,
   domain,
 }) => {
+  const t = useTranslations('license');
   const { getGlobalAccountDeveloperJwt } = useDimoAuth();
   const { publishEvent } = useEventEmitter<unknown>('developer-jwt-updated');
   const [copying, setCopying] = useState(false);
@@ -50,11 +43,11 @@ export const ConsoleAccess: FC<Props> = ({
       }
       if (!token) throw new Error('No developer JWT');
       await navigator.clipboard.writeText(token);
-      toast.success('JWT copied!');
+      toast.success(t('consoleAccess.jwtCopied'));
       publishEvent({}, true);
     } catch (e) {
       Sentry.captureException(e);
-      toast.error(JWT_FAILED);
+      toast.error(t('consoleAccess.jwtFailed'));
     } finally {
       setCopying(false);
     }
@@ -62,14 +55,16 @@ export const ConsoleAccess: FC<Props> = ({
 
   if (!on) {
     if (!isLicenseOwner)
-      return <p className="text-body-sm text-muted">{MEMBER_CONSOLE_OFF}</p>;
+      return <p className="text-body-sm text-muted">{t('consoleAccess.memberOff')}</p>;
     return (
       <div className="flex flex-col items-start gap-2">
-        <p className="text-body-sm text-muted">{CONSOLE_ACCESS_EXPLAINER}</p>
+        <p className="text-body-sm text-muted">{t('consoleAccess.explainer')}</p>
         <Button variant="secondary" disabled={enabling} onClick={onEnable}>
-          {ENABLE_CONSOLE_ACCESS}
+          {t('consoleAccess.enable')}
         </Button>
-        {enabling && <p className="text-body-sm text-muted">{ENABLING_CONSOLE_ACCESS}</p>}
+        {enabling && (
+          <p className="text-body-sm text-muted">{t('consoleAccess.enabling')}</p>
+        )}
         {error && (
           <p role="alert" className="text-body-sm text-negative">
             {error}
@@ -87,9 +82,11 @@ export const ConsoleAccess: FC<Props> = ({
         loading={copying}
         onClick={() => void copyJwt()}
       >
-        {COPY_JWT}
+        {t('consoleAccess.copyJwt')}
       </Button>
-      {!domain && <p className="text-body-sm text-muted">{NO_REDIRECT_URI_FOR_JWT}</p>}
+      {!domain && (
+        <p className="text-body-sm text-muted">{t('consoleAccess.noRedirectUri')}</p>
+      )}
     </div>
   );
 };

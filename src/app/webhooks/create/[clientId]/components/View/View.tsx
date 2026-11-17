@@ -9,8 +9,10 @@ import { getDevJwt } from '@/utils/devJwt';
 import { FormStepContextProvider } from '@/hoc/FormStepContextProvider';
 import { invalidateQuery } from '@/hooks/queries/useWebhooks';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
+  const t = useTranslations('webhooks');
   const { clientId } = use(params);
   const router = useRouter();
   const devJwt = getDevJwt(clientId);
@@ -42,10 +44,10 @@ export const View = ({ params }: { params: Promise<{ clientId: string }> }) => {
     <FormStepContextProvider>
       <nav className="mb-2 flex items-center gap-1.5 text-label text-muted">
         <Link href="/webhooks" className="transition-colors hover:text-ink">
-          Webhooks
+          {t('breadcrumb.webhooks')}
         </Link>
         <span>/</span>
-        <span className="text-ink">New webhook</span>
+        <span className="text-ink">{t('breadcrumb.newWebhook')}</span>
       </nav>
       <div className={'flex flex-1 flex-row'}>
         <div className={'mt-2 flex min-w-0 flex-1 flex-col'}>

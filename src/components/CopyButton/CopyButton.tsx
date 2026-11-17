@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { CheckIcon } from '@heroicons/react/16/solid';
 import { ContentCopyIcon } from '@/components/Icons';
 import { FC, useState } from 'react';
@@ -20,8 +21,9 @@ export const CopyButton: FC<ICopyButtonProps> = ({
   onCopySuccessMessage,
   className = '',
   size = 'inline',
-  ariaLabel = 'Copy',
+  ariaLabel,
 }) => {
+  const t = useTranslations('common');
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -29,9 +31,9 @@ export const CopyButton: FC<ICopyButtonProps> = ({
       void navigator.clipboard.writeText(value);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      toast.success(onCopySuccessMessage ?? 'Value copied to clipboard');
+      toast.success(onCopySuccessMessage ?? t('copyButton.copied'));
     } catch (err) {
-      toast.error('Failed to copy value');
+      toast.error(t('copyButton.failed'));
       console.error('failed to copy', err);
     }
   };
@@ -39,7 +41,7 @@ export const CopyButton: FC<ICopyButtonProps> = ({
   return (
     <button
       type="button"
-      aria-label={ariaLabel}
+      aria-label={ariaLabel ?? t('actions.copy')}
       onClick={handleCopy}
       className={classnames(
         'copy-button',

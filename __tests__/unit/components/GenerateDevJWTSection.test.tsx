@@ -15,12 +15,12 @@ jest.mock('@/components/GenerateDevJWT', () => ({
 }));
 jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
 import * as Sentry from '@sentry/nextjs';
-import {
-  CONSOLE_ACCESS_JWT_FAILED,
-  CONSOLE_ACCESS_JWT_PENDING,
-  GenerateDevJWTSection,
-} from '@/components/Webhooks/components/GenerateDevJWTSection';
+import { GenerateDevJWTSection } from '@/components/Webhooks/components/GenerateDevJWTSection';
+import common from '../../../messages/en/common.json';
 import { LocalDeveloperLicense } from '@/types/webhook';
+
+const CONSOLE_ACCESS_JWT_PENDING = common.webhooks.generateJwt.consoleAccessPending;
+const CONSOLE_ACCESS_JWT_FAILED = common.webhooks.generateJwt.consoleAccessFailed;
 
 // Identity lists signers checksummed; Turnkey returns the key lowercase.
 const CONSOLE_KEY = '0x5b2e4f6a8c0d2e4f6a8c0d2e4f6a8c0d2e4f6a8c';

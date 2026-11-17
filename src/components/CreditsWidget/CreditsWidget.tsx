@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { useFormatter, useTranslations } from 'next-intl';
 import { FC, useContext } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useTeam } from '@/hooks/useTeam';
-import { formatToCurrency } from '@/utils/formatBalance';
 import * as Sentry from '@sentry/nextjs';
 import { PlusIcon, WalletIcon } from '@/components/Icons';
 import { Button } from '@/components/Button';
@@ -18,6 +18,8 @@ interface ICreditsWidgetProps {
 const DCX_IN_USD = 0.001;
 
 export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) => {
+  const t = useTranslations('common');
+  const format = useFormatter();
   const { currentUser, getCurrentDcxBalance } = useGlobalAccount();
   const { isMember } = useTeam();
   const { setIsOpen: _setIsOpen } = useContext(CreditsContext);
@@ -38,7 +40,8 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
     enabled: Boolean(currentUser) && !isMember,
     staleTime: 30_000,
   });
-  const dcxBalance = formatToCurrency((balance ?? 0) * DCX_IN_USD);
+  const usdBalance = (balance ?? 0) * DCX_IN_USD;
+  const cents = { minimumFractionDigits: 2, maximumFractionDigits: 2 } as const;
 
   if (variant === 'large') {
     return (
@@ -49,9 +52,17 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
               <WalletIcon className="w-4 h-4 text-muted" />
               <div className="flex flex-col">
                 <div className="flex flex-row gap-2.5 items-center">
-                  <p className="text-metric text-ink">{dcxBalance}</p>
+                  <p className="text-metric text-ink">
+                    {format.number(usdBalance, {
+                      style: 'currency',
+                      currency: 'USD',
+                      ...cents,
+                    })}
+                  </p>
                 </div>
-                <p className="text-label text-muted">Current Balance</p>
+                <p className="text-label text-muted">
+                  {t('creditsWidget.currentBalance')}
+                </p>
               </div>
             </div>
           )}
@@ -74,7 +85,7 @@ export const CreditsWidget: FC<ICreditsWidgetProps> = ({ variant = 'small' }) =>
       className="flex items-center gap-1.5 rounded-full bg-control px-3 py-1"
     >
       <span className="text-label text-muted">$</span>
-      <span className="text-card-title text-ink">{dcxBalance.replace('$', '')}</span>
+      <span className="text-card-title text-ink">{format.number(usdBalance, cents)}</span>
     </div>
   );
 };

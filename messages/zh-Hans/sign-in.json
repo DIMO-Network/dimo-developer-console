@@ -1,0 +1,25 @@
+{
+  "metadataTitle": "登录 | {appName}",
+  "metadataDescription": "欢迎登录DIMO Developer Console。安全访问您的开发者仪表盘，管理应用，探索DIMO的高级工具。立即开始编码和优化！",
+  "view": {
+    "termsAgreement": "登录即表示您同意我们的<terms>服务条款</terms>和<privacy>隐私政策</privacy>",
+    "walletRestoreNeeded": "此账号需要先恢复钱包才能登录。请联系开发者支持。",
+    "genericError": "出了点问题，请重试",
+    "externalLoginFailed": "使用外部提供商登录失败"
+  },
+  "methodForm": {
+    "title": "用汽车数据构建应用",
+    "emailPlaceholder": "email@address.com",
+    "maxLength": "名称最多120个字符",
+    "invalidEmail": "邮箱地址无效",
+    "or": "或",
+    "lostPasskey": "丢失了通行密钥？<reset>通过邮箱重置</reset>",
+    "troubleLoggingIn": "登录遇到问题？<support>获取支持</support>"
+  },
+  "passkey": {
+    "title": "使用通行密钥继续",
+    "loginFailed": "使用通行密钥登录失败",
+    "lostPasskey": "丢失了通行密钥？<recover>通过邮箱恢复</recover>",
+    "troubleLoggingIn": "登录遇到问题？<support>获取支持</support>"
+  }
+}

@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { LicenseCard } from '@/components/LicenseCard';
 import EmptyList from '@/app/app/list/components/EmptyList';
 import CreateAppButton from '@/app/app/list/components/CreateAppButton';
@@ -25,14 +26,17 @@ export const LicenseList: FC<Props> = ({ licenseConnection }) => {
   const atLimit = fragment.nodes.length > MAX_LICENSES;
 
   const { isMember, activeTeam } = useTeam();
+  const t = useTranslations('license');
 
   return (
     <div className="license-list-content">
       <div className="description">
         <p className="title">
           {isMember
-            ? `${activeTeam?.name ?? 'Team'} licenses`
-            : 'Your developer licenses'}
+            ? t('list.teamLicenses', {
+                teamName: activeTeam?.name ?? t('list.teamFallbackName'),
+              })
+            : t('list.yourLicenses')}
         </p>
         {!isMember && <CreateAppButton disabled={atLimit} />}
       </div>
@@ -44,12 +48,8 @@ export const LicenseList: FC<Props> = ({ licenseConnection }) => {
         </div>
       ) : isMember ? (
         <div className="flex w-full flex-1 flex-col items-center justify-center rounded-card bg-card p-10 text-center">
-          <p className="text-card-title text-ink">
-            This team has no developer licenses yet
-          </p>
-          <p className="mt-1 text-body-sm text-muted">
-            Licenses the team owner creates show up here.
-          </p>
+          <p className="text-card-title text-ink">{t('list.teamEmptyTitle')}</p>
+          <p className="mt-1 text-body-sm text-muted">{t('list.teamEmptyBody')}</p>
         </div>
       ) : (
         <EmptyList />

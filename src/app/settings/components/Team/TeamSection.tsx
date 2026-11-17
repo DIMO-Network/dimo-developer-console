@@ -1,6 +1,7 @@
 'use client';
 import { type FC, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Section, SectionHeader } from '@/components/Section';
 import { Button } from '@/components/Button';
 import { Loader } from '@/components/Loader';
@@ -28,6 +29,8 @@ import {
 } from './signerOverlay';
 
 const TeamSectionComponent: FC = () => {
+  const t = useTranslations('settings');
+  const tCommon = useTranslations('common');
   const { activeTeam, isOwner, isLoading: teamLoading } = useTeam();
   const { members, isLoading, isError, refetch, upsertMember } = useTeamMembers();
   const {
@@ -60,22 +63,20 @@ const TeamSectionComponent: FC = () => {
       if (result?.ok) {
         upsertMember(result.data.member);
         trackEvent('Team Invite Resent', { teamId: activeTeam?.id });
-        toast.success(`Invite resent to ${member.email}`);
+        toast.success(t('team.resent', { email: member.email }));
       } else {
         toast.error(
-          result
-            ? inviteSendError(result, member.email)
-            : "We couldn't resend the invite. Try again.",
+          result ? inviteSendError(result, member.email, t) : t('team.resendFailed'),
         );
       }
     },
     cancel: async (member) => {
       const result = await cancelTeamInvite(member.id).catch(() => null);
       if (result?.ok) {
-        toast.success(`Invite to ${member.email} cancelled`);
+        toast.success(t('team.cancelled', { email: member.email }));
         void refetch();
       } else {
-        toast.error(result?.message ?? "We couldn't cancel the invite. Try again.");
+        toast.error(result?.message ?? t('team.cancelFailed'));
       }
     },
     ...(showDataAccess && licensesReady ? { grant: setGrantFor } : {}),
@@ -104,20 +105,15 @@ const TeamSectionComponent: FC = () => {
     body = (
       <div className="flex flex-col items-start gap-2">
         <p role="alert" className="text-body-sm text-negative">
-          Couldn&apos;t load your team.
+          {t('team.loadError')}
         </p>
         <Button variant="secondary" onClick={() => void refetch()}>
-          Try again
+          {tCommon('actions.retry')}
         </Button>
       </div>
     );
   } else if (isOwner && members.every((m) => m.role === 'OWNER')) {
-    body = (
-      <p className="text-body-sm text-muted">
-        Invite teammates to share this team&apos;s licenses with them. You choose who gets
-        data access.
-      </p>
-    );
+    body = <p className="text-body-sm text-muted">{t('team.ownerEmpty')}</p>;
   } else {
     body = (
       <MembersTable
@@ -133,8 +129,12 @@ const TeamSectionComponent: FC = () => {
 
   return (
     <Section>
-      <SectionHeader title={isOwner ? 'Team' : (activeTeam?.name ?? 'Team')}>
-        {isOwner && <Button onClick={() => setInviteOpen(true)}>Invite member</Button>}
+      <SectionHeader
+        title={isOwner ? t('team.title') : (activeTeam?.name ?? t('team.title'))}
+      >
+        {isOwner && (
+          <Button onClick={() => setInviteOpen(true)}>{t('team.inviteMember')}</Button>
+        )}
       </SectionHeader>
       {showDataAccess && !isLoading && !isError && (
         <PendingGrantBanner
@@ -148,11 +148,10 @@ const TeamSectionComponent: FC = () => {
       {isOwner && licensesError && (
         <div className="flex flex-col items-start gap-2">
           <p role="alert" className="text-body-sm text-negative">
-            Couldn&apos;t load this team&apos;s licenses, so data access can&apos;t be
-            changed right now.
+            {t('team.licensesLoadError')}
           </p>
           <Button variant="secondary" onClick={() => void refetchLicenses()}>
-            Load licenses again
+            {t('team.loadLicensesAgain')}
           </Button>
         </div>
       )}

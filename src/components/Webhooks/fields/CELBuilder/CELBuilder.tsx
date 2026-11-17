@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Section, SectionHeader } from '@/components/Section';
 import React from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
@@ -8,6 +9,7 @@ import { EventNameSelector } from '@/components/Webhooks/fields/CELBuilder/Event
 import { isEventService } from '@/utils/webhook';
 
 export const CELBuilder = () => {
+  const t = useTranslations('common');
   const { control, getValues, watch } = useFormContext<WebhookFormInput>();
   const service = watch('service');
 
@@ -19,7 +21,7 @@ export const CELBuilder = () => {
   if (isEventService(service)) {
     return (
       <Section>
-        <SectionHeader title={'Select an event'} />
+        <SectionHeader title={t('webhooks.celBuilder.selectEvent')} />
         <EventNameSelector service={service} />
       </Section>
     );
@@ -27,7 +29,7 @@ export const CELBuilder = () => {
 
   return (
     <Section>
-      <SectionHeader title={'Build the conditions'} />
+      <SectionHeader title={t('webhooks.celBuilder.buildConditions')} />
       <div className={'flex flex-col gap-4'}>
         {fields.map((field, index) => (
           <WebhookTriggerBuilderRow index={index} key={field.id} />

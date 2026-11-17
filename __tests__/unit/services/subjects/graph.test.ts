@@ -1,4 +1,10 @@
-import { buildVehicleGraph, resolveTelemetrySource } from '@/services/subjects/graph';
+import { getTranslations } from 'next-intl/server';
+import {
+  buildVehicleGraph,
+  resolveTelemetrySource,
+  subjectLabel,
+  subjectSublabel,
+} from '@/services/subjects/graph';
 import type { VehicleDetail } from '@/services/subjects/graph';
 
 const CHAIN = 80002;
@@ -41,8 +47,6 @@ describe('buildVehicleGraph', () => {
       did: vehicle.tokenDID,
       asset: vehicle.tokenDID,
       tokenId: 190231,
-      label: 'Vehicle',
-      sublabel: 'All sources combined',
       capabilities: ['summary', 'signals', 'raw', 'trips'],
     });
     expect(g.vehicle.fetchDid).toBe(vehicle.tokenDID);
@@ -68,9 +72,9 @@ describe('buildVehicleGraph', () => {
   });
 
   it('breaks each device out under the vehicle, authorised by the vehicle DID', () => {
-    expect(g.devices.map((d) => [d.kind, d.label, d.sublabel])).toEqual([
-      ['aftermarket-device', 'AutoPi', 'Aftermarket device'],
-      ['synthetic-device', 'Smartcar', 'Synthetic device'],
+    expect(g.devices.map((d) => [d.kind, d.name])).toEqual([
+      ['aftermarket-device', 'AutoPi'],
+      ['synthetic-device', 'Smartcar'],
     ]);
     for (const d of g.devices) {
       expect(d.asset).toBe(vehicle.tokenDID);
@@ -89,8 +93,6 @@ describe('buildVehicleGraph', () => {
       kind: 'account',
       did: 'did:ethr:80002:0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6',
       asset: 'did:ethr:80002:0x9f1e2d3c4b5a69788796a5b4c3d2e1f0a9b8c7d6',
-      label: 'Documents',
-      sublabel: 'Owner account',
       capabilities: ['documents', 'raw'],
     });
     expect(g.account.fetchDid).toBe(g.account.did);
@@ -105,14 +107,57 @@ describe('buildVehicleGraph', () => {
   it('carries details rows for the details panel', () => {
     expect(g.vehicle.details).toEqual(
       expect.arrayContaining([
-        { label: 'Make, model, year', value: 'Toyota RAV4 2024' },
-        { label: 'Owner', value: vehicle.owner, mono: true },
-        { label: 'Vehicle DID', value: vehicle.tokenDID, mono: true },
+        { key: 'makeModelYear', value: 'Toyota RAV4 2024' },
+        { key: 'owner', value: vehicle.owner, mono: true },
+        { key: 'minted', value: vehicle.mintedAt, date: true },
+        { key: 'vehicleDid', value: vehicle.tokenDID, mono: true },
       ]),
     );
     expect(g.devices[0].details).toEqual(
-      expect.arrayContaining([{ label: 'Serial', value: 'a7c3d9e2-58f1', mono: true }]),
+      expect.arrayContaining([{ key: 'serial', value: 'a7c3d9e2-58f1', mono: true }]),
     );
+  });
+
+  it('leaves an unknown make, model and year for the view to word', () => {
+    const bare = buildVehicleGraph({ ...vehicle, definition: null }, CHAIN);
+    expect(bare.vehicle.details[0]).toEqual({ key: 'makeModelYear', value: null });
+  });
+
+  it('labels each subject from messages, a device by its own name when it has one', async () => {
+    const t = await getTranslations('vehicles');
+    const unnamed = buildVehicleGraph(
+      {
+        ...vehicle,
+        aftermarketDevice: { ...vehicle.aftermarketDevice!, manufacturer: { name: '' } },
+        syntheticDevice: {
+          ...vehicle.syntheticDevice!,
+          connection: { ...vehicle.syntheticDevice!.connection!, name: '' },
+        },
+      },
+      CHAIN,
+    );
+    expect(
+      [...g.all, ...unnamed.devices].map((s) => [
+        subjectLabel(s, t),
+        subjectSublabel(s, t),
+      ]),
+    ).toEqual([
+      ['Vehicle', 'All sources combined'],
+      ['AutoPi', 'Aftermarket device'],
+      ['Smartcar', 'Synthetic device'],
+      ['Documents', 'Owner account'],
+      ['Aftermarket device', 'Aftermarket device'],
+      ['Synthetic device', 'Synthetic device'],
+    ]);
+  });
+
+  it('names export files in English, as the labels used to', () => {
+    expect(g.all.map((s) => s.fileStem)).toEqual([
+      'vehicle',
+      'autopi',
+      'smartcar',
+      'documents',
+    ]);
   });
 
   it('omits missing devices', () => {

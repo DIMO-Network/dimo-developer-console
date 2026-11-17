@@ -1,36 +1,48 @@
 import { Anchor } from '@/components/Anchor';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 
 export const NoPasskeySignup: FC = () => {
+  const t = useTranslations('sign-up');
   return (
     <>
       <div className="sign-up__form">
         <div className="sign-up__header">
-          <p className="text-title text-ink">Creating account without passkey</p>
+          <p className="text-title text-ink">{t('wallet.noPasskey.title')}</p>
         </div>
         <div className="otp-login-text">
-          <p>
-            Your DIMO account is being created without a passkey, please check your inbox
-            for a 6-digit OTP.
-          </p>
+          <p>{t('wallet.noPasskey.body')}</p>
         </div>
         <BubbleLoader isLoading={true} />
         <div className="sign-up__extra-links">
           <div className="flex flex-row">
             <p className="terms-caption">
-              Lost your passkey?{' '}
-              <Anchor href="/email-recovery" target="_self" className="grey underline">
-                Recover with your email
-              </Anchor>
+              {t.rich('wallet.lostPasskey', {
+                recover: (chunks) => (
+                  <Anchor
+                    href="/email-recovery"
+                    target="_self"
+                    className="grey underline"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+              })}
             </p>
           </div>
           <div className="flex flex-row">
             <p className="terms-caption">
-              Trouble logging in?{' '}
-              <Anchor href="mailto:developer-support@dimo.org" className="grey underline">
-                Get support
-              </Anchor>
+              {t.rich('wallet.troubleLoggingIn', {
+                support: (chunks) => (
+                  <Anchor
+                    href="mailto:developer-support@dimo.org"
+                    className="grey underline"
+                  >
+                    {chunks}
+                  </Anchor>
+                ),
+              })}
             </p>
           </div>
         </div>

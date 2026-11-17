@@ -20,33 +20,34 @@ describe('OwnerOnly', () => {
       isMember: false,
     });
     render(
-      <OwnerOnly feature="Webhooks">
+      <OwnerOnly feature="webhooks">
         <p>webhooks table</p>
       </OwnerOnly>,
     );
     expect(screen.getByText('webhooks table')).toBeInTheDocument();
   });
 
-  it.each(['Webhooks', 'Connections', 'Configurations'])(
-    'tells members who manages %s and hides the page',
-    (feature) => {
-      (useTeam as jest.Mock).mockReturnValue(MEMBER);
-      render(
-        <OwnerOnly feature={feature}>
-          <p>secret page</p>
-        </OwnerOnly>,
-      );
-      expect(screen.queryByText('secret page')).toBeNull();
-      expect(
-        screen.getByRole('heading', { name: `${feature} are managed by the team owner` }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          new RegExp(`ops@acme\\.dev manages ${feature.toLowerCase()} for Acme Mobility`),
-        ),
-      ).toBeInTheDocument();
-    },
-  );
+  it.each([
+    ['webhooks', 'Webhooks'],
+    ['connections', 'Connections'],
+    ['configurations', 'Configurations'],
+  ] as const)('tells members who manages %s and hides the page', (feature, name) => {
+    (useTeam as jest.Mock).mockReturnValue(MEMBER);
+    render(
+      <OwnerOnly feature={feature}>
+        <p>secret page</p>
+      </OwnerOnly>,
+    );
+    expect(screen.queryByText('secret page')).toBeNull();
+    expect(
+      screen.getByRole('heading', { name: `${name} are managed by the team owner` }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        `ops@acme.dev manages ${feature} for Acme Mobility. Switch to your own team to manage ${feature} for your licenses.`,
+      ),
+    ).toBeInTheDocument();
+  });
 
   it('waits for the teams before deciding', () => {
     (useTeam as jest.Mock).mockReturnValue({
@@ -55,7 +56,7 @@ describe('OwnerOnly', () => {
       isMember: false,
     });
     render(
-      <OwnerOnly feature="Connections">
+      <OwnerOnly feature="connections">
         <p>secret page</p>
       </OwnerOnly>,
     );

@@ -1,6 +1,7 @@
 'use client';
 import React, { FC } from 'react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import type { BrandView } from '@/services/brand';
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDelete }) => {
+  const t = useTranslations('license');
   // The only brand can go (the license falls back to DIMO's own look). The
   // default among several waits for another default, so one always remains.
   const canDelete = !isMultiple || !brand.isDefault;
@@ -23,7 +25,7 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
         <span className="text-body-sm font-medium text-ink">{brand.name}</span>
         {brand.isDefault && (
           <span className="rounded-chip bg-control px-2 py-0.5 text-label text-muted whitespace-nowrap">
-            Default
+            {t('brandRow.default')}
           </span>
         )}
       </div>
@@ -33,7 +35,7 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
             type="button"
             variant="secondary"
             size="icon"
-            title="Edit brand"
+            title={t('brandRow.edit')}
             onClick={onEdit}
           >
             <PencilIcon className="h-5 w-5" />
@@ -42,11 +44,7 @@ export const BrandRow: FC<Props> = ({ brand, isMultiple, isOwner, onEdit, onDele
             type="button"
             variant="secondary"
             size="icon"
-            title={
-              canDelete
-                ? 'Delete brand'
-                : 'Set another brand as default before deleting this one'
-            }
+            title={canDelete ? t('brandRow.delete') : t('brandRow.setDefaultFirst')}
             onClick={onDelete}
             disabled={!canDelete}
           >

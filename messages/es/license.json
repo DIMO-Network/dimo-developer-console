@@ -1,0 +1,216 @@
+{
+  "list": {
+    "teamLicenses": "Licencias de {teamName}",
+    "teamFallbackName": "Equipo",
+    "yourLicenses": "Tus licencias de desarrollador",
+    "teamEmptyTitle": "Este equipo aún no tiene licencias de desarrollador",
+    "teamEmptyBody": "Aquí aparecen las licencias que crea el propietario del equipo."
+  },
+  "breadcrumbLicenses": "Licencias",
+  "details": {
+    "metadataTitle": "Detalles de la licencia | {appName}",
+    "breadcrumbDetails": "Detalles de la licencia",
+    "loadError": "Hubo un error al obtener los detalles de la licencia",
+    "fallbackName": "Licencia #{tokenId}",
+    "rename": "Renombrar",
+    "clientIdCopied": "¡ID de cliente copiado!",
+    "tabs": {
+      "overview": "Resumen",
+      "config": "Ajustes",
+      "vehicles": "Vehículos",
+      "brand": "Marca"
+    },
+    "vehiclesConnected": "Vehículos conectados",
+    "viewVehicles": "Ver vehículos →"
+  },
+  "quickActions": {
+    "label": "Acciones rápidas",
+    "generateApiKey": "🔑 Generar clave de API",
+    "configureBranding": "🪪 Configurar marca",
+    "setupSharing": "⚙️ Configurar uso compartido",
+    "docs": "📖 Docs"
+  },
+  "usage": {
+    "creditsUsed": "Créditos usados",
+    "generateJwtHint": "Genera un JWT para ver el uso",
+    "unavailable": "Uso no disponible en este momento",
+    "learnAboutCredits": "Más sobre los créditos →"
+  },
+  "vehiclesTab": {
+    "loadError": "Error al cargar los vehículos",
+    "connectedVehicles": "Vehículos conectados",
+    "viewList": "Ver lista de vehículos →",
+    "vehicleList": "Lista de vehículos",
+    "configureSharing": "Configurar uso compartido"
+  },
+  "jwts": {
+    "title": "JWT de desarrollador",
+    "generateNew": "Generar nuevo JWT",
+    "empty": "No se encontraron JWT de desarrollador",
+    "copied": "¡JWT copiado!",
+    "deleteLabel": "Eliminar JWT",
+    "deleteTitle": "¿Seguro que quieres eliminar este JWT?",
+    "columns": {
+      "jwt": "JWT",
+      "createdAt": "Creado el",
+      "expiresAt": "Vence el"
+    },
+    "unknownExpiry": "Desconocido",
+    "invalidToken": "No válido"
+  },
+  "redirectUris": {
+    "title": "URI de redirección autorizados"
+  },
+  "brand": {
+    "title": "Marca",
+    "add": "Agregar marca",
+    "loading": "Cargando marcas…",
+    "none": "No hay ninguna marca configurada.",
+    "loadFailed": "No se pudieron cargar las marcas. Revisa tu conexión y vuelve a cargar la página.",
+    "workspaceFailed": "No se pudo cargar tu espacio de trabajo. Vuelve a iniciar sesión e inténtalo de nuevo.",
+    "deleteFailed": "No se pudo eliminar la marca. Inténtalo de nuevo.",
+    "deleteTitle": "¿Eliminar {name}?",
+    "deleteLoading": "Eliminando marca…",
+    "deleteLast": "Login with DIMO vuelve al aspecto propio de DIMO para esta licencia. Las páginas ya abiertas pueden tardar unos minutos en cambiar.",
+    "deleteOne": "Los sitios que piden esta marca por su nombre obtienen el aspecto propio de DIMO. Las páginas ya abiertas pueden tardar unos minutos en cambiar.",
+    "multipleTitle": "Usar varias marcas con Login with DIMO",
+    "multipleHint": "Cada botón de Login with DIMO acepta <code>brandOverride</code>. Omítelo para usar tu marca por defecto."
+  },
+  "brandRow": {
+    "default": "Por defecto",
+    "edit": "Editar marca",
+    "delete": "Eliminar marca",
+    "setDefaultFirst": "Establece otra marca por defecto antes de eliminar esta"
+  },
+  "brandForm": {
+    "displayName": "Nombre visible",
+    "displayNameRequired": "El nombre visible es obligatorio.",
+    "displayNameMax": "Máximo 100 caracteres",
+    "displayNamePlaceholder": "p. ej., Fleet App",
+    "nameTaken": "Ya existe una marca con este nombre",
+    "renameWarning": "Cambiar el nombre interrumpe las llamadas existentes de Login with DIMO que usan este nombre",
+    "logo": "Logotipo",
+    "logoHint": "Marca ancha que se muestra en el botón de Login with DIMO y en la parte superior de la ventana de inicio de sesión. PNG, JPEG, WebP o SVG.",
+    "icon": "Ícono",
+    "iconHint": "Marca cuadrada. Login with DIMO aún no la muestra. PNG, JPEG, WebP o SVG.",
+    "primaryColor": "Color principal",
+    "primaryColorHint": "Da color al botón de Login with DIMO y a los botones principales de la ventana de inicio de sesión; su texto cambia a negro o blanco para que se pueda leer. Hex de 7 caracteres, p. ej., <code>{example}</code>. Déjalo en blanco para usar los valores por defecto de DIMO.",
+    "pickColor": "Elegir color principal",
+    "colorInvalid": "Debe ser un hex #RRGGBB",
+    "lowContrast": "Los botones de este color son difíciles de ver en el modo {modes, select, light {claro} dark {oscuro} other {claro y oscuro}} de la ventana de inicio de sesión. Aun así puedes guardarlo.",
+    "saveFailed": "No se pudo guardar la marca",
+    "imageRefused": "Se rechazó esa imagen. Usa un PNG, JPEG, WebP o SVG de hasta 2 MB.",
+    "saved": "Marca guardada",
+    "defaultUpdated": "Marca por defecto actualizada",
+    "defaultFailed": "No se pudo establecer la marca por defecto",
+    "save": "Guardar marca",
+    "setDefault": "Usar por defecto"
+  },
+  "imagePicker": {
+    "unsupportedType": "Tipo de archivo no compatible: {type}. Usa PNG, JPEG, WebP o SVG.",
+    "tooLarge": "Archivo demasiado grande ({size} KB). Máximo 2 MB.",
+    "replace": "Reemplazar imagen",
+    "choose": "Elegir imagen",
+    "orDrop": "o suéltala aquí",
+    "previewAlt": "vista previa de la marca",
+    "crop": "Recortar"
+  },
+  "signers": {
+    "title": "Claves de API",
+    "apiKeyButton": "Crear una clave de API para tu servidor",
+    "apiKeyExplainer": "Para apps que generan JWT de desarrollador en sus propios servidores. Para probar desde la consola, usa Copiar JWT.",
+    "generateApiKey": "Generar clave de API",
+    "checkingConsole": "Comprobando el acceso de la consola…",
+    "signerAddress": "Dirección del firmante",
+    "signerAddressNote": "*Esta no es tu clave de API. Si perdiste tu clave de API, tendrás que generar una nueva.",
+    "enabledOn": "Habilitada el",
+    "belongsTo": "Pertenece a",
+    "assign": "Asignar",
+    "turnOffConsole": "Desactivar acceso de la consola",
+    "deleteKey": "Eliminar clave de API",
+    "actionsFor": "Acciones para {address}",
+    "recordFailed": "La clave funciona, pero no pudimos registrar para quién es.",
+    "saved": "Se guardó para quién es esta clave.",
+    "signerInUse": "Esta dirección es la wallet de un miembro del equipo. Regístrala con Otorgar en Configuración → Equipo.",
+    "saveFailed": "No pudimos guardar esto. Inténtalo de nuevo.",
+    "generating": "Generando una clave de API para tu licencia de desarrollador",
+    "consoleOffToast": "Acceso de la consola desactivado.",
+    "keyDeletedToast": "Clave de API eliminada. Los JWT ya emitidos con ella funcionan hasta que vencen (hasta 14 días).",
+    "turnOffTitle": "¿Desactivar el acceso de la consola?",
+    "deleteTitle": "¿Seguro que quieres eliminar esta clave de API?",
+    "deleteKeySubtitle": "Las apps que usan esta clave dejan de recibir nuevos JWT de desarrollador. Los JWT ya emitidos con ella siguen funcionando hasta que vencen, hasta 14 días.",
+    "consoleOffSubtitle": "La consola deja de generar JWT de desarrollador para esta licencia. Los JWT que ya generó siguen funcionando hasta que vencen, hasta 14 días.",
+    "deleteLoading": "Esperando la confirmación de la red…"
+  },
+  "consoleAccess": {
+    "explainer": "El acceso de la consola permite que esta consola genere JWT de desarrollador para esta licencia, así puedes hacer pruebas sin crear una clave de API. Activarlo agrega la clave de tu consola como firmante, en una sola transacción.",
+    "enable": "Activar acceso de la consola",
+    "enabling": "Activando el acceso de la consola…",
+    "memberOff": "El propietario de la licencia aún no activó el acceso de la consola.",
+    "notOwnerOnChain": "La wallet de tu consola no es propietaria de esta licencia en la blockchain, así que no puede activar el acceso de la consola.",
+    "copyJwt": "Copiar JWT",
+    "noRedirectUri": "Agrega un URI de redirección abajo para generar JWT de desarrollador.",
+    "jwtCopied": "¡JWT copiado!",
+    "jwtFailed": "No se pudo generar un JWT. Inténtalo de nuevo."
+  },
+  "belongsTo": {
+    "consoleYou": "Consola (tú)",
+    "consoleWallet": "Wallet de la consola",
+    "notRecorded": "Sin registrar",
+    "unassigned": "Sin asignar",
+    "assign": "Asignar",
+    "teamMember": "Miembro del equipo",
+    "unknown": "Desconocido",
+    "stillSyncing": "Sincronizando",
+    "disabledOutside": "Desactivado fuera de la consola"
+  },
+  "keyHolders": {
+    "title": "¿Para quién es esta clave?",
+    "teamMembers": "Miembros del equipo",
+    "others": "Otras personas (separadas por comas)",
+    "note": "Nota",
+    "chooseOne": "Elige al menos una persona o escribe un nombre.",
+    "noteTooLong": "La nota debe tener menos de {max} caracteres."
+  },
+  "apiKeyModal": {
+    "title": "Clave de API generada",
+    "warning": "Asegúrate de copiar tu clave de API ahora, porque no podrás volver a verla.",
+    "copied": "¡Clave de API copiada!"
+  },
+  "vehicles": {
+    "metadataTitle": "Vehículos con licencia | {appName}",
+    "loadError": "Algo salió mal al obtener los detalles del vehículo",
+    "breadcrumbVehicles": "Vehículos",
+    "connectedVehicles": "Vehículos conectados",
+    "testVehicles": "({count, plural, one {# vehículo de prueba} other {# vehículos de prueba}})",
+    "vehicleDetails": "Detalles del vehículo"
+  },
+  "renounce": {
+    "title": "¿Renunciar al acceso al vehículo?",
+    "tokenFallback": "Token #{tokenId}",
+    "tokenId": "ID de token: {tokenId}",
+    "warning": "Perderás todo el acceso a los datos de este vehículo. El propietario del vehículo tendría que volver a otorgar el acceso.",
+    "action": "Renunciar al acceso",
+    "failed": "La transacción falló"
+  },
+  "vehicleTable": {
+    "label": "Vehículos compartidos",
+    "renounced": "Se renunció al acceso",
+    "renounceFailed": "No se pudo renunciar al acceso",
+    "pageLoadFailed": "No se pudo cargar esa página. Inténtalo de nuevo.",
+    "lookupFailed": "No se pudo buscar el vehículo {tokenId}: {message}",
+    "noVehicle": "Ningún vehículo tiene el ID de token {tokenId}.",
+    "notShared": "El vehículo {tokenId} ({make} {model}) no está compartido con esta licencia.",
+    "error": "Error: {message}",
+    "rowActions": "Acciones de la fila",
+    "simulated": "Simulado",
+    "columns": {
+      "tokenDid": "DID del vehículo",
+      "mmy": "Marca/modelo/año",
+      "sources": "Fuentes",
+      "lastSeen": "Última actividad"
+    },
+    "needsJwt": "Falta JWT de desarrollador",
+    "unavailable": "No disponible"
+  }
+}

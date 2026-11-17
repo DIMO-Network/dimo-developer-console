@@ -1,18 +1,13 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import configuration from '@/config';
 import { View } from './components/View';
 
-// The page is a client shell with no server data. Rendering each path once and
-// serving it from cache spares a function invocation (and its cold start) on
-// every visit; the middleware still checks the session first.
-export const generateStaticParams = async () => [];
-
-export const metadata: Metadata = {
-  title: `Edit webhook | ${configuration.appName}`,
+export const generateMetadata = async (): Promise<Metadata> => {
+  const t = await getTranslations('webhooks');
+  return { title: t('metadata.edit', { appName: configuration.appName }) };
 };
 
-// Only params, not searchParams: handing the client view every prop would keep
-// the route dynamic, and generateStaticParams could not cache it.
 const EditWebhookPage = ({
   params,
 }: {

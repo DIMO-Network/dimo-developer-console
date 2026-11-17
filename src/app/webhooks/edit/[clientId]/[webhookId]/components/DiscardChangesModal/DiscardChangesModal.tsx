@@ -2,6 +2,7 @@ import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import React, { FC } from 'react';
 import { Button } from '@/components/Button';
+import { useTranslations } from 'next-intl';
 
 interface Props {
   isOpen: boolean;
@@ -10,21 +11,21 @@ interface Props {
 }
 
 export const DiscardChangesModal: FC<Props> = ({ isOpen, onClose, onConfirm }) => {
+  const t = useTranslations('webhooks');
+  const tCommon = useTranslations('common');
   return (
     <Modal isOpen={isOpen} setIsOpen={onClose}>
       <div className="flex w-full flex-col gap-12">
-        <Title className={'text-panel-title'}>Discard changes</Title>
+        <Title className={'text-panel-title'}>{t('discardChanges.title')}</Title>
         <div className="flex flex-col gap-4">
-          <p>
-            Are you sure you want to discard your changes? This action cannot be undone.
-          </p>
+          <p>{t('discardChanges.message')}</p>
         </div>
         <div className="flex flex-col gap-4">
           <Button onClick={onConfirm} variant="destructive">
-            Confirm
+            {tCommon('actions.confirm')}
           </Button>
           <Button variant="secondary" onClick={onClose}>
-            Cancel
+            {tCommon('actions.cancel')}
           </Button>
         </div>
       </div>

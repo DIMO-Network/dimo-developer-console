@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "listTitle": "範本 | {appName}",
+    "newTitle": "新增範本 | {appName}"
+  },
+  "loading": "載入中...",
+  "unavailable": {
+    "title": "車輛範本即將推出",
+    "description": "範本編輯器尚未開放，請稍後再回來查看。"
+  },
+  "header": {
+    "description": "依廠牌、車型和年份搜尋目錄，編輯車輛的定義",
+    "newTemplate": "新增範本"
+  },
+  "search": {
+    "fields": {
+      "make": "廠牌",
+      "model": "車型",
+      "year": "年份"
+    },
+    "submit": "搜尋",
+    "failed": "搜尋目錄時發生錯誤",
+    "noMake": "沒有符合此名稱的廠牌。請嘗試輸入車身上標示的品牌拼寫。",
+    "versionTrims": "v{version} · {trims, plural, other {#個車款}}",
+    "open": "開啟",
+    "create": "建立",
+    "status": {
+      "ok": "已有範本",
+      "missing": "尚無範本",
+      "invalidId": "需先修正ID"
+    },
+    "hints": {
+      "missing": "此年份車型存在，但還沒有人為它撰寫範本。",
+      "invalidId": "此ID不符合範本所需的make_model_year格式，因此在修正ID之前沒有可編輯的內容。"
+    }
+  },
+  "new": {
+    "title": "新增範本",
+    "description": "範本代表一個年份車型及其推出的車款。建立後會立即以您的名義發布。目前還沒有車輛使用它，因此不會影響路上的任何車輛。",
+    "manufacturer": "製造商",
+    "model": "車型",
+    "year": "年份",
+    "firstTrim": "第一個車款",
+    "exists": "已存在使用此ID的範本。",
+    "openIt": "開啟範本",
+    "create": "建立範本",
+    "createFailed": "無法建立此範本"
+  },
+  "editor": {
+    "loadFailed": "無法載入此範本",
+    "loadFailedDetail": "無法載入此範本：{message}（{status}）",
+    "header": "<code>{id}</code> · v{version}",
+    "headerWithAuthor": "<code>{id}</code> · v{version} · 最後由{author}發布",
+    "addTrim": "新增車款",
+    "publish": "發布",
+    "publishFailed": "發布失敗",
+    "published": "已發布版本{version}。",
+    "conflict": {
+      "moved": "您在編輯版本{expected}期間，此範本已更新至版本{actual}。",
+      "kept": "您的草稿並未捨棄，也沒有發布任何內容。請重新載入以查看目前版本，然後重新套用您的變更。",
+      "reload": "重新載入"
+    }
+  }
+}

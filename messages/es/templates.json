@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "listTitle": "Plantillas | {appName}",
+    "newTitle": "Nueva plantilla | {appName}"
+  },
+  "loading": "Cargando...",
+  "unavailable": {
+    "title": "Las plantillas de vehículos llegarán pronto",
+    "description": "El editor de plantillas aún no está disponible. Vuelve pronto."
+  },
+  "header": {
+    "description": "Busca en el catálogo por marca, modelo y año para editar la definición de un auto",
+    "newTemplate": "Nueva plantilla"
+  },
+  "search": {
+    "fields": {
+      "make": "Marca",
+      "model": "Modelo",
+      "year": "Año"
+    },
+    "submit": "Buscar",
+    "failed": "Algo salió mal al buscar en el catálogo",
+    "noMake": "Ninguna marca coincide con ese nombre. Prueba con la marca tal como aparece escrita en el auto.",
+    "versionTrims": "v{version} · {trims, plural, one {# acabado} other {# acabados}}",
+    "open": "Abrir",
+    "create": "Crear",
+    "status": {
+      "ok": "Plantilla",
+      "missing": "Sin plantilla aún",
+      "invalidId": "Hay que corregir el ID"
+    },
+    "hints": {
+      "missing": "Este año del modelo existe, pero nadie le ha escrito una plantilla todavía.",
+      "invalidId": "Este ID no tiene la forma make_model_year que necesita una plantilla, así que no hay nada que editar hasta que se corrija el ID."
+    }
+  },
+  "new": {
+    "title": "Nueva plantilla",
+    "description": "Una plantilla es un año del modelo y los acabados con los que salió. Al crearla se publica de inmediato, a tu nombre. Ningún auto la usa todavía, así que nada cambia en los autos en circulación.",
+    "manufacturer": "Fabricante",
+    "model": "Modelo",
+    "year": "Año",
+    "firstTrim": "Primer acabado",
+    "exists": "Ya existe una plantilla con este ID.",
+    "openIt": "Abrirla",
+    "create": "Crear plantilla",
+    "createFailed": "No se pudo crear esta plantilla"
+  },
+  "editor": {
+    "loadFailed": "No se pudo cargar esta plantilla",
+    "loadFailedDetail": "No se pudo cargar esta plantilla: {message} ({status})",
+    "header": "<code>{id}</code> · v{version}",
+    "headerWithAuthor": "<code>{id}</code> · v{version} · última publicación: {author}",
+    "addTrim": "Agregar acabado",
+    "publish": "Publicar",
+    "publishFailed": "No se pudo publicar",
+    "published": "Versión {version} publicada.",
+    "conflict": {
+      "moved": "Esta plantilla pasó a la versión {actual} mientras editabas la versión {expected}.",
+      "kept": "Tu borrador no se descartó y no se publicó nada. Vuelve a cargar para ver la versión actual y luego vuelve a aplicar tus cambios.",
+      "reload": "Recargar"
+    }
+  }
+}

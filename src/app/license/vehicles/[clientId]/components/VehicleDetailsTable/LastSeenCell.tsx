@@ -1,5 +1,6 @@
 'use client';
 import { FC } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
 import { lastSeenQuery } from '@/services/subjects/queries';
 import { FreshnessDot } from '@/components/FreshnessDot';
@@ -10,6 +11,7 @@ export const LastSeenCell: FC<{ asset: string; clientId: string }> = ({
   asset,
   clientId,
 }) => {
+  const t = useTranslations('license');
   const q = useSubjectQuery<{ latestIndex: { header: { time: string } } | null }>({
     api: 'fetch',
     asset,
@@ -20,7 +22,9 @@ export const LastSeenCell: FC<{ asset: string; clientId: string }> = ({
   if (q.error)
     return (
       <span className="whitespace-nowrap text-muted">
-        {q.error.code === 'DEV_JWT_MISSING' ? 'Needs a developer JWT' : 'Unavailable'}
+        {q.error.code === 'DEV_JWT_MISSING'
+          ? t('vehicleTable.needsJwt')
+          : t('vehicleTable.unavailable')}
       </span>
     );
   return (

@@ -3,6 +3,7 @@ import { type FC } from 'react';
 import { useUser } from '@/hooks/useUser';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import './View.css';
 import { BubbleLoader } from '@/components/BubbleLoader';
 import { useTeam } from '@/hooks/useTeam';
@@ -22,26 +23,22 @@ function getFirstName(name: string) {
 
 const shortcuts = [
   {
-    label: 'Licenses',
-    description: 'View and manage your developer licenses',
+    key: 'licenses',
     icon: DeveloperBoardIcon,
     href: '/licenses',
   },
   {
-    label: 'Connections',
-    description: 'Configure connections to bring your own data',
+    key: 'connections',
     icon: ConnectionsIcon,
     href: '/connections',
   },
   {
-    label: 'Webhooks',
-    description: 'Create and manage webhook event subscriptions',
+    key: 'webhooks',
     icon: IntegrationIcon,
     href: '/webhooks',
   },
   {
-    label: 'Vehicles',
-    description: 'See what data each shared vehicle sends and browse its raw events',
+    key: 'vehicles',
     icon: CarIcon,
     href: '/vehicles',
   },
@@ -57,6 +54,7 @@ export const visibleShortcuts = (isMember: boolean, dataAccessEnabled: boolean) 
   });
 
 export const View: FC = () => {
+  const t = useTranslations('app');
   const { data: user, isLoading: loadingUser } = useUser();
   const { isMember } = useTeam();
   const userFirstName = getFirstName(user?.name ?? '');
@@ -73,23 +71,31 @@ export const View: FC = () => {
                 src={'/images/waving_hand.svg'}
                 width={16}
                 height={16}
-                alt={'waving-hand'}
+                alt={t('home.wavingHandAlt')}
               />
-              <p className="title">Welcome{userFirstName ? `, ${userFirstName}` : '!'}</p>
+              <p className="title">
+                {userFirstName
+                  ? t('home.welcomeNamed', { name: userFirstName })
+                  : t('home.welcome')}
+              </p>
             </>
           )}
         </div>
 
         <div className="shortcuts-grid">
           {visibleShortcuts(isMember, TEAM_DATA_ACCESS_ENABLED).map(
-            ({ label, description, icon: Icon, href }) => (
+            ({ key, icon: Icon, href }) => (
               <Link key={href} href={href} className="shortcut-card">
                 <div className="shortcut-card__icon">
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="shortcut-card__body">
-                  <p className="shortcut-card__title">{label}</p>
-                  <p className="shortcut-card__desc">{description}</p>
+                  <p className="shortcut-card__title">
+                    {t(`home.shortcuts.${key}.label`)}
+                  </p>
+                  <p className="shortcut-card__desc">
+                    {t(`home.shortcuts.${key}.description`)}
+                  </p>
                 </div>
               </Link>
             ),

@@ -1,0 +1,24 @@
+{
+  "metadataTitle": "Recuperación por correo | {appName}",
+  "metadataDescription": "Inicia sesión en DIMO Developer Console. Accede de forma segura a tu panel de desarrollador para administrar aplicaciones y explorar las herramientas avanzadas de DIMO. ¡Empieza hoy!",
+  "form": {
+    "title": "Restablecer claves de acceso",
+    "warning": "Tus claves de acceso anteriores dejarán de funcionar cuando se complete el restablecimiento",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "email@address.com",
+    "sendFailed": "Algo salió mal al enviar el correo"
+  },
+  "checkEmail": {
+    "title": "Haz clic en el enlace de tu correo",
+    "hint": "¿No ves el correo? Revisa tu carpeta de spam o reenvía el código.",
+    "resend": "Reenviar código",
+    "resent": "Código de recuperación reenviado correctamente.",
+    "resendFailed": "Algo salió mal al enviar el código de recuperación."
+  },
+  "rewire": {
+    "title": "Recupera el acceso a tu cuenta",
+    "body": "Una clave de acceso es la forma más rápida y segura de iniciar sesión en DIMO.",
+    "progress": "Reconfigurando tu clave de acceso...",
+    "success": "Clave de acceso reconfigurada correctamente"
+  }
+}

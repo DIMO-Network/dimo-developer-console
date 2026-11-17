@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import React, { FC } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { saveAs } from 'file-saver';
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export const JsonBlock: FC<Props> = ({ value, maxHeight = 320, filename, className }) => {
+  const t = useTranslations('common');
   const text = JSON.stringify(value, null, 2) ?? 'undefined';
   return (
     <div data-testid="json-block" className={className}>
@@ -42,14 +44,14 @@ export const JsonBlock: FC<Props> = ({ value, maxHeight = 320, filename, classNa
               saveAs(new Blob([text], { type: 'application/json' }), filename)
             }
           >
-            Download JSON
+            {t('jsonBlock.download')}
           </Button>
         )}
         <CopyButton
           value={text}
-          onCopySuccessMessage="JSON copied"
+          onCopySuccessMessage={t('jsonBlock.copied')}
           size="icon"
-          ariaLabel="Copy JSON"
+          ariaLabel={t('jsonBlock.copyLabel')}
         />
       </div>
       <div

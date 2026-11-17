@@ -1,0 +1,749 @@
+{
+  "languageSwitcher": {
+    "label": "言語"
+  },
+  "actions": {
+    "close": "閉じる",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "copy": "コピー",
+    "saveChanges": "変更を保存",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "back": "戻る",
+    "next": "次へ",
+    "previous": "前へ",
+    "continue": "続行",
+    "done": "完了",
+    "submit": "送信",
+    "retry": "再試行",
+    "remove": "削除",
+    "add": "追加",
+    "create": "作成",
+    "download": "ダウンロード",
+    "learnMore": "詳細を見る",
+    "signOut": "サインアウト",
+    "refresh": "更新"
+  },
+  "accountInfo": {
+    "button": "アカウント情報",
+    "title": "アカウント情報",
+    "modalTitle": "アカウント情報",
+    "ownerEmail": "オーナーのメールアドレス",
+    "walletAddress": "組織のウォレットアドレス",
+    "walletCopied": "ウォレットアドレスをクリップボードにコピーしました",
+    "balancesError": "残高の読み込み中にエラーが発生しました",
+    "balancesLoading": "残高を読み込み中..."
+  },
+  "appCard": {
+    "details": "アプリの詳細"
+  },
+  "brand": {
+    "dimoLogoAlt": "DIMO"
+  },
+  "copyButton": {
+    "copied": "値をクリップボードにコピーしました",
+    "failed": "値をコピーできませんでした"
+  },
+  "createAppModal": {
+    "title": "新しい開発者ライセンスを作成"
+  },
+  "creditsWidget": {
+    "currentBalance": "現在の残高"
+  },
+  "support": {
+    "developerSupport": "開発者サポート"
+  },
+  "buyCredits": {
+    "title": "DCXを購入",
+    "pricing": "<description>1台の車両にアクセスする基本料金は月額$1.25です。</description><link>詳細はこちら。</link>",
+    "amountLabel": "購入金額",
+    "amountPositive": "金額は0より大きくする必要があります",
+    "amountMin": "最低金額は$10.00です",
+    "forAnotherAccount": "別のアカウント用に購入",
+    "accountAddress": "アカウントアドレス",
+    "invalidAddress": "無効なEthereumアドレスです",
+    "proceed": "支払いに進む"
+  },
+  "csvUpload": {
+    "oneFileOnly": "一度にアップロードできるファイルは1つだけです",
+    "duplicate": "同じファイルがすでにアップロードされています",
+    "tooLarge": "ファイルが50MBの上限を超えています。",
+    "onlyCsv": ".csvファイルのみ対応しています。",
+    "invalidFormat": "CSVの形式が無効です。",
+    "numericTokenId": "各行には数値の{header}が必要です。",
+    "parseFailed": "CSVを解析できませんでした。",
+    "listTitle": "車両一覧",
+    "vehicleCount": "{count, plural, other {#台の車両}}",
+    "addVehicles": "車両を追加",
+    "dropPrompt": "車両IDの一覧を含むCSVをドラッグ＆ドロップするか、アップロードしてください",
+    "formatHint": "CSVは1列のみとし、ヘッダーを<code>{header}</code>にしてください。",
+    "accepts": ".csvファイルに対応",
+    "maxSize": "最大ファイルサイズは50MBです。",
+    "upload": "アップロード"
+  },
+  "datePicker": {
+    "previousMonth": "前の月",
+    "nextMonth": "次の月",
+    "weekdays": {
+      "sun": "日",
+      "mon": "月",
+      "tue": "火",
+      "wed": "水",
+      "thu": "木",
+      "fri": "金",
+      "sat": "土"
+    }
+  },
+  "devSupportForm": {
+    "userName": "ユーザー名",
+    "inquiryType": "お問い合わせの種類",
+    "inquiryPlaceholder": "お問い合わせの種類を選択",
+    "message": "メッセージ",
+    "messagePlaceholder": "お困りのことをお知らせください...",
+    "messageTooLong": "メッセージは500文字以内で入力してください",
+    "submit": "送信"
+  },
+  "validation": {
+    "required": "この項目は必須です",
+    "invalidUrl": "有効なURLを入力してください",
+    "invalidNumber": "有効な数値を入力してください"
+  },
+  "generateJwt": {
+    "button": "開発者JWTを生成",
+    "apiKeyRequired": "有効なAPIキーを入力してください",
+    "failed": "開発者JWTを生成できませんでした",
+    "titleDone": "JWTを生成しました",
+    "titleNew": "新しいJWTを生成",
+    "subtitle": "サーバー用に作成したAPIキーをテストします。このAPIキーとライセンスの最初のリダイレクトURIから開発者JWTを作成します。APIキーなしでJWTを取得するには、コンソールアクセスをオンにして「JWTをコピー」を使用してください。",
+    "generating": "JWTを生成中...",
+    "apiKeyLabel": "APIキー",
+    "apiKeyPlaceholder": "APIキーを入力してください",
+    "done": "完了",
+    "generate": "生成",
+    "expires": "有効期限は14日間です。",
+    "copied": "JWTをコピーしました"
+  },
+  "jsonBlock": {
+    "download": "JSONをダウンロード",
+    "copied": "JSONをコピーしました",
+    "copyLabel": "JSONをコピー"
+  },
+  "licenseCard": {
+    "vehiclesConnected": "接続済みの車両",
+    "noVehicles": "接続済みの車両はありません",
+    "sharingUnavailable": "共有ステータスを取得できません",
+    "configurations": "{count, plural, other {#件の構成}} →",
+    "sharingCopied": "共有リンクをコピーしました",
+    "sharingLink": "車両共有リンク",
+    "notConfigured": "未設定。車両共有を設定する →",
+    "details": "ライセンスの詳細"
+  },
+  "menu": {
+    "logout": "ログアウト",
+    "signingOut": "サインアウト中",
+    "open": "メニューを開く",
+    "expand": "サイドバーを展開",
+    "collapse": "サイドバーを折りたたむ"
+  },
+  "onboarding": {
+    "title": "はじめに",
+    "intro": "DIMOでの開発に向けて順調に進んでいます！",
+    "createAccount": "アカウントを作成",
+    "confirmDetails": "登録情報を確認",
+    "createLicense": "最初のライセンスを作成",
+    "createLicenseHint": "アカウントの設定が完了しました。最初のライセンスを作成しましょう。"
+  },
+  "navigation": {
+    "sections": {
+      "workspace": "ワークスペース",
+      "resources": "リソース"
+    },
+    "items": {
+      "home": "ホーム",
+      "licenses": "ライセンス",
+      "vehicles": "車両",
+      "webhooks": "Webhook",
+      "templates": "テンプレート",
+      "connections": "接続",
+      "documentation": "ドキュメント",
+      "apiStatus": "APIステータス",
+      "settings": "設定"
+    },
+    "pageTitles": {
+      "home": "ホーム",
+      "licenses": "ライセンス",
+      "webhooks": "Webhook",
+      "templates": "車両テンプレート",
+      "connections": "接続",
+      "settings": "設定",
+      "vehicles": "車両",
+      "support": "サポート",
+      "vehicle": "車両",
+      "licenseDetails": "ライセンスの詳細",
+      "sdkConfigurator": "SDKコンフィギュレーター",
+      "licensedVehicles": "ライセンス対象の車両",
+      "createWebhook": "Webhookを作成",
+      "editWebhook": "Webhookを編集",
+      "createConnection": "接続を作成",
+      "connectionDetails": "接続の詳細",
+      "newTemplate": "新しいテンプレート",
+      "editTemplate": "テンプレートを編集"
+    }
+  },
+  "paymentMethod": {
+    "dimo": "DIMOで購入",
+    "usd": "USDで購入"
+  },
+  "pendingInvite": {
+    "alreadyMember": "すでにこのチームのメンバーです。",
+    "title": "{ownerEmail}がオーナーの{teamName}に参加しますか？",
+    "description": "チームのライセンスが表示されます。データアクセスも付与するかどうかはオーナーが決定します。",
+    "join": "チームに参加",
+    "notNow": "今はしない",
+    "errors": {
+      "INVITE_INVALID": "この招待リンクは無効になりました。チームのオーナーに新しいリンクを依頼してください。",
+      "INVITE_EXPIRED": "この招待は期限切れです。チームのオーナーに再送信を依頼してください。",
+      "INVITE_EMAIL_MISMATCH": "この招待は別のメールアドレスに送信されています。そのアドレスでサインインしてから、もう一度招待リンクを開いてください。",
+      "fallback": "この招待を承諾できませんでした。もう一度リンクを開いてください。"
+    }
+  },
+  "queryActions": {
+    "copied": "クエリをコピーしました",
+    "copyFailed": "クエリをコピーできませんでした",
+    "copy": "クエリをコピー",
+    "download": "JSONをダウンロード"
+  },
+  "redirectUri": {
+    "added": "リダイレクトURIを追加しました。",
+    "createFailed": "リダイレクトURIの作成中に問題が発生しました",
+    "invalidUrl": "有効なURLを入力してください。http://またはhttps://を含める必要があります",
+    "duplicate": "このURLはすでに一覧にあります",
+    "required": "リダイレクトURIを入力してください",
+    "tooLong": "名前は150文字以内で入力してください",
+    "add": "URIを追加",
+    "deleting": "選択したリダイレクトURIを削除中",
+    "deleted": "リダイレクトURIを削除しました",
+    "copied": "リダイレクトURIをコピーしました！",
+    "deleteTitle": "リダイレクトURIを削除",
+    "authorized": "承認済みURI",
+    "confirmTitle": "このリダイレクトURIを削除してもよろしいですか？",
+    "confirmSubtitle": "このリダイレクトURIはアプリで使用できなくなります。"
+  },
+  "errors": {
+    "transactionDenied": "トランザクションが拒否されました",
+    "somethingWentWrong": "問題が発生しました",
+    "emailRegistered": "このメールアドレスはすでに登録されています",
+    "sessionExpired": "セッションの有効期限が切れました。もう一度サインインしてください",
+    "tryAgain": "もう一度お試しください",
+    "transactionFailedOnChain": "トランザクションがブロックチェーン上で失敗したため、何も変更されていません",
+    "generic": "問題が発生しました。もう一度お試しください。",
+    "unknown": "不明なエラー",
+    "notFound": "見つかりません",
+    "loadFailed": "読み込めませんでした。もう一度お試しください。",
+    "copyFailed": "クリップボードにコピーできませんでした"
+  },
+  "sessionExpired": {
+    "errors": {
+      "passkeyFailed": "パスキーを確認できませんでした。もう一度お試しいただくか、メールのコードを使用してください。",
+      "codeFailed": "そのコードは無効でした。確認してもう一度お試しください。",
+      "codeCheckFailed": "コードを確認できませんでした。もう一度お試しください。",
+      "sendFailed": "コードを送信できませんでした。もう一度お試しください。",
+      "renewFailed": "再度サインインできませんでした。もう一度お試しいただくか、サインアウトしてください。",
+      "startAgain": "時間がかかりすぎました。最初からやり直してください。",
+      "signedInElsewhere": "このブラウザでは別のアカウントがサインインしています。アカウントを切り替えるにはサインアウトしてください。"
+    },
+    "tryAgain": "再試行",
+    "startOver": "最初からやり直す",
+    "codeSent": "{email}に6桁のコードを送信しました。",
+    "codeLabel": "コード",
+    "continue": "続行",
+    "resendIn": "{seconds}秒後にコードを再送信できます",
+    "resend": "コードを再送信",
+    "withPasskey": "パスキーで続行",
+    "emailInstead": "代わりにメールでコードを受け取る",
+    "emailCode": "メールでコードを受け取る",
+    "title": "セッションの有効期限が切れました",
+    "description": "作業を続けるには、{email}として再度サインインしてください。このページはそのまま表示されます。",
+    "signOut": "サインアウト"
+  },
+  "spendingLimit": {
+    "failed": "トランザクションの確認中に問題が発生しました",
+    "title": "利用上限を設定",
+    "description": "接続済みウォレットの$DIMOを開発者ライセンスが使用できるよう承認してください。$100 USD相当以上の$DIMOを承認することをおすすめします"
+  },
+  "theme": {
+    "light": "ライトモード",
+    "dark": "ダークモード",
+    "switchToLight": "ライトモードに切り替え",
+    "switchToDark": "ダークモードに切り替え"
+  },
+  "team": {
+    "switcher": "チーム",
+    "switchLabel": "チーム：{name}。チームを切り替え",
+    "roles": {
+      "OWNER": "オーナー",
+      "MEMBER": "メンバー"
+    },
+    "fallbackName": "あなたのチーム",
+    "unavailable": "チームを読み込めませんでした。現在はご自身のライセンスを表示しています。"
+  },
+  "templateEditor": {
+    "divergence": {
+      "setPerTrim": "グレードごとに設定",
+      "shared": "共通",
+      "moveToShared": "共通に移動"
+    },
+    "trim": {
+      "nameLabel": "グレード名",
+      "remove": "グレードを削除",
+      "manufacturerCode": "メーカーコード",
+      "styleName": "スタイル名",
+      "vinPattern": "VINパターン",
+      "selectorMissing": "複数のグレードを持つテンプレートには、セレクターのないグレードを含めることはできません。そのグレードはすべてのシグナルに一致し、この年式のデコードがすべて曖昧になります。このグレードにメーカーコード、スタイル名、またはVINパターンを設定してください。"
+    },
+    "entitlement": {
+      "create": "このテンプレートを作成できます",
+      "licensed": "このテンプレートを編集できます",
+      "manufacturer": "このテンプレートを編集できます",
+      "curator": "ここではすべてを編集できます",
+      "license-required": "開発者ライセンスが必要です",
+      "unavailable": "アクセス権を確認できませんでした",
+      "readOnly": "{title} — 閲覧のみ",
+      "hardwareLocked": "車にどのハードウェアを搭載するかはDIMOが決定するため、ハードウェアテンプレートの項目はロックされています。",
+      "reason": {
+        "curator": "あなたはDIMOのキュレーターなので、ロックされている項目はありません。",
+        "licenseUnavailable": "現在DIMO開発者ライセンスを確認できないため、編集できる項目はありません。しばらくしてから再読み込みすると解消されるはずです。",
+        "create": "{via, select, owner {あなたはDIMO開発者ライセンス{license}を保有しています。この年式ではまだ何も公開されていないため、最初の定義を作成することになります。} other {あなたはDIMO開発者ライセンス{license}の署名者です。この年式ではまだ何も公開されていないため、最初の定義を作成することになります。}}",
+        "licensed": "{via, select, owner {あなたはDIMO開発者ライセンス{license}を保有しており、それだけでここでの変更を公開できます。} other {あなたはDIMO開発者ライセンス{license}の署名者であり、それだけでここでの変更を公開できます。}}",
+        "manufacturerUnavailable": "現在このメーカーのManufacturer NFTの保有者を確認できません。しばらくしてから再読み込みすると解消されるはずです。",
+        "manufacturer": "あなたは{make}のManufacturer NFT（#{tokenId}）を保有しているため、このメーカーを編集できます。",
+        "licenseRequired": "テンプレートを編集するにはDIMO開発者ライセンスが必要ですが、このアカウントはライセンスを保有しておらず、署名者でもありません。「開発者ライセンス」でライセンスを作成してから、このページを再読み込みしてください。",
+        "license": "#{tokenId}",
+        "licenseWithAlias": "#{tokenId}、{alias}",
+        "vehicles": "{count, plural, =0 {この定義を使用している車はまだありません。} =1 {すでに1台の車がこの定義を使用しているため、公開するとその車の説明内容が変わります。} other {すでに#台の車がこの定義を使用しているため、公開するとそのすべての説明内容が変わります。}}",
+        "vehiclesUnknown": "この定義を使用している車の台数を確認できませんでした。すでに走行中の車があるものと想定してください。",
+        "withVehicles": "{reason}{vehicles}"
+      }
+    },
+    "normalisation": {
+      "title": "入力内容からエディターが変更した箇所",
+      "dismiss": "閉じる"
+    },
+    "notes": {
+      "cleared": "クリア済み。属性は空の値として保存されず、削除されます",
+      "storedAsNumber": "テキスト{text}ではなく数値{value}として保存",
+      "whitespace": "前後の空白を削除"
+    },
+    "where": {
+      "templateCell": "テンプレートの{label}",
+      "trimCell": "グレード{name}の{label}"
+    },
+    "grid": {
+      "attribute": "属性",
+      "values": "値",
+      "noSelector": "セレクターなし"
+    }
+  },
+  "toggle": {
+    "label": "切り替え"
+  },
+  "timeRange": {
+    "range": "期間",
+    "presets": {
+      "24h": "24時間",
+      "7d": "7日間",
+      "30d": "30日間",
+      "custom": "カスタム"
+    },
+    "from": "開始（UTC）",
+    "to": "終了（UTC）",
+    "invalid": "開始は終了より前にしてください。"
+  },
+  "signIn": {
+    "acceptTerms": "利用規約とプライバシーポリシーに同意する必要があります"
+  },
+  "vehicleTokenIds": {
+    "placeholder": "車両のトークンIDを1行に1つずつ、またはカンマ区切りで入力",
+    "label": "車両のトークンID",
+    "invalid": "無効なトークンID：「{id}」。トークンIDはすべて数値である必要があります。",
+    "tooMany": "トークンIDが多すぎます。入力できるIDは最大1000件です。",
+    "entered": "{count, plural, other {#件のトークンID}}を入力済み",
+    "enteredUnique": "{count, plural, other {#件のトークンID}}を入力済み（重複なし：{unique}件）",
+    "helpIntro": "車両のトークンIDは次の方法で入力できます：",
+    "helpPerLine": "1行に1つ：12345, 67890, 11111",
+    "helpComma": "カンマ区切り：12345, 67890, 11111",
+    "helpMixed": "混在した形式にも対応しています"
+  },
+  "assetDids": {
+    "placeholder": "車両のDIDを1行に1つずつ、またはカンマ区切りで入力",
+    "label": "アセットDID",
+    "empty": "アセットDIDを空にすることはできません。",
+    "tooLong": "アセットDIDが長すぎます：「{id}」。最大200文字です。",
+    "tooMany": "車両のDIDが多すぎます。入力できるDIDは最大1000件です。",
+    "entered": "{count, plural, other {#件のアセットDID}}を入力済み",
+    "enteredUnique": "{count, plural, other {#件のアセットDID}}を入力済み（重複なし：{unique}件）",
+    "helpIntro": "車両のDIDは次の方法で入力できます：",
+    "helpPerLine": "1行に1つ：",
+    "helpComma": "カンマ区切り："
+  },
+  "workspaceName": {
+    "updated": "開発者ライセンス名を更新しました。変更を確認するにはページを更新してください。",
+    "inUse": "この開発者ライセンス名はすでに使用されています。別の名前でもう一度お試しください。",
+    "failed": "開発者ライセンス名を更新できませんでした",
+    "title": "開発者ライセンス名を編集",
+    "label": "開発者ライセンス名",
+    "required": "開発者ライセンス名は必須です",
+    "placeholder": "開発者ライセンス名を入力",
+    "description": "これはすべてのアプリで使用される名前空間です。エコシステム内の他の開発者やユーザーに公開される名前です。"
+  },
+  "licenseAlias": {
+    "tooLong": "32文字以内で入力してください。アクセント付き文字や絵文字は複数文字として数えられます。"
+  },
+  "dataAccess": {
+    "connectWallet": "ウォレットで接続",
+    "connectFailed": "ウォレットを接続できませんでした。もう一度お試しください。",
+    "connectPrompt": "{license}を読み取るには、ウォレットで接続してください。チームのオーナーがあなたのウォレットにアクセス権を付与しています。トークンはこのブラウザ内に保存されます。"
+  },
+  "memberJwt": {
+    "sessionExpired": "セッションの有効期限が切れました。もう一度サインインしてください。",
+    "challengeFailed": "{status, select, none {このライセンスへの接続を開始できませんでした（応答なし）。もう一度お試しください。} other {このライセンスへの接続を開始できませんでした（{status}）。もう一度お試しください。}}",
+    "connectFailed": "{status, select, none {ウォレットを接続できませんでした（応答なし）。もう一度お試しください。} other {ウォレットを接続できませんでした（{status}）。もう一度お試しください。}}",
+    "propagating": "アクセス権はまだ反映中です。1分後にもう一度お試しください"
+  },
+  "teamCopy": {
+    "grantWarning": "データアクセスにより、{name}は車両が{license}に付与したすべての権限（コマンドを含む）を、コンソールに表示される範囲に限らずDIMO APIを通じて使用できるようになります。このメンバーのクエリでは{license}のDCXクレジットが消費されます。",
+    "askForAccess": "{license}へのデータアクセスを{ownerEmail}に依頼してください。",
+    "noLongerHasAccess": "このライセンスへのアクセス権がなくなりました。",
+    "dataAccessUnavailable": "チームメンバー向けのデータアクセスはまだ利用できません。",
+    "removedFromTeam": "{teamName}のメンバーではなくなりました。",
+    "removedFromThatTeam": "そのチームのメンバーではなくなりました。",
+    "signerLocked": "あなたのアクセス権は別のウォレットに紐付けられています。先に{ownerEmail}に取り消しを依頼してください。",
+    "signerLockedNoOwner": "あなたのアクセス権は別のウォレットに紐付けられています。先にチームのオーナーに取り消しを依頼してください。",
+    "leaveConfirm": "{teamName}から退出しますか？{ownerEmail}にデータアクセスの取り消しが依頼されます。",
+    "signerInUse": "このウォレットはすでに他のユーザーのキーとして登録されているため、データアクセスには使用できません。DIMOサポートにお問い合わせください。"
+  },
+  "webhooks": {
+    "table": {
+      "fetchError": "Webhookの取得中にエラーが発生しました",
+      "empty": "まだWebhookを作成していません。",
+      "description": "説明",
+      "displayName": "表示名",
+      "service": "サービス",
+      "cooldown": "クールダウン",
+      "vehicles": "車両",
+      "errors": "エラー",
+      "status": "ステータス"
+    },
+    "form": {
+      "genericError": "操作の完了中に問題が発生しました",
+      "cancel": "キャンセル",
+      "previous": "前へ",
+      "finish": "完了",
+      "next": "次へ"
+    },
+    "edit": {
+      "title": "Webhookを編集",
+      "updated": "Webhookを更新しました",
+      "updateFailed": "Webhookの更新中にエラーが発生しました",
+      "saveFirst": "続行する前に変更を保存または破棄してください",
+      "vehiclesFetchError": "登録済みの車両の取得中にエラーが発生しました",
+      "subscribedVehicles": "登録済みの車両",
+      "vehicleCount": "{count, plural, other {#台の車両}}",
+      "enterAssetDid": "アセットDIDを1つ以上入力してください。",
+      "unsubscribeFailed": "車両の登録を解除できませんでした。もう一度お試しください。",
+      "unsubscribedCount": "{count, plural, other {#台の車両の登録を解除しました}}",
+      "removeTitle": "車両を削除",
+      "removeDidsLabel": "登録を解除するアセットDID",
+      "removeDidsPlaceholder": "このWebhookから登録を解除するアセットDIDを入力",
+      "removing": "削除中...",
+      "removeCount": "{count, plural, other {#台の車両を削除}}",
+      "subscribeFailed": "車両を登録できませんでした。もう一度お試しください。",
+      "subscribedCount": "{count, plural, other {#台の車両を登録しました}}",
+      "addTitle": "車両を追加",
+      "addDidsLabel": "登録するアセットDID",
+      "addDidsPlaceholder": "このWebhookに登録するアセットDIDを入力",
+      "adding": "追加中...",
+      "addCount": "{count, plural, other {#台の車両を追加}}",
+      "vehicleTokenId": "車両のトークンID",
+      "fetchWebhookError": "Webhookの取得中にエラーが発生しました",
+      "notFound": "Webhookが見つかりません",
+      "subscribedAll": "すべての車両を登録しました",
+      "subscribeAllFailed": "すべての車両を登録できませんでした",
+      "whoToSubscribe": "どの車両を登録しますか？",
+      "manualControls": "手動操作",
+      "manualControlsHint": "このWebhookに紐付けられたすべての車両を手動で登録または登録解除します。",
+      "subscribing": "登録中...",
+      "subscribeAll": "すべての車両を登録",
+      "unsubscribeAll": "すべての車両の登録を解除",
+      "downloadCsv": "CSVをダウンロード",
+      "unsubscribeVehicles": "車両の登録を解除",
+      "unsubscribedAll": "すべての車両の登録を解除しました。",
+      "unsubscribeAllFailed": "すべての車両の登録解除中にエラーが発生しました。",
+      "unsubscribeAllConfirm": "登録済みのすべての車両の登録を解除してもよろしいですか？この操作は元に戻せません。",
+      "unsubscribing": "登録解除中...",
+      "unsubscribeAllButton": "すべて登録解除",
+      "button": "編集"
+    },
+    "delete": {
+      "mustUnsubscribe": "削除する前にすべての車両の登録を解除する必要があります",
+      "deleted": "Webhookを削除しました",
+      "error": "Webhookの削除中にエラーが発生しました",
+      "deleting": "Webhookを削除中...",
+      "success": "成功",
+      "title": "Webhookを削除",
+      "successBody": "Webhookを削除しました",
+      "confirm": "このWebhookを削除してもよろしいですか？この操作は元に戻せません。",
+      "done": "完了",
+      "button": "削除"
+    },
+    "test": {
+      "triggered": "Webhookをトリガーしました。",
+      "axiosError": "Webhookのテスト中にエラーが発生しました",
+      "error": "Webhookのテスト中にエラーが発生しました",
+      "sending": "テストを送信中...",
+      "title": "Webhookをテスト",
+      "confirm": "このWebhookをテストしますか？指定したターゲットURIにテストが送信されます。",
+      "send": "テストを送信"
+    },
+    "licenseSelector": {
+      "placeholder": "開発者ライセンスを選択",
+      "label": "開発者ライセンスを選択"
+    },
+    "details": {
+      "description": "説明",
+      "displayName": "表示名",
+      "service": "サービス",
+      "cooldownPeriod": "クールダウン期間",
+      "url": "Webhook URL",
+      "status": "ステータス",
+      "cooldown": "クールダウン",
+      "cooldownSeconds": "{seconds}秒"
+    },
+    "generateJwt": {
+      "message": "Webhookの設定を表示するには、開発者JWTを生成してください。",
+      "consoleAccessPending": "コンソールアクセスで開発者JWTを取得中…",
+      "consoleAccessFailed": "コンソールアクセスで開発者JWTを取得できませんでした。代わりにAPIキーを使用してください。"
+    },
+    "status": {
+      "enabled": "有効",
+      "disabled": "無効",
+      "failed": "失敗"
+    },
+    "statusToggle": {
+      "label": "ステータス"
+    },
+    "section": {
+      "title": "Webhook",
+      "create": "+ Webhookを作成"
+    },
+    "url": {
+      "label": "Webhook URL"
+    },
+    "toggle": {
+      "updating": "{status, select, enabled {Webhookのステータスを有効に更新中} other {Webhookのステータスを無効に更新中}}",
+      "updated": "Webhookのステータスを更新しました",
+      "failed": "Webhookのステータスを更新できませんでした"
+    },
+    "fields": {
+      "description": {
+        "label": "Webhookの説明",
+        "required": "Webhookの説明を入力してください",
+        "placeholder": "Webhookの説明を入力"
+      },
+      "displayName": {
+        "label": "表示名",
+        "placeholder": "Webhookの表示名を入力（任意）"
+      },
+      "cooldown": {
+        "label": "クールダウン",
+        "required": "クールダウン期間を秒単位で入力してください",
+        "invalidNumber": "有効な数値を入力してください",
+        "negative": "クールダウンは0以上にしてください",
+        "tooLong": "クールダウンは86400秒（24時間）以内にしてください",
+        "placeholder": "クールダウン期間を秒単位で入力（例：30）",
+        "hint": "同じイベントに対するWebhook呼び出しの最小間隔（0でリアルタイム）"
+      },
+      "service": {
+        "label": "サービス",
+        "placeholder": "サービスを選択",
+        "required": "Webhookのサービスを選択してください"
+      },
+      "targetUrl": {
+        "label": "Webhook URL",
+        "invalid": "有効なURLを入力してください",
+        "needsProtocol": "有効なURLを入力してください。http://またはhttps://を含める必要があります",
+        "placeholder": "イベントを受信するURLを入力",
+        "hint": "イベントを受信する、SSL対応の公開URLを入力してください"
+      },
+      "verification": {
+        "label": "検証トークン",
+        "required": "有効な文字列を入力してください",
+        "placeholder": "検証トークンを入力",
+        "hint": "Webhook URLの所有権を確認するための、任意の一意な文字列を指定してください。検証リクエストを送信した際、サーバーはこの文字列をそのままプレーンテキストで返す必要があります。これにより、送信先URLを管理していることが確認されます。"
+      },
+      "subscribe": {
+        "question": "どの車両を登録しますか？",
+        "all": "既存のすべての車両を登録",
+        "specificLabel": "特定の車両を選択",
+        "specificPlaceholder": "このWebhookに登録する車両のアセットDIDを入力"
+      }
+    },
+    "celBuilder": {
+      "selectEvent": "イベントを選択",
+      "buildConditions": "条件を作成",
+      "selectAttribute": "属性を選択",
+      "selectEventPlaceholder": "イベントを選択",
+      "selectOperator": "演算子を選択",
+      "enterNumber": "数値を入力",
+      "selectValue": "値を選択",
+      "generate": "CELを生成",
+      "true": "真",
+      "false": "偽",
+      "operators": {
+        "equal": "等しい",
+        "greater": "より大きい",
+        "less": "より小さい"
+      }
+    },
+    "validation": {
+      "valueRequired": "値は必須です",
+      "selectEvent": "イベント名を選択してください",
+      "oneCondition": "CEL条件はちょうど1つである必要があります",
+      "completeConditions": "保存する前に、すべての条件項目を入力してください。"
+    },
+    "events": {
+      "harshBraking": "急ブレーキ",
+      "extremeBraking": "極度の急ブレーキ",
+      "harshAcceleration": "急加速",
+      "harshCornering": "急ハンドル",
+      "collision": "衝突"
+    },
+    "conditions": {
+      "speed": "速度",
+      "obdIsPluggedIn": "デバイス接続中",
+      "isIgnitionOn": "イグニッションオン",
+      "batteryCurrentPower": "バッテリーの現在の電力",
+      "batteryIsCharging": "バッテリー充電中",
+      "odometer": "走行距離",
+      "chargeLevel": "充電レベル",
+      "fuelRelative": "燃料システムの相対レベル",
+      "fuelAbsolute": "燃料システムの絶対レベル",
+      "tireFrontLeft": "タイヤ空気圧（左前）",
+      "tireFrontRight": "タイヤ空気圧（右前）",
+      "tireBackLeft": "タイヤ空気圧（左後）",
+      "tireBackRight": "タイヤ空気圧（右後）",
+      "engineSpeed": "エンジン回転数",
+      "throttlePosition": "スロットル開度"
+    },
+    "steps": {
+      "configure": "設定",
+      "delivery": "配信先を指定",
+      "vehicles": "車両を指定"
+    },
+    "create": {
+      "created": "Webhookを作成しました",
+      "noVehicles": "登録された車両はありません",
+      "subscribedCount": "{count, plural, other {#台の車両を登録しました}}"
+    },
+    "service": {
+      "signals": "VSSシグナル",
+      "events": "イベント"
+    }
+  },
+  "freshness": {
+    "never": "なし",
+    "justNow": "たった今",
+    "minutesAgo": "{count, number}分前",
+    "hoursAgo": "{count, number}時間前",
+    "daysAgo": "{count, plural, other {#日前}}",
+    "absolute": "{date} {time} UTC",
+    "noDate": "—"
+  },
+  "loadingModal": {
+    "processing": "処理中"
+  },
+  "modal": {
+    "dialog": "ダイアログ"
+  },
+  "table": {
+    "showingNone": "0件中0件を表示",
+    "showing": "{total, number}件中{first, number}–{last, number}件を表示",
+    "label": "テーブル"
+  },
+  "transactions": {
+    "insufficientBalance": "DIMOまたはDCXの残高が不足しています",
+    "connectionNameTooLong": "接続名が長すぎます。32文字以内の名前を使用してください。",
+    "balanceCheckFailed": "DIMOの残高を確認できませんでした。もう一度お試しください。",
+    "insufficientDimo": "DIMOの残高が不足しています。接続を発行するには、少なくとも{required, number, ::.00} DIMOトークン（約${usd, number}）が必要です。",
+    "notEnoughDimo": "接続を発行するための$DIMOが不足しています。",
+    "connectionNameTaken": "この接続名はすでに使用されています。別の名前を選択して、もう一度お試しください。"
+  },
+  "signals": {
+    "speed": "速度",
+    "powertrainTransmissionTravelledDistance": "走行距離",
+    "powertrainCombustionEngineSpeed": "エンジン回転数",
+    "powertrainFuelSystemRelativeLevel": "燃料残量",
+    "powertrainRange": "航続可能距離",
+    "powertrainTractionBatteryStateOfChargeCurrent": "バッテリー残量",
+    "powertrainTractionBatteryChargingIsCharging": "充電中",
+    "currentLocationCoordinates": "位置情報",
+    "currentLocationApproximateCoordinates": "おおよその位置",
+    "currentLocationLatitude": "緯度",
+    "currentLocationLongitude": "経度",
+    "obdDTCList": "診断コード",
+    "obdEngineLoad": "エンジン負荷",
+    "obdRunTime": "エンジン稼働時間",
+    "lowVoltageBatteryCurrentVoltage": "12Vバッテリー電圧",
+    "exteriorAirTemperature": "外気温",
+    "isIgnitionOn": "イグニッションオン"
+  },
+  "permissions": {
+    "1": "位置情報以外のデータ",
+    "2": "コマンド",
+    "3": "現在地",
+    "4": "全期間の位置情報",
+    "5": "VIN証明情報",
+    "6": "リアルタイムデータ",
+    "7": "生データ",
+    "8": "おおよその位置",
+    "unknown": "権限{id}"
+  },
+  "status": {
+    "loading": "読み込み中...",
+    "saving": "保存中...",
+    "success": "成功",
+    "copied": "コピーしました"
+  },
+  "pagination": {
+    "previous": "前のページ",
+    "next": "次のページ",
+    "page": "{page}ページ"
+  },
+  "ownerOnly": {
+    "webhooks": {
+      "title": "Webhookはチームのオーナーが管理しています",
+      "body": "{team}のWebhookは{ownerEmail}が管理しています。自分のライセンスのWebhookを管理するには、自分のチームに切り替えてください。"
+    },
+    "connections": {
+      "title": "接続はチームのオーナーが管理しています",
+      "body": "{team}の接続は{ownerEmail}が管理しています。自分のライセンスの接続を管理するには、自分のチームに切り替えてください。"
+    },
+    "configurations": {
+      "title": "構成はチームのオーナーが管理しています",
+      "body": "{team}の構成は{ownerEmail}が管理しています。自分のライセンスの構成を管理するには、自分のチームに切り替えてください。"
+    }
+  },
+  "otp": {
+    "title": "おかえりなさい！",
+    "enterCode": "<strong>{email}</strong>に送信されたコードを入力してください",
+    "signIn": "サインイン",
+    "resendCode": "コードを再送信",
+    "invalidCode": "OTPコードが無効です",
+    "loginFailed": "OTPでログインできませんでした",
+    "resent": "新しいOTPコードをメールで送信しました",
+    "resendFailed": "OTPコードを再送信できませんでした",
+    "troubleLoggingIn": "ログインでお困りですか？<support>サポートに問い合わせる</support>"
+  }
+}

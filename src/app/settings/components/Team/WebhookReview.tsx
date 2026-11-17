@@ -1,6 +1,7 @@
 'use client';
 import { type FC, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { NeedsDevJwtError, useMemberWebhooks } from '@/hooks/useMemberWebhooks';
@@ -14,6 +15,7 @@ const LicenseWebhooks: FC<{
   addresses: string[];
   name: string;
 }> = ({ license, addresses, name }) => {
+  const t = useTranslations('settings');
   const [pasted, setPasted] = useState('');
   const [pastedJwt, setPastedJwt] = useState<string>();
   const [pasteError, setPasteError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ const LicenseWebhooks: FC<{
       clientId = undefined;
     }
     if (clientId?.toLowerCase() !== license.clientId.toLowerCase()) {
-      setPasteError('That developer JWT is for another license.');
+      setPasteError(t('webhookReview.wrongLicense'));
       return;
     }
     setPasteError(null);
@@ -40,18 +42,22 @@ const LicenseWebhooks: FC<{
   };
 
   if (query.isLoading)
-    return <p className="text-body-sm text-muted">Checking {license.label}…</p>;
+    return (
+      <p className="text-body-sm text-muted">
+        {t('webhookReview.checking', { license: license.label })}
+      </p>
+    );
   if (query.error) {
     const id = `review-jwt-${license.tokenId}`;
     return (
       <div className="flex flex-col gap-2">
         <p className="text-body-sm text-muted">
           {query.error instanceof NeedsDevJwtError
-            ? `We need a developer JWT for ${license.label} to check its webhooks.`
-            : `Couldn't load the webhooks for ${license.label}.`}
+            ? t('webhookReview.needsJwt', { license: license.label })
+            : t('webhookReview.loadFailed', { license: license.label })}
         </p>
         <label htmlFor={id} className="text-label text-muted">
-          {`Paste a developer JWT for ${license.label}`}
+          {t('webhookReview.pasteLabel', { license: license.label })}
         </label>
         <TextField id={id} value={pasted} onChange={(e) => setPasted(e.target.value)} />
         {pasteError && (
@@ -60,7 +66,7 @@ const LicenseWebhooks: FC<{
           </p>
         )}
         <Button variant="secondary" onClick={check} disabled={!pasted.trim()}>
-          Check webhooks
+          {t('webhookReview.check')}
         </Button>
       </div>
     );
@@ -68,7 +74,7 @@ const LicenseWebhooks: FC<{
   if (!query.data?.length) {
     return (
       <p className="text-body-sm text-muted">
-        {`No webhooks on ${license.label} were created or changed by ${name}.`}
+        {t('webhookReview.none', { license: license.label, name })}
       </p>
     );
   }
@@ -87,10 +93,10 @@ const LicenseWebhooks: FC<{
           </span>
           <span className="text-label text-muted">
             {created && updated
-              ? 'Created and last changed by them'
+              ? t('webhookReview.createdAndChanged')
               : created
-                ? 'Created by them'
-                : 'Last changed by them'}
+                ? t('webhookReview.created')
+                : t('webhookReview.changed')}
           </span>
         </li>
       ))}
@@ -104,6 +110,7 @@ export const WebhookReview: FC<{ member: TeamMember; licenses: TeamLicense[] }> 
   member,
   licenses,
 }) => {
+  const t = useTranslations('settings');
   const tokenIds = new Set(memberLicenseKeys(member, licenses).map((k) => k.tokenId));
   const reviewed = licenses.filter((l) => tokenIds.has(l.tokenId));
   if (!reviewed.length) return null;
@@ -111,10 +118,9 @@ export const WebhookReview: FC<{ member: TeamMember; licenses: TeamLicense[] }> 
   const addresses = memberAddresses(member);
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-body text-ink">Webhooks to review</h3>
+      <h3 className="text-body text-ink">{t('webhookReview.heading')}</h3>
       <p className="text-body-sm text-muted">
-        Webhooks keep sending vehicle data after {name} goes. Check the ones they created
-        or changed.
+        {t('webhookReview.description', { name })}
       </p>
       {reviewed.map((license) => (
         <LicenseWebhooks

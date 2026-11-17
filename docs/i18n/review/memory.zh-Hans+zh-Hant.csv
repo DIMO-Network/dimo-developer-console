@@ -1,0 +1,449 @@
+key,en,note,zh-Hans,zh-Hant
+tm.0001,0x… wallet address,"placeholder in the add-member wallet address input, fleet members panel",0x…钱包地址,0x…錢包地址
+tm.0002,"<x id=""0"" equiv-text=""${count}""/> Record","glovebox record count under the selected vehicle, singular (count is 1)","<x id=""0"" equiv-text=""${count}""/>条记录","<x id=""0"" equiv-text=""${count}""/>筆記錄"
+tm.0003,"<x id=""0"" equiv-text=""${d.tripCount}""/> trips · <x id=""1"" equiv-text=""${hrs.value} ${hrs.unit}""/>",driving behaviour panel summary: trip count and driving hours,"<x id=""0"" equiv-text=""${d.tripCount}""/>次行程 · <x id=""1"" equiv-text=""${hrs.value} ${hrs.unit}""/>","<x id=""0"" equiv-text=""${d.tripCount}""/>趟行程 · <x id=""1"" equiv-text=""${hrs.value} ${hrs.unit}""/>"
+tm.0004,"<x id=""0"" equiv-text=""${this.drawCount}""/> point(s) — click the map to add, the first point to finish.","hint while drawing a geofence on the map, with the point count","<x id=""0"" equiv-text=""${this.drawCount}""/>个点——点击地图添加，点击第一个点完成。","已放置<x id=""0"" equiv-text=""${this.drawCount}""/>個點，點選地圖即可新增，點選第一個點即可完成。"
+tm.0005,"<x id=""0"" equiv-text=""${this.memberIds.size}""/> of <x id=""1"" equiv-text=""${this.vehicles.length}""/> vehicles assigned.",assigned-vehicle count in the manage geofence vehicles dialog,"已分配<x id=""0"" equiv-text=""${this.memberIds.size}""/>/<x id=""1"" equiv-text=""${this.vehicles.length}""/>辆车。","已指派<x id=""0"" equiv-text=""${this.memberIds.size}""/>輛車（共<x id=""1"" equiv-text=""${this.vehicles.length}""/>輛）。"
+tm.0006,"<x id=""0"" equiv-text=""${this.results.length}""/> of <x id=""1"" equiv-text=""${this.total}""/> vehicles passed through · <x id=""2"" equiv-text=""${passCount}""/> passes",geofence activity dialog summary: vehicles that passed through and pass count,"<x id=""0"" equiv-text=""${this.results.length}""/>/<x id=""1"" equiv-text=""${this.total}""/>辆车经过 · 共<x id=""2"" equiv-text=""${passCount}""/>次通过","<x id=""1"" equiv-text=""${this.total}""/>輛車中有<x id=""0"" equiv-text=""${this.results.length}""/>輛經過 · 共<x id=""2"" equiv-text=""${passCount}""/>次通過"
+tm.0007,"<x id=""0"" equiv-text=""${this.visibleCards().length}""/> vehicles",vehicle count above the fleet vehicle list,"<x id=""0"" equiv-text=""${this.visibleCards().length}""/>辆车","<x id=""0"" equiv-text=""${this.visibleCards().length}""/>輛車"
+tm.0008,"<x id=""0"" equiv-text=""&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;""/> events since <x id=""1"" equiv-text=""${this.fmtDate(first)}""/>",driving behaviour panel: bold event total and the first event date,"自<x id=""1"" equiv-text=""${this.fmtDate(first)}""/>以来共<x id=""0"" equiv-text=""&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;""/>个事件","自<x id=""1"" equiv-text=""${this.fmtDate(first)}""/>以來共<x id=""0"" equiv-text=""&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;""/>個事件"
+tm.0009,"<x id=""0"" equiv-text=""&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;""/> driven",driving behaviour panel: bold distance driven,"已行驶<x id=""0"" equiv-text=""&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;""/>","已行駛<x id=""0"" equiv-text=""&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;""/>"
+tm.0010,"<x id=""0"" equiv-text=""&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;""/> driving time",driving behaviour panel: bold driving time,"驾驶时长<x id=""0"" equiv-text=""&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;""/>","駕駛時間<x id=""0"" equiv-text=""&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;""/>"
+tm.0011,"<x id=""0"" equiv-text=""&lt;b&gt;${trips}&lt;/b&gt;""/> trips",driving behaviour panel: bold trip count,"<x id=""0"" equiv-text=""&lt;b&gt;${trips}&lt;/b&gt;""/>次行程","<x id=""0"" equiv-text=""&lt;b&gt;${trips}&lt;/b&gt;""/>趟行程"
+tm.0012,"<x id=""0"" equiv-text=""&lt;p&gt;""/>Set <x id=""1"" equiv-text=""&lt;code&gt;""/>DIMO_AUTH_CLIENT_ID<x id=""2"" equiv-text=""&lt;/code&gt;""/> in the API <x id=""3"" equiv-text=""&lt;code&gt;""/>settings.yaml<x id=""4"" equiv-text=""&lt;/code&gt;""/> and register
+                    <x id=""5"" equiv-text=""&lt;code&gt;${location.origin}""/>/login.html<x id=""6"" equiv-text=""&lt;/code&gt;""/> as a redirect URI in the
+                    <x id=""7"" equiv-text=""&lt;a href=&quot;https://console.dimo.org&quot;&gt;""/>DIMO Developer Console<x id=""8"" equiv-text=""&lt;/a&gt;""/>.<x id=""9"" equiv-text=""&lt;/p&gt;""/>",developer setup message on the login screen when no client ID is configured; keep code tags and config names,"<x id=""0"" equiv-text=""&lt;p&gt;""/>请设置<x id=""1"" equiv-text=""&lt;code&gt;""/>DIMO_AUTH_CLIENT_ID<x id=""2"" equiv-text=""&lt;/code&gt;""/>（位于API的<x id=""3"" equiv-text=""&lt;code&gt;""/>settings.yaml<x id=""4"" equiv-text=""&lt;/code&gt;""/>中），并将<x id=""5"" equiv-text=""&lt;code&gt;${location.origin}""/>/login.html<x id=""6"" equiv-text=""&lt;/code&gt;""/>注册为<x id=""7"" equiv-text=""&lt;a href=&quot;https://console.dimo.org&quot;&gt;""/>DIMO Developer Console<x id=""8"" equiv-text=""&lt;/a&gt;""/>中的重定向URI。<x id=""9"" equiv-text=""&lt;/p&gt;""/>","<x id=""0"" equiv-text=""&lt;p&gt;""/>請在API的<x id=""3"" equiv-text=""&lt;code&gt;""/>settings.yaml<x id=""4"" equiv-text=""&lt;/code&gt;""/>中設定<x id=""1"" equiv-text=""&lt;code&gt;""/>DIMO_AUTH_CLIENT_ID<x id=""2"" equiv-text=""&lt;/code&gt;""/>，並在<x id=""7"" equiv-text=""&lt;a href=&quot;https://console.dimo.org&quot;&gt;""/>DIMO Developer Console<x id=""8"" equiv-text=""&lt;/a&gt;""/>中將<x id=""5"" equiv-text=""&lt;code&gt;${location.origin}""/>/login.html<x id=""6"" equiv-text=""&lt;/code&gt;""/>註冊為重新導向URI。<x id=""9"" equiv-text=""&lt;/p&gt;""/>"
+tm.0013,"Accepting your invitation, one moment.",loading message on the accept invitation page,正在接受邀请，请稍候。,正在接受邀請，請稍候。
+tm.0014,Account,section heading on the account settings page,账号,帳號
+tm.0015,Acquisition,TCO cost breakdown label and table column for acquisition cost,购置成本,購置
+tm.0016,Acquisition &amp; depreciation,section label in the TCO vehicle detail,购置与折旧,購置與折舊
+tm.0017,Active,member status label in a team members table (active member),已激活,使用中
+tm.0018,Activity,"button opening geofence activity, geofences page; short, next to an icon",活动,活動
+tm.0019,"Add <x id=""0"" equiv-text=""${categoryLabel(t).toLowerCase()}""/>","glovebox quick-add menu item, category name in lowercase","添加<x id=""0"" equiv-text=""${categoryLabel(t).toLowerCase()}""/>","新增<x id=""0"" equiv-text=""${categoryLabel(t).toLowerCase()}""/>"
+tm.0020,Add a document,upload document dialog heading and add-document button tooltip in the glovebox,添加文件,新增文件
+tm.0021,Add at least 3 points to make an area.,error when finishing a geofence drawing with fewer than 3 points,至少添加3个点才能构成区域。,請至少新增3個點以構成區域。
+tm.0022,Add by wallet address,section label in the fleet members panel for adding a member by wallet,通过钱包地址添加,透過錢包地址新增
+tm.0023,Add document,primary button in the glovebox that opens the upload dialog,添加文件,新增文件
+tm.0024,Add member,button that adds a member in the fleet or family members panel,添加成员,新增成員
+tm.0025,Add to geofence,tooltip on the toggle that adds a vehicle to a geofence,添加到地理围栏,加入地理圍欄
+tm.0026,Added by,field label in the document detail dialog (uploader),添加者,新增者
+tm.0027,Added through another DIMO app. You can view and download it here; only the app that added it can remove it.,notice in the document detail dialog for a document added by another app,此文件由其他DIMO应用添加。你可以在此查看和下载，但只有添加它的应用才能删除。,此文件是透過其他DIMO應用程式新增的。你可以在這裡檢視及下載，但只有新增它的應用程式才能將其移除。
+tm.0028,Adding…,add-member button label while the request runs,正在添加…,新增中…
+tm.0029,"Aftermarket device #<x id=""0"" equiv-text=""${this.vehicle.aftermarketDevice.tokenId}""/>",vehicle detail connection row naming an aftermarket device by token number,"后装设备#<x id=""0"" equiv-text=""${this.vehicle.aftermarketDevice.tokenId}""/>","後裝裝置#<x id=""0"" equiv-text=""${this.vehicle.aftermarketDevice.tokenId}""/>"
+tm.0030,Agentic Experiences,"dimo.org solution name: navbar link, page meta name and breadcrumb",智能体体验,代理式體驗
+tm.0031,All,"filter pill showing all documents in the glovebox, followed by a count",全部,全部
+tm.0032,All vehicles,geofence scope option and scope label meaning the geofence covers every vehicle,所有车辆,所有車輛
+tm.0033,All vehicles on this account are hidden.,empty state in the TCO view when every vehicle is hidden,此账号下的所有车辆均已隐藏。,此帳號的所有車輛皆已隱藏。
+tm.0034,Almost there,heading of the missing email step on the login page,马上就好,快完成了
+tm.0035,Amount,"table column header for a cost amount, TCO view",金额,金額
+tm.0036,Amount (optional),field label in the upload document dialog,金额（可选）,金額（選填）
+tm.0037,Applies to,field label for geofence scope in the create geofence dialog,适用范围,適用對象
+tm.0038,Applies to every vehicle in this fleet.,hint under the geofence scope option for all vehicles,适用于此车队的所有车辆。,適用於此車隊的所有車輛。
+tm.0039,Approximate location,permission name for approximate location access (sharing permissions list),大致位置,概略位置
+tm.0040,Area,"label before the drawn geofence area size, create geofence dialog",面积,面積
+tm.0041,Auto,trip detection method option (automatic),自动,自動
+tm.0042,Average,statistic label for an average value: signal aggregation option in the console and stat label on vehicle detail,平均值,平均
+tm.0043,Avg per day,stat label on the vehicle detail utilization card,日均,每日平均
+tm.0044,Avg speed,stat label in the trip replay dialog,平均速度,平均速度
+tm.0045,Back,accessible label or tooltip of a back navigation button,返回,返回
+tm.0046,Back to live,button in the trips panel that returns the map to the live position,返回实时位置,返回即時位置
+tm.0047,Battery,quick view telemetry row for the 12 V battery voltage; short label,电池,電池
+tm.0048,Battery voltage,chart heading on the vehicle detail page,电池电压,電池電壓
+tm.0049,Brand,"tab, section title and form label for a developer license brand (name and logo)",品牌,品牌
+tm.0050,Cancel,secondary button that closes a dialog or leaves a form without saving,取消,取消
+tm.0051,Category,"table column header or field label for a category (document category, signal category)",类别,類別
+tm.0052,Center map,map control tooltip that recenters the map,地图居中,地圖置中
+tm.0053,Change point,trip detection method option (change point detection),变点检测,變點偵測
+tm.0054,Charge,quick view telemetry row for EV state of charge; short label,电量,電量
+tm.0055,Check,status pill on the vehicle detail diagnostics card meaning a value needs checking; very short,需检查,需檢查
+tm.0056,Checking geofences…,progress message in the trips panel while geofence crossings load,正在检查地理围栏…,正在檢查地理圍欄…
+tm.0057,Checking…,loading status in the vehicle source rail while access or account state is checked,检查中…,檢查中…
+tm.0058,Click to finish,map tooltip on the first drawn point while drawing a geofence,点击完成,點選以完成
+tm.0059,Client ID and API key are required.,validation error on the onboard fleet form,客户端ID和API密钥为必填项。,必須填寫用戶端ID和API金鑰。
+tm.0060,Close,"button or accessible label that closes a dialog, sheet or modal",关闭,關閉
+tm.0061,Close search,map toolbar tooltip on the search toggle when search is open,关闭搜索,關閉搜尋
+tm.0062,Collapse panel,tooltip on the overview panel toggle,收起面板,收合面板
+tm.0063,Collapse sidebar,accessible label or tooltip on the sidebar collapse toggle,收起侧边栏,收合側邊欄
+tm.0064,Color,field label for the geofence color picker,颜色,顏色
+tm.0065,Comfortable view,tooltip on the vehicle card density toggle,宽松视图,舒適檢視
+tm.0066,Common questions,dimo.org FAQ section heading on compare and compliance pages,常见问题,常見問題
+tm.0067,Compact view,tooltip on the vehicle card density toggle,紧凑视图,精簡檢視
+tm.0068,Compare,dimo.org breadcrumb item for the compare section,对比,比較
+tm.0069,Compliance,"dimo.org breadcrumb item and section name for compliance, and a feature category tag",合规,法規遵循
+tm.0070,Confirm,heading of the confirm step in the upload document dialog,确认,確認
+tm.0071,Connected Vehicles,dimo.org industry page stat label under a number,网联汽车,聯網汽車
+tm.0072,Connection details,"console page title, breadcrumb and link for one connection detail page",连接详情,連線詳細資訊
+tm.0073,Connections,"console navigation item, page title, breadcrumb and home shortcut for connections",连接,連線
+tm.0074,Consumer Applications,"dimo.org solution name: navbar link, page meta name and breadcrumb",消费者应用,消費者應用
+tm.0075,Contact Sales,dimo.org call-to-action button on industry pages,联系销售,聯絡業務團隊
+tm.0076,Continue,primary button that continues to the next step,继续,繼續
+tm.0077,Coolant,quick view telemetry row for coolant temperature; short label,冷却液,冷卻液
+tm.0078,Coolant temperature,chart heading on the vehicle detail page,冷却液温度,冷卻液溫度
+tm.0079,Cooldown,"webhook cooldown setting: table column, detail label and form field label",冷却时间,冷卻時間
+tm.0080,Copied,confirmation shown after copying text to the clipboard; short,已复制,已複製
+tm.0081,Copy API key,"tooltip on the copy API key button, onboard fleet page",复制API密钥,複製API金鑰
+tm.0082,Copy wallet address,"tooltip on the copy wallet address button, account settings",复制钱包地址,複製錢包地址
+tm.0083,Could not add member.,error in the members panel when adding a member fails,无法添加成员。,無法新增成員。
+tm.0084,Could not load DIMO settings. Please enter credentials manually.,error on the onboard fleet page when DIMO settings fail to load,无法加载DIMO设置，请手动输入凭证。,無法載入DIMO設定，請手動輸入憑證。
+tm.0085,Could not load members.,error in the members panel when members fail to load,无法加载成员。,無法載入成員。
+tm.0086,Could not remove member.,error in the members panel when removing a member fails,无法移除成员。,無法移除成員。
+tm.0087,Could not resend invitation.,error in the members panel when resending an invitation fails,无法重新发送邀请。,無法重新傳送邀請。
+tm.0088,Could not revoke invitation.,error in the members panel when revoking an invitation fails,无法撤销邀请。,無法撤銷邀請。
+tm.0089,Create geofence,submit button in the create geofence dialog,创建地理围栏,建立地理圍欄
+tm.0090,Creating…,onboard fleet submit button while the fleet is being created,正在创建…,建立中…
+tm.0091,Credentials,permission name for VIN credential access (sharing permissions list and configurator),凭证,憑證
+tm.0092,Current location,permission name for current location access (sharing permissions list),当前位置,目前位置
+tm.0093,Custom color,tooltip on the custom color swatch in the create geofence dialog,自定义颜色,自訂顏色
+tm.0094,Customer Stories,dimo.org navbar link and breadcrumb for customer stories,客户案例,客戶案例
+tm.0095,DIMO API key,field label on the onboard fleet page,DIMO API密钥,DIMO API金鑰
+tm.0096,DIMO client ID,field label on the onboard fleet page,DIMO客户端ID,DIMO用戶端ID
+tm.0097,DIMO permissions required to read this vehicle’s documents,tooltip on the no-permission badge in the TCO vehicle list,需要DIMO权限才能读取此车辆的文件,需要DIMO權限才能讀取此車輛的文件
+tm.0098,DIMO vs Smartcar,dimo.org link text and heading comparing DIMO with Smartcar; names stay English,DIMO与Smartcar对比,DIMO vs Smartcar
+tm.0099,DIMO | Vehicle Platform for the Session-Based Economy,"dimo.org home page title, Open Graph title and Twitter title",DIMO | 面向会话经济的车辆平台,DIMO | 為工作階段經濟打造的車輛平台
+tm.0100,DTCs,"unit label after the diagnostic trouble code count, vehicle detail",个故障码,個故障碼
+tm.0101,Dark mode,theme toggle label that switches to dark mode,深色模式,深色模式
+tm.0102,Date,table column header in the TCO line items,日期,日期
+tm.0103,Dealerships,"dimo.org industry name: navbar link, page meta name and breadcrumb",汽车经销商,汽車經銷商
+tm.0104,Delete,button that deletes an item,删除,刪除
+tm.0105,Delete failed,error in the document detail dialog when deleting fails,删除失败,刪除失敗
+tm.0106,Delete this document? It will be removed from your list. The file itself stays stored on DIMO's infrastructure.,browser confirm prompt before deleting a glovebox document,要删除此文件吗？它将从你的列表中移除，但文件本身仍保存在DIMO的基础设施上。,要刪除此文件嗎？文件會從你的清單中移除，但檔案本身仍會保存在DIMO的基礎架構上。
+tm.0107,"Delete “<x id=""0"" equiv-text=""${g.name}""/>”?",inline confirmation before deleting a named group or geofence,"删除“<x id=""0"" equiv-text=""${g.name}""/>”？","要刪除「<x id=""0"" equiv-text=""${g.name}""/>」嗎？"
+tm.0108,Deleting…,"delete button label while the request runs, document detail dialog",正在删除…,刪除中…
+tm.0109,Delivery Service Providers,"dimo.org industry name: navbar link, page meta name and schema audience type",配送服务商,配送服務業者
+tm.0110,Depreciation to date,TCO cost breakdown label,累计折旧,迄今折舊
+tm.0111,Description,table column header or detail label for a description,描述,說明
+tm.0112,"Detected VIN <x id=""0"" equiv-text=""&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;""/>",upload document dialog line showing the VIN read from the file,"检测到VIN：<x id=""0"" equiv-text=""&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;""/>","偵測到的VIN：<x id=""0"" equiv-text=""&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;""/>"
+tm.0113,Diagnostics,section link on the vehicle detail page for diagnostics,诊断,診斷
+tm.0114,Display name,"field label, column header or detail label for a display name",显示名称,顯示名稱
+tm.0115,Distance,trip distance column header or stat label,距离,距離
+tm.0116,Distance · 7d,chart heading on the vehicle detail page for distance over 7 days,距离 · 7天,距離 · 7天
+tm.0117,Document ID,field label in the document detail dialog,文件ID,文件ID
+tm.0118,Documentation,navigation link to the developer documentation,文档,說明文件
+tm.0119,Documents,"tab, section title or label for vehicle documents",文件,文件
+tm.0120,Done,button that closes a finished flow or dialog,完成,完成
+tm.0121,Download,button that downloads a file,下载,下載
+tm.0122,Download failed,error in the document detail dialog when downloading fails,下载失败,下載失敗
+tm.0123,Downloading…,download button label while the file downloads,正在下载…,下載中…
+tm.0124,Draw the geofence area on the map first.,error in the create geofence dialog when no area is drawn,请先在地图上绘制地理围栏区域。,請先在地圖上繪製地理圍欄區域。
+tm.0125,Driver documents,document type name for driver documents (sharing and configurator),驾驶员文件,駕駛人文件
+tm.0126,Driving behaviour,"heading of the driving behaviour panel, vehicle detail",驾驶行为,駕駛行為
+tm.0127,Driving events,section label in the trips panel for driving events,驾驶事件,駕駛事件
+tm.0128,Driving time,chart heading on the vehicle detail page,驾驶时长,駕駛時間
+tm.0129,"Drop a file here, or <x id=""0"" equiv-text=""&lt;strong&gt;""/>click to choose<x id=""1"" equiv-text=""&lt;/strong&gt;""/>",file drop zone text in the upload document dialog; keep the strong tags,"将文件拖放到此处，或<x id=""0"" equiv-text=""&lt;strong&gt;""/>点击选择<x id=""1"" equiv-text=""&lt;/strong&gt;""/>","將檔案拖放到這裡，或<x id=""0"" equiv-text=""&lt;strong&gt;""/>點選以選擇<x id=""1"" equiv-text=""&lt;/strong&gt;""/>"
+tm.0130,Duration,trip duration column header or stat label,时长,持續時間
+tm.0131,EU Data Act,"dimo.org link text, heading and breadcrumb for the EU Data Act regulation",欧盟《数据法案》,歐盟資料法
+tm.0132,Edit,button or icon button label that edits an item,编辑,編輯
+tm.0133,Edit geofence,heading of the geofence dialog in edit mode,编辑地理围栏,編輯地理圍欄
+tm.0134,Edit webhook,"console page title, heading and breadcrumb for editing a webhook",编辑Webhook,編輯Webhook
+tm.0135,Email,field label for an email address input,邮箱,電子郵件
+tm.0136,Email address,label for the email address field or the email address data item being shared,邮箱地址,電子郵件地址
+tm.0137,Email me a code instead,link button that switches sign-in to an emailed one-time code,改为通过邮件接收验证码,改用電子郵件接收驗證碼
+tm.0138,End,map popup on the trip end marker in trip replay,终点,終點
+tm.0139,Ended,table column header for the end time of a trip or charging session,结束时间,結束時間
+tm.0140,Engine runtime,legend label in the geofence activity dialog,发动机运行时间,引擎運轉時間
+tm.0141,Enter a valid email address.,validation error for an invalid email in the invite member form,请输入有效的邮箱地址。,請輸入有效的電子郵件地址。
+tm.0142,"Enter a valid wallet address (0x…, 40 hex characters).",validation error for the add-by-wallet input in the members panel,请输入有效的钱包地址（0x开头，40位十六进制字符）。,請輸入有效的錢包地址（0x開頭，40個十六進位字元）。
+tm.0143,Enter an amount greater than 0,validation error for a missing amount in the TCO backfill table,请输入大于0的金额,請輸入大於0的金額
+tm.0144,Error codes,card heading on the vehicle detail page for diagnostic trouble codes,故障码,故障碼
+tm.0145,Events,"label for vehicle events: webhook service option, summary card, raw data mode and API capability",事件,事件
+tm.0146,Events per day,chart label in the driving behaviour panel,每日事件数,每日事件數
+tm.0147,Expand panel,tooltip on the overview panel toggle,展开面板,展開面板
+tm.0148,Expand sidebar,accessible label or tooltip on the sidebar expand toggle,展开侧边栏,展開側邊欄
+tm.0149,Export CSV,button in the TCO view that exports a CSV file,导出CSV,匯出CSV
+tm.0150,Exporting…,export button label while the CSV is generated,正在导出…,匯出中…
+tm.0151,Extract failed,error in the upload document dialog when field extraction fails,提取失败,擷取失敗
+tm.0152,FAQ,account settings menu item linking to the FAQ,常见问题,常見問題
+tm.0153,Failed to delete geofence,error on the geofences page when deleting fails,删除地理围栏失败,無法刪除地理圍欄
+tm.0154,Failed to load GPS data,error in the trip replay dialog when GPS points fail to load,加载GPS数据失败,無法載入GPS資料
+tm.0155,Failed to load assigned vehicles,error in the manage geofence vehicles dialog,加载已分配车辆失败,無法載入已指派的車輛
+tm.0156,Failed to load driving behaviour — check console for details.,error in the driving behaviour panel,加载驾驶行为失败，请查看控制台了解详情。,無法載入駕駛行為，詳情請查看主控台。
+tm.0157,Failed to load geofences,error on the geofences page when the list fails to load,加载地理围栏失败,無法載入地理圍欄
+tm.0158,Failed to load trips — check console for details.,error in the trips panel,加载行程失败，请查看控制台了解详情。,無法載入行程，詳情請查看主控台。
+tm.0159,Failed to load vehicle detail,error in the TCO vehicle detail,加载车辆详情失败,無法載入車輛詳細資料
+tm.0160,Failed to load vehicles,error when the vehicle list fails to load,加载车辆失败,無法載入車輛
+tm.0161,Failed to save,error when saving TCO settings fails,保存失败,無法儲存
+tm.0162,Failed to save geofence,error in the create geofence dialog when saving fails,保存地理围栏失败,無法儲存地理圍欄
+tm.0163,Failed to scan geofence activity,error in the geofence activity dialog,扫描地理围栏活动失败,無法掃描地理圍欄活動
+tm.0164,Failed to update assignment,error in the manage geofence vehicles dialog when assignment fails,更新分配失败,無法更新指派
+tm.0165,Favorite,tooltip on the favorite star in the vehicle quick view,收藏,最愛
+tm.0166,Fields,field label in the document detail dialog for extracted fields,字段,欄位
+tm.0167,File ID,field label in the document detail dialog,原始文件ID,檔案ID
+tm.0168,Finish,primary button that completes a multi-step form or a geofence drawing,完成,完成
+tm.0169,Finish setup,"console button, link and page title for finishing a connection setup",完成设置,完成設定
+tm.0170,Fit all vehicles,map control tooltip that fits every vehicle in view,显示所有车辆,顯示所有車輛
+tm.0171,Fleet Intelligence,"dimo.org solution name: navbar link, page meta name and breadcrumb",车队智能,車隊智慧
+tm.0172,Fleet Members,section heading on the account settings page,车队成员,車隊成員
+tm.0173,Fleets,dimo.org use case category tag for fleet use cases,车队,車隊
+tm.0174,Focus on map,tooltip on a geofence name in the trips panel that focuses it on the map,在地图上定位,在地圖上聚焦
+tm.0175,Frequency,trip detection method option (frequency analysis),频率分析,頻率
+tm.0176,Fuel,quick view telemetry row for fuel level; short label,燃油,燃油
+tm.0177,Fuel level,name of the fuel level signal or chart heading,燃油量,油量
+tm.0178,Full details,link in the vehicle quick view to the vehicle detail page,完整详情,完整詳細資料
+tm.0179,GPS data sparse — showing start and end only,notice in the trip replay dialog when GPS data is sparse,GPS数据稀疏，仅显示起点和终点,GPS資料稀疏，僅顯示起點和終點
+tm.0180,Geofences,side navigation item for the geofences page,地理围栏,地理圍欄
+tm.0181,Geofences crossed,section label in the trips panel,经过的地理围栏,經過的地理圍欄
+tm.0182,Get API Keys,dimo.org call-to-action button (title case),获取API密钥,取得API金鑰
+tm.0183,Get API keys,dimo.org link or button in body copy (sentence case),获取API密钥,取得API金鑰
+tm.0184,Get Started,"dimo.org call-to-action button on hero, pricing and product pages",开始使用,開始使用
+tm.0185,Get credentials from DIMO,button on the onboard fleet page that opens DIMO to provision credentials,从DIMO获取凭证,從DIMO取得憑證
+tm.0186,Glovebox,side navigation item for the glovebox documents page,手套箱,手套箱
+tm.0187,Grant DIMO permissions on this vehicle to see trip replay.,error in the trip replay dialog when the vehicle lacks permissions,请为此车辆授予DIMO权限以查看行程回放。,對此車輛授予DIMO權限，即可查看行程重播。
+tm.0188,Grant DIMO permissions to see driving behaviour on this vehicle.,notice in the driving behaviour panel when the vehicle lacks permissions,请授予DIMO权限以查看此车辆的驾驶行为。,對此車輛授予DIMO權限，即可查看駕駛行為。
+tm.0189,Grant DIMO permissions to see live telemetry on this vehicle.,notice in the trips panel when the vehicle lacks permissions,请授予DIMO权限以查看此车辆的实时遥测数据。,對此車輛授予DIMO權限，即可查看即時遙測。
+tm.0190,Grant DIMO permissions to this vehicle to include its documents in operating cost. Acquisition and depreciation below are unaffected.,notice in the TCO view when a vehicle lacks document permissions,请为此车辆授予DIMO权限，以将其文件计入运营成本。下方的购置成本和折旧不受影响。,對此車輛授予DIMO權限，即可將其文件計入營運成本。下方的購置與折舊不受影響。
+tm.0191,Grant DIMO permissions to view documents on this vehicle.,notice in the glovebox when a vehicle lacks document permissions,请授予DIMO权限以查看此车辆的文件。,對此車輛授予DIMO權限，即可檢視其文件。
+tm.0192,Harsh acceleration,driving behaviour event type label and legend,急加速,急加速
+tm.0193,Harsh braking,driving behaviour event type label and legend,急刹车,急煞車
+tm.0194,Harsh cornering,driving behaviour event type label and legend,急转弯,急轉彎
+tm.0195,Hide hidden vehicles,toggle that hides vehicles the user has hidden,不显示已隐藏车辆,不顯示已隱藏的車輛
+tm.0196,Hide vehicle,tooltip on the hide button of a vehicle row,隐藏车辆,隱藏車輛
+tm.0197,Home,"navigation item, page title or breadcrumb root for the home page",首页,首頁
+tm.0198,How It Works,"dimo.org section heading on industry, solution and customer story pages",工作原理,運作方式
+tm.0199,Hybrid,dimo.org use case category tag (mixed fleet and consumer); not the powertrain type,混合,混合型
+tm.0200,Idling,trip detection method option (idling),怠速,怠速
+tm.0201,Ignition,trip detection method option (ignition),点火,點火
+tm.0202,Industries,dimo.org navbar menu and breadcrumb item for industries,行业,產業
+tm.0203,Infrastructure,dimo.org feature or use case category tag,基础设施,基礎架構
+tm.0204,Invitation accepted — taking you to the fleet.,success message on the accept invitation page,已接受邀请，正在进入车队。,已接受邀請，正在帶你前往車隊。
+tm.0205,Invitation problem,error heading on the accept invitation page,邀请出现问题,邀請發生問題
+tm.0206,Invitation re-sent.,confirmation in the members panel after resending an invitation,邀请已重新发送。,已重新傳送邀請。
+tm.0207,Invite by email,section label in the members panel for inviting by email,通过邮箱邀请,透過電子郵件邀請
+tm.0208,Invite member,button or dialog heading for inviting a team member,邀请成员,邀請成員
+tm.0209,JWT copied!,toast after copying a developer JWT,JWT已复制！,已複製JWT！
+tm.0210,Joining…,loading heading on the accept invitation page,正在加入…,正在加入…
+tm.0211,Language,label of the language switcher or language setting,语言,語言
+tm.0212,Last 2 weeks,trips panel range label for the first page (last 2 weeks),最近2周,過去2週
+tm.0213,Last 24 hours,time window option in the geofence activity dialog,最近24小时,過去24小時
+tm.0214,Last 3 days,time window option in the geofence activity dialog,最近3天,過去3天
+tm.0215,Last 7 days,section label on the vehicle detail page,最近7天,過去7天
+tm.0216,"Last <x id=""0"" equiv-text=""${DAYS}""/> days",range label in the driving behaviour panel,"最近<x id=""0"" equiv-text=""${DAYS}""/>天","過去<x id=""0"" equiv-text=""${DAYS}""/>天"
+tm.0217,Last Location,table column header in the vehicle list,最后位置,最後位置
+tm.0218,"Last login <x id=""0"" equiv-text=""${new Date(m.lastLoginAt).toLocaleDateString()}""/>",last login date of a member in the members panel,"上次登录：<x id=""0"" equiv-text=""${new Date(m.lastLoginAt).toLocaleDateString()}""/>","上次登入：<x id=""0"" equiv-text=""${new Date(m.lastLoginAt).toLocaleDateString()}""/>"
+tm.0219,Last seen,column header or label for when a vehicle last reported data,最后在线,最後回報時間
+tm.0220,License details,"console link, page title and breadcrumb for a developer license detail page",许可证详情,授權詳細資訊
+tm.0221,Licenses,"console navigation item, page title, breadcrumb and home shortcut for licenses",许可证,授權
+tm.0222,Light mode,theme toggle label that switches to light mode,浅色模式,淺色模式
+tm.0223,Line items,section label in the TCO vehicle detail,明细,明細項目
+tm.0224,Live data,permission name for live data access (sharing permissions list),实时数据,即時資料
+tm.0225,Live telemetry,feature bullet on the login page,实时遥测,即時遙測
+tm.0226,Loading GPS data…,loading message in the trip replay map,正在加载GPS数据…,正在載入GPS資料…
+tm.0227,Loading assigned vehicles…,loading message in the manage geofence vehicles dialog,正在加载已分配车辆…,正在載入已指派的車輛…
+tm.0228,Loading documents…,loading message in the glovebox,正在加载文件…,正在載入文件…
+tm.0229,Loading geofences…,loading message on the geofences page,正在加载地理围栏…,正在載入地理圍欄…
+tm.0230,Loading members…,loading message in the members panel,正在加载成员…,正在載入成員…
+tm.0231,Loading telemetry…,loading message in the vehicle quick view,正在加载遥测数据…,正在載入遙測資料…
+tm.0232,Loading trips…,loading message in the trips panel,正在加载行程…,正在載入行程…
+tm.0233,Loading vehicles…,loading message for the vehicle list,正在加载车辆…,正在載入車輛…
+tm.0234,Loading…,"generic loading message in a panel, list or table",加载中…,載入中…
+tm.0235,Log out,button or menu item that logs the user out,退出登录,登出
+tm.0236,Maintenance,business type for vehicle maintenance: sign-up developer type option and dimo.org industry breadcrumb,维修保养,維修保養
+tm.0237,Make Favorite,button on the vehicle detail page that marks the vehicle as a favorite,加入收藏,設為最愛
+tm.0238,Manage Subscription,account settings menu item,管理订阅,管理訂閱
+tm.0239,Max speed,stat label in the trip replay dialog,最高速度,最高速度
+tm.0240,Measurement Units,account settings field label for metric or imperial units,计量单位,度量單位
+tm.0241,Member,team role name for a member (not owner),成员,成員
+tm.0242,Missing,glovebox section heading for missing document types,缺失,缺少
+tm.0243,Missing amounts,section label in the TCO vehicle detail,缺失金额,缺少金額
+tm.0244,Name,field label or column header for a name,名称,名稱
+tm.0245,"Name the area you drew, then choose which vehicles it applies to.",subtitle of the create geofence dialog,为你绘制的区域命名，然后选择其适用的车辆。,為你繪製的區域命名，然後選擇適用的車輛。
+tm.0246,New configuration,"console button, breadcrumb and subtitle for creating a new license configuration",新建配置,新增組態
+tm.0247,New geofence,heading of the geofence dialog in create mode,新建地理围栏,新增地理圍欄
+tm.0248,New template,"console page title, button and heading for creating a permission template",新建模板,新增範本
+tm.0249,Next,button that goes to the next page or step,下一步,下一步
+tm.0250,No Client ID configured,heading on the login screen when no client ID is configured,未配置客户端ID,未設定用戶端ID
+tm.0251,No DIMO integration yet,vehicle detail notice when the vehicle has no DIMO connection,尚未接入DIMO,尚未整合DIMO
+tm.0252,No DIMO integration — pair a device to stream telemetry,vehicle list row notice when the vehicle has no DIMO connection,未接入DIMO，请配对设备以传输遥测数据,尚未整合DIMO，請配對裝置以串流傳輸遙測資料
+tm.0253,No VIN detected — pick the vehicle manually.,notice in the upload document dialog when no VIN was found,未检测到VIN，请手动选择车辆。,未偵測到VIN，請手動選擇車輛。
+tm.0254,No access,status label when the app has no access to a vehicle,无访问权限,無存取權限
+tm.0255,No cost documents on file for this vehicle yet.,empty state in the TCO vehicle detail,此车辆尚无成本文件。,此車輛尚無成本文件。
+tm.0256,No data,"chart tooltip for a day without data, vehicle detail",无数据,無資料
+tm.0257,No distance,driving behaviour panel fallback when distance is missing,无距离,無距離資料
+tm.0258,No distance data,driving behaviour panel chart empty state,无距离数据,無距離資料
+tm.0259,No geofences match your search.,empty state on the geofences page when search finds nothing,没有符合搜索条件的地理围栏。,沒有符合搜尋條件的地理圍欄。
+tm.0260,No geofences yet. Click “New geofence” and draw an area on the map.,empty state on the geofences page,还没有地理围栏。点击“新建地理围栏”，然后在地图上绘制区域。,尚無地理圍欄。請點選「新增地理圍欄」並在地圖上繪製區域。
+tm.0261,No location access,map overlay when the vehicle lacks location permission,无位置访问权限,無位置存取權限
+tm.0262,No members yet.,empty state in the members panel,还没有成员。,尚無成員。
+tm.0263,No records yet.,glovebox empty state heading,还没有记录。,尚無記錄。
+tm.0264,No structured fields extracted,empty value in the document detail dialog,未提取到结构化字段,未擷取到結構化欄位
+tm.0265,No telemetry access,vehicle list cell when the vehicle lacks telemetry permission,无遥测访问权限,無遙測存取權限
+tm.0266,No telemetry data reported yet.,empty state in the vehicle quick view,尚未上报遥测数据。,尚未回報任何遙測資料。
+tm.0267,No trips,driving behaviour panel fallback when there are no trips,无行程,無行程
+tm.0268,No trips in the last 2 weeks.,empty state in the vehicle quick view,最近2周内无行程。,過去2週內沒有行程。
+tm.0269,No trips in this period.,empty state in the trips panel,此期间内无行程。,此期間沒有行程。
+tm.0270,No vehicles found.,empty state for the vehicle list,未找到车辆。,找不到車輛。
+tm.0271,No vehicles match your search.,empty state for the vehicle list when search finds nothing,没有符合搜索条件的车辆。,沒有符合搜尋條件的車輛。
+tm.0272,No vehicles match.,empty state in the manage geofence vehicles dialog search,没有匹配的车辆。,沒有相符的車輛。
+tm.0273,No vehicles on this account.,empty state in the TCO view,此账号下没有车辆。,此帳號沒有車輛。
+tm.0274,No vehicles passed through in this window.,empty state in the geofence activity dialog,此时间段内没有车辆经过。,此時段內沒有車輛經過。
+tm.0275,None,placeholder value when a field has nothing to show,无,無
+tm.0276,Normal,status pill on the vehicle detail diagnostics card meaning a value is normal; very short,正常,正常
+tm.0277,Not signed in.,empty state on the account settings page,未登录。,尚未登入。
+tm.0278,Not yet wired,"placeholder stat label for a metric that is not connected yet, vehicle detail",暂未接入,尚未串接
+tm.0279,OEM,business type for car manufacturers: sign-up developer type option and dimo.org industry breadcrumb,OEM,OEM
+tm.0280,Odometer,"odometer signal name, webhook condition or telemetry row label",里程表,里程表
+tm.0281,Ongoing,badge on a trip that is still in progress,进行中,進行中
+tm.0282,Opening DIMO…,onboard fleet button label while DIMO opens,正在打开DIMO…,正在開啟DIMO…
+tm.0283,Operating cost,TCO cost breakdown label,运营成本,營運成本
+tm.0284,Overview,tab or section link for an overview,概览,總覽
+tm.0285,Owner,team or fleet role name for the owner; fleet apps also label the vehicle owner row in the share dialog,所有者,擁有者
+tm.0286,"PDF · JPG · PNG, max 25 MB",file type and size hint in the upload document dialog,PDF · JPG · PNG，最大25 MB,PDF · JPG · PNG，上限25 MB
+tm.0287,"PDF, JPG, or PNG. We'll read the VIN and other details automatically, then securely save the document to DIMO.",subtitle of the upload document dialog,PDF、JPG或PNG。我们会自动读取VIN及其他信息，然后将文件安全保存到DIMO。,支援PDF、JPG或PNG。我們會自動讀取VIN和其他詳細資料，再將文件安全地儲存到DIMO。
+tm.0288,Pause,tooltip on the trip replay play/pause button,暂停,暫停
+tm.0289,"Peak <x id=""0"" equiv-text=""${max}""/>",chart label in the driving behaviour panel showing the peak value,"峰值<x id=""0"" equiv-text=""${max}""/>","峰值<x id=""0"" equiv-text=""${max}""/>"
+tm.0290,Pending invitations,section label in the members panel,待接受的邀请,待處理的邀請
+tm.0291,Pick a vehicle from the list,glovebox placeholder when no vehicle is selected,从列表中选择车辆,從清單中選擇車輛
+tm.0292,Pick which vehicle this belongs to and confirm the category.,subtitle of the confirm step in the upload document dialog,选择该文件所属的车辆并确认类别。,選擇此文件所屬的車輛，並確認類別。
+tm.0293,Platform Features,dimo.org section heading on industry and solution pages,平台功能,平台功能
+tm.0294,Play,tooltip on the trip replay play/pause button,播放,播放
+tm.0295,Playback speed,tooltip on the trip replay speed selector,播放速度,播放速度
+tm.0296,Please enter a geofence name.,validation error in the create geofence dialog,请输入地理围栏名称。,請輸入地理圍欄名稱。
+tm.0297,Please enter a valid email address.,validation error for an invalid email address,请输入有效的邮箱地址。,請輸入有效的電子郵件地址。
+tm.0298,Previous,button that goes to the previous page or step,上一步,上一步
+tm.0299,Pricing,dimo.org navbar link and page section heading for pricing,价格,價格方案
+tm.0300,Privacy &amp; Account,section heading on the account settings page,隐私与账号,隱私權與帳號
+tm.0301,Product Features,dimo.org section heading on product pages,产品功能,產品功能
+tm.0302,Products,dimo.org navbar menu and breadcrumb item for products,产品,產品
+tm.0303,Pulling out the VIN and other details.,status detail in the upload document dialog while reading,正在提取VIN及其他信息。,正在擷取VIN和其他詳細資料。
+tm.0304,Purchase date,field label in the TCO acquisition settings,购买日期,購買日期
+tm.0305,Purchase price,field label in the TCO acquisition settings,购买价格,購買價格
+tm.0306,Raw data,raw data: permission name in the sharing permissions list and console vehicle tab,原始数据,原始資料
+tm.0307,Read the Docs,dimo.org button linking to the developer docs,阅读文档,閱讀說明文件
+tm.0308,Reading document…,status heading in the upload document dialog,正在读取文件…,正在讀取文件…
+tm.0309,Recharge,trip detection method option (recharge),充电,充電
+tm.0310,Refresh,button or tooltip that reloads data,刷新,重新整理
+tm.0311,Refresh vehicle state,map toolbar tooltip that reloads vehicle state,刷新车辆状态,重新整理車輛狀態
+tm.0312,Refuel,trip detection method option (refuel),加油,加油
+tm.0313,Remove,button that removes an item or member,移除,移除
+tm.0314,Remove from Favorites,button on the vehicle detail page that unmarks the favorite,取消收藏,從最愛中移除
+tm.0315,Remove from geofence,tooltip on the toggle that removes a vehicle from a geofence,从地理围栏中移除,從地理圍欄中移除
+tm.0316,Remove member,tooltip on the remove member button,移除成员,移除成員
+tm.0317,Replay trip,tooltip on the trip replay button in the trips panel,回放行程,重播行程
+tm.0318,Required,chip or option marking an item as required,必需,必要
+tm.0319,Resend,action that resends a pending invitation,重新发送,重新傳送
+tm.0320,Reset,tooltip on the trip replay reset button,重置,重設
+tm.0321,Resources,navigation or footer section heading for resources,资源,資源
+tm.0322,Retry,button that retries a failed action,重试,重試
+tm.0323,Revoke,action that revokes an invitation or shared access,撤销,撤銷
+tm.0324,Role,field label or column header for a member role,角色,角色
+tm.0325,Run query,console button on vehicle data tabs that runs the query,运行查询,執行查詢
+tm.0326,Save,primary button that saves changes,保存,儲存
+tm.0327,Save document,primary button in the upload document dialog,保存文件,儲存文件
+tm.0328,"Save first, then assign specific vehicles with the “Vehicles” button.",hint in the create geofence dialog for specific vehicles,请先保存，然后使用“车辆”按钮分配指定车辆。,請先儲存，再使用「車輛」按鈕指派特定車輛。
+tm.0329,Save your API key now — it cannot be retrieved after this step.,warning on the onboard fleet page,请立即保存你的API密钥，此步骤之后将无法再次获取。,請立即儲存你的API金鑰，完成此步驟後將無法再次取得。
+tm.0330,Saved,heading of the upload document dialog after saving,已保存,已儲存
+tm.0331,Saving document…,status heading in the upload document dialog,正在保存文件…,正在儲存文件…
+tm.0332,Saving…,save button label while saving,正在保存…,儲存中…
+tm.0333,"Scanning <x id=""0"" equiv-text=""${this.scanned}""/> of <x id=""1"" equiv-text=""${this.total}""/> vehicles…",progress in the geofence activity dialog,"正在扫描<x id=""0"" equiv-text=""${this.scanned}""/>/<x id=""1"" equiv-text=""${this.total}""/>辆车…","正在掃描第<x id=""0"" equiv-text=""${this.scanned}""/>輛車，共<x id=""1"" equiv-text=""${this.total}""/>輛…"
+tm.0334,Search geofences…,search input placeholder on the geofences page,搜索地理围栏…,搜尋地理圍欄…
+tm.0335,Search vehicles,accessible label or tooltip for vehicle search,搜索车辆,搜尋車輛
+tm.0336,Search vehicles…,search input placeholder in the manage geofence vehicles dialog,搜索车辆…,搜尋車輛…
+tm.0337,Select,select input placeholder before a choice is made,请选择,請選擇
+tm.0338,Select a vehicle,glovebox heading placeholder before a vehicle is chosen,选择车辆,選擇車輛
+tm.0339,Select a vehicle…,empty option in the vehicle select of the upload document dialog,选择车辆…,選擇車輛…
+tm.0340,Send a new code,button that sends a new one-time sign-in code,发送新验证码,傳送新的驗證碼
+tm.0341,Send invite,submit button of the invite member form,发送邀请,傳送邀請
+tm.0342,Service,"webhook service: table column, detail label and form field label",服务,服務
+tm.0343,Settings,navigation item or page title for settings,设置,設定
+tm.0344,Shared,status label meaning a vehicle is shared with the app,共享中,共享中
+tm.0345,Sharing link copied,console toast after copying a sharing link,共享链接已复制,已複製共享連結
+tm.0346,Sharing…,share button label while sharing runs,正在共享…,正在共享…
+tm.0347,Show hidden vehicles,toggle that shows vehicles the user has hidden,显示已隐藏车辆,顯示已隱藏的車輛
+tm.0348,"Showing <x id=""0"" equiv-text=""${page * TCOView.PAGE_SIZE + 1}""/>–<x id=""1"" equiv-text=""${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}""/> of <x id=""2"" equiv-text=""${visible.length}""/>",pagination summary in the TCO view,"显示第<x id=""0"" equiv-text=""${page * TCOView.PAGE_SIZE + 1}""/>–<x id=""1"" equiv-text=""${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}""/>项，共<x id=""2"" equiv-text=""${visible.length}""/>项","顯示第<x id=""0"" equiv-text=""${page * TCOView.PAGE_SIZE + 1}""/>–<x id=""1"" equiv-text=""${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}""/>筆，共<x id=""2"" equiv-text=""${visible.length}""/>筆"
+tm.0349,Sign in with DIMO,sign-in page heading (dimo-login) or sign-in button (fleet apps),使用DIMO登录,使用DIMO登入
+tm.0350,Sign in with your DIMO account to join this fleet.,body text on the accept invitation page before sign-in,使用你的DIMO账号登录以加入此车队。,使用你的DIMO帳號登入以加入此車隊。
+tm.0351,Sign out,button or tooltip that signs the user out,退出登录,登出
+tm.0352,Signals,"tab, card label or column header for vehicle signals",信号,訊號
+tm.0353,Signing and securely storing your document with DIMO.,status detail in the upload document dialog while saving,正在签名并将你的文件安全存储到DIMO。,正在簽署文件，並安全地儲存到DIMO。
+tm.0354,Solutions,dimo.org navbar menu and breadcrumb item for solutions,解决方案,解決方案
+tm.0355,Something went wrong,error heading or toast for an unexpected failure,出了点问题,發生錯誤
+tm.0356,Something went wrong. Please try again.,error message for an unexpected failure with a retry hint,出了点问题，请重试。,發生錯誤，請再試一次。
+tm.0357,Specific,"geofence scope option for specific vehicles, create geofence dialog; short",指定,特定
+tm.0358,Specific vehicles,geofence scope label on the geofences page,指定车辆,特定車輛
+tm.0359,Speed,"speed signal name, webhook condition or telemetry row label",速度,速度
+tm.0360,Speed limit (optional),field label in the create geofence dialog,限速（可选）,速限（選填）
+tm.0361,Start,map popup on the trip start marker in trip replay,起点,起點
+tm.0362,Start Building,dimo.org call-to-action button on hero and pricing sections,开始构建,開始開發
+tm.0363,Start Building Today,dimo.org call-to-action heading on industry pages,立即开始构建,立即開始開發
+tm.0364,Status,column header or label for a status,状态,狀態
+tm.0365,Support,navigation item or page title for support,支持,支援
+tm.0366,Switch to dark mode,accessible label or tooltip on the theme toggle,切换到深色模式,切換至深色模式
+tm.0367,Switch to light mode,accessible label or tooltip on the theme toggle,切换到浅色模式,切換至淺色模式
+tm.0368,"Synthetic device #<x id=""0"" equiv-text=""${this.vehicle.syntheticDevice.tokenId}""/>",vehicle detail connection row naming a synthetic device by token number,"合成设备#<x id=""0"" equiv-text=""${this.vehicle.syntheticDevice.tokenId}""/>","合成裝置#<x id=""0"" equiv-text=""${this.vehicle.syntheticDevice.tokenId}""/>"
+tm.0369,TCO,side navigation item for the total cost of ownership page (abbreviation),TCO,TCO
+tm.0370,That wallet is already a member.,validation error in the members panel,该钱包已是成员。,此錢包已經是成員。
+tm.0371,These documents don’t have a cost amount on file. Add one to include them in this vehicle’s totals.,notice in the TCO view about documents without amounts,这些文件没有记录成本金额。添加金额后即可计入此车辆的总计。,這些文件尚未登錄成本金額。新增金額即可將其計入此車輛的總計。
+tm.0372,"This geofence applies to many vehicles — scanning the first <x id=""0"" equiv-text=""${this.total}""/>.",notice in the geofence activity dialog when the scan is capped,"此地理围栏适用于大量车辆，仅扫描前<x id=""0"" equiv-text=""${this.total}""/>辆。","此地理圍欄適用的車輛眾多，僅掃描前<x id=""0"" equiv-text=""${this.total}""/>輛。"
+tm.0373,"This invitation is invalid, already used, or expired.",error on the accept invitation page,此邀请无效、已被使用或已过期。,此邀請無效、已使用或已過期。
+tm.0374,This invitation link is missing its token. Ask the sender to re-send the invite.,error on the accept invitation page when the link has no token,此邀请链接缺少令牌。请让发送者重新发送邀请。,此邀請連結缺少權杖。請要求寄件者重新傳送邀請。
+tm.0375,"This page is educational, not legal advice.",dimo.org disclaimer at the end of compliance pages,本页内容仅供学习参考，不构成法律建议。,本頁內容僅供教育參考，不構成法律建議。
+tm.0376,"This vehicle is shared with you. You can view, download and add documents, but not delete them.",notice in the document detail dialog for a shared vehicle,此车辆由他人共享给你。你可以查看、下载和添加文件，但无法删除。,此車輛是與你共享的。你可以檢視、下載及新增文件，但無法刪除。
+tm.0377,This vehicle's connection doesn't report driving events.,notice in the driving behaviour panel,此车辆的连接不上报驾驶事件。,此車輛的連線不會回報駕駛事件。
+tm.0378,Time in,table column header in the geofence activity dialog (entry time),进入时间,進入時間
+tm.0379,Time out,table column header in the geofence activity dialog (exit time),离开时间,離開時間
+tm.0380,Token,vehicle list column header for the vehicle token ID,Token,Token
+tm.0381,"Token #<x id=""0"" equiv-text=""${this.tokenId}""/>",vehicle token number shown under the vehicle name,"Token #<x id=""0"" equiv-text=""${this.tokenId}""/>","Token #<x id=""0"" equiv-text=""${this.tokenId}""/>"
+tm.0382,Top,stat label on the vehicle detail utilization card (top value),最高,最高
+tm.0383,Total,stat label on the vehicle detail utilization card (total value),总计,總計
+tm.0384,Total Cost of Ownership,heading of the TCO page,总拥有成本,總擁有成本
+tm.0385,Total TCO,TCO cost breakdown label for the total,TCO总计,TCO總計
+tm.0386,Track expiration,glovebox hint for a registration document type,跟踪到期日,追蹤到期日
+tm.0387,Track next inspection,glovebox hint for an inspection document type,跟踪下次检验,追蹤下次檢驗
+tm.0388,Track renewals,glovebox hint for an insurance document type,跟踪续保,追蹤續保
+tm.0389,Trip Replay,title of the trip replay dialog,行程回放,行程重播
+tm.0390,Trip detection method,tooltip on the trip detection method selector,行程检测方法,行程偵測方式
+tm.0391,Trip history,feature bullet on the login page,行程历史,行程記錄
+tm.0392,Trips,"tab, panel title or heading for trips",行程,行程
+tm.0393,Trouble logging in? <support>Get support</support>,help line under sign-in forms; keep the support tags,登录遇到问题？<support>获取支持</support>,登入時遇到問題？<support>取得支援</support>
+tm.0394,Try again,button that retries after an error,重试,重試
+tm.0395,Unavailable,console fallback when a value or source cannot be loaded,不可用,無法使用
+tm.0396,Unknown,console fallback when a value is unknown,未知,未知
+tm.0397,Unknown error,fallback error message when no detail is available,未知错误,未知錯誤
+tm.0398,Update the geofence details. Redraw the area by deleting and recreating it.,subtitle of the geofence dialog in edit mode,更新地理围栏详情。如需重新绘制区域，请删除后重新创建。,更新地理圍欄詳細資料。如要重新繪製區域，請刪除後重新建立。
+tm.0399,Upload failed,error in the upload document dialog,上传失败,上傳失敗
+tm.0400,Use Cases,dimo.org section heading on industry pages,应用场景,使用案例
+tm.0401,Use the “Vehicles” button on the geofence to assign specific vehicles.,hint in the create geofence dialog in edit mode,使用地理围栏上的“车辆”按钮分配指定车辆。,請使用地理圍欄上的「車輛」按鈕指派特定車輛。
+tm.0402,Useful life (years),field label in the TCO acquisition settings,使用年限（年）,使用年限（年）
+tm.0403,User profile,"alt text of the profile image, account settings",用户头像,使用者個人資料
+tm.0404,Vehicle,"field label, page title or subject label for a vehicle",车辆,車輛
+tm.0405,"Vehicle #<x id=""0"" equiv-text=""${v.tokenId}""/>",fallback vehicle name with its token number,"车辆#<x id=""0"" equiv-text=""${v.tokenId}""/>","車輛#<x id=""0"" equiv-text=""${v.tokenId}""/>"
+tm.0406,Vehicle Commerce,"dimo.org solution name: navbar link, page meta name and breadcrumb",车辆商务,車輛商務
+tm.0407,Vehicle data,vehicle data: permission name for non-location history and console raw data scope option,车辆数据,車輛資料
+tm.0408,Vehicle documents,document type name for vehicle documents (sharing and configurator),车辆文件,車輛文件
+tm.0409,Vehicle list,section heading or side navigation item for a vehicle list,车辆列表,車輛清單
+tm.0410,Vehicle status,section heading on the vehicle detail page,车辆状态,車輛狀態
+tm.0411,Vehicles,"navigation item, page title, tab, breadcrumb or column header for vehicles",车辆,車輛
+tm.0412,View Documentation,dimo.org button linking to the developer docs on hero and CTA sections,查看文档,查看說明文件
+tm.0413,View documents,glovebox vehicle row subtitle before the record count loads,查看文件,檢視文件
+tm.0414,We could not accept this invitation.,error on the accept invitation page,我们无法接受此邀请。,我們無法接受此邀請。
+tm.0415,We couldn't get your email from your DIMO account. Add it to finish signing in.,body text of the missing email step on the login page,我们无法从你的DIMO账号获取邮箱。请添加邮箱以完成登录。,我們無法從你的DIMO帳號取得電子郵件地址。請新增電子郵件地址以完成登入。
+tm.0416,We couldn't verify that sign-in. Please sign in again.,error on the login page,我们无法验证此次登录，请重新登录。,我們無法驗證此次登入，請重新登入。
+tm.0417,Webhook URL,webhook target URL: detail label and form field label,Webhook URL,Webhook URL
+tm.0418,Webhooks,"console navigation item, page title, section title and breadcrumb for webhooks",Webhook,Webhook
+tm.0419,What you get,accessible label of the feature list on the login page,你将获得,你將獲得
+tm.0420,You,badge next to your own row in the members panel,你,你
+tm.0421,You're in,success heading on the accept invitation page,你已加入,你已加入
+tm.0422,You've been invited,heading on the accept invitation page before sign-in,你收到了邀请,你已獲邀
+tm.0423,Your cars,heading of the vehicle panel on the overview map page,你的车辆,你的車輛
+tm.0424,Your document has been saved to DIMO. The list will refresh.,subtitle of the upload document dialog after saving,你的文件已保存到DIMO，列表将自动刷新。,你的文件已儲存到DIMO，清單將會重新整理。
+tm.0425,Zoom in,map control tooltip,放大,放大
+tm.0426,Zoom out,map control tooltip,缩小,縮小
+tm.0427,Zoom to vehicle,tooltip on the zoom button of a vehicle card,缩放到车辆,縮放至車輛
+tm.0428,"all <x id=""0"" equiv-text=""${visible.length}""/>","count in parentheses after the fleet total row, TCO view","全部<x id=""0"" equiv-text=""${visible.length}""/>辆","全部<x id=""0"" equiv-text=""${visible.length}""/>輛"
+tm.0429,all compliance topics,dimo.org link text at the end of compliance pages,所有合规主题,所有法規遵循主題
+tm.0430,developer API key,API key input placeholder on the onboard fleet page,开发者API密钥,開發者API金鑰
+tm.0431,developer docs,dimo.org inline link text in body copy,开发者文档,開發者說明文件
+tm.0432,e.g. 50,speed limit input placeholder in the create geofence dialog,例如：50,例如：50
+tm.0433,e.g. Downtown Depot,geofence name input placeholder in the create geofence dialog,例如：市中心车场,例如：市中心車庫
+tm.0434,engine-on time during the pass,"legend explanation after Engine runtime, geofence activity dialog",通过期间的发动机运行时间,通過期間的引擎運轉時間
+tm.0435,km/h,"speed unit after the speed limit field; a unit, keep it short",km/h,km/h
+tm.0436,or,divider between sign-in options,或,或
+tm.0437,or enter manually,divider text on the onboard fleet page before manual fields,或手动输入,或手動輸入
+tm.0438,rental operations,dimo.org inline link text in body copy,租车运营,租賃營運
+tm.0439,session-scoped consent,dimo.org inline link text in body copy,会话级同意,限定工作階段的同意
+tm.0440,time inside the geofence,"legend explanation after Duration, geofence activity dialog",在地理围栏内的时长,在地理圍欄內的時間
+tm.0441,vehicle,unit after a count of one on group and geofence rows,辆车,輛車
+tm.0442,vehicle session infrastructure,dimo.org inline link text in body copy,车辆会话基础设施,車輛工作階段基礎架構
+tm.0443,vehicles,unit after a count other than one on group and geofence rows,辆车,輛車
+tm.0444,"{count, plural, one {# vehicle} other {# vehicles}}",vehicle count with ICU plural,"{count, plural, other {#辆车}}","{count, plural, other {#輛車}}"
+tm.0445,"— upload anything: receipt, insurance pdf, reg card",glovebox empty state hint,——可上传任何文件：收据、保险单PDF、行驶证,上傳任何文件皆可：收據、保單PDF、行照
+tm.0446,"<x id=""0"" equiv-text=""${count}""/> Records","glovebox record count under the selected vehicle, plural","<x id=""0"" equiv-text=""${count}""/>条记录","<x id=""0"" equiv-text=""${count}""/>筆記錄"

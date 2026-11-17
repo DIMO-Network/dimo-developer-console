@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { FC } from 'react';
@@ -10,6 +11,7 @@ interface Props {
   handleIsOpen: (e: boolean) => void;
 }
 export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
+  const t = useTranslations('common');
   const handleClose = () => {
     handleIsOpen(false);
   };
@@ -19,7 +21,7 @@ export const CreateAppModal: FC<Props> = ({ isOpen, handleIsOpen }) => {
       <div className="create-app-content">
         <div className="create-app-header">
           <Title className="text-panel-title" component="h3">
-            Create a new developer license
+            {t('createAppModal.title')}
           </Title>
         </div>
         <div className={'flex w-full flex-1 pt-6'}>

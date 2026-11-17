@@ -2,6 +2,7 @@
 import { type FC, useContext, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { toast } from 'sonner';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
@@ -44,12 +45,16 @@ export const RemoveMemberModal: FC<Props> = ({
   onClose,
   onDone,
 }) => {
+  const t = useTranslations('settings');
+  const tCommon = useTranslations('common');
+  const format = useFormatter();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const setLicenseSigners = useSetLicenseSigners();
   const { trackEvent } = useMixPanel();
   const [keys] = useState(() => actionableKeys(memberLicenseKeys(member, licenses)));
   const [busy, setBusy] = useState(false);
   const name = displayName(member);
+  const licenseList = (list: MemberLicenseKey[]) => format.list(labelsOfKeys(list));
 
   const recordKeys = async (unrecorded: MemberLicenseKey[]) => {
     if (!member.userId) return false;
@@ -67,7 +72,7 @@ export const RemoveMemberModal: FC<Props> = ({
 
   const remove = async () => {
     setBusy(true);
-    setLoadingStatus({ status: 'loading', label: `Removing ${name}` });
+    setLoadingStatus({ status: 'loading', label: t('remove.loading', { name }) });
     let unstamped: MemberLicenseKey[] = [];
     let txError: unknown = null;
     if (keys.length) {
@@ -85,9 +90,9 @@ export const RemoveMemberModal: FC<Props> = ({
       const unrecorded = keys.filter((k) => !k.registered);
       if (txError && unrecorded.length && !(await recordKeys(unrecorded))) {
         setBusy(false);
-        setLoadingStatus(txErrorStatus(txError));
+        setLoadingStatus(txErrorStatus(txError, tCommon));
         toast.error(
-          `${name} is still on ${teamName}: we couldn't remove their wallet from ${labelsOfKeys(keys)} on-chain. Try again.`,
+          t('remove.keptOnTeam', { name, teamName, licenses: licenseList(keys) }),
         );
         onDone();
         return;
@@ -104,7 +109,7 @@ export const RemoveMemberModal: FC<Props> = ({
         setBusy(false);
         setLoadingStatus({
           status: 'error',
-          label: result?.message ?? "We couldn't remove them. Try again.",
+          label: result?.message ?? t('remove.failedFallback'),
         });
         onDone();
         return;
@@ -113,18 +118,14 @@ export const RemoveMemberModal: FC<Props> = ({
     setBusy(false);
     trackEvent('Team Member Removed', { memberId: member.id });
     if (txError) {
-      setLoadingStatus(txErrorStatus(txError));
-      toast.error(
-        `${name} was removed, but is still a signer on ${labelsOfKeys(keys)}. Use Retry on their row.`,
-      );
+      setLoadingStatus(txErrorStatus(txError, tCommon));
+      toast.error(t('remove.removedStillSigner', { name, licenses: licenseList(keys) }));
     } else {
       clearLoadingStatus();
-      toast.success(`${name} was removed from ${teamName}.`);
+      toast.success(t('remove.removed', { name, teamName }));
     }
     if (unstamped.length) {
-      toast.error(
-        `We couldn't record the revoked access for ${labelsOfKeys(unstamped)}. Use Retry on their row to finish.`,
-      );
+      toast.error(t('remove.notRecorded', { licenses: licenseList(unstamped) }));
     }
     onDone(
       txError
@@ -138,20 +139,20 @@ export const RemoveMemberModal: FC<Props> = ({
     <Modal isOpen setIsOpen={(open) => !open && !busy && onClose()} showClose={!busy}>
       <div className="flex flex-col gap-4">
         <Title component="h2" className="text-panel-title text-ink">
-          {`Remove ${name} from ${teamName}?`}
+          {t('remove.title', { name, teamName })}
         </Title>
         <p className="text-body-sm text-muted">
           {keys.length
-            ? `They lose access to this team in the console, and their wallet is removed from ${labelsOfKeys(keys)} on-chain.`
-            : 'They lose access to this team in the console.'}
+            ? t('remove.descriptionWithKeys', { licenses: licenseList(keys) })
+            : t('remove.description')}
         </p>
         <WebhookReview member={member} licenses={licenses} />
         <div className="flex flex-col gap-2">
           <Button variant="destructive" loading={busy} onClick={remove}>
-            Remove from team
+            {t('remove.confirm')}
           </Button>
           <Button variant="secondary" disabled={busy} onClick={onClose}>
-            Cancel
+            {tCommon('actions.cancel')}
           </Button>
         </div>
       </div>

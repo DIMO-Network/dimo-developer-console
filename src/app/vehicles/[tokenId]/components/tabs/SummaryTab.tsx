@@ -1,6 +1,7 @@
 'use client';
 import { FC, useState } from 'react';
-import type { Subject } from '@/services/subjects/graph';
+import { useFormatter, useTranslations } from 'next-intl';
+import { subjectLabel, type Subject } from '@/services/subjects/graph';
 import type { SubjectContext } from '../SubjectView';
 import { useDataSummary } from '@/hooks/subjects/useDataSummary';
 import { useSubjectQuery } from '@/hooks/subjects/useSubjectQuery';
@@ -16,7 +17,7 @@ import { JsonBlock } from '@/components/JsonBlock';
 import { Button } from '@/components/Button';
 import { SignalTable, SignalFilter } from './SignalTable';
 import { humanizeSignal } from '@/utils/humanizeSignal';
-import { relativeTime, absoluteTime, utcDate } from '@/utils/freshness';
+import { useFreshnessText } from '@/hooks/useFreshnessText';
 
 type Types = {
   availableCloudEventTypes:
@@ -37,6 +38,10 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   subject,
   ctx,
 }) => {
+  const t = useTranslations('vehicles');
+  const tCommon = useTranslations('common');
+  const format = useFormatter();
+  const { relativeTime, absoluteTime, utcDate } = useFreshnessText();
   const [filter, setFilter] = useState('');
   const { summary, error, isLoading, unresolvedSource, fromBySignal } = useDataSummary(
     subject,
@@ -62,7 +67,8 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
   const latestType =
     latest.data?.data?.latestCloudEvent?.header?.type ?? ctx.freshness[subject.did]?.type;
   const producer = latest.data?.data?.latestCloudEvent?.header?.producer;
-  const producerLabel = ctx.graph.all.find((s) => s.did === producer)?.label;
+  const producerSubject = ctx.graph.all.find((s) => s.did === producer);
+  const producerLabel = producerSubject && subjectLabel(producerSubject, t);
   const typeRows = types.data?.data?.availableCloudEventTypes ?? [];
   const typesError =
     types.error?.message ?? fieldError(types.data?.errors, 'availableCloudEventTypes');
@@ -70,13 +76,13 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
     latest.error?.message ?? fieldError(latest.data?.errors, 'latestCloudEvent');
   const isVehicle = subject.kind === 'vehicle';
   // A device is the vehicle DID narrowed to its producer, not a DID of its own.
-  const scope = subject.fetchFilter ? 'from this device' : 'on this DID';
+  const scope = subject.fetchFilter ? 'device' : 'did';
 
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]">
         <StatCard
-          label="Latest payload"
+          label={t('summary.latestPayload')}
           className="col-span-2 md:col-span-1"
           value={
             <span className="inline-flex items-center gap-3">
@@ -88,54 +94,59 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
           }
           caption={
             latestAt
-              ? `${absoluteTime(latestAt)}${latestType ? ` · ${latestType}` : ''}${producerLabel ? ` from ${producerLabel}` : ''}`
+              ? t('summary.latestCaption', {
+                  time: absoluteTime(latestAt),
+                  hasType: latestType ? 'yes' : 'no',
+                  type: latestType ?? '',
+                  hasProducer: producerLabel ? 'yes' : 'no',
+                  producer: producerLabel ?? '',
+                })
               : latestError
-                ? 'Unavailable'
-                : 'No payload yet'
+                ? t('summary.unavailable')
+                : t('summary.noPayloadYet')
           }
         />
         <StatCard
-          label="First seen"
+          label={t('summary.firstSeen')}
           value={summary ? utcDate(summary.firstSeen) : '—'}
           caption={
             summary
-              ? `${daysBetween(summary.firstSeen, summary.lastSeen)} days of data`
+              ? t('summary.daysOfData', {
+                  count: daysBetween(summary.firstSeen, summary.lastSeen),
+                })
               : undefined
           }
         />
         <StatCard
-          label="Data points"
-          value={summary ? compact(summary.numberOfSignals) : '—'}
+          label={t('summary.dataPoints')}
+          value={
+            summary
+              ? format.number(summary.numberOfSignals, compact(summary.numberOfSignals))
+              : '—'
+          }
           caption={
             summary
-              ? `Across ${summary.availableSignals.length} ${
-                  summary.availableSignals.length === 1 ? 'signal' : 'signals'
-                }`
+              ? t('summary.acrossSignals', { count: summary.availableSignals.length })
               : undefined
           }
         />
         <StatCard
-          label="Signals"
+          label={t('summary.signals')}
           value={summary ? summary.availableSignals.length : '—'}
           caption={
             summary
-              ? `${summary.eventDataSummary.length} event ${
-                  summary.eventDataSummary.length === 1 ? 'type' : 'types'
-                }`
+              ? t('summary.eventTypes', { count: summary.eventDataSummary.length })
               : undefined
           }
         />
       </div>
 
       {unresolvedSource && (
-        <p className="px-1 text-body-sm text-muted">
-          This device has no cloud events yet, so the signal breakdown covers the whole
-          vehicle.
-        </p>
+        <p className="px-1 text-body-sm text-muted">{t('summary.unresolvedSource')}</p>
       )}
 
       <CollapsibleSection
-        title="Available signals"
+        title={t('summary.availableSignals')}
         count={summary?.availableSignals.length ?? '…'}
         defaultOpen
         actions={<SignalFilter value={filter} onChange={setFilter} />}
@@ -143,7 +154,7 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         {error ? (
           <Problem message={error} />
         ) : isLoading ? (
-          <p className="px-5 py-3 text-body-sm text-muted">Loading…</p>
+          <p className="px-5 py-3 text-body-sm text-muted">{t('summary.loading')}</p>
         ) : (
           <SignalTable
             filter={filter}
@@ -160,27 +171,29 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       </CollapsibleSection>
 
       <CollapsibleSection
-        title="Events"
+        title={t('summary.events')}
         count={summary?.eventDataSummary.length ?? '…'}
         meta={
           error
             ? undefined
             : summary?.eventDataSummary.length
-              ? `Last event ${relativeTime(
-                  summary.eventDataSummary
-                    .map((e) => e.lastSeen)
-                    .reduce((a, b) => (Date.parse(b) > Date.parse(a) ? b : a)),
-                )}`
-              : 'This source reports no events'
+              ? t('summary.lastEvent', {
+                  time: relativeTime(
+                    summary.eventDataSummary
+                      .map((e) => e.lastSeen)
+                      .reduce((a, b) => (Date.parse(b) > Date.parse(a) ? b : a)),
+                  ),
+                })
+              : t('summary.noEvents')
         }
       >
         {error && <Problem message={error} />}
         {!error && (
           <div className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
-            <span>Event</span>
-            <span className="text-right">Count</span>
-            <span>First seen</span>
-            <span>Last seen</span>
+            <span>{t('summary.event')}</span>
+            <span className="text-right">{t('summary.count')}</span>
+            <span>{t('summary.firstSeen')}</span>
+            <span>{t('summary.lastSeen')}</span>
           </div>
         )}
         {(error ? [] : (summary?.eventDataSummary ?? [])).map((e) => (
@@ -189,10 +202,12 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
             className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] items-center gap-4 border-t border-outline px-5 py-2 text-body-sm text-fg"
           >
             <span className="flex flex-col">
-              <span className="font-medium text-ink">{humanizeSignal(e.name)}</span>
+              <span className="font-medium text-ink">
+                {humanizeSignal(e.name, tCommon)}
+              </span>
               <span className="font-mono text-code text-muted">{e.name}</span>
             </span>
-            <span className="text-right">{e.numberOfEvents.toLocaleString('en-US')}</span>
+            <span className="text-right">{format.number(e.numberOfEvents)}</span>
             <span>{utcDate(e.firstSeen)}</span>
             <span>{relativeTime(e.lastSeen)}</span>
           </div>
@@ -200,47 +215,52 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
       </CollapsibleSection>
 
       <CollapsibleSection
-        title="Data types"
+        title={t('summary.dataTypes')}
         count={typeRows.length}
-        meta={typesError ? 'Unavailable' : `Cloud event types ${scope}`}
+        meta={
+          typesError ? t('summary.unavailable') : t('summary.cloudEventTypes', { scope })
+        }
       >
         {typesError && <Problem message={typesError} />}
         <div className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] gap-4 border-t border-outline px-5 py-2 text-label text-muted">
-          <span>Type</span>
-          <span className="text-right">Count</span>
-          <span>First seen</span>
-          <span>Last seen</span>
+          <span>{t('summary.type')}</span>
+          <span className="text-right">{t('summary.count')}</span>
+          <span>{t('summary.firstSeen')}</span>
+          <span>{t('summary.lastSeen')}</span>
         </div>
-        {typeRows.map((t) => (
+        {typeRows.map((row) => (
           <div
-            key={t.type}
+            key={row.type}
             className="grid grid-cols-[minmax(0,2.2fr)_repeat(3,minmax(0,1fr))] items-center gap-4 border-t border-outline px-5 py-2 text-body-sm text-fg"
           >
-            <span className="font-mono text-code text-ink">{t.type}</span>
-            <span className="text-right">{t.count.toLocaleString('en-US')}</span>
-            <span>{utcDate(t.firstSeen)}</span>
-            <FreshnessDot at={t.lastSeen} />
+            <span className="font-mono text-code text-ink">{row.type}</span>
+            <span className="text-right">{format.number(row.count)}</span>
+            <span>{utcDate(row.firstSeen)}</span>
+            <FreshnessDot at={row.lastSeen} />
           </div>
         ))}
         {typeRows.length === 0 && !typesError && (
           <p className="border-t border-outline px-5 py-3 text-body-sm text-muted">
-            No cloud events {scope} yet.
+            {t('summary.noCloudEvents', { scope })}
           </p>
         )}
       </CollapsibleSection>
 
       <CollapsibleSection
-        title="Latest payload"
+        title={t('summary.latestPayload')}
         meta={
           latestError
-            ? 'Unavailable'
+            ? t('summary.unavailable')
             : latestType
-              ? `${latestType} · ${relativeTime(latestAt)}`
+              ? t('summary.latestMeta', {
+                  type: latestType,
+                  time: relativeTime(latestAt),
+                })
               : undefined
         }
         actions={
           <Button variant="secondary" onClick={() => ctx.onBrowseRaw(subject.did)}>
-            Browse cloud events
+            {t('summary.browseCloudEvents')}
           </Button>
         }
       >
@@ -252,20 +272,24 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
         ) : (
           !latestError && (
             <p className="px-5 py-3 text-body-sm text-muted">
-              No cloud event {scope} yet.
+              {t('summary.noCloudEvent', { scope })}
             </p>
           )
         )}
       </CollapsibleSection>
 
-      <CollapsibleSection title={isVehicle ? 'Vehicle details' : 'Device details'}>
+      <CollapsibleSection
+        title={isVehicle ? t('summary.vehicleDetails') : t('summary.deviceDetails')}
+      >
         <div className="grid grid-cols-1 gap-x-8 gap-y-3 px-6 pb-5 pt-1 md:grid-cols-2">
           {subject.details.map((d) => (
             <div
-              key={d.label}
+              key={d.key}
               className="flex flex-col gap-0.5 border-b border-outline pb-2.5"
             >
-              <span className="text-label text-muted">{d.label}</span>
+              <span className="text-label text-muted">
+                {t(`subjects.details.${d.key}`)}
+              </span>
               <span
                 className={
                   d.mono
@@ -273,7 +297,7 @@ export const SummaryTab: FC<{ subject: Subject; ctx: SubjectContext }> = ({
                     : 'text-body-sm text-fg'
                 }
               >
-                {d.value}
+                {d.date ? utcDate(d.value) : (d.value ?? t('subjects.unknown'))}
               </span>
             </div>
           ))}

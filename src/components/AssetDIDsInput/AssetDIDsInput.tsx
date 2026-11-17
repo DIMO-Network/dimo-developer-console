@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { useState, useCallback, useMemo } from 'react';
 import { TextArea } from '@/components/TextArea';
 import { Label } from '@/components/Label';
@@ -15,11 +16,12 @@ interface AssetDIDsInputProps {
 export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
   assetDIDs,
   onChange,
-  placeholder = 'Enter vehicle DIDs, one per line or comma-separated',
-  label = 'Asset DIDs',
+  placeholder,
+  label,
   error,
   disabled = false,
 }) => {
+  const t = useTranslations('common');
   const [inputValue, setInputValue] = useState(assetDIDs.join('\n'));
   const [validationError, setValidationError] = useState<string>('');
 
@@ -35,25 +37,28 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
     return Array.from(new Set(ids)); // Remove duplicates
   }, []);
 
-  const validateAssetDIDs = useCallback((ids: string[]): string => {
-    if (ids.length === 0) return '';
+  const validateAssetDIDs = useCallback(
+    (ids: string[]): string => {
+      if (ids.length === 0) return '';
 
-    for (const id of ids) {
-      if (id.trim().length === 0) {
-        return 'Asset DIDs cannot be empty.';
+      for (const id of ids) {
+        if (id.trim().length === 0) {
+          return t('assetDids.empty');
+        }
+
+        if (id.length > 200) {
+          return t('assetDids.tooLong', { id });
+        }
       }
 
-      if (id.length > 200) {
-        return `Asset DID too long: "${id}". Maximum length is 200 characters.`;
+      if (ids.length > 1000) {
+        return t('assetDids.tooMany');
       }
-    }
 
-    if (ids.length > 1000) {
-      return 'Too many vehicle DIDs. Maximum of 1000 DIDs allowed.';
-    }
-
-    return '';
-  }, []);
+      return '';
+    },
+    [t],
+  );
 
   const handleInputChange = useCallback(
     (value: string) => {
@@ -83,11 +88,11 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
 
   return (
     <div className="flex flex-col gap-2.5">
-      <Label>{label}</Label>
+      <Label>{label ?? t('assetDids.label')}</Label>
       <TextArea
         value={inputValue}
         onChange={(e) => handleInputChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('assetDids.placeholder')}
         disabled={disabled}
         rows={6}
         className={displayError ? 'border-negative' : ''}
@@ -95,18 +100,19 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
 
       {stats.total > 0 && (
         <div className="text-body-sm text-muted">
-          {stats.total} asset DID{stats.total !== 1 ? 's' : ''} entered
-          {stats.unique !== stats.total && ` (${stats.unique} unique)`}
+          {stats.unique !== stats.total
+            ? t('assetDids.enteredUnique', { count: stats.total, unique: stats.unique })
+            : t('assetDids.entered', { count: stats.total })}
         </div>
       )}
 
       {displayError && <TextError errorMessage={displayError} />}
 
       <div className="text-body-sm text-muted">
-        <p>You can enter vehicle DIDs in the following ways:</p>
+        <p>{t('assetDids.helpIntro')}</p>
         <ul className="list-disc mt-1 space-y-1">
           <li>
-            <div>One per line:</div>
+            <div>{t('assetDids.helpPerLine')}</div>
             <div className="rounded-control bg-control px-3 py-2 mt-1 font-mono text-code text-fg">
               did:erc721:137:0x123:123
               <br />
@@ -116,7 +122,7 @@ export const AssetDIDsInput: React.FC<AssetDIDsInputProps> = ({
             </div>
           </li>
           <li>
-            <div>Comma-separated:</div>
+            <div>{t('assetDids.helpComma')}</div>
             <div className="rounded-control bg-control px-3 py-2 mt-1 font-mono text-code text-fg">
               did:erc721:137:0x123:123, did:erc721:137:0x456:456, did:erc721:137:0x789:789
             </div>

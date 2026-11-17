@@ -3,8 +3,10 @@ import { render, screen } from '@testing-library/react';
 
 // The authorized layout pulls in wallet and session providers; the gate only
 // decides what goes inside it, so render children as-is.
-jest.mock('@/layouts/AuthorizedLayout', () => ({
-  AuthorizedLayout: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+jest.mock('@/layouts/AuthorizedLayout/AuthorizedRouteLayout', () => ({
+  authorizedRouteLayout:
+    () =>
+    ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 type Loaded = {
@@ -58,8 +60,12 @@ describe('template editor gate', () => {
     'with the flag %s the Templates menu item disabled is %s',
     async (enabled, disabled) => {
       const { getNavSections } = await loadWithFlag(enabled);
-      const workspace = getNavSections(true).find((s) => s.label === 'Workspace');
-      const item = workspace?.items.find((entry) => entry.label === 'Templates');
+      const workspace = getNavSections(true).find(
+        (s) => s.labelKey === 'navigation.sections.workspace',
+      );
+      const item = workspace?.items.find(
+        (entry) => entry.labelKey === 'navigation.items.templates',
+      );
       expect(item?.disabled).toBe(disabled);
     },
   );

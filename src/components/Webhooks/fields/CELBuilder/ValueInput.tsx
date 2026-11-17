@@ -1,16 +1,17 @@
+import { useTranslations } from 'next-intl';
 import { useFormContext } from 'react-hook-form';
 import { WebhookFormInput } from '@/types/webhook';
 import { useFindTriggerConfig } from '@/components/Webhooks/hooks/useFindTriggerConfig';
 import { SelectField } from '@/components/SelectField';
 import React from 'react';
 
-const booleanValueOptions = [
-  { value: '1', text: 'True' },
-  { value: '0', text: 'False' },
-];
-
 export const ValueInput = ({ index }: { index: number }) => {
+  const t = useTranslations('common');
   const { register, control } = useFormContext<WebhookFormInput>();
+  const booleanValueOptions = [
+    { value: '1', text: t('webhooks.celBuilder.true') },
+    { value: '0', text: t('webhooks.celBuilder.false') },
+  ];
   const config = useFindTriggerConfig(index);
 
   if (config.inputType === 'number') {
@@ -18,7 +19,11 @@ export const ValueInput = ({ index }: { index: number }) => {
     const registerReturn = register(`cel.conditions.${index}.value`, config.validation);
     return (
       <div className={'text-field'}>
-        <input {...registerReturn} placeholder="Enter a number" type="number" />
+        <input
+          {...registerReturn}
+          placeholder={t('webhooks.celBuilder.enterNumber')}
+          type="number"
+        />
       </div>
     );
   }
@@ -30,7 +35,7 @@ export const ValueInput = ({ index }: { index: number }) => {
       rules={config.validation}
       control={control}
       options={booleanValueOptions}
-      placeholder="Select value"
+      placeholder={t('webhooks.celBuilder.selectValue')}
     />
   );
 };

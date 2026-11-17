@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Webhook } from '@/types/webhook';
@@ -21,6 +22,7 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
   setIsOpen,
   webhook,
 }) => {
+  const t = useTranslations('common');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRunWebhookTest = async () => {
@@ -29,10 +31,10 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
       await axios.post(webhook.targetURL, fakeData, {
         headers: { 'Content-Type': 'application/json' },
       });
-      toast.success('Webhook triggered successfully.');
+      toast.success(t('webhooks.test.triggered'));
     } catch (err: unknown) {
       captureException(err);
-      const message = extractAxiosMessage(err, 'An error occurred testing the webhook');
+      const message = extractAxiosMessage(err, t('webhooks.test.axiosError'));
       toast.error(message);
     }
   };
@@ -42,7 +44,7 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
       setIsLoading(true);
       await handleRunWebhookTest();
     } catch (err: unknown) {
-      let errorMessage = 'There was an error testing your webhook';
+      let errorMessage = t('webhooks.test.error');
       if (err instanceof Error) {
         errorMessage = err.message ?? errorMessage;
       }
@@ -56,7 +58,7 @@ export const TestWebhookModal: React.FC<TestWebhookModalProps> = ({
     <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
       <div className="flex flex-col flex-1 w-full gap-12">
         <Title className={'text-panel-title'}>
-          {isLoading ? 'Sending a test...' : 'Test webhook'}
+          {isLoading ? t('webhooks.test.sending') : t('webhooks.test.title')}
         </Title>
         <TestWebhookBody isLoading={isLoading} webhook={webhook} />
         <TestWebhookFooter
@@ -73,6 +75,7 @@ const TestWebhookBody: React.FC<{
   isLoading: boolean;
   webhook: Webhook;
 }> = ({ isLoading, webhook }) => {
+  const t = useTranslations('common');
   if (isLoading) {
     return (
       <div className="flex flex-1 justify-center items-center">
@@ -83,10 +86,7 @@ const TestWebhookBody: React.FC<{
 
   return (
     <div className="flex flex-col gap-4">
-      <p>
-        Would you like to test this webhook? A test will be sent to the specified Target
-        URI.
-      </p>
+      <p>{t('webhooks.test.confirm')}</p>
       <WebhookDetailsCard webhook={webhook} />
     </div>
   );
@@ -97,13 +97,14 @@ const TestWebhookFooter: React.FC<{
   onTest: () => void;
   onCancel: () => void;
 }> = ({ isLoading, onTest, onCancel }) => {
+  const t = useTranslations('common');
   if (isLoading) return null;
 
   return (
     <div className="flex flex-col gap-4">
-      <Button onClick={onTest}>Send a test</Button>
+      <Button onClick={onTest}>{t('webhooks.test.send')}</Button>
       <Button variant="secondary" onClick={onCancel}>
-        Close
+        {t('actions.close')}
       </Button>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import {
   CellData,
   flexRender,
@@ -69,8 +70,9 @@ export const PaginatedTableIdentityAPI = <TData extends RowData>({
   pageInfo,
   pageSize,
   onRowClick,
-  label = 'Table',
+  label,
 }: PaginatedTableProps<TData>) => {
+  const t = useTranslations('common');
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize,
@@ -111,6 +113,7 @@ export const PaginatedTableIdentityAPI = <TData extends RowData>({
         setIsTurning(false);
       });
   };
+  const summary = paginationSummary(pagination.pageIndex, pagination.pageSize, rowCount);
   const table = useLegacyTable({
     data,
     columns,
@@ -126,7 +129,7 @@ export const PaginatedTableIdentityAPI = <TData extends RowData>({
       <div
         className={'min-w-full overflow-x-auto rounded-card bg-card p-4'}
         role="region"
-        aria-label={label}
+        aria-label={label ?? t('table.label')}
         tabIndex={0}
       >
         <table className="table">
@@ -165,7 +168,7 @@ export const PaginatedTableIdentityAPI = <TData extends RowData>({
       </div>
 
       <div className={'flex flex-row items-center justify-between pt-4'}>
-        <p>{paginationSummary(pagination.pageIndex, pagination.pageSize, rowCount)}</p>
+        <p>{t(summary.key, summary.values)}</p>
         <div className={'flex flex-row items-center'}>
           <Button
             variant="secondary"

@@ -2,13 +2,13 @@
 import { type FC, useContext, useMemo, useState } from 'react';
 import * as Sentry from '@sentry/nextjs';
 import { toast } from 'sonner';
+import { useFormatter, useTranslations } from 'next-intl';
 import { Modal } from '@/components/Modal';
 import { Title } from '@/components/Title';
 import { Button } from '@/components/Button';
 import { CheckboxField } from '@/components/CheckboxField';
 import { LoadingStatusContext } from '@/context/LoadingStatusContext';
 import { markLicenseSignerDisabled } from '@/actions/teams';
-import { formatList } from '@/config/teamCopy';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { useSetLicenseSigners } from '@/hooks/useSetLicenseSigners';
 import type { TeamLicense } from '@/hooks/useTeamLicenses';
@@ -20,8 +20,9 @@ import { revokeMemberKeys } from './revokeMemberKeys';
 import type { SignerToggle } from './signerOverlay';
 import { WebhookReview } from './WebhookReview';
 
-export const labelsOfKeys = (keys: MemberLicenseKey[]) =>
-  formatList([...new Set(keys.map((k) => k.licenseLabel))]);
+export const labelsOfKeys = (keys: MemberLicenseKey[]) => [
+  ...new Set(keys.map((k) => k.licenseLabel)),
+];
 export const tokenIdsOfKeys = (keys: MemberLicenseKey[]) =>
   [...new Set(keys.map((k) => k.tokenId))].sort((a, b) => a - b);
 
@@ -33,6 +34,9 @@ interface Props {
 }
 
 export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone }) => {
+  const t = useTranslations('settings');
+  const tCommon = useTranslations('common');
+  const format = useFormatter();
   const { setLoadingStatus, clearLoadingStatus } = useContext(LoadingStatusContext);
   const setLicenseSigners = useSetLicenseSigners();
   const { trackEvent } = useMixPanel();
@@ -52,7 +56,7 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
 
   const run = async (target: MemberLicenseKey[], stampOnly = false) => {
     setBusy(true);
-    setLoadingStatus({ status: 'loading', label: `Revoking ${name}'s data access` });
+    setLoadingStatus({ status: 'loading', label: t('revoke.loading', { name }) });
     const outcome = await revokeMemberKeys(
       target,
       {
@@ -69,7 +73,7 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
     );
     if (outcome.txError) {
       Sentry.captureException(outcome.txError);
-      setLoadingStatus(txErrorStatus(outcome.txError));
+      setLoadingStatus(txErrorStatus(outcome.txError, tCommon));
       return;
     }
     clearLoadingStatus();
@@ -84,7 +88,7 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
       setUnstamped(outcome.unstamped);
       return;
     }
-    toast.success(`${name}'s data access is revoked.`);
+    toast.success(t('revoke.success', { name }));
     onClose();
   };
 
@@ -92,12 +96,9 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
     <Modal isOpen setIsOpen={(open) => !open && !busy && onClose()} showClose={!busy}>
       <div className="flex flex-col gap-4">
         <Title component="h2" className="text-panel-title text-ink">
-          {`Revoke ${name}'s data access?`}
+          {t('revoke.title', { name })}
         </Title>
-        <p className="text-body-sm text-muted">
-          Their wallet is removed from the chosen licenses on-chain. Tokens they already
-          hold stop working within about 10 minutes.
-        </p>
+        <p className="text-body-sm text-muted">{t('revoke.description')}</p>
         <ul className="flex flex-col gap-2">
           {choices.map(([tokenId, label]) => (
             <li key={tokenId} className="flex items-center gap-2">
@@ -123,14 +124,16 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
         {unstamped ? (
           <div className="flex flex-col items-start gap-2">
             <p role="alert" className="text-body-sm text-negative">
-              {`Data access is off, but we couldn't record that for ${labelsOfKeys(unstamped)}.`}
+              {t('revoke.notRecorded', {
+                licenses: format.list(labelsOfKeys(unstamped)),
+              })}
             </p>
             <Button
               variant="secondary"
               loading={busy}
               onClick={() => run(unstamped, true)}
             >
-              Retry
+              {t('revoke.retry')}
             </Button>
           </div>
         ) : (
@@ -140,7 +143,7 @@ export const RevokeAccessModal: FC<Props> = ({ member, licenses, onClose, onDone
             disabled={!target.length}
             onClick={() => run(target)}
           >
-            Revoke data access
+            {t('revoke.confirm')}
           </Button>
         )}
       </div>

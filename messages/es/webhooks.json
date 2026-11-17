@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "list": "Webhooks | {appName}",
+    "create": "Crear un webhook | {appName}",
+    "edit": "Editar webhook | {appName}"
+  },
+  "page": {
+    "description": "Recibe actualizaciones de eventos en tiempo real",
+    "addRedirectUri": "Agrega un URI de redirección a tu licencia para configurar webhooks.",
+    "createLicense": "Crea una licencia de desarrollador para configurar webhooks.",
+    "goToLicenses": "Ir a licencias",
+    "fetchLicensesError": "Hubo un problema al obtener tus licencias de desarrollador"
+  },
+  "breadcrumb": {
+    "webhooks": "Webhooks",
+    "newWebhook": "Nuevo webhook",
+    "editWebhook": "Editar webhook"
+  },
+  "edit": {
+    "fetchError": "Hubo un error al obtener tu webhook",
+    "notFound": "no se encontró ningún webhook"
+  },
+  "discardChanges": {
+    "title": "Descartar cambios",
+    "message": "¿Seguro que quieres descartar tus cambios? Esta acción no se puede deshacer."
+  }
+}

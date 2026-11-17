@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 import { type FC, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -8,15 +9,8 @@ import { Button } from '@/components/Button';
 import { acceptPendingInvite } from '@/actions/invites';
 import { useMixPanel } from '@/hooks/useMixPanel';
 import { fetchApiResult } from '@/utils/fetchApiResult';
-import { inviteErrorMessage } from '@/utils/inviteErrors';
+import { inviteErrorKey } from '@/utils/inviteErrors';
 import type { InvitePreview, TeamSummary } from '@/types/team';
-
-const explain = (code: string | null, status: number) => {
-  // A network failure keeps the cookie; a later page asks again.
-  if (status === 0) return;
-  if (code === 'ALREADY_MEMBER') toast("You're already a member of this team.");
-  else toast.error(inviteErrorMessage(code));
-};
 
 // The invite cookie is set only by a page load of /sign-in?invite=, so once
 // there was none, section changes needn't ask again (Next runs server actions
@@ -28,10 +22,18 @@ const NO_PENDING_INVITE = ['pending-invite', 'none'];
 export const PendingInvite: FC<{ onJoined: (team: TeamSummary) => void }> = ({
   onJoined,
 }) => {
+  const t = useTranslations('common');
   const [preview, setPreview] = useState<InvitePreview | null>(null);
   const [busy, setBusy] = useState(false);
   const { trackEvent } = useMixPanel();
   const queryClient = useQueryClient();
+
+  const explain = (code: string | null, status: number) => {
+    // A network failure keeps the cookie; a later page asks again.
+    if (status === 0) return;
+    if (code === 'ALREADY_MEMBER') toast(t('pendingInvite.alreadyMember'));
+    else toast.error(t(inviteErrorKey(code)));
+  };
 
   useEffect(() => {
     if (queryClient.getQueryData(NO_PENDING_INVITE)) return;
@@ -76,19 +78,19 @@ export const PendingInvite: FC<{ onJoined: (team: TeamSummary) => void }> = ({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1 pr-8">
           <Title component="h3" className="text-panel-title">
-            {`Join ${preview.teamName} owned by ${preview.ownerEmail}?`}
+            {t('pendingInvite.title', {
+              teamName: preview.teamName,
+              ownerEmail: preview.ownerEmail,
+            })}
           </Title>
-          <p className="text-body-sm text-muted">
-            You&apos;ll see the team&apos;s licenses. The owner decides whether you also
-            get data access.
-          </p>
+          <p className="text-body-sm text-muted">{t('pendingInvite.description')}</p>
         </div>
         <div className="flex flex-col gap-2 pt-2">
           <Button onClick={join} loading={busy}>
-            Join team
+            {t('pendingInvite.join')}
           </Button>
           <Button variant="secondary" onClick={() => setPreview(null)} disabled={busy}>
-            Not now
+            {t('pendingInvite.notNow')}
           </Button>
         </div>
       </div>

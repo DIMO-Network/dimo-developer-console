@@ -299,3 +299,21 @@
     @apply flex flex-row;
   }
 }
+
+/*
+  Chinese keeps Euclid Circular A for Latin text and the system's CJK face for
+  Han characters, ahead of the generic families; no CJK webfont is downloaded.
+  html carries both lang and --font-dimo, and preflight sets its font-family
+  from --font-sans.
+*/
+:root:lang(zh-Hans) {
+  --font-sans:
+    var(--font-dimo), 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC',
+    'Noto Sans SC', sans-serif;
+}
+
+:root:lang(zh-Hant) {
+  --font-sans:
+    var(--font-dimo), 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC',
+    'Noto Sans TC', sans-serif;
+}

@@ -1,28 +1,32 @@
-// Readable labels for VSS-style camelCase names. The overrides cover the names
-// people search for; everything else is split on capitals and digits.
-const OVERRIDES: Record<string, string> = {
-  speed: 'Speed',
-  powertrainTransmissionTravelledDistance: 'Odometer',
-  powertrainCombustionEngineSpeed: 'Engine speed',
-  powertrainFuelSystemRelativeLevel: 'Fuel level',
-  powertrainRange: 'Range',
-  powertrainTractionBatteryStateOfChargeCurrent: 'Battery charge',
-  powertrainTractionBatteryChargingIsCharging: 'Charging',
-  currentLocationCoordinates: 'Location',
-  currentLocationApproximateCoordinates: 'Approximate location',
-  currentLocationLatitude: 'Latitude',
-  currentLocationLongitude: 'Longitude',
-  obdDTCList: 'Diagnostic codes',
-  obdEngineLoad: 'Engine load',
-  obdRunTime: 'Engine run time',
-  lowVoltageBatteryCurrentVoltage: '12V battery voltage',
-  exteriorAirTemperature: 'Outside air temperature',
-  isIgnitionOn: 'Ignition on',
-};
+// Readable labels for VSS-style camelCase names. The named signals are the ones
+// people search for, labelled by common `signals.<name>`; everything else is
+// split on capitals and digits.
+export const NAMED_SIGNALS = [
+  'speed',
+  'powertrainTransmissionTravelledDistance',
+  'powertrainCombustionEngineSpeed',
+  'powertrainFuelSystemRelativeLevel',
+  'powertrainRange',
+  'powertrainTractionBatteryStateOfChargeCurrent',
+  'powertrainTractionBatteryChargingIsCharging',
+  'currentLocationCoordinates',
+  'currentLocationApproximateCoordinates',
+  'currentLocationLatitude',
+  'currentLocationLongitude',
+  'obdDTCList',
+  'obdEngineLoad',
+  'obdRunTime',
+  'lowVoltageBatteryCurrentVoltage',
+  'exteriorAirTemperature',
+  'isIgnitionOn',
+] as const;
 
-export const humanizeSignal = (name: string): string => {
-  const override = OVERRIDES[name];
-  if (override) return override;
+const NAMED: ReadonlySet<string> = new Set(NAMED_SIGNALS);
+
+// Pass the common-namespace `t`. The split of an unnamed signal is derived from
+// its identifier, so it reads the same in every locale.
+export const humanizeSignal = (name: string, t: (key: string) => string): string => {
+  if (NAMED.has(name)) return t(`signals.${name}`);
   const words = name
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/([A-Za-z])(\d)/g, '$1 $2')

@@ -1,5 +1,6 @@
 import { legacyCreateColumnHelper, LegacyColumnDef } from '@tanstack/react-table/legacy';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { shortDid } from '@/services/subjects/did';
 import { LastSeenCell } from './LastSeenCell';
 
@@ -18,6 +19,21 @@ export type VehicleRow = {
 };
 const columnHelper = legacyCreateColumnHelper<VehicleRow>();
 
+// Column headers and chips are built outside a component, so each one is a
+// small component that reads its own text.
+export const TEXT_KEYS = [
+  'vehicleTable.columns.tokenDid',
+  'vehicleTable.columns.mmy',
+  'vehicleTable.simulated',
+  'vehicleTable.columns.sources',
+  'vehicleTable.columns.lastSeen',
+] as const;
+
+const Text = ({ id }: { id: (typeof TEXT_KEYS)[number] }) => {
+  const t = useTranslations('license');
+  return <>{t(id)}</>;
+};
+
 function ActionsCell({
   tokenId,
   onRenounce,
@@ -25,6 +41,7 @@ function ActionsCell({
   tokenId: number;
   onRenounce: (tokenId: number) => void;
 }) {
+  const t = useTranslations('license');
   const [open, setOpen] = useState(false);
 
   return (
@@ -35,7 +52,7 @@ function ActionsCell({
           e.stopPropagation();
           setOpen((v) => !v);
         }}
-        aria-label="Row actions"
+        aria-label={t('vehicleTable.rowActions')}
       >
         ⋯
       </button>
@@ -58,7 +75,7 @@ function ActionsCell({
                 onRenounce(tokenId);
               }}
             >
-              Renounce access
+              {t('renounce.action')}
             </button>
           </div>
         </>
@@ -81,7 +98,7 @@ export const buildColumns = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): LegacyColumnDef<VehicleRow, any>[] => [
   columnHelper.accessor('tokenDID', {
-    header: 'Vehicle token DID',
+    header: () => <Text id="vehicleTable.columns.tokenDid" />,
     // The DID ends in the token ID, so phones show just that; the full DID is
     // on hover and on the vehicle page.
     cell: (i) => (
@@ -97,7 +114,7 @@ export const buildColumns = (
   }),
   columnHelper.display({
     id: 'vehicleMMY',
-    header: 'Vehicle MMY',
+    header: () => <Text id="vehicleTable.columns.mmy" />,
     cell: (info) => {
       const { tokenId, definition } = info.row.original;
       const isSimulated = simulatedTokenIds.has(tokenId);
@@ -108,7 +125,7 @@ export const buildColumns = (
           </span>
           {isSimulated && (
             <span className="shrink-0 whitespace-nowrap rounded-chip bg-highest px-2 py-0.5 text-label text-muted">
-              Simulated
+              <Text id="vehicleTable.simulated" />
             </span>
           )}
         </span>
@@ -119,7 +136,7 @@ export const buildColumns = (
     ? [
         columnHelper.display({
           id: 'sources',
-          header: 'Sources',
+          header: () => <Text id="vehicleTable.columns.sources" />,
           cell: (info) => {
             const { aftermarketDevice, syntheticDevice } = info.row.original;
             const names = [
@@ -147,7 +164,7 @@ export const buildColumns = (
     ? [
         columnHelper.display({
           id: 'lastSeen',
-          header: 'Last seen',
+          header: () => <Text id="vehicleTable.columns.lastSeen" />,
           cell: (info) => (
             <LastSeenCell asset={info.row.original.tokenDID} clientId={opts.clientId} />
           ),

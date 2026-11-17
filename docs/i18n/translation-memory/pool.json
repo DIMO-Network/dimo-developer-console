@@ -1,0 +1,7930 @@
+{
+  "entries": [
+    {
+      "id": "tm.0001",
+      "en": "0x… wallet address",
+      "note": "placeholder in the add-member wallet address input, fleet members panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sbf935a8f617fc8d2"
+        },
+        {
+          "app": "parentos",
+          "key": "sbf935a8f617fc8d2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0002",
+      "en": "<x id=\"0\" equiv-text=\"${count}\"/> Record",
+      "note": "glovebox record count under the selected vehicle, singular (count is 1)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s7f3a12c30425de42"
+        },
+        {
+          "app": "parentos",
+          "key": "s7f3a12c30425de42"
+        }
+      ]
+    },
+    {
+      "id": "tm.0003",
+      "en": "<x id=\"0\" equiv-text=\"${d.tripCount}\"/> trips · <x id=\"1\" equiv-text=\"${hrs.value} ${hrs.unit}\"/>",
+      "note": "driving behaviour panel summary: trip count and driving hours",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1a5c405badb44c10"
+        },
+        {
+          "app": "parentos",
+          "key": "s1a5c405badb44c10"
+        }
+      ]
+    },
+    {
+      "id": "tm.0004",
+      "en": "<x id=\"0\" equiv-text=\"${this.drawCount}\"/> point(s) — click the map to add, the first point to finish.",
+      "note": "hint while drawing a geofence on the map, with the point count",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s55a6ca816108f719"
+        },
+        {
+          "app": "parentos",
+          "key": "s55a6ca816108f719"
+        }
+      ]
+    },
+    {
+      "id": "tm.0005",
+      "en": "<x id=\"0\" equiv-text=\"${this.memberIds.size}\"/> of <x id=\"1\" equiv-text=\"${this.vehicles.length}\"/> vehicles assigned.",
+      "note": "assigned-vehicle count in the manage geofence vehicles dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s18d3e67298c3efeb"
+        },
+        {
+          "app": "parentos",
+          "key": "s18d3e67298c3efeb"
+        }
+      ]
+    },
+    {
+      "id": "tm.0006",
+      "en": "<x id=\"0\" equiv-text=\"${this.results.length}\"/> of <x id=\"1\" equiv-text=\"${this.total}\"/> vehicles passed through · <x id=\"2\" equiv-text=\"${passCount}\"/> passes",
+      "note": "geofence activity dialog summary: vehicles that passed through and pass count",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd01aa11617062a46"
+        },
+        {
+          "app": "parentos",
+          "key": "sd01aa11617062a46"
+        }
+      ]
+    },
+    {
+      "id": "tm.0007",
+      "en": "<x id=\"0\" equiv-text=\"${this.visibleCards().length}\"/> vehicles",
+      "note": "vehicle count above the fleet vehicle list",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s3cf3a9dbc14e94f6"
+        },
+        {
+          "app": "parentos",
+          "key": "s3cf3a9dbc14e94f6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0008",
+      "en": "<x id=\"0\" equiv-text=\"&lt;b&gt;${allTotal.toLocaleString()}&lt;/b&gt;\"/> events since <x id=\"1\" equiv-text=\"${this.fmtDate(first)}\"/>",
+      "note": "driving behaviour panel: bold event total and the first event date",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "h87a6f943df510f9b"
+        },
+        {
+          "app": "parentos",
+          "key": "h87a6f943df510f9b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0009",
+      "en": "<x id=\"0\" equiv-text=\"&lt;b&gt;${distFv.value} ${distFv.unit}&lt;/b&gt;\"/> driven",
+      "note": "driving behaviour panel: bold distance driven",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "h44c5e14d0e764356"
+        },
+        {
+          "app": "parentos",
+          "key": "h44c5e14d0e764356"
+        }
+      ]
+    },
+    {
+      "id": "tm.0010",
+      "en": "<x id=\"0\" equiv-text=\"&lt;b&gt;${hrs.value} ${hrs.unit}&lt;/b&gt;\"/> driving time",
+      "note": "driving behaviour panel: bold driving time",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "h0ac6feb485919afc"
+        },
+        {
+          "app": "parentos",
+          "key": "h0ac6feb485919afc"
+        }
+      ]
+    },
+    {
+      "id": "tm.0011",
+      "en": "<x id=\"0\" equiv-text=\"&lt;b&gt;${trips}&lt;/b&gt;\"/> trips",
+      "note": "driving behaviour panel: bold trip count",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "hb34baa507d1a47d6"
+        },
+        {
+          "app": "parentos",
+          "key": "hb34baa507d1a47d6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0012",
+      "en": "<x id=\"0\" equiv-text=\"&lt;p&gt;\"/>Set <x id=\"1\" equiv-text=\"&lt;code&gt;\"/>DIMO_AUTH_CLIENT_ID<x id=\"2\" equiv-text=\"&lt;/code&gt;\"/> in the API <x id=\"3\" equiv-text=\"&lt;code&gt;\"/>settings.yaml<x id=\"4\" equiv-text=\"&lt;/code&gt;\"/> and register\n                    <x id=\"5\" equiv-text=\"&lt;code&gt;${location.origin}\"/>/login.html<x id=\"6\" equiv-text=\"&lt;/code&gt;\"/> as a redirect URI in the\n                    <x id=\"7\" equiv-text=\"&lt;a href=&quot;https://console.dimo.org&quot;&gt;\"/>DIMO Developer Console<x id=\"8\" equiv-text=\"&lt;/a&gt;\"/>.<x id=\"9\" equiv-text=\"&lt;/p&gt;\"/>",
+      "note": "developer setup message on the login screen when no client ID is configured; keep code tags and config names",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "h7d06fca4f9d88ac5"
+        },
+        {
+          "app": "parentos",
+          "key": "h7d06fca4f9d88ac5"
+        }
+      ]
+    },
+    {
+      "id": "tm.0013",
+      "en": "Accepting your invitation, one moment.",
+      "note": "loading message on the accept invitation page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s9fa88a942189e7dd"
+        },
+        {
+          "app": "parentos",
+          "key": "s9fa88a942189e7dd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0014",
+      "en": "Account",
+      "note": "section heading on the account settings page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s846b3790b6e25c1c"
+        },
+        {
+          "app": "parentos",
+          "key": "s846b3790b6e25c1c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0015",
+      "en": "Acquisition",
+      "note": "TCO cost breakdown label and table column for acquisition cost",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sda845aa996d5d504"
+        },
+        {
+          "app": "parentos",
+          "key": "sda845aa996d5d504"
+        }
+      ]
+    },
+    {
+      "id": "tm.0016",
+      "en": "Acquisition &amp; depreciation",
+      "note": "section label in the TCO vehicle detail",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0f485ae78a8ee23b"
+        },
+        {
+          "app": "parentos",
+          "key": "s0f485ae78a8ee23b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0017",
+      "en": "Active",
+      "note": "member status label in a team members table (active member)",
+      "uses": [
+        {
+          "app": "console",
+          "key": "settings.members.status.active"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sa45a194b58837e4f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0018",
+      "en": "Activity",
+      "note": "button opening geofence activity, geofences page; short, next to an icon",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6c76b294d740446c"
+        },
+        {
+          "app": "parentos",
+          "key": "s6c76b294d740446c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0019",
+      "en": "Add <x id=\"0\" equiv-text=\"${categoryLabel(t).toLowerCase()}\"/>",
+      "note": "glovebox quick-add menu item, category name in lowercase",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se7a2360e38fc5886"
+        },
+        {
+          "app": "parentos",
+          "key": "se7a2360e38fc5886"
+        }
+      ]
+    },
+    {
+      "id": "tm.0020",
+      "en": "Add a document",
+      "note": "upload document dialog heading and add-document button tooltip in the glovebox",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s8773d074e96d8e74"
+        },
+        {
+          "app": "parentos",
+          "key": "s8773d074e96d8e74"
+        }
+      ]
+    },
+    {
+      "id": "tm.0021",
+      "en": "Add at least 3 points to make an area.",
+      "note": "error when finishing a geofence drawing with fewer than 3 points",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s55573ea6c71af551"
+        },
+        {
+          "app": "parentos",
+          "key": "s55573ea6c71af551"
+        }
+      ]
+    },
+    {
+      "id": "tm.0022",
+      "en": "Add by wallet address",
+      "note": "section label in the fleet members panel for adding a member by wallet",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sb730f38dec076dc2"
+        },
+        {
+          "app": "parentos",
+          "key": "sb730f38dec076dc2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0023",
+      "en": "Add document",
+      "note": "primary button in the glovebox that opens the upload dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf0d0b6de3ff78c2d"
+        },
+        {
+          "app": "parentos",
+          "key": "sf0d0b6de3ff78c2d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0024",
+      "en": "Add member",
+      "note": "button that adds a member in the fleet or family members panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s75ac7d15cf5d458e"
+        },
+        {
+          "app": "parentos",
+          "key": "s75ac7d15cf5d458e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0025",
+      "en": "Add to geofence",
+      "note": "tooltip on the toggle that adds a vehicle to a geofence",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s91efe1656eddd2b1"
+        },
+        {
+          "app": "parentos",
+          "key": "s91efe1656eddd2b1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0026",
+      "en": "Added by",
+      "note": "field label in the document detail dialog (uploader)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s37994d4488233fda"
+        },
+        {
+          "app": "parentos",
+          "key": "s37994d4488233fda"
+        }
+      ]
+    },
+    {
+      "id": "tm.0027",
+      "en": "Added through another DIMO app. You can view and download it here; only the app that added it can remove it.",
+      "note": "notice in the document detail dialog for a document added by another app",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s4adc5c14fd53aceb"
+        },
+        {
+          "app": "parentos",
+          "key": "s4adc5c14fd53aceb"
+        }
+      ]
+    },
+    {
+      "id": "tm.0028",
+      "en": "Adding…",
+      "note": "add-member button label while the request runs",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sbf0cc12a885e39a6"
+        },
+        {
+          "app": "parentos",
+          "key": "sbf0cc12a885e39a6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0029",
+      "en": "Aftermarket device #<x id=\"0\" equiv-text=\"${this.vehicle.aftermarketDevice.tokenId}\"/>",
+      "note": "vehicle detail connection row naming an aftermarket device by token number",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc2f1729e6cffd8e6"
+        },
+        {
+          "app": "parentos",
+          "key": "sc2f1729e6cffd8e6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0030",
+      "en": "Agentic Experiences",
+      "note": "dimo.org solution name: navbar link, page meta name and breadcrumb",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.agenticExperiences"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.meta.solutionName"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.body.agenticExperiences.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0031",
+      "en": "All",
+      "note": "filter pill showing all documents in the glovebox, followed by a count",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf993bb199fefbe04"
+        },
+        {
+          "app": "parentos",
+          "key": "sf993bb199fefbe04"
+        }
+      ]
+    },
+    {
+      "id": "tm.0032",
+      "en": "All vehicles",
+      "note": "geofence scope option and scope label meaning the geofence covers every vehicle",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0ae75ba7b2bf0745"
+        },
+        {
+          "app": "parentos",
+          "key": "s0ae75ba7b2bf0745"
+        }
+      ]
+    },
+    {
+      "id": "tm.0033",
+      "en": "All vehicles on this account are hidden.",
+      "note": "empty state in the TCO view when every vehicle is hidden",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s48ce58ef9178285d"
+        },
+        {
+          "app": "parentos",
+          "key": "s48ce58ef9178285d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0034",
+      "en": "Almost there",
+      "note": "heading of the missing email step on the login page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sa784a98858714115"
+        },
+        {
+          "app": "parentos",
+          "key": "sa784a98858714115"
+        }
+      ]
+    },
+    {
+      "id": "tm.0035",
+      "en": "Amount",
+      "note": "table column header for a cost amount, TCO view",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sba98a7152d80b949"
+        },
+        {
+          "app": "parentos",
+          "key": "sba98a7152d80b949"
+        }
+      ]
+    },
+    {
+      "id": "tm.0036",
+      "en": "Amount (optional)",
+      "note": "field label in the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s73cddee970a10604"
+        },
+        {
+          "app": "parentos",
+          "key": "s73cddee970a10604"
+        }
+      ]
+    },
+    {
+      "id": "tm.0037",
+      "en": "Applies to",
+      "note": "field label for geofence scope in the create geofence dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s2e081dcaddba4560"
+        },
+        {
+          "app": "parentos",
+          "key": "s2e081dcaddba4560"
+        }
+      ]
+    },
+    {
+      "id": "tm.0038",
+      "en": "Applies to every vehicle in this fleet.",
+      "note": "hint under the geofence scope option for all vehicles",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s37e66fcfe9b18388"
+        },
+        {
+          "app": "parentos",
+          "key": "s37e66fcfe9b18388"
+        }
+      ]
+    },
+    {
+      "id": "tm.0039",
+      "en": "Approximate location",
+      "note": "permission name for approximate location access (sharing permissions list)",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "permission.GetApproximateLocation.label"
+        },
+        {
+          "app": "console",
+          "key": "common.permissions.8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0040",
+      "en": "Area",
+      "note": "label before the drawn geofence area size, create geofence dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s06fd2f8b555158a4"
+        },
+        {
+          "app": "parentos",
+          "key": "s06fd2f8b555158a4"
+        }
+      ]
+    },
+    {
+      "id": "tm.0041",
+      "en": "Auto",
+      "note": "trip detection method option (automatic)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sdb73788b3c975f16"
+        },
+        {
+          "app": "parentos",
+          "key": "sdb73788b3c975f16"
+        }
+      ]
+    },
+    {
+      "id": "tm.0042",
+      "en": "Average",
+      "note": "statistic label for an average value: signal aggregation option in the console and stat label on vehicle detail",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.signals.aggregations.AVG"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s467b030b9a34b3c8"
+        },
+        {
+          "app": "parentos",
+          "key": "s467b030b9a34b3c8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0043",
+      "en": "Avg per day",
+      "note": "stat label on the vehicle detail utilization card",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s78146a50a83d227a"
+        },
+        {
+          "app": "parentos",
+          "key": "s78146a50a83d227a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0044",
+      "en": "Avg speed",
+      "note": "stat label in the trip replay dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s106f6269e3ce9d0c"
+        },
+        {
+          "app": "parentos",
+          "key": "s106f6269e3ce9d0c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0045",
+      "en": "Back",
+      "note": "accessible label or tooltip of a back navigation button",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "common.back"
+        },
+        {
+          "app": "console",
+          "key": "common.actions.back"
+        },
+        {
+          "app": "parentos",
+          "key": "sc16e00a7a8b2fde2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0046",
+      "en": "Back to live",
+      "note": "button in the trips panel that returns the map to the live position",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd44ca40cdcb462f3"
+        },
+        {
+          "app": "parentos",
+          "key": "sd44ca40cdcb462f3"
+        }
+      ]
+    },
+    {
+      "id": "tm.0047",
+      "en": "Battery",
+      "note": "quick view telemetry row for the 12 V battery voltage; short label",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s2eda024d0ca3dbae"
+        },
+        {
+          "app": "parentos",
+          "key": "s2eda024d0ca3dbae"
+        }
+      ]
+    },
+    {
+      "id": "tm.0048",
+      "en": "Battery voltage",
+      "note": "chart heading on the vehicle detail page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sfd6d1a6564abd0e8"
+        },
+        {
+          "app": "parentos",
+          "key": "sfd6d1a6564abd0e8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0049",
+      "en": "Brand",
+      "note": "tab, section title and form label for a developer license brand (name and logo)",
+      "uses": [
+        {
+          "app": "console",
+          "key": "configurator.form.brand.label"
+        },
+        {
+          "app": "console",
+          "key": "license.details.tabs.brand"
+        },
+        {
+          "app": "console",
+          "key": "license.brand.title"
+        }
+      ]
+    },
+    {
+      "id": "tm.0050",
+      "en": "Cancel",
+      "note": "secondary button that closes a dialog or leaves a form without saving",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "common.cancel"
+        },
+        {
+          "app": "console",
+          "key": "common.actions.cancel"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.form.cancel"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s2ceb11be2290bb1b"
+        },
+        {
+          "app": "parentos",
+          "key": "s2ceb11be2290bb1b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0051",
+      "en": "Category",
+      "note": "table column header or field label for a category (document category, signal category)",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "vehicleDataApi.body.category"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s079a052719914d71"
+        },
+        {
+          "app": "parentos",
+          "key": "s079a052719914d71"
+        }
+      ]
+    },
+    {
+      "id": "tm.0052",
+      "en": "Center map",
+      "note": "map control tooltip that recenters the map",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s29c5803a032fcf72"
+        },
+        {
+          "app": "parentos",
+          "key": "s29c5803a032fcf72"
+        }
+      ]
+    },
+    {
+      "id": "tm.0053",
+      "en": "Change point",
+      "note": "trip detection method option (change point detection)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s7a7ef8a51174479f"
+        },
+        {
+          "app": "parentos",
+          "key": "s7a7ef8a51174479f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0054",
+      "en": "Charge",
+      "note": "quick view telemetry row for EV state of charge; short label",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0f2fa21712471c91"
+        },
+        {
+          "app": "parentos",
+          "key": "s0f2fa21712471c91"
+        }
+      ]
+    },
+    {
+      "id": "tm.0055",
+      "en": "Check",
+      "note": "status pill on the vehicle detail diagnostics card meaning a value needs checking; very short",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s42cbd8dca939a9c7"
+        },
+        {
+          "app": "parentos",
+          "key": "s42cbd8dca939a9c7"
+        }
+      ]
+    },
+    {
+      "id": "tm.0056",
+      "en": "Checking geofences…",
+      "note": "progress message in the trips panel while geofence crossings load",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s3793c3cba760e854"
+        },
+        {
+          "app": "parentos",
+          "key": "s3793c3cba760e854"
+        }
+      ]
+    },
+    {
+      "id": "tm.0057",
+      "en": "Checking…",
+      "note": "loading status in the vehicle source rail while access or account state is checked",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.rail.checking"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.rail.access.loading"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.rail.account.loading"
+        }
+      ]
+    },
+    {
+      "id": "tm.0058",
+      "en": "Click to finish",
+      "note": "map tooltip on the first drawn point while drawing a geofence",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s40484ec22729d753"
+        },
+        {
+          "app": "parentos",
+          "key": "s40484ec22729d753"
+        }
+      ]
+    },
+    {
+      "id": "tm.0059",
+      "en": "Client ID and API key are required.",
+      "note": "validation error on the onboard fleet form",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sfddc1a3e571e109e"
+        },
+        {
+          "app": "parentos",
+          "key": "sfddc1a3e571e109e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0060",
+      "en": "Close",
+      "note": "button or accessible label that closes a dialog, sheet or modal",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "common.close"
+        },
+        {
+          "app": "console",
+          "key": "common.actions.close"
+        },
+        {
+          "app": "dimo-org",
+          "key": "pricing.enterpriseModal.close"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s5e8250fb85d64c23"
+        },
+        {
+          "app": "parentos",
+          "key": "s5e8250fb85d64c23"
+        }
+      ]
+    },
+    {
+      "id": "tm.0061",
+      "en": "Close search",
+      "note": "map toolbar tooltip on the search toggle when search is open",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s4e606ce6a461df05"
+        },
+        {
+          "app": "parentos",
+          "key": "s4e606ce6a461df05"
+        }
+      ]
+    },
+    {
+      "id": "tm.0062",
+      "en": "Collapse panel",
+      "note": "tooltip on the overview panel toggle",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s25c9b139cc1a6be8"
+        },
+        {
+          "app": "parentos",
+          "key": "s25c9b139cc1a6be8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0063",
+      "en": "Collapse sidebar",
+      "note": "accessible label or tooltip on the sidebar collapse toggle",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.menu.collapse"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s8f10b4e57121e256"
+        },
+        {
+          "app": "parentos",
+          "key": "s8f10b4e57121e256"
+        }
+      ]
+    },
+    {
+      "id": "tm.0064",
+      "en": "Color",
+      "note": "field label for the geofence color picker",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s344ea8f4939cdc98"
+        },
+        {
+          "app": "parentos",
+          "key": "s344ea8f4939cdc98"
+        }
+      ]
+    },
+    {
+      "id": "tm.0065",
+      "en": "Comfortable view",
+      "note": "tooltip on the vehicle card density toggle",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s5017b86392faf520"
+        },
+        {
+          "app": "parentos",
+          "key": "s5017b86392faf520"
+        }
+      ]
+    },
+    {
+      "id": "tm.0066",
+      "en": "Common questions",
+      "note": "dimo.org FAQ section heading on compare and compliance pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "compare.smartcarAlternative.body.commonQuestions"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.euDataAct.body.commonQuestions"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.ftcGmConsent.body.commonQuestions"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.vehicleAccessAuditTrail.body.commonQuestions"
+        }
+      ]
+    },
+    {
+      "id": "tm.0067",
+      "en": "Compact view",
+      "note": "tooltip on the vehicle card density toggle",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6e91993ea649ee1b"
+        },
+        {
+          "app": "parentos",
+          "key": "s6e91993ea649ee1b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0068",
+      "en": "Compare",
+      "note": "dimo.org breadcrumb item for the compare section",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "compare.smartcarAlternative.body.compare"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compare.standardFleetAlternative.body.compare.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compare.standardFleetAlternative.body.compare"
+        }
+      ]
+    },
+    {
+      "id": "tm.0069",
+      "en": "Compliance",
+      "note": "dimo.org breadcrumb item and section name for compliance, and a feature category tag",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "compliance.euDataAct.body.compliance.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.ftcGmConsent.body.compliance.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.body.compliance.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.body.compliance"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.sessionScopedConsent.body.compliance.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.vehicleAccessAuditTrail.body.compliance.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.consent.features.builtInRegulatoryCompliance.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.useCases.driverSafetyCompliance.type"
+        }
+      ]
+    },
+    {
+      "id": "tm.0070",
+      "en": "Confirm",
+      "note": "heading of the confirm step in the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sb85774dc5d18ff0f"
+        },
+        {
+          "app": "parentos",
+          "key": "sb85774dc5d18ff0f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0071",
+      "en": "Connected Vehicles",
+      "note": "dimo.org industry page stat label under a number",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.stats.connectedVehicles.label"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.stats.connectedVehicles.label"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.stats.connectedVehicles.label"
+        }
+      ]
+    },
+    {
+      "id": "tm.0072",
+      "en": "Connection details",
+      "note": "console page title, breadcrumb and link for one connection detail page",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.connectionDetails"
+        },
+        {
+          "app": "console",
+          "key": "connections.list.details"
+        },
+        {
+          "app": "console",
+          "key": "connections.details.title"
+        }
+      ]
+    },
+    {
+      "id": "tm.0073",
+      "en": "Connections",
+      "note": "console navigation item, page title, breadcrumb and home shortcut for connections",
+      "uses": [
+        {
+          "app": "console",
+          "key": "app.home.shortcuts.connections.label"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.items.connections"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.connections"
+        },
+        {
+          "app": "console",
+          "key": "connections.breadcrumb.connections"
+        },
+        {
+          "app": "console",
+          "key": "connections.list.title"
+        }
+      ]
+    },
+    {
+      "id": "tm.0074",
+      "en": "Consumer Applications",
+      "note": "dimo.org solution name: navbar link, page meta name and breadcrumb",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.consumerApplications"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.meta.solutionName"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.body.consumerApplications.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0075",
+      "en": "Contact Sales",
+      "note": "dimo.org call-to-action button on industry pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.cta.contactSales"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.cta.contactSales"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.cta.contactSales"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.cta.contactSales"
+        }
+      ]
+    },
+    {
+      "id": "tm.0076",
+      "en": "Continue",
+      "note": "primary button that continues to the next step",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "common.continue"
+        },
+        {
+          "app": "dimo-login",
+          "key": "signin.continue"
+        },
+        {
+          "app": "console",
+          "key": "common.actions.continue"
+        },
+        {
+          "app": "console",
+          "key": "common.sessionExpired.continue"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s81ecf2d4386b8e84"
+        },
+        {
+          "app": "parentos",
+          "key": "s81ecf2d4386b8e84"
+        }
+      ]
+    },
+    {
+      "id": "tm.0077",
+      "en": "Coolant",
+      "note": "quick view telemetry row for coolant temperature; short label",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s905f72536873fdcd"
+        },
+        {
+          "app": "parentos",
+          "key": "s905f72536873fdcd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0078",
+      "en": "Coolant temperature",
+      "note": "chart heading on the vehicle detail page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s780d736ae0ce0f93"
+        },
+        {
+          "app": "parentos",
+          "key": "s780d736ae0ce0f93"
+        }
+      ]
+    },
+    {
+      "id": "tm.0079",
+      "en": "Cooldown",
+      "note": "webhook cooldown setting: table column, detail label and form field label",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.table.cooldown"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.details.cooldown"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.fields.cooldown.label"
+        }
+      ]
+    },
+    {
+      "id": "tm.0080",
+      "en": "Copied",
+      "note": "confirmation shown after copying text to the clipboard; short",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "sign.copied"
+        },
+        {
+          "app": "console",
+          "key": "common.status.copied"
+        }
+      ]
+    },
+    {
+      "id": "tm.0081",
+      "en": "Copy API key",
+      "note": "tooltip on the copy API key button, onboard fleet page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s4280e090367d36bb"
+        },
+        {
+          "app": "parentos",
+          "key": "s4280e090367d36bb"
+        }
+      ]
+    },
+    {
+      "id": "tm.0082",
+      "en": "Copy wallet address",
+      "note": "tooltip on the copy wallet address button, account settings",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf35a744f0aba8b09"
+        },
+        {
+          "app": "parentos",
+          "key": "sf35a744f0aba8b09"
+        }
+      ]
+    },
+    {
+      "id": "tm.0083",
+      "en": "Could not add member.",
+      "note": "error in the members panel when adding a member fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s41e7876c024b72a0"
+        },
+        {
+          "app": "parentos",
+          "key": "s41e7876c024b72a0"
+        }
+      ]
+    },
+    {
+      "id": "tm.0084",
+      "en": "Could not load DIMO settings. Please enter credentials manually.",
+      "note": "error on the onboard fleet page when DIMO settings fail to load",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s80b97d0375031960"
+        },
+        {
+          "app": "parentos",
+          "key": "s80b97d0375031960"
+        }
+      ]
+    },
+    {
+      "id": "tm.0085",
+      "en": "Could not load members.",
+      "note": "error in the members panel when members fail to load",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sae0d84bbaa95a2e0"
+        },
+        {
+          "app": "parentos",
+          "key": "sae0d84bbaa95a2e0"
+        }
+      ]
+    },
+    {
+      "id": "tm.0086",
+      "en": "Could not remove member.",
+      "note": "error in the members panel when removing a member fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s87e746b950339c11"
+        },
+        {
+          "app": "parentos",
+          "key": "s87e746b950339c11"
+        }
+      ]
+    },
+    {
+      "id": "tm.0087",
+      "en": "Could not resend invitation.",
+      "note": "error in the members panel when resending an invitation fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s2868ccc6ec4b7b45"
+        },
+        {
+          "app": "parentos",
+          "key": "s2868ccc6ec4b7b45"
+        }
+      ]
+    },
+    {
+      "id": "tm.0088",
+      "en": "Could not revoke invitation.",
+      "note": "error in the members panel when revoking an invitation fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s307f80cb3f7264d4"
+        },
+        {
+          "app": "parentos",
+          "key": "s307f80cb3f7264d4"
+        }
+      ]
+    },
+    {
+      "id": "tm.0089",
+      "en": "Create geofence",
+      "note": "submit button in the create geofence dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd31e770995499709"
+        },
+        {
+          "app": "parentos",
+          "key": "sd31e770995499709"
+        }
+      ]
+    },
+    {
+      "id": "tm.0090",
+      "en": "Creating…",
+      "note": "onboard fleet submit button while the fleet is being created",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s84fe348d9e99e6b0"
+        },
+        {
+          "app": "parentos",
+          "key": "s84fe348d9e99e6b0"
+        }
+      ]
+    },
+    {
+      "id": "tm.0091",
+      "en": "Credentials",
+      "note": "permission name for VIN credential access (sharing permissions list and configurator)",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "permission.GetVINCredential.label"
+        },
+        {
+          "app": "console",
+          "key": "configurator.permissions.CREDENTIALS.title"
+        }
+      ]
+    },
+    {
+      "id": "tm.0092",
+      "en": "Current location",
+      "note": "permission name for current location access (sharing permissions list)",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "permission.GetCurrentLocation.label"
+        },
+        {
+          "app": "console",
+          "key": "common.permissions.3"
+        }
+      ]
+    },
+    {
+      "id": "tm.0093",
+      "en": "Custom color",
+      "note": "tooltip on the custom color swatch in the create geofence dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1995a948733ac7bd"
+        },
+        {
+          "app": "parentos",
+          "key": "s1995a948733ac7bd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0094",
+      "en": "Customer Stories",
+      "note": "dimo.org navbar link and breadcrumb for customer stories",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.customerStories"
+        },
+        {
+          "app": "dimo-org",
+          "key": "customerStories.emobi.body.customerStories.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "customerStories.grupoKaufmann.body.customerStories.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0095",
+      "en": "DIMO API key",
+      "note": "field label on the onboard fleet page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s075fdcd6e3f2ab6d"
+        },
+        {
+          "app": "parentos",
+          "key": "s075fdcd6e3f2ab6d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0096",
+      "en": "DIMO client ID",
+      "note": "field label on the onboard fleet page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s9504547ce8b04d22"
+        },
+        {
+          "app": "parentos",
+          "key": "s9504547ce8b04d22"
+        }
+      ]
+    },
+    {
+      "id": "tm.0097",
+      "en": "DIMO permissions required to read this vehicle’s documents",
+      "note": "tooltip on the no-permission badge in the TCO vehicle list",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s4d5a15b20f0dd5b6"
+        },
+        {
+          "app": "parentos",
+          "key": "s4d5a15b20f0dd5b6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0098",
+      "en": "DIMO vs Smartcar",
+      "note": "dimo.org link text and heading comparing DIMO with Smartcar; names stay English",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "connectedCarApi.body.dimoVsSmartcar"
+        },
+        {
+          "app": "dimo-org",
+          "key": "home.whatIsDimo.dimoVsSmartcar"
+        },
+        {
+          "app": "dimo-org",
+          "key": "vehicleDataApi.body.dimoVsSmartcar"
+        }
+      ]
+    },
+    {
+      "id": "tm.0099",
+      "en": "DIMO | Vehicle Platform for the Session-Based Economy",
+      "note": "dimo.org home page title, Open Graph title and Twitter title",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "home.meta.title"
+        },
+        {
+          "app": "dimo-org",
+          "key": "home.meta.ogTitle"
+        },
+        {
+          "app": "dimo-org",
+          "key": "home.meta.twitterTitle"
+        }
+      ]
+    },
+    {
+      "id": "tm.0100",
+      "en": "DTCs",
+      "note": "unit label after the diagnostic trouble code count, vehicle detail",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s38bf79725cd14a53"
+        },
+        {
+          "app": "parentos",
+          "key": "s38bf79725cd14a53"
+        }
+      ]
+    },
+    {
+      "id": "tm.0101",
+      "en": "Dark mode",
+      "note": "theme toggle label that switches to dark mode",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.theme.dark"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s57ed4d0e053c4318"
+        },
+        {
+          "app": "parentos",
+          "key": "s57ed4d0e053c4318"
+        }
+      ]
+    },
+    {
+      "id": "tm.0102",
+      "en": "Date",
+      "note": "table column header in the TCO line items",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sac8252732f2edb19"
+        },
+        {
+          "app": "parentos",
+          "key": "sac8252732f2edb19"
+        }
+      ]
+    },
+    {
+      "id": "tm.0103",
+      "en": "Dealerships",
+      "note": "dimo.org industry name: navbar link, page meta name and breadcrumb",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.dealerships"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.meta.industryName"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.body.dealerships.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0104",
+      "en": "Delete",
+      "note": "button that deletes an item",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.actions.delete"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.delete.button"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sdc673e73b5c13aea"
+        },
+        {
+          "app": "parentos",
+          "key": "sdc673e73b5c13aea"
+        }
+      ]
+    },
+    {
+      "id": "tm.0105",
+      "en": "Delete failed",
+      "note": "error in the document detail dialog when deleting fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se50bb7aee2221dff"
+        },
+        {
+          "app": "parentos",
+          "key": "se50bb7aee2221dff"
+        }
+      ]
+    },
+    {
+      "id": "tm.0106",
+      "en": "Delete this document? It will be removed from your list. The file itself stays stored on DIMO's infrastructure.",
+      "note": "browser confirm prompt before deleting a glovebox document",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s04b1606f40a07395"
+        },
+        {
+          "app": "parentos",
+          "key": "s04b1606f40a07395"
+        }
+      ]
+    },
+    {
+      "id": "tm.0107",
+      "en": "Delete “<x id=\"0\" equiv-text=\"${g.name}\"/>”?",
+      "note": "inline confirmation before deleting a named group or geofence",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s8b491ccba1cefcb0"
+        },
+        {
+          "app": "parentos",
+          "key": "s8b491ccba1cefcb0"
+        }
+      ]
+    },
+    {
+      "id": "tm.0108",
+      "en": "Deleting…",
+      "note": "delete button label while the request runs, document detail dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "saf7b6785c8312e71"
+        },
+        {
+          "app": "parentos",
+          "key": "saf7b6785c8312e71"
+        }
+      ]
+    },
+    {
+      "id": "tm.0109",
+      "en": "Delivery Service Providers",
+      "note": "dimo.org industry name: navbar link, page meta name and schema audience type",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.deliveryServiceProviders"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.meta.industryName"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.schema.audienceType"
+        }
+      ]
+    },
+    {
+      "id": "tm.0110",
+      "en": "Depreciation to date",
+      "note": "TCO cost breakdown label",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s4718bce90803b027"
+        },
+        {
+          "app": "parentos",
+          "key": "s4718bce90803b027"
+        }
+      ]
+    },
+    {
+      "id": "tm.0111",
+      "en": "Description",
+      "note": "table column header or detail label for a description",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.table.description"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.details.description"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s63d894b1ddb06289"
+        },
+        {
+          "app": "parentos",
+          "key": "s63d894b1ddb06289"
+        }
+      ]
+    },
+    {
+      "id": "tm.0112",
+      "en": "Detected VIN <x id=\"0\" equiv-text=\"&lt;span class=&quot;vin&quot;&gt;${vin}&lt;/span&gt;\"/>",
+      "note": "upload document dialog line showing the VIN read from the file",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "h3da2e750affa6331"
+        },
+        {
+          "app": "parentos",
+          "key": "h3da2e750affa6331"
+        }
+      ]
+    },
+    {
+      "id": "tm.0113",
+      "en": "Diagnostics",
+      "note": "section link on the vehicle detail page for diagnostics",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s56df31a121d65bd7"
+        },
+        {
+          "app": "parentos",
+          "key": "s56df31a121d65bd7"
+        }
+      ]
+    },
+    {
+      "id": "tm.0114",
+      "en": "Display name",
+      "note": "field label, column header or detail label for a display name",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.table.displayName"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.details.displayName"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.fields.displayName.label"
+        },
+        {
+          "app": "console",
+          "key": "license.brandForm.displayName"
+        }
+      ]
+    },
+    {
+      "id": "tm.0115",
+      "en": "Distance",
+      "note": "trip distance column header or stat label",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.trips.distance"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s30d8afddc9716922"
+        },
+        {
+          "app": "parentos",
+          "key": "s30d8afddc9716922"
+        }
+      ]
+    },
+    {
+      "id": "tm.0116",
+      "en": "Distance · 7d",
+      "note": "chart heading on the vehicle detail page for distance over 7 days",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0a5d6c42a9a74a8a"
+        },
+        {
+          "app": "parentos",
+          "key": "s0a5d6c42a9a74a8a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0117",
+      "en": "Document ID",
+      "note": "field label in the document detail dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1457ec4f895d93b1"
+        },
+        {
+          "app": "parentos",
+          "key": "s1457ec4f895d93b1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0118",
+      "en": "Documentation",
+      "note": "navigation link to the developer documentation",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.navigation.items.documentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.documentation"
+        }
+      ]
+    },
+    {
+      "id": "tm.0119",
+      "en": "Documents",
+      "note": "tab, section title or label for vehicle documents",
+      "uses": [
+        {
+          "app": "console",
+          "key": "configurator.form.share.documentsTitle"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.tabs.documents"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.subjects.account.label"
+        }
+      ]
+    },
+    {
+      "id": "tm.0120",
+      "en": "Done",
+      "note": "button that closes a finished flow or dialog",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "tesla.done.cta"
+        },
+        {
+          "app": "console",
+          "key": "common.actions.done"
+        },
+        {
+          "app": "console",
+          "key": "common.generateJwt.done"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.delete.done"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s0379fc73608ab971"
+        },
+        {
+          "app": "parentos",
+          "key": "s0379fc73608ab971"
+        }
+      ]
+    },
+    {
+      "id": "tm.0121",
+      "en": "Download",
+      "note": "button that downloads a file",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.actions.download"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sd3386a2ef42e80b9"
+        },
+        {
+          "app": "parentos",
+          "key": "sd3386a2ef42e80b9"
+        }
+      ]
+    },
+    {
+      "id": "tm.0122",
+      "en": "Download failed",
+      "note": "error in the document detail dialog when downloading fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se3182737589484f6"
+        },
+        {
+          "app": "parentos",
+          "key": "se3182737589484f6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0123",
+      "en": "Downloading…",
+      "note": "download button label while the file downloads",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se669394f6cda2953"
+        },
+        {
+          "app": "parentos",
+          "key": "se669394f6cda2953"
+        }
+      ]
+    },
+    {
+      "id": "tm.0124",
+      "en": "Draw the geofence area on the map first.",
+      "note": "error in the create geofence dialog when no area is drawn",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s382c29e4d4153b57"
+        },
+        {
+          "app": "parentos",
+          "key": "s382c29e4d4153b57"
+        }
+      ]
+    },
+    {
+      "id": "tm.0125",
+      "en": "Driver documents",
+      "note": "document type name for driver documents (sharing and configurator)",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "document.driver"
+        },
+        {
+          "app": "console",
+          "key": "configurator.documents.driver.title"
+        }
+      ]
+    },
+    {
+      "id": "tm.0126",
+      "en": "Driving behaviour",
+      "note": "heading of the driving behaviour panel, vehicle detail",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sfb2a5eab8cd5b61b"
+        },
+        {
+          "app": "parentos",
+          "key": "sfb2a5eab8cd5b61b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0127",
+      "en": "Driving events",
+      "note": "section label in the trips panel for driving events",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sbe85ebe781e1e7c1"
+        },
+        {
+          "app": "parentos",
+          "key": "sbe85ebe781e1e7c1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0128",
+      "en": "Driving time",
+      "note": "chart heading on the vehicle detail page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s46dd424bdc97f7b9"
+        },
+        {
+          "app": "parentos",
+          "key": "s46dd424bdc97f7b9"
+        }
+      ]
+    },
+    {
+      "id": "tm.0129",
+      "en": "Drop a file here, or <x id=\"0\" equiv-text=\"&lt;strong&gt;\"/>click to choose<x id=\"1\" equiv-text=\"&lt;/strong&gt;\"/>",
+      "note": "file drop zone text in the upload document dialog; keep the strong tags",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "h68eb2ca9278bb2bf"
+        },
+        {
+          "app": "parentos",
+          "key": "h68eb2ca9278bb2bf"
+        }
+      ]
+    },
+    {
+      "id": "tm.0130",
+      "en": "Duration",
+      "note": "trip duration column header or stat label",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.trips.duration"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s92921878e886e36d"
+        },
+        {
+          "app": "parentos",
+          "key": "s92921878e886e36d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0131",
+      "en": "EU Data Act",
+      "note": "dimo.org link text, heading and breadcrumb for the EU Data Act regulation",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "connectedCarApi.body.euDataAct"
+        },
+        {
+          "app": "dimo-org",
+          "key": "vehicleDataApi.body.euDataAct"
+        },
+        {
+          "app": "dimo-org",
+          "key": "vehicleSessionInfrastructure.body.euDataAct"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.euDataAct.body.euDataAct.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.euDataAct.body.euDataAct"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.body.euDataAct"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.sessionScopedConsent.body.euDataAct"
+        }
+      ]
+    },
+    {
+      "id": "tm.0132",
+      "en": "Edit",
+      "note": "button or icon button label that edits an item",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.actions.edit"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.edit.button"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s64ef2a6c2dd1d3d1"
+        },
+        {
+          "app": "parentos",
+          "key": "s64ef2a6c2dd1d3d1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0133",
+      "en": "Edit geofence",
+      "note": "heading of the geofence dialog in edit mode",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd376dd777095c7ed"
+        },
+        {
+          "app": "parentos",
+          "key": "sd376dd777095c7ed"
+        }
+      ]
+    },
+    {
+      "id": "tm.0134",
+      "en": "Edit webhook",
+      "note": "console page title, heading and breadcrumb for editing a webhook",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.editWebhook"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.edit.title"
+        },
+        {
+          "app": "console",
+          "key": "webhooks.breadcrumb.editWebhook"
+        }
+      ]
+    },
+    {
+      "id": "tm.0135",
+      "en": "Email",
+      "note": "field label for an email address input",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "signin.email_label"
+        },
+        {
+          "app": "console",
+          "key": "email-recovery.form.emailLabel"
+        },
+        {
+          "app": "console",
+          "key": "settings.userDetails.email"
+        },
+        {
+          "app": "console",
+          "key": "settings.inviteModal.emailLabel"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sd1f44f1a8bc20e67"
+        }
+      ]
+    },
+    {
+      "id": "tm.0136",
+      "en": "Email address",
+      "note": "label for the email address field or the email address data item being shared",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "email.item"
+        },
+        {
+          "app": "console",
+          "key": "configurator.form.signIn.email"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s38887b94b3320533"
+        },
+        {
+          "app": "parentos",
+          "key": "s38887b94b3320533"
+        }
+      ]
+    },
+    {
+      "id": "tm.0137",
+      "en": "Email me a code instead",
+      "note": "link button that switches sign-in to an emailed one-time code",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "passkey.email_code"
+        },
+        {
+          "app": "console",
+          "key": "common.sessionExpired.emailInstead"
+        }
+      ]
+    },
+    {
+      "id": "tm.0138",
+      "en": "End",
+      "note": "map popup on the trip end marker in trip replay",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd8f923198e0c5c6a"
+        },
+        {
+          "app": "parentos",
+          "key": "sd8f923198e0c5c6a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0139",
+      "en": "Ended",
+      "note": "table column header for the end time of a trip or charging session",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.trips.ended"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sf113fa256db9617b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0140",
+      "en": "Engine runtime",
+      "note": "legend label in the geofence activity dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s93b5111b63459c67"
+        },
+        {
+          "app": "parentos",
+          "key": "s93b5111b63459c67"
+        }
+      ]
+    },
+    {
+      "id": "tm.0141",
+      "en": "Enter a valid email address.",
+      "note": "validation error for an invalid email in the invite member form",
+      "uses": [
+        {
+          "app": "console",
+          "key": "settings.inviteError.invalidEmail"
+        },
+        {
+          "app": "parentos",
+          "key": "sdcfed6e7b373824a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0142",
+      "en": "Enter a valid wallet address (0x…, 40 hex characters).",
+      "note": "validation error for the add-by-wallet input in the members panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s9a7e860521a14477"
+        },
+        {
+          "app": "parentos",
+          "key": "s9a7e860521a14477"
+        }
+      ]
+    },
+    {
+      "id": "tm.0143",
+      "en": "Enter an amount greater than 0",
+      "note": "validation error for a missing amount in the TCO backfill table",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1d6b1bc152eb6e81"
+        },
+        {
+          "app": "parentos",
+          "key": "s1d6b1bc152eb6e81"
+        }
+      ]
+    },
+    {
+      "id": "tm.0144",
+      "en": "Error codes",
+      "note": "card heading on the vehicle detail page for diagnostic trouble codes",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s31935452f8d87e4b"
+        },
+        {
+          "app": "parentos",
+          "key": "s31935452f8d87e4b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0145",
+      "en": "Events",
+      "note": "label for vehicle events: webhook service option, summary card, raw data mode and API capability",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.service.events"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.summary.events"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.raw.modes.events"
+        },
+        {
+          "app": "dimo-org",
+          "key": "connectedCarApi.body.events"
+        }
+      ]
+    },
+    {
+      "id": "tm.0146",
+      "en": "Events per day",
+      "note": "chart label in the driving behaviour panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6aa5b7c5f76859f1"
+        },
+        {
+          "app": "parentos",
+          "key": "s6aa5b7c5f76859f1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0147",
+      "en": "Expand panel",
+      "note": "tooltip on the overview panel toggle",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sad56195767615a3b"
+        },
+        {
+          "app": "parentos",
+          "key": "sad56195767615a3b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0148",
+      "en": "Expand sidebar",
+      "note": "accessible label or tooltip on the sidebar expand toggle",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.menu.expand"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s7293d04c5979a8ad"
+        },
+        {
+          "app": "parentos",
+          "key": "s7293d04c5979a8ad"
+        }
+      ]
+    },
+    {
+      "id": "tm.0149",
+      "en": "Export CSV",
+      "note": "button in the TCO view that exports a CSV file",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s8b409dc1f261b173"
+        },
+        {
+          "app": "parentos",
+          "key": "s8b409dc1f261b173"
+        }
+      ]
+    },
+    {
+      "id": "tm.0150",
+      "en": "Exporting…",
+      "note": "export button label while the CSV is generated",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd5e67ee988f58e19"
+        },
+        {
+          "app": "parentos",
+          "key": "sd5e67ee988f58e19"
+        }
+      ]
+    },
+    {
+      "id": "tm.0151",
+      "en": "Extract failed",
+      "note": "error in the upload document dialog when field extraction fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s43ab54f81e2bc4cb"
+        },
+        {
+          "app": "parentos",
+          "key": "s43ab54f81e2bc4cb"
+        }
+      ]
+    },
+    {
+      "id": "tm.0152",
+      "en": "FAQ",
+      "note": "account settings menu item linking to the FAQ",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf32ec7199cf4745b"
+        },
+        {
+          "app": "parentos",
+          "key": "sf32ec7199cf4745b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0153",
+      "en": "Failed to delete geofence",
+      "note": "error on the geofences page when deleting fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sefac9fea31d5ef2a"
+        },
+        {
+          "app": "parentos",
+          "key": "sefac9fea31d5ef2a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0154",
+      "en": "Failed to load GPS data",
+      "note": "error in the trip replay dialog when GPS points fail to load",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6efdcceb044bc229"
+        },
+        {
+          "app": "parentos",
+          "key": "s6efdcceb044bc229"
+        }
+      ]
+    },
+    {
+      "id": "tm.0155",
+      "en": "Failed to load assigned vehicles",
+      "note": "error in the manage geofence vehicles dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s49b99bd09dbcc27a"
+        },
+        {
+          "app": "parentos",
+          "key": "s49b99bd09dbcc27a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0156",
+      "en": "Failed to load driving behaviour — check console for details.",
+      "note": "error in the driving behaviour panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s7f8352c3c0304063"
+        },
+        {
+          "app": "parentos",
+          "key": "s7f8352c3c0304063"
+        }
+      ]
+    },
+    {
+      "id": "tm.0157",
+      "en": "Failed to load geofences",
+      "note": "error on the geofences page when the list fails to load",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s2b7931014dfeddf0"
+        },
+        {
+          "app": "parentos",
+          "key": "s2b7931014dfeddf0"
+        }
+      ]
+    },
+    {
+      "id": "tm.0158",
+      "en": "Failed to load trips — check console for details.",
+      "note": "error in the trips panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sde36bd94f0c19183"
+        },
+        {
+          "app": "parentos",
+          "key": "sde36bd94f0c19183"
+        }
+      ]
+    },
+    {
+      "id": "tm.0159",
+      "en": "Failed to load vehicle detail",
+      "note": "error in the TCO vehicle detail",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s48bab881332d164c"
+        },
+        {
+          "app": "parentos",
+          "key": "s48bab881332d164c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0160",
+      "en": "Failed to load vehicles",
+      "note": "error when the vehicle list fails to load",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd23937b02cb5d454"
+        },
+        {
+          "app": "parentos",
+          "key": "sd23937b02cb5d454"
+        }
+      ]
+    },
+    {
+      "id": "tm.0161",
+      "en": "Failed to save",
+      "note": "error when saving TCO settings fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf345ddcc2e10c7ba"
+        },
+        {
+          "app": "parentos",
+          "key": "sf345ddcc2e10c7ba"
+        }
+      ]
+    },
+    {
+      "id": "tm.0162",
+      "en": "Failed to save geofence",
+      "note": "error in the create geofence dialog when saving fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf66afe3d5ccf3fd8"
+        },
+        {
+          "app": "parentos",
+          "key": "sf66afe3d5ccf3fd8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0163",
+      "en": "Failed to scan geofence activity",
+      "note": "error in the geofence activity dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sbe12e8d5959891b1"
+        },
+        {
+          "app": "parentos",
+          "key": "sbe12e8d5959891b1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0164",
+      "en": "Failed to update assignment",
+      "note": "error in the manage geofence vehicles dialog when assignment fails",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se814442621d42e47"
+        },
+        {
+          "app": "parentos",
+          "key": "se814442621d42e47"
+        }
+      ]
+    },
+    {
+      "id": "tm.0165",
+      "en": "Favorite",
+      "note": "tooltip on the favorite star in the vehicle quick view",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s51ba5321a04109cd"
+        },
+        {
+          "app": "parentos",
+          "key": "s51ba5321a04109cd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0166",
+      "en": "Fields",
+      "note": "field label in the document detail dialog for extracted fields",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s36cb242ac90353bc"
+        },
+        {
+          "app": "parentos",
+          "key": "s36cb242ac90353bc"
+        }
+      ]
+    },
+    {
+      "id": "tm.0167",
+      "en": "File ID",
+      "note": "field label in the document detail dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1bed893eb831653c"
+        },
+        {
+          "app": "parentos",
+          "key": "s1bed893eb831653c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0168",
+      "en": "Finish",
+      "note": "primary button that completes a multi-step form or a geofence drawing",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.form.finish"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sad59707375956ad2"
+        },
+        {
+          "app": "parentos",
+          "key": "sad59707375956ad2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0169",
+      "en": "Finish setup",
+      "note": "console button, link and page title for finishing a connection setup",
+      "uses": [
+        {
+          "app": "console",
+          "key": "connections.list.finishSetup"
+        },
+        {
+          "app": "console",
+          "key": "connections.create.titleFinish"
+        },
+        {
+          "app": "console",
+          "key": "connections.create.finishSetup"
+        }
+      ]
+    },
+    {
+      "id": "tm.0170",
+      "en": "Fit all vehicles",
+      "note": "map control tooltip that fits every vehicle in view",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s4ccb84efe836feac"
+        },
+        {
+          "app": "parentos",
+          "key": "s4ccb84efe836feac"
+        }
+      ]
+    },
+    {
+      "id": "tm.0171",
+      "en": "Fleet Intelligence",
+      "note": "dimo.org solution name: navbar link, page meta name and breadcrumb",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.fleetIntelligence"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.meta.solutionName"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.body.fleetIntelligence.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0172",
+      "en": "Fleet Members",
+      "note": "section heading on the account settings page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf8a96a87d2b00338"
+        },
+        {
+          "app": "parentos",
+          "key": "sf8a96a87d2b00338"
+        }
+      ]
+    },
+    {
+      "id": "tm.0173",
+      "en": "Fleets",
+      "note": "dimo.org use case category tag for fleet use cases",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.useCases.postSaleRelationshipManager.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.useCases.leasedVehicleFleet.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.useCases.fleetOperationsCommand.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.useCases.predictiveMaintenanceCopilot.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.useCases.driverBehaviorCoaching.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.useCases.routePerformanceAnalysis.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.useCases.damageDetectionIncident.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.useCases.realTimeFleetHealth.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.useCases.diagnosticsAssistance.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.useCases.proactiveCustomerOutreach.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.useCases.trainingAssistant.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.useCases.realTimeIssueMonitoring.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.useCases.geofenceSafetyAlerts.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.useCases.automatedReturnInspections.type"
+        }
+      ]
+    },
+    {
+      "id": "tm.0174",
+      "en": "Focus on map",
+      "note": "tooltip on a geofence name in the trips panel that focuses it on the map",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s60728a6d33bbfba2"
+        },
+        {
+          "app": "parentos",
+          "key": "s60728a6d33bbfba2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0175",
+      "en": "Frequency",
+      "note": "trip detection method option (frequency analysis)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s4bfaefac9bc26241"
+        },
+        {
+          "app": "parentos",
+          "key": "s4bfaefac9bc26241"
+        }
+      ]
+    },
+    {
+      "id": "tm.0176",
+      "en": "Fuel",
+      "note": "quick view telemetry row for fuel level; short label",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sb0d17b84dc5cd2ad"
+        },
+        {
+          "app": "parentos",
+          "key": "sb0d17b84dc5cd2ad"
+        }
+      ]
+    },
+    {
+      "id": "tm.0177",
+      "en": "Fuel level",
+      "note": "name of the fuel level signal or chart heading",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.signals.powertrainFuelSystemRelativeLevel"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s8f9af0ae53120447"
+        },
+        {
+          "app": "parentos",
+          "key": "s8f9af0ae53120447"
+        }
+      ]
+    },
+    {
+      "id": "tm.0178",
+      "en": "Full details",
+      "note": "link in the vehicle quick view to the vehicle detail page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se6406ce7686384a2"
+        },
+        {
+          "app": "parentos",
+          "key": "se6406ce7686384a2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0179",
+      "en": "GPS data sparse — showing start and end only",
+      "note": "notice in the trip replay dialog when GPS data is sparse",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s12c55576515ce3a6"
+        },
+        {
+          "app": "parentos",
+          "key": "s12c55576515ce3a6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0180",
+      "en": "Geofences",
+      "note": "side navigation item for the geofences page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s73205a59ad4c37d0"
+        },
+        {
+          "app": "parentos",
+          "key": "s73205a59ad4c37d0"
+        }
+      ]
+    },
+    {
+      "id": "tm.0181",
+      "en": "Geofences crossed",
+      "note": "section label in the trips panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s123f0fcd0ebdeb39"
+        },
+        {
+          "app": "parentos",
+          "key": "s123f0fcd0ebdeb39"
+        }
+      ]
+    },
+    {
+      "id": "tm.0182",
+      "en": "Get API Keys",
+      "note": "dimo.org call-to-action button (title case)",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "home.cta.getApiKeys"
+        },
+        {
+          "app": "dimo-org",
+          "key": "customerStories.grupoKaufmann.cta.getApiKeys"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.oem.hero.getApiKeys"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.oem.cta.getApiKeys"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.access.cta.getApiKeys"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.hero.getApiKeys"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.cta.getApiKeys"
+        }
+      ]
+    },
+    {
+      "id": "tm.0183",
+      "en": "Get API keys",
+      "note": "dimo.org link or button in body copy (sentence case)",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "connectedCarApi.body.getApiKeys"
+        },
+        {
+          "app": "dimo-org",
+          "key": "vehicleDataApi.body.getApiKeys"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compare.smartcarAlternative.body.getApiKeys"
+        }
+      ]
+    },
+    {
+      "id": "tm.0184",
+      "en": "Get Started",
+      "note": "dimo.org call-to-action button on hero, pricing and product pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "pricing.tiers.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "customerStories.emobi.cta.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.hero.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.hero.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.hero.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.hero.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.components.cta.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.consent.cta.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.ingest.cta.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.pay.cta.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.storage.cta.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.cta.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.hero.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.cta.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.hero.getStarted"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.cta.getStarted"
+        }
+      ]
+    },
+    {
+      "id": "tm.0185",
+      "en": "Get credentials from DIMO",
+      "note": "button on the onboard fleet page that opens DIMO to provision credentials",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc9b959bf636dd8ca"
+        },
+        {
+          "app": "parentos",
+          "key": "sc9b959bf636dd8ca"
+        }
+      ]
+    },
+    {
+      "id": "tm.0186",
+      "en": "Glovebox",
+      "note": "side navigation item for the glovebox documents page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s02795b9b8f085e7b"
+        },
+        {
+          "app": "parentos",
+          "key": "s02795b9b8f085e7b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0187",
+      "en": "Grant DIMO permissions on this vehicle to see trip replay.",
+      "note": "error in the trip replay dialog when the vehicle lacks permissions",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s15b883e99cead0b5"
+        },
+        {
+          "app": "parentos",
+          "key": "s15b883e99cead0b5"
+        }
+      ]
+    },
+    {
+      "id": "tm.0188",
+      "en": "Grant DIMO permissions to see driving behaviour on this vehicle.",
+      "note": "notice in the driving behaviour panel when the vehicle lacks permissions",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf1ce61f6f41ab9c5"
+        },
+        {
+          "app": "parentos",
+          "key": "sf1ce61f6f41ab9c5"
+        }
+      ]
+    },
+    {
+      "id": "tm.0189",
+      "en": "Grant DIMO permissions to see live telemetry on this vehicle.",
+      "note": "notice in the trips panel when the vehicle lacks permissions",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s76cd303740058bca"
+        },
+        {
+          "app": "parentos",
+          "key": "s76cd303740058bca"
+        }
+      ]
+    },
+    {
+      "id": "tm.0190",
+      "en": "Grant DIMO permissions to this vehicle to include its documents in operating cost. Acquisition and depreciation below are unaffected.",
+      "note": "notice in the TCO view when a vehicle lacks document permissions",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sbbd1f5edf6ff8df8"
+        },
+        {
+          "app": "parentos",
+          "key": "sbbd1f5edf6ff8df8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0191",
+      "en": "Grant DIMO permissions to view documents on this vehicle.",
+      "note": "notice in the glovebox when a vehicle lacks document permissions",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s98b3c841368a7b6f"
+        },
+        {
+          "app": "parentos",
+          "key": "s98b3c841368a7b6f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0192",
+      "en": "Harsh acceleration",
+      "note": "driving behaviour event type label and legend",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s3962a20f5663be61"
+        },
+        {
+          "app": "parentos",
+          "key": "s3962a20f5663be61"
+        }
+      ]
+    },
+    {
+      "id": "tm.0193",
+      "en": "Harsh braking",
+      "note": "driving behaviour event type label and legend",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sabc2b7bfdf6c1177"
+        },
+        {
+          "app": "parentos",
+          "key": "sabc2b7bfdf6c1177"
+        }
+      ]
+    },
+    {
+      "id": "tm.0194",
+      "en": "Harsh cornering",
+      "note": "driving behaviour event type label and legend",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s542d9799dc7cf21c"
+        },
+        {
+          "app": "parentos",
+          "key": "s542d9799dc7cf21c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0195",
+      "en": "Hide hidden vehicles",
+      "note": "toggle that hides vehicles the user has hidden",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sa7758cec045bda64"
+        },
+        {
+          "app": "parentos",
+          "key": "sa7758cec045bda64"
+        }
+      ]
+    },
+    {
+      "id": "tm.0196",
+      "en": "Hide vehicle",
+      "note": "tooltip on the hide button of a vehicle row",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s34444d528d6c041d"
+        },
+        {
+          "app": "parentos",
+          "key": "s34444d528d6c041d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0197",
+      "en": "Home",
+      "note": "navigation item, page title or breadcrumb root for the home page",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.navigation.items.home"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.home"
+        },
+        {
+          "app": "dimo-org",
+          "key": "connectedCarApi.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "vehicleDataApi.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "vehicleSessionInfrastructure.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compare.smartcarAlternative.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compare.standardFleetAlternative.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.euDataAct.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.ftcGmConsent.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.sessionScopedConsent.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.vehicleAccessAuditTrail.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "customerStories.emobi.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "customerStories.grupoKaufmann.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.oem.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.access.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.components.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.consent.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.ingest.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.pay.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.storage.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetSpend.body.home.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.body.home.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0198",
+      "en": "How It Works",
+      "note": "dimo.org section heading on industry, solution and customer story pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "customerStories.emobi.howItWorks.howItWorks"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.howItWorks.howItWorks"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.howItWorks.howItWorks"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.howItWorks.howItWorks"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.oem.howItWorks.howItWorks"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.howItWorks.howItWorks"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.howItWorks.howItWorks"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.howItWorks.howItWorks"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.howItWorks.howItWorks"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.howItWorks.howItWorks"
+        }
+      ]
+    },
+    {
+      "id": "tm.0199",
+      "en": "Hybrid",
+      "note": "dimo.org use case category tag (mixed fleet and consumer); not the powertrain type",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.useCases.usedVehiclePrePurchaseReport.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.useCases.tradeInValuationAssistant.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.useCases.proactiveBookingAgent.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.useCases.aiConciergeFor.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.useCases.smartUpsellOpportunities.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.useCases.rentalDueReminders.type"
+        }
+      ]
+    },
+    {
+      "id": "tm.0200",
+      "en": "Idling",
+      "note": "trip detection method option (idling)",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.trips.mechanisms.idling"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s76489bceca430574"
+        },
+        {
+          "app": "parentos",
+          "key": "s76489bceca430574"
+        }
+      ]
+    },
+    {
+      "id": "tm.0201",
+      "en": "Ignition",
+      "note": "trip detection method option (ignition)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s250bde15254b34c6"
+        },
+        {
+          "app": "parentos",
+          "key": "s250bde15254b34c6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0202",
+      "en": "Industries",
+      "note": "dimo.org navbar menu and breadcrumb item for industries",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.industries"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.body.industries.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.body.industries.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.body.industries.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.oem.body.industries.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.body.industries.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0203",
+      "en": "Infrastructure",
+      "note": "dimo.org feature or use case category tag",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "products.storage.features.cloudOrOnPrem.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.useCases.securedCompute.type"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.useCases.instantSettlement.type"
+        }
+      ]
+    },
+    {
+      "id": "tm.0204",
+      "en": "Invitation accepted — taking you to the fleet.",
+      "note": "success message on the accept invitation page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s61e02775ebf4af46"
+        },
+        {
+          "app": "parentos",
+          "key": "s61e02775ebf4af46"
+        }
+      ]
+    },
+    {
+      "id": "tm.0205",
+      "en": "Invitation problem",
+      "note": "error heading on the accept invitation page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s51aad7b9d5936eb9"
+        },
+        {
+          "app": "parentos",
+          "key": "s51aad7b9d5936eb9"
+        }
+      ]
+    },
+    {
+      "id": "tm.0206",
+      "en": "Invitation re-sent.",
+      "note": "confirmation in the members panel after resending an invitation",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sbc682e0258f5c1ae"
+        },
+        {
+          "app": "parentos",
+          "key": "sbc682e0258f5c1ae"
+        }
+      ]
+    },
+    {
+      "id": "tm.0207",
+      "en": "Invite by email",
+      "note": "section label in the members panel for inviting by email",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s8b0ef96eac2571f5"
+        },
+        {
+          "app": "parentos",
+          "key": "s8b0ef96eac2571f5"
+        }
+      ]
+    },
+    {
+      "id": "tm.0208",
+      "en": "Invite member",
+      "note": "button or dialog heading for inviting a team member",
+      "uses": [
+        {
+          "app": "console",
+          "key": "settings.team.inviteMember"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sf58e4d73e35ce582"
+        }
+      ]
+    },
+    {
+      "id": "tm.0209",
+      "en": "JWT copied!",
+      "note": "toast after copying a developer JWT",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.generateJwt.copied"
+        },
+        {
+          "app": "console",
+          "key": "license.jwts.copied"
+        },
+        {
+          "app": "console",
+          "key": "license.consoleAccess.jwtCopied"
+        }
+      ]
+    },
+    {
+      "id": "tm.0210",
+      "en": "Joining…",
+      "note": "loading heading on the accept invitation page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf7579f21a946ed33"
+        },
+        {
+          "app": "parentos",
+          "key": "sf7579f21a946ed33"
+        }
+      ]
+    },
+    {
+      "id": "tm.0211",
+      "en": "Language",
+      "note": "label of the language switcher or language setting",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "app.language"
+        },
+        {
+          "app": "console",
+          "key": "common.languageSwitcher.label"
+        },
+        {
+          "app": "console",
+          "key": "configurator.form.signIn.language"
+        },
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.language"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sefcf950b3cc4fc3b"
+        },
+        {
+          "app": "parentos",
+          "key": "sefcf950b3cc4fc3b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0212",
+      "en": "Last 2 weeks",
+      "note": "trips panel range label for the first page (last 2 weeks)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sfc73e619cc0f1e56"
+        },
+        {
+          "app": "parentos",
+          "key": "sfc73e619cc0f1e56"
+        }
+      ]
+    },
+    {
+      "id": "tm.0213",
+      "en": "Last 24 hours",
+      "note": "time window option in the geofence activity dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s115763f2236ae9b6"
+        },
+        {
+          "app": "parentos",
+          "key": "s115763f2236ae9b6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0214",
+      "en": "Last 3 days",
+      "note": "time window option in the geofence activity dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc6b717aff19ce673"
+        },
+        {
+          "app": "parentos",
+          "key": "sc6b717aff19ce673"
+        }
+      ]
+    },
+    {
+      "id": "tm.0215",
+      "en": "Last 7 days",
+      "note": "section label on the vehicle detail page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0c2d1faf314a032f"
+        },
+        {
+          "app": "parentos",
+          "key": "s0c2d1faf314a032f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0216",
+      "en": "Last <x id=\"0\" equiv-text=\"${DAYS}\"/> days",
+      "note": "range label in the driving behaviour panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sae9f8f72d2d50c62"
+        },
+        {
+          "app": "parentos",
+          "key": "sae9f8f72d2d50c62"
+        }
+      ]
+    },
+    {
+      "id": "tm.0217",
+      "en": "Last Location",
+      "note": "table column header in the vehicle list",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s9b38dee53cc7751c"
+        },
+        {
+          "app": "parentos",
+          "key": "s9b38dee53cc7751c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0218",
+      "en": "Last login <x id=\"0\" equiv-text=\"${new Date(m.lastLoginAt).toLocaleDateString()}\"/>",
+      "note": "last login date of a member in the members panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sabb87633a7b7cc02"
+        },
+        {
+          "app": "parentos",
+          "key": "sabb87633a7b7cc02"
+        }
+      ]
+    },
+    {
+      "id": "tm.0219",
+      "en": "Last seen",
+      "note": "column header or label for when a vehicle last reported data",
+      "uses": [
+        {
+          "app": "console",
+          "key": "license.vehicleTable.columns.lastSeen"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.summary.lastSeen"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.signals.table.lastSeen"
+        }
+      ]
+    },
+    {
+      "id": "tm.0220",
+      "en": "License details",
+      "note": "console link, page title and breadcrumb for a developer license detail page",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.licenseCard.details"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.licenseDetails"
+        },
+        {
+          "app": "console",
+          "key": "configurator.breadcrumb.licenseDetails"
+        },
+        {
+          "app": "console",
+          "key": "license.details.breadcrumbDetails"
+        }
+      ]
+    },
+    {
+      "id": "tm.0221",
+      "en": "Licenses",
+      "note": "console navigation item, page title, breadcrumb and home shortcut for licenses",
+      "uses": [
+        {
+          "app": "console",
+          "key": "app.home.shortcuts.licenses.label"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.items.licenses"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.licenses"
+        },
+        {
+          "app": "console",
+          "key": "license.breadcrumbLicenses"
+        }
+      ]
+    },
+    {
+      "id": "tm.0222",
+      "en": "Light mode",
+      "note": "theme toggle label that switches to light mode",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.theme.light"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s760fea0a0b77b2ea"
+        },
+        {
+          "app": "parentos",
+          "key": "s760fea0a0b77b2ea"
+        }
+      ]
+    },
+    {
+      "id": "tm.0223",
+      "en": "Line items",
+      "note": "section label in the TCO vehicle detail",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sbf782021bf42916f"
+        },
+        {
+          "app": "parentos",
+          "key": "sbf782021bf42916f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0224",
+      "en": "Live data",
+      "note": "permission name for live data access (sharing permissions list)",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "permission.GetLiveData.label"
+        },
+        {
+          "app": "console",
+          "key": "common.permissions.6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0225",
+      "en": "Live telemetry",
+      "note": "feature bullet on the login page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1497d908f2d02258"
+        },
+        {
+          "app": "parentos",
+          "key": "s1497d908f2d02258"
+        }
+      ]
+    },
+    {
+      "id": "tm.0226",
+      "en": "Loading GPS data…",
+      "note": "loading message in the trip replay map",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sb3da51086daed9ed"
+        },
+        {
+          "app": "parentos",
+          "key": "sb3da51086daed9ed"
+        }
+      ]
+    },
+    {
+      "id": "tm.0227",
+      "en": "Loading assigned vehicles…",
+      "note": "loading message in the manage geofence vehicles dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sb82063ff4133ae44"
+        },
+        {
+          "app": "parentos",
+          "key": "sb82063ff4133ae44"
+        }
+      ]
+    },
+    {
+      "id": "tm.0228",
+      "en": "Loading documents…",
+      "note": "loading message in the glovebox",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s98743891246c44c9"
+        },
+        {
+          "app": "parentos",
+          "key": "s98743891246c44c9"
+        }
+      ]
+    },
+    {
+      "id": "tm.0229",
+      "en": "Loading geofences…",
+      "note": "loading message on the geofences page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s71905b5086d80632"
+        },
+        {
+          "app": "parentos",
+          "key": "s71905b5086d80632"
+        }
+      ]
+    },
+    {
+      "id": "tm.0230",
+      "en": "Loading members…",
+      "note": "loading message in the members panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s79fa1c508e20f3b2"
+        },
+        {
+          "app": "parentos",
+          "key": "s79fa1c508e20f3b2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0231",
+      "en": "Loading telemetry…",
+      "note": "loading message in the vehicle quick view",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "saf9a16cf6a762b42"
+        },
+        {
+          "app": "parentos",
+          "key": "saf9a16cf6a762b42"
+        }
+      ]
+    },
+    {
+      "id": "tm.0232",
+      "en": "Loading trips…",
+      "note": "loading message in the trips panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s2dc18a6f5153c757"
+        },
+        {
+          "app": "parentos",
+          "key": "s2dc18a6f5153c757"
+        }
+      ]
+    },
+    {
+      "id": "tm.0233",
+      "en": "Loading vehicles…",
+      "note": "loading message for the vehicle list",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s902de20a95e404c6"
+        },
+        {
+          "app": "parentos",
+          "key": "s902de20a95e404c6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0234",
+      "en": "Loading…",
+      "note": "generic loading message in a panel, list or table",
+      "uses": [
+        {
+          "app": "console",
+          "key": "configurator.table.loading"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.summary.loading"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.sharing.loading"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.documents.loading"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.raw.loading"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s6ebc9bd6feae62a3"
+        },
+        {
+          "app": "parentos",
+          "key": "s6ebc9bd6feae62a3"
+        }
+      ]
+    },
+    {
+      "id": "tm.0235",
+      "en": "Log out",
+      "note": "button or menu item that logs the user out",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "common.log_out"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sb64127e4e4f0b575"
+        },
+        {
+          "app": "parentos",
+          "key": "sb64127e4e4f0b575"
+        }
+      ]
+    },
+    {
+      "id": "tm.0236",
+      "en": "Maintenance",
+      "note": "business type for vehicle maintenance: sign-up developer type option and dimo.org industry breadcrumb",
+      "uses": [
+        {
+          "app": "console",
+          "key": "sign-up.company.developerTypes.maintenance"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.body.maintenance.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0237",
+      "en": "Make Favorite",
+      "note": "button on the vehicle detail page that marks the vehicle as a favorite",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se15c9243be269005"
+        },
+        {
+          "app": "parentos",
+          "key": "se15c9243be269005"
+        }
+      ]
+    },
+    {
+      "id": "tm.0238",
+      "en": "Manage Subscription",
+      "note": "account settings menu item",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se313da332d8c6937"
+        },
+        {
+          "app": "parentos",
+          "key": "se313da332d8c6937"
+        }
+      ]
+    },
+    {
+      "id": "tm.0239",
+      "en": "Max speed",
+      "note": "stat label in the trip replay dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1d4ddddf4ee38ea6"
+        },
+        {
+          "app": "parentos",
+          "key": "s1d4ddddf4ee38ea6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0240",
+      "en": "Measurement Units",
+      "note": "account settings field label for metric or imperial units",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s7217759ddfc4c5e0"
+        },
+        {
+          "app": "parentos",
+          "key": "s7217759ddfc4c5e0"
+        }
+      ]
+    },
+    {
+      "id": "tm.0241",
+      "en": "Member",
+      "note": "team role name for a member (not owner)",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.team.roles.MEMBER"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s751678adb0aa2b23"
+        },
+        {
+          "app": "parentos",
+          "key": "s751678adb0aa2b23"
+        }
+      ]
+    },
+    {
+      "id": "tm.0242",
+      "en": "Missing",
+      "note": "glovebox section heading for missing document types",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sb52f6b2e5a4bc127"
+        },
+        {
+          "app": "parentos",
+          "key": "sb52f6b2e5a4bc127"
+        }
+      ]
+    },
+    {
+      "id": "tm.0243",
+      "en": "Missing amounts",
+      "note": "section label in the TCO vehicle detail",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "seb30df772c5df3ee"
+        },
+        {
+          "app": "parentos",
+          "key": "seb30df772c5df3ee"
+        }
+      ]
+    },
+    {
+      "id": "tm.0244",
+      "en": "Name",
+      "note": "field label or column header for a name",
+      "uses": [
+        {
+          "app": "console",
+          "key": "configurator.table.name"
+        },
+        {
+          "app": "console",
+          "key": "settings.userDetails.name"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sef49aec68fd1dc66"
+        },
+        {
+          "app": "parentos",
+          "key": "sef49aec68fd1dc66"
+        }
+      ]
+    },
+    {
+      "id": "tm.0245",
+      "en": "Name the area you drew, then choose which vehicles it applies to.",
+      "note": "subtitle of the create geofence dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s4cdf4e50ebbee02d"
+        },
+        {
+          "app": "parentos",
+          "key": "s4cdf4e50ebbee02d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0246",
+      "en": "New configuration",
+      "note": "console button, breadcrumb and subtitle for creating a new license configuration",
+      "uses": [
+        {
+          "app": "console",
+          "key": "configurator.breadcrumb.newConfiguration"
+        },
+        {
+          "app": "console",
+          "key": "configurator.list.newConfiguration"
+        },
+        {
+          "app": "console",
+          "key": "configurator.new.subtitle"
+        }
+      ]
+    },
+    {
+      "id": "tm.0247",
+      "en": "New geofence",
+      "note": "heading of the geofence dialog in create mode",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s5f5f916669344f2d"
+        },
+        {
+          "app": "parentos",
+          "key": "s5f5f916669344f2d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0248",
+      "en": "New template",
+      "note": "console page title, button and heading for creating a permission template",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.newTemplate"
+        },
+        {
+          "app": "console",
+          "key": "templates.header.newTemplate"
+        },
+        {
+          "app": "console",
+          "key": "templates.new.title"
+        }
+      ]
+    },
+    {
+      "id": "tm.0249",
+      "en": "Next",
+      "note": "button that goes to the next page or step",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "pager.next"
+        },
+        {
+          "app": "console",
+          "key": "common.actions.next"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.form.next"
+        }
+      ]
+    },
+    {
+      "id": "tm.0250",
+      "en": "No Client ID configured",
+      "note": "heading on the login screen when no client ID is configured",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se2625ea08370df1e"
+        },
+        {
+          "app": "parentos",
+          "key": "se2625ea08370df1e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0251",
+      "en": "No DIMO integration yet",
+      "note": "vehicle detail notice when the vehicle has no DIMO connection",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd12e9358e7e366cd"
+        },
+        {
+          "app": "parentos",
+          "key": "sd12e9358e7e366cd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0252",
+      "en": "No DIMO integration — pair a device to stream telemetry",
+      "note": "vehicle list row notice when the vehicle has no DIMO connection",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s9c82d2018344f8bc"
+        },
+        {
+          "app": "parentos",
+          "key": "s9c82d2018344f8bc"
+        }
+      ]
+    },
+    {
+      "id": "tm.0253",
+      "en": "No VIN detected — pick the vehicle manually.",
+      "note": "notice in the upload document dialog when no VIN was found",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "saae49cb481e5d6da"
+        },
+        {
+          "app": "parentos",
+          "key": "saae49cb481e5d6da"
+        }
+      ]
+    },
+    {
+      "id": "tm.0254",
+      "en": "No access",
+      "note": "status label when the app has no access to a vehicle",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.rail.access.notShared"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sb83d6c0b89001488"
+        },
+        {
+          "app": "parentos",
+          "key": "sb83d6c0b89001488"
+        }
+      ]
+    },
+    {
+      "id": "tm.0255",
+      "en": "No cost documents on file for this vehicle yet.",
+      "note": "empty state in the TCO vehicle detail",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0d2ba7a853a4934b"
+        },
+        {
+          "app": "parentos",
+          "key": "s0d2ba7a853a4934b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0256",
+      "en": "No data",
+      "note": "chart tooltip for a day without data, vehicle detail",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s187528426100c44e"
+        },
+        {
+          "app": "parentos",
+          "key": "s187528426100c44e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0257",
+      "en": "No distance",
+      "note": "driving behaviour panel fallback when distance is missing",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1cee2af0e1ed80b5"
+        },
+        {
+          "app": "parentos",
+          "key": "s1cee2af0e1ed80b5"
+        }
+      ]
+    },
+    {
+      "id": "tm.0258",
+      "en": "No distance data",
+      "note": "driving behaviour panel chart empty state",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sef41cf20b744f0b7"
+        },
+        {
+          "app": "parentos",
+          "key": "sef41cf20b744f0b7"
+        }
+      ]
+    },
+    {
+      "id": "tm.0259",
+      "en": "No geofences match your search.",
+      "note": "empty state on the geofences page when search finds nothing",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s7a24bda6d094df75"
+        },
+        {
+          "app": "parentos",
+          "key": "s7a24bda6d094df75"
+        }
+      ]
+    },
+    {
+      "id": "tm.0260",
+      "en": "No geofences yet. Click “New geofence” and draw an area on the map.",
+      "note": "empty state on the geofences page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s617f1e646d2d81cd"
+        },
+        {
+          "app": "parentos",
+          "key": "s617f1e646d2d81cd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0261",
+      "en": "No location access",
+      "note": "map overlay when the vehicle lacks location permission",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd775bc59932f680d"
+        },
+        {
+          "app": "parentos",
+          "key": "sd775bc59932f680d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0262",
+      "en": "No members yet.",
+      "note": "empty state in the members panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s339cc6ad232433e3"
+        },
+        {
+          "app": "parentos",
+          "key": "s339cc6ad232433e3"
+        }
+      ]
+    },
+    {
+      "id": "tm.0263",
+      "en": "No records yet.",
+      "note": "glovebox empty state heading",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se2a982f53e3bd234"
+        },
+        {
+          "app": "parentos",
+          "key": "se2a982f53e3bd234"
+        }
+      ]
+    },
+    {
+      "id": "tm.0264",
+      "en": "No structured fields extracted",
+      "note": "empty value in the document detail dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s71ad206448636a0a"
+        },
+        {
+          "app": "parentos",
+          "key": "s71ad206448636a0a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0265",
+      "en": "No telemetry access",
+      "note": "vehicle list cell when the vehicle lacks telemetry permission",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s51cf5795e7631ded"
+        },
+        {
+          "app": "parentos",
+          "key": "s51cf5795e7631ded"
+        }
+      ]
+    },
+    {
+      "id": "tm.0266",
+      "en": "No telemetry data reported yet.",
+      "note": "empty state in the vehicle quick view",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se4196af20ae36bf6"
+        },
+        {
+          "app": "parentos",
+          "key": "se4196af20ae36bf6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0267",
+      "en": "No trips",
+      "note": "driving behaviour panel fallback when there are no trips",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s33b55008dc569e72"
+        },
+        {
+          "app": "parentos",
+          "key": "s33b55008dc569e72"
+        }
+      ]
+    },
+    {
+      "id": "tm.0268",
+      "en": "No trips in the last 2 weeks.",
+      "note": "empty state in the vehicle quick view",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se8cd9f22365bee61"
+        },
+        {
+          "app": "parentos",
+          "key": "se8cd9f22365bee61"
+        }
+      ]
+    },
+    {
+      "id": "tm.0269",
+      "en": "No trips in this period.",
+      "note": "empty state in the trips panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s00a1c2a73e54ca2a"
+        },
+        {
+          "app": "parentos",
+          "key": "s00a1c2a73e54ca2a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0270",
+      "en": "No vehicles found.",
+      "note": "empty state for the vehicle list",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s160db8e7aaf41fd7"
+        },
+        {
+          "app": "parentos",
+          "key": "s160db8e7aaf41fd7"
+        }
+      ]
+    },
+    {
+      "id": "tm.0271",
+      "en": "No vehicles match your search.",
+      "note": "empty state for the vehicle list when search finds nothing",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s9130470494e3994f"
+        },
+        {
+          "app": "parentos",
+          "key": "s9130470494e3994f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0272",
+      "en": "No vehicles match.",
+      "note": "empty state in the manage geofence vehicles dialog search",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s539d9fe5d59f4f94"
+        },
+        {
+          "app": "parentos",
+          "key": "s539d9fe5d59f4f94"
+        }
+      ]
+    },
+    {
+      "id": "tm.0273",
+      "en": "No vehicles on this account.",
+      "note": "empty state in the TCO view",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1c85e4cb564ee2fb"
+        },
+        {
+          "app": "parentos",
+          "key": "s1c85e4cb564ee2fb"
+        }
+      ]
+    },
+    {
+      "id": "tm.0274",
+      "en": "No vehicles passed through in this window.",
+      "note": "empty state in the geofence activity dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s043ffe59951ed213"
+        },
+        {
+          "app": "parentos",
+          "key": "s043ffe59951ed213"
+        }
+      ]
+    },
+    {
+      "id": "tm.0275",
+      "en": "None",
+      "note": "placeholder value when a field has nothing to show",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "tx.none"
+        },
+        {
+          "app": "console",
+          "key": "settings.members.dataAccess.none"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.sharing.none"
+        }
+      ]
+    },
+    {
+      "id": "tm.0276",
+      "en": "Normal",
+      "note": "status pill on the vehicle detail diagnostics card meaning a value is normal; very short",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s9ff3121d30f88d52"
+        },
+        {
+          "app": "parentos",
+          "key": "s9ff3121d30f88d52"
+        }
+      ]
+    },
+    {
+      "id": "tm.0277",
+      "en": "Not signed in.",
+      "note": "empty state on the account settings page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s72c2c61080d15d3d"
+        },
+        {
+          "app": "parentos",
+          "key": "s72c2c61080d15d3d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0278",
+      "en": "Not yet wired",
+      "note": "placeholder stat label for a metric that is not connected yet, vehicle detail",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sa2f22e1ff53ba0c7"
+        },
+        {
+          "app": "parentos",
+          "key": "sa2f22e1ff53ba0c7"
+        }
+      ]
+    },
+    {
+      "id": "tm.0279",
+      "en": "OEM",
+      "note": "business type for car manufacturers: sign-up developer type option and dimo.org industry breadcrumb",
+      "uses": [
+        {
+          "app": "console",
+          "key": "sign-up.company.developerTypes.oem"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.oem.body.oem.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0280",
+      "en": "Odometer",
+      "note": "odometer signal name, webhook condition or telemetry row label",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.conditions.odometer"
+        },
+        {
+          "app": "console",
+          "key": "common.signals.powertrainTransmissionTravelledDistance"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "se2f2dc6fb02a09f8"
+        },
+        {
+          "app": "parentos",
+          "key": "se2f2dc6fb02a09f8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0281",
+      "en": "Ongoing",
+      "note": "badge on a trip that is still in progress",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0cd0f490954a4ee2"
+        },
+        {
+          "app": "parentos",
+          "key": "s0cd0f490954a4ee2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0282",
+      "en": "Opening DIMO…",
+      "note": "onboard fleet button label while DIMO opens",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6a47adf8f680d9fc"
+        },
+        {
+          "app": "parentos",
+          "key": "s6a47adf8f680d9fc"
+        }
+      ]
+    },
+    {
+      "id": "tm.0283",
+      "en": "Operating cost",
+      "note": "TCO cost breakdown label",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se78b336d8a6f6c3d"
+        },
+        {
+          "app": "parentos",
+          "key": "se78b336d8a6f6c3d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0284",
+      "en": "Overview",
+      "note": "tab or section link for an overview",
+      "uses": [
+        {
+          "app": "console",
+          "key": "license.details.tabs.overview"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s3d197283cb019b5a"
+        },
+        {
+          "app": "parentos",
+          "key": "s3d197283cb019b5a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0285",
+      "en": "Owner",
+      "note": "team or fleet role name for the owner; fleet apps also label the vehicle owner row in the share dialog",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.team.roles.OWNER"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sb971debc37bf0b54"
+        },
+        {
+          "app": "parentos",
+          "key": "sb971debc37bf0b54"
+        }
+      ]
+    },
+    {
+      "id": "tm.0286",
+      "en": "PDF · JPG · PNG, max 25 MB",
+      "note": "file type and size hint in the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s37181e73850a6ddd"
+        },
+        {
+          "app": "parentos",
+          "key": "s37181e73850a6ddd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0287",
+      "en": "PDF, JPG, or PNG. We'll read the VIN and other details automatically, then securely save the document to DIMO.",
+      "note": "subtitle of the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s62d4898071676447"
+        },
+        {
+          "app": "parentos",
+          "key": "s62d4898071676447"
+        }
+      ]
+    },
+    {
+      "id": "tm.0288",
+      "en": "Pause",
+      "note": "tooltip on the trip replay play/pause button",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s061cc20e3432dead"
+        },
+        {
+          "app": "parentos",
+          "key": "s061cc20e3432dead"
+        }
+      ]
+    },
+    {
+      "id": "tm.0289",
+      "en": "Peak <x id=\"0\" equiv-text=\"${max}\"/>",
+      "note": "chart label in the driving behaviour panel showing the peak value",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s959b17bfad3303f8"
+        },
+        {
+          "app": "parentos",
+          "key": "s959b17bfad3303f8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0290",
+      "en": "Pending invitations",
+      "note": "section label in the members panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc4e2982c4f19f108"
+        },
+        {
+          "app": "parentos",
+          "key": "sc4e2982c4f19f108"
+        }
+      ]
+    },
+    {
+      "id": "tm.0291",
+      "en": "Pick a vehicle from the list",
+      "note": "glovebox placeholder when no vehicle is selected",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6f3ab51192dc929e"
+        },
+        {
+          "app": "parentos",
+          "key": "s6f3ab51192dc929e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0292",
+      "en": "Pick which vehicle this belongs to and confirm the category.",
+      "note": "subtitle of the confirm step in the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd3a0bbaf0419cba8"
+        },
+        {
+          "app": "parentos",
+          "key": "sd3a0bbaf0419cba8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0293",
+      "en": "Platform Features",
+      "note": "dimo.org section heading on industry and solution pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "industries.oem.useCases.platformFeatures"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.useCases.platformFeatures"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.useCases.platformFeatures"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.useCases.platformFeatures"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.useCases.platformFeatures"
+        }
+      ]
+    },
+    {
+      "id": "tm.0294",
+      "en": "Play",
+      "note": "tooltip on the trip replay play/pause button",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "scd105819b5a10243"
+        },
+        {
+          "app": "parentos",
+          "key": "scd105819b5a10243"
+        }
+      ]
+    },
+    {
+      "id": "tm.0295",
+      "en": "Playback speed",
+      "note": "tooltip on the trip replay speed selector",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd7b61a3aef0fc1ef"
+        },
+        {
+          "app": "parentos",
+          "key": "sd7b61a3aef0fc1ef"
+        }
+      ]
+    },
+    {
+      "id": "tm.0296",
+      "en": "Please enter a geofence name.",
+      "note": "validation error in the create geofence dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s879ecc0cdb12e5e3"
+        },
+        {
+          "app": "parentos",
+          "key": "s879ecc0cdb12e5e3"
+        }
+      ]
+    },
+    {
+      "id": "tm.0297",
+      "en": "Please enter a valid email address.",
+      "note": "validation error for an invalid email address",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "pricing.enterpriseModal.invalidEmail"
+        },
+        {
+          "app": "dimo-org",
+          "key": "footer.newsletterSignup.pleaseEnterAValid"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s6adba329b433a53e"
+        },
+        {
+          "app": "parentos",
+          "key": "s6adba329b433a53e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0298",
+      "en": "Previous",
+      "note": "button that goes to the previous page or step",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "pager.previous"
+        },
+        {
+          "app": "console",
+          "key": "common.actions.previous"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.form.previous"
+        }
+      ]
+    },
+    {
+      "id": "tm.0299",
+      "en": "Pricing",
+      "note": "dimo.org navbar link and page section heading for pricing",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "connectedCarApi.body.pricing"
+        },
+        {
+          "app": "dimo-org",
+          "key": "vehicleDataApi.body.pricing"
+        },
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.pricing"
+        }
+      ]
+    },
+    {
+      "id": "tm.0300",
+      "en": "Privacy &amp; Account",
+      "note": "section heading on the account settings page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s07db37d6a443feee"
+        },
+        {
+          "app": "parentos",
+          "key": "s07db37d6a443feee"
+        }
+      ]
+    },
+    {
+      "id": "tm.0301",
+      "en": "Product Features",
+      "note": "dimo.org section heading on product pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "products.access.features.productFeatures"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.consent.features.productFeatures"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.ingest.features.productFeatures"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.pay.features.productFeatures"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.storage.features.productFeatures"
+        }
+      ]
+    },
+    {
+      "id": "tm.0302",
+      "en": "Products",
+      "note": "dimo.org navbar menu and breadcrumb item for products",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.products"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.access.body.products.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.components.body.products.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.consent.body.products.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.ingest.body.products.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.pay.body.products.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.storage.body.products.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0303",
+      "en": "Pulling out the VIN and other details.",
+      "note": "status detail in the upload document dialog while reading",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s8d38137a1bd6af89"
+        },
+        {
+          "app": "parentos",
+          "key": "s8d38137a1bd6af89"
+        }
+      ]
+    },
+    {
+      "id": "tm.0304",
+      "en": "Purchase date",
+      "note": "field label in the TCO acquisition settings",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s59775f70a95321b2"
+        },
+        {
+          "app": "parentos",
+          "key": "s59775f70a95321b2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0305",
+      "en": "Purchase price",
+      "note": "field label in the TCO acquisition settings",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sb2bd6a3049d96b37"
+        },
+        {
+          "app": "parentos",
+          "key": "sb2bd6a3049d96b37"
+        }
+      ]
+    },
+    {
+      "id": "tm.0306",
+      "en": "Raw data",
+      "note": "raw data: permission name in the sharing permissions list and console vehicle tab",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "permission.GetRawData.label"
+        },
+        {
+          "app": "console",
+          "key": "common.permissions.7"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.tabs.raw"
+        }
+      ]
+    },
+    {
+      "id": "tm.0307",
+      "en": "Read the Docs",
+      "note": "dimo.org button linking to the developer docs",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "home.hero.readTheDocs"
+        },
+        {
+          "app": "dimo-org",
+          "key": "customerStories.emobi.cta.readTheDocs"
+        },
+        {
+          "app": "dimo-org",
+          "key": "customerStories.grupoKaufmann.cta.readTheDocs"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.oem.cta.readTheDocs"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.components.vehicleSimulator.readTheDocs"
+        }
+      ]
+    },
+    {
+      "id": "tm.0308",
+      "en": "Reading document…",
+      "note": "status heading in the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0a47e8c52033e05a"
+        },
+        {
+          "app": "parentos",
+          "key": "s0a47e8c52033e05a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0309",
+      "en": "Recharge",
+      "note": "trip detection method option (recharge)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1f6629a2888c955c"
+        },
+        {
+          "app": "parentos",
+          "key": "s1f6629a2888c955c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0310",
+      "en": "Refresh",
+      "note": "button or tooltip that reloads data",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.actions.refresh"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s7b7163270e57e8b4"
+        },
+        {
+          "app": "parentos",
+          "key": "s7b7163270e57e8b4"
+        }
+      ]
+    },
+    {
+      "id": "tm.0311",
+      "en": "Refresh vehicle state",
+      "note": "map toolbar tooltip that reloads vehicle state",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sa5e39898013227d1"
+        },
+        {
+          "app": "parentos",
+          "key": "sa5e39898013227d1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0312",
+      "en": "Refuel",
+      "note": "trip detection method option (refuel)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0ff0b4d5da99de74"
+        },
+        {
+          "app": "parentos",
+          "key": "s0ff0b4d5da99de74"
+        }
+      ]
+    },
+    {
+      "id": "tm.0313",
+      "en": "Remove",
+      "note": "button that removes an item or member",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.actions.remove"
+        },
+        {
+          "app": "console",
+          "key": "settings.members.actions.remove"
+        },
+        {
+          "app": "parentos",
+          "key": "sea4f08110bb8f15d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0314",
+      "en": "Remove from Favorites",
+      "note": "button on the vehicle detail page that unmarks the favorite",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s36c7ff52d04afe46"
+        },
+        {
+          "app": "parentos",
+          "key": "s36c7ff52d04afe46"
+        }
+      ]
+    },
+    {
+      "id": "tm.0315",
+      "en": "Remove from geofence",
+      "note": "tooltip on the toggle that removes a vehicle from a geofence",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s83f3b9e92ba665c7"
+        },
+        {
+          "app": "parentos",
+          "key": "s83f3b9e92ba665c7"
+        }
+      ]
+    },
+    {
+      "id": "tm.0316",
+      "en": "Remove member",
+      "note": "tooltip on the remove member button",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sb38253b7012e60c5"
+        },
+        {
+          "app": "parentos",
+          "key": "sb38253b7012e60c5"
+        }
+      ]
+    },
+    {
+      "id": "tm.0317",
+      "en": "Replay trip",
+      "note": "tooltip on the trip replay button in the trips panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s26f417d2ab77db2d"
+        },
+        {
+          "app": "parentos",
+          "key": "s26f417d2ab77db2d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0318",
+      "en": "Required",
+      "note": "chip or option marking an item as required",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "email.required"
+        },
+        {
+          "app": "dimo-login",
+          "key": "tesla.required"
+        },
+        {
+          "app": "console",
+          "key": "configurator.form.signIn.emailOptions.required"
+        }
+      ]
+    },
+    {
+      "id": "tm.0319",
+      "en": "Resend",
+      "note": "action that resends a pending invitation",
+      "uses": [
+        {
+          "app": "console",
+          "key": "settings.members.actions.resend"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s12d31c3ac9b2687e"
+        },
+        {
+          "app": "parentos",
+          "key": "s12d31c3ac9b2687e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0320",
+      "en": "Reset",
+      "note": "tooltip on the trip replay reset button",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s255857544a9d5ec0"
+        },
+        {
+          "app": "parentos",
+          "key": "s255857544a9d5ec0"
+        }
+      ]
+    },
+    {
+      "id": "tm.0321",
+      "en": "Resources",
+      "note": "navigation or footer section heading for resources",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.navigation.sections.resources"
+        },
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.resources"
+        },
+        {
+          "app": "dimo-org",
+          "key": "footer.body.resources"
+        }
+      ]
+    },
+    {
+      "id": "tm.0322",
+      "en": "Retry",
+      "note": "button that retries a failed action",
+      "uses": [
+        {
+          "app": "console",
+          "key": "app.error.retry"
+        },
+        {
+          "app": "console",
+          "key": "settings.members.actions.retry"
+        },
+        {
+          "app": "console",
+          "key": "settings.revoke.retry"
+        }
+      ]
+    },
+    {
+      "id": "tm.0323",
+      "en": "Revoke",
+      "note": "action that revokes an invitation or shared access",
+      "uses": [
+        {
+          "app": "console",
+          "key": "settings.members.actions.revoke"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s0e871352ba4b17d3"
+        },
+        {
+          "app": "parentos",
+          "key": "s0e871352ba4b17d3"
+        }
+      ]
+    },
+    {
+      "id": "tm.0324",
+      "en": "Role",
+      "note": "field label or column header for a member role",
+      "uses": [
+        {
+          "app": "console",
+          "key": "settings.members.columns.role"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sca7fed2bef53cb99"
+        },
+        {
+          "app": "parentos",
+          "key": "sca7fed2bef53cb99"
+        }
+      ]
+    },
+    {
+      "id": "tm.0325",
+      "en": "Run query",
+      "note": "console button on vehicle data tabs that runs the query",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.raw.runQuery"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.signals.runQuery"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.trips.runQuery"
+        }
+      ]
+    },
+    {
+      "id": "tm.0326",
+      "en": "Save",
+      "note": "primary button that saves changes",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.actions.save"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s33f85f24c0f5f008"
+        },
+        {
+          "app": "parentos",
+          "key": "s33f85f24c0f5f008"
+        }
+      ]
+    },
+    {
+      "id": "tm.0327",
+      "en": "Save document",
+      "note": "primary button in the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1df5bff8121eccf1"
+        },
+        {
+          "app": "parentos",
+          "key": "s1df5bff8121eccf1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0328",
+      "en": "Save first, then assign specific vehicles with the “Vehicles” button.",
+      "note": "hint in the create geofence dialog for specific vehicles",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc550eccb17bdbd40"
+        },
+        {
+          "app": "parentos",
+          "key": "sc550eccb17bdbd40"
+        }
+      ]
+    },
+    {
+      "id": "tm.0329",
+      "en": "Save your API key now — it cannot be retrieved after this step.",
+      "note": "warning on the onboard fleet page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s65d89f28a70694dd"
+        },
+        {
+          "app": "parentos",
+          "key": "s65d89f28a70694dd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0330",
+      "en": "Saved",
+      "note": "heading of the upload document dialog after saving",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s44fa1773e1e78784"
+        },
+        {
+          "app": "parentos",
+          "key": "s44fa1773e1e78784"
+        }
+      ]
+    },
+    {
+      "id": "tm.0331",
+      "en": "Saving document…",
+      "note": "status heading in the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf07dd29e75899a32"
+        },
+        {
+          "app": "parentos",
+          "key": "sf07dd29e75899a32"
+        }
+      ]
+    },
+    {
+      "id": "tm.0332",
+      "en": "Saving…",
+      "note": "save button label while saving",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sb060188bb28bfa9f"
+        },
+        {
+          "app": "parentos",
+          "key": "sb060188bb28bfa9f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0333",
+      "en": "Scanning <x id=\"0\" equiv-text=\"${this.scanned}\"/> of <x id=\"1\" equiv-text=\"${this.total}\"/> vehicles…",
+      "note": "progress in the geofence activity dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s5246bbe920ca986a"
+        },
+        {
+          "app": "parentos",
+          "key": "s5246bbe920ca986a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0334",
+      "en": "Search geofences…",
+      "note": "search input placeholder on the geofences page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s1f64dec14c84753c"
+        },
+        {
+          "app": "parentos",
+          "key": "s1f64dec14c84753c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0335",
+      "en": "Search vehicles",
+      "note": "accessible label or tooltip for vehicle search",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.list.searchLabel"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s31196398a641533e"
+        },
+        {
+          "app": "parentos",
+          "key": "s31196398a641533e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0336",
+      "en": "Search vehicles…",
+      "note": "search input placeholder in the manage geofence vehicles dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "saf975462813691c8"
+        },
+        {
+          "app": "parentos",
+          "key": "saf975462813691c8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0337",
+      "en": "Select",
+      "note": "select input placeholder before a choice is made",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "common.select_placeholder"
+        },
+        {
+          "app": "console",
+          "key": "configurator.form.connection.select"
+        },
+        {
+          "app": "console",
+          "key": "sign-up.company.select"
+        }
+      ]
+    },
+    {
+      "id": "tm.0338",
+      "en": "Select a vehicle",
+      "note": "glovebox heading placeholder before a vehicle is chosen",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc2b308d865e8f74a"
+        },
+        {
+          "app": "parentos",
+          "key": "sc2b308d865e8f74a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0339",
+      "en": "Select a vehicle…",
+      "note": "empty option in the vehicle select of the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sbf0f73b52aa60c84"
+        },
+        {
+          "app": "parentos",
+          "key": "sbf0f73b52aa60c84"
+        }
+      ]
+    },
+    {
+      "id": "tm.0340",
+      "en": "Send a new code",
+      "note": "button that sends a new one-time sign-in code",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "otp.resend"
+        },
+        {
+          "app": "console",
+          "key": "common.sessionExpired.resend"
+        }
+      ]
+    },
+    {
+      "id": "tm.0341",
+      "en": "Send invite",
+      "note": "submit button of the invite member form",
+      "uses": [
+        {
+          "app": "console",
+          "key": "settings.inviteModal.send"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s55c22b612968d7d8"
+        },
+        {
+          "app": "parentos",
+          "key": "s55c22b612968d7d8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0342",
+      "en": "Service",
+      "note": "webhook service: table column, detail label and form field label",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.table.service"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.details.service"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.fields.service.label"
+        }
+      ]
+    },
+    {
+      "id": "tm.0343",
+      "en": "Settings",
+      "note": "navigation item or page title for settings",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.navigation.items.settings"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.settings"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s9d8b8aa2b404c2c8"
+        },
+        {
+          "app": "parentos",
+          "key": "s9d8b8aa2b404c2c8"
+        }
+      ]
+    },
+    {
+      "id": "tm.0344",
+      "en": "Shared",
+      "note": "status label meaning a vehicle is shared with the app",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "vehicle.shared"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.rail.account.shared"
+        }
+      ]
+    },
+    {
+      "id": "tm.0345",
+      "en": "Sharing link copied",
+      "note": "console toast after copying a sharing link",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.licenseCard.sharingCopied"
+        },
+        {
+          "app": "console",
+          "key": "configurator.table.linkCopied"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.documents.linkCopied"
+        }
+      ]
+    },
+    {
+      "id": "tm.0346",
+      "en": "Sharing…",
+      "note": "share button label while sharing runs",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "share.sharing"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s499ada0c6cfc11af"
+        }
+      ]
+    },
+    {
+      "id": "tm.0347",
+      "en": "Show hidden vehicles",
+      "note": "toggle that shows vehicles the user has hidden",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sfe30cca1ef185151"
+        },
+        {
+          "app": "parentos",
+          "key": "sfe30cca1ef185151"
+        }
+      ]
+    },
+    {
+      "id": "tm.0348",
+      "en": "Showing <x id=\"0\" equiv-text=\"${page * TCOView.PAGE_SIZE + 1}\"/>–<x id=\"1\" equiv-text=\"${Math.min((page + 1) * TCOView.PAGE_SIZE, visible.length)}\"/> of <x id=\"2\" equiv-text=\"${visible.length}\"/>",
+      "note": "pagination summary in the TCO view",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s96074d160f65b3c6"
+        },
+        {
+          "app": "parentos",
+          "key": "s96074d160f65b3c6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0349",
+      "en": "Sign in with DIMO",
+      "note": "sign-in page heading (dimo-login) or sign-in button (fleet apps)",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "signin.title_default"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s89765e47a0bb7888"
+        },
+        {
+          "app": "parentos",
+          "key": "s89765e47a0bb7888"
+        }
+      ]
+    },
+    {
+      "id": "tm.0350",
+      "en": "Sign in with your DIMO account to join this fleet.",
+      "note": "body text on the accept invitation page before sign-in",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s5a23df430e47b2e9"
+        },
+        {
+          "app": "parentos",
+          "key": "s5a23df430e47b2e9"
+        }
+      ]
+    },
+    {
+      "id": "tm.0351",
+      "en": "Sign out",
+      "note": "button or tooltip that signs the user out",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.actions.signOut"
+        },
+        {
+          "app": "console",
+          "key": "common.sessionExpired.signOut"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s7cfe12cd14df9950"
+        },
+        {
+          "app": "parentos",
+          "key": "s7cfe12cd14df9950"
+        }
+      ]
+    },
+    {
+      "id": "tm.0352",
+      "en": "Signals",
+      "note": "tab, card label or column header for vehicle signals",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.tabs.signals"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.summary.signals"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.signals.picker.signals"
+        },
+        {
+          "app": "dimo-org",
+          "key": "vehicleDataApi.body.signals"
+        }
+      ]
+    },
+    {
+      "id": "tm.0353",
+      "en": "Signing and securely storing your document with DIMO.",
+      "note": "status detail in the upload document dialog while saving",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s48cb998b9f54d836"
+        },
+        {
+          "app": "parentos",
+          "key": "s48cb998b9f54d836"
+        }
+      ]
+    },
+    {
+      "id": "tm.0354",
+      "en": "Solutions",
+      "note": "dimo.org navbar menu and breadcrumb item for solutions",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.solutions"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.body.solutions.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.body.solutions.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.body.solutions.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetSpend.body.solutions.name"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.body.solutions.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0355",
+      "en": "Something went wrong",
+      "note": "error heading or toast for an unexpected failure",
+      "uses": [
+        {
+          "app": "console",
+          "key": "app.error.title"
+        },
+        {
+          "app": "console",
+          "key": "common.errors.somethingWentWrong"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sb9bd4f5a3810b77e"
+        },
+        {
+          "app": "parentos",
+          "key": "sb9bd4f5a3810b77e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0356",
+      "en": "Something went wrong. Please try again.",
+      "note": "error message for an unexpected failure with a retry hint",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.errors.generic"
+        },
+        {
+          "app": "dimo-org",
+          "key": "pricing.enterpriseModal.error"
+        }
+      ]
+    },
+    {
+      "id": "tm.0357",
+      "en": "Specific",
+      "note": "geofence scope option for specific vehicles, create geofence dialog; short",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s38ae715766d186d9"
+        },
+        {
+          "app": "parentos",
+          "key": "s38ae715766d186d9"
+        }
+      ]
+    },
+    {
+      "id": "tm.0358",
+      "en": "Specific vehicles",
+      "note": "geofence scope label on the geofences page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc149e82259ebf46e"
+        },
+        {
+          "app": "parentos",
+          "key": "sc149e82259ebf46e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0359",
+      "en": "Speed",
+      "note": "speed signal name, webhook condition or telemetry row label",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.conditions.speed"
+        },
+        {
+          "app": "console",
+          "key": "common.signals.speed"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "se24130f1123560a0"
+        },
+        {
+          "app": "parentos",
+          "key": "se24130f1123560a0"
+        }
+      ]
+    },
+    {
+      "id": "tm.0360",
+      "en": "Speed limit (optional)",
+      "note": "field label in the create geofence dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s5211d1267cc7f7ae"
+        },
+        {
+          "app": "parentos",
+          "key": "s5211d1267cc7f7ae"
+        }
+      ]
+    },
+    {
+      "id": "tm.0361",
+      "en": "Start",
+      "note": "map popup on the trip start marker in trip replay",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sae1c7f13b7c0c47f"
+        },
+        {
+          "app": "parentos",
+          "key": "sae1c7f13b7c0c47f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0362",
+      "en": "Start Building",
+      "note": "dimo.org call-to-action button on hero and pricing sections",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "pricing.tiers.startBuilding"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.access.hero.startBuilding"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.components.hero.startBuilding"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.consent.hero.startBuilding"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.ingest.hero.startBuilding"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.pay.hero.startBuilding"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.storage.hero.startBuilding"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.hero.startBuilding"
+        }
+      ]
+    },
+    {
+      "id": "tm.0363",
+      "en": "Start Building Today",
+      "note": "dimo.org call-to-action heading on industry pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.cta.startBuildingToday"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.cta.startBuildingToday"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.cta.startBuildingToday"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.cta.startBuildingToday"
+        }
+      ]
+    },
+    {
+      "id": "tm.0364",
+      "en": "Status",
+      "note": "column header or label for a status",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.table.status"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.details.status"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.statusToggle.label"
+        },
+        {
+          "app": "console",
+          "key": "settings.members.columns.status"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "sad3e3c8146fc920f"
+        },
+        {
+          "app": "parentos",
+          "key": "sad3e3c8146fc920f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0365",
+      "en": "Support",
+      "note": "navigation item or page title for support",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.support"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s3736464cf8d6fa08"
+        },
+        {
+          "app": "parentos",
+          "key": "s3736464cf8d6fa08"
+        }
+      ]
+    },
+    {
+      "id": "tm.0366",
+      "en": "Switch to dark mode",
+      "note": "accessible label or tooltip on the theme toggle",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.theme.switchToDark"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s293e16fbf997f389"
+        },
+        {
+          "app": "parentos",
+          "key": "s293e16fbf997f389"
+        }
+      ]
+    },
+    {
+      "id": "tm.0367",
+      "en": "Switch to light mode",
+      "note": "accessible label or tooltip on the theme toggle",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.theme.switchToLight"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "see4417f44c48bef1"
+        },
+        {
+          "app": "parentos",
+          "key": "see4417f44c48bef1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0368",
+      "en": "Synthetic device #<x id=\"0\" equiv-text=\"${this.vehicle.syntheticDevice.tokenId}\"/>",
+      "note": "vehicle detail connection row naming a synthetic device by token number",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf273893857f4ae53"
+        },
+        {
+          "app": "parentos",
+          "key": "sf273893857f4ae53"
+        }
+      ]
+    },
+    {
+      "id": "tm.0369",
+      "en": "TCO",
+      "note": "side navigation item for the total cost of ownership page (abbreviation)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6c6cb319e19e97fd"
+        },
+        {
+          "app": "parentos",
+          "key": "s6c6cb319e19e97fd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0370",
+      "en": "That wallet is already a member.",
+      "note": "validation error in the members panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s5bdd260a177a9e18"
+        },
+        {
+          "app": "parentos",
+          "key": "s5bdd260a177a9e18"
+        }
+      ]
+    },
+    {
+      "id": "tm.0371",
+      "en": "These documents don’t have a cost amount on file. Add one to include them in this vehicle’s totals.",
+      "note": "notice in the TCO view about documents without amounts",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sfd8205687425cedd"
+        },
+        {
+          "app": "parentos",
+          "key": "sfd8205687425cedd"
+        }
+      ]
+    },
+    {
+      "id": "tm.0372",
+      "en": "This geofence applies to many vehicles — scanning the first <x id=\"0\" equiv-text=\"${this.total}\"/>.",
+      "note": "notice in the geofence activity dialog when the scan is capped",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s769c440ed2364da4"
+        },
+        {
+          "app": "parentos",
+          "key": "s769c440ed2364da4"
+        }
+      ]
+    },
+    {
+      "id": "tm.0373",
+      "en": "This invitation is invalid, already used, or expired.",
+      "note": "error on the accept invitation page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6bd42d24a203f1f4"
+        },
+        {
+          "app": "parentos",
+          "key": "s6bd42d24a203f1f4"
+        }
+      ]
+    },
+    {
+      "id": "tm.0374",
+      "en": "This invitation link is missing its token. Ask the sender to re-send the invite.",
+      "note": "error on the accept invitation page when the link has no token",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s920431b68a11a077"
+        },
+        {
+          "app": "parentos",
+          "key": "s920431b68a11a077"
+        }
+      ]
+    },
+    {
+      "id": "tm.0375",
+      "en": "This page is educational, not legal advice.",
+      "note": "dimo.org disclaimer at the end of compliance pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "compliance.ftcGmConsent.body.thisPageIsEducational"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.sessionScopedConsent.body.thisPageIsEducational"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.vehicleAccessAuditTrail.body.thisPageIsEducational"
+        }
+      ]
+    },
+    {
+      "id": "tm.0376",
+      "en": "This vehicle is shared with you. You can view, download and add documents, but not delete them.",
+      "note": "notice in the document detail dialog for a shared vehicle",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s0133efb90058acce"
+        },
+        {
+          "app": "parentos",
+          "key": "s0133efb90058acce"
+        }
+      ]
+    },
+    {
+      "id": "tm.0377",
+      "en": "This vehicle's connection doesn't report driving events.",
+      "note": "notice in the driving behaviour panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sdbc572f614d2e389"
+        },
+        {
+          "app": "parentos",
+          "key": "sdbc572f614d2e389"
+        }
+      ]
+    },
+    {
+      "id": "tm.0378",
+      "en": "Time in",
+      "note": "table column header in the geofence activity dialog (entry time)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd08a6db66b8b4603"
+        },
+        {
+          "app": "parentos",
+          "key": "sd08a6db66b8b4603"
+        }
+      ]
+    },
+    {
+      "id": "tm.0379",
+      "en": "Time out",
+      "note": "table column header in the geofence activity dialog (exit time)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sd4558bf8b3225d70"
+        },
+        {
+          "app": "parentos",
+          "key": "sd4558bf8b3225d70"
+        }
+      ]
+    },
+    {
+      "id": "tm.0380",
+      "en": "Token",
+      "note": "vehicle list column header for the vehicle token ID",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "se68398e3c2c760b2"
+        },
+        {
+          "app": "parentos",
+          "key": "se68398e3c2c760b2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0381",
+      "en": "Token #<x id=\"0\" equiv-text=\"${this.tokenId}\"/>",
+      "note": "vehicle token number shown under the vehicle name",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s2c5a7ccf5915e2e3"
+        },
+        {
+          "app": "parentos",
+          "key": "s2c5a7ccf5915e2e3"
+        }
+      ]
+    },
+    {
+      "id": "tm.0382",
+      "en": "Top",
+      "note": "stat label on the vehicle detail utilization card (top value)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6d02dc19e21eb49c"
+        },
+        {
+          "app": "parentos",
+          "key": "s6d02dc19e21eb49c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0383",
+      "en": "Total",
+      "note": "stat label on the vehicle detail utilization card (total value)",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sed8ec5e3c64fa25d"
+        },
+        {
+          "app": "parentos",
+          "key": "sed8ec5e3c64fa25d"
+        }
+      ]
+    },
+    {
+      "id": "tm.0384",
+      "en": "Total Cost of Ownership",
+      "note": "heading of the TCO page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s22d5fa291f2d7672"
+        },
+        {
+          "app": "parentos",
+          "key": "s22d5fa291f2d7672"
+        }
+      ]
+    },
+    {
+      "id": "tm.0385",
+      "en": "Total TCO",
+      "note": "TCO cost breakdown label for the total",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s2723579f71ec1e23"
+        },
+        {
+          "app": "parentos",
+          "key": "s2723579f71ec1e23"
+        }
+      ]
+    },
+    {
+      "id": "tm.0386",
+      "en": "Track expiration",
+      "note": "glovebox hint for a registration document type",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sa6251b7f6467df51"
+        },
+        {
+          "app": "parentos",
+          "key": "sa6251b7f6467df51"
+        }
+      ]
+    },
+    {
+      "id": "tm.0387",
+      "en": "Track next inspection",
+      "note": "glovebox hint for an inspection document type",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s063fde6f359d59a1"
+        },
+        {
+          "app": "parentos",
+          "key": "s063fde6f359d59a1"
+        }
+      ]
+    },
+    {
+      "id": "tm.0388",
+      "en": "Track renewals",
+      "note": "glovebox hint for an insurance document type",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s53ae2830817e95f5"
+        },
+        {
+          "app": "parentos",
+          "key": "s53ae2830817e95f5"
+        }
+      ]
+    },
+    {
+      "id": "tm.0389",
+      "en": "Trip Replay",
+      "note": "title of the trip replay dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s081e293c762bd669"
+        },
+        {
+          "app": "parentos",
+          "key": "s081e293c762bd669"
+        }
+      ]
+    },
+    {
+      "id": "tm.0390",
+      "en": "Trip detection method",
+      "note": "tooltip on the trip detection method selector",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s3578d562c2b5bada"
+        },
+        {
+          "app": "parentos",
+          "key": "s3578d562c2b5bada"
+        }
+      ]
+    },
+    {
+      "id": "tm.0391",
+      "en": "Trip history",
+      "note": "feature bullet on the login page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s60bcec93494ea596"
+        },
+        {
+          "app": "parentos",
+          "key": "s60bcec93494ea596"
+        }
+      ]
+    },
+    {
+      "id": "tm.0392",
+      "en": "Trips",
+      "note": "tab, panel title or heading for trips",
+      "uses": [
+        {
+          "app": "console",
+          "key": "vehicles.tabs.trips"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.trips.trips"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "se39db80d5e146efb"
+        },
+        {
+          "app": "parentos",
+          "key": "se39db80d5e146efb"
+        }
+      ]
+    },
+    {
+      "id": "tm.0393",
+      "en": "Trouble logging in? <support>Get support</support>",
+      "note": "help line under sign-in forms; keep the support tags",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.otp.troubleLoggingIn"
+        },
+        {
+          "app": "console",
+          "key": "sign-in.methodForm.troubleLoggingIn"
+        },
+        {
+          "app": "console",
+          "key": "sign-in.passkey.troubleLoggingIn"
+        },
+        {
+          "app": "console",
+          "key": "sign-up.wallet.troubleLoggingIn"
+        }
+      ]
+    },
+    {
+      "id": "tm.0394",
+      "en": "Try again",
+      "note": "button that retries after an error",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "common.try_again"
+        },
+        {
+          "app": "console",
+          "key": "common.actions.retry"
+        },
+        {
+          "app": "console",
+          "key": "common.sessionExpired.tryAgain"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "scd1dd6ff53d0d01a"
+        },
+        {
+          "app": "parentos",
+          "key": "scd1dd6ff53d0d01a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0395",
+      "en": "Unavailable",
+      "note": "console fallback when a value or source cannot be loaded",
+      "uses": [
+        {
+          "app": "console",
+          "key": "license.vehicleTable.unavailable"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.rail.unavailable"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.summary.unavailable"
+        }
+      ]
+    },
+    {
+      "id": "tm.0396",
+      "en": "Unknown",
+      "note": "console fallback when a value is unknown",
+      "uses": [
+        {
+          "app": "console",
+          "key": "license.jwts.unknownExpiry"
+        },
+        {
+          "app": "console",
+          "key": "license.belongsTo.unknown"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.subjects.unknown"
+        }
+      ]
+    },
+    {
+      "id": "tm.0397",
+      "en": "Unknown error",
+      "note": "fallback error message when no detail is available",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.errors.unknown"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s5787e20cab57b383"
+        },
+        {
+          "app": "parentos",
+          "key": "s5787e20cab57b383"
+        }
+      ]
+    },
+    {
+      "id": "tm.0398",
+      "en": "Update the geofence details. Redraw the area by deleting and recreating it.",
+      "note": "subtitle of the geofence dialog in edit mode",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s388d4a378e796b21"
+        },
+        {
+          "app": "parentos",
+          "key": "s388d4a378e796b21"
+        }
+      ]
+    },
+    {
+      "id": "tm.0399",
+      "en": "Upload failed",
+      "note": "error in the upload document dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc0ffeb5d53b60209"
+        },
+        {
+          "app": "parentos",
+          "key": "sc0ffeb5d53b60209"
+        }
+      ]
+    },
+    {
+      "id": "tm.0400",
+      "en": "Use Cases",
+      "note": "dimo.org section heading on industry pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.useCases.useCases"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.useCases.useCases"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.useCases.useCases"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.useCases.useCases"
+        }
+      ]
+    },
+    {
+      "id": "tm.0401",
+      "en": "Use the “Vehicles” button on the geofence to assign specific vehicles.",
+      "note": "hint in the create geofence dialog in edit mode",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s791ab754e4927fa6"
+        },
+        {
+          "app": "parentos",
+          "key": "s791ab754e4927fa6"
+        }
+      ]
+    },
+    {
+      "id": "tm.0402",
+      "en": "Useful life (years)",
+      "note": "field label in the TCO acquisition settings",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc281195c481f85de"
+        },
+        {
+          "app": "parentos",
+          "key": "sc281195c481f85de"
+        }
+      ]
+    },
+    {
+      "id": "tm.0403",
+      "en": "User profile",
+      "note": "alt text of the profile image, account settings",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s96a2c98044e2cd3b"
+        },
+        {
+          "app": "parentos",
+          "key": "s96a2c98044e2cd3b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0404",
+      "en": "Vehicle",
+      "note": "field label, page title or subject label for a vehicle",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.vehicle"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.subjects.vehicle.label"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "se06ad64a9de6df0f"
+        },
+        {
+          "app": "parentos",
+          "key": "se06ad64a9de6df0f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0405",
+      "en": "Vehicle #<x id=\"0\" equiv-text=\"${v.tokenId}\"/>",
+      "note": "fallback vehicle name with its token number",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s2b79e852aa6fd94c"
+        },
+        {
+          "app": "parentos",
+          "key": "s2b79e852aa6fd94c"
+        }
+      ]
+    },
+    {
+      "id": "tm.0406",
+      "en": "Vehicle Commerce",
+      "note": "dimo.org solution name: navbar link, page meta name and breadcrumb",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "navbar.body.vehicleCommerce"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.meta.solutionName"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.body.vehicleCommerce.name"
+        }
+      ]
+    },
+    {
+      "id": "tm.0407",
+      "en": "Vehicle data",
+      "note": "vehicle data: permission name for non-location history and console raw data scope option",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "permission.GetNonLocationHistory.label"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.raw.scopes.vehicle"
+        }
+      ]
+    },
+    {
+      "id": "tm.0408",
+      "en": "Vehicle documents",
+      "note": "document type name for vehicle documents (sharing and configurator)",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "document.vehicle"
+        },
+        {
+          "app": "console",
+          "key": "configurator.documents.vehicle.title"
+        }
+      ]
+    },
+    {
+      "id": "tm.0409",
+      "en": "Vehicle list",
+      "note": "section heading or side navigation item for a vehicle list",
+      "uses": [
+        {
+          "app": "console",
+          "key": "license.vehiclesTab.vehicleList"
+        },
+        {
+          "app": "parentos",
+          "key": "sc39bf5bc2ec03d99"
+        }
+      ]
+    },
+    {
+      "id": "tm.0410",
+      "en": "Vehicle status",
+      "note": "section heading on the vehicle detail page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s02e8d6f62a289f87"
+        },
+        {
+          "app": "parentos",
+          "key": "s02e8d6f62a289f87"
+        }
+      ]
+    },
+    {
+      "id": "tm.0411",
+      "en": "Vehicles",
+      "note": "navigation item, page title, tab, breadcrumb or column header for vehicles",
+      "uses": [
+        {
+          "app": "console",
+          "key": "app.home.shortcuts.vehicles.label"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.items.vehicles"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.vehicles"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.table.vehicles"
+        },
+        {
+          "app": "console",
+          "key": "configurator.form.transaction.vehicles"
+        },
+        {
+          "app": "console",
+          "key": "license.details.tabs.vehicles"
+        },
+        {
+          "app": "console",
+          "key": "license.vehicles.breadcrumbVehicles"
+        },
+        {
+          "app": "console",
+          "key": "vehicles.header.vehicles"
+        },
+        {
+          "app": "fleet-lite",
+          "key": "s3c699cca4f4dbfb4"
+        },
+        {
+          "app": "parentos",
+          "key": "s3c699cca4f4dbfb4"
+        }
+      ]
+    },
+    {
+      "id": "tm.0412",
+      "en": "View Documentation",
+      "note": "dimo.org button linking to the developer docs on hero and CTA sections",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "industries.dealerships.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.dsp.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.maintenance.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.oem.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "industries.rentals.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.access.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.access.cta.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.components.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.components.cta.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.consent.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.consent.cta.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.ingest.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.ingest.cta.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.pay.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.pay.cta.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.storage.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "products.storage.cta.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.agenticExperiences.cta.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.consumerApplications.cta.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.cta.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.hero.viewDocumentation"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.vehicleCommerce.cta.viewDocumentation"
+        }
+      ]
+    },
+    {
+      "id": "tm.0413",
+      "en": "View documents",
+      "note": "glovebox vehicle row subtitle before the record count loads",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s5de6302caaf70c36"
+        },
+        {
+          "app": "parentos",
+          "key": "s5de6302caaf70c36"
+        }
+      ]
+    },
+    {
+      "id": "tm.0414",
+      "en": "We could not accept this invitation.",
+      "note": "error on the accept invitation page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s4d985d57c1118f9e"
+        },
+        {
+          "app": "parentos",
+          "key": "s4d985d57c1118f9e"
+        }
+      ]
+    },
+    {
+      "id": "tm.0415",
+      "en": "We couldn't get your email from your DIMO account. Add it to finish signing in.",
+      "note": "body text of the missing email step on the login page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf17df24ef99c142f"
+        },
+        {
+          "app": "parentos",
+          "key": "sf17df24ef99c142f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0416",
+      "en": "We couldn't verify that sign-in. Please sign in again.",
+      "note": "error on the login page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s21110df9fb6d03a2"
+        },
+        {
+          "app": "parentos",
+          "key": "s21110df9fb6d03a2"
+        }
+      ]
+    },
+    {
+      "id": "tm.0417",
+      "en": "Webhook URL",
+      "note": "webhook target URL: detail label and form field label",
+      "uses": [
+        {
+          "app": "console",
+          "key": "common.webhooks.details.url"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.url.label"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.fields.targetUrl.label"
+        }
+      ]
+    },
+    {
+      "id": "tm.0418",
+      "en": "Webhooks",
+      "note": "console navigation item, page title, section title and breadcrumb for webhooks",
+      "uses": [
+        {
+          "app": "console",
+          "key": "app.home.shortcuts.webhooks.label"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.items.webhooks"
+        },
+        {
+          "app": "console",
+          "key": "common.navigation.pageTitles.webhooks"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.section.title"
+        },
+        {
+          "app": "console",
+          "key": "webhooks.breadcrumb.webhooks"
+        }
+      ]
+    },
+    {
+      "id": "tm.0419",
+      "en": "What you get",
+      "note": "accessible label of the feature list on the login page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s27b1fa6259efe138"
+        },
+        {
+          "app": "parentos",
+          "key": "s27b1fa6259efe138"
+        }
+      ]
+    },
+    {
+      "id": "tm.0420",
+      "en": "You",
+      "note": "badge next to your own row in the members panel",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "scb6a9c1a1757adbc"
+        },
+        {
+          "app": "parentos",
+          "key": "scb6a9c1a1757adbc"
+        }
+      ]
+    },
+    {
+      "id": "tm.0421",
+      "en": "You're in",
+      "note": "success heading on the accept invitation page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sae89bd829a4377e3"
+        },
+        {
+          "app": "parentos",
+          "key": "sae89bd829a4377e3"
+        }
+      ]
+    },
+    {
+      "id": "tm.0422",
+      "en": "You've been invited",
+      "note": "heading on the accept invitation page before sign-in",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s6ae83e368f4b32ad"
+        },
+        {
+          "app": "parentos",
+          "key": "s6ae83e368f4b32ad"
+        }
+      ]
+    },
+    {
+      "id": "tm.0423",
+      "en": "Your cars",
+      "note": "heading of the vehicle panel on the overview map page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s8aeca3c87bb07669"
+        },
+        {
+          "app": "parentos",
+          "key": "s8aeca3c87bb07669"
+        }
+      ]
+    },
+    {
+      "id": "tm.0424",
+      "en": "Your document has been saved to DIMO. The list will refresh.",
+      "note": "subtitle of the upload document dialog after saving",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s008718e504db8790"
+        },
+        {
+          "app": "parentos",
+          "key": "s008718e504db8790"
+        }
+      ]
+    },
+    {
+      "id": "tm.0425",
+      "en": "Zoom in",
+      "note": "map control tooltip",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s236ae937cbcd6a39"
+        },
+        {
+          "app": "parentos",
+          "key": "s236ae937cbcd6a39"
+        }
+      ]
+    },
+    {
+      "id": "tm.0426",
+      "en": "Zoom out",
+      "note": "map control tooltip",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sc65ea2cf2f21a13a"
+        },
+        {
+          "app": "parentos",
+          "key": "sc65ea2cf2f21a13a"
+        }
+      ]
+    },
+    {
+      "id": "tm.0427",
+      "en": "Zoom to vehicle",
+      "note": "tooltip on the zoom button of a vehicle card",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s127a0f60d8f0a0d3"
+        },
+        {
+          "app": "parentos",
+          "key": "s127a0f60d8f0a0d3"
+        }
+      ]
+    },
+    {
+      "id": "tm.0428",
+      "en": "all <x id=\"0\" equiv-text=\"${visible.length}\"/>",
+      "note": "count in parentheses after the fleet total row, TCO view",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s68deaebb72ef1556"
+        },
+        {
+          "app": "parentos",
+          "key": "s68deaebb72ef1556"
+        }
+      ]
+    },
+    {
+      "id": "tm.0429",
+      "en": "all compliance topics",
+      "note": "dimo.org link text at the end of compliance pages",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "compliance.euDataAct.body.allComplianceTopics"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.ftcGmConsent.body.allComplianceTopics"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.sessionScopedConsent.body.allComplianceTopics"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.vehicleAccessAuditTrail.body.allComplianceTopics"
+        }
+      ]
+    },
+    {
+      "id": "tm.0430",
+      "en": "developer API key",
+      "note": "API key input placeholder on the onboard fleet page",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sf22cdc8cca7661ee"
+        },
+        {
+          "app": "parentos",
+          "key": "sf22cdc8cca7661ee"
+        }
+      ]
+    },
+    {
+      "id": "tm.0431",
+      "en": "developer docs",
+      "note": "dimo.org inline link text in body copy",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "connectedCarApi.body.developerDocs"
+        },
+        {
+          "app": "dimo-org",
+          "key": "vehicleDataApi.body.developerDocs"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compare.smartcarAlternative.body.developerDocs"
+        }
+      ]
+    },
+    {
+      "id": "tm.0432",
+      "en": "e.g. 50",
+      "note": "speed limit input placeholder in the create geofence dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sa3e3377ea42cdd04"
+        },
+        {
+          "app": "parentos",
+          "key": "sa3e3377ea42cdd04"
+        }
+      ]
+    },
+    {
+      "id": "tm.0433",
+      "en": "e.g. Downtown Depot",
+      "note": "geofence name input placeholder in the create geofence dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sa1691fab227b1e7b"
+        },
+        {
+          "app": "parentos",
+          "key": "sa1691fab227b1e7b"
+        }
+      ]
+    },
+    {
+      "id": "tm.0434",
+      "en": "engine-on time during the pass",
+      "note": "legend explanation after Engine runtime, geofence activity dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s25edbe26de08a2af"
+        },
+        {
+          "app": "parentos",
+          "key": "s25edbe26de08a2af"
+        }
+      ]
+    },
+    {
+      "id": "tm.0435",
+      "en": "km/h",
+      "note": "speed unit after the speed limit field; a unit, keep it short",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s125a48d7351b5c42"
+        },
+        {
+          "app": "parentos",
+          "key": "s125a48d7351b5c42"
+        }
+      ]
+    },
+    {
+      "id": "tm.0436",
+      "en": "or",
+      "note": "divider between sign-in options",
+      "uses": [
+        {
+          "app": "dimo-login",
+          "key": "signin.or"
+        },
+        {
+          "app": "console",
+          "key": "sign-in.methodForm.or"
+        }
+      ]
+    },
+    {
+      "id": "tm.0437",
+      "en": "or enter manually",
+      "note": "divider text on the onboard fleet page before manual fields",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s3220e57d36c47737"
+        },
+        {
+          "app": "parentos",
+          "key": "s3220e57d36c47737"
+        }
+      ]
+    },
+    {
+      "id": "tm.0438",
+      "en": "rental operations",
+      "note": "dimo.org inline link text in body copy",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "compare.smartcarAlternative.body.rentalOperations"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.body.rentalOperations"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetIntelligence.hero.rentalOperations"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetSpend.body.rentalOperations"
+        }
+      ]
+    },
+    {
+      "id": "tm.0439",
+      "en": "session-scoped consent",
+      "note": "dimo.org inline link text in body copy",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "compliance.euDataAct.body.sessionScopedConsent"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.ftcGmConsent.body.sessionScopedConsent"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.body.sessionScopedConsent"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.vehicleAccessAuditTrail.body.sessionScopedConsent"
+        }
+      ]
+    },
+    {
+      "id": "tm.0440",
+      "en": "time inside the geofence",
+      "note": "legend explanation after Duration, geofence activity dialog",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s7b7e8e2fc035021f"
+        },
+        {
+          "app": "parentos",
+          "key": "s7b7e8e2fc035021f"
+        }
+      ]
+    },
+    {
+      "id": "tm.0441",
+      "en": "vehicle",
+      "note": "unit after a count of one on group and geofence rows",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "sfad9715041e583af"
+        },
+        {
+          "app": "parentos",
+          "key": "sfad9715041e583af"
+        }
+      ]
+    },
+    {
+      "id": "tm.0442",
+      "en": "vehicle session infrastructure",
+      "note": "dimo.org inline link text in body copy",
+      "uses": [
+        {
+          "app": "dimo-org",
+          "key": "compare.smartcarAlternative.body.vehicleSessionInfrastructure"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compare.standardFleetAlternative.body.vehicleSessionInfrastructure"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.body.vehicleSessionInfrastructure"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.sessionScopedConsent.body.vehicleSessionInfrastructure"
+        },
+        {
+          "app": "dimo-org",
+          "key": "compliance.vehicleAccessAuditTrail.body.vehicleSessionInfrastructure"
+        },
+        {
+          "app": "dimo-org",
+          "key": "solutions.fleetSpend.body.vehicleSessionInfrastructure"
+        }
+      ]
+    },
+    {
+      "id": "tm.0443",
+      "en": "vehicles",
+      "note": "unit after a count other than one on group and geofence rows",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s24ff675ff8ff0ed4"
+        },
+        {
+          "app": "parentos",
+          "key": "s24ff675ff8ff0ed4"
+        }
+      ]
+    },
+    {
+      "id": "tm.0444",
+      "en": "{count, plural, one {# vehicle} other {# vehicles}}",
+      "note": "vehicle count with ICU plural",
+      "uses": [
+        {
+          "app": "console",
+          "key": "app.simulator.fleet.count"
+        },
+        {
+          "app": "console",
+          "key": "common.csvUpload.vehicleCount"
+        },
+        {
+          "app": "console",
+          "key": "common.webhooks.edit.vehicleCount"
+        }
+      ]
+    },
+    {
+      "id": "tm.0445",
+      "en": "— upload anything: receipt, insurance pdf, reg card",
+      "note": "glovebox empty state hint",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s13dec33091fe72ca"
+        },
+        {
+          "app": "parentos",
+          "key": "s13dec33091fe72ca"
+        }
+      ]
+    },
+    {
+      "id": "tm.0446",
+      "en": "<x id=\"0\" equiv-text=\"${count}\"/> Records",
+      "note": "glovebox record count under the selected vehicle, plural",
+      "uses": [
+        {
+          "app": "fleet-lite",
+          "key": "s558c12600c588d43"
+        },
+        {
+          "app": "parentos",
+          "key": "s558c12600c588d43"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "metadataTitle": "透過電子郵件復原 | {appName}",
+  "metadataDescription": "歡迎登入DIMO Developer Console。安全存取您的開發者儀表板以管理應用程式，並探索進階的DIMO工具。立即開始開發與最佳化！",
+  "form": {
+    "title": "重設密碼金鑰",
+    "warning": "重設完成後，您的舊密碼金鑰將無法再使用",
+    "emailLabel": "電子郵件",
+    "emailPlaceholder": "email@address.com",
+    "sendFailed": "傳送電子郵件時發生錯誤"
+  },
+  "checkEmail": {
+    "title": "請點選電子郵件中的連結",
+    "hint": "沒有收到電子郵件嗎？請檢查垃圾郵件資料夾，或重新傳送驗證碼。",
+    "resend": "重新傳送驗證碼",
+    "resent": "已成功重新傳送復原碼。",
+    "resendFailed": "傳送復原碼時發生錯誤。"
+  },
+  "rewire": {
+    "title": "讓我們協助您重新登入",
+    "body": "密碼金鑰是登入DIMO最快速、最安全的方式。",
+    "progress": "正在重新設定您的密碼金鑰…",
+    "success": "已成功重新設定密碼金鑰"
+  }
+}

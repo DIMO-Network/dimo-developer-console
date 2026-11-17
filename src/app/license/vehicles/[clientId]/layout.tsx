@@ -7,6 +7,7 @@ import { Header } from '@/app/license/vehicles/[clientId]/components/Header';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { Loader } from '@/components/Loader';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 const DEVELOPER_LICENSE_BY_CLIENT_ID_SUMMARY = gql(`
   query DeveloperLicenseByClientIdSummary($clientId: Address!) {
@@ -33,6 +34,8 @@ export default function DeveloperLicenseDetailsPageLayout({
     },
   );
   const router = useRouter();
+  const t = useTranslations('license');
+  const tCommon = useTranslations('common');
 
   const onBack = () => {
     router.replace(`/license/${data?.developerLicense?.tokenId ?? ''}/details`);
@@ -40,13 +43,13 @@ export default function DeveloperLicenseDetailsPageLayout({
 
   return (
     <div>
-      {!!error && <p>Something went wrong fetching the vehicle details</p>}
+      {!!error && <p>{t('vehicles.loadError')}</p>}
       {loading && <Loader isLoading={true} />}
       {data?.developerLicense && (
         <div className={'flex flex-col'}>
           <div className={'py-4 self-start'}>
             <button
-              aria-label="Back"
+              aria-label={tCommon('actions.back')}
               className="text-muted transition-colors hover:text-ink"
               onClick={onBack}
             >

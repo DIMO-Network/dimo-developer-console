@@ -11,9 +11,9 @@ import { useGlobalAccount } from '@/hooks/useGlobalAccount';
 import { useMyConnections } from '@/hooks/queries/useMyConnections';
 import { ChipIcon } from '@/components/Icons';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { StatusChip } from '@/components/StatusChip';
 import { DiscardConnection } from '../DiscardConnection';
-import { KEYS_UNREADABLE_CHIP } from '../../copy';
 
 import './View.css';
 import { OwnerAction } from '@/components/OwnerOnly';
@@ -24,6 +24,7 @@ const isUnfinished = ({ status }: Connection) =>
   status === 'PENDING' || status === 'MINTED';
 
 const MainComponent: React.FC = () => {
+  const t = useTranslations('connections');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currentUser } = useGlobalAccount();
@@ -34,13 +35,13 @@ const MainComponent: React.FC = () => {
   useEffect(() => {
     const success = searchParams.get('success');
     if (success === 'connection-created' && !hasShownNotification.current) {
-      toast.success('Connection successfully created');
+      toast.success(t('list.created'));
       hasShownNotification.current = true;
       const url = new URL(window.location.href);
       url.searchParams.delete('success');
       window.history.replaceState({}, '', url.toString());
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleCreateConnection = () => {
     router.push(`/connections/create/${owner}`);
@@ -65,7 +66,7 @@ const MainComponent: React.FC = () => {
                   {connection.connection_license_public_key}
                 </div>
                 {connection.keys_unreadable && (
-                  <StatusChip tone="off">{KEYS_UNREADABLE_CHIP}</StatusChip>
+                  <StatusChip tone="off">{t('list.keysUnreadable')}</StatusChip>
                 )}
                 {owner && isUnfinished(connection) && !connection.keys_unreadable && (
                   <OwnerAction>
@@ -73,7 +74,7 @@ const MainComponent: React.FC = () => {
                       href={`/connections/create/${owner}?resume=${connection.id}`}
                       className="button primary w-full"
                     >
-                      Finish setup
+                      {t('list.finishSetup')}
                     </Link>
                   </OwnerAction>
                 )}
@@ -83,7 +84,7 @@ const MainComponent: React.FC = () => {
                   className="w-full"
                   onClick={() => router.push(`/connections/${connection.id}`)}
                 >
-                  Connection details
+                  {t('list.details')}
                 </Button>
               </div>
             ))}
@@ -94,9 +95,7 @@ const MainComponent: React.FC = () => {
 
     return (
       <div className="empty-state">
-        <p className="empty-state-message">
-          You haven&apos;t created any connections yet.
-        </p>
+        <p className="empty-state-message">{t('list.empty')}</p>
       </div>
     );
   };
@@ -104,7 +103,7 @@ const MainComponent: React.FC = () => {
   return (
     <div className="connections-page">
       <Section>
-        <SectionHeader title="Connections">
+        <SectionHeader title={t('list.title')}>
           {(!connections || connections.length === 0) && (
             <OwnerAction>
               <Button
@@ -113,7 +112,7 @@ const MainComponent: React.FC = () => {
                 disabled={isLoading}
               >
                 <PlusIcon className="w-4 h-4" />
-                Create a connection
+                {t('list.create')}
               </Button>
             </OwnerAction>
           )}
@@ -126,13 +125,14 @@ const MainComponent: React.FC = () => {
 };
 
 const View: React.FC = () => {
+  const t = useTranslations('connections');
   const { isLoading, error } = useMyConnections();
 
   return (
     <QueryPageWrapper
       loading={isLoading}
       error={error || undefined}
-      customErrorMessage={'There was a problem fetching your connections'}
+      customErrorMessage={t('list.loadError')}
     >
       <MainComponent />
     </QueryPageWrapper>

@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "listTitle": "テンプレート | {appName}",
+    "newTitle": "新しいテンプレート | {appName}"
+  },
+  "loading": "読み込み中...",
+  "unavailable": {
+    "title": "車両テンプレートは近日公開予定です",
+    "description": "テンプレートエディターはまだご利用いただけません。しばらくしてから再度ご確認ください。"
+  },
+  "header": {
+    "description": "メーカー、車種、年式でカタログを検索し、車の定義を編集します",
+    "newTemplate": "新しいテンプレート"
+  },
+  "search": {
+    "fields": {
+      "make": "メーカー",
+      "model": "車種",
+      "year": "年式"
+    },
+    "submit": "検索",
+    "failed": "カタログの検索中に問題が発生しました",
+    "noMake": "その名前に一致するメーカーはありません。車に表記されているとおりのブランド名で検索してください。",
+    "versionTrims": "v{version} · {trims, plural, other {#グレード}}",
+    "open": "開く",
+    "create": "作成",
+    "status": {
+      "ok": "テンプレートあり",
+      "missing": "テンプレート未作成",
+      "invalidId": "IDの修正が必要"
+    },
+    "hints": {
+      "missing": "この年式は存在しますが、まだ誰もテンプレートを作成していません。",
+      "invalidId": "このIDはテンプレートに必要なmake_model_yearの形式ではないため、ID自体を修正するまで編集できる内容はありません。"
+    }
+  },
+  "new": {
+    "title": "新しいテンプレート",
+    "description": "テンプレートは、1つの年式とその年式で販売されたグレードで構成されます。作成するとすぐに、あなたの名前で公開されます。まだこのテンプレートを使用している車はないため、実際に走行している車には影響しません。",
+    "manufacturer": "メーカー",
+    "model": "車種",
+    "year": "年式",
+    "firstTrim": "最初のグレード",
+    "exists": "このIDのテンプレートはすでに存在します。",
+    "openIt": "開く",
+    "create": "テンプレートを作成",
+    "createFailed": "このテンプレートを作成できませんでした"
+  },
+  "editor": {
+    "loadFailed": "このテンプレートを読み込めませんでした",
+    "loadFailedDetail": "このテンプレートを読み込めませんでした：{message}（{status}）",
+    "header": "<code>{id}</code> · v{version}",
+    "headerWithAuthor": "<code>{id}</code> · v{version} · 最終公開者：{author}",
+    "addTrim": "グレードを追加",
+    "publish": "公開",
+    "publishFailed": "公開に失敗しました",
+    "published": "バージョン{version}を公開しました。",
+    "conflict": {
+      "moved": "バージョン{expected}を編集している間に、このテンプレートはバージョン{actual}に更新されました。",
+      "kept": "下書きは破棄されておらず、何も公開されていません。再読み込みして最新のバージョンを確認してから、変更を再度適用してください。",
+      "reload": "再読み込み"
+    }
+  }
+}

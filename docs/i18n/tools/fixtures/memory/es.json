@@ -1,0 +1,5 @@
+{
+  "tm.0001": { "text": "Idioma", "source": "new", "approved": true },
+  "tm.0002": { "text": "Aplicaciones", "source": "new", "approved": true },
+  "tm.0003": { "text": "Guardar, ahora", "source": "new", "approved": false }
+}

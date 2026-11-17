@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { FC, useMemo, useState } from 'react';
 import {
   invalidateQuery,
@@ -27,15 +28,8 @@ interface Props {
 // Table rows must be objects, so each token ID is wrapped.
 type VehicleRow = { tokenId: string };
 
-const columns: LegacyColumnDef<VehicleRow>[] = [
-  {
-    header: 'Vehicle token ID',
-    accessorFn: (row) => row.tokenId,
-    cell: (info) => info.getValue(),
-  },
-];
-
 export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
+  const t = useTranslations('common');
   const [isAdding, setIsAdding] = useState(false);
   const [isUnsubscribing, setIsUnsubscribing] = useState(false);
   const [isUnsubscribeAll, setIsUnsubscribeAll] = useState(false);
@@ -43,25 +37,35 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
   const { data, isLoading, error } = useWebhookVehiclesById({ webhookId, clientId });
   // A new rows array on every render would send the table back to page 1.
   const rows = useMemo(() => (data ?? []).map((tokenId) => ({ tokenId })), [data]);
+  const columns = useMemo<LegacyColumnDef<VehicleRow>[]>(
+    () => [
+      {
+        header: t('webhooks.edit.vehicleTokenId'),
+        accessorFn: (row) => row.tokenId,
+        cell: (info) => info.getValue(),
+      },
+    ],
+    [t],
+  );
   if (isLoading) {
     return <Loader isLoading />;
   }
   if (error) {
-    return <p>Error fetching webhook</p>;
+    return <p>{t('webhooks.edit.fetchWebhookError')}</p>;
   }
   if (!data) {
-    return <p>No webhook found</p>;
+    return <p>{t('webhooks.edit.notFound')}</p>;
   }
 
   const subscribeAll = async () => {
     try {
       setSubscribingAll(true);
       const response = await subscribeAllVehicles(webhookId, getDevJwt(clientId) ?? '');
-      toast.success(response?.message ?? 'Successfully subscribed all vehicles');
+      toast.success(response?.message ?? t('webhooks.edit.subscribedAll'));
       invalidateQuery({ webhookId, clientId });
     } catch (err) {
       captureException(err);
-      toast.error('Failed to subscribe all vehicles');
+      toast.error(t('webhooks.edit.subscribeAllFailed'));
     } finally {
       setSubscribingAll(false);
     }
@@ -98,34 +102,36 @@ export const SubscribedVehicles: FC<Props> = ({ webhookId, clientId }) => {
         clientId={clientId}
         onSuccess={() => invalidateQuery({ webhookId, clientId })}
       />
-      <Title className={'text-card-title'}>Who do you want to subscribe?</Title>
+      <Title className={'text-card-title'}>{t('webhooks.edit.whoToSubscribe')}</Title>
       <Section>
-        <SectionHeader title="Manual controls" />
+        <SectionHeader title={t('webhooks.edit.manualControls')} />
         <p className={'text-body-sm text-muted'}>
-          Manually subscribe or unsubscribe all vehicles linked to this webhook.
+          {t('webhooks.edit.manualControlsHint')}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={subscribeAll} disabled={subscribingAll}>
-            {subscribingAll ? 'Subscribing...' : 'Subscribe all vehicles'}
+            {subscribingAll
+              ? t('webhooks.edit.subscribing')
+              : t('webhooks.edit.subscribeAll')}
           </Button>
           <Button variant="secondary" onClick={() => setIsUnsubscribeAll(true)}>
-            Unsubscribe all vehicles
+            {t('webhooks.edit.unsubscribeAll')}
           </Button>
         </div>
       </Section>
       <Section>
-        <SectionHeader title={'Subscribed vehicles'}>
+        <SectionHeader title={t('webhooks.edit.subscribedVehicles')}>
           <Title className={'text-card-title'}>{data.length}</Title>
         </SectionHeader>
         <div className="flex flex-wrap gap-2 pb-4">
           <Button variant="secondary" onClick={downloadCsv}>
-            Download CSV
+            {t('webhooks.edit.downloadCsv')}
           </Button>
           <Button variant="secondary" onClick={() => setIsAdding(true)}>
-            Add vehicles
+            {t('webhooks.edit.addTitle')}
           </Button>
           <Button variant="secondary" onClick={() => setIsUnsubscribing(true)}>
-            Unsubscribe vehicles
+            {t('webhooks.edit.unsubscribeVehicles')}
           </Button>
         </div>
         <div className="-mx-4 -mb-4">

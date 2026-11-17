@@ -1,18 +1,20 @@
 import { Suspense } from 'react';
 
-import { metadata as homeMetadata } from '@/app/app/page';
+import { generateMetadata as homeMetadata } from '@/app/app/page';
 import { View } from '@/app/View';
-import { AuthorizedLayout } from '@/layouts/AuthorizedLayout';
+import { authorizedRouteLayout } from '@/layouts/AuthorizedLayout/AuthorizedRouteLayout';
 
-export const metadata = homeMetadata;
+export const generateMetadata = homeMetadata;
+
+const HomeLayout = authorizedRouteLayout('/');
 
 const MainPage = () => {
   return (
-    <AuthorizedLayout>
+    <HomeLayout>
       <Suspense>
         <View />
       </Suspense>
-    </AuthorizedLayout>
+    </HomeLayout>
   );
 };
 

@@ -25,19 +25,15 @@ export const PERMISSION_NAMES: Record<number, string> = {
   8: 'privilege:GetApproximateLocation',
 };
 
-export const PERMISSION_LABELS: Record<number, string> = {
-  1: 'Non-location data',
-  2: 'Commands',
-  3: 'Current location',
-  4: 'All-time location',
-  5: 'VIN credential',
-  6: 'Live data',
-  7: 'Raw data',
-  8: 'Approximate location',
-};
-
-export const permissionLabels = (hex: string): string[] =>
-  decodeSacdPermissions(hex).map((id) => PERMISSION_LABELS[id] ?? `Privilege ${id}`);
+// Pass the common-namespace `t`: a known privilege is labelled by
+// `permissions.<id>`, any other by its number.
+export const permissionLabels = (
+  hex: string,
+  t: (key: string, values?: Record<string, number>) => string,
+): string[] =>
+  decodeSacdPermissions(hex).map((id) =>
+    PERMISSION_NAMES[id] ? t(`permissions.${id}`) : t('permissions.unknown', { id }),
+  );
 
 export const permissionNames = (hex: string): string[] =>
   decodeSacdPermissions(hex)

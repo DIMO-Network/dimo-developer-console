@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
 import { registryWrite } from '@/utils/registryWrite';
 import { txErrorStatus } from '@/utils/txErrorStatus';
@@ -49,16 +50,17 @@ describe('registryWrite', () => {
 });
 
 describe('txErrorStatus', () => {
-  it('names a denied and a reverted transaction', () => {
-    expect(txErrorStatus({ code: 4001 })).toEqual({
+  it('names a denied and a reverted transaction', async () => {
+    const t = await getTranslations('common');
+    expect(txErrorStatus({ code: 4001 }, t)).toEqual({
       status: 'error',
       label: 'The transaction was denied',
     });
-    expect(txErrorStatus(new UserOperationFailedError())).toEqual({
+    expect(txErrorStatus(new UserOperationFailedError(), t)).toEqual({
       status: 'error',
       label: 'The transaction failed on-chain, so nothing changed',
     });
-    expect(txErrorStatus(new Error('boom'))).toEqual({
+    expect(txErrorStatus(new Error('boom'), t)).toEqual({
       status: 'error',
       label: 'Something went wrong',
     });

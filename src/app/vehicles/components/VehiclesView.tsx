@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useValidDeveloperLicenses } from '@/components/Webhooks/hooks/useValidDeveloperLicenses';
@@ -15,7 +16,6 @@ import { useGetDevJwts } from '@/hooks/useGetDevJwts';
 import { useTeam } from '@/hooks/useTeam';
 import { LocalDeveloperLicense } from '@/types/webhook';
 import { TEAM_DATA_ACCESS_ENABLED } from '@/utils/featureFlags';
-import { DATA_ACCESS_UNAVAILABLE } from '@/config/teamCopy';
 
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 
@@ -40,6 +40,7 @@ const useLicenses = () => {
 };
 
 const Content = () => {
+  const t = useTranslations('vehicles');
   const { isMember } = useTeam();
   const { developerLicenses, hasLicenseWithoutRedirectUri, loading } = useLicenses();
   const router = useRouter();
@@ -82,18 +83,18 @@ const Content = () => {
         {isMember ? (
           <p className="text-body text-fg">
             {hasLicenseWithoutRedirectUri
-              ? "This team's licenses need a redirect URI first."
-              : 'This team has no developer licenses yet.'}
+              ? t('list.licensesNeedRedirectUri')
+              : t('list.teamNoLicenses')}
           </p>
         ) : (
           <>
             <p className="text-body text-fg">
               {hasLicenseWithoutRedirectUri
-                ? 'Add a redirect URI to your license to see the vehicles shared with it.'
-                : 'Create a developer license to see the vehicles shared with it.'}
+                ? t('list.addRedirectUri')
+                : t('list.createLicense')}
             </p>
             <Link href="/licenses" className="text-body-sm text-ink underline">
-              Go to licenses
+              {t('list.goToLicenses')}
             </Link>
           </>
         )}
@@ -113,26 +114,24 @@ const Content = () => {
       />
       {selected && (
         <Section>
-          <SectionHeader title="Shared vehicles">
+          <SectionHeader title={t('list.sharedVehicles')}>
             <TextField
-              placeholder="Search by token ID or owner address"
+              placeholder={t('list.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               wrapperClassName="md:w-80"
-              aria-label="Search vehicles"
+              aria-label={t('list.searchLabel')}
             />
           </SectionHeader>
           {invalidSearch && (
-            <p className="text-label text-muted">
-              Enter a token ID or a full 0x address.
-            </p>
+            <p className="text-label text-muted">{t('list.invalidSearch')}</p>
           )}
           {(!isAuthenticatedAsDev || dataAccess.kind.startsWith('member-')) && (
             <DevJwtPrompt
               license={selected}
               access={dataAccess}
               onSuccess={refetchJwts}
-              message="Generate a developer JWT to see when each vehicle was last seen."
+              message={t('list.jwtMessage')}
             />
           )}
           <div className="-mx-4 -mb-4">
@@ -153,12 +152,14 @@ const Content = () => {
 };
 
 export const VehiclesView = () => {
+  const t = useTranslations('vehicles');
+  const tCommon = useTranslations('common');
   const { loading, error } = useLicenses();
   const { isMember } = useTeam();
   if (isMember && !TEAM_DATA_ACCESS_ENABLED) {
     return (
       <Section>
-        <p className="text-body text-fg">{DATA_ACCESS_UNAVAILABLE}</p>
+        <p className="text-body text-fg">{tCommon('teamCopy.dataAccessUnavailable')}</p>
       </Section>
     );
   }
@@ -167,7 +168,7 @@ export const VehiclesView = () => {
       <QueryPageWrapper
         loading={loading}
         error={error}
-        customErrorMessage="There was a problem fetching your developer licenses"
+        customErrorMessage={t('list.licensesError')}
       >
         <Content />
       </QueryPageWrapper>
