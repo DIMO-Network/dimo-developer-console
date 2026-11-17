@@ -2,7 +2,6 @@
 import { type ChangeEvent, type FC, useTransition } from 'react';
 import { LanguageIcon } from '@heroicons/react/24/outline';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 
 import { setLocale } from '@/i18n/actions';
 import { LOCALE_LABELS, LOCALES, type Locale } from '@/i18n/locale';
@@ -20,16 +19,16 @@ interface IProps {
 export const LanguageSwitcher: FC<IProps> = ({ variant, collapsed = false }) => {
   const t = useTranslations('common');
   const locale = useLocale() as Locale;
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   // Not disabled while pending: that would drop keyboard focus to the body.
   const onChange = (event: ChangeEvent<HTMLSelectElement>) => {
     if (isPending) return;
     const next = event.target.value as Locale;
+    // Setting the cookie in a Server Action re-renders the page and its layouts
+    // in the action's response, so no router.refresh() (a second render).
     startTransition(async () => {
       await setLocale(next);
-      router.refresh();
     });
   };
 

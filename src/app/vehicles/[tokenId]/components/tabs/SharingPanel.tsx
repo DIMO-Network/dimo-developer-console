@@ -5,7 +5,7 @@ import { useIdentityQuery } from '@/hooks/useIdentityQuery';
 import { ACCOUNT_SACDS, LICENSE_ALIAS } from '../../queries';
 import type { VehicleDetail } from '@/services/subjects/graph';
 import { permissionLabels } from '@/utils/sacdPermissions';
-import { useFreshnessText } from '@/hooks/useFreshnessText';
+import { useUtcDate } from '@/hooks/useFreshnessText';
 import { shortAddress } from '@/services/subjects/did';
 
 const termsUrl = (source: string) =>
@@ -15,7 +15,7 @@ const COLS =
 
 const Expiry: FC<{ iso: string }> = ({ iso }) => {
   const t = useTranslations('vehicles');
-  const { utcDate } = useFreshnessText();
+  const { utcDate } = useUtcDate();
   const at = Date.parse(iso);
   if (!Number.isFinite(at)) return <span className="text-body-sm text-muted">—</span>;
   const ms = at - Date.now();
@@ -99,7 +99,7 @@ type Grant = {
 const SacdRow: FC<{ grant: Grant; mine: boolean }> = ({ grant, mine }) => {
   const t = useTranslations('vehicles');
   const tCommon = useTranslations('common');
-  const { utcDate } = useFreshnessText();
+  const { utcDate } = useUtcDate();
   const labels = permissionLabels(grant.permissions, tCommon);
   return (
     <div className={`grid ${COLS} items-start gap-4 border-t border-outline px-5 py-3.5`}>
@@ -171,7 +171,7 @@ export const SharingPanel: FC<{
   clientId: string;
 }> = ({ vehicle, clientId }) => {
   const t = useTranslations('vehicles');
-  const { utcDate } = useFreshnessText();
+  const { utcDate } = useUtcDate();
   const account = useIdentityQuery(ACCOUNT_SACDS, {
     variables: { address: vehicle.owner },
   });

@@ -5,7 +5,7 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { TextField } from '@/components/TextField';
 import { FreshnessDot } from '@/components/FreshnessDot';
 import { humanizeSignal } from '@/utils/humanizeSignal';
-import { useFreshnessText } from '@/hooks/useFreshnessText';
+import { useUtcDate } from '@/hooks/useFreshnessText';
 
 export type SignalRow = {
   name: string;
@@ -24,7 +24,7 @@ export const SignalTable: FC<{
   const t = useTranslations('vehicles');
   const tCommon = useTranslations('common');
   const format = useFormatter();
-  const { utcDate } = useFreshnessText();
+  const { utcDate } = useUtcDate();
   const label = (name: string) => humanizeSignal(name, tCommon);
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({
     key: 'lastSeen',

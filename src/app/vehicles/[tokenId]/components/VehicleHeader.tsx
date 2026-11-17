@@ -6,7 +6,7 @@ import { shortAddress } from '@/services/subjects/did';
 import { SelectWithChevron } from '@/components/SelectWithChevron';
 import type { LocalDeveloperLicense } from '@/types/webhook';
 import type { VehicleDetail } from '@/services/subjects/graph';
-import { useFreshnessText } from '@/hooks/useFreshnessText';
+import { useUtcDate } from '@/hooks/useFreshnessText';
 
 export const VehicleHeader: FC<{
   vehicle: VehicleDetail;
@@ -15,7 +15,7 @@ export const VehicleHeader: FC<{
   onSelectLicense: (clientId: string) => void;
 }> = ({ vehicle, licenses, selected, onSelectLicense }) => {
   const t = useTranslations('vehicles');
-  const { utcDate } = useFreshnessText();
+  const { utcDate } = useUtcDate();
   const name =
     [vehicle.definition?.make, vehicle.definition?.model, vehicle.definition?.year]
       .filter(Boolean)

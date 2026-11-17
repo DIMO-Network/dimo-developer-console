@@ -46,16 +46,15 @@ describe('LanguageSwitcher', () => {
     expect(screen.queryByText('English', { selector: 'span' })).not.toBeInTheDocument();
   });
 
-  it('stores the choice, then refreshes so the server renders it', async () => {
+  it('stores the choice and leaves the re-render to the Server Action', async () => {
     render(<LanguageSwitcher variant="menu" />);
-    fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), {
-      target: { value: 'zh-Hant' },
-    });
-    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
+    const select = screen.getByRole('combobox', { name: 'Language' });
+    fireEvent.change(select, { target: { value: 'zh-Hant' } });
+    await waitFor(() => expect(select).toHaveAttribute('aria-busy', 'false'));
     expect(setLocale).toHaveBeenCalledWith('zh-Hant');
-    expect(jest.mocked(setLocale).mock.invocationCallOrder[0]).toBeLessThan(
-      refresh.mock.invocationCallOrder[0],
-    );
+    // Next re-renders after a Server Action sets a cookie; a refresh would be a
+    // second server render.
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it('keeps focus while the choice is saved, and ignores changes until then', async () => {
@@ -78,6 +77,6 @@ describe('LanguageSwitcher', () => {
 
     await act(async () => finish());
     await waitFor(() => expect(select).toHaveAttribute('aria-busy', 'false'));
-    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(setLocale).toHaveBeenCalledTimes(1);
   });
 });

@@ -75,4 +75,46 @@ describe('i18n request config', () => {
       expect(await label()).toBe('言語');
     });
   });
+
+  describe('in production', () => {
+    const env = process.env;
+    afterEach(() => {
+      process.env = env;
+    });
+
+    it("builds each locale's catalog once and reuses it", async () => {
+      process.env = { ...env, NODE_ENV: 'production' };
+      mockJapanese = { common: { languageSwitcher: { label: '言語' } } };
+      // A fresh registry, so the module-level cache starts empty; the mocks are
+      // taken from inside it, as the isolated request.ts sees them.
+      await jest.isolateModulesAsync(async () => {
+        const nextHeaders = await import('next/headers');
+        jest.mocked(nextHeaders.cookies).mockResolvedValue({
+          get: () => ({ value: 'ja' }),
+        } as never);
+        jest.mocked(nextHeaders.headers).mockResolvedValue(new Headers() as never);
+        // The module object request.ts calls into, not an import() wrapper.
+        const messages =
+          jest.requireMock<typeof import('@/i18n/messages')>('@/i18n/messages');
+        const load = jest.spyOn(messages, 'loadMessages');
+        const isolated = (await import('@/i18n/request'))
+          .default as unknown as () => Promise<{
+          messages: AbstractIntlMessages;
+        }>;
+
+        const first = await isolated();
+        const second = await isolated();
+        expect(second.messages).toBe(first.messages);
+        // English once and Japanese once, for both requests.
+        expect(load.mock.calls.map(([locale]) => locale).sort()).toEqual(['en', 'ja']);
+        expect(
+          createTranslator({
+            locale: 'ja',
+            messages: first.messages,
+            namespace: 'common',
+          })('languageSwitcher.label'),
+        ).toBe('言語');
+      });
+    });
+  });
 });

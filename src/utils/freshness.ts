@@ -6,7 +6,8 @@ const MIN = 60_000;
 const HOUR = 60 * MIN;
 const DAY = 24 * HOUR;
 
-const parse = (iso: string | null | undefined): number | null => {
+/** An ISO timestamp in ms, or null when it is missing or not a date. */
+export const parseIsoTime = (iso: string | null | undefined): number | null => {
   if (!iso) return null;
   const t = Date.parse(iso);
   return Number.isNaN(t) ? null : t;
@@ -17,7 +18,7 @@ export const freshnessOf = (
   iso: string | null | undefined,
   now = Date.now(),
 ): Freshness => {
-  const t = parse(iso);
+  const t = parseIsoTime(iso);
   if (t === null) return 'none';
   const age = now - t;
   if (age < HOUR) return 'live';
@@ -36,7 +37,7 @@ export const relativeTimeParts = (
   iso: string | null | undefined,
   now = Date.now(),
 ): RelativeTimeParts => {
-  const t = parse(iso);
+  const t = parseIsoTime(iso);
   if (t === null) return { kind: 'never' };
   const age = Math.max(0, now - t);
   if (age < MIN) return { kind: 'justNow' };

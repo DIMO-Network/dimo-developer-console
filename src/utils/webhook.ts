@@ -37,15 +37,17 @@ interface ConditionConfig {
   validation: RegisterOptions;
 }
 
-// `required` holds a common message key, not text: nothing renders these rule
-// messages today, and anything that does must translate it.
+// No message in the rules: nothing renders them today, and a key stored here
+// would show as raw text wherever errors.message is rendered. A field that shows
+// the error picks its text where it renders, e.g.
+// t('webhooks.validation.valueRequired').
 const numericValidation: RegisterOptions = {
-  required: 'webhooks.validation.valueRequired',
+  required: true,
   validate: (val: string) => !isNaN(Number(val)),
 };
 
 const booleanValidation: RegisterOptions = {
-  required: 'webhooks.validation.valueRequired',
+  required: true,
   validate: (value: string) => {
     const parsedValue = Number(value);
     return parsedValue === 1 || parsedValue === 0;

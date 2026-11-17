@@ -27,7 +27,14 @@ export const EntitlementBanner: FC<{ entitlement: Entitlement }> = ({ entitlemen
             : t('templateEditor.entitlement.readOnly', { title })}
         </span>
         <span className="text-body-sm text-muted">
-          {entitlementReasonText(entitlement.reasonDetail, entitlement.mintedVehicles, t)}
+          {/* The English reason when a response predates reasonDetail. */}
+          {entitlement.reasonDetail
+            ? entitlementReasonText(
+                entitlement.reasonDetail,
+                entitlement.mintedVehicles,
+                t,
+              )
+            : entitlement.reason}
         </span>
         {!entitlement.canSetHardwareTemplateId && (
           <span className="text-body-sm text-muted">

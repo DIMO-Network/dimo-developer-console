@@ -31,4 +31,26 @@ describe('MergeMessages', () => {
     );
     expect(screen.getByText('Hello Vehicles 8:30 AM')).toBeInTheDocument();
   });
+
+  it('keeps the rest of an area when a section sends one subtree of it', () => {
+    const Both = () => {
+      const app = useTranslations('app');
+      return (
+        <p>
+          {app('error.title')} / {app('home.title')}
+        </p>
+      );
+    };
+    render(
+      <NextIntlClientProvider
+        locale="en"
+        messages={{ app: { error: { title: 'Oops' } } }}
+      >
+        <MergeMessages messages={{ app: { home: { title: 'Home' } } }}>
+          <Both />
+        </MergeMessages>
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByText('Oops / Home')).toBeInTheDocument();
+  });
 });

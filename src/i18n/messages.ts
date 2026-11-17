@@ -1,4 +1,5 @@
 import type { Locale } from './locale';
+import { deepMerge, isTree, type Messages } from './deepMerge';
 
 export const AREAS = [
   'common',
@@ -45,20 +46,7 @@ export const SECTION_MESSAGES = {
 } satisfies Record<string, MessagePath[]>;
 export type Section = keyof typeof SECTION_MESSAGES;
 
-type Messages = { [key: string]: unknown };
-
-const isTree = (value: unknown): value is Messages =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-// The override's values win; the base fills whatever the override lacks.
-export const deepMerge = (base: Messages, override: Messages): Messages =>
-  Object.entries(override).reduce<Messages>(
-    (merged, [key, value]) => ({
-      ...merged,
-      [key]: isTree(value) && isTree(merged[key]) ? deepMerge(merged[key], value) : value,
-    }),
-    { ...base },
-  );
+export { deepMerge };
 
 const pickPath = (messages: Messages, [key, ...rest]: string[]): Messages => {
   const value = messages[key];
